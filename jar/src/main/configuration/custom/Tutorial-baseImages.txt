@@ -1,0 +1,4 @@
+Wed Sep  7 15:37:17 CEST 2011
+Amazon AMIs for contextualized images to be used as BaseImages in Tutorial: 
+- Ubuntu 10.04 us-east-1:ami-4bf63722
+- Fedora 14    us-east-1:ami-7b04c712

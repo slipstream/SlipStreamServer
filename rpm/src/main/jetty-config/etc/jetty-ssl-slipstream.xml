@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+
+  <!-- if NIO is not available, use org.eclipse.jetty.server.ssl.SslSocketConnector -->
+
+  <New id="sslContextFactory" class="org.eclipse.jetty.http.ssl.SslContextFactory">
+    <Set name="KeyStore"><Property name="jetty.home" default="." />/etc/jetty.jks</Set>
+    <Set name="KeyStorePassword">OBF:1lts1k8q1jg81evx1r511v9u1vnw1vn61v8s1r2x1eu91jd21k5g1lq6</Set>
+    <Set name="KeyManagerPassword">OBF:1lts1k8q1jg81evx1r511v9u1vnw1vn61v8s1r2x1eu91jd21k5g1lq6</Set>
+    <Set name="TrustStore"><Property name="jetty.home" default="." />/etc/jetty.jks</Set>
+    <Set name="TrustStorePassword">OBF:1lts1k8q1jg81evx1r511v9u1vnw1vn61v8s1r2x1eu91jd21k5g1lq6</Set>
+  </New>
+
+  <Call name="addConnector">
+    <Arg>
+      <New class="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+        <Arg><Ref id="sslContextFactory" /></Arg>
+        <Set name="Port">443</Set>
+        <Set name="maxIdleTime">30000</Set>
+        <Set name="Acceptors">2</Set>
+        <Set name="AcceptQueueSize">100</Set>
+      </New>
+    </Arg>
+  </Call>
+</Configure>

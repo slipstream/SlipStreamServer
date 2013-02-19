@@ -1,0 +1,55 @@
+package com.sixsq.slipstream.connector;
+
+/*
+ * +=================================================================+
+ * SlipStream Server (WAR)
+ * =====
+ * Copyright (C) 2013 SixSq Sarl (sixsq.com)
+ * =====
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * -=================================================================-
+ */
+
+import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
+
+public class CredentialsBase {
+
+	protected User user;
+	protected UserParametersFactoryBase cloudParametersFactory;
+
+	public CredentialsBase(User user) {
+		this.user = user;
+	}
+
+	protected String getParameterValue(String key) throws InvalidElementException {
+		UserParameter parameter = user.getParameter(qualifyKey(key));
+		if (parameter == null) {
+			throwInvalidElementException(key);
+		}
+		return parameter.getValue();
+	}
+	
+	private String qualifyKey(String key) {
+		return cloudParametersFactory.constructKey(key);
+	}
+
+	private void throwInvalidElementException(String key)
+			throws InvalidElementException {
+		throw (new InvalidElementException("Missing mandatory user parameter: "
+				+ key + ". Consider editing your <a href='" + "/user/"
+				+ user.getName() + "'>user account</a>"));
+	}
+
+}

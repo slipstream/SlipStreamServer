@@ -1,0 +1,32 @@
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+
+<!-- ==================================================================
+Configure and deploy the SlipStream web application in $(jetty.home)/webapps/root
+===================================================================== -->
+
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Required minimal context configuration :                        -->
+  <!--  + contextPath                                                  -->
+  <!--  + war OR resourceBase                                          -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Set name="contextPath">/</Set>
+  <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/slipstream.war</Set>
+
+  <Call class="java.lang.System" name="setProperties">
+    <Arg>
+      <New class="java.util.Properties">
+        <Call name="putAll">
+          <Arg><Call class="java.lang.System" name="getProperties"/></Arg>
+        </Call>
+        <Call name="setProperty">
+          <Arg>persistence.unit</Arg>
+          <Arg>hsqldb-schema</Arg>
+        </Call>
+      </New>
+    </Arg>
+  </Call>
+
+</Configure>
