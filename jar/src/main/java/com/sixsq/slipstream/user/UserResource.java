@@ -155,9 +155,10 @@ public class UserResource extends ParameterizedResource<User> {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex);
 		}
 
-		if (!targetParameterizeUri.equals(user.getName())) {
-			throwClientBadRequest("The uploaded user does not correspond to the target user uri");
-		}
+		// FIXME: commented out as targetParameterizeUri never gets reset and is always 'new' at this point.
+//		if (!targetParameterizeUri.equals(user.getName())) {
+//			throwClientBadRequest("The uploaded user does not correspond to the target user uri");
+//		}
 
 		user.store();
 
