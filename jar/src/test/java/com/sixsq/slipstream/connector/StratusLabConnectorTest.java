@@ -37,18 +37,6 @@ import com.sixsq.slipstream.persistence.ExtraDisk;
 public class StratusLabConnectorTest extends StratusLabConnector {
 
 	@Test
-	public void getExtraDisksTest() {
-		List<ExtraDisk> disks = getExtraDisks();
-		
-		assertEquals(EXTRADISK_NAMES.size(), disks.size());
-		for (ExtraDisk disk : disks) {
-			String diskName = disk.getName();
-			assertTrue(diskName + " disk should be in the list.",
-					EXTRADISK_NAMES.contains(diskName));
-		}
-	}
-
-	@Test
 	public void parseDescribeInstanceTest() throws SlipStreamException {
 		String result = "id  state           cpu       memory    public ip\n"
 				+ "16  Running         1         128       134.158.73.235\n"
