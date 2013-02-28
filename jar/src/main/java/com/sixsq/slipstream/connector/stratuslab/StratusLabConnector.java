@@ -72,7 +72,6 @@ public class StratusLabConnector extends CliConnectorBase {
 
 	public StratusLabConnector(String instanceName) {
 		super(instanceName);
-		populateExtraDisksInfo();
 	}
 
 	public String getCloudServiceName() {
@@ -86,19 +85,6 @@ public class StratusLabConnector extends CliConnectorBase {
 				getConnectorInstanceName()).getParameters();
 	}
 
-	private void populateExtraDisksInfo() {
-		defineExtraDisk(EXTRADISK_NAME_VOLATILE, "Volatile extra disk in GB",
-				"^[0-9]*$", "Integer value expected for volatile extra disk");
-		defineExtraDisk(
-				EXTRADISK_NAME_PERSISTENT,
-				"Persistent extra disk given as PDisk UUID",
-				"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-				"UUID expected for persistent extra disk");
-		defineExtraDisk(EXTRADISK_NAME_READONLY,
-				"Readonly extra disk given as Marketplace ID",
-				"^[A-Za-z0-9_-]{27}$",
-				"Marketplace ID expected for readonly extra disk");
-	}
 
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {

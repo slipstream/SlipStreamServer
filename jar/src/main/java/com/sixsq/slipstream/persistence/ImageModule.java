@@ -60,7 +60,12 @@ public class ImageModule extends Module {
 	public static final String NETWORK_KEY = "network";
 	public static final String LOGINPASSWORD_KEY = "login.password";
 
-	public static final String EXTRADISK_PARAM_PREFIX = "extra_disk_";
+	public static final String EXTRADISK_PARAM_PREFIX = "extra.disk";
+	private static final String EXTRADISK_NAME_VOLATILE = "volatile";
+	public static final String EXTRADISK_VOLATILE_PARAM = EXTRADISK_PARAM_PREFIX
+											+ "." + EXTRADISK_NAME_VOLATILE;
+	private static final String VOLATILE_DISK_VALUE_REGEX = "^[0-9]*$";
+	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
 
 	@ElementList(required = false)
 	@OneToMany(cascade = CascadeType.ALL)
@@ -131,14 +136,13 @@ public class ImageModule extends Module {
 	}
 
 	private void validateExtraDisksParameters() throws ValidationException {
+		validateExtraVolatileDiskValue();
+	}
 
-		List<ExtraDisk> extraDisks = extractExtraDisksDefinition();
-
-		for (ExtraDisk disk : extraDisks) {
-			String paramValue = getParameterValue(
-					getExtraDiskParamterName(disk), "");
-			disk.validateParameterValue(paramValue);
-		}
+	private void validateExtraVolatileDiskValue() throws ValidationException {
+		String paramValue = getParameterValue(EXTRADISK_VOLATILE_PARAM, "");
+		if (!paramValue.matches(VOLATILE_DISK_VALUE_REGEX))
+			throw (new ValidationException(VOLATILE_DISK_VALUE_REGEXERROR));
 	}
 
 	private void validateHasImageId(String cloudService)
@@ -295,19 +299,12 @@ public class ImageModule extends Module {
 
 	private void updateExtraDisks() throws ValidationException,
 			ConfigurationException {
-
-		List<ExtraDisk> extraDisks = extractExtraDisksDefinition();
-
-		for (ExtraDisk disk : extraDisks) {
-			addMandatoryParameter(getExtraDiskParamterName(disk),
-					disk.getDescription(), ParameterCategory.Cloud);
-		}
+		addVolatileDiskParameter();
 	}
 
-	private List<ExtraDisk> extractExtraDisksDefinition() {
-		List<ExtraDisk> extraDisks = (List<ExtraDisk>) ParametersFactory
-				.getExtraDisks(ConnectorFactory.getConnectors());
-		return extraDisks;
+	private void addVolatileDiskParameter() throws ValidationException {
+		addMandatoryParameter(EXTRADISK_VOLATILE_PARAM,
+				"Volatile extra disk in GB", ParameterCategory.Cloud);
 	}
 
 	private void addMandatoryParameter(String name, String description,
@@ -347,8 +344,8 @@ public class ImageModule extends Module {
 		setParameter(parameter);
 	}
 
-	private String getExtraDiskParamterName(ExtraDisk disk) {
-		return EXTRADISK_PARAM_PREFIX + disk.getName();
+	private String getExtraDiskParamterName() {
+		return EXTRADISK_VOLATILE_PARAM;
 	}
 
 	public Boolean isBase() {
