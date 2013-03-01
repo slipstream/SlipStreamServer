@@ -21,18 +21,14 @@ package com.sixsq.slipstream.connector;
  */
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 import java.util.Properties;
 
 import org.junit.Test;
 
 import com.sixsq.slipstream.connector.stratuslab.StratusLabConnector;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.persistence.ExtraDisk;
 
 public class StratusLabConnectorTest extends StratusLabConnector {
 

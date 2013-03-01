@@ -34,9 +34,7 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 
-import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.InstanceType;
-import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.FormProcessor;
@@ -342,10 +340,6 @@ public class ImageModule extends Module {
 		}
 
 		setParameter(parameter);
-	}
-
-	private String getExtraDiskParamterName() {
-		return EXTRADISK_VOLATILE_PARAM;
 	}
 
 	public Boolean isBase() {
