@@ -181,14 +181,14 @@ public class StratusLabConnector extends CliConnectorBase {
 				&& ImageModule.INSTANCE_TYPE_INHERITED.equals(instanceType)) {
 			throw (new ValidationException(
 					"Base image cannot have inherited instance type. Please review the instance type under Parameters -> "
-							+ getCloudServiceName()));
+							+ getConnectorInstanceName()));
 		}
 
 		if (instanceType == null
 				&& (getRam(image) == null && getCpu(image) == null)) {
 			throw new ValidationException(
 					"Missing instance type or ram/cpu information. Please review the instance type under Parameters -> "
-							+ getCloudServiceName() + " Or it's parents.");
+							+ getConnectorInstanceName() + " Or it's parents.");
 		}
 	}
 
