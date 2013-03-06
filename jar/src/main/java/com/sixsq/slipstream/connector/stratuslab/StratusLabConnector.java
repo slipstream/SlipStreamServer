@@ -89,7 +89,7 @@ public class StratusLabConnector extends CliConnectorBase {
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
 
-		validate(user);
+		validate(run, user);
 
 		String command;
 		try {
@@ -143,12 +143,13 @@ public class StratusLabConnector extends CliConnectorBase {
 				: "machine";
 	}
 
-	private void validate(User user) throws ValidationException {
+	private void validate(Run run, User user) throws ValidationException {
 		validateCredentials(user);
 		validateUserSshPublicKey(user);
+		validateLaunch(run, user);
 	}
 
-	protected void validateLaunch(Run run, User user)
+	private void validateLaunch(Run run, User user)
 			throws ValidationException {
 		if (run.getCategory() == ModuleCategory.Image) {
 			ImageModule image = ImageModule.load(run.getModuleResourceUrl());
