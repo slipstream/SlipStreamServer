@@ -151,11 +151,7 @@ public class ConnectorFactory {
 		}
 	}
 
-	// Used in:
-	// - this.getConnectors(String[])
-	// - this.setConnectors(Map<String, Connector>)
 	protected static void setServiceName(Connector connector) {
-		// cloudServiceNames.add(connector.getCloudServiceName());
 		cloudServiceNames.add(connector.getConnectorInstanceName());
 	}
 
@@ -183,7 +179,7 @@ public class ConnectorFactory {
 			String name = "";
 			Connector connector;
 			if (isNamed) {
-				name = nameAndClassName[0];
+				name = nameAndClassName[0].trim();
 				connector = loadConnector(className, name);
 			} else {
 				connector = loadConnector(className);
