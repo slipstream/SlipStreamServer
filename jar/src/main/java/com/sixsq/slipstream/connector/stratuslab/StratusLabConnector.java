@@ -399,10 +399,6 @@ public class StratusLabConnector extends CliConnectorBase {
 		return parseDescribeInstanceResult(result);
 	}
 
-	protected String getEndpoint(User user) {
-		return user.getParameter("stratuslab.endpoint").getSafeValue();
-	}
-
 	@Override
 	public Map<String, ModuleParameter> getImageParametersTemplate()
 			throws ValidationException {
