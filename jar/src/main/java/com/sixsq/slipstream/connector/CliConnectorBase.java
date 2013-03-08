@@ -55,4 +55,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	private String wrapInSingleQuotes(String value) {
 		return "'" + value + "'";
 	}
+	
+	protected String getEndpoint(User user) {
+		return wrapInSingleQuotes(super.getEndpoint(user));
+	}
 }

@@ -464,6 +464,6 @@ public abstract class ConnectorBase implements Connector {
 	}
 	
 	protected String getEndpoint(User user) {
-		return user.getParameter(getConnectorInstanceName() + ".endpoint").getSafeValue();
+		return user.getParameter(getConnectorInstanceName() + ".endpoint").getValue();
 	}
 }
