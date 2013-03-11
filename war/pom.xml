@@ -78,11 +78,6 @@
     </dependency>
 
     <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
     </dependency>
@@ -90,7 +85,6 @@
     <dependency>
       <groupId>org.jclouds</groupId>
       <artifactId>jclouds-all</artifactId>
-      <version>1.5.2</version>
       <type>jar</type>
     </dependency>
 

@@ -88,7 +88,6 @@
     <dependency>
       <groupId>org.jclouds</groupId>
       <artifactId>jclouds-all</artifactId>
-      <version>1.5.2</version>
       <type>jar</type>
     </dependency>
     
@@ -183,19 +182,6 @@
           </componentProperties>
         </configuration>
         <executions>
-          <execution>
-            <id>mysql-schema-generation</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>hbm2ddl</goal>
-            </goals>
-            <configuration>
-              <componentProperties>
-                <persistenceunit>mysql-schema</persistenceunit>
-                <outputfilename>slipstream.mysql.ddl</outputfilename>
-              </componentProperties>
-            </configuration>
-          </execution>
           <execution>
             <id>hsqldb-schema-generation</id>
             <phase>process-classes</phase>
