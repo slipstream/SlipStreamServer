@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.jclouds.Constants;
+import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.keystone.v2_0.config.CredentialTypes;
 import org.jclouds.openstack.keystone.v2_0.config.KeystoneProperties;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
@@ -35,6 +36,11 @@ import org.jclouds.openstack.nova.v2_0.domain.ServerCreated;
 import org.jclouds.openstack.nova.v2_0.options.CreateServerOptions;
 import org.jclouds.openstack.v2_0.domain.Resource;
 import org.jclouds.rest.RestContext;
+
+import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
+import com.google.inject.Module;
+import com.google.common.collect.ImmutableSet;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Multimap;
@@ -55,6 +61,7 @@ import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+
 
 public class OpenStackConnector extends
 		JCloudsConnectorBase<NovaApi, NovaAsyncApi> {
@@ -196,7 +203,7 @@ public class OpenStackConnector extends
 	}
 
 	private NovaApi getClient(User user, Properties overrides)
-			throws InvalidElementException, ValidationException {
+			throws InvalidElementException, ValidationException {		
 		if (overrides == null)
 			overrides = new Properties();
 
@@ -207,8 +214,17 @@ public class OpenStackConnector extends
 		overrides.setProperty(KeystoneProperties.REQUIRES_TENANT, "true");
 		overrides.setProperty(KeystoneProperties.TENANT_NAME, user.getParameterValue(constructKey(OpenStackUserParametersFactory.TENANT_NAME), ""));
 
-		context = createContext(getCredentials(user), overrides);
-		return context.getApi();
+		
+		Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
+		ComputeServiceContext csContext = ContextBuilder.newBuilder(getJcloudsDriverName())
+			//.endpoint(getEndpoint(user))
+			.modules(modules)
+			.credentials(getKey(user), getSecret(user))
+			.overrides(overrides).buildView(ComputeServiceContext.class);
+		
+		this.context = csContext.unwrap();
+	 
+		return this.context.getApi();
 	}
 
 	// TODO Move this method to the superclass (JCloudsConnectorBase)
@@ -258,8 +274,7 @@ public class OpenStackConnector extends
 
 			ServerCreated server = null;
 			try {
-				server = client.getServerApiForZone(region).create(
-						instanceName, imageId, flavorId, options);
+				server = client.getServerApiForZone(region).create(instanceName, imageId, flavorId, options);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw (new ServerExecutionEnginePluginException(e.getMessage()));
