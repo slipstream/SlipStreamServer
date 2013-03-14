@@ -42,9 +42,9 @@
   </repositories>
 
   <scm>
-    <connection>scm:git:ssh://git@github.com/SixSq/SlipStreamServer.git</connection>
-    <url>scm:git:ssh://git@github.com/SixSq/SlipStreamServer.git</url>
-    <developerConnection>scm:git:ssh://git@github.com/SixSq/SlipStreamServer.git</developerConnection>
+    <connection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</connection>
+    <url>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</url>
+    <developerConnection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
