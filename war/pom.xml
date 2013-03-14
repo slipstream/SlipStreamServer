@@ -3,14 +3,14 @@
 
   <artifactId>SlipStreamServer-war</artifactId>
   <name>SlipStream Server (WAR)</name>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
 
   <packaging>war</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
   </parent>
   
   <dependencies>
@@ -18,7 +18,7 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamServer-jar</artifactId>
-      <version>1.2-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
     
     <dependency>

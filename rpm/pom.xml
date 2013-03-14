@@ -4,21 +4,21 @@
     <groupId>com.sixsq.slipstream</groupId>
 	<artifactId>SlipStreamServer-rpm</artifactId>
 	<name>SlipStream Server (RPM)</name>
-	<version>1.2-SNAPSHOT</version>
+	<version>1.2</version>
 
 	<packaging>pom</packaging>
 
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamServer</artifactId>
-		<version>1.2-SNAPSHOT</version>
+		<version>1.2</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamServer-war</artifactId>
-			<version>1.2-SNAPSHOT</version>
+			<version>1.2</version>
 			<type>war</type>
 		</dependency>
 	</dependencies>

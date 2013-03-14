@@ -3,7 +3,7 @@
 
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamServer</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
   <packaging>pom</packaging>
   <name>SlipStream Server</name>
   <url>http://sixsq.com/</url>
@@ -45,7 +45,7 @@
     <connection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</connection>
     <url>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</url>
     <developerConnection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>SlipStreamServer-1.2</tag>
   </scm>
 
   <reporting>
