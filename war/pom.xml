@@ -25,7 +25,6 @@
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamDocumentation</artifactId>
       <classifier>server-bundle</classifier>
-      <version>1.1</version>
       <type>zip</type>
     </dependency>
 
