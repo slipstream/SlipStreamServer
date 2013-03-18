@@ -90,6 +90,7 @@ public class RootApplication extends Application {
         getMetadataService().setDefaultMediaType(MediaType.TEXT_HTML);
         getMetadataService().addExtension("tgz",
                 MediaType.APPLICATION_COMPRESS, true);
+        getMetadataService().addExtension("multipart", MediaType.MULTIPART_ALL);
     }
 
     private void createStartupMetadata() throws ValidationException,
