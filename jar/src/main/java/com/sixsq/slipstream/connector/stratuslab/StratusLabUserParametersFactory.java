@@ -47,16 +47,16 @@ public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 		String[] _options = { IP_TYPE_DEFAULT, "local",
 				NetworkType.Private.name().toLowerCase() };
 		List<String> options = Arrays.asList(_options);
-		putEnumParameter("ip.type", "IP type: public, local, private", options,
-				IP_TYPE_DEFAULT, true);
+		putMandatoryEnumParameter("ip.type", "IP type: public, local, private", options,
+				IP_TYPE_DEFAULT);
 
-		putParameter(KEY_PARAMETER_NAME, "StratusLab account username", true,
+		putMandatoryParameter(KEY_PARAMETER_NAME, "StratusLab account username",
 				ParameterType.RestrictedString);
 
-		putPasswordParameter(SECRET_PARAMETER_NAME,
-				"StratusLab account password", true);
+		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME,
+				"StratusLab account password");
 
-		putParameter(
+		putMandatoryParameter(
 				ENDPOINT_KEY,
 				Configuration
 						.getInstance()
@@ -64,9 +64,9 @@ public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 						.getParameterValue(
 								constructKey("cloud.connector." + ENDPOINT_KEY),
 								"cloud.lal.stratuslab.eu"),
-				"StratusLab endpoint", true);
+				"StratusLab endpoint");
 
-		putParameter(
+		putMandatoryParameter(
 				"marketplace.endpoint",
 				Configuration
 						.getInstance()
@@ -74,11 +74,11 @@ public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 						.getParameterValue(
 								constructKey("cloud.connector." + "marketplace.endpoint"),
 								"http://marketplace.stratuslab.eu"),
-				"Default marketplace endpoint", true);
+				"Default marketplace endpoint");
 
-		putParameter(SSHKEY_PARAMETER_NAME,
+		putMandatoryParameter(SSHKEY_PARAMETER_NAME,
 				"SSH Public Key(s) (keys must be separated by new line)",
-				ParameterType.RestrictedText, true);
+				ParameterType.RestrictedText);
 	}
 
 }

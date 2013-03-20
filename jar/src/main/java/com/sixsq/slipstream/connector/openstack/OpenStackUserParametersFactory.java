@@ -40,20 +40,19 @@ public class OpenStackUserParametersFactory extends UserParametersFactoryBase {
 
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
-		putParameter(KEY_PARAMETER_NAME, "", "Username", "", true);
-		putPasswordParameter(SECRET_PARAMETER_NAME, "Password", true);
-		putParameter(
+		putMandatoryParameter(KEY_PARAMETER_NAME, "Username");
+		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME, "Password");
+		putMandatoryParameter(
 				TENANT_NAME,
-				"Project name (Correspond to your Keystone Tenant name for the project)",
-				true);
-		putParameter(KEYSTONE_URL, "",
-				"Authentification URL (Correspond to the Keystone URL)", true);
-		putParameter(KEYPAIR_NAME, "default", "Keypair Name", true);
-		putParameter(SECURITY_GROUP, "default",
-				"Security Groups (comma separated list)", true);
-		putParameter(PRIVATE_KEY,
+				"Project name (Correspond to your Keystone Tenant name for the project)");
+		putMandatoryParameter(KEYSTONE_URL,
+				"Authentification URL (Correspond to the Keystone URL)");
+		putMandatoryParameter(KEYPAIR_NAME, "default", "Keypair Name");
+		putMandatoryParameter(SECURITY_GROUP, "default",
+				"Security Groups (comma separated list)");
+		putMandatoryParameter(PRIVATE_KEY,
 				"Private key of keypair (required to build Images)",
-				ParameterType.Text, false);
+				ParameterType.Text);
 	}
 
 }

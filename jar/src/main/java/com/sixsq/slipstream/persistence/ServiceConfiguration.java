@@ -67,7 +67,7 @@ public class ServiceConfiguration extends
 
 		CLOUD_CONNECTOR_CLASS(
 				"Cloud connector java class name(s) (comma separated for multi-cloud configuration)",
-				ParameterCategory.SlipStream_basics),
+				ParameterCategory.SlipStream_basics, ParameterType.Text),
 
 		CLOUD_CONNECTOR_LIBRARY_LIBCLOUD_URL(
 				"URL to fetch libcloud library from",

@@ -39,8 +39,8 @@ public class LocalUserParametersFactory extends UserParametersFactoryBase {
 		putParameter(KEY_PARAMETER_NAME,
 				"Account username", true,
 				ParameterType.RestrictedString);
-		putPasswordParameter(SECRET_PARAMETER_NAME,
-				"Account password", true);
+		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME,
+				"Account password");
 
 	}
 }

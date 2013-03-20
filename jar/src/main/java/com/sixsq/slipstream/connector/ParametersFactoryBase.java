@@ -83,6 +83,12 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		addParameter(parameter, ParameterType.Enum, mandatory);
 	}
 
+	protected void putMandatoryEnumParameter(String name, String description,
+			List<String> options, String value)
+			throws ValidationException {
+		putEnumParameter(name, description, options, value, true);
+	}
+
 	protected void putParameter(String name, boolean value, String description,
 			boolean mandatory) throws ValidationException {
 		S parameter = createParameter(name, value, description);
@@ -95,10 +101,21 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		assignParameter(parameter);
 	}
 
+	protected void putMandatoryParameter(String name, String description,
+			ParameterType type) throws ValidationException {
+		S parameter = createParameter(name, null, description, true);
+		parameter.setType(type);
+		assignParameter(parameter);
+	}
+
 	protected void putMandatoryParameter(String name, String description, String category) throws ValidationException {
 		S parameter = createParameter(name, null, description, true);
 		parameter.setCategory(category);
 		assignParameter(parameter);
+	}
+
+	protected void putMandatoryParameter(String name, String description) throws ValidationException {
+		putMandatoryParameter(name, description, getCategory());
 	}
 
 	protected void putParameter(String name, String description,
@@ -129,10 +146,10 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		assignParameter(parameter);
 	}
 
-	protected void putPasswordParameter(String name, String description,
-			boolean mandatory) throws ValidationException {
-		S parameter = createParameter(name, description, mandatory);
-		addParameter(parameter, ParameterType.Password, mandatory);
+	protected void putMandatoryPasswordParameter(String name, String description) throws ValidationException {
+		S parameter = createParameter(name, description, true);
+		parameter.setCategory(getCategory());
+		addParameter(parameter, ParameterType.Password, true);
 	}
 
 	protected void assignParameter(S parameter) {
