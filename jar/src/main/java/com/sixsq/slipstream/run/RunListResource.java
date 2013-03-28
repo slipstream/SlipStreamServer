@@ -266,7 +266,8 @@ public class RunListResource extends ServerResource {
 		String defaultCloudService = getDefaultCloudService();
 		
 		for(Node node : deployment.getNodes().values()) {
-			node.setCloudService(defaultCloudService);
+			if (CloudImageIdentifier.DEFAULT_CLOUD_SERVICE.equals(node.getCloudService()))
+				node.setCloudService(defaultCloudService);
 		}
 
 		for (String nodename : parametersPerNode.keySet()) {
