@@ -300,6 +300,7 @@ public class Configuration {
 				parameter.setDescription(p.getDescription());
 				parameter.setMandatory(p.isMandatory());
 				parameter.setCategory(p.getCategory());
+				parameter.setType(p.getType());
 			}
 
 			serviceConfiguration.setParameter(parameter);

@@ -137,8 +137,7 @@ var nodeAdder = {
 		index: -1,
 		
 		populate: function(image) {
-			this.imageShortName = image.attr('name');
-			this.resourceUri = image.attr('resourceUri');
+			this.imageShortName = image.attr('shortName');
 		},
 		
 		setNodePrefix: function(index) {
@@ -274,7 +273,6 @@ var nodeAdder = {
 
 		that = nodeAdder;
 		var image = module;
-		var t = image.attr('class');
 		that.nodeInfo.populate(image);
 
 	    var index = $('#nodes > tr').size() + 1;
@@ -386,8 +384,8 @@ var nodeParametersAutoCompleter = {
 	},
 
 	extractOutputParameters: function(data, status, xhr) {
-		var imageName = $(data.firstChild).attr('resourceUri');
-		var imageNameNoVersion = nodeParametersAutoCompleter.extractImageRefNoVersion(imageName);
+	    var parameter = $(data.firstChild);
+		var imageNameNoVersion = $(parameter).attr('parentUri') + '/' + $(parameter).attr('shortName');
 		var inputs = [];
 		$(data).find('parameter[category=Output][type!=Dummy]').each(function(index, input) {
 			inputs.push($(input).attr('name'));
