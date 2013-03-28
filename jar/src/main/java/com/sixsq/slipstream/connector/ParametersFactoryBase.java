@@ -108,6 +108,14 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		assignParameter(parameter);
 	}
 
+	protected void putMandatoryParameter(String name, String description,
+			ParameterType type, String instructions) throws ValidationException {
+		S parameter = createParameter(name, null, description, true);
+		parameter.setType(type);
+		parameter.setInstructions(instructions);
+		assignParameter(parameter);
+	}
+
 	protected void putMandatoryParameter(String name, String description, String category) throws ValidationException {
 		S parameter = createParameter(name, null, description, true);
 		parameter.setCategory(category);
@@ -149,6 +157,13 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 	protected void putMandatoryPasswordParameter(String name, String description) throws ValidationException {
 		S parameter = createParameter(name, description, true);
 		parameter.setCategory(getCategory());
+		addParameter(parameter, ParameterType.Password, true);
+	}
+
+	protected void putMandatoryPasswordParameter(String name, String description, String instructions) throws ValidationException {
+		S parameter = createParameter(name, description, true);
+		parameter.setCategory(getCategory());
+		parameter.setInstructions(instructions);
 		addParameter(parameter, ParameterType.Password, true);
 	}
 
