@@ -303,11 +303,19 @@ public class RootApplication extends Application {
 
     private void attachUser(RootRouter router) {
         TemplateRoute route;
-        Authenticator authenticator = new CookieAuthenticator(getContext());
-        authenticator.setEnroler(new SuperEnroler());
-        authenticator.setNext(new UserRouter(getContext()));
+        
+        Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
+        basicAuthenticator.setEnroler(new SuperEnroler());
+
+        Authenticator cookieAuthenticator = new CookieAuthenticator(
+                getContext());
+        cookieAuthenticator.setOptional(true);
+
+        cookieAuthenticator.setNext(basicAuthenticator);
+
+        basicAuthenticator.setNext(new UserRouter(getContext()));
         route = router.attach(convertToRouterRoot(User.RESOURCE_URL_PREFIX),
-                authenticator);
+        		cookieAuthenticator);
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
     }
 
