@@ -20,7 +20,13 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -36,6 +42,9 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.ParametersFactory;
@@ -175,19 +184,95 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		}
 
 		updateOrCreate(module);
-		
+
 		setResponseOkAndViewLocation(module.getResourceUri());
 	}
 
 	@Put("multipart")
-	public void updateOrCreateFromXml(Representation entity)
+	public void updateOrCreateFromXmlMultipart(Representation entity)
 			throws ResourceException {
 
-		Module module = xmlToModule();
+		Module module = xmlMultipartToModule();
 
 		updateOrCreate(module);
 
 		setResponseRedirect("/" + module.getResourceUri());
+	}
+
+	private Module xmlMultipartToModule() {
+		return xmlToModule(extractXmlMultipart());
+	}
+
+	private String extractXmlMultipart() {
+	
+		RestletFileUpload upload = new RestletFileUpload(
+				new DiskFileItemFactory());
+	
+		List<FileItem> items;
+	
+		Request request = getRequest();
+		try {
+			items = upload.parseRequest(request);
+		} catch (FileUploadException e) {
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+					e.getMessage());
+		}
+	
+		String module = null;
+		for (FileItem fi : items) {
+			if (fi.getName() != null) {
+				module = getContent(fi);
+			}
+		}
+		if (module == null) {
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+					"the file is empty");
+		}
+	
+		return module;
+	}
+
+	@Put("xml")
+	public void updateOrCreateFromXml(Representation entity)
+			throws ResourceException {
+
+		Module module = xmlToModule();
+		
+		updateOrCreate(module);
+
+		if (this.isExisting()) {
+			getResponse().setStatus(Status.SUCCESS_ACCEPTED);
+		} else {
+			getResponse().setStatus(Status.SUCCESS_CREATED);
+		}
+	}
+
+	private Module xmlToModule() {
+		return xmlToModule(extractXml());
+	}
+
+	private Module xmlToModule(String xml) {
+	
+		String denormalized = XmlUtil.denormalize(xml);
+
+		Class<? extends Module> moduleClass = getModuleClass(denormalized);
+	
+		Module module = null;
+		try {
+			module = (Module) SerializationUtil.fromXml(denormalized, moduleClass);
+		} catch (SlipStreamClientException e) {
+			e.printStackTrace();
+			throwClientBadRequest("Invalid xml module: " + e.getMessage());
+		}
+		
+		// Reset user
+		module.getAuthz().setUser(getUser().getName());
+		
+		return module;
+	}
+
+	private String extractXml() {
+		return getRequest().getEntityAsText();
 	}
 
 	private void updateOrCreate(Module module) {
@@ -221,66 +306,65 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	}
 
-	private void checkConsistentModule(String moduleUri, String targetUri) throws ValidationException {
+	private void checkConsistentModule(String moduleUri, String targetUri)
+			throws ValidationException {
 		// Only check that the form contains the module uri corresponding
 		// to the target uri if the module is not new. In the case the module
 		// is new, the name is defined by the put request and the target
 		// is always 'new'
-		if(!isNew()) {
+		if (!isNew()) {
 			if (!targetUri.equals(moduleUri)) {
 				throwClientBadRequest("The uploaded module does not correspond to the target module uri");
 			}
 		}
-		
+
 		// Check that the new proposed module doesn't already exists.
 		// We need to do this here since the standard AA process runs before
 		// the module name is extracted from the request.
-		if(isNew()) {
-			if(loadModule(moduleUri) != null) {
+		if (isNew()) {
+			if (loadModule(moduleUri) != null) {
 				throwClientForbiddenError("Cannot create this resource. Does it already exist?");
 			}
 		}
 	}
 
-	private Module xmlToModule() {
-		Module module = null;
+	@SuppressWarnings("unchecked")
+	private Class<? extends Module> getModuleClass(String moduleAsXml) {
+
+		String category = null;
 		try {
-			module = (Module) SerializationUtil.fromXml(extractXml(),
-					ImageModule.class);
-		} catch (SlipStreamClientException e) {
+			category = extractCategory(moduleAsXml);
+		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
-			throwClientBadRequest("Invalid xml module: " + e.getMessage());
+			throwServerError("Failed to parse module");
+		} catch (SAXException e) {
+			e.printStackTrace();
+			throwClientBadRequest("Invalid xml document");
+		} catch (IOException e) {
+			e.printStackTrace();
+			throwServerError("Failed to parse module");
 		}
-		return module;
+
+		String className = "com.sixsq.slipstream.persistence." + category + "Module";
+		Class<? extends Module> moduleClass = null;
+		try {
+			moduleClass = (Class<? extends Module>) Class.forName(className);
+		} catch (ClassNotFoundException e) {
+			throwClientBadRequest("Unknown category");
+		}
+		return moduleClass;
 	}
 
-	private String extractXml() {
+	protected String extractCategory(String moduleAsXml)
+			throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db;
+		db = dbf.newDocumentBuilder();
+		StringReader reader = new StringReader(moduleAsXml);
+		Document document = db.parse(new InputSource(reader));
 
-		RestletFileUpload upload = new RestletFileUpload(
-				new DiskFileItemFactory());
-
-		List<FileItem> items;
-
-		Request request = getRequest();
-		try {
-			items = upload.parseRequest(request);
-		} catch (FileUploadException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-					e.getMessage());
-		}
-
-		String module = null;
-		for (FileItem fi : items) {
-			if (fi.getName() != null) {
-				module = getContent(fi);
-			}
-		}
-		if (module == null) {
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-					"the file is empty");
-		}
-
-		return XmlUtil.denormalize(module);
+		return document.getDocumentElement().getAttributes()
+				.getNamedItem("category").getNodeValue();
 	}
 
 	protected String getContent(FileItem fi) {
