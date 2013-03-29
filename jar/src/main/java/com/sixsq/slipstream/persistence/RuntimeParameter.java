@@ -172,6 +172,9 @@ public class RuntimeParameter extends Metadata {
 	private boolean mapsOthers;
 
 	@Attribute(required = false)
+	private ParameterType type = ParameterType.String;
+
+	@Attribute(required = false)
 	@Lob
 	private String mappedRuntimeParameterNames = "";
 
@@ -370,6 +373,14 @@ public class RuntimeParameter extends Metadata {
 		List<RuntimeParameter> list = q.getResultList();
 		em.close();
 		return list;
+	}
+
+	public void setType(ParameterType type) {
+		this.type = type;
+	}
+
+	public ParameterType getType() {
+		return type;
 	}
 	
 }

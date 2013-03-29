@@ -112,7 +112,8 @@ public class RunDeploymentFactory extends RunFactory {
 			Module image = node.getImage();
 			for (ModuleParameter param : image.getParameterList()) {
 				String initialValue = extractInitialValue(param, node);
-				run.createRuntimeParameter(node, param.getName(), initialValue);
+				run.createRuntimeParameter(node, param.getName(), initialValue,
+						param.getDescription(), param.getType());
 			}
 		}
 		return run;
@@ -234,12 +235,13 @@ public class RunDeploymentFactory extends RunFactory {
 			throws ConfigurationException, ValidationException {
 		HashSet<String> cloudServiceList = run.getCloudServicesList();
 		for (String cloudServiceName : cloudServiceList) {
-			String nodename = Run.ORCHESTRATOR_NAME + "-" + cloudServiceName; 
+			String nodename = Run.ORCHESTRATOR_NAME + "-" + cloudServiceName;
 			run.addNodeName(nodename);
-			run.assignRuntimeParameter(nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR
+			run.assignRuntimeParameter(nodename
+					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-			
+
 		}
 	}
 

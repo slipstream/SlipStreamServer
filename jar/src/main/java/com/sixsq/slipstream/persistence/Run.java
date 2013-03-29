@@ -393,9 +393,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 		setModule(module, false);
 	}
 
-	public void setModule(Module module, boolean populate) throws ValidationException {
+	public void setModule(Module module, boolean populate)
+			throws ValidationException {
 		this.module = module;
-		if(populate) {
+		if (populate) {
 			populateModule();
 		}
 	}
@@ -635,6 +636,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public void createRuntimeParameter(Node node, String key, String value)
 			throws ValidationException {
+		createRuntimeParameter(node, key, value, "", ParameterType.String);
+	}
+
+	public void createRuntimeParameter(Node node, String key, String value,
+			String description, ParameterType type) throws ValidationException {
 
 		// We only test for the first one
 		String parameterName = composeParameterName(node, key, 1);
@@ -643,14 +649,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 					+ " already exists in node " + node.getName());
 		}
 
-		createRuntimeParameter(node, key, value, null);
-	}
-
-	private void createRuntimeParameter(Node node, String key, String value,
-			String description) throws ValidationException {
 		for (int i = 1; i <= node.getMultiplicity(); i++) {
 			assignRuntimeParameter(composeParameterName(node, key, i), value,
-					description);
+					description, type);
 		}
 	}
 
@@ -722,6 +723,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public RuntimeParameter assignRuntimeParameter(String key, String value,
 			String description) throws ValidationException {
+		return assignRuntimeParameter(key, value, description,
+				ParameterType.String);
+	}
+
+	public RuntimeParameter assignRuntimeParameter(String key, String value,
+			String description, ParameterType type) throws ValidationException {
 		if (runtimeParameters.containsKey(key)) {
 			throw new ValidationException("Key " + key
 					+ " already exists, cannot re-define");
@@ -729,7 +736,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		RuntimeParameter parameter = new RuntimeParameter(this, key, value,
 				description);
 
+		parameter.setType(type);
 		runtimeParameters.put(key, parameter);
+
 		return parameter;
 	}
 
@@ -792,10 +801,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 	// LS: Temporary method
 	public Collection<Node> getNodes() throws ValidationException {
 		// FIXME: this is a hack and needs a real fix
-		if(module == null) {
-			module = new RunDeploymentFactory().overloadModule(this, User.loadByName(getUser()));
+		if (module == null) {
+			module = new RunDeploymentFactory().overloadModule(this,
+					User.loadByName(getUser()));
 		}
-		
+
 		if (module.getCategory() != ModuleCategory.Deployment) {
 			throw new SlipStreamInternalException(
 					"getNodes can only be used with a Deployment module");
@@ -826,8 +836,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void addGroup(String group, String serviceName) {
-		this.groups += serviceName
-				+ SERVICENAME_NODENAME_SEPARATOR + group + ", ";
+		this.groups += serviceName + SERVICENAME_NODENAME_SEPARATOR + group
+				+ ", ";
 	}
 
 	@Attribute
@@ -868,7 +878,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			throws ValidationException {
 		for (Node node : deployment.getNodes().values()) {
 
-//			node.setCloudService(getCloudServiceName());
+			// node.setCloudService(getCloudServiceName());
 
 			RunParameter runParameter;
 
@@ -878,11 +888,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 				node.setMultiplicity(runParameter.getValue());
 			}
 
-//			runParameter = getParameter(nodeRuntimeParameterKeyName(node,
-//					RuntimeParameter.CLOUD_SERVICE_NAME));
-//			if (runParameter != null) {
-//				node.setCloudService(runParameter.getValue());
-//			}
+			// runParameter = getParameter(nodeRuntimeParameterKeyName(node,
+			// RuntimeParameter.CLOUD_SERVICE_NAME));
+			// if (runParameter != null) {
+			// node.setCloudService(runParameter.getValue());
+			// }
 
 			node.getImage().assignImageIdFromCloudService(
 					node.getCloudService());
