@@ -33,10 +33,24 @@
   		</xsl:copy>			
   	</xsl:template>
   
+	<xsl:template match="children" />
+	  
 	<xsl:template match="parameter/@*">
 		<xsl:choose>
 			<xsl:when test="name(.) = 'resourceUri'">
 			</xsl:when>
+			<xsl:when test="name(.) = 'class'">
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:attribute name="{name(.)}">
+					<xsl:value-of select="." />
+				</xsl:attribute>
+			</xsl:otherwise>
+		</xsl:choose>	
+	</xsl:template>
+  
+	<xsl:template match="item/@*">
+		<xsl:choose>
 			<xsl:when test="name(.) = 'class'">
 			</xsl:when>
 			<xsl:otherwise>
