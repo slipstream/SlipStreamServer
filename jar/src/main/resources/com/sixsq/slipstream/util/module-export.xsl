@@ -23,7 +23,24 @@
 	version="1.0">
 
 	<xsl:template match="/">
-		<xsl:apply-templates />
+		<xsl:for-each select="node()">
+			<xsl:copy>
+				<xsl:for-each select="@*">
+					<xsl:choose>
+						<xsl:when test="name(.) = 'resourceUri'">
+						</xsl:when>
+						<xsl:when test="name(.) = 'name'">
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:attribute name="{name(.)}">
+								<xsl:value-of select="." />
+							</xsl:attribute>
+						</xsl:otherwise>
+					</xsl:choose>	
+				</xsl:for-each>
+	 			<xsl:apply-templates />
+			</xsl:copy>
+ 		</xsl:for-each>
 	</xsl:template>
 
   	<xsl:template match="node()">
@@ -33,42 +50,10 @@
   		</xsl:copy>			
   	</xsl:template>
   
-	<xsl:template match="children" />
-	  
-	<xsl:template match="parameter/@*">
-		<xsl:choose>
-			<xsl:when test="name(.) = 'resourceUri'">
-			</xsl:when>
-			<xsl:when test="name(.) = 'class'">
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:attribute name="{name(.)}">
-					<xsl:value-of select="." />
-				</xsl:attribute>
-			</xsl:otherwise>
-		</xsl:choose>	
-	</xsl:template>
-  
-	<xsl:template match="item/@*">
-		<xsl:choose>
-			<xsl:when test="name(.) = 'class'">
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:attribute name="{name(.)}">
-					<xsl:value-of select="." />
-				</xsl:attribute>
-			</xsl:otherwise>
-		</xsl:choose>	
-	</xsl:template>
-  
 	<xsl:template match="@*">
 		<xsl:choose>
 			<xsl:when test="name(.) = 'resourceUri'">
 			</xsl:when>
-			<xsl:when test="name(.) = 'name'">
-			</xsl:when>
-			<xsl:when test="name(.) = 'class'">
-			</xsl:when>
 			<xsl:otherwise>
 				<xsl:attribute name="{name(.)}">
 					<xsl:value-of select="." />
@@ -76,5 +61,5 @@
 			</xsl:otherwise>
 		</xsl:choose>	
 	</xsl:template>
-  
+
 </xsl:stylesheet>

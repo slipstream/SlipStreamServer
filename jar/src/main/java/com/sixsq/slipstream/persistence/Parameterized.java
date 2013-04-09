@@ -143,4 +143,12 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 		return parameterized;
 	}
 
+	@SuppressWarnings("unchecked")
+	public void postDeserialization() {
+		super.postDeserialization();
+		// Assign containers inside parameters
+		for(Entry<String, T> p : getParameters().entrySet()) {
+			p.getValue().setContainer((S) this);
+		}
+	}
 }

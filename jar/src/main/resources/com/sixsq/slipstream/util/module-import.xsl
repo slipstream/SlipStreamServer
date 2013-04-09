@@ -53,20 +53,28 @@
 					</xsl:attribute>
 				</xsl:for-each>
 	
-				<xsl:copy-of select="*" />
+				<xsl:apply-templates select="*" />
 			</xsl:element>
 		</xsl:for-each>
 	</xsl:template>
 
-  	<xsl:template match="node()">
+ 	<xsl:template match="children" />
+
+ 	<xsl:template match="image" />
+
+   	<xsl:template match="node()">
   		<xsl:copy>
 			<xsl:if test="name(.) = 'cloudImageIdentifier'">
 	  			<xsl:attribute name="resourceUri">
 	  				<xsl:value-of select="concat(/*/@parentUri, /*/@shortName, '/', @version, '/', @cloudServiceName)" />
 	  			</xsl:attribute>
 			</xsl:if>
-			<xsl:apply-templates select="*" />
+			<xsl:apply-templates select="*|@*|text()" />
   		</xsl:copy>
   	</xsl:template>
-  
+
+  	<xsl:template match="@*|text()">
+		<xsl:copy-of select="." />
+  	</xsl:template>
+
 </xsl:stylesheet>

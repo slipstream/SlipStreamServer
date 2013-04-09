@@ -52,7 +52,6 @@ public class CloudImageIdentifier implements Serializable {
 	@Attribute(required = false)
 	private String cloudImageIdentifier;
 
-	@SuppressWarnings("unused")
 	@ManyToOne
 	private ImageModule container;
 
@@ -62,7 +61,7 @@ public class CloudImageIdentifier implements Serializable {
 	public CloudImageIdentifier(ImageModule module, String cloudServiceName) {
 		this.setCloudServiceName(cloudServiceName);
 		this.resourceUri = module.getResourceUri() + "/" + cloudServiceName;
-		container = module;
+		setContainer(module);
 	}
 
 	public CloudImageIdentifier(ImageModule module, String cloudServiceName,
@@ -132,5 +131,13 @@ public class CloudImageIdentifier implements Serializable {
 				getCloudServiceName(), getRegion(), getCloudMachineIdentifer());
 		image.getCloudImageIdentifiers().add(copy);
 		return image;
+	}
+
+	public void setContainer(ImageModule container) {
+		this.container = container;
+	}
+
+	public ImageModule getContainer() {
+		return container;
 	}
 }

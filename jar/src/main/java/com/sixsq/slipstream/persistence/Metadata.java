@@ -176,5 +176,12 @@ public abstract class Metadata implements Serializable {
 		copy.setName(getName());
 		return copy;
 	}
+	
+	/**
+	 * Fix deserialization (e.g. from xml) lists and maps
+	 * containers.
+	 */
+	public void postDeserialization() {
+	}
 
 }

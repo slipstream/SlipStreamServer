@@ -268,6 +268,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		// Reset user
 		module.getAuthz().setUser(getUser().getName());
 		
+		module.postDeserialization();
+
 		return module;
 	}
 

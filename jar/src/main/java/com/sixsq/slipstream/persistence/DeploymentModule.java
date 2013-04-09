@@ -254,5 +254,16 @@ public class DeploymentModule extends Module {
 		
 		return deployment;
 	}
+	
+	public void postDeserialization() {
+		super.postDeserialization();
+		// Assign containers inside parameters
+		for(Entry<String, Node> n : getNodes().entrySet()) {
+			for(Entry<String, NodeParameter> p : n.getValue().getParameters().entrySet()) {
+				p.getValue().setContainer(n.getValue());				
+			}
+		}
+	}
+
 
 }

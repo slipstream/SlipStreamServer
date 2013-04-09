@@ -639,4 +639,12 @@ public class ImageModule extends Module {
 		return module;
 	}
 
+	public void postDeserialization() {
+		super.postDeserialization();
+		for(CloudImageIdentifier c : getCloudImageIdentifiers()) {
+			c.setContainer(this);
+		}
+	}
+
+
 }
