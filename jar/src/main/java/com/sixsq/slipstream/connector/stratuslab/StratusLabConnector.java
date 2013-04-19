@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.CliConnectorBase;
 import com.sixsq.slipstream.connector.Credentials;
+import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -194,7 +195,8 @@ public class StratusLabConnector extends CliConnectorBase {
 	}
 
 	private void validateUserSshPublicKey(User user) throws ValidationException {
-		String sshParameterName = constructKey(UserParametersFactoryBase.SSHKEY_PARAMETER_NAME);
+		String sshParameterName = ExecutionControlUserParametersFactory.CATEGORY
+				+ "." + UserParametersFactoryBase.SSHKEY_PARAMETER_NAME;
 		if (!isParameterDefined(user, sshParameterName)) {
 			String errorMessageLastPart = getErrorMessageLastPart(user);
 			throw (new ValidationException(

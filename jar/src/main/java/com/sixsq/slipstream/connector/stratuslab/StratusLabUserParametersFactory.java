@@ -75,10 +75,6 @@ public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 								constructKey("cloud.connector." + "marketplace.endpoint"),
 								"http://marketplace.stratuslab.eu"),
 				"Default marketplace endpoint");
-
-		putMandatoryParameter(SSHKEY_PARAMETER_NAME,
-				"SSH Public Key(s) (keys must be separated by new line)",
-				ParameterType.RestrictedText);
 	}
 
 }

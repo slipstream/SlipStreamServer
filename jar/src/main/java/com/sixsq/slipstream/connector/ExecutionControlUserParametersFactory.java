@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.ParameterType;
 
 public class ExecutionControlUserParametersFactory extends
 		UserParametersFactoryBase {
@@ -55,6 +56,9 @@ public class ExecutionControlUserParametersFactory extends
 				"30",
 				"Minutes - When this timeout is reached, the execution is forcefully terminated.",
 				true);
+		putMandatoryParameter(SSHKEY_PARAMETER_NAME,
+				"SSH Public Key(s) (keys must be separated by new line)",
+				ParameterType.RestrictedText);
 		String[] _options = {VERBOSITY_LEVEL_DEFAULT, "1", "2", "3"};
 		List<String> options = Arrays.asList(_options);
 		putEnumParameter(
