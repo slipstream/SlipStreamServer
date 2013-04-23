@@ -118,7 +118,6 @@
                 <artifactItem>
                   <groupId>com.sixsq.slipstream</groupId>
                   <artifactId>SlipStreamDocumentation</artifactId>
-                  <version>1.4</version>
                   <classifier>server-bundle</classifier>
                   <type>zip</type>
                   <outputDirectory>${project.build.directory}/static-content</outputDirectory>
