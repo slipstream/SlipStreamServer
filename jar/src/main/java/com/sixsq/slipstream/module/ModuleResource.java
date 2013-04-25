@@ -423,10 +423,10 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		// to ensure that all mandatory parameters are present.
 		// This is required to avoid inconsistent modules, for example
 		// when connectors are added in the configuration
-		Module module = getParameterized();
-		if (module != null) {
+		Module previous = getParameterized();
+		if (previous != null) {
 			try {
-				ParametersFactory.addParametersForEditing(module);
+				ParametersFactory.addParametersForEditing(previous);
 			} catch (ValidationException e) {
 				throwClientConflicError(e.getMessage());
 			} catch (ConfigurationException e) {
@@ -446,7 +446,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientError(e);
 		}
 
-		module = processor.getParametrized();
+		processor.adjustModule(previous);
+		Module module = processor.getParametrized();
 
 		category = module.getCategory();
 
