@@ -240,7 +240,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		
 		updateOrCreate(module);
 
-		if (this.isExisting()) {
+		if (isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_ACCEPTED);
 		} else {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
