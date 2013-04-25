@@ -446,7 +446,10 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientError(e);
 		}
 
-		processor.adjustModule(previous);
+		if(!isNew()) {
+			processor.adjustModule(previous);
+		}
+		
 		Module module = processor.getParametrized();
 
 		category = module.getCategory();
