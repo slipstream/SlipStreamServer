@@ -184,10 +184,12 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	}
 
 	protected boolean isNew() {
-		return isExisting()
+		boolean newInUri = isExisting()
 				&& NEW_NAME.equals(ModuleUriUtil
 						.extractShortNameFromResourceUri(getParameterized()
 								.getName()));
+		boolean newInQuery = extractNewFlagFromQuery();
+		return newInQuery || newInUri;
 	}
 
 	protected void setIsEdit() {
@@ -195,11 +197,19 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	}
 
 	private boolean extractEditFlagFromQuery() {
+		return isFlagSetInQuery("edit");
+	}
+
+	private boolean extractNewFlagFromQuery() {
+		return isFlagSetInQuery("new");
+	}
+
+	private boolean isFlagSetInQuery(String flag) {
 		Reference resourceRef = getRequest().getResourceRef();
 		Form form = resourceRef.getQueryAsForm();
-		String edit = form.getFirstValue("edit");
-		return ("true".equalsIgnoreCase(edit) || "yes".equalsIgnoreCase(edit) || "on"
-				.equalsIgnoreCase(edit));
+		String value = form.getFirstValue(flag);
+		return ("true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || "on"
+				.equalsIgnoreCase(value));
 	}
 
 	abstract protected String getViewStylesheet();

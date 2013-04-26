@@ -3,7 +3,7 @@
 
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamServer</artifactId>
-  <version>1.4-SNAPSHOT</version>
+  <version>1.5-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SlipStream Server</name>
   <url>http://sixsq.com/</url>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStream</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.6-SNAPSHOT</version>
   </parent>
 
   <modules>
@@ -86,7 +86,7 @@
 		      <groupId>com.sixsq.slipstream</groupId>
 		      <artifactId>SlipStreamDocumentation</artifactId>
 		      <classifier>server-bundle</classifier>
-		      <version>1.4-SNAPSHOT</version>
+		      <version>${project.version}</version>
 		      <type>zip</type>
 		    </dependency>
 

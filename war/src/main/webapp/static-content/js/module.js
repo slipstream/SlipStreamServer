@@ -38,6 +38,9 @@ $(document).ready(function() {
 				$(this).dialog("close");
 				background.fadeInTopWindow();
 				$("#commentinput").val($("#savecomment").val());
+				var oldAction = $("#formsave").attr("action");
+				var newAction = oldAction.replace("new?", $("#modulename").val() + "?new=true&");
+				$("#formsave").attr("action", newAction);
 				$("#formsave").submit();
 			},
 			"Cancel": function() {

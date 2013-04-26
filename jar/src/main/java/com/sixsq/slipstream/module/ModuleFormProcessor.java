@@ -84,16 +84,16 @@ public abstract class ModuleFormProcessor extends
 		setParametrized(getOrCreateParameterized(name));
 		getParametrized().setDescription(parseDescription());
 		getParametrized().setComment(parseComment());
-		
+
 		setDate();
 	}
 
 	private String parseName() throws ValidationException {
 		String parent = getForm().getFirstValue("parentmodulename", "");
 		String name = getForm().getFirstValue("name");
-	
+
 		validateName(name);
-	
+
 		return ("".equals(parent)) ? name : parent + "/" + name;
 	}
 
@@ -111,7 +111,7 @@ public abstract class ModuleFormProcessor extends
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
 		String date = getForm().getFirstValue("creation");
 
-		if(date == null) {
+		if (date == null) {
 			creation = new Date();
 		} else {
 			try {
@@ -119,7 +119,7 @@ public abstract class ModuleFormProcessor extends
 			} catch (ParseException e) {
 			}
 		}
-		
+
 		getParametrized().setCreation(creation);
 	}
 
@@ -156,12 +156,16 @@ public abstract class ModuleFormProcessor extends
 		authz.setPublicDelete(getBooleanValue(form, "publicDelete"));
 
 		authz.setGroupMembers(form.getFirstValue("groupmembers", ""));
-		authz.setInheritedGroupMembers(getBooleanValue(form, "inheritedGroupMembers"));
-		
-		if(module.getCategory() == ModuleCategory.Project) {
-			authz.setOwnerCreateChildren(getBooleanValue(form, "ownerCreateChildren"));
-			authz.setGroupCreateChildren(getBooleanValue(form, "groupCreateChildren"));
-			authz.setPublicCreateChildren(getBooleanValue(form, "publicCreateChildren"));
+		authz.setInheritedGroupMembers(getBooleanValue(form,
+				"inheritedGroupMembers"));
+
+		if (module.getCategory() == ModuleCategory.Project) {
+			authz.setOwnerCreateChildren(getBooleanValue(form,
+					"ownerCreateChildren"));
+			authz.setGroupCreateChildren(getBooleanValue(form,
+					"groupCreateChildren"));
+			authz.setPublicCreateChildren(getBooleanValue(form,
+					"publicCreateChildren"));
 		}
 
 		getParametrized().setAuthz(authz);
@@ -184,4 +188,6 @@ public abstract class ModuleFormProcessor extends
 		return new ModuleParameter(name, value, description);
 	}
 
+	public void adjustModule(Module older) throws ValidationException {
+	}
 }

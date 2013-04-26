@@ -116,14 +116,14 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		assignParameter(parameter);
 	}
 
-	protected void putMandatoryParameter(String name, String description, String category) throws ValidationException {
-		S parameter = createParameter(name, null, description, true);
-		parameter.setCategory(category);
+	protected void putMandatoryParameter(String name, String description, String value) throws ValidationException {
+		S parameter = createParameter(name, value, description, true);
+		parameter.setCategory(getCategory());
 		assignParameter(parameter);
 	}
 
 	protected void putMandatoryParameter(String name, String description) throws ValidationException {
-		putMandatoryParameter(name, description, getCategory());
+		putMandatoryParameter(name, description, "");
 	}
 
 	protected void putParameter(String name, String description,

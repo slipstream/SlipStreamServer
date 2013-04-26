@@ -96,4 +96,15 @@ public class Package implements Serializable {
 	public Package copy() throws ValidationException {
 		return new Package(getName(), getRepository(), getKey());
 	}
+	
+	public boolean equals(Package other) {
+		if(other == null) {
+			return false;
+		}
+		boolean equalName = (name != null ? name.equals(other.getName()) : other.getName() == null);
+		boolean equalRepository = (repository != null ? repository.equals(other.getRepository()) : other.getRepository() == null);
+		boolean equalKey = (key_ != null ? key_.equals(other.getKey()) : other.getKey() == null);
+		
+		return equalName && equalRepository && equalKey;
+	}
 }

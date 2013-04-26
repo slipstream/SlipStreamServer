@@ -29,6 +29,7 @@ import org.restlet.data.Form;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Package;
@@ -37,6 +38,8 @@ import com.sixsq.slipstream.persistence.Target;
 import com.sixsq.slipstream.persistence.User;
 
 public class ImageFormProcessor extends ModuleFormProcessor {
+
+	boolean needsRebuild = false;
 
 	public ImageFormProcessor(User user) {
 		super(user);
@@ -63,24 +66,13 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		module.setIsBase(getBooleanValue(getForm(), "isbase"));
 
-		parseImageId(module);
-
 		parsePackages(getForm());
 		parsePreRecipe(getForm());
 		parseRecipe(getForm());
 		parseNewImage(getForm());
 		parseTargets(getForm());
-	}
 
-	private void parseImageId(ImageModule module) throws ValidationException {
-		if (!castToModule().isBase()) {
-			return;
-		}
-		for (String cloudServiceName : ConnectorFactory.getCloudServiceNames()) {
-			String imageId = getForm().getFirstValue(
-					"cloudimageid_imageid_" + cloudServiceName);
-			module.setImageId(imageId, cloudServiceName);
-		}
+		parseImageId(module);
 	}
 
 	private void parsePackages(Form form) throws ValidationException {
@@ -110,8 +102,33 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 			}
 		}
 
+		if (havePackagesChanged(packages)) {
+			needsRebuild = true;
+		}
+
 		castToModule().setPackages(packages);
 
+	}
+
+	protected boolean havePackagesChanged(List<Package> packages) {
+		boolean haveChanged = false;
+		List<Package> oldPackages = castToModule().getPackages();
+		if (packages.size() != oldPackages.size()) {
+			haveChanged = true;
+		} else {
+			for (Package p : packages) {
+				boolean foundIt = false;
+				for (Package oldP : oldPackages) {
+					if (p.equals(oldP)) {
+						foundIt = true;
+					}
+				}
+				if (!foundIt) {
+					haveChanged = true;
+				}
+			}
+		}
+		return haveChanged;
 	}
 
 	private void parsePreRecipe(Form form) {
@@ -119,6 +136,10 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		String prerecipe = form.getFirstValue("prerecipe--script");
 		if (prerecipe == null) {
 			prerecipe = "";
+		}
+
+		if (prerecipe != castToModule().getPreRecipe()) {
+			needsRebuild = true;
 		}
 
 		castToModule().setPreRecipe(prerecipe);
@@ -130,6 +151,10 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		String recipe = form.getFirstValue("recipe--script");
 		if (recipe == null) {
 			recipe = "";
+		}
+
+		if (recipe != castToModule().getRecipe()) {
+			needsRebuild = true;
 		}
 
 		castToModule().setRecipe(recipe);
@@ -172,6 +197,17 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	}
 
+	private void parseImageId(ImageModule module) throws ValidationException {
+		if (needsRebuild) {
+			return;
+		}
+		for (String cloudServiceName : ConnectorFactory.getCloudServiceNames()) {
+			String imageId = getForm().getFirstValue(
+					"cloudimageid_imageid_" + cloudServiceName);
+			module.setImageId(imageId, cloudServiceName);
+		}
+	}
+
 	private void parseNewImage(Form form) {
 		parseLoginUser(form);
 		parsePlatform(form);
@@ -197,6 +233,18 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		castToModule().setPlatform(platform);
 
+	}
+
+	@Override
+	public void adjustModule(Module previous) throws ValidationException {
+		ImageModule olderImage = (ImageModule) previous;
+		if (!castToModule().isBase()) {
+			if (!needsRebuild) {
+				for (CloudImageIdentifier cii : olderImage.getCloudImageIdentifiers()) {
+					cii.copyTo(castToModule());
+				}
+			}
+		}
 	}
 
 	private ImageModule castToModule() {

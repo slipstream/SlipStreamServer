@@ -58,23 +58,23 @@ public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 
 		putMandatoryParameter(
 				ENDPOINT_KEY,
+				"StratusLab endpoint",
 				Configuration
 						.getInstance()
 						.getParameters()
 						.getParameterValue(
 								constructKey("cloud.connector." + ENDPOINT_KEY),
-								"cloud.lal.stratuslab.eu"),
-				"StratusLab endpoint");
+								"cloud.lal.stratuslab.eu"));
 
 		putMandatoryParameter(
 				"marketplace.endpoint",
+				"Default marketplace endpoint",
 				Configuration
 						.getInstance()
 						.getParameters()
 						.getParameterValue(
 								constructKey("cloud.connector." + "marketplace.endpoint"),
-								"http://marketplace.stratuslab.eu"),
-				"Default marketplace endpoint");
+								"http://marketplace.stratuslab.eu"));
 	}
 
 }

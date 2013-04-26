@@ -34,7 +34,8 @@ public class OpenStackUserParametersFactory extends UserParametersFactoryBase {
 	public static String SECURITY_GROUP = "security.group";
 	public static String PRIVATE_KEY = "private.key";
 
-	public OpenStackUserParametersFactory(String connectorInstanceName) throws ValidationException {
+	public OpenStackUserParametersFactory(String connectorInstanceName)
+			throws ValidationException {
 		super(connectorInstanceName);
 	}
 
@@ -42,14 +43,13 @@ public class OpenStackUserParametersFactory extends UserParametersFactoryBase {
 	protected void initReferenceParameters() throws ValidationException {
 		putMandatoryParameter(KEY_PARAMETER_NAME, "Username");
 		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME, "Password");
-		putMandatoryParameter(
-				TENANT_NAME,
+		putMandatoryParameter(TENANT_NAME,
 				"Project name (Correspond to your Keystone Tenant name for the project)");
 		putMandatoryParameter(KEYSTONE_URL,
 				"Authentification URL (Correspond to the Keystone URL)");
-		putMandatoryParameter(KEYPAIR_NAME, "default", "Keypair Name");
-		putMandatoryParameter(SECURITY_GROUP, "default",
-				"Security Groups (comma separated list)");
+		putMandatoryParameter(KEYPAIR_NAME, "Keypair Name", "default");
+		putMandatoryParameter(SECURITY_GROUP,
+				"Security Groups (comma separated list)", "default");
 		putMandatoryParameter(PRIVATE_KEY,
 				"Private key of keypair (required to build Images)",
 				ParameterType.Text);
