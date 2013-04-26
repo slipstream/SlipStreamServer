@@ -255,7 +255,7 @@ public abstract class ConnectorBase implements Connector {
 					diskInfo.get(EXTRADISK_KEY_REGEXERROR)));
 	}
 	
-	protected String constructScriptObfuscateCommand() {
+	protected String constructScriptObfuscateCommand(Run run, User user) throws ValidationException, IOException {
 		String command = "";
 		command += "sed -r -i 's/# *(account +required +pam_access\\.so).*/\\1/' /etc/pam.d/login;";
 		command += "echo '-:ALL:LOCAL' >> /etc/security/access.conf;";
@@ -265,23 +265,28 @@ public abstract class ConnectorBase implements Connector {
 		command += "sed --in-place '/PermitEmptyPasswords/d' /etc/ssh/sshd_config;";
 		command += "sed --in-place '/PubkeyAuthentication/d' /etc/ssh/sshd_config;";
 		command += "echo -e 'RSAAuthentication yes\nPubkeyAuthentication yes\nPasswordAuthentication no\nPermitEmptyPasswords no\n' >> /etc/ssh/sshd_config;";
-		command += "umask 077; test -d ~/.ssh || mkdir ~/.ssh ; echo '" + getPublicSshKey() + "' >> ~/.ssh/authorized_keys;";
+		command += "umask 077; test -d ~/.ssh || mkdir ~/.ssh ; echo '" + getPublicSshKey(run, user) + "' >> ~/.ssh/authorized_keys;";
 		command += "service ssh restart;";
 		return command;
 	}
 	
 	protected String getPrivateSshKey() {
-		// TODO: Change the way to get private key
-		String publicSshKeyFile = Configuration.getInstance().getProperty("cloud.connector.security.publicsshkey");
-		String privateSshKeyFile = publicSshKeyFile.substring(0, publicSshKeyFile.length() - 4);		
+		String privateSshKeyFile = getPrivateSshKeyFileName();	
 		return FileUtil.fileToString(privateSshKeyFile);
 	}
-	
+
 	protected String getPublicSshKey(Run run, User user) throws ValidationException, IOException {
 		String publicSshKeyFile = getPublicSshKeyFileName(run, user);
 		return FileUtil.fileToString(publicSshKeyFile);
 	}
 
+	protected String getPrivateSshKeyFileName() {
+		// TODO: Change the way to get private key
+		String publicSshKeyFile = Configuration.getInstance().getProperty("cloud.connector.security.publicsshkey");
+		String privateSshKeyFile = publicSshKeyFile.substring(0, publicSshKeyFile.length() - 4);
+		return privateSshKeyFile;
+	}
+	
 	protected String getPublicSshKeyFileName(Run run, User user)
 			throws IOException, ValidationException {
 		String publicSshKey;
@@ -291,7 +296,8 @@ public abstract class ConnectorBase implements Connector {
 					tempSshKeyFile));
 			String sshPublicKey = user
 					.getParameter(
-							constructKey(UserParametersFactoryBase.SSHKEY_PARAMETER_NAME))
+							ExecutionControlUserParametersFactory.CATEGORY
+							+ "." + UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
 					.getValue();
 			out.write(sshPublicKey);
 			out.close();
