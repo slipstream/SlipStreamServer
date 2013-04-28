@@ -153,6 +153,7 @@
 					<description>SlipStream REST Server, including open source connectors</description>
 					<requires>
 						<require>java-1.6.0-openjdk</require>
+						<require>slipstream-client &gt;= 1.3</require>
 					</requires>
 					<mappings>
 
