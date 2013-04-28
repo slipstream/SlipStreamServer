@@ -22,11 +22,7 @@
 			<type>war</type>
 		</dependency>
 	</dependencies>
-	
-	<properties>
-	   <jetty.version>7.6.9.v20130131</jetty.version>
-	</properties>
-    
+
 	<build>
 
 		<plugins>
