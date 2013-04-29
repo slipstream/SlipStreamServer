@@ -150,6 +150,7 @@
 					<requires>
 						<require>java-1.6.0-openjdk</require>
 						<require>slipstream-client &gt;= 1.3</require>
+						<require>hsqldb-slipstream &gt;= 2.2.4</require>
 					</requires>
 					<mappings>
 
