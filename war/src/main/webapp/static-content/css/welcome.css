@@ -1,0 +1,70 @@
+.bottom {
+    height: auto;
+}
+
+/* Banner */
+.banner {
+	display: block;
+	width: 990px;
+	height: 324px;
+	background: transparent url(img/design/banner.png) no-repeat scroll center top;
+}
+
+.bx-window {
+	width: 990px !important;
+/*  margin-left: 75px;
+*/	height: 200px !important;
+}
+
+.bx-wrapper {
+/*  height: 324px;
+*/}
+
+#slider1 {
+	height: 324px;
+	overflow: hidden;
+}
+
+#slider1 div {
+    margin-left: 5px;
+/*  margin-top: 69px;
+*/}
+
+#slider1 div h1,
+#slider1 div h3 {
+	line-height: 1;
+	width: 850px;
+}
+
+#slider1 div h1 {
+	margin: 0px;
+	font-size: 50px;
+	color: #279bdc;
+}
+
+#slider1 div h3 {
+	margin: 15px 0px;
+	font-size: 40px;
+	font-weight: normal;
+	color: #dbdada;
+}
+
+#slider1 div p {
+	color: #c9c9c9;
+/*  width: 850px;
+*/}
+
+.bx-prev,
+.bx-next {
+	position: absolute;
+	top: 70px;
+    z-index:99;
+}
+
+.bx-prev {
+	left: -10px;
+}
+
+.bx-next {
+	right: -20px;
+}

@@ -28,7 +28,11 @@ a {
 }
 
 #infovis {
-    height:600px;
+    height:400px;
+}
+
+#infovis-consumption {
+    height:400px;
 }
 
 /*TOOLTIPS*/

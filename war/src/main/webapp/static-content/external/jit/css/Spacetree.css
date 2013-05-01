@@ -27,15 +27,20 @@
 }
 
 .dashboard-vm-ok {
-	background-image: url('/images/common/nodeOk.png');
+	background-image: url('../../../images/nodeOk.png');
 	background-repeat: no-repeat;
 	padding-left: 55px;
 	height: 50px;
 }
 
 .dashboard-vm-error {
-	background-image: url('/images/common/nodeError.png');
+	background-image: url('../../../images/nodeError.png');
 	background-repeat: no-repeat;
 	padding-left: 55px;
 	height: 50px;
+}
+
+.dashboard-vm-ok ul, .dashboard-vm-error ul {
+    margin: 0px;
+    padding: 0px;
 }

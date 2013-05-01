@@ -46,9 +46,9 @@ jQuery.extend({
     }
 });
 
-if($.browser.msie) {
-	alert('Sorry this version of SlipStream does not support Internet Explorer. Please use Firefox, Safari or Chrome.');
-}
+// if($.browser.msie) {
+//  alert('Sorry this version of SlipStream does not support Internet Explorer. Please use Firefox, Safari or Chrome.');
+// }
 
 // String object prototype additions
 String.prototype.startsWith = function(str) {
@@ -61,6 +61,17 @@ String.prototype.endsWith = function(str) {
 
 String.prototype.trim = function() {
     return (this.replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, ""));
+}
+
+String.prototype.ellipse = function(max) {
+    var maxStringSize = max || 18;
+    var str = this
+    if (str.length > maxStringSize) {
+        var firstPart = str.substr(0, maxStringSize / 2 - 2);
+        var lastPart = str.substr(str.length - maxStringSize / 2 + 2, str.length - 1);
+        str = firstPart + '...' + lastPart;
+    }
+	return str;
 }
 
 // Cross browser function to retrieve element value
@@ -159,88 +170,6 @@ function validate(url) {
     removeElement('validateinput');
 }
 
-function addPackage() {
-	var packageid = '#packages';
-    var packages = $(packageid);
-	var count = $('tr', packages).length;
-	var index = count + 1;
-    var newtr = $('<tr>');
-    var id = 'package--' + index;
-    newtr.attr('id', id);
-
-	insertInput = function(name) {
-	    var newtd = $('<td>');
-	    var newinput = $('<input>');
-	    $(newinput).attr('type', 'text');
-	    newinput.attr('name', id + '--' + name);
-	    $(newinput).appendTo(newtd);
-	    $(newtd).appendTo(newtr);
-	}
-
-	insertInput('name')
-	insertInput('repository')
-	insertInput('key')
-
-    // Remove button
-    newtd = $('<td>');
-    var newinput = $('<input>');
-    newinput.attr('class', 'button');
-    newinput.attr('type', 'button');
-    newinput.attr('value', 'Remove');
-    newinput.click(function(){removeElement(id)});
-    newinput.appendTo(newtd);
-    newtd.appendTo(newtr);
-
-    alternateTableRows(packageid);
-
-    newtr.appendTo(packages);
-
-    setHash();
-}
-
-function makeElementVisibleById(id) {
-    var element = document.getElementById(id);
-    if (element) {
-        element.style.display = null;
-    }
-    return;
-}
-
-function addParameter(parentId) {
-	parent = $('#' + parentId);
-
-	var count = $('#' + parentId).find('tr').size();
-    var index = count + 1;
-
-    var category = parentId.split('-')[1];
-	var entryPart = parentId + "--entry--" + index;
-	var newParameter = $('<tr id="' + entryPart + '"> " \
-	<td> \
-		<input type="text" name="' + entryPart + '--name" value="" /> \
-	</td> \
-	<td> \
-		<input type="text" name="' + entryPart + '--description" value="" size="50" /> \
-		<input type="hidden" name="' + entryPart + '--category" value="' + category + '"> \
-		<input type="hidden" name="' + entryPart + '--type" value="String"> \
-	</td> \
-	<td> \
-		<input type="text" name="' + entryPart + '--value" value="" /> \
-	</td> \
-	<td width="7%"> \
-		<input type="button" name="remove" value="Remove" onClick="removeElement(\'' + entryPart + '\')" /> \
-	</td> \
-</tr>');
-
-
-    alternateTableRows(parentId);
-
-    $(parent.parent() > 'thead').show();
-
-    newParameter.appendTo(parent);
-
-    setHash();
-}
-
 function removeElement(id) {
     var element = $('#' + id);
     var parent = element.parent();
@@ -315,7 +244,7 @@ function addTarget(targetid) {
 
     alternateTableRows(targetid);
 
-    makeElementVisibleById('targetsthead');
+    $('targetsthead').show();
 
     setHash();
 }
@@ -504,6 +433,8 @@ var chooser = function() {
 	return {
 		// the handler is a function, if defined, to be called when a selection is made by the chooser
 		showChooser: function(inputid, targetType, handler) {
+			$("#chooser").dialog("open");
+			return;
 			setGlobal('inputid', inputid);
 			setGlobal('handler', handler);
 			var inputtarget = $('#' + inputid);
@@ -513,10 +444,10 @@ var chooser = function() {
 			}
 			src = 'module' + urlEncode(src);
 			var postfix = '?chooser=' + targetType;
-			$('#chooseriframe').attr('src', src + postfix);
+//			$('#chooseriframe').attr('src', src + postfix);
 			$('#chooseriframe').load(function() {
-				showChooserFrame();
-				fadeOutTopWindow();
+				$("#chooser").dialog("open");
+//				fadeOutTopWindow();
 				$(this).unbind('load');
 			});
 		},
@@ -783,9 +714,84 @@ var $$ = {
 		    var qname = $('#' + slipstreamns.get('inputid')).attr('value');
 			var uri = "module/" + urlEncode(qname);
 			var url = "/" + uri;
-		    $.get(url, SS.parameterDefaultUpdater.callback, "xml");
+		    $.get(url, $$.parameterDefaultUpdater.callback, "xml");
 		},
 	},
+	
+	removeTrFromButton: function(element) {
+        $(element).parent().parent().remove();
+    },
+    
+    addParameter: function(element) {
+        var table = $(element).prev();
+    	var count = $(table).find('tr').size;
+        var index = count + 1;
+
+        var id = $(table).attr('id');
+        var category = id.split('-')[1];
+    	var entryPart = id + "--entry--" + index;
+
+        var newParameter = $('<tr id="' + entryPart + '"> \
+        <td> \
+        	<input name="parameter-' + entryPart + '--name" value=""> \
+        	<input type="hidden" name="parameter-' + entryPart + '--category" value="' + category + '"> \
+        	<input type="hidden" name="parameter-' + entryPart + '--type" value="String"> \
+        </td> \
+        <td> \
+        	<input name="parameter-' + entryPart + '--description" value=""> \
+        </td> \
+        <td> \
+            <input name="parameter-' + entryPart + '--value" value="" placeholder=""> \
+        </td> \
+        <td> \
+            <button class="close small_close ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" \
+                    role="button" \
+                    aria-disabled="false" \
+                    onClick="$$.removeTrFromButton(this)"> \
+        	    <span class="ui-button-text">Close</span> \
+        	</button> \
+        </td> \
+    </tr>');
+
+        $(table).find('thead').show();
+
+        newParameter.appendTo(table);
+
+        setHash();
+    },
+
+    addPackage: function(element) {
+        var table = $(element).prev();
+    	var count = $(table).find('tr').size;
+        var index = count + 1;
+
+        var id = $(table).attr('id');
+    	var entryPart = id + "--entry--" + index;
+
+        var newPackage = $('<tr id="' + entryPart + '"> \
+		<td> \
+			<input name="parameter-' + entryPart + '--name" value=""> \
+		</td> \
+		<td> \
+			<input name="parameter-' + entryPart + '--repository" value=""> \
+		</td> \
+		<td> \
+			<input name="parameter-' + entryPart + '--key" value=""> \
+		</td> \
+		<td> \
+        <button class="close small_close" \
+                onClick="$$.removeTrFromButton(this)"> \
+    	    <span class="ui-button-text">Close</span> \
+    	</button> \
+        </td> \
+        </tr>');
+
+        $(table).find('thead').show();
+
+        newPackage.appendTo(table);
+
+        setHash();
+    }
 }
 
 function updateParameterDefaults() {
@@ -816,6 +822,21 @@ $(document).ready(function() {
 		$$.show($(this), error);
 	});
 
+	$('.accordion').accordion(
+		{ heightStyle: "content",
+		  collapsible: true });
+	$('.tab_block').tabs();
+	$('input[type=submit], a, button','.interaction')
+		.button()
+		.click(function( event ) {
+			event.preventDefault();
+	});
+	$('.add_item','.nodes')
+		.button()
+		.click(function( event ) {
+			event.preventDefault();
+	});
+	$('.hidden').hide();
 })
 
 

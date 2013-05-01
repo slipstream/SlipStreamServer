@@ -31,6 +31,8 @@ function toggleMultiplicity(index) {
 
 var mapper = {
 	
+	elementCounter: 1000, // a big number!
+	
 	createTdWithInput: function(inputName, inputValue, idValue) {
 		var value = '';
 		var id = '';
@@ -43,50 +45,42 @@ var mapper = {
 		return $('<td><input type="text"' + id + ' name="' + inputName + '" value="' + value + '" /></td>');
 	},
 
+	addEmptyParameterMapping: function(button) {
+	    var table = $(button).prev();
+	    this.addParameterMapping(table);
+    },
+    
 	addParameterMapping: function(mappingtable, iparam, oparam) {
-		// This method can be called with either a mappingtable element, or the id of the mappingtable element
-		// This depends if the method is called by the dynamic handler or by generated HTML.
 
-	    // Check if mappingtable is the table or the id of the table
-	    var mappingtableType = typeof mappingtable;
-	    var _mappingtable;
-	    var mappingtableid;
-	    if (mappingtableType == 'string') {
-	        _mappingtable = $('#' + mappingtable);
-	        mappingtableid = mappingtable;
-	    } else {
-	        _mappingtable = mappingtable;
-	        mappingtableid = mappingtable.attr('id');
-	    }
-	    var counter = elementCounter;
 	    // Increment the counter since we're adding a new param
-	    elementCounter += 1;
-	    var counter = elementCounter;
+	    var counter = ++this.elementCounter;
+	    var mappingtableid = mappingtable.attr('id');
 	    var id = mappingtableid + '--' + counter;
-	    var classattrib;
-	    if (counter % 2 == 1) {
-	        classattrib = 'odd';
-	    } else {
-	        classattrib = 'even';
-	    }
-	    var newtr = $('<tr id="' + id + '" class="' + classattrib + '">');
 
-	    // Input
-		var inputName = id + '--input';
-	    var newtd = this.createTdWithInput(inputName, iparam);
+        var iparamValue = iparam || '';
+        var oparamValue = oparam || '';
 
-	    newtd.appendTo(newtr);
+        var newtr = $('<tr> \
+			<td> \
+			    <input type="text" name="' + id + '--input" value="' + iparamValue + '"></input> \
+			</td> \
+			<td> \
+			    <input type="text" name="' + id + '--output" value="' + oparamValue + '"></input> \
+			</td> \
+			<td> \
+				<button \
+				    class="close small_close ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" \
+				    role="button" \
+				    aria-disabled="false" \
+				    onclick="$$.removeTrFromButton(this);"> \
+			    </button> \
+			</td> \
+		</tr>');
 
-	    //Output
-	    newtd = this.createTdWithInput(id + '--output', oparam, 'nodeparametermappingoutput');
-
-	    newtd.appendTo(newtr);
-
-	    // Button
-	    newtd = $('<td width="7%"><input class="button" type="button" value="Remove" onclick="removeElement(\'' + id + '\');" /></td>');
-	    newtd.appendTo(newtr);
-
-	    newtr.appendTo(_mappingtable);
+	    newtr.appendTo(mappingtable);
+	    
+	    // show table, since if it was empty it was hidden
+	    $(mappingtable).find('tr:first').show();
 	},
 
 	addParameterMappings: function(inputParameters) {
@@ -122,9 +116,11 @@ var mapper = {
 	}
 }
 
-function addParameterMapping(mappingtable, iparam, oparam) {
-	return mapper.addParameterMapping(mappingtable, iparam, oparam);
+function addEmptyParameterMapping(mappingtable) {
+	return mapper.addEmptyParameterMapping(mappingtable);
 }
+
+$$.addEmptyParameterMapping = addEmptyParameterMapping;
 
 var nodeAdder = {
 	
@@ -137,7 +133,8 @@ var nodeAdder = {
 		index: -1,
 		
 		populate: function(image) {
-			this.imageShortName = image.attr('shortName');
+			this.imageShortName = image.attr('name');
+			this.resourceUri = image.attr('resourceUri');
 		},
 		
 		setNodePrefix: function(index) {
@@ -273,6 +270,7 @@ var nodeAdder = {
 
 		that = nodeAdder;
 		var image = module;
+		var t = image.attr('class');
 		that.nodeInfo.populate(image);
 
 	    var index = $('#nodes > tr').size() + 1;
@@ -384,8 +382,8 @@ var nodeParametersAutoCompleter = {
 	},
 
 	extractOutputParameters: function(data, status, xhr) {
-	    var parameter = $(data.firstChild);
-		var imageNameNoVersion = $(parameter).attr('parentUri') + '/' + $(parameter).attr('shortName');
+		var imageName = $(data.firstChild).attr('resourceUri');
+		var imageNameNoVersion = nodeParametersAutoCompleter.extractImageRefNoVersion(imageName);
 		var inputs = [];
 		$(data).find('parameter[category=Output][type!=Dummy]').each(function(index, input) {
 			inputs.push($(input).attr('name'));
@@ -434,8 +432,6 @@ function nodeParametersAutoComplete(request, response) {
 function cleanNodeAutocompleteOnNodeNameChange() {
 	nodeParametersAutoCompleter.clear();
 }
-
-
 
 $(document).ready(function() {
 
