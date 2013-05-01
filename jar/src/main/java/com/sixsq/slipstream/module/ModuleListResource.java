@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import org.restlet.Request;
 import org.restlet.data.Cookie;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -36,9 +37,9 @@ import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.module.ModuleView.ModuleViewList;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sun.mail.handlers.text_html;
 
 public class ModuleListResource extends ModuleListResourceBase {
 
@@ -89,10 +90,14 @@ public class ModuleListResource extends ModuleListResourceBase {
 	public Representation toHtml() {
 
 		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
+
+		String metadata = SerializationUtil.toXmlString(moduleViewList);
 		
-		return HtmlUtil.transformToHtml(baseUrlSlash, resourceUri,
-				configuration.version, getViewStylesheet(), user, moduleViewList,
-				getChooser());
+		return new StringRepresentation(slipstream.ui.views.representation.tohtml(metadata, ""), MediaType.TEXT_HTML);
+		
+//		return HtmlUtil.transformToHtml(baseUrlSlash, resourceUri,
+//				configuration.version, getViewStylesheet(), user, moduleViewList,
+//				getChooser());
 	}
 
 	protected String getViewStylesheet() {
