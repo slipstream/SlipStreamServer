@@ -85,7 +85,6 @@
 		      <groupId>com.sixsq.slipstream</groupId>
 		      <artifactId>SlipStreamDocumentation</artifactId>
 		      <classifier>server-bundle</classifier>
-		      <version>1.5</version>
 		      <type>zip</type>
 		    </dependency>
 
