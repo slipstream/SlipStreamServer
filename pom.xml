@@ -79,15 +79,17 @@
 
   </properties>
 
+	<dependencies>
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDocumentation</artifactId>
+			<classifier>server-bundle</classifier>
+			<type>zip</type>
+		</dependency>
+	</dependencies>
+
 	<dependencyManagement>
 		<dependencies>
-		    <dependency>
-		      <groupId>com.sixsq.slipstream</groupId>
-		      <artifactId>SlipStreamDocumentation</artifactId>
-		      <classifier>server-bundle</classifier>
-		      <type>zip</type>
-		    </dependency>
-
 			<dependency>
 				<groupId>org.jclouds</groupId>
 				<artifactId>jclouds-all</artifactId>
