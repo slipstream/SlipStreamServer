@@ -26,6 +26,7 @@ import javax.persistence.EntityManager;
 
 import org.restlet.Request;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -34,6 +35,7 @@ import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ParametersFactory;
@@ -42,10 +44,10 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.Parameterized;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		extends ServerResource {
@@ -177,7 +179,8 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	abstract protected S loadParameterized(String targetParameterizedUri)
 			throws ValidationException;
 
-	private void createVolatileParameterizedForEditing() throws ValidationException {
+	private void createVolatileParameterizedForEditing()
+			throws ValidationException {
 		setParameterized(createParameterized(ModuleUriUtil
 				.extractModuleNameFromResourceUri(targetParameterizeUri)));
 		isEdit = true;
@@ -312,24 +315,30 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	@Get("html")
 	public Representation toHtml() {
-		checkCanGet();
 
-		Request request = getRequest();
-		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
+		Document doc = SerializationUtil.toXmlDocument(getParameterized());
 
-		String stylesheet = null;
-		try {
-			stylesheet = prepareTransformation();
-		} catch (ValidationException e) {
-			throwClientError(e.getMessage());
-		} catch (ConfigurationException e) {
-			throwServerError(e);
+		XmlUtil.addUser(doc, user);
+
+		String metadata = SerializationUtil.documentToString(doc);
+
+		return new StringRepresentation(
+				slipstream.ui.views.Representation.toHtml(metadata,
+						getPageRepresentation(), getTransformationType()), MediaType.TEXT_HTML);
+	}
+
+	private String getTransformationType() {
+		String type = "view";
+		if (isNew()) {
+			type = "new";
+		} else if (isEdit) {
+			type = "edit";
 		}
+		return type;
+	}
 
-		return HtmlUtil.transformToHtml(baseUrlSlash, getParameterized()
-				.getResourceUri(), configuration.version, stylesheet,
-				getUser(), getParameterized(), getChooser());
-
+	protected String getPageRepresentation() {
+		return "";
 	}
 
 	protected void checkCanGet() {
@@ -353,20 +362,6 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		return null;
 	}
 
-	private String prepareTransformation() throws ValidationException,
-			ConfigurationException {
-
-		String stylesheet;
-		if (isEdit) {
-			addParametersForEditing();
-			stylesheet = getEditStylesheet();
-		} else {
-			stylesheet = getViewStylesheet();
-		}
-
-		return stylesheet;
-	}
-
 	protected void setResponseCreatedAndViewLocation(String resourceUri) {
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 		String redirectUrl = getRequest().getRootRef() + "/" + resourceUri;
@@ -374,7 +369,8 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	}
 
 	protected void setResponseOkAndViewLocation(String resourceUri) {
-		Status status = isExisting() ? Status.SUCCESS_OK : Status.SUCCESS_CREATED;
+		Status status = isExisting() ? Status.SUCCESS_OK
+				: Status.SUCCESS_CREATED;
 		getResponse().setStatus(status);
 		String redirectUrl = getRequest().getRootRef() + "/" + resourceUri;
 		getResponse().setLocationRef(redirectUrl);

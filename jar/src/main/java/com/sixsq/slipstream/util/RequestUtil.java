@@ -74,7 +74,8 @@ public class RequestUtil {
 		Reference resourceRef = request.getResourceRef();
 		Reference baseRefSlash = new Reference(getBaseUrlSlash(request));
 		Reference resourceUrlRef = resourceRef.getRelativeRef(baseRefSlash);
-		return resourceUrlRef.getHierarchicalPart();
+		String uri = resourceUrlRef.getHierarchicalPart();
+		return uri.equals(".") ? "module/" : uri;
 	}
 
 	public static Configuration getConfigurationFromRequest(Request request) {

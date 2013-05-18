@@ -46,7 +46,7 @@ public class LoginResource extends AuthnResource {
 	private static final String resourceRoot = "/login";
 
 	public LoginResource() {
-		super("login.xml");
+		super("login");
 	}
 
 	@Post

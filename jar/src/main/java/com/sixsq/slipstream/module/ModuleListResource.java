@@ -30,6 +30,7 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
@@ -39,15 +40,13 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sun.mail.handlers.text_html;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public class ModuleListResource extends ModuleListResourceBase {
 
 	private Configuration configuration = null;
 
-	private User user = null;
-
-	private String baseUrlSlash = null;
+	protected User user = null;
 
 	private String resourceUri = null;
 
@@ -61,14 +60,10 @@ public class ModuleListResource extends ModuleListResourceBase {
 
 		user = User.loadByName(username);
 
-		// FIXME: Add authorization.
-
 		configuration = RequestUtil.getConfigurationFromRequest(request);
 		if (configuration == null) {
 			throw new SlipStreamInternalException("configuration is null");
 		}
-
-		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 
 		resourceUri = RequestUtil.extractResourceUri(getRequest());
 
@@ -91,20 +86,22 @@ public class ModuleListResource extends ModuleListResourceBase {
 
 		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
 
-		String metadata = SerializationUtil.toXmlString(moduleViewList);
-		
-		return new StringRepresentation(slipstream.ui.views.representation.tohtml(metadata, ""), MediaType.TEXT_HTML);
-		
-//		return HtmlUtil.transformToHtml(baseUrlSlash, resourceUri,
-//				configuration.version, getViewStylesheet(), user, moduleViewList,
-//				getChooser());
+		Document doc = SerializationUtil.toXmlDocument(moduleViewList);
+
+		XmlUtil.addUser(doc, user);
+
+		String metadata = SerializationUtil.documentToString(doc);
+
+		return new StringRepresentation(
+				slipstream.ui.views.Representation.toHtml(metadata, getPageRepresentation(), null),
+				MediaType.TEXT_HTML);
 	}
 
-	protected String getViewStylesheet() {
-		return "module-list.xsl";
+	protected String getPageRepresentation() {
+		return "project";
 	}
 
-	private ModuleViewList retrieveFilteredModuleViewList() {
+	protected ModuleViewList retrieveFilteredModuleViewList() {
 
 		ModuleViewList moduleViewList = new ModuleViewList(
 				Module.viewList(resourceUri));
@@ -113,9 +110,10 @@ public class ModuleListResource extends ModuleListResourceBase {
 	}
 
 	private ModuleViewList filterAuthz(ModuleViewList moduleViewList) {
-		ModuleViewList filtered = new ModuleViewList(new ArrayList<ModuleView>());
-		for(ModuleView view : moduleViewList.getList()) {
-			if(view.getAuthz().canGet(user)) {
+		ModuleViewList filtered = new ModuleViewList(
+				new ArrayList<ModuleView>());
+		for (ModuleView view : moduleViewList.getList()) {
+			if (view.getAuthz().canGet(user)) {
 				filtered.getList().add(view);
 			}
 		}

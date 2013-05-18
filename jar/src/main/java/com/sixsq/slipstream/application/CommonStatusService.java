@@ -20,7 +20,6 @@ package com.sixsq.slipstream.application;
  * -=================================================================-
  */
 
-
 import static org.restlet.data.MediaType.APPLICATION_XHTML;
 import static org.restlet.data.MediaType.APPLICATION_XML;
 import static org.restlet.data.MediaType.TEXT_HTML;
@@ -40,16 +39,16 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ResourceException;
 import org.restlet.service.StatusService;
+import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
 
 public class CommonStatusService extends StatusService {
 
@@ -135,20 +134,13 @@ public class CommonStatusService extends StatusService {
 	private Representation toXhtml(Status status, Response response, User user,
 			String baseUrlSlash, String version) {
 
-		try {
+		Document doc = SerializationUtil.toXmlDocument(user);
 
-			return HtmlUtil.representErrorAsHtml(status.getCode(),
-					status.getDescription(), user, baseUrlSlash, version);
+		String metadata = SerializationUtil.documentToString(doc);
 
-		} catch (SlipStreamException e) {
-
-			response.setStatus(Status.SERVER_ERROR_INTERNAL,
-					"Error in representErrorAsHtml()");
-
-			Representation representation = new StringRepresentation("");
-			representation.setMediaType(MediaType.TEXT_PLAIN);
-
-			return representation;
-		}
+		return new StringRepresentation(
+				slipstream.ui.views.Representation.toHtmlError(metadata,
+						status.getDescription(),
+						String.valueOf(status.getCode())), MediaType.TEXT_HTML);
 	}
 }

@@ -20,36 +20,23 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-
 import org.restlet.Request;
 import org.restlet.data.Cookie;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
-import com.sixsq.slipstream.util.ResourceUtils;
-import com.sixsq.slipstream.util.XmlUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
 
 public class AuthnResource extends ServerResource {
 
@@ -61,13 +48,12 @@ public class AuthnResource extends ServerResource {
 
 	protected String baseUrlSlash = null;
 
-	private final String formTemplate;
-	
+	private final String templateName; // name of the page
+
 	private boolean isEmbdded = false;
 
 	protected AuthnResource(String templateName) {
-		formTemplate = ResourceUtils.getResourceAsString(LogoutResource.class,
-				templateName);
+		this.templateName = templateName;
 	}
 
 	@Override
@@ -83,7 +69,7 @@ public class AuthnResource extends ServerResource {
 		resourceUri = RequestUtil.extractResourceUri(request);
 
 		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
-		
+
 		isEmbdded = getRequest().getAttributes().containsKey("embedded");
 
 	}
@@ -91,45 +77,33 @@ public class AuthnResource extends ServerResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		try {
+		String metadata = null;
+		if (user != null) {
+			Document document = SerializationUtil.toXmlDocument(user);
 
-			// Retrieve the form. Posts must be done back to this URL. The
-			// URL may contain query parts that indicate a redirect URL.
-			// This is important for returning the user to the requested
-			// page after authentication.
-			String page = String.format(formTemplate, getRequest().getResourceRef());
+			// if(isEmbdded) {
+			// parameters.put("embedded", "true");
+			// }
 
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db;
-			db = dbf.newDocumentBuilder();
-
-			StringReader reader = new StringReader(page);
-			Document document = db.parse(new InputSource(reader));
-
-			XmlUtil.addUser(document, user);
-			XmlUtil.addBreadcrumbs(document, "", resourceUri);
-
-			Map<String, Object> parameters = HtmlUtil.createParameters(baseUrlSlash,
-					resourceUri, configuration.version);
-			
-			if(isEmbdded) {
-				parameters.put("embedded", "true");
-			}
-
-			Source source = new DOMSource(document);
-			return HtmlUtil.sourceToHtmlRepresentation(source, "raw-content.xsl", parameters);
-
-		} catch (ParserConfigurationException e) {
-			throw new SlipStreamInternalException(e);
-		} catch (SAXException e) {
-			throw new SlipStreamInternalException(e);
-		} catch (IOException e) {
-			throw new SlipStreamInternalException(e);
+			metadata = SerializationUtil.documentToString(document);
 		}
-
+		return new StringRepresentation(
+				slipstream.ui.views.Representation.toHtml(metadata,
+						templateName, null), MediaType.TEXT_HTML);
 	}
 
 	protected Reference extractRedirectURL(Request request) {
+		return extractRedirectURL(request, null);
+	}
+
+	/**
+	 * If the defaultUrl is null and no redirect URL query parameter is provided,
+	 * the redirect URL is the base URL.
+	 * @param request
+	 * @param defaultUrl
+	 * @return redirectUrl
+	 */
+	protected Reference extractRedirectURL(Request request, String defaultUrl) {
 
 		Reference resourceRef = request.getResourceRef();
 		Form queryForm = resourceRef.getQueryAsForm();
@@ -137,11 +111,16 @@ public class AuthnResource extends ServerResource {
 
 		Reference baseRefSlash = RequestUtil.getBaseRefSlash(request);
 
+		Reference redirectUrl = null;
 		if (relativeURL != null) {
-			return new Reference(baseRefSlash, relativeURL);
+			redirectUrl = new Reference(baseRefSlash, relativeURL);
+		} else if (defaultUrl != null) {
+			redirectUrl = new Reference(baseRefSlash, defaultUrl);
 		} else {
-			return baseRefSlash;
+			redirectUrl = new Reference(baseRefSlash);
 		}
+		
+		return redirectUrl;
 	}
 
 }

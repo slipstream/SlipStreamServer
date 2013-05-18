@@ -79,6 +79,10 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	public static final String COPY_SOURCE_FORM_PARAMETER_NAME = "source_uri";
 	public static final String COPY_TARGET_FORM_PARAMETER_NAME = "target_name";
 
+	protected String getPageRepresentation() {
+		return "module";
+	}
+
 	@Get("xml")
 	public Representation toXml() {
 		checkCanGet();
@@ -185,7 +189,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		updateOrCreate(module);
 
-		setResponseOkAndViewLocation(module.getResourceUri());
+		setResponseRedirect("/" + module.getResourceUri());
 	}
 
 	@Put("multipart")

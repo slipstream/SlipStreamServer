@@ -20,85 +20,37 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
-import org.restlet.Request;
-import org.restlet.data.Cookie;
-import org.restlet.data.Status;
+import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
-import org.restlet.resource.ResourceException;
+import org.w3c.dom.Document;
 
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.module.ModuleListResourceBase;
+import com.sixsq.slipstream.module.ModuleListResource;
 import com.sixsq.slipstream.module.ModuleView.ModuleViewList;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
-public class WelcomeResource extends ModuleListResourceBase {
-
-	private Configuration configuration = null;
-
-	private User user = null;
-
-	private String baseUrlSlash = null;
-
-	private String resourceUri = null;
-
-	@Override
-	public void doInit() throws ResourceException {
-
-		Request request = getRequest();
-
-		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		String username = CookieUtils.getCookieUsername(cookie);
-
-		user = User.loadByName(username);
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
-		if (configuration == null) {
-			throw new SlipStreamInternalException("configuration is null");
-		}
-
-		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
-
-		resourceUri = RequestUtil.extractResourceUri(getRequest());
-
-		if (resourceUri == null) {
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-		}
-	}
+public class WelcomeResource extends ModuleListResource {
 
 	@Get("html")
 	public Representation toHtml() {
 
-		ModuleViewList moduleViewList;
-		try {
-			moduleViewList = retrieveFilteredModuleViewList();
-		} catch (ValidationException e) {
-			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					e.getMessage()));
-		}
+		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
 
-		return HtmlUtil.transformToHtml(baseUrlSlash, resourceUri,
-				configuration.version, getViewStylesheet(), user, moduleViewList,
-				getChooser());
+		Document doc = SerializationUtil.toXmlDocument(moduleViewList);
+
+		XmlUtil.addUser(doc, user);
+
+		String metadata = SerializationUtil.documentToString(doc);
+
+		return new StringRepresentation(
+				slipstream.ui.views.Representation.toHtml(metadata, getPageRepresentation(), null),
+				MediaType.TEXT_HTML);
 	}
 
-	private ModuleViewList retrieveFilteredModuleViewList()
-			throws ValidationException {
-
-		ModuleViewList publishedmoduleViewList = new ModuleViewList(
-				Module.viewPublishedList());
-
-		return publishedmoduleViewList;
-	}
-
-	protected String getViewStylesheet() {
-		return "welcome.xsl";
+	protected String getPageRepresentation() {
+		return "welcome";
 	}
 
 }

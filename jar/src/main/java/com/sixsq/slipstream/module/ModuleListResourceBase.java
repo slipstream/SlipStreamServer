@@ -26,10 +26,6 @@ import com.sixsq.slipstream.persistence.ModuleCategory;
 
 public abstract class ModuleListResourceBase extends ServerResource {
 
-	public ModuleListResourceBase() {
-		super();
-	}
-
 	protected ModuleCategory getChooser() {
 		String c = (String) getRequest().getAttributes().get("choosertype");
 		return (c == null) ? null : ModuleCategory.valueOf(c);

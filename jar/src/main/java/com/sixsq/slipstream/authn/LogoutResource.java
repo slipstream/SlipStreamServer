@@ -20,58 +20,28 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
-import org.restlet.Request;
-import org.restlet.Response;
-import org.restlet.data.Form;
-import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
-import org.restlet.resource.Post;
+import org.restlet.resource.Delete;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.util.RequestUtil;
 
 /**
- * This resource will remove any authentication cookies from the client's cache.
- * It displays a confirmation form in response to a GET request. That form will
- * POST to the same URL with the yes/no answer from the user. The cookie is only
- * removed if the user confirms the logout.
- * 
- * @author loomis
- * 
+ * The DELETE action on this resource will remove any authentication cookies from 
+ * the client's cache.
+ * The confirmation of deletion is expected to take place in the browser.
+ * The user is redirected to the login page by default, or the redirect
+ * query parameter if present.
  */
 public class LogoutResource extends AuthnResource {
 
 	public LogoutResource() {
-		super("logout.xml");
+		super("logout");
 	}
 
-	@Post
-	public void accept(Representation entity) {
-
-		// Get the request and response.
-		Request request = getRequest();
-		Response response = getResponse();
-
-		// Parse the form to extract the confirmation value.
-		Form form = new Form(entity);
-		String value = form.getFirstValue("confirm");
-
-		// This is the redirection URL. By default, it will send the
-		// user back to the welcome page of the application (i.e. baseUrl).
-		Reference redirectRef = RequestUtil.getBaseRefSlash(request);
-
-		// If the logout request was confirmed, remove the cookie. The baseUrl
-		// (already set) is the correct place to go.
-		if ("yes".equalsIgnoreCase(value)) {
-			CookieUtils.removeAuthnCookie(response);
-		} else {
-			// Send the user back to the referencing page, if it was given in
-			// the URL.
-			redirectRef = extractRedirectURL(request);
-		}
-
-		// Always redirect the user to the welcome page or the referring page.
-		response.redirectSeeOther(redirectRef);
+	@Delete
+	public void removeCookie(Representation entity) {
+        CookieUtils.removeAuthnCookie(getResponse());
+		getResponse().redirectSeeOther(extractRedirectURL(getRequest(), "login"));
 	}
 
 }

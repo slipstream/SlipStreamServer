@@ -204,7 +204,7 @@ public class XmlUtil {
 
 			if (root != null && user != null) {
 				Element element = document.createElement("user");
-				element.setAttribute("username", user.getName());
+				element.setAttribute("name", user.getName());
 				element.setAttribute("resourceUri", user.getResourceUri());
 				if (user.isSuper()) {
 					element.setAttribute("issuper", "true");

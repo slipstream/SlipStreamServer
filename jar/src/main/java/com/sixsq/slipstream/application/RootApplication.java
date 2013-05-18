@@ -364,7 +364,18 @@ public class RootApplication extends Application {
     }
 
     private void attachWelcome(RootRouter router) {
-        router.attach("/", WelcomeResource.class); 
+        Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
+        basicAuthenticator.setEnroler(new SuperEnroler());
+
+        Authenticator cookieAuthenticator = new CookieAuthenticator(
+                getContext());
+        cookieAuthenticator.setOptional(true);
+
+        cookieAuthenticator.setNext(basicAuthenticator);
+
+        basicAuthenticator.setNext(WelcomeResource.class);
+
+        router.attach("/", cookieAuthenticator); 
     }
 
     private void enableTunnelService() {
