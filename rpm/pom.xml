@@ -10,18 +10,23 @@
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamServer</artifactId>
-		<version>1.6-SNAPSHOT</version>
+		<version>1.5-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamServer-war</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>1.5-SNAPSHOT</version>
 			<type>war</type>
 		</dependency>
 	</dependencies>
 
+  <properties>
+    <hsqldb.version>2.2.4</hsqldb.version>
+    <stratuslab.version>2.3-20120831.02005629</stratuslab.version>
+  </properties>	
+	
 	<build>
 
 		<plugins>
@@ -170,10 +175,10 @@
 					<description>SlipStream REST Server, including open source connectors</description>
 					<requires>
 						<require>java-1.6.0-openjdk</require>
-						<require>hsqldb-slipstream &gt;= 2.2.4</require>
+						<require>hsqldb-${hsqldb.version}-slipstream</require>
 						<require>slipstream-client &gt;= 1.3</require>
 						<require>stratuslab-cli-user</require>
-						<require>stratuslab-slipstream-downloads</require>
+						<require>stratuslab-${stratuslab.version}-slipstream-downloads</require>
 					</requires>
 					<mappings>
 
