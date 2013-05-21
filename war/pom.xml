@@ -17,7 +17,7 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamServer-jar</artifactId>
-      <version>1.6-SNAPSHOT</version>
+      <version>1.5-SNAPSHOT</version>
     </dependency>
     
     <dependency>
