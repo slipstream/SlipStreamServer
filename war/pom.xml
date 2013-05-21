@@ -25,6 +25,7 @@
       <artifactId>SlipStreamDocumentation</artifactId>
       <classifier>server-bundle</classifier>
       <type>zip</type>
+      <version>1.5</version>
     </dependency>
 
     <dependency>
