@@ -66,6 +66,16 @@
 
   </properties>
 
+	<dependencies>
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDocumentation</artifactId>
+			<classifier>server-bundle</classifier>
+			<type>zip</type>
+			<version>1.5</version>
+		</dependency>
+	</dependencies>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
