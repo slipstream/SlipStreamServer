@@ -173,7 +173,7 @@
 						<require>hsqldb-${hsqldb.version}-slipstream</require>
 						<require>slipstream-client &gt;= 1.3</require>
 						<require>stratuslab-cli-user</require>
-						<require>stratuslab-${stratuslab.version}-slipstream-downloads</require>
+						<require>stratuslab-${stratuslab.version.zip.rpm}-slipstream-downloads</require>
 					</requires>
 					<mappings>
 
