@@ -37,6 +37,9 @@ public class Publish implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date publicationDate;
 
+	@Attribute(required = false)
+	private String publisher;
+	
 	@Text
 	private String comment = "";
 
@@ -54,6 +57,14 @@ public class Publish implements Serializable {
 
 	public String getComment() {
 		return comment;
+	}
+
+	public void setPublisher(String publisher) {
+		this.publisher = publisher;
+	}
+
+	public String getPublisher() {
+		return publisher;
 	}
 	
 }

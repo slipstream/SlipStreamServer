@@ -59,7 +59,7 @@
 			http-equiv="Pragma" content="no-cache"/>
 		-->
 		
-<!--    		<span style="display: none"> <xsl:copy-of select="/"/> </span>  -->
+    		<span style="display: none"> <xsl:copy-of select="/"/> </span>
 
 	</xsl:template>
 

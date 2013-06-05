@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width">
+
+    <title>SlipStream | Public/BaseImages/Ubuntu/12.04</title>
+
+    <link rel="stylesheet" type="text/css" href="css/application.css" />
+
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/common.js"></script>
+    <script>
+		$(document).ready(function() {
+			$('.accordion').accordion(
+				{ heightStyle: "content",
+				  collapsible: true});
+			$('.tab_block').tabs();
+			$('input[type=submit], a, button','.interaction')
+				.button()
+				.click(function( event ) {
+					event.preventDefault();
+			});
+			$('.add_item','.nodes')
+				.button()
+				.click(function( event ) {
+					event.preventDefault();
+			});
+			
+			// Give the main window the category, so that
+			// it can enable/disable the selection button
+			// on the dialog
+			window.parent.setModuleType($('#category').text());
+		});
+    </script>
+  </head>
+
+  <body class="overlay">
+    <div>
+      <div>
+	<div class="navigation">
+	  <ul class="breadcrumb">
+	    <li><a href="#"><i class="icon-home"></i></a></li>
+	    <li><a href="#">modules</a></li>
+	    <li><a href="#">Public</a></li>
+	    <li><a href="#">BaseImages</a></li>
+	    <li><a href="#">Ubuntu</a></li>
+	    <li><a href="#">12.04</a></li>
+	    <li><a href="#">123</a></li>
+	  </ul>
+	</div>
+	<div class="data_sheet">
+	  <div class="summary accordion">
+	    <h3>Summary</h3>
+	    <div>
+	      <table>
+		<tbody>
+		  <tr>
+		    <td>Module</td>
+		    <td>Public/BaseImages/Ubuntu/12.04</td>
+		  </tr>
+		  <tr>
+		    <td>Version</td>
+		    <td>123</td>
+		  </tr>
+		  <tr>
+		    <td>Description</td>
+		    <td>Description...</td>
+		  </tr>
+		  <tr>
+		    <td>Comment</td>
+		    <td>Latest comment...</td>
+		  </tr>
+		  <tr>
+		    <td>Category</td>
+		    <td id="category">Image</td>
+		  </tr>
+		  <tr>
+		    <td>Created</td>
+		    <td>2013-03-08 22:37:25.341 CET</td>
+		  </tr>
+		  <tr>
+		    <td>Last modified</td>
+		    <td>2013-03-08 22:37:25.341 CET</td>
+		  </tr>
+		  <tr>
+		    <td>Owner</td>
+		    <td>sixsq</td>
+		  </tr>
+		</tbody>
+	      </table>
+	    </div>
+	    <h3>Reference</h3>
+	    <div>
+	      <table>
+		<tr>
+		  <th>Machine Image IDs</th>
+		  <td>
+		    <div>stratuslab: ArCnG4gBogiprglBUdG6V8YX20y</div>
+		    <div>cloudsigma: 1234</div>
+		    <div>stratuslab: ArCnG4gBogiprglBUdG6V8YX20y</div>
+		    <div>cloudsigma: 1234</div>
+		  </td>
+		</tr>
+		<th>Is a base image (i.e. not created by SlipStream)</th>
+		<td>
+		  <input type="checkbox" name="isbase" disabled="true" checked="on">
+		</td>
+		<tr>
+		  <th>Platform</th>
+		  <td>Cent OS</td>
+		</tr>
+		<tr>
+		  <th class="row">Login username</th>
+		  <td class="values">root</td>
+		</tr>
+	      </table>
+	    </div>
+	    <h3>Parameters</h3>
+	    <div>
+	      <table>
+		<thead>
+		  <tr>
+		    <th>Name</th>
+		    <th>Description</th>
+		    <th>Value</th>
+		    <th> </th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr> <!--odd class is not necessary, only for old browsers (ie8)-->
+		    <td>SLIPSTREAM MAIL DEBUG</td>
+		    <td>Debug mail sending</td>
+		    <td> </td>
+		    <td class="help"> </td>
+		  </tr>
+		  <tr>
+		    <td>SLIPSTREAM MAIL DEBUG</td>
+		    <td>Debug mail sending</td>
+		    <td>smtp.gmail.com</td>
+		    <td class="help"><span>Help</span></td>
+		  </tr>
+		  <tr>
+		    <td>SLIPSTREAM MAIL DEBUG</td>
+		    <td>Debug mail sending</td>
+		    <td> </td>
+		    <td class="help"><span>Help</span></td>
+		  </tr>
+		  <tr>
+		    <td>SLIPSTREAMREGISTRATION EMAIL</td>
+		    <td>Debug mail sending</td>
+		    <td> </td>
+		    <td class="help"> </td>
+		  </tr>
+		  <tr>
+		    <td>SLIPSTREAM MAIL DEBUG</td>
+		    <td>Port on SMTP server (defaults to standard ports).</td>
+		    <td>slipstream-support@sixsq.com</td>
+		    <td class="help"><span>Help</span></td>
+		  </tr>
+		  <tr>
+		    <td>SLIPSTREAM MAIL DEBUG</td>
+		    <td>Debug mail sending</td>
+		    <td>smtp.gmail.com</td>
+		    <td class="help"></td>
+		  </tr>
+		</tbody>
+	      </table>
+	      <hr />
+	    </div>
+	    <h3>Creation</h3>
+	    <div>
+	    </div>
+	    <h3>Deployment</h3>
+	    <div>
+	    </div>
+	    <h3>Runs</h3>
+	    <div>
+	    </div>
+	    <h3>Authorization</h3>
+	    <div>
+	      <table class="autorization_table">
+		<thead>
+		  <tr>
+		    <th>Access Right</th>
+		    <th>Owner</th>
+		    <th>Group</th>
+		    <th>Public</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>View</td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout1" id="fillout1" value="fillout" checked="checked" /></td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout2" id="fillout2" value="fillout" /></td>
+		    <td><input class="checkbox" type="checkbox" name="fillout3" id="fillout3" value="fillout" /></td>
+		  </tr>
+		  <tr>
+		    <td>Edit</td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout4" id="fillout4" value="fillout" checked="checked" /></td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout5" id="fillout5" value="fillout" /></td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout6" id="fillout6" value="fillout" /></td>
+		  </tr>
+		  <tr>
+		    <td>Delete</td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout7" id="fillout7" value="fillout" checked="checked" /></td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout8" id="fillout8" value="fillout" /></td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout9" id="fillout9" value="fillout" /></td>
+		  </tr>
+		  <tr>
+		    <td>Execute (e.g. Run, Build)</td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout10" id="fillout10" value="fillout" checked="checked" /></td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout11" id="fillout11" value="fillout" /></td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout12" id="fillout12" value="fillout" /></td>
+		  </tr>
+		  <tr>
+		    <td>Create Children</td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout13" id="fillout13" value="fillout" checked="checked" /></td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout14" id="fillout14" value="fillout" /></td>
+		    <td><input disabled="true" class="checkbox" type="checkbox" name="fillout15" id="fillout15" value="fillout" /></td>
+		  </tr>
+		  
+		</tbody>
+	      </table>
+	      <hr />
+	      <table>
+		<thead>
+		  <tr>
+		    <th>Group members</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    <td>Inherited from parent: &nbsp;&nbsp;<input disabled="true" class="checkbox" type="checkbox" checked="checked" /></td>
+		  </tr>
+		  <tr>
+		    <td>meb, konstan</td>
+		  </tr>
+		</tbody>
+	      </table>
+	    </div>
+	  </div>
+	</div>
+      </div>
+    </div>
+  </body>
+  
+</html>

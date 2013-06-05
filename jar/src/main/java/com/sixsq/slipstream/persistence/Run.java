@@ -186,7 +186,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 		for (Run r : runs) {
 			runView = new RunView(r.getResourceUri(), r.getUuid(),
-					r.getModuleResourceUrl(), r.getStatus(), r.getStart());
+					r.getModuleResourceUrl(), r.getStatus(), r.getStart(), r.getCloudServiceName(), r.getUser());
 			try {
 				runView.hostname = r
 						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX

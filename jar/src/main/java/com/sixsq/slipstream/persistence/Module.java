@@ -331,11 +331,6 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 				.extractModuleNameFromResourceUri(resourceUri) + "/" + version);
 	}
 
-	/*
-	 * LS: Useless ? public List<String> getNodeNames(String moduleUrl) {
-	 * List<String> nodes = new ArrayList<String>();
-	 * nodes.add(Run.ORCHESTRATOR_NAME); return nodes; }
-	 */
 	public void setComment(String comment) {
 		this.comment = comment;
 	}

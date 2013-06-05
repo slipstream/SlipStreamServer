@@ -60,6 +60,10 @@ public class UserResource extends ParameterizedResource<User> {
 		return super.toHtml();
 	}
 
+	protected String getPageRepresentation() {
+		return "user";
+	}
+
 	@Override
 	protected String extractTargetUriFromRequest() {
 		return (String) getRequest().getAttributes().get("user");

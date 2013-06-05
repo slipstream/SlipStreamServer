@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width">
+
+    <title>SlipStream | Users</title>
+    
+    <link rel="stylesheet" type="text/css" href="css/application.css" />
+    
+    <script src="js/jquery.js" type="text/javascript"></script>
+    <script src="js/jquery-ui.js" type="text/javascript"></script>
+    <script src="external/jit/js/jit.js" type="text/javascript"></script>
+    <script src="external/jit/js/excanvas.js" type="text/javascript"></script>
+    <script src="js/users-dashboard.js" type="text/javascript"></script>
+    <script src="js/common.js"></script>
+  </head>
+
+  <body>
+    <div id="wrapper">
+      <div id="header">
+        <div class="top">
+          <a href="#" class="logo"></a>
+          
+          <div class="menu_bar">
+            <ul>
+              <li class="first"><a href="#"><i class="icon-home icon-2x"></i></a><li>
+              <li class="first"><a href="#"><i class="icon-info-sign icon-2x"></i></a><li>
+              <li class="first"><a href="#"><i class="icon-bar-chart icon-2x"></i></a><li>
+              <li class="first"><a href="#"><i class="icon-dashboard icon-2x"></i></a><li>
+              <li class="first"><a href="#"><i class="icon-group icon-2x"></i></a><li>
+              <li class="first"><a href="#"><i class="icon-wrench icon-2x"></i></a><li>
+                
+              <li><a id="user" href="#">Super <i class="icon-user icon-2x"></i></a></li>
+              <li class="first"><a class="action" href="#"><i class="icon-signout icon-2x"></i></a></li>
+            </ul>
+          </div>
+        </div>
+        
+      </div>
+      
+      <div class="bottom bottom_no_icon">
+        <h2><i class="icon-group"></i> 
+          Users Overview
+        </h2>
+        <h3>
+          This dashboard provides an overview of the users' resource consumption 
+        </h3>
+        <p>
+          Note: consumption is estimated by SlipStream and is not directly
+          queried from each cloud provider.  Therefore, discrepancies can occur
+          and should only be used as an approximation of the real consumption.
+        </p>
+      </div>
+      
+      <div id="content">
+        <div class="navigation">
+          <ul class="breadcrumb">
+	    <li><a href="#"><i class="icon-home"></i></a></li>
+            <li>Users</li>
+          </ul>
+          <ul class="interaction">
+            <li class="attention">
+              <button><i class="icon-user"></i> New User</button>
+            </li>
+          </ul>
+        </div>
+        <div class="data_sheet">
+          <div class="summary">
+            <h3>
+              Users
+            </h3>
+            <div>
+              <ul class="id-list" id="id-list"></ul>
+              <hr/>
+              <div>
+                <div class="uservis">
+                  <div class="infovis" id="infovis-user-a"></div>
+                </div>
+                <div class="userssummary">
+                  <table>
+                    <tbody>
+                      <tr>
+                	<th>Username</th>
+                	<td><a href="">Joe</a></td>
+                      </tr>
+                      <tr>
+                	<th>Description</th>
+                	<td>Description...</td>
+                      </tr>
+                      <tr>
+                	<th>Comment</th>
+                	<td>Latest comment...</td>
+                      </tr>
+                      <tr>
+                	<th>Category</th>
+                	<td>Deployment</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class='clear'></div>
+                <hr/>
+                <div>
+                  <div class="uservis">
+                    <div class="infovis" id="infovis-user-b"></div>
+                  </div>
+                  <div class="userssummary">
+                    <table>
+                      <tbody>
+                    	<tr>
+                    	  <th>Username</th>
+                    	  <td><a href="">Alice</a></td>
+                    	</tr>
+                    	<tr>
+                    	  <th>Description</th>
+                    	  <td>Description...</td>
+                    	</tr>
+                    	<tr>
+                    	  <th>Comment</th>
+                    	  <td>Latest comment...</td>
+                    	</tr>
+                    	<tr>
+                    	  <th>Category</th>
+                    	  <td>Deployment</td>
+                    	</tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class='clear'></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="navigation bottom_nav">
+          <ul class="interaction">
+            <li class="attention">
+              <button><i class="icon-user"></i> New User</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div id="footer">
+        <div class="footer_inner">
+          <div class="sixsq_logo"><a href="http://sixsq.com"></a></div>
+          <div class="copyright">Copyright &copy; 2008-2013 SixSq S&agrave;rl | 1.0-772</div>
+          <div class="swiss_made"><a href="http://swissmadesoftware.org"></a></div>
+        </div>
+      </div>
+    </div>
+</div>
+</body>
+</html>

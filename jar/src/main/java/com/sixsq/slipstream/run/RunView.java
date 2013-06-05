@@ -54,13 +54,21 @@ public class RunView {
 	@Attribute(required = false)
 	public String hostname;
 
+	@Attribute(required = false)
+	private String cloudServiceName;
+
+	@Attribute(required = false)
+	private String username;
+
 	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
-			String status, Date startTime) {
+			String status, Date startTime, String cloudServiceName, String username) {
 		this.resourceUri = resourceUrl;
 		this.uuid = uuid;
 		this.moduleResourceUri = moduleResourceUri;
 		this.status = status;
 		this.startTime = startTime;
+		this.cloudServiceName = cloudServiceName;
+		this.username = username;
 	}
 
 	public static RunViewList fetchListView(User user, boolean isSuper) {
@@ -79,6 +87,14 @@ public class RunView {
 					.viewList(user);
 		}
 		return new RunViewList(list);
+	}
+
+	public String getCloudServiceName() {
+		return cloudServiceName;
+	}
+
+	public String getUser() {
+		return username;
 	}
 
 	@Root(name = "list")

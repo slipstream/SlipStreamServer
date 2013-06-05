@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width">
+
+    <title>SlipStream | Deployment: client_server</title>
+    
+    <link rel="stylesheet" type="text/css" href="css/application.css" />
+    
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/deployment.js"></script>
+    <script>
+	var setModuleType = function(category) {
+		var buttons = $('button span:contains("Select Exact Version"), button span:contains("Select")').parent();
+		if(category === 'Image') {
+			$(buttons).removeAttr( "disabled" );
+		} else {
+			$(buttons).attr( "disabled", true );
+		}
+	};
+
+    $(document).ready(function() {
+		$('#chooser').dialog(
+			{ autoOpen: false,
+			  modal: true,
+			  width: 1050,
+			  height: 460,
+			  title: "Choose an image",
+			  buttons: [ { text: "Select", 
+			               click: function() { $( this ).dialog( "close" ); } },
+			     		 { text: "Select Exact Version", 
+			               click: function() { $( this ).dialog( "close" ); } },
+			             { text: "Cancel", 
+			               click: function() { $( this ).dialog( "close" ); } }
+			           ]
+		});
+		
+		$( "#moduleReferenceChooser" ).button().click(function() {
+            $( "#chooser" ).dialog( "open" );
+            //onclick__="showChooser('moduleReferenceInput','Image',updateParameterDefaults);"
+          });
+    });
+    </script>
+  </head>
+
+<body>
+    <div id="wrapper">
+	    <div id="header">
+		    <div class="top">
+			    <a href="/" class="logo"></a>
+                <div class="menu_bar">
+                    <ul>
+                        <li class="first"><a href="#"><i class="icon-home icon-2x"></i></a><li>
+                        <li class="first"><a href="#"><i class="icon-info-sign icon-2x"></i></a><li>
+                        <li class="first"><a href="#"><i class="icon-bar-chart icon-2x"></i></a><li>
+                        <li class="first"><a href="#"><i class="icon-dashboard icon-2x"></i></a><li>
+                        <li class="first"><a href="#"><i class="icon-group icon-2x"></i></a><li>
+                        <li class="first"><a href="#"><i class="icon-wrench icon-2x"></i></a><li>
+
+                        <li><a id="user" href="#">Super <i class="icon-user icon-2x"></i></a></li>
+                        <li class="first"><a class="action" href="#"><i class="icon-signout icon-2x"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bottom bottom_no_icon">
+	            <h2><i class="icon-cloud-upload"></i> Public/Tutorials/HelloWorld/client_server</h2>
+	            <h3>Ut non lobortis urna. Maecenas vitae tempus elit.</h3>
+	            <p>Pellentesque velit magna, faucibus non vestibulum ac, ultrices id ipsum. Nullam id pretium augue.
+	    Cras orci elit, cursus non sollicitudin sed, eleifend quis nunc.</p>
+            </div> 
+        </div>
+		<div id="content">
+			<div class="navigation">
+				<ul class="breadcrumb">
+            	    <li><a href="#"><i class="icon-home"></i></a></li>
+					<li><a href="#">modules</a></li>
+					<li><a href="#">Public</a></li>
+					<li><a href="#">Tutorials</a></li>
+					<li><a href="#">HelloWorld</a></li>
+					<li><a href="#">client_server</a></li>
+				</ul>
+				<ul class="interaction">
+                    <li class="attention"><button><i class="icon-save"></i> Save</button></li>
+                    <li class="attention"><button><i class="icon-stop"></i> Cancel</button></li>
+                    <li class="attention"><button><i class="icon-trash"></i> Delete</button></li>
+				</ul>
+			</div>
+			<div class="data_sheet">
+				<div class="summary accordion">
+					<h3>Summary</h3>
+					<div>
+						<table>
+							<tbody>
+								<tr class="odd">
+									<td>Module</td>
+									<td>Public/Tutorials/HelloWorld/client_server</td>
+								</tr>
+								<tr>
+									<td>Version</td>
+									<td>1<span id="versions"> (<a href="Deployment-view/">history</a>)</span></td>
+								</tr>
+								<tr class="odd">
+									<td>Description</td>
+									<td>
+										<input name="description" id="descriptionInput" type="text" value="Description...">
+									</td>
+								</tr>
+								<tr>
+									<td>Comment</td>
+									<td>Latest comment...</td>
+								</tr>
+								<tr class="odd">
+									<td>Category</td>
+									<td>Deployment
+									    <input name="category" type="hidden" value="Deployment" />
+                          		    </td>
+								</tr>
+								<tr>
+									<td>Created</td>
+									<td>2013-03-08 22:37:25.341 CET</td>
+								</tr>
+								<tr class="odd">
+									<td>Last modified</td>
+									<td>2013-03-08 22:37:25.341 CET</td>
+								</tr>
+								<tr>
+									<td>Owner</td>
+									<td>sixsq</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<h3>Nodes</h3>
+					<div class="nodes">
+						<table>
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Image link</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td class="node_name"><input type="text" name="fillout1" value="apache1" /></td>
+									<td>
+										<table class="image_link">
+											<tr>
+												<td>
+													<b>Reference image:</b> <a href="module/Public/Tutorials/HelloWorld/apache">
+													module/Public/Tutorials/HelloWorld/apache
+													</a>
+												</td>
+											</tr>
+											<tr>
+												<td class="multiplicity"><b>Default multiplicity: </b><input type="text" name="multiplicity" value="1" />
+												</td>
+											</tr>
+											<tr>
+												<td><b>Default cloud service:</b><select>
+												    <option>default</option>
+												    <option>CloudSigma</option>
+												    <option>StratusLab</option>
+												    <option>Interoute VDC</option>
+												    <option>Atos</option>
+												</select>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2">
+													<hr />
+													<b>Parameter mappings</b>
+													<table class="parameter_mapping" id="node--2--mappingtable">
+    													<tr class="hidden">
+    														<th>Input parameter</th>
+    														<th>Linked to</th>
+    													</tr>
+													</table>
+                        							<button 
+                        								class="add_item ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+                        								role="button" 
+                        								aria-disabled="false"
+                        								onclick="$$.addEmptyParameterMapping(this);"><i class="icon-plus"></i> Add Parameter Mapping</button>
+												</td>
+											</tr>
+										</table>
+									</td>
+									<td>
+										<button 
+											class="close small_close ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+											role="button" 
+											aria-disabled="false"
+											onclick="$$.removeTrFromButton(this);"></button>
+									</td>
+								</tr>
+								<tr>
+									<td class="node_name"><input type="text" name="fillout3" value="apache2" /></td>
+									<td>
+										<table class="image_link">
+											<tr>
+												<td>
+													<b>Reference image:</b> <a href="module/Public/Tutorials/HelloWorld/apache">
+													    module/Public/Tutorials/HelloWorld/apache
+													</a>
+												</td>
+											</tr>
+											<tr>
+												<td class="multiplicity"><b>Default multiplicity: </b><input type="text" name="multiplicity" value="1" />
+												</td>
+											</tr>
+											<tr>
+												<td><b>Default cloud service:</b><select>
+												    <option>default</option>
+												    <option>CloudSigma</option>
+												    <option>StratusLab</option>
+												    <option>Interoute VDC</option>
+												    <option>Atos</option>
+												</select>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2">
+													<hr />
+													<b>Parameter mappings</b>
+													<table class="parameter_mapping" id="node--2--mappingtable">
+														<tr>
+															<th>Input parameter</th>
+															<th>Linked to</th>
+														</tr>
+														<tr>
+															<td><input type="text" name="fillout" value="webserver.port" /></td>
+															<td><input type="text" name="fillout" value="apache1:port" /></td>
+                    										<td>
+                    											<button 
+                    												class="close small_close ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+                    												role="button" 
+                    												aria-disabled="false"
+                    												onclick="$$.removeTrFromButton(this);"></button>
+                    										</td>
+														</tr>
+														<tr>
+															<td><input type="text" name="fillout" value="webserver.port" /></td>
+															<td><input type="text" name="fillout" value="apache1:port" /></td>
+                    										<td>
+                    											<button 
+                    												class="close small_close ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+                    												role="button" 
+                    												aria-disabled="false"
+                    												onclick="$$.removeTrFromButton(this);"></button>
+                    										</td>
+														</tr>
+														<tr>
+															<td><input type="text" name="fillout" value="webserver.port" /></td>
+															<td><input type="text" name="fillout" value="apache1:port" /></td>
+                    										<td>
+                    											<button 
+                    												class="close small_close ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+                    												role="button" 
+                    												aria-disabled="false"
+                    												onclick="$$.removeTrFromButton(this);" />
+                    										</td>
+														</tr>
+													</table>
+                        							<button 
+                        								class="add_item ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+                        								href="#" 
+                        								role="button" 
+                        								aria-disabled="false"
+                        								onclick="$$.addEmptyParameterMapping(this);"><i class="icon-plus"></i> Add Parameter Mapping</button>
+												</td>
+											</tr>
+										</table>
+									</td>
+									<td>
+										<button 
+											class="close small_close ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+											role="button" 
+											aria-disabled="false"
+											onclick="$$.removeTrFromButton(this);" />
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<button 
+							class="bottom_section_button add_item ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+							name="addNode" 
+							id="addNodeChooser" 
+							onclick="showChooser('moduleReferenceInput','Deployment',updateParameterDefaults);">
+							<i class="icon-plus"></i> Add Node
+						</button>
+					</div>
+					<h3>Authorization</h3>
+					<div>
+					<table class="autorization_table">
+						<thead>
+							<tr>
+								<th>Access Right</th>
+								<th>Owner</th>
+								<th>Group</th>
+								<th>Public</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>View</td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout1" id="fillout1" value="fillout" checked="checked" /></td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout2" id="fillout2" value="fillout" /></td>
+								<td><input class="checkbox" type="checkbox" name="fillout3" id="fillout3" value="fillout" /></td>
+							</tr>
+							<tr>
+								<td>Edit</td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout4" id="fillout4" value="fillout" checked="checked" /></td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout5" id="fillout5" value="fillout" /></td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout6" id="fillout6" value="fillout" /></td>
+							</tr>
+							<tr>
+								<td>Delete</td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout7" id="fillout7" value="fillout" checked="checked" /></td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout8" id="fillout8" value="fillout" /></td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout9" id="fillout9" value="fillout" /></td>
+							</tr>
+							<tr>
+								<td>Execute (e.g. Run, Build)</td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout10" id="fillout10" value="fillout" checked="checked" /></td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout11" id="fillout11" value="fillout" /></td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout12" id="fillout12" value="fillout" /></td>
+							</tr>
+							<tr>
+								<td>Create Children</td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout13" id="fillout13" value="fillout" checked="checked" /></td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout14" id="fillout14" value="fillout" /></td>
+								<td><input disabled="true" class="checkbox" type="checkbox" name="fillout15" id="fillout15" value="fillout" /></td>
+							</tr>
+							
+						</tbody>
+					</table>
+					<hr />
+					<table>
+						<thead>
+							<tr>
+								<th>Group members</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Inherited from parent: &nbsp;&nbsp;<input disabled="true" class="checkbox" type="checkbox" checked="checked" /></td>
+							</tr>
+							<tr>
+								<td>meb, konstan</td>
+							</tr>
+							
+						</tbody>
+					</table>
+					</div>
+				</div>
+			</div>
+			<div class="navigation bottom_nav">
+				<ul class="interaction">
+                    <li class="attention"><button><i class="icon-save"></i> Save</button></li>
+                    <li class="attention"><button><i class="icon-stop"></i> Cancel</button></li>
+                    <li class="attention"><button><i class="icon-trash"></i> Delete</button></li>
+	            </ul>
+	        </div>
+        </div>
+        <div id="footer">
+	        <div class="footer_inner">
+                <div class="sixsq_logo"><a href="http://sixsq.com"></a></div>
+                <div class="copyright">Copyright &copy; 2008-2013 SixSq S&agrave;rl | 1.0-772</div>
+                <div class="swiss_made"><a href="http://swissmadesoftware.org"></a></div>
+	        </div>
+        </div>
+    </div>
+    <div id="chooser" class="overlay_sheet">
+        <iframe id="chooseriframe" src="image-view-chooser.html"></iframe>
+    </div>
+</body>
+  
+</html>

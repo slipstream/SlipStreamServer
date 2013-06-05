@@ -40,9 +40,6 @@ public class ConnectorFactory {
 	private static Map<String, Connector> connectors = null;
 	private static List<String> cloudServiceNames = null;
 
-	// Used in:
-	// - ConnectorBase, Dashboard, ModuleResource, Run, Launcher,
-	// RunListResource, RunResource
 	public static Connector getCurrentConnector(User user)
 			throws ConfigurationException, ValidationException {
 		String cloudServiceName = getDefaultCloudServiceName(user);
@@ -56,10 +53,6 @@ public class ConnectorFactory {
 		return getConnector(cloudServiceName);
 	}
 
-	// New method (split from this.getCurrentConnectors(User) )
-	// Used in:
-	// - this.getCurrentConnectors(User)
-	// - this.getConnector(String, User)
 	public static Connector getConnector(String cloudServiceName)
 			throws ConfigurationException, ValidationException {
 		Connector connector = null;
@@ -71,11 +64,6 @@ public class ConnectorFactory {
 		return connector;
 	}
 
-	// New method ( get specified cloudServiceName or user default cloud service
-	// name )
-	// Used in:
-	// -
-	// - AsyncLauncher.run()
 	public static Connector getConnector(String cloudServiceName, User user)
 			throws ConfigurationException, ValidationException {
 		if (isDefaultCloudService(cloudServiceName)) {
@@ -91,9 +79,6 @@ public class ConnectorFactory {
 						.equals(cloudServiceName) || cloudServiceName == null;
 	}
 
-	// Used in:
-	// - Ec2UserParametersFactoryTest
-	// - ResourceTestBase
 	public static Connector instantiateConnectorFromName(
 			String connectorClassName) throws InstantiationException,
 			IllegalAccessException, InvocationTargetException,
@@ -102,21 +87,15 @@ public class ConnectorFactory {
 				.newInstance();
 	}
 
-	// Used in:
-	// - this.getCurrentConnectors(User)
 	public static String getDefaultCloudServiceName(User user) {
 		return user.getDefaultCloudService();
 	}
 
-	// Used in:
-	// - this.getConnectors(String[])
 	private static Connector loadConnector(String className)
 			throws ConfigurationException {
 		return loadConnector(className, null);
 	}
 
-	// Used in:
-	// - this.getConnectors(String[])
 	private static Connector loadConnector(String className, String instanceName)
 			throws ConfigurationException {
 		try {
@@ -138,9 +117,6 @@ public class ConnectorFactory {
 		cloudServiceNames = null;
 	}
 
-	// Used in:
-	// - Ec2UserParametersFactoryTest
-	// - ResourceTestBase
 	public static void setConnectors(Map<String, Connector> connectors) {
 		ConnectorFactory.connectors = connectors;
 
@@ -155,10 +131,6 @@ public class ConnectorFactory {
 		cloudServiceNames.add(connector.getConnectorInstanceName());
 	}
 
-	// Used in:
-	// - this.getConnectors()
-	// -
-	// connector.ParametersFactory.getServiceconfigurationParametersTemplate(String[])
 	public static Map<String, Connector> getConnectors(String[] classeNames)
 			throws ConfigurationException {
 
@@ -193,22 +165,11 @@ public class ConnectorFactory {
 		return connectors;
 	}
 
-	// Used in:
-	// - this.getCurrentConnector(User)
-	// - this.getCloudServiceNames()
-	// -
-	// connector.ExecutionControlUserParametersFactory.initReferenceParameters()
-	// - connector.ParameterFactory.addParametersForEditing(Module)
-	// - connector.ParameterFactory.addParametersForEditing(User)
-	// - persistence.ImageModule.extractExtraDiskDefinition()
 	public static Map<String, Connector> getConnectors()
 			throws ConfigurationException {
 		return getConnectors(getConnectorClassNames());
 	}
 
-	// Used in:
-	// - this.getConnectors()
-	// - module.ModuleResource.setIsEdit()
 	public static String[] getConnectorClassNames() {
 		String connectorsClassNames = Configuration.getInstance()
 				.getRequiredProperty(
@@ -217,16 +178,10 @@ public class ConnectorFactory {
 		return splitConnectorClassNames(connectorsClassNames);
 	}
 
-	// Used in:
-	// - this.getConnectorClassNames()
-	// - configuration.Configuration.getConnectorClassNames()
 	public static String[] splitConnectorClassNames(String connectorsClassNames) {
 		return connectorsClassNames.split(",");
 	}
 
-	// Used in:
-	// - module.ImageFromProcessor.parseImageId(ImageModule)
-	// - module.ModuleResource.setIsEdit()
 	public static List<String> getCloudServiceNamesList() {
 		if (cloudServiceNames == null) {
 			// will also set the cloud service names

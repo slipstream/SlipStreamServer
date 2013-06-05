@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width">
+
+    <title>SlipStream | Image: Fedora 14.0</title>
+
+    <link rel="stylesheet" type="text/css" href="css/application.css" />
+    
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="external/jit/js/jit.js" type="text/javascript"></script>
+    <script src="external/jit/js/excanvas.js" type="text/javascript"></script>
+    <script src="js/common.js"></script>
+    <script src="js/image-dashboard.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div id="wrapper">
+
+        <div id="header">
+            <div class="top">
+                <a href="#" class="logo"></a>
+          
+                <div class="menu_bar">
+                    <ul>
+                        <li class="first"><a href="#"><i class="icon-home icon-2x"></i></a></li>
+                        <li class="first"><a href="#"><i class="icon-info-sign icon-2x"></i></a></li>
+                        <li class="first"><a href="#"><i class="icon-bar-chart icon-2x"></i></a></li>
+                        <li><a id="user" href="#">Joe <i class="icon-user icon-2x"></i></a></li>
+                        <li class="first"><a class="action" href="#"><i class="icon-signout icon-2x"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bottom bottom_no_icon">
+                <h2><i class="icon-desktop"></i> XX_Public/Baseimages/Fedora/14.0</h2>
+                <h3>Description...</h3>
+                <p>Latest comment...</p>
+            </div>
+        </div>
+      
+        <div id="content">
+	        <div class="navigation">
+	            <ul id="breadcrumb" class="breadcrumb">
+                    <li><a href="#"><i class="icon-home"></i></a></li>
+                    <li><a href="#">module</a></li>
+                    <li><a href="#">XX_Public</a></li>
+                    <li><a href="#">BaseImage</a></li>
+                    <li><a href="#">Fedora</a></li>
+                    <li><a href="#">14.0</a></li>
+                    <li><a href="#">123</a></li>
+	            </ul>
+	            <ul class="interaction">
+                    <li class="attention"><button id="build-button-top"><i class="icon-legal"></i> Build</button></li>
+                    <li class="attention"><button id="edit-button-top"><i class="icon-edit"></i> Edit</button></li>
+                    <li class="attention"><button id="publish-button-top"><i class="icon-globe"></i> Publish</button></li>
+	            </ul>
+	        </div>
+            <form id="build-form" method="post" action="run" name="formexec">
+                <input id="build-input" type="hidden" name="refqname" value="replace-me">
+            </form>
+            <form id="publish-form" method="post" action="change-me" name="formexec">
+            </form>
+            <div class="data_sheet">
+	            <div class="summary accordion">
+                    <!-- <h3>Overview</h3>
+                    <div>
+                        <div id="infovis"></div>
+                    </div> -->
+	                <h3>Summary</h3>
+                    <div id="module-summary">
+	                    <table>
+		                    <tbody>
+        		                <tr>
+        		                    <td>Name</td>
+        		                    <td id="module-name">MyProjects/CoolProject</td>
+        		                </tr>
+        		                <tr>
+        		                    <td>Version</td>
+        		                    <td id="module-version">1<span id="versions"> (<a href="Public-view/">history</a>)</td>
+        	                    </tr>
+        	                    <tr>
+        	                        <td>Description</td>
+        	                        <td id="module-description">Description...</td>
+        	                    </tr>
+        	                    <tr>
+        	                        <td>Comment</td>
+        	                        <td id="module-comment">Latest comment...</td>
+        	                    </tr>
+        	                    <tr>
+        	                        <td>Category</td>
+        	                        <td id="module-category">Project</td>
+        	                    </tr>
+        	                    <tr>
+        	                        <td>Created</td>
+        	                        <td id="module-created">2013-03-08 22:37:25.341 CET</td>
+        	                    </tr>
+                    		    <tr>
+                    		        <td>Last modified</td>
+                    		        <td id="module-last-modified">2013-03-08 22:37:25.341 CET</td>
+                    		    </tr>
+        	                    <tr>
+        	                        <td>Owner</td>
+        	                        <td id="module-owner">sixsq</td>
+        	                    </tr>
+        	                    <tr>
+        	                        <td>Is a base image</td>
+        	                        <td>
+        	                            <input id="module-is-base" disabled="disabled" class="checkbox" type="checkbox" checked="checked" />
+									</td>
+        	                    </tr>
+		                    </tbody>
+	                    </table>
+	                </div>
+	                <h3>Base Image Details</h3>
+	                <div id="module-base-image">
+	                    <table>
+                            <tr id="module-platform">
+                                <th>Platform</th>
+                                <td>Cent OS</td>
+                            </tr>
+                            <tr id="module-login">
+                                <th class="row">Login username</th>
+                                <td class="values">root</td>
+                            </tr>
+                        </table>
+	                </div>
+	                <h3>Parent Image</h3>
+	                <div id="module-image-reference">
+	                    <table>
+		                    <tr id="module-image-ids">
+		                        <th>Parent Machine Image</th>
+                                <td>
+                                    <a href="#">Parent-module</a>
+                                </td>
+                            </tr>
+                        </table>
+	                </div>
+	                <h3>Cloud Configuration</h3>
+	                <div id="cloud-configuration" class="tab_block">
+	                    <ul class="tabs inner_tabs">
+                            <li><a href="#fragment-parameters-Cloud">Cloud</a><span></span></li>
+                            <li><a href="#fragment-parameters-stratuslab">stratuslab</a><span></span></li>
+	                    </ul>
+	                    <div id="fragment-parameters-Cloud">
+	                        <table>
+		                        <thead>
+		                            <tr>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Value</th>
+                                        <th> </th>
+		                            </tr>
+		                        </thead>
+		                        <tbody>
+		                            <tr>
+                                        <td>SLIPSTREAM MAIL DEBUG</td>
+                                        <td>Debug mail sending</td>
+                                        <td> </td>
+                                        <td class="help"> </td>
+		                            </tr>
+		                            <tr>
+                                        <td>SLIPSTREAM MAIL DEBUG</td>
+                                        <td>Debug mail sending</td>
+                                        <td>smtp.gmail.com</td>
+                                        <td class="help"><span>Help</span></td>
+		                            </tr>
+		                        </tbody>
+	                        </table>
+    	                </div>
+	                    <div id="fragment-parameters-stratuslab">
+	                        <table>
+		                        <thead>
+		                            <tr>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Value</th>
+                                        <th> </th>
+		                            </tr>
+		                        </thead>
+		                        <tbody>
+		                            <tr>
+                                        <td>SLIPSTREAM MAIL DEBUG</td>
+                                        <td>Debug mail sending</td>
+                                        <td> </td>
+                                        <td class="help"> </td>
+		                            </tr>
+		                            <tr>
+                                        <td>SLIPSTREAM MAIL DEBUG</td>
+                                        <td>Debug mail sending</td>
+                                        <td>smtp.gmail.com</td>
+                                        <td class="help"><span>Help</span></td>
+		                            </tr>
+		                            <tr>
+                                        <td>Image id</td>
+                                        <td>Unique image identifier corresponding to this image</td>
+                                        <td>ami-123abc</td>
+                                        <td class="help"><span>Help</span></td>
+		                            </tr>
+		                        </tbody>
+	                        </table>
+    	                </div>
+	                </div>
+	                <h3 id="creation-header">Image Creation</h3>
+	                <div id="creation" class="tab_block">
+	                    <ul class="tabs inner_tabs">
+                            <li id="fragment-creation-recipe-header">
+                                <a href="#fragment-creation-recipe">Recipe</a>
+                                <span></span>
+                            </li>
+                            <li id="fragment-creation-packages-header">
+                                <a href="#fragment-creation-packages">Packages</a>
+                                <span></span>
+                            </li>
+                            <li id="fragment-creation-prerecipe-header">
+                                <a href="#fragment-creation-prerecipe">Pre Recipe</a>
+                                <span></span>
+                            </li>
+	                    </ul>
+	                    <div id="fragment-creation-recipe">
+		                    <table>
+		                        <thead>
+		                            <tr>
+		                                <th>Standard recipe (fires after packages are installed)</th>
+		                            </tr>
+		                        </thead>
+		                        <tbody>
+		                            <tr>
+		                                <td>
+			                                <textarea disabled="disabled">
+#!/bin/sh -xe
+apt-get update -y
+apt-get install -y apache2
+
+echo 'Hello from Apache deployed by SlipStream!' > /var/www/data.txt
+
+service apache2 stop
+port=$(ss-get port)
+sed -i -e 's/^Listen.*$/Listen '$port'/' /etc/apache2/ports.conf
+sed -i -e 's/^NameVirtualHost.*$/NameVirtualHost *:'$port'/' /etc/apache2/ports.conf
+sed -i -e 's/^&lt;VirtualHost.*$/&lt;VirtualHost *:'$port'&gt;/' /etc/apache2/sites-available/default
+service apache2 start
+ss-set ready true
+			                                </textarea>
+		                                </td>
+		                            </tr>
+		                        </tbody>
+		                    </table>
+	                    </div>
+	                    <div id="fragment-creation-prerecipe">
+		                    <table>
+		                        <thead>
+		                            <tr>
+		                                <th>Pre-recipe (fires before SlipStream client install and packages are installed)</th>
+		                            </tr>
+		                        </thead>
+		                        <tbody>
+		                            <tr>
+		                                <td>
+			                                <textarea disabled="disabled"></textarea>
+		                                </td>
+		                            </tr>
+		                        </tbody>
+		                    </table>
+	                    </div>
+	                    <div id="fragment-creation-packages">
+		                    <table>
+		                        <thead>
+		                            <tr>
+                                        <th>Name</th>
+                                        <th>Repository</th>
+                                        <th>Key</th>
+		                            </tr>
+		                        </thead>
+		                        <tbody>
+		                            <tr>
+		                                <td>apache2</td>
+		                                <td></td>
+		                                <td></td>
+		                            </tr>
+		                        </tbody>
+		                    </table>
+	                    </div>
+	                </div>
+	                <h3  id="deployment-header">Image Deployment</h3>
+	                <div id="deployment" class="tab_block">
+	                    <ul class="tabs inner_tabs">
+                            <li id="fragment-deployment-execute-header"><a href="#fragment-deployment-execute">Execute</a><span></span></li>
+                            <li id="fragment-deployment-report-header"><a href="#fragment-deployment-report">Report</a><span></span></li>
+                            <li id="fragment-deployment-parameters-header"><a href="#fragment-deployment-parameters">Parameters</a><span></span></li>
+	                    </ul>
+	                    <div id="fragment-deployment-execute">
+		                    <table>
+		                        <thead>
+		                            <tr>
+		                                <th>Standard recipe (fires during Running phase)</th>
+		                            </tr>
+		                        </thead>
+		                        <tbody>
+		                            <tr>
+		                                <td>
+			                                <textarea disabled="disabled">
+#!/bin/sh -xe
+apt-get update -y
+apt-get install -y apache2
+
+echo 'Hello from Apache deployed by SlipStream!' > /var/www/data.txt
+
+service apache2 stop
+port=$(ss-get port)
+sed -i -e 's/^Listen.*$/Listen '$port'/' /etc/apache2/ports.conf
+sed -i -e 's/^NameVirtualHost.*$/NameVirtualHost *:'$port'/' /etc/apache2/ports.conf
+sed -i -e 's/^&lt;VirtualHost.*$/&lt;VirtualHost *:'$port'&gt;/' /etc/apache2/sites-available/default
+service apache2 start
+ss-set ready true
+			                                </textarea>
+		                                </td>
+		                            </tr>
+		                        </tbody>
+		                    </table>
+	                    </div>
+	                    <div id="fragment-deployment-report">
+		                    <table>
+		                        <thead>
+		                            <tr>
+		                                <th>Gather logs and things for posterity (fires during the Sending Report phase)</th>
+		                            </tr>
+		                        </thead>
+		                        <tbody>
+		                            <tr>
+		                                <td>
+			                                <textarea disabled="disabled">
+#!/bin/sh -xe
+apt-get update -y
+apt-get install -y apache2
+
+echo 'Hello from Apache deployed by SlipStream!' > /var/www/data.txt
+
+service apache2 stop
+port=$(ss-get port)
+sed -i -e 's/^Listen.*$/Listen '$port'/' /etc/apache2/ports.conf
+sed -i -e 's/^NameVirtualHost.*$/NameVirtualHost *:'$port'/' /etc/apache2/ports.conf
+sed -i -e 's/^&lt;VirtualHost.*$/&lt;VirtualHost *:'$port'&gt;/' /etc/apache2/sites-available/default
+service apache2 start
+ss-set ready true
+			                                </textarea>
+		                                </td>
+		                            </tr>
+		                        </tbody>
+		                    </table>
+	                    </div>
+	                    <div id="fragment-deployment-parameters">
+	                        <table>
+		                        <thead>
+		                            <tr>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Category</th>
+                                        <th>Value</th>
+                                        <th> </th>
+		                            </tr>
+		                        </thead>
+		                        <tbody>
+		                            <tr>
+                                        <td>hostname</td>
+                                        <td>Hostname</td>
+                                        <td>Output</td>
+                                        <td>123.234.123.123</td>
+                                        <td class="help"> </td>
+		                            </tr>
+		                        </tbody>
+	                        </table>
+    	                </div>
+	                </div>
+	                <h3>Runs</h3>
+	                <div>
+	                    <table>
+		                    <thead>
+		                        <tr>
+                                    <th>UUID</th>
+                                    <th>Deployment</th>
+                                    <th>Note</th>
+                                    <th>Status</th>
+                                    <th>Start Time</th>
+		                        </tr>
+		                    </thead>
+		                    <tbody>
+		                        <tr>
+		                            <td>
+		                                <a href="run/d133c626-b6fc-41d8-871c-ffb6182ea956">d133c626-b6fc-41d8-871c-ffb6182ea956</a>
+		                            </td>
+		                            <td>
+		                                <a href="module/Public/Tutorials/HelloWorld/client_server/11">module/Public/Tutorials/HelloWorld/client_server/11</a>
+		                            </td>
+		                            <td>Good deployment, don't remove</td>
+		                            <td>Inactive</td>
+		                            <td>2013-03-26 18:46:04.694 CET</td>
+		                        </tr>
+		                        <tr>
+		                            <td>
+		                                <a href="run/d133c626-b6fc-41d8-871c-ffb6182ea956">d133c626-b6fc-41d8-871c-ffb6182ea956</a>
+		                            </td>
+		                            <td>
+		                                <a href="module/Public/Tutorials/HelloWorld/client_server/11">module/Public/Tutorials/HelloWorld/client_server/11</a>
+		                            </td>
+                                    <td>Good deployment, don't remove</td>
+                                    <td>Inactive</td>
+                                    <td>2013-03-26 18:46:04.694 CET</td>
+		                        </tr>
+		                    </tbody>
+	                    </table>
+	                </div>
+	                <h3>Authorization</h3>
+	                <div id="authorization">
+    	                <table class="autorization_table">
+    		                <thead>
+    		                    <tr>
+                                    <th>Access Right</th>
+                                    <th>Owner</th>
+                                    <th>Group</th>
+                                    <th>Public</th>
+    		                    </tr>
+    		                </thead>
+    		                <tbody>
+    		                    <tr>
+    		                        <td>View</td>
+    		                        <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout1" id="fillout1" value="fillout" checked="checked" /></td>
+    		                        <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout2" id="fillout2" value="fillout" /></td>
+    		                        <td><input class="checkbox" type="checkbox" name="fillout3" id="fillout3" value="fillout" /></td>
+    		                    </tr>
+        		                <tr>
+        		                    <td>Edit</td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout4" id="fillout4" value="fillout" checked="checked" /></td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout5" id="fillout5" value="fillout" /></td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout6" id="fillout6" value="fillout" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Delete</td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout7" id="fillout7" value="fillout" checked="checked" /></td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout8" id="fillout8" value="fillout" /></td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout9" id="fillout9" value="fillout" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Execute (e.g. Run, Build)</td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout10" id="fillout10" value="fillout" checked="checked" /></td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout11" id="fillout11" value="fillout" /></td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout12" id="fillout12" value="fillout" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Create Children</td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout13" id="fillout13" value="fillout" checked="checked" /></td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout14" id="fillout14" value="fillout" /></td>
+                                    <td><input disabled="disabled" class="checkbox" type="checkbox" name="fillout15" id="fillout15" value="fillout" /></td>
+                                </tr>
+    		                </tbody>
+    	                </table>
+    	                <hr />
+    	                <table>
+    		                <thead>
+    		                    <tr>
+    		                        <th>Group members</th>
+    		                    </tr>
+    		                </thead>
+    		                <tbody>
+    		                    <tr>
+    		                        <td>Inherited from parent: &nbsp;&nbsp;<input disabled="disabled" class="checkbox" type="checkbox" checked="checked" /></td>
+    		                    </tr>
+    		                    <tr>
+    		                        <td>meb, konstan</td>
+    		                    </tr>
+    		                </tbody>
+    	                </table>
+	                </div>
+                </div>
+	        </div>
+    	    <div class="navigation bottom_nav">
+                <ul class="interaction">
+                    <li class="attention"><button id="build-button-bottom"><i class="icon-legal"></i> Build</button></li>
+                    <li class="attention"><button id="edit-button-bottom"><i class="icon-edit"></i> Edit</button></li>
+                    <li class="attention"><button id="publish-button-bottom"><i class="icon-globe"></i> Publish</button></li>
+                </ul>
+    	    </div>
+	    </div>
+
+        <div id="footer">
+            <div class="footer_inner">
+                <div class="sixsq_logo"><a href="http://sixsq.com"></a></div>
+                <div class="copyright">Copyright &copy; 2008-2013 SixSq S&agrave;rl | 1.0-772</div>
+                <div class="swiss_made"><a href="http://swissmadesoftware.org"></a></div>
+            </div>
+        </div>
+
+    </div>
+</body>
+  
+</html>

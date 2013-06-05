@@ -270,23 +270,11 @@ public abstract class ConnectorBase implements Connector {
 		return command;
 	}
 	
-	protected String getPrivateSshKey() {
-		String privateSshKeyFile = getPrivateSshKeyFileName();	
-		return FileUtil.fileToString(privateSshKeyFile);
-	}
-
 	protected String getPublicSshKey(Run run, User user) throws ValidationException, IOException {
 		String publicSshKeyFile = getPublicSshKeyFileName(run, user);
 		return FileUtil.fileToString(publicSshKeyFile);
 	}
 
-	protected String getPrivateSshKeyFileName() {
-		// TODO: Change the way to get private key
-		String publicSshKeyFile = Configuration.getInstance().getProperty("cloud.connector.security.publicsshkey");
-		String privateSshKeyFile = publicSshKeyFile.substring(0, publicSshKeyFile.length() - 4);
-		return privateSshKeyFile;
-	}
-	
 	protected String getPublicSshKeyFileName(Run run, User user)
 			throws IOException, ValidationException {
 		String publicSshKey;

@@ -64,6 +64,8 @@
 									<th>Module</th>
 									<th>Status</th>
 									<th>Start time</th>
+									<th>Cloud</th>
+									<th></th>
 								</tr>
 							</thead>
 							<xsl:apply-templates />
@@ -120,6 +122,14 @@
 			</td>
 			<td class="values">
 				<xsl:value-of select="@startTime" />
+			</td>
+			<td class="values">
+				<xsl:value-of select="@cloudServiceName" />
+			</td>
+			<td class="values">
+ 				<xsl:if test="/list/user/@issuper = 'true'">
+					<xsl:value-of select="@username" />
+ 				</xsl:if>
 			</td>
 		</tr>
 	</xsl:template>

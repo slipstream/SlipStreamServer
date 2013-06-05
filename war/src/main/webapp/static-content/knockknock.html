@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>
+            SlipStream | Login
+        </title>
+        <link rel="stylesheet" type="text/css" href="/external/icon-font/css/font-awesome.min.css" media="screen" />
+        <link rel="stylesheet" type="text/css" href="/external/jquery/css/jquery.bxslider.css" media="screen" />
+        <link rel="stylesheet" type="text/css" href="/css/sixsq.css" media="screen" />
+        <link rel="stylesheet" type="text/css" href="/css/knockknock.css" media="screen" />
+
+        <script src="/external/jquery/js/jquery.js" type="text/javascript"></script>
+        <script src="/external/jquery/js/jquery.bxSlider.min.js" type="text/javascript"></script>
+        <script src="/external/jquery-ui/js/jquery-ui.js" type="text/javascript"></script>
+        <script src="/js/common.js" type="text/javascript"></script>
+        <script src="/js/knockknock.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="header">
+                <div class="top">
+                    <a href="/" class="logo"></a>
+                    <div class="menu_bar">
+                        <ul>
+                            <li><a href="#" title="Back to the home page"><i class="icon-home icon-2x"></i></a></li>
+                            <li><a href="#" title="Documentation"><i class="icon-info-sign icon-2x"></i></a></li>
+                          <!-- <li class="first"><a href="#"><i class="icon-bar-chart icon-2x"></i></a><li> -->
+
+                          <li class="separation"><a id="user" href="#" title="User information">Joe <i class="icon-user icon-2x"></i></a></li>
+                          <li class="separation"><a class="action" href="/logout" title="Signout/logout"><i class="icon-signout icon-2x"></i></a></li>
+                        </ul>
+                    </div>
+                    <div id="titles" class="bx-wrapper">
+                        <div class="bx-window">
+                            <div id="slider1">
+                                <div class="bottom bottom_with_slider">
+                                    <h2>
+                                       <i class="icon-signin"></i>Welcome to SlipStream
+                                    </h2>
+                                    <h3>
+                                        Your gateway to multi-cloud automation
+                                    </h3>
+                                    <p>
+                                    Here you will be able to provision simple and complex applications on the cloud of your choice, as well as build new virtual machine images. All this from single click.
+                                    </p>
+                                </div>
+                                <div class="bottom bottom_with_slider">
+                                    <h2>
+                                       <i class="icon-signin"></i>Single Click Application Deployment
+                                    </h2>
+                                    <h3>
+                                        Coordinate the deployment of any application
+                                    </h3>
+                                    <p>
+                                    With this feature you can (self-)provision applications and/or let colleagues. No more chasing down the corridor overworked system administrators.
+                                    </p>
+                                </div>
+                                <div class="bottom bottom_with_slider">
+                                    <h2>
+                                       <i class="icon-signin"></i>Version Controlled Image Factory
+                                    </h2>
+                                    <h3>
+                                        Create installation recipes and let SlipStream do the rest
+                                    </h3>
+                                    <p>
+                                    Using your favourite recipes (e.g. bash, Puppet, Chef) you can now create version controlled custom images on the clouds of your choice. 
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="messages" class="messages">
+                    <div id="message" class="message hidden">
+                        <span></span>
+                    </div>
+                    <div id="error" class="message conflict hidden">
+                        <span></span>
+                    </div>
+                </div>
+                <div id="submit_message" class="overlay hidden">
+        			<div class="ui-widget-overlay"></div>
+                	<div class="overlay_message">
+                		<h2>Registering your account</h2>
+                		<p>Please wait...</p>
+                	</div>
+                </div>
+            </div>
+            <div id="content">
+                <div class="navigation">
+                    <ul class="breadcrumb">
+                	    <li><a href="/"><i class="icon-home"></i></a></li>
+                        <li>Login</li>
+                    </ul>
+                </div>
+                <div class="data_sheet">
+                    <div class="summary accordion">
+                        <h3>
+                            Login
+                        </h3>
+                        <div id="login">
+                        	<form id="formlogin" action="/login" method="post" enctype="application/x-www-form-urlencoded">
+                                <table>
+                                    <tr>
+                                        <th>
+                                            Username
+                                        </th>
+                                        <td>
+                                            <input size="50" id="username" name="username" type="text" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            Password
+                                        </th>
+                                        <td>
+                                            <input size="50" id="password" name="password" type="password" />
+                                        </td>
+                                    </tr>
+                                </table>
+                                <button 
+                                    type="submit" 
+                                    class="bottom_section_button add_item ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+                                    role="button"
+                                    aria-disabled="false">
+                                    Login
+                                </button>
+                            </form>
+                        </div>
+
+                        <h3>
+                            Register
+                        </h3>
+                        <div id="register">
+                        	<form id="formregister" action="register" enctype="application/x-www-form-urlencoded" method="post">
+                                <div>
+                                    <p>
+                                    Please provide the following information to register for a SlipStream™ account. After submitting the form, you will be sent an email. Visit the link in the email to confirm your registration request.
+                                    </p>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <th>
+                                                    Username
+                                                </th>
+                                                <td>
+                                                    <input name="username" type="text" />*
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    First name
+                                                </th>
+                                                <td>
+                                                    <input name="firstname" type="text" />*
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Last name
+                                                </th>
+                                                <td>
+                                                    <input name="lastname" type="text" />*
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Organization
+                                                </th>
+                                                <td>
+                                                    <input name="organization" type="text" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Email
+                                                </th>
+                                                <td>
+                                                    <input name="email" type="text" />*
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    Comments
+                                                </th>
+                                                <td>
+                                                    <input name="comments" type="hidden" />
+                                                    <textarea style="height:200px" name="comments"></textarea>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <input name="agreement" type="checkbox" />
+                                        I have read and agree to the SlipStream&trade; 
+                                    <a href="html/terms-of-service.html">Terms of Service</a>.
+                                </div>
+                                <button 
+                                    id="button_register"
+                                    class="add_item ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"         
+                                    role="button"
+                                    type="submit"
+                                    aria-disabled="false">Register</button>
+                            </form>             			
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="footer">
+                <div class="footer_inner">
+                    <div class="sixsq_logo"><a href="http://sixsq.com"></a></div>
+                    <div class="copyright">Copyright &copy; 2008-2013 SixSq S&agrave;rl | 1.0-772</div>
+                    <div class="swiss_made"><a href="http://swissmadesoftware.org"></a></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

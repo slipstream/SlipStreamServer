@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width">
+    <title>
+        SlipStream | Welcome
+    </title>
+    <link rel="stylesheet" type="text/css" href="external/jit/css/base.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="external/jit/css/BarChart.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="external/jit/css/AreaChart.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="external/icon-font/css/font-awesome.min.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/sixsq.css" media="screen" />
+
+    <script src="js/jquery.js" type="text/javascript"></script>
+    <script src="js/jquery-ui.js" type="text/javascript"></script>
+    <script src="external/jit/js/jit.js" type="text/javascript"></script>
+    <script src="external/jit/js/excanvas.js" type="text/javascript"></script>
+    <script src="js/common.js" type="text/javascript"></script>
+    <script src="js/module.js" type="text/javascript"></script>
+    <script src="js/user-dashboard.js" type="text/javascript"></script>
+</head>
+    <body>
+        <div id="wrapper">
+            <div id="header">
+                <div class="top">
+                    <a href="/" class="logo"></a>
+
+                    <div class="menu_bar">
+                        <ul>
+                            <li><a href="#" title="Back to the home page"><i class="icon-home icon-2x"></i></a></li>
+                            <li><a href="#" title="Documentation"><i class="icon-info-sign icon-2x"></i></a></li>
+                            <!-- <li class="first"><a href="#"><i class="icon-bar-chart icon-2x"></i></a></li> -->
+                            <li class="separation"><a id="user" href="#" title="User information">Joe <i class="icon-user icon-2x"></i></a></li>
+                            <li class="separation"><a class="action" href="/logout" title="Signout/logout"><i class="icon-signout icon-2x"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="titles" class="bottom bottom_no_icon">
+                    <h2>
+                        <i class="icon-home"></i>Welcome to SlipStream
+                    </h2>
+                    <h3>
+                        Multi-cloud automated provisioning and image creation
+                    </h3>
+                    <p>
+                        This page gives you an overview of your current consumption, as well as published modules, your own modules and the root modules shared with all users.
+                    </p>
+                </div>
+            </div>
+            <div id="content">
+                <div class="navigation">
+                    <ul class="breadcrumb">
+                	    <li><a href="/"><i class="icon-home"></i></a></li>
+                    </ul>
+                    <ul class="interaction">
+                        <li class="attention">
+                            <button id="new-project-button-top"><i class="icon-folder-open"></i>New Project</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="data_sheet">
+                    <div class="summary">
+                        <!-- <h3>
+                                 Current Consumption
+                                 </h3>
+                                 <div>
+                                     <ul class="id-list" id="id-list"></ul>
+                                     <div class="infovis" id="infovis"></div>
+                                 </div>
+                                 <h3>
+                                     Metering
+                                 </h3>
+                                 <div class="tab_block">
+                                     <ul class="tabs inner_tabs">
+                                         <li>
+                                             <a href="#fragment-this-month">This Month</a>
+                                         </li>
+                                         <li>
+                                             <a href="#fragment-last-month">Last Month</a>
+                                         </li>
+                                     </ul>
+                                     <div id="fragment-this-month">
+                                         <ul class="id-list" id="id-list-consumption"></ul>
+                                         <table>
+                                             <tr>
+                                                 <th>
+                                                     Interoute VDC
+                                                 </th>
+                                             </tr>
+                                             <tr>
+                                                 <td>
+                                                     <div class="infovis-consumption" id="infovis-consumption"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <th>
+                                                     Atos
+                                                 </th>
+                                             </tr>
+                                             <tr>
+                                                 <td>
+                                                     <div class="infovis-consumption" id="infovis-consumption2"></div>
+                                                 </td>
+                                             </tr>
+                                         </table>
+                                     </div>
+                                     <div id="fragment-last-month"></div>
+                                 </div>
+                                 <h3>
+                                     My Deployments, Runs, Builds and VMs
+                                 </h3>
+                                 <div class="tab_block">
+                                     <ul class="tabs inner_tabs">
+                                         <li>
+                                             <a href="#fragment-deployments">Deployments</a>
+                                         </li>
+                                         <li>
+                                             <a href="#fragment-runs">Simple Runs</a>
+                                         </li>
+                                         <li>
+                                             <a href="#fragment-builds">Image Creations</a>
+                                         </li>
+                                         <li>
+                                             <a href="#fragment-vms">VMs</a>
+                                         </li>
+                                     </ul>
+                                     <div id="fragment-deployments">
+                                         <table id="parameter-General" class="parameters">
+                                             <thead>
+                                                 <tr>
+                                                     <th>
+                                                         UUID
+                                                     </th>
+                                                     <th>
+                                                         Deployment
+                                                     </th>
+                                                     <th>
+                                                         Note
+                                                     </th>
+                                                     <th>
+                                                         Status
+                                                     </th>
+                                                     <th>
+                                                         Start Time
+                                                     </th>
+                                                 </tr>
+                                             </thead>
+                                             <tbody>
+                                                 <tr>
+                                                     <td>
+                                                         <a href="run/d133c626-b6fc-41d8-871c-ffb6182ea956">d133c626-b6fc-41d8-871c-ffb6182ea956</a>
+                                                     </td>
+                                                     <td>
+                                                         <a href="module/Public/Tutorials/HelloWorld/client_server/11">module/Public/Tutorials/HelloWorld/client_server/11</a>
+                                                     </td>
+                                                     <td>
+                                                         Good deployment, don't remove
+                                                     </td>
+                                                     <td>
+                                                         Inactive
+                                                     </td>
+                                                     <td>
+                                                         2013-03-26 18:46:04.694 CET
+                                                     </td>
+                                                 </tr>
+                                                 <tr>
+                                                     <td>
+                                                         <a href="run/d133c626-b6fc-41d8-871c-ffb6182ea956">d133c626-b6fc-41d8-871c-ffb6182ea956</a>
+                                                     </td>
+                                                     <td>
+                                                         <a href="module/Public/Tutorials/HelloWorld/client_server/11">module/Public/Tutorials/HelloWorld/client_server/11</a>
+                                                     </td>
+                                                     <td>
+                                                         Good deployment, don't remove
+                                                     </td>
+                                                     <td>
+                                                         Inactive
+                                                     </td>
+                                                     <td>
+                                                         2013-03-26 18:46:04.694 CET
+                                                     </td>
+                                                 </tr>
+                                             </tbody>
+                                         </table>
+                                     </div>
+                                     <div id="fragment-runs"></div>
+                                     <div id="fragment-builds"></div>
+                                     <div id="fragment-vms"></div>
+                                 </div>
+                                 <h3>
+                                     My Modules
+                                 </h3>
+                                 <div id="my_modules">
+                                     <table>
+                                         <thead>
+                                             <tr>
+                                                 <th>
+                                                     Name
+                                                 </th>
+                                                 <th>
+                                                     Category
+                                                 </th>
+                                                 <th>
+                                                     Version
+                                                 </th>
+                                             </tr>
+                                         </thead>
+                                         <tr>
+                                             <td class="values category project_category">
+                                                 <a href="module/A/555">A</a>
+                                             </td>
+                                             <td class="values">
+                                                 Project
+                                             </td>
+                                             <td class="values"></td>
+                                         </tr>
+                                         <tr>
+                                             <td class="values category project_category">
+                                                 <a href="module/CELAR/899">CELAR</a>
+                                             </td>
+                                             <td class="values">
+                                                 Project
+                                             </td>
+                                             <td class="values"></td>
+                                         </tr>
+                                         <tr>
+                                             <td class="values category project_category">
+                                                 <a href="module/CELAR_CI/917">CELAR_CI</a>
+                                             </td>
+                                             <td class="values">
+                                                 Project
+                                             </td>
+                                             <td class="values"></td>
+                                         </tr>
+                                     </table>
+                                 </div>
+                                 <h3>
+                                     Published Modules
+                                 </h3>
+                                 <div id="published">
+                                     <table>
+                                         <thead>
+                                             <tr>
+                                                 <th>
+                                                     Name
+                                                 </th>
+                                                 <th>
+                                                     Category
+                                                 </th>
+                                                 <th>
+                                                     Version
+                                                 </th>
+                                             </tr>
+                                         </thead>
+                                         <tr>
+                                             <td class="values category image_category">
+                                                 <a href="module/A/555">CentOS-6.3</a>
+                                             </td>
+                                             <td class="values">
+                                                 Image
+                                             </td>
+                                             <td class="values"></td>
+                                         </tr>
+                                         <tr>
+                                             <td class="values category deployment_category">
+                                                 <a href="module/CELAR/899">Ubuntu-12.04</a>
+                                             </td>
+                                             <td class="values">
+                                                 Deployment
+                                             </td>
+                                             <td class="values"></td>
+                                         </tr>
+                                         <tr>
+                                             <td class="values category project_category">
+                                                 <a href="module/CELAR_CI/917">Windows-8</a>
+                                             </td>
+                                             <td class="values">
+                                                 Project
+                                             </td>
+                                             <td class="values"></td>
+                                         </tr>
+                                     </table>
+                                 </div> -->
+                        <h3>
+                            Shared Projects
+                        </h3>
+                        <div id="root-projects">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Name
+                                        </th>
+                                        <th>
+                                            Description
+                                        </th>
+                                        <th>
+                                            Owner
+                                        </th>
+                                        <th>
+                                            Version
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="category project_category">
+                                            <a href="module/A/555">Some project</a>
+                                        </td>
+                                        <td>
+                                            Description...
+                                        </td>
+                                        <td>sixsq</td>
+                                        <td>123</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="values category project_category">
+                                            <a href="module/CELAR/899">Some other project</a>
+                                        </td>
+                                        <td>
+                                            Some other description...
+                                        </td>
+                                        <td>Joe</td>
+                                        <td>321</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="navigation bottom_nav">
+                    <ul class="interaction">
+                        <li class="attention">
+                            <button id="new-project_button_bottom"><i class="icon-folder-open"></i>New Project</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div id="footer">
+                <div class="footer_inner">
+                    <div class="sixsq_logo"><a href="http://sixsq.com"></a></div>
+                    <div class="copyright">Copyright &copy; 2008-2013 SixSq S&agrave;rl | 1.0-772</div>
+                    <div class="swiss_made"><a href="http://swissmadesoftware.org"></a></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

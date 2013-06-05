@@ -316,29 +316,44 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	@Get("html")
 	public Representation toHtml() {
 
+		if (isEdit) {
+			try {
+				addParametersForEditing();
+			} catch (ValidationException e) {
+				throwClientValidationError(e.getMessage());
+			} catch (ConfigurationException e) {
+				throwServerError(e.getMessage());
+			}
+		}
+
 		Document doc = SerializationUtil.toXmlDocument(getParameterized());
 
 		XmlUtil.addUser(doc, user);
 
 		String metadata = SerializationUtil.documentToString(doc);
 
-		return new StringRepresentation(
-				slipstream.ui.views.Representation.toHtml(metadata,
-						getPageRepresentation(), getTransformationType()), MediaType.TEXT_HTML);
+		String html = slipstream.ui.views.Representation.toHtml(metadata,
+				getPageRepresentation(), getTransformationType());
+		
+		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
 	private String getTransformationType() {
 		String type = "view";
 		if (isNew()) {
 			type = "new";
-		} else if (isEdit) {
+		}
+		if (isEdit) {
 			type = "edit";
+		}
+		if (getChooser() != null) {
+			type = "chooser";
 		}
 		return type;
 	}
 
 	protected String getPageRepresentation() {
-		return "";
+		return "unknown";
 	}
 
 	protected void checkCanGet() {

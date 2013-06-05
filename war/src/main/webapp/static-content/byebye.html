@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>SlipStream | Logout</title>
+    <link rel="stylesheet" type="text/css" href="external/icon-font/css/font-awesome.min.css" media="screen" />
+	<link rel="stylesheet" type="text/css" href="css/sixsq.css" media="screen" />
+
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery-ui.js"></script>
+    <script src="js/jquery.bxSlider.min.js" type="text/javascript"></script>
+	<script src="js/common.js"></script>
+</head>
+
+<body>
+	<div id="wrapper">
+		<div id="header">
+			<div class="top">
+                <a href="/" class="logo"></a>
+
+                <div class="menu_bar">
+                    <ul>
+                        <li><a href="#" title="Back to the home page"><i class="icon-home icon-2x"></i></a></li>
+                        <li><a href="#" title="Documentation"><i class="icon-info-sign icon-2x"></i></a></li>
+                        <!-- <li class="first"><a href="#"><i class="icon-bar-chart icon-2x"></i></a></li> -->
+
+                        <li class="separation"><a id="user" href="#" title="User information">Joe <i class="icon-user icon-2x"></i></a></li>
+                        <li class="separation"><a class="action" href="/logout" title="Signout/logout"><i class="icon-signout icon-2x"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="titles" class="bottom bottom_no_icon">
+				<h2><i class="icon-signout"></i>
+				    Leaving? We hope to see you back soon...</h2>
+				<h3>Your gateway to multi-cloud automation</h3>
+				<p>Here you will be able to provision simple and complex applications on the cloud of your choice, as well as build new virtual machine images. All this from single click.</p>
+			</div>
+		</div>
+		<div id="content">
+			<div class="navigation">
+				<ul class="breadcrumb">
+            	    <li><a href="/"><i class="icon-home"></i></a></li>
+					<li><a href="/logout">Logout</a></li>
+				</ul>
+			</div>
+			<div class="data_sheet">
+				<div class="summary">
+					<h3>Logout</h3>
+                    <div id="logout">
+						<div>
+							<p>
+								Logging out will erase your current authentication cookie.
+								If you
+								logout, you will have to log back in before you can access
+								SlipStream&trade; resources.
+							</p>
+						</div>
+                    	<form id="formlogout" action="/logout?method=delete" method="post" enctype="application/x-www-form-urlencoded">
+                            <button type="submit" class="add_item">Logout</button>
+                            <button type="button" class="add_item" onclick="window.location = '/login';">Cancel</button>
+                        </form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="footer">
+			<div class="footer_inner">
+                          <div class="sixsq_logo"><a href="http://sixsq.com"></a></div>
+				<div class="copyright">Copyright &copy; 2008-2013 SixSq S&agrave;rl | 1.0-772</div>
+				<div class="swiss_made"><a href="http://swissmadesoftware.org"></a></div>
+			</div>
+		</div>
+	</div>
+</body>
+  
+</html>
+					

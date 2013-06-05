@@ -1,0 +1,99 @@
+.bottom {
+    height: auto;
+}
+
+/* Banner */
+.banner {
+	display: block;
+	width: 990px;
+	height: 324px;
+}
+
+.bx-window {
+	width: 985px;
+	height: 200px;
+}
+
+.bx-wrapper {
+    margin: 0 auto 20px;
+}
+
+.bx-wrapper .bx-viewport {
+	-moz-box-shadow: 0 0 0 #ccc;
+	-webkit-box-shadow: 0 0 0 #ccc;
+	box-shadow: 0 0 0 #ccc;
+	border: none;
+	left: 0px;
+	right: 10px;
+	background: none;
+}
+
+.bx-wrapper .bx-prev {
+	left: -10px;
+	background: url(/images/prev.png) no-repeat;
+}
+
+.bx-wrapper .bx-next {
+	right: -17px;
+	background: url(/images/next.png) no-repeat;
+}
+
+.bx-prev,
+.bx-next {
+	position: absolute;
+	top: 70px;
+    z-index:99;
+}
+
+.bx-wrapper .bx-controls-direction a {
+	width: 56px;
+	height: 56px;
+}
+
+.bx-viewport {
+    -moz-box-shadow: 0 0 5px #ccc;
+    -webkit-box-shadow: 0 0 5px #ccc;
+    box-shadow: 0 0 5px #ccc;
+    border: none 
+    left: 0;
+    width: 985px;
+}
+
+/* This is to override a strange behaviour from jquery.bxslider.css */
+.bx-wrapper .bx-next:hover {
+	background-position: 0 0;
+}
+
+#slider1 {
+	height: 324px;
+	overflow: hidden;
+}
+
+#slider1 div {
+    margin-left: 5px;
+}
+
+#slider1 div h1,
+#slider1 div h3 {
+	line-height: 1;
+	width: 850px;
+}
+
+#slider1 div h1 {
+	margin: 0px;
+	font-size: 50px;
+	color: #279bdc;
+}
+
+#slider1 div h3 {
+	margin: 15px 0px;
+	font-size: 40px;
+	font-weight: normal;
+	color: #dbdada;
+}
+
+#slider1 div p {
+	color: #c9c9c9;
+	font-size: 15px;
+    width: 850px;
+}

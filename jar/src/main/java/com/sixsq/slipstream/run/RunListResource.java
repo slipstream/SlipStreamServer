@@ -220,7 +220,7 @@ public class RunListResource extends ServerResource {
 
 	private void createAndSetPostResponseEntity(Run run) {
 		RunView view = new RunView(run.getRefqname(), run.getName(),
-				run.getModuleResourceUrl(), run.getStatus(), run.getStart());
+				run.getModuleResourceUrl(), run.getStatus(), run.getStart(), run.getCloudServiceName(), run.getUser());
 		view.vmstate = Run.INITIAL_NODE_STATE;
 
 		String result = SerializationUtil.toXmlString(view);
