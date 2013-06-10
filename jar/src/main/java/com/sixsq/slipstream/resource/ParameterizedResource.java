@@ -192,7 +192,8 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 						.extractShortNameFromResourceUri(getParameterized()
 								.getName()));
 		boolean newInQuery = extractNewFlagFromQuery();
-		return newInQuery || newInUri;
+		boolean doesntExists = !isExisting();
+		return newInQuery || newInUri || doesntExists;
 	}
 
 	protected void setIsEdit() {
