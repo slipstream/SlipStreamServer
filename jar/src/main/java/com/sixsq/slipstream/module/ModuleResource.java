@@ -190,6 +190,10 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		updateOrCreate(module);
 
 		getResponse().setLocationRef("/" + module.getResourceUri());
+		
+		if(isNew()) {
+			getResponse().setStatus(Status.SUCCESS_CREATED);
+		}
 	}
 
 	@Put("multipart")
@@ -201,6 +205,10 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		updateOrCreate(module);
 
 		getResponse().setLocationRef("/" + module.getResourceUri());
+		
+		if(isNew()) {
+			getResponse().setStatus(Status.SUCCESS_CREATED);
+		}
 	}
 
 	private Module xmlMultipartToModule() {
