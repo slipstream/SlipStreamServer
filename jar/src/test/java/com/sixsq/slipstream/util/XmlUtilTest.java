@@ -93,15 +93,16 @@ public class XmlUtilTest extends ResourceTestBase{
 		user2.setSuper(false);
 
 		XmlUtil.addUser(document, user1);
+		String txt = SerializationUtil.documentToString(document);
 
-		assertEquals(user1.getName(), runXpath("/*/user/@username", document));
+		assertEquals(user1.getName(), runXpath("/*/user/@name", document));
 		assertEquals(user1.getResourceUri(), runXpath("/*/user/@resourceUri",
 				document));
 		assertEquals("true", runXpath("/*/user/@issuper", document));
 
 		XmlUtil.addUser(document, user2);
 
-		assertEquals(user2.getName(), runXpath("/*/user/@username", document));
+		assertEquals(user2.getName(), runXpath("/*/user/@name", document));
 		assertEquals(user2.getResourceUri(), runXpath("/*/user/@resourceUri",
 				document));
 		assertEquals("", runXpath("/*/user/@isSuper", document));
