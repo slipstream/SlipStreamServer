@@ -211,26 +211,6 @@ public class StratusLabConnector extends CliConnectorBase {
 						.getParameter(sshParameterName).getValue() == null);
 	}
 
-	private String getErrorMessageLastPart(User user) {
-		return ", please edit your <a href='/user/" + user.getName()
-				+ "'>user account</a>";
-	}
-
-	private void validateCredentials(User user) throws ValidationException {
-		String errorMessageLastPart = getErrorMessageLastPart(user);
-
-		if (getKey(user) == null) {
-			throw (new ValidationException(
-					"StratusLab Username cannot be empty"
-							+ errorMessageLastPart));
-		}
-		if (getSecret(user) == null) {
-			throw (new ValidationException(
-					"StratusLab Password cannot be empty"
-							+ errorMessageLastPart));
-		}
-	}
-
 	@Override
 	protected String getOrchestratorImageId() throws ConfigurationException,
 			ValidationException {

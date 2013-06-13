@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 
 public abstract class CliConnectorBase extends ConnectorBase {
@@ -45,13 +46,21 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	protected String getKey(User user) {
-		return wrapInSingleQuotes(super.getKey(user));
+		return wrapInSingleQuotesOrNull(super.getKey(user));
 	}
 	
 	protected String getSecret(User user) {
-		return wrapInSingleQuotes(super.getSecret(user));
+		return wrapInSingleQuotesOrNull(super.getSecret(user));
 	}
 
+	private String wrapInSingleQuotesOrNull(String value) {
+		if (value == null || value.isEmpty()) {
+			return null;
+		} else {
+			return wrapInSingleQuotes(value);
+		}
+	}
+	
 	private String wrapInSingleQuotes(String value) {
 		return "'" + value + "'";
 	}
@@ -59,4 +68,25 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	protected String getEndpoint(User user) {
 		return wrapInSingleQuotes(super.getEndpoint(user));
 	}
+
+	protected String getErrorMessageLastPart(User user) {
+		return ", please edit your <a href='/user/" + user.getName()
+				+ "'>user account</a>";
+	}
+
+	protected void validateCredentials(User user) throws ValidationException {
+		String errorMessageLastPart = getErrorMessageLastPart(user);
+
+		if (getKey(user) == null) {
+			throw (new ValidationException(
+					"Cloud Username cannot be empty"
+							+ errorMessageLastPart));
+		}
+		if (getSecret(user) == null) {
+			throw (new ValidationException(
+					"Cloud Password cannot be empty"
+							+ errorMessageLastPart));
+		}
+	}
+
 }
