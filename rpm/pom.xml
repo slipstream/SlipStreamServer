@@ -174,6 +174,7 @@
 						<require>slipstream-client &gt;= 1.3</require>
 						<require>stratuslab-cli-user</require>
 						<require>stratuslab-slipstream-downloads</require>
+						<require>libcloud-slipstream-downloads</require>
 					</requires>
 					<mappings>
 
