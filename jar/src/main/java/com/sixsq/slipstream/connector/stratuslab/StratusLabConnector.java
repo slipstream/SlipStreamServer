@@ -379,9 +379,6 @@ public class StratusLabConnector extends CliConnectorBase {
 
 	@Override
 	public Properties describeInstances(User user) throws SlipStreamException {
-		// Properties statuses = new Properties();
-		// statuses.put("apache1.1:vmstatus", VmStatus.Running);
-
 		validateCredentials(user);
 
 		String command = "/usr/bin/stratus-describe-instance -u "
