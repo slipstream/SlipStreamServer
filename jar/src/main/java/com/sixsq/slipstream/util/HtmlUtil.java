@@ -123,12 +123,13 @@ public class HtmlUtil {
 
 	public static Representation transformToHtml(String baseUrlSlash,
 			String resourceUrl, String version, String stylesheet, User user,
-			Object data, ModuleCategory chooserType) {
+			Object data, boolean isChooser) {
 
 		Map<String, Object> parameters = createParameters(baseUrlSlash,
 				resourceUrl, version);
-		parameters.put("chooserType",
-				(chooserType == null) ? "" : chooserType.toString());
+		if(isChooser) {
+			parameters.put("chooserType", true);
+		}
 
 		return transformToHtml(stylesheet, user, data, parameters);
 
