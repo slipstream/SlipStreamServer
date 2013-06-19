@@ -47,7 +47,7 @@ public class ConnectorFactory {
 		if (!FormProcessor.isSet(cloudServiceName)) {
 			throw (new ValidationException(
 					"Missing cloud service selection. Consider editing your <a href='"
-							+ "/user/" + user.getName() + "'>user account</a>"));
+							+ "/user/" + user.getName() + "?edit=true'>user account</a>"));
 		}
 
 		return getConnector(cloudServiceName);
