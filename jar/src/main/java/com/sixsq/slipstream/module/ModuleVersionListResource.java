@@ -24,11 +24,13 @@ import java.util.List;
 
 import org.restlet.Request;
 import org.restlet.data.Cookie;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
@@ -36,17 +38,15 @@ import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.module.ModuleVersionView.ModuleVersionViewList;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public class ModuleVersionListResource extends ModuleListResourceBase {
 
 	private Configuration configuration = null;
 
 	private User user = null;
-
-	private String baseUrlSlash = null;
 
 	private String resourceUri = null;
 
@@ -66,8 +66,6 @@ public class ModuleVersionListResource extends ModuleListResourceBase {
 		if (configuration == null) {
 			throw new SlipStreamInternalException("configuration is null");
 		}
-
-		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 
 		resourceUri = RequestUtil.extractResourceUri(getRequest());
 
@@ -98,9 +96,16 @@ public class ModuleVersionListResource extends ModuleListResourceBase {
 		ModuleVersionViewList list = new ModuleVersionViewList(
 				Module.viewListAllVersions(resourceUri));
 
-		return HtmlUtil.transformToHtml(baseUrlSlash, resourceUri,
-				configuration.version, getViewStylesheet(), user, list,
-				getChooser());
+		Document doc = SerializationUtil.toXmlDocument(list);
+
+		XmlUtil.addUser(doc, user);
+
+		String metadata = SerializationUtil.documentToString(doc);
+
+		return new StringRepresentation(
+				slipstream.ui.views.Representation.toHtml(metadata,
+						getPageRepresentation(), getTransformationType()),
+				MediaType.TEXT_HTML);
 	}
 
 	private String serialized(List<ModuleVersionView> viewList) {
@@ -109,8 +114,8 @@ public class ModuleVersionListResource extends ModuleListResourceBase {
 		return SerializationUtil.toXmlString(moduleViewList);
 	}
 
-	protected String getViewStylesheet() {
-		return "module-list.xsl";
+	protected String getPageRepresentation() {
+		return "versions";
 	}
 
 }
