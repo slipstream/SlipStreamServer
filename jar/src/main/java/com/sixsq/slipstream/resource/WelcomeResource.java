@@ -45,7 +45,8 @@ public class WelcomeResource extends ModuleListResource {
 		String metadata = SerializationUtil.documentToString(doc);
 
 		return new StringRepresentation(
-				slipstream.ui.views.Representation.toHtml(metadata, getPageRepresentation(), null),
+				slipstream.ui.views.Representation.toHtml(metadata,
+						getPageRepresentation(), getTransformationType()),
 				MediaType.TEXT_HTML);
 	}
 
