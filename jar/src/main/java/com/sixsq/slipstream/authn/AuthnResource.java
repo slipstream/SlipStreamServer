@@ -50,8 +50,6 @@ public class AuthnResource extends ServerResource {
 
 	private final String templateName; // name of the page
 
-	private boolean isEmbdded = false;
-
 	protected AuthnResource(String templateName) {
 		this.templateName = templateName;
 	}
@@ -70,8 +68,6 @@ public class AuthnResource extends ServerResource {
 
 		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 
-		isEmbdded = getRequest().getAttributes().containsKey("embedded");
-
 	}
 
 	@Get("html")
@@ -80,11 +76,6 @@ public class AuthnResource extends ServerResource {
 		String metadata = null;
 		if (user != null) {
 			Document document = SerializationUtil.toXmlDocument(user);
-
-			// if(isEmbdded) {
-			// parameters.put("embedded", "true");
-			// }
-
 			metadata = SerializationUtil.documentToString(document);
 		}
 		return new StringRepresentation(
