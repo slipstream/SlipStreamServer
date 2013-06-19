@@ -32,6 +32,7 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.persistence.Authz;
+import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 
 @Root(name = "item")
@@ -55,16 +56,20 @@ public class ModuleVersionView {
 	@Attribute
 	public final int version;
 
+	@Attribute
+	public final ModuleCategory category;
+
 	@Element(required = false)
 	public final String comment;
 
-	public ModuleVersionView(String resourceUri, int version, Date lastModified, String comment, Authz authz) {
+	public ModuleVersionView(String resourceUri, int version, Date lastModified, String comment, Authz authz, ModuleCategory category) {
 
 		this.resourceUri = resourceUri;
 		this.version = version;
 		this.lastModified = lastModified;
 		this.comment = comment;
 		this.authz = authz;
+		this.category = category;
 	}
 
 	@Root(name = "versionList")
