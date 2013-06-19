@@ -22,13 +22,19 @@ package com.sixsq.slipstream.module;
 
 import org.restlet.resource.ServerResource;
 
-import com.sixsq.slipstream.persistence.ModuleCategory;
-
 public abstract class ModuleListResourceBase extends ServerResource {
 
-	protected ModuleCategory getChooser() {
-		String c = (String) getRequest().getAttributes().get("choosertype");
-		return (c == null) ? null : ModuleCategory.valueOf(c);
+	protected String getTransformationType() {
+		String type = "view";
+		if (isChooser()) {
+			type = "chooser";
+		}
+		return type;
+	}
+	
+	protected boolean isChooser() {
+		String c = (String) getRequest().getAttributes().get("chooser");
+		return (c == null) ? false : true;
 	}
 	
 }

@@ -623,9 +623,9 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@Override
-	protected ModuleCategory getChooser() {
-		String c = (String) getRequest().getAttributes().get("choosertype");
-		return (c == null) ? null : getCategory(c);
+	protected boolean isChooser() {
+		String c = (String) getRequest().getAttributes().get("chooser");
+		return (c == null) ? false : true;
 	}
 
 	@Override

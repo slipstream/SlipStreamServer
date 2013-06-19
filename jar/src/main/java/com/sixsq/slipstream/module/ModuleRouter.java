@@ -47,22 +47,22 @@ public class ModuleRouter extends Router {
 
 	private void attachRootModule() {
 		TemplateRoute route;
-		route = attach("?chooser={choosertype}", ModuleListResource.class);
+		route = attach("?chooser={chooser}", ModuleListResource.class);
 		route.setMatchingQuery(true);
 		route.getTemplate().getVariables()
-				.put("choosertype", new Variable(Variable.TYPE_URI_QUERY));
+				.put("chooser", new Variable(Variable.TYPE_URI_QUERY));
 
 		route = attach("", ModuleListResource.class);
 	}
 
 	private void attachModule() {
 		TemplateRoute route;
-		route = attach("/{module}?chooser={choosertype}", ModuleResource.class);
+		route = attach("/{module}?chooser={chooser}", ModuleResource.class);
 		route.setMatchingQuery(true);
 		route.getTemplate().getVariables()
 				.put("module", new Variable(Variable.TYPE_URI_PATH));
 		route.getTemplate().getVariables()
-				.put("choosertype", new Variable(Variable.TYPE_URI_QUERY));
+				.put("chooser", new Variable(Variable.TYPE_URI_QUERY));
 
 		route = attach("/{module}?category={category}", ModuleResource.class);
 		route.setMatchingQuery(true);
@@ -78,9 +78,6 @@ public class ModuleRouter extends Router {
 
 	private void attachSpecificVersion() {
 		TemplateRoute route;
-		// Specific version with chooser type, which returns HTML for selecting
-		// a module.
-		// {choosertype} must be a module type (e.g. Image, BlockStore).
 
 		route = attach("/{module}/{version}/{cloudservice}"
 				+ CloudImageIdentifier.CLOUD_SERVICE_ID_SEPARATOR + "{region}",
@@ -105,7 +102,7 @@ public class ModuleRouter extends Router {
 		route.getTemplate().getVariables()
 				.put("cloudmachineid", new Variable(Variable.TYPE_ALPHA));
 
-		route = attach("/{module}/{version}?chooser={choosertype}",
+		route = attach("/{module}/{version}?chooser={chooser}",
 				ModuleResource.class);
 		route.setMatchingQuery(true);
 		route.getTemplate().getVariables()
@@ -113,7 +110,7 @@ public class ModuleRouter extends Router {
 		route.getTemplate().getVariables()
 				.put("version", new Variable(Variable.TYPE_DIGIT));
 		route.getTemplate().getVariables()
-				.put("choosertype", new Variable(Variable.TYPE_URI_QUERY));
+				.put("chooser", new Variable(Variable.TYPE_URI_QUERY));
 
 		route = attach("/{module}/{version}", ModuleResource.class);
 		route.setMatchingQuery(true);
@@ -125,13 +122,13 @@ public class ModuleRouter extends Router {
 
 	private void attacheVersionList() {
 		TemplateRoute route;
-		route = attach("/{module}/?chooser={choosertype}",
+		route = attach("/{module}/?chooser={chooser}",
 				ModuleVersionListResource.class);
 		route.setMatchingQuery(true);
 		route.getTemplate().getVariables()
 				.put("module", new Variable(Variable.TYPE_URI_PATH));
 		route.getTemplate().getVariables()
-				.put("choosertype", new Variable(Variable.TYPE_URI_QUERY));
+				.put("chooser", new Variable(Variable.TYPE_URI_QUERY));
 
 		route = attach("/{module}/", ModuleVersionListResource.class);
 		route.getTemplate().getVariables()

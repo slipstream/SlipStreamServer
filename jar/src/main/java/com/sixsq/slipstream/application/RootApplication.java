@@ -248,15 +248,7 @@ public class RootApplication extends Application {
     }
 
     private void attachLogin(RootRouter router) {
-        TemplateRoute route;
-        route = router.attach(LoginResource.getResourceRoot()
-                + "?embedded={embedded}", LoginResource.class);
-        route.setMatchingQuery(true);
-        route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
-        route.getTemplate().getVariables()
-                .put("embedded", new Variable(Variable.TYPE_URI_QUERY));
-
-        route = router.attach(LoginResource.getResourceRoot(),
+    	TemplateRoute route = router.attach(LoginResource.getResourceRoot(),
                 LoginResource.class);
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
     }
@@ -320,7 +312,6 @@ public class RootApplication extends Application {
     }
 
     private void attachModule(RootRouter router) {
-        TemplateRoute route;
 
         Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
         basicAuthenticator.setEnroler(new SuperEnroler());
@@ -333,7 +324,7 @@ public class RootApplication extends Application {
 
         basicAuthenticator.setNext(new ModuleRouter(getContext()));
 
-        route = router.attach(convertToRouterRoot(Module.RESOURCE_URI_PREFIX),
+        TemplateRoute route = router.attach(convertToRouterRoot(Module.RESOURCE_URI_PREFIX),
                 cookieAuthenticator);
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
     }
@@ -374,6 +365,11 @@ public class RootApplication extends Application {
         cookieAuthenticator.setNext(basicAuthenticator);
 
         basicAuthenticator.setNext(WelcomeResource.class);
+
+        TemplateRoute route = router.attach("/?chooser={chooser}", cookieAuthenticator);
+		route.setMatchingQuery(true);
+		route.getTemplate().getVariables()
+				.put("chooser", new Variable(Variable.TYPE_URI_QUERY));
 
         router.attach("/", cookieAuthenticator); 
     }
