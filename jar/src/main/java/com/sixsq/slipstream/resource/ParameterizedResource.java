@@ -41,7 +41,6 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.Parameterized;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ModuleUriUtil;
@@ -347,7 +346,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		if (isEdit) {
 			type = "edit";
 		}
-		if (getChooser() != null) {
+		if (isChooser()) {
 			type = "chooser";
 		}
 		return type;
@@ -374,8 +373,8 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		}
 	}
 
-	protected ModuleCategory getChooser() {
-		return null;
+	protected boolean isChooser() {
+		return false;
 	}
 
 	protected void setResponseCreatedAndViewLocation(String resourceUri) {

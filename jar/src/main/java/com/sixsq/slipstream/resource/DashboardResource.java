@@ -86,7 +86,7 @@ public class DashboardResource extends ModuleListResourceBase {
 
 		return HtmlUtil.transformToHtml(baseUrlSlash, resourceUri,
 				configuration.version, getViewStylesheet(), user, dashboard,
-				getChooser());
+				isChooser());
 	}
 
 	protected String getViewStylesheet() {
