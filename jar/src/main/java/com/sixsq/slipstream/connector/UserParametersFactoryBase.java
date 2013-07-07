@@ -37,13 +37,13 @@ public abstract class UserParametersFactoryBase extends
 
 	protected Map<String, UserParameter> referenceParameters = new HashMap<String, UserParameter>();
 
-
-	public static List<String> extractCloudNames(Map<String, Connector> connectors) {
+	public static List<String> extractCloudNames(
+			Map<String, Connector> connectors) {
 		List<String> names = new ArrayList<String>();
-		for(Connector c : connectors.values()) {
+		for (Connector c : connectors.values()) {
 			names.add(c.getConnectorInstanceName());
 		}
-			return names;
+		return names;
 	}
 
 	protected Map<String, UserParameter> getReferenceParameters() {
@@ -67,8 +67,8 @@ public abstract class UserParametersFactoryBase extends
 
 	protected UserParameter createParameter(String name, boolean value,
 			String description) {
-		UserParameter p = new UserParameter(constructKey(name), (value) ? "on"
-				: null, description);
+		UserParameter p = new UserParameter(constructKey(name),
+				String.valueOf(value), description);
 		p.setCategory(getCategory());
 		p.setMandatory(true);
 		return p;
