@@ -77,6 +77,8 @@ public class CommonStatusService extends StatusService {
 		List<Preference<MediaType>> mediaTypes = clientInfo
 				.getAcceptedMediaTypes();
 
+		String error = statusToString(status);
+
 		for (Preference<MediaType> preference : mediaTypes) {
 
 			MediaType desiredMediaType = preference.getMetadata();
@@ -93,16 +95,14 @@ public class CommonStatusService extends StatusService {
 
 			} else if (TEXT_PLAIN.isCompatible(desiredMediaType)) {
 
-				representation = new StringRepresentation(status.toString());
+				representation = new StringRepresentation(error);
 				representation.setMediaType(TEXT_PLAIN);
 				return representation;
 
 			} else if (APPLICATION_XML.isCompatible(desiredMediaType)) {
 
-				String strRep = status.toString();
-
 				representation = new StringRepresentation("<error code=\""
-						+ status.getCode() + "\">" + strRep + "</error>");
+						+ status.getCode() + "\">" + error + "</error>");
 				representation.setMediaType(APPLICATION_XML);
 
 				return representation;
@@ -142,5 +142,10 @@ public class CommonStatusService extends StatusService {
 				slipstream.ui.views.Representation.toHtmlError(metadata,
 						status.getDescription(),
 						String.valueOf(status.getCode())), MediaType.TEXT_HTML);
+	}
+
+	private String statusToString(Status status) {
+		return "Error: " + status.getDescription() + " (" + status.getCode()
+				+ " - " + status.getName() + ")";
 	}
 }
