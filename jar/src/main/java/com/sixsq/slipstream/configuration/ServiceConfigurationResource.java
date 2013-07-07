@@ -96,6 +96,11 @@ public class ServiceConfigurationResource extends
 	}
 
 	@Override
+	protected String getPageRepresentation() {
+		return "configuration";
+	}
+
+	@Override
 	protected void setIsEdit() {
 	}
 
@@ -129,16 +134,6 @@ public class ServiceConfigurationResource extends
 	@Override
 	protected ServiceConfiguration loadParameterized(
 			String targetParameterizedUri) throws ValidationException {
-		throw (new NotImplementedException());
-	}
-
-	@Override
-	protected String getViewStylesheet() {
-		return "configuration.xsl";
-	}
-
-	@Override
-	protected String getEditStylesheet() {
 		throw (new NotImplementedException());
 	}
 
