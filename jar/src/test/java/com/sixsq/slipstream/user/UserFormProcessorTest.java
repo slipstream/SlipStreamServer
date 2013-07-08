@@ -263,7 +263,7 @@ public class UserFormProcessorTest {
 
 	private UserParameter createPasswordParameter() {
 		UserParameter password = new UserParameter("password",
-				"default_password", "d");
+				"default_password", "description");
 		password.setCategory(ParameterCategory.General);
 		password.setMandatory(true);
 		password.setType(ParameterType.Password);
