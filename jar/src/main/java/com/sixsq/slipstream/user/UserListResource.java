@@ -24,23 +24,21 @@ import java.util.List;
 
 import org.restlet.Request;
 import org.restlet.data.Cookie;
+import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+import org.w3c.dom.Document;
 
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.UserView.UserViewList;
-import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public class UserListResource extends ServerResource {
-
-	private Configuration configuration;
 
 	private User user = null;
 
@@ -53,8 +51,6 @@ public class UserListResource extends ServerResource {
 		String username = CookieUtils.getCookieUsername(cookie);
 
 		user = User.loadByName(username);
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
 	}
 
 	@Get("txt")
@@ -68,21 +64,31 @@ public class UserListResource extends ServerResource {
 		String viewList = serializedUserViewList(User.viewList());
 		return new StringRepresentation(viewList);
 	}
+	
+	private String serializedUserViewList(List<UserView> viewList) {
+		UserViewList userViewList = new UserViewList(viewList);
+		return SerializationUtil.toXmlString(userViewList);
+	}
 
 	@Get("html")
 	public Representation toHtml() {
 
-		Request request = getRequest();
-		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 		UserViewList userViewList = new UserViewList(User.viewList());
 
-		return HtmlUtil.transformToHtml(baseUrlSlash, "user",
-				configuration.version, "user-list.xsl", user, userViewList);
+		Document doc = SerializationUtil.toXmlDocument(userViewList);
+
+		XmlUtil.addUser(doc, user);
+
+		String metadata = SerializationUtil.documentToString(doc);
+
+		String html = slipstream.ui.views.Representation.toHtml(metadata,
+				getPageRepresentation(), null);
+		
+		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
-	private String serializedUserViewList(List<UserView> viewList) {
-		UserViewList userViewList = new UserViewList(viewList);
-		return SerializationUtil.toXmlString(userViewList);
+	protected String getPageRepresentation() {
+		return "users";
 	}
 
 }
