@@ -94,6 +94,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public final static String RESOURCE_URI_PREFIX = "run/";
 
+	public final static String TAGS_PARAMETER_NAME = "tags";
+	public final static String TAGS_PARAMETER_DESCRIPTION = "Tags (comma separated) or annotations for this run";
+
 	public static Run abortOrReset(String abortMessage, String nodename,
 			String uuid) {
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -186,7 +189,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 		for (Run r : runs) {
 			runView = new RunView(r.getResourceUri(), r.getUuid(),
-					r.getModuleResourceUrl(), r.getStatus(), r.getStart(), r.getCloudServiceName(), r.getUser());
+					r.getModuleResourceUrl(), r.getStatus(), r.getStart(),
+					r.getCloudServiceName(), r.getUser(), r.getType());
 			try {
 				runView.hostname = r
 						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
@@ -424,11 +428,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 		setStart();
 
-		initializeParameters();
-		initializeRuntimeParameters();
+		initializeVmRuntimeParameters();
+		initializeOrchestrtorRuntimeParameters();
+		initializeGlobalParameters();
 	}
 
-	private void initializeParameters() throws ValidationException {
+	private void initializeVmRuntimeParameters() throws ValidationException {
 
 		if (getCategory() == ModuleCategory.Deployment) {
 			DeploymentModule deployment = (DeploymentModule) module;
@@ -445,11 +450,17 @@ public class Run extends Parameterized<Run, RunParameter> {
 				setParameter(new RunParameter(nodeRuntimeParameterKeyName,
 						String.valueOf(node.getCloudService()),
 						RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
+
+				nodeRuntimeParameterKeyName = nodeRuntimeParameterKeyName(node,
+						TAGS_PARAMETER_NAME);
+				setParameter(new RunParameter(nodeRuntimeParameterKeyName, "",
+						TAGS_PARAMETER_DESCRIPTION));
 			}
 		}
 	}
 
-	private void initializeRuntimeParameters() throws ValidationException {
+	private void initializeOrchestrtorRuntimeParameters()
+			throws ValidationException {
 
 		if (getType() == RunType.Orchestration) {
 			if (getCategory() == ModuleCategory.Deployment) {
@@ -461,7 +472,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 				initializeOrchestratorParameters();
 			}
 		}
-		initializeGlobalParameters();
 	}
 
 	private void initializeGlobalParameters() throws ValidationException {
