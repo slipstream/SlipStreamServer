@@ -336,11 +336,11 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	private String getTransformationType() {
 		String type = "view";
-		if (isNew()) {
-			type = "new";
-		}
 		if (isEdit) {
 			type = "edit";
+		}
+		if (isNew()) {
+			type = "new";
 		}
 		if (isChooser()) {
 			type = "chooser";
