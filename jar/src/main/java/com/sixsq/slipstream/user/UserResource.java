@@ -106,20 +106,6 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Override
-	protected String getViewStylesheet() {
-		String stylesheet;
-		stylesheet = "user.xsl";
-		return stylesheet;
-	}
-
-	@Override
-	protected String getEditStylesheet() {
-		String stylesheet;
-		stylesheet = "user-editor.xsl";
-		return stylesheet;
-	}
-
-	@Override
 	protected void addParametersForEditing() throws ValidationException,
 			ConfigurationException {
 
