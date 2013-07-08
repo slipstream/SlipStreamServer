@@ -215,10 +215,6 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 				.equalsIgnoreCase(value));
 	}
 
-	abstract protected String getViewStylesheet();
-
-	abstract protected String getEditStylesheet();
-
 	protected void addParametersForEditing() throws ValidationException,
 			ConfigurationException {
 		user = ParametersFactory.addParametersForEditing(user);
