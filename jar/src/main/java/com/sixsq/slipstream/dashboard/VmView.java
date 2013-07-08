@@ -38,10 +38,14 @@ public class VmView {
     @Attribute(required=false)
     public final String status;
 
-    public VmView(String instanceId, String status, String runUuid) {
+    @Attribute
+    public final String cloud;
+
+    public VmView(String instanceId, String status, String runUuid, String cloud) {
         this.runUuid = runUuid;
         this.status = status;
         this.instanceId = instanceId;
+        this.cloud = cloud;
     }
 
     @Root(name = "list")
