@@ -368,12 +368,11 @@ public class ServiceConfiguration extends
 
 	@Override
 	public String getName() {
-		throw (new NotImplementedException());
+		return "configuration";
 	}
 
 	@Override
 	public void setName(String name) {
-		throw (new NotImplementedException());
 	}
 
 	@Override
