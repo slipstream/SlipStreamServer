@@ -220,7 +220,8 @@ public class RunListResource extends ServerResource {
 
 	private void createAndSetPostResponseEntity(Run run) {
 		RunView view = new RunView(run.getRefqname(), run.getName(),
-				run.getModuleResourceUrl(), run.getStatus(), run.getStart(), run.getCloudServiceName(), run.getUser());
+				run.getModuleResourceUrl(), run.getStatus(), run.getStart(),
+				run.getCloudServiceName(), run.getUser(), run.getType());
 		view.vmstate = Run.INITIAL_NODE_STATE;
 
 		String result = SerializationUtil.toXmlString(view);
@@ -262,11 +263,12 @@ public class RunListResource extends ServerResource {
 
 		Map<String, List<NodeParameter>> parametersPerNode = NodeParameter
 				.parseNodeNameOverride(form);
-		
+
 		String defaultCloudService = getDefaultCloudService();
-		
-		for(Node node : deployment.getNodes().values()) {
-			if (CloudImageIdentifier.DEFAULT_CLOUD_SERVICE.equals(node.getCloudService()))
+
+		for (Node node : deployment.getNodes().values()) {
+			if (CloudImageIdentifier.DEFAULT_CLOUD_SERVICE.equals(node
+					.getCloudService()))
 				node.setCloudService(defaultCloudService);
 		}
 
@@ -285,7 +287,8 @@ public class RunListResource extends ServerResource {
 				}
 				if (parameter.getName().equals(
 						RuntimeParameter.CLOUD_SERVICE_NAME)) {
-					String cloudService = (CloudImageIdentifier.DEFAULT_CLOUD_SERVICE.equals(parameter.getValue()) ? defaultCloudService
+					String cloudService = (CloudImageIdentifier.DEFAULT_CLOUD_SERVICE
+							.equals(parameter.getValue()) ? defaultCloudService
 							: parameter.getValue());
 					node.setCloudService(cloudService);
 					continue;
