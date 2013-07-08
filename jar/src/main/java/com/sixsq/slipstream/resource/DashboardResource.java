@@ -22,10 +22,13 @@ package com.sixsq.slipstream.resource;
 
 import org.restlet.Request;
 import org.restlet.data.Cookie;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
@@ -35,16 +38,15 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.module.ModuleListResourceBase;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public class DashboardResource extends ModuleListResourceBase {
 
 	private Configuration configuration = null;
 
 	private User user = null;
-
-	private String baseUrlSlash = null;
 
 	private String resourceUri = null;
 
@@ -62,8 +64,6 @@ public class DashboardResource extends ModuleListResourceBase {
 		if (configuration == null) {
 			throw new SlipStreamInternalException("configuration is null");
 		}
-
-		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 
 		resourceUri = RequestUtil.extractResourceUri(getRequest());
 
@@ -84,13 +84,15 @@ public class DashboardResource extends ModuleListResourceBase {
 			throw(new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
 		}
 
-		return HtmlUtil.transformToHtml(baseUrlSlash, resourceUri,
-				configuration.version, getViewStylesheet(), user, dashboard,
-				isChooser());
-	}
+		Document doc = SerializationUtil.toXmlDocument(dashboard);
 
-	protected String getViewStylesheet() {
-		return "dashboard.xsl";
+		XmlUtil.addUser(doc, user);
+		String metadata = SerializationUtil.documentToString(doc);
+
+		String html = slipstream.ui.views.Representation.toHtml(metadata,
+				"dashboard", getTransformationType());
+		
+		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
 }
