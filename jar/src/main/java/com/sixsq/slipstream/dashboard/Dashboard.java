@@ -22,7 +22,6 @@ package com.sixsq.slipstream.dashboard;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.simpleframework.xml.Element;
@@ -31,7 +30,6 @@ import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
@@ -86,28 +84,29 @@ public class Dashboard {
 	}
 
 	private void populateVms(User user) throws SlipStreamException {
-		Properties describeInstancesStates = new Properties();
-
 		for (String cloudServiceName : ConnectorFactory.getCloudServiceNames()) {
-			Connector connector = ConnectorFactory.getConnector(cloudServiceName);
+			Connector connector = ConnectorFactory
+					.getConnector(cloudServiceName);
 			Properties props = new Properties();
 			try {
 				props = connector.describeInstances(user);
-			} catch (SlipStreamClientException e) {
-				// swallow the exception, since we don't want to fail if users have
-				// wrong credentials
+			} catch (Exception e) {
+				// swallow the exception, since we don't want to fail if users
+				// have wrong credentials
 			}
-			for (String key : props.stringPropertyNames()) {
-				describeInstancesStates.put(key, props.getProperty(key));
-			}
-			
+			populateVmsForCloud(user, cloudServiceName, props);
 		}
-		
-		for (Entry<Object, Object> entry : describeInstancesStates.entrySet()) {
-			String instanceId = (String) entry.getKey();
-			String status = (String) entry.getValue();
+	}
+
+	protected void populateVmsForCloud(User user, String cloudServiceName,
+			Properties props) {
+		for (String key : props.stringPropertyNames()) {
+			String instanceId = key;
+			String status = (String) props.get(key);
 			String runUuid = fetchRunUuid(user, instanceId);
-			vms.getList().add(new VmView(instanceId, status, runUuid));
+			vms.getList().add(
+					new VmView(instanceId, status, runUuid,
+							cloudServiceName));
 		}
 	}
 
