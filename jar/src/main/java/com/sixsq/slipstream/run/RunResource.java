@@ -172,6 +172,18 @@ public class RunResource extends ServerResource {
 		// FIXME: This should either do something or be moved to guard.
 	}
 
+	@Put("form")
+	public void update(Representation entity) {
+		Form form = new Form(entity);
+		String tags = form.getFirstValue(Run.TAGS_PARAMETER_NAME, null);
+		if (tags != null) {
+			RuntimeParameter rtp = RuntimeParameter.loadFromUuidAndKey(
+					run.getUuid(), Run.TAGS_PARAMETER_NAME);
+			rtp.setValue(tags);
+			rtp.store();
+		}
+	}
+
 	@Delete
 	public void terminate() {
 
@@ -188,12 +200,14 @@ public class RunResource extends ServerResource {
 					try {
 						connector.terminate(run, user);
 					} catch (SlipStreamException e) {
-						throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
+						throw new ResourceException(
+								Status.CLIENT_ERROR_CONFLICT,
 								"Failed terminating VMs", e);
 					}
 				}
-			}else{
-				Connector connector = ConnectorFactory.getConnector(run.getCloudServiceName());
+			} else {
+				Connector connector = ConnectorFactory.getConnector(run
+						.getCloudServiceName());
 				try {
 					connector.terminate(run, user);
 				} catch (SlipStreamException e) {
