@@ -41,7 +41,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.User;
 
 public class HtmlUtil {
