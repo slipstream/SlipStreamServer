@@ -104,7 +104,8 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 		return parameter;
 	}
 
-	private void processPassword(Form form, User dbUser) {
+	private void processPassword(Form form, User dbUser)
+			throws ValidationException {
 
 		Passwords passwords = extractPasswords(form);
 
@@ -126,7 +127,8 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 		return new Passwords(oldPassword, password1, password2);
 	}
 
-	private boolean shouldChangePassword(Passwords passwords, User dbUser) {
+	private boolean shouldChangePassword(Passwords passwords, User dbUser)
+			throws ValidationException {
 
 		if (!isSet(passwords.newPassword1) && !isSet(passwords.newPassword2)) {
 			return false;
@@ -136,7 +138,10 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 
 		boolean notNew = !isNewUser(dbUser);
 		boolean notSuper = !getUser().isSuper();
-		boolean superChangingSuper = getUser().isSuper() && dbUser.isSuper();
+		boolean superChangingSuper = false;;
+		if (notNew) {
+			superChangingSuper = (!notSuper && dbUser.isSuper());
+		}
 
 		if (notNew && (notSuper || superChangingSuper)) {
 			compareOldAndNewPasswords(passwords.oldPassword,
@@ -181,7 +186,7 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 
 	private void processIsSuper(Form form) {
 		if (getUser().isSuper()) {
-			String isSuper = form.getFirstValue("super");
+			String isSuper = form.getFirstValue("issuper");
 			getParametrized().setSuper("on".equals(isSuper));
 		}
 	}
