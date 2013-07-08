@@ -137,7 +137,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		target.getAuthz().setUser(getUser().getName());
 		target.getAuthz().clear();
 		target.setName(targetFullName);
-		target.store();
+		target.store(); 
 
 		getResponse().redirectSeeOther("/" + target.getResourceUri());
 	}
@@ -610,16 +610,6 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientError("Invalid category attribute, got: " + category);
 		}
 		return c;
-	}
-
-	@Override
-	protected String getViewStylesheet() {
-		return "module.xsl";
-	}
-
-	@Override
-	protected String getEditStylesheet() {
-		return "module-editor.xsl";
 	}
 
 	@Override
