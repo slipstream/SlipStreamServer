@@ -28,6 +28,7 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
 
 @Root(name = "item")
@@ -60,8 +61,11 @@ public class RunView {
 	@Attribute(required = false)
 	private String username;
 
+	@Attribute(required = false)
+	private RunType type;
+
 	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
-			String status, Date startTime, String cloudServiceName, String username) {
+			String status, Date startTime, String cloudServiceName, String username, RunType type) {
 		this.resourceUri = resourceUrl;
 		this.uuid = uuid;
 		this.moduleResourceUri = moduleResourceUri;
@@ -69,6 +73,7 @@ public class RunView {
 		this.startTime = startTime;
 		this.cloudServiceName = cloudServiceName;
 		this.username = username;
+		this.type = type;
 	}
 
 	public static RunViewList fetchListView(User user, boolean isSuper) {
@@ -95,6 +100,10 @@ public class RunView {
 
 	public String getUser() {
 		return username;
+	}
+
+	public RunType getType() {
+		return type;
 	}
 
 	@Root(name = "list")
