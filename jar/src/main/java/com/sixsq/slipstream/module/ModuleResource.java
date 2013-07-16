@@ -180,6 +180,10 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	public void updateOrCreateFromForm(Representation entity)
 			throws ResourceException {
 
+		if(entity == null) {
+			throwClientBadRequest("Empty form");
+		}
+		
 		Module module = null;
 		try {
 			module = (Module) processEntityAsForm(entity);
