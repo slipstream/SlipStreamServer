@@ -62,6 +62,7 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 		user.setFirstName(getForm().getFirstValue("firstname"));
 		user.setLastName(getForm().getFirstValue("lastname"));
 		user.setEmail(getForm().getFirstValue("email"));
+		user.setOrganization(getForm().getFirstValue("organization"));
 		parseState(getForm(), user);
 
 		User dbUser = User.loadByName(name);
