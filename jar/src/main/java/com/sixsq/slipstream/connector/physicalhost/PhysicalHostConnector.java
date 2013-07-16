@@ -33,6 +33,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -59,6 +60,10 @@ public class PhysicalHostConnector extends ConnectorBase {
 		super(instanceName);
 	}
 
+	public Connector copy() {
+		return new PhysicalHostConnector(getConnectorInstanceName());
+	}
+	
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}

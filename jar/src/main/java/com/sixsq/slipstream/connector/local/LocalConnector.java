@@ -28,6 +28,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.stratuslab.StratusLabSystemConfigurationParametersFactory;
@@ -57,6 +58,10 @@ public class LocalConnector extends ConnectorBase {
 	
 	public LocalConnector(String instanceName) {
 		super(instanceName);
+	}
+	
+	public Connector copy(){
+		return new LocalConnector(getConnectorInstanceName());
 	}
 	
 	public String getCloudServiceName() {

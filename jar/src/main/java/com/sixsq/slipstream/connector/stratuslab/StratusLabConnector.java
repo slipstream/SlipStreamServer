@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.CliConnectorBase;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
@@ -75,6 +76,10 @@ public class StratusLabConnector extends CliConnectorBase {
 		super(instanceName);
 	}
 
+	public Connector copy() {
+		return new StratusLabConnector(getConnectorInstanceName());
+	}
+	
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
