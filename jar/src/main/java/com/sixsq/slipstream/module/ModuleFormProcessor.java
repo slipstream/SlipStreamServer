@@ -20,12 +20,8 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.restlet.data.Form;
@@ -84,8 +80,6 @@ public abstract class ModuleFormProcessor extends
 		setParametrized(getOrCreateParameterized(name));
 		getParametrized().setDescription(parseDescription());
 		getParametrized().setComment(parseComment());
-
-		setDate();
 	}
 
 	private String parseName() throws ValidationException {
@@ -103,24 +97,6 @@ public abstract class ModuleFormProcessor extends
 
 	private String parseComment() throws ValidationException {
 		return getForm().getFirstValue("comment");
-	}
-
-	private void setDate() {
-		Date creation = null;
-
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
-		String date = getForm().getFirstValue("creation");
-
-		if (date == null) {
-			creation = new Date();
-		} else {
-			try {
-				creation = df.parse(date);
-			} catch (ParseException e) {
-			}
-		}
-
-		getParametrized().setCreation(creation);
 	}
 
 	private void validateName(String name) throws ValidationException {
@@ -189,5 +165,6 @@ public abstract class ModuleFormProcessor extends
 	}
 
 	public void adjustModule(Module older) throws ValidationException {
+		getParametrized().setCreation(older.getCreation());
 	}
 }
