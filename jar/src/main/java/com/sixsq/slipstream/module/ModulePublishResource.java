@@ -42,24 +42,11 @@ public class ModulePublishResource extends ModuleResource {
 	}
 	
 	@Delete
-	public void deleteHtml() {
-
-		Module unpublished = unpublish();
-		redirectSeeOther(getRequest().getRootRef().toString() + "/" + unpublished.getResourceUri());
-	}
-
-	@Delete("json|xml")
-	public void deleteJsonXml() {
-
-		unpublish();
-		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
-	}
-
-	private Module unpublish() {
+	public void unpublish() {
 		Module module = (Module) getParameterized();
 		module.unpublish();
 		module.store(false);
-		return module;
+		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
 
 	@Put("form")
@@ -67,6 +54,10 @@ public class ModulePublishResource extends ModuleResource {
 	public void updateOrCreateFromForm(Representation entity)
 			throws ResourceException {
 
+		if (!isExisting()) {
+			throwNotFoundResource();
+		}
+		
 		Module module = (Module)getParameterized();
 		Publish published = module.getPublished();
 		if(published != null) {
@@ -75,6 +66,6 @@ public class ModulePublishResource extends ModuleResource {
 		module.publish();
 		module.store(false);
 		
-		redirectSeeOther(getRequest().getRootRef().toString() + "/" + module.getResourceUri());
+		getResponse().setLocationRef("/");
 	}
 }
