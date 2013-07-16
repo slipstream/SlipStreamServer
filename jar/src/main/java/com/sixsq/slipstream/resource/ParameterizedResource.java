@@ -253,6 +253,10 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		throwClientError(Status.CLIENT_ERROR_BAD_REQUEST, message);
 	}
 
+	protected void throwNotFoundResource() {
+		throwClientError(Status.CLIENT_ERROR_NOT_FOUND, "Not found");
+	}
+
 	protected void throwClientValidationError(String message) {
 		throwClientError(Status.CLIENT_ERROR_BAD_REQUEST, "Validation error: "
 				+ message);
