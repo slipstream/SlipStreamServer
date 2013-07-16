@@ -104,10 +104,15 @@ public class ModuleListResource extends ModuleListResourceBase {
 
 	protected ModuleViewList retrieveFilteredModuleViewList() {
 
-		ModuleViewList moduleViewList = new ModuleViewList(
+		ModuleViewList modules = new ModuleViewList(
 				Module.viewList(resourceUri));
+		
+		if("/".equals(getRequest().getResourceRef().getPath())) {
+			ModuleViewList published = new ModuleViewList(Module.viewPublishedList());
+			modules.getList().addAll(published.getList());
+		}
 
-		return filterAuthz(moduleViewList);
+		return filterAuthz(modules);
 	}
 
 	private ModuleViewList filterAuthz(ModuleViewList moduleViewList) {
