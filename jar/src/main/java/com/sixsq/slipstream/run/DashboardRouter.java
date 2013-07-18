@@ -22,6 +22,8 @@ package com.sixsq.slipstream.run;
 
 import org.restlet.Context;
 import org.restlet.routing.Router;
+import org.restlet.routing.TemplateRoute;
+import org.restlet.routing.Variable;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.resource.DashboardResource;
@@ -30,6 +32,12 @@ public class DashboardRouter extends Router {
 
 	public DashboardRouter(Context context) throws ConfigurationException {
 		super(context);
+
+		TemplateRoute route;
+		route = attach("?user={user}", DashboardResource.class);
+		route.setMatchingQuery(true);
+		route.getTemplate().getVariables()
+				.put("user", new Variable(Variable.TYPE_URI_QUERY));
 
 		attach("", DashboardResource.class);
 

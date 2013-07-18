@@ -72,9 +72,15 @@ public class DashboardResource extends ModuleListResourceBase {
 		}
 	}
 
-	@Get("html")
-	public Representation toHtml() {
+	private String computeDashboard() {
 
+		User user = this.user;
+
+		if(this.user.isSuper()) {
+			user = extractUserFromQuery();
+			user = (user == null) ? this.user : user;
+		}
+		
 		Dashboard dashboard = new Dashboard();
 		try {
 			dashboard.populate(user);
@@ -83,11 +89,31 @@ public class DashboardResource extends ModuleListResourceBase {
 		} catch (SlipStreamException e) {
 			throw(new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
 		}
-
+	
 		Document doc = SerializationUtil.toXmlDocument(dashboard);
-
-		XmlUtil.addUser(doc, user);
+	
+		XmlUtil.addUser(doc, this.user);
 		String metadata = SerializationUtil.documentToString(doc);
+		return metadata;
+	}
+
+	private User extractUserFromQuery() {
+		String username = (String) getRequest().getAttributes().get("user");
+		return User.loadByName(username);
+	}
+
+	@Get("xml")
+	public Representation toXml() {
+
+		String metadata = computeDashboard();
+
+		return new StringRepresentation(metadata, MediaType.TEXT_XML);
+	}
+
+	@Get("html")
+	public Representation toHtml() {
+
+		String metadata = computeDashboard();
 
 		String html = slipstream.ui.views.Representation.toHtml(metadata,
 				"dashboard", getTransformationType());
