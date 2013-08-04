@@ -80,6 +80,7 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		S parameter = createParameter(name, description, mandatory);
 		parameter.setEnumValues(options);
 		parameter.setValue(value);
+		parameter.setCategory(getCategory());
 		addParameter(parameter, ParameterType.Enum, mandatory);
 	}
 
