@@ -34,6 +34,7 @@ import org.restlet.resource.ServerResource;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
@@ -230,4 +231,11 @@ public class ResourceTestBase {
 		ConnectorFactory.resetConnectors();
 	}
 
+	protected static void updateServiceConfigurationParameters(
+			SystemConfigurationParametersFactoryBase connectorSystemConfigFactory)
+			throws ValidationException {
+		ServiceConfiguration sc = Configuration.getInstance().getParameters();
+		sc.setParameters(connectorSystemConfigFactory.getParameters());
+		sc.store();
+	}
 }
