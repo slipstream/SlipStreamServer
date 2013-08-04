@@ -264,7 +264,7 @@ public class StratusLabConnector extends CliConnectorBase {
 						.getRequiredProperty("slipstream.update.clienturl")
 				+ "#";
 
-		contextualization += "STRATUSLAB_BUNDLE_URL="
+		contextualization += "CLOUDCONNECTOR_BUNDLE_URL="
 				+ configuration
 						.getRequiredProperty(constructKey("cloud.connector.update.clienturl"))
 				+ "#";
