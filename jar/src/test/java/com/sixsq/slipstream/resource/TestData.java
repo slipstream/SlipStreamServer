@@ -34,8 +34,8 @@ public class TestData {
         Map<String, Map<String, String>> data = new HashMap<String, Map<String, String>>();
 
         Map<String, String> p = new HashMap<String, String>();
-        p.put("name", "apache1.1_report_2012-01-12T073003Z.tgz");
-        p.put("node", "apache1.1");
+        p.put("name", "apache.1_report_2012-01-12T073003Z.tgz");
+        p.put("node", "apache.1");
         p.put("date", "2012-01-12T073003Z");
         p.put("type", "tgz");
 
@@ -50,8 +50,8 @@ public class TestData {
         data.put(p.get("name"), Collections.unmodifiableMap(p));
 
         p = new HashMap<String, String>();
-        p.put("name", "testclient1.1_report_2012-01-12T093353Z.tgz");
-        p.put("node", "testclient1.1");
+        p.put("name", "testclient.1_report_2012-01-12T093353Z.tgz");
+        p.put("node", "testclient.1");
         p.put("date", "2012-01-12T093353Z");
         p.put("type", "tgz");
 

@@ -830,14 +830,12 @@
 				</xsl:if>
 				<xsl:text>Ubuntu</xsl:text>
 			</option>
-		<!--
 			<option value='windows'>
 				<xsl:if test="@platform = 'windows'">
 					<xsl:attribute name="selected">selected</xsl:attribute>
 				</xsl:if>
 				<xsl:text>Windows</xsl:text>
 			</option>
-		-->
 			<option value='other'>
 				<xsl:if test="@platform = 'other'">
 					<xsl:attribute name="selected">selected</xsl:attribute>

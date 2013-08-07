@@ -56,7 +56,8 @@ public class ConnectorFactory {
 	public static Connector getConnector(String cloudServiceName)
 			throws ConfigurationException, ValidationException {
 		Connector connector = null;
-		connector = getConnectors().get(cloudServiceName);
+		//connector = copyConnector( getConnectors().get(cloudServiceName) );
+		connector = getConnectors().get(cloudServiceName).copy();
 		if (connector == null) {
 			throw (new ValidationException("Failed to load cloud connector: "
 					+ cloudServiceName));
@@ -106,6 +107,15 @@ public class ConnectorFactory {
 				return (Connector) Class.forName(className.trim())
 						.getConstructor(String.class).newInstance(instanceName);
 			}
+		} catch (Exception e) {
+			throw new SlipStreamRuntimeException(e.getClass().toString() + " "
+					+ e.getMessage());
+		}
+	}
+	
+	private static Connector copyConnector(Connector connector){
+		try {
+			return (Connector) connector.getClass().getConstructor(connector.getClass()).newInstance(connector);
 		} catch (Exception e) {
 			throw new SlipStreamRuntimeException(e.getClass().toString() + " "
 					+ e.getMessage());

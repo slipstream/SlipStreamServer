@@ -1,24 +1,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.sixsq.slipstream</groupId>
+  <groupId>com.sixsq.slipstream</groupId>
 	<artifactId>SlipStreamServer-rpm</artifactId>
 	<name>SlipStream Server (RPM)</name>
-	<version>1.5-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamServer</artifactId>
-		<version>1.5-SNAPSHOT</version>
+		<version>1.8-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamServer-war</artifactId>
-			<version>1.5-SNAPSHOT</version>
+			<version>1.8-SNAPSHOT</version>
 			<type>war</type>
 		</dependency>
 	</dependencies>
@@ -130,12 +129,34 @@
 
 			</plugin>
 
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>update-initd</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>sed</executable>
+              <arguments>
+                <argument>-i</argument>
+                <argument>-e</argument>
+                <argument>s/#chkconfig:.*/# chkconfig: 36 80 25/</argument>
+                <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>rpm-maven-plugin</artifactId>
 				<extensions>true</extensions>
 				<configuration>
-					<version>${project.version}</version>
 					<classifier>${package.os}</classifier>
 					<release>${BUILD_NUMBER}.${package.os}</release>
 					<summary>SlipStream Server</summary>
@@ -149,8 +170,11 @@
 					<description>SlipStream REST Server, including open source connectors</description>
 					<requires>
 						<require>java-1.6.0-openjdk</require>
+						<require>hsqldb-slipstream</require>
 						<require>slipstream-client &gt;= 1.3</require>
-						<require>hsqldb-slipstream &gt;= 2.2.4</require>
+						<require>stratuslab-cli-user</require>
+						<require>stratuslab-slipstream-downloads</require>
+						<require>libcloud-slipstream-downloads</require>
 					</requires>
 					<mappings>
 

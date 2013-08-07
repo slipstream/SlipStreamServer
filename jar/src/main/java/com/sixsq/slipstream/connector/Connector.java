@@ -117,4 +117,6 @@ public interface Connector {
 	
 	String getOrchestratorName(Run run);
 
+	Connector copy();
+	
 }

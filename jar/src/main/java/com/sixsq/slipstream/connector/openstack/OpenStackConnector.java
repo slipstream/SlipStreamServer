@@ -41,6 +41,7 @@ import org.jclouds.compute.ComputeServiceContext;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Multimap;
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.JCloudsConnectorBase;
 import com.sixsq.slipstream.exceptions.ClientExecutionEnginePluginException;
@@ -77,6 +78,10 @@ public class OpenStackConnector extends
 	
 	public OpenStackConnector(String instanceName){
 		super(instanceName);
+	}
+	
+	public Connector copy(){
+		return new OpenStackConnector(getConnectorInstanceName());
 	}
 	
 	public String getCloudServiceName() {
@@ -181,7 +186,7 @@ public class OpenStackConnector extends
 		for (Server instance : instances) {
 			String status = instance.getStatus().value().toLowerCase();
 			String taskState = (instance.getExtendedStatus().isPresent()) ? instance
-					.getExtendedStatus().orNull().getTaskState()
+					.getExtendedStatus().get().getTaskState()
 					: null;
 			if (taskState != null)
 				status += " - " + taskState;
@@ -199,7 +204,7 @@ public class OpenStackConnector extends
 	}
 
 	private NovaApi getClient(User user, Properties overrides)
-			throws InvalidElementException, ValidationException {		
+			throws InvalidElementException, ValidationException {
 		if (overrides == null)
 			overrides = new Properties();
 
@@ -209,7 +214,7 @@ public class OpenStackConnector extends
 		overrides.setProperty(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
 		overrides.setProperty(KeystoneProperties.REQUIRES_TENANT, "true");
 		overrides.setProperty(KeystoneProperties.TENANT_NAME, user.getParameterValue(constructKey(OpenStackUserParametersFactory.TENANT_NAME), ""));
-
+		//overrides.setProperty(Constants.PROPERTY_API_VERSION, "X.X");
 		
 		//Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
 		ComputeServiceContext csContext = ContextBuilder.newBuilder(getJcloudsDriverName())
@@ -308,8 +313,6 @@ public class OpenStackConnector extends
 		closeContext();
 	}
 
-	// TODO Use cloud-init to put script in the virtual machine. So the base
-	// image only need to have cloudinit to work with SlipStream
 	private String createContextualizationData(Run run, User user,
 			Configuration configuration) throws ConfigurationException,
 			ServerExecutionEnginePluginException, SlipStreamClientException {
