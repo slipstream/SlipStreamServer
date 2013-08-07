@@ -211,19 +211,19 @@ public class Tutorials extends BaseImages {
 		deployment.setAuthz(authz);
 		NodeParameter np;
 
-		Node apache1 = new Node("apache1", ImageModule.constructResourceUri(webserver.getName()));
+		Node apache = new Node("apache", ImageModule.constructResourceUri(webserver.getName()));
 
-		deployment.getNodes().put(apache1.getName(), apache1);
+		deployment.getNodes().put(apache.getName(), apache);
 
-		Node testclient1 = new Node("testclient1", ImageModule.constructResourceUri(client.getName()));
-		np = new NodeParameter("webserver.hostname", "apache1:hostname");
-		testclient1.setParameterMapping(np);
-		np = new NodeParameter("webserver.port", "apache1:port");
-		testclient1.setParameterMapping(np);
-		np = new NodeParameter("webserver.ready", "apache1:ready");
-		testclient1.setParameterMapping(np);
+		Node testclient = new Node("testclient", ImageModule.constructResourceUri(client.getName()));
+		np = new NodeParameter("webserver.hostname", "apache:hostname");
+		testclient.setParameterMapping(np);
+		np = new NodeParameter("webserver.port", "apache:port");
+		testclient.setParameterMapping(np);
+		np = new NodeParameter("webserver.ready", "apache:ready");
+		testclient.setParameterMapping(np);
 
-		deployment.getNodes().put(testclient1.getName(), testclient1);
+		deployment.getNodes().put(testclient.getName(), testclient);
 
 		deployment.store();
 	}

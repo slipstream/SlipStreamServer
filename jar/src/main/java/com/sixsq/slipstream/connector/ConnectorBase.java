@@ -338,7 +338,7 @@ public abstract class ConnectorBase implements Connector {
 			String cloudService = run
 					.getRuntimeParameterValueIgnoreAbort(cloudServiceKey);
 
-			if (id != null
+			if (id != null && !id.equals("")
 					&& this.getConnectorInstanceName().equals(cloudService)) {
 				ids.add(id);
 			}
