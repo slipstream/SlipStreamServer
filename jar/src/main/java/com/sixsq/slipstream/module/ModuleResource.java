@@ -326,14 +326,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	private void checkConsistentModule(String moduleUri, String targetUri)
 			throws ValidationException {
-		// Only check that the form contains the module uri corresponding
-		// to the target uri if the module is not new. In the case the module
-		// is new, the name is defined by the put request and the target
-		// is always 'new'
-		if (!isNew()) {
-			if (!targetUri.equals(moduleUri)) {
-				throwClientBadRequest("The uploaded module does not correspond to the target module uri");
-			}
+		if (!targetUri.equals(moduleUri)) {
+			throwClientBadRequest("The uploaded module does not correspond to the target module uri");
 		}
 
 		// Check that the new proposed module doesn't already exists.
