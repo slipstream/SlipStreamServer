@@ -20,22 +20,15 @@ package com.sixsq.slipstream.connector.stratuslab;
  * -=================================================================-
  */
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.NetworkType;
 import com.sixsq.slipstream.persistence.ParameterType;
 
 public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 
 	public static String KEY_PARAMETER_NAME = "username";
 	public static String SECRET_PARAMETER_NAME = "password";
-
-	public static String IP_TYPE_DEFAULT = NetworkType.Public.name()
-			.toLowerCase();
+	
 
 	public StratusLabUserParametersFactory(String connectorInstanceName) throws ValidationException {
 		super(connectorInstanceName);
@@ -44,37 +37,12 @@ public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 
-		String[] _options = { IP_TYPE_DEFAULT, "local",
-				NetworkType.Private.name().toLowerCase() };
-		List<String> options = Arrays.asList(_options);
-		putMandatoryEnumParameter("ip.type", "IP type: public, local, private", options,
-				IP_TYPE_DEFAULT);
-
 		putMandatoryParameter(KEY_PARAMETER_NAME, "StratusLab account username",
 				ParameterType.RestrictedString);
 
 		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME,
 				"StratusLab account password");
 
-		putMandatoryParameter(
-				ENDPOINT_KEY,
-				"StratusLab endpoint",
-				Configuration
-						.getInstance()
-						.getParameters()
-						.getParameterValue(
-								constructKey("cloud.connector." + ENDPOINT_KEY),
-								"cloud.lal.stratuslab.eu"));
-
-		putMandatoryParameter(
-				"marketplace.endpoint",
-				"Default marketplace endpoint",
-				Configuration
-						.getInstance()
-						.getParameters()
-						.getParameterValue(
-								constructKey("cloud.connector." + "marketplace.endpoint"),
-								"http://marketplace.stratuslab.eu"));
 	}
 
 }

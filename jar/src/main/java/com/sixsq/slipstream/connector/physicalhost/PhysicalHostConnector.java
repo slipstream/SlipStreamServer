@@ -37,10 +37,12 @@ import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
@@ -90,6 +92,12 @@ public class PhysicalHostConnector extends ConnectorBase {
 	}
 	
 	@Override
+	public Map<String, ModuleParameter> getImageParametersTemplate()
+			throws ValidationException {
+		return new PhysicalHostImageParametersFactory(getConnectorInstanceName()).getParameters();
+	}
+	
+	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
 		switch (run.getCategory()) {
 		case Image:
@@ -104,13 +112,14 @@ public class PhysicalHostConnector extends ConnectorBase {
 		return run;
 	}
 	
+	//TODO: Change terminate to be able to terminate nodes in addition to orchestrator
 	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {
 		Credentials credentials = getCredentials(user);
 		
 		String username = credentials.getKey();
 		String password = credentials.getSecret(); 
-		String privateKey = user.getParameterValue(constructKey(PhysicalHostUserParametersFactory.PRIVATE_KEY), "");
+		String privateKey = user.getParameterValue(constructKey(PhysicalHostUserParametersFactory.ORCHESTRATOR_PRIVATE_KEY), "");
 		
 		String sudo = getSudo(username);
 		String command = sudo+" bash -c '"; 
@@ -127,7 +136,7 @@ public class PhysicalHostConnector extends ConnectorBase {
 	// Work only for Orchestrator host
 	@Override
 	public Properties describeInstances(User user) throws SlipStreamException {
-		String host = getOrchestratorImageId();
+		String host = getOrchestratorImageId(user);
 		Properties statuses = new Properties();
 		
 		InetAddress addr;
@@ -142,7 +151,12 @@ public class PhysicalHostConnector extends ConnectorBase {
 
 	@Override
 	protected String getOrchestratorImageId() throws ConfigurationException, ValidationException {
-		return Configuration.getInstance().getRequiredProperty(constructKey("cloud.connector.orchestrator.host"));
+		throw new NotImplementedException();
+	}
+	
+//	@Override
+	protected String getOrchestratorImageId(User user) throws ConfigurationException, ValidationException {
+		return user.getParameterValue(constructKey(PhysicalHostUserParametersFactory.ORCHESTRATOR_HOST), "");
 	}
 
 	private void launchDeployment(Run run, User user)
@@ -157,13 +171,13 @@ public class PhysicalHostConnector extends ConnectorBase {
 		try {
 			username = credentials.getKey();
 			password = credentials.getSecret();
-			privateKey = user.getParameterValue(constructKey(PhysicalHostUserParametersFactory.PRIVATE_KEY), "");
+			privateKey = user.getParameterValue(constructKey(PhysicalHostUserParametersFactory.ORCHESTRATOR_PRIVATE_KEY), "");
 		} catch (SlipStreamClientException e1) {
 			e1.printStackTrace();
 		}
 		if(privateKey == null) privateKey = "";
 		
-		String host = getOrchestratorImageId();
+		String host = getOrchestratorImageId(user);
 		
 		String command = createContextualizationData(run, user, configuration);
 		
@@ -196,7 +210,7 @@ public class PhysicalHostConnector extends ConnectorBase {
 		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"; ";	
 		userData += "export SLIPSTREAM_BUNDLE_URL=\"" + configuration.getRequiredProperty("slipstream.update.clienturl") + "\"; ";	
 		userData += "export SLIPSTREAM_BOOTSTRAP_BIN=\"" + configuration.getRequiredProperty("slipstream.update.clientbootstrapurl") + "\"; ";
-		userData += "export PHYSICALHOST_ORCHESTRATOR_HOST=\"" + getOrchestratorImageId() + "\"; ";
+		userData += "export PHYSICALHOST_ORCHESTRATOR_HOST=\"" + getOrchestratorImageId(user) + "\"; ";
 		userData += "export SLIPSTREAM_CATEGORY=\"" + run.getCategory().toString() + "\"; ";
 		userData += "export SLIPSTREAM_USERNAME=\"" + username + "\"; ";
 		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "; ";

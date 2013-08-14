@@ -286,9 +286,7 @@ public abstract class ConnectorBase implements Connector {
 	}
 
 	protected String getPrivateSshKeyFileName() {
-		// TODO: Change the way to get private key
-		String publicSshKeyFile = Configuration.getInstance().getProperty("cloud.connector.security.publicsshkey");
-		String privateSshKeyFile = publicSshKeyFile.substring(0, publicSshKeyFile.length() - 4);
+		String privateSshKeyFile = Configuration.getInstance().getProperty("cloud.connector.orchestrator.privatesshkey");
 		return privateSshKeyFile;
 	}
 	
@@ -309,7 +307,7 @@ public abstract class ConnectorBase implements Connector {
 			publicSshKey = tempSshKeyFile.getPath();
 		} else {
 			publicSshKey = Configuration.getInstance().getProperty(
-					"cloud.connector.security.publicsshkey");
+					"cloud.connector.orchestrator.publicsshkey");
 		}
 		return publicSshKey;
 	}
@@ -451,7 +449,7 @@ public abstract class ConnectorBase implements Connector {
 	private String getOrchestratorImageLoginUsername()
 			throws ConfigurationException, ValidationException {
 		return Configuration.getInstance().getRequiredProperty(
-				constructKey("cloud.connector.orchestrator.ssh.username"));
+				constructKey("orchestrator.ssh.username"));
 	}
 
 	private String getMachineImageLoginUsername(Run run)
@@ -478,7 +476,7 @@ public abstract class ConnectorBase implements Connector {
 	private String getOrchestratorImageLoginPassword()
 			throws ConfigurationException, ValidationException {
 		return Configuration.getInstance().getRequiredProperty(
-				constructKey("cloud.connector.orchestrator.ssh.password"));
+				constructKey("orchestrator.ssh.password"));
 	}
 
 	private String getMachineImageLoginPassword(Run run)

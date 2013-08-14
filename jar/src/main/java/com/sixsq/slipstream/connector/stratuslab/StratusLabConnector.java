@@ -140,10 +140,15 @@ public class StratusLabConnector extends CliConnectorBase {
 		return "/usr/bin/stratus-run-instance " + imageId + " --quiet --key "
 				+ publicSshKey + " -u " + getKey(user) + " -p "
 				+ getSecret(user) + " --endpoint " + getEndpoint(user)
+				+ " --marketplace-endpoint " + getMarketplaceEndpoint()
 				+ " --context " + context + " --vm-name " + vmName + ":"
 				+ run.getName() + ipTypeCommand + extraDisksCommand;
 	}
 
+	protected String getMarketplaceEndpoint() throws ConfigurationException, ValidationException {
+		return Configuration.getInstance().getRequiredProperty(constructKey("marketplace.endpoint"));
+	}
+	
 	private String getVmName(Run run) {
 		return run.getType() == RunType.Orchestration ? getOrchestratorName(run)
 				: "machine";
@@ -220,7 +225,7 @@ public class StratusLabConnector extends CliConnectorBase {
 	protected String getOrchestratorImageId() throws ConfigurationException,
 			ValidationException {
 		return Configuration.getInstance().getRequiredProperty(
-				constructKey("cloud.connector.orchestrator.imageid"));
+				constructKey("orchestrator.imageid"));
 	}
 
 	private String getIpTypeCommand(User user) throws ValidationException {
@@ -271,7 +276,7 @@ public class StratusLabConnector extends CliConnectorBase {
 
 		contextualization += "STRATUSLAB_BUNDLE_URL="
 				+ configuration
-						.getRequiredProperty(constructKey("cloud.connector.update.clienturl"))
+						.getRequiredProperty(constructKey("update.clienturl"))
 				+ "#";
 
 		contextualization += "SLIPSTREAM_BOOTSTRAP_BIN="
@@ -281,15 +286,15 @@ public class StratusLabConnector extends CliConnectorBase {
 
 		contextualization += "SLIPSTREAM_MESSAGING_TYPE="
 				+ configuration
-						.getRequiredProperty(constructKey("cloud.connector.messaging.type"))
+						.getRequiredProperty(constructKey("messaging.type"))
 				+ "#";
 		contextualization += "SLIPSTREAM_MESSAGING_ENDPOINT="
 				+ configuration
-						.getRequiredProperty(constructKey("cloud.connector.messaging.endpoint"))
+						.getRequiredProperty(constructKey("messaging.endpoint"))
 				+ "#";
 		contextualization += "SLIPSTREAM_MESSAGING_QUEUE="
 				+ configuration
-						.getRequiredProperty(constructKey("cloud.connector.messaging.queue"))
+						.getRequiredProperty(constructKey("messaging.queue"))
 				+ "#";
 
 		contextualization += "SLIPSTREAM_REPORT_DIR=" + SLIPSTREAM_REPORT_DIR;

@@ -81,31 +81,27 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 	protected void putMandatoryOrchestrationImageId()
 			throws ValidationException {
 		putMandatoryParameter(
-				super.constructKey("cloud.connector.orchestrator.imageid"),
+				super.constructKey("orchestrator.imageid"),
 				"Image Id of the orchestrator for " + getCategory());
 	}
 
 	protected void putMandatoryOrchestratorInstanceType()
 			throws ValidationException {
 		putMandatoryParameter(
-				super.constructKey("cloud.connector.orchestrator.instance.type"),
+				super.constructKey("orchestrator.instance.type"),
 				"Orchestrator instance type  " + getCategory());
 	}
 
 	protected void putMandatoryUpdateUrl() throws ValidationException {
 		putMandatoryParameter(
-				super.constructKey("cloud.connector.update.clienturl"),
+				super.constructKey("update.clienturl"),
 				"URL pointing to the tarball containing the client for "
 						+ getCategory());
 	}
 
 	protected void putMandatoryEndpoint() throws ValidationException {
-		putMandatoryParameter(super.constructKey("cloud.connector.endpoint"),
+		putMandatoryParameter(super.constructKey(ENDPOINT_KEY),
 				"Service endpoint for " + getCategory());
-	}
-
-	public String constructKey(String name) {
-		return constructKey("cloud", "connector", name);
 	}
 
 }
