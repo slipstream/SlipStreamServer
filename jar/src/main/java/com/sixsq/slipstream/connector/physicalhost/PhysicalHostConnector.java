@@ -53,6 +53,7 @@ public class PhysicalHostConnector extends ConnectorBase {
 	private static Logger log = Logger.getLogger(PhysicalHostConnector.class.toString());
 	
 	public static final String CLOUD_SERVICE_NAME = "physicalhost";
+	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.physicalhost.PhysicalHostClientCloud";
 	
 	public PhysicalHostConnector() {
 		this(CLOUD_SERVICE_NAME);
@@ -215,6 +216,7 @@ public class PhysicalHostConnector extends ConnectorBase {
 		userData += "export SLIPSTREAM_USERNAME=\"" + username + "\"; ";
 		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "; ";
 		userData += "export SLIPSTREAM_VERBOSITY_LEVEL=\"" + getVerboseParameterValue(user) + "\"; ";
+		userData += "export CLOUDCONNECTOR_PYTHON_MODULENAME=\"" + CLOUDCONNECTOR_PYTHON_MODULENAME + "\"; ";
 
 		userData += "mkdir -p " + SLIPSTREAM_REPORT_DIR + ";";
 		userData += "wget --no-check-certificate -O " + bootstrap + " $SLIPSTREAM_BOOTSTRAP_BIN > " + SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1 "

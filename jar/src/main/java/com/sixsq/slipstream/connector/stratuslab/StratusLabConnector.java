@@ -67,6 +67,7 @@ public class StratusLabConnector extends CliConnectorBase {
 			EXTRADISK_NAME_PERSISTENT);
 
 	public static final String CLOUD_SERVICE_NAME = "stratuslab";
+	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.stratuslab.StratuslabClientCloud";
 
 	public StratusLabConnector() {
 		this(CLOUD_SERVICE_NAME);
@@ -274,11 +275,14 @@ public class StratusLabConnector extends CliConnectorBase {
 						.getRequiredProperty("slipstream.update.clienturl")
 				+ "#";
 
-		contextualization += "STRATUSLAB_BUNDLE_URL="
+		contextualization += "CLOUDCONNECTOR_BUNDLE_URL="
 				+ configuration
 						.getRequiredProperty(constructKey("update.clienturl"))
 				+ "#";
 
+		contextualization += "CLOUDCONNECTOR_PYTHON_MODULENAME="
+				+ CLOUDCONNECTOR_PYTHON_MODULENAME + "#";
+		
 		contextualization += "SLIPSTREAM_BOOTSTRAP_BIN="
 				+ configuration
 						.getRequiredProperty("slipstream.update.clientbootstrapurl")

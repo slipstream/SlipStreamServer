@@ -71,6 +71,7 @@ public class OpenStackConnector extends
 
 	public static final String CLOUD_SERVICE_NAME = "openstack";
 	public static final String JCLOUDS_DRIVER_NAME = "openstack-nova";
+	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.openstack.OpenStackClientCloud";
 
 	public OpenStackConnector() {
 		this(CLOUD_SERVICE_NAME);
@@ -338,7 +339,8 @@ public class OpenStackConnector extends
 		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"\n";				
 		userData += "export SLIPSTREAM_BUNDLE_URL=\"" + configuration.getRequiredProperty("slipstream.update.clienturl") + "\"\n";
 		userData += "export SLIPSTREAM_BOOTSTRAP_BIN=\"" + configuration.getRequiredProperty("slipstream.update.clientbootstrapurl") + "\"\n";
-		userData += "export LIBCLOUD_BUNDLE_URL=\"" + configuration.getRequiredProperty("cloud.connector.library.libcloud.url") + "\"\n";
+		userData += "export CLOUDCONNECTOR_BUNDLE_URL=\"" + configuration.getRequiredProperty("cloud.connector.library.libcloud.url") + "\"\n";
+		userData += "export CLOUDCONNECTOR_PYTHON_MODULENAME=\"" + CLOUDCONNECTOR_PYTHON_MODULENAME + "\"\n";
 		userData += "export OPENSTACK_SERVICE_TYPE=\"" + configuration.getRequiredProperty(constructKey("service.type")) + "\"\n";
 		userData += "export OPENSTACK_SERVICE_NAME=\"" + configuration.getRequiredProperty(constructKey("service.name")) + "\"\n";
 		userData += "export OPENSTACK_SERVICE_REGION=\"" + configuration.getRequiredProperty(constructKey("service.region")) + "\"\n";
