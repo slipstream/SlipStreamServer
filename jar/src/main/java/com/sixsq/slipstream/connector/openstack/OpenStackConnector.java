@@ -142,7 +142,7 @@ public class OpenStackConnector extends
 	}
 
 	@Override
-	protected String getOrchestratorImageId() throws ConfigurationException, ValidationException {
+	protected String getOrchestratorImageId(User user) throws ConfigurationException, ValidationException {
 		return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.imageid"));
 	}
 
@@ -246,7 +246,7 @@ public class OpenStackConnector extends
 					.load(run.getModuleResourceUrl()) : null;
 
 			String region = configuration.getRequiredProperty(constructKey("service.region"));
-			String imageId = (run.getType() == RunType.Orchestration)? getOrchestratorImageId() : getImageId(run);
+			String imageId = (run.getType() == RunType.Orchestration)? getOrchestratorImageId(user) : getImageId(run, user);
 			
 			String instanceName = (run.getType() == RunType.Orchestration) ? getOrchestratorName(run) : imageModule.getShortName();
 			

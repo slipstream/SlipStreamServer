@@ -151,11 +151,6 @@ public class PhysicalHostConnector extends ConnectorBase {
 	}
 
 	@Override
-	protected String getOrchestratorImageId() throws ConfigurationException, ValidationException {
-		throw new NotImplementedException();
-	}
-	
-//	@Override
 	protected String getOrchestratorImageId(User user) throws ConfigurationException, ValidationException {
 		return user.getParameterValue(constructKey(PhysicalHostUserParametersFactory.ORCHESTRATOR_HOST), "");
 	}

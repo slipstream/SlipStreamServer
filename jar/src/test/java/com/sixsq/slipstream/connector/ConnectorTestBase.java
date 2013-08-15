@@ -78,7 +78,7 @@ public class ConnectorTestBase extends ConnectorBase {
 	}
 
 	@Override
-	protected String getOrchestratorImageId() {
+	protected String getOrchestratorImageId(User user) {
 		return null;
 	}
 	

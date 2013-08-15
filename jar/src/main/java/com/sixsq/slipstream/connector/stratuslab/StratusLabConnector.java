@@ -32,6 +32,7 @@ import com.sixsq.slipstream.connector.CliConnectorBase;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
+import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -133,7 +134,7 @@ public class StratusLabConnector extends CliConnectorBase {
 		String context = createContextualizationData(run, user);
 		String publicSshKey = getPublicSshKeyFileName(run, user);
 		String ipTypeCommand = getIpTypeCommand(user);
-		String imageId = getImageId(run);
+		String imageId = getImageId(run, user);
 		String vmName = getVmName(run);
 
 		String extraDisksCommand = getExtraDisksCommand(run);
@@ -141,13 +142,13 @@ public class StratusLabConnector extends CliConnectorBase {
 		return "/usr/bin/stratus-run-instance " + imageId + " --quiet --key "
 				+ publicSshKey + " -u " + getKey(user) + " -p "
 				+ getSecret(user) + " --endpoint " + getEndpoint(user)
-				+ " --marketplace-endpoint " + getMarketplaceEndpoint()
+				+ " --marketplace-endpoint " + getMarketplaceEndpoint(user)
 				+ " --context " + context + " --vm-name " + vmName + ":"
 				+ run.getName() + ipTypeCommand + extraDisksCommand;
 	}
 
-	protected String getMarketplaceEndpoint() throws ConfigurationException, ValidationException {
-		return Configuration.getInstance().getRequiredProperty(constructKey("marketplace.endpoint"));
+	protected String getMarketplaceEndpoint(User user) throws ConfigurationException, ValidationException {
+		return user.getParameter(constructKey("marketplace.endpoint")).getValue();
 	}
 	
 	private String getVmName(Run run) {
@@ -223,10 +224,9 @@ public class StratusLabConnector extends CliConnectorBase {
 	}
 
 	@Override
-	protected String getOrchestratorImageId() throws ConfigurationException,
+	protected String getOrchestratorImageId(User user) throws ConfigurationException,
 			ValidationException {
-		return Configuration.getInstance().getRequiredProperty(
-				constructKey("orchestrator.imageid"));
+		return user.getParameter(constructKey(StratusLabSystemConfigurationParametersFactory.ORCHESTRATOR_IMAGEID_KEY)).getValue();
 	}
 
 	private String getIpTypeCommand(User user) throws ValidationException {

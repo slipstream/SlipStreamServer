@@ -334,7 +334,7 @@ public class User extends Parameterized<User, UserParameter> {
 		User user = em.find(User.class, resourceUrl);
 		em.close();
 		
-		if(mergeSysteParameters) addSystemParametersIntoUser(user);
+		if(mergeSysteParameters && user != null) addSystemParametersIntoUser(user);
 		
 		return user;
 	}

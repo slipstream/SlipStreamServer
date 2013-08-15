@@ -96,13 +96,13 @@ public abstract class ConnectorBase implements Connector {
 		return ConnectorFactory.getCurrentConnector(user).getCredentials(user);
 	}
 
-	protected String getImageId(Run run)
+	protected String getImageId(Run run, User user)
 			throws SlipStreamClientException, ConfigurationException {
 
 		String imageId;
 
 		if (run.getType() == RunType.Orchestration) {
-			imageId = getOrchestratorImageId();
+			imageId = getOrchestratorImageId(user);
 		} else {
 			imageId = ((ImageModule) run.getModule()).extractBaseImageId(run
 	                   .getCloudServiceName());
@@ -110,7 +110,7 @@ public abstract class ConnectorBase implements Connector {
 		return imageId;
 	}
 
-	abstract protected String getOrchestratorImageId()
+	abstract protected String getOrchestratorImageId(User user)
 			throws ConfigurationException, ValidationException;
 
 	protected String getDefaultCloudServiceName(User user)

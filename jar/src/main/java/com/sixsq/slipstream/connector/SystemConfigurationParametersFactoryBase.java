@@ -29,7 +29,10 @@ import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 public abstract class SystemConfigurationParametersFactoryBase extends
 		ParametersFactoryBase<ServiceConfigurationParameter> {
 
-	protected static final String ENDPOINT_KEY = "endpoint";
+	public static final String ENDPOINT_KEY = "endpoint";
+	public static final String ORCHESTRATOR_IMAGEID_KEY = "orchestrator.imageid";
+	public static final String ORCHESTRATOR_INSTANCE_TYPE = "orchestrator.instance.type";
+	public static final String UPDATE_CLIENTURL_KEY = "update.clienturl";
 
 	protected Map<String, ServiceConfigurationParameter> referenceParameters = new HashMap<String, ServiceConfigurationParameter>();
 
@@ -81,20 +84,20 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 	protected void putMandatoryOrchestrationImageId()
 			throws ValidationException {
 		putMandatoryParameter(
-				super.constructKey("orchestrator.imageid"),
+				super.constructKey(ORCHESTRATOR_IMAGEID_KEY),
 				"Image Id of the orchestrator for " + getCategory());
 	}
 
 	protected void putMandatoryOrchestratorInstanceType()
 			throws ValidationException {
 		putMandatoryParameter(
-				super.constructKey("orchestrator.instance.type"),
+				super.constructKey(ORCHESTRATOR_INSTANCE_TYPE),
 				"Orchestrator instance type  " + getCategory());
 	}
 
 	protected void putMandatoryUpdateUrl() throws ValidationException {
 		putMandatoryParameter(
-				super.constructKey("update.clienturl"),
+				super.constructKey(UPDATE_CLIENTURL_KEY),
 				"URL pointing to the tarball containing the client for "
 						+ getCategory());
 	}

@@ -70,7 +70,7 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	@Override
-	protected String getOrchestratorImageId() throws ConfigurationException, ValidationException {
+	protected String getOrchestratorImageId(User user) throws ConfigurationException, ValidationException {
 		return Configuration.getInstance().getRequiredProperty(
 				constructKey("orchestrator.imageid"));
 	}
