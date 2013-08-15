@@ -22,6 +22,7 @@ package com.sixsq.slipstream.persistence;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,7 @@ import javax.persistence.Query;
 
 import org.simpleframework.xml.Attribute;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
@@ -316,14 +318,36 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	public static User loadByName(String name) {
-		return load(User.constructResourceUri(name));
+		return loadByName(name, true);
+	}
+	
+	public static User loadByName(String name, boolean mergeSysteParameters) {
+		return load(User.constructResourceUri(name), mergeSysteParameters);
 	}
 
 	public static User load(String resourceUrl) {
+		return load(resourceUrl, true);
+	}
+	
+	public static User load(String resourceUrl, boolean mergeSysteParameters) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		User user = em.find(User.class, resourceUrl);
 		em.close();
+		
+		if(mergeSysteParameters) addSystemParametersIntoUser(user);
+		
 		return user;
+	}
+	
+	public static void addSystemParametersIntoUser(User user){
+		ServiceConfiguration sc = Configuration.getInstance().getParameters();
+		for (Map.Entry<String, ServiceConfigurationParameter> entry : sc.getParameters().entrySet()) {
+			try {
+				UserParameter userParam = new UserParameter(entry.getKey(), entry.getValue().getValue(""), "");
+				userParam.setCategory("System");
+				user.setParameter(userParam);
+			} catch (ValidationException e) {}
+		}
 	}
 
 	public static void removeNamedUser(String name) {
