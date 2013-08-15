@@ -209,7 +209,7 @@ public class OpenStackConnector extends
 		if (overrides == null)
 			overrides = new Properties();
 
-		overrides.setProperty(Constants.PROPERTY_ENDPOINT, user.getParameterValue(constructKey(OpenStackUserParametersFactory.ENDPOINT_KEY),""));
+		overrides.setProperty(Constants.PROPERTY_ENDPOINT, user.getParameterValue(constructKey(OpenStackUserParametersFactory.ENDPOINT_PARAMETER_NAME),""));
 		overrides.setProperty(Constants.PROPERTY_RELAX_HOSTNAME, "true");
 		overrides.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, "true");
 		overrides.setProperty(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);

@@ -226,7 +226,7 @@ public class StratusLabConnector extends CliConnectorBase {
 	@Override
 	protected String getOrchestratorImageId(User user) throws ConfigurationException,
 			ValidationException {
-		return user.getParameter(constructKey(StratusLabSystemConfigurationParametersFactory.ORCHESTRATOR_IMAGEID_KEY)).getValue();
+		return user.getParameter(constructKey(StratusLabUserParametersFactory.ORCHESTRATOR_IMAGEID_PARAMETER_NAME)).getValue();
 	}
 
 	private String getIpTypeCommand(User user) throws ValidationException {
