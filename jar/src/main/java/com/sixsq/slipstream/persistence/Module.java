@@ -95,6 +95,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		return exists;
 	}
 
+	public static Module loadByName(String name) {
+		return load(constructResourceUri(name));
+	}
+	
 	public static Module load(String uri) {
 		String resourceUri = uri;
 		int version = ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
