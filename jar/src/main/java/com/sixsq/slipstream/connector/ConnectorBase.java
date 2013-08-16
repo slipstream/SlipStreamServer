@@ -255,20 +255,39 @@ public abstract class ConnectorBase implements Connector {
 					diskInfo.get(EXTRADISK_KEY_REGEXERROR)));
 	}
 	
-	protected String constructScriptObfuscateCommand(Run run, User user) throws ValidationException, IOException {
+	protected String constructScriptObfuscateCommand(Run run, User user)
+			throws IOException, SlipStreamClientException {
+		String sshUsername = getLoginUsername(run);
 		String command = "";
-		command += "sed -r -i 's/# *(account +required +pam_access\\.so).*/\\1/' /etc/pam.d/login;";
-		command += "echo '-:ALL:LOCAL' >> /etc/security/access.conf;";
-		command += "sed --in-place '/RSAAuthentication/d' /etc/ssh/sshd_config;";
-		command += "sed --in-place '/PubkeyAuthentication/d' /etc/ssh/sshd_config;";
-		command += "sed --in-place '/PasswordAuthentication/d' /etc/ssh/sshd_config;";
-		command += "sed --in-place '/PermitEmptyPasswords/d' /etc/ssh/sshd_config;";
-		command += "sed --in-place '/PubkeyAuthentication/d' /etc/ssh/sshd_config;";
-		command += "echo -e 'RSAAuthentication yes\nPubkeyAuthentication yes\nPasswordAuthentication no\nPermitEmptyPasswords no\n' >> /etc/ssh/sshd_config;";
-		command += "umask 077; test -d ~/.ssh || mkdir ~/.ssh ; echo '" + getPublicSshKey(run, user) + "' >> ~/.ssh/authorized_keys;";
-		command += "service ssh restart;";
+		// command += "sed -r -i 's/# *(account +required +pam_access\\.so).*/\\1/' /etc/pam.d/login\n";
+		// command += "echo '-:ALL:LOCAL' >> /etc/security/access.conf\n";
+		command += "sed -i '/RSAAuthentication/d' /etc/ssh/sshd_config\n";
+		command += "sed -i '/PubkeyAuthentication/d' /etc/ssh/sshd_config\n";
+		command += "sed -i '/PasswordAuthentication/d' /etc/ssh/sshd_config\n";
+		command += "echo -e 'RSAAuthentication yes\nPubkeyAuthentication yes\nPasswordAuthentication no\n' >> /etc/ssh/sshd_config\n";
+		command += "umask 077\n";
+		command += "mkdir -p ~/.ssh\n";
+		command += "echo '" + getPublicSshKey(run, user) + "' >> ~/.ssh/authorized_keys\n";
+		command += "chown -R " + sshUsername + ":$(id -g " + sshUsername + ")" + " ~/.ssh\n";
+		// If SELinux is installed and enabled.
+		command += "restorecon -Rv ~/.ssh || true\n";
+		command += "[ -x /etc/init.d/sshd ] && { service sshd reload; } || { service ssh reload; }\n";
 		return command;
 	}
+	
+	protected String getPrivateSshKey() {
+		String privateSshKeyFile = getPrivateSshKeyFileName();	
+		return FileUtil.fileToString(privateSshKeyFile);
+	}
+	
+	protected String getPrivateSshKeyFileName() {
+		// TODO: Change the way to get private key
+		String publicSshKeyFile = Configuration.getInstance().getProperty("cloud.connector.security.publicsshkey");
+		String privateSshKeyFile = publicSshKeyFile.substring(0, publicSshKeyFile.length() - 4);
+		return privateSshKeyFile;
+	}
+
+
 	
 	protected String getPublicSshKey(Run run, User user) throws ValidationException, IOException {
 		String publicSshKeyFile = getPublicSshKeyFileName(run, user);
@@ -321,7 +340,7 @@ public abstract class ConnectorBase implements Connector {
 			String cloudService = run
 					.getRuntimeParameterValueIgnoreAbort(cloudServiceKey);
 
-			if (id != null
+			if (id != null && !id.equals("")
 					&& this.getConnectorInstanceName().equals(cloudService)) {
 				ids.add(id);
 			}
@@ -440,10 +459,6 @@ public abstract class ConnectorBase implements Connector {
 	private String getMachineImageLoginUsername(Run run)
 			throws SlipStreamClientException {
 
-		if (run.getType() == RunType.Machine) {
-			return "\"\"";
-		}
-
 		ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
 		String username = machine.getLoginUser();
 		if (username == null) {
@@ -470,10 +485,6 @@ public abstract class ConnectorBase implements Connector {
 
 	private String getMachineImageLoginPassword(Run run)
 			throws SlipStreamClientException {
-
-		if (run.getType() == RunType.Machine) {
-			return "\"\"";
-		}
 
 		ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
 		String password = machine.getParameterValue(

@@ -4,14 +4,13 @@
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamServer-jar</artifactId>
   <name>SlipStream Server (JAR)</name>
-  <version>1.5-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.8-SNAPSHOT</version>
   </parent>
   
   <dependencies>

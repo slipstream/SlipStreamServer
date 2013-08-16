@@ -38,6 +38,10 @@ public class ConnectorTestBase extends ConnectorBase {
 		super(instanceName);
 	}
 
+	public Connector copy(){
+		return new ConnectorTestBase(getConnectorInstanceName());
+	}
+	
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
 		return null;

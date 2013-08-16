@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.CliConnectorBase;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
@@ -75,6 +76,10 @@ public class StratusLabConnector extends CliConnectorBase {
 		super(instanceName);
 	}
 
+	public Connector copy() {
+		return new StratusLabConnector(getConnectorInstanceName());
+	}
+	
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
@@ -209,26 +214,6 @@ public class StratusLabConnector extends CliConnectorBase {
 		return user.getParameters().containsKey(sshParameterName)
 				&& !("".equals(user.getParameter(sshParameterName).getValue()) || user
 						.getParameter(sshParameterName).getValue() == null);
-	}
-
-	private String getErrorMessageLastPart(User user) {
-		return ", please edit your <a href='/user/" + user.getName()
-				+ "'>user account</a>";
-	}
-
-	private void validateCredentials(User user) throws ValidationException {
-		String errorMessageLastPart = getErrorMessageLastPart(user);
-
-		if (getKey(user) == null) {
-			throw (new ValidationException(
-					"StratusLab Username cannot be empty"
-							+ errorMessageLastPart));
-		}
-		if (getSecret(user) == null) {
-			throw (new ValidationException(
-					"StratusLab Password cannot be empty"
-							+ errorMessageLastPart));
-		}
 	}
 
 	@Override
@@ -379,9 +364,6 @@ public class StratusLabConnector extends CliConnectorBase {
 
 	@Override
 	public Properties describeInstances(User user) throws SlipStreamException {
-		// Properties statuses = new Properties();
-		// statuses.put("apache1.1:vmstatus", VmStatus.Running);
-
 		validateCredentials(user);
 
 		String command = "/usr/bin/stratus-describe-instance -u "
