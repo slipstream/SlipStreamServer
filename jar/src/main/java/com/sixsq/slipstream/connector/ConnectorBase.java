@@ -97,7 +97,8 @@ public abstract class ConnectorBase implements Connector {
 	}
 
 	protected String getImageId(Run run, User user)
-			throws SlipStreamClientException, ConfigurationException {
+			throws SlipStreamClientException, ConfigurationException,
+			ServerExecutionEnginePluginException {
 
 		String imageId;
 
@@ -105,13 +106,28 @@ public abstract class ConnectorBase implements Connector {
 			imageId = getOrchestratorImageId(user);
 		} else {
 			imageId = ((ImageModule) run.getModule()).extractBaseImageId(run
-	                   .getCloudServiceName());
+						.getCloudServiceName());
 		}
 		return imageId;
 	}
+	
+	protected String getOrchestratorImageId(User user)
+			throws ValidationException, ServerExecutionEnginePluginException {
+		return getCloudParameterValue(user,
+				UserParametersFactoryBase.ORCHESTRATOR_IMAGEID_PARAMETER_NAME);
+	}
 
-	abstract protected String getOrchestratorImageId(User user)
-			throws ConfigurationException, ValidationException;
+	
+	protected String getCloudParameterValue(User user, String paramName)
+			throws ServerExecutionEnginePluginException, ValidationException {
+		String qualifiedParamName = constructKey(paramName);
+		String paramValue = user.getParameterValue(qualifiedParamName, null);
+		if (paramValue == null) {
+			throw (new ServerExecutionEnginePluginException(
+					"Missing parameter '" + qualifiedParamName + "'."));
+		}
+		return paramValue;
+	}	
 
 	protected String getDefaultCloudServiceName(User user)
 			throws ValidationException {

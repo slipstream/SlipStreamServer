@@ -70,12 +70,6 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	@Override
-	protected String getOrchestratorImageId(User user) throws ConfigurationException, ValidationException {
-		return Configuration.getInstance().getRequiredProperty(
-				constructKey("orchestrator.imageid"));
-	}
-
-	@Override
 	public Map<String, ServiceConfigurationParameter> getServiceConfigurationParametersTemplate()
 			throws ValidationException {
 		return new StratusLabSystemConfigurationParametersFactory(getConnectorInstanceName())

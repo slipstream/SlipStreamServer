@@ -38,6 +38,7 @@ import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
@@ -129,7 +130,8 @@ public class StratusLabConnector extends CliConnectorBase {
 
 	private String getRunInstanceCommand(Run run, User user)
 			throws InvalidElementException, ValidationException,
-			SlipStreamClientException, IOException {
+			SlipStreamClientException, IOException, ConfigurationException,
+			ServerExecutionEnginePluginException {
 
 		String context = createContextualizationData(run, user);
 		String publicSshKey = getPublicSshKeyFileName(run, user);
@@ -221,12 +223,6 @@ public class StratusLabConnector extends CliConnectorBase {
 		return user.getParameters().containsKey(sshParameterName)
 				&& !("".equals(user.getParameter(sshParameterName).getValue()) || user
 						.getParameter(sshParameterName).getValue() == null);
-	}
-
-	@Override
-	protected String getOrchestratorImageId(User user) throws ConfigurationException,
-			ValidationException {
-		return user.getParameter(constructKey(StratusLabUserParametersFactory.ORCHESTRATOR_IMAGEID_PARAMETER_NAME)).getValue();
 	}
 
 	private String getIpTypeCommand(User user) throws ValidationException {
