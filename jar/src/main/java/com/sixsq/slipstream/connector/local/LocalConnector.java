@@ -27,14 +27,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.stratuslab.StratusLabSystemConfigurationParametersFactory;
 import com.sixsq.slipstream.exceptions.ClientExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.ClientHttpException;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SerializationException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -67,12 +65,6 @@ public class LocalConnector extends ConnectorBase {
 	
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
-	}
-
-	@Override
-	protected String getOrchestratorImageId(User user) throws ConfigurationException, ValidationException {
-		return Configuration.getInstance().getRequiredProperty(
-				constructKey(LocalUserParametersFactory.ORCHESTRATOR_IMAGEID_PARAMETER_NAME));
 	}
 
 	@Override

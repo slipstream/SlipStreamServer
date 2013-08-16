@@ -142,11 +142,6 @@ public class OpenStackConnector extends
 	}
 
 	@Override
-	protected String getOrchestratorImageId(User user) throws ConfigurationException, ValidationException {
-		return Configuration.getInstance().getRequiredProperty(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_IMAGEID_PARAMETER_NAME));
-	}
-
-	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {
 		NovaApi client = getClient(user);
 
