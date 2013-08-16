@@ -226,7 +226,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	private void parsePlatform(Form form) {
 
-		String platform = form.getFirstValue("platform");
+		String platform = form.getFirstValue("platform--value");
 		if (platform == null) {
 			platform = "";
 		}
