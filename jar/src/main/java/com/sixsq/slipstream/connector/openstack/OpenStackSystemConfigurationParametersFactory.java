@@ -30,28 +30,26 @@ public class OpenStackSystemConfigurationParametersFactory extends
 			throws ValidationException {
 		super(connectorInstanceName);
 	}
-
+	
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 		super.initReferenceParameters();
 		super.putMandatoryEndpoint();
+		super.putMandatoryOrchestrationImageId();
 		
-		putMandatoryParameter(constructKey("orchestrator.instance.type"),
+		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME),
 				"OpenStack Flavor for the orchestrator. " +
 				"The actual image should support the desired Flavor.");
 
-		putMandatoryParameter(constructKey("orchestrator.imageid"),
-				"Image id to use for orchestrator");
-
-		putMandatoryParameter(constructKey("service.type"), 
+		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.SERVICE_TYPE_PARAMETER_NAME), 
 				"Type-name of the service who provide the instances functionality.",
 				"compute");
 		
-		putParameter(constructKey("service.name"), "nova", 
+		putParameter(constructKey(OpenStackUserParametersFactory.SERVICE_NAME_PARAMETER_NAME), "nova", 
 				"Name of the service who provide the instances functionality", 
 				"('nova' for OpenStack essex&folsom and 'Compute' for HP Cloud)", true);
 		
-		putMandatoryParameter(constructKey("service.region"), 
+		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME), 
 				"Region used by this cloud connector", "RegionOne");
 
 	}

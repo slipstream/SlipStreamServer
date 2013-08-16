@@ -143,7 +143,7 @@ public class OpenStackConnector extends
 
 	@Override
 	protected String getOrchestratorImageId(User user) throws ConfigurationException, ValidationException {
-		return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.imageid"));
+		return Configuration.getInstance().getRequiredProperty(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_IMAGEID_PARAMETER_NAME));
 	}
 
 	@Override
@@ -152,7 +152,7 @@ public class OpenStackConnector extends
 
 		Configuration configuration = Configuration.getInstance();
 		String region = configuration
-				.getRequiredProperty(constructKey("service.region"));
+				.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
 
 		for (String instanceId : getCloudNodeInstanceIds(run)) {
 			if (instanceId == null)
@@ -169,7 +169,7 @@ public class OpenStackConnector extends
 		NovaApi client = getClient(user);
 
 		Configuration configuration = Configuration.getInstance();
-		String region = configuration.getRequiredProperty(constructKey("service.region"));
+		String region = configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
 
 		FluentIterable<? extends Server> instances;
 		try {
@@ -245,13 +245,13 @@ public class OpenStackConnector extends
 			ImageModule imageModule = (run.getType() == RunType.Machine) ? ImageModule
 					.load(run.getModuleResourceUrl()) : null;
 
-			String region = configuration.getRequiredProperty(constructKey("service.region"));
+			String region = configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
 			String imageId = (run.getType() == RunType.Orchestration)? getOrchestratorImageId(user) : getImageId(run, user);
 			
 			String instanceName = (run.getType() == RunType.Orchestration) ? getOrchestratorName(run) : imageModule.getShortName();
 			
 			String flavorName = (run.getType() == RunType.Orchestration) ? configuration
-					.getRequiredProperty(constructKey("orchestrator.instance.type"))
+					.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME))
 					: getInstanceType(imageModule);
 			String flavorId = getFlavorId(client, region, flavorName);
 			String userData = (run.getType() == RunType.Orchestration) ? createContextualizationData(run, user, configuration) : "";
@@ -341,9 +341,9 @@ public class OpenStackConnector extends
 		userData += "export SLIPSTREAM_BOOTSTRAP_BIN=\"" + configuration.getRequiredProperty("slipstream.update.clientbootstrapurl") + "\"\n";
 		userData += "export CLOUDCONNECTOR_BUNDLE_URL=\"" + configuration.getRequiredProperty("cloud.connector.library.libcloud.url") + "\"\n";
 		userData += "export CLOUDCONNECTOR_PYTHON_MODULENAME=\"" + CLOUDCONNECTOR_PYTHON_MODULENAME + "\"\n";
-		userData += "export OPENSTACK_SERVICE_TYPE=\"" + configuration.getRequiredProperty(constructKey("service.type")) + "\"\n";
-		userData += "export OPENSTACK_SERVICE_NAME=\"" + configuration.getRequiredProperty(constructKey("service.name")) + "\"\n";
-		userData += "export OPENSTACK_SERVICE_REGION=\"" + configuration.getRequiredProperty(constructKey("service.region")) + "\"\n";
+		userData += "export OPENSTACK_SERVICE_TYPE=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_TYPE_PARAMETER_NAME)) + "\"\n";
+		userData += "export OPENSTACK_SERVICE_NAME=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_NAME_PARAMETER_NAME)) + "\"\n";
+		userData += "export OPENSTACK_SERVICE_REGION=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME)) + "\"\n";
 		userData += "export SLIPSTREAM_CATEGORY=\"" + run.getCategory().toString() + "\"\n";
 		userData += "export SLIPSTREAM_USERNAME=\"" + username + "\"\n";
 		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "\n";

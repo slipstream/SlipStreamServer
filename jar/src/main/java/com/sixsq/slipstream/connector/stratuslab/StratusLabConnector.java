@@ -32,7 +32,6 @@ import com.sixsq.slipstream.connector.CliConnectorBase;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
-import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -46,7 +45,6 @@ import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.NetworkType;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -133,7 +131,6 @@ public class StratusLabConnector extends CliConnectorBase {
 
 		String context = createContextualizationData(run, user);
 		String publicSshKey = getPublicSshKeyFileName(run, user);
-		String ipTypeCommand = getIpTypeCommand(user);
 		String imageId = getImageId(run, user);
 		String vmName = getVmName(run);
 
@@ -144,11 +141,11 @@ public class StratusLabConnector extends CliConnectorBase {
 				+ getSecret(user) + " --endpoint " + getEndpoint(user)
 				+ " --marketplace-endpoint " + getMarketplaceEndpoint(user)
 				+ " --context " + context + " --vm-name " + vmName + ":"
-				+ run.getName() + ipTypeCommand + extraDisksCommand;
+				+ run.getName() + extraDisksCommand;
 	}
 
 	protected String getMarketplaceEndpoint(User user) throws ConfigurationException, ValidationException {
-		return user.getParameter(constructKey("marketplace.endpoint")).getValue();
+		return user.getParameter(constructKey(StratusLabUserParametersFactory.MARKETPLACE_ENDPOINT_PARAMETER_NAME)).getValue();
 	}
 	
 	private String getVmName(Run run) {
@@ -229,19 +226,6 @@ public class StratusLabConnector extends CliConnectorBase {
 		return user.getParameter(constructKey(StratusLabUserParametersFactory.ORCHESTRATOR_IMAGEID_PARAMETER_NAME)).getValue();
 	}
 
-	private String getIpTypeCommand(User user) throws ValidationException {
-		String ipType = user.getParameterValue(constructKey("ip.type"), "");
-		String ipTypeCommand;
-		if (ipType.equals("local")) {
-			ipTypeCommand = " --local-ip";
-		} else if (ipType.equals(NetworkType.Private.name().toLowerCase())) {
-			ipTypeCommand = " --private-ip";
-		} else {
-			ipTypeCommand = "";
-		}
-		return ipTypeCommand;
-	}
-
 	private String createContextualizationData(Run run, User user)
 			throws ConfigurationException, InvalidElementException,
 			ValidationException {
@@ -290,15 +274,15 @@ public class StratusLabConnector extends CliConnectorBase {
 
 		contextualization += "SLIPSTREAM_MESSAGING_TYPE="
 				+ configuration
-						.getRequiredProperty(constructKey("messaging.type"))
+						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.MESSAGING_TYPE_PARAMETER_NAME))
 				+ "#";
 		contextualization += "SLIPSTREAM_MESSAGING_ENDPOINT="
 				+ configuration
-						.getRequiredProperty(constructKey("messaging.endpoint"))
+						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.MESSAGING_ENDPOINT_PARAMETER_NAME))
 				+ "#";
 		contextualization += "SLIPSTREAM_MESSAGING_QUEUE="
 				+ configuration
-						.getRequiredProperty(constructKey("messaging.queue"))
+						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.MESSAGING_QUEUE_PARAMETER_NAME))
 				+ "#";
 
 		contextualization += "SLIPSTREAM_REPORT_DIR=" + SLIPSTREAM_REPORT_DIR;

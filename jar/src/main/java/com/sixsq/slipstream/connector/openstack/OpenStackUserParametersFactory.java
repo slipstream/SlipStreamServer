@@ -30,6 +30,9 @@ public class OpenStackUserParametersFactory extends UserParametersFactoryBase {
 	public static String TENANT_NAME = "tenant.name";
 	public static String KEYPAIR_NAME = "keypair.name";
 	public static String PRIVATE_KEY = "private.key";
+	public static String SERVICE_TYPE_PARAMETER_NAME = "service.type";
+	public static String SERVICE_NAME_PARAMETER_NAME = "service.name";
+	public static String SERVICE_REGION_PARAMETER_NAME = "service.region";
 
 	public OpenStackUserParametersFactory(String connectorInstanceName)
 			throws ValidationException {
