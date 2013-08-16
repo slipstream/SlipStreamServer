@@ -126,10 +126,14 @@ public class RuntimeParameter extends Metadata {
 	public final static Pattern NODE_NAME_ONLY_PATTERN = Pattern.compile("^("
 			+ NODE_NAME_REGEX + ")*$");
 
-	private final static Pattern NODE_NAME_PART_PATTERN = Pattern.compile("("
-			+ NODE_NAME_REGEX + "\\.\\d+)|("
-			+ RuntimeParameter.GLOBAL_NAMESPACE + ")|(" + Run.ORCHESTRATOR_NAME
-			+ "(-\\w+)?)|(" + Run.MACHINE_NAME + ")");
+	private final static String ORCHESTRATOR_INSTANCE_NAME_REGEX = Run.ORCHESTRATOR_NAME
+			+ "(-\\w[-\\w]*)?";
+	
+	private final static Pattern NODE_NAME_PART_PATTERN = Pattern
+			.compile("(" + NODE_NAME_REGEX + "\\.\\d+)|("
+					+ RuntimeParameter.GLOBAL_NAMESPACE + ")|("
+					+ ORCHESTRATOR_INSTANCE_NAME_REGEX + ")|("
+					+ Run.MACHINE_NAME + ")");
 
 	private static final Pattern NAME_PATTERN = Pattern
 			.compile("\\w[\\w\\d\\.-]*");
