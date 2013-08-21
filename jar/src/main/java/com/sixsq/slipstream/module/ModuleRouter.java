@@ -20,7 +20,6 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
-
 import org.restlet.Context;
 import org.restlet.routing.Router;
 import org.restlet.routing.TemplateRoute;
@@ -64,12 +63,14 @@ public class ModuleRouter extends Router {
 		route.getTemplate().getVariables()
 				.put("chooser", new Variable(Variable.TYPE_URI_QUERY));
 
-		route = attach("/{module}?category={category}", ModuleResource.class);
+		route = attach("/{module}?category={category}&new={new}", ModuleResource.class);
 		route.setMatchingQuery(true);
 		route.getTemplate().getVariables()
 				.put("module", new Variable(Variable.TYPE_URI_PATH));
 		route.getTemplate().getVariables()
-				.put("category", new Variable(Variable.TYPE_URI_QUERY));
+		.put("category", new Variable(Variable.TYPE_URI_QUERY));
+		route.getTemplate().getVariables()
+		.put("new", new Variable(Variable.TYPE_URI_QUERY));
 
 		route = attach("/{module}", ModuleResource.class);
 		route.getTemplate().getVariables()
