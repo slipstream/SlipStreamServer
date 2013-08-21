@@ -170,8 +170,9 @@ public class ModuleResourceTest extends ResourceTestBase {
 		Module project = createAndStoreProject(projectName);
 		ModuleCategory category = ModuleCategory.Project;
 		Form form = createForm(projectName, category);
-		Request request = createPutRequest("new",
+		Request request = createPutRequest("existingProject",
 				form.getWebRepresentation(), user);
+		request.getAttributes().put("new", "true");
 		Response response = executeRequest(request);
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 		project.remove();
