@@ -37,22 +37,22 @@ public class StratusLabSystemConfigurationParametersFactory extends
 
 		putMandatoryEndpoint();
 
-		putMandatoryParameter(constructKey("orchestrator.instance.type"),
+		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME),
 				"Orchestrator instance type");
 
-		putMandatoryParameter(constructKey("marketplace.endpoint"),
+		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.MARKETPLACE_ENDPOINT_PARAMETER_NAME),
 				"Marketplace endpoint");
 
-		putMandatoryParameter(constructKey("messaging.type"),
+		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.MESSAGING_TYPE_PARAMETER_NAME),
 				"Messaging type: amazaonsqs, rest, dirq");
 
-		putMandatoryParameter(constructKey("messaging.endpoint"),
+		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.MESSAGING_ENDPOINT_PARAMETER_NAME),
 				"Messaging endpoint");
 
-		putMandatoryParameter(constructKey("messaging.queue"),
+		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.MESSAGING_QUEUE_PARAMETER_NAME),
 				"Messaging queue");
 
-		putMandatoryParameter(constructKey("update.clienturl"),
+		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.UPDATE_CLIENTURL_PARAMETER_NAME),
 				"URL with the cloud client specific connector");
 	}
 

@@ -79,9 +79,9 @@ public class DashboardResource extends ModuleListResourceBase {
 		try {
 			dashboard.populate(user);
 		} catch (SlipStreamClientException e) {
-			throw(new ResourceException(Status.CLIENT_ERROR_CONFLICT, e.getMessage()));
+			//throw(new ResourceException(Status.CLIENT_ERROR_CONFLICT, e.getMessage()));
 		} catch (SlipStreamException e) {
-			throw(new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
+			//throw(new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
 		}
 
 		return HtmlUtil.transformToHtml(baseUrlSlash, resourceUri,

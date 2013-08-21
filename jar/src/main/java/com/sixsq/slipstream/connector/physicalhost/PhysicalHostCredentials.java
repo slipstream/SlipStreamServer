@@ -41,11 +41,11 @@ public class PhysicalHostCredentials extends CredentialsBase implements Credenti
 	}
 
 	public String getKey() throws InvalidElementException {
-		return getParameterValue(PhysicalHostUserParametersFactory.KEY_PARAMETER_NAME);
+		return getParameterValue(PhysicalHostUserParametersFactory.ORCHESTRATOR_USERNAME);
 	}
 
 	public String getSecret() throws InvalidElementException {
-		return getParameterValue(PhysicalHostUserParametersFactory.SECRET_PARAMETER_NAME);
+		return getParameterValue(PhysicalHostUserParametersFactory.ORCHESTRATOR_PASSWORD);
 	}
 
 }

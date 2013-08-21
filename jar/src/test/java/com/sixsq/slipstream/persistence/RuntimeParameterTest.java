@@ -101,8 +101,8 @@ public class RuntimeParameterTest {
 		
 		String[] validNames = { "ss:a", "orchestrator:a", "machine:a",
 				"host.1:a", "host1.2:a", "ss.1:a", "orchestrator.1:a",
-				"machine.1:a", "host1.2:with.dots", "host1.2:with-dash",
-				"host1.2:with_underscore" };
+				"orchestrator-with-da-shes:a", "machine.1:a", "host1.2:with.dots",
+				"host1.2:with-dash", "host1.2:with_underscore" };
 
 		Run run = RunFactory.getRun(deployment, CommonTestUtil.cloudServiceName, user);
 		for (String name : validNames) {
@@ -116,8 +116,8 @@ public class RuntimeParameterTest {
 	public void checkInvalidNames() throws ValidationException {
 		String[] invalidNames = { "", "a", ":", ":a", " :a", ".:a", "a.b:a",
 				"ssx:a", "a:b:c", "a:b.c", "a:1", "ss:", "orchestrator:",
-				"machine:", "missing_key.1:", "missing_key:",
-				"name-with-dashes.1:a" };
+				"orchestrator--a:a", "machine:", "missing_key.1:",
+				"missing_key:", "name-with-dashes.1:a" };
 
 		for (String name : invalidNames) {
 			try {

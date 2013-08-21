@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.CliConnectorBase;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
@@ -36,6 +37,7 @@ import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
@@ -44,7 +46,6 @@ import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.NetworkType;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -66,6 +67,7 @@ public class StratusLabConnector extends CliConnectorBase {
 			EXTRADISK_NAME_PERSISTENT);
 
 	public static final String CLOUD_SERVICE_NAME = "stratuslab";
+	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.stratuslab.StratuslabClientCloud";
 
 	public StratusLabConnector() {
 		this(CLOUD_SERVICE_NAME);
@@ -75,6 +77,10 @@ public class StratusLabConnector extends CliConnectorBase {
 		super(instanceName);
 	}
 
+	public Connector copy() {
+		return new StratusLabConnector(getConnectorInstanceName());
+	}
+	
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
@@ -122,12 +128,12 @@ public class StratusLabConnector extends CliConnectorBase {
 
 	private String getRunInstanceCommand(Run run, User user)
 			throws InvalidElementException, ValidationException,
-			SlipStreamClientException, IOException {
+			SlipStreamClientException, IOException, ConfigurationException,
+			ServerExecutionEnginePluginException {
 
 		String context = createContextualizationData(run, user);
 		String publicSshKey = getPublicSshKeyFileName(run, user);
-		String ipTypeCommand = getIpTypeCommand(user);
-		String imageId = getImageId(run);
+		String imageId = getImageId(run, user);
 		String vmName = getVmName(run);
 
 		String extraDisksCommand = getExtraDisksCommand(run);
@@ -135,10 +141,15 @@ public class StratusLabConnector extends CliConnectorBase {
 		return "/usr/bin/stratus-run-instance " + imageId + " --quiet --key "
 				+ publicSshKey + " -u " + getKey(user) + " -p "
 				+ getSecret(user) + " --endpoint " + getEndpoint(user)
+				+ " --marketplace-endpoint " + getMarketplaceEndpoint(user)
 				+ " --context " + context + " --vm-name " + vmName + ":"
-				+ run.getName() + ipTypeCommand + extraDisksCommand;
+				+ run.getName() + extraDisksCommand;
 	}
 
+	protected String getMarketplaceEndpoint(User user) throws ConfigurationException, ValidationException {
+		return user.getParameter(constructKey(StratusLabUserParametersFactory.MARKETPLACE_ENDPOINT_PARAMETER_NAME)).getValue();
+	}
+	
 	private String getVmName(Run run) {
 		return run.getType() == RunType.Orchestration ? getOrchestratorName(run)
 				: "machine";
@@ -211,25 +222,6 @@ public class StratusLabConnector extends CliConnectorBase {
 						.getParameter(sshParameterName).getValue() == null);
 	}
 
-	@Override
-	protected String getOrchestratorImageId() throws ConfigurationException,
-			ValidationException {
-		return Configuration.getInstance().getRequiredProperty(
-				constructKey("cloud.connector.orchestrator.imageid"));
-	}
-
-	private String getIpTypeCommand(User user) throws ValidationException {
-		String ipType = user.getParameterValue(constructKey("ip.type"), "");
-		String ipTypeCommand;
-		if (ipType.equals("local")) {
-			ipTypeCommand = " --local-ip";
-		} else if (ipType.equals(NetworkType.Private.name().toLowerCase())) {
-			ipTypeCommand = " --private-ip";
-		} else {
-			ipTypeCommand = "";
-		}
-		return ipTypeCommand;
-	}
 
 	private String createContextualizationData(Run run, User user)
 			throws ConfigurationException, InvalidElementException,
@@ -264,11 +256,14 @@ public class StratusLabConnector extends CliConnectorBase {
 						.getRequiredProperty("slipstream.update.clienturl")
 				+ "#";
 
-		contextualization += "STRATUSLAB_BUNDLE_URL="
+		contextualization += "CLOUDCONNECTOR_BUNDLE_URL="
 				+ configuration
-						.getRequiredProperty(constructKey("cloud.connector.update.clienturl"))
+						.getRequiredProperty(constructKey("update.clienturl"))
 				+ "#";
 
+		contextualization += "CLOUDCONNECTOR_PYTHON_MODULENAME="
+				+ CLOUDCONNECTOR_PYTHON_MODULENAME + "#";
+		
 		contextualization += "SLIPSTREAM_BOOTSTRAP_BIN="
 				+ configuration
 						.getRequiredProperty("slipstream.update.clientbootstrapurl")
@@ -276,15 +271,15 @@ public class StratusLabConnector extends CliConnectorBase {
 
 		contextualization += "SLIPSTREAM_MESSAGING_TYPE="
 				+ configuration
-						.getRequiredProperty(constructKey("cloud.connector.messaging.type"))
+						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.MESSAGING_TYPE_PARAMETER_NAME))
 				+ "#";
 		contextualization += "SLIPSTREAM_MESSAGING_ENDPOINT="
 				+ configuration
-						.getRequiredProperty(constructKey("cloud.connector.messaging.endpoint"))
+						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.MESSAGING_ENDPOINT_PARAMETER_NAME))
 				+ "#";
 		contextualization += "SLIPSTREAM_MESSAGING_QUEUE="
 				+ configuration
-						.getRequiredProperty(constructKey("cloud.connector.messaging.queue"))
+						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.MESSAGING_QUEUE_PARAMETER_NAME))
 				+ "#";
 
 		contextualization += "SLIPSTREAM_REPORT_DIR=" + SLIPSTREAM_REPORT_DIR;

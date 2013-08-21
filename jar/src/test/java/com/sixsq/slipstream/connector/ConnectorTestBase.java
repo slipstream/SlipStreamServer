@@ -38,6 +38,10 @@ public class ConnectorTestBase extends ConnectorBase {
 		super(instanceName);
 	}
 
+	public Connector copy(){
+		return new ConnectorTestBase(getConnectorInstanceName());
+	}
+	
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
 		return null;
@@ -74,7 +78,7 @@ public class ConnectorTestBase extends ConnectorBase {
 	}
 
 	@Override
-	protected String getOrchestratorImageId() {
+	protected String getOrchestratorImageId(User user) {
 		return null;
 	}
 	

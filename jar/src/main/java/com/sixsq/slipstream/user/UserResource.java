@@ -232,7 +232,7 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected User loadParameterized(String targetParameterizedName) {
-		return User.loadByName(targetParameterizedName);
+		return User.loadByName(targetParameterizedName, false);
 	}
 
 }

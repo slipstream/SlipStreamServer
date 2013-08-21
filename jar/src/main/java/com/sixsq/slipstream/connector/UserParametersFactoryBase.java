@@ -33,8 +33,11 @@ public abstract class UserParametersFactoryBase extends
 
 	public static String SSHKEY_PARAMETER_NAME = "ssh.public.key";
 	public static String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
-	public static String ENDPOINT_KEY = "endpoint";
-
+	public static final String ENDPOINT_PARAMETER_NAME = "endpoint";
+	public static final String ORCHESTRATOR_IMAGEID_PARAMETER_NAME = "orchestrator.imageid";
+	public static final String ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME = "orchestrator.instance.type";
+	public static final String UPDATE_CLIENTURL_PARAMETER_NAME = "update.clienturl";
+	
 	protected Map<String, UserParameter> referenceParameters = new HashMap<String, UserParameter>();
 
 

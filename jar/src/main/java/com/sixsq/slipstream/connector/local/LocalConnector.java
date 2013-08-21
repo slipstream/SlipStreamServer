@@ -27,13 +27,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.stratuslab.StratusLabSystemConfigurationParametersFactory;
 import com.sixsq.slipstream.exceptions.ClientExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.ClientHttpException;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SerializationException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -50,6 +49,7 @@ import com.sixsq.slipstream.persistence.UserParameter;
 public class LocalConnector extends ConnectorBase {
 
 	public static final String CLOUD_SERVICE_NAME = "local";
+	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.dummy.DummyClientCloud";
 	
 	public LocalConnector() {
 		this(CLOUD_SERVICE_NAME);
@@ -59,14 +59,12 @@ public class LocalConnector extends ConnectorBase {
 		super(instanceName);
 	}
 	
+	public Connector copy(){
+		return new LocalConnector(getConnectorInstanceName());
+	}
+	
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
-	}
-
-	@Override
-	protected String getOrchestratorImageId() throws ConfigurationException, ValidationException {
-		return Configuration.getInstance().getRequiredProperty(
-				constructKey("orchestrator.imageid"));
 	}
 
 	@Override

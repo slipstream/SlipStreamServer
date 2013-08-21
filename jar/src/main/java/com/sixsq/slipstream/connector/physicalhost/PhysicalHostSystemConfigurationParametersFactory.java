@@ -34,8 +34,6 @@ public class PhysicalHostSystemConfigurationParametersFactory extends
 	protected void initReferenceParameters() throws ValidationException {		
 		//super.initReferenceParameters();
 
-		putMandatoryParameter(constructKey("orchestrator.host"),
-				"Hostname or IP address of the machine where the orchestrator will be install.");
 	}
 
 

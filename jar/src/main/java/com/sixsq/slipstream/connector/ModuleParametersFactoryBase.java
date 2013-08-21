@@ -31,9 +31,9 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 public abstract class ModuleParametersFactoryBase extends
 		ParametersFactoryBase<ModuleParameter> {
 
-	protected Map<String, ModuleParameter> referenceParameters = new HashMap<String, ModuleParameter>();
-
 	
+	
+	protected Map<String, ModuleParameter> referenceParameters = new HashMap<String, ModuleParameter>();
 
 	public static List<String> extractCloudNames(Map<String, Connector> connectors) {
 		List<String> names = new ArrayList<String>();

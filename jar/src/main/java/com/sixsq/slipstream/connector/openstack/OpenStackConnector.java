@@ -41,6 +41,7 @@ import org.jclouds.compute.ComputeServiceContext;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Multimap;
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.JCloudsConnectorBase;
 import com.sixsq.slipstream.exceptions.ClientExecutionEnginePluginException;
@@ -70,6 +71,7 @@ public class OpenStackConnector extends
 
 	public static final String CLOUD_SERVICE_NAME = "openstack";
 	public static final String JCLOUDS_DRIVER_NAME = "openstack-nova";
+	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.openstack.OpenStackClientCloud";
 
 	public OpenStackConnector() {
 		this(CLOUD_SERVICE_NAME);
@@ -77,6 +79,10 @@ public class OpenStackConnector extends
 	
 	public OpenStackConnector(String instanceName){
 		super(instanceName);
+	}
+	
+	public Connector copy(){
+		return new OpenStackConnector(getConnectorInstanceName());
 	}
 	
 	public String getCloudServiceName() {
@@ -136,17 +142,12 @@ public class OpenStackConnector extends
 	}
 
 	@Override
-	protected String getOrchestratorImageId() throws ConfigurationException, ValidationException {
-		return Configuration.getInstance().getRequiredProperty(constructKey("cloud.connector.orchestrator.imageid"));
-	}
-
-	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {
 		NovaApi client = getClient(user);
 
 		Configuration configuration = Configuration.getInstance();
 		String region = configuration
-				.getRequiredProperty(constructKey("cloud.connector.service.region"));
+				.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
 
 		for (String instanceId : getCloudNodeInstanceIds(run)) {
 			if (instanceId == null)
@@ -163,7 +164,7 @@ public class OpenStackConnector extends
 		NovaApi client = getClient(user);
 
 		Configuration configuration = Configuration.getInstance();
-		String region = configuration.getRequiredProperty(constructKey("cloud.connector.service.region"));
+		String region = configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
 
 		FluentIterable<? extends Server> instances;
 		try {
@@ -181,7 +182,7 @@ public class OpenStackConnector extends
 		for (Server instance : instances) {
 			String status = instance.getStatus().value().toLowerCase();
 			String taskState = (instance.getExtendedStatus().isPresent()) ? instance
-					.getExtendedStatus().orNull().getTaskState()
+					.getExtendedStatus().get().getTaskState()
 					: null;
 			if (taskState != null)
 				status += " - " + taskState;
@@ -199,17 +200,17 @@ public class OpenStackConnector extends
 	}
 
 	private NovaApi getClient(User user, Properties overrides)
-			throws InvalidElementException, ValidationException {		
+			throws InvalidElementException, ValidationException {
 		if (overrides == null)
 			overrides = new Properties();
 
-		overrides.setProperty(Constants.PROPERTY_ENDPOINT, user.getParameterValue(constructKey(OpenStackUserParametersFactory.KEYSTONE_URL),""));
+		overrides.setProperty(Constants.PROPERTY_ENDPOINT, user.getParameterValue(constructKey(OpenStackUserParametersFactory.ENDPOINT_PARAMETER_NAME),""));
 		overrides.setProperty(Constants.PROPERTY_RELAX_HOSTNAME, "true");
 		overrides.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, "true");
 		overrides.setProperty(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
 		overrides.setProperty(KeystoneProperties.REQUIRES_TENANT, "true");
 		overrides.setProperty(KeystoneProperties.TENANT_NAME, user.getParameterValue(constructKey(OpenStackUserParametersFactory.TENANT_NAME), ""));
-
+		//overrides.setProperty(Constants.PROPERTY_API_VERSION, "X.X");
 		
 		//Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
 		ComputeServiceContext csContext = ContextBuilder.newBuilder(getJcloudsDriverName())
@@ -239,13 +240,13 @@ public class OpenStackConnector extends
 			ImageModule imageModule = (run.getType() == RunType.Machine) ? ImageModule
 					.load(run.getModuleResourceUrl()) : null;
 
-			String region = configuration.getRequiredProperty(constructKey("cloud.connector.service.region"));
-			String imageId = (run.getType() == RunType.Orchestration)? getOrchestratorImageId() : getImageId(run);
+			String region = configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
+			String imageId = (run.getType() == RunType.Orchestration)? getOrchestratorImageId(user) : getImageId(run, user);
 			
 			String instanceName = (run.getType() == RunType.Orchestration) ? getOrchestratorName(run) : imageModule.getShortName();
 			
 			String flavorName = (run.getType() == RunType.Orchestration) ? configuration
-					.getRequiredProperty(constructKey("cloud.connector.orchestrator.instance.type"))
+					.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME))
 					: getInstanceType(imageModule);
 			String flavorId = getFlavorId(client, region, flavorName);
 			String userData = (run.getType() == RunType.Orchestration) ? createContextualizationData(run, user, configuration) : "";
@@ -253,7 +254,7 @@ public class OpenStackConnector extends
 					constructKey(OpenStackUserParametersFactory.KEYPAIR_NAME),
 					"");
 			String[] securityGroups = (run.getType() == RunType.Orchestration) ? "default".split(",")
-					: user.getParameterValue(constructKey(OpenStackUserParametersFactory.SECURITY_GROUP), "").split(",");
+					: getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUP, imageModule).split(",");
 
 			String instanceData = "\n\nStarting instance on region '" + region + "'\n";
 			instanceData += "Image id: " + imageId + "\n";
@@ -308,8 +309,6 @@ public class OpenStackConnector extends
 		closeContext();
 	}
 
-	// TODO Use cloud-init to put script in the virtual machine. So the base
-	// image only need to have cloudinit to work with SlipStream
 	private String createContextualizationData(Run run, User user,
 			Configuration configuration) throws ConfigurationException,
 			ServerExecutionEnginePluginException, SlipStreamClientException {
@@ -335,10 +334,11 @@ public class OpenStackConnector extends
 		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"\n";				
 		userData += "export SLIPSTREAM_BUNDLE_URL=\"" + configuration.getRequiredProperty("slipstream.update.clienturl") + "\"\n";
 		userData += "export SLIPSTREAM_BOOTSTRAP_BIN=\"" + configuration.getRequiredProperty("slipstream.update.clientbootstrapurl") + "\"\n";
-		userData += "export LIBCLOUD_BUNDLE_URL=\"" + configuration.getRequiredProperty("cloud.connector.library.libcloud.url") + "\"\n";
-		userData += "export OPENSTACK_SERVICE_TYPE=\"" + configuration.getRequiredProperty(constructKey("cloud.connector.service.type")) + "\"\n";
-		userData += "export OPENSTACK_SERVICE_NAME=\"" + configuration.getRequiredProperty(constructKey("cloud.connector.service.name")) + "\"\n";
-		userData += "export OPENSTACK_SERVICE_REGION=\"" + configuration.getRequiredProperty(constructKey("cloud.connector.service.region")) + "\"\n";
+		userData += "export CLOUDCONNECTOR_BUNDLE_URL=\"" + configuration.getRequiredProperty("cloud.connector.library.libcloud.url") + "\"\n";
+		userData += "export CLOUDCONNECTOR_PYTHON_MODULENAME=\"" + CLOUDCONNECTOR_PYTHON_MODULENAME + "\"\n";
+		userData += "export OPENSTACK_SERVICE_TYPE=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_TYPE_PARAMETER_NAME)) + "\"\n";
+		userData += "export OPENSTACK_SERVICE_NAME=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_NAME_PARAMETER_NAME)) + "\"\n";
+		userData += "export OPENSTACK_SERVICE_REGION=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME)) + "\"\n";
 		userData += "export SLIPSTREAM_CATEGORY=\"" + run.getCategory().toString() + "\"\n";
 		userData += "export SLIPSTREAM_USERNAME=\"" + username + "\"\n";
 		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "\n";
