@@ -63,12 +63,17 @@ public class ModuleRouter extends Router {
 		route.getTemplate().getVariables()
 				.put("chooser", new Variable(Variable.TYPE_URI_QUERY));
 
-		route = attach("/{module}?category={category}&new={new}", ModuleResource.class);
+		route = attach("/{module}?category={category}", ModuleResource.class);
 		route.setMatchingQuery(true);
 		route.getTemplate().getVariables()
 				.put("module", new Variable(Variable.TYPE_URI_PATH));
 		route.getTemplate().getVariables()
 		.put("category", new Variable(Variable.TYPE_URI_QUERY));
+
+		route = attach("/{module}?new={new}", ModuleResource.class);
+		route.setMatchingQuery(true);
+		route.getTemplate().getVariables()
+		.put("module", new Variable(Variable.TYPE_URI_PATH));
 		route.getTemplate().getVariables()
 		.put("new", new Variable(Variable.TYPE_URI_QUERY));
 
