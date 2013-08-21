@@ -113,15 +113,6 @@ public class ConnectorFactory {
 		}
 	}
 	
-	private static Connector copyConnector(Connector connector){
-		try {
-			return (Connector) connector.getClass().getConstructor(connector.getClass()).newInstance(connector);
-		} catch (Exception e) {
-			throw new SlipStreamRuntimeException(e.getClass().toString() + " "
-					+ e.getMessage());
-		}
-	}
-
 	public static void resetConnectors() {
 		connectors = null;
 		cloudServiceNames = null;
