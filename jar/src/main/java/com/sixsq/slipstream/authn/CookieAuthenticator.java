@@ -35,6 +35,7 @@ import org.restlet.security.User;
 import org.restlet.security.Verifier;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.util.RequestUtil;
 
 public class CookieAuthenticator extends Authenticator {
@@ -53,7 +54,8 @@ public class CookieAuthenticator extends Authenticator {
 		if (result == Verifier.RESULT_VALID) {
 
 	        setClientInfo(request, cookie);
-
+	        setCloudServiceName(request, cookie);
+	        
 			return true;
 
 		} else {
@@ -92,4 +94,11 @@ public class CookieAuthenticator extends Authenticator {
 		}
 	}
 
+	private void setCloudServiceName(Request request, Cookie cookie) {
+		String cookieCloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
+		if (cookieCloudServiceName != null) {
+			request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME, cookieCloudServiceName);
+		}
+	}
+	
 }

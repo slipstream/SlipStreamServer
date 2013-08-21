@@ -21,6 +21,7 @@ package com.sixsq.slipstream.user;
  */
 
 import java.io.IOException;
+import java.util.Map.Entry;
 
 import org.restlet.data.Form;
 import org.restlet.data.Status;
@@ -29,12 +30,17 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.resource.ParameterizedResource;
 
 /**
@@ -52,7 +58,20 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Get("xml")
 	public Representation toXml() {
+		User user = (User)getParameterized();
+		
+		mergeCloudSystemParameters(user);		
+
 		return super.toXml();
+	}
+
+	private void mergeCloudSystemParameters(User user) {
+		String cloudServiceName = (String) getRequest().getAttributes().get(RuntimeParameter.CLOUD_SERVICE_NAME);
+		if (cloudServiceName != null) {
+			for (Entry<String, Parameter<ServiceConfiguration>> p : Configuration.getInstance().getParameters().getParameters(cloudServiceName).entrySet()) {
+				user.getParameters().put(p.getKey(), UserParameter.convert(p.getValue()));
+			}
+		}
 	}
 
 	@Get("html")

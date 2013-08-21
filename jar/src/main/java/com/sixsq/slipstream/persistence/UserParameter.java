@@ -30,6 +30,10 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 @SuppressWarnings("serial")
 public class UserParameter extends Parameter<User> {
 
+	public static UserParameter convert(Parameter<ServiceConfiguration> source) {
+		return new UserParameter(source.getName(), source.getValue(), source.getDescription());
+	}
+
 	@Id
 	@GeneratedValue
 	Long id;
@@ -61,5 +65,5 @@ public class UserParameter extends Parameter<User> {
 		return (UserParameter) copyTo(new UserParameter(getName(),
 				getValue(), getDescription()));
 	}
-
+	
 }
