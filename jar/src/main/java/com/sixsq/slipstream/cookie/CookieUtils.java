@@ -21,6 +21,8 @@ package com.sixsq.slipstream.cookie;
  */
 
 import java.util.Date;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -32,6 +34,7 @@ import org.restlet.data.Form;
 import org.restlet.security.Verifier;
 import org.restlet.util.Series;
 
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 
 /**
@@ -123,6 +126,10 @@ public class CookieUtils {
 	}
 
 	public static String createCookieValue(String idType, String identifier) {
+		return createCookieValue(idType, identifier, new Properties());
+	}
+
+	public static String createCookieValue(String idType, String identifier, Properties properties) {
 		// Create the expiration date for the cookie. This is added to be sure
 		// that the server has control over this even if a malicious client
 		// extends the date of a cookie.
@@ -135,7 +142,12 @@ public class CookieUtils {
 		form.add(COOKIE_IDTYPE, idType);
 		form.add(COOKIE_IDENTIFIER, identifier);
 		form.add(COOKIE_EXPIRY_DATE, expiryDate);
-	
+
+		// Add all parameters
+		for(Entry<Object, Object> entry : properties.entrySet()) {
+			form.add((String)entry.getKey(), (String)entry.getValue());
+		}
+		
 		// Create the signed form of the query (i.e. without the signature
 		// added).
 		String signedQuery = form.getQueryString();
@@ -274,6 +286,17 @@ public class CookieUtils {
 			username = form.getFirstValue(COOKIE_IDENTIFIER);
 		}
 		return username;
+	}
+
+	public static String getCookieCloudServiceName(Cookie cookie) {
+
+		String cloudServiceName = null;
+
+		if (cookie != null) {
+			Form form = new Form(cookie.getValue());
+			cloudServiceName = form.getFirstValue(RuntimeParameter.CLOUD_SERVICE_NAME);
+		}
+		return cloudServiceName;
 	}
 
 	public static User getCookieUser(Cookie cookie) {
