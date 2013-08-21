@@ -365,12 +365,12 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	}
 
 	protected void checkCanPut() {
-		if (!canPut()) {
-			if (isNew()) {
+		if (canPut()) {
+			if (isNew() && isExisting()) {
 				throwClientForbiddenError("Cannot create this resource. Does it already exist?");
-			} else {
-				throwClientForbiddenError("Forbidden to update this resource.");
 			}
+		} else {
+				throwClientForbiddenError("Forbidden to update this resource.");
 		}
 	}
 
