@@ -27,7 +27,6 @@ import javax.persistence.EntityManager;
 import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
-import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -196,23 +195,25 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	}
 
 	protected void setIsEdit() {
-		isEdit = isEdit || extractEditFlagFromQuery() || isNew();
+		isEdit = isEdit || isEditFlagTrue() || isNew();
 	}
 
-	private boolean extractEditFlagFromQuery() {
-		return isFlagSetInQuery("edit");
+	private boolean isEditFlagTrue() {
+		return isQueryValueSetTrue("edit");
 	}
 
 	private boolean extractNewFlagFromQuery() {
-		return isFlagSetInQuery("new");
+		return isQueryValueSetTrue("new");
 	}
 
-	private boolean isFlagSetInQuery(String flag) {
-		Reference resourceRef = getRequest().getResourceRef();
-		Form form = resourceRef.getQueryAsForm();
-		String value = form.getFirstValue(flag);
+	private boolean isQueryValueSetTrue(String flag) {
+		String value = getQueryValue(flag);
 		return ("true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || "on"
 				.equalsIgnoreCase(value));
+	}
+
+	private String getQueryValue(String key) {
+		return (String) getRequest().getAttributes().get(key);
 	}
 
 	protected void addParametersForEditing() throws ValidationException,
@@ -334,7 +335,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 		String html = slipstream.ui.views.Representation.toHtml(metadata,
 				getPageRepresentation(), getTransformationType());
-		
+
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
