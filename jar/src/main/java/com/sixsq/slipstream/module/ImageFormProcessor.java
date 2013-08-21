@@ -163,38 +163,23 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	private void parseTargets(Form form) throws ValidationException {
 
-		Set<String> formitems = form.getNames();
-
-		// the targets are in the form:
-		// - targets--[id]--name
-		// - targets--[id]--script
-		// - targets--[id]--runinbackground
 		List<Target> targets = new ArrayList<Target>();
 
-		for (String targetName : formitems.toArray(new String[0])) {
-			if (targetName.startsWith("targets--")
-					&& targetName.endsWith("--name")) {
-				String[] bits = targetName.split("--");
-				String genericPart = bits[0] + "--" + bits[1] + "--";
-				String name = form.getFirstValue(targetName);
-				String script = form.getFirstValue(genericPart + "script");
-				Boolean runInBackground = "on".equals(form
-						.getFirstValue(genericPart + "runinbackground")) ? true
-						: false;
-				Target target = new Target(name, script, runInBackground);
-				for (Target t : targets) {
-					if (target.getName().equals(t.getName())) {
-						throw (new ValidationException(
-								"Cannot have targets multiply defined: "
-										+ target.getName()));
-					}
-				}
-				targets.add(target);
-			}
+		String[] targetNames = {"execute", "report"};
+		
+		for(String targetName : targetNames) {
+			addTarget(form, targets, targetName);
 		}
-
+		
 		castToModule().setTargets(targets);
 
+	}
+
+	private void addTarget(Form form, List<Target> targets, String targetName) {
+		String target = form.getFirstValue(targetName + "--script");
+		if(target != null) {
+			targets.add(new Target(targetName, target));
+		}
 	}
 
 	private void parseImageId(ImageModule module) throws ValidationException {
