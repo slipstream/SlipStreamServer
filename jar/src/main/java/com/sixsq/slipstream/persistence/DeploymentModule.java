@@ -82,11 +82,17 @@ public class DeploymentModule extends Module {
 		}
 	}
 
-	private HashMap<String, ImageModule> buildImageNameImageMap() {
+	private HashMap<String, ImageModule> buildImageNameImageMap()
+			throws ValidationException {
 
 		List<ImageModule> images = new LinkedList<ImageModule>();
 		for (Node node : nodes.values()) {
-			images.add(node.getImage());
+			ImageModule image = node.getImage();
+			if (image == null) {
+				throw new ValidationException("Cannot find image: "
+						+ node.getImageUri());
+			}
+			images.add(image);
 		}
 
 		// Build a map of: "image qname" : "image"
@@ -222,8 +228,8 @@ public class DeploymentModule extends Module {
 		return copy;
 	}
 
-	public static DeploymentModule populateFromRun(Run run, Module module, User user)
-			throws ValidationException {
+	public static DeploymentModule populateFromRun(Run run, Module module,
+			User user) throws ValidationException {
 
 		DeploymentModule deployment = (DeploymentModule) module;
 
@@ -248,22 +254,22 @@ public class DeploymentModule extends Module {
 				node.getImage().assignBaseImageIdToImageIdFromCloudService(
 						cloudService);
 			}
-			
+
 			RunFactory.resolveImageIdIfAppropriate(node.getImage(), user);
 		}
-		
+
 		return deployment;
 	}
-	
+
 	public void postDeserialization() {
 		super.postDeserialization();
 		// Assign containers inside parameters
-		for(Entry<String, Node> n : getNodes().entrySet()) {
-			for(Entry<String, NodeParameter> p : n.getValue().getParameters().entrySet()) {
-				p.getValue().setContainer(n.getValue());				
+		for (Entry<String, Node> n : getNodes().entrySet()) {
+			for (Entry<String, NodeParameter> p : n.getValue().getParameters()
+					.entrySet()) {
+				p.getValue().setContainer(n.getValue());
 			}
 		}
 	}
-
 
 }
