@@ -55,7 +55,7 @@ public class UserListResourceTest extends ResourceTestBase {
 	private Request createGetRequest(User user) throws ConfigurationException {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		Request request = createGetRequest(attributes);
-		CookieUtils.addAuthnCookie(request, "", user.getName());
+		CookieUtils.addAuthnCookie(request, user.getName());
 		return request;
 	}
 

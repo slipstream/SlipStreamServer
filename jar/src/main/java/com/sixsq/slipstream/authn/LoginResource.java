@@ -89,7 +89,7 @@ public class LoginResource extends AuthnResource {
 		Request request = getRequest();
 		Response response = getResponse();
 	
-		CookieUtils.addAuthnCookie(response, "local", username);
+		CookieUtils.addAuthnCookie(response, username);
 	
 		if (isHtmlRequested(request)) {
 			Reference redirectURL = extractRedirectURL(request);

@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
@@ -377,11 +376,7 @@ public abstract class ConnectorBase implements Connector {
 	}
 
 	protected String generateCookie(String identifier) {
-		Properties properties = new Properties();
-		properties.put(RuntimeParameter.CLOUD_SERVICE_NAME, getCloudServiceName());
-		return CookieUtils.getCookieName() + "="
-				+ CookieUtils.createCookieValue("local", identifier, properties)
-				+ "; Path:/";
+		return CookieUtils.createCookie(identifier, getConnectorInstanceName());
 	}
 
 	protected String getCookieForEnvironmentVariable(String identifier) {

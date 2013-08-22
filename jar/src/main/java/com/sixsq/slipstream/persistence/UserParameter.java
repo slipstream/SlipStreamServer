@@ -31,7 +31,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 public class UserParameter extends Parameter<User> {
 
 	public static UserParameter convert(Parameter<ServiceConfiguration> source) {
-		return new UserParameter(source.getName(), source.getValue(), source.getDescription());
+		UserParameter target = new UserParameter(source.getName(), source.getValue(), source.getDescription());
+		target.setCategory(source.getCategory());
+		return target;
 	}
 
 	@Id

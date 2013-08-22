@@ -106,7 +106,8 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 		boolean isDummy;
 		for (Parameter<S> parameter : getParameters().values()) {
 			isDummy = RuntimeParameter.NAME_DUMMY.equals(parameter.getName());
-			if (parameter.getCategory().equals(category) && !isDummy) {
+			String pCategory = parameter.getCategory();
+			if (pCategory.equals(category) && !isDummy) {
 				filteredParameters.put(parameter.getName(), parameter);
 			}
 		}
