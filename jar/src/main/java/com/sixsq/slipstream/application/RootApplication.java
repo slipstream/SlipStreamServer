@@ -60,11 +60,11 @@ import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.resource.DocumentationResource;
 import com.sixsq.slipstream.resource.ResultsDirectory;
 import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.run.DashboardRouter;
 import com.sixsq.slipstream.run.RunRouter;
-import com.sixsq.slipstream.staticcontent.StaticContentDecorator;
 import com.sixsq.slipstream.user.UserRouter;
 import com.sixsq.slipstream.util.RequestUtil;
 
@@ -159,7 +159,6 @@ public class RootApplication extends Application {
         attachLogout(router);
         attachRegister(router);
         attachConfiguration(router);
-        attachSupport(router);
         attachDocumentation(router);
         try {
             attachReports(router);
@@ -342,16 +341,7 @@ public class RootApplication extends Application {
     }
 
     private void attachDocumentation(RootRouter router) {
-        StaticContentDecorator restlet = new StaticContentDecorator(
-                "documentation");
-        router.attach("/documentation", restlet);
-        router.attach("/documentation/", restlet);
-    }
-
-    private void attachSupport(RootRouter router) {
-        StaticContentDecorator restlet = new StaticContentDecorator("support");
-        router.attach("/support", restlet);
-        router.attach("/support/", restlet);
+        router.attach("/documentation", DocumentationResource.class);
     }
 
     private void attachWelcome(RootRouter router) {

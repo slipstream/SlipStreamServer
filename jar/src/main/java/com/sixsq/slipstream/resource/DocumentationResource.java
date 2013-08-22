@@ -20,10 +20,11 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
-public class WelcomeResource extends SimpleResource {
+
+public class DocumentationResource extends SimpleResource {
 
 	protected String getPageRepresentation() {
-		return "welcome";
+		return "documentation";
 	}
 
 }
