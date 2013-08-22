@@ -27,6 +27,7 @@ import javax.persistence.EntityManager;
 import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
+import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -199,15 +200,25 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	}
 
 	private boolean isEditFlagTrue() {
-		return isQueryValueSetTrue("edit");
+		return isSetInQuery("edit");
 	}
 
+	private boolean isSetInQuery(String key) {
+		Reference resourceRef = getRequest().getResourceRef();
+		Form form = resourceRef.getQueryAsForm();
+		return isTrue(form.getFirstValue(key));
+	}
+	
 	private boolean extractNewFlagFromQuery() {
 		return isQueryValueSetTrue("new");
 	}
 
 	private boolean isQueryValueSetTrue(String flag) {
 		String value = getQueryValue(flag);
+		return isTrue(value);
+	}
+
+	protected boolean isTrue(String value) {
 		return ("true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || "on"
 				.equalsIgnoreCase(value));
 	}
