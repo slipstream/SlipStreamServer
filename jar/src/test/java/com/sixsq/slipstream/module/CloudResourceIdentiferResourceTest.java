@@ -195,7 +195,7 @@ public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 				cloudResourceUri);
 		attributes.put("version", version);
 		request.getAttributes().putAll(attributes);
-		CookieUtils.addAuthnCookie(request, "", user.getName());
+		CookieUtils.addAuthnCookie(request, user.getName());
 		return request;
 	}
 
@@ -218,7 +218,7 @@ public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 			attributes.put("region", region);
 		}
 		request.getAttributes().putAll(attributes);
-		CookieUtils.addAuthnCookie(request, "", user.getName());
+		CookieUtils.addAuthnCookie(request, user.getName());
 		return request;
 	}
 

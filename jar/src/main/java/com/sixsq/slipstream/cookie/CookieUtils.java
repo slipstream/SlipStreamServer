@@ -47,7 +47,7 @@ public class CookieUtils {
 
 	// For testing, the age defaults to 30 minutes. The value is given in
 	// seconds!
-	private static final int COOKIE_DEFAULT_AGE = 60*60*12; // 12 hours
+	private static final int COOKIE_DEFAULT_AGE = 60 * 60 * 12; // 12 hours
 
 	// Name used to identify the authentication cookie.
 	private static String COOKIE_NAME = "com.sixsq.slipstream.cookie";
@@ -58,6 +58,7 @@ public class CookieUtils {
 	private static final String COOKIE_IDENTIFIER = "com.sixsq.identifier";
 	private static final String COOKIE_EXPIRY_DATE = "com.sixsq.expirydate";
 	private static final String COOKIE_SIGNATURE = "com.sixsq.signature";
+	private static final String COOKIE_DEFAULT_IDTYPE = "local";
 
 	private static final Set<String> requiredCookieKeys = new TreeSet<String>();
 	static {
@@ -65,6 +66,16 @@ public class CookieUtils {
 		requiredCookieKeys.add(COOKIE_IDENTIFIER);
 		requiredCookieKeys.add(COOKIE_EXPIRY_DATE);
 		requiredCookieKeys.add(COOKIE_SIGNATURE);
+	}
+
+	/**
+	 * Insert a new authentication cookie into a Response using default id type.
+	 * 
+	 * @param response
+	 * @param identifier
+	 */
+	public static void addAuthnCookie(Response response, String identifier) {
+		addAuthnCookie(response, COOKIE_DEFAULT_IDTYPE, identifier);
 	}
 
 	/**
@@ -80,25 +91,43 @@ public class CookieUtils {
 
 		Series<CookieSetting> cookieSettings = response.getCookieSettings();
 		cookieSettings.removeAll(COOKIE_NAME);
-		CookieSetting cookieSetting = createAuthnCookieSetting(idType, identifier);
+		CookieSetting cookieSetting = createAuthnCookieSetting(idType,
+				identifier);
 		cookieSettings.add(cookieSetting);
 	}
 
 	/**
-	 * Insert a new authentication cookie into a Request using the given
-	 * values. None of the arguments can be null.
+	 * Insert a new authentication cookie into a Request using the given values.
+	 * None of the arguments can be null.
 	 * 
-	 * @param response
-	 * @param idType
 	 * @param identifier
+	 * @param response
 	 */
-	public static void addAuthnCookie(Request request, String idType,
-			String identifier) {
+	public static void addAuthnCookie(Request request, String identifier) {
 
 		request.getCookies().clear();
-		CookieSetting cookieSetting = createAuthnCookieSetting(idType, identifier);
+		CookieSetting cookieSetting = createAuthnCookieSetting(
+				COOKIE_DEFAULT_IDTYPE, identifier);
 		request.getCookies().add(cookieSetting);
 
+	}
+
+	/**
+	 * Insert a new authentication cookie into a Request using the given values.
+	 * None of the arguments can be null.
+	 * 
+	 * @param request
+	 * @param identifier
+	 * @param cloudServiceName
+	 */
+	public static void addAuthnCookie(Request request, String identifier,
+			String cloudServiceName) {
+
+		request.getCookies().clear();
+		CookieSetting cookieSetting = createAuthnCookieSetting(
+				COOKIE_DEFAULT_IDTYPE, identifier,
+				generateCloudServiceNameProperties(cloudServiceName));
+		request.getCookies().add(cookieSetting);
 	}
 
 	/**
@@ -113,29 +142,56 @@ public class CookieUtils {
 	 */
 	private static CookieSetting createAuthnCookieSetting(String idType,
 			String identifier) {
-	
-		String finalQuery = createCookieValue(idType, identifier);
-	
+
+		return createAuthnCookieSetting(idType, identifier, new Properties());
+	}
+
+	/**
+	 * Creates a new authentication cookie using the provided information. None
+	 * of the arguments may be null.
+	 * 
+	 * @param request
+	 * @param idType
+	 * @param identifier
+	 * 
+	 * @return new authentication cookie
+	 */
+	private static CookieSetting createAuthnCookieSetting(String idType,
+			String identifier, Properties properties) {
+
+		String finalQuery = createCookieValue(idType, identifier, properties);
+
 		CookieSetting cookieSetting = new CookieSetting(COOKIE_NAME, finalQuery);
 
 		cookieSetting.setPath("/");
 
 		cookieSetting.setDomain("");
-	
+
 		return cookieSetting;
 	}
 
-	public static String createCookieValue(String idType, String identifier) {
-		return createCookieValue(idType, identifier, new Properties());
+	public static String createCookie(String username, String cloudServiceName) {
+		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
+		return getCookieName() + "="
+				+ CookieUtils.createCookieValue("local", username, properties)
+				+ "; Path:/";
 	}
 
-	public static String createCookieValue(String idType, String identifier, Properties properties) {
+	private static Properties generateCloudServiceNameProperties(
+			String cloudServiceName) {
+		Properties properties = new Properties();
+		properties.put(RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName);
+		return properties;
+	}
+
+	public static String createCookieValue(String idType, String identifier,
+			Properties properties) {
 		// Create the expiration date for the cookie. This is added to be sure
 		// that the server has control over this even if a malicious client
 		// extends the date of a cookie.
 		long expiryMillis = (new Date()).getTime() + COOKIE_DEFAULT_AGE * 1000L;
 		String expiryDate = Long.toString(expiryMillis);
-	
+
 		// Create a form (and query) that contains the authentication
 		// information to be signed.
 		Form form = new Form();
@@ -144,15 +200,15 @@ public class CookieUtils {
 		form.add(COOKIE_EXPIRY_DATE, expiryDate);
 
 		// Add all parameters
-		for(Entry<Object, Object> entry : properties.entrySet()) {
-			form.add((String)entry.getKey(), (String)entry.getValue());
+		for (Entry<Object, Object> entry : properties.entrySet()) {
+			form.add((String) entry.getKey(), (String) entry.getValue());
 		}
-		
+
 		// Create the signed form of the query (i.e. without the signature
 		// added).
 		String signedQuery = form.getQueryString();
 		String signature = CryptoUtils.sign(signedQuery);
-	
+
 		// Add the signature to the form and create final query string.
 		form.add(COOKIE_SIGNATURE, signature);
 		String finalQuery = form.getQueryString();
@@ -199,20 +255,20 @@ public class CookieUtils {
 	 * @return CookieSetting object to remove authentication cookie
 	 */
 	private static CookieSetting createClearingCookie(Request request) {
-	
+
 		CookieSetting cookieSetting = new CookieSetting(COOKIE_NAME, "INVALID");
 
 		cookieSetting.setPath(COOKIE_PATH);
-	
+
 		// Note that the cookie setting/clearing doesn't work correctly if the
 		// domain is set.
 		cookieSetting.setDomain("");
-	
+
 		// Setting the age to zero forces the cookie to be discarded
 		// immediately. The value -1 will discard the cookie at the end of
 		// the session.
 		cookieSetting.setMaxAge(0);
-	
+
 		return cookieSetting;
 	}
 
@@ -294,7 +350,8 @@ public class CookieUtils {
 
 		if (cookie != null) {
 			Form form = new Form(cookie.getValue());
-			cloudServiceName = form.getFirstValue(RuntimeParameter.CLOUD_SERVICE_NAME);
+			cloudServiceName = form
+					.getFirstValue(RuntimeParameter.CLOUD_SERVICE_NAME);
 		}
 		return cloudServiceName;
 	}

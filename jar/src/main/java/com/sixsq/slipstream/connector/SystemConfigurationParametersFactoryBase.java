@@ -29,8 +29,6 @@ import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 public abstract class SystemConfigurationParametersFactoryBase extends
 		ParametersFactoryBase<ServiceConfigurationParameter> {
 
-	protected static final String ENDPOINT_KEY = "endpoint";
-
 	protected Map<String, ServiceConfigurationParameter> referenceParameters = new HashMap<String, ServiceConfigurationParameter>();
 
 	public SystemConfigurationParametersFactoryBase(String category)
@@ -81,31 +79,27 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 	protected void putMandatoryOrchestrationImageId()
 			throws ValidationException {
 		putMandatoryParameter(
-				super.constructKey("cloud.connector.orchestrator.imageid"),
+				super.constructKey(UserParametersFactoryBase.ORCHESTRATOR_IMAGEID_PARAMETER_NAME),
 				"Image Id of the orchestrator for " + getCategory());
 	}
 
 	protected void putMandatoryOrchestratorInstanceType()
 			throws ValidationException {
 		putMandatoryParameter(
-				super.constructKey("cloud.connector.orchestrator.instance.type"),
+				super.constructKey(UserParametersFactoryBase.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME),
 				"Orchestrator instance type  " + getCategory());
 	}
 
 	protected void putMandatoryUpdateUrl() throws ValidationException {
 		putMandatoryParameter(
-				super.constructKey("cloud.connector.update.clienturl"),
+				super.constructKey(UserParametersFactoryBase.UPDATE_CLIENTURL_PARAMETER_NAME),
 				"URL pointing to the tarball containing the client for "
 						+ getCategory());
 	}
 
 	protected void putMandatoryEndpoint() throws ValidationException {
-		putMandatoryParameter(super.constructKey("cloud.connector.endpoint"),
+		putMandatoryParameter(super.constructKey(UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME),
 				"Service endpoint for " + getCategory());
-	}
-
-	public String constructKey(String name) {
-		return constructKey("cloud", "connector", name);
 	}
 
 }

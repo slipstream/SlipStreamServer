@@ -74,8 +74,12 @@ public class ServiceConfiguration extends
 				ParameterCategory.SlipStream_advanced,
 				"URL should point to a valid gzipped tarball."),
 
-		CLOUD_CONNECTOR_SECURITY_PUBLICSSHKEY(
-				"SSH public key used for orchestrator",
+		CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY(
+				"Path to the SSH public key to put in the orchestrator",
+				ParameterCategory.SlipStream_advanced),
+				
+		CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY(
+				"Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)",
 				ParameterCategory.SlipStream_advanced),
 
 		SLIPSTREAM_HEADURL("", ParameterCategory.SlipStream_advanced),

@@ -41,14 +41,17 @@ import org.restlet.data.Status;
 
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public class UserResourceTest extends ResourceTestBase {
 
@@ -386,6 +389,27 @@ public class UserResourceTest extends ResourceTestBase {
 		withState.remove();
 	}
 
+	@Test
+	public void systemParameterMerge() throws SlipStreamClientException {
+		Request request = createGetRequest(superUser, otherUser.getName());
+
+		// Pick a category that we know always exists
+		String category = "SlipStream_Support";
+		CookieUtils.addAuthnCookie(request, otherUser.getName(), category);
+
+		String cookieCategory = CookieUtils.getCookieCloudServiceName(request.getCookies().getFirst(CookieUtils.getCookieName()));
+
+		// need to add the cloud service name directly as an attribute, since we're not going through the CookieAuthenticator
+		request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME, cookieCategory);
+		Response response = executeRequest(request);
+
+		String denormalized = XmlUtil.denormalize(response.getEntityAsText());
+		User user = (User) SerializationUtil.fromXml(denormalized, User.class);
+		
+		UserParameter systemParameter = user.getParameter("slipstream.support.email");
+		assertNotNull(systemParameter);
+	}
+	
 	private Request createDeleteRequest(User targetUser, User user)
 			throws ConfigurationException {
 		return createDeleteRequest(targetUser, user.getName());
