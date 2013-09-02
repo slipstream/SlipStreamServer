@@ -98,7 +98,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static Module loadByName(String name) {
 		return load(constructResourceUri(name));
 	}
-	
+
 	public static Module load(String uri) {
 		String resourceUri = uri;
 		int version = ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
@@ -285,7 +285,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		return moduleReferenceUri;
 	}
 
-	public void setModuleReference(Module reference) {
+	public void setModuleReference(Module reference) throws ValidationException {
+		if (getResourceUri().equals(reference.getResourceUri())) {
+			throw new ValidationException("Module reference cannot be itself");
+		}
 		this.moduleReferenceUri = reference.getResourceUri();
 	}
 
