@@ -73,7 +73,7 @@ public class AuthnResource extends ServerResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		String metadata = null;
+		String metadata = "";
 		if (user != null) {
 			Document document = SerializationUtil.toXmlDocument(user);
 			metadata = SerializationUtil.documentToString(document);
