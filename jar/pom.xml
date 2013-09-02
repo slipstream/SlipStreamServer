@@ -25,11 +25,11 @@
       <artifactId>clojure</artifactId>
     </dependency>
 
-		<dependency>
-		  <groupId>org.clojars.nathell</groupId>
-		  <artifactId>tagsoup</artifactId>
-		  <version>1.2.1</version>
-		</dependency>
+	<dependency>
+	  <groupId>org.clojars.nathell</groupId>
+	  <artifactId>tagsoup</artifactId>
+	  <version>1.2.1</version>
+	</dependency>
 
     <dependency>
       <groupId>org.restlet.jee</groupId>
