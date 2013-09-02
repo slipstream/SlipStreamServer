@@ -103,11 +103,9 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 
 	public Map<String, Parameter<S>> getParameters(String category) {
 		Map<String, Parameter<S>> filteredParameters = new HashMap<String, Parameter<S>>();
-		boolean isDummy;
 		for (Parameter<S> parameter : getParameters().values()) {
-			isDummy = RuntimeParameter.NAME_DUMMY.equals(parameter.getName());
 			String pCategory = parameter.getCategory();
-			if (pCategory.equals(category) && !isDummy) {
+			if (pCategory.equals(category)) {
 				filteredParameters.put(parameter.getName(), parameter);
 			}
 		}

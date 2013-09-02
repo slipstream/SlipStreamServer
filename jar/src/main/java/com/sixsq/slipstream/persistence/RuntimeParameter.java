@@ -138,7 +138,6 @@ public class RuntimeParameter extends Metadata {
 	private static final Pattern NAME_PATTERN = Pattern
 			.compile("\\w[\\w\\d\\.-]*");
 
-	public static final String NAME_DUMMY = "dummy";
 	public static final String NODE_NAME = "nodename";
 	public static final String NODE_INDEX = "index";
 
