@@ -134,10 +134,13 @@ public class CommonStatusService extends StatusService {
 	private Representation toXhtml(Status status, Response response, User user,
 			String baseUrlSlash, String version) {
 
-		Document doc = SerializationUtil.toXmlDocument(user);
+		String metadata = "";
 
-		String metadata = SerializationUtil.documentToString(doc);
-
+		if (user != null) {
+			Document doc = SerializationUtil.toXmlDocument(user);
+			metadata = SerializationUtil.documentToString(doc);
+		}
+		
 		return new StringRepresentation(
 				slipstream.ui.views.Representation.toHtmlError(metadata,
 						status.getDescription(),
