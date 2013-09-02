@@ -212,7 +212,7 @@ public class RunListResource extends ServerResource {
 
 		createAndSetPostResponseEntity(run);
 
-		String location = Run.RESOURCE_URI_PREFIX + run.getName();
+		String location = "/" + Run.RESOURCE_URI_PREFIX + run.getName();
 
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 		getResponse().setLocationRef(location);
@@ -222,7 +222,7 @@ public class RunListResource extends ServerResource {
 		RunView view = new RunView(run.getRefqname(), run.getName(),
 				run.getModuleResourceUrl(), run.getStatus(), run.getStart(),
 				run.getCloudServiceName(), run.getUser(), run.getType());
-		view.vmstate = Run.INITIAL_NODE_STATE;
+		view.setVmstate(Run.INITIAL_NODE_STATE);
 
 		String result = SerializationUtil.toXmlString(view);
 		getResponse().setEntity(

@@ -175,10 +175,10 @@ public class RunResource extends ServerResource {
 	@Put("form")
 	public void update(Representation entity) {
 		Form form = new Form(entity);
-		String tags = form.getFirstValue(Run.TAGS_PARAMETER_NAME, null);
+		String tags = form.getFirstValue(RuntimeParameter.TAGS_KEY, null);
 		if (tags != null) {
 			RuntimeParameter rtp = RuntimeParameter.loadFromUuidAndKey(
-					run.getUuid(), Run.TAGS_PARAMETER_NAME);
+					run.getUuid(), RuntimeParameter.GLOBAL_TAGS_KEY);
 			rtp.setValue(tags);
 			rtp.store();
 		}

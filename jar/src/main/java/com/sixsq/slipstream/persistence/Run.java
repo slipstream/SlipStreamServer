@@ -94,7 +94,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public final static String RESOURCE_URI_PREFIX = "run/";
 
-	public final static String TAGS_PARAMETER_NAME = "tags";
 	public final static String TAGS_PARAMETER_DESCRIPTION = "Tags (comma separated) or annotations for this run";
 
 	public static Run abortOrReset(String abortMessage, String nodename,
@@ -192,12 +191,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 					r.getModuleResourceUrl(), r.getStatus(), r.getStart(),
 					r.getCloudServiceName(), r.getUser(), r.getType());
 			try {
-				runView.hostname = r
+				runView.setHostname(r
 						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-								+ RuntimeParameter.HOSTNAME_KEY);
-				runView.vmstate = r
+								+ RuntimeParameter.HOSTNAME_KEY));
+				runView.setVmstate(r
 						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-								+ RuntimeParameter.STATE_VM_KEY);
+								+ RuntimeParameter.STATE_VM_KEY));
+				runView.setTags(r
+						.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
 			} catch (NotFoundException e) {
 			}
 			views.add(runView);
@@ -452,9 +453,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 						RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
 
 				nodeRuntimeParameterKeyName = nodeRuntimeParameterKeyName(node,
-						TAGS_PARAMETER_NAME);
+						RuntimeParameter.TAGS_KEY);
 				setParameter(new RunParameter(nodeRuntimeParameterKeyName, "",
-						TAGS_PARAMETER_DESCRIPTION));
+						RuntimeParameter.GLOBAL_TAGS_DESCRIPTION));
 			}
 		}
 	}
@@ -487,10 +488,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 		assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_MESSAGE_KEY,
 				Run.INITIAL_NODE_STATE_MESSAGE,
 				RuntimeParameter.GLOBAL_STATE_MESSAGE_DESCRIPTION);
-		assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
-				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
 		assignRuntimeParameter(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY, "",
 				RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION);
+
+		assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
+				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
+
 	}
 
 	private void initializeOrchestratorParameters() throws ValidationException {

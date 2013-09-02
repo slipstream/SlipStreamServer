@@ -90,10 +90,12 @@ public class RuntimeParameter extends Metadata {
 	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX
 			+ "category";
 
-	public static final String TAGS_KEY = "tag";
+	public static final String TAGS_KEY = "tags";
+	public static final String TAGS_DESCRIPTION = "Tags (comma separated) or annotations for this VM";
+
 	public static final String GLOBAL_TAGS_KEY = GLOBAL_NAMESPACE_PREFIX + TAGS_KEY;
 	public static final String GLOBAL_TAGS_DESCRIPTION = "Comma separated tag values";
-
+	
 	public static final String NODE_GROUPS_KEY = "groups";
 	public static final String GLOBAL_NODE_GROUPS_KEY = GLOBAL_NAMESPACE_PREFIX + NODE_GROUPS_KEY;
 	public static final String GLOBAL_NODE_GROUPS_DESCRIPTION = "Comma separated node groups";

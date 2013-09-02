@@ -50,10 +50,10 @@ public class RunView {
 	public final Date startTime;
 	
 	@Attribute(required = false)
-	public String vmstate;
+	private String vmstate;
 
 	@Attribute(required = false)
-	public String hostname;
+	private String hostname;
 
 	@Attribute(required = false)
 	private String cloudServiceName;
@@ -63,6 +63,9 @@ public class RunView {
 
 	@Attribute(required = false)
 	private RunType type;
+
+	@Attribute(required = false)
+	public String tags;
 
 	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
 			String status, Date startTime, String cloudServiceName, String username, RunType type) {
@@ -98,12 +101,36 @@ public class RunView {
 		return cloudServiceName;
 	}
 
-	public String getUser() {
+	public String getUsername() {
 		return username;
 	}
 
 	public RunType getType() {
 		return type;
+	}
+
+	public String getVmstate() {
+		return vmstate;
+	}
+
+	public void setVmstate(String vmstate) {
+		this.vmstate = vmstate;
+	}
+
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
+	}
+
+	public String getHostname() {
+		return hostname;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+
+	public String getTags() {
+		return tags;
 	}
 
 	@Root(name = "list")
