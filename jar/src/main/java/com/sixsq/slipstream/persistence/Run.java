@@ -194,9 +194,15 @@ public class Run extends Parameterized<Run, RunParameter> {
 				runView.setHostname(r
 						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
 								+ RuntimeParameter.HOSTNAME_KEY));
+			} catch (NotFoundException e) {
+			}
+			try {
 				runView.setVmstate(r
 						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
 								+ RuntimeParameter.STATE_VM_KEY));
+			} catch (NotFoundException e) {
+			}
+			try {
 				runView.setTags(r
 						.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
 			} catch (NotFoundException e) {
