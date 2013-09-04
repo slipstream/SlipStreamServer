@@ -791,6 +791,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return (Run) super.store();
 	}
 
+	public Run store(EntityManager em) {
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
+		Run merged = em.merge(this);
+		transaction.commit();
+		return merged;
+	}
+	
 	public void setType(RunType type) {
 		this.type = type;
 	}

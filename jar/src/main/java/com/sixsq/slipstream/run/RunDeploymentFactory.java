@@ -194,7 +194,8 @@ public class RunDeploymentFactory extends RunFactory {
 	}
 
 	private static void updateMultiplicityForAll(Run run, Node node,
-			int newMultiplicity) {
+			int newMultiplicity) throws ValidationException {
+		node.setMultiplicity(newMultiplicity);
 		for (int i = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX; i < newMultiplicity; i++) {
 			run.getRuntimeParameters().get(multiplicityKey(node.getName(), i))
 					.setValue(String.valueOf(newMultiplicity));
