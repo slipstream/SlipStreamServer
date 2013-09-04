@@ -65,7 +65,7 @@ public class RunFactoryTest extends RunTest {
 
 	public static DeploymentModule deployment = null;
 
-	private static String cloudServiceName = new LocalConnector()
+	protected static String cloudServiceName = new LocalConnector()
 			.getCloudServiceName();
 
 	@BeforeClass
@@ -84,9 +84,10 @@ public class RunFactoryTest extends RunTest {
 		} catch (Exception e) {
 			fail();
 		}
-		
+
 		try {
-			CommonTestUtil.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+			CommonTestUtil
+					.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -131,7 +132,7 @@ public class RunFactoryTest extends RunTest {
 		customImage.store();
 	}
 
-	private static void createDeployment() throws ValidationException,
+	protected static void createDeployment() throws ValidationException,
 			NotFoundException {
 
 		imageForDeployment1 = new ImageModule("test/imagefordeployment1");
@@ -141,7 +142,7 @@ public class RunFactoryTest extends RunTest {
 		imageForDeployment1.setParameter(new ModuleParameter("po1",
 				"po1 init value", "po1 parameter desc",
 				ParameterCategory.Output));
-		
+
 		imageForDeployment1.setIsBase(true);
 		imageForDeployment1.setImageId("123", cloudServiceName);
 		imageForDeployment1.store();
@@ -246,7 +247,9 @@ public class RunFactoryTest extends RunTest {
 	public void commonDeploymentRuntimeParameters() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
-		String[] nodePrefixes = { Run.ORCHESTRATOR_NAME + "-" + cloudServiceName + RuntimeParameter.NODE_PROPERTY_SEPARATOR, "node1.1:" };
+		String[] nodePrefixes = {
+				Run.ORCHESTRATOR_NAME + "-" + cloudServiceName
+						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR, "node1.1:" };
 		commonRuntimeParameters(run, nodePrefixes);
 
 	}
@@ -297,7 +300,7 @@ public class RunFactoryTest extends RunTest {
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
 		deployment.getNodes().put(node.getName(), node);
-		
+
 		deployment.store();
 
 		Run run = RunFactory.getRun(deployment, cloudServiceName, user);

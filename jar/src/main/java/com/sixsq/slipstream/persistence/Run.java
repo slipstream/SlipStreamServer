@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -817,8 +816,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return cloudServiceName;
 	}
 
-	// LS: Temporary method
-	public Collection<Node> getNodes() throws ValidationException {
+	public Map<String, Node> getNodes() throws ValidationException {
 		// FIXME: this is a hack and needs a real fix
 		if (module == null) {
 			module = new RunDeploymentFactory().overloadModule(this,
@@ -830,16 +828,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 					"getNodes can only be used with a Deployment module");
 		}
 
-		Collection<Node> nodes = ((DeploymentModule) module).getNodes()
-				.values();
-
-		return nodes;
+		return ((DeploymentModule) module).getNodes();
 	}
 
 	public HashSet<String> getCloudServicesList()
 			throws ConfigurationException, ValidationException {
 		HashSet<String> cloudServicesList = new HashSet<String>();
-		for (Node n : this.getNodes()) {
+		for (Node n : this.getNodes().values()) {
 			String cloudServiceName = n.getCloudService();
 			cloudServicesList
 					.add(getEffectiveCloudServiceName(cloudServiceName));

@@ -22,6 +22,7 @@ package com.sixsq.slipstream.run;
 
 import java.util.HashSet;
 
+import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -168,25 +169,8 @@ public class RunDeploymentFactory extends RunFactory {
 
 		for (int i = 1; i <= multiplicity; i++) {
 
-			String nodeNamePartWithNodePropertySeparator = constructNodeNamePartWithNodePropertySeparator(
-					node, i);
-
-			run.assignRuntimeParameters(nodeNamePartWithNodePropertySeparator);
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME,
-					String.valueOf(multiplicity),
-					"Multiplicity value for this node");
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.NODE_NAME, node.getName(), "Nodename");
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.NODE_INDEX, String.valueOf(i),
-					"Node index");
-
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
-					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-
-			run.addNodeName(constructNodeNamePart(node, i));
+			addNodeInstanceRuntimeParameters(node, run, multiplicity,
+					cloudServiceName, i);
 		}
 
 		run.addGroup(node.getName(), cloudServiceName);
@@ -194,13 +178,77 @@ public class RunDeploymentFactory extends RunFactory {
 		return run;
 	}
 
-	private static String constructNodeNamePart(Node node, int index) {
-		return node.getName()
-				+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + index;
+	public static void addNodeInstance(Run run, String nodeName, int variation)
+			throws ValidationException, NotFoundException, AbortException {
+		Node node = run.getNodes().get(nodeName);
+		int oldMultiplicity = node.getMultiplicity();
+		int newMultiplicity = oldMultiplicity + variation;
+		if (variation > 0) {
+			for (int i = oldMultiplicity + 1; i <= newMultiplicity; i++) {
+				addNodeInstance(run, node, i, newMultiplicity);
+				updateMultiplicityForAll(run, node, newMultiplicity);
+			}
+		} else if (variation < 0) {
+			// todo...
+		}
+	}
+
+	private static void updateMultiplicityForAll(Run run, Node node,
+			int newMultiplicity) {
+		for (int i = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX; i < newMultiplicity; i++) {
+			run.getRuntimeParameters().get(multiplicityKey(node.getName(), i))
+					.setValue(String.valueOf(newMultiplicity));
+		}
+	}
+
+	public static Run addNodeInstance(Run run, Node node, int index,
+			int multiplicity) throws NotFoundException, AbortException,
+			ValidationException {
+		addNodeInstanceRuntimeParameters(node, run, multiplicity,
+				node.getCloudService(), index);
+		return run;
+	}
+
+	protected static void addNodeInstanceRuntimeParameters(Node node, Run run,
+			int multiplicity, String cloudServiceName, int index)
+			throws ValidationException {
+		String nodeNamePartWithNodePropertySeparator = constructNodeNamePartWithNodePropertySeparator(
+				node.getName(), index);
+
+		run.assignRuntimeParameters(nodeNamePartWithNodePropertySeparator);
+		run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
+				+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME,
+				String.valueOf(multiplicity),
+				"Multiplicity value for this node");
+		run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
+				+ RuntimeParameter.NODE_NAME, node.getName(), "Nodename");
+		run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
+				+ RuntimeParameter.NODE_INDEX, String.valueOf(index),
+				"Node index");
+
+		run.assignRuntimeParameter(cloudServiceNameKey(node.getName(), index),
+				cloudServiceName, RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+
+		run.addNodeName(constructNodeNamePart(node.getName(), index));
+	}
+
+	protected static String cloudServiceNameKey(String node, int index) {
+		return constructNodeNamePartWithNodePropertySeparator(node, index)
+				+ RuntimeParameter.CLOUD_SERVICE_NAME;
+	}
+
+	protected static String multiplicityKey(String node, int index) {
+		return constructNodeNamePartWithNodePropertySeparator(node, index)
+				+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME;
+	}
+
+	private static String constructNodeNamePart(String node, int index) {
+		return node + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR
+				+ index;
 	}
 
 	private static String constructNodeNamePartWithNodePropertySeparator(
-			Node node, int index) {
+			String node, int index) {
 		return constructNodeNamePart(node, index)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 	}

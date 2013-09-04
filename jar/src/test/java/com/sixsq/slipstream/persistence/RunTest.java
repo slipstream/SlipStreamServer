@@ -58,7 +58,7 @@ public class RunTest {
 	protected static ImageModule imagebase = null;
 	protected static ImageModule imagenoref = null;
 
-	private static String cloudServiceName = new LocalConnector()
+	protected static String cloudServiceName = new LocalConnector()
 	.getCloudServiceName();
 
 	@BeforeClass
