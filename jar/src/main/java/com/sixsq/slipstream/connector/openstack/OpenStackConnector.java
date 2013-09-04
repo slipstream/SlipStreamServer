@@ -246,7 +246,7 @@ public class OpenStackConnector extends
 			String instanceName = (run.getType() == RunType.Orchestration) ? getOrchestratorName(run) : imageModule.getShortName();
 			
 			String flavorName = (run.getType() == RunType.Orchestration) ? configuration
-					.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME))
+					.getRequiredProperty(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME))
 					: getInstanceType(imageModule);
 			String flavorId = getFlavorId(client, region, flavorName);
 			String userData = (run.getType() == RunType.Orchestration) ? createContextualizationData(run, user, configuration) : "";

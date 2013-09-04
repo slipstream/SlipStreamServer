@@ -26,5 +26,10 @@ public class FileUtil {
         }
         return result;
     }
+	
+	public static boolean exist(String file){
+		File f = new File(file);
+		return f.exists();
+	}
 
 }

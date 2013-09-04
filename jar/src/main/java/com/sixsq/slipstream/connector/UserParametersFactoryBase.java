@@ -31,6 +31,8 @@ import com.sixsq.slipstream.persistence.UserParameter;
 public abstract class UserParametersFactoryBase extends
 		ParametersFactoryBase<UserParameter> {
 
+	public static String KEY_PARAMETER_NAME = "username";
+	public static String SECRET_PARAMETER_NAME = "password";
 	public static String SSHKEY_PARAMETER_NAME = "ssh.public.key";
 	public static String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
 	public static final String ENDPOINT_PARAMETER_NAME = "endpoint";
