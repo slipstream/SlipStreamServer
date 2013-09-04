@@ -33,6 +33,7 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
+import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
@@ -41,6 +42,7 @@ import org.w3c.dom.Document;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -189,14 +191,27 @@ public class RunResource extends ServerResource {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 
-		Run run = Run.load(this.run.getResourceUri(), em);
-
 		try {
-			if (run.getCategory() == ModuleCategory.Deployment) {
-				HashSet<String> cloudServicesList = run.getCloudServicesList();
-				for (String cloudServiceName : cloudServicesList) {
-					Connector connector = ConnectorFactory
-							.getConnector(cloudServiceName);
+			Run run = Run.load(this.run.getResourceUri(), em);
+
+			try {
+				if (run.getCategory() == ModuleCategory.Deployment) {
+					HashSet<String> cloudServicesList = run
+							.getCloudServicesList();
+					for (String cloudServiceName : cloudServicesList) {
+						Connector connector = ConnectorFactory
+								.getConnector(cloudServiceName);
+						try {
+							connector.terminate(run, user);
+						} catch (SlipStreamException e) {
+							throw new ResourceException(
+									Status.CLIENT_ERROR_CONFLICT,
+									"Failed terminating VMs", e);
+						}
+					}
+				} else {
+					Connector connector = ConnectorFactory.getConnector(run
+							.getCloudServiceName());
 					try {
 						connector.terminate(run, user);
 					} catch (SlipStreamException e) {
@@ -205,23 +220,53 @@ public class RunResource extends ServerResource {
 								"Failed terminating VMs", e);
 					}
 				}
-			} else {
-				Connector connector = ConnectorFactory.getConnector(run
-						.getCloudServiceName());
-				try {
-					connector.terminate(run, user);
-				} catch (SlipStreamException e) {
-					throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-							"Failed terminating VMs", e);
-				}
+			} catch (ConfigurationException e) {
+				e.printStackTrace();
+				throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e));
+			} catch (ValidationException e) {
+				throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, e));
 			}
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e));
-		} catch (ValidationException e) {
-			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, e));
+
+		} finally {
+			em.close();
+		}
+	}
+
+	@Post("form")
+	public void autoscale(Representation entity) {
+		Form form = new Form(entity);
+		String nodeName = form.getFirstValue("autoscale-nodename", null);
+		int autoScaleValue = 0;
+		try {
+			autoScaleValue = Integer.parseInt(form.getFirstValue(
+					"autoscale-variation", "0"));
+		} catch (NumberFormatException e) {
+			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+					"Invalid variation value. Must be integer"));
+		}
+		if (nodeName == null) {
+			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+					"Missing the node name to autoscale"));
 		}
 
-		em.close();
+		EntityManager em = PersistenceUtil.createEntityManager();
+
+		try {
+			Run run = Run.load(this.run.getResourceUri(), em);
+			try {
+				RunDeploymentFactory.addNodeInstance(run, nodeName,
+						autoScaleValue);
+			} catch (ValidationException e) {
+				throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e));
+			} catch (NotFoundException e) {
+				throw (new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, e));
+			} catch (AbortException e) {
+				throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, e));
+			}
+			
+			run = run.store(em);
+		} finally {
+			em.close();
+		}
 	}
 }
