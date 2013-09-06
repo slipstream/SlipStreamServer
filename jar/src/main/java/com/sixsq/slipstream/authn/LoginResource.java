@@ -20,19 +20,11 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
-import static org.restlet.data.MediaType.APPLICATION_XHTML;
-import static org.restlet.data.MediaType.TEXT_HTML;
 import static org.restlet.data.Status.CLIENT_ERROR_UNAUTHORIZED;
-import static org.restlet.data.Status.SUCCESS_OK;
-
-import java.util.List;
 
 import org.restlet.Request;
 import org.restlet.Response;
-import org.restlet.data.ClientInfo;
 import org.restlet.data.Form;
-import org.restlet.data.MediaType;
-import org.restlet.data.Preference;
 import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
@@ -50,8 +42,7 @@ public class LoginResource extends AuthnResource {
 	}
 
 	@Post
-	public void login(Representation entity)
-			throws ResourceException {
+	public void login(Representation entity) throws ResourceException {
 
 		Form form = new Form(entity);
 
@@ -82,47 +73,22 @@ public class LoginResource extends AuthnResource {
 	}
 
 	private void throwUnauthorizedWithMessage() {
-		throw new ResourceException(CLIENT_ERROR_UNAUTHORIZED, "Username/password combination not valid");
+		throw new ResourceException(CLIENT_ERROR_UNAUTHORIZED,
+				"Username/password combination not valid");
 	}
 
 	private void setResponse(String username) {
 		Request request = getRequest();
 		Response response = getResponse();
-	
+
 		CookieUtils.addAuthnCookie(response, username);
-	
-		if (isHtmlRequested(request)) {
-			Reference redirectURL = extractRedirectURL(request);
-			response.redirectSeeOther(redirectURL);
-		} else {
-			response.setStatus(SUCCESS_OK);
-		}
-	}
 
-	private boolean isHtmlRequested(Request request) {
-
-		ClientInfo clientInfo = request.getClientInfo();
-		List<Preference<MediaType>> preferences = clientInfo
-				.getAcceptedMediaTypes();
-
-		for (Preference<MediaType> preference : preferences) {
-			if (isHtmlLike(preference.getMetadata())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean isHtmlLike(MediaType mediaType) {
-		if (TEXT_HTML.isCompatible(mediaType)
-				|| APPLICATION_XHTML.isCompatible(mediaType)) {
-			return true;
-		}
-		return false;
+		Reference redirectURL = extractRedirectURL(request);
+		response.setLocationRef(redirectURL);
 	}
 
 	public static String getResourceRoot() {
 		return resourceRoot;
 	}
-	
+
 }
