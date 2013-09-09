@@ -225,7 +225,7 @@ public class ResourceTestBase {
 
 		ServiceConfiguration sc = configuration.getParameters();
 		sc.setParameter(new ServiceConfigurationParameter(
-				RequiredParameters.CLOUD_CONNECTOR_CLASS.getValue(),
+				RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
 				connectorClassName));
 		sc.store();
 		ConnectorFactory.resetConnectors();

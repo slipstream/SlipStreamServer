@@ -77,7 +77,7 @@ public class ServiceConfiguration extends
 		CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY(
 				"Path to the SSH public key to put in the orchestrator",
 				ParameterCategory.SlipStream_advanced),
-				
+
 		CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY(
 				"Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)",
 				ParameterCategory.SlipStream_advanced),
@@ -149,13 +149,20 @@ public class ServiceConfiguration extends
 							+ value);
 				}
 			}
-		};
+		},
+
+		SLIPSTREAM_REGISTRATION_ENABLE("Allow self user registration. If true, user will be able to create accounts themselves.",
+				ParameterCategory.SlipStream_basics);
 
 		private final String description;
 		private final ParameterCategory category;
 		private final String instructions;
 		private final ParameterType type;
 		private final boolean readonly;
+
+		public String getInstructions() {
+			return instructions;
+		}
 
 		private RequiredParameters(String description,
 				ParameterCategory category) {
@@ -257,10 +264,15 @@ public class ServiceConfiguration extends
 		public boolean isReadonly() {
 			return readonly;
 		}
-
-		public String getValue() {
-			return name().replace("_", ".").toLowerCase();
-		}
+		
+		 /**
+		 * Convert the enum name into parameter name
+		 * where word separators are converted from _ to .
+		 * and lower cased.
+		 */
+		public String getName() {
+		 return name().replace("_", ".").toLowerCase();
+		 }
 	}
 
 	@Id
@@ -279,7 +291,7 @@ public class ServiceConfiguration extends
 		if (parameters == null) {
 			parameters = new HashMap<String, ServiceConfigurationParameter>();
 		}
-		for(ServiceConfigurationParameter p : parameters.values()) {
+		for (ServiceConfigurationParameter p : parameters.values()) {
 			setParameter(p);
 		}
 	}
@@ -344,7 +356,7 @@ public class ServiceConfiguration extends
 
 		// Check that all of the required parameters are present.
 		for (RequiredParameters p : RequiredParameters.values()) {
-			if (getParameter(p.getValue()) == null) {
+			if (getParameter(p.getName()) == null) {
 				throw new IllegalArgumentException(
 						"missing required system configuration parameter: "
 								+ p.name());

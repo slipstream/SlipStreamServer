@@ -41,7 +41,6 @@ import com.sixsq.slipstream.authn.BasicAuthenticator;
 import com.sixsq.slipstream.authn.CookieAuthenticator;
 import com.sixsq.slipstream.authn.LoginResource;
 import com.sixsq.slipstream.authn.LogoutResource;
-import com.sixsq.slipstream.authn.RegistrationResource;
 import com.sixsq.slipstream.authz.ReportsAuthorizer;
 import com.sixsq.slipstream.authz.SuperEnroler;
 import com.sixsq.slipstream.configuration.Configuration;
@@ -157,7 +156,6 @@ public class RootApplication extends Application {
         attachWelcome(router);
         attachLogin(router);
         attachLogout(router);
-        attachRegister(router);
         attachConfiguration(router);
         attachDocumentation(router);
         try {
@@ -231,12 +229,6 @@ public class RootApplication extends Application {
         authenticator.setNext(ServiceConfigurationResource.class);
         authenticator.setEnroler(new SuperEnroler());
         route = router.attach(ServiceConfigurationResource.CONFIGURATION_PATH, authenticator);
-        route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
-    }
-
-    private void attachRegister(RootRouter router) {
-        TemplateRoute route;
-        route = router.attach("/register", RegistrationResource.class);
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
     }
 

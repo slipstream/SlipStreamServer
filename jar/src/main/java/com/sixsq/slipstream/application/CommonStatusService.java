@@ -116,13 +116,13 @@ public class CommonStatusService extends StatusService {
 		Configuration configuration = Configuration.getInstance();
 
 		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_EMAIL
-				.getValue();
+				.getName();
 		ServiceConfigurationParameter parameter = configuration.getParameters()
 				.getParameter(key);
 		String email = parameter.getValue();
 
 		key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_URL
-				.getValue();
+				.getName();
 		parameter = configuration.getParameters().getParameter(key);
 		String url = parameter.getValue();
 		Reference ref = new Reference(url);

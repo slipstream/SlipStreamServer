@@ -134,7 +134,7 @@ public class ServiceConfigurationTest {
 
 		cfg = minimalValidConfiguration();
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
-				ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME.getValue(),
+				ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME.getName(),
 				"OK", "");
 		cfg.setParameter(parameter);
 		cfg.store();
@@ -147,7 +147,7 @@ public class ServiceConfigurationTest {
 
 		ServiceConfigurationParameter recoveredParameter = cfg
 				.getParameter(ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME
-						.getValue());
+						.getName());
 		assertNotNull(recoveredParameter);
 		assertEquals("OK", recoveredParameter.getValue());
 	}

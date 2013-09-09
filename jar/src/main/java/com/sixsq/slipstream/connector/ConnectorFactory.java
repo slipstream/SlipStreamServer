@@ -174,7 +174,7 @@ public class ConnectorFactory {
 	public static String[] getConnectorClassNames() {
 		String connectorsClassNames = Configuration.getInstance()
 				.getRequiredProperty(
-						RequiredParameters.CLOUD_CONNECTOR_CLASS.getValue());
+						RequiredParameters.CLOUD_CONNECTOR_CLASS.getName());
 
 		return splitConnectorClassNames(connectorsClassNames);
 	}

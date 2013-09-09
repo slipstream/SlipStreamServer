@@ -354,7 +354,7 @@ public class RunListResource extends ServerResource {
 		String repositoryLocation;
 		repositoryLocation = configuration
 				.getRequiredProperty(ServiceConfiguration.RequiredParameters.SLIPSTREAM_REPORTS_LOCATION
-						.getValue());
+						.getName());
 
 		String absRepositoryLocation = repositoryLocation + "/" + run.getName();
 

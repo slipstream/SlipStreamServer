@@ -78,7 +78,7 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 	
 	private void mergePulicKeyParameter(User user){
-		String pubKeyParameterName = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY.getValue();
+		String pubKeyParameterName = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY.getName();
 		ServiceConfigurationParameter pubKeySystemParameter = Configuration.getInstance().getParameters().getParameter(pubKeyParameterName);
 		String pubKeyFilePath = pubKeySystemParameter.getValue();
 		if(FileUtil.exist(pubKeyFilePath)){
