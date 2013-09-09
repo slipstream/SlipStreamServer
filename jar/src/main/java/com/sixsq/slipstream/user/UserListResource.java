@@ -30,13 +30,12 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
-import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.UserView.UserViewList;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.XmlUtil;
 
 public class UserListResource extends ServerResource {
 
@@ -75,14 +74,8 @@ public class UserListResource extends ServerResource {
 
 		UserViewList userViewList = new UserViewList(User.viewList());
 
-		Document doc = SerializationUtil.toXmlDocument(userViewList);
-
-		XmlUtil.addUser(doc, user);
-
-		String metadata = SerializationUtil.documentToString(doc);
-
-		String html = slipstream.ui.views.Representation.toHtml(metadata,
-				getPageRepresentation(), null);
+		String html = HtmlUtil.toHtml(userViewList,
+				getPageRepresentation(), user);
 		
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}

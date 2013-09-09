@@ -22,13 +22,10 @@ package com.sixsq.slipstream.resource;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 
 import org.restlet.Request;
 import org.restlet.data.Cookie;
@@ -44,7 +41,6 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.XmlUtil;
 
@@ -113,13 +109,15 @@ public class SimpleRepresentationBaseResource extends ServerResource {
 
 		XmlUtil.addUser(document, user);
 		XmlUtil.addBreadcrumbs(document, "", resourceUri);
-
-		Map<String, Object> parameters = HtmlUtil.createParameters(
-				baseUrlSlash, resourceUri, configuration.version);
-
-		Source source = new DOMSource(document);
-		return HtmlUtil.sourceToHtmlRepresentation(source, "raw-content.xsl",
-				parameters);
+		
+		return null;
+		// TODO: complete this feature
+//		Map<String, Object> parameters = HtmlUtil.createParameters(
+//				baseUrlSlash, resourceUri, configuration.version);
+//
+//		Source source = new DOMSource(document);
+//		return HtmlUtil.sourceToHtmlRepresentation(source, "raw-content.xsl",
+//				parameters);
 
 	}
 

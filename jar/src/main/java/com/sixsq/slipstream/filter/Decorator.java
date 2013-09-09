@@ -29,6 +29,7 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.routing.Filter;
 
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.util.HtmlUtil;
 
 public class Decorator extends Filter {
 
@@ -52,8 +53,8 @@ public class Decorator extends Filter {
 
 		String xhtmlRepresentation = convertHtmlToXhtml(response.getEntityAsText());
 
-		String html = slipstream.ui.views.Representation.toHtml(xhtmlRepresentation,
-				getPageRepresentation(), null);
+		String html = HtmlUtil.toHtml(xhtmlRepresentation,
+				getPageRepresentation());
 		
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}

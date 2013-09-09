@@ -35,6 +35,7 @@ import org.w3c.dom.Document;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
@@ -78,9 +79,8 @@ public class AuthnResource extends ServerResource {
 			Document document = SerializationUtil.toXmlDocument(user);
 			metadata = SerializationUtil.documentToString(document);
 		}
-		return new StringRepresentation(
-				slipstream.ui.views.Representation.toHtml(metadata,
-						templateName, null), MediaType.TEXT_HTML);
+		return new StringRepresentation(HtmlUtil.toHtml(metadata, templateName,
+				null, user), MediaType.TEXT_HTML);
 	}
 
 	protected Reference extractRedirectURL(Request request) {
@@ -88,8 +88,9 @@ public class AuthnResource extends ServerResource {
 	}
 
 	/**
-	 * If the defaultUrl is null and no redirect URL query parameter is provided,
-	 * the redirect URL is the base URL.
+	 * If the defaultUrl is null and no redirect URL query parameter is
+	 * provided, the redirect URL is the base URL.
+	 * 
 	 * @param request
 	 * @param defaultUrl
 	 * @return redirectUrl
@@ -110,7 +111,7 @@ public class AuthnResource extends ServerResource {
 		} else {
 			redirectUrl = new Reference(baseRefSlash);
 		}
-		
+
 		return redirectUrl;
 	}
 

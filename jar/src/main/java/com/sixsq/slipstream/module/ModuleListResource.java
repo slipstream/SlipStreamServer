@@ -30,7 +30,6 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
-import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
@@ -38,9 +37,9 @@ import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.module.ModuleView.ModuleViewList;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.XmlUtil;
 
 public class ModuleListResource extends ModuleListResourceBase {
 
@@ -86,15 +85,9 @@ public class ModuleListResource extends ModuleListResourceBase {
 
 		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
 
-		Document doc = SerializationUtil.toXmlDocument(moduleViewList);
-
-		XmlUtil.addUser(doc, user);
-
-		String metadata = SerializationUtil.documentToString(doc);
-
 		return new StringRepresentation(
-				slipstream.ui.views.Representation.toHtml(metadata,
-						getPageRepresentation(), getTransformationType()),
+				HtmlUtil.toHtml(moduleViewList,
+						getPageRepresentation(), getTransformationType(), user),
 				MediaType.TEXT_HTML);
 	}
 

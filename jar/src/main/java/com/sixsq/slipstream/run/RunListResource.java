@@ -25,7 +25,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -127,19 +126,15 @@ public class RunListResource extends ServerResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		Request request = getRequest();
-		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 		RunViewList runViewList = fetchListView();
 
-		Map<String, Object> parameters = new HashMap<String, Object>();
+		String type = "";
 
 		if (isEmbedded) {
-			parameters.put("isembedded", isEmbedded);
+			type = "chooser";
 		}
-
-		return HtmlUtil.transformToHtml(baseUrlSlash, "run",
-				configuration.version, "run-list.xsl", user, runViewList,
-				parameters);
+		return new StringRepresentation(HtmlUtil.toHtml(runViewList,
+				"runs", type, user), MediaType.TEXT_HTML);
 	}
 
 	private RunViewList fetchListView() {

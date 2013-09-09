@@ -47,6 +47,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
@@ -140,11 +141,9 @@ public class CommonStatusService extends StatusService {
 			Document doc = SerializationUtil.toXmlDocument(user);
 			metadata = SerializationUtil.documentToString(doc);
 		}
-		
-		return new StringRepresentation(
-				slipstream.ui.views.Representation.toHtmlError(metadata,
-						status.getDescription(),
-						String.valueOf(status.getCode())), MediaType.TEXT_HTML);
+
+		return new StringRepresentation(HtmlUtil.toHtmlError(metadata,
+				status.getDescription(), status.getCode()), MediaType.TEXT_HTML);
 	}
 
 	private String statusToString(Status status) {

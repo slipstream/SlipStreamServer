@@ -24,12 +24,10 @@ import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
-import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.module.ModuleListResource;
 import com.sixsq.slipstream.module.ModuleView.ModuleViewList;
-import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.XmlUtil;
+import com.sixsq.slipstream.util.HtmlUtil;
 
 public abstract class SimpleResource extends ModuleListResource {
 
@@ -38,15 +36,9 @@ public abstract class SimpleResource extends ModuleListResource {
 
 		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
 
-		Document doc = SerializationUtil.toXmlDocument(moduleViewList);
-
-		XmlUtil.addUser(doc, user);
-
-		String metadata = SerializationUtil.documentToString(doc);
-
 		return new StringRepresentation(
-				slipstream.ui.views.Representation.toHtml(metadata,
-						getPageRepresentation(), getTransformationType()),
+				HtmlUtil.toHtml(moduleViewList,
+						getPageRepresentation(), getTransformationType(), user),
 				MediaType.TEXT_HTML);
 	}
 

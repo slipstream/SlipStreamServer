@@ -35,7 +35,6 @@ import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
-import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ParametersFactory;
@@ -43,10 +42,10 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameterized;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.XmlUtil;
 
 public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		extends ServerResource {
@@ -338,14 +337,8 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 			}
 		}
 
-		Document doc = SerializationUtil.toXmlDocument(getParameterized());
-
-		XmlUtil.addUser(doc, user);
-
-		String metadata = SerializationUtil.documentToString(doc);
-
-		String html = slipstream.ui.views.Representation.toHtml(metadata,
-				getPageRepresentation(), getTransformationType());
+		String html = HtmlUtil.toHtml(getParameterized(),
+				getPageRepresentation(), getTransformationType(), user);
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}

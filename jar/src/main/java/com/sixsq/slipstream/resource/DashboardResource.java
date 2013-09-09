@@ -28,7 +28,6 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
-import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
@@ -38,9 +37,9 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.module.ModuleListResourceBase;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.XmlUtil;
 
 public class DashboardResource extends ModuleListResourceBase {
 
@@ -72,10 +71,32 @@ public class DashboardResource extends ModuleListResourceBase {
 		}
 	}
 
-	private String computeDashboard() {
+	private User extractUserFromQuery() {
+		String username = (String) getRequest().getAttributes().get("user");
+		return User.loadByName(username);
+	}
 
+	@Get("xml")
+	public Representation toXml() {
+
+		String metadata = SerializationUtil.toXmlString(computeDashboard());
+		return new StringRepresentation(metadata, MediaType.TEXT_XML);
+
+	}
+
+	@Get("html")
+	public Representation toHtml() {
+
+		String html = HtmlUtil.toHtml(computeDashboard(),
+				"dashboard", user);
+		
+		return new StringRepresentation(html, MediaType.TEXT_HTML);
+	}
+
+	private Dashboard computeDashboard() {
+	
 		User user = this.user;
-
+	
 		if(this.user.isSuper()) {
 			user = extractUserFromQuery();
 			user = (user == null) ? this.user : user;
@@ -90,35 +111,7 @@ public class DashboardResource extends ModuleListResourceBase {
 			//throw(new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
 		}
 	
-		Document doc = SerializationUtil.toXmlDocument(dashboard);
-	
-		XmlUtil.addUser(doc, this.user);
-		String metadata = SerializationUtil.documentToString(doc);
-		return metadata;
-	}
-
-	private User extractUserFromQuery() {
-		String username = (String) getRequest().getAttributes().get("user");
-		return User.loadByName(username);
-	}
-
-	@Get("xml")
-	public Representation toXml() {
-
-		String metadata = computeDashboard();
-
-		return new StringRepresentation(metadata, MediaType.TEXT_XML);
-	}
-
-	@Get("html")
-	public Representation toHtml() {
-
-		String metadata = computeDashboard();
-
-		String html = slipstream.ui.views.Representation.toHtml(metadata,
-				"dashboard", getTransformationType());
-		
-		return new StringRepresentation(html, MediaType.TEXT_HTML);
+		return dashboard;
 	}
 
 }
