@@ -64,7 +64,6 @@ public class CookieAuthenticator extends Authenticator {
 				CookieUtils.removeAuthnCookie(response);
 			}
 
-			
 			List<MediaType> supported = new ArrayList<MediaType>();
 			supported.add(MediaType.APPLICATION_XML);
 			supported.add(MediaType.TEXT_HTML);

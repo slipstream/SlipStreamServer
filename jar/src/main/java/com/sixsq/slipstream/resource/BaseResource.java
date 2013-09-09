@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.module;
+package com.sixsq.slipstream.resource;
 
 /*
  * +=================================================================+
@@ -20,9 +20,30 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
+import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
-public abstract class ModuleListResourceBase extends ServerResource {
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.RequestUtil;
+
+public abstract class BaseResource extends ServerResource {
+
+	private User user = null;
+
+	@Override
+	protected void doInit() throws ResourceException {
+
+		setUser(RequestUtil.getUserFromRequest(getRequest()));
+
+	}
+
+	protected void setUser(User user) {
+		this.user = user;
+	}
+
+	protected User getUser() {
+		return user;
+	}
 
 	protected String getTransformationType() {
 		String type = "view";
@@ -36,5 +57,4 @@ public abstract class ModuleListResourceBase extends ServerResource {
 		String c = (String) getRequest().getAttributes().get("chooser");
 		return (c == null) ? false : true;
 	}
-	
 }

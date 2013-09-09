@@ -20,56 +20,19 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
-import org.restlet.Request;
-import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
-import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
-import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.dashboard.Dashboard;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
-import com.sixsq.slipstream.module.ModuleListResourceBase;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public class DashboardResource extends ModuleListResourceBase {
-
-	private Configuration configuration = null;
-
-	private User user = null;
-
-	private String resourceUri = null;
-
-	@Override
-	public void doInit() throws ResourceException {
-
-		Request request = getRequest();
-
-		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		String username = CookieUtils.getCookieUsername(cookie);
-
-		user = User.loadByName(username);
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
-		if (configuration == null) {
-			throw new SlipStreamInternalException("configuration is null");
-		}
-
-		resourceUri = RequestUtil.extractResourceUri(getRequest());
-
-		if (resourceUri == null) {
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-		}
-	}
+public class DashboardResource extends BaseResource {
 
 	private User extractUserFromQuery() {
 		String username = (String) getRequest().getAttributes().get("user");
@@ -88,18 +51,18 @@ public class DashboardResource extends ModuleListResourceBase {
 	public Representation toHtml() {
 
 		String html = HtmlUtil.toHtml(computeDashboard(),
-				"dashboard", user);
+				"dashboard", getUser());
 		
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
 	private Dashboard computeDashboard() {
 	
-		User user = this.user;
+		User user = this.getUser();
 	
-		if(this.user.isSuper()) {
+		if(this.getUser().isSuper()) {
 			user = extractUserFromQuery();
-			user = (user == null) ? this.user : user;
+			user = (user == null) ? this.getUser() : user;
 		}
 		
 		Dashboard dashboard = new Dashboard();

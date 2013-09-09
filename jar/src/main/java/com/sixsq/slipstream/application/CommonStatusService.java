@@ -30,7 +30,6 @@ import java.util.List;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.ClientInfo;
-import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Preference;
 import org.restlet.data.Reference;
@@ -42,7 +41,6 @@ import org.restlet.service.StatusService;
 import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
@@ -66,8 +64,7 @@ public class CommonStatusService extends StatusService {
 
 		Representation representation = null;
 
-		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		User user = CookieUtils.getCookieUser(cookie);
+		User user = RequestUtil.getUserFromRequest(request);
 
 		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 

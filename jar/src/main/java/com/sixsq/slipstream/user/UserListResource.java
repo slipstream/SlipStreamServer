@@ -22,35 +22,18 @@ package com.sixsq.slipstream.user;
 
 import java.util.List;
 
-import org.restlet.Request;
-import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 
-import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.user.UserView.UserViewList;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public class UserListResource extends ServerResource {
-
-	private User user = null;
-
-	@Override
-	public void doInit() throws ResourceException {
-
-		Request request = getRequest();
-
-		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		String username = CookieUtils.getCookieUsername(cookie);
-
-		user = User.loadByName(username);
-	}
+public class UserListResource extends BaseResource {
 
 	@Get("txt")
 	public Representation toTxt() {
@@ -75,7 +58,7 @@ public class UserListResource extends ServerResource {
 		UserViewList userViewList = new UserViewList(User.viewList());
 
 		String html = HtmlUtil.toHtml(userViewList,
-				getPageRepresentation(), user);
+				getPageRepresentation(), getUser());
 		
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}

@@ -309,7 +309,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			moduleUri = ModuleUriUtil.extractVersionLessResourceUri(module
 					.getResourceUri());
 			targetUri = ModuleUriUtil
-					.extractVersionLessResourceUri(targetParameterizeUri);
+					.extractVersionLessResourceUri(getTargetParameterizeUri());
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
@@ -471,7 +471,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	private Module resetMandatoryParameters(Module module)
 			throws ValidationException {
-		for (ModuleParameter referenceParameter : createParameterized(
+		for (ModuleParameter referenceParameter : getOrCreateParameterized(
 				"reference").getParameterList()) {
 			ModuleParameter p = module.getParameter(referenceParameter
 					.getName());
@@ -545,7 +545,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			String parentResourceUri = null;
 			try {
 				parentResourceUri = ModuleUriUtil
-						.extractParentUriFromResourceUri(targetParameterizeUri);
+						.extractParentUriFromResourceUri(getTargetParameterizeUri());
 			} catch (ValidationException e) {
 				return false;
 			}
@@ -565,7 +565,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@Override
-	protected Module createParameterized(String name)
+	protected Module getOrCreateParameterized(String name)
 			throws ValidationException {
 		Module module = null;
 		switch (getCategory()) {

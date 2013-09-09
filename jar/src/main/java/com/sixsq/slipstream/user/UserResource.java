@@ -60,31 +60,39 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Get("xml")
 	public Representation toXml() {
-		User user = (User)getParameterized();
-		
-		mergeCloudSystemParameters(user);		
+		User user = (User) getParameterized();
+
+		mergeCloudSystemParameters(user);
 
 		return super.toXml();
 	}
 
 	private void mergeCloudSystemParameters(User user) {
-		String cloudServiceName = (String) getRequest().getAttributes().get(RuntimeParameter.CLOUD_SERVICE_NAME);
+		String cloudServiceName = (String) getRequest().getAttributes().get(
+				RuntimeParameter.CLOUD_SERVICE_NAME);
 		if (cloudServiceName != null) {
-			for (Entry<String, Parameter<ServiceConfiguration>> p : Configuration.getInstance().getParameters().getParameters(cloudServiceName).entrySet()) {
-				user.getParameters().put(p.getKey(), UserParameter.convert(p.getValue()));
+			for (Entry<String, Parameter<ServiceConfiguration>> p : Configuration
+					.getInstance().getParameters()
+					.getParameters(cloudServiceName).entrySet()) {
+				user.getParameters().put(p.getKey(),
+						UserParameter.convert(p.getValue()));
 			}
 		}
 		mergePulicKeyParameter(user);
 	}
-	
-	private void mergePulicKeyParameter(User user){
-		String pubKeyParameterName = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY.getName();
-		ServiceConfigurationParameter pubKeySystemParameter = Configuration.getInstance().getParameters().getParameter(pubKeyParameterName);
+
+	private void mergePulicKeyParameter(User user) {
+		String pubKeyParameterName = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY
+				.getName();
+		ServiceConfigurationParameter pubKeySystemParameter = Configuration
+				.getInstance().getParameters()
+				.getParameter(pubKeyParameterName);
 		String pubKeyFilePath = pubKeySystemParameter.getValue();
-		if(FileUtil.exist(pubKeyFilePath)){
+		if (FileUtil.exist(pubKeyFilePath)) {
 			String pubKey = FileUtil.fileToString(pubKeyFilePath);
 			pubKeyParameterName = "General.orchestrator.publicsshkey";
-			UserParameter pubKeyUserParameter = new UserParameter(pubKeyParameterName, pubKey, "");
+			UserParameter pubKeyUserParameter = new UserParameter(
+					pubKeyParameterName, pubKey, "");
 			pubKeyUserParameter.setCategory("General");
 			user.getParameters().put(pubKeyParameterName, pubKeyUserParameter);
 		}
@@ -105,7 +113,7 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Override
-	protected User createParameterized(String name) {
+	protected User getOrCreateParameterized(String name) {
 		User user = getParameterized();
 		if (user == null) {
 			try {
@@ -151,7 +159,7 @@ public class UserResource extends ParameterizedResource<User> {
 	public void modifyOrCreateFromForm(Representation entity)
 			throws ResourceException {
 
-		setParameterized(createParameterized(targetParameterizeUri));
+		setParameterized(getOrCreateParameterized(getTargetParameterizeUri()));
 
 		try {
 			ParametersFactory.addParametersForEditing(getParameterized());
@@ -180,7 +188,7 @@ public class UserResource extends ParameterizedResource<User> {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex);
 		}
 
-		if (!targetParameterizeUri.equals(user.getName())) {
+		if (!getTargetParameterizeUri().equals(user.getName())) {
 			throwClientBadRequest("The uploaded user does not correspond to the target user uri");
 		}
 

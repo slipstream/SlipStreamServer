@@ -24,7 +24,6 @@ import java.io.IOException;
 
 import javax.persistence.EntityManager;
 
-import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
@@ -34,30 +33,24 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameterized;
-import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
-		extends ServerResource {
+		extends BaseResource {
 
-	protected static final String NEW_NAME = "new";
+	private static final String NEW_NAME = "new";
 
 	private S parameterized = null;
 
-	private User user = null;
-
-	protected String baseUrlSlash = null;
-	protected String targetParameterizeUri = null;
+	private String targetParameterizeUri = null;
 
 	private boolean isEdit = false;
 
@@ -66,18 +59,10 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	private boolean canPost = false;
 	private boolean canDelete = false;
 
-	protected Configuration configuration;
-
 	@Override
 	public void doInit() throws ResourceException {
 
-		Request request = getRequest();
-
-		setUser(User.loadByName(request.getClientInfo().getUser().getName()));
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
-
-		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
+		super.doInit();
 
 		try {
 			loadTargetParameterized();
@@ -92,8 +77,12 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	abstract protected String extractTargetUriFromRequest();
 
-	abstract protected S createParameterized(String name)
+	abstract protected S getOrCreateParameterized(String name)
 			throws ValidationException;
+
+	public String getTargetParameterizeUri() {
+		return targetParameterizeUri;
+	}
 
 	public boolean isEdit() {
 		return isEdit;
@@ -137,14 +126,6 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	abstract protected void authorize();
 
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
 	public void setParameterized(S parameterized) {
 		this.parameterized = parameterized;
 	}
@@ -179,7 +160,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	private void createVolatileParameterizedForEditing()
 			throws ValidationException {
-		setParameterized(createParameterized(ModuleUriUtil
+		setParameterized(getOrCreateParameterized(ModuleUriUtil
 				.extractModuleNameFromResourceUri(targetParameterizeUri)));
 		isEdit = true;
 	}
@@ -207,7 +188,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		Form form = resourceRef.getQueryAsForm();
 		return isTrue(form.getFirstValue(key));
 	}
-	
+
 	private boolean extractNewFlagFromQuery() {
 		return isQueryValueSetTrue("new");
 	}
@@ -228,7 +209,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected void addParametersForEditing() throws ValidationException,
 			ConfigurationException {
-		user = ParametersFactory.addParametersForEditing(user);
+		setUser(ParametersFactory.addParametersForEditing(getUser()));
 	}
 
 	protected void throwUnauthorized() {
@@ -338,12 +319,12 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		}
 
 		String html = HtmlUtil.toHtml(getParameterized(),
-				getPageRepresentation(), getTransformationType(), user);
+				getPageRepresentation(), getTransformationType(), getUser());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
-	private String getTransformationType() {
+	protected String getTransformationType() {
 		String type = "view";
 		if (isEdit) {
 			type = "edit";
@@ -374,7 +355,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 				throwClientForbiddenError("Cannot create this resource. Does it already exist?");
 			}
 		} else {
-				throwClientForbiddenError("Forbidden to update this resource.");
+			throwClientForbiddenError("Forbidden to update this resource.");
 		}
 	}
 

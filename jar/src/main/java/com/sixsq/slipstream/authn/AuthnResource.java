@@ -21,33 +21,20 @@ package com.sixsq.slipstream.authn;
  */
 
 import org.restlet.Request;
-import org.restlet.data.Cookie;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
 
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public class AuthnResource extends ServerResource {
-
-	protected User user = null;
-
-	protected Configuration configuration = null;
-
-	protected String resourceUri = null;
-
-	protected String baseUrlSlash = null;
+public class AuthnResource extends BaseResource {
 
 	private final String templateName; // name of the page
 
@@ -55,32 +42,16 @@ public class AuthnResource extends ServerResource {
 		this.templateName = templateName;
 	}
 
-	@Override
-	public void doInit() throws ResourceException {
-
-		Request request = getRequest();
-
-		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		user = CookieUtils.getCookieUser(cookie);
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
-
-		resourceUri = RequestUtil.extractResourceUri(request);
-
-		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
-
-	}
-
 	@Get("html")
 	public Representation toHtml() {
 
 		String metadata = "";
-		if (user != null) {
-			Document document = SerializationUtil.toXmlDocument(user);
+		if (getUser() != null) {
+			Document document = SerializationUtil.toXmlDocument(getUser());
 			metadata = SerializationUtil.documentToString(document);
 		}
 		return new StringRepresentation(HtmlUtil.toHtml(metadata, templateName,
-				null, user), MediaType.TEXT_HTML);
+				null, getUser()), MediaType.TEXT_HTML);
 	}
 
 	protected Reference extractRedirectURL(Request request) {

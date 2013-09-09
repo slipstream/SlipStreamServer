@@ -38,7 +38,7 @@ public abstract class SimpleResource extends ModuleListResource {
 
 		return new StringRepresentation(
 				HtmlUtil.toHtml(moduleViewList,
-						getPageRepresentation(), getTransformationType(), user),
+						getPageRepresentation(), getTransformationType(), getUser()),
 				MediaType.TEXT_HTML);
 	}
 

@@ -37,12 +37,20 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.resource.ParameterizedResource;
+import com.sixsq.slipstream.util.RequestUtil;
 
 public class ServiceConfigurationResource extends
 		ParameterizedResource<ServiceConfiguration> {
 
 	public static final String CONFIGURATION_PATH = "/configuration";
 
+	protected Configuration configuration;
+
+	@Override
+	public void doInit() throws ResourceException {
+		super.doInit();
+		configuration = RequestUtil.getConfigurationFromRequest(getRequest());
+	}
 	@Put
 	public void update(Representation entity) {
 
@@ -115,7 +123,7 @@ public class ServiceConfigurationResource extends
 	}
 
 	@Override
-	protected ServiceConfiguration createParameterized(String name)
+	protected ServiceConfiguration getOrCreateParameterized(String name)
 			throws ValidationException {
 		throw (new NotImplementedException());
 	}

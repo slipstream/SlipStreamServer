@@ -30,6 +30,7 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.User;
 
 public class RequestUtil {
 
@@ -40,6 +41,10 @@ public class RequestUtil {
 	public static final String ENTITY_MANAGER_KEY = "ENTITY_MANAGER";
 
 	private RequestUtil() {
+	}
+
+	public static User getUserFromRequest(Request request) {
+		return User.loadByName(request.getClientInfo().getUser().getName(), true);
 	}
 
 	public static Reference getBaseRefSlash(Request request) {
