@@ -20,7 +20,8 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -45,6 +46,7 @@ import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.user.UserView;
 
 /**
@@ -101,9 +103,10 @@ public class User extends Parameterized<User, UserParameter> {
 
 	}
 
-	public User(String name, String password) throws ValidationException {
+	public User(String name, String password) throws ValidationException,
+			NoSuchAlgorithmException, UnsupportedEncodingException {
 		this(name);
-		setPassword(password);
+		hashAndSetPassword(password);
 	}
 
 	public User(String name) throws ValidationException {
@@ -190,6 +193,11 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public String getPassword() {
 		return password;
+	}
+
+	public void hashAndSetPassword(String password)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		this.password = Passwords.hash(password);
 	}
 
 	public void setPassword(String password) {
@@ -320,7 +328,7 @@ public class User extends Parameterized<User, UserParameter> {
 	public static User loadByName(String name) {
 		return loadByName(name, true);
 	}
-	
+
 	public static User loadByName(String name, boolean mergeSysteParameters) {
 		return load(User.constructResourceUri(name), mergeSysteParameters);
 	}
@@ -328,25 +336,29 @@ public class User extends Parameterized<User, UserParameter> {
 	public static User load(String resourceUrl) {
 		return load(resourceUrl, true);
 	}
-	
+
 	public static User load(String resourceUrl, boolean mergeSysteParameters) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		User user = em.find(User.class, resourceUrl);
 		em.close();
-		
-		if(mergeSysteParameters && user != null) addSystemParametersIntoUser(user);
-		
+
+		if (mergeSysteParameters && user != null)
+			addSystemParametersIntoUser(user);
+
 		return user;
 	}
-	
-	public static void addSystemParametersIntoUser(User user){
+
+	public static void addSystemParametersIntoUser(User user) {
 		ServiceConfiguration sc = Configuration.getInstance().getParameters();
-		for (Map.Entry<String, ServiceConfigurationParameter> entry : sc.getParameters().entrySet()) {
+		for (Map.Entry<String, ServiceConfigurationParameter> entry : sc
+				.getParameters().entrySet()) {
 			try {
-				UserParameter userParam = new UserParameter(entry.getKey(), entry.getValue().getValue(""), "");
+				UserParameter userParam = new UserParameter(entry.getKey(),
+						entry.getValue().getValue(""), "");
 				userParam.setCategory("System");
 				user.setParameter(userParam);
-			} catch (ValidationException e) {}
+			} catch (ValidationException e) {
+			}
 		}
 	}
 

@@ -26,7 +26,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 import org.junit.After;
@@ -56,8 +58,9 @@ import com.sixsq.slipstream.util.XmlUtil;
 public class UserResourceTest extends ResourceTestBase {
 
 	private static final String NEW_PASSWORD = "newPassword";
+	private static final String SUPER_PASSWORD = "passwordSuper";
 	private static User otherUser = createUser("test2", "password2");
-	private static User superUser = createUser("super", "passwordSuper");
+	private static User superUser = createUser("super", SUPER_PASSWORD);
 
 	@BeforeClass
 	public static void setupBeforeClass() throws InstantiationException,
@@ -119,11 +122,12 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void changePasswordValidAsSuper() throws ConfigurationException {
+	public void changePasswordValidAsSuper() throws ConfigurationException,
+			NoSuchAlgorithmException, UnsupportedEncodingException {
 
-		assertThat(getPersistedPassword(user), is(not((NEW_PASSWORD))));
+		assertThat(getPersistedPassword(user), is(not(Passwords.hash(NEW_PASSWORD))));
 
-		Passwords passwords = createValidPasswords(user);
+		Passwords passwords = createValidPasswords(PASSWORD);
 		Request request = createPutRequest(user, superUser.getName(), passwords);
 		Response response = executeRequest(request);
 
@@ -131,18 +135,20 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User modifiedUser = User.load(user.getResourceUri());
 
-		assertThat(getPersistedPassword(modifiedUser), is((NEW_PASSWORD)));
+		assertThat(getPersistedPassword(modifiedUser), is(Passwords.hash(NEW_PASSWORD)));
 	}
 
 	@Test
-	public void changePasswordValidAsItself() throws ConfigurationException {
+	public void changePasswordValidAsItself() throws ConfigurationException,
+			NoSuchAlgorithmException, UnsupportedEncodingException {
 
 		user = user.store();
-		user.setPassword("something old");
+		String oldPassword = "something old";
+		user.hashAndSetPassword(oldPassword);
 		user = user.store();
-		assertThat(getPersistedPassword(user), is(not((NEW_PASSWORD))));
+		assertThat(getPersistedPassword(user), is(not(NEW_PASSWORD)));
 
-		Passwords passwords = createValidPasswords(user);
+		Passwords passwords = createValidPasswords(oldPassword);
 		Request request = createPutRequest(user, user.getName(), passwords);
 		Response response = executeRequest(request);
 
@@ -150,17 +156,20 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User modifiedUser = User.load(user.getResourceUri());
 
-		assertThat(getPersistedPassword(modifiedUser), is((NEW_PASSWORD)));
+		assertThat(getPersistedPassword(modifiedUser), is(Passwords.hash(NEW_PASSWORD)));
 	}
 
 	@Test
-	public void cannotChangePasswordOfOtherUser() throws ConfigurationException {
+	public void cannotChangePasswordOfOtherUser()
+			throws ConfigurationException, NoSuchAlgorithmException,
+			UnsupportedEncodingException {
 
-		user.setPassword("old password");
+		String oldPassword = "old password";
+		user.setPassword(oldPassword);
 		user = (User) user.store();
-		assertThat(getPersistedPassword(user), is(not((NEW_PASSWORD))));
+		assertThat(getPersistedPassword(user), is(not(NEW_PASSWORD)));
 
-		Passwords passwords = createValidPasswords(user);
+		Passwords passwords = createValidPasswords(oldPassword);
 		Request request = createPutRequest(user, otherUser.getName(), passwords);
 		Response response = executeRequest(request);
 
@@ -169,9 +178,10 @@ public class UserResourceTest extends ResourceTestBase {
 
 	@Test
 	public void changePasswordMissingOldPassword()
-			throws ConfigurationException {
+			throws ConfigurationException, NoSuchAlgorithmException,
+			UnsupportedEncodingException {
 
-		Passwords passwords = createValidPasswords(user);
+		Passwords passwords = createValidPasswords(PASSWORD);
 		passwords.oldPassword = null;
 		Request request = createPutRequest(user, user.getName(), passwords);
 		Response response = executeRequest(request);
@@ -181,11 +191,12 @@ public class UserResourceTest extends ResourceTestBase {
 
 	@Test
 	public void superCanChangeOthersPasswordWithoutOldPassword()
-			throws ConfigurationException, ValidationException {
+			throws ConfigurationException, ValidationException,
+			NoSuchAlgorithmException, UnsupportedEncodingException {
 
-		user.setPassword(PASSWORD);
+		user.hashAndSetPassword(PASSWORD);
 
-		Passwords passwords = createValidPasswords(user);
+		Passwords passwords = createValidPasswords(PASSWORD);
 		passwords.oldPassword = null;
 		Request request = createPutRequest(user, superUser.getName(), passwords);
 		Response response = executeRequest(request);
@@ -193,16 +204,18 @@ public class UserResourceTest extends ResourceTestBase {
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
 		user = User.load(user.getResourceUri());
-		assertThat(user.getPassword(), is(NEW_PASSWORD));
+		assertThat(user.getPassword(), is(Passwords.hash(NEW_PASSWORD)));
 	}
 
 	@Test
 	public void superMustProvideItsOwnOldPassowrdToChangeItsPassword()
-			throws ConfigurationException, ValidationException {
+			throws ConfigurationException, ValidationException,
+			NoSuchAlgorithmException, UnsupportedEncodingException {
 
-		Passwords passwords = createValidPasswords(superUser);
+		Passwords passwords = createValidPasswords(SUPER_PASSWORD);
 		passwords.oldPassword = null;
-		Request request = createPutRequest(superUser, superUser.getName(), passwords);
+		Request request = createPutRequest(superUser, superUser.getName(),
+				passwords);
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_CONFLICT));
@@ -226,8 +239,8 @@ public class UserResourceTest extends ResourceTestBase {
 		Request request = createGetRequest(user, superUser.getName());
 		Response response = executeRequest(request);
 
-		User user = (User) SerializationUtil.fromXml(
-				response.toString(), User.class);
+		User user = (User) SerializationUtil.fromXml(response.toString(),
+				User.class);
 		assertNotNull(user.getPassword());
 	}
 
@@ -324,8 +337,9 @@ public class UserResourceTest extends ResourceTestBase {
 		return restoredUser.getPassword();
 	}
 
-	private Passwords createValidPasswords(User user) {
-		Passwords passwords = new Passwords(user.getPassword(), NEW_PASSWORD,
+	private Passwords createValidPasswords(String oldPassword)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		Passwords passwords = new Passwords(oldPassword, NEW_PASSWORD,
 				NEW_PASSWORD);
 		return passwords;
 	}
@@ -397,19 +411,23 @@ public class UserResourceTest extends ResourceTestBase {
 		String category = "SlipStream_Support";
 		CookieUtils.addAuthnCookie(request, otherUser.getName(), category);
 
-		String cookieCategory = CookieUtils.getCookieCloudServiceName(request.getCookies().getFirst(CookieUtils.getCookieName()));
+		String cookieCategory = CookieUtils.getCookieCloudServiceName(request
+				.getCookies().getFirst(CookieUtils.getCookieName()));
 
-		// need to add the cloud service name directly as an attribute, since we're not going through the CookieAuthenticator
-		request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME, cookieCategory);
+		// need to add the cloud service name directly as an attribute, since
+		// we're not going through the CookieAuthenticator
+		request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME,
+				cookieCategory);
 		Response response = executeRequest(request);
 
 		String denormalized = XmlUtil.denormalize(response.getEntityAsText());
 		User user = (User) SerializationUtil.fromXml(denormalized, User.class);
-		
-		UserParameter systemParameter = user.getParameter("slipstream.support.email");
+
+		UserParameter systemParameter = user
+				.getParameter("slipstream.support.email");
 		assertNotNull(systemParameter);
 	}
-	
+
 	private Request createDeleteRequest(User targetUser, User user)
 			throws ConfigurationException {
 		return createDeleteRequest(targetUser, user.getName());

@@ -165,19 +165,19 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		List<Target> targets = new ArrayList<Target>();
 
-		String[] targetNames = {"execute", "report"};
-		
-		for(String targetName : targetNames) {
+		String[] targetNames = { "execute", "report" };
+
+		for (String targetName : targetNames) {
 			addTarget(form, targets, targetName);
 		}
-		
+
 		castToModule().setTargets(targets);
 
 	}
 
 	private void addTarget(Form form, List<Target> targets, String targetName) {
 		String target = form.getFirstValue(targetName + "--script");
-		if(target != null) {
+		if (target != null) {
 			targets.add(new Target(targetName, target));
 		}
 	}
@@ -225,7 +225,8 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		ImageModule olderImage = (ImageModule) previous;
 		if (!castToModule().isBase()) {
 			if (!needsRebuild) {
-				for (CloudImageIdentifier cii : olderImage.getCloudImageIdentifiers()) {
+				for (CloudImageIdentifier cii : olderImage
+						.getCloudImageIdentifiers()) {
 					cii.copyTo(castToModule());
 				}
 			}

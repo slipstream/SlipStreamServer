@@ -400,7 +400,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		RunFactory.resolveImageIdIfAppropriate(module, getUser());
 	}
 
-	private Module loadModule(String targetParameterizedUri)
+	public Module loadModule(String targetParameterizedUri)
 			throws ValidationException {
 		Module module = Module.load(targetParameterizedUri);
 		if (module != null) {
