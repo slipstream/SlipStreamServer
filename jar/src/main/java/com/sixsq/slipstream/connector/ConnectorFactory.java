@@ -43,6 +43,11 @@ public class ConnectorFactory {
 	public static Connector getCurrentConnector(User user)
 			throws ConfigurationException, ValidationException {
 		String cloudServiceName = getDefaultCloudServiceName(user);
+		
+		if("".equals(cloudServiceName)) {
+			// user not configured, we take the first connector
+			cloudServiceName = getConnectors().entrySet().iterator().next().getKey();
+		}
 
 		if (!FormProcessor.isSet(cloudServiceName)) {
 			throw (new ValidationException(
