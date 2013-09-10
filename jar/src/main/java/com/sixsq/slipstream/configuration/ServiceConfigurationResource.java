@@ -48,8 +48,8 @@ public class ServiceConfigurationResource extends
 
 	@Override
 	public void doInit() throws ResourceException {
-		super.doInit();
 		configuration = RequestUtil.getConfigurationFromRequest(getRequest());
+		super.doInit();
 	}
 	@Put
 	public void update(Representation entity) {

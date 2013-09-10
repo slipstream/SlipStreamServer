@@ -151,8 +151,8 @@ public class ServiceConfiguration extends
 			}
 		},
 
-		SLIPSTREAM_REGISTRATION_ENABLE("Allow self user registration. If true, user will be able to create accounts themselves.",
-				ParameterCategory.SlipStream_basics);
+		SLIPSTREAM_REGISTRATION_ENABLE("Allow self user registration. If checked, user will be able to create accounts themselves.",
+				ParameterCategory.SlipStream_basics, ParameterType.Boolean);
 
 		private final String description;
 		private final ParameterCategory category;
