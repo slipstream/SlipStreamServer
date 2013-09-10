@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.UserParameter;
 
 public abstract class UserParametersFactoryBase extends
@@ -87,6 +88,10 @@ public abstract class UserParametersFactoryBase extends
 		p.setCategory(getCategory());
 		p.setMandatory(true);
 		return p;
+	}
+	
+	public static String getPublicKeyParameterName(){
+		return ParametersFactory.constructKey(ParameterCategory.General.toString(), SSHKEY_PARAMETER_NAME);
 	}
 
 }
