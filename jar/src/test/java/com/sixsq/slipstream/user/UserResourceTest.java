@@ -125,6 +125,9 @@ public class UserResourceTest extends ResourceTestBase {
 	public void changePasswordValidAsSuper() throws ConfigurationException,
 			NoSuchAlgorithmException, UnsupportedEncodingException {
 
+		user = user.store();
+		user.hashAndSetPassword("something old");
+		user = user.store();
 		assertThat(getPersistedPassword(user), is(not(Passwords.hash(NEW_PASSWORD))));
 
 		Passwords passwords = createValidPasswords(PASSWORD);
