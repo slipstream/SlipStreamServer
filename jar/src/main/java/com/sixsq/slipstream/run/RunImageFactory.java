@@ -20,6 +20,7 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
@@ -38,10 +39,12 @@ public class RunImageFactory extends BuildImageFactory {
 
 		checkNoCircularDependencies(image);
 
+		checkCloudServiceDefined(cloudService, user);
+
 		Run run = constructRun(image, type, cloudService, user);
 
 		image.validateForRun(cloudService);
-		
+
 		initRuntimeParameters(image, run);
 
 		initMachineState(run);
@@ -49,6 +52,15 @@ public class RunImageFactory extends BuildImageFactory {
 		initNodeNames(run, cloudService);
 
 		return run;
+	}
+
+	private void checkCloudServiceDefined(String cloudService, User user)
+			throws SlipStreamClientException {
+		if ("".equals(cloudService)) {
+			throw new SlipStreamClientException(
+					ConnectorFactory
+							.incompleteCloudConfigurationErrorMessage(user));
+		}
 	}
 
 	private static void initNodeNames(Run run, String cloudService) {

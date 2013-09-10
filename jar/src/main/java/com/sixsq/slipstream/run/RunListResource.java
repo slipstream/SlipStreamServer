@@ -228,7 +228,7 @@ public class RunListResource extends ServerResource {
 		String cloudServiceName = user.getDefaultCloudService();
 		if (cloudServiceName == null || "".equals(cloudServiceName)) {
 			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					"No cloud selected, please edit your account"));
+					ConnectorFactory.incompleteCloudConfigurationErrorMessage(user)));
 		}
 		return cloudServiceName;
 	}

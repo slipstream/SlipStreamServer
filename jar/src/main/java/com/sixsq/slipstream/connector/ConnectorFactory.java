@@ -43,19 +43,30 @@ public class ConnectorFactory {
 	public static Connector getCurrentConnector(User user)
 			throws ConfigurationException, ValidationException {
 		String cloudServiceName = getDefaultCloudServiceName(user);
-		
-		if("".equals(cloudServiceName)) {
+
+		if ("".equals(cloudServiceName)) {
 			// user not configured, we take the first connector
-			cloudServiceName = getConnectors().entrySet().iterator().next().getKey();
+			cloudServiceName = getConnectors().entrySet().iterator().next()
+					.getKey();
 		}
 
 		if (!FormProcessor.isSet(cloudServiceName)) {
-			throw (new ValidationException(
-					"Missing cloud service selection. Consider editing your <a href='"
-							+ "/user/" + user.getName() + "?edit=true'>user account</a>"));
+			throwIncompleteUserCloudConfiguration(user);
 		}
 
 		return getConnector(cloudServiceName);
+	}
+
+	protected static void throwIncompleteUserCloudConfiguration(User user)
+			throws ValidationException {
+		throw new ValidationException(
+				incompleteCloudConfigurationErrorMessage(user));
+	}
+
+	public static String incompleteCloudConfigurationErrorMessage(User user) {
+		return "Incomplete cloud configuration. Consider editing your <a href='"
+				+ "/user/" + user.getName()
+				+ "?edit=true'>user account</a>";
 	}
 
 	public static Connector getConnector(String cloudServiceName)
@@ -72,6 +83,9 @@ public class ConnectorFactory {
 			throws ConfigurationException, ValidationException {
 		if (isDefaultCloudService(cloudServiceName)) {
 			cloudServiceName = getDefaultCloudServiceName(user);
+			if ("".equals(cloudServiceName)) {
+				throw new ValidationException("Missing default cloud in user");
+			}
 		}
 
 		return getConnector(cloudServiceName);
@@ -115,7 +129,7 @@ public class ConnectorFactory {
 					+ e.getMessage());
 		}
 	}
-	
+
 	public static void resetConnectors() {
 		connectors = null;
 		cloudServiceNames = null;
