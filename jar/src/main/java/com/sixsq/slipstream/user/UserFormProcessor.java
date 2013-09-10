@@ -20,6 +20,9 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+
 import org.restlet.data.Form;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
@@ -67,8 +70,9 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 
 		User dbUser = User.loadByName(name);
 
-		processPassword(getForm(), dbUser);
 		processIsSuper(getForm());
+
+		processPassword(getForm(), dbUser);
 	}
 
 	private void parseState(Form form, User user) {
@@ -108,7 +112,16 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 	private void processPassword(Form form, User dbUser)
 			throws ValidationException {
 
-		Passwords passwords = extractPasswords(form);
+		Passwords passwords;
+		try {
+			passwords = extractPasswords(form);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			throw new ValidationException(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			throw new ValidationException(e.getMessage());
+		}
 
 		boolean changePassword = shouldChangePassword(passwords, dbUser);
 
@@ -121,11 +134,15 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 		getParametrized().setPassword(password);
 	}
 
-	private Passwords extractPasswords(Form form) {
+	private Passwords extractPasswords(Form form)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException,
+			ValidationException {
 		String password1 = form.getFirstValue("password1");
 		String password2 = form.getFirstValue("password2");
 		String oldPassword = form.getFirstValue("oldPassword");
-		return new Passwords(oldPassword, password1, password2);
+		Passwords passwords = new Passwords(oldPassword, password1, password2);
+		passwords.hash();
+		return passwords;
 	}
 
 	private boolean shouldChangePassword(Passwords passwords, User dbUser)
@@ -139,7 +156,8 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 
 		boolean notNew = !isNewUser(dbUser);
 		boolean notSuper = !getUser().isSuper();
-		boolean superChangingSuper = false;;
+		boolean superChangingSuper = false;
+
 		if (notNew) {
 			superChangingSuper = (!notSuper && dbUser.isSuper());
 		}

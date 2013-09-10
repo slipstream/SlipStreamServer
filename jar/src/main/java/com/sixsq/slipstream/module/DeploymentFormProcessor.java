@@ -152,7 +152,7 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 			setMultiplicity(getForm(), nodeindex, node);
 
 			setCloudService(getForm(), nodeindex, node);
-			
+
 			module.getNodes().put(shortname, node);
 		}
 	}
@@ -198,11 +198,12 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 		deploymentVersion.setParameters(parameters);
 	}
 
-	private void setCloudService(Form form, String nodeindex, Node node){
-		String cloudServiceValue = form.getFirstValue("node--" + nodeindex + "--cloudservice--value", "default");
+	private void setCloudService(Form form, String nodeindex, Node node) {
+		String cloudServiceValue = form.getFirstValue("node--" + nodeindex
+				+ "--cloudservice--value", "default");
 		node.setCloudService(cloudServiceValue);
 	}
-	
+
 	private void setMultiplicity(Form form, String nodeindex, Node node)
 			throws ValidationException {
 

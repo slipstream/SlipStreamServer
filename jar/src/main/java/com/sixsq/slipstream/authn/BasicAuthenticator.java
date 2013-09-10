@@ -20,6 +20,8 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,7 @@ import org.restlet.security.User;
 import org.restlet.security.Verifier;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.util.RequestUtil;
 
 public class BasicAuthenticator extends Authenticator {
@@ -68,8 +71,16 @@ public class BasicAuthenticator extends Authenticator {
 					.loadByName(username);
 
 			if (user != null) {
-				if (user.getPassword().equals(password)) {
-					result = Verifier.RESULT_VALID;
+				try {
+					if (user.getPassword().equals(Passwords.hash(password))) {
+						result = Verifier.RESULT_VALID;
+					}
+				} catch (NoSuchAlgorithmException e) {
+					response.setStatus(Status.SERVER_ERROR_INTERNAL, e);
+					return false;
+				} catch (UnsupportedEncodingException e) {
+					response.setStatus(Status.SERVER_ERROR_INTERNAL, e);
+					return false;
 				}
 			}
 		}

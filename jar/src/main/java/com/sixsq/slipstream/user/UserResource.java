@@ -159,6 +159,10 @@ public class UserResource extends ParameterizedResource<User> {
 	public void modifyOrCreateFromForm(Representation entity)
 			throws ResourceException {
 
+		if(!canPut()) {
+			throwClientForbiddenError();
+		}
+		
 		setParameterized(getOrCreateParameterized(getTargetParameterizeUri()));
 
 		try {

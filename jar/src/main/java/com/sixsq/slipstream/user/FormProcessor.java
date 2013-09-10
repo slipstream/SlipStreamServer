@@ -144,7 +144,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		parameter.setCategory(extractCategory(form, genericPart));
 		parameter.setType(extractType(form, genericPart));
 
-		if(shouldSetValue(parameter, value)) {
+		if (shouldSetValue(parameter, value)) {
 			parametrized.setParameter(parameter);
 		}
 	}
