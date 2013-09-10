@@ -121,6 +121,9 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void changePasswordValidAsSuper() throws ConfigurationException {
 
+		user = user.store();
+		user.setPassword("something old");
+		user = user.store();
 		assertThat(getPersistedPassword(user), is(not((NEW_PASSWORD))));
 
 		Passwords passwords = createValidPasswords(user);
