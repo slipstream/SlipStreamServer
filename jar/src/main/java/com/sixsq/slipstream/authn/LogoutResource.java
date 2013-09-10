@@ -22,6 +22,7 @@ package com.sixsq.slipstream.authn;
 
 import org.restlet.representation.Representation;
 import org.restlet.resource.Delete;
+import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
 
@@ -33,6 +34,11 @@ import com.sixsq.slipstream.cookie.CookieUtils;
  * query parameter if present.
  */
 public class LogoutResource extends AuthnResource {
+
+	@Override
+	protected void doInit() throws ResourceException {
+
+	}
 
 	public LogoutResource() {
 		super("logout");
