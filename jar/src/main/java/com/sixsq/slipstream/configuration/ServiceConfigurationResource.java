@@ -46,11 +46,6 @@ public class ServiceConfigurationResource extends
 
 	protected Configuration configuration;
 
-	@Override
-	public void doInit() throws ResourceException {
-		configuration = RequestUtil.getConfigurationFromRequest(getRequest());
-		super.doInit();
-	}
 	@Put
 	public void update(Representation entity) {
 
@@ -114,6 +109,7 @@ public class ServiceConfigurationResource extends
 
 	@Override
 	protected void loadTargetParameterized() throws ValidationException {
+		configuration = RequestUtil.getConfigurationFromRequest(getRequest());
 		setParameterized(configuration.getParameters());
 	}
 
