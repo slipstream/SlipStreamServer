@@ -274,12 +274,12 @@ public abstract class ConnectorBase implements Connector {
 		command += "[ -x /etc/init.d/sshd ] && { service sshd reload; } || { service ssh reload; }\n";
 		return command;
 	}
-	
+
 	protected String getPrivateSshKey() {
 		String privateSshKeyFile = getPrivateSshKeyFileName();	
 		return FileUtil.fileToString(privateSshKeyFile);
 	}
-	
+
 	protected String getPrivateSshKeyFileName() {
 		// TODO: Change the way to get private key
 		String publicSshKeyFile = Configuration.getInstance().getProperty("cloud.connector.security.publicsshkey");
@@ -287,8 +287,6 @@ public abstract class ConnectorBase implements Connector {
 		return privateSshKeyFile;
 	}
 
-
-	
 	protected String getPublicSshKey(Run run, User user) throws ValidationException, IOException {
 		String publicSshKeyFile = getPublicSshKeyFileName(run, user);
 		return FileUtil.fileToString(publicSshKeyFile);
