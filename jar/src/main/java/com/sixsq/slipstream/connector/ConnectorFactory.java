@@ -57,12 +57,12 @@ public class ConnectorFactory {
 			throws ConfigurationException, ValidationException {
 		Connector connector = null;
 		//connector = copyConnector( getConnectors().get(cloudServiceName) );
-		connector = getConnectors().get(cloudServiceName).copy();
+		connector = getConnectors().get(cloudServiceName);
 		if (connector == null) {
 			throw (new ValidationException("Failed to load cloud connector: "
 					+ cloudServiceName));
 		}
-		return connector;
+		return connector.copy();
 	}
 
 	public static Connector getConnector(String cloudServiceName, User user)
