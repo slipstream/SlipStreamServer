@@ -63,7 +63,6 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 			module.setModuleReference(Module
 					.constructResourceUri(moduleReferenceUri));
 		}
-
 		module.setIsBase(getBooleanValue(getForm(), "isbase"));
 
 		parsePackages(getForm());
@@ -211,10 +210,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	private void parsePlatform(Form form) {
 
-		String platform = form.getFirstValue("platform--value");
-		if (platform == null) {
-			platform = "";
-		}
+		String platform = form.getFirstValue("platform");
 
 		castToModule().setPlatform(platform);
 
@@ -223,13 +219,17 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 	@Override
 	public void adjustModule(Module previous) throws ValidationException {
 		ImageModule olderImage = (ImageModule) previous;
-		if (!castToModule().isBase()) {
+		ImageModule newImage = castToModule();
+		if (!newImage.isBase()) {
 			if (!needsRebuild) {
 				for (CloudImageIdentifier cii : olderImage
 						.getCloudImageIdentifiers()) {
-					cii.copyTo(castToModule());
+					cii.copyTo(newImage);
 				}
 			}
+		}
+		if (newImage.getPlatform() == null) {
+			newImage.setPlatform(olderImage.getPlatform());
 		}
 	}
 
