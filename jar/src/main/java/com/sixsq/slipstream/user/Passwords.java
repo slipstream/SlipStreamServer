@@ -52,7 +52,7 @@ public class Passwords {
 			if (newPassword2 != null) {
 				newPassword2 = hash(newPassword2);
 			}
-			if (newPassword1 != null) {
+			if (oldPassword != null) {
 				oldPassword = hash(oldPassword);
 			}
 		}
