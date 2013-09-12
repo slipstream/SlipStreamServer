@@ -29,10 +29,10 @@ import com.sixsq.slipstream.persistence.NetworkType;
 public class StratusLabImageParametersFactory extends ModuleParametersFactoryBase {
 
 	public static String IP_TYPE_DEFAULT = NetworkType.Public.name().toLowerCase();
-	public static String INSTANCE_TYPE_DEFAULT = InstanceType.M1_SMALL.toString();
+	public static String INSTANCE_TYPE_DEFAULT = InstanceType.M1_SMALL.getValue();
 	
 	public static String DISKSBUS_TYPE_KEY = "disks.bus.type";
-	public static String DISKSBUS_TYPE_DEFAULT = DisksBusType.VIRTIO.toString();
+	public static String DISKSBUS_TYPE_DEFAULT = DisksBusType.VIRTIO.getValue();
 	
 	public StratusLabImageParametersFactory(String connectorInstanceName) throws ValidationException {
 		super(connectorInstanceName);
