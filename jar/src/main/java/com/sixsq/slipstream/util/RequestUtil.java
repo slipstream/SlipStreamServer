@@ -44,7 +44,14 @@ public class RequestUtil {
 	}
 
 	public static User getUserFromRequest(Request request) {
-		return User.loadByName(request.getClientInfo().getUser().getName(), true);
+		User user = null;
+		try {
+			user = User.loadByName(request.getClientInfo().getUser().getName(),
+					true);
+		} catch (NullPointerException ex) {
+			// user not authenticated
+		}
+		return user;
 	}
 
 	public static Reference getBaseRefSlash(Request request) {
@@ -112,14 +119,16 @@ public class RequestUtil {
 		}
 	}
 
-	public static void addConfigurationToRequest(Request request) throws ConfigurationException {
+	public static void addConfigurationToRequest(Request request)
+			throws ConfigurationException {
 		Map<String, Object> attributes = request.getAttributes();
 
 		Configuration configuration = Configuration.getInstance();
-//		configuration.update();
+		// configuration.update();
 		attributes.put(CONFIGURATION_KEY, configuration);
 		request.setAttributes(attributes);
-		request.getAttributes().put(RequestUtil.SVC_CONFIGURATION_KEY, configuration.getParameters());
+		request.getAttributes().put(RequestUtil.SVC_CONFIGURATION_KEY,
+				configuration.getParameters());
 
 	}
 
