@@ -139,7 +139,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		target.setName(targetFullName);
 		target.store(); 
 
-		getResponse().redirectSeeOther("/" + target.getResourceUri());
+		getResponse().setLocationRef("/" + target.getResourceUri());
+		getResponse().setStatus(Status.SUCCESS_CREATED);
 	}
 
 	@Delete
