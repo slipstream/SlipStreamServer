@@ -22,7 +22,6 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>docs-pkg</artifactId>
-      <classifier>bundle</classifier>
       <type>zip</type>
     </dependency>
 
@@ -115,8 +114,7 @@
 
                 <artifactItem>
                   <groupId>com.sixsq.slipstream</groupId>
-                  <artifactId>SlipStreamDocumentation</artifactId>
-                  <classifier>server-bundle</classifier>
+                  <artifactId>docs-pkg</artifactId>
                   <type>zip</type>
                   <outputDirectory>${project.build.directory}/static-content</outputDirectory>
                 </artifactItem>
