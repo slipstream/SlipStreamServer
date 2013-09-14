@@ -21,6 +21,12 @@
     
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamUI-static-content</artifactId>
+      <type>zip</type>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
       <artifactId>docs-pkg</artifactId>
       <type>zip</type>
     </dependency>
@@ -115,6 +121,13 @@
                 <artifactItem>
                   <groupId>com.sixsq.slipstream</groupId>
                   <artifactId>docs-pkg</artifactId>
+                  <type>zip</type>
+                  <outputDirectory>${project.build.directory}/static-content</outputDirectory>
+                </artifactItem>
+
+                <artifactItem>
+                  <groupId>com.sixsq.slipstream</groupId>
+                  <artifactId>SlipStreamUI-static-content</artifactId>
                   <type>zip</type>
                   <outputDirectory>${project.build.directory}/static-content</outputDirectory>
                 </artifactItem>

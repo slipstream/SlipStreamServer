@@ -15,8 +15,9 @@
   </parent>
 
   <modules>
-     <module>jar</module>
-     <module>war</module>
+    <module>jar</module>
+    <module>war</module>
+    <module>static-content</module>
   </modules>
 
   <profiles>
@@ -66,15 +67,32 @@
 
   </properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.jclouds</groupId>
-				<artifactId>jclouds-all</artifactId>
-				<version>1.5.5</version>
-				<type>jar</type>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+  <dependencyManagement>
+    <dependencies>
+
+      <dependency>
+        <groupId>org.jclouds</groupId>
+        <artifactId>jclouds-all</artifactId>
+        <version>1.5.5</version>
+        <type>jar</type>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sixsq.slipstream</groupId>
+        <artifactId>SlipStreamUI</artifactId>
+        <version>${project.version}</version>
+        <type>jar</type>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sixsq.slipstream</groupId>
+        <artifactId>SlipStreamUI-static-content</artifactId>
+        <version>${project.version}</version>
+        <type>zip</type>
+      </dependency>
+
+    </dependencies>
+
+  </dependencyManagement>
 
 </project>

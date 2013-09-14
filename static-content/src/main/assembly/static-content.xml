@@ -1,0 +1,23 @@
+<assembly>
+  <id>static-content</id>
+
+  <includeBaseDirectory>false</includeBaseDirectory>
+
+  <formats>
+    <format>zip</format>
+  </formats>
+
+  <fileSets>
+    <fileSet>
+      <directory>target/results/slipstream/ui/views</directory>
+      <outputDirectory></outputDirectory>
+      <includes>
+        <include>css/**/*</include>
+        <include>js/**/*</include>
+        <include>external/**/*</include>
+        <include>images/**/*</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+
+</assembly>
