@@ -34,7 +34,6 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 
-import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.InstanceType;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
