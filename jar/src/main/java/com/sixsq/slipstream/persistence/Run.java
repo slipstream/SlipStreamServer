@@ -396,22 +396,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private Run() throws NotFoundException {
 	}
 
-	public Module getModule() {
-		return module;
-	}
-
-	public void setModule(Module module) throws ValidationException {
-		setModule(module, false);
-	}
-
-	public void setModule(Module module, boolean populate)
-			throws ValidationException {
-		this.module = module;
-		if (populate) {
-			populateModule();
-		}
-	}
-
 	public Run(Module module, String cloudServiceName, User user)
 			throws ValidationException {
 		this(module, RunType.Orchestration, cloudServiceName, user);
@@ -438,6 +422,22 @@ public class Run extends Parameterized<Run, RunParameter> {
 		initializeVmRuntimeParameters();
 		initializeOrchestrtorRuntimeParameters();
 		initializeGlobalParameters();
+	}
+
+	public Module getModule() {
+		return module;
+	}
+
+	public void setModule(Module module) throws ValidationException {
+		setModule(module, false);
+	}
+
+	public void setModule(Module module, boolean populate)
+			throws ValidationException {
+		this.module = module;
+		if (populate) {
+			populateModule();
+		}
 	}
 
 	private void initializeVmRuntimeParameters() throws ValidationException {
@@ -817,9 +817,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return cloudServiceName;
 	}
 
-	// LS: Temporary method
 	public Collection<Node> getNodes() throws ValidationException {
-		// FIXME: this is a hack and needs a real fix
 		if (module == null) {
 			module = new RunDeploymentFactory().overloadModule(this,
 					User.loadByName(getUser()));
