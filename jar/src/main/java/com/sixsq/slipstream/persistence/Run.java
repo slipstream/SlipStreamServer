@@ -212,19 +212,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return views;
 	}
 
-	// REMARK: LS: I think this method is useless
-	private static List<Run> updateVmStatus(List<Run> runs, User user)
-			throws SlipStreamException {
-		/*
-		 * Connector connector = ConnectorFactory.getCurrentConnector(user);
-		 * Properties describeInstancesStates =
-		 * connector.describeInstances(user); for (Run run : runs) {
-		 * 
-		 * run = populateVmStateProperties(run, describeInstancesStates); }
-		 */
-		return runs;
-	}
-
 	public static Run updateVmStatus(Run run, User user)
 			throws SlipStreamException {
 		Properties describeInstancesStates;
