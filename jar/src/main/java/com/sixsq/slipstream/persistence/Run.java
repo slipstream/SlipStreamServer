@@ -181,11 +181,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private static List<RunView> convertRunsToRunViews(List<Run> runs, User user) {
 		List<RunView> views = new ArrayList<RunView>();
 		RunView runView;
-		try {
-			runs = updateVmStatus(runs, user);
-		} catch (SlipStreamException e1) {
-			// It's ok to fail
-		}
 		for (Run r : runs) {
 			runView = new RunView(r.getResourceUri(), r.getUuid(),
 					r.getModuleResourceUrl(), r.getStatus(), r.getStart(),
