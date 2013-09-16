@@ -895,8 +895,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 			throws ValidationException {
 		for (Node node : deployment.getNodes().values()) {
 
-			// node.setCloudService(getCloudServiceName());
-
 			RunParameter runParameter;
 
 			runParameter = getParameter(nodeRuntimeParameterKeyName(node,
@@ -904,12 +902,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 			if (runParameter != null) {
 				node.setMultiplicity(runParameter.getValue());
 			}
-
-			// runParameter = getParameter(nodeRuntimeParameterKeyName(node,
-			// RuntimeParameter.CLOUD_SERVICE_NAME));
-			// if (runParameter != null) {
-			// node.setCloudService(runParameter.getValue());
-			// }
 
 			node.getImage().assignImageIdFromCloudService(
 					node.getCloudService());
