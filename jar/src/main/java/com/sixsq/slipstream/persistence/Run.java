@@ -191,8 +191,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 			// create a RunView instance for each
 			String cloudServiceName = r.getCloudServiceName();
 			String[] cloudServiceNames = { cloudServiceName };
-			if (r.getCloudServiceNameList().length > 0) {
-				cloudServiceNames = r.getCloudServiceNameList();
+			String[] list = new String[0];
+			try {
+				list = r.getCloudServiceNameList();
+			} catch (ValidationException ex) {
+				// it's if we have missing modules
+			}
+			if (list.length > 0) {
+				cloudServiceNames = list;
 			}
 
 			runView = new RunView(r.getResourceUri(), r.getUuid(),
