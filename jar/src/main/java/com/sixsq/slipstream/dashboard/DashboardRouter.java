@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.run;
+package com.sixsq.slipstream.dashboard;
 
 /*
  * +=================================================================+
@@ -26,7 +26,6 @@ import org.restlet.routing.TemplateRoute;
 import org.restlet.routing.Variable;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.resource.DashboardResource;
 
 public class DashboardRouter extends Router {
 

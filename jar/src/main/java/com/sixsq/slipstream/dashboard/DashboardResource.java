@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.resource;
+package com.sixsq.slipstream.dashboard;
 
 /*
  * +=================================================================+
@@ -25,10 +25,10 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 
-import com.sixsq.slipstream.dashboard.Dashboard;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
