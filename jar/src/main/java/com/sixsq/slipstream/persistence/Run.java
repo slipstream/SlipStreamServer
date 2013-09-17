@@ -51,6 +51,7 @@ import javax.persistence.TemporalType;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.connector.Connector;
@@ -167,7 +168,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@SuppressWarnings("unchecked")
 	public static List<RunView> viewListByInstanceId(User user,
-			String instanceId) {
+			String instanceId) throws ConfigurationException,
+			ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("getRunByInstanceId");
 		q.setParameter("user", user.getName());
@@ -178,13 +180,24 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return views;
 	}
 
-	private static List<RunView> convertRunsToRunViews(List<Run> runs, User user) {
+	private static List<RunView> convertRunsToRunViews(List<Run> runs, User user)
+			throws ConfigurationException, ValidationException {
 		List<RunView> views = new ArrayList<RunView>();
 		RunView runView;
 		for (Run r : runs) {
+			// Deployment runs can span several clouds
+			// this info in held in getCloudServiceNameList()
+			// so if the list is not empty, use it and
+			// create a RunView instance for each
+			String cloudServiceName = r.getCloudServiceName();
+			String[] cloudServiceNames = { cloudServiceName };
+			if (r.getCloudServiceNameList().length > 0) {
+				cloudServiceNames = r.getCloudServiceNameList();
+			}
+
 			runView = new RunView(r.getResourceUri(), r.getUuid(),
 					r.getModuleResourceUrl(), r.getStatus(), r.getStart(),
-					r.getCloudServiceName(), r.getUser(), r.getType());
+					r.getUser(), r.getType());
 			try {
 				runView.setHostname(r
 						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
@@ -202,7 +215,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 						.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
 			} catch (NotFoundException e) {
 			}
-			views.add(runView);
+
+			// For each cloud service, create a RunView entry
+			for (String csn : cloudServiceNames) {
+				RunView rv = runView.copy();
+				rv.setCloudServiceName(csn);
+				views.add(rv);
+			}
 		}
 		return views;
 	}
@@ -268,7 +287,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<RunView> viewListAll(User user) {
+	public static List<RunView> viewListAll(User user)
+			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("allActiveRunViews");
 		List<Run> runs = q.getResultList();
@@ -278,7 +298,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<RunView> viewList(User user) {
+	public static List<RunView> viewList(User user)
+			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("activeRunViews");
 		q.setParameter("user", user.getName());
@@ -289,7 +310,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<RunView> viewList(String moduleResourceUri, User user) {
+	public static List<RunView> viewList(String moduleResourceUri, User user)
+			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("activeRunViewsByRefModule");
 		q.setParameter("user", user.getName());
@@ -373,6 +395,24 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@Element(required = false)
 	private transient Module module;
+
+	/**
+	 * List of cloud service names used in the current run
+	 */
+	@ElementArray(required = false)
+	public String[] getCloudServiceNameList() throws ConfigurationException,
+			ValidationException {
+		if (getCategory() == ModuleCategory.Deployment) {
+			return getCloudServicesList().toArray(new String[0]);
+		} else {
+			String[] names = { getCloudServiceName() };
+			return names;
+		}
+	}
+
+	@ElementArray(required = false)
+	public void setCloudServiceNameList(String[] names) {
+	}
 
 	@SuppressWarnings("unused")
 	private Run() throws NotFoundException {
@@ -816,10 +856,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return nodes;
 	}
 
-	public HashSet<String> getCloudServicesList()
-			throws ConfigurationException, ValidationException {
+	public HashSet<String> getCloudServicesList() throws ValidationException {
 		HashSet<String> cloudServicesList = new HashSet<String>();
-		for (Node n : this.getNodes()) {
+		for (Node n : getNodes()) {
 			String cloudServiceName = n.getCloudService();
 			cloudServicesList
 					.add(getEffectiveCloudServiceName(cloudServiceName));

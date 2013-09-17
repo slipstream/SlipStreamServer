@@ -30,7 +30,9 @@ import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.run.RunView;
@@ -79,7 +81,8 @@ public class Dashboard {
 		populateVms(user);
 	}
 
-	private void populateRuns(User user, boolean isSuper) {
+	private void populateRuns(User user, boolean isSuper)
+			throws ConfigurationException, ValidationException {
 		runs = RunView.fetchListView(user, isSuper);
 	}
 
@@ -99,18 +102,19 @@ public class Dashboard {
 	}
 
 	protected void populateVmsForCloud(User user, String cloudServiceName,
-			Properties props) {
+			Properties props) throws ConfigurationException,
+			ValidationException {
 		for (String key : props.stringPropertyNames()) {
 			String instanceId = key;
 			String status = (String) props.get(key);
 			String runUuid = fetchRunUuid(user, instanceId);
 			vms.getList().add(
-					new VmView(instanceId, status, runUuid,
-							cloudServiceName));
+					new VmView(instanceId, status, runUuid, cloudServiceName));
 		}
 	}
 
-	protected String fetchRunUuid(User user, String instanceId) {
+	protected String fetchRunUuid(User user, String instanceId)
+			throws ConfigurationException, ValidationException {
 		List<RunView> runs = Run.viewListByInstanceId(user, instanceId);
 		if (runs.size() == 0) {
 			return "Unknown";
