@@ -188,6 +188,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	@Attribute(required = false)
 	private String moduleReferenceUri;
 
+	/**
+	 * Contains all available cloud services, plus
+	 * 'default'. Used for HTML UI.
+	 */
 	@Transient
 	@ElementArray(required = false)
 	protected String[] cloudNames;
