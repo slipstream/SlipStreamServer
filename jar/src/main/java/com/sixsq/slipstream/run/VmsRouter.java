@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.dashboard;
+package com.sixsq.slipstream.run;
 
 /*
  * +=================================================================+
@@ -20,10 +20,25 @@ package com.sixsq.slipstream.dashboard;
  * -=================================================================-
  */
 
-import org.simpleframework.xml.Root;
+import org.restlet.Context;
+import org.restlet.routing.Router;
+import org.restlet.routing.TemplateRoute;
+import org.restlet.routing.Variable;
 
-import com.sixsq.slipstream.run.Runs;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 
-@Root
-public class Dashboard extends Runs {
+public class VmsRouter extends Router {
+
+	public VmsRouter(Context context) throws ConfigurationException {
+		super(context);
+
+		TemplateRoute route;
+		route = attach("?cloud={cloudServiceName}", VmsResource.class);
+		route.setMatchingQuery(true);
+		route.getTemplate().getVariables()
+				.put("cloudServiceName", new Variable(Variable.TYPE_URI_QUERY));
+
+		attach("", VmsResource.class);
+		attach("/", VmsResource.class);
+	}
 }

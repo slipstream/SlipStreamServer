@@ -148,12 +148,15 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	/**
 	 * Look for a value in the local parameter list, otherwise return the value
 	 * from the image parameter list
-	 * 
-	 * @return ram
-	 * @throws ValidationException 
 	 */
-	private String extractParameterWithOverride(String key) throws ValidationException {
-		return getParameterValue(key, getImage().getParameterValue(key, null));
+	private String extractParameterWithOverride(String key) throws ValidationException {		
+		ImageModule image = getImage();
+		if(image != null) {
+			return getParameterValue(key, image.getParameterValue(key, null));
+		} else {
+			// The image is missing, but this will be picked-up when running
+			return null;
+		}
 	}
 
 	@Override

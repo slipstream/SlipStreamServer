@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.dashboard;
+package com.sixsq.slipstream.run;
 
 /*
  * +=================================================================+
@@ -20,44 +20,52 @@ package com.sixsq.slipstream.dashboard;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
-@Root(name = "item")
+@Root(name = "vm")
 public class VmView {
 
-    @Attribute
-    public final String runUuid;
+	@Attribute
+	public final String runUuid;
 
-    @Attribute
-    public final String instanceId;
+	@Attribute
+	public final String instanceId;
 
-    @Attribute(required=false)
-    public final String status;
+	@Attribute(required = false)
+	public final String status;
 
-    @Attribute
-    public final String cloud;
+	@Attribute
+	public final String cloudServiceName;
 
-    public VmView(String instanceId, String status, String runUuid, String cloud) {
-        this.runUuid = runUuid;
-        this.status = status;
-        this.instanceId = instanceId;
-        this.cloud = cloud;
-    }
+	public VmView(String instanceId, String status, String runUuid,
+			String cloudServiceName) {
+		this.runUuid = runUuid;
+		this.status = status;
+		this.instanceId = instanceId;
+		this.cloudServiceName = cloudServiceName;
+	}
 
-    @Root(name = "list")
-    public static class VmViewList {
+	@Root(name = "vms")
+	public static class VmViewList {
 
-        @SuppressWarnings("unused")
-        @ElementList(inline = true, required = false)
-        private final List<VmView> list;
+		@ElementList(inline = true, required = false)
+		private List<VmView> list = new ArrayList<VmView>();
 
-        public VmViewList(List<VmView> list) {
-            this.list = list;
-        }
-    }
+		public VmViewList() {
+		}
+
+		public VmViewList(List<VmView> list) {
+			this.list = list;
+		}
+
+		public List<VmView> getList() {
+			return list;
+		}
+	}
 
 }

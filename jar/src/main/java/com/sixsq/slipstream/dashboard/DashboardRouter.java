@@ -41,7 +41,6 @@ public class DashboardRouter extends Router {
 		attach("", DashboardResource.class);
 
 		attach("/", DashboardResource.class);
-
 	}
 
 }

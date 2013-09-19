@@ -1,0 +1,59 @@
+package com.sixsq.slipstream.run;
+
+/*
+ * +=================================================================+
+ * SlipStream Server (WAR)
+ * =====
+ * Copyright (C) 2013 SixSq Sarl (sixsq.com)
+ * =====
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * -=================================================================-
+ */
+
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
+
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.run.RunView.RunViewList;
+
+@Root
+public class Runs {
+
+	@Element
+	private RunViewList runs;
+
+	public RunViewList getRuns() {
+		return runs;
+	}
+
+	public void populate(User user) throws SlipStreamException {
+		user.validate();
+		User.validateMinimumInfo(user);
+		populateRuns(user, user.isSuper());
+	}
+
+	public void populateRuns(User user, boolean isSuper)
+			throws ConfigurationException, ValidationException {
+		runs = RunView.fetchListView(user, isSuper);
+	}
+
+	public void populateRuns(User user, boolean isSuper,
+			String moduleResourceUri) throws ConfigurationException,
+			ValidationException {
+		runs = RunView.fetchListView(moduleResourceUri, user, isSuper);
+	}
+
+}

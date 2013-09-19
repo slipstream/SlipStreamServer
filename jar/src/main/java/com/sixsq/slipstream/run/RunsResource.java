@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.dashboard;
+package com.sixsq.slipstream.run;
 
 /*
  * +=================================================================+
@@ -28,15 +28,16 @@ import org.restlet.resource.Get;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.resource.BaseResource;
+import com.sixsq.slipstream.run.RunView.RunViewList;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public class DashboardResource extends BaseResource {
+public class RunsResource extends BaseResource {
 
 	@Get("xml")
 	public Representation toXml() {
 
-		String metadata = SerializationUtil.toXmlString(computeDashboard());
+		String metadata = SerializationUtil.toXmlString(getRuns());
 		return new StringRepresentation(metadata, MediaType.TEXT_XML);
 
 	}
@@ -44,22 +45,22 @@ public class DashboardResource extends BaseResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		String html = HtmlUtil.toHtml(computeDashboard(),
-				"dashboard", getUser());
+		String html = HtmlUtil.toHtml(getRuns(),
+				"runs", getUser());
 		
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
-	private Dashboard computeDashboard() {
+	private RunViewList getRuns() {
 	
-		Dashboard dashboard = new Dashboard();
+		Runs runs = new Runs();
 		try {
-			dashboard.populate(getUser());
+			runs.populate(getUser());
 		} catch (SlipStreamClientException e) {
 		} catch (SlipStreamException e) {
 		}
 	
-		return dashboard;
+		return runs.getRuns();
 	}
 
 }
