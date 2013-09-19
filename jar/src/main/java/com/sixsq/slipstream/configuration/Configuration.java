@@ -39,6 +39,8 @@ import javax.persistence.NoResultException;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
 
+import slipstream.ui.views.Representation;
+
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -217,6 +219,11 @@ public class Configuration {
 			throw (new ConfigurationException("Invalid version value: "
 					+ e.getMessage()));
 		}
+		
+		versionParameter.setReadonly(true);
+		
+		// set the version in the UI
+		Representation.setReleaseVersion(version);
 	}
 
 	private void setMandatoryToAllParameters() {
