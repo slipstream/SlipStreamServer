@@ -86,11 +86,6 @@ public class RunListResourceTest extends ResourceTestBase {
 		baseImage.setIsBase(true);
 		baseImage = baseImage.store();
 
-		try {
-			user.remove();
-		} catch (Exception e) {
-
-		}
 		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
 		user = (User) user.store();
 
@@ -101,7 +96,11 @@ public class RunListResourceTest extends ResourceTestBase {
 	public void tearDown() throws ValidationException {
 		baseImage.remove();
 
-		user.remove();
+		try {
+			user.remove();
+		} catch (Exception ex) {
+
+		}
 
 		try {
 			image.remove();
