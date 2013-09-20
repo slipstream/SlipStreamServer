@@ -72,9 +72,7 @@ public class CommonTestUtil {
 			throw (new SlipStreamRuntimeException(e));
 		}
 
-		user.store();
-		
-		return user;
+		return user.store();
 	}
 
 	public static void deleteUser(User user) {
