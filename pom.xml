@@ -80,14 +80,12 @@
       <dependency>
         <groupId>com.sixsq.slipstream</groupId>
         <artifactId>SlipStreamUI</artifactId>
-        <version>${project.version}</version>
         <type>jar</type>
       </dependency>
 
       <dependency>
         <groupId>com.sixsq.slipstream</groupId>
         <artifactId>SlipStreamUI-static-content</artifactId>
-        <version>${project.version}</version>
         <type>zip</type>
       </dependency>
 
