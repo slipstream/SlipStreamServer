@@ -63,6 +63,7 @@ public class CommonTestUtil {
 			user = new User(name);
 		} catch (ValidationException e) {
 			e.printStackTrace();
+			throw (new SlipStreamRuntimeException(e));
 		}
 		user.setPassword(password);
 
