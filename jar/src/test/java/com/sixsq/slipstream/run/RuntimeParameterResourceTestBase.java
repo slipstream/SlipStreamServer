@@ -67,7 +67,11 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 	@AfterClass
 	public static void classTearDown() throws ValidationException {
 		baseImage.remove();
+		try {
 		CommonTestUtil.deleteUser(user);
+		} catch (Exception ex) {
+			// ok ... FIXME
+		}
 	}
 
 	@After
