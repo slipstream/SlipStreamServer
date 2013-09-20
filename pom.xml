@@ -67,30 +67,4 @@
 
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-
-      <dependency>
-        <groupId>org.jclouds</groupId>
-        <artifactId>jclouds-all</artifactId>
-        <version>1.5.5</version>
-        <type>jar</type>
-      </dependency>
-
-      <dependency>
-        <groupId>com.sixsq.slipstream</groupId>
-        <artifactId>SlipStreamUI</artifactId>
-        <type>jar</type>
-      </dependency>
-
-      <dependency>
-        <groupId>com.sixsq.slipstream</groupId>
-        <artifactId>SlipStreamUI-static-content</artifactId>
-        <type>zip</type>
-      </dependency>
-
-    </dependencies>
-
-  </dependencyManagement>
-
 </project>
