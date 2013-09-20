@@ -55,10 +55,8 @@ public class CommonTestUtil {
 	}
 
 	public static User createUser(String name, String password) {
-		User user = (User) User.loadByName(name);
-		if (user != null) {
-			user.remove();
-		}
+		User user;
+
 		try {
 			user = new User(name);
 		} catch (ValidationException e) {
