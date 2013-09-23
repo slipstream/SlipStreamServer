@@ -12,6 +12,10 @@
     <version>2.0.1-SNAPSHOT</version>
   </parent>
   
+  <properties>
+    <ui.static.content.artifactId>SlipStreamServer-ui-static-content</ui.static.content.artifactId>
+  </properties>
+  
   <dependencies>
 
     <dependency>
@@ -21,7 +25,7 @@
     
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamUI-static-content</artifactId>
+      <artifactId>${ui.static.content.artifactId}</artifactId>
       <type>zip</type>
     </dependency>
 
@@ -127,7 +131,7 @@
 
                 <artifactItem>
                   <groupId>com.sixsq.slipstream</groupId>
-                  <artifactId>SlipStreamUI-static-content</artifactId>
+                  <artifactId>${ui.static.content.artifactId}</artifactId>
                   <type>zip</type>
                   <outputDirectory>${project.build.directory}/static-content</outputDirectory>
                 </artifactItem>
