@@ -61,8 +61,10 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.ProjectModule;
+import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.run.RunFactory;
+import com.sixsq.slipstream.run.RunView.RunViewList;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
@@ -79,6 +81,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	public static final String COPY_SOURCE_FORM_PARAMETER_NAME = "source_uri";
 	public static final String COPY_TARGET_FORM_PARAMETER_NAME = "target_name";
 
+	@Override
 	protected String getPageRepresentation() {
 		return "module";
 	}
@@ -87,7 +90,16 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	public Representation toXml() {
 		checkCanGet();
 
-		String result = XmlUtil.normalize(getParameterized());
+		Module prepared = null;
+		try {
+			prepared = prepareForSerialization();
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		} catch (ConfigurationException e) {
+			throwServerError(e.getMessage());
+		}
+
+		String result = XmlUtil.normalize(prepared);
 		return new StringRepresentation(result);
 	}
 
@@ -137,7 +149,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		target.getAuthz().setUser(getUser().getName());
 		target.getAuthz().clear();
 		target.setName(targetFullName);
-		target.store(); 
+		target.store();
 
 		getResponse().setLocationRef("/" + target.getResourceUri());
 		getResponse().setStatus(Status.SUCCESS_CREATED);
@@ -181,10 +193,10 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	public void updateOrCreateFromForm(Representation entity)
 			throws ResourceException {
 
-		if(entity == null) {
+		if (entity == null) {
 			throwClientBadRequest("Empty form");
 		}
-		
+
 		Module module = null;
 		try {
 			module = (Module) processEntityAsForm(entity);
@@ -195,8 +207,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		updateOrCreate(module);
 
 		getResponse().setLocationRef("/" + module.getResourceUri());
-		
-		if(isNew()) {
+
+		if (isNew()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
 	}
@@ -210,8 +222,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		updateOrCreate(module);
 
 		getResponse().setLocationRef("/" + module.getResourceUri());
-		
-		if(isNew()) {
+
+		if (isNew()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
 	}
@@ -221,12 +233,12 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	private String extractXmlMultipart() {
-	
+
 		RestletFileUpload upload = new RestletFileUpload(
 				new DiskFileItemFactory());
-	
+
 		List<FileItem> items;
-	
+
 		Request request = getRequest();
 		try {
 			items = upload.parseRequest(request);
@@ -234,7 +246,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
 					e.getMessage());
 		}
-	
+
 		String module = null;
 		for (FileItem fi : items) {
 			if (fi.getName() != null) {
@@ -245,7 +257,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
 					"the file is empty");
 		}
-	
+
 		return module;
 	}
 
@@ -254,7 +266,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throws ResourceException {
 
 		Module module = xmlToModule();
-		
+
 		updateOrCreate(module);
 
 		if (isExisting()) {
@@ -269,22 +281,23 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	private Module xmlToModule(String xml) {
-	
+
 		String denormalized = XmlUtil.denormalize(xml);
 
 		Class<? extends Module> moduleClass = getModuleClass(denormalized);
-	
+
 		Module module = null;
 		try {
-			module = (Module) SerializationUtil.fromXml(denormalized, moduleClass);
+			module = (Module) SerializationUtil.fromXml(denormalized,
+					moduleClass);
 		} catch (SlipStreamClientException e) {
 			e.printStackTrace();
 			throwClientBadRequest("Invalid xml module: " + e.getMessage());
 		}
-		
+
 		// Reset user
 		module.getAuthz().setUser(getUser().getName());
-		
+
 		module.postDeserialization();
 
 		return module;
@@ -358,7 +371,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwServerError("Failed to parse module");
 		}
 
-		String className = "com.sixsq.slipstream.persistence." + category + "Module";
+		String className = "com.sixsq.slipstream.persistence." + category
+				+ "Module";
 		Class<? extends Module> moduleClass = null;
 		try {
 			moduleClass = (Class<? extends Module>) Class.forName(className);
@@ -399,7 +413,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	private void resolveImageIdIfAppropriate(Module module)
 			throws ConfigurationException, ValidationException {
 		try {
-		RunFactory.resolveImageIdIfAppropriate(module, getUser());
+			RunFactory.resolveImageIdIfAppropriate(module, getUser());
 		} catch (ValidationException ex) {
 			// ok, the user might not be fully configured
 		}
@@ -461,10 +475,10 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientError(e);
 		}
 
-		if(!isNew()) {
+		if (!isNew()) {
 			processor.adjustModule(previous);
 		}
-		
+
 		Module module = processor.getParametrized();
 
 		category = module.getCategory();
@@ -626,6 +640,17 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			ConfigurationException {
 
 		ParametersFactory.addParametersForEditing(getParameterized());
+	}
+
+	@Override
+	protected Module prepareForSerialization() throws ConfigurationException,
+			ValidationException {
+		Module module = getParameterized();
+		// Add runs for this specific module version (will not apply to project)
+		RunViewList runs = new RunViewList(Run.viewList(module.getResourceUri(),
+				getUser()));
+		module.setRuns(runs);
+		return module;
 	}
 
 }

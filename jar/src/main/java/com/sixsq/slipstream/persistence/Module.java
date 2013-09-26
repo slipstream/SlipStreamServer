@@ -43,6 +43,7 @@ import org.simpleframework.xml.ElementArray;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleVersionView;
 import com.sixsq.slipstream.module.ModuleView;
+import com.sixsq.slipstream.run.RunView.RunViewList;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 
 /**
@@ -196,6 +197,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	@ElementArray(required = false)
 	protected String[] cloudNames;
 
+	@Transient
+	@Element(required = false)
+	private RunViewList runs;
+
 	protected Module() {
 		super();
 	}
@@ -208,6 +213,14 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		setName(name);
 	}
 
+	public RunViewList getRuns() {
+		return runs;
+	}
+
+	public void setRuns(RunViewList runs) {
+		this.runs = runs;
+	}
+	
 	private void validateName(String name) throws ValidationException {
 		if (name == null || "".equals(name)) {
 			throw new ValidationException("module name cannot be empty");
@@ -359,11 +372,11 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	}
 
 	public void publish() {
-		this.published = new Publish();
+		published = new Publish();
 	}
 
 	public void unpublish() {
-		this.published = null;
+		published = null;
 	}
 
 	public Publish getPublished() {

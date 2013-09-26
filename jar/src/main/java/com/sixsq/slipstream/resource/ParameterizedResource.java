@@ -239,7 +239,16 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	public Representation toXml() {
 		checkCanGet();
 
-		String result = SerializationUtil.toXmlString(getParameterized());
+		S prepared = null;
+		try {
+			prepared = prepareForSerialization();
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		} catch (ConfigurationException e) {
+			throwServerError(e.getMessage());
+		}
+
+		String result = SerializationUtil.toXmlString(prepared);
 		return new StringRepresentation(result);
 	}
 
@@ -256,10 +265,24 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 			}
 		}
 
-		String html = HtmlUtil.toHtml(getParameterized(),
+		S prepared = null;
+		try {
+			prepared = prepareForSerialization();
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		} catch (ConfigurationException e) {
+			throwServerError(e.getMessage());
+		}
+		
+		String html = HtmlUtil.toHtml(prepared,
 				getPageRepresentation(), getTransformationType(), getUser());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
+	}
+
+	protected S prepareForSerialization() throws ConfigurationException,
+			ValidationException {
+		return getParameterized();
 	}
 
 	protected String getTransformationType() {

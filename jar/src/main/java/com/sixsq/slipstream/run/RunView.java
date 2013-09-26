@@ -149,7 +149,7 @@ public class RunView {
 		return tags;
 	}
 
-	@Root(name = "list")
+	@Root(name = "runs")
 	public static class RunViewList {
 
 		@ElementList(inline = true, required = false)
