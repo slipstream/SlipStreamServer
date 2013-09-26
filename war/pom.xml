@@ -21,7 +21,7 @@
     
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamUI-static-content</artifactId>
+      <artifactId>SlipStreamServer-ui-static-content</artifactId>
       <type>zip</type>
     </dependency>
 
@@ -127,7 +127,7 @@
 
                 <artifactItem>
                   <groupId>com.sixsq.slipstream</groupId>
-                  <artifactId>SlipStreamUI-static-content</artifactId>
+                  <artifactId>SlipStreamServer-ui-static-content</artifactId>
                   <type>zip</type>
                   <outputDirectory>${project.build.directory}/static-content</outputDirectory>
                 </artifactItem>
