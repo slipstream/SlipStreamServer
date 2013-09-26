@@ -20,6 +20,9 @@ package com.sixsq.slipstream.initialstartup;
  * -=================================================================-
  */
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -38,13 +41,21 @@ public class Users {
 		createTestUser();
 	}
 
-	private static void createSuperUser() {
+	private static void createSuperUser() throws ValidationException {
 		User user = createUser("super");
 		user.setFirstName("Super");
 		user.setLastName("User");
 		user.setEmail("super@sixsq.com");
 		user.setOrganization("SixSq");
-		user.setPassword("supeRsupeR");
+		try {
+			user.hashAndSetPassword("supeRsupeR");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			throw new ValidationException(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			throw new ValidationException(e.getMessage());
+		}
 		user.setState(State.ACTIVE);
 		user.setSuper(true);
 
@@ -61,7 +72,15 @@ public class Users {
 		user.setLastName("User");
 		user.setEmail("test@sixsq.com");
 		user.setOrganization("SixSq");
-		user.setPassword("tesTtesT");
+		try {
+			user.hashAndSetPassword("tesTtesT");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			throw new ValidationException(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			throw new ValidationException(e.getMessage());
+		}
 		user.setState(State.ACTIVE);
 		user.setSuper(false);
 
