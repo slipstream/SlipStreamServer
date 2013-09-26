@@ -17,11 +17,13 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamServer-jar</artifactId>
+      <version>${project.version}</version>
     </dependency>
     
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamServer-ui-static-content</artifactId>
+      <version>${project.version}</version>
       <type>zip</type>
     </dependency>
 
