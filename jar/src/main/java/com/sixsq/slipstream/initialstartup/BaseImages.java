@@ -20,6 +20,9 @@ package com.sixsq.slipstream.initialstartup;
  * -=================================================================-
  */
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+
 import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.connector.stratuslab.StratusLabConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -39,12 +42,14 @@ public class BaseImages extends ModuleCreator {
 	private static final String SIXSQ = "sixsq";
 
 	public static void create() throws ValidationException, NotFoundException,
-			ConfigurationException {
+			ConfigurationException, NoSuchAlgorithmException,
+			UnsupportedEncodingException {
 		createUsers();
 		createModules();
 	}
 
-	private static void createUsers() {
+	private static void createUsers() throws NoSuchAlgorithmException,
+			UnsupportedEncodingException {
 
 		if (User.loadByName(SIXSQ) != null) {
 			return;
@@ -54,13 +59,14 @@ public class BaseImages extends ModuleCreator {
 
 	}
 
-	private static void createSixSqUser() {
+	private static void createSixSqUser() throws NoSuchAlgorithmException,
+			UnsupportedEncodingException {
 		User user = createUser(SIXSQ);
 		user.setFirstName("SixSq");
 		user.setLastName("Administrator");
 		user.setEmail("slipstream-support@sixsq.com");
 		user.setOrganization("SixSq");
-		user.setPassword("siXsQsiXsQ");
+		user.hashAndSetPassword("siXsQsiXsQ");
 		user.setState(State.ACTIVE);
 
 		user.store();
