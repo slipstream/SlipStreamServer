@@ -168,7 +168,7 @@ public class UserResourceTest extends ResourceTestBase {
 			UnsupportedEncodingException {
 
 		String oldPassword = "old password";
-		user.setPassword(oldPassword);
+		user.hashAndSetPassword(oldPassword);
 		user = (User) user.store();
 		assertThat(getPersistedPassword(user), is(not(NEW_PASSWORD)));
 

@@ -73,6 +73,7 @@ public class RunFactoryTest extends RunTest {
 		try {
 			RunTest.setupClass();
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 
@@ -82,13 +83,16 @@ public class RunFactoryTest extends RunTest {
 			createDeployment();
 			createImage();
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
-		
+
 		try {
-			CommonTestUtil.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+			CommonTestUtil
+					.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 		} catch (Exception e) {
 			e.printStackTrace();
+			fail();
 		}
 	}
 
@@ -141,7 +145,7 @@ public class RunFactoryTest extends RunTest {
 		imageForDeployment1.setParameter(new ModuleParameter("po1",
 				"po1 init value", "po1 parameter desc",
 				ParameterCategory.Output));
-		
+
 		imageForDeployment1.setIsBase(true);
 		imageForDeployment1.setImageId("123", cloudServiceName);
 		imageForDeployment1.store();
@@ -173,14 +177,25 @@ public class RunFactoryTest extends RunTest {
 	public static void teardownClass() {
 		RunTest.teardownClass();
 
-		imageCircular1of2.remove();
-		imageCircular2of2.remove();
+		if (imageCircular1of2 != null) {
+			imageCircular1of2.remove();
+		}
+		if (imageCircular2of2 != null) {
+			imageCircular2of2.remove();
+		}
+		if (imageCircular1of3 != null) {
+			imageCircular1of3.remove();
+		}
+		if (imageCircular2of3 != null) {
+			imageCircular2of3.remove();
+		}
+		if (imageCircular3of3 != null) {
+			imageCircular3of3.remove();
+		}
 
-		imageCircular1of3.remove();
-		imageCircular2of3.remove();
-		imageCircular3of3.remove();
-
-		deployment.remove();
+		if (deployment != null) {
+			deployment.remove();
+		}
 	}
 
 	@Test(expected = SlipStreamClientException.class)
@@ -246,7 +261,9 @@ public class RunFactoryTest extends RunTest {
 	public void commonDeploymentRuntimeParameters() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
-		String[] nodePrefixes = { Run.ORCHESTRATOR_NAME + "-" + cloudServiceName + RuntimeParameter.NODE_PROPERTY_SEPARATOR, "node1.1:" };
+		String[] nodePrefixes = {
+				Run.ORCHESTRATOR_NAME + "-" + cloudServiceName
+						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR, "node1.1:" };
 		commonRuntimeParameters(run, nodePrefixes);
 
 	}
@@ -297,7 +314,7 @@ public class RunFactoryTest extends RunTest {
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
 		deployment.getNodes().put(node.getName(), node);
-		
+
 		deployment.store();
 
 		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
