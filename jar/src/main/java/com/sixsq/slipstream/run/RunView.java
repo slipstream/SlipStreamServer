@@ -153,7 +153,11 @@ public class RunView {
 	public static class RunViewList {
 
 		@ElementList(inline = true, required = false)
-		private final List<RunView> list;
+		private List<RunView> list;
+
+		@SuppressWarnings("unused")
+		private RunViewList() {
+		}
 
 		public RunViewList(List<RunView> list) {
 			this.list = list;
