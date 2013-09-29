@@ -133,20 +133,6 @@ public class ServiceConfiguration extends
 				super.validate(value);
 				isValidEmail(value);
 			}
-		},
-
-		SLIPSTREAM_SUPPORT_URL("URL where support can be obtained.",
-				ParameterCategory.SlipStream_Support) {
-			@Override
-			public void validate(String value) {
-				super.validate(value);
-				try {
-					new URL(value);
-				} catch (MalformedURLException e) {
-					throw new IllegalArgumentException("invalid support URL: "
-							+ value);
-				}
-			}
 		};
 
 //		SLIPSTREAM_REGISTRATION_ENABLE("Allow self user registration. If checked, user will be able to create accounts themselves.",
