@@ -77,20 +77,6 @@ public class ServiceConfigurationTest {
 	}
 
 	@Test
-	public void validSupportUrl() {
-		String value = "http://support.example.org/";
-		ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_URL
-				.validate(value);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void invalidSupportUrl() {
-		String value = ":invalid-support-url";
-		ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_URL
-				.validate(value);
-	}
-
-	@Test
 	public void checkInvalidPorts() {
 		String[] values = { "-1", "aaa", "65536" };
 		for (String value : values) {

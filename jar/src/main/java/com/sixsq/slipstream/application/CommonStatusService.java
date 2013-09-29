@@ -32,7 +32,6 @@ import org.restlet.Response;
 import org.restlet.data.ClientInfo;
 import org.restlet.data.MediaType;
 import org.restlet.data.Preference;
-import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -119,14 +118,7 @@ public class CommonStatusService extends StatusService {
 				.getParameter(key);
 		String email = parameter.getValue();
 
-		key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_URL
-				.getName();
-		parameter = configuration.getParameters().getParameter(key);
-		String url = parameter.getValue();
-		Reference ref = new Reference(url);
-
 		setContactEmail(email);
-		setHomeRef(ref);
 	}
 
 	private Representation toXhtml(Status status, Response response, User user,

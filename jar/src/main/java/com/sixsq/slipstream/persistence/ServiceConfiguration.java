@@ -20,8 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
