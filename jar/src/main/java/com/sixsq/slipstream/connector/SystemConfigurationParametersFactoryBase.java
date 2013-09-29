@@ -99,7 +99,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 
 	protected void putMandatoryEndpoint() throws ValidationException {
 		putMandatoryParameter(super.constructKey(UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME),
-				"Service endpoint for " + getCategory());
+				"Service endpoint for " + getCategory() + " (e.g. http://example.com:5000/v2.0)");
 	}
 
 }
