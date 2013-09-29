@@ -85,7 +85,7 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_VERSION("Installed SlipStream version",
 				ParameterCategory.SlipStream_Advanced, true),
 
-		SLIPSTREAM_REPORTS_LOCATION("", ParameterCategory.SlipStream_Advanced),
+		SLIPSTREAM_REPORTS_LOCATION("Location where the deployments and build reports are saved", ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_REGISTRATION_EMAIL(
 				"Email address for account approvals, etc.",
