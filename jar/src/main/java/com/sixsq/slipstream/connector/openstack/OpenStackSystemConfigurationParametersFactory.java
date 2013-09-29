@@ -39,10 +39,10 @@ public class OpenStackSystemConfigurationParametersFactory extends
 		
 		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME),
 				"OpenStack Flavor for the orchestrator. " +
-				"The actual image should support the desired Flavor.");
+				"The actual image should support the desired Flavor");
 
 		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.SERVICE_TYPE_PARAMETER_NAME), 
-				"Type-name of the service who provide the instances functionality.",
+				"Type-name of the service who provide the instances functionality",
 				"compute");
 		
 		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.SERVICE_NAME_PARAMETER_NAME), 
