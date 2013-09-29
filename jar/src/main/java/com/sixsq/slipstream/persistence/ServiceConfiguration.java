@@ -82,8 +82,6 @@ public class ServiceConfiguration extends
 				"Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)",
 				ParameterCategory.SlipStream_Advanced),
 
-		SLIPSTREAM_HEADURL("", ParameterCategory.SlipStream_Advanced),
-
 		SLIPSTREAM_VERSION("Installed SlipStream version",
 				ParameterCategory.SlipStream_Advanced, true),
 
