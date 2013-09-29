@@ -46,7 +46,7 @@ public class ServiceConfiguration extends
 	public final static String RESOURCE_URI_PREFIX = "configuration/";
 
 	public enum ParameterCategory {
-		SlipStream_Support, SlipStream_basics, SlipStream_advanced, Cloud_connector, StratusLab_basics, StratusLab_advanced, EC2_basics, EC2_advanced, CloudSigma_advanced, OpenStack_basics, OpenStack_advanced, PhysicalHost_advanced
+		SlipStream_Support, SlipStream_Basics, SlipStream_Advanced
 	}
 
 	/**
@@ -55,39 +55,39 @@ public class ServiceConfiguration extends
 	public enum RequiredParameters {
 
 		SLIPSTREAM_BASE_URL("Default URL and port for the SlipStream RESTlet",
-				ParameterCategory.SlipStream_basics),
+				ParameterCategory.SlipStream_Basics),
 
 		SLIPSTREAM_UPDATE_CLIENTURL(
 				"Endpoint of the SlipStream client tarball",
-				ParameterCategory.SlipStream_advanced),
+				ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_UPDATE_CLIENTBOOTSTRAPURL(
 				"Endpoint of the SlipStream client bootstrap script",
-				ParameterCategory.SlipStream_advanced),
+				ParameterCategory.SlipStream_Advanced),
 
 		CLOUD_CONNECTOR_CLASS(
 				"Cloud connector java class name(s) (comma separated for multi-cloud configuration)",
-				ParameterCategory.SlipStream_basics, ParameterType.Text),
+				ParameterCategory.SlipStream_Basics, ParameterType.Text),
 
 		CLOUD_CONNECTOR_LIBRARY_LIBCLOUD_URL(
 				"URL to fetch libcloud library from",
-				ParameterCategory.SlipStream_advanced,
+				ParameterCategory.SlipStream_Advanced,
 				"URL should point to a valid gzipped tarball."),
 
 		CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY(
 				"Path to the SSH public key to put in the orchestrator",
-				ParameterCategory.SlipStream_advanced),
+				ParameterCategory.SlipStream_Advanced),
 
 		CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY(
 				"Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)",
-				ParameterCategory.SlipStream_advanced),
+				ParameterCategory.SlipStream_Advanced),
 
-		SLIPSTREAM_HEADURL("", ParameterCategory.SlipStream_advanced),
+		SLIPSTREAM_HEADURL("", ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_VERSION("Installed SlipStream version",
-				ParameterCategory.SlipStream_advanced, true),
+				ParameterCategory.SlipStream_Advanced, true),
 
-		SLIPSTREAM_REPORTS_LOCATION("", ParameterCategory.SlipStream_advanced),
+		SLIPSTREAM_REPORTS_LOCATION("", ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_REGISTRATION_EMAIL(
 				"Email address for account approvals, etc.",
@@ -149,10 +149,10 @@ public class ServiceConfiguration extends
 							+ value);
 				}
 			}
-		},
+		};
 
-		SLIPSTREAM_REGISTRATION_ENABLE("Allow self user registration. If checked, user will be able to create accounts themselves.",
-				ParameterCategory.SlipStream_basics, ParameterType.Boolean);
+//		SLIPSTREAM_REGISTRATION_ENABLE("Allow self user registration. If checked, user will be able to create accounts themselves.",
+//				ParameterCategory.SlipStream_Basics, ParameterType.Boolean);
 
 		private final String description;
 		private final ParameterCategory category;
