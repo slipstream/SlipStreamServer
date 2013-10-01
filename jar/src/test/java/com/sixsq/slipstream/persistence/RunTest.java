@@ -20,10 +20,12 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,6 +44,7 @@ import org.junit.Test;
 
 import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -59,7 +62,7 @@ public class RunTest {
 	protected static ImageModule imagenoref = null;
 
 	private static String cloudServiceName = new LocalConnector()
-	.getCloudServiceName();
+			.getCloudServiceName();
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
@@ -275,8 +278,9 @@ public class RunTest {
 	@Test
 	public void createAndRetreive() throws FileNotFoundException, IOException,
 			SlipStreamException {
-		
-		Run run = new Run(new ImageModule("createAndRetreive"), cloudServiceName, user);
+
+		Run run = new Run(new ImageModule("createAndRetreive"),
+				cloudServiceName, user);
 		run.store();
 
 		Run runRestored = Run.loadFromUuid(run.getUuid());
@@ -309,7 +313,8 @@ public class RunTest {
 		dontfindit.store();
 		Metadata run3 = createAndStoreRun(dontfindit);
 
-		List<RunView> runList = Run.viewList(findit.getResourceUri(), new User("user"));
+		List<RunView> runList = Run.viewList(findit.getResourceUri(), new User(
+				"user"));
 
 		assertEquals(2, runList.size());
 
@@ -336,7 +341,8 @@ public class RunTest {
 		Metadata myOtherRun = createAndStoreRun(image);
 		Metadata notMyRun = createAndStoreRun(image, "other");
 
-		List<RunView> runList = Run.viewList(image.getResourceUri(), new User("user"));
+		List<RunView> runList = Run.viewList(image.getResourceUri(), new User(
+				"user"));
 
 		assertEquals(2, runList.size());
 
@@ -429,9 +435,13 @@ public class RunTest {
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void setInexistantRuntimeParameter() throws SlipStreamException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
-		CommonTestUtil.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
-		
+	public void setInexistantRuntimeParameter() throws SlipStreamException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException,
+			ClassNotFoundException {
+		CommonTestUtil
+				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+
 		ImageModule image = new ImageModule(
 				"setInexistantRuntimeParameterImage");
 		image.setImageId("123", cloudServiceName);
@@ -462,17 +472,57 @@ public class RunTest {
 		parameter = new NodeParameter("pi1", "node1:po1", null);
 		parameter.setContainer(node2);
 		node2.setParameterMapping(parameter, deployment);
-		
+
 		deployment.store();
 
 		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
-		
+
 		try {
 			run.updateRuntimeParameter("node1.1:notthere", null);
 		} finally {
 			deployment.remove();
 		}
-	
+
+	}
+
+	@Test
+	public void done() throws ValidationException, ConfigurationException {
+
+		ImageModule image = new ImageModule("doneImage");
+
+		Run run = new Run(image, cloudServiceName, user);
+
+		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
+				States.Inactive);
+
+		run.done();
+		assertThat(run.getStatus(), is(States.Cancelled.toString()));
+
+		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
+				States.Running);
+		run.done();
+		assertThat(run.getStatus(), is(States.Cancelled.toString()));
+
+		run.getRuntimeParameters().put(
+				RuntimeParameter.GLOBAL_ABORT_KEY,
+				new RuntimeParameter(run, RuntimeParameter.GLOBAL_ABORT_KEY,
+						"Kaboom", ""));
+
+		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
+				States.Aborting);
+		run.done();
+		assertThat(run.getStatus(), is(States.Aborted.toString()));
+
+		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
+				States.Aborted);
+		run.done();
+		assertThat(run.getStatus(), is(States.Aborted.toString()));
+	}
+
+	private void setRuntimeParameterState(Run run, String key, States state)
+			throws ValidationException {
+		run.getRuntimeParameters().put(key,
+				new RuntimeParameter(run, key, state.toString(), ""));
 	}
 
 }

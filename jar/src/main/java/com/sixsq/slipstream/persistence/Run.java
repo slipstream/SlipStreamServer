@@ -335,8 +335,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Attribute
 	private String uuid;
 
-	private String status;
-
 	@Attribute(empty = "Orchestration")
 	private RunType type = RunType.Orchestration;
 
@@ -345,23 +343,24 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@Attribute
 	public String getStatus() {
-		States globalState = States.valueOf(runtimeParameters.get(
-				RuntimeParameter.GLOBAL_STATE_KEY).getValue());
+		States globalState = getGlobalState();
 		RunStatus status = new RunStatus(globalState, isAbort());
-		this.status = status.toString();
-		return this.status;
+		return status.toString();
+	}
+
+	private States getGlobalState() {
+		return States.valueOf(runtimeParameters.get(
+				RuntimeParameter.GLOBAL_STATE_KEY).getValue());
 	}
 
 	@Attribute
 	public void setStatus(String status) {
-		this.status = status;
 	}
 
 	@Attribute(required = false)
 	@Enumerated(EnumType.STRING)
 	public States getState() {
-		return States.valueOf(runtimeParameters.get(
-				RuntimeParameter.GLOBAL_STATE_KEY).getValue());
+		return getGlobalState();
 	}
 
 	@Attribute
@@ -948,6 +947,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 		} else {
 			image.assignImageIdFromCloudService(getCloudServiceName());
 		}
+	}
+
+	public void done() {
+		RunStatus status = new RunStatus(this);
+		status.done();
+		getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY).setValue(
+				status.toString());
 	}
 
 }

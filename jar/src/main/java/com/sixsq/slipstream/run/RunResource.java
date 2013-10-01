@@ -214,6 +214,8 @@ public class RunResource extends ServerResource {
 		} catch (ValidationException e) {
 			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, e));
 		}
+		
+		run.done();
 
 		em.close();
 	}
