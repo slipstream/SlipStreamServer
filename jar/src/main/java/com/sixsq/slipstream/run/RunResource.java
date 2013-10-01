@@ -216,6 +216,8 @@ public class RunResource extends ServerResource {
 		}
 		
 		run.done();
+		
+		run.store();
 
 		em.close();
 	}
