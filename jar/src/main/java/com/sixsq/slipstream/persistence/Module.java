@@ -43,6 +43,7 @@ import org.simpleframework.xml.ElementArray;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleVersionView;
 import com.sixsq.slipstream.module.ModuleView;
+import com.sixsq.slipstream.run.RunView.RunViewList;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 
 /**
@@ -98,7 +99,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static Module loadByName(String name) {
 		return load(constructResourceUri(name));
 	}
-	
+
 	public static Module load(String uri) {
 		String resourceUri = uri;
 		int version = ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
@@ -188,9 +189,17 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	@Attribute(required = false)
 	private String moduleReferenceUri;
 
+	/**
+	 * Contains all available cloud services, plus
+	 * 'default'. Used for HTML UI.
+	 */
 	@Transient
 	@ElementArray(required = false)
 	protected String[] cloudNames;
+
+	@Transient
+	@Element(required = false)
+	private RunViewList runs;
 
 	protected Module() {
 		super();
@@ -204,6 +213,14 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		setName(name);
 	}
 
+	public RunViewList getRuns() {
+		return runs;
+	}
+
+	public void setRuns(RunViewList runs) {
+		this.runs = runs;
+	}
+	
 	private void validateName(String name) throws ValidationException {
 		if (name == null || "".equals(name)) {
 			throw new ValidationException("module name cannot be empty");
@@ -285,7 +302,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		return moduleReferenceUri;
 	}
 
-	public void setModuleReference(Module reference) {
+	public void setModuleReference(Module reference) throws ValidationException {
+		if (getResourceUri().equals(reference.getResourceUri())) {
+			throw new ValidationException("Module reference cannot be itself");
+		}
 		this.moduleReferenceUri = reference.getResourceUri();
 	}
 
@@ -352,11 +372,11 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	}
 
 	public void publish() {
-		this.published = new Publish();
+		published = new Publish();
 	}
 
 	public void unpublish() {
-		this.published = null;
+		published = null;
 	}
 
 	public Publish getPublished() {

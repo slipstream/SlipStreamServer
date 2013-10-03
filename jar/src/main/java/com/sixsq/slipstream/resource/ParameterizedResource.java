@@ -24,7 +24,6 @@ import java.io.IOException;
 
 import javax.persistence.EntityManager;
 
-import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
@@ -34,31 +33,24 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
-import org.w3c.dom.Document;
 
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameterized;
-import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.XmlUtil;
 
 public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
-		extends ServerResource {
+		extends BaseResource {
 
-	protected static final String NEW_NAME = "new";
+	private static final String NEW_NAME = "new";
 
 	private S parameterized = null;
 
-	private User user = null;
-
-	protected String baseUrlSlash = null;
-	protected String targetParameterizeUri = null;
+	private String targetParameterizeUri = null;
 
 	private boolean isEdit = false;
 
@@ -67,18 +59,10 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	private boolean canPost = false;
 	private boolean canDelete = false;
 
-	protected Configuration configuration;
-
 	@Override
 	public void doInit() throws ResourceException {
 
-		Request request = getRequest();
-
-		setUser(User.loadByName(request.getClientInfo().getUser().getName()));
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
-
-		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
+		super.doInit();
 
 		try {
 			loadTargetParameterized();
@@ -93,8 +77,12 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	abstract protected String extractTargetUriFromRequest();
 
-	abstract protected S createParameterized(String name)
+	abstract protected S getOrCreateParameterized(String name)
 			throws ValidationException;
+
+	public String getTargetParameterizeUri() {
+		return targetParameterizeUri;
+	}
 
 	public boolean isEdit() {
 		return isEdit;
@@ -138,14 +126,6 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	abstract protected void authorize();
 
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
 	public void setParameterized(S parameterized) {
 		this.parameterized = parameterized;
 	}
@@ -180,7 +160,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	private void createVolatileParameterizedForEditing()
 			throws ValidationException {
-		setParameterized(createParameterized(ModuleUriUtil
+		setParameterized(getOrCreateParameterized(ModuleUriUtil
 				.extractModuleNameFromResourceUri(targetParameterizeUri)));
 		isEdit = true;
 	}
@@ -208,7 +188,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		Form form = resourceRef.getQueryAsForm();
 		return isTrue(form.getFirstValue(key));
 	}
-	
+
 	private boolean extractNewFlagFromQuery() {
 		return isQueryValueSetTrue("new");
 	}
@@ -229,69 +209,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected void addParametersForEditing() throws ValidationException,
 			ConfigurationException {
-		user = ParametersFactory.addParametersForEditing(user);
-	}
-
-	protected void throwUnauthorized() {
-		throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,
-				"You are not allowed to access this resource");
-	}
-
-	protected void throwClientError(Throwable e) {
-		throwClientError(e.getMessage());
-	}
-
-	protected void throwClientError(String message) {
-		throwClientError(Status.CLIENT_ERROR_BAD_REQUEST, message);
-	}
-
-	protected void throwClientConflicError(String message) {
-		throwClientError(Status.CLIENT_ERROR_CONFLICT, message);
-	}
-
-	protected void throwClientForbiddenError() {
-		throwClientError(Status.CLIENT_ERROR_FORBIDDEN, "");
-	}
-
-	protected void throwClientForbiddenError(String message) {
-		throwClientError(Status.CLIENT_ERROR_FORBIDDEN, message);
-	}
-
-	protected void throwClientForbiddenError(Throwable e) {
-		throwClientError(Status.CLIENT_ERROR_FORBIDDEN, e);
-	}
-
-	protected void throwClientBadRequest(String message) {
-		throwClientError(Status.CLIENT_ERROR_BAD_REQUEST, message);
-	}
-
-	protected void throwNotFoundResource() {
-		throwClientError(Status.CLIENT_ERROR_NOT_FOUND, "Not found");
-	}
-
-	protected void throwClientValidationError(String message) {
-		throwClientError(Status.CLIENT_ERROR_BAD_REQUEST, "Validation error: "
-				+ message);
-	}
-
-	protected void throwClientConflicError(Throwable e) {
-		throwClientError(Status.CLIENT_ERROR_CONFLICT, e);
-	}
-
-	protected void throwClientError(Status status, String message) {
-		throw new ResourceException(status, message);
-	}
-
-	protected void throwClientError(Status status, Throwable e) {
-		throw new ResourceException(status, e);
-	}
-
-	protected void throwServerError(Throwable e) {
-		throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
-	}
-
-	protected void throwServerError(String message) {
-		throw new ResourceException(Status.SERVER_ERROR_INTERNAL, message);
+		setUser(ParametersFactory.addParametersForEditing(getUser()));
 	}
 
 	@Delete
@@ -321,7 +239,16 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	public Representation toXml() {
 		checkCanGet();
 
-		String result = SerializationUtil.toXmlString(getParameterized());
+		S prepared = null;
+		try {
+			prepared = prepareForSerialization();
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		} catch (ConfigurationException e) {
+			throwServerError(e.getMessage());
+		}
+
+		String result = SerializationUtil.toXmlString(prepared);
 		return new StringRepresentation(result);
 	}
 
@@ -338,19 +265,27 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 			}
 		}
 
-		Document doc = SerializationUtil.toXmlDocument(getParameterized());
-
-		XmlUtil.addUser(doc, user);
-
-		String metadata = SerializationUtil.documentToString(doc);
-
-		String html = slipstream.ui.views.Representation.toHtml(metadata,
-				getPageRepresentation(), getTransformationType());
+		S prepared = null;
+		try {
+			prepared = prepareForSerialization();
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		} catch (ConfigurationException e) {
+			throwServerError(e.getMessage());
+		}
+		
+		String html = HtmlUtil.toHtml(prepared,
+				getPageRepresentation(), getTransformationType(), getUser());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
-	private String getTransformationType() {
+	protected S prepareForSerialization() throws ConfigurationException,
+			ValidationException {
+		return getParameterized();
+	}
+
+	protected String getTransformationType() {
 		String type = "view";
 		if (isEdit) {
 			type = "edit";
@@ -381,7 +316,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 				throwClientForbiddenError("Cannot create this resource. Does it already exist?");
 			}
 		} else {
-				throwClientForbiddenError("Forbidden to update this resource.");
+			throwClientForbiddenError("Forbidden to update this resource.");
 		}
 	}
 

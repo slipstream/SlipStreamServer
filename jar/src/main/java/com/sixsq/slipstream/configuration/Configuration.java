@@ -39,6 +39,8 @@ import javax.persistence.NoResultException;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
 
+import slipstream.ui.views.Representation;
+
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -171,7 +173,7 @@ public class Configuration {
 		// Validate the base URL (and associated Reference) and cache the
 		// results.
 		baseRef = initializeBaseRef(RequiredParameters.SLIPSTREAM_BASE_URL
-				.getValue());
+				.getName());
 
 		// Calculate the base path. This value must both begin and end with a
 		// slash and cannot be null or empty.
@@ -195,19 +197,19 @@ public class Configuration {
 	protected void extractAndSetVersion() {
 		RequiredParameters versionRequiredParameter = RequiredParameters.SLIPSTREAM_VERSION;
 		version = loadConfigFileProperties().getProperty(
-				versionRequiredParameter.getValue());
+				versionRequiredParameter.getName());
 
 		if (version == null) {
 			throw (new ConfigurationException(
 					"Missing mandatory configuration parameter "
-							+ versionRequiredParameter.getValue()));
+							+ versionRequiredParameter.getName()));
 		}
 
 		ServiceConfigurationParameter versionParameter = getParameters()
-				.getParameter(versionRequiredParameter.getValue());
+				.getParameter(versionRequiredParameter.getName());
 		if (versionParameter == null) {
 			versionParameter = createParameter(version,
-					versionRequiredParameter.getValue(),
+					versionRequiredParameter.getName(),
 					versionRequiredParameter.getDescription(),
 					versionRequiredParameter.getCategory().name());
 		}
@@ -217,6 +219,11 @@ public class Configuration {
 			throw (new ConfigurationException("Invalid version value: "
 					+ e.getMessage()));
 		}
+		
+		versionParameter.setReadonly(true);
+		
+		// set the version in the UI
+		Representation.setReleaseVersion(version);
 	}
 
 	private void setMandatoryToAllParameters() {
@@ -342,7 +349,7 @@ public class Configuration {
 
 	protected String[] getConnectorClassNames() {
 		String cloudConnectorClassNameParameterKey = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_CLASS
-				.getValue();
+				.getName();
 
 		if (!serviceConfiguration.getParameters().containsKey(
 				cloudConnectorClassNameParameterKey)) {
@@ -704,7 +711,7 @@ public class Configuration {
 		for (RequiredParameters required : ServiceConfiguration.RequiredParameters
 				.values()) {
 			ServiceConfigurationParameter target = serviceConfiguration
-					.getParameter(required.getValue());
+					.getParameter(required.getName());
 			target.setCategory(required.getCategory().name());
 			target.setType(required.getType());
 			target.setDescription(required.getDescription());

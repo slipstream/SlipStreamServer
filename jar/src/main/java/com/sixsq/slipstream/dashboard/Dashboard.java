@@ -20,102 +20,10 @@ package com.sixsq.slipstream.dashboard;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
-import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.ConnectorFactory;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.run.RunView;
-import com.sixsq.slipstream.run.RunView.RunViewList;
+import com.sixsq.slipstream.run.Runs;
 
 @Root
-public class Dashboard {
-
-	@Root(name = "vms")
-	public static class VmViewList {
-
-		@ElementList(inline = true, required = false)
-		private List<VmView> list = new ArrayList<VmView>();
-
-		public VmViewList() {
-		}
-
-		public VmViewList(List<VmView> list) {
-			this.list = list;
-		}
-
-		public List<VmView> getList() {
-			return list;
-		}
-
-	}
-
-	@Element
-	private RunViewList runs;
-
-	@Element
-	private VmViewList vms = new VmViewList();
-
-	public RunViewList getRuns() {
-		return runs;
-	}
-
-	public VmViewList getVms() {
-		return vms;
-	}
-
-	public void populate(User user) throws SlipStreamException {
-		user.validate();
-		User.validateMinimumInfo(user);
-		populateRuns(user, user.isSuper());
-		populateVms(user);
-	}
-
-	private void populateRuns(User user, boolean isSuper) {
-		runs = RunView.fetchListView(user, isSuper);
-	}
-
-	private void populateVms(User user) throws SlipStreamException {
-		for (String cloudServiceName : ConnectorFactory.getCloudServiceNames()) {
-			Connector connector = ConnectorFactory
-					.getConnector(cloudServiceName);
-			Properties props = new Properties();
-			try {
-				props = connector.describeInstances(user);
-			} catch (Exception e) {
-				// swallow the exception, since we don't want to fail if users
-				// have wrong credentials
-			}
-			populateVmsForCloud(user, cloudServiceName, props);
-		}
-	}
-
-	protected void populateVmsForCloud(User user, String cloudServiceName,
-			Properties props) {
-		for (String key : props.stringPropertyNames()) {
-			String instanceId = key;
-			String status = (String) props.get(key);
-			String runUuid = fetchRunUuid(user, instanceId);
-			vms.getList().add(
-					new VmView(instanceId, status, runUuid,
-							cloudServiceName));
-		}
-	}
-
-	protected String fetchRunUuid(User user, String instanceId) {
-		List<RunView> runs = Run.viewListByInstanceId(user, instanceId);
-		if (runs.size() == 0) {
-			return "Unknown";
-		}
-		return runs.get(0).uuid;
-	}
-
+public class Dashboard extends Runs {
 }

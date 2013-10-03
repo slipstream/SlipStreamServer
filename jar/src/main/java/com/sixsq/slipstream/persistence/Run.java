@@ -51,6 +51,7 @@ import javax.persistence.TemporalType;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.connector.Connector;
@@ -94,7 +95,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public final static String RESOURCE_URI_PREFIX = "run/";
 
-	public final static String TAGS_PARAMETER_NAME = "tags";
 	public final static String TAGS_PARAMETER_DESCRIPTION = "Tags (comma separated) or annotations for this run";
 
 	public static Run abortOrReset(String abortMessage, String nodename,
@@ -168,7 +168,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@SuppressWarnings("unchecked")
 	public static List<RunView> viewListByInstanceId(User user,
-			String instanceId) {
+			String instanceId) throws ConfigurationException,
+			ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("getRunByInstanceId");
 		q.setParameter("user", user.getName());
@@ -179,43 +180,56 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return views;
 	}
 
-	private static List<RunView> convertRunsToRunViews(List<Run> runs, User user) {
+	private static List<RunView> convertRunsToRunViews(List<Run> runs, User user)
+			throws ConfigurationException, ValidationException {
 		List<RunView> views = new ArrayList<RunView>();
 		RunView runView;
-		try {
-			runs = updateVmStatus(runs, user);
-		} catch (SlipStreamException e1) {
-			// It's ok to fail
-		}
 		for (Run r : runs) {
+			// Deployment runs can span several clouds
+			// this info in held in getCloudServiceNameList()
+			// so if the list is not empty, use it and
+			// create a RunView instance for each
+			String cloudServiceName = r.getCloudServiceName();
+			String[] cloudServiceNames = { cloudServiceName };
+			String[] list = new String[0];
+			try {
+				list = r.getCloudServiceNameList();
+			} catch (ValidationException ex) {
+				// it's if we have missing modules
+			}
+			if (list.length > 0) {
+				cloudServiceNames = list;
+			}
+
 			runView = new RunView(r.getResourceUri(), r.getUuid(),
 					r.getModuleResourceUrl(), r.getStatus(), r.getStart(),
-					r.getCloudServiceName(), r.getUser(), r.getType());
+					r.getUser(), r.getType());
 			try {
-				runView.hostname = r
+				runView.setHostname(r
 						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-								+ RuntimeParameter.HOSTNAME_KEY);
-				runView.vmstate = r
-						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-								+ RuntimeParameter.STATE_VM_KEY);
+								+ RuntimeParameter.HOSTNAME_KEY));
 			} catch (NotFoundException e) {
 			}
-			views.add(runView);
+			try {
+				runView.setVmstate(r
+						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
+								+ RuntimeParameter.STATE_VM_KEY));
+			} catch (NotFoundException e) {
+			}
+			try {
+				runView.setTags(r
+						.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
+			} catch (NotFoundException e) {
+			}
+
+			// For each cloud service, create a RunView entry
+			for (String csn : cloudServiceNames) {
+				RunView rv = runView.copy();
+				rv.setCloudServiceName(csn);
+				views.add(rv);
+			}
 		}
 		return views;
-	}
-
-	// REMARK: LS: I think this method is useless
-	private static List<Run> updateVmStatus(List<Run> runs, User user)
-			throws SlipStreamException {
-		/*
-		 * Connector connector = ConnectorFactory.getCurrentConnector(user);
-		 * Properties describeInstancesStates =
-		 * connector.describeInstances(user); for (Run run : runs) {
-		 * 
-		 * run = populateVmStateProperties(run, describeInstancesStates); }
-		 */
-		return runs;
 	}
 
 	public static Run updateVmStatus(Run run, User user)
@@ -279,7 +293,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<RunView> viewListAll(User user) {
+	public static List<RunView> viewListAll(User user)
+			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("allActiveRunViews");
 		List<Run> runs = q.getResultList();
@@ -289,7 +304,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<RunView> viewList(User user) {
+	public static List<RunView> viewList(User user)
+			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("activeRunViews");
 		q.setParameter("user", user.getName());
@@ -300,7 +316,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<RunView> viewList(String moduleResourceUri, User user) {
+	public static List<RunView> viewList(String moduleResourceUri, User user)
+			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("activeRunViewsByRefModule");
 		q.setParameter("user", user.getName());
@@ -318,8 +335,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Attribute
 	private String uuid;
 
-	private String status;
-
 	@Attribute(empty = "Orchestration")
 	private RunType type = RunType.Orchestration;
 
@@ -328,23 +343,24 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@Attribute
 	public String getStatus() {
-		States globalState = States.valueOf(runtimeParameters.get(
-				RuntimeParameter.GLOBAL_STATE_KEY).getValue());
+		States globalState = getGlobalState();
 		RunStatus status = new RunStatus(globalState, isAbort());
-		this.status = status.toString();
-		return this.status;
+		return status.toString();
+	}
+
+	private States getGlobalState() {
+		return States.valueOf(runtimeParameters.get(
+				RuntimeParameter.GLOBAL_STATE_KEY).getValue());
 	}
 
 	@Attribute
 	public void setStatus(String status) {
-		this.status = status;
 	}
 
 	@Attribute(required = false)
 	@Enumerated(EnumType.STRING)
 	public States getState() {
-		return States.valueOf(runtimeParameters.get(
-				RuntimeParameter.GLOBAL_STATE_KEY).getValue());
+		return getGlobalState();
 	}
 
 	@Attribute
@@ -385,24 +401,26 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Element(required = false)
 	private transient Module module;
 
+	/**
+	 * List of cloud service names used in the current run
+	 */
+	@ElementArray(required = false)
+	public String[] getCloudServiceNameList() throws ConfigurationException,
+			ValidationException {
+		if (getCategory() == ModuleCategory.Deployment) {
+			return getCloudServicesList().toArray(new String[0]);
+		} else {
+			String[] names = { getCloudServiceName() };
+			return names;
+		}
+	}
+
+	@ElementArray(required = false)
+	public void setCloudServiceNameList(String[] names) {
+	}
+
 	@SuppressWarnings("unused")
 	private Run() throws NotFoundException {
-	}
-
-	public Module getModule() {
-		return module;
-	}
-
-	public void setModule(Module module) throws ValidationException {
-		setModule(module, false);
-	}
-
-	public void setModule(Module module, boolean populate)
-			throws ValidationException {
-		this.module = module;
-		if (populate) {
-			populateModule();
-		}
 	}
 
 	public Run(Module module, String cloudServiceName, User user)
@@ -433,6 +451,22 @@ public class Run extends Parameterized<Run, RunParameter> {
 		initializeGlobalParameters();
 	}
 
+	public Module getModule() {
+		return module;
+	}
+
+	public void setModule(Module module) throws ValidationException {
+		setModule(module, false);
+	}
+
+	public void setModule(Module module, boolean populate)
+			throws ValidationException {
+		this.module = module;
+		if (populate) {
+			populateModule();
+		}
+	}
+
 	private void initializeVmRuntimeParameters() throws ValidationException {
 
 		if (getCategory() == ModuleCategory.Deployment) {
@@ -452,9 +486,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 						RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
 
 				nodeRuntimeParameterKeyName = nodeRuntimeParameterKeyName(node,
-						TAGS_PARAMETER_NAME);
+						RuntimeParameter.TAGS_KEY);
 				setParameter(new RunParameter(nodeRuntimeParameterKeyName, "",
-						TAGS_PARAMETER_DESCRIPTION));
+						RuntimeParameter.GLOBAL_TAGS_DESCRIPTION));
 			}
 		}
 	}
@@ -487,10 +521,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 		assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_MESSAGE_KEY,
 				Run.INITIAL_NODE_STATE_MESSAGE,
 				RuntimeParameter.GLOBAL_STATE_MESSAGE_DESCRIPTION);
-		assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
-				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
 		assignRuntimeParameter(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY, "",
 				RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION);
+
+		assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
+				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
+
 	}
 
 	private void initializeOrchestratorParameters() throws ValidationException {
@@ -808,9 +844,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return cloudServiceName;
 	}
 
-	// LS: Temporary method
 	public Collection<Node> getNodes() throws ValidationException {
-		// FIXME: this is a hack and needs a real fix
 		if (module == null) {
 			module = new RunDeploymentFactory().overloadModule(this,
 					User.loadByName(getUser()));
@@ -827,10 +861,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return nodes;
 	}
 
-	public HashSet<String> getCloudServicesList()
-			throws ConfigurationException, ValidationException {
+	public HashSet<String> getCloudServicesList() throws ValidationException {
 		HashSet<String> cloudServicesList = new HashSet<String>();
-		for (Node n : this.getNodes()) {
+		for (Node n : getNodes()) {
 			String cloudServiceName = n.getCloudService();
 			cloudServicesList
 					.add(getEffectiveCloudServiceName(cloudServiceName));
@@ -888,8 +921,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 			throws ValidationException {
 		for (Node node : deployment.getNodes().values()) {
 
-			// node.setCloudService(getCloudServiceName());
-
 			RunParameter runParameter;
 
 			runParameter = getParameter(nodeRuntimeParameterKeyName(node,
@@ -897,12 +928,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 			if (runParameter != null) {
 				node.setMultiplicity(runParameter.getValue());
 			}
-
-			// runParameter = getParameter(nodeRuntimeParameterKeyName(node,
-			// RuntimeParameter.CLOUD_SERVICE_NAME));
-			// if (runParameter != null) {
-			// node.setCloudService(runParameter.getValue());
-			// }
 
 			node.getImage().assignImageIdFromCloudService(
 					node.getCloudService());
@@ -922,6 +947,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 		} else {
 			image.assignImageIdFromCloudService(getCloudServiceName());
 		}
+	}
+
+	public void done() {
+		RunStatus status = new RunStatus(this);
+		status.done();
+		getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY).setValue(
+				status.toString());
 	}
 
 }

@@ -20,12 +20,13 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,16 +51,17 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
-public class LoginResourceTest extends ResourceTestBase{
+public class LoginResourceTest extends ResourceTestBase {
 
 	@Before
 	public void setUpBeforeClass() throws Exception {
 		createAndStoreUser();
 	}
 
-	private void createAndStoreUser() {
+	private void createAndStoreUser() throws NoSuchAlgorithmException,
+			UnsupportedEncodingException {
 		user = createUser("test");
-		user.setPassword("password");
+		user.hashAndSetPassword("password");
 		user.store();
 	}
 
@@ -69,47 +71,46 @@ public class LoginResourceTest extends ResourceTestBase{
 	}
 
 	@Test
-	public void loginValidUser() throws ConfigurationException
-	{
-		
+	public void loginValidUser() throws ConfigurationException {
+
 		Request request = createPostRequest(user);
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		}
+	}
 
 	@Test
-	public void loginValidUserWithCookiePresent() throws ConfigurationException
-	{
-		
+	public void loginValidUserWithCookiePresent() throws ConfigurationException {
+
 		Request request = createPostRequest(user);
 		Response response = executeRequest(request);
 
-		Cookie cookie = response.getCookieSettings().getFirst(CookieUtils.getCookieName());
+		Cookie cookie = response.getCookieSettings().getFirst(
+				CookieUtils.getCookieName());
 
 		assertNotNull(cookie);
 
-		assertThat(CookieUtils.verifyAuthnCookie(cookie), is(Verifier.RESULT_VALID));
+		assertThat(CookieUtils.verifyAuthnCookie(cookie),
+				is(Verifier.RESULT_VALID));
 
 	}
 
 	@Test
-	public void loginInvalidUserNoCookie() throws ConfigurationException
-	{
-		User invalid = createUser("invalid","password");
+	public void loginInvalidUserNoCookie() throws ConfigurationException {
+		User invalid = createUser("invalid", "password");
 		Request request = createPostRequest(invalid);
 		Response response = executeRequest(request);
 
-		Cookie cookie = response.getCookieSettings().getFirst(CookieUtils.getCookieName());
+		Cookie cookie = response.getCookieSettings().getFirst(
+				CookieUtils.getCookieName());
 
 		assertNull(cookie);
 	}
 
 	@Test
-	public void loginInvalidUser() throws ConfigurationException
-	{
-		User invalid = createUser("invalid","password");
+	public void loginInvalidUser() throws ConfigurationException {
+		User invalid = createUser("invalid", "password");
 		Request request = createPostRequest(invalid);
 		Response response = executeRequest(request);
 
@@ -117,21 +118,20 @@ public class LoginResourceTest extends ResourceTestBase{
 	}
 
 	@Test
-	public void loginInvalidPasswordNoCookie() throws ConfigurationException
-	{
-		User invalid = createUser(user.getName(),"wrong");
+	public void loginInvalidPasswordNoCookie() throws ConfigurationException {
+		User invalid = createUser(user.getName(), "wrong");
 		Request request = createPostRequest(invalid);
 		Response response = executeRequest(request);
 
-		Cookie cookie = response.getCookieSettings().getFirst(CookieUtils.getCookieName());
+		Cookie cookie = response.getCookieSettings().getFirst(
+				CookieUtils.getCookieName());
 
 		assertNull(cookie);
 	}
 
 	@Test
-	public void loginWrongPasswordUser() throws ConfigurationException
-	{
-		User wrongPassword = createUser(user.getName(),"wrong");
+	public void loginWrongPasswordUser() throws ConfigurationException {
+		User wrongPassword = createUser(user.getName(), "wrong");
 		Request request = createPostRequest(wrongPassword);
 		Response response = executeRequest(request);
 
@@ -139,22 +139,23 @@ public class LoginResourceTest extends ResourceTestBase{
 	}
 
 	@Test
-	public void redirectsOnSuccessHtmlLogin() throws ConfigurationException
-	{
-		Request request = new Request(Method.POST, "http://something.org/test/request?redirectURL=/module");
+	public void redirectsOnSuccessHtmlLogin() throws ConfigurationException {
+		Request request = new Request(Method.POST,
+				"http://something.org/test/request?redirectURL=/module");
 		request.setRootRef(new Reference("http://something.org"));
 
-		Representation entity = createUserLoginForm(user).getWebRepresentation();
+		Representation entity = createUserLoginForm(user)
+				.getWebRepresentation();
 		entity.setMediaType(MediaType.TEXT_HTML);
-		
+
 		request.setEntity(entity);
 
 		Preference<MediaType> mediaType = new Preference<MediaType>();
 		mediaType.setMetadata(MediaType.TEXT_HTML);
 		request.getClientInfo().getAcceptedMediaTypes().add(mediaType);
-		
+
 		RequestUtil.addConfigurationToRequest(request);
-		
+
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.REDIRECTION_SEE_OTHER));
@@ -170,13 +171,12 @@ public class LoginResourceTest extends ResourceTestBase{
 	private Form createUserLoginForm(User user) {
 		Form form = new Form();
 		form.add("username", user.getName());
-		form.add("password", user.getPassword());
+		form.add("password", PASSWORD);
 		return form;
 	}
 
 	protected Response executeRequest(Request request) {
 		return executeRequest(request, new LoginResource());
 	}
-
 
 }

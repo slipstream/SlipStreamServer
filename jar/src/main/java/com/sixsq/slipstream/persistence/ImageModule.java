@@ -283,8 +283,6 @@ public class ImageModule extends Module {
 		addMandatoryParameter(RuntimeParameter.INSTANCE_ID_KEY,
 				RuntimeParameter.INSTANCE_ID_DESCRIPTION,
 				ParameterCategory.Output);
-		addMandatoryParameter("dummy", "Placeholder for display",
-				ParameterCategory.Input, ParameterType.Dummy);
 
 		updateNetwork();
 		updateExtraDisks();

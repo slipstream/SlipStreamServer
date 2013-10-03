@@ -27,6 +27,8 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
@@ -48,12 +50,12 @@ public class RunView {
 
 	@Attribute
 	public final Date startTime;
-	
-	@Attribute(required = false)
-	public String vmstate;
 
 	@Attribute(required = false)
-	public String hostname;
+	private String vmstate;
+
+	@Attribute(required = false)
+	private String hostname;
 
 	@Attribute(required = false)
 	private String cloudServiceName;
@@ -64,24 +66,27 @@ public class RunView {
 	@Attribute(required = false)
 	private RunType type;
 
+	@Attribute(required = false)
+	public String tags;
+
 	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
-			String status, Date startTime, String cloudServiceName, String username, RunType type) {
+			String status, Date startTime, String username, RunType type) {
 		this.resourceUri = resourceUrl;
 		this.uuid = uuid;
 		this.moduleResourceUri = moduleResourceUri;
 		this.status = status;
 		this.startTime = startTime;
-		this.cloudServiceName = cloudServiceName;
 		this.username = username;
 		this.type = type;
 	}
 
-	public static RunViewList fetchListView(User user, boolean isSuper) {
+	public static RunViewList fetchListView(User user, boolean isSuper)
+			throws ConfigurationException, ValidationException {
 		return fetchListView(null, user, isSuper);
 	}
 
 	public static RunViewList fetchListView(String query, User user,
-			boolean isSuper) {
+			boolean isSuper) throws ConfigurationException, ValidationException {
 		List<RunView> list;
 
 		if (isSuper) {
@@ -94,11 +99,25 @@ public class RunView {
 		return new RunViewList(list);
 	}
 
+	public RunView copy() {
+		RunView copy = new RunView(resourceUri, uuid, moduleResourceUri,
+				status, startTime, username, type);
+		copy.setHostname(hostname);
+		copy.setTags(tags);
+		copy.setVmstate(vmstate);
+		copy.setCloudServiceName(cloudServiceName);
+		return copy;
+	}
+
 	public String getCloudServiceName() {
 		return cloudServiceName;
 	}
 
-	public String getUser() {
+	public void setCloudServiceName(String cloudServiceName) {
+		this.cloudServiceName = cloudServiceName;
+	}
+
+	public String getUsername() {
 		return username;
 	}
 
@@ -106,11 +125,39 @@ public class RunView {
 		return type;
 	}
 
-	@Root(name = "list")
+	public String getVmstate() {
+		return vmstate;
+	}
+
+	public void setVmstate(String vmstate) {
+		this.vmstate = vmstate;
+	}
+
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
+	}
+
+	public String getHostname() {
+		return hostname;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+
+	public String getTags() {
+		return tags;
+	}
+
+	@Root(name = "runs")
 	public static class RunViewList {
 
 		@ElementList(inline = true, required = false)
-		private final List<RunView> list;
+		private List<RunView> list;
+
+		@SuppressWarnings("unused")
+		private RunViewList() {
+		}
 
 		public RunViewList(List<RunView> list) {
 			this.list = list;

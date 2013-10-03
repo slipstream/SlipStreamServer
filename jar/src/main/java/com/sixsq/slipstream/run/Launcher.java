@@ -109,7 +109,7 @@ public class Launcher {
 					} catch (SlipStreamException e) {
 						run = run.store();
 						run = Run.abortOrReset(e.getMessage(),
-								connector.getOrchestratorName(run),
+								Run.MACHINE_NAME,
 								run.getUuid());
 					}
 				}

@@ -25,7 +25,7 @@ public enum ParameterType {
 	Text,
 	Password,
 	Boolean,
-	Dummy,
+	Dummy, // not used anymore
 	Enum,
 	RestrictedString,
 	RestrictedText

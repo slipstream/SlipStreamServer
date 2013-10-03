@@ -33,6 +33,7 @@ import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.Address;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.domain.ServerCreated;
+import org.jclouds.openstack.nova.v2_0.extensions.KeyPairApi;
 import org.jclouds.openstack.nova.v2_0.options.CreateServerOptions;
 import org.jclouds.openstack.v2_0.domain.Resource;
 import org.jclouds.rest.RestContext;
@@ -189,7 +190,7 @@ public class OpenStackConnector extends
 			statuses.put(instance.getId(), status);
 		}
 
-		// closeContext();
+		closeContext();
 
 		return statuses;
 	}
@@ -246,13 +247,12 @@ public class OpenStackConnector extends
 			String instanceName = (run.getType() == RunType.Orchestration) ? getOrchestratorName(run) : imageModule.getShortName();
 			
 			String flavorName = (run.getType() == RunType.Orchestration) ? configuration
-					.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME))
+					.getRequiredProperty(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME))
 					: getInstanceType(imageModule);
 			String flavorId = getFlavorId(client, region, flavorName);
 			String userData = (run.getType() == RunType.Orchestration) ? createContextualizationData(run, user, configuration) : "";
-			String keyPairName = user.getParameterValue(
-					constructKey(OpenStackUserParametersFactory.KEYPAIR_NAME),
-					"");
+			String keyPairName = (run.getType() == RunType.Orchestration) ? "slipstream-"+String.valueOf(System.currentTimeMillis()) 
+					: user.getParameterValue(constructKey(OpenStackUserParametersFactory.KEYPAIR_NAME),	"");
 			String[] securityGroups = (run.getType() == RunType.Orchestration) ? "default".split(",")
 					: getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUP, imageModule).split(",");
 
@@ -264,17 +264,24 @@ public class OpenStackConnector extends
 			log.info(instanceData);
 
 			CreateServerOptions options = CreateServerOptions.Builder
-					.keyPairName(keyPairName)
-					.securityGroupNames(securityGroups);
-			if (run.getType() == RunType.Orchestration)
+					.securityGroupNames(securityGroups)
+					.keyPairName(keyPairName);
+			
+			KeyPairApi kpApi = client.getKeyPairExtensionForZone(region).get();
+			if (run.getType() == RunType.Orchestration){
 				options.userData(userData.getBytes());
-
+				kpApi.createWithPublicKey(keyPairName, getPublicSshKey(run, user));
+			}
+			
 			ServerCreated server = null;
 			try {
 				server = client.getServerApiForZone(region).create(instanceName, imageId, flavorId, options);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw (new ServerExecutionEnginePluginException(e.getMessage()));
+			}finally{
+				if (run.getType() == RunType.Orchestration)
+					kpApi.delete(keyPairName);
 			}
 
 			String instanceId = server.getId();
@@ -344,6 +351,11 @@ public class OpenStackConnector extends
 		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "\n";
 		userData += "export SLIPSTREAM_VERBOSITY_LEVEL=\"" + getVerboseParameterValue(user) + "\"\n";
 
+		/*userData += "mkdir -p ~/.ssh\n"
+				+ "echo '" + getPublicSshKey(run, user) + "' >> ~/.ssh/authorized_keys\n"
+				+ "chmod 0700 ~/.ssh\n"
+				+ "chmod 0640 ~/.ssh/authorized_keys\n";
+		*/
 		userData += "mkdir -p " + SLIPSTREAM_REPORT_DIR + "\n"
 				+ "wget --no-check-certificate -O " + bootstrap
 				+ " $SLIPSTREAM_BOOTSTRAP_BIN > " + SLIPSTREAM_REPORT_DIR + "/"

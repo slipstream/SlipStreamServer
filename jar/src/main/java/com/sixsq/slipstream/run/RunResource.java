@@ -36,7 +36,6 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
-import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
@@ -52,9 +51,9 @@ import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.XmlUtil;
 
 public class RunResource extends ServerResource {
 
@@ -124,14 +123,8 @@ public class RunResource extends ServerResource {
 					e.getMessage());
 		}
 
-		Document doc = SerializationUtil.toXmlDocument(run);
-
-		XmlUtil.addUser(doc, user);
-
-		String metadata = SerializationUtil.documentToString(doc);
-
-		String html = slipstream.ui.views.Representation.toHtml(metadata,
-				getPageRepresentation(), null);
+		String html = HtmlUtil.toHtml(run,
+				getPageRepresentation(), user);
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 
@@ -175,10 +168,10 @@ public class RunResource extends ServerResource {
 	@Put("form")
 	public void update(Representation entity) {
 		Form form = new Form(entity);
-		String tags = form.getFirstValue(Run.TAGS_PARAMETER_NAME, null);
+		String tags = form.getFirstValue(RuntimeParameter.TAGS_KEY, null);
 		if (tags != null) {
 			RuntimeParameter rtp = RuntimeParameter.loadFromUuidAndKey(
-					run.getUuid(), Run.TAGS_PARAMETER_NAME);
+					run.getUuid(), RuntimeParameter.GLOBAL_TAGS_KEY);
 			rtp.setValue(tags);
 			rtp.store();
 		}
@@ -221,6 +214,10 @@ public class RunResource extends ServerResource {
 		} catch (ValidationException e) {
 			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, e));
 		}
+		
+		run.done();
+		
+		run.store();
 
 		em.close();
 	}

@@ -30,10 +30,8 @@ import java.util.List;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.ClientInfo;
-import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Preference;
-import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -42,11 +40,11 @@ import org.restlet.service.StatusService;
 import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
@@ -65,8 +63,7 @@ public class CommonStatusService extends StatusService {
 
 		Representation representation = null;
 
-		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		User user = CookieUtils.getCookieUser(cookie);
+		User user = RequestUtil.getUserFromRequest(request);
 
 		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 
@@ -116,32 +113,26 @@ public class CommonStatusService extends StatusService {
 		Configuration configuration = Configuration.getInstance();
 
 		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_EMAIL
-				.getValue();
+				.getName();
 		ServiceConfigurationParameter parameter = configuration.getParameters()
 				.getParameter(key);
 		String email = parameter.getValue();
 
-		key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_URL
-				.getValue();
-		parameter = configuration.getParameters().getParameter(key);
-		String url = parameter.getValue();
-		Reference ref = new Reference(url);
-
 		setContactEmail(email);
-		setHomeRef(ref);
 	}
 
 	private Representation toXhtml(Status status, Response response, User user,
 			String baseUrlSlash, String version) {
 
-		Document doc = SerializationUtil.toXmlDocument(user);
+		String metadata = "";
 
-		String metadata = SerializationUtil.documentToString(doc);
+		if (user != null) {
+			Document doc = SerializationUtil.toXmlDocument(user);
+			metadata = SerializationUtil.documentToString(doc);
+		}
 
-		return new StringRepresentation(
-				slipstream.ui.views.Representation.toHtmlError(metadata,
-						status.getDescription(),
-						String.valueOf(status.getCode())), MediaType.TEXT_HTML);
+		return new StringRepresentation(HtmlUtil.toHtmlError(metadata,
+				status.getDescription(), status.getCode()), MediaType.TEXT_HTML);
 	}
 
 	private String statusToString(Status status) {

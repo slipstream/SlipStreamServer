@@ -39,7 +39,15 @@ import com.sixsq.slipstream.persistence.UserParameter;
  */
 public interface Connector {
 
-	// Cloud runtime interactions
+	/**
+	 * Launch Orchestrator virtual machine.
+	 * 
+	 * @param run
+	 *            for which corresponding virtual machines must be launched
+	 * @param user
+	 *            owner of the run
+	 * @throws SlipStreamException
+	 */
 	Run launch(Run run, User user) throws SlipStreamException;
 
 	/**
@@ -57,7 +65,7 @@ public interface Connector {
 	 * Terminate all running virtual machines associated with the run.
 	 * 
 	 * @param run
-	 *            for which corresponding virtual machines must be deleted.
+	 *            for which corresponding virtual machines must be terminated.
 	 * @param user
 	 *            owner of the run
 	 * @throws SlipStreamException
@@ -69,7 +77,7 @@ public interface Connector {
 	 * @return properties representing each running machine instance. The
 	 *         minimum key/value pairs the method returns includes:
 	 *         <ul>
-	 *         <li>...</li>
+	 *         <li>virtual machine cloud ID/state</li>
 	 *         </ul>
 	 * @throws SlipStreamException
 	 */

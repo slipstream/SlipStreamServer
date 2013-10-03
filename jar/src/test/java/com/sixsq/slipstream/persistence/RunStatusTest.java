@@ -31,25 +31,61 @@ public class RunStatusTest {
 	@Test
 	public void verifyRunningSuccess() {
 
-		assertEquals(new RunStatus(States.Running, false).toString(), States.Running.toString());
+		assertEquals(States.Running.toString(), new RunStatus(States.Running, false).toString());
 	}
 
 	@Test
 	public void verifyRunningWhileAborting() {
 
-		assertEquals(new RunStatus(States.Running, true).toString(), RunStatus.FAILING);
+		assertEquals(RunStatus.FAILING, new RunStatus(States.Running, true).toString());
 	}
 
 	@Test
 	public void verifyFinalStateWithSuccess() {
 
-		assertEquals(new RunStatus(States.Terminal, false).toString(), RunStatus.SUCCESS);
+		assertEquals(RunStatus.SUCCESS, new RunStatus(States.Terminal, false).toString());
 	}
 
 	@Test
 	public void verifyFinalStateAndAborted() {
 
-		assertEquals(new RunStatus(States.Terminal, true).toString(), RunStatus.FAILED);
+		assertEquals(RunStatus.FAILED, new RunStatus(States.Terminal, true).toString());
+	}
+
+	@Test
+	public void verifyDoneFromNotFinal() {
+
+		boolean isAborted = false;
+		RunStatus rs = new RunStatus(States.Inactive, isAborted);
+		rs.done();
+		assertEquals(States.Cancelled.toString(), rs.toString());
+	}
+
+	@Test
+	public void verifyDoneFromNotFinalAborted() {
+
+		boolean isAborted = true;
+		RunStatus rs = new RunStatus(States.Running, isAborted);
+		rs.done();
+		assertEquals(States.Aborted.toString(), rs.toString());
+	}
+
+	@Test
+	public void verifyDoneFromFinal() {
+
+		boolean isAborted = false;
+		RunStatus rs = new RunStatus(States.Terminal, isAborted);
+		rs.done();
+		assertEquals(States.Done.toString(), rs.toString());
+	}
+
+	@Test
+	public void verifyDoneFromFinalAborted() {
+
+		boolean isAborted = true;
+		RunStatus rs = new RunStatus(States.Terminal, isAborted);
+		rs.done();
+		assertEquals(States.Aborted.toString(), rs.toString());
 	}
 
 }

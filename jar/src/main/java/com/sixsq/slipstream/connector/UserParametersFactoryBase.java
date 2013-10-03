@@ -26,11 +26,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.UserParameter;
 
 public abstract class UserParametersFactoryBase extends
 		ParametersFactoryBase<UserParameter> {
 
+	public static String KEY_PARAMETER_NAME = "username";
+	public static String SECRET_PARAMETER_NAME = "password";
 	public static String SSHKEY_PARAMETER_NAME = "ssh.public.key";
 	public static String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
 	public static final String ENDPOINT_PARAMETER_NAME = "endpoint";
@@ -85,6 +88,10 @@ public abstract class UserParametersFactoryBase extends
 		p.setCategory(getCategory());
 		p.setMandatory(true);
 		return p;
+	}
+	
+	public static String getPublicKeyParameterName(){
+		return ParametersFactory.constructKey(ParameterCategory.General.toString(), SSHKEY_PARAMETER_NAME);
 	}
 
 }

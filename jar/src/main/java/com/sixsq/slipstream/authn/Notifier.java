@@ -130,7 +130,7 @@ public class Notifier {
 
 		try {
 
-			String key = RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL.getValue();
+			String key = RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL.getName();
 			ServiceConfigurationParameter parameter = cfg.getParameter(key);
 			String adminEmail = parameter.getValue();
 			return new InternetAddress(adminEmail);
@@ -147,7 +147,7 @@ public class Notifier {
 
 	private static String getMailPassword(ServiceConfiguration cfg) {
 
-		String key = RequiredParameters.SLIPSTREAM_MAIL_PASSWORD.getValue();
+		String key = RequiredParameters.SLIPSTREAM_MAIL_PASSWORD.getName();
 		ServiceConfigurationParameter parameter = cfg.getParameter(key);
 		if (parameter != null) {
 			return parameter.getValue();
@@ -173,7 +173,7 @@ public class Notifier {
 
 			// Determine whether or not to use SSL. By default, SSL is not used
 			// when contacting the SMTP server.
-			String key = RequiredParameters.SLIPSTREAM_MAIL_SSL.getValue();
+			String key = RequiredParameters.SLIPSTREAM_MAIL_SSL.getName();
 			ServiceConfigurationParameter parameter = cfg.getParameter(key);
 			boolean useSSL = false;
 			if ("on".equals(parameter.getValue())) {
@@ -186,13 +186,13 @@ public class Notifier {
 
 			// Set the SMTP server parameters. The host name is required; the
 			// port is optional.
-			key = RequiredParameters.SLIPSTREAM_MAIL_HOST.getValue();
+			key = RequiredParameters.SLIPSTREAM_MAIL_HOST.getName();
 			parameter = cfg.getParameter(key);
 			String mailHost = parameter.getValue();
 
 			props.put("mail." + protocol + ".host", mailHost);
 
-			key = RequiredParameters.SLIPSTREAM_MAIL_PORT.getValue();
+			key = RequiredParameters.SLIPSTREAM_MAIL_PORT.getName();
 			parameter = cfg.getParameter(key);
 			if (parameter != null) {
 				String mailPort = parameter.getValue();
@@ -201,14 +201,14 @@ public class Notifier {
 
 			// Set the name of the user on the SMTP server. This must be
 			// specified.
-			key = RequiredParameters.SLIPSTREAM_MAIL_USERNAME.getValue();
+			key = RequiredParameters.SLIPSTREAM_MAIL_USERNAME.getName();
 			parameter = cfg.getParameter(key);
 			String mailUser = parameter.getValue();
 			props.put("mail." + protocol + ".user", mailUser);
 
 			// Determine whether or not the debugging should be enabled for java
 			// mail. If the option isn't given, then debugging will be off.
-			key = RequiredParameters.SLIPSTREAM_MAIL_DEBUG.getValue();
+			key = RequiredParameters.SLIPSTREAM_MAIL_DEBUG.getName();
 			parameter = cfg.getParameter(key);
 			if (parameter != null) {
 				String mailDebug = parameter.getValue();

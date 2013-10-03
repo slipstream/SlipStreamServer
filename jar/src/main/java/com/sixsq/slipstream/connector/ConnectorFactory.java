@@ -44,31 +44,48 @@ public class ConnectorFactory {
 			throws ConfigurationException, ValidationException {
 		String cloudServiceName = getDefaultCloudServiceName(user);
 
+		if ("".equals(cloudServiceName)) {
+			// user not configured, we take the first connector
+			cloudServiceName = getConnectors().entrySet().iterator().next()
+					.getKey();
+		}
+
 		if (!FormProcessor.isSet(cloudServiceName)) {
-			throw (new ValidationException(
-					"Missing cloud service selection. Consider editing your <a href='"
-							+ "/user/" + user.getName() + "?edit=true'>user account</a>"));
+			throwIncompleteUserCloudConfiguration(user);
 		}
 
 		return getConnector(cloudServiceName);
 	}
 
+	protected static void throwIncompleteUserCloudConfiguration(User user)
+			throws ValidationException {
+		throw new ValidationException(
+				incompleteCloudConfigurationErrorMessage(user));
+	}
+
+	public static String incompleteCloudConfigurationErrorMessage(User user) {
+		return "Incomplete cloud configuration. Consider editing your <a href='"
+				+ "/user/" + user.getName()
+				+ "?edit=true'>user account</a>";
+	}
+
 	public static Connector getConnector(String cloudServiceName)
 			throws ConfigurationException, ValidationException {
-		Connector connector = null;
-		//connector = copyConnector( getConnectors().get(cloudServiceName) );
-		connector = getConnectors().get(cloudServiceName).copy();
+		Connector connector = getConnectors().get(cloudServiceName);
 		if (connector == null) {
 			throw (new ValidationException("Failed to load cloud connector: "
 					+ cloudServiceName));
 		}
-		return connector;
+		return connector.copy();
 	}
 
 	public static Connector getConnector(String cloudServiceName, User user)
 			throws ConfigurationException, ValidationException {
 		if (isDefaultCloudService(cloudServiceName)) {
 			cloudServiceName = getDefaultCloudServiceName(user);
+			if ("".equals(cloudServiceName)) {
+				throw new ValidationException("Missing default cloud in user");
+			}
 		}
 
 		return getConnector(cloudServiceName);
@@ -112,7 +129,7 @@ public class ConnectorFactory {
 					+ e.getMessage());
 		}
 	}
-	
+
 	public static void resetConnectors() {
 		connectors = null;
 		cloudServiceNames = null;
@@ -174,7 +191,7 @@ public class ConnectorFactory {
 	public static String[] getConnectorClassNames() {
 		String connectorsClassNames = Configuration.getInstance()
 				.getRequiredProperty(
-						RequiredParameters.CLOUD_CONNECTOR_CLASS.getValue());
+						RequiredParameters.CLOUD_CONNECTOR_CLASS.getName());
 
 		return splitConnectorClassNames(connectorsClassNames);
 	}

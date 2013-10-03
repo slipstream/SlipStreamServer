@@ -205,6 +205,7 @@ public class Tutorials extends BaseImages {
 			Module webserver, Module client)
 			throws ValidationException {
 		DeploymentModule deployment = new DeploymentModule(DEPLOYMENT_NAME);
+		deployment.setDescription("Deployment binding the apache server and the test client nodes");
 		Authz authz = new Authz(user.getName(), deployment);
 		authz.setPublicGet(true);
 		authz.setPublicPost(true);

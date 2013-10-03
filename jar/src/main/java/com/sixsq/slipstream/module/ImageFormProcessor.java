@@ -63,7 +63,6 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 			module.setModuleReference(Module
 					.constructResourceUri(moduleReferenceUri));
 		}
-
 		module.setIsBase(getBooleanValue(getForm(), "isbase"));
 
 		parsePackages(getForm());
@@ -165,19 +164,19 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		List<Target> targets = new ArrayList<Target>();
 
-		String[] targetNames = {"execute", "report"};
-		
-		for(String targetName : targetNames) {
+		String[] targetNames = { "execute", "report" };
+
+		for (String targetName : targetNames) {
 			addTarget(form, targets, targetName);
 		}
-		
+
 		castToModule().setTargets(targets);
 
 	}
 
 	private void addTarget(Form form, List<Target> targets, String targetName) {
 		String target = form.getFirstValue(targetName + "--script");
-		if(target != null) {
+		if (target != null) {
 			targets.add(new Target(targetName, target));
 		}
 	}
@@ -212,23 +211,28 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 	private void parsePlatform(Form form) {
 
 		String platform = form.getFirstValue("platform");
+
 		if (platform == null) {
 			platform = "";
 		}
 
 		castToModule().setPlatform(platform);
-
 	}
 
 	@Override
 	public void adjustModule(Module previous) throws ValidationException {
 		ImageModule olderImage = (ImageModule) previous;
-		if (!castToModule().isBase()) {
+		ImageModule newImage = castToModule();
+		if (!newImage.isBase()) {
 			if (!needsRebuild) {
-				for (CloudImageIdentifier cii : olderImage.getCloudImageIdentifiers()) {
-					cii.copyTo(castToModule());
+				for (CloudImageIdentifier cii : olderImage
+						.getCloudImageIdentifiers()) {
+					cii.copyTo(newImage);
 				}
 			}
+		}
+		if (newImage.getPlatform() == null) {
+			newImage.setPlatform(olderImage.getPlatform());
 		}
 	}
 

@@ -20,7 +20,6 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -32,7 +31,6 @@ import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Status;
 
-import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ResourceTestBase;
@@ -55,7 +53,8 @@ public class UserListResourceTest extends ResourceTestBase {
 	private Request createGetRequest(User user) throws ConfigurationException {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		Request request = createGetRequest(attributes);
-		CookieUtils.addAuthnCookie(request, user.getName());
+		request.getClientInfo().setUser(
+				new org.restlet.security.User(user.getName()));
 		return request;
 	}
 

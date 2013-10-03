@@ -20,7 +20,11 @@ package com.sixsq.slipstream.util;
  * -=================================================================-
  */
 
+import static org.junit.Assert.fail;
+
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +63,7 @@ public class ResourceTestBase {
 	protected static User user = createUser("test", PASSWORD);
 
 	public static User createUser(String name) {
-		return ResourceTestBase.createUser(name, null);
+		return ResourceTestBase.createUser(name, PASSWORD);
 	}
 
 	public static User createUser(String name, String password) {
@@ -72,7 +76,15 @@ public class ResourceTestBase {
 		} catch (ValidationException e) {
 			e.printStackTrace();
 		}
-		user.setPassword(password);
+		try {
+			user.hashAndSetPassword(password);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			fail();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			fail();
+		}
 
 		try {
 			user.setDefaultCloudServiceName(cloudServiceName);
@@ -225,7 +237,7 @@ public class ResourceTestBase {
 
 		ServiceConfiguration sc = configuration.getParameters();
 		sc.setParameter(new ServiceConfigurationParameter(
-				RequiredParameters.CLOUD_CONNECTOR_CLASS.getValue(),
+				RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
 				connectorClassName));
 		sc.store();
 		ConnectorFactory.resetConnectors();

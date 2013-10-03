@@ -20,7 +20,11 @@ package com.sixsq.slipstream.common.util;
  * -=================================================================-
  */
 
+import static org.junit.Assert.fail;
+
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,27 +48,38 @@ public class CommonTestUtil {
 
 	// Need to set cloudServiceName before the status user is
 	// created, since the createUser method uses it
-	public static final String cloudServiceName = new LocalConnector().getCloudServiceName();
-	
-	public static User createTestUser(){
+	public static final String cloudServiceName = new LocalConnector()
+			.getCloudServiceName();
+
+	public static User createTestUser() {
 		return createUser("test", PASSWORD);
 	}
-	
+
 	public static User createUser(String name) {
 		return CommonTestUtil.createUser(name, null);
 	}
 
 	public static User createUser(String name, String password) {
-		User user = (User) User.loadByName(name);
-		if (user != null) {
+		User user = User.loadByName(name);
+		if(user != null) {
 			user.remove();
 		}
+		
 		try {
 			user = new User(name);
 		} catch (ValidationException e) {
 			e.printStackTrace();
+			throw (new SlipStreamRuntimeException(e));
 		}
-		user.setPassword(password);
+		try {
+			user.hashAndSetPassword(password);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			fail();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			fail();
+		}
 
 		try {
 			user.setDefaultCloudServiceName(cloudServiceName);
@@ -72,31 +87,33 @@ public class CommonTestUtil {
 			throw (new SlipStreamRuntimeException(e));
 		}
 
-		user.store();
-		
-		return user;
+		return user.store();
 	}
 
 	public static void deleteUser(User user) {
-		user.remove();
+		if (user != null) {
+			user.remove();
+		}
 	}
-	
-	public static DeploymentModule createDeployment() throws ValidationException,
-	NotFoundException {
 
-		ImageModule imageForDeployment1 = new ImageModule("test/imagefordeployment1");
+	public static DeploymentModule createDeployment()
+			throws ValidationException, NotFoundException {
+
+		ImageModule imageForDeployment1 = new ImageModule(
+				"test/imagefordeployment1");
 		imageForDeployment1
 				.setParameter(new ModuleParameter("pi1", "pi1 init value",
 						"pi1 parameter desc", ParameterCategory.Input));
 		imageForDeployment1.setParameter(new ModuleParameter("po1",
 				"po1 init value", "po1 parameter desc",
 				ParameterCategory.Output));
-		
+
 		imageForDeployment1.setIsBase(true);
 		imageForDeployment1.setImageId("123", CommonTestUtil.cloudServiceName);
 		imageForDeployment1.store();
-		
-		ImageModule imageForDeployment2 = new ImageModule("test/imagefordeployment2");
+
+		ImageModule imageForDeployment2 = new ImageModule(
+				"test/imagefordeployment2");
 		imageForDeployment2
 				.setParameter(new ModuleParameter("pi2", "pi2 init value",
 						"pi2 parameter desc", ParameterCategory.Input));
@@ -105,29 +122,29 @@ public class CommonTestUtil {
 				ParameterCategory.Output));
 		imageForDeployment2.setImageId("123", CommonTestUtil.cloudServiceName);
 		imageForDeployment2.store();
-		
+
 		DeploymentModule deployment = new DeploymentModule("test/deployment");
-		
+
 		Node node;
-		
+
 		node = new Node("node1", imageForDeployment1);
 		deployment.getNodes().put(node.getName(), node);
-		
+
 		node = new Node("node2", imageForDeployment2);
 		deployment.getNodes().put(node.getName(), node);
-		
+
 		deployment.store();
-		
+
 		return deployment;
 	}
-	
-	public static void deleteDeployment(DeploymentModule deployment){
+
+	public static void deleteDeployment(DeploymentModule deployment) {
 		for (Node n : deployment.getNodes().values()) {
 			n.getImage().remove();
 		}
 		deployment.remove();
 	}
-	
+
 	public static void resetAndLoadConnector(
 			Class<? extends Connector> connectorClass)
 			throws InstantiationException, IllegalAccessException,
@@ -145,10 +162,10 @@ public class CommonTestUtil {
 		connectors.put(connector.getCloudServiceName(), connector);
 		ConnectorFactory.setConnectors(connectors);
 	}
-	
+
 	// Only static methods. Ensure no instances are created.
 	public CommonTestUtil() {
-		
+
 	}
 
 }

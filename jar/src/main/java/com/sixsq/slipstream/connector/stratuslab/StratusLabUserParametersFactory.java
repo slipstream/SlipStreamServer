@@ -26,14 +26,10 @@ import com.sixsq.slipstream.persistence.ParameterType;
 
 public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 
-	public static String KEY_PARAMETER_NAME = "username";
-	public static String SECRET_PARAMETER_NAME = "password";
-	public static String ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME = "orchestrator.instance.type";
 	public static String MARKETPLACE_ENDPOINT_PARAMETER_NAME = "marketplace.endpoint";
 	public static String MESSAGING_TYPE_PARAMETER_NAME = "messaging.type";
 	public static String MESSAGING_ENDPOINT_PARAMETER_NAME = "messaging.endpoint";
 	public static String MESSAGING_QUEUE_PARAMETER_NAME = "messaging.queue";
-	public static String UPDATE_CLIENTURL_PARAMETER_NAME = "update.clienturl";
 	
 
 	public StratusLabUserParametersFactory(String connectorInstanceName) throws ValidationException {

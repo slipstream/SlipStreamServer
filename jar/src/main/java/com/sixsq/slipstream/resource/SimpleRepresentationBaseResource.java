@@ -22,63 +22,23 @@ package com.sixsq.slipstream.resource;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 
-import org.restlet.Request;
-import org.restlet.data.Cookie;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.XmlUtil;
 
-public class SimpleRepresentationBaseResource extends ServerResource {
-
-	protected User user = null;
-
-	protected Configuration configuration = null;
-
-	protected ServiceConfiguration cfg = null;
-
-	protected String baseUrlSlash = null;
-
-	protected String resourceUri = null;
+public class SimpleRepresentationBaseResource extends BaseResource {
 
 	private String message;
-
-	@Override
-	protected void doInit() throws ResourceException {
-
-		Request request = getRequest();
-
-		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		user = CookieUtils.getCookieUser(cookie);
-
-		baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
-
-		resourceUri = RequestUtil.extractResourceUri(request);
-
-		cfg = RequestUtil.getServiceConfigurationFromRequest(request);
-
-	}
 
 	protected void setPostResponse() {
 		Representation representation = null;
@@ -111,15 +71,17 @@ public class SimpleRepresentationBaseResource extends ServerResource {
 		StringReader reader = new StringReader(createRawMessage());
 		Document document = db.parse(new InputSource(reader));
 
-		XmlUtil.addUser(document, user);
-		XmlUtil.addBreadcrumbs(document, "", resourceUri);
-
-		Map<String, Object> parameters = HtmlUtil.createParameters(
-				baseUrlSlash, resourceUri, configuration.version);
-
-		Source source = new DOMSource(document);
-		return HtmlUtil.sourceToHtmlRepresentation(source, "raw-content.xsl",
-				parameters);
+		XmlUtil.addUser(document, getUser());
+//		XmlUtil.addBreadcrumbs(document, "", resourceUri);
+		
+		return null;
+		// TODO: complete this feature
+//		Map<String, Object> parameters = HtmlUtil.createParameters(
+//				baseUrlSlash, resourceUri, configuration.version);
+//
+//		Source source = new DOMSource(document);
+//		return HtmlUtil.sourceToHtmlRepresentation(source, "raw-content.xsl",
+//				parameters);
 
 	}
 

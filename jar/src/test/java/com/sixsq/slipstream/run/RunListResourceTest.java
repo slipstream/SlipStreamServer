@@ -52,7 +52,6 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
@@ -86,13 +85,8 @@ public class RunListResourceTest extends ResourceTestBase {
 		baseImage.setIsBase(true);
 		baseImage = baseImage.store();
 
-		try {
-			user.remove();
-		} catch (Exception e) {
-
-		}
 		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
-		user = (User) user.store();
+		user = user.store();
 
 		setCloudConnector(LocalConnector.class.getName());
 	}
@@ -100,8 +94,6 @@ public class RunListResourceTest extends ResourceTestBase {
 	@After
 	public void tearDown() throws ValidationException {
 		baseImage.remove();
-
-		user.remove();
 
 		try {
 			image.remove();

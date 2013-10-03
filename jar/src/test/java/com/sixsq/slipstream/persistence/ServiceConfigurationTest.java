@@ -77,20 +77,6 @@ public class ServiceConfigurationTest {
 	}
 
 	@Test
-	public void validSupportUrl() {
-		String value = "http://support.example.org/";
-		ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_URL
-				.validate(value);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void invalidSupportUrl() {
-		String value = ":invalid-support-url";
-		ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_URL
-				.validate(value);
-	}
-
-	@Test
 	public void checkInvalidPorts() {
 		String[] values = { "-1", "aaa", "65536" };
 		for (String value : values) {
@@ -134,7 +120,7 @@ public class ServiceConfigurationTest {
 
 		cfg = minimalValidConfiguration();
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
-				ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME.getValue(),
+				ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME.getName(),
 				"OK", "");
 		cfg.setParameter(parameter);
 		cfg.store();
@@ -147,7 +133,7 @@ public class ServiceConfigurationTest {
 
 		ServiceConfigurationParameter recoveredParameter = cfg
 				.getParameter(ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME
-						.getValue());
+						.getName());
 		assertNotNull(recoveredParameter);
 		assertEquals("OK", recoveredParameter.getValue());
 	}

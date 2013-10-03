@@ -22,6 +22,9 @@ package com.sixsq.slipstream.authn;
 
 import static org.restlet.data.Status.CLIENT_ERROR_UNAUTHORIZED;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
@@ -32,6 +35,8 @@ import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.user.Passwords;
+import com.sixsq.slipstream.util.RequestUtil;
 
 public class LoginResource extends AuthnResource {
 
@@ -39,6 +44,17 @@ public class LoginResource extends AuthnResource {
 
 	public LoginResource() {
 		super("login");
+	}
+
+	@Override
+	protected void doInit() throws ResourceException {
+
+		try {
+			setUser(RequestUtil.getUserFromRequest(getRequest()));
+		} catch (NullPointerException ex) {
+			// user not logged-in. But it's ok for this page
+		}
+
 	}
 
 	@Post
@@ -67,7 +83,17 @@ public class LoginResource extends AuthnResource {
 		}
 
 		String realPassword = dbUser.getPassword();
-		if (!password.equals(realPassword)) {
+		String hashedPassword = null;
+		try {
+			hashedPassword = Passwords.hash(password);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			throwUnauthorized();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			throwUnauthorized();
+		}
+		if (!realPassword.equals(hashedPassword)) {
 			throwUnauthorizedWithMessage();
 		}
 	}

@@ -22,50 +22,28 @@ package com.sixsq.slipstream.module;
 
 import java.util.List;
 
-import org.restlet.Request;
-import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
-import org.w3c.dom.Document;
 
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.module.ModuleVersionView.ModuleVersionViewList;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.resource.BaseResource;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.XmlUtil;
 
-public class ModuleVersionListResource extends ModuleListResourceBase {
-
-	private Configuration configuration = null;
-
-	private User user = null;
+public class ModuleVersionListResource extends BaseResource {
 
 	private String resourceUri = null;
 
 	@Override
 	public void doInit() throws ResourceException {
 
-		Request request = getRequest();
-
-		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		String username = CookieUtils.getCookieUsername(cookie);
-
-		user = User.loadByName(username);
-
-		// FIXME: Add authorization.
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
-		if (configuration == null) {
-			throw new SlipStreamInternalException("configuration is null");
-		}
+		super.doInit();
 
 		resourceUri = RequestUtil.extractResourceUri(getRequest());
 
@@ -96,15 +74,9 @@ public class ModuleVersionListResource extends ModuleListResourceBase {
 		ModuleVersionViewList list = new ModuleVersionViewList(
 				Module.viewListAllVersions(resourceUri));
 
-		Document doc = SerializationUtil.toXmlDocument(list);
-
-		XmlUtil.addUser(doc, user);
-
-		String metadata = SerializationUtil.documentToString(doc);
-
 		return new StringRepresentation(
-				slipstream.ui.views.Representation.toHtml(metadata,
-						getPageRepresentation(), getTransformationType()),
+				HtmlUtil.toHtml(list,
+						getPageRepresentation(), getTransformationType(), getUser()),
 				MediaType.TEXT_HTML);
 	}
 

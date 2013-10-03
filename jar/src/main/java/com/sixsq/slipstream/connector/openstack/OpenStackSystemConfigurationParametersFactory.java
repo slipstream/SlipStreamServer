@@ -39,15 +39,16 @@ public class OpenStackSystemConfigurationParametersFactory extends
 		
 		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME),
 				"OpenStack Flavor for the orchestrator. " +
-				"The actual image should support the desired Flavor.");
+				"The actual image should support the desired Flavor");
 
 		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.SERVICE_TYPE_PARAMETER_NAME), 
-				"Type-name of the service who provide the instances functionality.",
+				"Type-name of the service who provide the instances functionality",
 				"compute");
 		
-		putParameter(constructKey(OpenStackUserParametersFactory.SERVICE_NAME_PARAMETER_NAME), "nova", 
-				"Name of the service who provide the instances functionality", 
-				"('nova' for OpenStack essex&folsom and 'Compute' for HP Cloud)", true);
+		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.SERVICE_NAME_PARAMETER_NAME), 
+				"Name of the service who provide the instances functionality",
+				"nova");
+				//"('nova' for OpenStack essex&folsom and 'Compute' for HP Cloud)"
 		
 		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME), 
 				"Region used by this cloud connector", "RegionOne");

@@ -99,7 +99,7 @@ public class UserEmailValidationAction extends OneShotAction {
 				.getParameters()
 				.getParameter(
 						ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL
-								.getValue());
+								.getName());
 		return p.getValue();
 	}
 

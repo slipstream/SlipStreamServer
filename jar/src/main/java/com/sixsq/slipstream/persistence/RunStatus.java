@@ -20,6 +20,9 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.statemachine.States;
@@ -30,37 +33,64 @@ public class RunStatus {
 	public static final String FAILED = "Aborted";
 	public static final String FAILING = "Aborting";
 
+	public static final List<States> finalStates = new ArrayList<States>();
+	
+	static {
+		finalStates.add(States.Aborted);
+		finalStates.add(States.Done);
+		finalStates.add(States.Terminal);
+		finalStates.add(States.Cancelled);
+	}
+	
 	@Attribute
 	private String status;
-	
-    public RunStatus(States state, boolean isAbort) {
-    	init(state, isAbort);
-    }
-    
-    private void init(States state, boolean isAbort) {
-    	boolean isFinal = (state == States.Terminal);
-    	if(!isAbort) {
-    		if(isFinal) {
-        		this.status = SUCCESS;
-    		} else {
-    			this.status = state.toString();
-    		}
-    	} else {
-    		if(isFinal) {
-    			this.status = FAILED;
-    		} else {
-    			this.status = FAILING;
-    		}
-    	}
-    }
 
-    public RunStatus(Run run) {
-    	States state = States.valueOf(run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY).toString());
-    	init(state, run.isAbort());
-    }
+	@Attribute
+	private boolean isAbort = false;
 
-    @Override
-    public String toString() {
-    	return status;
-    }
+	public RunStatus(Run run) {
+		this(extractState(run), run.isAbort());
+	}
+
+	static private States extractState(Run run) {
+		RuntimeParameter rp = run.getRuntimeParameters().get(
+				RuntimeParameter.GLOBAL_STATE_KEY);
+		States state = States.valueOf(rp.getValue());
+		return state;
+	}
+
+	public RunStatus(States state, boolean isAbort) {
+		this.isAbort = isAbort;
+		status = state.toString();
+		init();
+	}
+
+	private void init() {
+		States state = States.valueOf(status);
+		boolean isFinal = isFinal(state);
+		if (isAbort) {
+			if (isFinal) {
+				status = FAILED;
+			} else {
+				status = FAILING;
+			}
+		} else if (state == States.Terminal) {
+			status = SUCCESS;
+		}
+	}
+
+	private boolean isFinal(States state) {
+		return finalStates.contains(state);
+	}
+
+	@Override
+	public String toString() {
+		return status;
+	}
+
+	public void done() {
+		status = (isFinal(States.valueOf(status)) ? States.Terminal
+				: States.Cancelled).toString();
+		init();
+	}
 }

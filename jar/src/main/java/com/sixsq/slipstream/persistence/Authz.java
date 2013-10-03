@@ -45,11 +45,6 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
  * @see AuthzTest
  * 
  */
-/**
- * For unittests
- * @see AuthzTest
- *
- */
 @Entity
 @SuppressWarnings("serial")
 public class Authz implements Serializable {

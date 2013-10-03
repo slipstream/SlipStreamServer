@@ -139,14 +139,10 @@ public abstract class RunFactory {
 
 	/**
 	 * Load the module corresponding to the run and set some of its attributes
-	 * (e.g. multipliticty, cloud service) to match the specific configuration
+	 * (e.g. multiplicity, cloud service) to match the specific configuration
 	 * of the run.
 	 * 
 	 * The returned module is transient and not persisted.
-	 * 
-	 * @param run
-	 * @return update module
-	 * @throws ValidationException
 	 */
 	public abstract Module overloadModule(Run run, User user) throws ValidationException;
 

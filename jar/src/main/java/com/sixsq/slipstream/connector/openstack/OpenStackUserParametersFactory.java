@@ -25,8 +25,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 public class OpenStackUserParametersFactory extends UserParametersFactoryBase {
 
-	public static String KEY_PARAMETER_NAME = "username";
-	public static String SECRET_PARAMETER_NAME = "password";
 	public static String TENANT_NAME = "tenant.name";
 	public static String KEYPAIR_NAME = "keypair.name";
 	public static String PRIVATE_KEY = "private.key";

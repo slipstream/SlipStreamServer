@@ -20,8 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +44,7 @@ public class ServiceConfiguration extends
 	public final static String RESOURCE_URI_PREFIX = "configuration/";
 
 	public enum ParameterCategory {
-		SlipStream_Support, SlipStream_basics, SlipStream_advanced, Cloud_connector, StratusLab_basics, StratusLab_advanced, EC2_basics, EC2_advanced, CloudSigma_advanced, OpenStack_basics, OpenStack_advanced, PhysicalHost_advanced
+		SlipStream_Support, SlipStream_Basics, SlipStream_Advanced
 	}
 
 	/**
@@ -55,39 +53,37 @@ public class ServiceConfiguration extends
 	public enum RequiredParameters {
 
 		SLIPSTREAM_BASE_URL("Default URL and port for the SlipStream RESTlet",
-				ParameterCategory.SlipStream_basics),
+				ParameterCategory.SlipStream_Basics),
 
 		SLIPSTREAM_UPDATE_CLIENTURL(
 				"Endpoint of the SlipStream client tarball",
-				ParameterCategory.SlipStream_advanced),
+				ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_UPDATE_CLIENTBOOTSTRAPURL(
 				"Endpoint of the SlipStream client bootstrap script",
-				ParameterCategory.SlipStream_advanced),
+				ParameterCategory.SlipStream_Advanced),
 
 		CLOUD_CONNECTOR_CLASS(
 				"Cloud connector java class name(s) (comma separated for multi-cloud configuration)",
-				ParameterCategory.SlipStream_basics, ParameterType.Text),
+				ParameterCategory.SlipStream_Basics, ParameterType.Text),
 
 		CLOUD_CONNECTOR_LIBRARY_LIBCLOUD_URL(
 				"URL to fetch libcloud library from",
-				ParameterCategory.SlipStream_advanced,
+				ParameterCategory.SlipStream_Advanced,
 				"URL should point to a valid gzipped tarball."),
 
 		CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY(
 				"Path to the SSH public key to put in the orchestrator",
-				ParameterCategory.SlipStream_advanced),
-				
+				ParameterCategory.SlipStream_Advanced),
+
 		CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY(
 				"Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)",
-				ParameterCategory.SlipStream_advanced),
-
-		SLIPSTREAM_HEADURL("", ParameterCategory.SlipStream_advanced),
+				ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_VERSION("Installed SlipStream version",
-				ParameterCategory.SlipStream_advanced, true),
+				ParameterCategory.SlipStream_Advanced, true),
 
-		SLIPSTREAM_REPORTS_LOCATION("", ParameterCategory.SlipStream_advanced),
+		SLIPSTREAM_REPORTS_LOCATION("Location where the deployments and build reports are saved", ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_REGISTRATION_EMAIL(
 				"Email address for account approvals, etc.",
@@ -135,27 +131,20 @@ public class ServiceConfiguration extends
 				super.validate(value);
 				isValidEmail(value);
 			}
-		},
-
-		SLIPSTREAM_SUPPORT_URL("URL where support can be obtained.",
-				ParameterCategory.SlipStream_Support) {
-			@Override
-			public void validate(String value) {
-				super.validate(value);
-				try {
-					new URL(value);
-				} catch (MalformedURLException e) {
-					throw new IllegalArgumentException("invalid support URL: "
-							+ value);
-				}
-			}
 		};
+
+//		SLIPSTREAM_REGISTRATION_ENABLE("Allow self user registration. If checked, user will be able to create accounts themselves.",
+//				ParameterCategory.SlipStream_Basics, ParameterType.Boolean);
 
 		private final String description;
 		private final ParameterCategory category;
 		private final String instructions;
 		private final ParameterType type;
 		private final boolean readonly;
+
+		public String getInstructions() {
+			return instructions;
+		}
 
 		private RequiredParameters(String description,
 				ParameterCategory category) {
@@ -257,10 +246,15 @@ public class ServiceConfiguration extends
 		public boolean isReadonly() {
 			return readonly;
 		}
-
-		public String getValue() {
-			return name().replace("_", ".").toLowerCase();
-		}
+		
+		 /**
+		 * Convert the enum name into parameter name
+		 * where word separators are converted from _ to .
+		 * and lower cased.
+		 */
+		public String getName() {
+		 return name().replace("_", ".").toLowerCase();
+		 }
 	}
 
 	@Id
@@ -279,7 +273,7 @@ public class ServiceConfiguration extends
 		if (parameters == null) {
 			parameters = new HashMap<String, ServiceConfigurationParameter>();
 		}
-		for(ServiceConfigurationParameter p : parameters.values()) {
+		for (ServiceConfigurationParameter p : parameters.values()) {
 			setParameter(p);
 		}
 	}
@@ -344,7 +338,7 @@ public class ServiceConfiguration extends
 
 		// Check that all of the required parameters are present.
 		for (RequiredParameters p : RequiredParameters.values()) {
-			if (getParameter(p.getValue()) == null) {
+			if (getParameter(p.getName()) == null) {
 				throw new IllegalArgumentException(
 						"missing required system configuration parameter: "
 								+ p.name());

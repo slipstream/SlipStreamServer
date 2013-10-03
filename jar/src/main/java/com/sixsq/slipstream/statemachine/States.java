@@ -28,5 +28,9 @@ public enum States {
     Disconnected,
     Finalizing,
     Terminal, 
-    Unknown;
+    Unknown,
+    Done,
+    Cancelled,
+    Aborting,
+    Aborted;
 }

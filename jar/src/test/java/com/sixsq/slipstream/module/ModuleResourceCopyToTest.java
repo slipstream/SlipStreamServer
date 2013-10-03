@@ -199,7 +199,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 
 		Response response = executeRequest(request);
 		
-		assertThat(response.getStatus(), is(Status.REDIRECTION_SEE_OTHER));
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
 		
 		Module.load(Module.constructResourceUri(publicProject.getName() + "/" + targetName)).remove();
 	}

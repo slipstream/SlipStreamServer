@@ -24,12 +24,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
@@ -39,10 +36,7 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 
-import com.sixsq.slipstream.authz.SuperEnroler;
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.Credentials;
@@ -63,6 +57,7 @@ import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.run.RunView.RunViewList;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
@@ -74,40 +69,10 @@ import com.sixsq.slipstream.util.SerializationUtil;
  * @see RunListResourceTest.class
  * 
  */
-public class RunListResource extends ServerResource {
+public class RunListResource extends BaseResource {
 
 	public static final String REFQNAME = "refqname";
-
-	Configuration configuration;
-
-	User user = null;
-
-	boolean isEdit = false;
-
-	String query = null;
-
 	String refqname = null;
-
-	boolean isEmbedded = false;
-
-	static {
-		ArrayList<String> names = new ArrayList<String>();
-		names.add(RuntimeParameter.GLOBAL_NAMESPACE);
-		names.add(Run.MACHINE_NAME);
-		names.trimToSize();
-	}
-
-	@Override
-	public void doInit() throws ResourceException {
-
-		Request request = getRequest();
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
-
-		user = User.loadByName(request.getClientInfo().getUser().getName());
-
-		extractParametersFromQuery();
-	}
 
 	@Get("txt")
 	public Representation toTxt() {
@@ -127,29 +92,35 @@ public class RunListResource extends ServerResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		Request request = getRequest();
-		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 		RunViewList runViewList = fetchListView();
 
-		Map<String, Object> parameters = new HashMap<String, Object>();
-
-		if (isEmbedded) {
-			parameters.put("isembedded", isEmbedded);
-		}
-
-		return HtmlUtil.transformToHtml(baseUrlSlash, "run",
-				configuration.version, "run-list.xsl", user, runViewList,
-				parameters);
+		return new StringRepresentation(HtmlUtil.toHtml(runViewList, "runs",
+				getTransformationType(), getUser()), MediaType.TEXT_HTML);
 	}
 
 	private RunViewList fetchListView() {
-		return fetchListView(query, user, isSuperRole());
+
+		Reference resourceRef = getRequest().getResourceRef();
+		Form form = resourceRef.getQueryAsForm();
+		String query = form.getFirstValue("query");
+
+		RunViewList list = null;
+		try {
+			list = fetchListView(query, getUser());
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+			throwServerError(e.getMessage());
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
+		return list;
 	}
 
-	static RunViewList fetchListView(String query, User user, boolean isSuper) {
+	static RunViewList fetchListView(String query, User user)
+			throws ConfigurationException, ValidationException {
 		List<RunView> list;
 
-		if (isSuper) {
+		if (user.isSuper()) {
 			list = (query != null) ? Run.viewList(query, user) : Run
 					.viewListAll(user);
 		} else {
@@ -159,25 +130,16 @@ public class RunListResource extends ServerResource {
 		return new RunViewList(list);
 	}
 
-	private boolean isSuperRole() {
-		return getClientInfo().getRoles().contains(SuperEnroler.SUPER);
-	}
-
-	private void extractParametersFromQuery() {
-		Reference resourceRef = getRequest().getResourceRef();
-		Form form = resourceRef.getQueryAsForm();
-
-		String flag = form.getFirstValue("edit");
-		isEdit = ("true".equalsIgnoreCase(flag) || "yes".equalsIgnoreCase(flag));
-
-		query = form.getFirstValue("query");
-
-		String embedded = form.getFirstValue("isembedded");
-		isEmbedded = ("true".equalsIgnoreCase(embedded) || "yes"
-				.equalsIgnoreCase(embedded));
-
-	}
-
+	/**
+	 * We need to merge data from different sources: - the form (entity) - the
+	 * default module
+	 * 
+	 * In the case of orchestrator + VM(s) (i.e. deployment and build) we also
+	 * need to merge: - the default from each node
+	 * 
+	 * The service cloud is the part that causes most trouble, since it can be
+	 * defined at all levels.
+	 */
 	@Post("form|txt")
 	public void createRun(Representation entity) throws ResourceException,
 			FileNotFoundException, IOException, SQLException,
@@ -196,8 +158,8 @@ public class RunListResource extends ServerResource {
 
 			module.validate();
 
-			run = RunFactory.getRun(module, parseType(form),
-					user.getDefaultCloudService(), user);
+			run = RunFactory.getRun(module, parseType(form), getUser()
+					.getDefaultCloudService(), getUser());
 
 			run = addCredentials(run);
 
@@ -210,30 +172,19 @@ public class RunListResource extends ServerResource {
 					ex.getMessage()));
 		}
 
-		createAndSetPostResponseEntity(run);
-
-		String location = Run.RESOURCE_URI_PREFIX + run.getName();
+		String location = "/" + Run.RESOURCE_URI_PREFIX + run.getName();
 
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 		getResponse().setLocationRef(location);
 	}
 
-	private void createAndSetPostResponseEntity(Run run) {
-		RunView view = new RunView(run.getRefqname(), run.getName(),
-				run.getModuleResourceUrl(), run.getStatus(), run.getStart(),
-				run.getCloudServiceName(), run.getUser(), run.getType());
-		view.vmstate = Run.INITIAL_NODE_STATE;
-
-		String result = SerializationUtil.toXmlString(view);
-		getResponse().setEntity(
-				new StringRepresentation(result, MediaType.APPLICATION_XML));
-	}
-
 	private String getDefaultCloudService() {
-		String cloudServiceName = user.getDefaultCloudService();
+		String cloudServiceName = getUser().getDefaultCloudService();
 		if (cloudServiceName == null || "".equals(cloudServiceName)) {
-			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					"No cloud selected, please edit your account"));
+			throw (new ResourceException(
+					Status.CLIENT_ERROR_CONFLICT,
+					ConnectorFactory
+							.incompleteCloudConfigurationErrorMessage(getUser())));
 		}
 		return cloudServiceName;
 	}
@@ -330,7 +281,7 @@ public class RunListResource extends ServerResource {
 
 	private Run launch(Run run) throws SlipStreamException {
 		Launcher launcher = new Launcher();
-		return launcher.launch(run, user);
+		return launcher.launch(run, getUser());
 	}
 
 	private Run addCredentials(Run run) throws ConfigurationException,
@@ -345,16 +296,18 @@ public class RunListResource extends ServerResource {
 	private Credentials loadCredentialsObject() throws ConfigurationException,
 			ValidationException {
 
-		Connector connector = ConnectorFactory.getCurrentConnector(user);
-		return connector.getCredentials(user);
+		Connector connector = ConnectorFactory.getCurrentConnector(getUser());
+		return connector.getCredentials(getUser());
 	}
 
 	private void createRepositoryResource(Run run)
 			throws ConfigurationException {
 		String repositoryLocation;
-		repositoryLocation = configuration
-				.getRequiredProperty(ServiceConfiguration.RequiredParameters.SLIPSTREAM_REPORTS_LOCATION
-						.getValue());
+		repositoryLocation = RequestUtil
+				.getConfigurationFromRequest(getRequest())
+				.getRequiredProperty(
+						ServiceConfiguration.RequiredParameters.SLIPSTREAM_REPORTS_LOCATION
+								.getName());
 
 		String absRepositoryLocation = repositoryLocation + "/" + run.getName();
 
