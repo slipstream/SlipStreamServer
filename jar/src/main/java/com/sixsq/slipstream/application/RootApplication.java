@@ -25,6 +25,7 @@ import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.Restlet;
+import org.restlet.data.CharacterSet;
 import org.restlet.data.MediaType;
 import org.restlet.resource.Directory;
 import org.restlet.routing.Filter;
@@ -34,6 +35,7 @@ import org.restlet.routing.TemplateRoute;
 import org.restlet.routing.Variable;
 import org.restlet.security.Authenticator;
 import org.restlet.security.Authorizer;
+import org.restlet.service.MetadataService;
 
 import com.sixsq.slipstream.action.ActionRouter;
 import com.sixsq.slipstream.authn.BasicAuthenticator;
@@ -87,10 +89,11 @@ public class RootApplication extends Application {
 			throw new SlipStreamInternalException(e.getMessage(), e);
 		}
 
-		getMetadataService().setDefaultMediaType(MediaType.TEXT_HTML);
-		getMetadataService().addExtension("tgz",
-				MediaType.APPLICATION_COMPRESS, true);
-		getMetadataService().addExtension("multipart", MediaType.MULTIPART_ALL);
+		MetadataService ms = getMetadataService();
+		ms.setDefaultMediaType(MediaType.TEXT_HTML);
+		ms.setDefaultCharacterSet(CharacterSet.UTF_8);
+		ms.addExtension("tgz", MediaType.APPLICATION_COMPRESS, true);
+		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
 	}
 
 	private void createStartupMetadata() throws ValidationException,
@@ -291,8 +294,8 @@ public class RootApplication extends Application {
 
 		basicAuthenticator.setNext(router);
 
-		TemplateRoute route = rootRouter.attach(
-				convertToRouterRoot(rootUri), cookieAuthenticator);
+		TemplateRoute route = rootRouter.attach(convertToRouterRoot(rootUri),
+				cookieAuthenticator);
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 	}
 
