@@ -37,9 +37,7 @@ public abstract class JCloudsConnectorBase<S, A> extends ConnectorBase {
 		super(instanceName);
 	}
 
-	public String getJcloudsDriverName() {
-		return "unknown";
-	}
+	abstract public String getJcloudsDriverName();
 
 	protected RestContext<S, A> createContext(
 			Credentials credentials)
