@@ -53,8 +53,12 @@ public class UserTest extends ResourceTestBase {
 	
 	@After
 	public void tearDown(){
+		try {
 		user.remove();
-	}
+		} catch (Exception ex) {
+			
+		}
+ 	}
 	
 	@Test
 	public void setParameter() throws ValidationException {
@@ -63,7 +67,7 @@ public class UserTest extends ResourceTestBase {
 		user.setParameter(new UserParameter("p", "v", "d"));
 		user = user.store();
 		user.setParameter(new UserParameter("p", "v", "d"));
-		user.store();
+		user = user.store();
 		user.remove();
 	}
 	
