@@ -72,6 +72,13 @@ public class RunListResourceTest extends ResourceTestBase {
 			NoSuchMethodException, ClassNotFoundException {
 
 		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+		
+//		try {
+			user = storeUser(user);
+//		} catch (Exception ex) {
+//
+//		}
+		
 	}
 
 	@Before
