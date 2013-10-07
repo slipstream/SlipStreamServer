@@ -30,6 +30,7 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Authz;
+import com.sixsq.slipstream.persistence.Commit;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
@@ -79,7 +80,7 @@ public abstract class ModuleFormProcessor extends
 		String name = parseName();
 		setParametrized(getOrCreateParameterized(name));
 		getParametrized().setDescription(parseDescription());
-		getParametrized().setComment(parseComment());
+		getParametrized().setCommit(parseCommit());
 	}
 
 	private String parseName() throws ValidationException {
@@ -95,8 +96,8 @@ public abstract class ModuleFormProcessor extends
 		return getForm().getFirstValue("description");
 	}
 
-	private String parseComment() throws ValidationException {
-		return getForm().getFirstValue("comment");
+	private Commit parseCommit() throws ValidationException {
+		return new Commit(getUser().getName(), getForm().getFirstValue("comment"));
 	}
 
 	private void validateName(String name) throws ValidationException {
@@ -166,5 +167,6 @@ public abstract class ModuleFormProcessor extends
 
 	public void adjustModule(Module older) throws ValidationException {
 		getParametrized().setCreation(older.getCreation());
+		getParametrized().getAuthz().setUser(older.getOwner());
 	}
 }

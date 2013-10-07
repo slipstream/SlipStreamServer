@@ -58,7 +58,7 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 @NamedQueries({
 		@NamedQuery(name = "moduleLastVersion", query = "SELECT m FROM Module m WHERE m.version = (SELECT MAX(m.version) FROM Module m WHERE m.name = :name)"),
 		@NamedQuery(name = "moduleViewLatestChildren", query = "SELECT NEW com.sixsq.slipstream.module.ModuleView(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.parentUri = :parent AND m.version = (SELECT MAX(c.version) FROM Module c WHERE c.name = m.name)"),
-		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.comment, m.authz, m.category) FROM Module m WHERE m.name = :name"),
+		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name"),
 		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.published != null") })
 public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
@@ -171,9 +171,15 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	@Lob
 	private String tag;
 
+	@SuppressWarnings("unused")
 	@Element(required = false)
 	@Lob
+	@Deprecated()
 	private String comment;
+
+	@Element(required = false)
+	@OneToOne(cascade = CascadeType.ALL)
+	private Commit commit = new Commit();
 
 	@Element(required = false)
 	@Lob
@@ -355,12 +361,16 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 				.extractModuleNameFromResourceUri(resourceUri) + "/" + version);
 	}
 
-	public void setComment(String comment) {
-		this.comment = comment;
+	public void setCommit(String author, String commit) {
+		this.commit = new Commit(author, commit);
 	}
 
-	public String getComment() {
-		return comment;
+	public void setCommit(Commit commit) {
+		this.commit = commit;
+	}
+
+	public Commit getCommit() {
+		return commit;
 	}
 
 	public String[] getCloudNames() {
@@ -399,16 +409,12 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		return value;
 	}
 
-	public void resetUser(String username) {
-		getAuthz().setUser(username);
-	}
-
 	public abstract Module copy() throws ValidationException;
 
 	protected Module copyTo(Module copy) throws ValidationException {
 		copy = (Module) super.copyTo(copy);
 
-		copy.setComment(getComment());
+		copy.setCommit(getCommit().copy());
 		copy.setCustomVersion(getCustomVersion());
 
 		copy.setCloudNames((cloudNames == null ? null : cloudNames.clone()));
