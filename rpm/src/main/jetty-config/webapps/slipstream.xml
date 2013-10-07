@@ -13,7 +13,27 @@ Configure and deploy the SlipStream web application in $(jetty.home)/webapps/roo
   <!--  + war OR resourceBase                                          -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Set name="contextPath">/</Set>
-  <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/slipstream.war</Set>
+  <Set name="tempDirectory"><SystemProperty name="jetty.home" default="."/>/tmp/war</Set>
+  <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps.slipstream/SlipStreamServer-war.war</Set>
+
+  <!-- Require SSL connections.  This will force redirect from port 80. -->
+  <Set name="securityHandler">
+    <New class="org.eclipse.jetty.security.ConstraintSecurityHandler">
+      <Call name="addConstraintMapping">
+        <Arg>
+          <New class="org.eclipse.jetty.security.ConstraintMapping">
+            <Set name="pathSpec">/*</Set>
+            <Set name="constraint">
+              <New class="org.eclipse.jetty.util.security.Constraint">
+                <!-- 2 means CONFIDENTIAL. 1 means INTEGRITY -->
+                <Set name="dataConstraint">2</Set>
+              </New>
+            </Set>
+          </New>
+        </Arg>
+      </Call>
+    </New>
+  </Set>
 
   <Call class="java.lang.System" name="setProperties">
     <Arg>

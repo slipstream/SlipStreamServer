@@ -1,133 +1,135 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.sixsq.slipstream</groupId>
-	<artifactId>SlipStreamServer-rpm</artifactId>
-	<name>SlipStream Server (RPM)</name>
+  <artifactId>SlipStreamServer-rpm</artifactId>
+  <name>SlipStream Server (RPM)</name>
 
-	<packaging>pom</packaging>
+  <packaging>pom</packaging>
 
-	<parent>
-		<groupId>com.sixsq.slipstream</groupId>
-		<artifactId>SlipStreamServer</artifactId>
-		<version>2.0.4-SNAPSHOT</version>
-	</parent>
+  <parent>
+    <groupId>com.sixsq.slipstream</groupId>
+    <artifactId>SlipStreamServer</artifactId>
+    <version>2.0.4-SNAPSHOT</version>
+  </parent>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamServer-war</artifactId>
-			<version>${project.version}</version>
-			<type>war</type>
-		</dependency>
-	</dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamServer-war</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>
+  </dependencies>
 
-	<build>
+  <build>
 
-		<plugins>
+    <plugins>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-resources-plugin</artifactId>
 
-				<executions>
+	<executions>
 
-					<execution>
-						<id>filter-jetty-configs</id>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<phase>process-resources</phase>
-						<configuration>
-							<outputDirectory>${basedir}/target/jetty-config</outputDirectory>
-							<nonFilteredFileExtensions>
-								<nonFilteredFileExtension>jks</nonFilteredFileExtension>
-							</nonFilteredFileExtensions>
-							<resources>
-								<resource>
-									<directory>${basedir}/src/main/jetty-config</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
+	  <execution>
+	    <id>filter-jetty-configs</id>
+	    <goals>
+	      <goal>copy-resources</goal>
+	    </goals>
+	    <phase>process-resources</phase>
+	    <configuration>
+	      <outputDirectory>${basedir}/target/jetty-config</outputDirectory>
+	      <nonFilteredFileExtensions>
+		<nonFilteredFileExtension>jks</nonFilteredFileExtension>
+	      </nonFilteredFileExtensions>
+	      <resources>
+		<resource>
+		  <directory>${basedir}/src/main/jetty-config</directory>
+		  <filtering>true</filtering>
+		</resource>
+	      </resources>
+	    </configuration>
+	  </execution>
 
-					<execution>
-						<id>filter-service-configs</id>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<phase>process-resources</phase>
-						<configuration>
-							<outputDirectory>${basedir}/target/service-config</outputDirectory>
-							<nonFilteredFileExtensions>
-								<nonFilteredFileExtension>jks</nonFilteredFileExtension>
-							</nonFilteredFileExtensions>
-							<resources>
-								<resource>
-									<directory>${basedir}/src/main/service-config</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
+	  <execution>
+	    <id>filter-service-configs</id>
+	    <goals>
+	      <goal>copy-resources</goal>
+	    </goals>
+	    <phase>process-resources</phase>
+	    <configuration>
+	      <outputDirectory>${basedir}/target/service-config</outputDirectory>
+	      <nonFilteredFileExtensions>
+		<nonFilteredFileExtension>jks</nonFilteredFileExtension>
+	      </nonFilteredFileExtensions>
+	      <resources>
+		<resource>
+		  <directory>${basedir}/src/main/service-config</directory>
+		  <filtering>true</filtering>
+		</resource>
+	      </resources>
+	    </configuration>
+	  </execution>
 
-				</executions>
-			</plugin>
+	</executions>
+      </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-dependency-plugin</artifactId>
 
-				<executions>
+	<executions>
 
-					<execution>
-						<id>unpack-jetty</id>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.eclipse.jetty</groupId>
-									<artifactId>jetty-distribution</artifactId>
-									<version>${jetty.version}</version>
-									<type>tar.gz</type>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
+	  <execution>
+	    <id>unpack-jetty</id>
+	    <goals>
+	      <goal>unpack</goal>
+	    </goals>
+	    <configuration>
+	      <artifactItems>
+		<artifactItem>
+		  <groupId>org.eclipse.jetty</groupId>
+		  <artifactId>jetty-distribution</artifactId>
+		  <version>${jetty.version}</version>
+		  <type>tar.gz</type>
+		</artifactItem>
+	      </artifactItems>
+	    </configuration>
+	  </execution>
 
-					<execution>
-						<id>copy-jars</id>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/dependency/jars</outputDirectory>
-						</configuration>
-					</execution>
+	  <execution>
+	    <id>copy-jars</id>
+	    <goals>
+	      <goal>copy-dependencies</goal>
+	    </goals>
+	    <configuration>
+	      <outputDirectory>${project.build.directory}/dependency/jars</outputDirectory>
+	    </configuration>
+	  </execution>
 
-					<execution>
-						<id>copy-war</id>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/dependency/webapps/slipstream.war</outputDirectory>
-							<artifactItems>
-								<artifactItem>
-									<groupId>com.sixsq.slipstream</groupId>
-									<artifactId>SlipStreamServer-war</artifactId>
-									<type>war</type>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
+          <execution>
+            <id>copy-war</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+	      <stripVersion>true</stripVersion>
+	      <stripClassifier>true</stripClassifier>
+              <outputDirectory>${project.build.directory}/dependency/webapps</outputDirectory>
+                <artifactItems>
+                  <artifactItem>
+		    <groupId>com.sixsq.slipstream</groupId>
+		    <artifactId>SlipStreamServer-war</artifactId>
+                    <type>war</type>
+                  </artifactItem>
+                </artifactItems>
+              </configuration>
+            </execution>
 
-				</executions>
+	</executions>
 
-			</plugin>
+      </plugin>
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -152,133 +154,145 @@
         </executions>
       </plugin>
 
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>rpm-maven-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<classifier>${package.os}</classifier>
-					<release>${BUILD_NUMBER}.${package.os}</release>
-					<summary>SlipStream Server</summary>
-					<name>slipstream-server</name>
-					<group>Applications/Engineering</group>
-					<vendor>SixSq</vendor>
-					<packager>SixSq</packager>
-					<copyright>Apache License, Version 2.0</copyright>
-					<url>http://sixsq.com</url>
-					<needarch>noarch</needarch>
-					<description>SlipStream REST Server, including open source connectors</description>
-					<requires>
-						<require>java-1.6.0-openjdk</require>
-						<require>hsqldb-slipstream</require>
-						<require>slipstream-client &gt;= 1.3</require>
-						<require>stratuslab-cli-user</require>
-						<require>stratuslab-slipstream-downloads</require>
-						<require>libcloud-slipstream-downloads</require>
-					</requires>
-					<mappings>
+      <plugin>
+	<groupId>org.codehaus.mojo</groupId>
+	<artifactId>rpm-maven-plugin</artifactId>
+	<extensions>true</extensions>
+	<configuration>
+	  <classifier>${package.os}</classifier>
+	  <release>${BUILD_NUMBER}.${package.os}</release>
+	  <summary>SlipStream Server</summary>
+	  <name>slipstream-server</name>
+	  <group>Applications/Engineering</group>
+	  <vendor>SixSq</vendor>
+	  <packager>SixSq</packager>
+	  <copyright>Apache License, Version 2.0</copyright>
+	  <url>http://sixsq.com</url>
+	  <needarch>noarch</needarch>
+	  <description>SlipStream REST Server, including open source connectors</description>
+	  <requires>
+	    <require>java-1.7.0-openjdk</require>
+	    <require>hsqldb-slipstream</require>
+	    <require>slipstream-client &gt;= 1.3</require>
+	    <require>stratuslab-cli-user</require>
+	    <require>stratuslab-slipstream-downloads</require>
+	    <require>libcloud-slipstream-downloads</require>
+	  </requires>
+	  <mappings>
 
-						<mapping>
-							<directory>${installation.dir}</directory>
-							<filemode>644</filemode>
-							<username>root</username>
-							<groupname>root</groupname>
-							<directoryIncluded>false</directoryIncluded>
-							<sources>
-								<source>
-									<location>target/dependency/jetty-distribution-${jetty.version}/</location>
-									<includes>
-										<include>*.txt</include>
-										<include>*.html</include>
-										<include>start.jar</include>
-										<include>etc/**/*</include>
-										<include>lib/**/*</include>
-										<include>logs/**/*</include>
-										<include>contexts/README.txt</include>
-									</includes>
-									<excludes>
-									  <exclude>etc/jetty.conf</exclude>
-									</excludes>
-								</source>
-							</sources>
-						</mapping>
+	    <mapping>
+	      <directory>${installation.dir}</directory>
+	      <filemode>644</filemode>
+	      <username>root</username>
+	      <groupname>root</groupname>
+	      <directoryIncluded>false</directoryIncluded>
+	      <sources>
+		<source>
+		  <location>target/dependency/jetty-distribution-${jetty.version}/</location>
+		  <includes>
+		    <include>*.txt</include>
+		    <include>*.html</include>
+		    <include>start.jar</include>
+		    <include>etc/**/*</include>
+		    <include>lib/**/*</include>
+		    <include>logs/**/*</include>
+		    <include>contexts/README.txt</include>
+		  </includes>
+                  <!-- remove references to binary files -->
+		  <excludes>
+                    <exclude>lib/setuid/**/*</exclude>
+                    <exclude>etc/jetty-setuid.xml</exclude>
+                    <exclude>etc/jetty.conf</exclude>
+		  </excludes>
+		</source>
+	      </sources>
+	    </mapping>
 
-						<mapping>
-							<directory>/etc/rc.d/init.d/</directory>
-							<filemode>755</filemode>
-							<username>root</username>
-							<groupname>root</groupname>
-							<directoryIncluded>false</directoryIncluded>
-							<sources>
-								<source>
-									<location>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</location>
-									<destination>slipstream</destination>
-								</source>
-							</sources>
-						</mapping>
+	    <mapping>
+	      <directory>/etc/rc.d/init.d/</directory>
+	      <filemode>755</filemode>
+	      <username>root</username>
+	      <groupname>root</groupname>
+	      <directoryIncluded>false</directoryIncluded>
+	      <sources>
+		<source>
+		  <location>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</location>
+		  <destination>slipstream</destination>
+		</source>
+	      </sources>
+	    </mapping>
 
-						<mapping>
-							<directory>/etc/default/</directory>
-							<filemode>644</filemode>
-							<username>root</username>
-							<groupname>root</groupname>
-							<directoryIncluded>false</directoryIncluded>
-							<sources>
-								<source>
-									<location>${basedir}/src/main/scripts/etc-default-jetty7</location>
-									<destination>jetty7</destination>
-								</source>
-							</sources>
-						</mapping>
+	    <mapping>
+	      <directory>${installation.dir}/etc</directory>
+	      <filemode>755</filemode>
+	      <username>root</username>
+	      <groupname>root</groupname>
+	      <directoryIncluded>false</directoryIncluded>
+	      <sources>
+		<source>
+		  <location>src/main/scripts</location>
+		  <includes>
+		    <include>generate-jetty-certificate.sh</include>
+		  </includes>
+		</source>
+	      </sources>
+	    </mapping>
 
-						<mapping>
-							<directory>${installation.dir}/etc</directory>
-							<filemode>755</filemode>
-							<username>root</username>
-							<groupname>root</groupname>
-							<directoryIncluded>false</directoryIncluded>
-							<sources>
-								<source>
-									<location>src/main/scripts</location>
-									<includes>
-										<include>generate-jetty-certificate.sh</include>
-									</includes>
-								</source>
-							</sources>
-						</mapping>
+            <mapping>
+              <directory>${installation.dir}/resources</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/jetty-distribution-${jetty.version}/resources</location>
+                  <excludes>
+                    <exclude>log4j.properties</exclude>
+                  </excludes>
+                </source>
+              </sources>
+            </mapping>
 
-						<mapping>
-							<directory>${installation.dir}/webapps/slipstream.war</directory>
-							<filemode>644</filemode>
-							<username>root</username>
-							<groupname>root</groupname>
-							<directoryIncluded>false</directoryIncluded>
-							<sources>
-								<source>
-									<location>target/dependency/webapps/slipstream.war</location>
+            <mapping>
+              <directory>${installation.dir}/webapps.slipstream/</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/webapps</location>
+                  <includes>
+                    <include>*.war</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <configuration>true</configuration>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/jetty-config</location>
                   <includes>
                     <include>**/*</include>
                   </includes>
-								</source>
-							</sources>
-						</mapping>
+                </source>
+              </sources>
+            </mapping>
 
-						<mapping>
-							<directory>${installation.dir}</directory>
-							<filemode>644</filemode>
-							<username>root</username>
-							<groupname>root</groupname>
-							<configuration>true</configuration>
-							<directoryIncluded>false</directoryIncluded>
-							<sources>
-								<source>
-									<location>target/jetty-config</location>
-									<includes>
-										<include>**/*</include>
-									</includes>
-								</source>
-							</sources>
-						</mapping>
+            <mapping>
+              <directory>${installation.dir}/tmp</directory>
+              <filemode>755</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+            </mapping>
 
             <mapping>
               <directory>${slipstream.base.dir}/downloads</directory>
@@ -308,31 +322,45 @@
               </sources>
             </mapping>
 
-					</mappings>
+	    <mapping>
+	      <directory>/etc/default/</directory>
+	      <filemode>644</filemode>
+	      <username>root</username>
+	      <groupname>root</groupname>
+	      <directoryIncluded>false</directoryIncluded>
+	      <sources>
+		<source>
+		  <location>${basedir}/src/main/scripts/etc-default-jetty</location>
+		  <destination>jetty</destination>
+		</source>
+	      </sources>
+	    </mapping>
+
+	  </mappings>
           <postinstallScriptlet>
             <script>
-/sbin/chkconfig --add slipstream
+	      /sbin/chkconfig --add slipstream
             </script>
           </postinstallScriptlet>
 
-				</configuration>
+	</configuration>
 
-				<executions>
-					<execution>
-						<id>attach-rpm</id>
-						<phase>package</phase>
-						<goals>
-							<goal>attached-rpm</goal>
-						</goals>
-					</execution>
-				</executions>
+	<executions>
+	  <execution>
+	    <id>attach-rpm</id>
+	    <phase>package</phase>
+	    <goals>
+	      <goal>attached-rpm</goal>
+	    </goals>
+	  </execution>
+	</executions>
 
-			</plugin>
+      </plugin>
 
-		</plugins>
+    </plugins>
 
-	</build>
-	
+  </build>
+  
   <profiles>
     <profile>
       <id>nexus-yum-repo-gen-snapshots</id>

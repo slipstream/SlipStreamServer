@@ -1,1 +1,2 @@
 export JETTY_HOME=/opt/slipstream/server
+export TMPDIR=/opt/slipstream/server/tmp
