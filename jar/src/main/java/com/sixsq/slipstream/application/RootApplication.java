@@ -20,6 +20,8 @@ package com.sixsq.slipstream.application;
  * -=================================================================-
  */
 
+import java.util.ServiceLoader;
+
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -44,6 +46,7 @@ import com.sixsq.slipstream.authz.ReportsAuthorizer;
 import com.sixsq.slipstream.authz.SuperEnroler;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.configuration.ServiceConfigurationResource;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.dashboard.DashboardRouter;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -91,6 +94,15 @@ public class RootApplication extends Application {
 		getMetadataService().addExtension("tgz",
 				MediaType.APPLICATION_COMPRESS, true);
 		getMetadataService().addExtension("multipart", MediaType.MULTIPART_ALL);
+	}
+
+	protected void loadConnectors() {
+		ServiceLoader<Connector> connectorLoader = ServiceLoader
+				.load(Connector.class);
+
+		for (Connector c : connectorLoader) {
+	         getLogger().info("Connctor name: " + c.getCloudServiceName());
+	     }
 	}
 
 	private void createStartupMetadata() throws ValidationException,
