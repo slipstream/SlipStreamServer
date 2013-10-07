@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
@@ -39,6 +40,7 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ExtraDisk;
 import com.sixsq.slipstream.persistence.ImageModule;
@@ -53,6 +55,21 @@ import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.FileUtil;
 
 public abstract class ConnectorBase implements Connector {
+
+	@Override
+	abstract public String getCloudServiceName();
+
+	@Override
+	abstract public Run launch(Run run, User user) throws SlipStreamException;
+
+	@Override
+	abstract public Credentials getCredentials(User user);
+
+	@Override
+	abstract public void terminate(Run run, User user) throws SlipStreamException;
+
+	@Override
+	abstract public Properties describeInstances(User user) throws SlipStreamException;
 
 	private static Logger log = Logger
 			.getLogger(ConnectorBase.class.toString());
@@ -133,9 +150,6 @@ public abstract class ConnectorBase implements Connector {
 			throws ValidationException {
 		return user.getDefaultCloudService();
 	}
-
-	@Override
-	abstract public String getCloudServiceName();
 
 	public String getConnectorInstanceName() {
 		return instanceName;

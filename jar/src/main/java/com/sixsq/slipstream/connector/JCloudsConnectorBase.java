@@ -29,9 +29,27 @@ import org.jclouds.rest.RestContext;
 
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.User;
 
 @SuppressWarnings("deprecation")
 public abstract class JCloudsConnectorBase<S, A> extends ConnectorBase {
+
+	@Override
+	abstract public String getCloudServiceName();
+
+	@Override
+	abstract public Run launch(Run run, User user) throws SlipStreamException;
+
+	@Override
+	abstract public Credentials getCredentials(User user);
+
+	@Override
+	abstract public void terminate(Run run, User user) throws SlipStreamException;
+
+	@Override
+	abstract public Properties describeInstances(User user) throws SlipStreamException;
 
 	public JCloudsConnectorBase(String instanceName) {
 		super(instanceName);

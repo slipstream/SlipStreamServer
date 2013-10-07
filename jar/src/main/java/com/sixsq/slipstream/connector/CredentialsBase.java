@@ -24,7 +24,13 @@ import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 
-public class CredentialsBase {
+public abstract class CredentialsBase implements Credentials {
+
+	@Override
+	abstract public String getKey() throws InvalidElementException;
+
+	@Override
+	abstract public String getSecret() throws InvalidElementException;
 
 	protected User user;
 	protected UserParametersFactoryBase cloudParametersFactory;

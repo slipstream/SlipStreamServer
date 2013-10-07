@@ -8,12 +8,25 @@ import java.util.Properties;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
 
 public abstract class CliConnectorBase extends ConnectorBase {
 
 	@Override
 	abstract public String getCloudServiceName();
+
+	@Override
+	abstract public Run launch(Run run, User user) throws SlipStreamException;
+
+	@Override
+	abstract public Credentials getCredentials(User user);
+
+	@Override
+	abstract public void terminate(Run run, User user) throws SlipStreamException;
+
+	@Override
+	abstract public Properties describeInstances(User user) throws SlipStreamException;
 	
 	public static Properties parseDescribeInstanceResult(String result)
 			throws SlipStreamException {
