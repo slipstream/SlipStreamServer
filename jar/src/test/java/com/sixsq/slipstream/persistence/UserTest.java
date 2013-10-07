@@ -47,30 +47,34 @@ import com.sixsq.slipstream.util.SerializationUtil;
 public class UserTest extends ResourceTestBase {
 
 	@Before
-	public void setup(){
-		storeUser(user);
-	}
-	
-	@After
-	public void tearDown(){
+	public void setup() {
 		try {
-		user.remove();
+			storeUser(user);
 		} catch (Exception ex) {
-			
+
 		}
- 	}
-	
+	}
+
+	@After
+	public void tearDown() {
+		try {
+			user.remove();
+		} catch (Exception ex) {
+
+		}
+	}
+
 	@Test
 	public void setParameter() throws ValidationException {
 		User user = User.loadByName("test");
-		
+
 		user.setParameter(new UserParameter("p", "v", "d"));
 		user = user.store();
 		user.setParameter(new UserParameter("p", "v", "d"));
 		user = user.store();
 		user.remove();
 	}
-	
+
 	@Test
 	public void verifyCorrectName() throws SlipStreamClientException {
 
@@ -217,7 +221,7 @@ public class UserTest extends ResourceTestBase {
 		allUsernames.add("user3");
 
 		userViewList = User.viewList();
-		assertThat(userViewList.size(), is(allUsernames.size()+before));
+		assertThat(userViewList.size(), is(allUsernames.size() + before));
 
 		User.removeNamedUser("user1");
 		User.removeNamedUser("user2");
