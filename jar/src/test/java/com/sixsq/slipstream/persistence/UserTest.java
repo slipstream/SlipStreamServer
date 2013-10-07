@@ -48,11 +48,11 @@ public class UserTest extends ResourceTestBase {
 
 	@Before
 	public void setup() {
-//		try {
+		try {
 			user = storeUser(user);
-//		} catch (Exception ex) {
-//
-//		}
+		} catch (Exception ex) {
+
+		}
 	}
 
 	@After
