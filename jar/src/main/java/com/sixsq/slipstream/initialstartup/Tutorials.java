@@ -99,6 +99,7 @@ public class Tutorials extends BaseImages {
 		Authz authz;
 		
 		ImageModule webserver = new ImageModule(WEBSERVER_NAME);
+		webserver.setDescription("Apache web server");
 		authz = new Authz(user.getName(), webserver);
 		authz.setPublicGet(true);
 		webserver.setAuthz(authz);
@@ -152,6 +153,7 @@ public class Tutorials extends BaseImages {
 		Authz authz;
 
 		ImageModule testclient = new ImageModule(TESTCLIENT_NAME);
+		testclient.setDescription("Test client testing correct connectivity and data content with web server");
 		authz = new Authz(user.getName(), testclient);
 		authz.setPublicGet(true);
 		testclient.setAuthz(authz);
