@@ -135,9 +135,7 @@ public abstract class ConnectorBase implements Connector {
 	}
 
 	@Override
-	public String getCloudServiceName() {
-		return "unknown";
-	}
+	abstract public String getCloudServiceName();
 
 	public String getConnectorInstanceName() {
 		return instanceName;

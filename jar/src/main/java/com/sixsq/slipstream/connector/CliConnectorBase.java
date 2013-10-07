@@ -12,6 +12,9 @@ import com.sixsq.slipstream.persistence.User;
 
 public abstract class CliConnectorBase extends ConnectorBase {
 
+	@Override
+	abstract public String getCloudServiceName();
+	
 	public static Properties parseDescribeInstanceResult(String result)
 			throws SlipStreamException {
 		Properties states = new Properties();

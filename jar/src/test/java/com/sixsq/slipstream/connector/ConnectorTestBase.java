@@ -86,4 +86,9 @@ public class ConnectorTestBase extends ConnectorBase {
 	protected String constructKey(String key) throws ValidationException {
 		return null;
 	}
+
+	@Override
+	public String getCloudServiceName() {
+		return null;
+	}
 }
