@@ -193,7 +193,7 @@ public class RunListResourceTest extends ResourceTestBase {
 				new CloudImageIdentifier(image,
 						LocalConnector.CLOUD_SERVICE_NAME, "abc"));
 
-		image.store();
+		image = image.store();
 
 		Node node = new Node(NODE_NAME, image);
 		node.setMultiplicity(1);
@@ -201,7 +201,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		deployment = new DeploymentModule(moduleName + "Deployment");
 		deployment.getNodes().put(node.getName(), node);
-		deployment.store();
+		deployment = (DeploymentModule) deployment.store();
 	}
 
 	private Request createPostRequest(List<NodeParameter> parameters,
