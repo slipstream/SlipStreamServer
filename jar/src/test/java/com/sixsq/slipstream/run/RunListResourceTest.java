@@ -73,11 +73,11 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 		
-//		try {
+		try {
 			user = storeUser(user);
-//		} catch (Exception ex) {
-//
-//		}
+		} catch (Exception ex) {
+
+		}
 		
 	}
 

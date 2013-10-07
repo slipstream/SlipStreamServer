@@ -62,7 +62,11 @@ public class CommonTestUtil {
 	public static User createUser(String name, String password) {
 		User user = User.loadByName(name);
 		if(user != null) {
-			user.remove();
+			try {
+				user.remove();
+			} catch (Exception ex) {
+				
+			}
 		}
 		
 		try {
