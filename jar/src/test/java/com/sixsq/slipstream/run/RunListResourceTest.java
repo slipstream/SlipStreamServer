@@ -92,10 +92,6 @@ public class RunListResourceTest extends ResourceTestBase {
 		baseImage.setIsBase(true);
 		baseImage = baseImage.store();
 
-		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
-		user = user.store();
-
-		setCloudConnector(LocalConnector.class.getName());
 	}
 
 	@After
