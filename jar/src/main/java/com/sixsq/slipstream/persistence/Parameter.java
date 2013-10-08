@@ -135,7 +135,7 @@ public abstract class Parameter<T> implements Serializable {
 	@Element(required = false, data = true)
 	public void setValue(String value) throws ValidationException {
 		if(type == ParameterType.Boolean) {
-			this.value = ("on".equals(value) ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
+			this.value = "on".equals(value) ? Boolean.TRUE.toString() : Boolean.FALSE.toString();
 		} else {
 			this.value = value;
 		}

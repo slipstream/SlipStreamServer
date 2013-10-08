@@ -64,7 +64,7 @@ public abstract class ModuleParametersFactoryBase extends
 
 	protected ModuleParameter createParameter(String name, boolean value,
 			String description) throws ValidationException {
-		ModuleParameter p = new ModuleParameter(constructKey(name), (value) ? "on"
+		ModuleParameter p = new ModuleParameter(constructKey(name), value ? "on"
 				: null, description);
 		p.setCategory(getCategory());
 		p.setMandatory(true);
