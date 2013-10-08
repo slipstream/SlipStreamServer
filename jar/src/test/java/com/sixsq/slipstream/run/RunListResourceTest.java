@@ -52,6 +52,7 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
@@ -91,6 +92,8 @@ public class RunListResourceTest extends ResourceTestBase {
 		baseImage.setImageId("1234", cloudServiceName);
 		baseImage.setIsBase(true);
 		baseImage = baseImage.store();
+		
+		user = User.loadByName(user.getName());
 
 	}
 
