@@ -89,7 +89,7 @@ public class RunTest {
 		imagenoref.setRecipe("a recipe");
 		imagenoref.store();
 
-		user = CommonTestUtil.createTestUser();
+		user = CommonTestUtil.createUser("userRunTest", "password");
 	}
 
 	@AfterClass
@@ -97,7 +97,7 @@ public class RunTest {
 		imagebase.remove();
 		imageref.remove();
 		image.remove();
-		CommonTestUtil.deleteUser(user);
+		user.remove();
 	}
 
 	@Test

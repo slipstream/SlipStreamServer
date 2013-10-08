@@ -66,12 +66,13 @@ public class ModuleResourceTest extends ResourceTestBase {
 
 		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 
+		user = createUser("userModuleResourceTest", "password");
 		user.setDefaultCloudServiceName(cloudServiceName);
 		user = storeUser(user);
 
 		anotherUser = new User("anotherUser");
 		anotherUser.setDefaultCloudServiceName(cloudServiceName);
-		storeUser(anotherUser);
+		anotherUser = storeUser(anotherUser);
 	}
 
 	@AfterClass
