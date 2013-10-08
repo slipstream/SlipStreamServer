@@ -24,18 +24,19 @@ import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.RequestUtil;
 
 public abstract class BaseResource extends ServerResource {
 
 	private User user = null;
+	private ServiceConfiguration configuration = null;
 
 	@Override
 	protected void doInit() throws ResourceException {
-
 		setUser(RequestUtil.getUserFromRequest(getRequest()));
-
+		configuration = RequestUtil.getServiceConfigurationFromRequest(getRequest());
 	}
 
 	protected void setUser(User user) {
@@ -57,6 +58,10 @@ public abstract class BaseResource extends ServerResource {
 	protected boolean isChooser() {
 		String c = (String) getRequest().getAttributes().get("chooser");
 		return (c == null) ? false : true;
+	}
+
+	public ServiceConfiguration getConfiguration() {
+		return configuration;
 	}
 
 	protected void throwUnauthorized() {
