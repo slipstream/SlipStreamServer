@@ -21,7 +21,6 @@ package com.sixsq.slipstream.run;
  */
 
 import java.util.HashSet;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -35,9 +34,7 @@ import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -51,33 +48,25 @@ import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public class RunResource extends ServerResource {
+public class RunResource extends BaseResource {
 
 	private User user = null;
 
-	Run run = null;
-
-	String execid = null;
-
-	public Configuration configuration;
+	private Run run = null;
 
 	@Override
 	public void doInit() throws ResourceException {
 
+		super.doInit();
+
 		Request request = getRequest();
 
-		user = User.loadByName(request.getClientInfo().getUser().getName());
-
 		validateUser();
-
-		Map<String, Object> attributes = request.getAttributes();
-		execid = (String) attributes.get("execid");
-
-		configuration = RequestUtil.getConfigurationFromRequest(request);
 
 		String resourceUri = RequestUtil.extractResourceUri(request);
 		run = Run.load(resourceUri);
@@ -85,9 +74,11 @@ public class RunResource extends ServerResource {
 		if (run == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 		}
+		
+		authorize();
 	}
 
-	protected void authorize() {
+	private void authorize() {
 		if (!user.getName().equals(run.getUser())) {
 			throw (new ResourceException(Status.CLIENT_ERROR_FORBIDDEN));
 		}
