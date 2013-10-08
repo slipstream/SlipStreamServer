@@ -176,7 +176,7 @@ public class Notifier {
 			String key = RequiredParameters.SLIPSTREAM_MAIL_SSL.getName();
 			ServiceConfigurationParameter parameter = cfg.getParameter(key);
 			boolean useSSL = false;
-			if ("on".equals(parameter.getValue())) {
+			if ("true".equals(parameter.getValue())) {
 				useSSL = true;
 			}
 

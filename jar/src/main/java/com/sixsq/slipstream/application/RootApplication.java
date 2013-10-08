@@ -44,6 +44,7 @@ import com.sixsq.slipstream.authn.BasicAuthenticator;
 import com.sixsq.slipstream.authn.CookieAuthenticator;
 import com.sixsq.slipstream.authn.LoginResource;
 import com.sixsq.slipstream.authn.LogoutResource;
+import com.sixsq.slipstream.authn.RegistrationResource;
 import com.sixsq.slipstream.authz.ReportsAuthorizer;
 import com.sixsq.slipstream.authz.SuperEnroler;
 import com.sixsq.slipstream.configuration.Configuration;
@@ -104,8 +105,8 @@ public class RootApplication extends Application {
 				.load(Connector.class);
 
 		for (Connector c : connectorLoader) {
-	         getLogger().info("Connctor name: " + c.getCloudServiceName());
-	     }
+			getLogger().info("Connctor name: " + c.getCloudServiceName());
+		}
 	}
 
 	private void createStartupMetadata() throws ValidationException,
@@ -257,6 +258,9 @@ public class RootApplication extends Application {
 		TemplateRoute route = router.attach(LoginResource.getResourceRoot(),
 				LoginResource.class);
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
+
+		router.attach(RegistrationResource.getResourceRoot(),
+				RegistrationResource.class);
 	}
 
 	private void attachRun(RootRouter router) throws ConfigurationException {

@@ -20,39 +20,32 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
-import java.io.IOException;
-import java.io.StringReader;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ResourceException;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import com.sixsq.slipstream.util.XmlUtil;
+import com.sixsq.slipstream.util.HtmlUtil;
 
-public class SimpleRepresentationBaseResource extends BaseResource {
+public abstract class SimpleRepresentationBaseResource extends BaseResource {
 
 	private String message;
 
-	protected void setPostResponse() {
-		Representation representation = null;
-			try {
-				representation = getHtmlRepresentation();
-			} catch (ParserConfigurationException e) {
-				handleError(e);
-			} catch (SAXException e) {
-				handleError(e);
-			} catch (IOException e) {
-				handleError(e);
-			}
-		getResponse().setEntity(representation);
+	abstract protected String getPageRepresentation();
 
+
+	protected void setResponse(String content, MediaType mediaType, Status status) {
+		getResponse().setEntity(new StringRepresentation(content, mediaType));
+		getResponse().setStatus(status);
+	}
+
+	protected void setPostResponse(String content, MediaType mediaType) {
+		getResponse().setEntity(new StringRepresentation(content, mediaType));
+		getResponse().setStatus(Status.SUCCESS_CREATED);
+	}
+
+	protected void setPostResponse() {
+		getResponse().setEntity(generateHtml(), MediaType.TEXT_HTML);
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 	}
 
@@ -61,46 +54,11 @@ public class SimpleRepresentationBaseResource extends BaseResource {
 		throw(new ResourceException(Status.SERVER_ERROR_INTERNAL, e));
 	}
 
-	protected Representation getHtmlRepresentation()
-			throws ParserConfigurationException, SAXException, IOException {
+	protected String generateHtml() {
 		
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db;
-		db = dbf.newDocumentBuilder();
+		return HtmlUtil.toHtml(getMessage(),
+				getPageRepresentation(), getUser());
 
-		StringReader reader = new StringReader(createRawMessage());
-		Document document = db.parse(new InputSource(reader));
-
-		XmlUtil.addUser(document, getUser());
-//		XmlUtil.addBreadcrumbs(document, "", resourceUri);
-		
-		return null;
-		// TODO: complete this feature
-//		Map<String, Object> parameters = HtmlUtil.createParameters(
-//				baseUrlSlash, resourceUri, configuration.version);
-//
-//		Source source = new DOMSource(document);
-//		return HtmlUtil.sourceToHtmlRepresentation(source, "raw-content.xsl",
-//				parameters);
-
-	}
-
-	private String createRawMessage() {
-		return createRawXmlRepresentation(message, "Registration");
-	}
-
-	protected String createRawXmlRepresentation(String message, String title) {
-		String raw = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-		raw += "<raw-content title=\"" + title + "\">\n";
-		raw += "<div class=\"page_head\">\n";
-		raw += "<span class=\"pageheadtitle\">" + title + "</span>\n";
-		raw += "</div>\n";
-		raw += "<div>\n";
-		raw += message + "\n";
-		raw += "</div>\n";
-		raw += "</raw-content>";
-
-		return raw;
 	}
 
 	public String getMessage() {

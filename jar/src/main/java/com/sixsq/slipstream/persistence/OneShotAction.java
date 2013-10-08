@@ -20,7 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -144,10 +143,11 @@ public abstract class OneShotAction {
 	 * 
 	 * @param request
 	 * @return
-	 * @throws ConfigurationException 
-	 * @throws SlipStreamRuntimeException 
+	 * @throws ConfigurationException
+	 * @throws SlipStreamRuntimeException
 	 */
-	public abstract Representation doAction(Request request) throws SlipStreamRuntimeException, ConfigurationException;
+	public abstract Representation doAction(Request request)
+			throws SlipStreamRuntimeException, ConfigurationException;
 
 	public static OneShotAction load(String uuid) {
 		EntityManager em = PersistenceUtil.createEntityManager();

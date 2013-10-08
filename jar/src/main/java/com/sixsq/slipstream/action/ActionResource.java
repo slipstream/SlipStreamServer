@@ -25,13 +25,12 @@ import static org.restlet.data.Status.CLIENT_ERROR_NOT_FOUND;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
-import org.xml.sax.SAXException;
 
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.persistence.OneShotAction;
@@ -77,19 +76,12 @@ public class ActionResource extends SimpleRepresentationBaseResource {
 		} catch (IOException e) {
 			handleError(e);
 		}
-
-		Representation representation = null;
-		try {
-			representation = getHtmlRepresentation();
-		} catch (ParserConfigurationException e) {
-			handleError(e);
-		} catch (SAXException e) {
-			handleError(e);
-		} catch (IOException e) {
-			handleError(e);
-		}
 		
-		return representation;
-	
+		return new StringRepresentation(generateHtml(), MediaType.TEXT_HTML);
+	}
+
+	@Override
+	protected String getPageRepresentation() {
+		return "action";
 	}
 }
