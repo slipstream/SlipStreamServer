@@ -45,10 +45,10 @@ public class Commit implements Serializable {
 	@OneToOne
 	private Module guardedModule;
 
-	@Attribute
+	@Attribute(required=false)
 	private String author;
 
-	@Element
+	@Element(required=false)
 	@Lob
 	private String comment;
 
