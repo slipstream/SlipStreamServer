@@ -20,6 +20,8 @@
 
 package com.sixsq.slipstream.util;
 
+import org.restlet.data.Status;
+import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
 
 import slipstream.ui.views.Representation;
@@ -40,7 +42,11 @@ public class HtmlUtil {
 		XmlUtil.addUser(doc, user);
 
 		String xml = SerializationUtil.documentToString(doc);
+		try {
 		return Representation.toHtml(xml, page, type);
+		} catch (IllegalArgumentException ex) {
+			throw(new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Unknown resource: " + page));
+		}
 	}
 
 	public static String toHtml(String metadata, String page) {
