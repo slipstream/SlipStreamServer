@@ -66,13 +66,12 @@ public class UserTest extends ResourceTestBase {
 
 	@Test
 	public void setParameter() throws ValidationException {
-		User user = User.loadByName("test");
+		User user = User.loadByName(UserTest.user.getName());
 
 		user.setParameter(new UserParameter("p", "v", "d"));
 		user = user.store();
 		user.setParameter(new UserParameter("p", "v", "d"));
 		user = user.store();
-		user.remove();
 	}
 
 	@Test

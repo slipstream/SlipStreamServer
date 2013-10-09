@@ -365,7 +365,7 @@ public class UserResourceTest extends ResourceTestBase {
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
-		assertThat(response.getLocationRef().getPath(), is("/user/test"));
+		assertThat(response.getLocationRef().getPath(), is("/user/" + user.getName()));
 	}
 
 	@Test
