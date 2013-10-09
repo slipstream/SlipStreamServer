@@ -4,7 +4,7 @@
   <artifactId>SlipStreamServer</artifactId>
   <packaging>pom</packaging>
   <name>SlipStream Server</name>
-  <version>2.0.4-SNAPSHOT</version>
+  <version>2.0.4</version>
   <url>http://sixsq.com/</url>
 
   <parent>
@@ -45,7 +45,7 @@
     <connection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</connection>
     <url>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</url>
     <developerConnection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</developerConnection>
-    <tag>SlipStreamServer-2.0.0</tag>
+    <tag>SlipStreamServer-2.0.4</tag>
   </scm>
 
   <reporting>
