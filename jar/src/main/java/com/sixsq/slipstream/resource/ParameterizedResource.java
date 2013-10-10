@@ -254,6 +254,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	@Get("html")
 	public Representation toHtml() {
+		checkCanGet();
 
 		if (isEdit) {
 			try {
