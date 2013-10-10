@@ -4,13 +4,12 @@
   <artifactId>SlipStreamServer</artifactId>
   <packaging>pom</packaging>
   <name>SlipStream Server</name>
-  <version>2.0.5-SNAPSHOT</version>
   <url>http://sixsq.com/</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStream</artifactId>
-    <version>2.0.4</version>
+    <version>2.0.5-SNAPSHOT</version>
   </parent>
 
   <modules>
