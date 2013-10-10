@@ -55,8 +55,6 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class RunResource extends BaseResource {
 
-	private User user = null;
-
 	private Run run = null;
 
 	@Override
@@ -79,7 +77,7 @@ public class RunResource extends BaseResource {
 	}
 
 	private void authorize() {
-		if (!user.getName().equals(run.getUser())) {
+		if (!getUser().getName().equals(run.getUser())) {
 			throw (new ResourceException(Status.CLIENT_ERROR_FORBIDDEN));
 		}
 
@@ -115,7 +113,7 @@ public class RunResource extends BaseResource {
 		}
 
 		String html = HtmlUtil.toHtml(run,
-				getPageRepresentation(), user);
+				getPageRepresentation(), getUser());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 
@@ -130,7 +128,7 @@ public class RunResource extends BaseResource {
 
 		Run run = Run.load(this.run.getResourceUri(), em);
 		try {
-			run = updateVmStatus(run, user);
+			run = updateVmStatus(run, getUser());
 		} catch (SlipStreamClientException e) {
 			run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
 		} catch (SlipStreamException e) {
@@ -142,7 +140,7 @@ public class RunResource extends BaseResource {
 		}
 
 		Module module = RunFactory.selectFactory(run.getCategory(),
-				run.getType()).overloadModule(run, user);
+				run.getType()).overloadModule(run, getUser());
 		run.setModule(module, true);
 
 		return run;
@@ -182,7 +180,7 @@ public class RunResource extends BaseResource {
 					Connector connector = ConnectorFactory
 							.getConnector(cloudServiceName);
 					try {
-						connector.terminate(run, user);
+						connector.terminate(run, getUser());
 					} catch (SlipStreamException e) {
 						throw new ResourceException(
 								Status.CLIENT_ERROR_CONFLICT,
@@ -193,7 +191,7 @@ public class RunResource extends BaseResource {
 				Connector connector = ConnectorFactory.getConnector(run
 						.getCloudServiceName());
 				try {
-					connector.terminate(run, user);
+					connector.terminate(run, getUser());
 				} catch (SlipStreamException e) {
 					throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 							"Failed terminating VMs", e);
