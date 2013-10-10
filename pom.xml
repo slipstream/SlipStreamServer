@@ -46,7 +46,7 @@
     <connection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</connection>
     <url>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</url>
     <developerConnection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</developerConnection>
-    <tag>SlipStreamServer-2.0.0</tag>
+    <tag>SlipStreamServer-2.0.4</tag>
   </scm>
 
   <reporting>
