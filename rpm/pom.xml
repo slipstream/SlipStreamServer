@@ -253,7 +253,7 @@
             </mapping>
 
             <mapping>
-              <directory>${installation.dir}/webapps.slipstream/</directory>
+              <directory>${installation.dir}/webapps</directory>
               <filemode>644</filemode>
               <username>root</username>
               <groupname>root</groupname>
