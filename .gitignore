@@ -5,4 +5,5 @@ slipstreamdb.*
 bin
 .classpath
 .settings
-.project
+*.iml
+.idea/
