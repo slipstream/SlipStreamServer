@@ -108,24 +108,22 @@
 	    </configuration>
 	  </execution>
 
-          <execution>
-            <id>copy-war</id>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-	      <stripVersion>true</stripVersion>
-	      <stripClassifier>true</stripClassifier>
-              <outputDirectory>${project.build.directory}/dependency/webapps</outputDirectory>
-                <artifactItems>
-                  <artifactItem>
-		    <groupId>com.sixsq.slipstream</groupId>
-		    <artifactId>SlipStreamServer-war</artifactId>
-                    <type>war</type>
-                  </artifactItem>
-                </artifactItems>
-              </configuration>
-            </execution>
+      <execution>
+        <id>copy-war</id>
+        <goals>
+          <goal>unpack</goal>
+        </goals>
+        <configuration>
+          <outputDirectory>${project.build.directory}/dependency/webapps/slipstream.war</outputDirectory>
+          <artifactItems>
+            <artifactItem>
+              <groupId>com.sixsq.slipstream</groupId>
+              <artifactId>SlipStreamServer-war</artifactId>
+              <type>war</type>
+            </artifactItem>
+          </artifactItems>
+        </configuration>
+      </execution>
 
 	</executions>
 
