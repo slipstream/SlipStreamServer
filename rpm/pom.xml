@@ -262,7 +262,7 @@
                 <source>
                   <location>target/dependency/webapps</location>
                   <includes>
-                    <include>*.war</include>
+                    <include>*.war/*</include>
                   </includes>
                 </source>
               </sources>
