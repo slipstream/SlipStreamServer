@@ -40,6 +40,7 @@ import java.util.*;
 public class OkeanosConnector extends OpenStackConnector {
     public static final String CLOUD_SERVICE_NAME = "okeanos";
     public static final String JCLOUDS_DRIVER_NAME = "openstack-nova";
+    public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.okeanos.OkeanosClientCloud";
 
     public OkeanosConnector() {
         this(OkeanosConnector.CLOUD_SERVICE_NAME);
@@ -185,9 +186,10 @@ public class OkeanosConnector extends OpenStackConnector {
         userData += "export SLIPSTREAM_BUNDLE_URL=\"" + configuration.getRequiredProperty("slipstream.update.clienturl") + "\"\n";
         userData += "export SLIPSTREAM_BOOTSTRAP_BIN=\"" + configuration.getRequiredProperty("slipstream.update.clientbootstrapurl") + "\"\n";
         userData += "export LIBCLOUD_BUNDLE_URL=\"" + configuration.getRequiredProperty("cloud.connector.library.libcloud.url") + "\"\n";
-        userData += "export OPENSTACK_SERVICE_TYPE=\"" + configuration.getRequiredProperty(constructKey("cloud.connector.service.type")) + "\"\n";
-        userData += "export OPENSTACK_SERVICE_NAME=\"" + configuration.getRequiredProperty(constructKey("cloud.connector.service.name")) + "\"\n";
-        userData += "export OPENSTACK_SERVICE_REGION=\"" + configuration.getRequiredProperty(constructKey("cloud.connector.service.region")) + "\"\n";
+        userData += "export CLOUDCONNECTOR_PYTHON_MODULENAME=\"" + OkeanosConnector.CLOUDCONNECTOR_PYTHON_MODULENAME + "\"\n";
+        userData += "export OPENSTACK_SERVICE_TYPE=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_TYPE_PARAMETER_NAME)) + "\"\n";
+        userData += "export OPENSTACK_SERVICE_NAME=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_NAME_PARAMETER_NAME)) + "\"\n";
+        userData += "export OPENSTACK_SERVICE_REGION=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME)) + "\"\n";
         userData += "export SLIPSTREAM_CATEGORY=\"" + run.getCategory().toString() + "\"\n";
         userData += "export SLIPSTREAM_USERNAME=\"" + username + "\"\n";
         userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "\n";
