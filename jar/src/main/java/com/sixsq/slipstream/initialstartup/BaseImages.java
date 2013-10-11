@@ -106,7 +106,7 @@ public class BaseImages extends ModuleCreator {
 					new CloudImageIdentifier(ubuntu, new StratusLabConnector()
 							.getCloudServiceName(),
 							"HZTKYZgX7XzSokCHMB60lS0wsiv"));
-			ubuntu.setPlatform(Platforms.debian.toString());
+			ubuntu.setPlatform(Platforms.ubuntu.toString());
 			ubuntu.setLoginUser("root");
 			ParametersFactory.addParametersForEditing(ubuntu);
 			ubuntu.store();

@@ -25,5 +25,6 @@ public enum Platforms {
 	debian,
 	suse,
 	other,
-	windows
+	windows,
+	ubuntu
 }
