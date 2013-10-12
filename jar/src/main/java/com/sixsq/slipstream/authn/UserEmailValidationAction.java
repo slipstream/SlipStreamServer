@@ -24,6 +24,9 @@ import static com.sixsq.slipstream.messages.MessageUtils.MSG_ACCOUNT_APPROVED;
 import static com.sixsq.slipstream.messages.MessageUtils.MSG_EMAIL_CONFIRMED;
 import static com.sixsq.slipstream.messages.MessageUtils.MSG_NEW_USER_NOTIFICATION;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+
 import javax.persistence.Entity;
 
 import org.restlet.Request;
@@ -56,7 +59,7 @@ public class UserEmailValidationAction extends OneShotAction {
 		setForm(form);
 	}
 
-	protected void emailValidated(String baseUrlSlash)
+	private void emailValidated(String baseUrlSlash)
 			throws SlipStreamRuntimeException, ConfigurationException {
 
 		Form form = getForm();
@@ -65,15 +68,22 @@ public class UserEmailValidationAction extends OneShotAction {
 		User user = User.load(userResourceUrl);
 		user.setState(User.State.ACTIVE);
 
-		user.store();
+		try {
+			informUserAccountActivated(user, baseUrlSlash, userResourceUrl);
+		} catch (NoSuchAlgorithmException e) {
+			throw new ConfigurationException(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			throw new ConfigurationException(e.getMessage());
+		}
 
-		informUserAccountActivated(user, baseUrlSlash, userResourceUrl);
+		user = user.store();
 
 		informAdministratorOfUserCreation(baseUrlSlash, userResourceUrl);
 	}
 
 	private void informUserAccountActivated(User user, String baseUrlSlash,
-			String userResourceUrl) {
+			String userResourceUrl) throws NoSuchAlgorithmException,
+			UnsupportedEncodingException {
 		String username = user.getName();
 		String password = user.getPassword();
 		String url = baseUrlSlash + userResourceUrl;
@@ -81,6 +91,10 @@ public class UserEmailValidationAction extends OneShotAction {
 		String msg = MessageUtils.format(MSG_ACCOUNT_APPROVED, username,
 				password, url);
 
+		// now that the random password has been sent to the user
+		// hash it before it is stored
+		user.hashAndSetPassword(user.getPassword());
+		
 		Notifier.sendNotification(user.getEmail(), msg);
 	}
 
