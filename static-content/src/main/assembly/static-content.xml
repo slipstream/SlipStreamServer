@@ -16,6 +16,7 @@
         <include>js/**/*</include>
         <include>external/**/*</include>
         <include>images/**/*</include>
+        <include>font/**/*</include>
       </includes>
     </fileSet>
   </fileSets>
