@@ -42,7 +42,7 @@ public class OpenStackUserParametersFactory extends UserParametersFactoryBase {
 		putMandatoryParameter(KEY_PARAMETER_NAME, "Username");
 		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME, "Password");
 		putMandatoryParameter(TENANT_NAME,
-				"Project name (sometime it's call Tenant name)");
+				"Project name (sometime it's called Tenant name)");
 		putMandatoryParameter(KEYPAIR_NAME, "Keypair Name", "default");
 		
 	}
