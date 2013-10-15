@@ -65,7 +65,7 @@ public class UserEmailValidationAction extends OneShotAction {
 		Form form = getForm();
 		String userResourceUrl = form.getFirst("userResourceUrl").getValue();
 
-		User user = User.load(userResourceUrl);
+		User user = User.load(userResourceUrl, false);
 		user.setState(User.State.ACTIVE);
 
 		try {
