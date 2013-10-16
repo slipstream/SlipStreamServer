@@ -24,6 +24,7 @@ import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.MediaType;
 import org.restlet.data.Method;
+import org.restlet.data.Preference;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.routing.Filter;
@@ -31,38 +32,52 @@ import org.restlet.routing.Filter;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.util.HtmlUtil;
 
-public class Decorator extends Filter {
+public class ReportDecorator extends Filter {
 
 	@Override
 	protected int doHandle(Request request, Response response) {
 
 		super.doHandle(request, response);
 
-		if(response.getStatus().isSuccess() && request.getMethod().equals(Method.GET)) {
-			try {
-				response.setEntity(toHtml(request, response));
-			} catch (SlipStreamException e) {
-				// ok it failed generating html... do we care?
+		if (response.getStatus().isSuccess()
+				&& request.getMethod().equals(Method.GET)) {
+			boolean isHtml = false;
+			for (Preference<MediaType> mt : request.getClientInfo()
+					.getAcceptedMediaTypes()) {
+				if (mt.getMetadata().includes(MediaType.APPLICATION_XHTML)
+						|| mt.getMetadata().includes(MediaType.TEXT_HTML)) {
+					isHtml = true;
+					break;
+				}
+			}
+			if (isHtml) {
+				try {
+					response.setEntity(toHtml(request, response));
+				} catch (SlipStreamException e) {
+					// ok it failed generating html... do we care?
+				}
 			}
 		}
-		
+
 		return CONTINUE;
 	}
 
-	public Representation toHtml(Request request, Response response) throws SlipStreamException {
+	public Representation toHtml(Request request, Response response)
+			throws SlipStreamException {
 
-		String xhtmlRepresentation = convertHtmlToXhtml(response.getEntityAsText());
+		String xhtmlRepresentation = convertHtmlToXhtml(response
+				.getEntityAsText());
 
 		String html = HtmlUtil.toHtml(xhtmlRepresentation,
 				getPageRepresentation());
-		
+
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
 	protected String getPageRepresentation() {
 		return "reports";
 	}
-		
+
 	private String convertHtmlToXhtml(String htmlRepresentation) {
 		return htmlRepresentation.replace("<br>", "<br/>");
 	}

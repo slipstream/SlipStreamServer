@@ -53,6 +53,7 @@ public class ResultsDirectory extends Directory {
     private void setDefaults() {
         setModifiable(true);
         setListingAllowed(true);
+        setNegotiatingContent(true);
     }
 
     public Representation getIndexRepresentation(Variant variant,

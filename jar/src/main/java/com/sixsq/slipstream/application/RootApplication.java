@@ -30,13 +30,11 @@ import org.restlet.Restlet;
 import org.restlet.data.CharacterSet;
 import org.restlet.data.MediaType;
 import org.restlet.resource.Directory;
-import org.restlet.routing.Filter;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
 import org.restlet.routing.Variable;
 import org.restlet.security.Authenticator;
-import org.restlet.security.Authorizer;
 import org.restlet.service.MetadataService;
 
 import com.sixsq.slipstream.action.ActionRouter;
@@ -45,7 +43,6 @@ import com.sixsq.slipstream.authn.CookieAuthenticator;
 import com.sixsq.slipstream.authn.LoginResource;
 import com.sixsq.slipstream.authn.LogoutResource;
 import com.sixsq.slipstream.authn.RegistrationResource;
-import com.sixsq.slipstream.authz.ReportsAuthorizer;
 import com.sixsq.slipstream.authz.SuperEnroler;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.configuration.ServiceConfigurationResource;
@@ -56,7 +53,6 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.filter.Decorator;
 import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.BaseImages;
 import com.sixsq.slipstream.initialstartup.Tutorials;
@@ -66,7 +62,7 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.DocumentationResource;
-import com.sixsq.slipstream.resource.ResultsDirectory;
+import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.RunsRouter;
@@ -94,7 +90,7 @@ public class RootApplication extends Application {
 		}
 
 		MetadataService ms = getMetadataService();
-		ms.setDefaultMediaType(MediaType.TEXT_HTML);
+		ms.addCommonExtensions();
 		ms.setDefaultCharacterSet(CharacterSet.UTF_8);
 		ms.addExtension("tgz", MediaType.APPLICATION_COMPRESS, true);
 		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
@@ -158,13 +154,9 @@ public class RootApplication extends Application {
 	@Override
 	public Restlet createInboundRoot() {
 
+		enableTunnelService();
+
 		RootRouter router = new RootRouter(getContext());
-
-		Directory directoryStaticContent = attachStaticContent();
-		router.attachDefault(directoryStaticContent);
-
-		Directory directoryDownloads = attachDownloadsDirectory();
-		router.attach("/downloads", directoryDownloads);
 
 		try {
 			attachAction(router);
@@ -185,7 +177,11 @@ public class RootApplication extends Application {
 			throw (new SlipStreamRuntimeException(e));
 		}
 
-		enableTunnelService();
+		Directory directoryStaticContent = attachStaticContent();
+		router.attachDefault(directoryStaticContent);
+
+		Directory directoryDownloads = attachDownloadsDirectory();
+		router.attach("/downloads", directoryDownloads);
 
 		// Some browsers need to have their media types preferences trimmed.
 		// Create a filter and put this in front of the application router.
@@ -216,26 +212,7 @@ public class RootApplication extends Application {
 	}
 
 	private void attachReports(RootRouter router) throws ConfigurationException {
-		String reportsLocation = Configuration.getInstance().getProperty(
-				"slipstream.reports.location");
-
-		// router.getContext().getClientDispatcher().getProtocols()
-		// .add(Protocol.FILE);
-		ResultsDirectory directory = new ResultsDirectory(getContext(),
-				"file://" + reportsLocation);
-
-		Filter decorator = new Decorator();
-		decorator.setNext(directory);
-		Authorizer authorizer = new ReportsAuthorizer();
-		authorizer.setNext(decorator);
-		Authenticator authenticator = new CookieAuthenticator(getContext());
-		authenticator.setNext(authorizer);
-		authenticator.setEnroler(new SuperEnroler());
-
-		router.attach("/reports", authenticator);
-
-		// router.getContext().getClientDispatcher().getProtocols()
-		// .add(Protocol.FILE);
+		router.attach("/reports", new ReportRouter(getContext()));
 	}
 
 	private void attachConfiguration(RootRouter router) {
@@ -390,6 +367,7 @@ public class RootApplication extends Application {
 	}
 
 	private void enableTunnelService() {
+		getTunnelService().setExtensionsTunnel(true);
 		getTunnelService().setEnabled(true);
 	}
 
