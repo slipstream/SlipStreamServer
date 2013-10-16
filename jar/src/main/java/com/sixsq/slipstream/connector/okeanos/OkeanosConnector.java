@@ -5,6 +5,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.openstack.OpenStackConnector;
 import com.sixsq.slipstream.connector.openstack.OpenStackImageParametersFactory;
 import com.sixsq.slipstream.connector.openstack.OpenStackUserParametersFactory;
@@ -49,6 +50,11 @@ public class OkeanosConnector extends OpenStackConnector {
 
     public OkeanosConnector(String instanceName) {
         super(instanceName);
+    }
+
+    @Override
+    public Connector copy() {
+        return new OkeanosConnector(getConnectorInstanceName());
     }
 
     public String getCloudServiceName() {
@@ -143,6 +149,9 @@ public class OkeanosConnector extends OpenStackConnector {
 
     @Override
     protected NovaApi getClient(User user, Properties overrides) throws InvalidElementException, ValidationException {
+        if (overrides == null) {
+            overrides = new Properties();
+        }
         updateContextBuilderPropertiesOverrides(user, overrides);
 
         final ContextBuilder contextBuilder = updateContextBuilder(newContextBuilder(), user, overrides);
