@@ -21,11 +21,8 @@ package com.sixsq.slipstream.resource;
  */
 
 import org.restlet.Context;
-import org.restlet.resource.Directory;
 import org.restlet.routing.Filter;
 import org.restlet.routing.Router;
-import org.restlet.routing.Template;
-import org.restlet.routing.TemplateRoute;
 import org.restlet.security.Authenticator;
 import org.restlet.security.Authorizer;
 
@@ -48,11 +45,6 @@ public class ReportRouter extends Router {
 		Authenticator authenticator = new CookieAuthenticator(getContext());
 		authenticator.setNext(authorizer);
 		authenticator.setEnroler(new SuperEnroler());
-
-//		authorizer.setNext(new Directory(getContext(), "file://" + reportsLocation));
-//		TemplateRoute route = attach("/{uuid}/{file}.tgz", authorizer);
-//		route.getTemplate().setMatchingMode(Template.MODE_EQUALS);
-		
 
 		ResultsDirectory directory = new ResultsDirectory(getContext(),
 				"file://" + reportsLocation);
