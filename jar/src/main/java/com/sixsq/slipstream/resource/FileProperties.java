@@ -42,10 +42,10 @@ public class FileProperties {
     @Element
     public final String type;
 
-    @Element
+    @Element(required=false)
     public final String node;
 
-    @Element
+    @Element(required=false)
     public final String date;
 
     public FileProperties(Reference r) {
