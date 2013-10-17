@@ -49,6 +49,8 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 	public void createNewAccount(Representation entity)
 			throws ResourceException {
 
+		checkIsAllowed();
+
 		User newUser = processUser(entity);
 
 		checkUserDoesntExist(newUser);
@@ -59,7 +61,22 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 
 		newUser.store();
 
-		setPostResponse(MessageUtils.format(MSG_REGISTRATION_SENT), MediaType.TEXT_PLAIN);
+		setPostResponse(MessageUtils.format(MSG_REGISTRATION_SENT),
+				MediaType.TEXT_PLAIN);
+	}
+
+	private void checkIsAllowed() {
+		boolean allow = true; // allowed by default
+		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_ENABLE
+				.getName();
+		ServiceConfigurationParameter parameter = getConfiguration()
+				.getParameters().get(key);
+		if(parameter != null) {
+			allow = parameter.isTrue();
+		}
+		if(!allow) {
+			throwClientForbiddenError("Self registration disabled");
+		}
 	}
 
 	private User processUser(Representation entity) {

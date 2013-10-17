@@ -83,7 +83,9 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_VERSION("Installed SlipStream version",
 				ParameterCategory.SlipStream_Advanced, true),
 
-		SLIPSTREAM_REPORTS_LOCATION("Location where the deployments and build reports are saved", ParameterCategory.SlipStream_Advanced),
+		SLIPSTREAM_REPORTS_LOCATION(
+				"Location where the deployments and build reports are saved",
+				ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_REGISTRATION_EMAIL(
 				"Email address for account approvals, etc.",
@@ -131,10 +133,11 @@ public class ServiceConfiguration extends
 				super.validate(value);
 				isValidEmail(value);
 			}
-		};
+		},
 
-//		SLIPSTREAM_REGISTRATION_ENABLE("Allow self user registration. If checked, user will be able to create accounts themselves.",
-//				ParameterCategory.SlipStream_Basics, ParameterType.Boolean);
+		SLIPSTREAM_REGISTRATION_ENABLE(
+				"Allow user self registration. If checked, user will be able to create accounts themselves.",
+				ParameterCategory.SlipStream_Basics, ParameterType.Boolean);
 
 		private final String description;
 		private final ParameterCategory category;
@@ -246,15 +249,14 @@ public class ServiceConfiguration extends
 		public boolean isReadonly() {
 			return readonly;
 		}
-		
-		 /**
-		 * Convert the enum name into parameter name
-		 * where word separators are converted from _ to .
-		 * and lower cased.
+
+		/**
+		 * Convert the enum name into parameter name where word separators are
+		 * converted from _ to . and lower cased.
 		 */
 		public String getName() {
-		 return name().replace("_", ".").toLowerCase();
-		 }
+			return name().replace("_", ".").toLowerCase();
+		}
 	}
 
 	@Id

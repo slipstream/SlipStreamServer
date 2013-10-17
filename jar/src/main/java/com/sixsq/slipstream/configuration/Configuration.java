@@ -695,7 +695,13 @@ public class Configuration {
 		resetRequiredParameterDefinition();
 	}
 
+	/**
+	 * First load config file (just in case there are new required parameters)
+	 * The overwrite them with content from the db (if previously persisted)
+	 * Then process and validate
+	 */
 	public void update(Map<String, ServiceConfigurationParameter> parameters) {
+		loadFromFile();
 		serviceConfiguration.setParameters(parameters);
 		mergeWithParametersFromConnectors();
 		postProcessParameters();
