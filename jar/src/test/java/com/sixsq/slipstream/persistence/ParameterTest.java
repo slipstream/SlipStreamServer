@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -81,7 +82,7 @@ public class ParameterTest {
 		assertThat(p.getCategory(), is("something"));
 	}
 
-	@Test(expected=ValidationException.class)
+	@Test(expected = ValidationException.class)
 	public void setInvalidStringValue() throws ValidationException {
 		ModuleParameter p = new ModuleParameter("name");
 		p.setType(ParameterType.RestrictedString);
@@ -89,7 +90,7 @@ public class ParameterTest {
 		p.validateValue();
 	}
 
-	@Test(expected=ValidationException.class)
+	@Test(expected = ValidationException.class)
 	public void setInvalidTextValue() throws ValidationException {
 		ModuleParameter p = new ModuleParameter("name");
 		p.setType(ParameterType.RestrictedText);
@@ -97,11 +98,28 @@ public class ParameterTest {
 		p.validateValue();
 	}
 
-	@Test(expected=ValidationException.class)
+	@Test(expected = ValidationException.class)
 	public void setInvalidPassordValue() throws ValidationException {
 		ModuleParameter p = new ModuleParameter("name");
 		p.setType(ParameterType.Password);
 		p.setValue("'");
 		p.validateValue();
+	}
+
+	@Test
+	public void isTrue() throws ValidationException {
+		ModuleParameter p;
+
+		p = new ModuleParameter("name", "true", "");
+		assertTrue(p.isTrue());
+
+		p = new ModuleParameter("name", "false", "");
+		assertFalse(p.isTrue());
+
+		p = new ModuleParameter("name", "", "");
+		assertFalse(p.isTrue());
+
+		p = new ModuleParameter("name", null, "");
+		assertFalse(p.isTrue());
 	}
 }

@@ -279,4 +279,8 @@ public abstract class Parameter<T> implements Serializable {
 
 		return copy;
 	}
+	
+	public boolean isTrue() {
+		return Boolean.parseBoolean(getValue());
+	}
 }
