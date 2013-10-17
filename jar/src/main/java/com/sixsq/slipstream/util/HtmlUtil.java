@@ -30,8 +30,7 @@ import com.sixsq.slipstream.persistence.User;
 
 public class HtmlUtil {
 
-	public static String toHtml(Object metadata, String page,
-			User user) {
+	public static String toHtml(Object metadata, String page, User user) {
 		return toHtml(metadata, page, null, user);
 	}
 
@@ -43,9 +42,10 @@ public class HtmlUtil {
 
 		String xml = SerializationUtil.documentToString(doc);
 		try {
-		return Representation.toHtml(xml, page, type);
+			return Representation.toHtml(xml, page, type);
 		} catch (IllegalArgumentException ex) {
-			throw(new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Unknown resource: " + page));
+			throw (new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
+					"Unknown resource: " + page));
 		}
 	}
 
