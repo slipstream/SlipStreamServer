@@ -34,7 +34,6 @@ import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.FormProcessor;
-import com.sun.xml.internal.fastinfoset.util.StringArray;
 
 public class ConnectorFactory {
 
