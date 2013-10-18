@@ -355,10 +355,10 @@ public class ServiceConfiguration extends
 		return (ServiceConfiguration) q.getSingleResult();
 	}
 
-	public Metadata store() {
+	public ServiceConfiguration store() {
 		validate();
 		setId();
-		return super.store();
+		return (ServiceConfiguration) super.store();
 	}
 
 	@Override
