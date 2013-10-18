@@ -69,7 +69,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return wrapInSingleQuotesOrNull(super.getSecret(user));
 	}
 
-	private String wrapInSingleQuotesOrNull(String value) {
+	protected String wrapInSingleQuotesOrNull(String value) {
 		if (value == null || value.isEmpty()) {
 			return null;
 		} else {
@@ -77,8 +77,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 	}
 	
-	private String wrapInSingleQuotes(String value) {
-		return "'" + value + "'";
+	protected String wrapInSingleQuotes(String value) {
+		return "'" + value.replaceAll("'","'\\\\''") + "'";
 	}
 	
 	protected String getEndpoint(User user) {
