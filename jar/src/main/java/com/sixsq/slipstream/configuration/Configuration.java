@@ -155,7 +155,7 @@ public class Configuration {
 	private Configuration() throws ConfigurationException {
 
 		try {
-			serviceConfiguration = ServiceConfiguration.load();
+			ServiceConfiguration serviceConfiguration = ServiceConfiguration.load();
 			update(serviceConfiguration.getParameters());
 		} catch (NoResultException ex) {
 			reset();
@@ -360,12 +360,6 @@ public class Configuration {
 		String cloudConnectorClassNameParameterValue = serviceConfiguration
 				.getParameters().get(cloudConnectorClassNameParameterKey)
 				.getValue();
-		if (cloudConnectorClassNameParameterValue == null
-				|| "".equals(cloudConnectorClassNameParameterValue)) {
-			throw (new ConfigurationException(
-					"Missing from the configuration file mandatory system configuration parameter value: "
-							+ cloudConnectorClassNameParameterKey));
-		}
 
 		return ConnectorFactory
 				.splitConnectorClassNames(cloudConnectorClassNameParameterValue);
@@ -688,6 +682,7 @@ public class Configuration {
 	 * @throws ConfigurationException
 	 */
 	public void reset() throws ConfigurationException {
+		serviceConfiguration = new ServiceConfiguration();
 		loadFromFile();
 		mergeWithParametersFromConnectors();
 		postProcessParameters();
@@ -702,7 +697,9 @@ public class Configuration {
 	 */
 	public void update(Map<String, ServiceConfigurationParameter> parameters) {
 		loadFromFile();
-		serviceConfiguration.setParameters(parameters);
+		for(ServiceConfigurationParameter p : parameters.values()) {
+			this.serviceConfiguration.setParameter(p);
+		}
 		mergeWithParametersFromConnectors();
 		postProcessParameters();
 		validateRequiredParameters();

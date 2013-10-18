@@ -124,7 +124,6 @@ public class RequestUtil {
 		Map<String, Object> attributes = request.getAttributes();
 
 		Configuration configuration = Configuration.getInstance();
-		// configuration.update();
 		attributes.put(CONFIGURATION_KEY, configuration);
 		request.setAttributes(attributes);
 		request.getAttributes().put(RequestUtil.SVC_CONFIGURATION_KEY,

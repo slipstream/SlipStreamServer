@@ -94,6 +94,7 @@ public class ServiceConfigurationResource extends
 			e.printStackTrace();
 			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e));
 		}
+		configuration.store();
 		ConnectorFactory.resetConnectors();
 		getResponse().setLocationRef(getRequest().getResourceRef());
 	}
