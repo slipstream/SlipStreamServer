@@ -3,7 +3,6 @@
 
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamServer-jar</artifactId>
-  <version>2.0.5-SNAPSHOT</version>
   <name>SlipStream Server (JAR)</name>
 
   <packaging>jar</packaging>
