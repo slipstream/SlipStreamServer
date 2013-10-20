@@ -77,6 +77,9 @@ public class RunResource extends BaseResource {
 	}
 
 	private void authorize() {
+		if(getUser().isSuper()) {
+			return;
+		}
 		if (!getUser().getName().equals(run.getUser())) {
 			throw (new ResourceException(Status.CLIENT_ERROR_FORBIDDEN));
 		}
