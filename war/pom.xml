@@ -94,9 +94,14 @@
 
     <dependency>
       <groupId>com.jcraft</groupId>
-    	<artifactId>jsch</artifactId>
-    	<version>0.1.49</version>
-    	<type>jar</type>
+      <artifactId>jsch</artifactId>
+      <version>0.1.49</version>
+      <type>jar</type>
+    </dependency>
+
+    <dependency>
+      <groupId>net.kencochrane.raven</groupId>
+      <artifactId>raven</artifactId>
     </dependency>
 
   </dependencies>
