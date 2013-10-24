@@ -105,7 +105,19 @@ public class BaseImages extends ModuleCreator {
 			ubuntu.getCloudImageIdentifiers().add(
 					new CloudImageIdentifier(ubuntu, new StratusLabConnector()
 							.getCloudServiceName(),
-							"HZTKYZgX7XzSokCHMB60lS0wsiv"));
+							"KBhcU87Wm5IZNOXZYGHrczGekwp"));
+			ubuntu.setPlatform(Platforms.ubuntu.toString());
+			ubuntu.setLoginUser("root");
+			ParametersFactory.addParametersForEditing(ubuntu);
+			ubuntu.store();
+
+			ubuntu = new ImageModule(UBUNTU13_IMAGE_NAME);
+			ubuntu.setAuthz(createPublicGetAuthz(user, module));
+			ubuntu.setIsBase(true);
+			ubuntu.getCloudImageIdentifiers().add(
+					new CloudImageIdentifier(ubuntu, new StratusLabConnector()
+							.getCloudServiceName(),
+							"L5DrIX5eSjxdxTzQSEOEEotGw3c"));
 			ubuntu.setPlatform(Platforms.ubuntu.toString());
 			ubuntu.setLoginUser("root");
 			ParametersFactory.addParametersForEditing(ubuntu);
@@ -113,22 +125,22 @@ public class BaseImages extends ModuleCreator {
 		}
 
 		if (!ProjectModule.exists(ProjectModule
-				.constructResourceUri(FEDORA_PROJECT_NAME))) {
-			module = new ProjectModule(FEDORA_PROJECT_NAME);
+				.constructResourceUri(CENTOS_PROJECT_NAME))) {
+			module = new ProjectModule(CENTOS_PROJECT_NAME);
 			module.setAuthz(createPublicGetAuthz(user, module));
 			module.store();
 
-			ImageModule fedora = new ImageModule(FEDORA_IMAGE_NAME);
-			fedora.setAuthz(createPublicGetAuthz(user, module));
-			fedora.setIsBase(true);
-			fedora.getCloudImageIdentifiers().add(
-					new CloudImageIdentifier(fedora, new StratusLabConnector()
+			ImageModule centos = new ImageModule(CENTOS_IMAGE_NAME);
+			centos.setAuthz(createPublicGetAuthz(user, module));
+			centos.setIsBase(true);
+			centos.getCloudImageIdentifiers().add(
+					new CloudImageIdentifier(centos, new StratusLabConnector()
 							.getCloudServiceName(),
-							"ArCnG4gBogiprglBUdG6V8YX20y"));
-			fedora.setPlatform(Platforms.redhat.toString());
-			fedora.setLoginUser("root");
-			ParametersFactory.addParametersForEditing(fedora);
-			fedora.store();
+							"H8dg0ssw_j4jg67FTwXysCUrJPl"));
+			centos.setPlatform(Platforms.redhat.toString());
+			centos.setLoginUser("root");
+			ParametersFactory.addParametersForEditing(centos);
+			centos.store();
 		}
 	}
 
