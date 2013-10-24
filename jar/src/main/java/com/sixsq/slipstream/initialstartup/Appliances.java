@@ -84,11 +84,11 @@ public class Appliances extends ModuleCreator {
 			module.store();
 
 			appliancesModule = new ProjectModule(APPLIANCES_PROJECT_NAME);
-			module.setAuthz(createPublicGetAuthz(user, appliancesModule));
+			appliancesModule.setAuthz(createPublicGetAuthz(user, appliancesModule));
 			appliancesModule.store();
 
 			ImageModule rstudio = new ImageModule(RSTUDIO_IMAGE_NAME);
-			rstudio.setAuthz(createPublicGetAuthz(user, appliancesModule));
+			rstudio.setAuthz(createPublicGetAuthz(user, rstudio));
 			rstudio.setIsBase(false);
 			rstudio.setModuleReference(Module
 					.constructResourceUri(CENTOS_IMAGE_NAME));
@@ -154,7 +154,7 @@ public class Appliances extends ModuleCreator {
 			rstudio.store();
 
 			ImageModule tmaster = new ImageModule(TORQUE_MASTER_IMAGE_NAME);
-			tmaster.setAuthz(createPublicGetAuthz(user, appliancesModule));
+			tmaster.setAuthz(createPublicGetAuthz(user, tmaster));
 
 			tmaster.setIsBase(true);
 			tmaster.getCloudImageIdentifiers().add(
@@ -238,13 +238,11 @@ public class Appliances extends ModuleCreator {
 			mp.setCategory(ParameterCategory.Output);
 			tmaster.setParameter(mp);
 
-			tmaster.getPackages().add(new Package("R"));
-
-			ParametersFactory.addParametersForEditing(rstudio);
+			ParametersFactory.addParametersForEditing(tmaster);
 			tmaster.store();
 
 			ImageModule tworker = new ImageModule(TORQUE_WORKER_IMAGE_NAME);
-			tworker.setAuthz(createPublicGetAuthz(user, appliancesModule));
+			tworker.setAuthz(createPublicGetAuthz(user, tworker));
 
 			tworker.setIsBase(true);
 			tworker.getCloudImageIdentifiers().add(
@@ -293,13 +291,6 @@ public class Appliances extends ModuleCreator {
 					+ "service pbs_mom start \n";
 
 			tworker.getTargets().add(new Target(Target.EXECUTE_TARGET, script));
-
-			mp = new ModuleParameter("munge_key64", "",
-					"base64 encoded munge key");
-			mp.setCategory(ParameterCategory.Output);
-			tworker.setParameter(mp);
-
-			tworker.getPackages().add(new Package("R"));
 
 			ParametersFactory.addParametersForEditing(rstudio);
 			tworker.store();

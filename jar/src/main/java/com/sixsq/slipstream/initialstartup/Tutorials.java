@@ -48,6 +48,10 @@ public class Tutorials extends BaseImages {
 			+ "/testclient";
 	private static final String DEPLOYMENT_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
 			+ "/client_server";
+	private static final String RSTUDIO_DEPLOYMENT_NAME = TUTORIALS_PROJECT_NAME
+			+ "/rstudio";
+	private static final String TORQUE_DEPLOYMENT_NAME = TUTORIALS_PROJECT_NAME
+			+ "/torque";
 	private static User user;
 
 	public static void create() throws ValidationException, NotFoundException,
@@ -70,6 +74,8 @@ public class Tutorials extends BaseImages {
 		Module webserver = createWebServerModule();
 		Module client = createTestClientModule();
 		createClientServerDeploymentModule(webserver, client);
+		createRStudioDeploymentModule();
+		createTorqueDeploymentModule();
 	}
 
 	private static void createProjects() throws ValidationException,
@@ -227,6 +233,42 @@ public class Tutorials extends BaseImages {
 		testclient.setParameterMapping(np);
 
 		deployment.getNodes().put(testclient.getName(), testclient);
+
+		deployment.store();
+	}
+
+	private static void createRStudioDeploymentModule()
+			throws ValidationException {
+		
+		DeploymentModule deployment = new DeploymentModule(RSTUDIO_DEPLOYMENT_NAME);
+		deployment.setDescription("Standalone RStudio Server");
+		Authz authz = new Authz(user.getName(), deployment);
+		authz.setPublicGet(true);
+		authz.setPublicPost(true);
+		deployment.setAuthz(authz);
+
+		Node rstudio = new Node("rstudio", ImageModule.constructResourceUri("appliances/rstudio"));
+
+		deployment.getNodes().put(rstudio.getName(), rstudio);
+
+		deployment.store();
+	}
+
+	private static void createTorqueDeploymentModule()
+			throws ValidationException {
+
+		DeploymentModule deployment = new DeploymentModule(TORQUE_DEPLOYMENT_NAME);
+		deployment.setDescription("Standalone RStudio Server");
+		Authz authz = new Authz(user.getName(), deployment);
+		authz.setPublicGet(true);
+		authz.setPublicPost(true);
+		deployment.setAuthz(authz);
+
+		Node tmaster = new Node("rstudio", ImageModule.constructResourceUri("appliances/torque-master"));
+		deployment.getNodes().put(tmaster.getName(), tmaster);
+
+		Node tworker = new Node("rstudio", ImageModule.constructResourceUri("appliances/torque-worker"));
+		deployment.getNodes().put(tworker.getName(), tworker);
 
 		deployment.store();
 	}

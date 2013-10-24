@@ -34,7 +34,7 @@ public class ModuleCreator {
 	protected static final String UBUNTU13_IMAGE_NAME = UBUNTU_PROJECT_NAME + "/13.04";
 
 	protected static final String CENTOS_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME + "/CentOS";
-	protected static final String CENTOS_IMAGE_NAME = CENTOS_PROJECT_NAME + "/6";
+	protected static final String CENTOS_IMAGE_NAME = CENTOS_PROJECT_NAME + "/6.3";
 
 	protected static User createUser(String name) {
 		User user = null;
