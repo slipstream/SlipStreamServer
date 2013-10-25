@@ -87,7 +87,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	protected String getErrorMessageLastPart(User user) {
 		return ", please edit your <a href='/user/" + user.getName()
-				+ "'>user account</a>";
+				+ "'> user account</a>";
 	}
 
 	protected void validateCredentials(User user) throws ValidationException {

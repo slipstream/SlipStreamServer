@@ -311,16 +311,9 @@ public class OpenStackConnector extends
 
 		String logfilename = "orchestrator.slipstream.log";
 		String bootstrap = "/tmp/slipstream.bootstrap";
-
 		String username = user.getName();
-		String password = user.getPassword();
-		if (password == null) {
-			throw (new ServerExecutionEnginePluginException(
-					"Missing password entry in user profile"));
-		}
 
 		String userData = "#!/bin/sh -e \n";
-
 		userData += "# SlipStream contextualization script for VMs on Amazon. \n";
 		userData += "export SLIPSTREAM_CLOUD=\"" + getCloudServiceName() + "\"\n";
 		userData += "export SLIPSTREAM_CONNECTOR_INSTANCE=\"" + getConnectorInstanceName() + "\"\n";
@@ -352,7 +345,7 @@ public class OpenStackConnector extends
 				+ bootstrap + " slipstream-orchestrator >> "
 				+ SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1\n";
 
-		System.out.print(userData);
+		//System.out.print(userData);
 
 		return userData;
 	}
