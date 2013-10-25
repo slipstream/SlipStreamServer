@@ -252,7 +252,7 @@ public class OkeanosConnector extends OpenStackConnector {
             String flavorId = getFlavorId(client, region, flavorName);
             System.out.println("flavorId = " + flavorId);
             String[] securityGroups = (run.getType() == RunType.Orchestration) ? "default".split(",")
-                : getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUP, imageModule).split(",");
+                : getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUPS, imageModule).split(",");
             System.out.println("securityGroups = " + Arrays.toString(securityGroups));
 
             String instanceData = "\n\nStarting instance on region '" + region + "'\n";
