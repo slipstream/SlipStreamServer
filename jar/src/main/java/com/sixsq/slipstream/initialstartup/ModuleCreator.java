@@ -31,9 +31,10 @@ public class ModuleCreator {
 				+ "/BaseImages";
 	protected static final String UBUNTU_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME + "/Ubuntu";
 	protected static final String UBUNTU_IMAGE_NAME = UBUNTU_PROJECT_NAME + "/12.04";
+	protected static final String UBUNTU13_IMAGE_NAME = UBUNTU_PROJECT_NAME + "/13.04";
 
-	protected static final String FEDORA_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME + "/Fedora";
-	protected static final String FEDORA_IMAGE_NAME = FEDORA_PROJECT_NAME + "/14.0";
+	protected static final String CENTOS_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME + "/CentOS";
+	protected static final String CENTOS_IMAGE_NAME = CENTOS_PROJECT_NAME + "/6.3";
 
 	protected static User createUser(String name) {
 		User user = null;
