@@ -31,7 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipstream.common.util.CommonTestUtil;
-import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -57,16 +56,8 @@ public class RunFactoryTest extends RunTest {
 	protected static ImageModule imageCircular2of3 = null;
 	protected static ImageModule imageCircular3of3 = null;
 
-	protected static ImageModule imageForDeployment1 = null;
-	protected static ImageModule imageForDeployment2 = null;
-
 	protected static ImageModule baseImage = null;
 	protected static ImageModule customImage = null;
-
-	public static DeploymentModule deployment = null;
-
-	private static String cloudServiceName = new LocalConnector()
-			.getCloudServiceName();
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
@@ -80,7 +71,7 @@ public class RunFactoryTest extends RunTest {
 		create2ElementCircularDependentImages();
 		create3ElementCircularDependentImages();
 		try {
-			createDeployment();
+			setupDeployments();
 			createImage();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -133,44 +124,6 @@ public class RunFactoryTest extends RunTest {
 		customImage.setRecipe("echo hello;");
 		customImage.setModuleReference(baseImage);
 		customImage.store();
-	}
-
-	private static void createDeployment() throws ValidationException,
-			NotFoundException {
-
-		imageForDeployment1 = new ImageModule("test/imagefordeployment1");
-		imageForDeployment1
-				.setParameter(new ModuleParameter("pi1", "pi1 init value",
-						"pi1 parameter desc", ParameterCategory.Input));
-		imageForDeployment1.setParameter(new ModuleParameter("po1",
-				"po1 init value", "po1 parameter desc",
-				ParameterCategory.Output));
-
-		imageForDeployment1.setIsBase(true);
-		imageForDeployment1.setImageId("123", cloudServiceName);
-		imageForDeployment1.store();
-
-		imageForDeployment2 = new ImageModule("test/imagefordeployment2");
-		imageForDeployment2
-				.setParameter(new ModuleParameter("pi2", "pi2 init value",
-						"pi2 parameter desc", ParameterCategory.Input));
-		imageForDeployment2.setParameter(new ModuleParameter("po2",
-				"po2 init value", "po2 parameter desc",
-				ParameterCategory.Output));
-		imageForDeployment2.setImageId("123", cloudServiceName);
-		imageForDeployment2.store();
-
-		deployment = new DeploymentModule("test/deployment");
-
-		Node node;
-
-		node = new Node("node1", imageForDeployment1);
-		deployment.getNodes().put(node.getName(), node);
-
-		node = new Node("node2", imageForDeployment2);
-		deployment.getNodes().put(node.getName(), node);
-
-		deployment.store();
 	}
 
 	@AfterClass
@@ -479,7 +432,7 @@ public class RunFactoryTest extends RunTest {
 
 	@Test
 	public void insertMultiplicityIndexInName() {
-		assertThat(RunDeploymentFactory.insertMultiplicityIndexInParameterName(
+		assertThat(DeploymentFactory.insertMultiplicityIndexInParameterName(
 				"node:param", 1), is("node.1:param"));
 	}
 }

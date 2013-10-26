@@ -33,6 +33,7 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -145,7 +146,7 @@ public class ParametersFactory {
 	public static String constructKey(String category, String... names) {
 		String newKey = category;
 		for(String name : names) {
-				newKey += "." + name;
+				newKey += RuntimeParameter.PARAM_WORD_SEPARATOR + name;
 		}
 		return newKey;
 	}

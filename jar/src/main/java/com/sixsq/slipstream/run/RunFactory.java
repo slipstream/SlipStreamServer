@@ -41,7 +41,7 @@ public abstract class RunFactory {
 		return constructRun(module, RunType.Orchestration, cloudService, user);
 	}
 
-	public Run createRun(Module module, RunType type, String cloudService,
+	protected Run createRun(Module module, RunType type, String cloudService,
 			User user) throws SlipStreamClientException {
 		return constructRun(module, type, cloudService, user);
 	}
@@ -54,36 +54,34 @@ public abstract class RunFactory {
 
 	public static Run getRun(Module module, RunType type, String cloudService,
 			User user) throws SlipStreamClientException {
-
-		RunFactory factory = selectFactory(module.getCategory(), type);
+		RunFactory factory = selectFactory(type);
 
 		Run run = factory.createRun(module, type, cloudService, user);
 
 		return run;
 	}
 
-	public static RunFactory selectFactory(ModuleCategory category, RunType type)
+	static RunFactory selectFactory(RunType type)
 			throws SlipStreamClientException {
 
 		RunFactory factory = null;
 
-		switch (category) {
+		switch (type) {
 
-		case Deployment:
-			factory = new RunDeploymentFactory();
+		case Orchestration:
+			factory = new DeploymentFactory();
 			break;
 
-		case Image:
-			if (type == RunType.Orchestration) {
-				factory = new BuildImageFactory();
-			} else {
-				factory = new RunImageFactory();
-			}
+		case Machine:
+			factory = new BuildImageFactory();
+			break;
+		case Run:
+			factory = new SimpleRunFactory();
 			break;
 
 		default:
-			throw (new SlipStreamClientException("Unknown module category: "
-					+ category));
+			throw (new SlipStreamClientException("Unknown module type: "
+					+ type));
 		}
 		return factory;
 	}
@@ -109,8 +107,7 @@ public abstract class RunFactory {
 	public static void resolveImageIdIfAppropriate(Module module, User user)
 			throws ConfigurationException, ValidationException {
 		if (module != null && module.getCategory() == ModuleCategory.Image) {
-			Connector connector = ConnectorFactory
-					.getCurrentConnector(user);
+			Connector connector = ConnectorFactory.getCurrentConnector(user);
 			setImageId(module, connector);
 		}
 		if (module != null && module.getCategory() == ModuleCategory.Deployment) {
@@ -139,12 +136,13 @@ public abstract class RunFactory {
 
 	/**
 	 * Load the module corresponding to the run and set some of its attributes
-	 * (e.g. multiplicity, cloud service) to match the specific configuration
-	 * of the run.
+	 * (e.g. multiplicity, cloud service) to match the specific configuration of
+	 * the run.
 	 * 
 	 * The returned module is transient and not persisted.
 	 */
-	public abstract Module overloadModule(Run run, User user) throws ValidationException;
+	public abstract Module overloadModule(Run run, User user)
+			throws ValidationException;
 
 	protected Module loadModule(Run run) throws ValidationException {
 		Module module = Module.load(run.getModuleResourceUrl());

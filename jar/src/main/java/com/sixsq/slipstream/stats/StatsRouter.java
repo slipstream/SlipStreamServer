@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.connector.local;
+package com.sixsq.slipstream.stats;
 
 /*
  * +=================================================================+
@@ -20,27 +20,19 @@ package com.sixsq.slipstream.connector.local;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.UserParametersFactoryBase;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ParameterType;
+import org.restlet.Context;
+import org.restlet.routing.Router;
 
-public class LocalUserParametersFactory extends UserParametersFactoryBase {
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 
-	public static String KEY_PARAMETER_NAME = "username";
-	public static String SECRET_PARAMETER_NAME = "password";
-	
-	public LocalUserParametersFactory() throws ValidationException {
-		super(LocalConnector.CLOUD_SERVICE_NAME);
+public class StatsRouter extends Router {
+
+	public StatsRouter(Context context) throws ConfigurationException {
+		super(context);
+
+		attach("", StatsResource.class);
+
+		attach("/", StatsResource.class);
 	}
 
-	@Override
-	protected void initReferenceParameters() throws ValidationException {
-
-		putParameter(KEY_PARAMETER_NAME,
-				"Account username", true,
-				ParameterType.RestrictedString);
-		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME,
-				"Account password");
-
-	}
 }

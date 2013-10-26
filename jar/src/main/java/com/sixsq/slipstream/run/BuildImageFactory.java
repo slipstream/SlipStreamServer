@@ -39,14 +39,14 @@ import com.sixsq.slipstream.persistence.User;
 public class BuildImageFactory extends RunFactory {
 
 	@Override
-	public Run createRun(Module module, RunType type, String cloudService,
-			User user) throws SlipStreamClientException {
+	public Run createRun(Module module, String cloudService, User user)
+			throws SlipStreamClientException {
 
 		ImageModule image = (ImageModule) module;
 
 		validate(image, cloudService);
 
-		Run run = constructRun(image, cloudService, user);
+		Run run = constructRun(image, RunType.Machine, cloudService, user);
 
 		initialize(image, run, cloudService);
 
@@ -118,18 +118,18 @@ public class BuildImageFactory extends RunFactory {
 
 	private void initialize(ImageModule image, Run run, String cloudService)
 			throws ValidationException, NotFoundException {
-		
+
 		initRuntimeParameters(image, run);
-	
+
 		initMachineState(run);
-	
+
 		initNodeNames(run, cloudService);
 	}
 
 	protected static void initMachineState(Run run) throws ValidationException,
 			NotFoundException {
 
-		run.assignRuntimeParameters(Run.MACHINE_NAME_PREFIX);
+		run.assignRuntimeParameters(Run.MACHINE_NAME);
 	}
 
 	protected static void initRuntimeParameters(Module image, Run run)
@@ -149,13 +149,13 @@ public class BuildImageFactory extends RunFactory {
 			}
 		}
 
-		String cloudServiceName = run.getCloudServiceName();
+		String cloudServiceName = run.getCloudService();
 		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX
 				+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-		
+
 		if (run.getType() == RunType.Orchestration) {
-			cloudServiceName = run.getCloudServiceName();
+			cloudServiceName = run.getCloudService();
 			run.assignRuntimeParameter(Run.ORCHESTRATOR_NAME_PREFIX
 					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);

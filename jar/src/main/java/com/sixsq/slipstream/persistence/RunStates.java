@@ -27,11 +27,11 @@ import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.statemachine.States;
 
-public class RunStatus {
+public class RunStates {
 
-	public static final String SUCCESS = "Done";
-	public static final String FAILED = "Aborted";
-	public static final String FAILING = "Aborting";
+	public static final States SUCCESS = States.Done;
+	public static final States FAILED = States.Aborted;
+	public static final States FAILING = States.Aborting;
 
 	public static final List<States> finalStates = new ArrayList<States>();
 	
@@ -43,39 +43,35 @@ public class RunStatus {
 	}
 	
 	@Attribute
-	private String status;
+	private States state;
 
 	@Attribute
 	private boolean isAbort = false;
 
-	public RunStatus(Run run) {
+	public RunStates(Run run) {
 		this(extractState(run), run.isAbort());
 	}
 
 	static private States extractState(Run run) {
-		RuntimeParameter rp = run.getRuntimeParameters().get(
-				RuntimeParameter.GLOBAL_STATE_KEY);
-		States state = States.valueOf(rp.getValue());
-		return state;
+		return run.getState();
 	}
 
-	public RunStatus(States state, boolean isAbort) {
+	public RunStates(States state, boolean isAbort) {
 		this.isAbort = isAbort;
-		status = state.toString();
+		this.state = state;
 		init();
 	}
 
 	private void init() {
-		States state = States.valueOf(status);
 		boolean isFinal = isFinal(state);
 		if (isAbort) {
 			if (isFinal) {
-				status = FAILED;
+				state = States.Aborted;
 			} else {
-				status = FAILING;
+				state = States.Aborting;
 			}
 		} else if (state == States.Terminal) {
-			status = SUCCESS;
+			state = SUCCESS;
 		}
 	}
 
@@ -83,14 +79,18 @@ public class RunStatus {
 		return finalStates.contains(state);
 	}
 
+	public States getState() {
+		return state;
+	}
+	
 	@Override
 	public String toString() {
-		return status;
+		return state.toString();
 	}
 
 	public void done() {
-		status = (isFinal(States.valueOf(status)) ? States.Terminal
-				: States.Cancelled).toString();
+		state = isFinal(state) ? States.Terminal
+				: States.Cancelled;
 		init();
 	}
 }

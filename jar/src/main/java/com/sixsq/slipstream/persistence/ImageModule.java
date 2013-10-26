@@ -607,7 +607,7 @@ public class ImageModule extends Module {
 		ImageModule module = ImageModule.load(run.getModuleResourceUrl());
 
 		module.assignBaseImageIdToImageIdFromCloudService(run
-				.getCloudServiceName());
+				.getCloudService());
 
 		return module;
 	}
@@ -623,7 +623,7 @@ public class ImageModule extends Module {
 			throws ValidationException {
 
 		((ImageModule) module).assignBaseImageIdToImageIdFromCloudService(run
-				.getCloudServiceName());
+				.getCloudService());
 
 		return module;
 	}
@@ -632,7 +632,7 @@ public class ImageModule extends Module {
 			throws ValidationException {
 
 		((ImageModule) module).assignImageIdFromCloudService(run
-				.getCloudServiceName());
+				.getCloudService());
 
 		return module;
 	}

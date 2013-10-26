@@ -36,17 +36,18 @@ import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 
-public class RunDeploymentFactory extends RunFactory {
+public class DeploymentFactory extends RunFactory {
 
 	@Override
-	public Run createRun(Module module, RunType type, String cloudService,
-			User user) throws ValidationException, NotFoundException {
+	public Run createRun(Module module, String cloudService, User user)
+			throws ValidationException, NotFoundException {
 
 		DeploymentModule deployment = (DeploymentModule) module;
 
-		Run run = constructRun(deployment, cloudService, user);
+		Run run = constructRun(deployment, RunType.Orchestration, cloudService,
+				user);
 
-		RunDeploymentFactory.initOrchestratorsNodeNames(run);
+		DeploymentFactory.initOrchestratorsNodeNames(run);
 
 		run = initRuntimeParameters(deployment, run);
 		run = initRuntimeParametersMapping(deployment, run);
@@ -168,25 +169,27 @@ public class RunDeploymentFactory extends RunFactory {
 
 		for (int i = 1; i <= multiplicity; i++) {
 
-			String nodeNamePartWithNodePropertySeparator = constructNodeNamePartWithNodePropertySeparator(
-					node, i);
-
-			run.assignRuntimeParameters(nodeNamePartWithNodePropertySeparator);
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME,
+			String nodename = constructNodeName(node.getName(), i);
+			run.assignRuntimeParameters(nodename);
+			run.assignRuntimeParameter(
+					constructParamName(nodename,
+							RuntimeParameter.MULTIPLICITY_PARAMETER_NAME),
 					String.valueOf(multiplicity),
 					"Multiplicity value for this node");
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.NODE_NAME, node.getName(), "Nodename");
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.NODE_INDEX, String.valueOf(i),
-					"Node index");
+			String paramname = RuntimeParameter.NODE_NAME;
+			run.assignRuntimeParameter(constructParamName(nodename, paramname),
+					node.getName(), "Nodename");
+			run.assignRuntimeParameter(
+					constructParamName(nodename, RuntimeParameter.NODE_INDEX),
+					String.valueOf(i), "Node index");
 
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
+			run.assignRuntimeParameter(
+					constructParamName(nodename,
+							RuntimeParameter.CLOUD_SERVICE_NAME),
+					cloudServiceName,
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
-			run.addNodeName(constructNodeNamePart(node, i));
+			run.addNodeName(nodename);
 		}
 
 		run.addGroup(node.getName(), cloudServiceName);
@@ -194,15 +197,12 @@ public class RunDeploymentFactory extends RunFactory {
 		return run;
 	}
 
-	private static String constructNodeNamePart(Node node, int index) {
-		return node.getName()
-				+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + index;
+	private static String constructNodeName(String groupname, int index) {
+		return RuntimeParameter.constructNodeName(groupname, index);
 	}
 
-	private static String constructNodeNamePartWithNodePropertySeparator(
-			Node node, int index) {
-		return constructNodeNamePart(node, index)
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+	private static String constructParamName(String nodename, String paramname) {
+		return RuntimeParameter.constructParamName(nodename, paramname);
 	}
 
 	private static String extractInitialValue(ModuleParameter parameter,

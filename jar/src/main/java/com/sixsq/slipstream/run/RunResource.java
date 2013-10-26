@@ -47,7 +47,6 @@ import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
@@ -72,12 +71,12 @@ public class RunResource extends BaseResource {
 		if (run == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 		}
-		
+
 		authorize();
 	}
 
 	private void authorize() {
-		if(getUser().isSuper()) {
+		if (getUser().isSuper()) {
 			return;
 		}
 		if (!getUser().getName().equals(run.getUser())) {
@@ -115,8 +114,7 @@ public class RunResource extends BaseResource {
 					e.getMessage());
 		}
 
-		String html = HtmlUtil.toHtml(run,
-				getPageRepresentation(), getUser());
+		String html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 
@@ -127,30 +125,14 @@ public class RunResource extends BaseResource {
 	}
 
 	private Run constructRun() throws SlipStreamClientException {
-		EntityManager em = PersistenceUtil.createEntityManager();
 
-		Run run = Run.load(this.run.getResourceUri(), em);
-		try {
-			run = updateVmStatus(run, getUser());
-		} catch (SlipStreamClientException e) {
-			run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
-		} catch (SlipStreamException e) {
-			getLogger().warning(
-					"Error updating vm status for run " + run.getName() + ": "
-							+ e.getMessage());
-		} finally {
-			em.close();
-		}
+		Run run = Run.load(this.run.getResourceUri());
 
-		Module module = RunFactory.selectFactory(run.getCategory(),
-				run.getType()).overloadModule(run, getUser());
+		Module module = RunFactory.selectFactory(run.getType()).overloadModule(
+				run, getUser());
 		run.setModule(module, true);
 
 		return run;
-	}
-
-	private Run updateVmStatus(Run run, User user) throws SlipStreamException {
-		return Run.updateVmStatus(run, user);
 	}
 
 	private void validateUser() {
@@ -192,7 +174,7 @@ public class RunResource extends BaseResource {
 				}
 			} else {
 				Connector connector = ConnectorFactory.getConnector(run
-						.getCloudServiceName());
+						.getCloudService());
 				try {
 					connector.terminate(run, getUser());
 				} catch (SlipStreamException e) {
@@ -206,9 +188,9 @@ public class RunResource extends BaseResource {
 		} catch (ValidationException e) {
 			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, e));
 		}
-		
+
 		run.done();
-		
+
 		run.store();
 
 		em.close();

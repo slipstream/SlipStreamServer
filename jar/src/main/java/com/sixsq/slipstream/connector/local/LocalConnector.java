@@ -39,8 +39,9 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.DeploymentModule;
+import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunStatus;
+import com.sixsq.slipstream.persistence.RunStates;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
@@ -81,8 +82,8 @@ public class LocalConnector extends ConnectorBase {
 		return;
 	}
 
-	public RunStatus getStatus(Run run) {
-		return new RunStatus(run);
+	public RunStates getStatus(Run run) {
+		return new RunStates(run);
 	}
 
 	public Run launch(Run run, User user)
@@ -145,8 +146,14 @@ public class LocalConnector extends ConnectorBase {
 
 	}
 
-	private RunStatus launchImage(Run run) {
+	private RunStates launchImage(Run run) {
 		return null;
+	}
+
+	@Override
+	public Map<String, ModuleParameter> getImageParametersTemplate()
+			throws ValidationException {
+		return new LocalImageParametersFactory(getConnectorInstanceName()).getParameters();
 	}
 
 	@Override

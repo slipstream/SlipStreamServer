@@ -59,7 +59,6 @@ import com.sixsq.slipstream.initialstartup.Tutorials;
 import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.DocumentationResource;
 import com.sixsq.slipstream.resource.ReportRouter;
@@ -67,6 +66,7 @@ import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.RunsRouter;
 import com.sixsq.slipstream.run.VmsRouter;
+import com.sixsq.slipstream.stats.StatsRouter;
 import com.sixsq.slipstream.user.UserRouter;
 import com.sixsq.slipstream.util.RequestUtil;
 
@@ -166,6 +166,7 @@ public class RootApplication extends Application {
 			attachRuns(router);
 			attachVms(router);
 			attachRun(router);
+			attachStats(router);
 			attachWelcome(router);
 			attachLogin(router);
 			attachLogout(router);
@@ -241,23 +242,11 @@ public class RootApplication extends Application {
 	}
 
 	private void attachRun(RootRouter router) throws ConfigurationException {
-		TemplateRoute route;
+		guardAndAttach(router, new RunRouter(getContext()), "run");
+	}
 
-		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler());
-
-		Authenticator cookieAuthenticator = new CookieAuthenticator(
-				getContext());
-		cookieAuthenticator.setOptional(true);
-
-		cookieAuthenticator.setNext(basicAuthenticator);
-		cookieAuthenticator.setEnroler(new SuperEnroler());
-
-		basicAuthenticator.setNext(new RunRouter(getContext()));
-
-		route = router.attach(convertToRouterRoot(Run.RESOURCE_URI_PREFIX),
-				cookieAuthenticator);
-		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
+	private void attachStats(RootRouter router) throws ConfigurationException {
+		guardAndAttach(router, new StatsRouter(getContext()), "stats");
 	}
 
 	private void attachDashboard(RootRouter router)

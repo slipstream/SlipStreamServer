@@ -48,7 +48,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.run.RunView;
 
@@ -186,8 +185,7 @@ public class StateMachinetTest {
 
 	private Run updateRun(String[] nodes) throws ValidationException {
 		for (String node : nodes) {
-			run.assignRuntimeParameters(node
-					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR);
+			run.assignRuntimeParameters(node);
 			run.addNodeName(node);
 		}
 		run = run.store();

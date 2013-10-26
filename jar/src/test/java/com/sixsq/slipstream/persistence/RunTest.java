@@ -39,65 +39,29 @@ import javax.persistence.EntityTransaction;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sixsq.slipstream.common.util.CommonTestUtil;
-import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.run.RunFactory;
+import com.sixsq.slipstream.run.RunTestBase;
 import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public class RunTest {
-
-	protected static User user = null;
-	protected static ImageModule image = null;
-	protected static ImageModule imageref = null;
-	protected static ImageModule imagebase = null;
-	protected static ImageModule imagenoref = null;
-
-	private static String cloudServiceName = new LocalConnector()
-			.getCloudServiceName();
+public class RunTest extends RunTestBase {
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
-		imagebase = new ImageModule("test/imagebase");
-		imagebase.setImageId("base_image_id", cloudServiceName);
-		imagebase.setIsBase(true);
-		imagebase.store();
-
-		imageref = new ImageModule("test/imageref");
-		imageref.setModuleReference(imagebase);
-		imageref.setImageId("ref_image_id", cloudServiceName);
-		imageref.store();
-
-		image = new ImageModule("test/image");
-		image.setModuleReference(imageref.getResourceUri());
-		image.setRecipe("a recipe");
-		image.store();
-
-		imagenoref = new ImageModule("test/imagenoref");
-		imagenoref.setRecipe("a recipe");
-		imagenoref.store();
-
-		imagenoref = new ImageModule("test/imagenoref");
-		imagenoref.setRecipe("a recipe");
-		imagenoref.store();
-
-		user = CommonTestUtil.createUser("userRunTest", "password");
+		setupImages();
 	}
 
 	@AfterClass
 	public static void teardownClass() {
-		imagebase.remove();
-		imageref.remove();
-		image.remove();
-		user.remove();
+		tearDownImages();
 	}
 
 	@Test
@@ -334,7 +298,7 @@ public class RunTest {
 		ImageModule image = new ImageModule("onlyViewListMyRuns");
 		authz = new Authz("test", image);
 		image.setAuthz(authz);
-		image.setModuleReference(RunTest.image);
+		image.setModuleReference(RunTestBase.image);
 		image.setRecipe("a recipe");
 		image.store();
 		Metadata myRun = createAndStoreRun(image);
@@ -351,21 +315,6 @@ public class RunTest {
 		notMyRun.remove();
 
 		image.remove();
-	}
-
-	private Metadata createAndStoreRun(Module module)
-			throws SlipStreamException {
-
-		return createAndStoreRun(module, "user");
-	}
-
-	private Metadata createAndStoreRun(Module module, String user)
-			throws SlipStreamException {
-
-		Run run = RunFactory.getRun(module, cloudServiceName, RunTest.user);
-		run.setUser(user);
-		run.store();
-		return run;
 	}
 
 	@Test
@@ -412,26 +361,6 @@ public class RunTest {
 
 		assertEquals("v1", run.getRuntimeParameterValue("node.1:k1"));
 		assertEquals("v2", run.getRuntimeParameterValue("node.1:k2"));
-	}
-
-	@Test
-	@Ignore
-	public void finalStateFromAborting() throws FileNotFoundException,
-			IOException, SlipStreamException {
-		// Test that if the abort flag is set, the final state of the execution
-		// is Aborted
-
-		String key = RuntimeParameter.GLOBAL_STATE_KEY;
-
-		Run run = RunFactory.getRun(image, cloudServiceName, user);
-
-		run.updateRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY, "Oops");
-		assertEquals(RunStatus.FAILING,
-				run.getRuntimeParameterValueIgnoreAbort(key));
-		run.updateRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY,
-				States.Terminal.toString());
-		assertEquals(RuntimeParameter.GLOBAL_ABORT_KEY,
-				run.getRuntimeParameterValueIgnoreAbort(key));
 	}
 
 	@Test(expected = NotFoundException.class)
@@ -486,22 +415,41 @@ public class RunTest {
 	}
 
 	@Test
+	public void abort() throws ValidationException, ConfigurationException {
+
+		ImageModule image = new ImageModule("abort");
+
+		Run run = new Run(image, cloudServiceName, user);
+
+		assertThat(run.isAbort(), is(false));
+
+		run.getRuntimeParameters().put(
+				RuntimeParameter.GLOBAL_ABORT_KEY,
+				new RuntimeParameter(run, RuntimeParameter.GLOBAL_ABORT_KEY,
+						"Kaboom", ""));
+
+		assertThat(run.isAbort(), is(true));
+
+		RuntimeParameter p = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_ABORT_KEY);
+		p.setIsSet(false);
+
+		assertThat(run.isAbort(), is(false));
+	}
+
+	@Test
 	public void done() throws ValidationException, ConfigurationException {
 
 		ImageModule image = new ImageModule("doneImage");
 
 		Run run = new Run(image, cloudServiceName, user);
 
-		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
-				States.Inactive);
-
+		run.setState(States.Inactive);
 		run.done();
-		assertThat(run.getStatus(), is(States.Cancelled.toString()));
+		assertThat(run.getState(), is(States.Cancelled));
 
-		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
-				States.Running);
+		run.setState(States.Running);
 		run.done();
-		assertThat(run.getStatus(), is(States.Cancelled.toString()));
+		assertThat(run.getState(), is(States.Cancelled));
 
 		run.getRuntimeParameters().put(
 				RuntimeParameter.GLOBAL_ABORT_KEY,
@@ -511,18 +459,12 @@ public class RunTest {
 		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
 				States.Aborting);
 		run.done();
-		assertThat(run.getStatus(), is(States.Aborted.toString()));
+		assertThat(run.getState(), is(States.Aborted));
 
 		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
 				States.Aborted);
 		run.done();
-		assertThat(run.getStatus(), is(States.Aborted.toString()));
-	}
-
-	private void setRuntimeParameterState(Run run, String key, States state)
-			throws ValidationException {
-		run.getRuntimeParameters().put(key,
-				new RuntimeParameter(run, key, state.toString(), ""));
+		assertThat(run.getState(), is(States.Aborted));
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.connector.local;
+package com.sixsq.slipstream.stats;
 
 /*
  * +=================================================================+
@@ -20,27 +20,34 @@ package com.sixsq.slipstream.connector.local;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.UserParametersFactoryBase;
+import java.util.List;
+
+import org.simpleframework.xml.Root;
+
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ParameterType;
+import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.Run;
 
-public class LocalUserParametersFactory extends UserParametersFactoryBase {
-
-	public static String KEY_PARAMETER_NAME = "username";
-	public static String SECRET_PARAMETER_NAME = "password";
-	
-	public LocalUserParametersFactory() throws ValidationException {
-		super(LocalConnector.CLOUD_SERVICE_NAME);
-	}
+/**
+ * Unit test:
+ * 
+ * @see MeasurementTest
+ * 
+ */
+@Root(name = "measurements")
+@SuppressWarnings("serial")
+public class SimpleRunMeasurements extends Measurements {
 
 	@Override
-	protected void initReferenceParameters() throws ValidationException {
+	protected List<Measurement> populateSingle(Run run)
+			throws ValidationException {
 
-		putParameter(KEY_PARAMETER_NAME,
-				"Account username", true,
-				ParameterType.RestrictedString);
-		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME,
-				"Account password");
+		ImageModule image = (ImageModule) Module.load(run.getModuleResourceUrl());
+		String cloud = run.getCloudService();
 
+		fill(run, Run.MACHINE_NAME, image, cloud);
+		return getMeasurments();
 	}
+
 }

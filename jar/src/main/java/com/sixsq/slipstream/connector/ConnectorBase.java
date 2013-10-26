@@ -123,7 +123,7 @@ public abstract class ConnectorBase implements Connector {
 			imageId = getOrchestratorImageId(user);
 		} else {
 			imageId = ((ImageModule) run.getModule()).extractBaseImageId(run
-						.getCloudServiceName());
+						.getCloudService());
 		}
 		return imageId;
 	}

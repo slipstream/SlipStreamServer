@@ -29,10 +29,10 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
 
-public class RunImageFactory extends BuildImageFactory {
+public class SimpleRunFactory extends BuildImageFactory {
 
 	@Override
-	public Run createRun(Module module, RunType type, String cloudService,
+	public Run createRun(Module module, String cloudService,
 			User user) throws SlipStreamClientException {
 
 		ImageModule image = (ImageModule) module;
@@ -41,7 +41,7 @@ public class RunImageFactory extends BuildImageFactory {
 
 		checkCloudServiceDefined(cloudService, user);
 
-		Run run = constructRun(image, type, cloudService, user);
+		Run run = constructRun(image, RunType.Run, cloudService, user);
 
 		image.validateForRun(cloudService);
 

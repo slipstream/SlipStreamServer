@@ -20,27 +20,20 @@ package com.sixsq.slipstream.connector.local;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.UserParametersFactoryBase;
+import com.sixsq.slipstream.connector.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ParameterType;
+import com.sixsq.slipstream.persistence.Run;
 
-public class LocalUserParametersFactory extends UserParametersFactoryBase {
+public class LocalImageParametersFactory extends ModuleParametersFactoryBase {
 
-	public static String KEY_PARAMETER_NAME = "username";
-	public static String SECRET_PARAMETER_NAME = "password";
-	
-	public LocalUserParametersFactory() throws ValidationException {
-		super(LocalConnector.CLOUD_SERVICE_NAME);
+	public LocalImageParametersFactory(String connectorInstanceName)
+			throws ValidationException {
+		super(connectorInstanceName);
 	}
 
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
-
-		putParameter(KEY_PARAMETER_NAME,
-				"Account username", true,
-				ParameterType.RestrictedString);
-		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME,
-				"Account password");
-
+		putParameter(Run.CPU_PARAMETER_NAME, "Cores", true);
+		putParameter(Run.RAM_PARAMETER_NAME, "RAM", true);
 	}
 }
