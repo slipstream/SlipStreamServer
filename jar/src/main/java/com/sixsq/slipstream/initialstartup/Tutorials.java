@@ -238,7 +238,7 @@ public class Tutorials extends BaseImages {
 		deployment.setAuthz(authz);
 
 		Node rstudio = new Node("rstudio",
-				ImageModule.constructResourceUri("appliances/rstudio"));
+				ImageModule.constructResourceUri(RSTUDIO_IMAGE_NAME));
 
 		deployment.getNodes().put(rstudio.getName(), rstudio);
 
@@ -257,11 +257,12 @@ public class Tutorials extends BaseImages {
 		deployment.setAuthz(authz);
 
 		Node tmaster = new Node("master",
-				ImageModule.constructResourceUri("appliances/torque-master"));
+				ImageModule.constructResourceUri(TORQUE_MASTER_IMAGE_NAME));
 		deployment.getNodes().put(tmaster.getName(), tmaster);
 
 		Node tworker = new Node("worker",
-				ImageModule.constructResourceUri("appliances/torque-worker"));
+				ImageModule.constructResourceUri(TORQUE_WORKER_IMAGE_NAME));
+		tworker.setMultiplicity(2);
 		deployment.getNodes().put(tworker.getName(), tworker);
 
 		deployment.store();

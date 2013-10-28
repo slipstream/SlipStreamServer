@@ -98,8 +98,10 @@ public class Appliances extends ModuleCreator {
 			rstudio.setIsBase(false);
 			rstudio.setModuleReference(Module
 					.constructResourceUri(CENTOS_IMAGE_NAME));
-
 			rstudio.setPlatform(Platforms.redhat.toString());
+			
+			rstudio.setDescription("RStudio analysis server");
+			
 			rstudio.setLoginUser("root");
 
 			String script = "#!/bin/bash -x\n"
@@ -178,6 +180,8 @@ public class Appliances extends ModuleCreator {
 					new CloudImageIdentifier(tmaster, new StratusLabConnector()
 							.getCloudServiceName(),
 							"H8dg0ssw_j4jg67FTwXysCUrJPl"));
+			
+			tmaster.setDescription("master node for torque cluster");
 
 			tmaster.setPlatform(Platforms.redhat.toString());
 			tmaster.setLoginUser("root");
@@ -272,15 +276,16 @@ public class Appliances extends ModuleCreator {
 			ModuleParameter mp = new ModuleParameter("munge_key64", "",
 					"base64 encoded munge key");
 			mp.setCategory(ParameterCategory.Output);
+			tmaster.setParameter(mp);
 
 			mp = new ModuleParameter("user_id_rsa64", "",
 					"base64 encoded ssh private key for user");
 			mp.setCategory(ParameterCategory.Output);
+			tmaster.setParameter(mp);
 
 			mp = new ModuleParameter("master_hostname", "",
 					"hostname as name, not IP address");
 			mp.setCategory(ParameterCategory.Output);
-
 			tmaster.setParameter(mp);
 
 			ParametersFactory.addParametersForEditing(tmaster);
@@ -305,6 +310,8 @@ public class Appliances extends ModuleCreator {
 					new CloudImageIdentifier(tworker, new StratusLabConnector()
 							.getCloudServiceName(),
 							"H8dg0ssw_j4jg67FTwXysCUrJPl"));
+			
+			tworker.setDescription("worker node for torque cluster");
 
 			tworker.setPlatform(Platforms.redhat.toString());
 			tworker.setLoginUser("root");
