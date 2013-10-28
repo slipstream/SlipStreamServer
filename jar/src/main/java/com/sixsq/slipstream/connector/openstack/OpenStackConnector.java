@@ -240,10 +240,10 @@ public class OpenStackConnector extends
 					: getInstanceType(imageModule);
 			String flavorId = getFlavorId(client, region, flavorName);
 			String userData = (run.getType() == RunType.Orchestration) ? createContextualizationData(run, user, configuration) : "";
-			String keyPairName = (run.getType() == RunType.Orchestration) ? "slipstream-"+String.valueOf(System.currentTimeMillis()) 
-					: user.getParameterValue(constructKey(OpenStackUserParametersFactory.KEYPAIR_NAME),	"");
+			String keyPairName = "ss-"+String.valueOf(System.currentTimeMillis());
+			String publicKey = getPublicSshKey(run, user);
 			String[] securityGroups = (run.getType() == RunType.Orchestration) ? "default".split(",")
-					: getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUP, imageModule).split(",");
+					: getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUPS, imageModule).split(",");
 
 			String instanceData = "\n\nStarting instance on region '" + region + "'\n";
 			instanceData += "Image id: " + imageId + "\n";
@@ -256,11 +256,12 @@ public class OpenStackConnector extends
 					.securityGroupNames(securityGroups)
 					.keyPairName(keyPairName);
 			
-			KeyPairApi kpApi = client.getKeyPairExtensionForZone(region).get();
 			if (run.getType() == RunType.Orchestration){
 				options.userData(userData.getBytes());
-				kpApi.createWithPublicKey(keyPairName, getPublicSshKey(run, user));
 			}
+
+			KeyPairApi kpApi = client.getKeyPairExtensionForZone(region).get();
+			kpApi.createWithPublicKey(keyPairName, publicKey);
 			
 			ServerCreated server = null;
 			try {

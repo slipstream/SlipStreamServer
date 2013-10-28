@@ -26,7 +26,7 @@ import com.sixsq.slipstream.persistence.ImageModule;
 
 public class OpenStackImageParametersFactory extends ModuleParametersFactoryBase {
 	
-	public static String SECURITY_GROUP = "security.group";
+	public static String SECURITY_GROUPS = "security.groups";
 	
 	public OpenStackImageParametersFactory(String connectorInstanceName) throws ValidationException {
 		super(connectorInstanceName);
@@ -35,6 +35,6 @@ public class OpenStackImageParametersFactory extends ModuleParametersFactoryBase
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 		putParameter(ImageModule.INSTANCE_TYPE_KEY, "Instance type (flavor)", true);
-		putMandatoryParameter(SECURITY_GROUP, "Security Groups (comma separated list)", "default");
+		putMandatoryParameter(SECURITY_GROUPS, "Security Groups (comma separated list)", "default");
 	}
 }

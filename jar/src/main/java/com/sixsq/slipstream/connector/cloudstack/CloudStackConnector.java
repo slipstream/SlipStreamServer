@@ -195,8 +195,7 @@ public class CloudStackConnector extends CliConnectorBase {
 			return "Public";
 		} else {
 			ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
-			return machine.getParameterValue(
-					constructKey(ImageModule.NETWORK_KEY), null);
+			return machine.getParameterValue(ImageModule.NETWORK_KEY, null);
 		}
 	}
 	
