@@ -38,20 +38,6 @@ import com.sixsq.slipstream.persistence.User;
 
 public class Tutorials extends BaseImages {
 
-	private static final String TUTORIALS_PROJECT_NAME = PUBLIC_PROJECT_NAME
-			+ "/Tutorials";
-	private static final String CLIENT_SERVER_TUTORIALS_PROJECT_NAME = TUTORIALS_PROJECT_NAME
-			+ "/HelloWorld";
-	private static final String WEBSERVER_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
-			+ "/apache";
-	private static final String TESTCLIENT_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
-			+ "/testclient";
-	private static final String DEPLOYMENT_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
-			+ "/client_server";
-	private static final String RSTUDIO_DEPLOYMENT_NAME = TUTORIALS_PROJECT_NAME
-			+ "/rstudio";
-	private static final String TORQUE_DEPLOYMENT_NAME = TUTORIALS_PROJECT_NAME
-			+ "/torque";
 	private static User user;
 
 	public static void create() throws ValidationException, NotFoundException,
@@ -74,6 +60,7 @@ public class Tutorials extends BaseImages {
 		Module webserver = createWebServerModule();
 		Module client = createTestClientModule();
 		createClientServerDeploymentModule(webserver, client);
+
 		createRStudioDeploymentModule();
 		createTorqueDeploymentModule();
 	}
@@ -83,7 +70,7 @@ public class Tutorials extends BaseImages {
 
 		Module module;
 		Authz authz;
-		
+
 		module = new ProjectModule(TUTORIALS_PROJECT_NAME);
 		authz = new Authz(user.getName(), module);
 		authz.setPublicGet(true);
@@ -98,12 +85,12 @@ public class Tutorials extends BaseImages {
 
 	}
 
-	private static Module createWebServerModule()
-			throws ValidationException, NotFoundException {
+	private static Module createWebServerModule() throws ValidationException,
+			NotFoundException {
 
 		ModuleParameter mp;
 		Authz authz;
-		
+
 		ImageModule webserver = new ImageModule(WEBSERVER_NAME);
 		webserver.setDescription("Apache web server");
 		authz = new Authz(user.getName(), webserver);
@@ -129,8 +116,8 @@ public class Tutorials extends BaseImages {
 				new Target(Target.EXECUTE_TARGET, executeTarget));
 
 		String reportTarget = "#!/bin/sh -x\n"
-			    + "cp /var/log/apache2/access.log $SLIPSTREAM_REPORT_DIR\n"
-			    + "cp /var/log/apache2/error.log $SLIPSTREAM_REPORT_DIR";
+				+ "cp /var/log/apache2/access.log $SLIPSTREAM_REPORT_DIR\n"
+				+ "cp /var/log/apache2/error.log $SLIPSTREAM_REPORT_DIR";
 
 		webserver.getTargets().add(
 				new Target(Target.REPORT_TARGET, reportTarget));
@@ -152,14 +139,15 @@ public class Tutorials extends BaseImages {
 
 	}
 
-	private static Module createTestClientModule()
-			throws ValidationException, NotFoundException {
+	private static Module createTestClientModule() throws ValidationException,
+			NotFoundException {
 
 		ModuleParameter mp;
 		Authz authz;
 
 		ImageModule testclient = new ImageModule(TESTCLIENT_NAME);
-		testclient.setDescription("Test client testing correct connectivity and data content with web server");
+		testclient
+				.setDescription("Test client testing correct connectivity and data content with web server");
 		authz = new Authz(user.getName(), testclient);
 		authz.setPublicGet(true);
 		testclient.setAuthz(authz);
@@ -181,10 +169,10 @@ public class Tutorials extends BaseImages {
 				new Target(Target.EXECUTE_TARGET, executeTarget));
 
 		String reportTarget = "#!/bin/sh -x\n"
-			+ "cp /tmp/data.txt $SLIPSTREAM_REPORT_DIR";
+				+ "cp /tmp/data.txt $SLIPSTREAM_REPORT_DIR";
 
 		testclient.getTargets().add(
-			new Target(Target.REPORT_TARGET, reportTarget));
+				new Target(Target.REPORT_TARGET, reportTarget));
 
 		mp = new ModuleParameter("webserver.port", "",
 				"Port on which the web server listens");
@@ -196,11 +184,10 @@ public class Tutorials extends BaseImages {
 		mp.setCategory(ParameterCategory.Input);
 		testclient.setParameter(mp);
 
-		mp = new ModuleParameter("webserver.hostname", "",
-				"Server hostname");
+		mp = new ModuleParameter("webserver.hostname", "", "Server hostname");
 		mp.setCategory(ParameterCategory.Input);
 		testclient.setParameter(mp);
-		
+
 		ParametersFactory.addParametersForEditing(testclient);
 
 		testclient.store();
@@ -209,22 +196,24 @@ public class Tutorials extends BaseImages {
 
 	}
 
-	private static void createClientServerDeploymentModule(
-			Module webserver, Module client)
-			throws ValidationException {
+	private static void createClientServerDeploymentModule(Module webserver,
+			Module client) throws ValidationException {
 		DeploymentModule deployment = new DeploymentModule(DEPLOYMENT_NAME);
-		deployment.setDescription("Deployment binding the apache server and the test client nodes");
+		deployment
+				.setDescription("Deployment binding the apache server and the test client nodes");
 		Authz authz = new Authz(user.getName(), deployment);
 		authz.setPublicGet(true);
 		authz.setPublicPost(true);
 		deployment.setAuthz(authz);
 		NodeParameter np;
 
-		Node apache = new Node("apache", ImageModule.constructResourceUri(webserver.getName()));
+		Node apache = new Node("apache",
+				ImageModule.constructResourceUri(webserver.getName()));
 
 		deployment.getNodes().put(apache.getName(), apache);
 
-		Node testclient = new Node("testclient", ImageModule.constructResourceUri(client.getName()));
+		Node testclient = new Node("testclient",
+				ImageModule.constructResourceUri(client.getName()));
 		np = new NodeParameter("webserver.hostname", "apache:hostname");
 		testclient.setParameterMapping(np);
 		np = new NodeParameter("webserver.port", "apache:port");
@@ -239,15 +228,17 @@ public class Tutorials extends BaseImages {
 
 	private static void createRStudioDeploymentModule()
 			throws ValidationException {
-		
-		DeploymentModule deployment = new DeploymentModule(RSTUDIO_DEPLOYMENT_NAME);
+
+		DeploymentModule deployment = new DeploymentModule(
+				RSTUDIO_DEPLOYMENT_NAME);
 		deployment.setDescription("Standalone RStudio Server");
 		Authz authz = new Authz(user.getName(), deployment);
 		authz.setPublicGet(true);
 		authz.setPublicPost(true);
 		deployment.setAuthz(authz);
 
-		Node rstudio = new Node("rstudio", ImageModule.constructResourceUri("appliances/rstudio"));
+		Node rstudio = new Node("rstudio",
+				ImageModule.constructResourceUri("appliances/rstudio"));
 
 		deployment.getNodes().put(rstudio.getName(), rstudio);
 
@@ -257,17 +248,20 @@ public class Tutorials extends BaseImages {
 	private static void createTorqueDeploymentModule()
 			throws ValidationException {
 
-		DeploymentModule deployment = new DeploymentModule(TORQUE_DEPLOYMENT_NAME);
-		deployment.setDescription("Standalone RStudio Server");
+		DeploymentModule deployment = new DeploymentModule(
+				TORQUE_DEPLOYMENT_NAME);
+		deployment.setDescription("Torque Batch Cluster");
 		Authz authz = new Authz(user.getName(), deployment);
 		authz.setPublicGet(true);
 		authz.setPublicPost(true);
 		deployment.setAuthz(authz);
 
-		Node tmaster = new Node("rstudio", ImageModule.constructResourceUri("appliances/torque-master"));
+		Node tmaster = new Node("master",
+				ImageModule.constructResourceUri("appliances/torque-master"));
 		deployment.getNodes().put(tmaster.getName(), tmaster);
 
-		Node tworker = new Node("rstudio", ImageModule.constructResourceUri("appliances/torque-worker"));
+		Node tworker = new Node("worker",
+				ImageModule.constructResourceUri("appliances/torque-worker"));
 		deployment.getNodes().put(tworker.getName(), tworker);
 
 		deployment.store();

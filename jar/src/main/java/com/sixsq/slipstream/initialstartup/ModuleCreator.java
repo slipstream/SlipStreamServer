@@ -27,14 +27,44 @@ import com.sixsq.slipstream.persistence.User;
 public class ModuleCreator {
 
 	protected static final String PUBLIC_PROJECT_NAME = "Public";
-	protected static final String BASE_IMAGES_PROJECT_NAME = PUBLIC_PROJECT_NAME
-				+ "/BaseImages";
-	protected static final String UBUNTU_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME + "/Ubuntu";
-	protected static final String UBUNTU_IMAGE_NAME = UBUNTU_PROJECT_NAME + "/12.04";
-	protected static final String UBUNTU13_IMAGE_NAME = UBUNTU_PROJECT_NAME + "/13.04";
 
-	protected static final String CENTOS_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME + "/CentOS";
-	protected static final String CENTOS_IMAGE_NAME = CENTOS_PROJECT_NAME + "/6.3";
+	protected static final String BASE_IMAGES_PROJECT_NAME = PUBLIC_PROJECT_NAME
+			+ "/BaseImages";
+	protected static final String UBUNTU_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME
+			+ "/Ubuntu";
+	protected static final String UBUNTU_IMAGE_NAME = UBUNTU_PROJECT_NAME
+			+ "/12.04";
+	protected static final String UBUNTU13_IMAGE_NAME = UBUNTU_PROJECT_NAME
+			+ "/13.04";
+
+	protected static final String CENTOS_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME
+			+ "/CentOS";
+	protected static final String CENTOS_IMAGE_NAME = CENTOS_PROJECT_NAME
+			+ "/6.3";
+
+	protected static final String APPLIANCES_PROJECT_NAME = PUBLIC_PROJECT_NAME
+			+ "/appliances";
+	protected static final String RSTUDIO_IMAGE_NAME = APPLIANCES_PROJECT_NAME
+			+ "/rstudio";
+	protected static final String TORQUE_MASTER_IMAGE_NAME = APPLIANCES_PROJECT_NAME
+			+ "/torque-master";
+	protected static final String TORQUE_WORKER_IMAGE_NAME = APPLIANCES_PROJECT_NAME
+			+ "/torque-worker";
+
+	protected static final String TUTORIALS_PROJECT_NAME = PUBLIC_PROJECT_NAME
+			+ "/Tutorials";
+	protected static final String CLIENT_SERVER_TUTORIALS_PROJECT_NAME = TUTORIALS_PROJECT_NAME
+			+ "/HelloWorld";
+	protected static final String WEBSERVER_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
+			+ "/apache";
+	protected static final String TESTCLIENT_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
+			+ "/testclient";
+	protected static final String DEPLOYMENT_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
+			+ "/client_server";
+	protected static final String RSTUDIO_DEPLOYMENT_NAME = TUTORIALS_PROJECT_NAME
+			+ "/rstudio";
+	protected static final String TORQUE_DEPLOYMENT_NAME = TUTORIALS_PROJECT_NAME
+			+ "/torque";
 
 	protected static User createUser(String name) {
 		User user = null;

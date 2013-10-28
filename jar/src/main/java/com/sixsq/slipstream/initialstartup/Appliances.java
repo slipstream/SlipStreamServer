@@ -20,6 +20,8 @@ package com.sixsq.slipstream.initialstartup;
  * -=================================================================-
  */
 
+import static com.sixsq.slipstream.initialstartup.Users.SIXSQ;
+
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
@@ -42,17 +44,6 @@ import com.sixsq.slipstream.persistence.User;
 
 public class Appliances extends ModuleCreator {
 
-	private static final String SIXSQ = "sixsq";
-
-	private static final String APPLIANCES_PROJECT_NAME = PUBLIC_PROJECT_NAME
-			+ "/Appliances";
-	private static final String RSTUDIO_IMAGE_NAME = APPLIANCES_PROJECT_NAME
-			+ "/rstudio";
-	private static final String TORQUE_MASTER_IMAGE_NAME = APPLIANCES_PROJECT_NAME
-			+ "/torque-master";
-	private static final String TORQUE_WORKER_IMAGE_NAME = APPLIANCES_PROJECT_NAME
-			+ "/torque-worker";
-
 	public static void create() throws ValidationException, NotFoundException,
 			ConfigurationException, NoSuchAlgorithmException,
 			UnsupportedEncodingException {
@@ -62,30 +53,45 @@ public class Appliances extends ModuleCreator {
 			return;
 		}
 
-		Appliances.createModules();
+		createProjectModules();
+		createRStudioAppliance();
+		createTorqueMasterAppliance();
+		createTorqueWorkerAppliance();
 	}
 
-	private static void createModules() throws ValidationException,
+	private static void createProjectModules() throws ValidationException,
 			NotFoundException {
 
 		User user = User.loadByName(SIXSQ);
 
 		Module module;
 
-		Module appliancesModule;
-
 		if (!ProjectModule.exists(ProjectModule
-				.constructResourceUri(APPLIANCES_PROJECT_NAME))) {
+				.constructResourceUri(PUBLIC_PROJECT_NAME))) {
 			module = new ProjectModule(PUBLIC_PROJECT_NAME);
 			Authz authz = createPublicGetAuthz(user, module);
 			authz.setInheritedGroupMembers(false);
 			authz.setPublicCreateChildren(true);
 			module.setAuthz(authz);
 			module.store();
+		}
 
-			appliancesModule = new ProjectModule(APPLIANCES_PROJECT_NAME);
-			appliancesModule.setAuthz(createPublicGetAuthz(user, appliancesModule));
-			appliancesModule.store();
+		if (!ProjectModule.exists(ProjectModule
+				.constructResourceUri(APPLIANCES_PROJECT_NAME))) {
+			module = new ProjectModule(APPLIANCES_PROJECT_NAME);
+			module.setAuthz(createPublicGetAuthz(user, module));
+			module.store();
+		}
+
+	}
+
+	private static void createRStudioAppliance() throws ValidationException,
+			NotFoundException {
+
+		User user = User.loadByName(SIXSQ);
+
+		if (!ProjectModule.exists(ProjectModule
+				.constructResourceUri(RSTUDIO_IMAGE_NAME))) {
 
 			ImageModule rstudio = new ImageModule(RSTUDIO_IMAGE_NAME);
 			rstudio.setAuthz(createPublicGetAuthz(user, rstudio));
@@ -152,6 +158,17 @@ public class Appliances extends ModuleCreator {
 
 			ParametersFactory.addParametersForEditing(rstudio);
 			rstudio.store();
+		}
+
+	}
+
+	private static void createTorqueMasterAppliance()
+			throws ValidationException, NotFoundException {
+
+		User user = User.loadByName(SIXSQ);
+
+		if (!ProjectModule.exists(ProjectModule
+				.constructResourceUri(TORQUE_MASTER_IMAGE_NAME))) {
 
 			ImageModule tmaster = new ImageModule(TORQUE_MASTER_IMAGE_NAME);
 			tmaster.setAuthz(createPublicGetAuthz(user, tmaster));
@@ -165,7 +182,7 @@ public class Appliances extends ModuleCreator {
 			tmaster.setPlatform(Platforms.redhat.toString());
 			tmaster.setLoginUser("root");
 
-			script = "#!/bin/bash -x\n"
+			String script = "#!/bin/bash -x\n"
 					+ "\n"
 					+ "#\n"
 					+ "# turn off firewall for now\n"
@@ -188,6 +205,8 @@ public class Appliances extends ModuleCreator {
 					+ "master_ip=`ss-get --timeout 480 master.1:hostname`\n"
 					+ "cmd=\"import socket; print socket.getfqdn('$master_ip')\"\n"
 					+ "export master_hostname=`python -c \"$cmd\"`\n"
+					+ "\n"
+					+ "ss-set master_hostname $master_hostname\n"
 					+ "\n"
 					+ "#\n"
 					+ "# initialize the server configuration with hostname\n"
@@ -227,19 +246,56 @@ public class Appliances extends ModuleCreator {
 					+ "  cmd=\"import socket; print socket.getfqdn('$worker_ip')\"\n"
 					+ "  worker_hostname=`python -c \"$cmd\"`\n"
 					+ "  echo $worker_hostname >> /var/lib/torque/server_priv/nodes\n"
-					+ "done\n" + "\n" + "#\n"
+					+ "done\n"
+					+ "\n"
+					+ "#\n"
 					+ "# restart the server so that it will see all workers\n"
-					+ "#\n" + "service pbs_server restart\n";
+					+ "#\n"
+					+ "service pbs_server restart\n"
+					+ "\n"
+					+ "#\n"
+					+ "# configuration for ssh access between nodes as user\n"
+					+ "#\n"
+					+ "su - tuser -c 'mkdir -p /home/tuser/.ssh'\n"
+					+ "su - tuser -c 'chmod 0700 /home/tuser/.ssh'\n"
+					+ "su - tuser -c 'ssh-keygen -f /home/tuser/.ssh/id_rsa -N \"\"'\n"
+					+ "\n"
+					+ "cp /root/.ssh/authorized_keys /home/tuser/.ssh/authorized_keys\n"
+					+ "chown tuser:tuser /home/tuser/.ssh/authorized_keys\n"
+					+ "chmod 0600 /home/tuser/.ssh/authorized_keys\n"
+					+ "su - tuser -c 'cat /home/tuser/.ssh/id_rsa.pub >> /home/tuser/.ssh/authorized_keys'\n"
+					+ "\n"
+					+ "ss-set user_id_rsa64 `cat /home/tuser/.ssh/id_rsa | base64 --wrap 0`\n";
 
 			tmaster.getTargets().add(new Target(Target.EXECUTE_TARGET, script));
 
-			mp = new ModuleParameter("munge_key64", "",
+			ModuleParameter mp = new ModuleParameter("munge_key64", "",
 					"base64 encoded munge key");
 			mp.setCategory(ParameterCategory.Output);
+
+			mp = new ModuleParameter("user_id_rsa64", "",
+					"base64 encoded ssh private key for user");
+			mp.setCategory(ParameterCategory.Output);
+
+			mp = new ModuleParameter("master_hostname", "",
+					"hostname as name, not IP address");
+			mp.setCategory(ParameterCategory.Output);
+
 			tmaster.setParameter(mp);
 
 			ParametersFactory.addParametersForEditing(tmaster);
 			tmaster.store();
+		}
+
+	}
+
+	private static void createTorqueWorkerAppliance()
+			throws ValidationException, NotFoundException {
+
+		User user = User.loadByName(SIXSQ);
+
+		if (!ProjectModule.exists(ProjectModule
+				.constructResourceUri(TORQUE_WORKER_IMAGE_NAME))) {
 
 			ImageModule tworker = new ImageModule(TORQUE_WORKER_IMAGE_NAME);
 			tworker.setAuthz(createPublicGetAuthz(user, tworker));
@@ -253,7 +309,7 @@ public class Appliances extends ModuleCreator {
 			tworker.setPlatform(Platforms.redhat.toString());
 			tworker.setLoginUser("root");
 
-			script = "#!/bin/bash -x\n"
+			String script = "#!/bin/bash -x\n"
 					+ "\n"
 					+ "#\n"
 					+ "# turn off firewall for now\n"
@@ -274,7 +330,7 @@ public class Appliances extends ModuleCreator {
 					+ "# import the munge key from the server and start daemon\n"
 					+ "#\n"
 					+ "export munge_key64=`ss-get --timeout 480 master.1:munge_key64`\n"
-					+ "echo $munge_key64 > /etc/munge/munge.key\n"
+					+ "echo $munge_key64 | base64 -d > /etc/munge/munge.key\n"
 					+ "chown munge:munge /etc/munge/munge.key\n"
 					+ "chmod 0400 /etc/munge/munge.key\n"
 					+ "service munge start\n"
@@ -287,12 +343,26 @@ public class Appliances extends ModuleCreator {
 					+ "export master_hostname=`python -c \"$cmd\"`\n"
 					+ "\n"
 					+ "echo \"\\$pbsserver \" $master_hostname > /etc/torque/mom/config\n"
-					+ "\n" + "#\n" + "# start the worker daemon\n" + "#\n"
-					+ "service pbs_mom start \n";
+					+ "\n"
+					+ "#\n"
+					+ "# start the worker daemon\n"
+					+ "#\n"
+					+ "service pbs_mom start \n"
+					+ "\n"
+					+ "#\n"
+					+ "# setup SSH configuration\n"
+					+ "#\n"
+					+ "su - tuser -c 'mkdir -p /home/tuser/.ssh'\n"
+					+ "ss-get --timeout 480 master.1:user_id_rsa64 | base64 -d >> /home/tuser/.ssh/id_rsa\n"
+					+ "chown tuser:tuser /home/tuser/.ssh/id_rsa\n"
+					+ "chmod 0400 /home/tuser/.ssh/id_rsa\n"
+					+ "\n"
+					+ "ssh-keyscan `ss-get master.1:hostname` >> /home/tuser/.ssh/known_hosts\n"
+					+ "ssh-keyscan `ss-get master.1:master_hostname` >> /home/tuser/.ssh/known_hosts\n";
 
 			tworker.getTargets().add(new Target(Target.EXECUTE_TARGET, script));
 
-			ParametersFactory.addParametersForEditing(rstudio);
+			ParametersFactory.addParametersForEditing(tworker);
 			tworker.store();
 
 		}

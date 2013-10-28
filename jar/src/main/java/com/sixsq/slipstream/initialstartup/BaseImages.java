@@ -20,6 +20,8 @@ package com.sixsq.slipstream.initialstartup;
  * -=================================================================-
  */
 
+import static com.sixsq.slipstream.initialstartup.Users.SIXSQ;
+
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
@@ -35,41 +37,15 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ProjectModule;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.User.State;
 
 public class BaseImages extends ModuleCreator {
-
-	private static final String SIXSQ = "sixsq";
 
 	public static void create() throws ValidationException, NotFoundException,
 			ConfigurationException, NoSuchAlgorithmException,
 			UnsupportedEncodingException {
-		createUsers();
+
+		assert User.loadByName(SIXSQ) != null;
 		createModules();
-	}
-
-	private static void createUsers() throws NoSuchAlgorithmException,
-			UnsupportedEncodingException {
-
-		if (User.loadByName(SIXSQ) != null) {
-			return;
-		}
-
-		createSixSqUser();
-
-	}
-
-	private static void createSixSqUser() throws NoSuchAlgorithmException,
-			UnsupportedEncodingException {
-		User user = createUser(SIXSQ);
-		user.setFirstName("SixSq");
-		user.setLastName("Administrator");
-		user.setEmail("slipstream-support@sixsq.com");
-		user.setOrganization("SixSq");
-		user.hashAndSetPassword("siXsQsiXsQ");
-		user.setState(State.ACTIVE);
-
-		user.store();
 	}
 
 	private static void createModules() throws ValidationException,
@@ -80,14 +56,17 @@ public class BaseImages extends ModuleCreator {
 		Module module;
 
 		if (!ProjectModule.exists(ProjectModule
-				.constructResourceUri(BASE_IMAGES_PROJECT_NAME))) {
+				.constructResourceUri(PUBLIC_PROJECT_NAME))) {
 			module = new ProjectModule(PUBLIC_PROJECT_NAME);
 			Authz authz = createPublicGetAuthz(user, module);
 			authz.setInheritedGroupMembers(false);
 			authz.setPublicCreateChildren(true);
 			module.setAuthz(authz);
 			module.store();
+		}
 
+		if (!ProjectModule.exists(ProjectModule
+				.constructResourceUri(BASE_IMAGES_PROJECT_NAME))) {
 			module = new ProjectModule(BASE_IMAGES_PROJECT_NAME);
 			module.setAuthz(createPublicGetAuthz(user, module));
 			module.store();
@@ -100,7 +79,7 @@ public class BaseImages extends ModuleCreator {
 			module.store();
 
 			ImageModule ubuntu = new ImageModule(UBUNTU_IMAGE_NAME);
-			ubuntu.setAuthz(createPublicGetAuthz(user, module));
+			ubuntu.setAuthz(createPublicGetAuthz(user, ubuntu));
 			ubuntu.setIsBase(true);
 			ubuntu.getCloudImageIdentifiers().add(
 					new CloudImageIdentifier(ubuntu, new StratusLabConnector()
@@ -112,7 +91,7 @@ public class BaseImages extends ModuleCreator {
 			ubuntu.store();
 
 			ubuntu = new ImageModule(UBUNTU13_IMAGE_NAME);
-			ubuntu.setAuthz(createPublicGetAuthz(user, module));
+			ubuntu.setAuthz(createPublicGetAuthz(user, ubuntu));
 			ubuntu.setIsBase(true);
 			ubuntu.getCloudImageIdentifiers().add(
 					new CloudImageIdentifier(ubuntu, new StratusLabConnector()
@@ -131,7 +110,7 @@ public class BaseImages extends ModuleCreator {
 			module.store();
 
 			ImageModule centos = new ImageModule(CENTOS_IMAGE_NAME);
-			centos.setAuthz(createPublicGetAuthz(user, module));
+			centos.setAuthz(createPublicGetAuthz(user, centos));
 			centos.setIsBase(true);
 			centos.getCloudImageIdentifiers().add(
 					new CloudImageIdentifier(centos, new StratusLabConnector()
