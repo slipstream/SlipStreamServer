@@ -38,7 +38,7 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ProjectModule;
 import com.sixsq.slipstream.persistence.User;
 
-public class BaseImages extends ModuleCreator {
+public class Images extends ModuleCreator {
 
 	public static void create() throws ValidationException, NotFoundException,
 			ConfigurationException, NoSuchAlgorithmException,
@@ -56,8 +56,8 @@ public class BaseImages extends ModuleCreator {
 		Module module;
 
 		if (!ProjectModule.exists(ProjectModule
-				.constructResourceUri(PUBLIC_PROJECT_NAME))) {
-			module = new ProjectModule(PUBLIC_PROJECT_NAME);
+				.constructResourceUri(EXAMPLES_PROJECT_NAME))) {
+			module = new ProjectModule(EXAMPLES_PROJECT_NAME);
 			Authz authz = createPublicGetAuthz(user, module);
 			authz.setInheritedGroupMembers(false);
 			authz.setPublicCreateChildren(true);
@@ -66,17 +66,14 @@ public class BaseImages extends ModuleCreator {
 		}
 
 		if (!ProjectModule.exists(ProjectModule
-				.constructResourceUri(BASE_IMAGES_PROJECT_NAME))) {
-			module = new ProjectModule(BASE_IMAGES_PROJECT_NAME);
+				.constructResourceUri(IMAGES_PROJECT_NAME))) {
+			module = new ProjectModule(IMAGES_PROJECT_NAME);
 			module.setAuthz(createPublicGetAuthz(user, module));
 			module.store();
 		}
 
-		if (!ProjectModule.exists(ProjectModule
-				.constructResourceUri(UBUNTU_PROJECT_NAME))) {
-			module = new ProjectModule(UBUNTU_PROJECT_NAME);
-			module.setAuthz(createPublicGetAuthz(user, module));
-			module.store();
+		if (!ImageModule.exists(ImageModule
+				.constructResourceUri(UBUNTU_IMAGE_NAME))) {
 
 			ImageModule ubuntu = new ImageModule(UBUNTU_IMAGE_NAME);
 			ubuntu.setAuthz(createPublicGetAuthz(user, ubuntu));
@@ -89,25 +86,10 @@ public class BaseImages extends ModuleCreator {
 			ubuntu.setLoginUser("root");
 			ParametersFactory.addParametersForEditing(ubuntu);
 			ubuntu.store();
-
-			ubuntu = new ImageModule(UBUNTU13_IMAGE_NAME);
-			ubuntu.setAuthz(createPublicGetAuthz(user, ubuntu));
-			ubuntu.setIsBase(true);
-			ubuntu.getCloudImageIdentifiers().add(
-					new CloudImageIdentifier(ubuntu, new StratusLabConnector()
-							.getCloudServiceName(),
-							"L5DrIX5eSjxdxTzQSEOEEotGw3c"));
-			ubuntu.setPlatform(Platforms.ubuntu.toString());
-			ubuntu.setLoginUser("root");
-			ParametersFactory.addParametersForEditing(ubuntu);
-			ubuntu.store();
 		}
 
-		if (!ProjectModule.exists(ProjectModule
-				.constructResourceUri(CENTOS_PROJECT_NAME))) {
-			module = new ProjectModule(CENTOS_PROJECT_NAME);
-			module.setAuthz(createPublicGetAuthz(user, module));
-			module.store();
+		if (!ImageModule.exists(ImageModule
+				.constructResourceUri(CENTOS_IMAGE_NAME))) {
 
 			ImageModule centos = new ImageModule(CENTOS_IMAGE_NAME);
 			centos.setAuthz(createPublicGetAuthz(user, centos));
@@ -121,12 +103,6 @@ public class BaseImages extends ModuleCreator {
 			ParametersFactory.addParametersForEditing(centos);
 			centos.store();
 		}
-	}
-
-	private static Authz createPublicGetAuthz(User user, Module module) {
-		Authz authz = new Authz(user.getName(), module);
-		authz.setPublicGet(true);
-		return authz;
 	}
 
 }

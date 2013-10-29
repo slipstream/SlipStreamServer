@@ -22,49 +22,49 @@ package com.sixsq.slipstream.initialstartup;
 
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Authz;
+import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
 
 public class ModuleCreator {
 
-	protected static final String PUBLIC_PROJECT_NAME = "Public";
+	protected static final String EXAMPLES_PROJECT_NAME = "examples";
 
-	protected static final String BASE_IMAGES_PROJECT_NAME = PUBLIC_PROJECT_NAME
-			+ "/BaseImages";
-	protected static final String UBUNTU_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME
-			+ "/Ubuntu";
-	protected static final String UBUNTU_IMAGE_NAME = UBUNTU_PROJECT_NAME
-			+ "/12.04";
-	protected static final String UBUNTU13_IMAGE_NAME = UBUNTU_PROJECT_NAME
-			+ "/13.04";
+	protected static final String IMAGES_PROJECT_NAME = EXAMPLES_PROJECT_NAME
+			+ "/images";
+	protected static final String UBUNTU_IMAGE_NAME = IMAGES_PROJECT_NAME
+			+ "/ubuntu-12.04";
+	protected static final String CENTOS_IMAGE_NAME = IMAGES_PROJECT_NAME
+			+ "/centos-6.3";
 
-	protected static final String CENTOS_PROJECT_NAME = BASE_IMAGES_PROJECT_NAME
-			+ "/CentOS";
-	protected static final String CENTOS_IMAGE_NAME = CENTOS_PROJECT_NAME
-			+ "/6.3";
+	protected static final String TUTORIALS_PROJECT_NAME = EXAMPLES_PROJECT_NAME
+			+ "/tutorials";
 
-	protected static final String APPLIANCES_PROJECT_NAME = PUBLIC_PROJECT_NAME
-			+ "/appliances";
-	protected static final String RSTUDIO_IMAGE_NAME = APPLIANCES_PROJECT_NAME
+	protected static final String RSTUDIO_PROJECT_NAME = TUTORIALS_PROJECT_NAME
 			+ "/rstudio";
-	protected static final String TORQUE_MASTER_IMAGE_NAME = APPLIANCES_PROJECT_NAME
+	protected static final String RSTUDIO_IMAGE_NAME = RSTUDIO_PROJECT_NAME
+			+ "/rstudio-appliance";
+	protected static final String RSTUDIO_DEPLOYMENT_NAME = RSTUDIO_PROJECT_NAME
+			+ "/rstudio";
+
+	protected static final String TORQUE_PROJECT_NAME = TUTORIALS_PROJECT_NAME
+			+ "/torque";
+	protected static final String TORQUE_MASTER_IMAGE_NAME = TORQUE_PROJECT_NAME
 			+ "/torque-master";
-	protected static final String TORQUE_WORKER_IMAGE_NAME = APPLIANCES_PROJECT_NAME
+	protected static final String TORQUE_WORKER_IMAGE_NAME = TORQUE_PROJECT_NAME
 			+ "/torque-worker";
-
-	protected static final String TUTORIALS_PROJECT_NAME = PUBLIC_PROJECT_NAME
-			+ "/Tutorials";
-	protected static final String CLIENT_SERVER_TUTORIALS_PROJECT_NAME = TUTORIALS_PROJECT_NAME
-			+ "/HelloWorld";
-	protected static final String WEBSERVER_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
-			+ "/apache";
-	protected static final String TESTCLIENT_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
-			+ "/testclient";
-	protected static final String DEPLOYMENT_NAME = CLIENT_SERVER_TUTORIALS_PROJECT_NAME
-			+ "/client_server";
-	protected static final String RSTUDIO_DEPLOYMENT_NAME = TUTORIALS_PROJECT_NAME
-			+ "/rstudio";
 	protected static final String TORQUE_DEPLOYMENT_NAME = TUTORIALS_PROJECT_NAME
 			+ "/torque";
+
+	protected static final String SERVICE_TESTING_PROJECT_NAME = TUTORIALS_PROJECT_NAME
+			+ "/service-testing";
+	protected static final String APACHE_IMAGE_NAME = SERVICE_TESTING_PROJECT_NAME
+			+ "/apache";
+	protected static final String CLIENT_IMAGE_NAME = SERVICE_TESTING_PROJECT_NAME
+			+ "/client";
+	protected static final String SERVICE_TESTING_DEPLOYMENT_NAME = SERVICE_TESTING_PROJECT_NAME
+			+ "/system";
+
 
 	protected static User createUser(String name) {
 		User user = null;
@@ -74,6 +74,12 @@ public class ModuleCreator {
 			throw (new SlipStreamRuntimeException(e));
 		}
 		return user;
+	}
+
+	protected static Authz createPublicGetAuthz(User user, Module module) {
+		Authz authz = new Authz(user.getName(), module);
+		authz.setPublicGet(true);
+		return authz;
 	}
 
 }
