@@ -53,7 +53,7 @@ public class ModuleCreator {
 			+ "/torque-master";
 	protected static final String TORQUE_WORKER_IMAGE_NAME = TORQUE_PROJECT_NAME
 			+ "/torque-worker";
-	protected static final String TORQUE_DEPLOYMENT_NAME = TUTORIALS_PROJECT_NAME
+	protected static final String TORQUE_DEPLOYMENT_NAME = TORQUE_PROJECT_NAME
 			+ "/torque";
 
 	protected static final String SERVICE_TESTING_PROJECT_NAME = TUTORIALS_PROJECT_NAME
