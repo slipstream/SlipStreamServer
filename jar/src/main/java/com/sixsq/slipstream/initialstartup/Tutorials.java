@@ -23,13 +23,11 @@ package com.sixsq.slipstream.initialstartup;
 import static com.sixsq.slipstream.initialstartup.Users.SIXSQ;
 
 import com.sixsq.slipstream.connector.ParametersFactory;
-import com.sixsq.slipstream.connector.stratuslab.StratusLabConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.Platforms;
 import com.sixsq.slipstream.persistence.Authz;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
@@ -261,7 +259,7 @@ public class Tutorials extends Images {
 			rstudio.setAuthz(createPublicGetAuthz(user, rstudio));
 			rstudio.setIsBase(false);
 			rstudio.setModuleReference(Module
-					.constructResourceUri(CENTOS_IMAGE_NAME));
+					.constructResourceUri(UBUNTU_IMAGE_NAME));
 			rstudio.setPlatform(Platforms.ubuntu.toString());
 
 			rstudio.setDescription("RStudio analysis server");
@@ -274,8 +272,8 @@ public class Tutorials extends Images {
 					+ "# install RStudio\n"
 					+ "#\n"
 					+ "wget http://download2.rstudio.org/rstudio-server-0.97.551-amd64.deb\n"
-					+ "gdebi rstudio-server-0.97.551-amd64.deb\n"
-					+ "\n" + "#\n" + "# put this on standard port\n" + "#\n"
+					+ "gdebi rstudio-server-0.97.551-amd64.deb\n" + "\n"
+					+ "#\n" + "# put this on standard port\n" + "#\n"
 					+ "echo 'www-port=80' > /etc/rstudio/rserver.conf\n";
 
 			rstudio.setRecipe(script);
@@ -361,11 +359,10 @@ public class Tutorials extends Images {
 			ImageModule tmaster = new ImageModule(TORQUE_MASTER_IMAGE_NAME);
 			tmaster.setAuthz(createPublicGetAuthz(user, tmaster));
 
-			tmaster.setIsBase(true);
-			tmaster.getCloudImageIdentifiers().add(
-					new CloudImageIdentifier(tmaster, new StratusLabConnector()
-							.getCloudServiceName(),
-							"H8dg0ssw_j4jg67FTwXysCUrJPl"));
+			tmaster.setIsBase(false);
+			tmaster.setModuleReference(Module
+					.constructResourceUri(UBUNTU_IMAGE_NAME));
+			tmaster.setPlatform(Platforms.ubuntu.toString());
 
 			tmaster.setDescription("master node for torque cluster");
 
@@ -486,11 +483,10 @@ public class Tutorials extends Images {
 			ImageModule tworker = new ImageModule(TORQUE_WORKER_IMAGE_NAME);
 			tworker.setAuthz(createPublicGetAuthz(user, tworker));
 
-			tworker.setIsBase(true);
-			tworker.getCloudImageIdentifiers().add(
-					new CloudImageIdentifier(tworker, new StratusLabConnector()
-							.getCloudServiceName(),
-							"H8dg0ssw_j4jg67FTwXysCUrJPl"));
+			tworker.setIsBase(false);
+			tworker.setModuleReference(Module
+					.constructResourceUri(UBUNTU_IMAGE_NAME));
+			tworker.setPlatform(Platforms.ubuntu.toString());
 
 			tworker.setDescription("worker node for torque cluster");
 
