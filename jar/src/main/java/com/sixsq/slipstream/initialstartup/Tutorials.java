@@ -272,9 +272,17 @@ public class Tutorials extends Images {
 					+ "# install RStudio\n"
 					+ "#\n"
 					+ "wget http://download2.rstudio.org/rstudio-server-0.97.551-amd64.deb\n"
-					+ "gdebi rstudio-server-0.97.551-amd64.deb\n" + "\n"
-					+ "#\n" + "# put this on standard port\n" + "#\n"
-					+ "echo 'www-port=80' > /etc/rstudio/rserver.conf\n";
+					+ "gdebi --non-interactive rstudio-server-0.97.551-amd64.deb\n"
+					+ "\n"
+					+ "#\n"
+					+ "# put this on standard port\n"
+					+ "#\n"
+					+ "echo 'www-port=80' > /etc/rstudio/rserver.conf\n"
+					+ "\n"
+					+ "#\n"
+					+ "# finish by upgrading entire system\n"
+					+ "#\n"
+					+ "apt-get -o DPkg::options::=\"--force-confdef\" -o DPkg::options::=\"--force-confold\" -y upgrade";
 
 			rstudio.setRecipe(script);
 
@@ -369,12 +377,18 @@ public class Tutorials extends Images {
 			tmaster.setPlatform(Platforms.ubuntu.toString());
 			tmaster.setLoginUser("root");
 
+			String script = "#!/bin/bash -x\n" + "\n" + "#\n"
+					+ "# update system\n" + "#\n" + "yum clean all\n"
+					+ "yum -y upgrade\n";
+
+			tmaster.setRecipe(script);
+
 			tmaster.getPackages().add(new Package("munge"));
 			tmaster.getPackages().add(new Package("torque-scheduler"));
 			tmaster.getPackages().add(new Package("torque-server"));
 			tmaster.getPackages().add(new Package("torque-client"));
 
-			String script = "#!/bin/bash -x\n"
+			script = "#!/bin/bash -x\n"
 					+ "\n"
 					+ "#\n"
 					+ "# create normal user\n"
@@ -493,10 +507,16 @@ public class Tutorials extends Images {
 			tworker.setPlatform(Platforms.ubuntu.toString());
 			tworker.setLoginUser("root");
 
+			String script = "#!/bin/bash -x\n" + "\n" + "#\n"
+					+ "# update system\n" + "#\n" + "yum clean all\n"
+					+ "yum -y upgrade\n";
+
+			tworker.setRecipe(script);
+
 			tworker.getPackages().add(new Package("munge"));
 			tworker.getPackages().add(new Package("torque-mom"));
 
-			String script = "#!/bin/bash -x\n"
+			script = "#!/bin/bash -x\n"
 					+ "\n"
 					+ "#\n"
 					+ "# create normal user\n"
