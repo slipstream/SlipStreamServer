@@ -377,9 +377,12 @@ public class Tutorials extends Images {
 			tmaster.setPlatform(Platforms.ubuntu.toString());
 			tmaster.setLoginUser("root");
 
-			String script = "#!/bin/bash -x\n" + "\n" + "#\n"
-					+ "# update system\n" + "#\n" + "yum clean all\n"
-					+ "yum -y upgrade\n";
+			String script = "#!/bin/bash -x\n"
+					+ "\n"
+					+ "#\n"
+					+ "# update system\n"
+					+ "#\n"
+					+ "apt-get -o DPkg::options::=\"--force-confdef\" -o DPkg::options::=\"--force-confold\" -y upgrade";
 
 			tmaster.setRecipe(script);
 
@@ -507,9 +510,12 @@ public class Tutorials extends Images {
 			tworker.setPlatform(Platforms.ubuntu.toString());
 			tworker.setLoginUser("root");
 
-			String script = "#!/bin/bash -x\n" + "\n" + "#\n"
-					+ "# update system\n" + "#\n" + "yum clean all\n"
-					+ "yum -y upgrade\n";
+			String script = "#!/bin/bash -x\n"
+					+ "\n"
+					+ "#\n"
+					+ "# update system\n"
+					+ "#\n"
+					+ "apt-get -o DPkg::options::=\"--force-confdef\" -o DPkg::options::=\"--force-confold\" -y upgrade";
 
 			tworker.setRecipe(script);
 
