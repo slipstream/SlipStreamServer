@@ -26,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.sixsq.slipstream.configuration.Configuration;
@@ -35,8 +36,10 @@ import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.module.ModuleView;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.ParameterCategory;
@@ -104,7 +107,7 @@ public class CommonTestUtil {
 			throws ValidationException, NotFoundException {
 
 		ImageModule imageForDeployment1 = new ImageModule(
-				"test/imagefordeployment1");
+				"imagefordeployment1");
 		imageForDeployment1
 				.setParameter(new ModuleParameter("pi1", "pi1 init value",
 						"pi1 parameter desc", ParameterCategory.Input));
@@ -114,10 +117,10 @@ public class CommonTestUtil {
 
 		imageForDeployment1.setIsBase(true);
 		imageForDeployment1.setImageId("123", CommonTestUtil.cloudServiceName);
-		imageForDeployment1.store();
+		imageForDeployment1 = imageForDeployment1.store();
 
 		ImageModule imageForDeployment2 = new ImageModule(
-				"test/imagefordeployment2");
+				"imagefordeployment2");
 		imageForDeployment2
 				.setParameter(new ModuleParameter("pi2", "pi2 init value",
 						"pi2 parameter desc", ParameterCategory.Input));
@@ -125,7 +128,7 @@ public class CommonTestUtil {
 				"po2 init value", "po2 parameter desc",
 				ParameterCategory.Output));
 		imageForDeployment2.setImageId("123", CommonTestUtil.cloudServiceName);
-		imageForDeployment2.store();
+		imageForDeployment2 = imageForDeployment2.store();
 
 		DeploymentModule deployment = new DeploymentModule("test/deployment");
 
@@ -137,9 +140,7 @@ public class CommonTestUtil {
 		node = new Node("node2", imageForDeployment2);
 		deployment.getNodes().put(node.getName(), node);
 
-		deployment.store();
-
-		return deployment;
+		return deployment.store();
 	}
 
 	public static void deleteDeployment(DeploymentModule deployment) {
@@ -167,9 +168,18 @@ public class CommonTestUtil {
 		ConnectorFactory.setConnectors(connectors);
 	}
 
+	public static void cleanupModules() {
+		List<ModuleView> moduleViewList = Module
+				.viewList(Module.RESOURCE_URI_PREFIX);
+		for(ModuleView m : moduleViewList) {
+			Module.loadByName(m.getName()).remove();
+		}
+	}
+
 	// Only static methods. Ensure no instances are created.
 	public CommonTestUtil() {
 
 	}
 
+	
 }

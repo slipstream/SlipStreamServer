@@ -21,7 +21,9 @@ package com.sixsq.slipstream.stats;
  */
 
 import java.io.Serializable;
+import java.util.Date;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.persistence.RunType;
@@ -32,20 +34,54 @@ import com.sixsq.slipstream.persistence.RunType;
  * @see MeasurementTest
  * 
  */
-@Root
+@Root(name="vm")
 @SuppressWarnings("serial")
 public class Measurement implements Serializable {
 
+	@Attribute(name = "instance_id",required=false)
 	private String vm;
+
+	@Attribute(name = "run_id")
 	private String run;
+
+	@Attribute(name = "index", required = false)
+	private int index;
+
+	@Attribute(name="node", required=false)
 	private String nodeName;
+
+	@Attribute(name = "name")
 	private String module;
+
+	@Attribute(name = "image_id")
 	private String image;
+
+	@Attribute(name = "user_id")
+	private String user;
+	
+	@Attribute
 	private RunType type;
+
+	@Attribute
 	private String cloud;
+
+	@Attribute(required=false)
 	private int cpu;
+
+	@Attribute(required=false)
 	private int ram; // in MB
+
+	@Attribute(required=false)
 	private int storage; // in GB
+
+	@Attribute(name = "created_at")
+	private Date startTime;
+
+	@Attribute(name = "deleted_at", required = false)
+	private Date endTime;
+	
+	@Attribute(required=false)
+	private String status;
 
 	public String getRun() {
 		return run;
@@ -125,6 +161,54 @@ public class Measurement implements Serializable {
 
 	public void setStorage(int storage) {
 		this.storage = storage;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	public void setCreation(Date startTime) {
+		this.startTime = startTime;
+	}
+
+	public Date getEndTime() {
+		return endTime;
+	}
+
+	public void setEnd(Date endTime) {
+		this.endTime = endTime;
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
+
+	public void setEndTime(Date endTime) {
+		this.endTime = endTime;
 	}
 
 }

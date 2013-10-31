@@ -24,10 +24,13 @@ import java.util.List;
 
 import org.simpleframework.xml.Root;
 
+import com.sixsq.slipstream.exceptions.AbortException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 
 /**
  * Unit test:
@@ -41,13 +44,17 @@ public class SimpleRunMeasurements extends Measurements {
 
 	@Override
 	protected List<Measurement> populateSingle(Run run)
-			throws ValidationException {
+			throws ValidationException, NotFoundException, AbortException {
 
-		ImageModule image = (ImageModule) Module.load(run.getModuleResourceUrl());
+		ImageModule image = (ImageModule) Module.load(run
+				.getModuleResourceUrl());
 		String cloud = run.getCloudService();
 
-		fill(run, Run.MACHINE_NAME, image, cloud);
+		fill(run, Run.MACHINE_NAME, image.getName(), cloud);
 		return getMeasurments();
 	}
 
+	protected RunType getType() {
+		return RunType.Run;
+	}
 }

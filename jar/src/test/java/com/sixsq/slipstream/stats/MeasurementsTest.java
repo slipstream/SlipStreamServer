@@ -21,13 +21,11 @@ package com.sixsq.slipstream.stats;
  */
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.lang.reflect.InvocationTargetException;
 
 import org.junit.After;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sixsq.slipstream.common.util.CommonTestUtil;
@@ -57,7 +55,8 @@ public class MeasurementsTest extends RunTestBase {
 
 		setupImages();
 
-		image = updateImageForLocalConnector(image, 2, 4);
+		imagebuildme = updateImageForLocalConnector(imagebuildme, 2, 4);
+		image = updateImageForLocalConnector(image, 22, 44);
 
 		setupDeployments();
 		imageForDeployment1 = updateImageForDeployment(imageForDeployment1, 4,
@@ -78,6 +77,7 @@ public class MeasurementsTest extends RunTestBase {
 		image.setParameter(new ModuleParameter(ParametersFactory.constructKey(
 				cloudServiceName, Run.RAM_PARAMETER_NAME), String.valueOf(ram),
 				""));
+
 		return image.store();
 	}
 
@@ -101,22 +101,30 @@ public class MeasurementsTest extends RunTestBase {
 	@Test
 	public void computeImageBuildRun() throws SlipStreamException {
 
-		createACoupleOfImageBuildRuns(image);
+		createACoupleOfImageBuildRuns(imagebuildme);
 
 		Measurements ms = new Measurements();
 		ms.populate();
 
-		assertEquals(2, ms.getMeasurments().size());
+		assertEquals(4, ms.getMeasurments().size());
 
+		// first orchestrator
 		Measurement m = ms.getMeasurments().get(0);
 
-		assertEquals(4, m.getCpu());
-		assertEquals(8, m.getRam());
+		assertEquals(1, m.getCpu());
+		assertEquals(1, m.getRam());
 
+		// first machine
 		m = ms.getMeasurments().get(1);
 
-		assertEquals(4, m.getCpu());
-		assertEquals(8, m.getRam());
+		assertEquals(2, m.getCpu());
+		assertEquals(4, m.getRam());
+
+		// second machine
+		m = ms.getMeasurments().get(3);
+
+		assertEquals(2, m.getCpu());
+		assertEquals(4, m.getRam());
 	}
 
 	@Test
@@ -127,17 +135,39 @@ public class MeasurementsTest extends RunTestBase {
 		Measurements ms = new Measurements();
 		ms.populate();
 
-		assertEquals(4, ms.getMeasurments().size());
+		// 2 x (2 VMs + 1 orchestrator)
+		assertEquals(6, ms.getMeasurments().size());
 
 		Measurement m = ms.getMeasurments().get(0);
+
+		assertEquals(1, m.getCpu());
+		assertEquals(1, m.getRam());
+
+		m = ms.getMeasurments().get(1);
 
 		assertEquals(4, m.getCpu());
 		assertEquals(8, m.getRam());
 
-		m = ms.getMeasurments().get(1);
+		m = ms.getMeasurments().get(2);
 
 		assertEquals(44, m.getCpu());
 		assertEquals(88, m.getRam());
+	}
+
+	@Test
+	public void computeSimpleRun() throws SlipStreamException {
+
+		createACoupleOfSimpleRuns(image);
+
+		Measurements ms = new Measurements();
+		ms.populate();
+
+		assertEquals(2, ms.getMeasurments().size());
+
+		Measurement m = ms.getMeasurments().get(1);
+
+		assertEquals(22, m.getCpu());
+		assertEquals(44, m.getRam());
 	}
 
 	private void createACoupleOfImageBuildRuns(Module module)
@@ -158,10 +188,4 @@ public class MeasurementsTest extends RunTestBase {
 		createAndStoreRun(module, user.getName(), RunType.Run);
 	}
 
-	@Test
-	@Ignore
-	public void computeSimpleRun() throws SlipStreamException {
-		createACoupleOfSimpleRuns(image);
-		fail();
-	}
 }

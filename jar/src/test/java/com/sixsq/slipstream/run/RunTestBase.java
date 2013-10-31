@@ -1,13 +1,14 @@
 package com.sixsq.slipstream.run;
 
 import com.sixsq.slipstream.common.util.CommonTestUtil;
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Metadata;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
@@ -16,17 +17,19 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.run.RunFactory;
 import com.sixsq.slipstream.statemachine.States;
 
 public class RunTestBase {
 
+	private static final String USER_DEFAULT = "user";
 	protected static User user = null;
 	protected static ImageModule image = null;
 	protected static ImageModule imageref = null;
 	protected static ImageModule imagebase = null;
 	protected static ImageModule imagenoref = null;
-	protected static String cloudServiceName = new LocalConnector()
+	protected static ImageModule imagebuildme = null;
+	protected static Connector localConnector = new LocalConnector();
+	protected static String cloudServiceName = localConnector
 			.getCloudServiceName();
 	public static DeploymentModule deployment = null;
 	protected static ImageModule imageForDeployment1 = null;
@@ -46,7 +49,13 @@ public class RunTestBase {
 		image = new ImageModule("test/image");
 		image.setModuleReference(imageref.getResourceUri());
 		image.setRecipe("a recipe");
+		image.setImageId("image_id", cloudServiceName);
 		image = image.store();
+
+		imagebuildme = new ImageModule("test/imagebuildme");
+		imagebuildme.setModuleReference(imageref.getResourceUri());
+		imagebuildme.setRecipe("a recipe");
+		imagebuildme = imagebuildme.store();
 
 		imagenoref = new ImageModule("test/imagenoref");
 		imagenoref.setRecipe("a recipe");
@@ -99,23 +108,34 @@ public class RunTestBase {
 
 		Node node;
 
-		node = new Node("node1", imageForDeployment1);
+		node = new Node("node1", ImageModule.constructResourceUri(imageForDeployment1.getName()));
 		deployment.getNodes().put(node.getName(), node);
 
-		node = new Node("node2", imageForDeployment2);
+		node = new Node("node2", ImageModule.constructResourceUri(imageForDeployment2.getName()));
 		deployment.getNodes().put(node.getName(), node);
 
 		deployment = deployment.store();
+	}
+
+	protected void removeDeployments() {
+		deployment.remove();
+		imageForDeployment1.remove();
+		imageForDeployment2.remove();
 	}
 
 	public RunTestBase() {
 		super();
 	}
 
-	protected Metadata createAndStoreRun(Module module)
+	protected Run createAndStoreRun(Module module) throws SlipStreamException {
+
+		return createAndStoreRun(module, USER_DEFAULT);
+	}
+
+	protected Run createAndStoreRun(Module module, RunType type)
 			throws SlipStreamException {
 
-		return createAndStoreRun(module, "user");
+		return createAndStoreRun(module, USER_DEFAULT, type);
 	}
 
 	protected Run createAndStoreRun(Module module, String user)
@@ -127,8 +147,10 @@ public class RunTestBase {
 	protected Run createAndStoreRun(Module module, String user, RunType type)
 			throws SlipStreamException {
 
-		Run run = RunFactory.getRun(module, type, cloudServiceName, RunTestBase.user);
+		Run run = RunFactory.getRun(module, type, cloudServiceName,
+				RunTestBase.user);
 		run.setUser(user);
+		run = ConnectorFactory.getConnector(cloudServiceName).launch(run, RunTestBase.user);
 		return run.store();
 	}
 

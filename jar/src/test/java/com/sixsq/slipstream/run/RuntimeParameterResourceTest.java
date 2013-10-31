@@ -48,7 +48,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.statemachine.States;
 
 public class RuntimeParameterResourceTest extends
 		RuntimeParameterResourceTestBase {
@@ -310,48 +309,55 @@ public class RuntimeParameterResourceTest extends
 	@Test
 	public void errorSetsNodeAndGlobalAbort() throws FileNotFoundException,
 			IOException, SlipStreamException {
-		String key = "orchestrator:abort";
-		Run run = createAndStoreRunImage("errorSetsNodeAndGlobalAbort");
 
-		Request request = createPutRequest(run.getUuid(), key,
-				new StringRepresentation("orchestrator abort"));
+		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase() + RuntimeParameter.ABORT_KEY;
+		String globalAbortKey = RuntimeParameter.GLOBAL_ABORT_KEY;
+		String abortMessage = "machine abort";
+
+		Run run = createAndStoreRunImage("errorSetsNodeAndGlobalAbort");
+		
+		Request request = createPutRequest(run.getUuid(), machineAbortKey,
+				new StringRepresentation(abortMessage));
 		Response response = executeRequest(request);
 
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
 
 		RuntimeParameter nodeAbort = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), "orchestrator:abort");
-		assertThat(nodeAbort.getValue(), is("orchestrator abort"));
+				run.getUuid(), machineAbortKey);
+		assertThat(nodeAbort.getValue(), is(abortMessage));
 
 		RuntimeParameter globalAbort = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), "ss:abort");
-		assertThat(globalAbort.getValue(), is("orchestrator abort"));
+				run.getUuid(), globalAbortKey);
+		assertThat(globalAbort.getValue(), is(abortMessage));
 	}
 
 	@Test
 	public void cancelAbort() throws FileNotFoundException, IOException,
 			SlipStreamException {
 
-		String key = "orchestrator:abort";
+		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase() + RuntimeParameter.ABORT_KEY;
+		String globalAbortKey = RuntimeParameter.GLOBAL_ABORT_KEY;
+		String abortMessage = "machine abort";
+
 		Run run = createAndStoreRunImage("errorSetsNodeAndGlobalAbort");
 
-		Request request = createPutRequest(run.getUuid(), key,
-				new StringRepresentation("orchestrator abort"));
+		Request request = createPutRequest(run.getUuid(), machineAbortKey,
+				new StringRepresentation(abortMessage));
 		Response response = executeRequest(request);
 
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
 
 		RuntimeParameter nodeAbort = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), "orchestrator:abort");
-		assertThat(nodeAbort.getValue(), is("orchestrator abort"));
+				run.getUuid(), machineAbortKey);
+		assertThat(nodeAbort.getValue(), is(abortMessage));
 
 		RuntimeParameter globalAbort = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), "ss:abort");
-		assertThat(globalAbort.getValue(), is("orchestrator abort"));
+				run.getUuid(), RuntimeParameter.GLOBAL_ABORT_KEY);
+		assertThat(globalAbort.getValue(), is(abortMessage));
 
 		Map<String, Object> attributes = createRequestAttributes(run.getUuid(),
-				key);
-		attributes.put("ignoreabort", "true");
+				machineAbortKey);
+		attributes.put(RunListResource.IGNORE_ABORT_QUERY, "true");
 		request = createPutRequest(attributes, new StringRepresentation(""));
 
 		response = executeRequest(request);
@@ -359,102 +365,11 @@ public class RuntimeParameterResourceTest extends
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
 
 		nodeAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-				"orchestrator:abort");
+				machineAbortKey);
 		assertThat(nodeAbort.getValue(), is(""));
 		globalAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-				"ss:abort");
+				globalAbortKey);
 		assertThat(globalAbort.getValue(), is(""));
 	}
 
-	@Test
-	public void completeCurrentState() throws FileNotFoundException,
-			IOException, SlipStreamException {
-		Run run = createAndStoreRunImage("completeCurrentState");
-		States newState = States.Inactive;
-		String orchestratorStateKey = Run.ORCHESTRATOR_NAME_PREFIX
-				+ RuntimeParameter.STATE_KEY;
-		String machineStateKey = Run.MACHINE_NAME_PREFIX
-				+ RuntimeParameter.STATE_KEY;
-		String machineCompleteKey = Run.MACHINE_NAME_PREFIX
-				+ RuntimeParameter.COMPLETE_KEY;
-
-		assertState(run, States.Inactive, newState);
-
-		newState = completeCurrentState(orchestratorStateKey, run);
-
-		assertState(run, States.Initializing, newState);
-
-		newState = completeCurrentState(machineStateKey, run);
-
-		assertState(run, States.Initializing, newState);
-
-		newState = completeCurrentState(orchestratorStateKey, run);
-
-		assertState(run, States.Running, newState);
-
-		newState = completeCurrentState(machineStateKey, run);
-
-		assertState(run, States.Running, newState);
-
-		newState = completeCurrentState(orchestratorStateKey, run);
-
-		assertState(run, States.SendingFinalReport, newState);
-
-		newState = completeCurrentState(machineCompleteKey, run);
-
-		assertState(run, States.SendingFinalReport, newState);
-
-		newState = completeCurrentState(machineCompleteKey, run);
-		newState = completeCurrentState(orchestratorStateKey, run);
-
-		assertState(run, States.Finalizing, newState);
-
-		newState = completeCurrentState(machineCompleteKey, run);
-		newState = completeCurrentState(orchestratorStateKey, run);
-
-		assertState(run, States.Terminal, newState);
-
-		newState = completeCurrentState(machineCompleteKey, run, Status.CLIENT_ERROR_CONFLICT);
-		newState = completeCurrentState(orchestratorStateKey, run, Status.CLIENT_ERROR_CONFLICT);
-	}
-
-	private States completeCurrentState(String key, Run run)
-			throws ConfigurationException {
-		return completeCurrentState(key, run, Status.SUCCESS_OK);
-	}
-
-	private States completeCurrentState(String key, Run run, Status expected)
-			throws ConfigurationException {
-		Request request = createPostRequest(run.getUuid(), key,
-				new StringRepresentation(""));
-		Response response = executeRequest(request);
-
-		assertEquals(expected, response.getStatus());
-		String state = response.getEntityAsText();
-		return state == null ? States.Unknown : States.valueOf(state);
-	}
-
-	private void assertState(Run run, States expectedState,
-			States effectiveState) {
-		String globalStateKey = RuntimeParameter.GLOBAL_STATE_KEY;
-		String orchestratorStateKey = Run.ORCHESTRATOR_NAME_PREFIX
-				+ RuntimeParameter.STATE_KEY;
-		String machineStateKey = Run.MACHINE_NAME_PREFIX
-				+ RuntimeParameter.STATE_KEY;
-
-		assertThat(effectiveState, is(expectedState));
-
-		RuntimeParameter state = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), globalStateKey);
-		assertThat(state.getValue(), is(expectedState.toString()));
-
-		state = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-				orchestratorStateKey);
-		assertThat(state.getValue(), is(expectedState.toString()));
-
-		state = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-				machineStateKey);
-		assertThat(state.getValue(), is(expectedState.toString()));
-
-	}
 }

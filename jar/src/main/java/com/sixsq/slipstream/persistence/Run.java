@@ -75,11 +75,10 @@ import com.sixsq.slipstream.statemachine.States;
 		@NamedQuery(name = "runsByInstanceId", query = "SELECT r FROM Run r JOIN r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
 
+	public static final String ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR = "-";
 	public static final String NODE_NAME_PARAMETER_SEPARATOR = "--";
 	// Orchestrator
 	public final static String ORCHESTRATOR_NAME = "orchestrator";
-	public final static String ORCHESTRATOR_NAME_PREFIX = ORCHESTRATOR_NAME
-			+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 	public static final String SERVICENAME_NODENAME_SEPARATOR = RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 
 	// Default machine name for image and disk creation
@@ -97,8 +96,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public final static String TAGS_PARAMETER_DESCRIPTION = "Tags (comma separated) or annotations for this run";
 
 	public final static String CPU_PARAMETER_NAME = ImageModule.CPU_KEY;
+	public final static String CPU_PARAMETER_DESCRIPTION = "Number of CPUs (i.e. virtual cores)";
 
 	public final static String RAM_PARAMETER_NAME = ImageModule.RAM_KEY;
+	public final static String RAM_PARAMETER_DESCRIPTION = "Amount of RAM, in GB";
 
 	public static Run abortOrReset(String abortMessage, String nodename,
 			String uuid) {
@@ -384,7 +385,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private Date endTime;
 
 	/**
-	 * Comma separated list of node names E.g. apache1.1, apache1.2, ...
+	 * Comma separated list of node names - e.g. apache1.1, apache1.2, ...
+	 * Including the orchestrator: orchestrator-local, ...
 	 */
 	@Attribute
 	@Lob
@@ -425,11 +427,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private Run() throws NotFoundException {
 	}
 
-	public Run(Module module, String cloudServiceName, User user)
-			throws ValidationException {
-		this(module, RunType.Orchestration, cloudServiceName, user);
-	}
-
 	public Run(Module module, RunType type, String cloudServiceName, User user)
 			throws ValidationException {
 
@@ -447,13 +444,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.module = module;
 
 		setStart();
-
-		initializeVmRuntimeParameters();
-		initializeOrchestrtorRuntimeParameters();
-		initializeGlobalParameters();
 	}
 
 	public Module getModule() {
+		if (module == null) {
+			module = Module.load(getModuleResourceUrl());
+		}
 		return module;
 	}
 
@@ -467,115 +463,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		if (populate) {
 			populateModule();
 		}
-	}
-
-	private void initializeVmRuntimeParameters() throws ValidationException {
-
-		if (getCategory() == ModuleCategory.Deployment) {
-			DeploymentModule deployment = (DeploymentModule) module;
-			for (Node node : deployment.getNodes().values()) {
-
-				String nodeRuntimeParameterKeyName = nodeRuntimeParameterKeyName(
-						node, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
-				setParameter(new RunParameter(nodeRuntimeParameterKeyName,
-						String.valueOf(node.getMultiplicity()),
-						RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION));
-
-				nodeRuntimeParameterKeyName = nodeRuntimeParameterKeyName(node,
-						RuntimeParameter.CLOUD_SERVICE_NAME);
-				setParameter(new RunParameter(nodeRuntimeParameterKeyName,
-						String.valueOf(node.getCloudService()),
-						RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
-
-				nodeRuntimeParameterKeyName = nodeRuntimeParameterKeyName(node,
-						RuntimeParameter.TAGS_KEY);
-				setParameter(new RunParameter(nodeRuntimeParameterKeyName, "",
-						RuntimeParameter.GLOBAL_TAGS_DESCRIPTION));
-			}
-		}
-	}
-
-	private void initializeOrchestrtorRuntimeParameters()
-			throws ValidationException {
-
-		if (getType() == RunType.Orchestration) {
-			if (getCategory() == ModuleCategory.Deployment) {
-				HashSet<String> cloudServiceList = getCloudServicesList();
-				for (String cloudServiceName : cloudServiceList) {
-					initializeOrchestratorParameters(cloudServiceName);
-				}
-			} else {
-				initializeOrchestratorParameters();
-			}
-		}
-	}
-
-	private void initializeGlobalParameters() throws ValidationException {
-
-		assignRuntimeParameter(RuntimeParameter.GLOBAL_CATEGORY_KEY,
-				getCategory().toString(), "Module category");
-
-		assignRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY, "",
-				RuntimeParameter.GLOBAL_ABORT_DESCRIPTION);
-		assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_KEY,
-				Run.INITIAL_NODE_STATE,
-				RuntimeParameter.GLOBAL_STATE_DESCRIPTION);
-		assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_MESSAGE_KEY,
-				Run.INITIAL_NODE_STATE_MESSAGE,
-				RuntimeParameter.GLOBAL_STATE_MESSAGE_DESCRIPTION);
-		assignRuntimeParameter(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY, "",
-				RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION);
-
-		assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
-				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
-
-	}
-
-	private void initializeOrchestratorParameters() throws ValidationException {
-		initializeOrchestratorParameters("");
-	}
-
-	private void initializeOrchestratorParameters(String cloudService)
-			throws ValidationException {
-
-		String prefix = Run.ORCHESTRATOR_NAME;
-
-		if (!"".equals(cloudService)) {
-			prefix += "-" + cloudService;
-		}
-
-		assignRuntimeParameters(prefix);
-		assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.HOSTNAME_KEY),
-				RuntimeParameter.HOSTNAME_DESCRIPTION);
-		assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.INSTANCE_ID_KEY),
-				RuntimeParameter.INSTANCE_ID_DESCRIPTION);
-	}
-
-	/**
-	 * @param nodename
-	 *            Example (< nodename>.< index>)
-	 * @throws ValidationException
-	 */
-	public void assignRuntimeParameters(String nodename)
-			throws ValidationException {
-		String prefix = nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
-		assignRuntimeParameter(prefix + RuntimeParameter.STATE_KEY,
-				Run.INITIAL_NODE_STATE, RuntimeParameter.STATE_DESCRIPTION);
-		assignRuntimeParameter(prefix + RuntimeParameter.STATE_MESSAGE_KEY,
-				Run.INITIAL_NODE_STATE,
-				RuntimeParameter.STATE_MESSAGE_DESCRIPTION);
-		assignRuntimeParameter(prefix + RuntimeParameter.STATE_CUSTOM_KEY, "",
-				RuntimeParameter.STATE_CUSTOM_DESCRIPTION);
-		assignRuntimeParameter(prefix + RuntimeParameter.STATE_VM_KEY, "",
-				RuntimeParameter.STATE_VM_DESCRIPTION);
-		assignRuntimeParameter(prefix + RuntimeParameter.ABORT_KEY, "",
-				RuntimeParameter.ABORT_DESCRIPTION);
-		assignRuntimeParameter(prefix + RuntimeParameter.COMPLETE_KEY, "false",
-				RuntimeParameter.COMPLETE_DESCRIPTION);
-		assignRuntimeParameter(prefix + RuntimeParameter.TAGS_KEY, "",
-				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
 	}
 
 	@Override
@@ -683,6 +570,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		try {
 			abort = extractRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY);
 		} catch (NotFoundException e) {
+			return false;
 		}
 		return abort.isSet();
 	}
@@ -731,7 +619,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public Date getEnd() {
-		return (Date) endTime.clone();
+		return endTime == null ? null : (Date) endTime.clone();
 	}
 
 	public void setEnd(Date end) {
@@ -835,7 +723,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public States getState() {
-		return state;
+		// required to keep backward compatibility
+		return state == null ? States.Unknown : state;
 	}
 
 	public void setState(States state) {
@@ -860,6 +749,18 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return cloudServiceName;
 	}
 
+	public List<String> getOrchestrators() {
+		List<String> orchestrators = new ArrayList<String>();
+
+		for (String nodename : getNodeNameList()) {
+			if (nodename.startsWith(Run.ORCHESTRATOR_NAME)) {
+				orchestrators.add(nodename);
+			}
+		}
+
+		return orchestrators;
+	}
+
 	public Map<String, Node> getNodes() throws ValidationException {
 		if (module == null) {
 			module = new DeploymentFactory().overloadModule(this,
@@ -876,10 +777,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public HashSet<String> getCloudServicesList() throws ValidationException {
 		HashSet<String> cloudServicesList = new HashSet<String>();
-		for (Node n : getNodes().values()) {
-			String cloudServiceName = n.getCloudService();
-			cloudServicesList
-					.add(getEffectiveCloudServiceName(cloudServiceName));
+		if (getCategory() == ModuleCategory.Deployment) {
+			for (Node n : getNodes().values()) {
+				String cloudServiceName = n.getCloudService();
+				cloudServicesList
+						.add(getEffectiveCloudServiceName(cloudServiceName));
+			}
+		} else {
+			cloudServicesList.add(getCloudService());
 		}
 		return cloudServicesList;
 	}
@@ -966,6 +871,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.state = state.getState();
 		getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY).setValue(
 				state.toString());
+	}
+
+	public static String constructOrchestratorName(String cloudService) {
+		return ORCHESTRATOR_NAME + ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR
+				+ cloudService;
 	}
 
 }

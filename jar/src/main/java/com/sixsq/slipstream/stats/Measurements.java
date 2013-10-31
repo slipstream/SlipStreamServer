@@ -29,29 +29,31 @@ import javax.persistence.EntityManager;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
+import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 
 /**
  * Unit test:
  * 
- * @see MeasurementTest
+ * @see MeasurementsTest
  * 
  */
-@Root(name = "measurements")
+@Root(name = "vms")
 @SuppressWarnings("serial")
 public class Measurements implements Serializable {
 
-	@ElementList(inline = true, name = "ms")
+	@ElementList(inline = true, name = "vm")
 	private List<Measurement> measurments = new ArrayList<Measurement>();
 
 	public List<Measurement> populate() throws ConfigurationException,
-			ValidationException {
+			ValidationException, NotFoundException, AbortException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 
@@ -70,7 +72,7 @@ public class Measurements implements Serializable {
 	}
 
 	protected List<Measurement> populateSingle(Run run)
-			throws ValidationException {
+			throws ValidationException, NotFoundException, AbortException {
 		return measurments;
 	};
 
@@ -78,41 +80,92 @@ public class Measurements implements Serializable {
 		return measurments;
 	}
 
-	protected void fill(Run run, String nodename, ImageModule image,
-			String cloud) throws ValidationException {
+	protected Measurement fill(Run run, String nodename, String imagename,
+			String cloud) throws ValidationException, NotFoundException,
+			AbortException {
 
-		// might be default
-		String effectiveCloud = run.getEffectiveCloudServiceName(cloud);
+		int cpu = 0;
+		int ram = 0;
+		String instanceid = "";
 		
+		try {
+			cpu = Integer.parseInt(getRuntimeParameterValue(
+					ImageModule.CPU_KEY, nodename, run, cloud, "0"));
+		} catch (NumberFormatException e) {
+		}
+				
+		try {
+			ram = Integer.parseInt(getRuntimeParameterValue(
+					ImageModule.RAM_KEY, nodename, run, cloud, "0"));
+		} catch (NumberFormatException e) {
+		}
+
+		try {
+			instanceid = getRuntimeParameterValue(
+					RuntimeParameter.INSTANCE_ID_KEY, nodename, run);
+		} catch (NotFoundException e) {
+		}
+		
+		return fill(run, nodename, imagename, cloud, cpu, ram, instanceid);
+	}
+
+	protected Measurement fill(Run run, String nodename, String imagename,
+			String cloud, int cpu, int ram, String instanceid)
+			throws ValidationException, NotFoundException, AbortException {
+
+		// might be 'default'
+		String effectiveCloud = run.getEffectiveCloudServiceName(cloud);
+
 		Measurement m = new Measurement();
 
-		m.setVm(run.getParameterValue(RuntimeParameter.constructParamName(
-				nodename, RuntimeParameter.INSTANCE_ID_KEY), "Unknown"));
+		m.setVm(instanceid);
 		m.setRun(run.getUuid());
 		m.setNodeName(nodename);
 		m.setModule(run.getModuleResourceUrl());
-		m.setImage(image.getName());
+		m.setImage(imagename);
 		m.setType(run.getType());
 		m.setCloud(effectiveCloud);
-		m.setCpu(Integer.parseInt(getRuntimeParameterValue(ImageModule.CPU_KEY,
-				run, nodename, effectiveCloud, "0")));
-		m.setRam(Integer.parseInt(getRuntimeParameterValue(ImageModule.RAM_KEY,
-				run, nodename, effectiveCloud, "0")));
+		m.setCpu(cpu);
+		m.setRam(ram);
+		m.setCreation(run.getCreation());
+		m.setEnd(run.getEnd());
+		m.setUser(run.getUser());
+
+		m.setType(getType());
 
 		getMeasurments().add(m);
+
+		return m;
 	}
 
-	protected String getRuntimeParameterValue(String param, Run run,
-			String nodename, String cloud, String defaultValue)
-			throws ValidationException {
+	protected RunType getType() {
+		return null;
+	}
+
+	private String getRuntimeParameterValue(String param, String node, Run run)
+			throws AbortException, NotFoundException {
+		return run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter
+				.constructParamName(node, param));
+	}
+
+	protected String getRuntimeParameterValue(String param, String node,
+			Run run, String cloud, String defaultValue)
+			throws ValidationException, NotFoundException {
 		String value;
+		String qualified = constructCloudQualifiedParamName(param, cloud);
 		try {
 			value = run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter
-					.constructParamName(nodename, cloud
-							+ RuntimeParameter.PARAM_WORD_SEPARATOR + param));
+					.constructParamName(node, qualified));
 		} catch (NotFoundException ex) {
 			value = defaultValue;
 		}
 		return value;
+	}
+
+	private String constructCloudQualifiedParamName(String param, String cloud) {
+		// FIXME: need to be bound to the connectors
+		String qualified = cloud + RuntimeParameter.PARAM_WORD_SEPARATOR
+				+ param;
+		return "".equals(cloud) ? param : qualified;
 	}
 }

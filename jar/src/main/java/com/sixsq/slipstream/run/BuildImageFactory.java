@@ -39,23 +39,16 @@ import com.sixsq.slipstream.persistence.User;
 public class BuildImageFactory extends RunFactory {
 
 	@Override
-	public Run createRun(Module module, String cloudService, User user)
+	protected Run constructRun(Module module, String cloudService, User user)
+			throws ValidationException {
+		return new Run(module, RunType.Machine, cloudService, user);
+	}
+
+	@Override
+	protected void validateModule(Module module, String cloudService)
 			throws SlipStreamClientException {
 
 		ImageModule image = (ImageModule) module;
-
-		validate(image, cloudService);
-
-		Run run = constructRun(image, RunType.Machine, cloudService, user);
-
-		initialize(image, run, cloudService);
-
-		return run;
-	}
-
-	private void validate(ImageModule image, String cloudService)
-			throws SlipStreamClientException {
-
 		if (image.isBase()) {
 			throw new SlipStreamClientException("A base image cannot be built");
 		}
@@ -116,32 +109,42 @@ public class BuildImageFactory extends RunFactory {
 		}
 	}
 
-	private void initialize(ImageModule image, Run run, String cloudService)
+	@Override
+	protected void initialize(Module module, Run run, String cloudService)
 			throws ValidationException, NotFoundException {
 
-		initRuntimeParameters(image, run);
-
+		super.initialize(module, run, cloudService);
+		
+		initializeOrchestrtorRuntimeParameters(run);
+		initRuntimeParameters((ImageModule) module, run);
 		initMachineState(run);
-
 		initNodeNames(run, cloudService);
 	}
 
 	protected static void initMachineState(Run run) throws ValidationException,
 			NotFoundException {
 
-		run.assignRuntimeParameters(Run.MACHINE_NAME);
+		assignRuntimeParameters(run, Run.MACHINE_NAME);
 	}
 
 	protected static void initRuntimeParameters(Module image, Run run)
 			throws ValidationException, NotFoundException {
+
 		// Add default values for the params as set in the image
 		// definition
-		// Prepend the machine name prefix for the keys
+		// Only process the standrad categories and the cloud service
+		// (not the other cloud services, if any)
+
+		List<String> filter = new ArrayList<String>();
+		for (ParameterCategory c : ParameterCategory.values()) {
+			filter.add(c.toString());
+		}
+		String cloudService = run.getCloudService();
+		filter.add(cloudService);
+
 		if (image.getParameters() != null) {
-			for (ModuleParameter param : image.getParameters().values()) {
-				if (param.getValue() != null
-						|| param.getCategory().equals(
-								ParameterCategory.Output.name())) {
+			for (ModuleParameter param : image.getParameterList()) {
+				if (filter.contains(param.getCategory())) {
 					run.assignRuntimeParameter(
 							Run.MACHINE_NAME_PREFIX + param.getName(),
 							param.getValue(), param.getDescription());
@@ -149,17 +152,19 @@ public class BuildImageFactory extends RunFactory {
 			}
 		}
 
+		// Add cloud service name to orchestrator and machine
 		String cloudServiceName = run.getCloudService();
 		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX
 				+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
-		if (run.getType() == RunType.Orchestration) {
-			cloudServiceName = run.getCloudService();
-			run.assignRuntimeParameter(Run.ORCHESTRATOR_NAME_PREFIX
-					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
-					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-		}
+		cloudServiceName = run.getCloudService();
+		String orchestratorNodename = Run
+				.constructOrchestratorName(cloudServiceName);
+		String key = RuntimeParameter.constructParamName(orchestratorNodename,
+				RuntimeParameter.CLOUD_SERVICE_NAME);
+		run.assignRuntimeParameter(key, cloudServiceName,
+				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 	}
 
 	private static void initNodeNames(Run run, String cloudService) {

@@ -99,17 +99,24 @@ public class LocalConnector extends ConnectorBase {
 			logger.info("	Category: " + run.getCategory());
 			logger.info("	Type: " + run.getType());
 
-			switch (run.getCategory()) {
-			case Deployment:
+			switch (run.getType()) {
+			case Orchestration:
 				launchDeployment(run);
 				break;
-			case Image:
+			case Machine:
+				launchBuild(run);
+				break;
+			case Run:
 				launchImage(run);
 				break;
 			default:
 				throw (new ServerExecutionEnginePluginException(
 						"Cannot submit type: " + run.getCategory() + " yet!!"));
 			}
+			
+			updateInstanceIdAndIpOnRun(run, "instance-id-for-local",
+					"hostname-for-local");
+
 
 		} catch (ClientHttpException e) {
 			throw (new ClientExecutionEnginePluginException(e.getMessage()
@@ -147,6 +154,10 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	private RunStates launchImage(Run run) {
+		return null;
+	}
+
+	private RunStates launchBuild(Run run) {
 		return null;
 	}
 

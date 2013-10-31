@@ -33,7 +33,7 @@ public class LocalImageParametersFactory extends ModuleParametersFactoryBase {
 
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
-		putParameter(Run.CPU_PARAMETER_NAME, "Cores", true);
-		putParameter(Run.RAM_PARAMETER_NAME, "RAM", true);
+		putParameter(Run.CPU_PARAMETER_NAME, Run.CPU_PARAMETER_DESCRIPTION, true);
+		putParameter(Run.RAM_PARAMETER_NAME, Run.RAM_PARAMETER_DESCRIPTION, true);
 	}
 }

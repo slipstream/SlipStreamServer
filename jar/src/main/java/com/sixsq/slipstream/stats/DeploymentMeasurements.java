@@ -24,10 +24,13 @@ import java.util.List;
 
 import org.simpleframework.xml.Root;
 
+import com.sixsq.slipstream.exceptions.AbortException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 
 /**
@@ -42,20 +45,39 @@ public class DeploymentMeasurements extends Measurements {
 
 	@Override
 	protected List<Measurement> populateSingle(Run run)
-			throws ValidationException {
+			throws ValidationException, NotFoundException, AbortException {
+
+		String cloud;
+		String nodename;
+
+		for (String name : run.getOrchestrators()) {
+			String firstPart = name
+					.split(Run.ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR)[0];
+			String lastPart = name.substring(firstPart.length() + 1);
+			cloud = lastPart;
+			fill(run, name, Run.ORCHESTRATOR_NAME, cloud, 1, 1, "Unknown");
+		}
 
 		for (Node node : run.getNodes().values()) {
 
 			ImageModule image = node.getImage();
-			String cloud = node.getCloudService();
-			String nodename = node.getName();
-			
-			for(int i=1;i<=node.getMultiplicity();i++) {
-				fill(run, RuntimeParameter.constructNodeName(nodename, i), image, cloud);
+			cloud = node.getCloudService();
+			String effectiveCloud = run.getEffectiveCloudServiceName(cloud);
+
+			nodename = node.getName();
+
+			Measurement ms;
+			for (int i = 1; i <= node.getMultiplicity(); i++) {
+				ms = fill(run, RuntimeParameter.constructNodeName(nodename, i),
+						image.getName(), effectiveCloud);
+				ms.setIndex(i);
 			}
 		}
 
 		return getMeasurments();
 	}
 
+	protected RunType getType() {
+		return RunType.Orchestration;
+	}
 }

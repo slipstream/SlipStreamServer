@@ -24,8 +24,11 @@ import java.util.List;
 
 import org.simpleframework.xml.Root;
 
+import com.sixsq.slipstream.exceptions.AbortException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 
 /**
  * Unit test:
@@ -39,9 +42,33 @@ public class BuildImageMeasurements extends Measurements {
 
 	@Override
 	protected List<Measurement> populateSingle(Run run)
-			throws ValidationException {
+			throws ValidationException, NotFoundException, AbortException {
 
-		return null;
+		// might be 'default'
+		String effectiveCloud = run.getEffectiveCloudServiceName(run
+				.getCloudService());
+
+		Measurement ms;
+
+		// Orchestrator
+		String imagename = Run.ORCHESTRATOR_NAME;
+		String nodename = Run.constructOrchestratorName(effectiveCloud);
+		// for builds the orchestrator node is not decorated with the cloud
+		// (there's only one)
+		ms = fill(run, nodename, imagename, "");
+		ms.setType(RunType.Machine);
+
+		// Machine
+		imagename = run.getModule().getName();
+		nodename = Run.MACHINE_NAME;
+
+		ms = fill(run, nodename, imagename, effectiveCloud);
+		ms.setType(RunType.Machine);
+
+		return getMeasurments();
 	}
 
+	protected RunType getType() {
+		return RunType.Machine;
+	}
 }

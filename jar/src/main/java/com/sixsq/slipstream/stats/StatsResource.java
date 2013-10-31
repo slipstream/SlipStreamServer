@@ -25,9 +25,10 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 
+import com.sixsq.slipstream.exceptions.AbortException;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class StatsResource extends BaseResource {
@@ -40,23 +41,19 @@ public class StatsResource extends BaseResource {
 
 	}
 
-	@Get("html")
-	public Representation toHtml() {
-
-		String html = HtmlUtil.toHtml(compute(),
-				"stats", getUser());
-		
-		return new StringRepresentation(html, MediaType.TEXT_HTML);
-	}
-
 	private Measurements compute() {
-	
+
 		Measurements measurements = new Measurements();
 		try {
 			measurements.populate();
 		} catch (SlipStreamClientException e) {
+			throwClientConflicError(e.getMessage());
+		} catch (ConfigurationException e) {
+			throwServerError(e);
+		} catch (AbortException e) {
+			throwServerError(e);
 		}
-	
+
 		return measurements;
 	}
 

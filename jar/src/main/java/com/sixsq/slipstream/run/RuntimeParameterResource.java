@@ -85,7 +85,7 @@ public class RuntimeParameterResource extends ServerResource {
 	}
 
 	private void extractAndSetIgnoreAbort() {
-		ignoreAbort = getRequest().getAttributes().containsKey("ignoreabort");
+		ignoreAbort = getRequest().getAttributes().containsKey(RunListResource.IGNORE_ABORT_QUERY);
 	}
 
 	private void fetchRepresentation() {

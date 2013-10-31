@@ -41,21 +41,25 @@ import com.sixsq.slipstream.run.RunFactory;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class RuntimeParameterTest {
-	
+
 	private static User user;
-	
+
 	@BeforeClass
-	public static void setupClass() throws ValidationException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+	public static void setupClass() throws ValidationException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException,
+			ClassNotFoundException {
 		user = CommonTestUtil.createTestUser();
-		
-		CommonTestUtil.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+
+		CommonTestUtil
+				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 	}
-	
+
 	@AfterClass
 	public static void teardownClass() {
 		CommonTestUtil.deleteUser(user);
 	}
-	
+
 	@Test(expected = ValidationException.class)
 	public void nullRun() throws SlipStreamException {
 
@@ -64,22 +68,24 @@ public class RuntimeParameterTest {
 	}
 
 	@Test(expected = ValidationException.class)
-	public void nullParameterName() throws SlipStreamException {		
+	public void nullParameterName() throws SlipStreamException {
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
-		
-		Run run = RunFactory.getRun(deployment, CommonTestUtil.cloudServiceName, user);
-		//Run run = new Run("nullParameterName", ModuleCategory.Deployment,
-		//		new LocalConnector().getCloudServiceName());
+
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
+				CommonTestUtil.cloudServiceName, user);
+		// Run run = new Run("nullParameterName", ModuleCategory.Deployment,
+		// new LocalConnector().getCloudServiceName());
 		run.assignRuntimeParameter(null, "ok", null);
-		
+
 		CommonTestUtil.deleteDeployment(deployment);
 	}
 
 	@Test
 	public void serializationWorks() throws SlipStreamException {
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
-		
-		Run run = RunFactory.getRun(deployment, CommonTestUtil.cloudServiceName, user);
+
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
+				CommonTestUtil.cloudServiceName, user);
 		Metadata parameter = run.assignRuntimeParameter("node.1:dummy", "ok",
 				null);
 
@@ -91,24 +97,26 @@ public class RuntimeParameterTest {
 		Document document = SerializationUtil.toXmlDocument(parameter);
 
 		assertNotNull(document);
-		
+
 		CommonTestUtil.deleteDeployment(deployment);
 	}
 
 	@Test
 	public void checkValidNames() throws SlipStreamException {
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
-		
+
 		String[] validNames = { "ss:a", "orchestrator:a", "machine:a",
 				"host.1:a", "host1.2:a", "ss.1:a", "orchestrator.1:a",
-				"orchestrator-with-da-shes:a", "machine.1:a", "host1.2:with.dots",
-				"host1.2:with-dash", "host1.2:with_underscore" };
+				"orchestrator-with-da-shes:a", "machine.1:a",
+				"host1.2:with.dots", "host1.2:with-dash",
+				"host1.2:with_underscore" };
 
-		Run run = RunFactory.getRun(deployment, CommonTestUtil.cloudServiceName, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
+				CommonTestUtil.cloudServiceName, user);
 		for (String name : validNames) {
 			new RuntimeParameter(run, name, "", "");
 		}
-		
+
 		CommonTestUtil.deleteDeployment(deployment);
 	}
 

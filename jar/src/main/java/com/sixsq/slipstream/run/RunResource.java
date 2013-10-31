@@ -89,32 +89,38 @@ public class RunResource extends BaseResource {
 	public Representation toXml() throws NotFoundException,
 			ValidationException, ConfigurationException {
 
+		EntityManager em = PersistenceUtil.createEntityManager();
 		Run run;
+		String xml;
 		try {
-			run = constructRun();
+			run = constructRun(em);
+			xml = SerializationUtil.toXmlString(run);
 		} catch (SlipStreamClientException e) {
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
+		} finally {
+			em.close();
 		}
 
-		String result = SerializationUtil.toXmlString(run);
-
-		return new StringRepresentation(result, MediaType.TEXT_XML);
+		return new StringRepresentation(xml, MediaType.TEXT_XML);
 	}
 
 	@Get("html")
 	public Representation toHtml() throws ConfigurationException,
 			NotFoundException, ValidationException {
 
+		EntityManager em = PersistenceUtil.createEntityManager();
 		Run run;
+		String html;
 		try {
-			run = constructRun();
+			run = constructRun(em);
+			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
+		} finally {
+			em.close();
 		}
-
-		String html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 
@@ -124,9 +130,9 @@ public class RunResource extends BaseResource {
 		return "run";
 	}
 
-	private Run constructRun() throws SlipStreamClientException {
+	private Run constructRun(EntityManager em) throws SlipStreamClientException {
 
-		Run run = Run.load(this.run.getResourceUri());
+		Run run = Run.load(this.run.getResourceUri(), em);
 
 		Module module = RunFactory.selectFactory(run.getType()).overloadModule(
 				run, getUser());

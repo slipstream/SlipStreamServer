@@ -175,9 +175,4 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 	public String constructKey(String... names) {
 		return ParametersFactory.constructKey(getCategory(), names);
 	}
-/*
-	public static String constructKey(String category, String... names) {
-		return ParametersFactory.constructKey(category, names);
-	}
-*/
 }

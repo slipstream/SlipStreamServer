@@ -49,6 +49,7 @@ import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Package;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.run.RunFactory;
 import com.sixsq.slipstream.run.RuntimeParameterResourceTestBase;
@@ -58,11 +59,11 @@ public class StateMachineMultiThreadingTest extends
 
 	private static String ORCHESTRATOR_NAME = Run.ORCHESTRATOR_NAME + "-local";
 	private static int errors = 0;
-	
+
 	public synchronized static void incrementError() {
 		errors++;
 	}
-	
+
 	protected static String createParameterName(String key, String nodename) {
 		return nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR + key;
 	}
@@ -96,8 +97,8 @@ public class StateMachineMultiThreadingTest extends
 			Response response = executeRequest(request);
 
 			success = response.getStatus().isSuccess();
-			
-			if(!success) {
+
+			if (!success) {
 				StateMachineMultiThreadingTest.incrementError();
 			}
 		}
@@ -122,9 +123,9 @@ public class StateMachineMultiThreadingTest extends
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException,
 			ClassNotFoundException {
-		
+
 		errors = 0;
-		
+
 		CommonTestUtil
 				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 
@@ -138,9 +139,12 @@ public class StateMachineMultiThreadingTest extends
 
 		waitAllThreadsComplete(threads);
 
-		assertTransitionReached(Run.load(run.getResourceUri()), finalState);
-
-		assertThat(errors, is(0));
+		try {
+			assertTransitionReached(Run.load(run.getResourceUri()), finalState);
+			assertThat(errors, is(0));
+		} finally {
+			run.remove();
+		}
 	}
 
 	private Run initRun(EntityManager em) throws FileNotFoundException,
@@ -204,7 +208,7 @@ public class StateMachineMultiThreadingTest extends
 		}
 	}
 
-	protected Run createRunDeployment(String moduleName)
+	private Run createRunDeployment(String moduleName)
 			throws FileNotFoundException, IOException, SlipStreamException {
 		image = new ImageModule(moduleName);
 		image.setModuleReference(baseImage);
@@ -220,7 +224,8 @@ public class StateMachineMultiThreadingTest extends
 
 		deployment.store();
 
-		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
+				cloudServiceName, user);
 		return run;
 	}
 
