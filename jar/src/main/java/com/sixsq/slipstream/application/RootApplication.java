@@ -54,7 +54,6 @@ import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
-import com.sixsq.slipstream.initialstartup.Appliances;
 import com.sixsq.slipstream.initialstartup.BaseImages;
 import com.sixsq.slipstream.initialstartup.Tutorials;
 import com.sixsq.slipstream.initialstartup.Users;
@@ -120,12 +119,6 @@ public class RootApplication extends Application {
 		} catch (Exception ex) {
 			getLogger().warning(
 					"Error creating base images... already existing?");
-		}
-		try {
-			Appliances.create();
-		} catch (Exception ex) {
-			getLogger().warning(
-					"Error creating appliances... already existing?");
 		}
 		try {
 			Tutorials.create();
