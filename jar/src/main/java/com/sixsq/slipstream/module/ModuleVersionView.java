@@ -76,7 +76,6 @@ public class ModuleVersionView {
 	@Root(name = "versionList")
 	public static class ModuleVersionViewList {
 
-		@SuppressWarnings("unused")
 		@ElementList(inline = true, required = false)
 		private final List<ModuleVersionView> list;
 

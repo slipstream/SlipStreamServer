@@ -46,7 +46,6 @@ public abstract class Metadata implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date lastModified;
 
-	@SuppressWarnings("unused")
 	@Version
 	private int jpaVersion;
 

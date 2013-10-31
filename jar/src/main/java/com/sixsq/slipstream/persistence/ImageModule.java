@@ -91,7 +91,6 @@ public class ImageModule extends Module {
 	/**
 	 * Only set by resource, once a cloud service name is known. This is a hack!
 	 */
-	@SuppressWarnings("unused")
 	@Attribute(required = false)
 	@Transient
 	private String imageId;

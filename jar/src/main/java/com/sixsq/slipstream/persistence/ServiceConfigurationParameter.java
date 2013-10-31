@@ -39,7 +39,6 @@ public class ServiceConfigurationParameter extends
 	Long id;
 
 	@Attribute(required = false)
-	@SuppressWarnings("unused")
 	private ServiceConfigurationParameter() {
 	}
 
