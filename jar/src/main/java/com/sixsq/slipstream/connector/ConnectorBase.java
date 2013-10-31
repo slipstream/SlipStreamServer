@@ -182,7 +182,8 @@ public abstract class ConnectorBase implements Connector {
 			throws NotFoundException, ValidationException,
 			ServerExecutionEnginePluginException {
 
-		if (run.getType() == RunType.Orchestration) {
+		if (run.getType() == RunType.Orchestration
+				|| run.getType() == RunType.Machine) {
 			updateOrchestratorInstanceIdOnRun(run, instanceId, orchestratorName);
 			updateOrchestratorInstanceIpOnRun(run, ipAddress, orchestratorName);
 		} else {
@@ -413,8 +414,9 @@ public abstract class ConnectorBase implements Connector {
 		String orchestratorName = Run.ORCHESTRATOR_NAME;
 
 		if (run.getType() == RunType.Orchestration
-				&& run.getCategory() == ModuleCategory.Deployment) {
-			orchestratorName += "-" + getConnectorInstanceName();
+				|| run.getType() == RunType.Machine) {
+			orchestratorName = Run
+					.constructOrchestratorName(getConnectorInstanceName());
 		}
 
 		return orchestratorName;
