@@ -35,7 +35,6 @@ public class OpenStackSystemConfigurationParametersFactory extends
 	protected void initReferenceParameters() throws ValidationException {
 		super.initReferenceParameters();
 		super.putMandatoryEndpoint();
-		super.putMandatoryOrchestrationImageId();
 		
 		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME),
 				"OpenStack Flavor for the orchestrator. " +
