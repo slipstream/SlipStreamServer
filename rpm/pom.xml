@@ -108,6 +108,28 @@
 	    </configuration>
 	  </execution>
 
+	  <execution>
+	    <id>copy-logging-jars</id>
+	    <goals>
+	      <goal>copy</goal>
+	    </goals>
+	    <configuration>
+	      <outputDirectory>${project.build.directory}/dependency/logging</outputDirectory>
+          <artifactItems>
+            <artifactItem>
+		        <groupId>org.slf4j</groupId>
+		        <artifactId>slf4j-api</artifactId>
+		        <version>1.6.6</version>
+            </artifactItem>
+            <artifactItem>
+		        <groupId>org.slf4j</groupId>
+		        <artifactId>slf4j-jdk14</artifactId>
+		        <version>1.6.6</version>
+            </artifactItem>
+          </artifactItems>
+	    </configuration>
+	  </execution>
+
       <execution>
         <id>copy-war</id>
         <goals>
@@ -261,6 +283,19 @@
               <sources>
                 <source>
                   <location>target/dependency/webapps</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/lib/logging</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/logging</location>
                 </source>
               </sources>
             </mapping>
