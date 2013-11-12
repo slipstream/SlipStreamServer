@@ -91,11 +91,14 @@ public class RunResource extends BaseResource {
 			ValidationException, ConfigurationException {
 
 		Run run;
+		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
-			run = constructRun();
+			run = constructRun(em);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
 					e.getMessage());
+		} finally {
+			em.close();
 		}
 
 		String result = SerializationUtil.toXmlString(run);
@@ -108,11 +111,14 @@ public class RunResource extends BaseResource {
 			NotFoundException, ValidationException {
 
 		Run run;
+		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
-			run = constructRun();
+			run = constructRun(em);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
+		} finally {
+			em.close();
 		}
 
 		String html = HtmlUtil.toHtml(run,
@@ -126,8 +132,7 @@ public class RunResource extends BaseResource {
 		return "run";
 	}
 
-	private Run constructRun() throws SlipStreamClientException {
-		EntityManager em = PersistenceUtil.createEntityManager();
+	private Run constructRun(EntityManager em) throws SlipStreamClientException {
 
 		Run run = Run.load(this.run.getResourceUri(), em);
 		try {
@@ -138,8 +143,6 @@ public class RunResource extends BaseResource {
 			getLogger().warning(
 					"Error updating vm status for run " + run.getName() + ": "
 							+ e.getMessage());
-		} finally {
-			em.close();
 		}
 
 		Module module = RunFactory.selectFactory(run.getCategory(),
