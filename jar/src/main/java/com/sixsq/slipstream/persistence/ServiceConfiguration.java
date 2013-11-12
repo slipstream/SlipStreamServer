@@ -59,6 +59,10 @@ public class ServiceConfiguration extends
 				"Endpoint of the SlipStream client tarball",
 				ParameterCategory.SlipStream_Advanced),
 
+		SLIPSTREAM_ENABLE_SERVICE_CATALOG(
+				"Enable service catalog feature",
+				ParameterCategory.SlipStream_Advanced),
+
 		SLIPSTREAM_UPDATE_CLIENTBOOTSTRAPURL(
 				"Endpoint of the SlipStream client bootstrap script",
 				ParameterCategory.SlipStream_Advanced),

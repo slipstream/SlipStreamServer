@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 
 public class ServiceConfigurationTest {
 
@@ -43,13 +44,13 @@ public class ServiceConfigurationTest {
 		ServiceConfiguration first = new ServiceConfiguration();
 		Thread.sleep(1000);
 		ServiceConfiguration second = new ServiceConfiguration();
-		
+
 		String[] parts;
 		parts = first.getId().split("/");
-		Long firstMilli = Long.valueOf(parts[parts.length-1]);
+		Long firstMilli = Long.valueOf(parts[parts.length - 1]);
 		parts = second.getId().split("/");
-		Long secondMilli = Long.valueOf(parts[parts.length-1]);
-		
+		Long secondMilli = Long.valueOf(parts[parts.length - 1]);
+
 		assertTrue(secondMilli > firstMilli);
 	}
 
@@ -81,7 +82,8 @@ public class ServiceConfigurationTest {
 		String[] values = { "-1", "aaa", "65536" };
 		for (String value : values) {
 			try {
-				ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_PORT.validate(value);
+				ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_PORT
+						.validate(value);
 				fail("illegal value did not throw exception: " + value);
 			} catch (IllegalArgumentException e) {
 				// OK
@@ -93,20 +95,21 @@ public class ServiceConfigurationTest {
 	public void checkValidPorts() {
 		String[] values = { "1", "1010", "65535" };
 		for (String value : values) {
-			ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_PORT.validate(value);
+			ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_PORT
+					.validate(value);
 		}
 	}
 
 	@Test
 	public void ensureMinimalConfigurationIsValid()
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		ServiceConfiguration cfg = minimalValidConfiguration();
 		cfg.validate();
 	}
 
 	@Test
 	public void storeLoadCycle() throws InterruptedException,
-			ConfigurationException {
+			ConfigurationException, ValidationException {
 
 		ServiceConfiguration cfg = minimalValidConfiguration();
 		cfg.store();
@@ -120,8 +123,8 @@ public class ServiceConfigurationTest {
 
 		cfg = minimalValidConfiguration();
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
-				ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME.getName(),
-				"OK", "");
+				ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME
+						.getName(), "OK", "");
 		cfg.setParameter(parameter);
 		cfg.store();
 		String second = cfg.getId();
@@ -139,7 +142,7 @@ public class ServiceConfigurationTest {
 	}
 
 	public ServiceConfiguration minimalValidConfiguration()
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 
 		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
 

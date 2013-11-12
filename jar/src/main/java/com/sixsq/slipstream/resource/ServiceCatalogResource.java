@@ -6,6 +6,7 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ServiceCatalog;
 import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -30,50 +31,54 @@ import com.sixsq.slipstream.util.SerializationUtil;
  * -=================================================================-
  */
 
-public class WelcomeResource extends SimpleResource {
+public class ServiceCatalogResource extends SimpleResource {
 
-	@Get("xml|txt")
+	@Get("xml")
 	public Representation toXml() {
 
-		String result = SerializationUtil.toXmlString(retrieveWelcome());
+		String result = null;
+		try {
+			result = SerializationUtil
+					.toXmlString(retrieveServiceCatalogs());
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
 		return new StringRepresentation(result);
 	}
 
 	@Get("html")
 	public Representation toHtml() {
 
-		return new StringRepresentation(HtmlUtil.toHtml(retrieveWelcome(),
-				getPageRepresentation(), getTransformationType(), getUser()),
-				MediaType.TEXT_HTML);
-	}
+		StringRepresentation result = null;
 
-	private Welcome retrieveWelcome() {
-
-		Welcome welcome = new Welcome();
-
-		welcome.setModules(retrieveFilteredModuleViewList());
 		try {
-			welcome.setServiceCatalogues(retrieveServiceCatalogs());
+			result = new StringRepresentation(HtmlUtil.toHtml(
+					retrieveServiceCatalogs(), getPageRepresentation(),
+					getTransformationType(), getUser()), MediaType.TEXT_HTML);
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
-
-		return welcome;
+		return result;
 	}
 
-	private ServiceCatalogs retrieveServiceCatalogs()
+	public ServiceCatalogs retrieveServiceCatalogs()
 			throws ValidationException {
 
 		ServiceCatalogs scs = new ServiceCatalogs();
-		scs.retrieveServiceCatalogs();
-		scs.updateForEditing(getUser());
+
+		for (ServiceCatalog sc : ServiceCatalog.listall()) {
+			if (isEdit()) {
+				sc.populateDefinedParameters();
+			}
+			scs.getList().add(sc);
+		}
 
 		return scs;
 
 	}
 
 	protected String getPageRepresentation() {
-		return "welcome";
+		return "service_catalog";
 	}
 
 }

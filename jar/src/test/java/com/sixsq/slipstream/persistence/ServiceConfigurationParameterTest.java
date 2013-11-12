@@ -27,18 +27,31 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ServiceConfigurationParameterTest {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void nullParameterName() throws SlipStreamClientException {
+	@Test(expected = ValidationException.class)
+	public void nullKeyNotAllowed() throws SlipStreamClientException {
 
 		new ServiceConfigurationParameter(null, "ok", "ok");
 	}
 
+	@Test(expected = ValidationException.class)
+	public void emptyKeyNotAllowed() throws SlipStreamClientException {
+
+		new ServiceConfigurationParameter("", "ok", "ok");
+	}
+
+	@Test(expected = ValidationException.class)
+	public void keyCantStartWithDot() throws SlipStreamClientException {
+
+		new ServiceConfigurationParameter(".123", "ok", "ok");
+	}
+
 	@Test
-	public void serializationWorks() {
+	public void serializationWorks() throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				"dummy", "ok", "ok");
 
