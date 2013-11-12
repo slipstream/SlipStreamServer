@@ -91,17 +91,17 @@ public class RunResource extends BaseResource {
 			ValidationException, ConfigurationException {
 
 		Run run;
+		String result = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
 			run = constructRun(em);
+			result = SerializationUtil.toXmlString(run);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
 					e.getMessage());
 		} finally {
 			em.close();
 		}
-
-		String result = SerializationUtil.toXmlString(run);
 
 		return new StringRepresentation(result, MediaType.TEXT_XML);
 	}
@@ -111,18 +111,19 @@ public class RunResource extends BaseResource {
 			NotFoundException, ValidationException {
 
 		Run run;
+		String html = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
 			run = constructRun(em);
+			html = HtmlUtil.toHtml(run,
+					getPageRepresentation(), getUser());
+
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
 		} finally {
 			em.close();
 		}
-
-		String html = HtmlUtil.toHtml(run,
-				getPageRepresentation(), getUser());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 
