@@ -80,7 +80,7 @@ public class StratusLabConnector extends CliConnectorBase {
 	public Connector copy() {
 		return new StratusLabConnector(getConnectorInstanceName());
 	}
-	
+
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
@@ -91,7 +91,6 @@ public class StratusLabConnector extends CliConnectorBase {
 		return new StratusLabSystemConfigurationParametersFactory(
 				getConnectorInstanceName()).getParameters();
 	}
-
 
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
@@ -146,10 +145,14 @@ public class StratusLabConnector extends CliConnectorBase {
 				+ run.getName() + extraDisksCommand;
 	}
 
-	protected String getMarketplaceEndpoint(User user) throws ConfigurationException, ValidationException {
-		return user.getParameter(constructKey(StratusLabUserParametersFactory.MARKETPLACE_ENDPOINT_PARAMETER_NAME)).getValue();
+	protected String getMarketplaceEndpoint(User user)
+			throws ConfigurationException, ValidationException {
+		return user
+				.getParameter(
+						constructKey(StratusLabUserParametersFactory.MARKETPLACE_ENDPOINT_PARAMETER_NAME))
+				.getValue();
 	}
-	
+
 	private String getVmName(Run run) {
 		return run.getType() == RunType.Orchestration ? getOrchestratorName(run)
 				: "machine";
@@ -161,8 +164,7 @@ public class StratusLabConnector extends CliConnectorBase {
 		validateLaunch(run, user);
 	}
 
-	private void validateLaunch(Run run, User user)
-			throws ValidationException {
+	private void validateLaunch(Run run, User user) throws ValidationException {
 		if (run.getCategory() == ModuleCategory.Image) {
 			ImageModule image = ImageModule.load(run.getModuleResourceUrl());
 			validateImageModule(image, user);
@@ -222,7 +224,6 @@ public class StratusLabConnector extends CliConnectorBase {
 						.getParameter(sshParameterName).getValue() == null);
 	}
 
-
 	private String createContextualizationData(Run run, User user)
 			throws ConfigurationException, InvalidElementException,
 			ValidationException {
@@ -263,7 +264,7 @@ public class StratusLabConnector extends CliConnectorBase {
 
 		contextualization += "CLOUDCONNECTOR_PYTHON_MODULENAME="
 				+ CLOUDCONNECTOR_PYTHON_MODULENAME + "#";
-		
+
 		contextualization += "SLIPSTREAM_BOOTSTRAP_BIN="
 				+ configuration
 						.getRequiredProperty("slipstream.update.clientbootstrapurl")
@@ -289,7 +290,8 @@ public class StratusLabConnector extends CliConnectorBase {
 		return contextualization;
 	}
 
-	private String constructScriptExecCommand() throws ConfigurationException {
+	private String constructScriptExecCommand() throws ConfigurationException,
+			ValidationException {
 
 		Configuration configuration = Configuration.getInstance();
 

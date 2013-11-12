@@ -86,4 +86,9 @@ public class AuthnResource extends BaseResource {
 		return redirectUrl;
 	}
 
+	@Override
+	protected String getPageRepresentation() {
+		return null;
+	}
+
 }

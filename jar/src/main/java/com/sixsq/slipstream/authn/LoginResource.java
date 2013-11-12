@@ -41,6 +41,8 @@ import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.util.RequestUtil;
@@ -60,25 +62,35 @@ public class LoginResource extends AuthnResource {
 			setUser(RequestUtil.getUserFromRequest(getRequest()));
 		} catch (NullPointerException ex) {
 			// user not logged-in. But it's ok for this page
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
 		}
 
 	}
 
 	@Post
-	public void login(Representation entity)
-			throws ResourceException {
+	public void login(Representation entity) throws ResourceException {
 
 		Form form = new Form(entity);
 
 		String username = form.getFirstValue("username");
 		String password = form.getFirstValue("password");
 
-		validateUser(username, password);
+		try {
+			validateUser(username, password);
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
 
 		setResponse(username);
 	}
 
-	private void validateUser(String username, String password) {
+	private void validateUser(String username, String password)
+			throws ConfigurationException, ValidationException {
 
 		if (username == null || password == null) {
 			throwUnauthorizedWithMessage();
@@ -107,15 +119,16 @@ public class LoginResource extends AuthnResource {
 	}
 
 	private void throwUnauthorizedWithMessage() {
-		throw new ResourceException(CLIENT_ERROR_UNAUTHORIZED, "Username/password combination not valid");
+		throw new ResourceException(CLIENT_ERROR_UNAUTHORIZED,
+				"Username/password combination not valid");
 	}
 
 	private void setResponse(String username) {
 		Request request = getRequest();
 		Response response = getResponse();
-	
+
 		CookieUtils.addAuthnCookie(response, username);
-	
+
 		if (isHtmlRequested(request)) {
 			Reference redirectURL = extractRedirectURL(request);
 			response.redirectSeeOther(redirectURL);
@@ -149,5 +162,5 @@ public class LoginResource extends AuthnResource {
 	public static String getResourceRoot() {
 		return resourceRoot;
 	}
-	
+
 }

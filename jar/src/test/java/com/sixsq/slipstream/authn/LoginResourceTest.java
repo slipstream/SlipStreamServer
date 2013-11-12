@@ -47,6 +47,7 @@ import org.restlet.security.Verifier;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
@@ -59,7 +60,8 @@ public class LoginResourceTest extends ResourceTestBase {
 	}
 
 	private void createAndStoreUser() throws NoSuchAlgorithmException,
-			UnsupportedEncodingException {
+			UnsupportedEncodingException, ConfigurationException,
+			ValidationException {
 		user = createUser("test");
 		user.hashAndSetPassword("password");
 		user.store();
@@ -71,7 +73,8 @@ public class LoginResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void loginValidUser() throws ConfigurationException {
+	public void loginValidUser() throws ConfigurationException,
+			ValidationException {
 
 		Request request = createPostRequest(user);
 		Response response = executeRequest(request);
@@ -81,7 +84,8 @@ public class LoginResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void loginValidUserWithCookiePresent() throws ConfigurationException {
+	public void loginValidUserWithCookiePresent()
+			throws ConfigurationException, ValidationException {
 
 		Request request = createPostRequest(user);
 		Response response = executeRequest(request);
@@ -97,7 +101,8 @@ public class LoginResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void loginInvalidUserNoCookie() throws ConfigurationException {
+	public void loginInvalidUserNoCookie() throws ConfigurationException,
+			ValidationException {
 		User invalid = createUser("invalid", "password");
 		Request request = createPostRequest(invalid);
 		Response response = executeRequest(request);
@@ -109,7 +114,8 @@ public class LoginResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void loginInvalidUser() throws ConfigurationException {
+	public void loginInvalidUser() throws ConfigurationException,
+			ValidationException {
 		User invalid = createUser("invalid", "password");
 		Request request = createPostRequest(invalid);
 		Response response = executeRequest(request);
@@ -118,7 +124,8 @@ public class LoginResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void loginInvalidPasswordNoCookie() throws ConfigurationException {
+	public void loginInvalidPasswordNoCookie() throws ConfigurationException,
+			ValidationException {
 		User invalid = createUser(user.getName(), "wrong");
 		Request request = createPostRequest(invalid);
 		Response response = executeRequest(request);
@@ -130,7 +137,8 @@ public class LoginResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void loginWrongPasswordUser() throws ConfigurationException {
+	public void loginWrongPasswordUser() throws ConfigurationException,
+			ValidationException {
 		User wrongPassword = createUser(user.getName(), "wrong");
 		Request request = createPostRequest(wrongPassword);
 		Response response = executeRequest(request);
@@ -139,7 +147,8 @@ public class LoginResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void redirectsOnSuccessHtmlLogin() throws ConfigurationException {
+	public void redirectsOnSuccessHtmlLogin() throws ConfigurationException,
+			ValidationException {
 		Request request = new Request(Method.POST,
 				"http://something.org/test/request?redirectURL=/module");
 		request.setRootRef(new Reference("http://something.org"));
@@ -162,7 +171,8 @@ public class LoginResourceTest extends ResourceTestBase {
 		assertThat(response.getLocationRef().getPath(), is("/module"));
 	}
 
-	private Request createPostRequest(User user) throws ConfigurationException {
+	private Request createPostRequest(User user) throws ConfigurationException,
+			ValidationException {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		Form form = createUserLoginForm(user);
 		return createPostRequest(attributes, form.getWebRepresentation());

@@ -37,6 +37,8 @@ import org.restlet.representation.StringRepresentation;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
+import com.sixsq.slipstream.exceptions.Util;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
 import com.sixsq.slipstream.persistence.OneShotAction;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
@@ -60,7 +62,7 @@ public class UserEmailValidationAction extends OneShotAction {
 	}
 
 	private void emailValidated(String baseUrlSlash)
-			throws SlipStreamRuntimeException, ConfigurationException {
+			throws ConfigurationException, ValidationException {
 
 		Form form = getForm();
 		String userResourceUrl = form.getFirst("userResourceUrl").getValue();
@@ -94,12 +96,13 @@ public class UserEmailValidationAction extends OneShotAction {
 		// now that the random password has been sent to the user
 		// hash it before it is stored
 		user.hashAndSetPassword(user.getPassword());
-		
+
 		Notifier.sendNotification(user.getEmail(), msg);
 	}
 
 	private void informAdministratorOfUserCreation(String baseUrlSlash,
-			String userResourceUrl) throws ConfigurationException {
+			String userResourceUrl) throws ValidationException,
+			SlipStreamRuntimeException {
 
 		String msg = MessageUtils.format(MSG_NEW_USER_NOTIFICATION,
 				baseUrlSlash + userResourceUrl);
@@ -107,7 +110,8 @@ public class UserEmailValidationAction extends OneShotAction {
 		Notifier.sendNotification(getRegistrationEmail(), msg);
 	}
 
-	private String getRegistrationEmail() throws ConfigurationException {
+	private String getRegistrationEmail() throws ConfigurationException,
+			ValidationException {
 		ServiceConfigurationParameter p = Configuration
 				.getInstance()
 				.getParameters()
@@ -123,7 +127,11 @@ public class UserEmailValidationAction extends OneShotAction {
 
 		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 
-		emailValidated(baseUrlSlash);
+		try {
+			emailValidated(baseUrlSlash);
+		} catch (ValidationException e) {
+			Util.throwClientValidationError(e.getMessage());
+		}
 
 		String msg = MessageUtils.format(MSG_EMAIL_CONFIRMED);
 

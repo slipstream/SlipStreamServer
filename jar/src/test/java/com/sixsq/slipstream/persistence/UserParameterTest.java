@@ -36,14 +36,14 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class UserParameterTest {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = ValidationException.class)
 	public void nullParameterName() throws SlipStreamClientException {
 
 		new UserParameter(null, "ok", "ok");
 	}
 
 	@Test
-	public void serializationWorks() {
+	public void serializationWorks() throws ValidationException {
 		UserParameter parameter = new UserParameter("dummy", "ok", "ok");
 
 		String serialization = SerializationUtil.toXmlString(parameter);
@@ -60,13 +60,13 @@ public class UserParameterTest {
 	public void parametersPersisted() throws ValidationException {
 		User user = new User("parametersPersisted");
 		ParametersFactory.addParametersForEditing(user);
-		
+
 		user.store();
-		
+
 		user = User.loadByName(user.getName());
-		
+
 		assertThat(user.getParameters().size(), is(greaterThan(1)));
-		
+
 		user.remove();
 	}
 }

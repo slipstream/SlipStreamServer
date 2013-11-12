@@ -41,6 +41,7 @@ import org.junit.Test;
 import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -63,7 +64,8 @@ public class StateMachinetTest {
 			.getCloudServiceName();
 
 	@BeforeClass
-	public static void beforeClass() {
+	public static void beforeClass() throws ConfigurationException,
+			ValidationException {
 		user = CommonTestUtil.createTestUser();
 	}
 

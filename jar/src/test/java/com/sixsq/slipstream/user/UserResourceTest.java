@@ -123,12 +123,14 @@ public class UserResourceTest extends ResourceTestBase {
 
 	@Test
 	public void changePasswordValidAsSuper() throws ConfigurationException,
-			NoSuchAlgorithmException, UnsupportedEncodingException {
+			NoSuchAlgorithmException, UnsupportedEncodingException,
+			ValidationException {
 
 		user = user.store();
 		user.hashAndSetPassword("something old");
 		user = user.store();
-		assertThat(getPersistedPassword(user), is(not(Passwords.hash(NEW_PASSWORD))));
+		assertThat(getPersistedPassword(user),
+				is(not(Passwords.hash(NEW_PASSWORD))));
 
 		Passwords passwords = createValidPasswords(PASSWORD);
 		Request request = createPutRequest(user, superUser.getName(), passwords);
@@ -138,12 +140,14 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User modifiedUser = User.load(user.getResourceUri());
 
-		assertThat(getPersistedPassword(modifiedUser), is(Passwords.hash(NEW_PASSWORD)));
+		assertThat(getPersistedPassword(modifiedUser),
+				is(Passwords.hash(NEW_PASSWORD)));
 	}
 
 	@Test
 	public void changePasswordValidAsItself() throws ConfigurationException,
-			NoSuchAlgorithmException, UnsupportedEncodingException {
+			NoSuchAlgorithmException, UnsupportedEncodingException,
+			ValidationException {
 
 		user = user.store();
 		String oldPassword = "something old";
@@ -159,13 +163,14 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User modifiedUser = User.load(user.getResourceUri());
 
-		assertThat(getPersistedPassword(modifiedUser), is(Passwords.hash(NEW_PASSWORD)));
+		assertThat(getPersistedPassword(modifiedUser),
+				is(Passwords.hash(NEW_PASSWORD)));
 	}
 
 	@Test
 	public void cannotChangePasswordOfOtherUser()
 			throws ConfigurationException, NoSuchAlgorithmException,
-			UnsupportedEncodingException {
+			UnsupportedEncodingException, ValidationException {
 
 		String oldPassword = "old password";
 		user.hashAndSetPassword(oldPassword);
@@ -335,7 +340,8 @@ public class UserResourceTest extends ResourceTestBase {
 
 	}
 
-	private String getPersistedPassword(User user) {
+	private String getPersistedPassword(User user)
+			throws ConfigurationException, ValidationException {
 		User restoredUser = User.load(user.getResourceUri());
 		return restoredUser.getPassword();
 	}
@@ -365,7 +371,8 @@ public class UserResourceTest extends ResourceTestBase {
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
-		assertThat(response.getLocationRef().getPath(), is("/user/" + user.getName()));
+		assertThat(response.getLocationRef().getPath(),
+				is("/user/" + user.getName()));
 	}
 
 	@Test

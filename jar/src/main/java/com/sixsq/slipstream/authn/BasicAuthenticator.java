@@ -36,6 +36,9 @@ import org.restlet.security.User;
 import org.restlet.security.Verifier;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.Util;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.util.RequestUtil;
 
@@ -67,8 +70,16 @@ public class BasicAuthenticator extends Authenticator {
 				result = Verifier.RESULT_MISSING;
 			}
 
-			com.sixsq.slipstream.persistence.User user = com.sixsq.slipstream.persistence.User
-					.loadByName(username);
+			com.sixsq.slipstream.persistence.User user = null;
+			
+			try {
+				user = com.sixsq.slipstream.persistence.User
+						.loadByName(username);
+			} catch (ConfigurationException e) {
+				Util.throwConfigurationException(e);
+			} catch (ValidationException e) {
+				Util.throwServerError(e.getMessage());
+			}
 
 			if (user != null) {
 				try {

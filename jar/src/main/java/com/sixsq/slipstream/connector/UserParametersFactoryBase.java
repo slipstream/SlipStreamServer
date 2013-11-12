@@ -40,7 +40,7 @@ public abstract class UserParametersFactoryBase extends
 	public static final String ORCHESTRATOR_IMAGEID_PARAMETER_NAME = "orchestrator.imageid";
 	public static final String ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME = "orchestrator.instance.type";
 	public static final String UPDATE_CLIENTURL_PARAMETER_NAME = "update.clienturl";
-	
+
 	protected Map<String, UserParameter> referenceParameters = new HashMap<String, UserParameter>();
 
 	public static List<String> extractCloudNames(
@@ -67,12 +67,12 @@ public abstract class UserParametersFactoryBase extends
 	}
 
 	protected UserParameter createParameter(String name, String description,
-			boolean mandatory) {
+			boolean mandatory) throws ValidationException {
 		return createParameter(name, null, description, mandatory);
 	}
 
 	protected UserParameter createParameter(String name, boolean value,
-			String description) {
+			String description) throws ValidationException {
 		UserParameter p = new UserParameter(constructKey(name),
 				String.valueOf(value), description);
 		p.setCategory(getCategory());
@@ -81,7 +81,7 @@ public abstract class UserParametersFactoryBase extends
 	}
 
 	protected UserParameter createParameter(String name, String value,
-			String description, boolean mandatory) {
+			String description, boolean mandatory) throws ValidationException {
 		UserParameter p = new UserParameter(constructKey(name), value,
 				description);
 		p.setName(p.getName());
@@ -89,9 +89,10 @@ public abstract class UserParametersFactoryBase extends
 		p.setMandatory(true);
 		return p;
 	}
-	
-	public static String getPublicKeyParameterName(){
-		return ParametersFactory.constructKey(ParameterCategory.General.toString(), SSHKEY_PARAMETER_NAME);
+
+	public static String getPublicKeyParameterName() {
+		return ParametersFactory.constructKey(
+				ParameterCategory.General.toString(), SSHKEY_PARAMETER_NAME);
 	}
 
 }

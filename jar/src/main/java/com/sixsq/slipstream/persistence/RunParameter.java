@@ -38,7 +38,8 @@ public class RunParameter extends Parameter<Run> {
 	private RunParameter() {
 	}
 
-	public RunParameter(String name, String value, String description) {
+	public RunParameter(String name, String value, String description)
+			throws ValidationException {
 		super(name, value, description);
 	}
 
@@ -54,8 +55,8 @@ public class RunParameter extends Parameter<Run> {
 
 	@Override
 	public RunParameter copy() throws ValidationException {
-		return (RunParameter) copyTo(new RunParameter(getName(),
-				getValue(), getDescription()));
+		return (RunParameter) copyTo(new RunParameter(getName(), getValue(),
+				getDescription()));
 	}
 
 }

@@ -40,6 +40,10 @@ public class ModuleListResource extends BaseResource {
 
 	private String resourceUri = null;
 
+	protected String getResourceUri() {
+		return resourceUri;
+	}
+
 	@Override
 	public void doInit() throws ResourceException {
 
@@ -55,9 +59,7 @@ public class ModuleListResource extends BaseResource {
 	@Get("xml|txt")
 	public Representation toXml() {
 
-		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
-
-		String result = SerializationUtil.toXmlString(moduleViewList);
+		String result = SerializationUtil.toXmlString(retrieveFilteredModuleViewList());
 		return new StringRepresentation(result);
 	}
 
@@ -89,7 +91,7 @@ public class ModuleListResource extends BaseResource {
 		return filterAuthz(modules);
 	}
 
-	private ModuleViewList filterAuthz(ModuleViewList moduleViewList) {
+	protected ModuleViewList filterAuthz(ModuleViewList moduleViewList) {
 		ModuleViewList filtered = new ModuleViewList(
 				new ArrayList<ModuleView>());
 		for (ModuleView view : moduleViewList.getList()) {

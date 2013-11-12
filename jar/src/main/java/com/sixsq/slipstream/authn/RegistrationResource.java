@@ -33,8 +33,10 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
 import com.sixsq.slipstream.persistence.OneShotAction;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
@@ -53,7 +55,13 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 
 		User newUser = processUser(entity);
 
-		checkUserDoesntExist(newUser);
+		try {
+			checkUserDoesntExist(newUser);
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
 
 		OneShotAction action = createConfirmationEntry(newUser);
 
@@ -71,10 +79,10 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 				.getName();
 		ServiceConfigurationParameter parameter = getConfiguration()
 				.getParameters().get(key);
-		if(parameter != null) {
+		if (parameter != null) {
 			allow = parameter.isTrue();
 		}
-		if(!allow) {
+		if (!allow) {
 			throwClientForbiddenError("Self registration disabled");
 		}
 	}
@@ -122,7 +130,8 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 		return action;
 	}
 
-	public void checkUserDoesntExist(User user) throws ResourceException {
+	public void checkUserDoesntExist(User user) throws ConfigurationException,
+			ValidationException {
 
 		if (User.loadByName(user.getName()) != null) {
 			throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,

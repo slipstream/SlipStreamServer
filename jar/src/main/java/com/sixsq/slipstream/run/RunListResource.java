@@ -94,8 +94,9 @@ public class RunListResource extends BaseResource {
 
 		RunViewList runViewList = fetchListView();
 
-		return new StringRepresentation(HtmlUtil.toHtml(runViewList, "runs",
-				getTransformationType(), getUser()), MediaType.TEXT_HTML);
+		return new StringRepresentation(HtmlUtil.toHtml(runViewList,
+				getPageRepresentation(), getTransformationType(), getUser()),
+				MediaType.TEXT_HTML);
 	}
 
 	private RunViewList fetchListView() {
@@ -108,8 +109,7 @@ public class RunListResource extends BaseResource {
 		try {
 			list = fetchListView(query, getUser());
 		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			throwServerError(e.getMessage());
+			throwConfigurationException(e);
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
@@ -330,6 +330,11 @@ public class RunListResource extends BaseResource {
 
 	private void updateReference(Module module) {
 		refqname = module.getName();
+	}
+
+	@Override
+	protected String getPageRepresentation() {
+		return "runs";
 	}
 
 }

@@ -50,8 +50,7 @@ import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.dashboard.DashboardRouter;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
-import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
+import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.Images;
@@ -84,9 +83,9 @@ public class RootApplication extends Application {
 			verifyMinimumDatabaseInfo();
 
 		} catch (ConfigurationException e) {
-			throw new SlipStreamInternalException(e.getMessage(), e);
+			Util.throwConfigurationException(e);
 		} catch (NotFoundException e) {
-			throw new SlipStreamInternalException(e.getMessage(), e);
+			Util.throwConfigurationException(e);
 		}
 
 		MetadataService ms = getMetadataService();
@@ -138,7 +137,7 @@ public class RootApplication extends Application {
 	}
 
 	private static void verifyMinimumDatabaseInfo()
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 
 		User user = User.loadByName("super");
 		if (user == null) {
@@ -173,8 +172,9 @@ public class RootApplication extends Application {
 			attachDocumentation(router);
 			attachReports(router);
 		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			throw (new SlipStreamRuntimeException(e));
+			Util.throwConfigurationException(e);
+		} catch (ValidationException e) {
+			Util.throwConfigurationException(e);
 		}
 
 		Directory directoryStaticContent = attachStaticContent();
@@ -211,7 +211,8 @@ public class RootApplication extends Application {
 		return directory;
 	}
 
-	private void attachReports(RootRouter router) throws ConfigurationException {
+	private void attachReports(RootRouter router)
+			throws ConfigurationException, ValidationException {
 		router.attach("/reports", new ReportRouter(getContext()));
 	}
 
@@ -372,7 +373,7 @@ public class RootApplication extends Application {
 	}
 
 	public void addConfigurationToRequest(Request request)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 
 		RequestUtil.addConfigurationToRequest(request);
 
@@ -390,7 +391,9 @@ public class RootApplication extends Application {
 			try {
 				addConfigurationToRequest(request);
 			} catch (ConfigurationException e) {
-				throw new SlipStreamInternalException(e.getMessage(), e);
+				Util.throwConfigurationException(e);
+			} catch (ValidationException e) {
+				Util.throwClientValidationError(e.getMessage());
 			}
 
 			super.doHandle(next, request, response);

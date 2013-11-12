@@ -30,8 +30,10 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 @SuppressWarnings("serial")
 public class UserParameter extends Parameter<User> {
 
-	public static UserParameter convert(Parameter<ServiceConfiguration> source) {
-		UserParameter target = new UserParameter(source.getName(), source.getValue(), source.getDescription());
+	public static UserParameter convert(Parameter<ServiceConfiguration> source)
+			throws ValidationException {
+		UserParameter target = new UserParameter(source.getName(),
+				source.getValue(), source.getDescription());
 		target.setCategory(source.getCategory());
 		return target;
 	}
@@ -44,11 +46,12 @@ public class UserParameter extends Parameter<User> {
 	private UserParameter() {
 	}
 
-	public UserParameter(String name, String value, String description) {
+	public UserParameter(String name, String value, String description)
+			throws ValidationException {
 		super(name, value, description);
 	}
 
-	public UserParameter(String name) {
+	public UserParameter(String name) throws ValidationException {
 		super(name);
 	}
 
@@ -64,8 +67,8 @@ public class UserParameter extends Parameter<User> {
 
 	@Override
 	public UserParameter copy() throws ValidationException {
-		return (UserParameter) copyTo(new UserParameter(getName(),
-				getValue(), getDescription()));
+		return (UserParameter) copyTo(new UserParameter(getName(), getValue(),
+				getDescription()));
 	}
-	
+
 }

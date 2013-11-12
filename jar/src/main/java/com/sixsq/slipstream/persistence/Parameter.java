@@ -87,23 +87,24 @@ public abstract class Parameter<T> implements Serializable {
 		super();
 	}
 
-	public Parameter(String name) {
+	public Parameter(String name) throws ValidationException {
 		this();
 		this.name = name;
-		validateName(name);
+		validateName();
 		this.category = ParameterCategory.General.name();
 	}
 
-	public Parameter(String name, String value, String description) {
+	public Parameter(String name, String value, String description)
+			throws ValidationException {
 		this(name);
 		this.description = description;
 		this.value = value;
 	}
 
-	private void validateName(String name) {
+	protected void validateName() throws ValidationException {
 		if (name == null) {
-			throw (new IllegalArgumentException(
-					"Error creating new Parameter type, argument name cannot be null"));
+			throw (new ValidationException(
+					"Error creating new Parameter, argument name cannot be null"));
 		}
 	}
 
@@ -134,8 +135,9 @@ public abstract class Parameter<T> implements Serializable {
 
 	@Element(required = false, data = true)
 	public void setValue(String value) throws ValidationException {
-		if(type == ParameterType.Boolean) {
-			this.value = "on".equals(value) ? Boolean.TRUE.toString() : Boolean.FALSE.toString();
+		if (type == ParameterType.Boolean) {
+			this.value = "on".equals(value) ? Boolean.TRUE.toString()
+					: Boolean.FALSE.toString();
 		} else {
 			this.value = value;
 		}
@@ -279,8 +281,9 @@ public abstract class Parameter<T> implements Serializable {
 
 		return copy;
 	}
-	
+
 	public boolean isTrue() {
 		return Boolean.parseBoolean(getValue());
 	}
+
 }

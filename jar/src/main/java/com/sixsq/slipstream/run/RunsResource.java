@@ -46,7 +46,7 @@ public class RunsResource extends BaseResource {
 	public Representation toHtml() {
 
 		String html = HtmlUtil.toHtml(getRuns(),
-				"runs", getUser());
+				getPageRepresentation(), getUser());
 		
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
@@ -61,6 +61,11 @@ public class RunsResource extends BaseResource {
 		}
 	
 		return runs.getRuns();
+	}
+
+	@Override
+	protected String getPageRepresentation() {
+		return "runs";
 	}
 
 }

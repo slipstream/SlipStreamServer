@@ -45,7 +45,7 @@ public class ModuleParameter extends Parameter<Module> {
 	private ModuleParameter() {
 	}
 
-	public ModuleParameter(String name) {
+	public ModuleParameter(String name) throws ValidationException {
 		super(name);
 	}
 

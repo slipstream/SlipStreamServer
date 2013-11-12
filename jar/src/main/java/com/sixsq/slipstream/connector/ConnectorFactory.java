@@ -65,8 +65,7 @@ public class ConnectorFactory {
 
 	public static String incompleteCloudConfigurationErrorMessage(User user) {
 		return "Incomplete cloud configuration. Consider editing your <a href='"
-				+ "/user/" + user.getName()
-				+ "?edit=true'>user account</a>";
+				+ "/user/" + user.getName() + "?edit=true'>user account</a>";
 	}
 
 	public static Connector getConnector(String cloudServiceName)
@@ -184,11 +183,12 @@ public class ConnectorFactory {
 	}
 
 	public static Map<String, Connector> getConnectors()
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		return getConnectors(getConnectorClassNames());
 	}
 
-	public static String[] getConnectorClassNames() {
+	public static String[] getConnectorClassNames()
+			throws ConfigurationException, ValidationException {
 		String connectorsClassNames = Configuration.getInstance()
 				.getRequiredProperty(
 						RequiredParameters.CLOUD_CONNECTOR_CLASS.getName());
@@ -197,13 +197,14 @@ public class ConnectorFactory {
 	}
 
 	public static String[] splitConnectorClassNames(String connectorsClassNames) {
-		if(connectorsClassNames.trim().isEmpty()) {
+		if (connectorsClassNames.trim().isEmpty()) {
 			return new String[0];
 		}
 		return connectorsClassNames.split(",");
 	}
 
-	public static List<String> getCloudServiceNamesList() {
+	public static List<String> getCloudServiceNamesList()
+			throws ConfigurationException, ValidationException {
 		if (cloudServiceNames == null) {
 			// will also set the cloud service names
 			getConnectors();
@@ -211,7 +212,8 @@ public class ConnectorFactory {
 		return new ArrayList<String>(cloudServiceNames);
 	}
 
-	public static String[] getCloudServiceNames() {
+	public static String[] getCloudServiceNames()
+			throws ConfigurationException, ValidationException {
 		return getCloudServiceNamesList().toArray(new String[0]);
 	}
 }

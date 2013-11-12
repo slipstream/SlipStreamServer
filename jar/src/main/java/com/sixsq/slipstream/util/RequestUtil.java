@@ -29,6 +29,7 @@ import org.restlet.data.Reference;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 
@@ -43,7 +44,8 @@ public class RequestUtil {
 	private RequestUtil() {
 	}
 
-	public static User getUserFromRequest(Request request) {
+	public static User getUserFromRequest(Request request)
+			throws ConfigurationException, ValidationException {
 		User user = null;
 		try {
 			user = User.loadByName(request.getClientInfo().getUser().getName(),
@@ -120,7 +122,7 @@ public class RequestUtil {
 	}
 
 	public static void addConfigurationToRequest(Request request)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		Map<String, Object> attributes = request.getAttributes();
 
 		Configuration configuration = Configuration.getInstance();

@@ -44,6 +44,7 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
@@ -325,19 +326,23 @@ public class User extends Parameterized<User, UserParameter> {
 
 	}
 
-	public static User loadByName(String name) {
+	public static User loadByName(String name) throws ConfigurationException,
+			ValidationException {
 		return loadByName(name, true);
 	}
 
-	public static User loadByName(String name, boolean mergeSysteParameters) {
+	public static User loadByName(String name, boolean mergeSysteParameters)
+			throws ConfigurationException, ValidationException {
 		return load(User.constructResourceUri(name), mergeSysteParameters);
 	}
 
-	public static User load(String resourceUrl) {
+	public static User load(String resourceUrl) throws ConfigurationException,
+			ValidationException {
 		return load(resourceUrl, true);
 	}
 
-	public static User load(String resourceUrl, boolean mergeSysteParameters) {
+	public static User load(String resourceUrl, boolean mergeSysteParameters)
+			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		User user = em.find(User.class, resourceUrl);
 		em.close();
@@ -348,7 +353,8 @@ public class User extends Parameterized<User, UserParameter> {
 		return user;
 	}
 
-	public static void addSystemParametersIntoUser(User user) {
+	public static void addSystemParametersIntoUser(User user)
+			throws ConfigurationException, ValidationException {
 		ServiceConfiguration sc = Configuration.getInstance().getParameters();
 		for (Map.Entry<String, ServiceConfigurationParameter> entry : sc
 				.getParameters().entrySet()) {

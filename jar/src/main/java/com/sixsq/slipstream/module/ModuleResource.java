@@ -51,6 +51,7 @@ import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Authz;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
@@ -96,7 +97,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		} catch (ConfigurationException e) {
-			throwServerError(e.getMessage());
+			Util.throwConfigurationException(e);
 		}
 
 		String result = XmlUtil.normalize(prepared);
@@ -432,7 +433,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@Override
-	protected void setIsEdit() {
+	protected void setIsEdit() throws ConfigurationException,
+			ValidationException {
 		super.setIsEdit();
 
 		if (isExisting()) {
@@ -459,7 +461,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			} catch (ValidationException e) {
 				throwClientConflicError(e.getMessage());
 			} catch (ConfigurationException e) {
-				throwServerError(e.getMessage());
+				throwConfigurationException(e);
 			}
 		}
 
@@ -647,8 +649,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			ValidationException {
 		Module module = getParameterized();
 		// Add runs for this specific module version (will not apply to project)
-		RunViewList runs = new RunViewList(Run.viewList(module.getResourceUri(),
-				getUser()));
+		RunViewList runs = new RunViewList(Run.viewList(
+				module.getResourceUri(), getUser()));
 		module.setRuns(runs);
 		return module;
 	}

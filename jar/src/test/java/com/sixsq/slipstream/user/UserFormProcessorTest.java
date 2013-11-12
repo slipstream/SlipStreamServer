@@ -20,7 +20,6 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertNull;
@@ -261,7 +260,7 @@ public class UserFormProcessorTest {
 		assertThat(user.getParameter("password").getValue(), is("1234"));
 	}
 
-	private UserParameter createPasswordParameter() {
+	private UserParameter createPasswordParameter() throws ValidationException {
 		UserParameter password = new UserParameter("password",
 				"default_password", "description");
 		password.setCategory(ParameterCategory.General);

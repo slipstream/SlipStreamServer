@@ -21,7 +21,7 @@ package com.sixsq.slipstream.resource;
  */
 
 
-public class DocumentationResource extends SimpleResource {
+public class DocumentationResource extends BaseResource {
 
 	protected String getPageRepresentation() {
 		return "documentation";

@@ -36,14 +36,14 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ParameterTest {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = ValidationException.class)
 	public void nullParameterName() throws SlipStreamClientException {
 
 		new RunParameter(null, "ok", "ok");
 	}
 
 	@Test
-	public void serializationWorks() {
+	public void serializationWorks() throws ValidationException {
 		RunParameter parameter = new RunParameter("dummy", "ok", "ok");
 
 		String serialization = SerializationUtil.toXmlString(parameter);

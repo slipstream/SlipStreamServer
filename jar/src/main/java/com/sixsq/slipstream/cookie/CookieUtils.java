@@ -34,6 +34,8 @@ import org.restlet.data.Form;
 import org.restlet.security.Verifier;
 import org.restlet.util.Series;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 
@@ -356,7 +358,8 @@ public class CookieUtils {
 		return cloudServiceName;
 	}
 
-	public static User getCookieUser(Cookie cookie) {
+	public static User getCookieUser(Cookie cookie)
+			throws ConfigurationException, ValidationException {
 
 		if (cookie != null) {
 			Form form = new Form(cookie.getValue());

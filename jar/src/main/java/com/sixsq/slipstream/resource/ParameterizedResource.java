@@ -26,7 +26,6 @@ import javax.persistence.EntityManager;
 
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
-import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -46,13 +45,9 @@ import com.sixsq.slipstream.util.SerializationUtil;
 public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		extends BaseResource {
 
-	private static final String NEW_NAME = "new";
-
 	private S parameterized = null;
 
 	private String targetParameterizeUri = null;
-
-	private boolean isEdit = false;
 
 	private boolean canGet = false;
 	private boolean canPut = false;
@@ -62,7 +57,11 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	@Override
 	public void doInit() throws ResourceException {
 
-		super.doInit();
+		try {
+			super.doInit();
+		} catch (Exception e) {
+			throwServerError(e.getMessage());
+		}
 
 		try {
 			loadTargetParameterized();
@@ -72,7 +71,13 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 		authorize();
 
-		setIsEdit();
+		try {
+			setIsEdit();
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
 	}
 
 	abstract protected String extractTargetUriFromRequest();
@@ -82,14 +87,6 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	public String getTargetParameterizeUri() {
 		return targetParameterizeUri;
-	}
-
-	public boolean isEdit() {
-		return isEdit;
-	}
-
-	public void setEdit(boolean isEdit) {
-		this.isEdit = isEdit;
 	}
 
 	public boolean canGet() {
@@ -162,7 +159,13 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 			throws ValidationException {
 		setParameterized(getOrCreateParameterized(ModuleUriUtil
 				.extractModuleNameFromResourceUri(targetParameterizeUri)));
-		isEdit = true;
+		setIsEdit(true);
+	}
+
+	@Override
+	protected void setIsEdit() throws ConfigurationException,
+	ValidationException {
+		setIsEdit(isEdit() || isEditFlagTrue() || isNew());
 	}
 
 	protected boolean isNew() {
@@ -173,38 +176,6 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		boolean newInQuery = extractNewFlagFromQuery();
 		boolean doesntExists = !isExisting();
 		return newInQuery || newInUri || doesntExists;
-	}
-
-	protected void setIsEdit() {
-		isEdit = isEdit || isEditFlagTrue() || isNew();
-	}
-
-	private boolean isEditFlagTrue() {
-		return isSetInQuery("edit");
-	}
-
-	private boolean isSetInQuery(String key) {
-		Reference resourceRef = getRequest().getResourceRef();
-		Form form = resourceRef.getQueryAsForm();
-		return isTrue(form.getFirstValue(key));
-	}
-
-	private boolean extractNewFlagFromQuery() {
-		return isQueryValueSetTrue("new");
-	}
-
-	private boolean isQueryValueSetTrue(String flag) {
-		String value = getQueryValue(flag);
-		return isTrue(value);
-	}
-
-	protected boolean isTrue(String value) {
-		return ("true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || "on"
-				.equalsIgnoreCase(value));
-	}
-
-	private String getQueryValue(String key) {
-		return (String) getRequest().getAttributes().get(key);
 	}
 
 	protected void addParametersForEditing() throws ValidationException,
@@ -245,7 +216,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		} catch (ConfigurationException e) {
-			throwServerError(e.getMessage());
+			throwConfigurationException(e);
 		}
 
 		String result = SerializationUtil.toXmlString(prepared);
@@ -256,13 +227,13 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	public Representation toHtml() {
 		checkCanGet();
 
-		if (isEdit) {
+		if (isEdit()) {
 			try {
 				addParametersForEditing();
 			} catch (ValidationException e) {
 				throwClientValidationError(e.getMessage());
 			} catch (ConfigurationException e) {
-				throwServerError(e.getMessage());
+				throwConfigurationException(e);
 			}
 		}
 
@@ -272,11 +243,11 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		} catch (ConfigurationException e) {
-			throwServerError(e.getMessage());
+			throwConfigurationException(e);
 		}
-		
-		String html = HtmlUtil.toHtml(prepared,
-				getPageRepresentation(), getTransformationType(), getUser());
+
+		String html = HtmlUtil.toHtml(prepared, getPageRepresentation(),
+				getTransformationType(), getUser());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
@@ -288,7 +259,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected String getTransformationType() {
 		String type = "view";
-		if (isEdit) {
+		if (isEdit()) {
 			type = "edit";
 		}
 		if (isNew()) {

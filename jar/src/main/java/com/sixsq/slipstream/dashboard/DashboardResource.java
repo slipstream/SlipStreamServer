@@ -45,7 +45,7 @@ public class DashboardResource extends BaseResource {
 	public Representation toHtml() {
 
 		String html = HtmlUtil.toHtml(computeDashboard(),
-				"dashboard", getUser());
+				getPageRepresentation(), getUser());
 		
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
@@ -60,6 +60,11 @@ public class DashboardResource extends BaseResource {
 		}
 	
 		return dashboard;
+	}
+
+	@Override
+	protected String getPageRepresentation() {
+		return "dashboard";
 	}
 
 }

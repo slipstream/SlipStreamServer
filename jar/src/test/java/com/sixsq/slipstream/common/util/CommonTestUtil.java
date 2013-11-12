@@ -32,6 +32,7 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -51,24 +52,27 @@ public class CommonTestUtil {
 	public static final String cloudServiceName = new LocalConnector()
 			.getCloudServiceName();
 
-	public static User createTestUser() {
+	public static User createTestUser() throws ConfigurationException,
+			ValidationException {
 		return createUser("test", PASSWORD);
 	}
 
-	public static User createUser(String name) {
+	public static User createUser(String name) throws ConfigurationException,
+			ValidationException {
 		return CommonTestUtil.createUser(name, null);
 	}
 
-	public static User createUser(String name, String password) {
+	public static User createUser(String name, String password)
+			throws ConfigurationException, ValidationException {
 		User user = User.loadByName(name);
-		if(user != null) {
+		if (user != null) {
 			try {
 				user.remove();
 			} catch (Exception ex) {
-				
+
 			}
 		}
-		
+
 		try {
 			user = new User(name);
 		} catch (ValidationException e) {
@@ -153,7 +157,7 @@ public class CommonTestUtil {
 			Class<? extends Connector> connectorClass)
 			throws InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException,
-			ClassNotFoundException {
+			ClassNotFoundException, ConfigurationException, ValidationException {
 
 		// Instantiate the configuration force loading from disk
 		// This is required otherwise the first loading from

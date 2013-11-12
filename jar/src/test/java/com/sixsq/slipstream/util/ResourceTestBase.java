@@ -67,7 +67,16 @@ public class ResourceTestBase {
 	}
 
 	public static User createUser(String name, String password) {
-		User user = (User) User.loadByName(name);
+		User user = null;
+		try {
+			user = (User) User.loadByName(name);
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+			fail();
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			fail();
+		}
 		if (user != null) {
 			user.remove();
 		}
@@ -108,7 +117,13 @@ public class ResourceTestBase {
 		// Instantiate the configuration force loading from disk
 		// This is required otherwise the first loading from
 		// disk will reset the connectors
-		Configuration.getInstance();
+		try {
+			Configuration.getInstance();
+		} catch (ConfigurationException e) {
+			fail();
+		} catch (ValidationException e) {
+			fail();
+		}
 
 		Map<String, Connector> connectors = new HashMap<String, Connector>();
 		Connector connector = ConnectorFactory
@@ -136,7 +151,11 @@ public class ResourceTestBase {
 		request.setEntity(entity);
 		request.setAttributes(attributes);
 
-		RequestUtil.addConfigurationToRequest(request);
+		try {
+			RequestUtil.addConfigurationToRequest(request);
+		} catch (ValidationException e) {
+			fail();
+		}
 
 		return request;
 	}
@@ -233,12 +252,21 @@ public class ResourceTestBase {
 
 	public static void setCloudConnector(String connectorClassName)
 			throws ConfigurationException {
-		Configuration configuration = Configuration.getInstance();
+		Configuration configuration = null;
+		try {
+			configuration = Configuration.getInstance();
+		} catch (ValidationException e) {
+			fail();
+		}
 
 		ServiceConfiguration sc = configuration.getParameters();
-		sc.setParameter(new ServiceConfigurationParameter(
-				RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
-				connectorClassName));
+		try {
+			sc.setParameter(new ServiceConfigurationParameter(
+					RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
+					connectorClassName));
+		} catch (ValidationException e) {
+			fail();
+		}
 		sc.store();
 		ConnectorFactory.resetConnectors();
 	}

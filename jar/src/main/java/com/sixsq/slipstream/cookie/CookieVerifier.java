@@ -28,28 +28,55 @@ import org.restlet.data.ChallengeResponse;
 import org.restlet.data.Cookie;
 import org.restlet.security.Verifier;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.Util;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 
 public class CookieVerifier implements Verifier {
 
+	@Override
 	public int verify(Request request, Response response) {
 
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-
+		int result = RESULT_INVALID;
+		
 		if (cookie != null) {
-			int result = CookieUtils.verifyAuthnCookie(cookie);
+			result = CookieUtils.verifyAuthnCookie(cookie);
 			if (result == Verifier.RESULT_INVALID) {
-				return checkUsernamePassword(request, response);
+				try {
+					return checkUsernamePassword(request, response);
+				} catch (ConfigurationException e) {
+					throwConfigurationError(e);
+				} catch (ValidationException e) {
+					throwValidationError(e);
+				}
 			} else {
 				return result;
 			}
 		} else {
-			return checkUsernamePassword(request, response);
+			try {
+				return checkUsernamePassword(request, response);
+			} catch (ConfigurationException e) {
+				throwConfigurationError(e);
+			} catch (ValidationException e) {
+				throwValidationError(e);
+			}
 		}
 
+		return result;
 	}
 
-	private int checkUsernamePassword(Request request, Response response) {
+	private void throwValidationError(ValidationException e) {
+		Util.throwClientValidationError(e.getMessage());
+	}
+
+	private void throwConfigurationError(ConfigurationException e) {
+		Util.throwServerError(e.getMessage());
+	}
+
+	private int checkUsernamePassword(Request request, Response response)
+			throws ConfigurationException, ValidationException {
 
 		ChallengeResponse challengeResponse = request.getChallengeResponse();
 
@@ -72,7 +99,8 @@ public class CookieVerifier implements Verifier {
 
 	}
 
-	private boolean checkCredentialsInDb(String identifier, char[] secret) {
+	private boolean checkCredentialsInDb(String identifier, char[] secret)
+			throws ConfigurationException, ValidationException {
 
 		User user = User.loadByName(identifier);
 		if (user != null) {
@@ -81,6 +109,6 @@ public class CookieVerifier implements Verifier {
 		} else {
 			return false;
 		}
-		
+
 	}
 }

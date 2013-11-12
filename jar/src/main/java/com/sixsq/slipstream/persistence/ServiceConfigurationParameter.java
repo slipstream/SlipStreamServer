@@ -20,6 +20,8 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.regex.Pattern;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -42,21 +44,23 @@ public class ServiceConfigurationParameter extends
 	private ServiceConfigurationParameter() {
 	}
 
-	public ServiceConfigurationParameter(String name) {
+	public ServiceConfigurationParameter(String name)
+			throws ValidationException {
 		super(name);
 	}
 
-	public ServiceConfigurationParameter(String name, String value) {
+	public ServiceConfigurationParameter(String name, String value)
+			throws ValidationException {
 		super(name, value, "");
 	}
 
 	public ServiceConfigurationParameter(String name, String value,
-			String description) {
+			String description) throws ValidationException {
 		super(name, value, description);
 	}
 
 	public ServiceConfigurationParameter(RequiredParameters parameter,
-			String value) {
+			String value) throws ValidationException {
 		super(parameter.name(), value, parameter.getDescription());
 		setType(parameter.getType());
 		setInstructions(parameter.getInstruction());
@@ -77,8 +81,19 @@ public class ServiceConfigurationParameter extends
 
 	@Override
 	public ServiceConfigurationParameter copy() throws ValidationException {
-		return (ServiceConfigurationParameter) copyTo(new ServiceConfigurationParameter(getName(),
-				getValue(), getDescription()));
+		return (ServiceConfigurationParameter) copyTo(new ServiceConfigurationParameter(
+				getName(), getValue(), getDescription()));
 	}
 
+	@Override
+	protected void validateName() throws ValidationException {
+		super.validateName();
+		if ("".equals(getName())) {
+			throw (new ValidationException("Key cannot be empty"));
+		}
+		if (!Pattern.matches("\\w[\\w\\d.]+", getName())) {
+			throw new ValidationException(
+					"Key must start with a letter and contain only letters, digits and dots.");
+		}
+	}
 }

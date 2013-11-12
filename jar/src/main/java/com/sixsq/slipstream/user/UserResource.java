@@ -62,12 +62,19 @@ public class UserResource extends ParameterizedResource<User> {
 	public Representation toXml() {
 		User user = (User) getParameterized();
 
-		mergeCloudSystemParameters(user);
+		try {
+			mergeCloudSystemParameters(user);
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
 
 		return super.toXml();
 	}
 
-	private void mergeCloudSystemParameters(User user) {
+	private void mergeCloudSystemParameters(User user)
+			throws ConfigurationException, ValidationException {
 		String cloudServiceName = (String) getRequest().getAttributes().get(
 				RuntimeParameter.CLOUD_SERVICE_NAME);
 		if (cloudServiceName != null) {
@@ -81,7 +88,8 @@ public class UserResource extends ParameterizedResource<User> {
 		mergePulicKeyParameter(user);
 	}
 
-	private void mergePulicKeyParameter(User user) {
+	private void mergePulicKeyParameter(User user)
+			throws ConfigurationException, ValidationException {
 		String pubKeyParameterName = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY
 				.getName();
 		ServiceConfigurationParameter pubKeySystemParameter = Configuration
@@ -159,10 +167,10 @@ public class UserResource extends ParameterizedResource<User> {
 	public void modifyOrCreateFromForm(Representation entity)
 			throws ResourceException {
 
-		if(!canPut()) {
+		if (!canPut()) {
 			throwClientForbiddenError();
 		}
-		
+
 		setParameterized(getOrCreateParameterized(getTargetParameterizeUri()));
 
 		try {
@@ -170,7 +178,7 @@ public class UserResource extends ParameterizedResource<User> {
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		} catch (ConfigurationException e) {
-			throwServerError(e.getMessage());
+			throwConfigurationException(e);
 		}
 
 		processEntityAsForm(entity);
@@ -249,7 +257,8 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Override
-	protected User loadParameterized(String targetParameterizedName) {
+	protected User loadParameterized(String targetParameterizedName)
+			throws ConfigurationException, ValidationException {
 		return User.loadByName(targetParameterizedName, false);
 	}
 

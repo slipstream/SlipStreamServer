@@ -105,7 +105,7 @@ public class RunResource extends BaseResource {
 
 	@Get("html")
 	public Representation toHtml() throws ConfigurationException,
-			NotFoundException, ValidationException {
+			 ValidationException {
 
 		Run run;
 		try {
@@ -122,7 +122,7 @@ public class RunResource extends BaseResource {
 
 	}
 
-	private String getPageRepresentation() {
+	protected String getPageRepresentation() {
 		return "run";
 	}
 
@@ -201,10 +201,9 @@ public class RunResource extends BaseResource {
 				}
 			}
 		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e));
+			throwConfigurationException(e);
 		} catch (ValidationException e) {
-			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, e));
+			throwClientValidationError(e.getMessage());
 		}
 		
 		run.done();

@@ -20,8 +20,6 @@ package com.sixsq.slipstream.action;
  * -=================================================================-
  */
 
-import static org.restlet.data.Status.CLIENT_ERROR_NOT_FOUND;
-
 import java.io.IOException;
 import java.util.Map;
 
@@ -33,6 +31,7 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
+import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.persistence.OneShotAction;
 import com.sixsq.slipstream.resource.SimpleRepresentationBaseResource;
 
@@ -53,7 +52,7 @@ public class ActionResource extends SimpleRepresentationBaseResource {
 		action = OneShotAction.load(uuid);
 
 		if (action == null) {
-			throw new ResourceException(CLIENT_ERROR_NOT_FOUND);
+			Util.throwNotFoundResource();
 		}
 
 	}

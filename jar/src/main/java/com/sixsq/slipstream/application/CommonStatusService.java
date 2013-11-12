@@ -35,12 +35,13 @@ import org.restlet.data.Preference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.ResourceException;
 import org.restlet.service.StatusService;
 import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.Util;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
@@ -57,13 +58,21 @@ public class CommonStatusService extends StatusService {
 		try {
 			reloadParameters();
 		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
+			Util.throwConfigurationException(e);
+		} catch (ValidationException e) {
+			Util.throwClientValidationError(e.getMessage());
 		}
 
 		Representation representation = null;
 
-		User user = RequestUtil.getUserFromRequest(request);
+		User user = null;
+		try {
+			user = RequestUtil.getUserFromRequest(request);
+		} catch (ConfigurationException e) {
+			Util.throwConfigurationException(e);
+		} catch (ValidationException e) {
+			Util.throwClientValidationError(e.getMessage());
+		}
 
 		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 
@@ -109,7 +118,9 @@ public class CommonStatusService extends StatusService {
 		return representation;
 	}
 
-	private void reloadParameters() throws ConfigurationException {
+	private void reloadParameters() throws ConfigurationException,
+			ValidationException {
+		
 		Configuration configuration = Configuration.getInstance();
 
 		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_EMAIL

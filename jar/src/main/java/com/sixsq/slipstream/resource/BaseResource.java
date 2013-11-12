@@ -20,24 +20,78 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
+import org.restlet.data.Form;
+import org.restlet.data.MediaType;
+import org.restlet.data.Reference;
 import org.restlet.data.Status;
+import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
+import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.Util;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Empty;
+import com.sixsq.slipstream.persistence.Metadata;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
 
 public abstract class BaseResource extends ServerResource {
 
 	private User user = null;
 	private ServiceConfiguration configuration = null;
+	protected static final String NEW_NAME = "new";
+	private boolean isEdit = false;
 
 	@Override
 	protected void doInit() throws ResourceException {
-		setUser(RequestUtil.getUserFromRequest(getRequest()));
-		configuration = RequestUtil.getServiceConfigurationFromRequest(getRequest());
+		try {
+			setUser(RequestUtil.getUserFromRequest(getRequest()));
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
+		configuration = RequestUtil
+				.getServiceConfigurationFromRequest(getRequest());
 	}
+
+	@Get("xml|txt")
+	public Representation toXml() throws NotFoundException,
+			ValidationException, ConfigurationException {
+
+		String result = "";
+		User user = getUser();
+		if (user != null) {
+			result = SerializationUtil.toXmlString(getUser());
+		}
+		return new StringRepresentation(result);
+	}
+
+	@Get("html")
+	public Representation toHtml() throws ConfigurationException,
+			ValidationException {
+
+		Metadata metadata;
+		User user = getUser();
+		if (user == null) {
+			metadata = new Empty();
+		} else {
+			metadata = user;
+		}
+		return new StringRepresentation(HtmlUtil.toHtml(metadata,
+				getPageRepresentation(), getTransformationType(), getUser()),
+				MediaType.TEXT_HTML);
+
+	}
+
+	protected abstract String getPageRepresentation();
 
 	protected void setUser(User user) {
 		this.user = user;
@@ -54,7 +108,7 @@ public abstract class BaseResource extends ServerResource {
 		}
 		return type;
 	}
-	
+
 	protected boolean isChooser() {
 		String c = (String) getRequest().getAttributes().get("chooser");
 		return (c == null) ? false : true;
@@ -65,64 +119,109 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected void throwUnauthorized() {
-		throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,
-				"You are not allowed to access this resource");
+		Util.throwUnauthorized();
 	}
 
 	protected void throwClientError(Throwable e) {
-		throwClientError(e.getMessage());
+		Util.throwClientError(e);
 	}
 
 	protected void throwClientError(String message) {
-		throwClientError(Status.CLIENT_ERROR_BAD_REQUEST, message);
+		Util.throwClientError(message);
 	}
 
 	protected void throwClientConflicError(String message) {
-		throwClientError(Status.CLIENT_ERROR_CONFLICT, message);
+		Util.throwClientConflicError(message);
 	}
 
 	protected void throwClientForbiddenError() {
-		throwClientError(Status.CLIENT_ERROR_FORBIDDEN, "");
+		Util.throwClientForbiddenError();
 	}
 
 	protected void throwClientForbiddenError(String message) {
-		throwClientError(Status.CLIENT_ERROR_FORBIDDEN, message);
+		Util.throwClientForbiddenError(message);
 	}
 
 	protected void throwClientForbiddenError(Throwable e) {
-		throwClientError(Status.CLIENT_ERROR_FORBIDDEN, e);
+		Util.throwClientForbiddenError(e);
 	}
 
 	protected void throwClientBadRequest(String message) {
-		throwClientError(Status.CLIENT_ERROR_BAD_REQUEST, message);
+		Util.throwClientBadRequest(message);
 	}
 
 	protected void throwNotFoundResource() {
-		throwClientError(Status.CLIENT_ERROR_NOT_FOUND, "Not found");
+		Util.throwNotFoundResource();
 	}
 
 	protected void throwClientValidationError(String message) {
-		throwClientError(Status.CLIENT_ERROR_BAD_REQUEST, "Validation error: "
-				+ message);
+		Util.throwClientValidationError(message);
 	}
 
 	protected void throwClientConflicError(Throwable e) {
-		throwClientError(Status.CLIENT_ERROR_CONFLICT, e);
+		Util.throwClientConflicError(e);
 	}
 
 	protected void throwClientError(Status status, String message) {
-		throw new ResourceException(status, message);
+		Util.throwClientError(status, message);
 	}
 
 	protected void throwClientError(Status status, Throwable e) {
-		throw new ResourceException(status, e);
+		Util.throwClientError(status, e);
+	}
+
+	protected void throwConfigurationException(ConfigurationException e) {
+		Util.throwConfigurationException(e);
 	}
 
 	protected void throwServerError(Throwable e) {
-		throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
+		Util.throwServerError(e);
 	}
 
 	protected void throwServerError(String message) {
-		throw new ResourceException(Status.SERVER_ERROR_INTERNAL, message);
+		Util.throwServerError(message);
 	}
+
+	protected void setIsEdit() throws ConfigurationException,
+			ValidationException {
+		isEdit = isEdit || isEditFlagTrue();
+	}
+
+	protected void setIsEdit(boolean isEdit) throws ConfigurationException,
+			ValidationException {
+		this.isEdit = isEdit;
+	}
+
+	protected boolean isEdit() {
+		return isEdit;
+	}
+
+	protected boolean isEditFlagTrue() {
+		return isSetInQuery("edit");
+	}
+
+	private boolean isQueryValueSetTrue(String flag) {
+		String value = getQueryValue(flag);
+		return isTrue(value);
+	}
+
+	protected boolean isTrue(String value) {
+		return ("true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || "on"
+				.equalsIgnoreCase(value));
+	}
+
+	private String getQueryValue(String key) {
+		return (String) getRequest().getAttributes().get(key);
+	}
+
+	boolean isSetInQuery(String key) {
+		Reference resourceRef = getRequest().getResourceRef();
+		Form form = resourceRef.getQueryAsForm();
+		return isTrue(form.getFirstValue(key));
+	}
+
+	boolean extractNewFlagFromQuery() {
+		return isQueryValueSetTrue("new");
+	}
+
 }

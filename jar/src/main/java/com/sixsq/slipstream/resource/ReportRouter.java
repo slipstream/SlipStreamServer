@@ -31,15 +31,17 @@ import com.sixsq.slipstream.authz.ReportsAuthorizer;
 import com.sixsq.slipstream.authz.SuperEnroler;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.filter.ReportDecorator;
 
 public class ReportRouter extends Router {
 
-	public ReportRouter(Context context) throws ConfigurationException {
+	public ReportRouter(Context context) throws ConfigurationException,
+			ValidationException {
 		super(context);
 
 		String reportsLocation = Configuration.getInstance().getProperty(
-		"slipstream.reports.location");
+				"slipstream.reports.location");
 
 		Authorizer authorizer = new ReportsAuthorizer();
 		Authenticator authenticator = new CookieAuthenticator(getContext());

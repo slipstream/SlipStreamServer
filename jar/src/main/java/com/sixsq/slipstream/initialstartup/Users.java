@@ -117,7 +117,7 @@ public class Users {
 	}
 
 	public static void createServiceConfiguration()
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 
 		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
 

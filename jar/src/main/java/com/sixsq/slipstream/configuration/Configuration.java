@@ -134,9 +134,10 @@ public class Configuration {
 	 * 
 	 * @throws ConfigurationException
 	 *             if there is an error when reading the configuration
+	 * @throws ValidationException 
 	 */
 	public static synchronized Configuration getInstance()
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		if (instance == null) {
 			instance = new Configuration();
 		}
@@ -151,11 +152,13 @@ public class Configuration {
 	 * @throws ConfigurationException
 	 *             if an error occurs during the default initialization or when
 	 *             searching for user-specified configuration file
+	 * @throws ValidationException
 	 */
-	private Configuration() throws ConfigurationException {
+	private Configuration() throws ConfigurationException, ValidationException {
 
 		try {
-			ServiceConfiguration serviceConfiguration = ServiceConfiguration.load();
+			ServiceConfiguration serviceConfiguration = ServiceConfiguration
+					.load();
 			update(serviceConfiguration.getParameters());
 		} catch (NoResultException ex) {
 			reset();
@@ -164,7 +167,8 @@ public class Configuration {
 
 	}
 
-	private void postProcessParameters() throws ConfigurationException {
+	private void postProcessParameters() throws ConfigurationException,
+			ValidationException {
 		// Extract the SlipStream version number from the tag. Add this as a
 		// property in the configuration. Do this at the end so that a user
 		// cannot override the value.
@@ -194,7 +198,7 @@ public class Configuration {
 		setMandatoryToAllParameters();
 	}
 
-	protected void extractAndSetVersion() {
+	protected void extractAndSetVersion() throws ValidationException {
 		RequiredParameters versionRequiredParameter = RequiredParameters.SLIPSTREAM_VERSION;
 		version = loadConfigFileProperties().getProperty(
 				versionRequiredParameter.getName());
@@ -219,9 +223,9 @@ public class Configuration {
 			throw (new ConfigurationException("Invalid version value: "
 					+ e.getMessage()));
 		}
-		
+
 		versionParameter.setReadonly(true);
-		
+
 		// set the version in the UI
 		Representation.setReleaseVersion(version);
 	}
@@ -233,7 +237,8 @@ public class Configuration {
 		}
 	}
 
-	private void loadFromFile() throws ConfigurationException {
+	private void loadFromFile() throws ConfigurationException,
+			ValidationException {
 
 		Properties properties = loadConfigFileProperties();
 		serviceConfiguration
@@ -316,7 +321,7 @@ public class Configuration {
 
 	protected ServiceConfigurationParameter createParameter(String value,
 			String parameterFormattedKeyName, String description,
-			String category) {
+			String category) throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				parameterFormattedKeyName, value);
 
@@ -328,7 +333,7 @@ public class Configuration {
 	}
 
 	private Map<String, ServiceConfigurationParameter> convertPropertiesToParameters(
-			Properties properties) {
+			Properties properties) throws ValidationException {
 		Map<String, ServiceConfigurationParameter> parameters = new HashMap<String, ServiceConfigurationParameter>();
 		for (Entry<Object, Object> entry : properties.entrySet()) {
 			String key = (String) entry.getKey();
@@ -680,8 +685,9 @@ public class Configuration {
 	 * validate that the required parameters are present.
 	 * 
 	 * @throws ConfigurationException
+	 * @throws ValidationException
 	 */
-	public void reset() throws ConfigurationException {
+	public void reset() throws ConfigurationException, ValidationException {
 		serviceConfiguration = new ServiceConfiguration();
 		loadFromFile();
 		mergeWithParametersFromConnectors();
@@ -694,10 +700,14 @@ public class Configuration {
 	 * First load config file (just in case there are new required parameters)
 	 * The overwrite them with content from the db (if previously persisted)
 	 * Then process and validate
+	 * 
+	 * @throws ValidationException
+	 * @throws ConfigurationException
 	 */
-	public void update(Map<String, ServiceConfigurationParameter> parameters) {
+	public void update(Map<String, ServiceConfigurationParameter> parameters)
+			throws ConfigurationException, ValidationException {
 		loadFromFile();
-		for(ServiceConfigurationParameter p : parameters.values()) {
+		for (ServiceConfigurationParameter p : parameters.values()) {
 			this.serviceConfiguration.setParameter(p);
 		}
 		mergeWithParametersFromConnectors();

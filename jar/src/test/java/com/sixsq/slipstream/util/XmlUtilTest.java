@@ -34,9 +34,11 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 
-public class XmlUtilTest extends ResourceTestBase{
+public class XmlUtilTest extends ResourceTestBase {
 
 	@Test
 	public void ensureCleanRemovesElements()
@@ -82,7 +84,8 @@ public class XmlUtilTest extends ResourceTestBase{
 
 	@Test
 	public void ensureUserInfoAdded() throws ParserConfigurationException,
-			XPathExpressionException {
+			XPathExpressionException, ConfigurationException,
+			ValidationException {
 
 		Document document = createNewDocument();
 
@@ -95,15 +98,15 @@ public class XmlUtilTest extends ResourceTestBase{
 		XmlUtil.addUser(document, user1);
 
 		assertEquals(user1.getName(), runXpath("/*/user/@name", document));
-		assertEquals(user1.getResourceUri(), runXpath("/*/user/@resourceUri",
-				document));
+		assertEquals(user1.getResourceUri(),
+				runXpath("/*/user/@resourceUri", document));
 		assertEquals("true", runXpath("/*/user/@issuper", document));
 
 		XmlUtil.addUser(document, user2);
 
 		assertEquals(user2.getName(), runXpath("/*/user/@name", document));
-		assertEquals(user2.getResourceUri(), runXpath("/*/user/@resourceUri",
-				document));
+		assertEquals(user2.getResourceUri(),
+				runXpath("/*/user/@resourceUri", document));
 		assertEquals("", runXpath("/*/user/@isSuper", document));
 
 	}
@@ -124,20 +127,20 @@ public class XmlUtilTest extends ResourceTestBase{
 
 		assertEquals("3", runXpath("count(/*/breadcrumbs/crumb)", document));
 
-		assertEquals("gamma", runXpath("/*/breadcrumbs/crumb[1]/@name",
-				document));
-		assertEquals("alpha/beta/gamma", runXpath(
-				"/*/breadcrumbs/crumb[1]/@path", document));
+		assertEquals("gamma",
+				runXpath("/*/breadcrumbs/crumb[1]/@name", document));
+		assertEquals("alpha/beta/gamma",
+				runXpath("/*/breadcrumbs/crumb[1]/@path", document));
 
-		assertEquals("delta", runXpath("/*/breadcrumbs/crumb[2]/@name",
-				document));
-		assertEquals("alpha/beta/gamma/delta", runXpath(
-				"/*/breadcrumbs/crumb[2]/@path", document));
+		assertEquals("delta",
+				runXpath("/*/breadcrumbs/crumb[2]/@name", document));
+		assertEquals("alpha/beta/gamma/delta",
+				runXpath("/*/breadcrumbs/crumb[2]/@path", document));
 
-		assertEquals("epsilon", runXpath("/*/breadcrumbs/crumb[3]/@name",
-				document));
-		assertEquals("alpha/beta/gamma/delta/epsilon", runXpath(
-				"/*/breadcrumbs/crumb[3]/@path", document));
+		assertEquals("epsilon",
+				runXpath("/*/breadcrumbs/crumb[3]/@name", document));
+		assertEquals("alpha/beta/gamma/delta/epsilon",
+				runXpath("/*/breadcrumbs/crumb[3]/@path", document));
 
 	}
 

@@ -52,7 +52,8 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 
 	@Override
 	protected ServiceConfigurationParameter createParameter(String name,
-			String value, String description, boolean mandatory) {
+			String value, String description, boolean mandatory)
+			throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				name, value, description);
 		parameter.setMandatory(mandatory);
@@ -61,7 +62,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 
 	@Override
 	protected ServiceConfigurationParameter createParameter(String name,
-			String description, boolean mandatory) {
+			String description, boolean mandatory) throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				name, "", description);
 		parameter.setMandatory(mandatory);
@@ -70,7 +71,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 
 	@Override
 	protected ServiceConfigurationParameter createParameter(String name,
-			boolean value, String description) {
+			boolean value, String description) throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				name, String.valueOf(value), description);
 		return parameter;
@@ -98,8 +99,10 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 	}
 
 	protected void putMandatoryEndpoint() throws ValidationException {
-		putMandatoryParameter(super.constructKey(UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME),
-				"Service endpoint for " + getCategory() + " (e.g. http://example.com:5000/v2.0)");
+		putMandatoryParameter(
+				super.constructKey(UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME),
+				"Service endpoint for " + getCategory()
+						+ " (e.g. http://example.com:5000/v2.0)");
 	}
 
 }

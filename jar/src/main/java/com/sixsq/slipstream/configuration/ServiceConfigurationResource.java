@@ -20,7 +20,6 @@ package com.sixsq.slipstream.configuration;
  * -=================================================================-
  */
 
-
 import org.restlet.data.Form;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -34,6 +33,7 @@ import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.resource.ParameterizedResource;
@@ -52,10 +52,10 @@ public class ServiceConfigurationResource extends
 		try {
 			processEntityAsForm(entity);
 		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			throw (new ResourceException(e));
+			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
-			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e.getMessage()));
+			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+					e.getMessage()));
 		}
 
 		ConnectorFactory.resetConnectors();
@@ -86,13 +86,13 @@ public class ServiceConfigurationResource extends
 	}
 
 	@Post
-	public void reloadConfigFile(Representation entity) {
+	public void reloadConfigFile(Representation entity)
+			throws ValidationException {
 
 		try {
 			configuration.reset();
 		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e));
+			Util.throwConfigurationException(e);
 		}
 		configuration.store();
 		ConnectorFactory.resetConnectors();
