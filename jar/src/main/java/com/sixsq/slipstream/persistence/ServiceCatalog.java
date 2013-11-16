@@ -152,6 +152,7 @@ public class ServiceCatalog extends
 				scp.setMandatory(false);
 				scp.setReadonly(false);
 				scp.setType(dp.getType());
+				setParameter(scp);
 			}
 		}
 	}

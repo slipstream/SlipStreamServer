@@ -31,6 +31,8 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
+import com.sixsq.slipstream.persistence.ServiceCatalog;
+import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.FormProcessor;
@@ -179,7 +181,33 @@ public class ConnectorFactory {
 			setServiceName(connector);
 		}
 
+		updateServiceCatalog();
+		
 		return connectors;
+	}
+
+	private static void updateServiceCatalog() {
+		ServiceCatalogs scs = new ServiceCatalogs();
+		for(ServiceCatalog sc : scs.getList()) {
+			if(!cloudServiceNames.contains(sc.getCloud())) {
+				sc.remove();
+				scs.getList().remove(sc);
+			}
+		}
+		for(String cloud : cloudServiceNames) {
+			boolean foundIt = false;
+			for(ServiceCatalog sc : scs.getList()) {
+				if(sc.getCloud().equals(cloud)) {
+					foundIt = true;
+					break;
+				}
+			}
+			if(!foundIt) {
+				ServiceCatalog sc = new ServiceCatalog(cloud);
+				sc = sc.store();
+				scs.getList().add(sc);
+			}
+		}
 	}
 
 	public static Map<String, Connector> getConnectors()
