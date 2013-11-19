@@ -44,6 +44,7 @@ public class Main {
 		component.getServers().add(Protocol.HTTP, 8182);
 		component.getServers().add(Protocol.FILE);
 		component.getClients().add(Protocol.FILE);
+		component.getClients().add(Protocol.HTTP);
 		Application rootApplication = new RootApplication();
 		component.getDefaultHost().attach("", rootApplication);
 

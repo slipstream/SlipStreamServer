@@ -30,6 +30,7 @@ import org.restlet.Restlet;
 import org.restlet.data.CharacterSet;
 import org.restlet.data.MediaType;
 import org.restlet.resource.Directory;
+import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
@@ -159,6 +160,7 @@ public class RootApplication extends Application {
 		RootRouter router = new RootRouter(getContext());
 
 		try {
+			attachMetering(router);
 			attachAction(router);
 			attachModule(router);
 			attachUser(router);
@@ -365,6 +367,22 @@ public class RootApplication extends Application {
 
 		RequestUtil.addConfigurationToRequest(request);
 
+	}
+	
+	private void attachMetering(RootRouter router) {
+
+		// Create a Redirector to Google search service
+		String target = "http://localhost:5000/api/v1/meters/{meter}/statistics?{query}";
+		Redirector redirector = new Redirector(getContext(), target,
+		Redirector.MODE_SERVER_OUTBOUND);
+
+		// Attach the extractor to the router
+		TemplateRoute route = router.attach("/meters/{meter}/statistics?{query}", redirector);
+		route.setMatchingQuery(true);
+		route.getTemplate().getVariables()
+				.put("meter", new Variable(Variable.TYPE_URI_PATH));
+		route.getTemplate().getVariables()
+				.put("query", new Variable(Variable.TYPE_URI_QUERY));
 	}
 
 	public class RootRouter extends Router {
