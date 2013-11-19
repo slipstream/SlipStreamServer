@@ -104,22 +104,30 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 				&& paramName.endsWith("--name");
 	}
 
-	private void processSingleParameter(Form form, String paramName)
+	protected void processSingleParameter(Form form, String paramName)
 			throws BadlyFormedElementException, SlipStreamClientException {
 
 		String genericPart = getGenericPart(paramName);
 		String name = form.getFirstValue(paramName);
 
-		boolean exists = getParametrized().getParameters().containsKey(name);
 
 		String value = extractValue(form, genericPart);
 
+		if(!shouldProcess(name)) {
+			return;
+		}
+	 	
+		boolean exists = getParametrized().getParameters().containsKey(name);
 		if (exists) {
 			setExistingParameter(name, value);
 		} else {
 			setNewParameter(form, genericPart, name, value);
 		}
 
+	}
+
+	protected boolean shouldProcess(String paramName) {
+		return true;
 	}
 
 	protected void setExistingParameter(String name, String value)
@@ -156,13 +164,13 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 	protected abstract T createParameter(String name, String value,
 			String description) throws SlipStreamClientException;
 
-	private String getGenericPart(String paramName) {
+	protected String getGenericPart(String paramName) {
 		String[] parts = paramName.split("--");
 		int lastSize = parts[parts.length - 1].length();
 		return paramName.substring(0, paramName.length() - lastSize);
 	}
 
-	private String extractValue(Form form, String genericPart) {
+	protected String extractValue(Form form, String genericPart) {
 
 		return form.getFirstValue(genericPart + "value");
 	}

@@ -20,6 +20,7 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.mail.internet.AddressException;
@@ -33,6 +34,7 @@ import javax.persistence.Query;
 
 import org.simpleframework.xml.Attribute;
 
+import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
@@ -48,6 +50,12 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 		@NamedQuery(name = "all", query = "SELECT sc FROM ServiceCatalog sc") })
 public class ServiceCatalog extends
 		Parameterized<ServiceCatalog, ServiceCatalogParameter> {
+
+	private final static String CATEGORY_GENERAL = "General";
+	private final static String CATEGORY_OVERALL_CAPACITY = "Overall Capacity";
+	private final static String CATEGORY_SINGLE_VM_CAPACITY = "Single VM Capacity";
+	private final static String CATEGORY_PRICING = "Pricing";
+//	private final static String CATEGORY_OTHER = "Other";
 
 	public final static String RESOURCE_URL_PREFIX = "servicecatalog/";
 
@@ -127,8 +135,7 @@ public class ServiceCatalog extends
 	}
 
 	public static ServiceCatalog load() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new NotImplementedException();
 	}
 
 	@Override
@@ -138,16 +145,17 @@ public class ServiceCatalog extends
 
 	public void populateDefinedParameters() throws ValidationException {
 		for (DefinedParameters dp : DefinedParameters.values()) {
-			ServiceCatalogParameter scp = getParameter(dp.getName());
+			String name = cloud + "." + dp.getName();
+			ServiceCatalogParameter scp = getParameter(name);
 			if (scp != null) {
-				scp.setCatalogCategory(dp.getCategory());
+				scp.setCategory(dp.getCategory());
 				scp.setDescription(dp.getDescription());
 				scp.setInstructions(dp.getInstruction());
 				scp.setType(dp.getType());
 			} else {
-				scp = new ServiceCatalogParameter(dp.getName(), "",
+				scp = new ServiceCatalogParameter(name, "",
 						dp.getDescription());
-				scp.setCatalogCategory(dp.getCategory());
+				scp.setCategory(dp.getCategory());
 				scp.setInstructions(dp.getInstruction());
 				scp.setMandatory(false);
 				scp.setReadonly(false);
@@ -157,6 +165,10 @@ public class ServiceCatalog extends
 		}
 	}
 
+	public void clearParameters() {
+		setParameters(new HashMap<String, ServiceCatalogParameter>());
+	}
+
 	/**
 	 * Encoded names. '_' here corresponds to '.' in config file.
 	 */
@@ -164,10 +176,10 @@ public class ServiceCatalog extends
 
 		GENERAL_DESCRIPTION(
 				"General description of the cloud service (including optional further links)",
-				ServiceCatalogCategory.General),
+				CATEGORY_GENERAL),
 
 		SUPPORT_EMAIL("Support email adress for this cloud service",
-				ServiceCatalogCategory.General) {
+				CATEGORY_GENERAL) {
 			@Override
 			public void validate(String value) {
 				super.validate(value);
@@ -176,18 +188,29 @@ public class ServiceCatalog extends
 		},
 
 		OVERALL_CPU("Overall available CPUs (cores)",
-				ServiceCatalogCategory.Overall),
+				CATEGORY_OVERALL_CAPACITY),
 
-		OVERALL_RAM("Overall available RAM", ServiceCatalogCategory.Overall),
+		OVERALL_RAM("Overall available RAM", CATEGORY_OVERALL_CAPACITY),
 
-		SINGLE_VM_MAX_CPU("Maximum number of CPUs (cores) for a single VM",
-				ServiceCatalogCategory.Single_VM),
+		OVERALL_STORAGE("Overall available storage", CATEGORY_OVERALL_CAPACITY),
 
-		SINGLE_VM_MAX_RAM("Maximum number of RAM (GB) for a single VM",
-				ServiceCatalogCategory.Single_VM);
+		SINGLE_VM_MAX_CPU("Maximum number of CPUs (cores) available for a single VM",
+				CATEGORY_SINGLE_VM_CAPACITY),
 
+		SINGLE_VM_MAX_RAM("Maximum number of RAM (GB) available for a single VM",
+				CATEGORY_SINGLE_VM_CAPACITY),
+
+		PRICING_CPU_PER_HOUR("CPU cost per hour, in euro",
+				CATEGORY_PRICING),
+
+		PRICING_RAM_PER_HOUR("RAM (GB) cost per hour, in euro",
+				CATEGORY_PRICING),
+
+		PRICING_STORAGE_PER_HOUR("Storage (GB) cost per hour, in euro",
+				CATEGORY_PRICING);
+		
 		private final String description;
-		private final ServiceCatalogCategory category;
+		private final String category;
 		private final String instructions;
 		private final ParameterType type;
 		private final boolean readonly;
@@ -197,7 +220,7 @@ public class ServiceCatalog extends
 		}
 
 		private DefinedParameters(String description,
-				ServiceCatalogCategory category) {
+				String category) {
 			this.description = description;
 			this.category = category;
 			this.instructions = "";
@@ -206,7 +229,7 @@ public class ServiceCatalog extends
 		}
 
 		private DefinedParameters(String description,
-				ServiceCatalogCategory category, boolean readonly) {
+				String category, boolean readonly) {
 			this.description = description;
 			this.category = category;
 			this.instructions = "";
@@ -215,7 +238,7 @@ public class ServiceCatalog extends
 		}
 
 		private DefinedParameters(String description,
-				ServiceCatalogCategory category, String instructions) {
+				String category, String instructions) {
 			this.description = description;
 			this.category = category;
 			this.instructions = instructions;
@@ -224,7 +247,7 @@ public class ServiceCatalog extends
 		}
 
 		private DefinedParameters(String description,
-				ServiceCatalogCategory category, ParameterType type) {
+				String category, ParameterType type) {
 			this.description = description;
 			this.category = category;
 			this.instructions = "";
@@ -233,7 +256,7 @@ public class ServiceCatalog extends
 		}
 
 		private DefinedParameters(String description,
-				ServiceCatalogCategory category, String instructions,
+				String category, String instructions,
 				ParameterType type) {
 			this.description = description;
 			this.category = category;
@@ -250,7 +273,7 @@ public class ServiceCatalog extends
 			return description;
 		}
 
-		public ServiceCatalogCategory getCategory() {
+		public String getCategory() {
 			return category;
 		}
 

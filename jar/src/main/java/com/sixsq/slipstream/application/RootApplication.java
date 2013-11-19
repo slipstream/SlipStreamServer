@@ -59,9 +59,11 @@ import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.DocumentationResource;
 import com.sixsq.slipstream.resource.ReportRouter;
+import com.sixsq.slipstream.resource.ServiceCatalogRouter;
 import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.RunsRouter;
@@ -169,6 +171,7 @@ public class RootApplication extends Application {
 			attachLogin(router);
 			attachLogout(router);
 			attachConfiguration(router);
+			attachServiceCatalog(router); // needs to be after configuration
 			attachDocumentation(router);
 			attachReports(router);
 		} catch (ConfigurationException e) {
@@ -264,6 +267,14 @@ public class RootApplication extends Application {
 	private void attachDashboard(RootRouter router)
 			throws ConfigurationException {
 		guardAndAttach(router, new DashboardRouter(getContext()), "dashboard");
+	}
+
+	private void attachServiceCatalog(RootRouter router)
+			throws ConfigurationException, ValidationException {
+		if (ServiceCatalogs.isEnabled()) {
+			guardAndAttach(router, new ServiceCatalogRouter(getContext()),
+					"service_catalog");
+		}
 	}
 
 	private void attachVms(RootRouter router) throws ConfigurationException {

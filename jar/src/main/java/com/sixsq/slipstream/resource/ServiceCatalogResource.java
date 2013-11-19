@@ -1,16 +1,5 @@
 package com.sixsq.slipstream.resource;
 
-import org.restlet.data.MediaType;
-import org.restlet.representation.Representation;
-import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.Get;
-
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ServiceCatalog;
-import com.sixsq.slipstream.persistence.ServiceCatalogs;
-import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
-
 /*
  * +=================================================================+
  * SlipStream Server (WAR)
@@ -31,54 +20,71 @@ import com.sixsq.slipstream.util.SerializationUtil;
  * -=================================================================-
  */
 
+import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
+import org.restlet.resource.Get;
+import org.restlet.resource.Put;
+import org.restlet.resource.ResourceException;
+
+import com.sixsq.slipstream.exceptions.NotImplementedException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ServiceCatalog;
+import com.sixsq.slipstream.util.SerializationUtil;
+
 public class ServiceCatalogResource extends SimpleResource {
 
-	@Get("xml")
+	@Get("xml|html")
 	public Representation toXml() {
 
 		String result = null;
 		try {
-			result = SerializationUtil
-					.toXmlString(retrieveServiceCatalogs());
+			result = SerializationUtil.toXmlString(retrieveServiceCatalog());
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
 		return new StringRepresentation(result);
 	}
 
-	@Get("html")
-	public Representation toHtml() {
+	public ServiceCatalog retrieveServiceCatalog() throws ValidationException {
+		String cloud = (String) getRequestAttributes().get("cloud");
+		return ServiceCatalog.loadByCloud(cloud);
+	}
 
-		StringRepresentation result = null;
+	/**
+	 * Only expects single catalog entry
+	 */
+	@Put("xml")
+	public void updateOrCreateFromXml(Representation entity)
+			throws ResourceException {
 
+		xmlToServiceCatalog().store();
+
+	}
+
+	private ServiceCatalog xmlToServiceCatalog() {
+
+		String xml = extractXml();
+
+		ServiceCatalog s = null;
 		try {
-			result = new StringRepresentation(HtmlUtil.toHtml(
-					retrieveServiceCatalogs(), getPageRepresentation(),
-					getTransformationType(), getUser()), MediaType.TEXT_HTML);
-		} catch (ValidationException e) {
-			throwClientValidationError(e.getMessage());
-		}
-		return result;
-	}
-
-	public ServiceCatalogs retrieveServiceCatalogs()
-			throws ValidationException {
-
-		ServiceCatalogs scs = new ServiceCatalogs();
-
-		for (ServiceCatalog sc : ServiceCatalog.listall()) {
-			if (isEdit()) {
-				sc.populateDefinedParameters();
-			}
-			scs.getList().add(sc);
+			s = (ServiceCatalog) SerializationUtil.fromXml(xml,
+					ServiceCatalog.class);
+		} catch (SlipStreamClientException e) {
+			throwClientBadRequest("Invalid xml service catalog: "
+					+ e.getMessage());
 		}
 
-		return scs;
-
+		return s;
 	}
 
+	private String extractXml() {
+		return getRequest().getEntityAsText();
+	}
+
+	@Override
 	protected String getPageRepresentation() {
-		return "service_catalog";
+		throw new NotImplementedException();
 	}
 
 }

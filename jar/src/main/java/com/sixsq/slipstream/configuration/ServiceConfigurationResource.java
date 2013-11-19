@@ -44,7 +44,7 @@ public class ServiceConfigurationResource extends
 
 	public static final String CONFIGURATION_PATH = "/configuration";
 
-	protected Configuration configuration;
+	private Configuration configuration;
 
 	@Put
 	public void update(Representation entity) {

@@ -20,11 +20,8 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
-import java.io.IOException;
-
 import javax.persistence.EntityManager;
 
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -312,20 +309,6 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected void setResponseRedirect(String resourceUri) {
 		getResponse().redirectSeeOther(resourceUri);
-	}
-
-	protected Form extractFormFromEntity(Representation entity)
-			throws ResourceException {
-
-		Form form = null;
-		try {
-			form = new Form(entity.getText());
-		} catch (IOException e) {
-			String msg = "Failed retreiving text from entity. "
-					+ e.getMessage();
-			throwClientError(msg);
-		}
-		return form;
 	}
 
 }

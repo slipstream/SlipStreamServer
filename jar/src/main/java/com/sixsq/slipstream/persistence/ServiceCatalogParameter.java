@@ -26,8 +26,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import org.simpleframework.xml.Attribute;
-
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 @Entity
@@ -74,21 +72,10 @@ public class ServiceCatalogParameter extends Parameter<ServiceCatalog> {
 		this.id = id;
 	}
 
-	@Attribute
-	private ServiceCatalogCategory catalogCategory = ServiceCatalogCategory.General;
-	
 	@Override
 	public ServiceCatalogParameter copy() throws ValidationException {
 		return (ServiceCatalogParameter) copyTo(new ServiceCatalogParameter(
 				getName(), getValue(), getDescription()));
-	}
-
-	public ServiceCatalogCategory getCatalogCategory() {
-		return catalogCategory;
-	}
-
-	public void setCatalogCategory(ServiceCatalogCategory catalogCategory) {
-		this.catalogCategory = catalogCategory;
 	}
 
 }

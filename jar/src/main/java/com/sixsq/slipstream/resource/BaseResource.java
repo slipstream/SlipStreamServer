@@ -20,6 +20,8 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
+import java.io.IOException;
+
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
@@ -224,4 +226,27 @@ public abstract class BaseResource extends ServerResource {
 		return isQueryValueSetTrue("new");
 	}
 
+	protected Form extractFormFromEntity(Representation entity)
+			throws ResourceException {
+			
+				Form form = null;
+				try {
+					form = new Form(entity.getText());
+				} catch (IOException e) {
+					String msg = "Failed retreiving text from entity. "
+							+ e.getMessage();
+					throwClientError(msg);
+				}
+				return form;
+			}
+
+	protected void checkIsSuper() {
+		if(!isSuper()) {
+			throwClientForbiddenError("Only privileged users can perform this action");
+		}
+	}
+
+	protected boolean isSuper() {
+		return getUser().isSuper();
+	}
 }
