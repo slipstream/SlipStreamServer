@@ -60,6 +60,7 @@ import com.sixsq.slipstream.initialstartup.Tutorials;
 import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.DocumentationResource;
 import com.sixsq.slipstream.resource.ReportRouter;
@@ -371,12 +372,11 @@ public class RootApplication extends Application {
 	
 	private void attachMetering(RootRouter router) {
 
-		// Create a Redirector to Google search service
-		String target = "http://localhost:5000/api/v1/meters/{meter}/statistics?{query}";
+		String hostname = Configuration.getInstance().getProperty(RequiredParameters.SLIPSTREAM_METERING_HOSTNAME.getName());
+		String target = hostname + "/api/v1/meters/{meter}/statistics?{query}";
 		Redirector redirector = new Redirector(getContext(), target,
 		Redirector.MODE_SERVER_OUTBOUND);
 
-		// Attach the extractor to the router
 		TemplateRoute route = router.attach("/meters/{meter}/statistics?{query}", redirector);
 		route.setMatchingQuery(true);
 		route.getTemplate().getVariables()
