@@ -1,0 +1,33 @@
+<projectModule category="Project" creation="2013-10-30 10:54:53.776 CET" deleted="false" description="Demo of complete service testing using Apache as an example." lastModified="2013-11-16 08:33:40.46 CET" parentUri="module/examples/tutorials" shortName="service-testing" version="294">
+   <parameters class="org.hibernate.collection.PersistentMap" />
+   <authz groupCreateChildren="false" groupDelete="false" groupGet="true" groupPost="false" groupPut="false" inheritedGroupMembers="true" owner="sixsq" ownerCreateChildren="true" ownerDelete="true" ownerGet="true" ownerPost="false" ownerPut="true" publicCreateChildren="false" publicDelete="false" publicGet="true" publicPost="false" publicPut="false">
+      <groupMembers class="java.util.ArrayList" />
+   </authz>
+   <commit author="sixsq">
+      <comment />
+   </commit>
+   <cloudNames length="4">
+      <string>stratuslab</string>
+      <string>LLR</string>
+      <string>CC-IN2P3</string>
+      <string>default</string>
+   </cloudNames>
+   <runs />
+   <children class="java.util.ArrayList">
+      <item category="Image" description="Apache web server appliance with custom landing page." name="apache" version="315">
+         <authz groupCreateChildren="false" groupDelete="false" groupGet="true" groupPost="false" groupPut="false" inheritedGroupMembers="true" owner="sixsq" ownerCreateChildren="true" ownerDelete="true" ownerGet="true" ownerPost="true" ownerPut="true" publicCreateChildren="false" publicDelete="false" publicGet="true" publicPost="false" publicPut="false">
+            <groupMembers class="java.util.ArrayList" />
+         </authz>
+      </item>
+      <item category="Image" description="Web client tests server connectivity and verifies content." name="client" version="317">
+         <authz groupCreateChildren="false" groupDelete="false" groupGet="true" groupPost="false" groupPut="false" inheritedGroupMembers="true" owner="sixsq" ownerCreateChildren="true" ownerDelete="true" ownerGet="true" ownerPost="true" ownerPut="true" publicCreateChildren="false" publicDelete="false" publicGet="true" publicPost="false" publicPut="false">
+            <groupMembers class="java.util.ArrayList" />
+         </authz>
+      </item>
+      <item category="Deployment" description="Deployment binding the apache server and the test client node(s)." name="system" version="297">
+         <authz groupCreateChildren="false" groupDelete="false" groupGet="true" groupPost="false" groupPut="false" inheritedGroupMembers="true" owner="sixsq" ownerCreateChildren="true" ownerDelete="true" ownerGet="true" ownerPost="true" ownerPut="true" publicCreateChildren="false" publicDelete="false" publicGet="true" publicPost="false" publicPut="false">
+            <groupMembers class="java.util.ArrayList" />
+         </authz>
+      </item>
+   </children>
+</projectModule>

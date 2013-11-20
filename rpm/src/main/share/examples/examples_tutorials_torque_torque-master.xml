@@ -1,0 +1,258 @@
+<imageModule category="Image" creation="2013-11-16 11:03:32.474 CET" deleted="false" description="master node for torque cluster" imageId="KBhcU87Wm5IZNOXZYGHrczGekwp" isBase="false" lastModified="2013-11-16 11:03:32.495 CET" loginUser="root" moduleReferenceUri="module/examples/images/ubuntu-12.04" parentUri="module/examples/tutorials/torque" platform="ubuntu" shortName="torque-master" version="321">
+   <parameters class="org.hibernate.collection.PersistentMap">
+      <entry>
+         <string>extra.disk.volatile</string>
+         <parameter category="Cloud" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Volatile extra disk in GB" isSet="false" mandatory="true" name="extra.disk.volatile" readonly="false" type="String" />
+      </entry>
+      <entry>
+         <string>stratuslab.disks.bus.type</string>
+         <parameter category="stratuslab" class="com.sixsq.slipstream.persistence.ModuleParameter" description="VM disks bus type" isSet="true" mandatory="true" name="stratuslab.disks.bus.type" readonly="false" type="Enum">
+            <enumValues length="2">
+               <string>virtio</string>
+               <string>scsi</string>
+            </enumValues>
+            <value>virtio</value>
+            <defaultValue>virtio</defaultValue>
+         </parameter>
+      </entry>
+      <entry>
+         <string>CC-IN2P3.instance.type</string>
+         <parameter category="CC-IN2P3" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Instance type (flavor)" isSet="true" mandatory="true" name="CC-IN2P3.instance.type" readonly="false" type="String">
+            <value>m1.tiny</value>
+            <defaultValue>m1.tiny</defaultValue>
+         </parameter>
+      </entry>
+      <entry>
+         <string>stratuslab.instance.type</string>
+         <parameter category="stratuslab" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Cloud instance type" isSet="true" mandatory="true" name="stratuslab.instance.type" readonly="false" type="Enum">
+            <enumValues length="7">
+               <string>m1.small</string>
+               <string>c1.medium</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.xlarge</string>
+               <string>t1.micro</string>
+               <string>standard.xsmall</string>
+            </enumValues>
+            <value>m1.large</value>
+            <defaultValue>m1.large</defaultValue>
+         </parameter>
+      </entry>
+      <entry>
+         <string>LLR.cpu</string>
+         <parameter category="LLR" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Requested CPUs" isSet="false" mandatory="true" name="LLR.cpu" readonly="false" type="String" />
+      </entry>
+      <entry>
+         <string>munge_key64</string>
+         <parameter category="Output" class="com.sixsq.slipstream.persistence.ModuleParameter" description="base64 encoded munge key" isSet="false" mandatory="false" name="munge_key64" readonly="false" type="String" />
+      </entry>
+      <entry>
+         <string>hostname</string>
+         <parameter category="Output" class="com.sixsq.slipstream.persistence.ModuleParameter" description="hostname/ip of the image" isSet="false" mandatory="true" name="hostname" readonly="false" type="String" />
+      </entry>
+      <entry>
+         <string>user_id_rsa64</string>
+         <parameter category="Output" class="com.sixsq.slipstream.persistence.ModuleParameter" description="base64 encoded ssh private key for user" isSet="false" mandatory="false" name="user_id_rsa64" readonly="false" type="String" />
+      </entry>
+      <entry>
+         <string>LLR.ram</string>
+         <parameter category="LLR" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Requested RAM (in GB)" isSet="false" mandatory="true" name="LLR.ram" readonly="false" type="String" />
+      </entry>
+      <entry>
+         <string>stratuslab.ram</string>
+         <parameter category="stratuslab" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Requested RAM (in GB)" isSet="true" mandatory="true" name="stratuslab.ram" readonly="false" type="String">
+            <value>2</value>
+            <defaultValue>2</defaultValue>
+         </parameter>
+      </entry>
+      <entry>
+         <string>master_hostname</string>
+         <parameter category="Output" class="com.sixsq.slipstream.persistence.ModuleParameter" description="hostname as name, not IP address" isSet="false" mandatory="false" name="master_hostname" readonly="false" type="String" />
+      </entry>
+      <entry>
+         <string>LLR.instance.type</string>
+         <parameter category="LLR" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Cloud instance type" isSet="true" mandatory="true" name="LLR.instance.type" readonly="false" type="Enum">
+            <enumValues length="7">
+               <string>m1.small</string>
+               <string>c1.medium</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.xlarge</string>
+               <string>t1.micro</string>
+               <string>standard.xsmall</string>
+            </enumValues>
+            <value>m1.small</value>
+            <defaultValue>m1.small</defaultValue>
+         </parameter>
+      </entry>
+      <entry>
+         <string>network</string>
+         <parameter category="Cloud" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Network type" isSet="true" mandatory="true" name="network" readonly="false" type="Enum">
+            <enumValues length="2">
+               <string>Public</string>
+               <string>Private</string>
+            </enumValues>
+            <value>Public</value>
+            <defaultValue>Public</defaultValue>
+         </parameter>
+      </entry>
+      <entry>
+         <string>CC-IN2P3.security.groups</string>
+         <parameter category="CC-IN2P3" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Security Groups (comma separated list)" isSet="true" mandatory="true" name="CC-IN2P3.security.groups" readonly="false" type="String">
+            <value>default</value>
+            <defaultValue>default</defaultValue>
+         </parameter>
+      </entry>
+      <entry>
+         <string>LLR.disks.bus.type</string>
+         <parameter category="LLR" class="com.sixsq.slipstream.persistence.ModuleParameter" description="VM disks bus type" isSet="true" mandatory="true" name="LLR.disks.bus.type" readonly="false" type="Enum">
+            <enumValues length="2">
+               <string>virtio</string>
+               <string>scsi</string>
+            </enumValues>
+            <value>virtio</value>
+            <defaultValue>virtio</defaultValue>
+         </parameter>
+      </entry>
+      <entry>
+         <string>stratuslab.cpu</string>
+         <parameter category="stratuslab" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Requested CPUs" isSet="true" mandatory="true" name="stratuslab.cpu" readonly="false" type="String">
+            <value>2</value>
+            <defaultValue>2</defaultValue>
+         </parameter>
+      </entry>
+      <entry>
+         <string>instanceid</string>
+         <parameter category="Output" class="com.sixsq.slipstream.persistence.ModuleParameter" description="Cloud instance id" isSet="false" mandatory="true" name="instanceid" readonly="false" type="String" />
+      </entry>
+   </parameters>
+   <authz groupCreateChildren="false" groupDelete="false" groupGet="true" groupPost="false" groupPut="false" inheritedGroupMembers="true" owner="sixsq" ownerCreateChildren="true" ownerDelete="true" ownerGet="true" ownerPost="true" ownerPut="true" publicCreateChildren="false" publicDelete="false" publicGet="true" publicPost="false" publicPut="false">
+      <groupMembers class="java.util.ArrayList" />
+   </authz>
+   <commit author="sixsq" />
+   <cloudNames length="4">
+      <string>stratuslab</string>
+      <string>LLR</string>
+      <string>CC-IN2P3</string>
+      <string>default</string>
+   </cloudNames>
+   <runs />
+   <targets class="org.hibernate.collection.PersistentBag">
+      <target name="execute" runInBackground="false">#!/bin/bash -x
+
+#
+# ==========
+#  Following section could be put into image recipe for those
+#  clouds that support image creation.
+# ==========
+#
+
+#
+# install prerequisites
+#
+apt-get clean
+apt-get update
+apt-get -y install munge torque-scheduler torque-server
+
+#
+# update system
+#
+apt-get -o DPkg::options::="--force-confdef" -o DPkg::options::="--force-confold" -y upgrade
+
+#
+# ==========
+#
+
+#
+# create normal user
+#
+adduser --quiet --uid 1000 --disabled-password --gecos '' tuser
+
+#
+# master hostname (must be a name!)
+#
+master_ip=`ss-get --timeout 480 master.1:hostname`
+cmd="import socket; print socket.getfqdn('$master_ip')"
+export master_hostname=`python -c "$cmd"`
+
+ss-set master_hostname $master_hostname
+
+#
+# initialize the server configuration with hostname
+# 
+touch /var/spool/torque/server_priv/nodes
+echo $master_hostname &gt;  /etc/torque/server_name 
+
+#
+# configure and start munge service
+#
+create-munge-key
+service munge start 
+
+#
+# set parameter with munge key to be shared with workers
+# value is the base64 encoded value of the binary file
+#
+ss-set munge_key64 `cat /etc/munge/munge.key | base64 --wrap 0`
+
+#
+# ensure server is stopped, remove existing database
+#
+service torque-server stop
+rm -f /var/spool/torque/server_priv/nodes
+rm -f /var/spool/torque/server_priv/serverdb
+
+#
+# minimal setup of the batch system and queues
+#
+cp /usr/share/doc/torque-common/torque.setup .
+chmod a+x torque.setup
+./torque.setup root $master_hostname
+
+#
+# ensure again that server is stopped
+#
+service torque-server stop
+
+#
+# pull in node names of all of the workers
+#
+rm -f /var/spool/torque/server_priv/nodes
+for (( i=1; i &lt;= `ss-get worker.1:multiplicity`; i++ )); do
+  worker_ip=`ss-get --timeout 480 worker.$i:hostname`
+  cmd="import socket; print socket.getfqdn('$worker_ip')"
+  worker_hostname=`python -c "$cmd"`
+  echo $worker_hostname &gt;&gt; /var/spool/torque/server_priv/nodes
+done
+
+#
+# restart the server so that it will see all workers
+#
+service torque-server restart
+
+#
+# now start the torque scheduler (simple FIFO)
+#
+service torque-scheduler restart
+
+#
+# configuration for ssh access between nodes as user
+#
+su - tuser -c 'mkdir -p /home/tuser/.ssh'
+su - tuser -c 'chmod 0700 /home/tuser/.ssh'
+su - tuser -c 'ssh-keygen -f /home/tuser/.ssh/id_rsa -N ""'
+
+cp /root/.ssh/authorized_keys /home/tuser/.ssh/authorized_keys
+chown tuser:tuser /home/tuser/.ssh/authorized_keys
+chmod 0600 /home/tuser/.ssh/authorized_keys
+su - tuser -c 'cat /home/tuser/.ssh/id_rsa.pub &gt;&gt; /home/tuser/.ssh/authorized_keys'
+
+ss-set user_id_rsa64 `cat /home/tuser/.ssh/id_rsa | base64 --wrap 0`</target>
+   </targets>
+   <packages class="org.hibernate.collection.PersistentBag" />
+   <prerecipe />
+   <recipe />
+   <cloudImageIdentifiers class="org.hibernate.collection.PersistentBag">
+      </cloudImageIdentifiers>
+   <extraDisks class="org.hibernate.collection.PersistentBag" />
+</imageModule>
