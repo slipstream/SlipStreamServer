@@ -171,7 +171,6 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	@Lob
 	private String tag;
 
-	@SuppressWarnings("unused")
 	@Element(required = false)
 	@Lob
 	@Deprecated()

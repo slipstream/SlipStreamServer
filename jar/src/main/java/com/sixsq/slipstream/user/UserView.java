@@ -62,7 +62,6 @@ public class UserView {
 	@Root(name = "list")
 	public static class UserViewList {
 
-		@SuppressWarnings("unused")
 		@ElementList(inline = true, required = false)
 		private final List<UserView> list;
 

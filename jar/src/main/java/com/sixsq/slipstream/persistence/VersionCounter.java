@@ -49,7 +49,6 @@ public class VersionCounter implements Serializable {
 		return counter.counter;
 	}
 	
-	@SuppressWarnings("unused")
 	@Id
 	private int id = ID;
 	

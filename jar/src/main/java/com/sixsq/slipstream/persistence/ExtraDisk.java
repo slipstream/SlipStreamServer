@@ -33,7 +33,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 @Entity
 public class ExtraDisk {
 
-	@SuppressWarnings("unused")
 	@Id
 	@GeneratedValue
 	private Long id;

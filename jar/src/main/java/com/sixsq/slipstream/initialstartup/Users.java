@@ -35,10 +35,14 @@ import com.sixsq.slipstream.persistence.User.State;
 // FIXME: This class should be moved into a more complete integration test.
 public class Users {
 
+	public static final String SIXSQ = "sixsq";
+
 	public static void create() throws ValidationException, NotFoundException,
-			ConfigurationException {
+			ConfigurationException, NoSuchAlgorithmException,
+			UnsupportedEncodingException {
 		createSuperUser();
 		createTestUser();
+		createSixSqUser();
 	}
 
 	private static void createSuperUser() throws ValidationException {
@@ -87,6 +91,19 @@ public class Users {
 		user.store();
 
 		user = User.loadByName("test");
+	}
+
+	private static void createSixSqUser() throws NoSuchAlgorithmException,
+			UnsupportedEncodingException {
+		User user = createUser(SIXSQ);
+		user.setFirstName("SixSq");
+		user.setLastName("Administrator");
+		user.setEmail("slipstream-support@sixsq.com");
+		user.setOrganization("SixSq");
+		user.hashAndSetPassword("siXsQsiXsQ");
+		user.setState(State.ACTIVE);
+
+		user.store();
 	}
 
 	private static User createUser(String name) {

@@ -1,0 +1,28 @@
+<projectModule category="Project" creation="2013-10-30 10:54:53.598 CET" deleted="false" description="Standard minimal images of common operating systems." lastModified="2013-11-16 08:33:38.763 CET" parentUri="module/examples" shortName="images" version="287">
+   <parameters class="org.hibernate.collection.PersistentMap" />
+   <authz groupCreateChildren="false" groupDelete="false" groupGet="true" groupPost="false" groupPut="false" inheritedGroupMembers="true" owner="sixsq" ownerCreateChildren="true" ownerDelete="true" ownerGet="true" ownerPost="false" ownerPut="true" publicCreateChildren="false" publicDelete="false" publicGet="true" publicPost="false" publicPut="false">
+      <groupMembers class="java.util.ArrayList" />
+   </authz>
+   <commit author="sixsq">
+      <comment />
+   </commit>
+   <cloudNames length="4">
+      <string>stratuslab</string>
+      <string>LLR</string>
+      <string>CC-IN2P3</string>
+      <string>default</string>
+   </cloudNames>
+   <runs />
+   <children class="java.util.ArrayList">
+      <item category="Image" description="Minimal installation of the CentOS 6.3 operating system." name="centos-6.3" version="288">
+         <authz groupCreateChildren="false" groupDelete="false" groupGet="true" groupPost="false" groupPut="false" inheritedGroupMembers="true" owner="sixsq" ownerCreateChildren="true" ownerDelete="true" ownerGet="true" ownerPost="true" ownerPut="true" publicCreateChildren="false" publicDelete="false" publicGet="true" publicPost="false" publicPut="false">
+            <groupMembers class="java.util.ArrayList" />
+         </authz>
+      </item>
+      <item category="Image" description="Minimal installation of the Ubuntu 12.04 (LTS) operating system." name="ubuntu-12.04" version="289">
+         <authz groupCreateChildren="false" groupDelete="false" groupGet="true" groupPost="false" groupPut="false" inheritedGroupMembers="true" owner="sixsq" ownerCreateChildren="true" ownerDelete="true" ownerGet="true" ownerPost="true" ownerPut="true" publicCreateChildren="false" publicDelete="false" publicGet="true" publicPost="false" publicPut="false">
+            <groupMembers class="java.util.ArrayList" />
+         </authz>
+      </item>
+   </children>
+</projectModule>
