@@ -1,15 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
-
-
-<!-- =============================================================== -->
-<!-- Configure stderr and stdout to a Jetty rollover log file        -->
-<!-- this configuration file should be used in combination with      -->
-<!-- other configuration files.  e.g.                                -->
-<!--    java -jar start.jar etc/jetty-logging.xml                    -->
-<!-- =============================================================== -->
+ 
 <Configure id="Server" class="org.eclipse.jetty.server.Server">
-
   <Call id="logMgr" class="java.util.logging.LogManager" name="getLogManager">
     <Call name="readConfiguration">
       <Arg class="java.io.InputStream">
@@ -19,5 +11,4 @@
       </Arg>
     </Call>
   </Call>
-
 </Configure>

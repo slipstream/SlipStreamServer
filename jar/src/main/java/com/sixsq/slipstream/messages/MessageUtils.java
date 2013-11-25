@@ -40,17 +40,25 @@ public class MessageUtils {
 
 	public static final String MSG_ACCOUNT_REJECTED = "MSG_ACCOUNT_REJECTED";
 
+	public static final String MSG_PASSWORD_RESET = "MSG_PASSWORD_RESET";
+
 	public static final String MSG_NEW_USER_NOTIFICATION = "MSG_NEW_USER_NOTIFICATION";
 
 	public static final String MSG_INVALID_ACTION_URL = "MSG_INVALID_ACTION_URL";
 
 	public static final String MSG_REGISTRATION_SENT = "MSG_REGISTRATION_SENT";
 
+	public static final String MSG_RESET_SENT = "MSG_RESET_SENT";
+
 	public static final String MSG_CONFIRM_EMAIL = "MSG_CONFIRM_EMAIL";
+
+	public static final String MSG_CONFIRM_RESET = "MSG_CONFIRM_RESET";
 
 	public static final String MSG_ERROR_SENDING_EMAIL = "MSG_ERROR_SENDING_EMAIL";
 
 	public static final String MSG_EMAIL_CONFIRMED = "MSG_EMAIL_CONFIRMED";
+
+	public static final String MSG_EMAIL_CONFIRMED_FOR_RESET = "MSG_EMAIL_CONFIRMED_FOR_RESET";
 
 	private MessageUtils() {
 	}

@@ -32,9 +32,20 @@ Please update your password and other information here:
 
 {2}
 
-Any question can be email at support@sixsq.com.
+Any questions can be emailed to support@sixsq.com.
 
 Thanks for your interest in SlipStream(TM).
+</entry>
+
+<entry key="MSG_PASSWORD_RESET">
+Your SlipStream(TM) password has been reset to ''{1}''.
+
+Please log in and change this temporary password:
+
+{2} 
+
+If you have any questions or problems contact us at
+support@sixsq.com.
 </entry>
 
 <entry key="MSG_ACCOUNT_REJECTED">
@@ -46,7 +57,7 @@ Please contact the administrator for more information.
 <entry key="MSG_NEW_USER_NOTIFICATION">
 A new SlipStream(TM) user has registered.
 
-You can find the user''s info here:
+You can find the user''s information here:
   {0}
 </entry>
 
@@ -59,12 +70,29 @@ An email has been sent to the address you have given.
 Please visit the link in that email to activate your account.
 </entry>
 
+<entry key="MSG_RESET_SENT">
+A password reset validation email has been sent to the address
+in your account profile.  Please visit the link in that email 
+to confirm this request.
+</entry>
+
 <entry key="MSG_CONFIRM_EMAIL">
 Please confirm your email address by visiting the link:
 
 {0}
 
 Once confirmed your account will be activated.
+</entry>
+
+<entry key="MSG_CONFIRM_RESET">
+A request has been made to reset your SlipStream(TM) account
+password.  To validate this request, visit the link:
+
+{0}
+
+You will receive a follow-up email with a temporary password.
+
+If you did not request this, simply ignore this email. 
 </entry>
 
 <entry key="MSG_ERROR_SENDING_EMAIL">
@@ -76,4 +104,11 @@ Please contact the administrator ({0}).
 Your email address has been confirmed.
 You should now be receiving another email with your account details.						
 </entry>
+
+<entry key="MSG_EMAIL_CONFIRMED_FOR_RESET">
+Your password has been reset.  You will receive another email
+with the new password.  						
+</entry>
+
+
 </properties>
