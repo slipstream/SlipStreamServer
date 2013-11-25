@@ -87,7 +87,11 @@ public class RunListResourceTest extends ResourceTestBase {
 			ValidationException {
 
 		for (Run r : Run.viewListAllActive()) {
-			r.remove();
+			try {
+				r.remove();
+			} catch (Exception ex) {
+
+			}
 		}
 
 	}
