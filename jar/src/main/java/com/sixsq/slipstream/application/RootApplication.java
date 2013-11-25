@@ -43,6 +43,7 @@ import com.sixsq.slipstream.authn.CookieAuthenticator;
 import com.sixsq.slipstream.authn.LoginResource;
 import com.sixsq.slipstream.authn.LogoutResource;
 import com.sixsq.slipstream.authn.RegistrationResource;
+import com.sixsq.slipstream.authn.ResetPasswordResource;
 import com.sixsq.slipstream.authz.SuperEnroler;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.configuration.ServiceConfigurationResource;
@@ -53,8 +54,6 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
-import com.sixsq.slipstream.initialstartup.Images;
-import com.sixsq.slipstream.initialstartup.Tutorials;
 import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
@@ -114,18 +113,6 @@ public class RootApplication extends Application {
 		} catch (Exception ex) {
 			getLogger().warning(
 					"Error creating default users... already existing?");
-		}
-		try {
-			Images.create();
-		} catch (Exception ex) {
-			getLogger().warning(
-					"Error creating base images... already existing?");
-		}
-		try {
-			Tutorials.create();
-		} catch (Exception ex) {
-			getLogger()
-					.warning("Error creating tutorials... already existing?");
 		}
 	}
 
@@ -242,6 +229,9 @@ public class RootApplication extends Application {
 
 		router.attach(RegistrationResource.getResourceRoot(),
 				RegistrationResource.class);
+
+		router.attach(ResetPasswordResource.getResourceRoot(),
+				ResetPasswordResource.class);
 	}
 
 	private void attachRun(RootRouter router) throws ConfigurationException {

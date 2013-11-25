@@ -20,10 +20,14 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+
+import javax.persistence.EntityManager;
 
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
@@ -31,7 +35,9 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
+import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 
 public class Launcher {
@@ -82,10 +88,12 @@ public class Launcher {
 
 		@Override
 		public void run() {
+			Map<String, String> idsAndIps = new HashMap<String, String>();
+			
 			try {
 				logger.info("Submitting asynchronous launch operation for run: "
 						+ run.getUuid());
-
+				
 				if (run.getCategory() == ModuleCategory.Deployment) {
 					HashSet<String> cloudServicesList = run
 							.getCloudServicesList();
@@ -94,6 +102,24 @@ public class Launcher {
 								.getConnector(cloudServiceName);
 						try {
 							connector.launch(run, user);
+							try{
+								String id = run.
+										getRuntimeParameterValue(
+												connector
+														.getOrchestratorName(run)
+														+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+														+ RuntimeParameter.INSTANCE_ID_KEY);
+								String ip = run
+										.getRuntimeParameterValue(
+												connector
+														.getOrchestratorName(run)
+														+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+														+ RuntimeParameter.HOSTNAME_KEY);
+								idsAndIps.put(connector.getOrchestratorName(run), id+ "," + ip);
+							} catch (Exception e) {
+								logger.severe("Error getting IP and ID");
+								e.printStackTrace();
+							}
 						} catch (SlipStreamException e) {
 							run = run.store();
 							run = Run.abortOrReset(e.getMessage(),
@@ -118,12 +144,30 @@ public class Launcher {
 				logger.severe("Error executing asynchronous launch operation");
 				e.printStackTrace();
 			}
-
+			
 			try {
 				run.store();
 			} catch (Exception e) {
 				logger.severe("Error storing run after async run method for run: "
 						+ run.getUuid());
+				e.printStackTrace();
+			}
+			
+			try{
+				EntityManager em = PersistenceUtil.createEntityManager();
+				run = Run.load(run.getResourceUri(), em);
+				
+				for(Map.Entry<String, String> entry: idsAndIps.entrySet()){
+					String key = entry.getKey();
+				    String value = entry.getValue();
+				    String[] ipid = value.split(",");
+				    run.updateRuntimeParameter(key + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.INSTANCE_ID_KEY, ipid[0]);
+				    run.updateRuntimeParameter(key + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.HOSTNAME_KEY, ipid[1]);
+				}
+				
+				run.store();
+			} catch (Exception e) {
+				logger.severe("Error setting IP and ID");
 				e.printStackTrace();
 			}
 		}
