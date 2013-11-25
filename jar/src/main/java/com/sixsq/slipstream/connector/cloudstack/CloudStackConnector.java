@@ -216,11 +216,15 @@ public class CloudStackConnector extends CliConnectorBase {
 		String command = "/usr/bin/cloudstack-terminate-instances"
 				+ getCommandBaseParams(user);
 		
+		String instances = "";
 		for (String id : getCloudNodeInstanceIds(run)) {
-			command += " --instance-id " + wrapInSingleQuotes(id);
+			instances += " --instance-id " + wrapInSingleQuotes(id);
+		}
+		if(instances.isEmpty()){
+			throw new SlipStreamClientException("There is no instances to terminate");
 		}
 		
-		String[] commands = { "sh", "-c", command };
+		String[] commands = { "sh", "-c", command + instances };
 		try {
 			ProcessUtils.execGetOutput(commands);
 		} catch (SlipStreamClientException e) {
