@@ -21,15 +21,13 @@ package com.sixsq.slipstream.connector.cloudstack;
  */
 
 import java.io.IOException;
-
-import java.util.Properties;
 import java.util.Map;
-
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.CliConnectorBase;
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
@@ -42,7 +40,6 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -73,7 +70,7 @@ public class CloudStackConnector extends CliConnectorBase {
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
 		
-		if(run.getType() == RunType.Orchestration && run.getCategory() == ModuleCategory.Image)
+		if(isInOrchestrationContext(run) && run.getCategory() == ModuleCategory.Image)
 			throw new SlipStreamException("Image creation is not yet available for this connector");
 		
 		String command;
@@ -117,7 +114,7 @@ public class CloudStackConnector extends CliConnectorBase {
 				" --instance-type " + wrapInSingleQuotes(getInstanceType(run, user)) +
 				" --public-key " + wrapInSingleQuotes(getPublicSshKey(run, user)) +
 				" --network " + getNetwork(run);
-		if (run.getType() == RunType.Orchestration)
+		if (isInOrchestrationContext(run))
 			command += " --context-script " + wrapInSingleQuotes(createContextualizationData(run, user));
 		 		
 		return command;
@@ -132,13 +129,13 @@ public class CloudStackConnector extends CliConnectorBase {
 	}
 	
 	protected String getVmName(Run run){
-		return run.getType() == RunType.Orchestration ? 
+		return isInOrchestrationContext(run) ? 
 				getOrchestratorName(run) + "-" + run.getUuid() : 
 				"machine" + "-" + run.getUuid();
 	}
 	
 	protected String getInstanceType(Run run, User user) throws ValidationException{
-		return (run.getType() == RunType.Orchestration) ? 
+		return (isInOrchestrationContext(run)) ? 
 				user.getParameter(constructKey(CloudStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME)).getValue() :
 				getInstanceType( ImageModule.load(run.getModuleResourceUrl()) );
 	}
@@ -173,7 +170,7 @@ public class CloudStackConnector extends CliConnectorBase {
 		
 		String instanceType = getInstanceType(run, user);
 		if (instanceType == null || "".equals(instanceType)){
-			if (run.getType() == RunType.Orchestration){
+			if (isInOrchestrationContext(run)){
 				throw (new ValidationException("Orchestrator instance type cannot be empty. Please contact your SlipStream administrator"));
 			}else{
 				throw (new ValidationException("Instance type cannot be empty. Please update your image parameters"));
@@ -182,7 +179,7 @@ public class CloudStackConnector extends CliConnectorBase {
 		
 		String imageId = getImageId(run, user);
 		if (imageId == null  || "".equals(imageId)){
-			if (run.getType() == RunType.Orchestration){
+			if (isInOrchestrationContext(run)){
 				throw (new ValidationException("Orchestrator image id cannot be empty. Please contact your SlipStream administrator"));
 			}else{
 				throw (new ValidationException("Image id cannot be empty. Please update your image parameters"));
@@ -191,7 +188,7 @@ public class CloudStackConnector extends CliConnectorBase {
 	}
 	
 	protected String getNetwork(Run run) throws ValidationException{
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			return "Public";
 		} else {
 			ImageModule machine = ImageModule.load(run.getModuleResourceUrl());

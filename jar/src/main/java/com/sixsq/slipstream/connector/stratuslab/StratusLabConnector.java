@@ -151,7 +151,7 @@ public class StratusLabConnector extends CliConnectorBase {
 	}
 	
 	private String getVmName(Run run) {
-		return run.getType() == RunType.Orchestration ? getOrchestratorName(run)
+		return isInOrchestrationContext(run) ? getOrchestratorName(run)
 				: "machine";
 	}
 

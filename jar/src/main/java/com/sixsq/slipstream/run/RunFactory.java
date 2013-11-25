@@ -23,6 +23,7 @@ package com.sixsq.slipstream.run;
 import java.util.HashSet;
 
 import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -100,7 +101,6 @@ public abstract class RunFactory {
 		case Orchestration:
 			factory = new DeploymentFactory();
 			break;
-
 		case Machine:
 			factory = new BuildImageFactory();
 			break;
@@ -189,11 +189,11 @@ public abstract class RunFactory {
 	}
 
 	private static boolean withOrchestrator(Run run) {
-		return run.getType() == RunType.Orchestration
-				|| run.getType() == RunType.Machine;
+		return ConnectorBase.isInOrchestrationContext(run);
 	}
 
-	protected static void initializeGlobalParameters(Run run) throws ValidationException {
+	protected static void initializeGlobalParameters(Run run)
+			throws ValidationException {
 
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_CATEGORY_KEY, run
 				.getCategory().toString(), "Module category");

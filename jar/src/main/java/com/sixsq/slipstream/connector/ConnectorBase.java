@@ -101,6 +101,15 @@ public abstract class ConnectorBase implements Connector {
 
 	private final String instanceName;
 
+	/**
+	 * Is a deployment or a build image, where both cases require an
+	 * orchestrator
+	 */
+	public static boolean isInOrchestrationContext(Run run) {
+		return run.getType() == RunType.Orchestration
+				|| run.getType() == RunType.Machine;
+	}
+
 	public ConnectorBase(String instanceName) {
 		this.instanceName = instanceName;
 	}
@@ -116,7 +125,7 @@ public abstract class ConnectorBase implements Connector {
 
 		String imageId;
 
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			imageId = getOrchestratorImageId(user);
 		} else {
 			imageId = ((ImageModule) run.getModule()).extractBaseImageId(run
@@ -178,8 +187,7 @@ public abstract class ConnectorBase implements Connector {
 			throws NotFoundException, ValidationException,
 			ServerExecutionEnginePluginException {
 
-		if (run.getType() == RunType.Orchestration
-				|| run.getType() == RunType.Machine) {
+		if (isInOrchestrationContext(run) || run.getType() == RunType.Machine) {
 			updateOrchestratorInstanceIdOnRun(run, instanceId, orchestratorName);
 			updateOrchestratorInstanceIpOnRun(run, ipAddress, orchestratorName);
 		} else {
@@ -411,8 +419,7 @@ public abstract class ConnectorBase implements Connector {
 	public String getOrchestratorName(Run run) {
 		String orchestratorName = Run.ORCHESTRATOR_NAME;
 
-		if (run.getType() == RunType.Orchestration
-				|| run.getType() == RunType.Machine) {
+		if (isInOrchestrationContext(run) || run.getType() == RunType.Machine) {
 			orchestratorName = Run
 					.constructOrchestratorName(getConnectorInstanceName());
 		}
@@ -467,7 +474,7 @@ public abstract class ConnectorBase implements Connector {
 	}
 
 	protected String getLoginUsername(Run run) throws SlipStreamClientException {
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			return getOrchestratorImageLoginUsername();
 		} else {
 			return getMachineImageLoginUsername(run);
@@ -494,7 +501,7 @@ public abstract class ConnectorBase implements Connector {
 
 	protected String getLoginPassword(Run run) throws ConfigurationException,
 			SlipStreamClientException {
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			return getOrchestratorImageLoginPassword();
 		} else {
 			return getMachineImageLoginPassword(run);
