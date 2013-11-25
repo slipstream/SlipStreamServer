@@ -158,7 +158,17 @@ public class StratusLabConnector extends CliConnectorBase {
 	private void validate(Run run, User user) throws ValidationException {
 		validateCredentials(user);
 		validateUserSshPublicKey(user);
+		validateMarketplaceEndpoint(user);
 		validateLaunch(run, user);
+	}
+
+	private void validateMarketplaceEndpoint(User user) throws ValidationException {
+		String endpoint = getMarketplaceEndpoint(user);
+		if (endpoint == null || endpoint.isEmpty()) {
+			throw (new ValidationException(
+					"Marketplace endpoint should be set for "
+							+ getConnectorInstanceName()));
+		}
 	}
 
 	private void validateLaunch(Run run, User user)
