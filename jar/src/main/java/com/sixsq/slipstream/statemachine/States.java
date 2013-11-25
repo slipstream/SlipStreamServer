@@ -1,5 +1,8 @@
 package com.sixsq.slipstream.statemachine;
 
+import java.util.Arrays;
+import java.util.List;
+
 /*
  * +=================================================================+
  * SlipStream Server (WAR)
@@ -32,5 +35,13 @@ public enum States {
     Done,
     Cancelled,
     Aborting,
-    Aborted;
+    Aborted,
+    Failing,
+    Failed;
+    
+    public static List<States> completed() {
+    	return Arrays.asList(States.Inactive,
+				States.Cancelled, States.Terminal,
+				States.Aborted);
+    }
 }

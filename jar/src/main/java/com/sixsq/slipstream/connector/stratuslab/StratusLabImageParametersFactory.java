@@ -25,6 +25,7 @@ import com.sixsq.slipstream.connector.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.NetworkType;
+import com.sixsq.slipstream.persistence.Run;
 
 public class StratusLabImageParametersFactory extends ModuleParametersFactoryBase {
 
@@ -41,8 +42,8 @@ public class StratusLabImageParametersFactory extends ModuleParametersFactoryBas
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 
-		putParameter(ImageModule.RAM_KEY, "Requested RAM (in GB)", true);
-		putParameter(ImageModule.CPU_KEY, "Requested CPUs", true);
+		putMandatoryParameter(Run.RAM_PARAMETER_NAME, Run.RAM_PARAMETER_NAME);
+		putMandatoryParameter(Run.CPU_PARAMETER_NAME, Run.CPU_PARAMETER_NAME);
 		putEnumParameter(ImageModule.INSTANCE_TYPE_KEY, "Cloud instance type", 
 				InstanceType.getValues(), INSTANCE_TYPE_DEFAULT, true);
 		putEnumParameter(DISKSBUS_TYPE_KEY, "VM disks bus type", 

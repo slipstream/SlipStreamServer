@@ -44,7 +44,6 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ExtraDisk;
 import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -66,10 +65,12 @@ public abstract class ConnectorBase implements Connector {
 	abstract public Credentials getCredentials(User user);
 
 	@Override
-	abstract public void terminate(Run run, User user) throws SlipStreamException;
+	abstract public void terminate(Run run, User user)
+			throws SlipStreamException;
 
 	@Override
-	abstract public Properties describeInstances(User user) throws SlipStreamException;
+	abstract public Properties describeInstances(User user)
+			throws SlipStreamException;
 
 	private static Logger log = Logger
 			.getLogger(ConnectorBase.class.toString());
@@ -78,11 +79,7 @@ public abstract class ConnectorBase implements Connector {
 		return log;
 	}
 
-	protected static String ORCHESTRATOR_INSTANCE_ID_NAME = Run.ORCHESTRATOR_NAME_PREFIX
-			+ RuntimeParameter.INSTANCE_ID_KEY;
 	private static String ORCHESTRATOR_INSTANCE_ID_DESCRIPTION = "Orchestrator instance id";
-	protected static String ORCHESTRATOR_INSTANCE_HOSTNAME = Run.ORCHESTRATOR_NAME_PREFIX
-			+ RuntimeParameter.HOSTNAME_KEY;
 	private static String ORCHESTRATOR_INSTANCE_HOSTNAME_DESCRIPTION = "Orchestrator instance hostname/IP";
 
 	private static final String MACHINE_INSTANCE_ID_NAME = Run.MACHINE_NAME_PREFIX
@@ -104,6 +101,15 @@ public abstract class ConnectorBase implements Connector {
 
 	private final String instanceName;
 
+	/**
+	 * Is a deployment or a build image, where both cases require an
+	 * orchestrator
+	 */
+	public static boolean isInOrchestrationContext(Run run) {
+		return run.getType() == RunType.Orchestration
+				|| run.getType() == RunType.Machine;
+	}
+
 	public ConnectorBase(String instanceName) {
 		this.instanceName = instanceName;
 	}
@@ -119,22 +125,21 @@ public abstract class ConnectorBase implements Connector {
 
 		String imageId;
 
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			imageId = getOrchestratorImageId(user);
 		} else {
 			imageId = ((ImageModule) run.getModule()).extractBaseImageId(run
-						.getCloudServiceName());
+					.getCloudService());
 		}
 		return imageId;
 	}
-	
+
 	protected String getOrchestratorImageId(User user)
 			throws ValidationException, ServerExecutionEnginePluginException {
 		return getCloudParameterValue(user,
 				UserParametersFactoryBase.ORCHESTRATOR_IMAGEID_PARAMETER_NAME);
 	}
 
-	
 	protected String getCloudParameterValue(User user, String paramName)
 			throws ServerExecutionEnginePluginException, ValidationException {
 		String qualifiedParamName = constructKey(paramName);
@@ -144,7 +149,7 @@ public abstract class ConnectorBase implements Connector {
 					"Missing parameter '" + qualifiedParamName + "'."));
 		}
 		return paramValue;
-	}	
+	}
 
 	protected String getDefaultCloudServiceName(User user)
 			throws ValidationException {
@@ -182,7 +187,7 @@ public abstract class ConnectorBase implements Connector {
 			throws NotFoundException, ValidationException,
 			ServerExecutionEnginePluginException {
 
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run) || run.getType() == RunType.Machine) {
 			updateOrchestratorInstanceIdOnRun(run, instanceId, orchestratorName);
 			updateOrchestratorInstanceIpOnRun(run, ipAddress, orchestratorName);
 		} else {
@@ -282,12 +287,13 @@ public abstract class ConnectorBase implements Connector {
 			throw (new ValidationException(
 					diskInfo.get(EXTRADISK_KEY_REGEXERROR)));
 	}
-	
+
 	protected String constructScriptObfuscateCommand(Run run, User user)
 			throws IOException, SlipStreamClientException {
 		String sshUsername = getLoginUsername(run);
 		String command = "";
-		// command += "sed -r -i 's/# *(account +required +pam_access\\.so).*/\\1/' /etc/pam.d/login\n";
+		// command +=
+		// "sed -r -i 's/# *(account +required +pam_access\\.so).*/\\1/' /etc/pam.d/login\n";
 		// command += "echo '-:ALL:LOCAL' >> /etc/security/access.conf\n";
 		command += "sed -i '/RSAAuthentication/d' /etc/ssh/sshd_config\n";
 		command += "sed -i '/PubkeyAuthentication/d' /etc/ssh/sshd_config\n";
@@ -295,27 +301,29 @@ public abstract class ConnectorBase implements Connector {
 		command += "echo -e 'RSAAuthentication yes\nPubkeyAuthentication yes\nPasswordAuthentication no\n' >> /etc/ssh/sshd_config\n";
 		command += "umask 077\n";
 		command += "mkdir -p ~/.ssh\n";
-		command += "echo '" + getPublicSshKey(run, user) + "' >> ~/.ssh/authorized_keys\n";
-		command += "chown -R " + sshUsername + ":$(id -g " + sshUsername + ")" + " ~/.ssh\n";
+		command += "echo '" + getPublicSshKey(run, user)
+				+ "' >> ~/.ssh/authorized_keys\n";
+		command += "chown -R " + sshUsername + ":$(id -g " + sshUsername + ")"
+				+ " ~/.ssh\n";
 		// If SELinux is installed and enabled.
 		command += "restorecon -Rv ~/.ssh || true\n";
 		command += "[ -x /etc/init.d/sshd ] && { service sshd reload; } || { service ssh reload; }\n";
 		return command;
 	}
-	
+
 	protected String getPrivateSshKey() {
-		String privateSshKeyFile = getPrivateSshKeyFileName();	
+		String privateSshKeyFile = getPrivateSshKeyFileName();
 		return FileUtil.fileToString(privateSshKeyFile);
 	}
-	
+
 	protected String getPrivateSshKeyFileName() {
-		String privateSshKeyFile = Configuration.getInstance().getProperty("cloud.connector.orchestrator.privatesshkey");
+		String privateSshKeyFile = Configuration.getInstance().getProperty(
+				"cloud.connector.orchestrator.privatesshkey");
 		return privateSshKeyFile;
 	}
 
-
-	
-	protected String getPublicSshKey(Run run, User user) throws ValidationException, IOException {
+	protected String getPublicSshKey(Run run, User user)
+			throws ValidationException, IOException {
 		String publicSshKeyFile = getPublicSshKeyFileName(run, user);
 		return FileUtil.fileToString(publicSshKeyFile);
 	}
@@ -327,10 +335,9 @@ public abstract class ConnectorBase implements Connector {
 			File tempSshKeyFile = File.createTempFile("sshkey", ".tmp");
 			BufferedWriter out = new BufferedWriter(new FileWriter(
 					tempSshKeyFile));
-			String sshPublicKey = user
-					.getParameter(
-							ExecutionControlUserParametersFactory.CATEGORY
-							+ "." + UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
+			String sshPublicKey = user.getParameter(
+					ExecutionControlUserParametersFactory.CATEGORY + "."
+							+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
 					.getValue();
 			out.write(sshPublicKey);
 			out.close();
@@ -412,9 +419,9 @@ public abstract class ConnectorBase implements Connector {
 	public String getOrchestratorName(Run run) {
 		String orchestratorName = Run.ORCHESTRATOR_NAME;
 
-		if (run.getType() == RunType.Orchestration
-				&& run.getCategory() == ModuleCategory.Deployment) {
-			orchestratorName += "-" + getConnectorInstanceName();
+		if (isInOrchestrationContext(run) || run.getType() == RunType.Machine) {
+			orchestratorName = Run
+					.constructOrchestratorName(getConnectorInstanceName());
 		}
 
 		return orchestratorName;
@@ -467,7 +474,7 @@ public abstract class ConnectorBase implements Connector {
 	}
 
 	protected String getLoginUsername(Run run) throws SlipStreamClientException {
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			return getOrchestratorImageLoginUsername();
 		} else {
 			return getMachineImageLoginUsername(run);
@@ -494,7 +501,7 @@ public abstract class ConnectorBase implements Connector {
 
 	protected String getLoginPassword(Run run) throws ConfigurationException,
 			SlipStreamClientException {
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			return getOrchestratorImageLoginPassword();
 		} else {
 			return getMachineImageLoginPassword(run);
@@ -519,8 +526,11 @@ public abstract class ConnectorBase implements Connector {
 		}
 		return password;
 	}
-	
+
 	protected String getEndpoint(User user) {
-		return user.getParameter(getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME).getValue();
+		return user.getParameter(
+				getConnectorInstanceName() + "."
+						+ UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME)
+				.getValue();
 	}
 }

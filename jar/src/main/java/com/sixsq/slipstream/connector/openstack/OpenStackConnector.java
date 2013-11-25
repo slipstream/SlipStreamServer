@@ -231,18 +231,18 @@ public class OpenStackConnector extends
 					.load(run.getModuleResourceUrl()) : null;
 
 			String region = configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
-			String imageId = (run.getType() == RunType.Orchestration)? getOrchestratorImageId(user) : getImageId(run, user);
+			String imageId = (isInOrchestrationContext(run))? getOrchestratorImageId(user) : getImageId(run, user);
 			
-			String instanceName = (run.getType() == RunType.Orchestration) ? getOrchestratorName(run) : imageModule.getShortName();
+			String instanceName = (isInOrchestrationContext(run)) ? getOrchestratorName(run) : imageModule.getShortName();
 			
-			String flavorName = (run.getType() == RunType.Orchestration) ? configuration
+			String flavorName = (isInOrchestrationContext(run)) ? configuration
 					.getRequiredProperty(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME))
 					: getInstanceType(imageModule);
 			String flavorId = getFlavorId(client, region, flavorName);
-			String userData = (run.getType() == RunType.Orchestration) ? createContextualizationData(run, user, configuration) : "";
+			String userData = (isInOrchestrationContext(run)) ? createContextualizationData(run, user, configuration) : "";
 			String keyPairName = "ss-"+String.valueOf(System.currentTimeMillis());
 			String publicKey = getPublicSshKey(run, user);
-			String[] securityGroups = (run.getType() == RunType.Orchestration) ? "default".split(",")
+			String[] securityGroups = (isInOrchestrationContext(run)) ? "default".split(",")
 					: getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUPS, imageModule).split(",");
 
 			String instanceData = "\n\nStarting instance on region '" + region + "'\n";
@@ -256,7 +256,7 @@ public class OpenStackConnector extends
 					.securityGroupNames(securityGroups)
 					.keyPairName(keyPairName);
 			
-			if (run.getType() == RunType.Orchestration){
+			if (isInOrchestrationContext(run)){
 				options.userData(userData.getBytes());
 			}
 
@@ -270,7 +270,7 @@ public class OpenStackConnector extends
 				e.printStackTrace();
 				throw (new ServerExecutionEnginePluginException(e.getMessage()));
 			}finally{
-				if (run.getType() == RunType.Orchestration)
+				if (isInOrchestrationContext(run))
 					kpApi.delete(keyPairName);
 			}
 

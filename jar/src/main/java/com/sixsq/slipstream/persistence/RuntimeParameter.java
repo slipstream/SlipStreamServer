@@ -46,8 +46,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
  */
 @Entity
 @SuppressWarnings("serial")
-@NamedQueries({
-		@NamedQuery(name = "getParameterByInstanceId", query = "SELECT p FROM RuntimeParameter p WHERE p.key_ = 'instanceid' AND p.value = :instanceid") })
+@NamedQueries({ @NamedQuery(name = "getParameterByInstanceId", query = "SELECT p FROM RuntimeParameter p WHERE p.key_ = 'instanceid' AND p.value = :instanceid") })
 public class RuntimeParameter extends Metadata {
 
 	// Define the constants for properties:
@@ -58,6 +57,7 @@ public class RuntimeParameter extends Metadata {
 	// <nodename>.<index>:<property>
 	public final static String NODE_PROPERTY_SEPARATOR = ":";
 	public final static String NODE_MULTIPLICITY_INDEX_SEPARATOR = ".";
+	public final static String PARAM_WORD_SEPARATOR = ".";
 
 	public final static String STATE_KEY = "state";
 	public static final String STATE_DESCRIPTION = "Machine state";
@@ -93,11 +93,13 @@ public class RuntimeParameter extends Metadata {
 	public static final String TAGS_KEY = "tags";
 	public static final String TAGS_DESCRIPTION = "Tags (comma separated) or annotations for this VM";
 
-	public static final String GLOBAL_TAGS_KEY = GLOBAL_NAMESPACE_PREFIX + TAGS_KEY;
+	public static final String GLOBAL_TAGS_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ TAGS_KEY;
 	public static final String GLOBAL_TAGS_DESCRIPTION = "Comma separated tag values";
-	
+
 	public static final String NODE_GROUPS_KEY = "groups";
-	public static final String GLOBAL_NODE_GROUPS_KEY = GLOBAL_NAMESPACE_PREFIX + NODE_GROUPS_KEY;
+	public static final String GLOBAL_NODE_GROUPS_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ NODE_GROUPS_KEY;
 	public static final String GLOBAL_NODE_GROUPS_DESCRIPTION = "Comma separated node groups";
 
 	public static final String COMPLETE_KEY = "complete";
@@ -115,7 +117,7 @@ public class RuntimeParameter extends Metadata {
 
 	public static final String HOSTNAME_KEY = "hostname";
 	public static final String HOSTNAME_DESCRIPTION = "hostname/ip of the image";
-	
+
 	public static final String CLOUD_SERVICE_NAME = "cloudservice";
 	public static final String CLOUD_SERVICE_DESCRIPTION = "Cloud Service where the node resides";
 
@@ -130,7 +132,7 @@ public class RuntimeParameter extends Metadata {
 
 	private final static String ORCHESTRATOR_INSTANCE_NAME_REGEX = Run.ORCHESTRATOR_NAME
 			+ "(-\\w[-\\w]*)?";
-	
+
 	private final static Pattern NODE_NAME_PART_PATTERN = Pattern
 			.compile("(" + NODE_NAME_REGEX + "\\.\\d+)|("
 					+ RuntimeParameter.GLOBAL_NAMESPACE + ")|("
@@ -155,6 +157,23 @@ public class RuntimeParameter extends Metadata {
 			return null;
 		}
 		return name.split(NODE_PROPERTY_SEPARATOR)[1];
+	}
+
+	public static String constructParamName(String nodename, String paramname) {
+		String prefix = nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+		return prefix + paramname;
+	}
+
+	public static String constructParamName(String groupname, int index,
+			String paramname) {
+		String prefix = constructNodeName(groupname, index)
+				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+		return prefix + paramname;
+	}
+
+	public static String constructNodeName(String groupname, int index) {
+		return groupname + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR
+				+ index;
 	}
 
 	@Id
@@ -308,7 +327,7 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	public String getNodeName() {
-		return key_.split(":")[0];
+		return key_.split(NODE_PROPERTY_SEPARATOR)[0];
 	}
 
 	@Override
@@ -369,9 +388,10 @@ public class RuntimeParameter extends Metadata {
 			mappedRuntimeParameter.setValue(getValue());
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public static List<RuntimeParameter> listRuntimeParameterByInstanceId(String instanceId) {
+	public static List<RuntimeParameter> listRuntimeParameterByInstanceId(
+			String instanceId) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("getParameterByInstanceId");
 		q.setParameter("instanceid", instanceId);
@@ -387,5 +407,5 @@ public class RuntimeParameter extends Metadata {
 	public ParameterType getType() {
 		return type;
 	}
-	
+
 }

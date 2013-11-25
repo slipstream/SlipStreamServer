@@ -31,32 +31,32 @@ public class RunStatusTest {
 	@Test
 	public void verifyRunningSuccess() {
 
-		assertEquals(States.Running.toString(), new RunStatus(States.Running, false).toString());
+		assertEquals(States.Running, new RunStates(States.Running, false).getState());
 	}
 
 	@Test
 	public void verifyRunningWhileAborting() {
 
-		assertEquals(RunStatus.FAILING, new RunStatus(States.Running, true).toString());
+		assertEquals(RunStates.FAILING, new RunStates(States.Running, true).getState());
 	}
 
 	@Test
 	public void verifyFinalStateWithSuccess() {
 
-		assertEquals(RunStatus.SUCCESS, new RunStatus(States.Terminal, false).toString());
+		assertEquals(RunStates.SUCCESS, new RunStates(States.Terminal, false).getState());
 	}
 
 	@Test
 	public void verifyFinalStateAndAborted() {
 
-		assertEquals(RunStatus.FAILED, new RunStatus(States.Terminal, true).toString());
+		assertEquals(RunStates.FAILED, new RunStates(States.Terminal, true).getState());
 	}
 
 	@Test
 	public void verifyDoneFromNotFinal() {
 
 		boolean isAborted = false;
-		RunStatus rs = new RunStatus(States.Inactive, isAborted);
+		RunStates rs = new RunStates(States.Inactive, isAborted);
 		rs.done();
 		assertEquals(States.Cancelled.toString(), rs.toString());
 	}
@@ -65,7 +65,7 @@ public class RunStatusTest {
 	public void verifyDoneFromNotFinalAborted() {
 
 		boolean isAborted = true;
-		RunStatus rs = new RunStatus(States.Running, isAborted);
+		RunStates rs = new RunStates(States.Running, isAborted);
 		rs.done();
 		assertEquals(States.Aborted.toString(), rs.toString());
 	}
@@ -74,7 +74,7 @@ public class RunStatusTest {
 	public void verifyDoneFromFinal() {
 
 		boolean isAborted = false;
-		RunStatus rs = new RunStatus(States.Terminal, isAborted);
+		RunStates rs = new RunStates(States.Terminal, isAborted);
 		rs.done();
 		assertEquals(States.Done.toString(), rs.toString());
 	}
@@ -83,7 +83,7 @@ public class RunStatusTest {
 	public void verifyDoneFromFinalAborted() {
 
 		boolean isAborted = true;
-		RunStatus rs = new RunStatus(States.Terminal, isAborted);
+		RunStates rs = new RunStates(States.Terminal, isAborted);
 		rs.done();
 		assertEquals(States.Aborted.toString(), rs.toString());
 	}

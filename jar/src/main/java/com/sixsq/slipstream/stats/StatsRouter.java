@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.run;
+package com.sixsq.slipstream.stats;
 
 /*
  * +=================================================================+
@@ -22,33 +22,17 @@ package com.sixsq.slipstream.run;
 
 import org.restlet.Context;
 import org.restlet.routing.Router;
-import org.restlet.routing.TemplateRoute;
-import org.restlet.routing.Variable;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 
-public class RunRouter extends Router {
+public class StatsRouter extends Router {
 
-	public RunRouter(Context context) throws ConfigurationException {
+	public StatsRouter(Context context) throws ConfigurationException {
 		super(context);
 
-		attach("", RunListResource.class);
+		attach("", StatsResource.class);
 
-		attach("/", RunListResource.class);
-
-		TemplateRoute route = attach("/{uuid}/{key}?ignoreabort={ignoreabort}", RuntimeParameterResource.class);
-		route.setMatchingQuery(true);
-		route.getTemplate().getVariables()
-				.put(RunListResource.IGNORE_ABORT_QUERY, new Variable(Variable.TYPE_URI_QUERY));
-
-		attach("/{uuid}/{key}", RuntimeParameterResource.class);
-
-		attach("/{uuid}/{key}/", RuntimeParameterResource.class);
-
-		attach("/{uuid}", RunResource.class);
-
-		attach("/{uuid}/", RunResource.class);
-
+		attach("/", StatsResource.class);
 	}
 
 }

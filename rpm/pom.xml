@@ -371,19 +371,6 @@
 	      </sources>
 	    </mapping>
 
-	    <mapping>
-	      <directory>/usr/share/doc/slipstream</directory>
-	      <filemode>644</filemode>
-	      <username>root</username>
-	      <groupname>root</groupname>
-	      <directoryIncluded>false</directoryIncluded>
-	      <sources>
-		<source>
-		  <location>${basedir}/src/main/share</location>
-		</source>
-	      </sources>
-	    </mapping>
-
 	  </mappings>
           <postinstallScriptlet>
             <script>

@@ -31,7 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipstream.common.util.CommonTestUtil;
-import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -46,6 +45,7 @@ import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunTest;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 
 public class RunFactoryTest extends RunTest {
@@ -57,16 +57,8 @@ public class RunFactoryTest extends RunTest {
 	protected static ImageModule imageCircular2of3 = null;
 	protected static ImageModule imageCircular3of3 = null;
 
-	protected static ImageModule imageForDeployment1 = null;
-	protected static ImageModule imageForDeployment2 = null;
-
 	protected static ImageModule baseImage = null;
 	protected static ImageModule customImage = null;
-
-	public static DeploymentModule deployment = null;
-
-	private static String cloudServiceName = new LocalConnector()
-			.getCloudServiceName();
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
@@ -80,7 +72,7 @@ public class RunFactoryTest extends RunTest {
 		create2ElementCircularDependentImages();
 		create3ElementCircularDependentImages();
 		try {
-			createDeployment();
+			setupDeployments();
 			createImage();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -135,44 +127,6 @@ public class RunFactoryTest extends RunTest {
 		customImage.store();
 	}
 
-	private static void createDeployment() throws ValidationException,
-			NotFoundException {
-
-		imageForDeployment1 = new ImageModule("test/imagefordeployment1");
-		imageForDeployment1
-				.setParameter(new ModuleParameter("pi1", "pi1 init value",
-						"pi1 parameter desc", ParameterCategory.Input));
-		imageForDeployment1.setParameter(new ModuleParameter("po1",
-				"po1 init value", "po1 parameter desc",
-				ParameterCategory.Output));
-
-		imageForDeployment1.setIsBase(true);
-		imageForDeployment1.setImageId("123", cloudServiceName);
-		imageForDeployment1.store();
-
-		imageForDeployment2 = new ImageModule("test/imagefordeployment2");
-		imageForDeployment2
-				.setParameter(new ModuleParameter("pi2", "pi2 init value",
-						"pi2 parameter desc", ParameterCategory.Input));
-		imageForDeployment2.setParameter(new ModuleParameter("po2",
-				"po2 init value", "po2 parameter desc",
-				ParameterCategory.Output));
-		imageForDeployment2.setImageId("123", cloudServiceName);
-		imageForDeployment2.store();
-
-		deployment = new DeploymentModule("test/deployment");
-
-		Node node;
-
-		node = new Node("node1", imageForDeployment1);
-		deployment.getNodes().put(node.getName(), node);
-
-		node = new Node("node2", imageForDeployment2);
-		deployment.getNodes().put(node.getName(), node);
-
-		deployment.store();
-	}
-
 	@AfterClass
 	public static void teardownClass() {
 		RunTest.teardownClass();
@@ -201,14 +155,14 @@ public class RunFactoryTest extends RunTest {
 	@Test(expected = SlipStreamClientException.class)
 	public void cannotBuildBaseImage() throws SlipStreamException {
 
-		RunFactory.getRun(imagebase, cloudServiceName, user);
+		getBuildImageRun(imagebase);
 
 	}
 
 	@Test(expected = SlipStreamClientException.class)
 	public void cannotBuildImageWithoutReference() throws SlipStreamException {
 
-		RunFactory.getRun(imagenoref, cloudServiceName, user);
+		getBuildImageRun(imagenoref);
 
 	}
 
@@ -216,7 +170,7 @@ public class RunFactoryTest extends RunTest {
 	public void cannotBuildImageWith2ElementCircularDependency()
 			throws SlipStreamClientException {
 
-		RunFactory.getRun(imageCircular1of2, cloudServiceName, user);
+		getBuildImageRun(imageCircular1of2);
 
 	}
 
@@ -224,8 +178,26 @@ public class RunFactoryTest extends RunTest {
 	public void cannotBuildImageWith3ElementCircularDependency()
 			throws SlipStreamException {
 
-		RunFactory.getRun(imageCircular1of3, cloudServiceName, user);
+		getBuildImageRun(imageCircular1of3);
 
+	}
+
+	private Run getBuildImageRun(ImageModule image)
+			throws SlipStreamClientException {
+		return RunFactory
+				.getRun(image, RunType.Machine, cloudServiceName, user);
+	}
+
+	private Run getDeploymentRun(DeploymentModule deployment)
+			throws SlipStreamClientException {
+		return RunFactory.getRun(deployment, RunType.Orchestration,
+				cloudServiceName, user);
+	}
+
+	@Test(expected = ValidationException.class)
+	public void cannotCreateDeploymentWithImageModule()
+			throws SlipStreamClientException {
+		RunFactory.getRun(image, RunType.Orchestration, cloudServiceName, user);
 	}
 
 	@Test(expected = ValidationException.class)
@@ -238,7 +210,7 @@ public class RunFactoryTest extends RunTest {
 
 		deploymentwithimagenoref.store();
 		try {
-			RunFactory.getRun(deploymentwithimagenoref, cloudServiceName, user);
+			getDeploymentRun(deploymentwithimagenoref);
 		} finally {
 			deploymentwithimagenoref.remove();
 		}
@@ -248,7 +220,7 @@ public class RunFactoryTest extends RunTest {
 	public void deploymentRuntimeParameterInitialState()
 			throws SlipStreamException {
 
-		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
+		Run run = getDeploymentRun(deployment);
 
 		assertThat(run.getRuntimeParameterValue("node1.1:state"),
 				is("Inactive"));
@@ -260,9 +232,10 @@ public class RunFactoryTest extends RunTest {
 	@Test
 	public void commonDeploymentRuntimeParameters() throws SlipStreamException {
 
-		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
+		Run run = getDeploymentRun(deployment);
+
 		String[] nodePrefixes = {
-				Run.ORCHESTRATOR_NAME + "-" + cloudServiceName
+				Run.constructOrchestratorName(cloudServiceName)
 						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR, "node1.1:" };
 		commonRuntimeParameters(run, nodePrefixes);
 
@@ -271,8 +244,9 @@ public class RunFactoryTest extends RunTest {
 	@Test
 	public void commonImageRuntimeParameters() throws SlipStreamException {
 
-		Run run = RunFactory.getRun(customImage, cloudServiceName, user);
-		String[] nodePrefixes = { Run.ORCHESTRATOR_NAME_PREFIX,
+		Run run = getBuildImageRun(customImage);
+		String[] nodePrefixes = {
+				Run.constructOrchestratorName(cloudServiceName) + RuntimeParameter.NODE_PROPERTY_SEPARATOR,
 				Run.MACHINE_NAME_PREFIX };
 		commonRuntimeParameters(run, nodePrefixes);
 
@@ -317,7 +291,7 @@ public class RunFactoryTest extends RunTest {
 
 		deployment.store();
 
-		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
+		Run run = getDeploymentRun(deployment);
 
 		assertThat(run.getRuntimeParameterValue("node2.1:pi1"),
 				is(po1.getValue()));
@@ -397,7 +371,7 @@ public class RunFactoryTest extends RunTest {
 	@Test
 	public void nodeNames() throws SlipStreamException {
 
-		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
+		Run run = getDeploymentRun(deployment);
 
 		int ORCHESTRATOR_AND_2_NODES = 3;
 		assertThat(run.getNodeNames().split(", ").length,
@@ -417,7 +391,7 @@ public class RunFactoryTest extends RunTest {
 
 		deployment.getNodes().put(node.getName(), node);
 
-		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
+		Run run = getDeploymentRun(deployment);
 
 		assertTrue(run.getRuntimeParameters().containsKey("node1.1:pi1"));
 	}
@@ -440,7 +414,7 @@ public class RunFactoryTest extends RunTest {
 		node.setParameterMapping(parameter, deployment);
 		deployment.getNodes().put(node.getName(), node);
 
-		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
+		Run run = getDeploymentRun(deployment);
 
 		assertTrue(run.getRuntimeParameters().get("node2.1:po2").isMapsOthers());
 		assertThat(run.getRuntimeParameters().get("node2.1:po2")
@@ -466,7 +440,7 @@ public class RunFactoryTest extends RunTest {
 		node.setParameterMapping(parameter, deployment);
 		deployment.getNodes().put(node.getName(), node);
 
-		Run run = RunFactory.getRun(deployment, cloudServiceName, user);
+		Run run = getDeploymentRun(deployment);
 		run.store();
 
 		run.getRuntimeParameters().get("node2.1:po2").setValue("new value");
@@ -479,7 +453,7 @@ public class RunFactoryTest extends RunTest {
 
 	@Test
 	public void insertMultiplicityIndexInName() {
-		assertThat(RunDeploymentFactory.insertMultiplicityIndexInParameterName(
+		assertThat(DeploymentFactory.insertMultiplicityIndexInParameterName(
 				"node:param", 1), is("node.1:param"));
 	}
 }

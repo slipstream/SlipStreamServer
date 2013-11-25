@@ -20,9 +20,7 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -30,18 +28,8 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 
 public abstract class ModuleParametersFactoryBase extends
 		ParametersFactoryBase<ModuleParameter> {
-
-	
 	
 	protected Map<String, ModuleParameter> referenceParameters = new HashMap<String, ModuleParameter>();
-
-	public static List<String> extractCloudNames(Map<String, Connector> connectors) {
-		List<String> names = new ArrayList<String>();
-		for(Connector c : connectors.values()) {
-			names.add(c.getConnectorInstanceName());
-		}
-			return names;
-	}
 
 	protected Map<String, ModuleParameter> getReferenceParameters() {
 		return referenceParameters;
