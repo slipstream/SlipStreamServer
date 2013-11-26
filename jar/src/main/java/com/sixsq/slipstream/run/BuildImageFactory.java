@@ -23,6 +23,7 @@ package com.sixsq.slipstream.run;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -114,12 +115,12 @@ public class BuildImageFactory extends RunFactory {
 			throws ValidationException, NotFoundException {
 
 		super.initialize(module, run, cloudService);
-		
+
 		initializeOrchestrtorRuntimeParameters(run);
 		initRuntimeParameters((ImageModule) module, run);
-		initOrchestratorRuntimeParameters(run);
 		initMachineState(run);
 		initNodeNames(run, cloudService);
+		initOrchestratorsNodeNames(run);
 	}
 
 	protected static void initMachineState(Run run) throws ValidationException,
@@ -161,18 +162,8 @@ public class BuildImageFactory extends RunFactory {
 
 	}
 
-	private static void initOrchestratorRuntimeParameters(Run run) throws ValidationException {
-		String cloudServiceName = run.getCloudService();
-		String orchestratorNodename = Run
-				.constructOrchestratorName(cloudServiceName);
-		String key = RuntimeParameter.constructParamName(orchestratorNodename,
-				RuntimeParameter.CLOUD_SERVICE_NAME);
-		run.assignRuntimeParameter(key, cloudServiceName,
-				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-	}
-
-	private static void initNodeNames(Run run, String cloudService) {
-		RunFactory.initOrchestratorNodeName(run);
+	private static void initNodeNames(Run run, String cloudService)
+			throws ConfigurationException, ValidationException {
 		run.addNodeName(Run.MACHINE_NAME);
 		run.addGroup(Run.MACHINE_NAME, cloudService);
 	}
