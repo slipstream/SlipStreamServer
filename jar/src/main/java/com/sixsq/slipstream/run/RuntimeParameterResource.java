@@ -207,8 +207,23 @@ public class RuntimeParameterResource extends ServerResource {
 
 		newState = attemptCompleteCurrentNodeState(nodeName);
 
+		updateRunState(newState, true);
+		
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
 
+	}
+
+	private void updateRunState(States newState, boolean retry) {
+		Run run = Run.loadFromUuid(runtimeParameter.getContainer().getUuid());
+		try {
+			run.setState(newState);
+			run.store();
+		} catch (Exception e) {
+			// retry once
+			if(retry) {
+				updateRunState(newState, false);
+			}
+		}
 	}
 
 	private States attemptCompleteCurrentNodeState(String nodeName) {
