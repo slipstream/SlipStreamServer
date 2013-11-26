@@ -56,7 +56,9 @@ public class DashboardResource extends BaseResource {
 		try {
 			dashboard.populate(getUser());
 		} catch (SlipStreamClientException e) {
+			throwClientConflicError(e.getMessage());
 		} catch (SlipStreamException e) {
+			throwClientConflicError(e.getMessage());
 		}
 	
 		return dashboard;
