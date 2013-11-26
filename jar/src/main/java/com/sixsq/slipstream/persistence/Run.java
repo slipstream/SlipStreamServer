@@ -362,7 +362,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Attribute
 	private String cloudServiceName;
 
-	@Attribute
+	@Attribute(required=false)
 	@Enumerated
 	private States state = States.Unknown;
 
