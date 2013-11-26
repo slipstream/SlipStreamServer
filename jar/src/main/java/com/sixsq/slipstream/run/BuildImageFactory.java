@@ -117,6 +117,7 @@ public class BuildImageFactory extends RunFactory {
 		
 		initializeOrchestrtorRuntimeParameters(run);
 		initRuntimeParameters((ImageModule) module, run);
+		initOrchestratorRuntimeParameters(run);
 		initMachineState(run);
 		initNodeNames(run, cloudService);
 	}
@@ -132,7 +133,7 @@ public class BuildImageFactory extends RunFactory {
 
 		// Add default values for the params as set in the image
 		// definition
-		// Only process the standrad categories and the cloud service
+		// Only process the standard categories and the cloud service
 		// (not the other cloud services, if any)
 
 		List<String> filter = new ArrayList<String>();
@@ -158,7 +159,10 @@ public class BuildImageFactory extends RunFactory {
 				+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
-		cloudServiceName = run.getCloudService();
+	}
+
+	private static void initOrchestratorRuntimeParameters(Run run) throws ValidationException {
+		String cloudServiceName = run.getCloudService();
 		String orchestratorNodename = Run
 				.constructOrchestratorName(cloudServiceName);
 		String key = RuntimeParameter.constructParamName(orchestratorNodename,
