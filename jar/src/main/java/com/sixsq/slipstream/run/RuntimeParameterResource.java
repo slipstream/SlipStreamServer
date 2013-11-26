@@ -222,7 +222,6 @@ public class RuntimeParameterResource extends ServerResource {
 		try {
 			Run run = Run.loadFromUuid(uuid, em);
 			run.setState(newState);
-			run.store();
 			transaction.commit();
 			em.close();
 		} catch (Exception e) {
