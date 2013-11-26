@@ -32,7 +32,7 @@ import com.sixsq.slipstream.run.RunView.RunViewList;
 @Root
 public class Runs {
 
-	@Element
+	@Element(required=false)
 	private RunViewList runs;
 
 	public RunViewList getRuns() {
