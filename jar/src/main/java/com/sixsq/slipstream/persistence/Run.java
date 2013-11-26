@@ -364,7 +364,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@Attribute(required=false)
 	@Enumerated
-	private States state = States.Unknown;
+	private States state = States.Inactive;
 
 	@Attribute
 	private String moduleResourceUri;
