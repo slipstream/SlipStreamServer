@@ -40,8 +40,9 @@ public enum States {
     Failed;
     
     public static List<States> completed() {
-    	return Arrays.asList(States.Inactive,
-				States.Cancelled, States.Terminal,
-				States.Aborted);
+    	return Arrays.asList(States.Cancelled, 
+    						 States.Terminal,
+    						 States.Aborted,
+    						 States.Done);
     }
 }
