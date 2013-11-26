@@ -23,6 +23,7 @@ package com.sixsq.slipstream.run;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -85,7 +86,8 @@ public class RuntimeParameterResource extends ServerResource {
 	}
 
 	private void extractAndSetIgnoreAbort() {
-		ignoreAbort = getRequest().getAttributes().containsKey(RunListResource.IGNORE_ABORT_QUERY);
+		ignoreAbort = getRequest().getAttributes().containsKey(
+				RunListResource.IGNORE_ABORT_QUERY);
 	}
 
 	private void fetchRepresentation() {
@@ -208,19 +210,30 @@ public class RuntimeParameterResource extends ServerResource {
 		newState = attemptCompleteCurrentNodeState(nodeName);
 
 		updateRunState(newState, true);
-		
+
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
 
 	}
 
 	private void updateRunState(States newState, boolean retry) {
-		Run run = Run.loadFromUuid(runtimeParameter.getContainer().getUuid());
+		EntityManager em = PersistenceUtil.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
 		try {
+			Run run = Run.loadFromUuid(uuid, em);
 			run.setState(newState);
 			run.store();
+			transaction.commit();
+			em.close();
 		} catch (Exception e) {
+			String error = "error setting run state: " + newState;
+			if (retry) {
+				Logger.getLogger("restlet").warning(error + " retrying...");
+			} else {
+				Logger.getLogger("restlet").severe(error);
+			}
 			// retry once
-			if(retry) {
+			if (retry) {
 				updateRunState(newState, false);
 			}
 		}
