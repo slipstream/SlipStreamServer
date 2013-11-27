@@ -110,10 +110,9 @@ public class RunResource extends BaseResource {
 			NotFoundException, ValidationException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run;
 		String html;
 		try {
-			run = constructRun(em);
+			Run run = constructRun(em);
 			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
