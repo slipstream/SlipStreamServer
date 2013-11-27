@@ -47,6 +47,7 @@ import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
@@ -132,12 +133,25 @@ public class RunResource extends BaseResource {
 	private Run constructRun(EntityManager em) throws SlipStreamClientException {
 
 		Run run = Run.load(this.run.getResourceUri(), em);
+		try {
+			run = updateVmStatus(run);
+		} catch (SlipStreamClientException e) {
+			run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
+		} catch (SlipStreamException e) {
+			getLogger().warning(
+					"Error updating vm status for run " + run.getName() + ": "
+							+ e.getMessage());
+		}
 
 		Module module = RunFactory.selectFactory(run.getType()).overloadModule(
 				run, getUser());
 		run.setModule(module, true);
 
 		return run;
+	}
+
+	private Run updateVmStatus(Run run) throws SlipStreamException {
+		return Run.updateVmStatus(run, getUser());
 	}
 
 	private void validateUser() {
