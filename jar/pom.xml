@@ -210,6 +210,9 @@
               <value>${project.build.directory}/configuration/slipstream.conf</value>
             </property>
           </systemPropertyVariables>
+          <excludes>
+            <exclude>${slipstream.test.excludes}</exclude>
+          </excludes>
         </configuration>
       </plugin>
 
