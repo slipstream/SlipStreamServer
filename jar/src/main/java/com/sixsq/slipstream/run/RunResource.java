@@ -103,7 +103,7 @@ public class RunResource extends BaseResource {
 			em.close();
 		}
 
-		return new StringRepresentation(xml, MediaType.TEXT_XML);
+		return new StringRepresentation(xml, MediaType.APPLICATION_XML);
 	}
 
 	@Get("html")

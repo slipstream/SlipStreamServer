@@ -87,7 +87,7 @@ public class RunListResource extends BaseResource {
 
 		RunViewList runViewList = fetchListView();
 		String result = SerializationUtil.toXmlString(runViewList);
-		return new StringRepresentation(result);
+		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
 
 	@Get("html")

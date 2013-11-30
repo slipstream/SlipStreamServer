@@ -65,7 +65,7 @@ public class ModuleVersionListResource extends BaseResource {
 		ModuleVersionViewList list = new ModuleVersionViewList(
 				Module.viewListAllVersions(resourceUri));
 		String result = SerializationUtil.toXmlString(list);
-		return new StringRepresentation(result);
+		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
 
 	@Get("html")

@@ -38,7 +38,7 @@ public class VmsResource extends BaseResource {
 	public Representation toXml() {
 
 		String metadata = SerializationUtil.toXmlString(getVms());
-		return new StringRepresentation(metadata, MediaType.TEXT_XML);
+		return new StringRepresentation(metadata, MediaType.APPLICATION_XML);
 
 	}
 
