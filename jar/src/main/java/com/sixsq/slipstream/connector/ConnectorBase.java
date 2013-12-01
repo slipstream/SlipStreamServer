@@ -419,7 +419,7 @@ public abstract class ConnectorBase implements Connector {
 	public String getOrchestratorName(Run run) {
 		String orchestratorName = Run.ORCHESTRATOR_NAME;
 
-		if (isInOrchestrationContext(run) || run.getType() == RunType.Machine) {
+		if (isInOrchestrationContext(run)) {
 			orchestratorName = Run
 					.constructOrchestratorName(getConnectorInstanceName());
 		}
