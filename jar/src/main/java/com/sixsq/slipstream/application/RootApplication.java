@@ -65,7 +65,6 @@ import com.sixsq.slipstream.resource.DocumentationResource;
 import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.run.RunRouter;
-import com.sixsq.slipstream.run.RunsRouter;
 import com.sixsq.slipstream.run.VmsRouter;
 import com.sixsq.slipstream.stats.StatsRouter;
 import com.sixsq.slipstream.user.UserRouter;
@@ -153,7 +152,6 @@ public class RootApplication extends Application {
 			attachModule(router);
 			attachUser(router);
 			attachDashboard(router);
-			attachRuns(router);
 			attachVms(router);
 			attachRun(router);
 			attachStats(router);
@@ -249,10 +247,6 @@ public class RootApplication extends Application {
 
 	private void attachVms(RootRouter router) throws ConfigurationException {
 		guardAndAttach(router, new VmsRouter(getContext()), "vms");
-	}
-
-	private void attachRuns(RootRouter router) throws ConfigurationException {
-		guardAndAttach(router, new RunsRouter(getContext()), "runs");
 	}
 
 	private void guardAndAttach(Router rootRouter, Router router, String rootUri)

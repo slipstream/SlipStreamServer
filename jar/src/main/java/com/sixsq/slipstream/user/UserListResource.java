@@ -44,7 +44,7 @@ public class UserListResource extends BaseResource {
 	@Get("xml")
 	public Representation toXml() {
 		String viewList = serializedUserViewList(User.viewList());
-		return new StringRepresentation(viewList);
+		return new StringRepresentation(viewList, MediaType.APPLICATION_XML);
 	}
 	
 	private String serializedUserViewList(List<UserView> viewList) {
