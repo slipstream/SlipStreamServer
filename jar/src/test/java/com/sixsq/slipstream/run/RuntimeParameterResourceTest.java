@@ -32,6 +32,9 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -51,6 +54,22 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
 
 public class RuntimeParameterResourceTest extends
 		RuntimeParameterResourceTestBase {
+
+	@BeforeClass
+	public static void classSetup() throws ValidationException {
+		RuntimeParameterResourceTestBase.classSetup();
+	}
+
+	@AfterClass
+	public static void classTearDown() throws ValidationException {
+		RuntimeParameterResourceTestBase.classTearDown();
+	}
+
+	@After
+	public void tearDown() {
+		super.tearDown();
+	}
+
 
 	@Test
 	public void runtimeParameterResourceGetUnknownUuid()

@@ -27,9 +27,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
@@ -50,7 +47,6 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 
 	static protected ImageModule baseImage = null;
 
-	@BeforeClass
 	public static void classSetup() throws ValidationException {
 		baseImage = new ImageModule("RuntimeParameterResourceTestBaseImage");
 		baseImage.setImageId("1234", cloudServiceName);
@@ -60,7 +56,6 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 		user = CommonTestUtil.createTestUser();
 	}
 
-	@AfterClass
 	public static void classTearDown() throws ValidationException {
 		baseImage.remove();
 		try {
@@ -70,7 +65,6 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 		}
 	}
 
-	@After
 	public void tearDown() {
 		try {
 			image.remove();
