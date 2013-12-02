@@ -71,7 +71,7 @@ public class Measurement implements Serializable {
 	@Attribute(required=false)
 	private int ram; // in MB
 
-	@Attribute(required=false)
+	@Attribute(required=false, name = "disk")
 	private int storage; // in GB
 
 	@Attribute(name = "created_at")
@@ -81,7 +81,7 @@ public class Measurement implements Serializable {
 	private Date endTime;
 	
 	@Attribute(required=false)
-	private String status;
+	private String status = "Unknown";
 
 	public String getRun() {
 		return run;
