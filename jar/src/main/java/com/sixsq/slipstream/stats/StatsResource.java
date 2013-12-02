@@ -37,7 +37,7 @@ public class StatsResource extends BaseResource {
 	public Representation toXml() {
 
 		String metadata = SerializationUtil.toXmlString(compute());
-		return new StringRepresentation(metadata, MediaType.TEXT_XML);
+		return new StringRepresentation(metadata, MediaType.APPLICATION_XML);
 
 	}
 
