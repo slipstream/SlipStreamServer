@@ -362,7 +362,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Attribute
 	private String cloudServiceName;
 
-	@Attribute(required=false)
+	@Attribute(required = false)
 	@Enumerated
 	private States state = States.Inactive;
 
@@ -378,7 +378,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@Attribute
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date startTime;
+	private Date startTime = new Date();
 
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -611,7 +611,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setStart() {
-		this.startTime = new Date();
+		setDateNow(startTime);
 	}
 
 	public void setStart(Date start) {
@@ -624,6 +624,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public void setEnd(Date end) {
 		this.endTime = (Date) end.clone();
+	}
+
+	public void setEnd() {
+		setDateNow(endTime);
+	}
+
+	public void setDateNow(Date date) {
+		date = new Date();
 	}
 
 	public void addNodeName(String node) {
@@ -871,6 +879,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.state = state.getState();
 		getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY).setValue(
 				state.toString());
+		setEnd();
 	}
 
 	public static String constructOrchestratorName(String cloudService) {
