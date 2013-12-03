@@ -104,7 +104,7 @@ public class MeasurementsTest extends RunTestBase {
 		createACoupleOfImageBuildRuns(imagebuildme);
 
 		Measurements ms = new Measurements();
-		ms.populate();
+		ms.populate(user);
 
 		assertEquals(4, ms.getMeasurments().size());
 
@@ -133,7 +133,7 @@ public class MeasurementsTest extends RunTestBase {
 		createACoupleOfDeploymentRuns(deployment);
 
 		Measurements ms = new Measurements();
-		ms.populate();
+		ms.populate(user);
 
 		// 2 x (2 VMs + 1 orchestrator)
 		assertEquals(6, ms.getMeasurments().size());
@@ -160,7 +160,7 @@ public class MeasurementsTest extends RunTestBase {
 		createACoupleOfSimpleRuns(image);
 
 		Measurements ms = new Measurements();
-		ms.populate();
+		ms.populate(user);
 
 		assertEquals(2, ms.getMeasurments().size());
 
