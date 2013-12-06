@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
@@ -130,6 +131,7 @@ public class RunListResourceTest extends ResourceTestBase {
 	}
 
 	@Test
+	@Ignore
 	public void overrideParameters() throws ConfigurationException,
 			NotFoundException, AbortException, ValidationException {
 		int multiplicityOverride = 2;
