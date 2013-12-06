@@ -64,6 +64,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.run.DeploymentFactory;
 import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.statemachine.States;
+import com.sixsq.slipstream.util.Logger;
 
 @SuppressWarnings("serial")
 @Entity
@@ -238,27 +239,29 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public static Run updateVmStatus(Run run, User user)
 			throws SlipStreamException {
-		Properties describeInstancesStates;
 
-		if (run.getCategory() == ModuleCategory.Deployment) {
-			describeInstancesStates = new Properties();
-			HashSet<String> cloudServicesList = run.getCloudServicesList();
+		return updateVmStatus(run, describeInstances(user));
+	}
 
-			for (String cloudServiceName : cloudServicesList) {
-				Connector connector = ConnectorFactory
-						.getConnector(cloudServiceName);
-				Properties props = connector.describeInstances(user);
-				for (String key : props.stringPropertyNames()) {
-					describeInstancesStates.put(key, props.getProperty(key));
-				}
-
+	private static Properties describeInstances(User user)
+			throws ValidationException {
+		Properties describeInstancesStates = new Properties();
+		String[] cloudServicesList = ConnectorFactory.getCloudServiceNames();
+		for (String cloudServiceName : cloudServicesList) {
+			Connector connector = ConnectorFactory
+					.getConnector(cloudServiceName);
+			Properties props;
+			try {
+				props = connector.describeInstances(user);
+			} catch (SlipStreamException e) {
+				Logger.warning(e.getMessage());
+				continue;
 			}
-		} else {
-			Connector connector = ConnectorFactory.getCurrentConnector(user);
-			describeInstancesStates = connector.describeInstances(user);
+			for (String key : props.stringPropertyNames()) {
+				describeInstancesStates.put(key, props.getProperty(key));
+			}
 		}
-
-		return updateVmStatus(run, describeInstancesStates);
+		return describeInstancesStates;
 	}
 
 	private static Run updateVmStatus(Run run,

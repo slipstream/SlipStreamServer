@@ -32,7 +32,6 @@ import org.simpleframework.xml.Root;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
@@ -40,7 +39,6 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.Logger;
 
 /**
  * Unit test:
@@ -64,6 +62,11 @@ public class Measurements implements Serializable {
 			List<Run> runs = Run.viewListAllActive(em);
 
 			for (Run r : runs) {
+//				try {
+//					Run.updateVmStatus(r, user);
+//				} catch (SlipStreamException e) {
+//					Logger.warning(e.getMessage());
+//				}
 				Measurements ms = MeasurementsFactory.get(r);
 				getMeasurments().addAll(ms.populateSingle(r));
 			}
