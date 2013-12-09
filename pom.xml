@@ -7,9 +7,10 @@
   <name>SlipStream Server</name>
   <url>http://sixsq.com/</url>
 
+  <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStream</artifactId>
-    <version>2.0.16</version>
+    <version>2.0.16-SNAPSHOT</version>
     <relativePath>../SlipStreamParent</relativePath>
   </parent>
 
@@ -53,7 +54,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.0.16</version>
+        <version>2.5.3</version>
       </plugin>
     </plugins>
   </reporting>
