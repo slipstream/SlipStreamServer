@@ -93,7 +93,7 @@ public class RunResource extends BaseResource {
 		Run run;
 		String xml;
 		try {
-			run = constructRun(em);
+			run = constructRun(em, true);
 			xml = SerializationUtil.toXmlString(run);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
@@ -102,7 +102,7 @@ public class RunResource extends BaseResource {
 			em.close();
 		}
 
-		return new StringRepresentation(xml, MediaType.TEXT_XML);
+		return new StringRepresentation(xml, MediaType.APPLICATION_XML);
 	}
 
 	@Get("html")
@@ -110,10 +110,9 @@ public class RunResource extends BaseResource {
 			NotFoundException, ValidationException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run;
 		String html;
 		try {
-			run = constructRun(em);
+			Run run = constructRun(em, false);
 			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
@@ -130,15 +129,32 @@ public class RunResource extends BaseResource {
 		return "run";
 	}
 
-	private Run constructRun(EntityManager em) throws SlipStreamClientException {
+	private Run constructRun(EntityManager em, boolean withVmState)
+			throws SlipStreamClientException {
 
 		Run run = Run.load(this.run.getResourceUri(), em);
+
+		if (withVmState) {
+			try {
+				run = updateVmStatus(run);
+			} catch (SlipStreamClientException e) {
+				run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
+			} catch (SlipStreamException e) {
+				getLogger().warning(
+						"Error updating vm status for run " + run.getName()
+								+ ": " + e.getMessage());
+			}
+		}
 
 		Module module = RunFactory.selectFactory(run.getType()).overloadModule(
 				run, getUser());
 		run.setModule(module, true);
 
 		return run;
+	}
+
+	private Run updateVmStatus(Run run) throws SlipStreamException {
+		return Run.updateVmStatus(run, getUser());
 	}
 
 	private void validateUser() {

@@ -37,7 +37,7 @@ public class DashboardResource extends BaseResource {
 	public Representation toXml() {
 
 		String metadata = SerializationUtil.toXmlString(computeDashboard());
-		return new StringRepresentation(metadata, MediaType.TEXT_XML);
+		return new StringRepresentation(metadata, MediaType.APPLICATION_XML);
 
 	}
 
@@ -56,7 +56,9 @@ public class DashboardResource extends BaseResource {
 		try {
 			dashboard.populate(getUser());
 		} catch (SlipStreamClientException e) {
+			throwClientConflicError(e.getMessage());
 		} catch (SlipStreamException e) {
+			throwClientConflicError(e.getMessage());
 		}
 	
 		return dashboard;

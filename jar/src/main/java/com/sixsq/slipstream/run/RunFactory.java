@@ -119,10 +119,6 @@ public abstract class RunFactory {
 		return new Run(module, type, cloudService, user);
 	}
 
-	protected static void initOrchestratorNodeName(Run run) {
-		run.addNodeName(Run.ORCHESTRATOR_NAME);
-	}
-
 	public static void terminate(Run run) {
 
 	}
@@ -262,4 +258,18 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(prefix + RuntimeParameter.TAGS_KEY, "",
 				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
 	}
+	
+	protected static void initOrchestratorsNodeNames(Run run)
+			throws ConfigurationException, ValidationException {
+		HashSet<String> cloudServiceList = run.getCloudServicesList();
+		for (String cloudServiceName : cloudServiceList) {
+			String nodename = Run.constructOrchestratorName(cloudServiceName);
+			run.addNodeName(nodename);
+			run.assignRuntimeParameter(nodename
+					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
+					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+		}
+	}
+
 }

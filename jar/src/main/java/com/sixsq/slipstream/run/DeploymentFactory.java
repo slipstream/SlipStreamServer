@@ -20,9 +20,6 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import java.util.HashSet;
-
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -245,19 +242,6 @@ public class DeploymentFactory extends RunFactory {
 		}
 
 		return value;
-	}
-
-	protected static void initOrchestratorsNodeNames(Run run)
-			throws ConfigurationException, ValidationException {
-		HashSet<String> cloudServiceList = run.getCloudServicesList();
-		for (String cloudServiceName : cloudServiceList) {
-			String nodename = Run.constructOrchestratorName(cloudServiceName);
-			run.addNodeName(nodename);
-			run.assignRuntimeParameter(nodename
-					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
-					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-		}
 	}
 
 	@Override

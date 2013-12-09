@@ -237,7 +237,7 @@ public class StratusLabConnector extends CliConnectorBase {
 			throws ConfigurationException, InvalidElementException,
 			ValidationException {
 
-		if (run.getType() == RunType.Machine) {
+		if (!isInOrchestrationContext(run)) {
 			return "\"\"";
 		}
 

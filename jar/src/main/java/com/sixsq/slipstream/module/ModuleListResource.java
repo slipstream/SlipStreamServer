@@ -52,13 +52,13 @@ public class ModuleListResource extends BaseResource {
 		}
 	}
 
-	@Get("xml|txt")
+	@Get("xml")
 	public Representation toXml() {
 
 		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
 
 		String result = SerializationUtil.toXmlString(moduleViewList);
-		return new StringRepresentation(result);
+		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
 
 	@Get("html")

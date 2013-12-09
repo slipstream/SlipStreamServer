@@ -23,6 +23,7 @@ package com.sixsq.slipstream.run;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -114,11 +115,12 @@ public class BuildImageFactory extends RunFactory {
 			throws ValidationException, NotFoundException {
 
 		super.initialize(module, run, cloudService);
-		
+
 		initializeOrchestrtorRuntimeParameters(run);
 		initRuntimeParameters((ImageModule) module, run);
 		initMachineState(run);
 		initNodeNames(run, cloudService);
+		initOrchestratorsNodeNames(run);
 	}
 
 	protected static void initMachineState(Run run) throws ValidationException,
@@ -132,7 +134,7 @@ public class BuildImageFactory extends RunFactory {
 
 		// Add default values for the params as set in the image
 		// definition
-		// Only process the standrad categories and the cloud service
+		// Only process the standard categories and the cloud service
 		// (not the other cloud services, if any)
 
 		List<String> filter = new ArrayList<String>();
@@ -158,17 +160,10 @@ public class BuildImageFactory extends RunFactory {
 				+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
-		cloudServiceName = run.getCloudService();
-		String orchestratorNodename = Run
-				.constructOrchestratorName(cloudServiceName);
-		String key = RuntimeParameter.constructParamName(orchestratorNodename,
-				RuntimeParameter.CLOUD_SERVICE_NAME);
-		run.assignRuntimeParameter(key, cloudServiceName,
-				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 	}
 
-	private static void initNodeNames(Run run, String cloudService) {
-		RunFactory.initOrchestratorNodeName(run);
+	private static void initNodeNames(Run run, String cloudService)
+			throws ConfigurationException, ValidationException {
 		run.addNodeName(Run.MACHINE_NAME);
 		run.addGroup(Run.MACHINE_NAME, cloudService);
 	}
