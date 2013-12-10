@@ -88,15 +88,14 @@ public class OpenStackConnector extends
 			throws SlipStreamException {
 
 		switch (run.getType()) {
+		case Run:
 		case Machine:
-			launchDeployment(run, user);
-			break;
 		case Orchestration:
 			launchDeployment(run, user);
 			break;
 		default:
 			throw (new ServerExecutionEnginePluginException(
-					"Cannot submit type: " + run.getCategory() + " yet!!"));
+					"Cannot submit type: " + run.getType() + " yet!!"));
 		}
 
 		return run;
@@ -227,8 +226,8 @@ public class OpenStackConnector extends
 
 		try {
 			Configuration configuration = Configuration.getInstance();
-			ImageModule imageModule = (run.getType() == RunType.Machine) ? ImageModule
-					.load(run.getModuleResourceUrl()) : null;
+			ImageModule imageModule = (isInOrchestrationContext(run)) ? null: 
+				ImageModule.load(run.getModuleResourceUrl());
 
 			String region = configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
 			String imageId = (isInOrchestrationContext(run))? getOrchestratorImageId(user) : getImageId(run, user);
@@ -270,8 +269,7 @@ public class OpenStackConnector extends
 				e.printStackTrace();
 				throw (new ServerExecutionEnginePluginException(e.getMessage()));
 			}finally{
-				if (isInOrchestrationContext(run))
-					kpApi.delete(keyPairName);
+				kpApi.delete(keyPairName);
 			}
 
 			String instanceId = server.getId();

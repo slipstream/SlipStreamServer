@@ -331,7 +331,7 @@ public abstract class ConnectorBase implements Connector {
 	protected String getPublicSshKeyFileName(Run run, User user)
 			throws IOException, ValidationException {
 		String publicSshKey;
-		if (run.getType() == RunType.Machine) {
+		if (run.getType() == RunType.Run) {
 			File tempSshKeyFile = File.createTempFile("sshkey", ".tmp");
 			BufferedWriter out = new BufferedWriter(new FileWriter(
 					tempSshKeyFile));
