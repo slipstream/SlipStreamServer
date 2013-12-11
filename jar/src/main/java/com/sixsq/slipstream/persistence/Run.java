@@ -70,12 +70,13 @@ import com.sixsq.slipstream.util.Logger;
 @Entity
 @NamedQueries({
 		@NamedQuery(name = "allActiveRuns", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) ORDER BY r.startTime DESC"),
-		@NamedQuery(name = "allRunsByUser", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
+		@NamedQuery(name = "allRuns", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r WHERE r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runsByInstanceId", query = "SELECT r FROM Run r JOIN r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
 
+	private static final int MAX_NO_OF_ENTRIES = 20;
 	public static final String ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR = "-";
 	public static final String NODE_NAME_PARAMETER_SEPARATOR = "--";
 	// Orchestrator
@@ -303,7 +304,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static List<RunView> viewListAll(User user)
 			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("allRunsByUser");
+		Query q = createNamedQuery(em, "allRuns");
 		List<Run> runs = q.getResultList();
 		List<RunView> views = convertRunsToRunViews(runs, user);
 		em.close();
@@ -314,7 +315,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static List<RunView> viewList(User user)
 			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("runsByUser");
+		Query q = createNamedQuery(em, "runsByUser");
 		q.setParameter("user", user.getName());
 		List<Run> runs = q.getResultList();
 		List<RunView> views = convertRunsToRunViews(runs, user);
@@ -326,7 +327,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static List<RunView> viewList(String moduleResourceUri, User user)
 			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("runsByRefModule");
+		Query q = createNamedQuery(em, "runsByRefModule");
 		q.setParameter("user", user.getName());
 		q.setParameter("referenceModule", moduleResourceUri);
 		List<Run> runs = q.getResultList();
@@ -338,10 +339,16 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@SuppressWarnings("unchecked")
 	public static List<Run> viewListAllActive(EntityManager em)
 			throws ConfigurationException, ValidationException {
-		Query q = em.createNamedQuery("allActiveRuns");
+		Query q = em.createNamedQuery("allActiveRuns"); // not limited
 		q.setParameter("completed", States.completed());
 		List<Run> runs = q.getResultList();
 		return runs;
+	}
+
+	private static Query createNamedQuery(EntityManager em, String query) {
+		Query q = em.createNamedQuery(query);
+		q.setMaxResults(MAX_NO_OF_ENTRIES);
+		return q;
 	}
 
 	public static List<Run> viewListAllActive() throws ConfigurationException,
