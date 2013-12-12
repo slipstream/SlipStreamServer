@@ -51,15 +51,16 @@ public class BuildImageMeasurements extends Measurements {
 		Measurement ms;
 
 		// Orchestrator
-		String imagename = Run.ORCHESTRATOR_NAME;
 		String nodename = Run.constructOrchestratorName(effectiveCloud);
 		// for builds the orchestrator node is not decorated with the cloud
 		// (there's only one)
-		ms = fill(run, nodename, imagename, "");
+		ms = fill(run, nodename, Run.ORCHESTRATOR_NAME, effectiveCloud,
+				ORCHESTRATOR_DEFAULT_CPU, ORCHESTRATOR_DEFAULT_RAM,
+				ORCHESTRATOR_DEFAULT_STORAGE, getInstanceId(run, nodename));
 		ms.setType(RunType.Machine);
 
 		// Machine
-		imagename = run.getModule().getName();
+		String imagename = run.getModule().getName();
 		nodename = Run.MACHINE_NAME;
 
 		ms = fill(run, nodename, imagename, effectiveCloud);

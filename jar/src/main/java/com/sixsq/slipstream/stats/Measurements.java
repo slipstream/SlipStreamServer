@@ -53,6 +53,11 @@ import com.sixsq.slipstream.util.Logger;
 @SuppressWarnings("serial")
 public class Measurements implements Serializable {
 
+	protected static final int ORCHESTRATOR_DEFAULT_CPU = 1;
+	protected static final int ORCHESTRATOR_DEFAULT_RAM = 1;
+	protected static final int ORCHESTRATOR_DEFAULT_STORAGE = 1;
+	protected static final int DEFAULT_STORAGE = 1;
+
 	@ElementList(inline = true, name = "vm")
 	private List<Measurement> measurments = new ArrayList<Measurement>();
 
@@ -97,6 +102,7 @@ public class Measurements implements Serializable {
 
 		int cpu = 0;
 		int ram = 0;
+		int storage = DEFAULT_STORAGE;
 		String instanceid = "";
 		
 		try {
@@ -112,11 +118,17 @@ public class Measurements implements Serializable {
 		}
 
 		try {
+			storage += Integer.parseInt(getRuntimeParameterValue(
+					ImageModule.EXTRADISK_VOLATILE_PARAM, nodename, run));
+		} catch (NumberFormatException e) {
+		}
+
+		try {
 			instanceid = getInstanceId(run, nodename);
 		} catch (NotFoundException e) {
 		}
 		
-		return fill(run, nodename, imagename, cloud, cpu, ram, instanceid);
+		return fill(run, nodename, imagename, cloud, cpu, ram, storage, instanceid);
 	}
 
 	protected String getInstanceId(Run run, String nodename)
@@ -132,7 +144,7 @@ public class Measurements implements Serializable {
 	}
 
 	protected Measurement fill(Run run, String nodename, String imagename,
-			String cloud, int cpu, int ram, String instanceid)
+			String cloud, int cpu, int ram, int storage, String instanceid)
 			throws ValidationException, NotFoundException, AbortException {
 
 		// might be 'default'
@@ -150,6 +162,7 @@ public class Measurements implements Serializable {
 		m.setCloud(effectiveCloud);
 		m.setCpu(cpu);
 		m.setRam(ram);
+		m.setStorage(storage);
 		m.setCreation(run.getCreation());
 		m.setEnd(run.getEnd());
 		m.setUser(run.getUser());

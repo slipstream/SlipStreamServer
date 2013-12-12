@@ -55,7 +55,9 @@ public class DeploymentMeasurements extends Measurements {
 					.split(Run.ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR)[0];
 			String lastPart = name.substring(firstPart.length() + 1);
 			cloud = lastPart;
-			fill(run, name, Run.ORCHESTRATOR_NAME, cloud, 1, 1, getInstanceId(run, name));
+			fill(run, name, Run.ORCHESTRATOR_NAME, cloud,
+					ORCHESTRATOR_DEFAULT_CPU, ORCHESTRATOR_DEFAULT_RAM,
+					ORCHESTRATOR_DEFAULT_STORAGE, getInstanceId(run, name));
 		}
 
 		for (Node node : run.getNodes().values()) {
