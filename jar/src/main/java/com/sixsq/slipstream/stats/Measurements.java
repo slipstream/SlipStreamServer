@@ -23,6 +23,7 @@ package com.sixsq.slipstream.stats;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.persistence.EntityManager;
 
@@ -32,6 +33,7 @@ import org.simpleframework.xml.Root;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
@@ -39,6 +41,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.Logger;
 
 /**
  * Unit test:
@@ -56,17 +59,19 @@ public class Measurements implements Serializable {
 	public List<Measurement> populate(User user) throws ConfigurationException,
 			ValidationException, NotFoundException, AbortException {
 
+		Properties describeInstancesStates = Run.describeInstances(user);
+		
 		EntityManager em = PersistenceUtil.createEntityManager();
 
 		try {
 			List<Run> runs = Run.viewListAllActive(em);
 
 			for (Run r : runs) {
-//				try {
-//					Run.updateVmStatus(r, user);
-//				} catch (SlipStreamException e) {
-//					Logger.warning(e.getMessage());
-//				}
+				try {
+					Run.updateVmStatus(r, describeInstancesStates);
+				} catch (SlipStreamException e) {
+					Logger.warning(e.getMessage());
+				}
 				Measurements ms = MeasurementsFactory.get(r);
 				getMeasurments().addAll(ms.populateSingle(r));
 			}
@@ -107,12 +112,23 @@ public class Measurements implements Serializable {
 		}
 
 		try {
-			instanceid = getRuntimeParameterValue(
-					RuntimeParameter.INSTANCE_ID_KEY, nodename, run);
+			instanceid = getInstanceId(run, nodename);
 		} catch (NotFoundException e) {
 		}
 		
 		return fill(run, nodename, imagename, cloud, cpu, ram, instanceid);
+	}
+
+	protected String getInstanceId(Run run, String nodename)
+			throws AbortException, NotFoundException {
+		return getRuntimeParameterValue(
+				RuntimeParameter.INSTANCE_ID_KEY, nodename, run);
+	}
+
+	protected String getState(Run run, String nodename)
+			throws AbortException, NotFoundException {
+		return getRuntimeParameterValue(
+				RuntimeParameter.STATE_KEY, nodename, run);
 	}
 
 	protected Measurement fill(Run run, String nodename, String imagename,
@@ -124,6 +140,7 @@ public class Measurements implements Serializable {
 
 		Measurement m = new Measurement();
 
+		m.setStatus(getState(run, nodename));
 		m.setVm(instanceid);
 		m.setRun(run.getUuid());
 		m.setNodeName(nodename);
