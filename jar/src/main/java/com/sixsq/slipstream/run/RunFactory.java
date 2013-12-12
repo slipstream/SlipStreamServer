@@ -83,7 +83,12 @@ public abstract class RunFactory {
 			throws ValidationException, NotFoundException {
 
 		initializeGlobalParameters(run);
+		initCloudServices(run);
 
+	}
+
+	private void initCloudServices(Run run) throws ValidationException {
+		run.assignCloudServiceNames();
 	}
 
 	public static Run getRun(Module module, RunType type, String cloudService,

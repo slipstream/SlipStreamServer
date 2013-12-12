@@ -47,6 +47,7 @@ import javax.persistence.Query;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.lang.StringUtils;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
@@ -195,17 +196,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			// this info in held in getCloudServiceNameList()
 			// so if the list is not empty, use it and
 			// create a RunView instance for each
-			String cloudServiceName = r.getCloudService();
-			String[] cloudServiceNames = { cloudServiceName };
-			String[] list = new String[0];
-			try {
-				list = r.getCloudServiceNameList();
-			} catch (ValidationException ex) {
-				// it's if we have missing modules
-			}
-			if (list.length > 0) {
-				cloudServiceNames = list;
-			}
+			String[] cloudServiceNames = r.getCloudServiceNameList();
 
 			runView = new RunView(r.getResourceUri(), r.getUuid(),
 					r.getModuleResourceUrl(), r.getState().toString(),
@@ -244,7 +235,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return updateVmStatus(run, describeInstances(user));
 	}
 
-	private static Properties describeInstances(User user)
+	public static Properties describeInstances(User user)
 			throws ValidationException {
 		Properties describeInstancesStates = new Properties();
 		String[] cloudServicesList = ConnectorFactory.getCloudServiceNames();
@@ -265,8 +256,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return describeInstancesStates;
 	}
 
-	private static Run updateVmStatus(Run run,
-			Properties describeInstancesStates) throws SlipStreamException {
+	public static Run updateVmStatus(Run run, Properties describeInstancesStates)
+			throws SlipStreamException {
 		run = populateVmStateProperties(run, describeInstancesStates);
 		return run;
 	}
@@ -372,6 +363,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Attribute
 	private String cloudServiceName;
 
+	/**
+	 * Cloud service names (only applies to deployment type run) comma separated
+	 */
+	@Attribute(required = false)
+	@Lob
+	private String cloudServiceNames;
+
 	@Attribute(required = false)
 	@Enumerated
 	private States state = States.Inactive;
@@ -419,14 +417,18 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 * List of cloud service names used in the current run
 	 */
 	@ElementArray(required = false)
-	public String[] getCloudServiceNameList() throws ConfigurationException,
-			ValidationException {
+	public String[] getCloudServiceNameList() {
+		return cloudServiceNames == null ? new String[] { cloudServiceName }
+				: cloudServiceNames.split(",");
+	}
+
+	public void assignCloudServiceNames() throws ValidationException {
 		if (getCategory() == ModuleCategory.Deployment) {
-			return getCloudServicesList().toArray(new String[0]);
+			cloudServiceNames = StringUtils.join(getCloudServicesList(), ",");
 		} else {
-			String[] names = { getCloudService() };
-			return names;
+			cloudServiceNames = getCloudService();
 		}
+
 	}
 
 	@ElementArray(required = false)
@@ -895,6 +897,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static String constructOrchestratorName(String cloudService) {
 		return ORCHESTRATOR_NAME + ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR
 				+ cloudService;
+	}
+
+	public String getCloudServiceNames() {
+		return cloudServiceNames;
+	}
+
+	public void setCloudServiceNames(String cloudServiceNames) {
+		this.cloudServiceNames = cloudServiceNames;
 	}
 
 }
