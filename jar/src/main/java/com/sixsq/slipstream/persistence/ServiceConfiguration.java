@@ -139,7 +139,14 @@ public class ServiceConfiguration extends
 				"Allow user self registration. If checked, user will be able to create accounts themselves.",
 				ParameterCategory.SlipStream_Basics, ParameterType.Boolean),
 
-		SLIPSTREAM_METERING_HOSTNAME("Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:8183).",
+		SLIPSTREAM_METERING_HOSTNAME(
+				"Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:8183).",
+				ParameterCategory.SlipStream_Advanced),
+
+		SLIPSTREAM_METERING_ENABLE("Metering enabled",
+				ParameterCategory.SlipStream_Advanced),
+
+		SLIPSTREAM_SERVICE_CATALOG_ENABLE("Service catalog enabled",
 				ParameterCategory.SlipStream_Advanced);
 
 		private final String description;
