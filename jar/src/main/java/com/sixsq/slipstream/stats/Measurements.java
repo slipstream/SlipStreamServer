@@ -41,6 +41,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.Logger;
 
 /**
@@ -120,6 +121,7 @@ public class Measurements implements Serializable {
 		try {
 			storage += Integer.parseInt(getRuntimeParameterValue(
 					ImageModule.EXTRADISK_VOLATILE_PARAM, nodename, run));
+		} catch (NotFoundException e) {
 		} catch (NumberFormatException e) {
 		}
 
@@ -152,7 +154,13 @@ public class Measurements implements Serializable {
 
 		Measurement m = new Measurement();
 
-		m.setStatus(getState(run, nodename));
+		String state = States.Unknown.toString();
+		try {
+			state = getState(run, nodename);			
+		} catch(NotFoundException e) {
+		}
+
+		m.setStatus(state);
 		m.setVm(instanceid);
 		m.setRun(run.getUuid());
 		m.setNodeName(nodename);
