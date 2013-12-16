@@ -52,11 +52,17 @@ public class BuildImageMeasurements extends Measurements {
 
 		// Orchestrator
 		String nodename = Run.constructOrchestratorName(effectiveCloud);
+		String instanceId = "";
+		try {
+			instanceId = getInstanceId(run, nodename);
+		} catch (NotFoundException e) {
+		}
+
 		// for builds the orchestrator node is not decorated with the cloud
 		// (there's only one)
 		ms = fill(run, nodename, Run.ORCHESTRATOR_NAME, effectiveCloud,
 				ORCHESTRATOR_DEFAULT_CPU, ORCHESTRATOR_DEFAULT_RAM,
-				ORCHESTRATOR_DEFAULT_STORAGE, getInstanceId(run, nodename));
+				ORCHESTRATOR_DEFAULT_STORAGE, instanceId);
 		ms.setType(RunType.Machine);
 
 		// Machine
