@@ -36,9 +36,11 @@ public class HtmlUtil {
 
 	public static String toHtml(Object metadata, String page, String type,
 			User user) {
+		
 		Document doc = SerializationUtil.toXmlDocument(metadata);
 
 		XmlUtil.addUser(doc, user);
+		XmlUtil.addSystemConfiguration(doc);
 
 		String xml = SerializationUtil.documentToString(doc);
 		try {

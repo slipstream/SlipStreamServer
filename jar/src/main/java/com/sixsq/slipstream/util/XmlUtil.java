@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
 
@@ -72,6 +73,13 @@ public class XmlUtil {
 
 	}
 
+	public static void addSystemConfiguration(Document root) {
+		Document configurationDoc = SerializationUtil
+				.toXmlDocument(Configuration.getInstance().getParameters());
+		root.getDocumentElement().appendChild(
+				root.importNode(configurationDoc.getFirstChild(), true));
+	}
+
 	private static void stripNamedElements(Document document, String name) {
 		Element root = document.getDocumentElement();
 		if (root != null) {
@@ -84,28 +92,32 @@ public class XmlUtil {
 	}
 
 	/**
-	 * Normalize xml representation of a module, which is natively
-	 * denormalized to facilitate xslt (for example) processing
+	 * Normalize xml representation of a module, which is natively denormalized
+	 * to facilitate xslt (for example) processing
+	 * 
 	 * @param module
 	 * @return
 	 */
 	public static String normalize(Module module) {
-		
+
 		Document document = SerializationUtil.toXmlDocument(module);
 		Source source = new DOMSource(document);
 
-		return XslUtils.transform(source, "module-export.xsl", new HashMap<String, Object>());
+		return XslUtils.transform(source, "module-export.xsl",
+				new HashMap<String, Object>());
 	}
-	
+
 	/**
 	 * Denormalize xml representation of a module, which is natively
 	 * denormalized to facilitate xslt (for example) processing
+	 * 
 	 * @param imported
 	 * @return
 	 */
 	public static String denormalize(String external) {
-		
+
 		Source source = new StreamSource(new StringReader(external));
-		return XslUtils.transform(source, "module-import.xsl", new HashMap<String, Object>());
+		return XslUtils.transform(source, "module-import.xsl",
+				new HashMap<String, Object>());
 	}
 }
