@@ -43,6 +43,7 @@ public enum States {
     	return Arrays.asList(States.Cancelled, 
     						 States.Terminal,
     						 States.Aborted,
+    						 States.Unknown,
     						 States.Done);
     }
 }
