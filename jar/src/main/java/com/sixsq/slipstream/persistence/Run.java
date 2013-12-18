@@ -71,6 +71,7 @@ import com.sixsq.slipstream.util.Logger;
 @Entity
 @NamedQueries({
 		@NamedQuery(name = "allActiveRuns", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) ORDER BY r.startTime DESC"),
+		@NamedQuery(name = "activeRunsByUser", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) AND r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "allRuns", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
@@ -328,14 +329,24 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<Run> viewListAllActive(EntityManager em)
+	public static List<Run> listAllActive(EntityManager em)
 			throws ConfigurationException, ValidationException {
-		Query q = em.createNamedQuery("allActiveRuns"); // not limited
+		Query q = em.createNamedQuery("allActiveRuns");
 		q.setParameter("completed", States.completed());
 		List<Run> runs = q.getResultList();
 		return runs;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static List<Run> listAllActive(EntityManager em, User user)
+			throws ConfigurationException, ValidationException {
+		Query q = em.createNamedQuery("activeRunsByUser");
+		q.setParameter("completed", States.completed());
+		q.setParameter("user", user.getName());
+		List<Run> runs = q.getResultList();
+		return runs;
+	}
+	
 	private static Query createNamedQuery(EntityManager em, String query) {
 		Query q = em.createNamedQuery(query);
 		q.setMaxResults(MAX_NO_OF_ENTRIES);
@@ -345,7 +356,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static List<Run> viewListAllActive() throws ConfigurationException,
 			ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		List<Run> runs = viewListAllActive(em);
+		List<Run> runs = listAllActive(em);
 		em.close();
 		return runs;
 	}

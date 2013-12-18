@@ -70,7 +70,7 @@ public class Measurements implements Serializable {
 		EntityManager em = PersistenceUtil.createEntityManager();
 
 		try {
-			List<Run> runs = Run.viewListAllActive(em);
+			List<Run> runs = Run.listAllActive(em, user);
 
 			for (Run r : runs) {
 				try {
