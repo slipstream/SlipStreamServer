@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStream</artifactId>
-    <version>2.0.17-SNAPSHOT</version>
+    <version>2.0.17</version>
     <relativePath>../SlipStreamParent</relativePath>
   </parent>
 
