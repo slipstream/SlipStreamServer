@@ -58,14 +58,7 @@ public class Launcher {
 
 	private Run storeRunKeepModule(Run run) throws ValidationException {
 		Module module = run.getModule();
-		try {
-			run = run.store();
-		} catch (Exception e) {
-			// FIXME: should not swallow the exception
-			logger.severe("Error storing run before async run method for run: "
-					+ run.getUuid());
-			e.printStackTrace();
-		}
+		run = run.store();
 		run.setModule(module);
 		return run;
 	}
