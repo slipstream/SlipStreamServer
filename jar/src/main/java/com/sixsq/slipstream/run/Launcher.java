@@ -89,48 +89,9 @@ public class Launcher {
 						+ run.getUuid());
 
 				if (run.getCategory() == ModuleCategory.Deployment) {
-					HashSet<String> cloudServicesList = run
-							.getCloudServicesList();
-					for (String cloudServiceName : cloudServicesList) {
-						Connector connector = ConnectorFactory
-								.getConnector(cloudServiceName);
-						try {
-							connector.launch(run, user);
-							try {
-								String id = run
-										.getRuntimeParameterValue(connector
-												.getOrchestratorName(run)
-												+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-												+ RuntimeParameter.INSTANCE_ID_KEY);
-								String ip = run
-										.getRuntimeParameterValue(connector
-												.getOrchestratorName(run)
-												+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-												+ RuntimeParameter.HOSTNAME_KEY);
-								idsAndIps.put(
-										connector.getOrchestratorName(run), id
-												+ "," + ip);
-							} catch (Exception e) {
-								logger.severe("Error getting IP and ID");
-								e.printStackTrace();
-							}
-						} catch (SlipStreamException e) {
-							run = run.store();
-							run = Run.abortOrReset(e.getMessage(),
-									connector.getOrchestratorName(run),
-									run.getUuid());
-						}
-					}
+					runDeployment(idsAndIps);
 				} else {
-					Connector connector = ConnectorFactory
-							.getCurrentConnector(user);
-					try {
-						connector.launch(run, user);
-					} catch (SlipStreamException e) {
-						run = run.store();
-						run = Run.abortOrReset(e.getMessage(),
-								Run.MACHINE_NAME, run.getUuid());
-					}
+					runOther();
 				}
 
 			} catch (SlipStreamException e) {
@@ -166,6 +127,54 @@ public class Launcher {
 			} catch (Exception e) {
 				logger.severe("Error setting IP and ID");
 				e.printStackTrace();
+			}
+		}
+
+		private void runDeployment(Map<String, String> idsAndIps)
+				throws ValidationException {
+			HashSet<String> cloudServicesList = run
+					.getCloudServicesList();
+			for (String cloudServiceName : cloudServicesList) {
+				Connector connector = ConnectorFactory
+						.getConnector(cloudServiceName);
+				try {
+					connector.launch(run, user);
+					try {
+						String id = run
+								.getRuntimeParameterValue(connector
+										.getOrchestratorName(run)
+										+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+										+ RuntimeParameter.INSTANCE_ID_KEY);
+						String ip = run
+								.getRuntimeParameterValue(connector
+										.getOrchestratorName(run)
+										+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+										+ RuntimeParameter.HOSTNAME_KEY);
+						idsAndIps.put(
+								connector.getOrchestratorName(run), id
+										+ "," + ip);
+					} catch (Exception e) {
+						logger.severe("Error getting IP and ID");
+						e.printStackTrace();
+					}
+				} catch (SlipStreamException e) {
+					run = run.store();
+					run = Run.abortOrReset(e.getMessage(),
+							connector.getOrchestratorName(run),
+							run.getUuid());
+				}
+			}
+		}
+
+		private void runOther() throws ValidationException {
+			Connector connector = ConnectorFactory
+					.getCurrentConnector(user);
+			try {
+				connector.launch(run, user);
+			} catch (SlipStreamException e) {
+				run = run.store();
+				run = Run.abortOrReset(e.getMessage(),
+						Run.MACHINE_NAME, run.getUuid());
 			}
 		}
 
