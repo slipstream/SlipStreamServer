@@ -33,7 +33,6 @@ import javax.persistence.OneToMany;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.run.RunFactory;
 
 @Entity
 @SuppressWarnings("serial")
@@ -254,8 +253,6 @@ public class DeploymentModule extends Module {
 				node.getImage().assignBaseImageIdToImageIdFromCloudService(
 						cloudService);
 			}
-
-			RunFactory.resolveImageIdIfAppropriate(node.getImage(), user);
 		}
 
 		return deployment;

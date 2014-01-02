@@ -30,8 +30,6 @@ import javax.persistence.ManyToOne;
 
 import org.simpleframework.xml.Attribute;
 
-import com.sixsq.slipstream.user.FormProcessor;
-
 @SuppressWarnings("serial")
 @Entity
 public class CloudImageIdentifier implements Serializable {
@@ -74,7 +72,7 @@ public class CloudImageIdentifier implements Serializable {
 			String region, String cloudImageIdentifer) {
 		this(module, cloudServiceName, cloudImageIdentifer);
 		this.region = region;
-		if (FormProcessor.isSet(region)) {
+		if (Parameter.hasValueSet(region)) {
 			resourceUri += CloudImageIdentifier.CLOUD_SERVICE_ID_SEPARATOR
 					+ region;
 		}

@@ -20,6 +20,7 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;

@@ -34,9 +34,9 @@ import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.Parameterized;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;

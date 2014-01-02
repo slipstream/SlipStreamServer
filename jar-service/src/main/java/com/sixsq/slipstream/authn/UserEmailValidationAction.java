@@ -34,11 +34,11 @@ import org.restlet.data.Form;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 
+import com.sixsq.slipstream.action.OneShotAction;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.messages.MessageUtils;
-import com.sixsq.slipstream.persistence.OneShotAction;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
@@ -65,7 +65,7 @@ public class UserEmailValidationAction extends OneShotAction {
 		Form form = getForm();
 		String userResourceUrl = form.getFirst("userResourceUrl").getValue();
 
-		User user = User.load(userResourceUrl, false);
+		User user = User.load(userResourceUrl);
 		user.setState(User.State.ACTIVE);
 
 		try {

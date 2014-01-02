@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;

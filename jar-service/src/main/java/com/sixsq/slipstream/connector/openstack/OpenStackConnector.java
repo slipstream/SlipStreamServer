@@ -24,10 +24,11 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Multimap;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.JCloudsConnectorBase;
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.*;
+
 import org.jclouds.Constants;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeServiceContext;

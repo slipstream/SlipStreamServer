@@ -29,7 +29,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import com.sixsq.slipstream.connector.InstanceType;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -60,7 +59,7 @@ public class ParameterTest {
 	public void setInvalidEnumTypeValue() throws ValidationException {
 		UserParameter parameter = new UserParameter("", "doesntexist", "desc");
 
-		parameter.setEnumValues(InstanceType.getValues());
+		parameter.setEnumValues(InstanceTypeTest.getValues());
 
 		parameter.setValue("setInvalidEnumTypeValue");
 		parameter.validateValue();
@@ -70,9 +69,9 @@ public class ParameterTest {
 	public void setValidEnumTypeValue() throws ValidationException {
 		UserParameter parameter = new UserParameter("", "", "");
 
-		parameter.setEnumValues(InstanceType.getValues());
+		parameter.setEnumValues(InstanceTypeTest.getValues());
 
-		parameter.setValue(InstanceType.C1_MEDIUM.getValue());
+		parameter.setValue(InstanceTypeTest.C1_MEDIUM.getValue());
 	}
 
 	@Test

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
 public abstract class SystemConfigurationParametersFactoryBase extends

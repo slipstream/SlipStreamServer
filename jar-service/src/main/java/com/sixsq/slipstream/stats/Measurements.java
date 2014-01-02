@@ -41,6 +41,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.run.RunFactory;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.Logger;
 
@@ -65,7 +66,7 @@ public class Measurements implements Serializable {
 	public List<Measurement> populate(User user) throws ConfigurationException,
 			ValidationException, NotFoundException, AbortException {
 
-		Properties describeInstancesStates = Run.describeInstances(user);
+		Properties describeInstancesStates = RunFactory.describeInstances(user);
 		
 		EntityManager em = PersistenceUtil.createEntityManager();
 
@@ -74,7 +75,7 @@ public class Measurements implements Serializable {
 
 			for (Run r : runs) {
 				try {
-					Run.updateVmStatus(r, describeInstancesStates);
+					RunFactory.updateVmStatus(r, describeInstancesStates);
 				} catch (SlipStreamException e) {
 					Logger.warning(e.getMessage());
 				}
@@ -150,7 +151,7 @@ public class Measurements implements Serializable {
 			throws ValidationException, NotFoundException, AbortException {
 
 		// might be 'default'
-		String effectiveCloud = run.getEffectiveCloudServiceName(cloud);
+		String effectiveCloud = RunFactory.getEffectiveCloudServiceName(cloud, run);
 
 		Measurement m = new Measurement();
 

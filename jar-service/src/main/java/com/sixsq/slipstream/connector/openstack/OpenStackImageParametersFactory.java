@@ -20,8 +20,8 @@ package com.sixsq.slipstream.connector.openstack;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ImageModule;
 
 public class OpenStackImageParametersFactory extends ModuleParametersFactoryBase {

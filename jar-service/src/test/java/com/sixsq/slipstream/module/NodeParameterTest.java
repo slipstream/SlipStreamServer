@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.persistence;
+package com.sixsq.slipstream.module;
 
 /*
  * +=================================================================+
@@ -32,6 +32,10 @@ import org.restlet.data.Form;
 
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.NodeParameter;
+import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.run.RunListResource;
 
 public class NodeParameterTest {
 
@@ -56,7 +60,7 @@ public class NodeParameterTest {
 		form.add("parameter--node--n1--p2", "'value2'");
 		form.add("parameter--node--n2--pa", "'valuea'");
 		form.add("parameter--node--n2--pb", "'valueb'");
-		Map<String, List<NodeParameter>> parsed = NodeParameter.parseNodeNameOverride(form);
+		Map<String, List<NodeParameter>> parsed = RunListResource.parseNodeNameOverride(form);
 		assertThat(parsed.size(), is(2));
 		assertThat(parsed.get("n1").size(), is(2));
 		assertThat(parsed.get("n1").get(0).getName(), is("p1"));

@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.connector;
+package com.sixsq.slipstream.persistence;
 
 /*
  * +=================================================================+
@@ -23,7 +23,7 @@ package com.sixsq.slipstream.connector;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum InstanceType {
+public enum InstanceTypeTest {
 	M1_SMALL("m1.small"), C1_MEDIUM("c1.medium"), M1_LARGE("m1.large"), M1_XLARGE(
 			"m1.xlarge"), C1_XLARGE("c1.xlarge"), T1_MICRO("t1.micro"), 
 			STANDARD_XSMALL("standard.xsmall"); // Add this for HPcloud
@@ -32,7 +32,7 @@ public enum InstanceType {
 	
 	private final String value;
 
-	InstanceType(String value) {
+	InstanceTypeTest(String value) {
 		this.value = value;
 	}
 
@@ -43,7 +43,7 @@ public enum InstanceType {
 	public static List<String> getValues() {
 		List<String> types = new ArrayList<String>();
 	
-		for (InstanceType type : InstanceType.values()) {
+		for (InstanceTypeTest type : InstanceTypeTest.values()) {
 			types.add(type.getValue());
 		}
 		return types;

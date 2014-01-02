@@ -23,6 +23,7 @@ package com.sixsq.slipstream.connector;
 import java.util.Map;
 import java.util.Properties;
 
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;

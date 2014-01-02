@@ -24,8 +24,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -37,9 +40,11 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipsteam.run.RunView;
+import com.sixsq.slipsteam.run.RunView.RunViewList;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
-import com.sixsq.slipstream.connector.Credentials;
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -58,7 +63,6 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.run.RunView.RunViewList;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -213,8 +217,7 @@ public class RunListResource extends BaseResource {
 	private void overrideNodes(Form form, DeploymentModule deployment)
 			throws ValidationException {
 
-		Map<String, List<NodeParameter>> parametersPerNode = NodeParameter
-				.parseNodeNameOverride(form);
+		Map<String, List<NodeParameter>> parametersPerNode = parseNodeNameOverride(form);
 
 		String defaultCloudService = getDefaultCloudService();
 
@@ -254,6 +257,32 @@ public class RunListResource extends BaseResource {
 			}
 
 		}
+	}
+
+	public static Map<String, List<NodeParameter>> parseNodeNameOverride(
+			Form form) throws ValidationException {
+		Map<String, List<NodeParameter>> parametersPerNode = new HashMap<String, List<NodeParameter>>();
+		for (Entry<String, String> entry : form.getValuesMap().entrySet()) {
+			// parameter--node--[nodename]--[paramname]
+			String[] parts = entry.getKey().split("--");
+			if (RunListResource.REFQNAME.equals(entry.getKey())) {
+				continue;
+			}
+			if (parts.length != 4) {
+				throw new ValidationException("Invalid key format: "
+						+ entry.getKey());
+			}
+			String nodename = parts[2];
+			String parameterName = parts[3];
+			String value = entry.getValue();
+			if (!parametersPerNode.containsKey(nodename)) {
+				parametersPerNode.put(nodename, new ArrayList<NodeParameter>());
+			}
+			NodeParameter parameter = new NodeParameter(parameterName);
+			parameter.setUnsafeValue(value);
+			parametersPerNode.get(nodename).add(parameter);
+		}
+		return parametersPerNode;
 	}
 
 	private void overrideImage(Form form, ImageModule image)

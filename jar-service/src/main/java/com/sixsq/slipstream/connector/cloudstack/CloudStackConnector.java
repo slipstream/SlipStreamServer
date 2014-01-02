@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.CliConnectorBase;
 import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.Credentials;
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;

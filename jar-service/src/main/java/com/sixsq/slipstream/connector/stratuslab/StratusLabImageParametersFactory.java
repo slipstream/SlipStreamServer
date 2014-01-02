@@ -20,9 +20,8 @@ package com.sixsq.slipstream.connector.stratuslab;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.InstanceType;
-import com.sixsq.slipstream.connector.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.NetworkType;
 import com.sixsq.slipstream.persistence.Run;

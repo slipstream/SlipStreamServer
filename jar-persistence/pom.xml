@@ -5,7 +5,7 @@
 
 	<artifactId>SlipStreamPersistence</artifactId>
 	<packaging>jar</packaging>
-	<name>SlipStreamAsync</name>
+	<name>SlipStreamPersistence</name>
 	<description>SlipStream Persistence (JAR)</description>
 
 	<url>http://sixsq.com</url>

@@ -20,8 +20,8 @@ package com.sixsq.slipstream.connector.stratuslab;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.CredentialsBase;
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;

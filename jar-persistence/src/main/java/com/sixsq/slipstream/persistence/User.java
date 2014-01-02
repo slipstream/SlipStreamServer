@@ -40,10 +40,6 @@ import javax.persistence.Query;
 
 import org.simpleframework.xml.Attribute;
 
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
-import com.sixsq.slipstream.connector.ParametersFactory;
-import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
@@ -251,10 +247,14 @@ public class User extends Parameterized<User, UserParameter> {
 		return parameter == null ? "" : parameter.getValue();
 	}
 
-	protected UserParameter getDefaultCloudServiceParameter() {
-		return getParameter(ParametersFactory.constructKey(
-				ExecutionControlUserParametersFactory.CATEGORY,
-				UserParametersFactoryBase.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME));
+	private UserParameter getDefaultCloudServiceParameter() {
+		return getParameter(constructCloudServiceKey());
+	}
+
+	private String constructCloudServiceKey() {
+		return Parameter.constructKey(
+				ParameterCategory.getDefault(),
+				UserParameter.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME);
 	}
 
 	public void setDefaultCloudServiceName(String defaultCloudServiceName)
@@ -262,10 +262,7 @@ public class User extends Parameterized<User, UserParameter> {
 		UserParameter parameter = getDefaultCloudServiceParameter();
 		if (parameter == null) {
 			parameter = new UserParameter(
-					ParametersFactory
-							.constructKey(
-									ExecutionControlUserParametersFactory.CATEGORY,
-									UserParametersFactoryBase.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME));
+					constructCloudServiceKey());
 			setParameter(parameter);
 		}
 		parameter.setValue(defaultCloudServiceName);
@@ -326,37 +323,39 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	public static User loadByName(String name) {
-		return loadByName(name, true);
+		return loadByName(name, null);
 	}
 
-	public static User loadByName(String name, boolean mergeSysteParameters) {
-		return load(User.constructResourceUri(name), mergeSysteParameters);
+	public static User loadByName(String name, ServiceConfiguration sc) {
+		return load(User.constructResourceUri(name), sc);
 	}
 
-	public static User load(String resourceUrl) {
-		return load(resourceUrl, true);
-	}
-
-	public static User load(String resourceUrl, boolean mergeSysteParameters) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		User user = em.find(User.class, resourceUrl);
-		em.close();
-
-		if (mergeSysteParameters && user != null)
-			addSystemParametersIntoUser(user);
+	public static User load(String resourceUrl, ServiceConfiguration sc) {
+		User user = load(resourceUrl);
+		
+		if (sc != null && user != null) {
+			user.addSystemParametersIntoUser(sc);
+		}
 
 		return user;
 	}
 
-	public static void addSystemParametersIntoUser(User user) {
-		ServiceConfiguration sc = Configuration.getInstance().getParameters();
+	public static User load(String resourceUrl) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		User user = em.find(User.class, resourceUrl);
+		em.close();
+		return user;
+	}
+
+	public void addSystemParametersIntoUser(ServiceConfiguration sc) {
+//		ServiceConfiguration sc = Configuration.getInstance().getParameters();
 		for (Map.Entry<String, ServiceConfigurationParameter> entry : sc
 				.getParameters().entrySet()) {
 			try {
 				UserParameter userParam = new UserParameter(entry.getKey(),
 						entry.getValue().getValue(""), "");
 				userParam.setCategory("System");
-				user.setParameter(userParam);
+				setParameter(userParam);
 			} catch (ValidationException e) {
 			}
 		}

@@ -20,11 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,11 +27,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import org.restlet.data.Form;
 import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.run.RunListResource;
 
 @Entity
 @SuppressWarnings("serial")
@@ -80,32 +73,6 @@ public class NodeParameter extends Parameter<Node> {
 		boolean single = value.startsWith("\'") && value.endsWith("\'");
 		boolean double_ = value.startsWith("\"") && value.endsWith("\"");
 		return double_ || single;
-	}
-
-	public static Map<String, List<NodeParameter>> parseNodeNameOverride(
-			Form form) throws ValidationException {
-		Map<String, List<NodeParameter>> parametersPerNode = new HashMap<String, List<NodeParameter>>();
-		for (Entry<String, String> entry : form.getValuesMap().entrySet()) {
-			// parameter--node--[nodename]--[paramname]
-			String[] parts = entry.getKey().split("--");
-			if (RunListResource.REFQNAME.equals(entry.getKey())) {
-				continue;
-			}
-			if (parts.length != 4) {
-				throw new ValidationException("Invalid key format: "
-						+ entry.getKey());
-			}
-			String nodename = parts[2];
-			String parameterName = parts[3];
-			String value = entry.getValue();
-			if (!parametersPerNode.containsKey(nodename)) {
-				parametersPerNode.put(nodename, new ArrayList<NodeParameter>());
-			}
-			NodeParameter parameter = new NodeParameter(parameterName);
-			parameter.setUnsafeValue(value);
-			parametersPerNode.get(nodename).add(parameter);
-		}
-		return parametersPerNode;
 	}
 
 	@Id

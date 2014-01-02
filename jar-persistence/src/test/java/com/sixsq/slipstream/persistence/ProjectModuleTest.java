@@ -24,8 +24,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -34,10 +34,10 @@ import java.util.TreeSet;
 
 import org.junit.Test;
 
-import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleView;
+import com.sixsq.slipstream.util.ModuleTestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ProjectModuleTest {
@@ -119,7 +119,7 @@ public class ProjectModuleTest {
 	public void verifyModuleViewList() throws ValidationException {
 
 		// clean-up
-		CommonTestUtil.cleanupModules();
+		ModuleTestUtil.cleanupModules();
 		
 		Module module1 = new ProjectModule("module1");
 		module1.store();

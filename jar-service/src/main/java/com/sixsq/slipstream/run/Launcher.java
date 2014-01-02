@@ -137,7 +137,7 @@ public class Launcher {
 
 		private void runDeployment(Map<String, String> idsAndIps)
 				throws ValidationException {
-			HashSet<String> cloudServicesList = run.getCloudServicesList();
+			HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
 			for (String cloudServiceName : cloudServicesList) {
 				Connector connector = ConnectorFactory
 						.getConnector(cloudServiceName);

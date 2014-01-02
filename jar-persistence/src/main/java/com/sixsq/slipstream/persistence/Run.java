@@ -26,10 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -47,25 +45,18 @@ import javax.persistence.Query;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apache.commons.lang.StringUtils;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
-import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.ConnectorFactory;
-import com.sixsq.slipstream.connector.Credentials;
+import com.sixsq.slipsteam.run.RunView;
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.run.DeploymentFactory;
-import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.statemachine.States;
-import com.sixsq.slipstream.util.Logger;
 
 @SuppressWarnings("serial")
 @Entity
@@ -230,68 +221,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return views;
 	}
 
-	public static Run updateVmStatus(Run run, User user)
-			throws SlipStreamException {
-
-		return updateVmStatus(run, describeInstances(user));
-	}
-
-	public static Properties describeInstances(User user)
-			throws ValidationException {
-		Properties describeInstancesStates = new Properties();
-		String[] cloudServicesList = ConnectorFactory.getCloudServiceNames();
-		for (String cloudServiceName : cloudServicesList) {
-			Connector connector = ConnectorFactory
-					.getConnector(cloudServiceName);
-			Properties props;
-			try {
-				props = connector.describeInstances(user);
-			} catch (SlipStreamException e) {
-				Logger.warning(e.getMessage());
-				continue;
-			}
-			for (String key : props.stringPropertyNames()) {
-				describeInstancesStates.put(key, props.getProperty(key));
-			}
-		}
-		return describeInstancesStates;
-	}
-
-	public static Run updateVmStatus(Run run, Properties describeInstancesStates)
-			throws SlipStreamException {
-		run = populateVmStateProperties(run, describeInstancesStates);
-		return run;
-	}
-
-	public static Run populateVmStateProperties(Run run,
-			Properties describeInstancesStates) throws NotFoundException,
-			ValidationException {
-
-		List<String> nodes = run.getNodeNameList();
-		String vmIdKey;
-		String vmId;
-		String vmStateKey;
-
-		for (String nodeName : nodes) {
-			String keyPrefix = nodeName
-					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
-			vmIdKey = keyPrefix + RuntimeParameter.INSTANCE_ID_KEY;
-			vmId = run.getRuntimeParameterValueIgnoreAbort(vmIdKey);
-			vmId = vmId == null ? "" : vmId;
-			vmStateKey = keyPrefix + RuntimeParameter.STATE_VM_KEY;
-			String vmState = describeInstancesStates.getProperty(vmId,
-					"Unknown");
-			try {
-				run.updateRuntimeParameter(vmStateKey, vmState);
-			} catch (NotFoundException e) {
-				run.assignRuntimeParameter(vmStateKey, vmState,
-						RuntimeParameter.STATE_VM_DESCRIPTION);
-			}
-		}
-
-		return run;
-	}
-
 	@SuppressWarnings("unchecked")
 	public static List<RunView> viewListAll(User user)
 			throws ConfigurationException, ValidationException {
@@ -433,15 +362,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 				: cloudServiceNames.split(",");
 	}
 
-	public void assignCloudServiceNames() throws ValidationException {
-		if (getCategory() == ModuleCategory.Deployment) {
-			cloudServiceNames = StringUtils.join(getCloudServicesList(), ",");
-		} else {
-			cloudServiceNames = getCloudService();
-		}
-
-	}
-
 	@ElementArray(required = false)
 	public void setCloudServiceNameList(String[] names) {
 	}
@@ -469,11 +389,15 @@ public class Run extends Parameterized<Run, RunParameter> {
 		setStart();
 	}
 
-	public Module getModule() {
-		if (module == null) {
+	public Module getModule(boolean load) {
+		if (module == null && load) {
 			module = Module.load(getModuleResourceUrl());
 		}
 		return module;
+	}
+
+	public Module getModule() {
+		return getModule(true);
 	}
 
 	public void setModule(Module module) throws ValidationException {
@@ -790,39 +714,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 
 		return orchestrators;
-	}
-
-	public Map<String, Node> getNodes() throws ValidationException {
-		if (module == null) {
-			module = new DeploymentFactory().overloadModule(this,
-					User.loadByName(getUser()));
-		}
-
-		if (module.getCategory() != ModuleCategory.Deployment) {
-			throw new SlipStreamInternalException(
-					"getNodes can only be used with a Deployment module");
-		}
-
-		return ((DeploymentModule) module).getNodes();
-	}
-
-	public HashSet<String> getCloudServicesList() throws ValidationException {
-		HashSet<String> cloudServicesList = new HashSet<String>();
-		if (getCategory() == ModuleCategory.Deployment) {
-			for (Node n : getNodes().values()) {
-				String cloudServiceName = n.getCloudService();
-				cloudServicesList
-						.add(getEffectiveCloudServiceName(cloudServiceName));
-			}
-		} else {
-			cloudServicesList.add(getCloudService());
-		}
-		return cloudServicesList;
-	}
-
-	public String getEffectiveCloudServiceName(String cloudService) {
-		return ConnectorFactory.isDefaultCloudService(cloudService) ? this.cloudServiceName
-				: cloudService;
 	}
 
 	public void addGroup(String group, String serviceName) {

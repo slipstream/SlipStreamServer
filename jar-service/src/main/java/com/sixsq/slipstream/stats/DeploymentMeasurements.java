@@ -32,6 +32,8 @@ import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.run.DeploymentFactory;
+import com.sixsq.slipstream.run.RunFactory;
 
 /**
  * Unit test:
@@ -60,11 +62,11 @@ public class DeploymentMeasurements extends Measurements {
 					ORCHESTRATOR_DEFAULT_STORAGE, getInstanceId(run, name));
 		}
 
-		for (Node node : run.getNodes().values()) {
+		for (Node node : DeploymentFactory.getNodes(run).values()) {
 
 			ImageModule image = node.getImage();
 			cloud = node.getCloudService();
-			String effectiveCloud = run.getEffectiveCloudServiceName(cloud);
+			String effectiveCloud = RunFactory.getEffectiveCloudServiceName(cloud, run);
 
 			nodename = node.getName();
 

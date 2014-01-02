@@ -1,7 +1,7 @@
 package com.sixsq.slipstream.connector.physicalhost;
 
-import com.sixsq.slipstream.connector.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ParameterType;
 
 public class PhysicalHostImageParametersFactory extends ModuleParametersFactoryBase {

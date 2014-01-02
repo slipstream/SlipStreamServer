@@ -26,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.sixsq.slipstream.configuration.Configuration;
@@ -36,16 +35,14 @@ import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.module.ModuleView;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.User;
 
-public class CommonTestUtil {
+public abstract class CommonTestUtil {
 
 	protected static final String PASSWORD = "password";
 
@@ -168,18 +165,4 @@ public class CommonTestUtil {
 		ConnectorFactory.setConnectors(connectors);
 	}
 
-	public static void cleanupModules() {
-		List<ModuleView> moduleViewList = Module
-				.viewList(Module.RESOURCE_URI_PREFIX);
-		for(ModuleView m : moduleViewList) {
-			Module.loadByName(m.getName()).remove();
-		}
-	}
-
-	// Only static methods. Ensure no instances are created.
-	public CommonTestUtil() {
-
-	}
-
-	
 }

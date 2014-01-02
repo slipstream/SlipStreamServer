@@ -34,10 +34,8 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 
-import com.sixsq.slipstream.connector.InstanceType;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.user.FormProcessor;
 
 /**
  * Unit test see:
@@ -50,7 +48,7 @@ import com.sixsq.slipstream.user.FormProcessor;
 public class ImageModule extends Module {
 
 	public static final String INSTANCE_TYPE_KEY = "instance.type";
-	public static final String INSTANCE_TYPE_INHERITED = InstanceType.INHERITED;
+	public static final String INSTANCE_TYPE_INHERITED = "inherited";
 
 	public static final String RAM_KEY = "ram";
 	public static final String CPU_KEY = "cpu";
@@ -444,56 +442,9 @@ public class ImageModule extends Module {
 		return getPackages().isEmpty() ? true : false;
 	}
 
-	/*
-	 * LS: Useless ?
-	 * 
-	 * @Override public List<String> getNodeNames(String moduleUrl) {
-	 * List<String> nodes = super.getNodeNames(moduleUrl);
-	 * nodes.add(Run.MACHINE_NAME); return nodes; }
-	 */
 	public void setPackage(Package package_) {
 		packages.add(package_);
 	}
-
-	// @Attribute(required=false)
-	// public String getInstanceType() throws ValidationException {
-	//
-	// ModuleParameter instanceTypeParameter = getParameter(INSTANCE_TYPE_KEY);
-	// String instanceType = null;
-	// if (instanceTypeParameter == null) {
-	// instanceType = INSTANCE_TYPE_INHERITED;
-	// } else {
-	// instanceType = instanceTypeParameter.getValue();
-	// }
-	//
-	// String moduleReference = getModuleReference() == null ? "" :
-	// getModuleReference();
-	// if (INSTANCE_TYPE_INHERITED.equals(instanceType)
-	// && FormProcessor.isSet(moduleReference)) {
-	// ImageModule parent = ImageModule.load(moduleReference);
-	// instanceType = parent.getInstanceType();
-	// }
-	// return instanceType == null ? instanceTypeParameter.getEnumValues()
-	// .get(0) : instanceType;
-	// }
-	//
-	// @Attribute(required=false)
-	// public void setInstanceType(String instanceType) throws
-	// ValidationException {
-	// ModuleParameter parameter = getParameter(INSTANCE_TYPE_KEY);
-	// boolean found = false;
-	// for (String v : parameter.getEnumValues()) {
-	// if (v.equals(instanceType)) {
-	// found = true;
-	// break;
-	// }
-	// }
-	// if (!found) {
-	// throw (new ValidationException("Invalid instance type: "
-	// + instanceType));
-	// }
-	// parameter.setValue(instanceType);
-	// }
 
 	public ImageModule store() {
 		setVersion();
@@ -524,7 +475,7 @@ public class ImageModule extends Module {
 	}
 
 	protected boolean isSet(String value) {
-		return FormProcessor.isSet(value);
+		return Parameter.hasValueSet(value);
 	}
 
 	public ImageModule copy() throws ValidationException {

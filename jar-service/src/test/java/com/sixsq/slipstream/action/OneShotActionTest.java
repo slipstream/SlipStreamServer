@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.persistence;
+package com.sixsq.slipstream.action;
 
 /*
  * +=================================================================+
@@ -20,9 +20,9 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import static com.sixsq.slipstream.persistence.OneShotAction.State.ABORTED;
-import static com.sixsq.slipstream.persistence.OneShotAction.State.ACTIVE;
-import static com.sixsq.slipstream.persistence.OneShotAction.State.DONE;
+import static com.sixsq.slipstream.action.OneShotAction.State.ABORTED;
+import static com.sixsq.slipstream.action.OneShotAction.State.ACTIVE;
+import static com.sixsq.slipstream.action.OneShotAction.State.DONE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

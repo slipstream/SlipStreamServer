@@ -21,6 +21,8 @@ package com.sixsq.slipstream.run;
  */
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
 
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
@@ -28,7 +30,9 @@ import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.CloudService;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
@@ -38,6 +42,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.Logger;
 
 public abstract class RunFactory {
 
@@ -87,8 +92,8 @@ public abstract class RunFactory {
 
 	}
 
-	private void initCloudServices(Run run) throws ValidationException {
-		run.assignCloudServiceNames();
+	protected void initCloudServices(Run run) throws ValidationException {
+		run.setCloudServiceNames(run.getCloudService());
 	}
 
 	public static Run getRun(Module module, RunType type, String cloudService,
@@ -178,11 +183,11 @@ public abstract class RunFactory {
 		return module;
 	}
 
-	protected static void initializeOrchestrtorRuntimeParameters(Run run)
+	protected void initializeOrchestrtorRuntimeParameters(Run run)
 			throws ValidationException {
 
 		if (withOrchestrator(run)) {
-			HashSet<String> cloudServiceList = run.getCloudServicesList();
+			HashSet<String> cloudServiceList = getCloudServicesList(run);
 			for (String cloudServiceName : cloudServiceList) {
 				initializeOrchestratorParameters(run, cloudServiceName);
 			}
@@ -263,10 +268,10 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(prefix + RuntimeParameter.TAGS_KEY, "",
 				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
 	}
-	
-	protected static void initOrchestratorsNodeNames(Run run)
+
+	protected void initOrchestratorsNodeNames(Run run)
 			throws ConfigurationException, ValidationException {
-		HashSet<String> cloudServiceList = run.getCloudServicesList();
+		HashSet<String> cloudServiceList = getCloudServicesList(run);
 		for (String cloudServiceName : cloudServiceList) {
 			String nodename = Run.constructOrchestratorName(cloudServiceName);
 			run.addNodeName(nodename);
@@ -276,5 +281,88 @@ public abstract class RunFactory {
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 		}
 	}
+
+	public static HashSet<String> getCloudServicesList(Run run)
+			throws ValidationException {
+
+		HashSet<String> cloudServicesList;
+
+		if (run.getCategory() == ModuleCategory.Deployment) {
+			cloudServicesList = DeploymentFactory.getCloudServicesList(run);
+		} else {
+			cloudServicesList = new HashSet<String>();
+			cloudServicesList.add(run.getCloudService());
+		}
+
+		return cloudServicesList;
+	}
+
+	public static String getEffectiveCloudServiceName(String cloudService, Run run) {
+		return CloudService.isDefaultCloudService(cloudService) ? run
+				.getCloudService() : cloudService;
+	}
+	
+	public static Run updateVmStatus(Run run, User user)
+			throws SlipStreamException {
+
+		return updateVmStatus(run, describeInstances(user));
+	}
+
+	public static Properties describeInstances(User user)
+			throws ValidationException {
+		Properties describeInstancesStates = new Properties();
+		String[] cloudServicesList = ConnectorFactory.getCloudServiceNames();
+		for (String cloudServiceName : cloudServicesList) {
+			Connector connector = ConnectorFactory
+					.getConnector(cloudServiceName);
+			Properties props;
+			try {
+				props = connector.describeInstances(user);
+			} catch (SlipStreamException e) {
+				Logger.warning(e.getMessage());
+				continue;
+			}
+			for (String key : props.stringPropertyNames()) {
+				describeInstancesStates.put(key, props.getProperty(key));
+			}
+		}
+		return describeInstancesStates;
+	}
+
+	public static Run updateVmStatus(Run run, Properties describeInstancesStates)
+			throws SlipStreamException {
+		run = populateVmStateProperties(run, describeInstancesStates);
+		return run;
+	}
+
+	public static Run populateVmStateProperties(Run run,
+			Properties describeInstancesStates) throws NotFoundException,
+			ValidationException {
+
+		List<String> nodes = run.getNodeNameList();
+		String vmIdKey;
+		String vmId;
+		String vmStateKey;
+
+		for (String nodeName : nodes) {
+			String keyPrefix = nodeName
+					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+			vmIdKey = keyPrefix + RuntimeParameter.INSTANCE_ID_KEY;
+			vmId = run.getRuntimeParameterValueIgnoreAbort(vmIdKey);
+			vmId = vmId == null ? "" : vmId;
+			vmStateKey = keyPrefix + RuntimeParameter.STATE_VM_KEY;
+			String vmState = describeInstancesStates.getProperty(vmId,
+					"Unknown");
+			try {
+				run.updateRuntimeParameter(vmStateKey, vmState);
+			} catch (NotFoundException e) {
+				run.assignRuntimeParameter(vmStateKey, vmState,
+						RuntimeParameter.STATE_VM_DESCRIPTION);
+			}
+		}
+
+		return run;
+	}
+
 
 }

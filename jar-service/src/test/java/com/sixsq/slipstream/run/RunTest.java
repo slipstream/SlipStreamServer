@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.persistence;
+package com.sixsq.slipstream.run;
 
 /*
  * +=================================================================+
@@ -41,23 +41,42 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sixsq.slipsteam.run.RunView;
 import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.run.RunFactory;
-import com.sixsq.slipstream.run.RunTestBase;
-import com.sixsq.slipstream.run.RunView;
+import com.sixsq.slipstream.persistence.Authz;
+import com.sixsq.slipstream.persistence.CloudImageIdentifier;
+import com.sixsq.slipstream.persistence.DeploymentModule;
+import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.Metadata;
+import com.sixsq.slipstream.persistence.ModuleCategory;
+import com.sixsq.slipstream.persistence.ModuleParameter;
+import com.sixsq.slipstream.persistence.Node;
+import com.sixsq.slipstream.persistence.NodeParameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.PersistenceUtil;
+import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
+import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class RunTest extends RunTestBase {
 
 	@BeforeClass
-	public static void setupClass() throws ValidationException {
+	public static void setupClass() throws ValidationException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException,
+			ClassNotFoundException {
 		setupImages();
+		CommonTestUtil
+				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 	}
 
 	@AfterClass
@@ -444,10 +463,10 @@ public class RunTest extends RunTestBase {
 	public void done() throws ConfigurationException, SlipStreamClientException {
 
 		ImageModule image = new ImageModule("doneImage");
-		image.getCloudImageIdentifiers().add(new CloudImageIdentifier(image, cloudServiceName, "123"));
+		image.getCloudImageIdentifiers().add(
+				new CloudImageIdentifier(image, cloudServiceName, "123"));
 
-		Run run = RunFactory.getRun(image, RunType.Run,
-				cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
 
 		run.setState(States.Inactive);
 		run.done();

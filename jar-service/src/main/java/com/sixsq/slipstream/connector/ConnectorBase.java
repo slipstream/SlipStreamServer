@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -45,6 +46,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ExtraDisk;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.ModuleParameter;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
@@ -91,11 +93,8 @@ public abstract class ConnectorBase implements Connector {
 
 	protected static final String SLIPSTREAM_REPORT_DIR = "/tmp/slipstream/reports";
 
-	protected Map<String, Map<String, String>> extraDisksInfo = new HashMap<String, Map<String, String>>();
-
-	protected static final String EXTRADISK_KEY_REGEX = "regex";
-	protected static final String EXTRADISK_KEY_REGEXERROR = "regexError";
-	protected static final String EXTRADISK_KEY_DESCRIPTION = "description";
+	// TODO: shouldn't be there!!
+	private Map<String, Map<String, String>> extraDisksInfo = new HashMap<String, Map<String, String>>();
 
 	private File tempSshKeyFile;
 
@@ -255,9 +254,9 @@ public abstract class ConnectorBase implements Connector {
 	protected void defineExtraDisk(String name, String description,
 			String regex, String regexError) {
 		Map<String, String> diskInfo = new HashMap<String, String>();
-		diskInfo.put(EXTRADISK_KEY_DESCRIPTION, description);
-		diskInfo.put(EXTRADISK_KEY_REGEX, regex);
-		diskInfo.put(EXTRADISK_KEY_REGEXERROR, regexError);
+		diskInfo.put(ExtraDisk.EXTRADISK_KEY_DESCRIPTION, description);
+		diskInfo.put(ExtraDisk.EXTRADISK_KEY_REGEX, regex);
+		diskInfo.put(ExtraDisk.EXTRADISK_KEY_REGEXERROR, regexError);
 
 		extraDisksInfo.put(name, Collections.unmodifiableMap(diskInfo));
 	}
@@ -270,7 +269,7 @@ public abstract class ConnectorBase implements Connector {
 			String name = entry.getKey();
 			Map<String, String> valuesList = entry.getValue();
 			ExtraDisk disk = new ExtraDisk(name,
-					valuesList.get(EXTRADISK_KEY_DESCRIPTION), this);
+					valuesList.get(ExtraDisk.EXTRADISK_KEY_DESCRIPTION));
 			disks.add(disk);
 		}
 
@@ -283,9 +282,9 @@ public abstract class ConnectorBase implements Connector {
 			return;
 		}
 		Map<String, String> diskInfo = extraDisksInfo.get(name);
-		if (!param.matches(diskInfo.get(EXTRADISK_KEY_REGEX)))
+		if (!param.matches(diskInfo.get(ExtraDisk.EXTRADISK_KEY_REGEX)))
 			throw (new ValidationException(
-					diskInfo.get(EXTRADISK_KEY_REGEXERROR)));
+					diskInfo.get(ExtraDisk.EXTRADISK_KEY_REGEXERROR)));
 	}
 
 	protected String constructScriptObfuscateCommand(Run run, User user)
@@ -411,7 +410,7 @@ public abstract class ConnectorBase implements Connector {
 			throws ValidationException {
 		return user
 				.getParameterValue(
-						new ExecutionControlUserParametersFactory()
+						Parameter
 								.constructKey(ExecutionControlUserParametersFactory.VERBOSITY_LEVEL),
 						ExecutionControlUserParametersFactory.VERBOSITY_LEVEL_DEFAULT);
 	}

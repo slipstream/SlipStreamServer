@@ -28,5 +28,9 @@ public enum ParameterCategory {
 	Input,
 	Output,
 	Execution_Parameters,
-	Cloud
+	Cloud;
+	
+	public static String getDefault() {
+		return General.toString();
+	}
 }

@@ -27,6 +27,7 @@ import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.ComputeServiceContextFactory;
 import org.jclouds.rest.RestContext;
 
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;

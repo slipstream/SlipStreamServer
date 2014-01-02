@@ -20,6 +20,9 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -27,75 +30,86 @@ import javax.persistence.Transient;
 
 import org.simpleframework.xml.Attribute;
 
-import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 @Entity
 public class ExtraDisk {
 
+	public static final String EXTRADISK_KEY_REGEX = "regex";
+	public static final String EXTRADISK_KEY_REGEXERROR = "regexError";
+	public static final String EXTRADISK_KEY_DESCRIPTION = "description";
+
 	@Id
 	@GeneratedValue
 	private Long id;
-	
+
+	@Transient
+	private Map<String, Map<String, String>> extraDisksInfo = new HashMap<String, Map<String, String>>();
+
 	@Attribute
 	private String name;
 
 	@Attribute
 	private String description;
-	
+
 	@Attribute
 	private String mountPoint;
-	
+
 	@Attribute
 	private String deviceName;
-	
+
 	@Attribute(required = false)
 	private int size;
-	
+
 	@Attribute(required = false)
 	private String moduleReferenceUri;
-
-	@Transient
-	private volatile ConnectorBase connector;
 
 	public ExtraDisk() {
 		super();
 	}
 
-	public ExtraDisk(String name, String description, ConnectorBase connector) {
+	public ExtraDisk(String name, String description) {
 		super();
 		setName(name);
 		setDescription(description);
-		setCloudConnector(connector);
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
 	public String getDescription() {
 		return description;
 	}
+
 	public String getMountPoint() {
 		return mountPoint;
 	}
+
 	public void setMountPoint(String mountPoint) {
 		this.mountPoint = mountPoint;
 	}
+
 	public String getDeviceName() {
 		return deviceName;
 	}
+
 	public void setDeviceName(String deviceName) {
 		this.deviceName = deviceName;
 	}
+
 	public int getSize() {
 		return size;
 	}
+
 	public void setSize(int size) {
 		this.size = size;
 	}
@@ -108,21 +122,23 @@ public class ExtraDisk {
 		return moduleReferenceUri;
 	}
 
-	public void setCloudConnector(ConnectorBase connector) {
-		this.connector = connector;
-	}
-	
 	public void validateParameterValue(String param) throws ValidationException {
-		connector.validateExtraDiskParameter(this.name, param);
+		if (param == null || param.isEmpty()) {
+			return;
+		}
+		Map<String, String> diskInfo = extraDisksInfo.get(name);
+		if (!param.matches(diskInfo.get(EXTRADISK_KEY_REGEX)))
+			throw (new ValidationException(
+					diskInfo.get(EXTRADISK_KEY_REGEXERROR)));
 	}
 
 	public ExtraDisk copy() {
-		ExtraDisk copy = new ExtraDisk(getName(), getDescription(), connector);
+		ExtraDisk copy = new ExtraDisk(getName(), getDescription());
 		copy.setDeviceName(getDeviceName());
 		copy.setModuleReferenceUri(getModuleReferenceUri());
 		copy.setMountPoint(getMountPoint());
 		copy.setSize(getSize());
 		return copy;
 	}
-	
+
 }

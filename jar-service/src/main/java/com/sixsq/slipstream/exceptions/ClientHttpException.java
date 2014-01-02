@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.credentials;
+package com.sixsq.slipstream.exceptions;
 
 /*
  * +=================================================================+
@@ -20,13 +20,25 @@ package com.sixsq.slipstream.credentials;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.exceptions.InvalidElementException;
 
+import org.restlet.data.Status;
 
-public interface Credentials {
+/**
+ * HTTP client error wrapper.
+ * @author meb
+ *
+ */
+@SuppressWarnings("serial")
+public class ClientHttpException extends SlipStreamException {
 
-	public String getKey() throws InvalidElementException;
-	
-	public String getSecret() throws InvalidElementException;
-	
+	private Status status;
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public ClientHttpException(String error, Status status){
+		super(error);
+		this.status = status;
+	}
 }

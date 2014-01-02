@@ -30,11 +30,11 @@ import java.lang.reflect.InvocationTargetException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.connector.stratuslab.StratusLabConnector;
 import com.sixsq.slipstream.connector.stratuslab.StratusLabUserParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.ResourceTestBase;

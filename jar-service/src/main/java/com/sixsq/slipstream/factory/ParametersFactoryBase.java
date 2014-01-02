@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.connector;
+package com.sixsq.slipstream.factory;
 
 /*
  * +=================================================================+
@@ -173,6 +173,6 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 	}
 
 	public String constructKey(String... names) {
-		return ParametersFactory.constructKey(getCategory(), names);
+		return Parameter.constructKey(getCategory(), names);
 	}
 }

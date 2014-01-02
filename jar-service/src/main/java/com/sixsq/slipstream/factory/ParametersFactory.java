@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.connector;
+package com.sixsq.slipstream.factory;
 
 /*
  * +=================================================================+
@@ -26,14 +26,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ExtraDisk;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -103,7 +106,7 @@ public class ParametersFactory {
 	protected static void resetCloudServiceNameEnum(User user,
 			Map<String, UserParameter> execParameters) {
 		// Reset enum for cloud service name (in case connectors changed since)
-		String cloudServiceNameKey = constructKey(
+		String cloudServiceNameKey = Parameter.constructKey(
 				ParameterCategory.General.toString(),
 				ExecutionControlUserParametersFactory.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME);
 		UserParameter cloudServiceParameter = user
@@ -145,14 +148,6 @@ public class ParametersFactory {
 				module.setParameter(entry.getValue());
 			}
 		}
-	}
-
-	public static String constructKey(String category, String... names) {
-		String newKey = category;
-		for (String name : names) {
-			newKey += RuntimeParameter.PARAM_WORD_SEPARATOR + name;
-		}
-		return newKey;
 	}
 
 }

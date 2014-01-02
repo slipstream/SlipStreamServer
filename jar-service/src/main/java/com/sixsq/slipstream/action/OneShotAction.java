@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.persistence;
+package com.sixsq.slipstream.action;
 
 /*
  * +=================================================================+
@@ -40,6 +40,7 @@ import org.restlet.representation.Representation;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
+import com.sixsq.slipstream.persistence.PersistenceUtil;
 
 /**
  * Parent class for one shot, asynchronous actions. These include such things as
@@ -47,9 +48,9 @@ import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
  * 
  * Subclasses must call the method setForm only from the constructor.
  * 
- * @author loomis
- * 
  */
+
+// TODO: split the persistent part from the resource
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class OneShotAction {

@@ -47,7 +47,7 @@ public class RequestUtil {
 		User user = null;
 		try {
 			user = User.loadByName(request.getClientInfo().getUser().getName(),
-					true);
+					getConfigurationFromRequest(request).getParameters());
 		} catch (NullPointerException ex) {
 			// user not authenticated
 		}

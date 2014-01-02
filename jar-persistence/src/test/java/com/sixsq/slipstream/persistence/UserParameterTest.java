@@ -29,7 +29,6 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -59,13 +58,15 @@ public class UserParameterTest {
 	@Test
 	public void parametersPersisted() throws ValidationException {
 		User user = new User("parametersPersisted");
-		ParametersFactory.addParametersForEditing(user);
+		
+		UserParameter p = new UserParameter("pname");
+		user.setParameter(p);
 		
 		user.store();
 		
 		user = User.loadByName(user.getName());
 		
-		assertThat(user.getParameters().size(), is(greaterThan(1)));
+		assertThat(user.getParameters().size(), is(greaterThan(0)));
 		
 		user.remove();
 	}

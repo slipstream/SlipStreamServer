@@ -33,7 +33,6 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
-import com.sixsq.slipstream.persistence.OneShotAction;
 import com.sixsq.slipstream.resource.SimpleRepresentationBaseResource;
 
 public class ActionResource extends SimpleRepresentationBaseResource {

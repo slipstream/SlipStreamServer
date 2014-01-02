@@ -6,7 +6,7 @@
 	<version>2.0.18-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>SlipStreamAsync</name>
-	<description>SlipStream Asynchronous Operations</description>
+	<description>SlipStream Asynchronous Operations (JAR)</description>
 	<url>http://sixsq.com</url>
 	<licenses>
 		<license>

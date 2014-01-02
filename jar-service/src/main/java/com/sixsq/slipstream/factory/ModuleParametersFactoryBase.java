@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.connector;
+package com.sixsq.slipstream.factory;
 
 /*
  * +=================================================================+

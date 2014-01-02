@@ -154,7 +154,7 @@ public class RunResource extends BaseResource {
 	}
 
 	private Run updateVmStatus(Run run) throws SlipStreamException {
-		return Run.updateVmStatus(run, getUser());
+		return RunFactory.updateVmStatus(run, getUser());
 	}
 
 	private void validateUser() {
@@ -182,7 +182,7 @@ public class RunResource extends BaseResource {
 
 		try {
 			if (run.getCategory() == ModuleCategory.Deployment) {
-				HashSet<String> cloudServicesList = run.getCloudServicesList();
+				HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
 				for (String cloudServiceName : cloudServicesList) {
 					Connector connector = ConnectorFactory
 							.getConnector(cloudServiceName);

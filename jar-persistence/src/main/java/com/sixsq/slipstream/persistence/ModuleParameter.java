@@ -28,14 +28,13 @@ import javax.persistence.Lob;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
-import com.sixsq.slipstream.connector.InstanceType;
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 @Entity
 @SuppressWarnings("serial")
 public class ModuleParameter extends Parameter<Module> {
 
-	public static final String INSTANCE_TYPE_INHERITED = InstanceType.INHERITED;
+	private static final String INSTANCE_TYPE_INHERITED = ImageModule.INSTANCE_TYPE_INHERITED;
 
 	@Id
 	@GeneratedValue

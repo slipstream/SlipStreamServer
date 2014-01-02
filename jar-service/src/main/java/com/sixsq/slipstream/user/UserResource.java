@@ -31,11 +31,11 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
@@ -297,7 +297,7 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected User loadParameterized(String targetParameterizedName) {
-		return User.loadByName(targetParameterizedName, false);
+		return User.loadByName(targetParameterizedName);
 	}
 
 }

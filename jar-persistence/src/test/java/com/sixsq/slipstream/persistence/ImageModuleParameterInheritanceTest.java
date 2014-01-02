@@ -27,7 +27,6 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.sixsq.slipstream.connector.InstanceType;
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 public class ImageModuleParameterInheritanceTest {
@@ -93,8 +92,8 @@ public class ImageModuleParameterInheritanceTest {
 		
 		ModuleParameter parameter = new ModuleParameter(PARAMETER_NAME);
 		parameter.setType(ParameterType.Enum);
-		parameter.setEnumValues(Arrays.asList(InstanceType.INHERITED, "A", "B"));
-		parameter.setValue(InstanceType.INHERITED);
+		parameter.setEnumValues(Arrays.asList(ImageModule.INSTANCE_TYPE_INHERITED, "A", "B"));
+		parameter.setValue(ImageModule.INSTANCE_TYPE_INHERITED);
 		image.setParameter(parameter);
 
 		ImageModule baseImage = new ImageModule("base");

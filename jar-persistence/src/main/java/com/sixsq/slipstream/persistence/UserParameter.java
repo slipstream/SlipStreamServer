@@ -30,6 +30,8 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 @SuppressWarnings("serial")
 public class UserParameter extends Parameter<User> {
 
+	public static String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
+
 	public static UserParameter convert(Parameter<ServiceConfiguration> source) {
 		UserParameter target = new UserParameter(source.getName(), source.getValue(), source.getDescription());
 		target.setCategory(source.getCategory());

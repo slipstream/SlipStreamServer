@@ -29,6 +29,7 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.run.RunFactory;
 
 /**
  * Unit test:
@@ -45,8 +46,8 @@ public class BuildImageMeasurements extends Measurements {
 			throws ValidationException, NotFoundException, AbortException {
 
 		// might be 'default'
-		String effectiveCloud = run.getEffectiveCloudServiceName(run
-				.getCloudService());
+		String effectiveCloud = RunFactory.getEffectiveCloudServiceName(run
+				.getCloudService(), run);
 
 		Measurement ms;
 

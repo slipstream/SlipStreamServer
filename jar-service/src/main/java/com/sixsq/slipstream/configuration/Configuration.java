@@ -42,9 +42,9 @@ import org.restlet.data.Reference;
 import slipstream.ui.views.Representation;
 
 import com.sixsq.slipstream.connector.ConnectorFactory;
-import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;

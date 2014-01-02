@@ -30,7 +30,7 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
+import com.sixsq.slipstream.factory.CloudService;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.FormProcessor;
@@ -81,7 +81,7 @@ public class ConnectorFactory {
 
 	public static Connector getConnector(String cloudServiceName, User user)
 			throws ConfigurationException, ValidationException {
-		if (isDefaultCloudService(cloudServiceName)) {
+		if (CloudService.isDefaultCloudService(cloudServiceName)) {
 			cloudServiceName = getDefaultCloudServiceName(user);
 			if ("".equals(cloudServiceName)) {
 				throw new ValidationException("Missing default cloud in user");
@@ -89,12 +89,6 @@ public class ConnectorFactory {
 		}
 
 		return getConnector(cloudServiceName);
-	}
-
-	public static boolean isDefaultCloudService(String cloudServiceName) {
-		return "".equals(cloudServiceName)
-				|| CloudImageIdentifier.DEFAULT_CLOUD_SERVICE
-						.equals(cloudServiceName) || cloudServiceName == null;
 	}
 
 	public static Connector instantiateConnectorFromName(

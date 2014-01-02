@@ -31,8 +31,8 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.action.OneShotAction;
 import com.sixsq.slipstream.messages.MessageUtils;
-import com.sixsq.slipstream.persistence.OneShotAction;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;

@@ -1,10 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>SlipStreamServer-jar</artifactId>
-  <name>SlipStream Server (JAR)</name>
+  <artifactId>SlipStreamService</artifactId>
+  <name>SlipStream Service (JAR)</name>
 
   <packaging>jar</packaging>
+
+  <url>http://sixsq.com</url>
+ 
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
@@ -15,14 +24,19 @@
   <dependencies>
 
 	<dependency>
-		<groupId>com.fasterxml.jackson.core</groupId>
-		<artifactId>jackson-databind</artifactId>
+		<groupId>com.sixsq.slipstream</groupId>
+		<artifactId>SlipStreamPersistence</artifactId>
 	</dependency>
 
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamUI</artifactId>
     </dependency>
+
+	<dependency>
+		<groupId>com.fasterxml.jackson.core</groupId>
+		<artifactId>jackson-databind</artifactId>
+	</dependency>
 
     <dependency>
       <groupId>org.clojure</groupId>
@@ -83,21 +97,21 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
+<!--     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
     </dependency>
-
+ -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jdk14</artifactId>
     </dependency>
 
-    <dependency>
+<!--     <dependency>
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
     </dependency>
-
+ -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -221,7 +235,7 @@
         </configuration>
       </plugin>
 
-      <plugin>
+<!--       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>hibernate3-maven-plugin</artifactId>
         <version>2.2</version>
@@ -255,7 +269,7 @@
           </execution>
         </executions>
       </plugin>
-
+ -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>

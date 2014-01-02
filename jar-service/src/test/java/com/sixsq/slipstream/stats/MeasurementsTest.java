@@ -29,7 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipstream.common.util.CommonTestUtil;
-import com.sixsq.slipstream.connector.ParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -38,6 +37,7 @@ import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.run.RunTestBase;
@@ -67,14 +67,23 @@ public class MeasurementsTest extends RunTestBase {
 		imageForDeployment2 = imageForDeployment2.store();
 
 		createUser();
+		
+		cleanRuns();
+
+	}
+
+	private static void cleanRuns() throws ValidationException {
+		for (Run r : Run.viewListAllActive()) {
+			r.remove();
+		}
 	}
 
 	private static ImageModule updateImageForLocalConnector(ImageModule image,
 			int cpu, int ram) throws ValidationException {
-		image.setParameter(new ModuleParameter(ParametersFactory.constructKey(
+		image.setParameter(new ModuleParameter(Parameter.constructKey(
 				cloudServiceName, Run.CPU_PARAMETER_NAME), String.valueOf(cpu),
 				""));
-		image.setParameter(new ModuleParameter(ParametersFactory.constructKey(
+		image.setParameter(new ModuleParameter(Parameter.constructKey(
 				cloudServiceName, Run.RAM_PARAMETER_NAME), String.valueOf(ram),
 				""));
 
@@ -92,9 +101,7 @@ public class MeasurementsTest extends RunTestBase {
 	@After
 	public void tearDown() throws ConfigurationException, ValidationException {
 
-		for (Run r : Run.viewListAllActive()) {
-			r.remove();
-		}
+		cleanRuns();
 
 	}
 

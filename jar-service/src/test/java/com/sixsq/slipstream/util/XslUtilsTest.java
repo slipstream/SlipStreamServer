@@ -29,10 +29,7 @@ public class XslUtilsTest {
 	@Test
 	public void compileXsl() {
 
-		String[] xslNames = { "error.xsl", "module-editor.xsl",
-				"module.xsl", "run.xsl", "user-editor.xsl", "user.xsl",
-				"user-list.xsl", "run-list.xsl", "module-list.xsl",
-				"configuration.xsl", "raw-content.xsl" };
+		String[] xslNames = { "module-export.xsl", "module-import.xsl" };
 
 		for (String name : xslNames) {
 			try {

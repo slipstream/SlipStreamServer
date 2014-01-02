@@ -283,4 +283,12 @@ public abstract class Parameter<T> implements Serializable {
 	public boolean isTrue() {
 		return Boolean.parseBoolean(getValue());
 	}
+
+	public static String constructKey(String category, String... names) {
+		String newKey = category;
+		for (String name : names) {
+			newKey += RuntimeParameter.PARAM_WORD_SEPARATOR + name;
+		}
+		return newKey;
+	}
 }

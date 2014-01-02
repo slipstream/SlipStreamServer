@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.credentials;
+package com.sixsq.slipstream.connector.stratuslab;
 
 /*
  * +=================================================================+
@@ -20,13 +20,32 @@ package com.sixsq.slipstream.credentials;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.exceptions.InvalidElementException;
+import java.util.ArrayList;
+import java.util.List;
 
+public enum InstanceType {
+	M1_SMALL("m1.small"), C1_MEDIUM("c1.medium"), M1_LARGE("m1.large"), M1_XLARGE(
+			"m1.xlarge"), C1_XLARGE("c1.xlarge"), T1_MICRO("t1.micro"), 
+			STANDARD_XSMALL("standard.xsmall"); // Add this for HPcloud
 
-public interface Credentials {
-
-	public String getKey() throws InvalidElementException;
+	public static final String INHERITED = "inherited";
 	
-	public String getSecret() throws InvalidElementException;
+	private final String value;
+
+	InstanceType(String value) {
+		this.value = value;
+	}
+
+	public String getValue() {
+		return value;
+	}
 	
+	public static List<String> getValues() {
+		List<String> types = new ArrayList<String>();
+	
+		for (InstanceType type : InstanceType.values()) {
+			types.add(type.getValue());
+		}
+		return types;
+	}
 }

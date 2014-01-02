@@ -20,12 +20,19 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import java.util.HashSet;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
@@ -77,16 +84,16 @@ public class DeploymentFactory extends RunFactory {
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 
 		for (Node node : deployment.getNodes().values()) {
-			String cloudServiceName = run.getEffectiveCloudServiceName(node
-					.getCloudService());
+			String cloudServiceName = getEffectiveCloudServiceName(
+					node.getCloudService(), run);
 			ImageModule image = node.getImage();
-			if(image == null) {
-				throw new ValidationException("Unknown image: " + node.getImageUri());
+			if (image == null) {
+				throw new ValidationException("Unknown image: "
+						+ node.getImageUri());
 			}
 
 			try {
-				checkImageHasReferenceOrImageId(image,
-						cloudServiceName);
+				checkImageHasReferenceOrImageId(image, cloudServiceName);
 			} catch (ValidationException ex) {
 				throw new ValidationException("Node " + node.getName()
 						+ " refers to image " + ex.getMessage());
@@ -122,8 +129,8 @@ public class DeploymentFactory extends RunFactory {
 		}
 	}
 
-	private static void initNodeRuntimeParameters(Run run)
-			throws ValidationException, NotFoundException {
+	private void initNodeRuntimeParameters(Run run) throws ValidationException,
+			NotFoundException {
 
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 
@@ -173,12 +180,12 @@ public class DeploymentFactory extends RunFactory {
 				+ index + RuntimeParameter.NODE_PROPERTY_SEPARATOR + parts[1];
 	}
 
-	private static Run initMachineState(Node node, Run run)
+	private Run initMachineState(Node node, Run run)
 			throws ValidationException, NotFoundException {
 
 		int multiplicity = node.getMultiplicity();
-		String cloudServiceName = run.getEffectiveCloudServiceName(node
-				.getCloudService());
+		String cloudServiceName = getEffectiveCloudServiceName(
+				node.getCloudService(), run);
 
 		for (int i = 1; i <= multiplicity; i++) {
 
@@ -246,8 +253,15 @@ public class DeploymentFactory extends RunFactory {
 
 	@Override
 	public Module overloadModule(Run run, User user) throws ValidationException {
-		Module module = loadModule(run);
-		return DeploymentModule.populateFromRun(run, module, user);
+
+		DeploymentModule deployment = DeploymentModule.populateFromRun(run,
+				loadModule(run), user);
+
+		for (Node node : deployment.getNodes().values()) {
+			RunFactory.resolveImageIdIfAppropriate(node.getImage(), user);
+		}
+
+		return deployment;
 	}
 
 	protected static void initializeVmRuntimeParameters(Run run)
@@ -275,4 +289,37 @@ public class DeploymentFactory extends RunFactory {
 					RuntimeParameter.GLOBAL_TAGS_DESCRIPTION));
 		}
 	}
+
+	public static Map<String, Node> getNodes(Run run) throws ValidationException {
+		Module module = run.getModule(false);
+		if (module == null) {
+			module = new DeploymentFactory().overloadModule(run,
+					User.loadByName(run.getUser()));
+		}
+
+		if (module.getCategory() != ModuleCategory.Deployment) {
+			throw new SlipStreamInternalException(
+					"getNodes can only be used with a Deployment module");
+		}
+
+		return ((DeploymentModule) module).getNodes();
+	}
+
+	public static HashSet<String> getCloudServicesList(Run run)
+			throws ValidationException {
+		HashSet<String> cloudServicesList = new HashSet<String>();
+		for (Node n : getNodes(run).values()) {
+			String cloudServiceName = n.getCloudService();
+			cloudServicesList.add(getEffectiveCloudServiceName(
+					cloudServiceName, run));
+		}
+		return cloudServicesList;
+	}
+
+	@Override
+	protected void initCloudServices(Run run) throws ValidationException {
+		run.setCloudServiceNames(StringUtils.join(getCloudServicesList(run),
+				","));
+	}
+
 }

@@ -20,8 +20,8 @@ package com.sixsq.slipstream.connector.local;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.Credentials;
 import com.sixsq.slipstream.connector.stratuslab.StratusLabUserParametersFactory;
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;

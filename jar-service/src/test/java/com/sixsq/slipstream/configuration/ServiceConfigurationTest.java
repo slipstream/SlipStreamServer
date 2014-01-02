@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.persistence;
+package com.sixsq.slipstream.configuration;
 
 /*
  * +=================================================================+
@@ -27,8 +27,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
 public class ServiceConfigurationTest {
 
@@ -142,43 +143,6 @@ public class ServiceConfigurationTest {
 			throws ConfigurationException {
 
 		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
-
-		// ServiceConfigurationParameter parameter;
-		//
-		// parameter = new ServiceConfigurationParameter(
-		// ServiceConfiguration.AllowedParameter.REGISTRATION_EMAIL,
-		// "admin@example.org");
-		// cfg.setParameter(parameter);
-		//
-		// parameter = new ServiceConfigurationParameter(
-		// ServiceConfiguration.AllowedParameter.MAIL_HOST,
-		// "mail.example.org");
-		// cfg.setParameter(parameter);
-		//
-		// parameter = new ServiceConfigurationParameter(
-		// ServiceConfiguration.AllowedParameter.MAIL_USERNAME,
-		// "mail.sender");
-		// cfg.setParameter(parameter);
-		//
-		// parameter = new ServiceConfigurationParameter(
-		// ServiceConfiguration.AllowedParameter.SLIPSTREAM_SUPPORT_EMAIL,
-		// "support@example.org");
-		// cfg.setParameter(parameter);
-		//
-		// parameter = new ServiceConfigurationParameter(
-		// ServiceConfiguration.AllowedParameter.SLIPSTREAM_SUPPORT_URL,
-		// "http://support.example.org/");
-		// cfg.setParameter(parameter);
-		//
-		// parameter = new ServiceConfigurationParameter(
-		// ServiceConfiguration.AllowedParameter.SLIPSTREAM_BASE_URL,
-		// "http://support.example.org/");
-		// cfg.setParameter(parameter);
-		//
-		// parameter = new ServiceConfigurationParameter(
-		// ServiceConfiguration.AllowedParameter.SLIPSTREAM_BASE_URL,
-		// "http://support.example.org/");
-		// cfg.setParameter(parameter);
 
 		return cfg;
 	}
