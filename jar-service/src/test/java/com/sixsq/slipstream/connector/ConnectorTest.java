@@ -30,7 +30,6 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -41,12 +40,13 @@ import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.run.RunFactory;
+import com.sixsq.slipstream.util.CommonTestUtil;
 
-public class ConnectorBaseTest extends ConnectorTestBase {
+public class ConnectorTest extends ConnectorDummy {
 
 	protected static final String INSTANCE_NAME = "test";
 
-	public ConnectorBaseTest() {
+	public ConnectorTest() {
 		super(INSTANCE_NAME);
 	}
 

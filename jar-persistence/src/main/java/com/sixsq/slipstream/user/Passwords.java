@@ -26,7 +26,6 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
-@SuppressWarnings("restriction")
 public class Passwords {
 
 	public String newPassword1 = null;

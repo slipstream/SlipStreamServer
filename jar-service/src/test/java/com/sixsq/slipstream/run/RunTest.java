@@ -42,7 +42,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipsteam.run.RunView;
-import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -65,6 +64,7 @@ import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.statemachine.States;
+import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class RunTest extends RunTestBase {

@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.configuration;
+package com.sixsq.slipstream.resource.configuration;
 
 /*
  * +=================================================================+
@@ -29,6 +29,7 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.authz.SuperEnroler;
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;

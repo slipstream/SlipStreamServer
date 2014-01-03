@@ -33,14 +33,14 @@ import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 
-public class ConnectorTestBase extends ConnectorBase {
+public class ConnectorDummy extends ConnectorBase {
 
-	public ConnectorTestBase(String instanceName) {
+	public ConnectorDummy(String instanceName) {
 		super(instanceName);
 	}
 
 	public Connector copy(){
-		return new ConnectorTestBase(getConnectorInstanceName());
+		return new ConnectorDummy(getConnectorInstanceName());
 	}
 	
 	@Override

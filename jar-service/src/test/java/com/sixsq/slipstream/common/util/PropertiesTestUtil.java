@@ -30,8 +30,6 @@ import java.util.Properties;
  * Utility class for accessing configuration file and building service url based
  * on configuration
  * 
- * @author meb
- * 
  */
 
 public class PropertiesTestUtil {

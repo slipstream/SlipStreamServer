@@ -1,6 +1,5 @@
 package com.sixsq.slipstream.run;
 
-import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.local.LocalConnector;
@@ -18,6 +17,7 @@ import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.statemachine.States;
+import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class RunTestBase {
 

@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.common.util;
+package com.sixsq.slipstream.util;
 
 /*
  * +=================================================================+

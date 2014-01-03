@@ -16,6 +16,7 @@
 
   <modules>
     <module>jar-persistence</module>
+    <module>jar-connector</module>
     <module>jar-async</module>
     <module>jar-service</module>
     <module>static-content</module>

@@ -41,7 +41,6 @@ import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.representation.StringRepresentation;
 
-import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -56,6 +55,7 @@ import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.run.RunFactory;
 import com.sixsq.slipstream.run.RuntimeParameterResourceTestBase;
+import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class StateMachineMultiThreadingTest extends
 		RuntimeParameterResourceTestBase {

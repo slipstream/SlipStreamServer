@@ -39,7 +39,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipsteam.run.RunView;
-import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
@@ -52,6 +51,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.run.RunFactory;
+import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class StateMachinetTest {
 

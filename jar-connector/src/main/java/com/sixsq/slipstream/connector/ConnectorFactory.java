@@ -30,10 +30,10 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.factory.CloudService;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.user.FormProcessor;
+import com.sixsq.slipstream.util.CloudService;
 
 public class ConnectorFactory {
 
@@ -50,7 +50,7 @@ public class ConnectorFactory {
 					.getKey();
 		}
 
-		if (!FormProcessor.isSet(cloudServiceName)) {
+		if (!Parameter.hasValueSet(cloudServiceName)) {
 			throwIncompleteUserCloudConfiguration(user);
 		}
 

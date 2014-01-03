@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.factory;
+package com.sixsq.slipstream.util;
 
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 

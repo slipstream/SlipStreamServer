@@ -23,8 +23,6 @@ package com.sixsq.slipstream.run;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
@@ -43,45 +41,42 @@ import com.sixsq.slipstream.persistence.User;
 
 public class Launcher {
 
-	private static ExecutorService executor = Executors.newCachedThreadPool();
 	private static Logger logger = Logger.getLogger(Launcher.class.getName());
 
-	public Run launch(Run run, User user) throws SlipStreamException {
+	public static void launch(Run run, User user) throws SlipStreamException {
 
 		validateUserParameters(user);
 
 		run = storeRunKeepModule(run);
 
 		launchAsync(run, user);
-
-		return run;
 	}
 
-	private Run storeRunKeepModule(Run run) throws ValidationException {
+	private static Run storeRunKeepModule(Run run) throws ValidationException {
 		Module module = run.getModule();
 		run = run.store();
 		run.setModule(module);
 		return run;
 	}
 
-	private void validateUserParameters(User user) {
+	private static void validateUserParameters(User user) {
 
 	}
 
-	private void launchAsync(Run run, User user) {
-		executor.execute(new AsyncLauncher(run, user));
+	private static void launchAsync(Run run, User user) {
+		SyncLauncher sl = (new Launcher()).new SyncLauncher(run, user);
+		sl.run();
 	}
 
-	public class AsyncLauncher implements Runnable {
+	public class SyncLauncher {
 		private Run run;
 		private final User user;
 
-		AsyncLauncher(Run run, User user) {
+		SyncLauncher(Run run, User user) {
 			this.run = run;
 			this.user = user;
 		}
 
-		@Override
 		public void run() {
 			
 			Map<String, String> idsAndIps = launch();

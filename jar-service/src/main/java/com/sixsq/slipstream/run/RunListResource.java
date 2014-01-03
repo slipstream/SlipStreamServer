@@ -310,8 +310,8 @@ public class RunListResource extends BaseResource {
 	}
 
 	private Run launch(Run run) throws SlipStreamException {
-		Launcher launcher = new Launcher();
-		return launcher.launch(run, getUser());
+		Launcher.launch(run, getUser());
+		return run;
 	}
 
 	private Run addCredentials(Run run) throws ConfigurationException,

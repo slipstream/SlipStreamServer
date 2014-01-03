@@ -194,7 +194,7 @@ public class Configuration {
 		setMandatoryToAllParameters();
 	}
 
-	protected void extractAndSetVersion() {
+	private void extractAndSetVersion() {
 		RequiredParameters versionRequiredParameter = RequiredParameters.SLIPSTREAM_VERSION;
 		version = loadConfigFileProperties().getProperty(
 				versionRequiredParameter.getName());

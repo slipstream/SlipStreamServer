@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.configuration;
+package com.sixsq.slipstream.resource.configuration;
 
 /*
  * +=================================================================+
