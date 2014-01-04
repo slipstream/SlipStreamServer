@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.run;
+package com.sixsq.slipstream.factory;
 
 /*
  * +=================================================================+
@@ -173,7 +173,7 @@ public class DeploymentFactory extends RunFactory {
 		run.getRuntimeParameters().put(input.getName(), input);
 	}
 
-	protected static String insertMultiplicityIndexInParameterName(String name,
+	public static String insertMultiplicityIndexInParameterName(String name,
 			int index) {
 		String[] parts = name.split(RuntimeParameter.NODE_PROPERTY_SEPARATOR);
 		return parts[0] + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR

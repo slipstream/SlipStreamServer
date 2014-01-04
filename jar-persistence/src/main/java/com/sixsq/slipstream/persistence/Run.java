@@ -132,6 +132,18 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return run;
 	}
 
+	public static Run abort(String abortMessage, String uuid) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Run run = Run.loadFromUuid(uuid, em);
+		RuntimeParameter globalAbort = getGlobalAbort(run);
+		if (!globalAbort.isSet()) {
+			globalAbort.setValue(abortMessage);
+			run.setState(run.getState());
+		}
+		em.close();
+		return run;
+	}
+
 	private static RuntimeParameter getGlobalAbort(Run run) {
 		RuntimeParameter abort = run.getRuntimeParameters().get(
 				RuntimeParameter.GLOBAL_ABORT_KEY);
@@ -478,8 +490,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 */
 	public String getRuntimeParameterValueIgnoreAbort(String key)
 			throws NotFoundException {
-
-		assert (runtimeParameters != null);
 
 		RuntimeParameter parameter = extractRuntimeParameter(key);
 		return parameter.getValue();

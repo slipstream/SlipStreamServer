@@ -33,7 +33,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.CloudService;
 
 public class ConnectorFactory {
 

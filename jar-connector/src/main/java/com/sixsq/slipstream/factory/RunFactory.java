@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.run;
+package com.sixsq.slipstream.factory;
 
 /*
  * +=================================================================+
@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
+import com.sixsq.slipstream.connector.CloudService;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.ConnectorFactory;
@@ -41,7 +42,6 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.CloudService;
 import com.sixsq.slipstream.util.Logger;
 
 public abstract class RunFactory {
@@ -101,7 +101,7 @@ public abstract class RunFactory {
 		return selectFactory(type).createRun(module, cloudService, user);
 	}
 
-	static RunFactory selectFactory(RunType type)
+	public static RunFactory selectFactory(RunType type)
 			throws SlipStreamClientException {
 
 		RunFactory factory = null;

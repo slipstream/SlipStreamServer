@@ -27,13 +27,13 @@ import org.simpleframework.xml.Root;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.DeploymentFactory;
+import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.run.DeploymentFactory;
-import com.sixsq.slipstream.run.RunFactory;
 
 /**
  * Unit test:

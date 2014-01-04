@@ -36,6 +36,7 @@ import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.Metadata;
 import com.sixsq.slipstream.persistence.Run;

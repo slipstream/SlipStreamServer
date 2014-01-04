@@ -44,12 +44,14 @@ import com.sixsq.slipsteam.run.RunView;
 import com.sixsq.slipsteam.run.RunView.RunViewList;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.Launcher;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
@@ -310,7 +312,7 @@ public class RunListResource extends BaseResource {
 	}
 
 	private Run launch(Run run) throws SlipStreamException {
-		Launcher.launch(run, getUser());
+		slipstream.async.Launcher.launch(run, getUser());
 		return run;
 	}
 
