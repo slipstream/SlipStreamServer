@@ -233,13 +233,25 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static Run updateVmStatus(Run run, User user)
 			throws SlipStreamException {
 
-		return updateVmStatus(run, describeInstances(user));
+		return updateVmStatus(run, describeInstances(user, run));
 	}
 
-	public static Properties describeInstances(User user)
+	public static Properties describeInstances(User user) 
+			throws ValidationException{
+		return describeInstances(user, null);
+	}
+	
+	public static Properties describeInstances(User user, Run run)
 			throws ValidationException {
 		Properties describeInstancesStates = new Properties();
-		String[] cloudServicesList = ConnectorFactory.getCloudServiceNames();
+		
+		String[] cloudServicesList = null;
+		if(run != null){
+			cloudServicesList = run.getCloudServiceNameList();
+		}else{
+			cloudServicesList = ConnectorFactory.getCloudServiceNames();
+		}
+		
 		for (String cloudServiceName : cloudServicesList) {
 			Connector connector = ConnectorFactory
 					.getConnector(cloudServiceName);
