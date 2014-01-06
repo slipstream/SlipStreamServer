@@ -49,7 +49,8 @@
         (if (nil? v)
           (do
             (log-error "Oops... timeout")
-            (swap! errors inc))
+            (swap! errors inc)
+            (Run/abort "Timeout launching run" (.getUuid run)))
           (do
             (log-info "Launched!")
             (swap! completed inc)))))
