@@ -44,7 +44,6 @@ import com.sixsq.slipsteam.run.RunView;
 import com.sixsq.slipsteam.run.RunView.RunViewList;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
-import com.sixsq.slipstream.connector.Launcher;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
