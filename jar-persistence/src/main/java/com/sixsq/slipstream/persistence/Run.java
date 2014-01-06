@@ -123,7 +123,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 				nodeAbort.reset();
 			}
 		} else if (!globalAbort.isSet()) {
-			globalAbort.setValue(abortMessage);
+			setGlobalAbortState(abortMessage, globalAbort);
 			if (nodeAbort != null) {
 				nodeAbort.setValue(abortMessage);
 			}
@@ -132,13 +132,19 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return run;
 	}
 
+	private static void setGlobalAbortState(String abortMessage,
+			RuntimeParameter globalAbort) {
+		globalAbort.setValue(abortMessage);
+		Run run = globalAbort.getContainer();
+		run.setState(run.getState());
+	}
+
 	public static Run abort(String abortMessage, String uuid) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Run run = Run.loadFromUuid(uuid, em);
 		RuntimeParameter globalAbort = getGlobalAbort(run);
 		if (!globalAbort.isSet()) {
-			globalAbort.setValue(abortMessage);
-			run.setState(run.getState());
+			setGlobalAbortState(abortMessage, globalAbort);
 		}
 		em.close();
 		return run;
@@ -287,7 +293,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		List<Run> runs = q.getResultList();
 		return runs;
 	}
-	
+
 	private static Query createNamedQuery(EntityManager em, String query) {
 		Query q = em.createNamedQuery(query);
 		q.setMaxResults(MAX_NO_OF_ENTRIES);
