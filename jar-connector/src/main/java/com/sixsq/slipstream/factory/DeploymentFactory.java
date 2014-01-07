@@ -63,9 +63,11 @@ public class DeploymentFactory extends RunFactory {
 	}
 
 	@Override
-	protected void validateRun(Run run, String cloudService)
+	protected void validateRun(Run run, User user, String cloudService)
 			throws SlipStreamClientException {
-
+		
+		super.validateRun(run, user, cloudService);
+		
 		checkIsDeploymentModule(run);
 
 		checkAllImagesHaveReferenceOrImageId(run);

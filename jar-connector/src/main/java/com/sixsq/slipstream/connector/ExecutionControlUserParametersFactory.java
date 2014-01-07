@@ -57,7 +57,7 @@ public class ExecutionControlUserParametersFactory extends
 				"Minutes - When this timeout is reached, the execution is forcefully terminated.",
 				true);
 		putMandatoryParameter(SSHKEY_PARAMETER_NAME,
-				"SSH Public Key(s) (keys must be separated by new line)",
+				"SSH Public Key(s) (keys must be separated by new line) Warning: Some clouds may take into account only the first key.",
 				ParameterType.RestrictedText);
 		String[] _options = {VERBOSITY_LEVEL_DEFAULT, "1", "2", "3"};
 		List<String> options = Arrays.asList(_options);

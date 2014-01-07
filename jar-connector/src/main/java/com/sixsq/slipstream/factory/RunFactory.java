@@ -24,10 +24,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.CloudService;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
+import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -42,6 +45,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.FileUtil;
 import com.sixsq.slipstream.util.Logger;
 
 public abstract class RunFactory {
@@ -55,7 +59,7 @@ public abstract class RunFactory {
 
 		Run run = constructRun(module, cloudService, user);
 
-		validateRun(run, cloudService);
+		validateRun(run, user, cloudService);
 
 		initialize(module, run, cloudService);
 
@@ -70,9 +74,38 @@ public abstract class RunFactory {
 
 	}
 
-	protected void validateRun(Run run, String cloudService)
+	protected void validateRun(Run run, User user, String cloudService)
 			throws SlipStreamClientException {
+	
+		validatePublicSshKey(run, user);
+	}
+	
+	private void validatePublicSshKey(Run run, User user)
+			throws ValidationException {
+		if (run.getType() != RunType.Run) {
+			String publicSshKeyFile = Configuration.getInstance().getProperty(
+					"cloud.connector.orchestrator.publicsshkey", null);
 
+			if (publicSshKeyFile == null || "".equals(publicSshKeyFile)) {
+				throw new ValidationException(
+						"The path to the SSH public key to put in the orchestrator is empty. "
+								+ "Please contact your SlipStream administrator.");
+			}
+			if (!FileUtil.exist(publicSshKeyFile)) {
+				throw new ValidationException(
+						"The path to the SSH public key to put in the orchestrator points to a nonexistent file. "
+								+ "Please contact your SlipStream administrator.");
+			}
+		}
+
+		String publicSshKey = user.getParameter(
+				ExecutionControlUserParametersFactory.CATEGORY + "."
+						+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
+				.getValue();
+		if (publicSshKey == null || "".equals(publicSshKey)) {
+			throw new ValidationException(
+					"Missing public key in your user profile.");
+		}
 	}
 
 	private void checkCloudServiceDefined(String cloudService, User user)
