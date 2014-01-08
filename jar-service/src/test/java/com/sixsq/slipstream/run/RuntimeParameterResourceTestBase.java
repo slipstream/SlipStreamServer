@@ -55,6 +55,8 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 		baseImage.store();
 
 		user = CommonTestUtil.createTestUser();
+		
+		CommonTestUtil.addSshKeys(user);
 	}
 
 	public static void classTearDown() throws ValidationException {

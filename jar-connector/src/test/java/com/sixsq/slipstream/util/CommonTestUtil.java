@@ -31,6 +31,7 @@ import java.util.Map;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
@@ -40,7 +41,9 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
 
 public abstract class CommonTestUtil {
 
@@ -98,6 +101,20 @@ public abstract class CommonTestUtil {
 		if (user != null) {
 			user.remove();
 		}
+	}
+	
+	public static void addSshKeys(User user) throws ValidationException {
+		UserParameter userKey = new UserParameter(
+				UserParametersFactoryBase.getPublicKeyParameterName(), "xxx",
+				"xxx");
+		user.setParameter(userKey);
+
+		String publicSshKey = "cloud.connector.orchestrator.publicsshkey";
+		Configuration config = Configuration.getInstance();
+
+		config.getParameters().setParameter(
+				new ServiceConfigurationParameter(publicSshKey, "/dev/null"));
+		config.store();
 	}
 
 	public static DeploymentModule createDeployment()

@@ -68,6 +68,8 @@ public class MeasurementsTest extends RunTestBase {
 
 		createUser();
 		
+		CommonTestUtil.addSshKeys(user);
+		
 		cleanRuns();
 
 	}

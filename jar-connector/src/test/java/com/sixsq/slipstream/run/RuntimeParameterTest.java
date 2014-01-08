@@ -57,6 +57,8 @@ public class RuntimeParameterTest {
 			ClassNotFoundException {
 		user = CommonTestUtil.createTestUser();
 
+		CommonTestUtil.addSshKeys(user);
+		
 		CommonTestUtil
 				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 	}
@@ -89,7 +91,7 @@ public class RuntimeParameterTest {
 	@Test
 	public void serializationWorks() throws SlipStreamException {
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
-
+		
 		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
 				CommonTestUtil.cloudServiceName, user);
 		Metadata parameter = run.assignRuntimeParameter("node.1:dummy", "ok",

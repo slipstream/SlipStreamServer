@@ -59,6 +59,8 @@ public class ConnectorTest extends ConnectorDummy {
 		User user = CommonTestUtil.createTestUser();
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
 
+		CommonTestUtil.addSshKeys(user);
+		
 		CommonTestUtil
 				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 
