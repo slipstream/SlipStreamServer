@@ -98,10 +98,12 @@ public abstract class RunFactory {
 			}
 		}
 
-		String publicSshKey = user.getParameter(
-				ExecutionControlUserParametersFactory.CATEGORY + "."
-						+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
-				.getValue();
+		String publicSshKey = user
+				.getParameterValue(
+						ExecutionControlUserParametersFactory.CATEGORY
+								+ "."
+								+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME,
+						null);
 		if (publicSshKey == null || "".equals(publicSshKey)) {
 			throw new ValidationException(
 					"Missing public key in your user profile.");
@@ -338,13 +340,25 @@ public abstract class RunFactory {
 	public static Run updateVmStatus(Run run, User user)
 			throws SlipStreamException {
 
-		return updateVmStatus(run, describeInstances(user));
+		return updateVmStatus(run, describeInstances(user, run));
 	}
 
 	public static Properties describeInstances(User user)
 			throws ValidationException {
+		return describeInstances(user, null);
+	}
+	
+	public static Properties describeInstances(User user, Run run)
+			throws ValidationException {
 		Properties describeInstancesStates = new Properties();
-		String[] cloudServicesList = ConnectorFactory.getCloudServiceNames();
+
+		String[] cloudServicesList = null;
+		if(run != null){
+			cloudServicesList = run.getCloudServiceNameList();
+		}else{
+			cloudServicesList = ConnectorFactory.getCloudServiceNames();
+		}
+		
 		for (String cloudServiceName : cloudServicesList) {
 			Connector connector = ConnectorFactory
 					.getConnector(cloudServiceName);
