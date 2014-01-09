@@ -67,6 +67,16 @@ public class MeasurementsTest extends RunTestBase {
 		imageForDeployment2 = imageForDeployment2.store();
 
 		createUser();
+		
+		removeRuns();
+		
+		CommonTestUtil.createDeployment();
+	}
+
+	private static void removeRuns() throws ValidationException {
+		for (Run r : Run.viewListAllActive()) {
+			r.remove();
+		}
 	}
 
 	private static ImageModule updateImageForLocalConnector(ImageModule image,
@@ -92,9 +102,7 @@ public class MeasurementsTest extends RunTestBase {
 	@After
 	public void tearDown() throws ConfigurationException, ValidationException {
 
-		for (Run r : Run.viewListAllActive()) {
-			r.remove();
-		}
+		removeRuns();
 
 	}
 
