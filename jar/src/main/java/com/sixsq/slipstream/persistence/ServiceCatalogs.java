@@ -1,6 +1,7 @@
 package com.sixsq.slipstream.persistence;
 
 import java.util.List;
+import java.util.Map;
 
 import org.simpleframework.xml.ElementList;
 
@@ -10,8 +11,8 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 public class ServiceCatalogs {
 
-	public static boolean isEnabled()
-			throws ConfigurationException, ValidationException {
+	public static boolean isEnabled() throws ConfigurationException,
+			ValidationException {
 		return Boolean
 				.parseBoolean(Configuration
 						.getInstance()
@@ -49,8 +50,8 @@ public class ServiceCatalogs {
 	}
 
 	public void store() {
-		for (ServiceCatalog sc : getList()) {
-			sc.store();
+		for (ServiceCatalog s : getList()) {
+			s = s.store();
 		}
 	}
 
@@ -68,16 +69,20 @@ public class ServiceCatalogs {
 	public void update(ServiceCatalog updated) throws ValidationException {
 		ServiceCatalog sc = getServiceCatalog(updated.getCloud());
 
+		Map<String, ServiceCatalogParameter> existingParameters = sc
+				.getParameters();
 		sc.clearParameters();
 
-		for (ServiceCatalogParameter p : updated.getParameterList()) {
+		for (ServiceCatalogParameter p : updated.getParameters().values()) {
 
-			ServiceCatalogParameter existing = sc.getParameter(p.getName());
+			ServiceCatalogParameter existing = existingParameters.get(p
+					.getName());
 
 			if (existing == null) {
 				sc.setParameter(p);
 			} else {
 				existing.setValue(p.getValue());
+				sc.setParameter(existing);
 			}
 		}
 
