@@ -47,9 +47,9 @@ public class HtmlUtil {
 		} catch (ConfigurationException e) {
 			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL,
 					e.getMessage()));
-//		} catch (ValidationException e) {
-//			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-//					e.getMessage()));
+		} catch (ValidationException e) {
+			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+					e.getMessage()));
 		}
 
 		String xml = SerializationUtil.documentToString(doc);
