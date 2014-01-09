@@ -166,7 +166,9 @@ public class ServiceCatalog extends
 	}
 
 	public void clearParameters() {
-		setParameters(new HashMap<String, ServiceCatalogParameter>());
+		for(ServiceCatalogParameter p : getParameters().values()) {
+			p.setContainer(null);
+		}
 	}
 
 	/**
