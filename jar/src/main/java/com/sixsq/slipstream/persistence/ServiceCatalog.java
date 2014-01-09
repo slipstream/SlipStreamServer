@@ -20,7 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.HashMap;
 import java.util.List;
 
 import javax.mail.internet.AddressException;
@@ -157,8 +156,8 @@ public class ServiceCatalog extends
 						dp.getDescription());
 				scp.setCategory(dp.getCategory());
 				scp.setInstructions(dp.getInstruction());
-				scp.setMandatory(false);
 				scp.setReadonly(false);
+				scp.setMandatory(true);
 				scp.setType(dp.getType());
 				setParameter(scp);
 			}
