@@ -37,6 +37,7 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.run.RunFactory;
@@ -44,28 +45,36 @@ import com.sixsq.slipstream.run.RunFactory;
 public class ConnectorBaseTest extends ConnectorTestBase {
 
 	protected static final String INSTANCE_NAME = "test";
-	
+
 	public ConnectorBaseTest() {
 		super(INSTANCE_NAME);
 	}
 
 	@Test
-	public void updateInstanceIdAndIpOnRunTest() throws ServerExecutionEnginePluginException,
-			AbortException, SlipStreamClientException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
-		User user  = CommonTestUtil.createTestUser();
+	public void updateInstanceIdAndIpOnRunTest()
+			throws ServerExecutionEnginePluginException, AbortException,
+			SlipStreamClientException, InstantiationException,
+			IllegalAccessException, InvocationTargetException,
+			NoSuchMethodException, ClassNotFoundException {
+		User user = CommonTestUtil.createTestUser();
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
-		
-		CommonTestUtil.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
-		
-		Run run = RunFactory.getRun(deployment, CommonTestUtil.cloudServiceName, user);
-		
+
+		CommonTestUtil
+				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
+				CommonTestUtil.cloudServiceName, user);
+
 		updateInstanceIdAndIpOnRun(run, "foo", "bar");
-		assertThat(run.getRuntimeParameterValue(Run.ORCHESTRATOR_NAME + "-" + INSTANCE_NAME + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.INSTANCE_ID_KEY),
-				is("foo"));
-		assertThat(
-				run.getRuntimeParameterValue(Run.ORCHESTRATOR_NAME + "-" + INSTANCE_NAME + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.HOSTNAME_KEY),
-				is("bar"));
-		
+		assertThat(run.getRuntimeParameterValue(Run
+				.constructOrchestratorName(INSTANCE_NAME)
+				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+				+ RuntimeParameter.INSTANCE_ID_KEY), is("foo"));
+		assertThat(run.getRuntimeParameterValue(Run
+				.constructOrchestratorName(INSTANCE_NAME)
+				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+				+ RuntimeParameter.HOSTNAME_KEY), is("bar"));
+
 		CommonTestUtil.deleteUser(user);
 	}
 

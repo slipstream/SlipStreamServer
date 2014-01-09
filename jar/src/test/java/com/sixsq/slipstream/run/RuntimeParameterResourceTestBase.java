@@ -27,9 +27,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
@@ -40,21 +37,16 @@ import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Package;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 
 	static protected ImageModule baseImage = null;
-	static protected ImageModule image = null;
-	static protected DeploymentModule deployment = null;
-	static protected User user = null;
 
-	@BeforeClass
 	public static void classSetup() throws ValidationException {
 		baseImage = new ImageModule("RuntimeParameterResourceTestBaseImage");
 		baseImage.setImageId("1234", cloudServiceName);
@@ -64,7 +56,6 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 		user = CommonTestUtil.createTestUser();
 	}
 
-	@AfterClass
 	public static void classTearDown() throws ValidationException {
 		baseImage.remove();
 		try {
@@ -74,7 +65,6 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 		}
 	}
 
-	@After
 	public void tearDown() {
 		try {
 			image.remove();
@@ -131,9 +121,10 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 		image.setModuleReference(baseImage);
 		image.getPackages().add(new Package("package1"));
 		image.setModuleReference(baseImage);
+		image.setImageId("image-id", cloudServiceName);
 		image = image.store();
 
-		Run run = RunFactory.getRun(image, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
 		return (Run) run.store();
 	}
 

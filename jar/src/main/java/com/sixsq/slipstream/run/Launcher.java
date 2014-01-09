@@ -61,6 +61,7 @@ public class Launcher {
 		try {
 			run = run.store();
 		} catch (Exception e) {
+			// FIXME: should not swallow the exception
 			logger.severe("Error storing run before async run method for run: "
 					+ run.getUuid());
 			e.printStackTrace();
@@ -89,11 +90,11 @@ public class Launcher {
 		@Override
 		public void run() {
 			Map<String, String> idsAndIps = new HashMap<String, String>();
-			
+
 			try {
 				logger.info("Submitting asynchronous launch operation for run: "
 						+ run.getUuid());
-				
+
 				if (run.getCategory() == ModuleCategory.Deployment) {
 					HashSet<String> cloudServicesList = run
 							.getCloudServicesList();
@@ -102,20 +103,20 @@ public class Launcher {
 								.getConnector(cloudServiceName);
 						try {
 							connector.launch(run, user);
-							try{
-								String id = run.
-										getRuntimeParameterValue(
-												connector
-														.getOrchestratorName(run)
-														+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-														+ RuntimeParameter.INSTANCE_ID_KEY);
+							try {
+								String id = run
+										.getRuntimeParameterValue(connector
+												.getOrchestratorName(run)
+												+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+												+ RuntimeParameter.INSTANCE_ID_KEY);
 								String ip = run
-										.getRuntimeParameterValue(
-												connector
-														.getOrchestratorName(run)
-														+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-														+ RuntimeParameter.HOSTNAME_KEY);
-								idsAndIps.put(connector.getOrchestratorName(run), id+ "," + ip);
+										.getRuntimeParameterValue(connector
+												.getOrchestratorName(run)
+												+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+												+ RuntimeParameter.HOSTNAME_KEY);
+								idsAndIps.put(
+										connector.getOrchestratorName(run), id
+												+ "," + ip);
 							} catch (Exception e) {
 								logger.severe("Error getting IP and ID");
 								e.printStackTrace();
@@ -135,8 +136,7 @@ public class Launcher {
 					} catch (SlipStreamException e) {
 						run = run.store();
 						run = Run.abortOrReset(e.getMessage(),
-								Run.MACHINE_NAME,
-								run.getUuid());
+								Run.MACHINE_NAME, run.getUuid());
 					}
 				}
 
@@ -144,7 +144,7 @@ public class Launcher {
 				logger.severe("Error executing asynchronous launch operation");
 				e.printStackTrace();
 			}
-			
+
 			try {
 				run.store();
 			} catch (Exception e) {
@@ -152,19 +152,23 @@ public class Launcher {
 						+ run.getUuid());
 				e.printStackTrace();
 			}
-			
-			try{
+
+			try {
 				EntityManager em = PersistenceUtil.createEntityManager();
 				run = Run.load(run.getResourceUri(), em);
-				
-				for(Map.Entry<String, String> entry: idsAndIps.entrySet()){
+
+				for (Map.Entry<String, String> entry : idsAndIps.entrySet()) {
 					String key = entry.getKey();
-				    String value = entry.getValue();
-				    String[] ipid = value.split(",");
-				    run.updateRuntimeParameter(key + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.INSTANCE_ID_KEY, ipid[0]);
-				    run.updateRuntimeParameter(key + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.HOSTNAME_KEY, ipid[1]);
+					String value = entry.getValue();
+					String[] ipid = value.split(",");
+					run.updateRuntimeParameter(key
+							+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+							+ RuntimeParameter.INSTANCE_ID_KEY, ipid[0]);
+					run.updateRuntimeParameter(key
+							+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+							+ RuntimeParameter.HOSTNAME_KEY, ipid[1]);
 				}
-				
+
 				run.store();
 			} catch (Exception e) {
 				logger.severe("Error setting IP and ID");

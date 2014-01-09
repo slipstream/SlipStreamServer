@@ -272,4 +272,8 @@ public class DeploymentModule extends Module {
 		}
 	}
 
+	public DeploymentModule store() {
+		return (DeploymentModule) store(true);
+	}
+
 }

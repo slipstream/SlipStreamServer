@@ -39,7 +39,7 @@ public class RunRouter extends Router {
 		TemplateRoute route = attach("/{uuid}/{key}?ignoreabort={ignoreabort}", RuntimeParameterResource.class);
 		route.setMatchingQuery(true);
 		route.getTemplate().getVariables()
-				.put("ignoreabort", new Variable(Variable.TYPE_URI_QUERY));
+				.put(RunListResource.IGNORE_ABORT_QUERY, new Variable(Variable.TYPE_URI_QUERY));
 
 		attach("/{uuid}/{key}", RuntimeParameterResource.class);
 

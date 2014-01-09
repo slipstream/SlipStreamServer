@@ -32,7 +32,9 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.AfterClass;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
@@ -51,6 +53,7 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
+import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -63,8 +66,6 @@ public class RunListResourceTest extends ResourceTestBase {
 	private static final String PARAMETER_NAME = "parameter_name";
 
 	static protected ImageModule baseImage = null;
-	static protected ImageModule image = null;
-	static protected DeploymentModule deployment = null;
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException,
@@ -73,13 +74,27 @@ public class RunListResourceTest extends ResourceTestBase {
 			NoSuchMethodException, ClassNotFoundException {
 
 		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
-		
+
 		try {
 			user = storeUser(user);
 		} catch (Exception ex) {
 
 		}
-		
+
+	}
+
+	@AfterClass
+	public static void teardownClass() throws ConfigurationException,
+			ValidationException {
+
+		for (Run r : Run.viewListAllActive()) {
+			try {
+				r.remove();
+			} catch (Exception ex) {
+
+			}
+		}
+
 	}
 
 	@Before
@@ -92,7 +107,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		baseImage.setImageId("1234", cloudServiceName);
 		baseImage.setIsBase(true);
 		baseImage = baseImage.store();
-		
+
 		user = User.loadByName(user.getName());
 
 	}
@@ -116,6 +131,7 @@ public class RunListResourceTest extends ResourceTestBase {
 	}
 
 	@Test
+	@Ignore
 	public void overrideParameters() throws ConfigurationException,
 			NotFoundException, AbortException, ValidationException {
 		int multiplicityOverride = 2;

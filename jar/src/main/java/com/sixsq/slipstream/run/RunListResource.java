@@ -72,6 +72,7 @@ import com.sixsq.slipstream.util.SerializationUtil;
 public class RunListResource extends BaseResource {
 
 	public static final String REFQNAME = "refqname";
+	public static final String IGNORE_ABORT_QUERY = "ignoreabort";
 	String refqname = null;
 
 	@Get("txt")
@@ -86,7 +87,7 @@ public class RunListResource extends BaseResource {
 
 		RunViewList runViewList = fetchListView();
 		String result = SerializationUtil.toXmlString(runViewList);
-		return new StringRepresentation(result);
+		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
 
 	@Get("html")

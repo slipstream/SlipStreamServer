@@ -66,7 +66,7 @@ public class NodeParameter extends Parameter<Node> {
 							+ ". Should be in the form: "
 							+ RuntimeParameter.GLOBAL_NAMESPACE_PREFIX
 							+ "* or "
-							+ Run.ORCHESTRATOR_NAME_PREFIX
+							+ Run.ORCHESTRATOR_NAME
 							+ "* or "
 							+ Run.MACHINE_NAME_PREFIX
 							+ "* or [nodename]"

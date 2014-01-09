@@ -31,6 +31,8 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
 import com.sixsq.slipstream.persistence.OneShotAction;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
@@ -44,7 +46,14 @@ public class ResetPasswordResource extends SimpleRepresentationBaseResource {
 	@Post("form")
 	public void resetPassword(Representation entity) throws ResourceException {
 
-		User user = retrieveNamedUser(entity);
+		User user = null;
+		try {
+			user = retrieveNamedUser(entity);
+		} catch (ConfigurationException e) {
+			throwServerError(e.getMessage());
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
 
 		OneShotAction action = createResetPasswordEntry(user);
 
@@ -92,7 +101,8 @@ public class ResetPasswordResource extends SimpleRepresentationBaseResource {
 	}
 
 	public User retrieveNamedUser(Representation entity)
-			throws ResourceException {
+			throws ResourceException, ConfigurationException,
+			ValidationException {
 
 		Form form = new Form(entity);
 		String username = form.getFirstValue("username");

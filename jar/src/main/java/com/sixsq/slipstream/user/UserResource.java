@@ -44,6 +44,8 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.util.FileUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
 /**
  * @see UserResourceTest
@@ -190,6 +192,51 @@ public class UserResource extends ParameterizedResource<User> {
 		}
 	}
 
+	@Put("xml")
+	public void updateOrCreateFromXml(Representation entity)
+			throws ResourceException {
+
+		User user = xmlToUser();
+
+		try {
+			updateOrCreate(user);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
+
+		if (isExisting()) {
+			getResponse().setStatus(Status.SUCCESS_ACCEPTED);
+		} else {
+			getResponse().setStatus(Status.SUCCESS_CREATED);
+		}
+	}
+
+	private User xmlToUser() {
+		return xmlToUser(extractXml());
+	}
+
+	private User xmlToUser(String xml) {
+
+		String denormalized = XmlUtil.denormalize(xml);
+
+		User user = null;
+		try {
+			user = (User) SerializationUtil.fromXml(denormalized,
+					User.class);
+		} catch (SlipStreamClientException e) {
+			throwClientBadRequest("Invalid xml user: " + e.getMessage());
+		}
+
+		user.postDeserialization();
+
+		return user;
+	}
+
+	private String extractXml() {
+		return getRequest().getEntityAsText();
+	}
+
+
 	private void updateOrCreate(User user) throws ValidationException {
 
 		checkCanPut();
@@ -200,7 +247,7 @@ public class UserResource extends ParameterizedResource<User> {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex);
 		}
 
-		if (!getTargetParameterizeUri().equals(user.getName())) {
+		if (!getTargetParameterizeUri().equals(user.getName()) && !getUser().isSuper()) {
 			throwClientBadRequest("The uploaded user does not correspond to the target user uri");
 		}
 

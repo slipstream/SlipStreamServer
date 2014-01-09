@@ -145,7 +145,14 @@ public class ServiceConfiguration extends
 
 		SLIPSTREAM_SERVICE_CATALOG_ENABLE(
 				"Enable service catalog feature.",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean);
+				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+
+		SLIPSTREAM_METERING_HOSTNAME(
+				"Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:8183).",
+				ParameterCategory.SlipStream_Advanced),
+
+		SLIPSTREAM_METERING_ENABLE("Metering enabled",
+				ParameterCategory.SlipStream_Advanced);
 
 		private final String description;
 		private final ParameterCategory category;

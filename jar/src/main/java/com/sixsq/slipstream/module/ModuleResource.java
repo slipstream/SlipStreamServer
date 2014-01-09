@@ -33,6 +33,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.restlet.Request;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.fileupload.RestletFileUpload;
 import org.restlet.representation.Representation;
@@ -101,7 +102,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		}
 
 		String result = XmlUtil.normalize(prepared);
-		return new StringRepresentation(result);
+		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
 
 	@Post("form")

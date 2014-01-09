@@ -154,17 +154,28 @@ public class StratusLabConnector extends CliConnectorBase {
 	}
 
 	private String getVmName(Run run) {
-		return run.getType() == RunType.Orchestration ? getOrchestratorName(run)
+		return isInOrchestrationContext(run) ? getOrchestratorName(run)
 				: "machine";
 	}
 
 	private void validate(Run run, User user) throws ValidationException {
 		validateCredentials(user);
 		validateUserSshPublicKey(user);
+		validateMarketplaceEndpoint(user);
 		validateLaunch(run, user);
 	}
 
-	private void validateLaunch(Run run, User user) throws ValidationException {
+	private void validateMarketplaceEndpoint(User user) throws ValidationException {
+		String endpoint = getMarketplaceEndpoint(user);
+		if (endpoint == null || endpoint.isEmpty()) {
+			throw (new ValidationException(
+					"Marketplace endpoint should be set for "
+							+ getConnectorInstanceName()));
+		}
+	}
+
+	private void validateLaunch(Run run, User user)
+			throws ValidationException {
 		if (run.getCategory() == ModuleCategory.Image) {
 			ImageModule image = ImageModule.load(run.getModuleResourceUrl());
 			validateImageModule(image, user);
@@ -228,7 +239,7 @@ public class StratusLabConnector extends CliConnectorBase {
 			throws ConfigurationException, InvalidElementException,
 			ValidationException {
 
-		if (run.getType() == RunType.Machine) {
+		if (!isInOrchestrationContext(run)) {
 			return "\"\"";
 		}
 

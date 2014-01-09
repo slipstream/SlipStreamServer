@@ -44,7 +44,6 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ExtraDisk;
 import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -80,11 +79,7 @@ public abstract class ConnectorBase implements Connector {
 		return log;
 	}
 
-	protected static String ORCHESTRATOR_INSTANCE_ID_NAME = Run.ORCHESTRATOR_NAME_PREFIX
-			+ RuntimeParameter.INSTANCE_ID_KEY;
 	private static String ORCHESTRATOR_INSTANCE_ID_DESCRIPTION = "Orchestrator instance id";
-	protected static String ORCHESTRATOR_INSTANCE_HOSTNAME = Run.ORCHESTRATOR_NAME_PREFIX
-			+ RuntimeParameter.HOSTNAME_KEY;
 	private static String ORCHESTRATOR_INSTANCE_HOSTNAME_DESCRIPTION = "Orchestrator instance hostname/IP";
 
 	private static final String MACHINE_INSTANCE_ID_NAME = Run.MACHINE_NAME_PREFIX
@@ -106,6 +101,15 @@ public abstract class ConnectorBase implements Connector {
 
 	private final String instanceName;
 
+	/**
+	 * Is a deployment or a build image, where both cases require an
+	 * orchestrator
+	 */
+	public static boolean isInOrchestrationContext(Run run) {
+		return run.getType() == RunType.Orchestration
+				|| run.getType() == RunType.Machine;
+	}
+
 	public ConnectorBase(String instanceName) {
 		this.instanceName = instanceName;
 	}
@@ -121,11 +125,11 @@ public abstract class ConnectorBase implements Connector {
 
 		String imageId;
 
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			imageId = getOrchestratorImageId(user);
 		} else {
 			imageId = ((ImageModule) run.getModule()).extractBaseImageId(run
-					.getCloudServiceName());
+					.getCloudService());
 		}
 		return imageId;
 	}
@@ -183,7 +187,7 @@ public abstract class ConnectorBase implements Connector {
 			throws NotFoundException, ValidationException,
 			ServerExecutionEnginePluginException {
 
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run) || run.getType() == RunType.Machine) {
 			updateOrchestratorInstanceIdOnRun(run, instanceId, orchestratorName);
 			updateOrchestratorInstanceIpOnRun(run, ipAddress, orchestratorName);
 		} else {
@@ -329,7 +333,7 @@ public abstract class ConnectorBase implements Connector {
 	protected String getPublicSshKeyFileName(Run run, User user)
 			throws IOException, ValidationException {
 		String publicSshKey;
-		if (run.getType() == RunType.Machine) {
+		if (run.getType() == RunType.Run) {
 			File tempSshKeyFile = File.createTempFile("sshkey", ".tmp");
 			BufferedWriter out = new BufferedWriter(new FileWriter(
 					tempSshKeyFile));
@@ -417,9 +421,9 @@ public abstract class ConnectorBase implements Connector {
 	public String getOrchestratorName(Run run) {
 		String orchestratorName = Run.ORCHESTRATOR_NAME;
 
-		if (run.getType() == RunType.Orchestration
-				&& run.getCategory() == ModuleCategory.Deployment) {
-			orchestratorName += "-" + getConnectorInstanceName();
+		if (isInOrchestrationContext(run)) {
+			orchestratorName = Run
+					.constructOrchestratorName(getConnectorInstanceName());
 		}
 
 		return orchestratorName;
@@ -472,7 +476,7 @@ public abstract class ConnectorBase implements Connector {
 	}
 
 	protected String getLoginUsername(Run run) throws SlipStreamClientException {
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			return getOrchestratorImageLoginUsername();
 		} else {
 			return getMachineImageLoginUsername(run);
@@ -499,7 +503,7 @@ public abstract class ConnectorBase implements Connector {
 
 	protected String getLoginPassword(Run run) throws ConfigurationException,
 			SlipStreamClientException {
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			return getOrchestratorImageLoginPassword();
 		} else {
 			return getMachineImageLoginPassword(run);

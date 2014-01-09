@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>2.0.6-SNAPSHOT</version>
+    <version>2.0.18-SNAPSHOT</version>
   </parent>
   
   <dependencies>
@@ -99,11 +99,11 @@
       <type>jar</type>
     </dependency>
 
-    <dependency>
+<!--     <dependency>
       <groupId>net.kencochrane.raven</groupId>
       <artifactId>raven</artifactId>
     </dependency>
-
+ -->
   </dependencies>
 
   <build>

@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.run;
+package com.sixsq.slipstream.stats;
 
 /*
  * +=================================================================+
@@ -20,47 +20,52 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 
+import com.sixsq.slipstream.exceptions.AbortException;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.run.RunView.RunViewList;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public class RunsResource extends BaseResource {
+public class StatsResource extends BaseResource {
 
 	@Get("xml")
 	public Representation toXml() {
 
-		String metadata = SerializationUtil.toXmlString(getRuns());
-		return new StringRepresentation(metadata, MediaType.TEXT_XML);
+		String metadata = SerializationUtil.toXmlString(compute());
+		return new StringRepresentation(metadata, MediaType.APPLICATION_XML);
 
 	}
 
-	@Get("html")
-	public Representation toHtml() {
+	private Measurements compute() {
 
-		String html = HtmlUtil.toHtml(getRuns(),
-				getPageRepresentation(), getUser());
-		
-		return new StringRepresentation(html, MediaType.TEXT_HTML);
-	}
+		Measurements measurements = new Measurements();
 
-	private RunViewList getRuns() {
-	
-		Runs runs = new Runs();
-		try {
-			runs.populate(getUser());
-		} catch (SlipStreamClientException e) {
-		} catch (SlipStreamException e) {
+		List<User> users = getUser().isSuper() ? User.list() : Arrays
+				.asList(getUser());
+
+		for (User user : users) {
+
+			try {
+				measurements.populate(user);
+			} catch (SlipStreamClientException e) {
+				throwClientConflicError(e.getMessage());
+			} catch (ConfigurationException e) {
+				throwServerError(e);
+			} catch (AbortException e) {
+				throwServerError(e);
+			}
+
 		}
-	
-		return runs.getRuns();
+		return measurements;
 	}
 
 	@Override

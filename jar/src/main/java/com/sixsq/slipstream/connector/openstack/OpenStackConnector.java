@@ -88,15 +88,14 @@ public class OpenStackConnector extends
 			throws SlipStreamException {
 
 		switch (run.getType()) {
+		case Run:
 		case Machine:
-			launchDeployment(run, user);
-			break;
 		case Orchestration:
 			launchDeployment(run, user);
 			break;
 		default:
 			throw (new ServerExecutionEnginePluginException(
-					"Cannot submit type: " + run.getCategory() + " yet!!"));
+					"Cannot submit type: " + run.getType() + " yet!!"));
 		}
 
 		return run;
@@ -227,22 +226,22 @@ public class OpenStackConnector extends
 
 		try {
 			Configuration configuration = Configuration.getInstance();
-			ImageModule imageModule = (run.getType() == RunType.Machine) ? ImageModule
-					.load(run.getModuleResourceUrl()) : null;
+			ImageModule imageModule = (isInOrchestrationContext(run)) ? null: 
+				ImageModule.load(run.getModuleResourceUrl());
 
 			String region = configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
-			String imageId = (run.getType() == RunType.Orchestration)? getOrchestratorImageId(user) : getImageId(run, user);
+			String imageId = (isInOrchestrationContext(run))? getOrchestratorImageId(user) : getImageId(run, user);
 			
-			String instanceName = (run.getType() == RunType.Orchestration) ? getOrchestratorName(run) : imageModule.getShortName();
+			String instanceName = (isInOrchestrationContext(run)) ? getOrchestratorName(run) : imageModule.getShortName();
 			
-			String flavorName = (run.getType() == RunType.Orchestration) ? configuration
+			String flavorName = (isInOrchestrationContext(run)) ? configuration
 					.getRequiredProperty(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME))
 					: getInstanceType(imageModule);
 			String flavorId = getFlavorId(client, region, flavorName);
-			String userData = (run.getType() == RunType.Orchestration) ? createContextualizationData(run, user, configuration) : "";
+			String userData = (isInOrchestrationContext(run)) ? createContextualizationData(run, user, configuration) : "";
 			String keyPairName = "ss-"+String.valueOf(System.currentTimeMillis());
 			String publicKey = getPublicSshKey(run, user);
-			String[] securityGroups = (run.getType() == RunType.Orchestration) ? "default".split(",")
+			String[] securityGroups = (isInOrchestrationContext(run)) ? "default".split(",")
 					: getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUPS, imageModule).split(",");
 
 			String instanceData = "\n\nStarting instance on region '" + region + "'\n";
@@ -256,7 +255,7 @@ public class OpenStackConnector extends
 					.securityGroupNames(securityGroups)
 					.keyPairName(keyPairName);
 			
-			if (run.getType() == RunType.Orchestration){
+			if (isInOrchestrationContext(run)){
 				options.userData(userData.getBytes());
 			}
 
@@ -270,8 +269,7 @@ public class OpenStackConnector extends
 				e.printStackTrace();
 				throw (new ServerExecutionEnginePluginException(e.getMessage()));
 			}finally{
-				if (run.getType() == RunType.Orchestration)
-					kpApi.delete(keyPairName);
+				kpApi.delete(keyPairName);
 			}
 
 			String instanceId = server.getId();

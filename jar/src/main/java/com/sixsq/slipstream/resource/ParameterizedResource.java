@@ -217,7 +217,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		}
 
 		String result = SerializationUtil.toXmlString(prepared);
-		return new StringRepresentation(result);
+		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
 
 	@Get("html")

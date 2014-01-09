@@ -20,6 +20,7 @@ package com.sixsq.slipstream.application;
  * -=================================================================-
  */
 
+import static org.restlet.data.MediaType.APPLICATION_JSON;
 import static org.restlet.data.MediaType.APPLICATION_XHTML;
 import static org.restlet.data.MediaType.APPLICATION_XML;
 import static org.restlet.data.MediaType.TEXT_HTML;
@@ -99,37 +100,22 @@ public class CommonStatusService extends StatusService {
 				return toXhtml(status, response, user, baseUrlSlash,
 						configuration.version);
 
+			} else if (APPLICATION_JSON.isCompatible(desiredMediaType)) {
+
+				return toJson(status);
+
 			} else if (TEXT_PLAIN.isCompatible(desiredMediaType)) {
 
-				representation = new StringRepresentation(error);
-				representation.setMediaType(TEXT_PLAIN);
-				return representation;
+				return toTxt(error);
 
 			} else if (APPLICATION_XML.isCompatible(desiredMediaType)) {
 
-				representation = new StringRepresentation("<error code=\""
-						+ status.getCode() + "\">" + error + "</error>");
-				representation.setMediaType(APPLICATION_XML);
+				return toXml(status, error);
 
-				return representation;
 			}
 		}
 
 		return representation;
-	}
-
-	private void reloadParameters() throws ConfigurationException,
-			ValidationException {
-		
-		Configuration configuration = Configuration.getInstance();
-
-		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_EMAIL
-				.getName();
-		ServiceConfigurationParameter parameter = configuration.getParameters()
-				.getParameter(key);
-		String email = parameter.getValue();
-
-		setContactEmail(email);
 	}
 
 	private Representation toXhtml(Status status, Response response, User user,
@@ -146,8 +132,55 @@ public class CommonStatusService extends StatusService {
 				status.getDescription(), status.getCode()), MediaType.TEXT_HTML);
 	}
 
+	private Representation toJson(Status status) {
+
+		StringBuilder json = new StringBuilder();
+
+		json.append("{\n");
+		json.append("   \"error\": \"" + status.getCode() + "\",\n");
+		json.append("   \"reason\": \"" + status.getName() + "\",\n");
+		json.append("   \"detail\": \"" + status.getDescription() + "\"\n");
+		json.append("}\n");
+
+		Representation representation = new StringRepresentation(
+				json.toString());
+		representation.setMediaType(APPLICATION_JSON);
+
+		return representation;
+	}
+
+	private Representation toTxt(String error) {
+		Representation representation;
+		representation = new StringRepresentation(error);
+		representation.setMediaType(TEXT_PLAIN);
+		return representation;
+	}
+
+	private Representation toXml(Status status, String error) {
+		Representation representation;
+		representation = new StringRepresentation("<error code=\""
+				+ status.getCode() + "\">" + error + "</error>");
+		representation.setMediaType(APPLICATION_XML);
+		return representation;
+	}
+
+	private void reloadParameters() throws ConfigurationException,
+			ValidationException {
+		Configuration configuration = Configuration.getInstance();
+
+		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_EMAIL
+				.getName();
+		ServiceConfigurationParameter parameter = configuration.getParameters()
+				.getParameter(key);
+		String email = parameter.getValue();
+
+		setContactEmail(email);
+	}
+
 	private String statusToString(Status status) {
+
 		return "Error: " + status.getDescription() + " (" + status.getCode()
 				+ " - " + status.getName() + ")";
+
 	}
 }

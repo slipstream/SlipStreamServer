@@ -47,7 +47,6 @@ import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
@@ -72,12 +71,12 @@ public class RunResource extends BaseResource {
 		if (run == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 		}
-		
+
 		authorize();
 	}
 
 	private void authorize() {
-		if(getUser().isSuper()) {
+		if (getUser().isSuper()) {
 			return;
 		}
 		if (!getUser().getName().equals(run.getUser())) {
@@ -90,34 +89,31 @@ public class RunResource extends BaseResource {
 	public Representation toXml() throws NotFoundException,
 			ValidationException, ConfigurationException {
 
-		Run run;
-		String result = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
+		Run run;
+		String xml;
 		try {
-			run = constructRun(em);
-			result = SerializationUtil.toXmlString(run);
+			run = constructRun(em, true);
+			xml = SerializationUtil.toXmlString(run);
 		} catch (SlipStreamClientException e) {
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
 		} finally {
 			em.close();
 		}
 
-		return new StringRepresentation(result, MediaType.TEXT_XML);
+		return new StringRepresentation(xml, MediaType.APPLICATION_XML);
 	}
 
 	@Get("html")
 	public Representation toHtml() throws ConfigurationException,
 			 ValidationException {
 
-		Run run;
-		String html = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
+		String html;
 		try {
-			run = constructRun(em);
-			html = HtmlUtil.toHtml(run,
-					getPageRepresentation(), getUser());
-
+			Run run = constructRun(em, false);
+			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
@@ -133,28 +129,32 @@ public class RunResource extends BaseResource {
 		return "run";
 	}
 
-	private Run constructRun(EntityManager em) throws SlipStreamClientException {
+	private Run constructRun(EntityManager em, boolean withVmState)
+			throws SlipStreamClientException {
 
 		Run run = Run.load(this.run.getResourceUri(), em);
-		try {
-			run = updateVmStatus(run, getUser());
-		} catch (SlipStreamClientException e) {
-			run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
-		} catch (SlipStreamException e) {
-			getLogger().warning(
-					"Error updating vm status for run " + run.getName() + ": "
-							+ e.getMessage());
+
+		if (withVmState) {
+			try {
+				run = updateVmStatus(run);
+			} catch (SlipStreamClientException e) {
+				run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
+			} catch (SlipStreamException e) {
+				getLogger().warning(
+						"Error updating vm status for run " + run.getName()
+								+ ": " + e.getMessage());
+			}
 		}
 
-		Module module = RunFactory.selectFactory(run.getCategory(),
-				run.getType()).overloadModule(run, getUser());
+		Module module = RunFactory.selectFactory(run.getType()).overloadModule(
+				run, getUser());
 		run.setModule(module, true);
 
 		return run;
 	}
 
-	private Run updateVmStatus(Run run, User user) throws SlipStreamException {
-		return Run.updateVmStatus(run, user);
+	private Run updateVmStatus(Run run) throws SlipStreamException {
+		return Run.updateVmStatus(run, getUser());
 	}
 
 	private void validateUser() {
@@ -196,7 +196,7 @@ public class RunResource extends BaseResource {
 				}
 			} else {
 				Connector connector = ConnectorFactory.getConnector(run
-						.getCloudServiceName());
+						.getCloudService());
 				try {
 					connector.terminate(run, getUser());
 				} catch (SlipStreamException e) {
@@ -209,9 +209,9 @@ public class RunResource extends BaseResource {
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
-		
+
 		run.done();
-		
+
 		run.store();
 
 		em.close();

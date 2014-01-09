@@ -218,6 +218,8 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	@Override
 	public void adjustModule(Module previous) throws ValidationException {
+		super.adjustModule(previous);
+		
 		ImageModule olderImage = (ImageModule) previous;
 		ImageModule newImage = castToModule();
 		if (!newImage.isBase()) {

@@ -232,7 +232,7 @@ public class XmlUtil {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		return builder.parse(new InputSource(new StringReader(xmlSource)));
-	}
+	} 
 	
 	/**
 	 * Normalize xml representation of a module, which is natively
@@ -258,5 +258,10 @@ public class XmlUtil {
 		
 		Source source = new StreamSource(new StringReader(external));
 		return XslUtils.transform(source, "module-import.xsl", new HashMap<String, Object>());
+	}
+
+	public static void addSystemConfiguration(Document doc) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -50,8 +50,9 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.run.RunTestBase;
 
-public class ResourceTestBase {
+public class ResourceTestBase extends RunTestBase {
 
 	protected static final String PASSWORD = "password";
 

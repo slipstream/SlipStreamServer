@@ -34,6 +34,7 @@ import java.util.TreeSet;
 
 import org.junit.Test;
 
+import com.sixsq.slipstream.common.util.CommonTestUtil;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleView;
@@ -117,6 +118,9 @@ public class ProjectModuleTest {
 	@Test
 	public void verifyModuleViewList() throws ValidationException {
 
+		// clean-up
+		CommonTestUtil.cleanupModules();
+		
 		Module module1 = new ProjectModule("module1");
 		module1.store();
 

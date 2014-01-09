@@ -46,11 +46,12 @@ import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.run.RunFactory;
 import com.sixsq.slipstream.run.RunView;
 
 public class StateMachinetTest {
@@ -87,7 +88,7 @@ public class StateMachinetTest {
 
 	@Before
 	public void setUp() throws SlipStreamException {
-		run = new Run(new ImageModule("setUp"), cloudServiceName, user);
+		run = RunFactory.getRun(new DeploymentModule("setUp"), RunType.Orchestration, cloudServiceName, user);
 		run = run.store();
 	}
 
@@ -188,8 +189,7 @@ public class StateMachinetTest {
 
 	private Run updateRun(String[] nodes) throws ValidationException {
 		for (String node : nodes) {
-			run.assignRuntimeParameters(node
-					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR);
+			RunFactory.assignRuntimeParameters(run, node);
 			run.addNodeName(node);
 		}
 		run = run.store();

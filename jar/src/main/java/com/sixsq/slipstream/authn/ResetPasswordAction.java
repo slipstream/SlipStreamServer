@@ -30,11 +30,14 @@ import javax.persistence.Entity;
 
 import org.restlet.Request;
 import org.restlet.data.Form;
+import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
+import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
 import com.sixsq.slipstream.persistence.OneShotAction;
 import com.sixsq.slipstream.persistence.User;
@@ -56,7 +59,8 @@ public class ResetPasswordAction extends OneShotAction {
 	}
 
 	private void resetValidated(String baseUrlSlash)
-			throws SlipStreamRuntimeException, ConfigurationException {
+			throws SlipStreamRuntimeException, ConfigurationException,
+			ValidationException {
 
 		Form form = getForm();
 		String userResourceUrl = form.getFirst("userResourceUrl").getValue();
@@ -98,7 +102,11 @@ public class ResetPasswordAction extends OneShotAction {
 
 		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
 
-		resetValidated(baseUrlSlash);
+		try {
+			resetValidated(baseUrlSlash);
+		} catch (ValidationException e) {
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, e.getMessage());
+		}
 
 		String msg = MessageUtils.format(MSG_EMAIL_CONFIRMED_FOR_RESET);
 

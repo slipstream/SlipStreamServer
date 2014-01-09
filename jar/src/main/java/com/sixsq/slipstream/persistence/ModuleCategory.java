@@ -20,13 +20,19 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-
 /**
- * Represents the different categories an element can be in.  They are all implemented by the Component
- * class.
- * @author meb
- *
+ * Represents the different categories an element can be in. They are all
+ * implemented by the Component class.
+ * 
  */
 public enum ModuleCategory {
-    Project, Component, Deployment, Image, Service, Test, Platform, Package, BlockStore
+	Project, 
+	Component, // deprecated
+	Deployment, 
+	Image, 
+	Service, // deprecated
+	Test, // deprecated
+	Platform, // deprecated
+	Package, // deprecated
+	BlockStore // deprecated
 }

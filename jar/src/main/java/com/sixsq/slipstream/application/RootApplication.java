@@ -9,9 +9,9 @@ package com.sixsq.slipstream.application;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import org.restlet.Restlet;
 import org.restlet.data.CharacterSet;
 import org.restlet.data.MediaType;
 import org.restlet.resource.Directory;
+import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
@@ -57,16 +58,16 @@ import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.ServiceCatalogs;
+import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.DocumentationResource;
 import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.ServiceCatalogRouter;
 import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.run.RunRouter;
-import com.sixsq.slipstream.run.RunsRouter;
 import com.sixsq.slipstream.run.VmsRouter;
+import com.sixsq.slipstream.stats.StatsRouter;
 import com.sixsq.slipstream.user.UserRouter;
 import com.sixsq.slipstream.util.RequestUtil;
 
@@ -147,13 +148,14 @@ public class RootApplication extends Application {
 		RootRouter router = new RootRouter(getContext());
 
 		try {
+			attachMetering(router);
 			attachAction(router);
 			attachModule(router);
 			attachUser(router);
 			attachDashboard(router);
-			attachRuns(router);
 			attachVms(router);
 			attachRun(router);
+			attachStats(router);
 			attachWelcome(router);
 			attachLogin(router);
 			attachLogout(router);
@@ -235,23 +237,11 @@ public class RootApplication extends Application {
 	}
 
 	private void attachRun(RootRouter router) throws ConfigurationException {
-		TemplateRoute route;
+		guardAndAttach(router, new RunRouter(getContext()), "run");
+	}
 
-		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler());
-
-		Authenticator cookieAuthenticator = new CookieAuthenticator(
-				getContext());
-		cookieAuthenticator.setOptional(true);
-
-		cookieAuthenticator.setNext(basicAuthenticator);
-		cookieAuthenticator.setEnroler(new SuperEnroler());
-
-		basicAuthenticator.setNext(new RunRouter(getContext()));
-
-		route = router.attach(convertToRouterRoot(Run.RESOURCE_URI_PREFIX),
-				cookieAuthenticator);
-		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
+	private void attachStats(RootRouter router) throws ConfigurationException {
+		guardAndAttach(router, new StatsRouter(getContext()), "stats");
 	}
 
 	private void attachDashboard(RootRouter router)
@@ -269,10 +259,6 @@ public class RootApplication extends Application {
 
 	private void attachVms(RootRouter router) throws ConfigurationException {
 		guardAndAttach(router, new VmsRouter(getContext()), "vms");
-	}
-
-	private void attachRuns(RootRouter router) throws ConfigurationException {
-		guardAndAttach(router, new RunsRouter(getContext()), "runs");
 	}
 
 	private void guardAndAttach(Router rootRouter, Router router, String rootUri)
@@ -378,6 +364,24 @@ public class RootApplication extends Application {
 
 		RequestUtil.addConfigurationToRequest(request);
 
+	}
+
+	private void attachMetering(RootRouter router)
+			throws ConfigurationException, ValidationException {
+
+		String hostname = Configuration.getInstance().getProperty(
+				RequiredParameters.SLIPSTREAM_METERING_HOSTNAME.getName());
+		String target = hostname + "/meters/{meter}/statistics?{query}";
+		Redirector redirector = new Redirector(getContext(), target,
+				Redirector.MODE_SERVER_OUTBOUND);
+
+		TemplateRoute route = router.attach(
+				"/meters/{meter}/statistics?{query}", redirector);
+		route.setMatchingQuery(true);
+		route.getTemplate().getVariables()
+				.put("meter", new Variable(Variable.TYPE_URI_PATH));
+		route.getTemplate().getVariables()
+				.put("query", new Variable(Variable.TYPE_URI_QUERY));
 	}
 
 	public class RootRouter extends Router {

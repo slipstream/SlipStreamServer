@@ -20,10 +20,8 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import java.util.HashSet;
-
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
@@ -32,42 +30,62 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 
-public class RunDeploymentFactory extends RunFactory {
+public class DeploymentFactory extends RunFactory {
 
 	@Override
-	public Run createRun(Module module, RunType type, String cloudService,
-			User user) throws ValidationException, NotFoundException {
-
-		DeploymentModule deployment = (DeploymentModule) module;
-
-		Run run = constructRun(deployment, cloudService, user);
-
-		RunDeploymentFactory.initOrchestratorsNodeNames(run);
-
-		run = initRuntimeParameters(deployment, run);
-		run = initRuntimeParametersMapping(deployment, run);
-
-		validate(deployment, run);
-
-		return run;
-	}
-
-	private void validate(DeploymentModule deployment, Run run)
+	protected Run constructRun(Module module, String cloudService, User user)
 			throws ValidationException {
-		checkAllImagesHaveReferenceOrImageId(deployment, run);
+		return new Run(module, RunType.Orchestration, cloudService, user);
 	}
 
-	private void checkAllImagesHaveReferenceOrImageId(
-			DeploymentModule deployment, Run run) throws ValidationException {
+	@Override
+	protected void initialize(Module module, Run run, String cloudService)
+			throws ValidationException, NotFoundException {
+
+		super.initialize(module, run, cloudService);
+
+		initializeVmRuntimeParameters(run);
+		initializeOrchestrtorRuntimeParameters(run);
+		initOrchestratorsNodeNames(run);
+		initNodeRuntimeParameters(run);
+	}
+
+	@Override
+	protected void validateRun(Run run, String cloudService)
+			throws SlipStreamClientException {
+
+		checkIsDeploymentModule(run);
+
+		checkAllImagesHaveReferenceOrImageId(run);
+	}
+
+	private void checkIsDeploymentModule(Run run) throws ValidationException {
+		if (!(run.getModule() instanceof DeploymentModule)) {
+			throw new ValidationException(
+					"Only deployment modules can be deployed");
+		}
+	}
+
+	private void checkAllImagesHaveReferenceOrImageId(Run run)
+			throws ValidationException {
+
+		DeploymentModule deployment = (DeploymentModule) run.getModule();
+
 		for (Node node : deployment.getNodes().values()) {
 			String cloudServiceName = run.getEffectiveCloudServiceName(node
 					.getCloudService());
+			ImageModule image = node.getImage();
+			if(image == null) {
+				throw new ValidationException("Unknown image: " + node.getImageUri());
+			}
+
 			try {
-				checkImageHasReferenceOrImageId(node.getImage(),
+				checkImageHasReferenceOrImageId(image,
 						cloudServiceName);
 			} catch (ValidationException ex) {
 				throw new ValidationException("Node " + node.getName()
@@ -104,8 +122,10 @@ public class RunDeploymentFactory extends RunFactory {
 		}
 	}
 
-	private static Run initRuntimeParameters(DeploymentModule deployment,
-			Run run) throws ValidationException, NotFoundException {
+	private static void initNodeRuntimeParameters(Run run)
+			throws ValidationException, NotFoundException {
+
+		DeploymentModule deployment = (DeploymentModule) run.getModule();
 
 		for (Node node : deployment.getNodes().values()) {
 			run = initMachineState(node, run);
@@ -116,13 +136,8 @@ public class RunDeploymentFactory extends RunFactory {
 						param.getDescription(), param.getType());
 			}
 		}
-		return run;
-	}
 
-	private static Run initRuntimeParametersMapping(
-			DeploymentModule deployment, Run run) throws ValidationException,
-			NotFoundException {
-
+		// mapping
 		for (Node node : deployment.getNodes().values()) {
 			int multiplicity = node.getMultiplicity();
 			for (NodeParameter param : node.getParameterMappings().values()) {
@@ -134,7 +149,6 @@ public class RunDeploymentFactory extends RunFactory {
 			}
 		}
 
-		return run;
 	}
 
 	private static void addParameterMapping(Run run, NodeParameter param, int i) {
@@ -168,25 +182,27 @@ public class RunDeploymentFactory extends RunFactory {
 
 		for (int i = 1; i <= multiplicity; i++) {
 
-			String nodeNamePartWithNodePropertySeparator = constructNodeNamePartWithNodePropertySeparator(
-					node, i);
-
-			run.assignRuntimeParameters(nodeNamePartWithNodePropertySeparator);
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME,
+			String nodename = constructNodeName(node.getName(), i);
+			assignRuntimeParameters(run, nodename);
+			run.assignRuntimeParameter(
+					constructParamName(nodename,
+							RuntimeParameter.MULTIPLICITY_PARAMETER_NAME),
 					String.valueOf(multiplicity),
 					"Multiplicity value for this node");
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.NODE_NAME, node.getName(), "Nodename");
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.NODE_INDEX, String.valueOf(i),
-					"Node index");
+			String paramname = RuntimeParameter.NODE_NAME;
+			run.assignRuntimeParameter(constructParamName(nodename, paramname),
+					node.getName(), "Nodename");
+			run.assignRuntimeParameter(
+					constructParamName(nodename, RuntimeParameter.NODE_INDEX),
+					String.valueOf(i), "Node index");
 
-			run.assignRuntimeParameter(nodeNamePartWithNodePropertySeparator
-					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
+			run.assignRuntimeParameter(
+					constructParamName(nodename,
+							RuntimeParameter.CLOUD_SERVICE_NAME),
+					cloudServiceName,
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
-			run.addNodeName(constructNodeNamePart(node, i));
+			run.addNodeName(nodename);
 		}
 
 		run.addGroup(node.getName(), cloudServiceName);
@@ -194,15 +210,12 @@ public class RunDeploymentFactory extends RunFactory {
 		return run;
 	}
 
-	private static String constructNodeNamePart(Node node, int index) {
-		return node.getName()
-				+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + index;
+	private static String constructNodeName(String groupname, int index) {
+		return RuntimeParameter.constructNodeName(groupname, index);
 	}
 
-	private static String constructNodeNamePartWithNodePropertySeparator(
-			Node node, int index) {
-		return constructNodeNamePart(node, index)
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+	private static String constructParamName(String nodename, String paramname) {
+		return RuntimeParameter.constructParamName(nodename, paramname);
 	}
 
 	private static String extractInitialValue(ModuleParameter parameter,
@@ -231,24 +244,35 @@ public class RunDeploymentFactory extends RunFactory {
 		return value;
 	}
 
-	protected static void initOrchestratorsNodeNames(Run run)
-			throws ConfigurationException, ValidationException {
-		HashSet<String> cloudServiceList = run.getCloudServicesList();
-		for (String cloudServiceName : cloudServiceList) {
-			String nodename = Run.ORCHESTRATOR_NAME + "-" + cloudServiceName;
-			run.addNodeName(nodename);
-			run.assignRuntimeParameter(nodename
-					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
-					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-
-		}
-	}
-
 	@Override
 	public Module overloadModule(Run run, User user) throws ValidationException {
 		Module module = loadModule(run);
 		return DeploymentModule.populateFromRun(run, module, user);
 	}
 
+	protected static void initializeVmRuntimeParameters(Run run)
+			throws ValidationException {
+
+		DeploymentModule deployment = (DeploymentModule) run.getModule();
+		for (Node node : deployment.getNodes().values()) {
+
+			String nodeRuntimeParameterKeyName = run
+					.nodeRuntimeParameterKeyName(node,
+							RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+			run.setParameter(new RunParameter(nodeRuntimeParameterKeyName,
+					String.valueOf(node.getMultiplicity()),
+					RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION));
+
+			nodeRuntimeParameterKeyName = run.nodeRuntimeParameterKeyName(node,
+					RuntimeParameter.CLOUD_SERVICE_NAME);
+			run.setParameter(new RunParameter(nodeRuntimeParameterKeyName,
+					String.valueOf(node.getCloudService()),
+					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
+
+			nodeRuntimeParameterKeyName = run.nodeRuntimeParameterKeyName(node,
+					RuntimeParameter.TAGS_KEY);
+			run.setParameter(new RunParameter(nodeRuntimeParameterKeyName, "",
+					RuntimeParameter.GLOBAL_TAGS_DESCRIPTION));
+		}
+	}
 }

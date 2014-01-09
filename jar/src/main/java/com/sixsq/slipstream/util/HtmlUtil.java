@@ -26,6 +26,8 @@ import org.w3c.dom.Document;
 
 import slipstream.ui.views.Representation;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 
 public class HtmlUtil {
@@ -36,9 +38,19 @@ public class HtmlUtil {
 
 	public static String toHtml(Object metadata, String page, String type,
 			User user) {
+		
 		Document doc = SerializationUtil.toXmlDocument(metadata);
 
 		XmlUtil.addUser(doc, user);
+		try {
+			XmlUtil.addSystemConfiguration(doc);
+		} catch (ConfigurationException e) {
+			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL,
+					e.getMessage()));
+//		} catch (ValidationException e) {
+//			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+//					e.getMessage()));
+		}
 
 		String xml = SerializationUtil.documentToString(doc);
 		try {

@@ -33,6 +33,7 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -57,15 +58,16 @@ public class ParametersFactory {
 		return parameters;
 	}
 
-	public static Map<String, ServiceConfigurationParameter> getServiceConfigurationParametersTemplate(String[] connectorClassNames)
-			throws ValidationException {
-		Map<String, Connector> connectors = ConnectorFactory.getConnectors(connectorClassNames);
+	public static Map<String, ServiceConfigurationParameter> getServiceConfigurationParametersTemplate(
+			String[] connectorClassNames) throws ValidationException {
+		Map<String, Connector> connectors = ConnectorFactory
+				.getConnectors(connectorClassNames);
 		return getServiceConfigurationParametersTemplate(connectors);
 	}
 
 	private static Map<String, ServiceConfigurationParameter> getServiceConfigurationParametersTemplate(
 			Map<String, Connector> connectors) throws ValidationException {
-		
+
 		Map<String, ServiceConfigurationParameter> parameters = new HashMap<String, ServiceConfigurationParameter>();
 		for (Connector c : connectors.values()) {
 			parameters.putAll(c.getServiceConfigurationParametersTemplate());
@@ -129,23 +131,26 @@ public class ParametersFactory {
 					.getImageParametersTemplate(connectors);
 		}
 
-		Map<String, ModuleParameter> existingParameters = module
-				.getParameters();
-
-		for (Entry<String, ModuleParameter> entry : templateParameters
-				.entrySet()) {
-			if (!existingParameters.containsKey(entry.getKey())) {
-				module.setParameter(entry.getValue());
-			}
-		}
+		setParameters(module, templateParameters);
 
 		return module;
 	}
 
+	private static void setParameters(Module module,
+			Map<String, ModuleParameter> parameters)
+			throws ValidationException {
+		for (Entry<String, ModuleParameter> entry : parameters
+				.entrySet()) {
+			if (!module.getParameters().containsKey(entry.getKey())) {
+				module.setParameter(entry.getValue());
+			}
+		}
+	}
+
 	public static String constructKey(String category, String... names) {
 		String newKey = category;
-		for(String name : names) {
-				newKey += "." + name;
+		for (String name : names) {
+			newKey += RuntimeParameter.PARAM_WORD_SEPARATOR + name;
 		}
 		return newKey;
 	}

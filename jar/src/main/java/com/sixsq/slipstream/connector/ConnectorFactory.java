@@ -225,7 +225,7 @@ public class ConnectorFactory {
 	}
 
 	public static String[] splitConnectorClassNames(String connectorsClassNames) {
-		if (connectorsClassNames.trim().isEmpty()) {
+		if(connectorsClassNames == null || connectorsClassNames.trim().isEmpty()) {
 			return new String[0];
 		}
 		return connectorsClassNames.split(",");

@@ -239,19 +239,19 @@ public class OkeanosConnector extends OpenStackConnector {
 
             String region = configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
             System.out.println("region = " + region);
-            String imageId = (run.getType() == RunType.Orchestration)? getOrchestratorImageId(user) : getImageId(run, user);
+            String imageId = (isInOrchestrationContext(run))? getOrchestratorImageId(user) : getImageId(run, user);
             System.out.println("imageId = " + imageId);
 
-            String instanceName = (run.getType() == RunType.Orchestration) ? getOrchestratorName(run) : imageModule.getShortName();
+            String instanceName = (isInOrchestrationContext(run)) ? getOrchestratorName(run) : imageModule.getShortName();
             System.out.println("instanceName = " + instanceName);
 
-            String flavorName = (run.getType() == RunType.Orchestration) ? configuration
+            String flavorName = (isInOrchestrationContext(run)) ? configuration
                 .getRequiredProperty(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME))
                 : getInstanceType(imageModule);
             System.out.println("flavorName = " + flavorName);
             String flavorId = getFlavorId(client, region, flavorName);
             System.out.println("flavorId = " + flavorId);
-            String[] securityGroups = (run.getType() == RunType.Orchestration) ? "default".split(",")
+            String[] securityGroups = (isInOrchestrationContext(run)) ? "default".split(",")
                 : getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUPS, imageModule).split(",");
             System.out.println("securityGroups = " + Arrays.toString(securityGroups));
 

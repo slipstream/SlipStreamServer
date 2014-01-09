@@ -20,7 +20,7 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
@@ -29,40 +29,35 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
 
-public class RunImageFactory extends BuildImageFactory {
+public class SimpleRunFactory extends BuildImageFactory {
 
 	@Override
-	public Run createRun(Module module, RunType type, String cloudService,
-			User user) throws SlipStreamClientException {
+	protected Run constructRun(Module module, String cloudService, User user)
+			throws ValidationException {
+		return new Run(module, RunType.Run, cloudService, user);
+	}
+
+	@Override
+	protected void initialize(Module module, Run run, String cloudService)
+			throws ValidationException, NotFoundException {
+
+		initializeGlobalParameters(run);
+		initRuntimeParameters(module, run);
+		initMachineState(run);
+		initNodeNames(run, cloudService);
+	}
+
+	@Override
+	protected void validateModule(Module module, String cloudService)
+			throws SlipStreamClientException {
 
 		ImageModule image = (ImageModule) module;
 
 		checkNoCircularDependencies(image);
 
-		checkCloudServiceDefined(cloudService, user);
-
-		Run run = constructRun(image, type, cloudService, user);
-
 		image.validateForRun(cloudService);
-
-		initRuntimeParameters(image, run);
-
-		initMachineState(run);
-
-		initNodeNames(run, cloudService);
-
-		return run;
 	}
-
-	private void checkCloudServiceDefined(String cloudService, User user)
-			throws SlipStreamClientException {
-		if ("".equals(cloudService)) {
-			throw new SlipStreamClientException(
-					ConnectorFactory
-							.incompleteCloudConfigurationErrorMessage(user));
-		}
-	}
-
+	
 	private static void initNodeNames(Run run, String cloudService) {
 		run.addNodeName(Run.MACHINE_NAME);
 		run.addGroup(Run.MACHINE_NAME, cloudService);
@@ -73,5 +68,4 @@ public class RunImageFactory extends BuildImageFactory {
 		Module module = loadModule(run);
 		return ImageModule.populateForImageRun(run, module);
 	}
-
 }
