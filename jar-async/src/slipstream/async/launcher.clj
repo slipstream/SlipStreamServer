@@ -67,7 +67,6 @@
           (if (nil? v)
             (log-info "Reader " i " loop idle. Looping...")
             (do
-              (swap! completed inc)
               (launch! (first v) (second v)))))))))
 
 (defonce ^:dynamic *launch-processor* (launch-readers))
