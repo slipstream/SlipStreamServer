@@ -38,6 +38,7 @@ public class ServiceCatalogParameter extends Parameter<ServiceCatalog> {
 
 	@SuppressWarnings("unused")
 	private ServiceCatalogParameter() {
+		super();
 	}
 
 	public ServiceCatalogParameter(String key, String value, String description)
