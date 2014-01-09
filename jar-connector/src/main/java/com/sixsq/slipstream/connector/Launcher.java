@@ -93,6 +93,7 @@ public class Launcher {
 				rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
 						idParamName);
 				rp.setValue(idsAndIps.get(key).getProperty(ID_KEY));
+				rp.store();
 
 				String ipParamName = key
 						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
@@ -100,6 +101,7 @@ public class Launcher {
 				rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
 						ipParamName);
 				rp.setValue(idsAndIps.get(key).getProperty(IP_KEY));
+				rp.store();
 
 			}
 		}
@@ -114,14 +116,12 @@ public class Launcher {
 				if (run.getCategory() == ModuleCategory.Deployment) {
 					runDeployment(idsAndIps);
 				} else {
-					runOther();
+					runOther(idsAndIps);
 				}
 
 			} catch (SlipStreamException e) {
 				logger.severe("Error executing asynchronous launch operation");
 				throw (new SlipStreamRuntimeException(e));
-			} finally {
-				run = run.store();
 			}
 			return idsAndIps;
 		}
@@ -135,7 +135,8 @@ public class Launcher {
 						.getConnector(cloudServiceName);
 				try {
 					connector.launch(run, user);
-					assembleIdsAndIps(idsAndIps, connector);
+					String vmName = connector.getOrchestratorName(run);
+					assembleIdsAndIps(idsAndIps, vmName);
 				} catch (SlipStreamException e) {
 					abortRun(connector.getOrchestratorName(run), e);
 				}
@@ -143,19 +144,17 @@ public class Launcher {
 		}
 
 		private void assembleIdsAndIps(Map<String, Properties> idsAndIps,
-				Connector connector) throws NotFoundException {
-			String id = run.getRuntimeParameterValueIgnoreAbort(connector
-					.getOrchestratorName(run)
+				String vmName) throws NotFoundException {
+			String id = run.getRuntimeParameterValueIgnoreAbort(vmName
 					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 					+ RuntimeParameter.INSTANCE_ID_KEY);
-			String ip = run.getRuntimeParameterValueIgnoreAbort(connector
-					.getOrchestratorName(run)
+			String ip = run.getRuntimeParameterValueIgnoreAbort(vmName
 					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 					+ RuntimeParameter.HOSTNAME_KEY);
 			Properties props = new Properties();
 			props.put(ID_KEY, id);
 			props.put(IP_KEY, ip);
-			idsAndIps.put(connector.getOrchestratorName(run), props);
+			idsAndIps.put(vmName, props);
 		}
 
 		private void abortRun(String nodename, SlipStreamException e) {
@@ -163,10 +162,11 @@ public class Launcher {
 			run = Run.abortOrReset(e.getMessage(), nodename, run.getUuid());
 		}
 
-		private void runOther() throws ValidationException {
+		private void runOther(Map<String, Properties> idsAndIps) throws ValidationException {
 			Connector connector = ConnectorFactory.getCurrentConnector(user);
 			try {
 				connector.launch(run, user);
+				assembleIdsAndIps(idsAndIps, Run.MACHINE_NAME);
 			} catch (SlipStreamException e) {
 				abortRun(Run.MACHINE_NAME, e);
 			}
