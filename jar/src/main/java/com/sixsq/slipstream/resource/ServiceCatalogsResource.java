@@ -86,10 +86,6 @@ public class ServiceCatalogsResource extends SimpleResource {
 
 		checkIsSuper();
 
-		if (entity == null) {
-			throwClientBadRequest("Empty form");
-		}
-
 		try {
 			processEntityAsForm(entity);
 		} catch (ValidationException e) {
@@ -105,7 +101,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 			throws ResourceException, ConfigurationException,
 			ValidationException {
 
-		Form form = extractFormFromEntity(entity);
+		Form form = (entity == null) ? new Form() : extractFormFromEntity(entity);
 
 		for (ServiceCatalog s : sc.getList()) {
 
