@@ -39,9 +39,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Metadata;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
@@ -50,6 +52,14 @@ public class XmlUtil {
 
 	private final static String[] addedElementNames = { "breadcrumbs",
 			"services", "user" };
+
+	public static void addSystemConfiguration(Document root)
+			throws ConfigurationException, ValidationException {
+		Document configurationDoc = SerializationUtil
+				.toXmlDocument(Configuration.getInstance().getParameters());
+		root.getDocumentElement().appendChild(
+				root.importNode(configurationDoc.getFirstChild(), true));
+	}
 
 	/**
 	 * Remove nodes that were added after the serialization (e.g. navigation,
@@ -232,36 +242,36 @@ public class XmlUtil {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		return builder.parse(new InputSource(new StringReader(xmlSource)));
-	} 
-	
+	}
+
 	/**
-	 * Normalize xml representation of a module, which is natively
-	 * denormalized to facilitate xslt (for example) processing
+	 * Normalize xml representation of a module, which is natively denormalized
+	 * to facilitate xslt (for example) processing
+	 * 
 	 * @param module
 	 * @return
 	 */
 	public static String normalize(Module module) {
-		
+
 		Document document = SerializationUtil.toXmlDocument(module);
 		Source source = new DOMSource(document);
 
-		return XslUtils.transform(source, "module-export.xsl", new HashMap<String, Object>());
+		return XslUtils.transform(source, "module-export.xsl",
+				new HashMap<String, Object>());
 	}
-	
+
 	/**
 	 * Denormalize xml representation of a module, which is natively
 	 * denormalized to facilitate xslt (for example) processing
+	 * 
 	 * @param imported
 	 * @return
 	 */
 	public static String denormalize(String external) {
-		
+
 		Source source = new StreamSource(new StringReader(external));
-		return XslUtils.transform(source, "module-import.xsl", new HashMap<String, Object>());
+		return XslUtils.transform(source, "module-import.xsl",
+				new HashMap<String, Object>());
 	}
 
-	public static void addSystemConfiguration(Document doc) {
-		// TODO Auto-generated method stub
-		
-	}
 }
