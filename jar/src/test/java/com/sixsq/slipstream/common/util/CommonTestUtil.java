@@ -37,7 +37,6 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.module.ModuleView;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
@@ -110,8 +109,7 @@ public class CommonTestUtil {
 	public static DeploymentModule createDeployment()
 			throws ValidationException, NotFoundException {
 
-		ImageModule imageForDeployment1 = new ImageModule(
-				"imagefordeployment1");
+		ImageModule imageForDeployment1 = new ImageModule("imagefordeployment1");
 		imageForDeployment1
 				.setParameter(new ModuleParameter("pi1", "pi1 init value",
 						"pi1 parameter desc", ParameterCategory.Input));
@@ -123,8 +121,7 @@ public class CommonTestUtil {
 		imageForDeployment1.setImageId("123", CommonTestUtil.cloudServiceName);
 		imageForDeployment1 = imageForDeployment1.store();
 
-		ImageModule imageForDeployment2 = new ImageModule(
-				"imagefordeployment2");
+		ImageModule imageForDeployment2 = new ImageModule("imagefordeployment2");
 		imageForDeployment2
 				.setParameter(new ModuleParameter("pi2", "pi2 init value",
 						"pi2 parameter desc", ParameterCategory.Input));
@@ -173,10 +170,13 @@ public class CommonTestUtil {
 	}
 
 	public static void cleanupModules() {
-		List<ModuleView> moduleViewList = Module
-				.viewList(Module.RESOURCE_URI_PREFIX);
-		for(ModuleView m : moduleViewList) {
-			Module.loadByName(m.getName()).remove();
+		List<Module> modules = Module.listAll();
+		for (Module m : modules) {
+			try {
+				m.remove();
+			}
+			catch (Exception ex) {
+			}
 		}
 	}
 
@@ -185,5 +185,4 @@ public class CommonTestUtil {
 
 	}
 
-	
 }

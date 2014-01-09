@@ -59,6 +59,7 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 		@NamedQuery(name = "moduleLastVersion", query = "SELECT m FROM Module m WHERE m.version = (SELECT MAX(m.version) FROM Module m WHERE m.name = :name)"),
 		@NamedQuery(name = "moduleViewLatestChildren", query = "SELECT NEW com.sixsq.slipstream.module.ModuleView(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.parentUri = :parent AND m.version = (SELECT MAX(c.version) FROM Module c WHERE c.name = m.name)"),
 		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name"),
+		@NamedQuery(name = "moduleAll", query = "SELECT m FROM Module m"),
 		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.published != null") })
 public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
@@ -105,6 +106,13 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		int version = ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
 		return (version == DEFAULT_VERSION ? loadLatest(resourceUri)
 				: loadByUri(resourceUri));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<Module> listAll() {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = em.createNamedQuery("moduleAll");
+		return q.getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
