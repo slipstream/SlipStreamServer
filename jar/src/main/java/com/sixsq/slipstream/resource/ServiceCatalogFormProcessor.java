@@ -32,12 +32,10 @@ public class ServiceCatalogFormProcessor extends
 		FormProcessor<ServiceCatalog, ServiceCatalogParameter> {
 
 	private String cloud;
-	private String prefix;
 	
 	public ServiceCatalogFormProcessor(User user, String cloud) {
 		super(user);
 		this.cloud = cloud;
-		prefix = cloud + ".";
 	}
 
 	@Override
@@ -49,13 +47,13 @@ public class ServiceCatalogFormProcessor extends
 	@Override
 	protected ServiceCatalog getOrCreateParameterized(String cloud)
 			throws ValidationException, NotFoundException {
-		return ServiceCatalog.loadByCloud(cloud);
+		return new ServiceCatalog(cloud);
 	}
 
 	@Override
 	protected ServiceCatalogParameter createParameter(String name,
 			String value, String description) throws SlipStreamClientException {
-		return new ServiceCatalogParameter(prefix + name, value, description);
+		return new ServiceCatalogParameter(name, value, description);
 	}
 
 	@Override
@@ -64,7 +62,7 @@ public class ServiceCatalogFormProcessor extends
 	}
 
 	private boolean partOfThisCloud(String paramName) {
-		return paramName.startsWith(prefix);
+		return paramName.startsWith(cloud + '.');
 	}
 
 }
