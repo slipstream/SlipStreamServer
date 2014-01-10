@@ -110,7 +110,6 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		String genericPart = getGenericPart(paramName);
 		String name = form.getFirstValue(paramName);
 
-
 		String value = extractValue(form, genericPart);
 
 		if(!shouldProcess(name)) {
@@ -126,7 +125,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 
 	}
 
-	protected boolean shouldProcess(String paramName) {
+	protected boolean shouldProcess(String paramName) throws ValidationException {
 		return true;
 	}
 
@@ -170,8 +169,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		return paramName.substring(0, paramName.length() - lastSize);
 	}
 
-	protected String extractValue(Form form, String genericPart) {
-
+	private String extractValue(Form form, String genericPart) {
 		return form.getFirstValue(genericPart + "value");
 	}
 
