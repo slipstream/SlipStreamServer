@@ -91,9 +91,9 @@ public class ServiceConfigurationParameter extends
 		if ("".equals(getName())) {
 			throw (new ValidationException("Key cannot be empty"));
 		}
-		if (!Pattern.matches("\\w[\\w\\d.]+", getName())) {
+		if (!Pattern.matches("\\w[\\w\\d._-]+", getName())) {
 			throw new ValidationException(
-					"Key must start with a letter and contain only letters, digits and dots.");
+					"Key must start with a letter and contain only letters, digits, dots, dash and underscores.");
 		}
 	}
 }
