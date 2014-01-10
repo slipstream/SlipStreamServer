@@ -22,8 +22,6 @@ package com.sixsq.slipstream.persistence;
 
 import java.util.List;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -56,7 +54,7 @@ public class ServiceCatalog extends
 	private final static String CATEGORY_LOCATION = "Locations";
 	private final static String CATEGORY_SUPPLIERS_CATALOG = "Suppliers catalogue";
 
-	public final static String RESOURCE_URL_PREFIX = "servicecatalog/";
+	public final static String RESOURCE_URL_PREFIX = "service_catalog/";
 
 	@Attribute
 	@Id
@@ -146,20 +144,16 @@ public class ServiceCatalog extends
 		for (DefinedParameters dp : DefinedParameters.values()) {
 			String name = cloud + "." + dp.getName();
 			ServiceCatalogParameter scp = getParameter(name);
-			if (scp != null) {
-				scp.setCategory(dp.getCategory());
-				scp.setDescription(dp.getDescription());
-				scp.setInstructions(dp.getInstruction());
-				scp.setType(dp.getType());
-			} else {
+			if (scp == null) {
 				scp = new ServiceCatalogParameter(name, "", dp.getDescription());
-				scp.setCategory(dp.getCategory());
-				scp.setInstructions(dp.getInstruction());
-				scp.setReadonly(false);
-				scp.setMandatory(true);
-				scp.setType(dp.getType());
-				setParameter(scp);
 			}
+			scp.setCategory(dp.getCategory());
+			scp.setDescription(dp.getDescription());
+			scp.setInstructions(dp.getInstruction());
+			scp.setType(dp.getType());
+			scp.setReadonly(true);
+			scp.setMandatory(true);
+			setParameter(scp);
 		}
 	}
 
