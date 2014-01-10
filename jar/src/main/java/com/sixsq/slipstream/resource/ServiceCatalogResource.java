@@ -26,13 +26,41 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceCatalog;
+import com.sixsq.slipstream.persistence.ServiceCatalogParameter;
+import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ServiceCatalogResource extends SimpleResource {
+
+	ServiceCatalog serviceCatalog = null;
+
+	@Override
+	public void doInit() throws ResourceException {
+
+		super.doInit();
+
+		try {
+			if(!ServiceCatalogs.isEnabled()) {
+				throwNotFoundResource();
+			}
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}		
+		
+		// Service catalogs are loaded from the system configuration
+		// Therefore they already exist in the system
+		serviceCatalog = ServiceCatalog.load(getResourceUri());
+		if(serviceCatalog == null) {
+			throwNotFoundResource();
+		}
+	}
 
 	@Get("xml|html")
 	public Representation toXml() {
@@ -46,7 +74,7 @@ public class ServiceCatalogResource extends SimpleResource {
 		return new StringRepresentation(result);
 	}
 
-	public ServiceCatalog retrieveServiceCatalog() throws ValidationException {
+	private ServiceCatalog retrieveServiceCatalog() throws ValidationException {
 		String cloud = (String) getRequestAttributes().get("cloud");
 		return ServiceCatalog.loadByCloud(cloud);
 	}
@@ -58,11 +86,12 @@ public class ServiceCatalogResource extends SimpleResource {
 	public void updateOrCreateFromXml(Representation entity)
 			throws ResourceException {
 
-		xmlToServiceCatalog().store();
+		parseToServiceCatalog();
+		serviceCatalog = serviceCatalog.store();
 
 	}
 
-	private ServiceCatalog xmlToServiceCatalog() {
+	private ServiceCatalog parseToServiceCatalog() {
 
 		String xml = extractXml();
 
@@ -73,6 +102,25 @@ public class ServiceCatalogResource extends SimpleResource {
 		} catch (SlipStreamClientException e) {
 			throwClientBadRequest("Invalid xml service catalog: "
 					+ e.getMessage());
+		}
+
+		serviceCatalog.clearParameters();
+
+		for (ServiceCatalogParameter p : s.getParameters().values()) {
+			try {
+				// Don't trust the provided info
+				p.setMandatory(false);
+				p.setReadonly(true);
+				serviceCatalog.setParameter(p);
+			} catch (ValidationException e) {
+				throwClientBadRequest(e.getMessage());
+			}
+		}
+
+		try {
+			serviceCatalog.populateDefinedParameters();
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
 		}
 
 		return s;

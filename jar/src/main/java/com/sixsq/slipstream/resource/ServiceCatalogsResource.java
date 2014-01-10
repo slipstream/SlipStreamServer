@@ -41,6 +41,22 @@ public class ServiceCatalogsResource extends SimpleResource {
 
 	private ServiceCatalogs sc = new ServiceCatalogs();
 
+	@Override
+	public void doInit() throws ResourceException {
+
+		super.doInit();
+
+		try {
+			if(!ServiceCatalogs.isEnabled()) {
+				throwNotFoundResource();
+			}
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
+	}
+	
 	@Get("xml")
 	public Representation toXml() {
 
