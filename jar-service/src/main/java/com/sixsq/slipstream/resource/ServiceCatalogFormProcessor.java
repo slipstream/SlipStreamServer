@@ -32,7 +32,7 @@ public class ServiceCatalogFormProcessor extends
 		FormProcessor<ServiceCatalog, ServiceCatalogParameter> {
 
 	private String cloud;
-	
+
 	public ServiceCatalogFormProcessor(User user, String cloud) {
 		super(user);
 		this.cloud = cloud;
@@ -57,7 +57,11 @@ public class ServiceCatalogFormProcessor extends
 	}
 
 	@Override
-	protected boolean shouldProcess(String paramName) {
+	protected boolean shouldProcess(String paramName)
+			throws ValidationException {
+		if (paramName == null) {
+			throw new ValidationException("Missing parameter name");
+		}
 		return partOfThisCloud(paramName);
 	}
 

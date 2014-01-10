@@ -50,11 +50,11 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 public class ServiceCatalog extends
 		Parameterized<ServiceCatalog, ServiceCatalogParameter> {
 
-	private final static String CATEGORY_GENERAL = "General";
-	private final static String CATEGORY_OVERALL_CAPACITY = "Overall Capacity";
-	private final static String CATEGORY_SINGLE_VM_CAPACITY = "Single VM Capacity";
-	private final static String CATEGORY_PRICING = "Pricing";
-//	private final static String CATEGORY_OTHER = "Other";
+	private final static String CATEGORY_OVERALL_CAPACITY = "Overall capacity";
+	private final static String CATEGORY_SINGLE_VM_CAPACITY = "Single VM capacity";
+	private final static String CATEGORY_PRICE = "Price";
+	private final static String CATEGORY_LOCATION = "Locations";
+	private final static String CATEGORY_SUPPLIERS_CATALOG = "Suppliers catalogue";
 
 	public final static String RESOURCE_URL_PREFIX = "servicecatalog/";
 
@@ -152,8 +152,7 @@ public class ServiceCatalog extends
 				scp.setInstructions(dp.getInstruction());
 				scp.setType(dp.getType());
 			} else {
-				scp = new ServiceCatalogParameter(name, "",
-						dp.getDescription());
+				scp = new ServiceCatalogParameter(name, "", dp.getDescription());
 				scp.setCategory(dp.getCategory());
 				scp.setInstructions(dp.getInstruction());
 				scp.setReadonly(false);
@@ -165,7 +164,7 @@ public class ServiceCatalog extends
 	}
 
 	public void clearParameters() {
-		for(ServiceCatalogParameter p : getParameters().values()) {
+		for (ServiceCatalogParameter p : getParameters().values()) {
 			p.setContainer(null);
 		}
 	}
@@ -175,41 +174,84 @@ public class ServiceCatalog extends
 	 */
 	public enum DefinedParameters {
 
-		GENERAL_DESCRIPTION(
-				"General description of the cloud service (including optional further links)",
-				CATEGORY_GENERAL),
+		// Overall capacity
 
-		SUPPORT_EMAIL("Support email adress for this cloud service",
-				CATEGORY_GENERAL) {
-			@Override
-			public void validate(String value) {
-				super.validate(value);
-				isValidEmail(value);
-			}
-		},
-
-		OVERALL_CPU("Overall available CPUs (cores)",
+		OVERALL_CAPACITY_CPU(
+				"Nature: the number of CPU cores (currently) available within (the relevant part of) the supplier’s IaaS environment;\nValue: an integer, and possibly approximate, number, e.g. 1,000; Explanation: to give an indication of the scale of the environment available for use",
 				CATEGORY_OVERALL_CAPACITY),
 
-		OVERALL_RAM("Overall available RAM", CATEGORY_OVERALL_CAPACITY),
+		OVERALL_CAPACITY_RAM(
+				"Nature: the amount of random-access memory in total; Value: expressed in relevant terms, e.g. 10 TB; Explanation: the amount of memory available across the installation as a whole. See below for what is available on any one system",
+				CATEGORY_OVERALL_CAPACITY),
 
-		OVERALL_STORAGE("Overall available storage", CATEGORY_OVERALL_CAPACITY),
+		OVERALL_CAPACITY_STORAGE(
+				"Nature: the amount of persistent storage (e.g. SSD, disk, tape) available within that supplier’s environment; Value: expressed in relevant terms, e.g. 10 PB; Explanation: possibly multiple values, e.g. per technology type",
+				CATEGORY_OVERALL_CAPACITY),
 
-		SINGLE_VM_MAX_CPU("Maximum number of CPUs (cores) available for a single VM",
+		// Single vm capacity
+
+		SINGLE_VM_MIN_CPU(
+				"Nature: the minimum number of CPU cores with which this supplier’s VMs can be configured; Value: an integer number, e.g. 1; Explanation: to give an indication of the minimum configurable environment",
 				CATEGORY_SINGLE_VM_CAPACITY),
 
-		SINGLE_VM_MAX_RAM("Maximum number of RAM (GB) available for a single VM",
+		SINGLE_VM_MAX_CPU(
+				"Nature: the maximum number of CPU cores with which this supplier’s  VMs can be configured; Value: an integer number, e.g. 8; Explanation: to give an indication of the maximum configurable environment",
 				CATEGORY_SINGLE_VM_CAPACITY),
 
-		PRICING_CPU_PER_HOUR("CPU cost per hour, in euro",
-				CATEGORY_PRICING),
+		SINGLE_VM_MIN_RAM(
+				"Nature: the minimum amount of random-access memory (currently) available within VMs; Value: expressed in relevant terms, e.g. 128 GB; Explanation: the amount of memory available to any one VM within the supplier’s IaaS environment",
+				CATEGORY_SINGLE_VM_CAPACITY),
 
-		PRICING_RAM_PER_HOUR("RAM (GB) cost per hour, in euro",
-				CATEGORY_PRICING),
+		SINGLE_VM_MAX_RAM(
+				"Nature: the maximum amount of random-access memory (currently) available within VMs; Value: expressed in relevant terms, e.g. 128 GB; Explanation: the amount of memory available to any one VM within the supplier’s IaaS environment",
+				CATEGORY_SINGLE_VM_CAPACITY),
 
-		PRICING_STORAGE_PER_HOUR("Storage (GB) cost per hour, in euro",
-				CATEGORY_PRICING);
-		
+		SINGLE_VM_STORAGE_VOLATILE(
+				"Nature: the amount of volatile storage available locally to that VM; Value: expressed in relevant terms, e.g. 500 GB; Explanation: the amount of “scratch” space, which could be used, e.g. to extend the random access memory of a VM. Local disk space is typically slower than ram but faster than persistent storage space",
+				CATEGORY_SINGLE_VM_CAPACITY),
+
+		SINGLE_VM_STORAGE_PERSISTENT(
+				"Nature: the amount of persistent storage (e.g. SSD, disk, tape) available to that VM; Storage access method (e.g. local or network); Storage type: block device or network mount; Value: expressed in relevant terms, e.g. 10 TB per drive/block device; Resilience level or equivalent eg. RAID6, RAID5 etc. Explanation: possibly multiple values, e.g. per technology type. This presumes that storage is associated with a particular VM, i.e. it is locally attached or via a restricted network. Otherwise, it could be up to the total figure, as above",
+				CATEGORY_SINGLE_VM_CAPACITY),
+
+		// Price
+
+		PRICE_CHARGING_UNIT(
+				"Nature: the unit used for charging; Value: the pricing unit, e.g. GHz, portion of CPU chip, etc.; Explanation: this could vary per supplier, as there is no standard unit. Work from the ODCA or Deutsche Boerse could be used to derive such a standard, at least for comparative purposes, in the future",
+				CATEGORY_PRICE),
+
+		PRICE_CHARGING_PERIOD(
+				"Nature: the period used for charging; Value: the pricing period, e.g. hour, month; Explanation: this could vary per resource, e.g. CPU per hour, storage per month",
+				CATEGORY_PRICE),
+
+		PRICE_CPU_PER_HOUR(
+				"Nature: the price for use of a unit of processing per period, e.g. hour; Value: the price in euros, e.g. €0.05",
+				CATEGORY_PRICE),
+
+		PRICE_RAM_PER_HOUR(
+				"Nature: the price for use of a unit (e.g. 1 GB) of memory per hour; Value: the price in euros, e.g. €0.05",
+				CATEGORY_PRICE),
+
+		PRICE_STORAGE_PER_HOUR(
+				"Nature: the price for use of a unit (e.g. 1 GB) of storage per hour; Value: the price in euros, e.g. €0.0005; Explanation: note that is possible that storage is either associated with a particular VM or as a generally-available resource",
+				CATEGORY_PRICE),
+
+		PRICE_IO(
+				"Nature: the price for transmitting a unit (e.g. 1 GB) in or out of the environment; Value: the price in euros, e.g. €0.30",
+				CATEGORY_PRICE),
+
+		// Location
+
+		LOCATION(
+				"Nature: geographical location of relevant data centre(s); Value: ISO-standard country code and name for cloud location and operational company location, e.g. NL The Netherlands; Explanation: currently, data protection legislation differs per country",
+				CATEGORY_LOCATION),
+
+		// Suppliers catalog
+
+		SUPPLIERS_CATALOG(
+				"Nature: URL of web site with further details; Value: e.g. http://example.com",
+				CATEGORY_SUPPLIERS_CATALOG);
+
 		private final String description;
 		private final String category;
 		private final String instructions;
@@ -220,8 +262,7 @@ public class ServiceCatalog extends
 			return instructions;
 		}
 
-		private DefinedParameters(String description,
-				String category) {
+		private DefinedParameters(String description, String category) {
 			this.description = description;
 			this.category = category;
 			this.instructions = "";
@@ -229,8 +270,8 @@ public class ServiceCatalog extends
 			this.readonly = false;
 		}
 
-		private DefinedParameters(String description,
-				String category, boolean readonly) {
+		private DefinedParameters(String description, String category,
+				boolean readonly) {
 			this.description = description;
 			this.category = category;
 			this.instructions = "";
@@ -238,8 +279,8 @@ public class ServiceCatalog extends
 			this.readonly = readonly;
 		}
 
-		private DefinedParameters(String description,
-				String category, String instructions) {
+		private DefinedParameters(String description, String category,
+				String instructions) {
 			this.description = description;
 			this.category = category;
 			this.instructions = instructions;
@@ -247,8 +288,8 @@ public class ServiceCatalog extends
 			this.readonly = false;
 		}
 
-		private DefinedParameters(String description,
-				String category, ParameterType type) {
+		private DefinedParameters(String description, String category,
+				ParameterType type) {
 			this.description = description;
 			this.category = category;
 			this.instructions = "";
@@ -256,9 +297,8 @@ public class ServiceCatalog extends
 			this.readonly = false;
 		}
 
-		private DefinedParameters(String description,
-				String category, String instructions,
-				ParameterType type) {
+		private DefinedParameters(String description, String category,
+				String instructions, ParameterType type) {
 			this.description = description;
 			this.category = category;
 			this.instructions = instructions;
@@ -289,15 +329,6 @@ public class ServiceCatalog extends
 			if (value == null || "".equals(value)) {
 				throw new IllegalArgumentException(
 						"value cannot be empty or null");
-			}
-		}
-
-		private static void isValidEmail(String s) {
-			try {
-				new InternetAddress(s);
-			} catch (AddressException e) {
-				throw new IllegalArgumentException("invalid email address: "
-						+ e.getMessage());
 			}
 		}
 
