@@ -148,7 +148,7 @@ public class ServiceConfiguration extends
 				ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_METERING_ENABLE("Metering enabled",
-				ParameterCategory.SlipStream_Advanced);
+				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean);
 
 		private final String description;
 		private final ParameterCategory category;
