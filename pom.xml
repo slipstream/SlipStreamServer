@@ -15,7 +15,10 @@
   </parent>
 
   <modules>
-    <module>jar</module>
+    <module>jar-persistence</module>
+    <module>jar-connector</module>
+    <module>jar-async</module>
+    <module>jar-service</module>
     <module>static-content</module>
     <module>war</module>
   </modules>
