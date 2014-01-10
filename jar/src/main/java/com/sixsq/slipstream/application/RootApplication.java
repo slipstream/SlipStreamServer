@@ -58,7 +58,6 @@ import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.DocumentationResource;
@@ -251,10 +250,8 @@ public class RootApplication extends Application {
 
 	private void attachServiceCatalog(RootRouter router)
 			throws ConfigurationException, ValidationException {
-		if (ServiceCatalogs.isEnabled()) {
-			guardAndAttach(router, new ServiceCatalogRouter(getContext()),
-					"service_catalog");
-		}
+		guardAndAttach(router, new ServiceCatalogRouter(getContext()),
+				"service_catalog");
 	}
 
 	private void attachVms(RootRouter router) throws ConfigurationException {
