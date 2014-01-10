@@ -94,7 +94,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 
 		sc.store();
 
-		getResponse().redirectSeeOther("/service_catalog");
+		getResponse().setLocationRef("/service_catalog");
 	}
 
 	public void processEntityAsForm(Representation entity)
