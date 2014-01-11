@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.simpleframework.xml.ElementList;
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 public class ServiceCatalogs {

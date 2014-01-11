@@ -30,7 +30,6 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceCatalog;
 import com.sixsq.slipstream.persistence.ServiceCatalogs;

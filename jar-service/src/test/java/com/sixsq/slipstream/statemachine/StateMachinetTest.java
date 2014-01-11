@@ -52,7 +52,6 @@ import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.run.RunTestBase;
 import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class StateMachinetTest {

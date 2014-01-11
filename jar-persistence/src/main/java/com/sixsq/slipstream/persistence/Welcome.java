@@ -2,10 +2,7 @@ package com.sixsq.slipstream.persistence;
 
 import org.simpleframework.xml.Element;
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleView.ModuleViewList;
-import com.sixsq.slipstream.persistence.ServiceCatalogs;
 
 public class Welcome {
 
