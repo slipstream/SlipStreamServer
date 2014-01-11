@@ -102,7 +102,7 @@ public class ServiceCatalog extends
 
 	@Override
 	public String getResourceUri() {
-		return "servicecatalog/" + getCloud();
+		return constructResourceUri(getCloud());
 	}
 
 	@Override
