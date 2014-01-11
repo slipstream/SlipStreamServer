@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>SlipStreamConnector</artifactId>
+	<packaging>jar</packaging>
+	<name>SlipStreamConnector</name>
+	<description>SlipStream Connector (JAR)</description>
+
+	<url>http://sixsq.com</url>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+
+	<parent>
+		<groupId>com.sixsq.slipstream</groupId>
+		<artifactId>SlipStreamServer</artifactId>
+		<version>2.1.0-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamPersistence</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamUI</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.restlet.jee</groupId>
+			<artifactId>org.restlet</artifactId>
+		</dependency>
+
+		<!-- Needs to be before junit -->
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jclouds</groupId>
+			<artifactId>jclouds-all</artifactId>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jclouds.driver</groupId>
+			<artifactId>jclouds-slf4j</artifactId>
+			<version>${version.jclouds}</version>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jclouds.driver</groupId>
+			<artifactId>jclouds-sshj</artifactId>
+			<version>${version.jclouds}</version>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<type>jar</type>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<property>
+							<name>slipstream.config.file</name>
+							<value>${project.build.directory}/configuration/slipstream.conf
+							</value>
+						</property>
+					</systemPropertyVariables>
+					<excludes>
+						<exclude>${slipstream.test.excludes}</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+
+		<outputDirectory>target/classes</outputDirectory>
+
+	</build>
+</project>
