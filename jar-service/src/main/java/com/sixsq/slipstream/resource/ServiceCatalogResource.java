@@ -32,7 +32,6 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceCatalog;
 import com.sixsq.slipstream.persistence.ServiceCatalogParameter;
-import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ServiceCatalogResource extends SimpleResource {
@@ -45,19 +44,19 @@ public class ServiceCatalogResource extends SimpleResource {
 		super.doInit();
 
 		try {
-			if(!ServiceCatalogs.isEnabled()) {
+			if (!ServiceCatalogsResource.serviceCatalogsEnabled()) {
 				throwNotFoundResource();
 			}
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
-		}		
-		
+		}
+
 		// Service catalogs are loaded from the system configuration
 		// Therefore they already exist in the system
 		serviceCatalog = ServiceCatalog.load(getResourceUri());
-		if(serviceCatalog == null) {
+		if (serviceCatalog == null) {
 			throwNotFoundResource();
 		}
 	}

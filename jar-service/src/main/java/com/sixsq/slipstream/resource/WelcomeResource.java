@@ -5,11 +5,9 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceCatalogs;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.Welcome;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -58,7 +56,7 @@ public class WelcomeResource extends SimpleResource {
 		welcome.setModules(retrieveFilteredModuleViewList());
 	
 		try {
-			if (serviceCatalogEnabled()) {
+			if (ServiceCatalogsResource.serviceCatalogsEnabled()) {
 				welcome.setServiceCatalogues(retrieveServiceCatalogs());
 			}
 		} catch (ConfigurationException e) {
@@ -70,16 +68,6 @@ public class WelcomeResource extends SimpleResource {
 		return welcome;
 	}
 
-	public static boolean serviceCatalogEnabled() throws ConfigurationException,
-			ValidationException {
-		return Boolean
-				.parseBoolean(Configuration
-						.getInstance()
-						.getProperty(
-								ServiceConfiguration.RequiredParameters.SLIPSTREAM_SERVICE_CATALOG_ENABLE
-										.getName()));
-	}
-	
 	private ServiceCatalogs retrieveServiceCatalogs()
 			throws ValidationException {
 

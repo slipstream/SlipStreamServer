@@ -28,12 +28,14 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceCatalog;
 import com.sixsq.slipstream.persistence.ServiceCatalogs;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
@@ -47,7 +49,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 		super.doInit();
 
 		try {
-			if(!ServiceCatalogs.isEnabled()) {
+			if (!serviceCatalogsEnabled()) {
 				throwNotFoundResource();
 			}
 		} catch (ConfigurationException e) {
@@ -56,7 +58,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 			throwClientValidationError(e.getMessage());
 		}
 	}
-	
+
 	@Get("xml")
 	public Representation toXml() {
 
@@ -117,7 +119,8 @@ public class ServiceCatalogsResource extends SimpleResource {
 			throws ResourceException, ConfigurationException,
 			ValidationException {
 
-		Form form = (entity == null) ? new Form() : extractFormFromEntity(entity);
+		Form form = (entity == null) ? new Form()
+				: extractFormFromEntity(entity);
 
 		for (ServiceCatalog s : sc.getList()) {
 
@@ -140,6 +143,16 @@ public class ServiceCatalogsResource extends SimpleResource {
 
 	protected String getPageRepresentation() {
 		return "service_catalog";
+	}
+
+	public static boolean serviceCatalogsEnabled()
+			throws ConfigurationException, ValidationException {
+		return Boolean
+				.parseBoolean(Configuration
+						.getInstance()
+						.getProperty(
+								ServiceConfiguration.RequiredParameters.SLIPSTREAM_SERVICE_CATALOG_ENABLE
+										.getName()));
 	}
 
 }
