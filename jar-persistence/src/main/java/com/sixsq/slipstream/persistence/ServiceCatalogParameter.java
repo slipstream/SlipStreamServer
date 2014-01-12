@@ -56,7 +56,7 @@ public class ServiceCatalogParameter extends Parameter<ServiceCatalog> {
 		}
 
 		String key = getName();
-		if (!Pattern.matches("\\w[\\w\\d.]+", key)) {
+		if (!Pattern.matches("\\w[-\\w\\d.]+", key)) {
 			throw new ValidationException(
 					"Service catalog entry must start with a letter and contain only letters, digits and dots.");
 		}
