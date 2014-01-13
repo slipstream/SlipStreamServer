@@ -68,6 +68,7 @@ import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
 import com.sixsq.slipstream.stats.StatsRouter;
 import com.sixsq.slipstream.user.UserRouter;
+import com.sixsq.slipstream.util.Logger;
 import com.sixsq.slipstream.util.RequestUtil;
 
 public class RootApplication extends Application {
@@ -94,6 +95,15 @@ public class RootApplication extends Application {
 		ms.setDefaultCharacterSet(CharacterSet.UTF_8);
 		ms.addExtension("tgz", MediaType.APPLICATION_COMPRESS, true);
 		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
+		
+		logServerStarted();
+	}
+
+	private void logServerStarted() {
+		String message = "Server started";
+		Logger.info(message);
+		Logger.warning(message);
+		Logger.severe(message);
 	}
 
 	protected void loadConnectors() {
