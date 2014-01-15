@@ -339,7 +339,7 @@ public class OpenStackConnector extends
 				+ "chmod 0640 ~/.ssh/authorized_keys\n";
 		*/
 		userData += "mkdir -p " + SLIPSTREAM_REPORT_DIR + "\n"
-				+ "wget --no-check-certificate -O " + bootstrap
+				+ "wget --secure-protocol=SSLv3 --no-check-certificate -O " + bootstrap
 				+ " $SLIPSTREAM_BOOTSTRAP_BIN > " + SLIPSTREAM_REPORT_DIR + "/"
 				+ logfilename + " 2>&1 " + "&& chmod 0755 " + bootstrap + "\n"
 				+ bootstrap + " slipstream-orchestrator >> "

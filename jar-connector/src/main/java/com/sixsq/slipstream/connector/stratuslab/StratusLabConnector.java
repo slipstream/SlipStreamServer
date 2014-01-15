@@ -311,7 +311,7 @@ public class StratusLabConnector extends CliConnectorBase {
 				.getRequiredProperty("slipstream.update.clientbootstrapurl");
 
 		return "SCRIPT_EXEC=\"sleep 15; mkdir -p " + SLIPSTREAM_REPORT_DIR
-				+ "; wget --no-check-certificate -O " + bootstrap + " "
+				+ "; wget --secure-protocol=SSLv3 --no-check-certificate -O " + bootstrap + " "
 				+ bootstrapUrl + " > " + SLIPSTREAM_REPORT_DIR
 				+ "/orchestrator.slipstream.log 2>&1 && chmod 0755 "
 				+ bootstrap + "; " + bootstrap + " slipstream-orchestrator >> "

@@ -213,7 +213,7 @@ public class PhysicalHostConnector extends ConnectorBase {
 		userData += "export CLOUDCONNECTOR_PYTHON_MODULENAME=\"" + CLOUDCONNECTOR_PYTHON_MODULENAME + "\"; ";
 
 		userData += "mkdir -p " + SLIPSTREAM_REPORT_DIR + ";";
-		userData += "wget --no-check-certificate -O " + bootstrap + " $SLIPSTREAM_BOOTSTRAP_BIN > " + SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1 "
+		userData += "wget --secure-protocol=SSLv3 --no-check-certificate -O " + bootstrap + " $SLIPSTREAM_BOOTSTRAP_BIN > " + SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1 "
 				+ "&& chmod 0755 " + bootstrap + "; "
 				+ bootstrap + " slipstream-orchestrator >> " + SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1 "
 				+ "'\\'') > /dev/null 2>&1 &' | at now";
