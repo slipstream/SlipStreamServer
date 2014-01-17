@@ -27,6 +27,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -34,6 +35,7 @@ import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 
@@ -113,10 +115,17 @@ public class Launcher {
 				logger.info("Submitting asynchronous launch operation for run: "
 						+ run.getUuid());
 
-				if (run.getCategory() == ModuleCategory.Deployment) {
-					runDeployment(idsAndIps);
-				} else {
-					runOther(idsAndIps);
+				switch (run.getType()) {
+					case Orchestration:
+					case Machine:
+						runOrchestration(idsAndIps);
+						break;
+					case Run:
+						runImage(idsAndIps);
+						break;
+					default:
+						throw (new ServerExecutionEnginePluginException(
+								"Cannot submit type: " + run.getType() + " yet!!"));
 				}
 
 			} catch (SlipStreamException e) {
@@ -125,8 +134,19 @@ public class Launcher {
 			}
 			return idsAndIps;
 		}
-
-		private void runDeployment(Map<String, Properties> idsAndIps)
+		
+		private void runImage(Map<String, Properties> idsAndIps) throws ValidationException {
+			Connector connector = ConnectorFactory.getCurrentConnector(user);
+			try {
+				connector.launch(run, user);
+				String vmName = Run.MACHINE_NAME;
+				assembleIdsAndIps(idsAndIps, vmName);
+			} catch (SlipStreamException e) {
+				abortRun(Run.MACHINE_NAME, e);
+			}
+		}
+		
+		private void runOrchestration(Map<String, Properties> idsAndIps)
 				throws ValidationException {
 			HashSet<String> cloudServicesList = RunFactory
 					.getCloudServicesList(run);
@@ -140,17 +160,6 @@ public class Launcher {
 				} catch (SlipStreamException e) {
 					abortRun(connector.getOrchestratorName(run), e);
 				}
-			}
-		}
-		
-		private void runOther(Map<String, Properties> idsAndIps) throws ValidationException {
-			Connector connector = ConnectorFactory.getCurrentConnector(user);
-			try {
-				connector.launch(run, user);
-				String vmName = connector.getOrchestratorName(run);
-				assembleIdsAndIps(idsAndIps, vmName);
-			} catch (SlipStreamException e) {
-				abortRun(connector.getOrchestratorName(run), e);
 			}
 		}
 
