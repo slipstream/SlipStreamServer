@@ -142,6 +142,17 @@ public class Launcher {
 				}
 			}
 		}
+		
+		private void runOther(Map<String, Properties> idsAndIps) throws ValidationException {
+			Connector connector = ConnectorFactory.getCurrentConnector(user);
+			try {
+				connector.launch(run, user);
+				String vmName = connector.getOrchestratorName(run);
+				assembleIdsAndIps(idsAndIps, vmName);
+			} catch (SlipStreamException e) {
+				abortRun(connector.getOrchestratorName(run), e);
+			}
+		}
 
 		private void assembleIdsAndIps(Map<String, Properties> idsAndIps,
 				String vmName) throws NotFoundException {
@@ -160,16 +171,6 @@ public class Launcher {
 		private void abortRun(String nodename, SlipStreamException e) {
 			run = run.store();
 			run = Run.abortOrReset(e.getMessage(), nodename, run.getUuid());
-		}
-
-		private void runOther(Map<String, Properties> idsAndIps) throws ValidationException {
-			Connector connector = ConnectorFactory.getCurrentConnector(user);
-			try {
-				connector.launch(run, user);
-				assembleIdsAndIps(idsAndIps, Run.MACHINE_NAME);
-			} catch (SlipStreamException e) {
-				abortRun(Run.MACHINE_NAME, e);
-			}
 		}
 
 	}
