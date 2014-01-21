@@ -125,6 +125,11 @@ public class Configuration {
 	 */
 	public String baseUrl;
 
+	public static boolean isEnabled(String key) throws ValidationException {
+		return Boolean.parseBoolean(Configuration.getInstance()
+				.getProperty(key));
+	}
+
 	/**
 	 * Return the singleton instance of a Configuration object. This method must
 	 * be synchronized to ensure that only one instance of this class is
@@ -134,7 +139,7 @@ public class Configuration {
 	 * 
 	 * @throws ConfigurationException
 	 *             if there is an error when reading the configuration
-	 * @throws ValidationException 
+	 * @throws ValidationException
 	 */
 	public static synchronized Configuration getInstance()
 			throws ConfigurationException, ValidationException {
