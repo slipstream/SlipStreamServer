@@ -171,8 +171,8 @@ public class ServiceCatalog extends
 		// Overall capacity
 
 		OVERALL_CAPACITY_CPU(
-				"Nature: the number of CPU cores (currently) available within (the relevant part of) the supplier’s IaaS environment;\nValue: an integer, and possibly approximate, number, e.g. 1,000; Explanation: to give an indication of the scale of the environment available for use",
-				CATEGORY_OVERALL_CAPACITY),
+				"The number of CPU cores (currently) available within (the relevant part of) the supplier’s IaaS environment",
+				CATEGORY_OVERALL_CAPACITY, "Value: an integer, and possibly approximate, number, e.g. 1,000; Explanation: to give an indication of the scale of the environment available for use"),
 
 		OVERALL_CAPACITY_RAM(
 				"Nature: the amount of random-access memory in total; Value: expressed in relevant terms, e.g. 10 TB; Explanation: the amount of memory available across the installation as a whole. See below for what is available on any one system",
@@ -261,16 +261,7 @@ public class ServiceCatalog extends
 			this.category = category;
 			this.instructions = "";
 			this.type = ParameterType.String;
-			this.readonly = false;
-		}
-
-		private DefinedParameters(String description, String category,
-				boolean readonly) {
-			this.description = description;
-			this.category = category;
-			this.instructions = "";
-			this.type = ParameterType.String;
-			this.readonly = readonly;
+			this.readonly = true;
 		}
 
 		private DefinedParameters(String description, String category,
@@ -279,25 +270,7 @@ public class ServiceCatalog extends
 			this.category = category;
 			this.instructions = instructions;
 			this.type = ParameterType.String;
-			this.readonly = false;
-		}
-
-		private DefinedParameters(String description, String category,
-				ParameterType type) {
-			this.description = description;
-			this.category = category;
-			this.instructions = "";
-			this.type = type;
-			this.readonly = false;
-		}
-
-		private DefinedParameters(String description, String category,
-				String instructions, ParameterType type) {
-			this.description = description;
-			this.category = category;
-			this.instructions = instructions;
-			this.type = type;
-			this.readonly = false;
+			this.readonly = true;
 		}
 
 		public String getInstruction() {
