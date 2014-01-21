@@ -3,13 +3,13 @@
   (:import [com.sixsq.slipstream.persistence Run])
   (:import [com.sixsq.slipstream.persistence User])
   (:import [com.sixsq.slipstream.util Logger])
-  (:require [clojure.core.async :as async :refer :all]))
+  (:require [clojure.core.async :as async :refer :all])
   (:gen-class
     :name slipstream.async.Launcher
     :methods [#^{:static true 
                  :doc "Takes: run user"}
                 [launch [com.sixsq.slipstream.persistence.Run
-                         com.sixsq.slipstream.persistence.User] void]])
+                         com.sixsq.slipstream.persistence.User] void]]))
 
 (defn minutes-in-msecs
   [minutes]
