@@ -148,6 +148,9 @@ public class ServiceConfiguration extends
 				ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_METERING_ENABLE("Metering enabled",
+				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+
+		SLIPSTREAM_QUOTA_ENABLE("Quota enforcement enabled",
 				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean);
 
 		private final String description;

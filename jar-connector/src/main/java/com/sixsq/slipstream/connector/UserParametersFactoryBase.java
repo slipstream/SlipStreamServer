@@ -25,10 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactoryBase;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.UserParameter;
 
 public abstract class UserParametersFactoryBase extends
@@ -64,6 +66,19 @@ public abstract class UserParametersFactoryBase extends
 		initReferenceParameters();
 	}
 
+	@Override
+	protected void initReferenceParameters()
+			throws ValidationException {
+		if(isQuotaEnabled()) {
+		}
+	}
+
+	private static boolean isQuotaEnabled() throws ValidationException {
+		return Configuration
+				.isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_QUOTA_ENABLE
+						.getName());
+	}
+
 	public Map<String, UserParameter> getParameters() {
 		return referenceParameters;
 	}
@@ -93,8 +108,8 @@ public abstract class UserParametersFactoryBase extends
 	}
 
 	public static String getPublicKeyParameterName() {
-		return Parameter.constructKey(
-				ParameterCategory.General.toString(), SSHKEY_PARAMETER_NAME);
+		return Parameter.constructKey(ParameterCategory.General.toString(),
+				SSHKEY_PARAMETER_NAME);
 	}
 
 }

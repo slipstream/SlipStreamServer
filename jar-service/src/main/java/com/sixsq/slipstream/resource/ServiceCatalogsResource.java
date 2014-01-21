@@ -36,6 +36,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceCatalog;
 import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
@@ -147,12 +148,14 @@ public class ServiceCatalogsResource extends SimpleResource {
 
 	public static boolean serviceCatalogsEnabled()
 			throws ConfigurationException, ValidationException {
-		return Boolean
-				.parseBoolean(Configuration
-						.getInstance()
-						.getProperty(
-								ServiceConfiguration.RequiredParameters.SLIPSTREAM_SERVICE_CATALOG_ENABLE
-										.getName()));
+		return isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_SERVICE_CATALOG_ENABLE);
+	}
+
+	private static boolean isEnabled(
+			RequiredParameters slipstreamServiceCatalogEnable)
+			throws ValidationException {
+		return Configuration
+				.isEnabled(slipstreamServiceCatalogEnable.getName());
 	}
 
 }
