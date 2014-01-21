@@ -31,7 +31,6 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 	
 	private String category;
 	
-
 	protected abstract void initReferenceParameters()
 			throws ValidationException;
 
