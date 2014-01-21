@@ -173,6 +173,41 @@ public class AuthzTest {
 	}
 	
 	@Test
+	public void cannotGetViaNestedInheritedGroupIfNotInParentGroup() throws ValidationException {
+		User owner = new User("owner");
+		User user = new User("user");
+
+		Module project = new ProjectModule("parent/project");
+		Authz projectAuthz = new Authz(owner.getName(), project);
+		projectAuthz.setInheritedGroupMembers(true);
+		project = project.store();
+		
+		Module parent = new ProjectModule("parent");
+		Authz parentAuthz = new Authz(owner.getName(), parent);
+		parentAuthz.addGroupMember("other");
+		parentAuthz.setInheritedGroupMembers(false);
+		parent.store();
+
+		Module module = new ImageModule("parent/project/module");
+		Authz moduleAuthz = new Authz(owner.getName(), module);
+		moduleAuthz.setGroupGet(true);
+		
+		// group can view but user not in parent group
+		assertThat(moduleAuthz.canGet(user), is(false));
+
+		// add to parent group
+		parent.getAuthz().addGroupMember("user");
+		parent.store();
+
+		// now user can view
+		assertThat(moduleAuthz.canGet(user), is(true));
+
+		project.remove();
+		parent.remove();
+		
+	}
+	
+	@Test
 	public void canActionViaPublic() throws ValidationException {
 		User owner = new User("owner");
 		User user = new User("user");

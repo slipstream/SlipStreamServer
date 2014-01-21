@@ -333,14 +333,11 @@ public class Authz implements Serializable {
 		if (user.getName().equals(owner)) {
 			return ownerGet;
 		}
-		if (getGroupMembers().contains(user.getName())) {
-			return groupGet;
-		}
 		if (user.isSuper()) {
 			return true;
 		}
-		if(inheritedGroupMembers) {
-			return getParentAuthz().canGet(user);
+		if(groupGet) {
+			return isUserInInheritedGroup(user);
 		}
 		return publicGet;
 	}
@@ -352,14 +349,11 @@ public class Authz implements Serializable {
 		if (user.getName().equals(owner)) {
 			return ownerPut;
 		}
-		if (getGroupMembers().contains(user.getName())) {
-			return groupPut;
-		}
-		if(inheritedGroupMembers) {
-			return getParentAuthz().canPut(user);
-		}
 		if (user.isSuper()) {
 			return true;
+		}
+		if(groupPut) {
+			return isUserInInheritedGroup(user);
 		}
 		return publicPut;
 	}
@@ -371,14 +365,11 @@ public class Authz implements Serializable {
 		if (user.getName().equals(owner)) {
 			return ownerPost;
 		}
-		if (getGroupMembers().contains(user.getName())) {
-			return groupPost;
-		}
-		if(inheritedGroupMembers) {
-			return getParentAuthz().canPost(user);
-		}
 		if (user.isSuper()) {
 			return true;
+		}
+		if(groupPost) {
+			return isUserInInheritedGroup(user);
 		}
 		return publicPost;
 	}
@@ -390,14 +381,11 @@ public class Authz implements Serializable {
 		if (user.getName().equals(owner)) {
 			return ownerDelete;
 		}
-		if (getGroupMembers().contains(user.getName())) {
-			return groupDelete;
-		}
-		if(inheritedGroupMembers) {
-			return getParentAuthz().canDelete(user);
-		}
 		if (user.isSuper()) {
 			return true;
+		}
+		if(groupDelete) {
+			return isUserInInheritedGroup(user);
 		}
 		return publicDelete;
 	}
@@ -409,13 +397,46 @@ public class Authz implements Serializable {
 		if (user.getName().equals(owner)) {
 			return ownerCreateChildren;
 		}
-		if(inheritedGroupMembers) {
-			getParentAuthz().canCreateChildren(user);
-		}
 		if (user.isSuper()) {
 			return true;
 		}
+		if(groupCreateChildren) {
+			if (getGroupMembers().contains(user.getName())) {
+				return true;
+			} else {
+				if(inheritedGroupMembers) {
+					return isInInheritedGroup(user);
+				}
+			}
+		}
 		return publicCreateChildren;
+	}
+
+	private boolean isUserInInheritedGroup(User user) {
+		if (getGroupMembers().contains(user.getName())) {
+			return true;
+		} else {
+			if(inheritedGroupMembers) {
+				return isInInheritedGroup(user);
+			} else {
+				return false;
+			}
+		}
+	}
+
+	private boolean isInInheritedGroup(User user) {
+		return lastInherited().getGroupMembers().contains(user.getName());
+	}
+
+	private Authz lastInherited() {
+		return inheritedAuthz(this);
+	}
+
+	private Authz inheritedAuthz(Authz authz) {
+		if(authz.isInheritedGroupMembers()) {
+			return inheritedAuthz(authz.getParentAuthz());
+		}
+		return authz;
 	}
 
 	private Authz getParentAuthz() {
