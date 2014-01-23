@@ -32,9 +32,14 @@ import java.sql.Timestamp;
 
 import org.junit.Test;
 
-public abstract class OneShotActionTest {
+import com.sixsq.slipstream.authn.ResetPasswordAction;
+import com.sixsq.slipstream.authn.UserEmailValidationAction;
 
-	public abstract OneShotAction getConcreteTestInstance();
+public class OneShotActionTest {
+
+	public OneShotAction getConcreteTestInstance() {
+		return new ResetPasswordAction("user/test");
+	};
 
 	@Test
 	public void verifyAutomaticFieldsAreSet() {
@@ -85,6 +90,14 @@ public abstract class OneShotActionTest {
 		Timestamp laterTime = action.getLastModified();
 
 		assertTrue(initialTime.before(laterTime));
+	}
+
+	@Test
+	public void storeUserEmailValidationActionChangesTime() {
+
+		OneShotAction action = new ResetPasswordAction("action/test");
+		action.store();
+
 	}
 
 }
