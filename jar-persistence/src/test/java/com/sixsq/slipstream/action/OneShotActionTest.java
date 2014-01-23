@@ -32,9 +32,6 @@ import java.sql.Timestamp;
 
 import org.junit.Test;
 
-import com.sixsq.slipstream.authn.ResetPasswordAction;
-import com.sixsq.slipstream.authn.UserEmailValidationAction;
-
 public class OneShotActionTest {
 
 	public OneShotAction getConcreteTestInstance() {

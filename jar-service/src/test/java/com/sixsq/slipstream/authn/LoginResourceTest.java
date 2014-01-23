@@ -49,7 +49,7 @@ import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class LoginResourceTest extends ResourceTestBase {
@@ -163,7 +163,7 @@ public class LoginResourceTest extends ResourceTestBase {
 		mediaType.setMetadata(MediaType.TEXT_HTML);
 		request.getClientInfo().getAcceptedMediaTypes().add(mediaType);
 
-		RequestUtil.addConfigurationToRequest(request);
+		ConfigurationUtil.addConfigurationToRequest(request);
 
 		Response response = executeRequest(request);
 

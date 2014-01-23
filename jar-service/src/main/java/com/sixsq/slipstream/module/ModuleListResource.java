@@ -33,7 +33,7 @@ import com.sixsq.slipstream.module.ModuleView.ModuleViewList;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ModuleListResource extends BaseResource {
@@ -49,7 +49,7 @@ public class ModuleListResource extends BaseResource {
 
 		super.doInit();
 
-		resourceUri = RequestUtil.extractResourceUri(getRequest());
+		resourceUri = ResourceUriUtil.extractResourceUri(getRequest());
 
 		if (resourceUri == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);

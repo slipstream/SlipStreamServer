@@ -35,6 +35,7 @@ import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.action.OneShotAction;
+import com.sixsq.slipstream.action.UserEmailValidationAction;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -43,7 +44,8 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.SimpleRepresentationBaseResource;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.Notifier;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 
 public class RegistrationResource extends SimpleRepresentationBaseResource {
 
@@ -99,7 +101,7 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 	}
 
 	private void notifyUser(User newUser, OneShotAction action) {
-		String baseUrlSlash = RequestUtil.getBaseUrlSlash(getRequest());
+		String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(getRequest());
 		String confirmUrl = baseUrlSlash + "action/" + action.getUuid()
 				+ "/confirm";
 

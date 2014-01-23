@@ -68,8 +68,8 @@ import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
 import com.sixsq.slipstream.stats.StatsRouter;
 import com.sixsq.slipstream.user.UserRouter;
+import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.Logger;
-import com.sixsq.slipstream.util.RequestUtil;
 
 public class RootApplication extends Application {
 
@@ -369,7 +369,7 @@ public class RootApplication extends Application {
 	public void addConfigurationToRequest(Request request)
 			throws ConfigurationException, ValidationException {
 
-		RequestUtil.addConfigurationToRequest(request);
+		ConfigurationUtil.addConfigurationToRequest(request);
 
 	}
 

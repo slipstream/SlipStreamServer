@@ -153,7 +153,7 @@ public class ResourceTestBase extends RunTestBase {
 		request.setAttributes(attributes);
 
 		try {
-			RequestUtil.addConfigurationToRequest(request);
+			ConfigurationUtil.addConfigurationToRequest(request);
 		} catch (ValidationException e) {
 			fail();
 		}

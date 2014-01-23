@@ -46,8 +46,10 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class CommonStatusService extends StatusService {
@@ -75,9 +77,9 @@ public class CommonStatusService extends StatusService {
 			Util.throwClientValidationError(e.getMessage());
 		}
 
-		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
+		String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(request);
 
-		Configuration configuration = RequestUtil
+		Configuration configuration = ConfigurationUtil
 				.getConfigurationFromRequest(request);
 
 		ClientInfo clientInfo = request.getClientInfo();

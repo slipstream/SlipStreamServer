@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.authn;
+package com.sixsq.slipstream.util;
 
 /*
  * +=================================================================+

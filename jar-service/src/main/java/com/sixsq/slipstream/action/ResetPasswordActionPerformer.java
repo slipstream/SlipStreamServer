@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.authn;
+package com.sixsq.slipstream.action;
 
 /*
  * +=================================================================+
@@ -26,8 +26,6 @@ import static com.sixsq.slipstream.messages.MessageUtils.MSG_PASSWORD_RESET;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
-import javax.persistence.Entity;
-
 import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.Status;
@@ -35,27 +33,18 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.action.OneShotAction;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.Notifier;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 
-@Entity
-public class ResetPasswordAction extends OneShotAction {
+public class ResetPasswordActionPerformer extends OneShotActionPerformer {
 
-	@SuppressWarnings("unused")
-	private ResetPasswordAction() {
-	}
-
-	public ResetPasswordAction(String userResourceUrl) {
-		super();
-
-		Form form = new Form();
-		form.add("userResourceUrl", userResourceUrl);
-		setForm(form);
+	public ResetPasswordActionPerformer(OneShotAction action) {
+		super(action);
 	}
 
 	private void resetValidated(String baseUrlSlash)
@@ -100,7 +89,7 @@ public class ResetPasswordAction extends OneShotAction {
 	public Representation doAction(Request request)
 			throws SlipStreamRuntimeException, ConfigurationException {
 
-		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
+		String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(request);
 
 		try {
 			resetValidated(baseUrlSlash);

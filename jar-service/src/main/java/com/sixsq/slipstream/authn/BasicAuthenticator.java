@@ -40,7 +40,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 
 public class BasicAuthenticator extends Authenticator {
 
@@ -113,7 +113,7 @@ public class BasicAuthenticator extends Authenticator {
 					supported);
 
 			if (prefered != null && prefered.isCompatible(MediaType.TEXT_HTML)) {
-				Reference baseRef = RequestUtil.getBaseRef(request);
+				Reference baseRef = ResourceUriUtil.getBaseRef(request);
 
 				Reference redirectRef = new Reference(baseRef,
 						LoginResource.getResourceRoot());

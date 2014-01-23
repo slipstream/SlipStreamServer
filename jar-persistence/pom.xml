@@ -67,6 +67,11 @@
 			<artifactId>mail</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.restlet.jee</groupId>
+			<artifactId>org.restlet</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -40,6 +40,7 @@ import com.sixsq.slipstream.persistence.Empty;
 import com.sixsq.slipstream.persistence.Metadata;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -60,7 +61,7 @@ public abstract class BaseResource extends ServerResource {
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
-		configuration = RequestUtil
+		configuration = ConfigurationUtil
 				.getServiceConfigurationFromRequest(getRequest());
 	}
 

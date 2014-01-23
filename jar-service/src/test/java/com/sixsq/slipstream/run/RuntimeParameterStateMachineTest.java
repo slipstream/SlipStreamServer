@@ -24,6 +24,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.statemachine.States;
+import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class RuntimeParameterStateMachineTest extends
 		RuntimeParameterResourceTestBase {
@@ -59,6 +60,7 @@ public class RuntimeParameterStateMachineTest extends
 				RuntimeParameter.COMPLETE_KEY);
 
 		createUser();
+		CommonTestUtil.addSshKeys(user);
 	}
 
 	@After

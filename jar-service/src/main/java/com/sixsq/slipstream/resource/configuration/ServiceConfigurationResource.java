@@ -38,7 +38,7 @@ import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.resource.ParameterizedResource;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ConfigurationUtil;
 
 public class ServiceConfigurationResource extends
 		ParameterizedResource<ServiceConfiguration> {
@@ -111,7 +111,7 @@ public class ServiceConfigurationResource extends
 
 	@Override
 	protected void loadTargetParameterized() throws ValidationException {
-		configuration = RequestUtil.getConfigurationFromRequest(getRequest());
+		configuration = ConfigurationUtil.getConfigurationFromRequest(getRequest());
 		setParameterized(configuration.getParameters());
 	}
 

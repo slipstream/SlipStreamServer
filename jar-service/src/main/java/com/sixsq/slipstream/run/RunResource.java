@@ -50,7 +50,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class RunResource extends BaseResource {
@@ -66,7 +66,7 @@ public class RunResource extends BaseResource {
 
 		validateUser();
 
-		String resourceUri = RequestUtil.extractResourceUri(request);
+		String resourceUri = ResourceUriUtil.extractResourceUri(request);
 		run = Run.load(resourceUri);
 
 		if (run == null) {

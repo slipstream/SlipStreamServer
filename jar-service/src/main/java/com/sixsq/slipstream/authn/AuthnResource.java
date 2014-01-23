@@ -31,7 +31,7 @@ import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class AuthnResource extends BaseResource {
@@ -72,7 +72,7 @@ public class AuthnResource extends BaseResource {
 		Form queryForm = resourceRef.getQueryAsForm();
 		String relativeURL = queryForm.getFirstValue("redirectURL", true);
 
-		Reference baseRefSlash = RequestUtil.getBaseRefSlash(request);
+		Reference baseRefSlash = ResourceUriUtil.getBaseRefSlash(request);
 
 		Reference redirectUrl = null;
 		if (relativeURL != null) {

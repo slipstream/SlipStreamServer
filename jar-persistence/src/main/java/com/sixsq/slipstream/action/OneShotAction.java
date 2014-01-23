@@ -34,12 +34,8 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Lob;
 
-import org.restlet.Request;
 import org.restlet.data.Form;
-import org.restlet.representation.Representation;
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 
 /**
@@ -70,13 +66,21 @@ public abstract class OneShotAction {
 	@Lob
 	private String encodedForm;
 
-	public OneShotAction() {
+	protected OneShotAction() {
 		this.uuid = UUID.randomUUID().toString();
 		this.state = State.ACTIVE;
 
 		encodedForm = null;
 
 		setLastModified();
+	}
+
+	public OneShotAction(String userResourceUrl) {
+		this();
+		
+		Form form = new Form();
+		form.add("userResourceUrl", userResourceUrl);
+		setForm(form);
 	}
 
 	public String getUuid() {
@@ -128,27 +132,6 @@ public abstract class OneShotAction {
 			throw new IllegalArgumentException(e.getMessage());
 		}
 	}
-
-	/**
-	 * If the URL for this action accessed, then this method will be called to
-	 * execute the given action. The command embedded in the URL will be passed
-	 * as the parameter. The semantics of the command are defined by the
-	 * subclass. Before the method completes, it must update the state
-	 * information setting it to DONE or ABORTED. It may leave the state as
-	 * ACTIVE, if the action couldn't be done for some reason and it makes sense
-	 * to keep it accessible.
-	 * 
-	 * The command used in the URL is available through the request attributes
-	 * with the key "command". The service configuration information is
-	 * available through the key "org.sixsq.slipstream.Configuration".
-	 * 
-	 * @param request
-	 * @return
-	 * @throws ConfigurationException
-	 * @throws SlipStreamRuntimeException
-	 */
-	public abstract Representation doAction(Request request)
-			throws SlipStreamRuntimeException, ConfigurationException;
 
 	public static OneShotAction load(String uuid) {
 		EntityManager em = PersistenceUtil.createEntityManager();

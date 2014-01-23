@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.authn;
+package com.sixsq.slipstream.action;
 
 /*
  * +=================================================================+
@@ -27,14 +27,11 @@ import static com.sixsq.slipstream.messages.MessageUtils.MSG_NEW_USER_NOTIFICATI
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
-import javax.persistence.Entity;
-
 import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 
-import com.sixsq.slipstream.action.OneShotAction;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
@@ -44,21 +41,13 @@ import com.sixsq.slipstream.messages.MessageUtils;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.Notifier;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 
-@Entity
-public class UserEmailValidationAction extends OneShotAction {
+public class UserEmailValidationActionPerformer extends OneShotActionPerformer {
 
-	@SuppressWarnings("unused")
-	private UserEmailValidationAction() {
-	}
-
-	public UserEmailValidationAction(String userResourceUrl) {
-		super();
-
-		Form form = new Form();
-		form.add("userResourceUrl", userResourceUrl);
-		setForm(form);
+	public UserEmailValidationActionPerformer(OneShotAction action) {
+		super(action);
 	}
 
 	private void emailValidated(String baseUrlSlash)
@@ -68,6 +57,11 @@ public class UserEmailValidationAction extends OneShotAction {
 		String userResourceUrl = form.getFirst("userResourceUrl").getValue();
 
 		User user = User.load(userResourceUrl);
+		
+		if(user.getState() != User.State.NEW) {
+			throw new ValidationException("User not new. Did you already validate this user?");
+		}
+		
 		user.setState(User.State.ACTIVE);
 
 		try {
@@ -125,7 +119,7 @@ public class UserEmailValidationAction extends OneShotAction {
 	public Representation doAction(Request request)
 			throws SlipStreamRuntimeException, ConfigurationException {
 
-		String baseUrlSlash = RequestUtil.getBaseUrlSlash(request);
+		String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(request);
 
 		try {
 			emailValidated(baseUrlSlash);

@@ -34,12 +34,14 @@ import org.restlet.resource.ResourceException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.action.OneShotAction;
+import com.sixsq.slipstream.action.ResetPasswordAction;
 import com.sixsq.slipstream.messages.MessageUtils;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.SimpleRepresentationBaseResource;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.Notifier;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 
 public class ResetPasswordResource extends SimpleRepresentationBaseResource {
 
@@ -65,7 +67,7 @@ public class ResetPasswordResource extends SimpleRepresentationBaseResource {
 
 	private void notifyUser(User user, OneShotAction action) {
 		if (user != null && action != null) {
-			String baseUrlSlash = RequestUtil.getBaseUrlSlash(getRequest());
+			String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(getRequest());
 			String confirmUrl = baseUrlSlash + "action/" + action.getUuid()
 					+ "/confirm";
 

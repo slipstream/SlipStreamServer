@@ -64,8 +64,8 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
+import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 /**
@@ -334,7 +334,7 @@ public class RunListResource extends BaseResource {
 	private void createRepositoryResource(Run run)
 			throws ConfigurationException {
 		String repositoryLocation;
-		repositoryLocation = RequestUtil
+		repositoryLocation = ConfigurationUtil
 				.getConfigurationFromRequest(getRequest())
 				.getRequiredProperty(
 						ServiceConfiguration.RequiredParameters.SLIPSTREAM_REPORTS_LOCATION

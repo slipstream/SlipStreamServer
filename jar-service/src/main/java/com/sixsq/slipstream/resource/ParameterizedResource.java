@@ -36,7 +36,7 @@ import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.Parameterized;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
@@ -126,7 +126,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected EntityManager getEntityManager() {
 		return (EntityManager) getRequest().getAttributes().get(
-				RequestUtil.ENTITY_MANAGER_KEY);
+				ResourceUriUtil.ENTITY_MANAGER_KEY);
 	}
 
 	public S getParameterized() {

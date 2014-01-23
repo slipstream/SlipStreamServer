@@ -36,7 +36,7 @@ import org.restlet.security.Verifier;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 
 public class CookieAuthenticator extends Authenticator {
 
@@ -70,7 +70,7 @@ public class CookieAuthenticator extends Authenticator {
 			MediaType prefered = request.getClientInfo().getPreferredMediaType(supported);
 
 			if(prefered != null && prefered.isCompatible(MediaType.TEXT_HTML)) {
-				Reference baseRef = RequestUtil.getBaseRef(request);
+				Reference baseRef = ResourceUriUtil.getBaseRef(request);
 
 				Reference redirectRef = new Reference(baseRef, LoginResource.getResourceRoot());
 				redirectRef.setQuery("redirectURL="
