@@ -171,7 +171,10 @@ public class RunListResource extends BaseResource {
 
 			createRepositoryResource(run);
 
-			run = launch(run);
+			run = run.store();
+			run = Run.loadFromUuid(run.getUuid());
+			
+			launch(run);
 
 		} catch (SlipStreamClientException ex) {
 			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
