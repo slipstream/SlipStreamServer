@@ -51,10 +51,10 @@ public class BasicAuthenticator extends Authenticator {
 	@Override
 	protected boolean authenticate(Request request, Response response) {
 
-		if(request.getClientInfo().isAuthenticated()) {
+		if (request.getClientInfo().isAuthenticated()) {
 			return true;
 		}
-		
+
 		int result = Verifier.RESULT_INVALID;
 		String username = null;
 
@@ -71,7 +71,7 @@ public class BasicAuthenticator extends Authenticator {
 			}
 
 			com.sixsq.slipstream.persistence.User user = null;
-			
+
 			try {
 				user = com.sixsq.slipstream.persistence.User
 						.loadByName(username);
@@ -131,10 +131,8 @@ public class BasicAuthenticator extends Authenticator {
 	}
 
 	private void setClientInfo(Request request, String username) {
-		if (request.getClientInfo() != null) {
-			request.getClientInfo().setAuthenticated(true);
-			request.getClientInfo().setUser(new User(username));
-		}
+		request.getClientInfo().setAuthenticated(true);
+		request.getClientInfo().setUser(new User(username));
 	}
 
 }

@@ -53,9 +53,9 @@ public class CookieAuthenticator extends Authenticator {
 
 		if (result == Verifier.RESULT_VALID) {
 
-	        setClientInfo(request, cookie);
-	        setCloudServiceName(request, cookie);
-	        
+			setClientInfo(request, cookie);
+			setCloudServiceName(request, cookie);
+
 			return true;
 
 		} else {
@@ -67,37 +67,40 @@ public class CookieAuthenticator extends Authenticator {
 			List<MediaType> supported = new ArrayList<MediaType>();
 			supported.add(MediaType.APPLICATION_XML);
 			supported.add(MediaType.TEXT_HTML);
-			MediaType prefered = request.getClientInfo().getPreferredMediaType(supported);
+			MediaType prefered = request.getClientInfo().getPreferredMediaType(
+					supported);
 
-			if(prefered != null && prefered.isCompatible(MediaType.TEXT_HTML)) {
+			if (prefered != null && prefered.isCompatible(MediaType.TEXT_HTML)) {
 				Reference baseRef = ResourceUriUtil.getBaseRef(request);
 
-				Reference redirectRef = new Reference(baseRef, LoginResource.getResourceRoot());
+				Reference redirectRef = new Reference(baseRef,
+						LoginResource.getResourceRoot());
 				redirectRef.setQuery("redirectURL="
 						+ request.getResourceRef().getPath().toString());
 
-				response.redirectTemporary(redirectRef);				
+				response.redirectTemporary(redirectRef);
 			} else {
 				response.setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
 			}
-		
+
 		}
 
 		return false;
 	}
 
 	private void setClientInfo(Request request, Cookie cookie) {
-		if (request.getClientInfo() != null) {
-		    request.getClientInfo().setAuthenticated(true);
-		    request.getClientInfo().setUser(new User(CookieUtils.getCookieUsername(cookie)));
-		}
+		request.getClientInfo().setAuthenticated(true);
+		request.getClientInfo().setUser(
+				new User(CookieUtils.getCookieUsername(cookie)));
 	}
 
 	private void setCloudServiceName(Request request, Cookie cookie) {
-		String cookieCloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
+		String cookieCloudServiceName = CookieUtils
+				.getCookieCloudServiceName(cookie);
 		if (cookieCloudServiceName != null) {
-			request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME, cookieCloudServiceName);
+			request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME,
+					cookieCloudServiceName);
 		}
 	}
-	
+
 }
