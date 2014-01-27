@@ -55,11 +55,13 @@ import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.Users;
+import com.sixsq.slipstream.meter.MeterRouter;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.DocumentationResource;
+import com.sixsq.slipstream.resource.MeteringRedirector;
 import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.ServiceCatalogRouter;
 import com.sixsq.slipstream.resource.WelcomeResource;
@@ -95,7 +97,7 @@ public class RootApplication extends Application {
 		ms.setDefaultCharacterSet(CharacterSet.UTF_8);
 		ms.addExtension("tgz", MediaType.APPLICATION_COMPRESS, true);
 		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
-		
+
 		logServerStarted();
 	}
 
@@ -376,19 +378,7 @@ public class RootApplication extends Application {
 	private void attachMetering(RootRouter router)
 			throws ConfigurationException, ValidationException {
 
-		String hostname = Configuration.getInstance().getProperty(
-				RequiredParameters.SLIPSTREAM_METERING_HOSTNAME.getName());
-		String target = hostname + "/meters/{meter}/statistics?{query}";
-		Redirector redirector = new Redirector(getContext(), target,
-				Redirector.MODE_SERVER_OUTBOUND);
-
-		TemplateRoute route = router.attach(
-				"/meters/{meter}/statistics?{query}", redirector);
-		route.setMatchingQuery(true);
-		route.getTemplate().getVariables()
-				.put("meter", new Variable(Variable.TYPE_URI_PATH));
-		route.getTemplate().getVariables()
-				.put("query", new Variable(Variable.TYPE_URI_QUERY));
+		guardAndAttach(router, new MeterRouter(getContext()), MeterRouter.ROOT_URI);
 	}
 
 	public class RootRouter extends Router {
