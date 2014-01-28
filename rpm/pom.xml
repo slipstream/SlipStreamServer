@@ -117,6 +117,14 @@
                                     <groupId>net.kencochrane.raven</groupId>
                                     <artifactId>raven</artifactId>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.google.guava</groupId>
+                                    <artifactId>guava</artifactId>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>net.kencochrane.raven</groupId>
+                                    <artifactId>raven</artifactId>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
