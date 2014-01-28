@@ -171,8 +171,7 @@ public class RunListResource extends BaseResource {
 
 			createRepositoryResource(run);
 
-			run = run.store();
-			run = Run.loadFromUuid(run.getUuid());
+			run.store();
 			
 			launch(run);
 
