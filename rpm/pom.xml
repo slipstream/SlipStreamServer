@@ -96,7 +96,7 @@
                     <execution>
                         <id>copy-logging-jars</id>
                         <goals>
-                            <goal>copy-dependencies</goal>
+                            <goal>copy</goal>
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/dependency/logging</outputDirectory>
