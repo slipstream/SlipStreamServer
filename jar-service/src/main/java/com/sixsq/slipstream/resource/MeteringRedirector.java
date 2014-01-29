@@ -22,7 +22,7 @@ public class MeteringRedirector extends Redirector {
 
 	private Request addUserToQuery(Request request, String user) {
 		String query = request.getResourceRef().getQuery();
-		request.getResourceRef().setQuery(query + "&user=" + user);
+		request.getResourceRef().setQuery(query + "&user_id=" + user);
 		return request;
 	}
 
