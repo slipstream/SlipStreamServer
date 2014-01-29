@@ -15,15 +15,9 @@ public class MeteringRedirector extends Redirector {
 	protected void outboundServerRedirect(Reference targetRef, Request request,
 			Response response) {
 		String user = request.getClientInfo().getUser().getName();
-		request = addUserToQuery(request, user);
+		targetRef.addQueryParameter("user_id", user);
 		super.outboundServerRedirect(targetRef, request,
 				response);
-	}
-
-	private Request addUserToQuery(Request request, String user) {
-		String query = request.getResourceRef().getQuery();
-		request.getResourceRef().setQuery(query + "&user_id=" + user);
-		return request;
 	}
 
 }
