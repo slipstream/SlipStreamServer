@@ -42,7 +42,6 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.Logger;
 
 /**
@@ -67,7 +66,7 @@ public class Measurements implements Serializable {
 			ValidationException, NotFoundException, AbortException {
 
 		Properties describeInstancesStates = RunFactory.describeInstances(user);
-		
+
 		EntityManager em = PersistenceUtil.createEntityManager();
 
 		try {
@@ -106,13 +105,13 @@ public class Measurements implements Serializable {
 		int ram = 0;
 		int storage = DEFAULT_STORAGE;
 		String instanceid = "";
-		
+
 		try {
 			cpu = Integer.parseInt(getRuntimeParameterValue(
 					ImageModule.CPU_KEY, nodename, run, cloud, "0"));
 		} catch (NumberFormatException e) {
 		}
-				
+
 		try {
 			ram = Integer.parseInt(getRuntimeParameterValue(
 					ImageModule.RAM_KEY, nodename, run, cloud, "0"));
@@ -130,20 +129,27 @@ public class Measurements implements Serializable {
 			instanceid = getInstanceId(run, nodename);
 		} catch (NotFoundException e) {
 		}
-		
-		return fill(run, nodename, imagename, cloud, cpu, ram, storage, instanceid);
+
+		return fill(run, nodename, imagename, cloud, cpu, ram, storage,
+				instanceid);
 	}
 
 	protected String getInstanceId(Run run, String nodename)
 			throws AbortException, NotFoundException {
-		return getRuntimeParameterValue(
-				RuntimeParameter.INSTANCE_ID_KEY, nodename, run);
+		return getRuntimeParameterValue(RuntimeParameter.INSTANCE_ID_KEY,
+				nodename, run);
 	}
 
-	protected String getState(Run run, String nodename)
+	protected String getState(Run run, String nodename) throws AbortException,
+			NotFoundException {
+		return getRuntimeParameterValue(RuntimeParameter.STATE_KEY, nodename,
+				run);
+	}
+
+	protected String getVmState(Run run, String nodename)
 			throws AbortException, NotFoundException {
-		return getRuntimeParameterValue(
-				RuntimeParameter.STATE_KEY, nodename, run);
+		return getRuntimeParameterValue(RuntimeParameter.STATE_VM_KEY,
+				nodename, run);
 	}
 
 	protected Measurement fill(Run run, String nodename, String imagename,
@@ -151,18 +157,18 @@ public class Measurements implements Serializable {
 			throws ValidationException, NotFoundException, AbortException {
 
 		// might be 'default'
-		String effectiveCloud = RunFactory.getEffectiveCloudServiceName(cloud, run);
+		String effectiveCloud = RunFactory.getEffectiveCloudServiceName(cloud,
+				run);
 
 		Measurement m = new Measurement();
 
-		String state = States.Unknown.toString();
-		try {
-			state = getState(run, nodename);			
-		} catch(NotFoundException e) {
-		}
+		String state = getState(run, nodename);
 
-		m.setStatus(state);
-		m.setVm(instanceid);
+		String vmstate = getVmState(run, nodename);
+
+		m.setState(state);
+		m.setVmState(vmstate);
+		m.setInstanceId(instanceid);
 		m.setRun(run.getUuid());
 		m.setNodeName(nodename);
 		m.setModule(run.getModuleResourceUrl());

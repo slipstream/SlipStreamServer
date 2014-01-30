@@ -20,6 +20,8 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -50,6 +52,9 @@ import com.sixsq.slipstream.util.Logger;
 
 public abstract class RunFactory {
 
+	private static final List<String> VALID_RUNNING_STATE = Arrays.asList("running", "on");
+	private static final String RUNNING_STATE = "running";
+	
 	public Run createRun(Module module, String cloudService, User user)
 			throws SlipStreamClientException {
 
@@ -400,6 +405,9 @@ public abstract class RunFactory {
 			vmStateKey = keyPrefix + RuntimeParameter.STATE_VM_KEY;
 			String vmState = describeInstancesStates.getProperty(vmId,
 					"Unknown");
+			
+			vmState = cleanVmState(vmState);
+			
 			try {
 				run.updateRuntimeParameter(vmStateKey, vmState);
 			} catch (NotFoundException e) {
@@ -409,6 +417,15 @@ public abstract class RunFactory {
 		}
 
 		return run;
+	}
+
+	private static String cleanVmState(String vmState) {
+		if(vmState != null) {
+			if( VALID_RUNNING_STATE.contains(vmState.toLowerCase())) {
+				vmState = RUNNING_STATE;
+			}
+		}
+		return vmState;
 	}
 
 

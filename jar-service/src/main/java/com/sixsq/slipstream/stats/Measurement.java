@@ -39,7 +39,7 @@ import com.sixsq.slipstream.persistence.RunType;
 public class Measurement implements Serializable {
 
 	@Attribute(name = "instance_id",required=false)
-	private String vm;
+	private String instanceId;
 
 	@Attribute(name = "run_id")
 	private String run;
@@ -81,7 +81,10 @@ public class Measurement implements Serializable {
 	private Date endTime;
 	
 	@Attribute(required=false)
-	private String status = "Unknown";
+	private String state = "Unknown";
+
+	@Attribute(required=false)
+	private String vmstate = "Unknown";
 
 	public String getRun() {
 		return run;
@@ -131,12 +134,12 @@ public class Measurement implements Serializable {
 		this.cloud = cloud;
 	}
 
-	public String getVm() {
-		return vm;
+	public String getInstanceId() {
+		return instanceId;
 	}
 
-	public void setVm(String vm) {
-		this.vm = vm;
+	public void setInstanceId(String id) {
+		this.instanceId = id;
 	}
 
 	public int getCpu() {
@@ -195,12 +198,20 @@ public class Measurement implements Serializable {
 		this.user = user;
 	}
 
-	public String getStatus() {
-		return status;
+	public String getState() {
+		return state;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getVmState() {
+		return vmstate;
+	}
+
+	public void setVmState(String vmstate) {
+		this.vmstate = vmstate;
 	}
 
 	public void setStartTime(Date startTime) {
