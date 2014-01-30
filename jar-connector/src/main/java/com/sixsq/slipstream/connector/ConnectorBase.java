@@ -81,16 +81,10 @@ public abstract class ConnectorBase implements Connector {
 		return log;
 	}
 
-	private static String ORCHESTRATOR_INSTANCE_ID_DESCRIPTION = "Orchestrator instance id";
-	private static String ORCHESTRATOR_INSTANCE_HOSTNAME_DESCRIPTION = "Orchestrator instance hostname/IP";
-
 	private static final String MACHINE_INSTANCE_ID_NAME = Run.MACHINE_NAME_PREFIX
 			+ RuntimeParameter.INSTANCE_ID_KEY;
-	private static String MACHINE_INSTANCE_ID_DESCRIPTION = "Machine instance id";
 	protected static String MACHINE_INSTANCE_HOSTNAME = Run.MACHINE_NAME_PREFIX
 			+ RuntimeParameter.HOSTNAME_KEY;
-	private static String MACHINE_INSTANCE_HOSTNAME_DESCRIPTION = "Machine instance hostname/IP";
-
 	protected static final String SLIPSTREAM_REPORT_DIR = "/tmp/slipstream/reports";
 
 	// TODO: shouldn't be there!!
@@ -186,7 +180,7 @@ public abstract class ConnectorBase implements Connector {
 			throws NotFoundException, ValidationException,
 			ServerExecutionEnginePluginException {
 
-		if (isInOrchestrationContext(run) || run.getType() == RunType.Machine) {
+		if (isInOrchestrationContext(run)) {
 			updateOrchestratorInstanceIdOnRun(run, instanceId, orchestratorName);
 			updateOrchestratorInstanceIpOnRun(run, ipAddress, orchestratorName);
 		} else {
@@ -204,22 +198,19 @@ public abstract class ConnectorBase implements Connector {
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 				+ RuntimeParameter.INSTANCE_ID_KEY;
 
-		try {
-			run.assignRuntimeParameter(orchestratorInstanceIdName, instanceId,
-					ORCHESTRATOR_INSTANCE_ID_DESCRIPTION);
-		} catch (ValidationException ex) {
-			run.updateRuntimeParameter(orchestratorInstanceIdName, instanceId);
-		}
+		setRuntimeParameterValue(orchestratorInstanceIdName, instanceId, run);
+	}
+
+	private void setRuntimeParameterValue(String key, String value, Run run) {
+		RuntimeParameter p = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
+				key);
+		p.setValue(value);
+		p.store();
 	}
 
 	private void updateMachineInstanceIdOnRun(Run run, String instanceId)
 			throws NotFoundException, ValidationException {
-		try {
-			run.assignRuntimeParameter(MACHINE_INSTANCE_ID_NAME, instanceId,
-					MACHINE_INSTANCE_ID_DESCRIPTION);
-		} catch (ValidationException ex) {
-			run.updateRuntimeParameter(MACHINE_INSTANCE_ID_NAME, instanceId);
-		}
+		setRuntimeParameterValue(MACHINE_INSTANCE_ID_NAME, instanceId, run);
 	}
 
 	private void updateOrchestratorInstanceIpOnRun(Run run,
@@ -230,25 +221,13 @@ public abstract class ConnectorBase implements Connector {
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 				+ RuntimeParameter.HOSTNAME_KEY;
 
-		try {
-			run.assignRuntimeParameter(machineInstanceHostname,
-					instanceHostname,
-					ORCHESTRATOR_INSTANCE_HOSTNAME_DESCRIPTION);
-		} catch (ValidationException ex) {
-			run.updateRuntimeParameter(machineInstanceHostname,
-					instanceHostname);
-		}
+		setRuntimeParameterValue(machineInstanceHostname, instanceHostname, run);
 	}
 
 	private void updateMachineInstanceIpOnRun(Run run, String instanceHostname)
 			throws NotFoundException, ValidationException {
-		try {
-			run.assignRuntimeParameter(MACHINE_INSTANCE_HOSTNAME,
-					instanceHostname, MACHINE_INSTANCE_HOSTNAME_DESCRIPTION);
-		} catch (ValidationException ex) {
-			run.updateRuntimeParameter(MACHINE_INSTANCE_HOSTNAME,
-					instanceHostname);
-		}
+		setRuntimeParameterValue(MACHINE_INSTANCE_HOSTNAME, instanceHostname,
+				run);
 	}
 
 	protected void defineExtraDisk(String name, String description,

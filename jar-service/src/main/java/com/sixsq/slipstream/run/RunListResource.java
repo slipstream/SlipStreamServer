@@ -171,7 +171,7 @@ public class RunListResource extends BaseResource {
 
 			createRepositoryResource(run);
 
-//			run.store();
+			run.store();
 			
 			launch(run);
 

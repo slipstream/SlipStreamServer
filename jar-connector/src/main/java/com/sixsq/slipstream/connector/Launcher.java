@@ -20,10 +20,7 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -40,9 +37,6 @@ import com.sixsq.slipstream.statemachine.States;
 
 public class Launcher {
 
-	private static final String ID_KEY = "id";
-	private static final String IP_KEY = "ip";
-
 	private static Logger logger = Logger.getLogger(Launcher.class.getName());
 
 	public static Run launch(Run run, User user) throws SlipStreamException {
@@ -52,6 +46,7 @@ public class Launcher {
 			SyncLauncher sl = (new Launcher()).new SyncLauncher(run, user);
 			sl.run();
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			run = Run.abort(ex.getMessage(), run.getUuid());
 			run = run.store();
 		}
@@ -59,9 +54,10 @@ public class Launcher {
 	}
 
 	private static Run storeRunKeepModule(Run run) throws ValidationException {
+		run = Run.loadFromUuid(run.getUuid());
 		Module module = run.getModule();
-		run = run.store();
 		run.setModule(module);
+		run = run.store();
 		return run;
 	}
 
@@ -75,42 +71,10 @@ public class Launcher {
 		}
 
 		public void run() throws NotFoundException, ValidationException {
-
-			Map<String, Properties> idsAndIps = launch();
-
-			setIdsAndIps(idsAndIps);
+			launch();
 		}
 
-		private void setIdsAndIps(Map<String, Properties> idsAndIps)
-				throws NotFoundException, ValidationException {
-
-			for (Map.Entry<String, Properties> entry : idsAndIps.entrySet()) {
-
-				RuntimeParameter rp;
-				String key = entry.getKey();
-
-				String idParamName = key
-						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-						+ RuntimeParameter.INSTANCE_ID_KEY;
-				rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-						idParamName);
-				rp.setValue(idsAndIps.get(key).getProperty(ID_KEY));
-				rp.store();
-
-				String ipParamName = key
-						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-						+ RuntimeParameter.HOSTNAME_KEY;
-				rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-						ipParamName);
-				rp.setValue(idsAndIps.get(key).getProperty(IP_KEY));
-				rp.store();
-
-			}
-		}
-
-		private Map<String, Properties> launch() {
-			Map<String, Properties> idsAndIps = new HashMap<String, Properties>();
-
+		private void launch() {
 			try {
 				logger.info("Submitting asynchronous launch operation for run: "
 						+ run.getUuid());
@@ -118,10 +82,10 @@ public class Launcher {
 				switch (run.getType()) {
 				case Orchestration:
 				case Machine:
-					runOrchestration(idsAndIps);
+					runOrchestration();
 					break;
 				case Run:
-					runImage(idsAndIps);
+					runImage();
 					break;
 				default:
 					throw (new ServerExecutionEnginePluginException(
@@ -132,17 +96,13 @@ public class Launcher {
 				logger.severe("Error executing asynchronous launch operation");
 				throw (new SlipStreamRuntimeException(e));
 			}
-
-			return idsAndIps;
 		}
 
-		private void runImage(Map<String, Properties> idsAndIps)
+		private void runImage()
 				throws ValidationException {
 			Connector connector = ConnectorFactory.getCurrentConnector(user);
 			try {
 				connector.launch(run, user);
-				String vmName = Run.MACHINE_NAME;
-				assembleIdsAndIps(idsAndIps, vmName);
 				setSimpleRunState(States.Detached);
 			} catch (SlipStreamException e) {
 				abortRun(Run.MACHINE_NAME, e);
@@ -160,7 +120,7 @@ public class Launcher {
 			machineState.store();
 		}
 
-		private void runOrchestration(Map<String, Properties> idsAndIps)
+		private void runOrchestration()
 				throws ValidationException {
 			HashSet<String> cloudServicesList = RunFactory
 					.getCloudServicesList(run);
@@ -169,26 +129,10 @@ public class Launcher {
 						.getConnector(cloudServiceName);
 				try {
 					connector.launch(run, user);
-					String vmName = connector.getOrchestratorName(run);
-					assembleIdsAndIps(idsAndIps, vmName);
 				} catch (SlipStreamException e) {
 					abortRun(connector.getOrchestratorName(run), e);
 				}
 			}
-		}
-
-		private void assembleIdsAndIps(Map<String, Properties> idsAndIps,
-				String vmName) throws NotFoundException {
-			String id = run.getRuntimeParameterValueIgnoreAbort(vmName
-					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-					+ RuntimeParameter.INSTANCE_ID_KEY);
-			String ip = run.getRuntimeParameterValueIgnoreAbort(vmName
-					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-					+ RuntimeParameter.HOSTNAME_KEY);
-			Properties props = new Properties();
-			props.put(ID_KEY, id);
-			props.put(IP_KEY, ip);
-			idsAndIps.put(vmName, props);
 		}
 
 		private void abortRun(String nodename, SlipStreamException e) {
