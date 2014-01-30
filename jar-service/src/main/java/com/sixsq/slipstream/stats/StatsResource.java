@@ -31,11 +31,24 @@ import org.restlet.resource.Get;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class StatsResource extends BaseResource {
+
+	@Get("html")
+	public Representation toHtml() throws ConfigurationException,
+			ValidationException {
+
+		String metadata = SerializationUtil.toXmlString(compute());
+		return new StringRepresentation(HtmlUtil.toHtml(metadata,
+				getPageRepresentation(), getTransformationType(), getUser()),
+				MediaType.TEXT_HTML);
+
+	}
 
 	@Get("xml")
 	public Representation toXml() {
