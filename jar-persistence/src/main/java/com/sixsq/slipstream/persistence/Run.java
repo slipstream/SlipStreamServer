@@ -574,7 +574,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setStart() {
-		setDateNow(startTime);
+		startTime = now();
 	}
 
 	public void setStart(Date start) {
@@ -590,11 +590,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setEnd() {
-		setDateNow(endTime);
+		if (endTime == null) {
+			endTime = now();
+		}
 	}
 
-	public void setDateNow(Date date) {
-		date = new Date();
+	public Date now() {
+		return new Date();
 	}
 
 	public void addNodeName(String node) {
