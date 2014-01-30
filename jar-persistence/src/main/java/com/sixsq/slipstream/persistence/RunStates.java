@@ -40,6 +40,7 @@ public class RunStates {
 		finalStates.add(States.Done);
 		finalStates.add(States.Terminal);
 		finalStates.add(States.Cancelled);
+		finalStates.add(States.Detached);
 	}
 	
 	@Attribute

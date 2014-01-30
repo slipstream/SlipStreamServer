@@ -36,6 +36,7 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.statemachine.States;
 
 public class Launcher {
 
@@ -52,6 +53,7 @@ public class Launcher {
 			sl.run();
 		} catch (Exception ex) {
 			run = Run.abort(ex.getMessage(), run.getUuid());
+			run = run.store();
 		}
 		return run;
 	}
@@ -114,36 +116,50 @@ public class Launcher {
 						+ run.getUuid());
 
 				switch (run.getType()) {
-					case Orchestration:
-					case Machine:
-						runOrchestration(idsAndIps);
-						break;
-					case Run:
-						runImage(idsAndIps);
-						break;
-					default:
-						throw (new ServerExecutionEnginePluginException(
-								"Cannot submit type: " + run.getType() + " yet!!"));
+				case Orchestration:
+				case Machine:
+					runOrchestration(idsAndIps);
+					break;
+				case Run:
+					runImage(idsAndIps);
+					break;
+				default:
+					throw (new ServerExecutionEnginePluginException(
+							"Cannot submit type: " + run.getType() + " yet!!"));
 				}
 
 			} catch (SlipStreamException e) {
 				logger.severe("Error executing asynchronous launch operation");
 				throw (new SlipStreamRuntimeException(e));
 			}
+
 			return idsAndIps;
 		}
-		
-		private void runImage(Map<String, Properties> idsAndIps) throws ValidationException {
+
+		private void runImage(Map<String, Properties> idsAndIps)
+				throws ValidationException {
 			Connector connector = ConnectorFactory.getCurrentConnector(user);
 			try {
 				connector.launch(run, user);
 				String vmName = Run.MACHINE_NAME;
 				assembleIdsAndIps(idsAndIps, vmName);
+				setSimpleRunState(States.Detached);
 			} catch (SlipStreamException e) {
 				abortRun(Run.MACHINE_NAME, e);
 			}
 		}
-		
+
+		private void setSimpleRunState(States state) {
+			run.setState(state);
+			run = run.store();
+			RuntimeParameter machineState = RuntimeParameter
+					.loadFromUuidAndKey(run.getUuid(), RuntimeParameter
+							.constructParamName(Run.MACHINE_NAME,
+									RuntimeParameter.STATE_KEY));
+			machineState.setValue(state.toString());
+			machineState.store();
+		}
+
 		private void runOrchestration(Map<String, Properties> idsAndIps)
 				throws ValidationException {
 			HashSet<String> cloudServicesList = RunFactory
@@ -176,7 +192,6 @@ public class Launcher {
 		}
 
 		private void abortRun(String nodename, SlipStreamException e) {
-			run = run.store();
 			run = Run.abortOrReset(e.getMessage(), nodename, run.getUuid());
 		}
 

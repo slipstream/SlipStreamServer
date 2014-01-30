@@ -31,25 +31,29 @@ public class RunStatusTest {
 	@Test
 	public void verifyRunningSuccess() {
 
-		assertEquals(States.Running, new RunStates(States.Running, false).getState());
+		assertEquals(States.Running,
+				new RunStates(States.Running, false).getState());
 	}
 
 	@Test
 	public void verifyRunningWhileAborting() {
 
-		assertEquals(RunStates.FAILING, new RunStates(States.Running, true).getState());
+		assertEquals(RunStates.FAILING,
+				new RunStates(States.Running, true).getState());
 	}
 
 	@Test
 	public void verifyFinalStateWithSuccess() {
 
-		assertEquals(RunStates.SUCCESS, new RunStates(States.Terminal, false).getState());
+		assertEquals(RunStates.SUCCESS,
+				new RunStates(States.Terminal, false).getState());
 	}
 
 	@Test
 	public void verifyFinalStateAndAborted() {
 
-		assertEquals(RunStates.FAILED, new RunStates(States.Terminal, true).getState());
+		assertEquals(RunStates.FAILED,
+				new RunStates(States.Terminal, true).getState());
 	}
 
 	@Test
@@ -75,6 +79,10 @@ public class RunStatusTest {
 
 		boolean isAborted = false;
 		RunStates rs = new RunStates(States.Terminal, isAborted);
+		rs.done();
+		assertEquals(States.Done.toString(), rs.toString());
+
+		rs = new RunStates(States.Detached, isAborted);
 		rs.done();
 		assertEquals(States.Done.toString(), rs.toString());
 	}

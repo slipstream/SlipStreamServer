@@ -37,7 +37,8 @@ public enum States {
     Aborting,
     Aborted,
     Failing,
-    Failed;
+    Failed,
+    Detached;
     
     public static List<States> completed() {
     	return Arrays.asList(States.Cancelled, 
