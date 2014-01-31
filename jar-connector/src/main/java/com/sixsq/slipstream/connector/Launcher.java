@@ -58,6 +58,7 @@ public class Launcher {
 		Module module = run.getModule();
 		run.setModule(module);
 		run = run.store();
+		run = Run.loadRunWithRuntimeParameters(run.getUuid());
 		return run;
 	}
 

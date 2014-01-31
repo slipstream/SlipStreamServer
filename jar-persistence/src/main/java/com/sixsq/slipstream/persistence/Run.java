@@ -172,10 +172,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return load(resourceUri, em);
 	}
 
-	public static Run loadFromUuidWithRuntimeParameters(String uuid) {
-		Run.li
-	}
-
 	public static Run load(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Run run = em.find(Run.class, resourceUri);
@@ -265,6 +261,16 @@ public class Run extends Parameterized<Run, RunParameter> {
 		List<RunView> views = convertRunsToRunViews(runs, user);
 		em.close();
 		return views;
+	}
+
+	public static Run loadRunWithRuntimeParameters(String uuid)
+			throws ConfigurationException, ValidationException {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = createNamedQuery(em, "runWithRuntimeParameters");
+		q.setParameter("uuid", uuid);
+		Run run = (Run) q.getSingleResult();
+		em.close();
+		return run;
 	}
 
 	@SuppressWarnings("unchecked")
