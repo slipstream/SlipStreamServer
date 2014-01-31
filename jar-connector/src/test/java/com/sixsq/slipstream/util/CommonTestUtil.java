@@ -108,7 +108,7 @@ public abstract class CommonTestUtil {
 			user.remove();
 		}
 	}
-	
+
 	public static void addSshKeys(User user) throws ValidationException {
 		UserParameter userKey = new UserParameter(
 				UserParametersFactoryBase.getPublicKeyParameterName(), "xxx",
@@ -169,7 +169,7 @@ public abstract class CommonTestUtil {
 	}
 
 	public static void resetAndLoadConnector(
-			Class<? extends Connector> connectorClass)
+			Class<? extends Connector> connectorClass, String instanceName)
 			throws InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException,
 			ClassNotFoundException, ConfigurationException, ValidationException {
@@ -182,8 +182,21 @@ public abstract class CommonTestUtil {
 		Map<String, Connector> connectors = new HashMap<String, Connector>();
 		Connector connector = ConnectorFactory
 				.instantiateConnectorFromName(connectorClass.getName());
-		connectors.put(connector.getCloudServiceName(), connector);
+
+		String connectorName = instanceName == null ? connector
+				.getCloudServiceName() : instanceName;
+
+		connectors.put(connectorName, connector);
 		ConnectorFactory.setConnectors(connectors);
+	}
+
+	public static void resetAndLoadConnector(
+			Class<? extends Connector> connectorClass)
+			throws InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException,
+			ClassNotFoundException, ConfigurationException, ValidationException {
+
+		resetAndLoadConnector(connectorClass, null);
 	}
 
 	public static void cleanupModules() {
@@ -191,8 +204,7 @@ public abstract class CommonTestUtil {
 		for (Module m : modules) {
 			try {
 				m.remove();
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 			}
 		}
 	}

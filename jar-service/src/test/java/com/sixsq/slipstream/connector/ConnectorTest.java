@@ -44,7 +44,7 @@ import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class ConnectorTest extends ConnectorDummy {
 
-	protected static final String INSTANCE_NAME = "test";
+	protected static final String INSTANCE_NAME = "local";
 
 	public ConnectorTest() {
 		super(INSTANCE_NAME);
@@ -60,22 +60,31 @@ public class ConnectorTest extends ConnectorDummy {
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
 
 		CommonTestUtil.addSshKeys(user);
-		
-		CommonTestUtil
-				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+
+		CommonTestUtil.resetAndLoadConnector(
+				com.sixsq.slipstream.connector.local.LocalConnector.class,
+				INSTANCE_NAME);
 
 		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				CommonTestUtil.cloudServiceName, user);
+				INSTANCE_NAME, user);
 
+		run = run.store();
+		
 		updateInstanceIdAndIpOnRun(run, "foo", "bar");
-		assertThat(run.getRuntimeParameterValue(Run
+
+		RuntimeParameter instanceId = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), Run
 				.constructOrchestratorName(INSTANCE_NAME)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-				+ RuntimeParameter.INSTANCE_ID_KEY), is("foo"));
-		assertThat(run.getRuntimeParameterValue(Run
+				+ RuntimeParameter.INSTANCE_ID_KEY);
+		
+		assertThat(instanceId.getValue(), is("foo"));
+
+		RuntimeParameter hostname = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), Run
 				.constructOrchestratorName(INSTANCE_NAME)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-				+ RuntimeParameter.HOSTNAME_KEY), is("bar"));
+				+ RuntimeParameter.HOSTNAME_KEY);
+		
+		assertThat(hostname.getValue(), is("bar"));
 
 		CommonTestUtil.deleteUser(user);
 	}

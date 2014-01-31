@@ -157,9 +157,10 @@ public class RunTestBase {
 		Run run = RunFactory.getRun(module, type, cloudServiceName,
 				RunTestBase.user);
 		run.setUser(user);
+		run = run.store();
 		run = ConnectorFactory.getConnector(cloudServiceName).launch(run,
 				RunTestBase.user);
-		return run.store();
+		return run;
 	}
 
 	protected void setRuntimeParameterState(Run run, String key, States state)
