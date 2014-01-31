@@ -26,7 +26,6 @@ import java.util.Properties;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
-import com.sixsq.slipsteam.run.RunView;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;

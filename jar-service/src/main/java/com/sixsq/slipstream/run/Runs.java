@@ -23,12 +23,11 @@ package com.sixsq.slipstream.run;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
-import com.sixsq.slipsteam.run.RunView;
-import com.sixsq.slipsteam.run.RunView.RunViewList;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.run.RunView.RunViewList;
 
 @Root
 public class Runs {
