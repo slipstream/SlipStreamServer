@@ -41,7 +41,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sixsq.slipsteam.run.RunView;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;

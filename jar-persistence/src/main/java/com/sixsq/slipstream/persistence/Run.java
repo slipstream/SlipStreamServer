@@ -65,6 +65,7 @@ import com.sixsq.slipstream.statemachine.States;
 		@NamedQuery(name = "activeRunsByUser", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) AND r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "allRuns", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user ORDER BY r.startTime DESC"),
+		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
 		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runsByInstanceId", query = "SELECT r FROM Run r JOIN r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
@@ -169,6 +170,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static Run loadFromUuid(String uuid, EntityManager em) {
 		String resourceUri = RESOURCE_URI_PREFIX + uuid;
 		return load(resourceUri, em);
+	}
+
+	public static Run loadFromUuidWithRuntimeParameters(String uuid) {
+		Run.li
 	}
 
 	public static Run load(String resourceUri) {
