@@ -50,12 +50,12 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
-import com.sixsq.slipsteam.run.RunView;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.statemachine.States;
 
 @SuppressWarnings("serial")

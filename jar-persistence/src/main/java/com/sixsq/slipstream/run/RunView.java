@@ -1,4 +1,4 @@
-package com.sixsq.slipsteam.run;
+package com.sixsq.slipstream.run;
 
 /*
  * +=================================================================+
