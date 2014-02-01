@@ -22,9 +22,7 @@ package com.sixsq.slipstream.util;
 
 import static org.junit.Assert.fail;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +39,6 @@ import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Authz;
 import com.sixsq.slipstream.persistence.Module;
@@ -51,63 +48,16 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.run.RunTestBase;
+import com.sixsq.slipstream.user.UserTest;
 
 public class ResourceTestBase extends RunTestBase {
 
-	protected static final String PASSWORD = "password";
-
 	// Need to set cloudServiceName before the status user is
 	// created, since the createUser method uses it
-	protected static String cloudServiceName = new LocalConnector()
+	public static String cloudServiceName = new LocalConnector()
 			.getCloudServiceName();
 
-	protected static User user = createUser("test", PASSWORD);
-
-	public static User createUser(String name) {
-		return ResourceTestBase.createUser(name, PASSWORD);
-	}
-
-	public static User createUser(String name, String password) {
-		User user = null;
-		try {
-			user = (User) User.loadByName(name);
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			fail();
-		} catch (ValidationException e) {
-			e.printStackTrace();
-			fail();
-		}
-		if (user != null) {
-			user.remove();
-		}
-		try {
-			user = new User(name);
-		} catch (ValidationException e) {
-			e.printStackTrace();
-		}
-		try {
-			user.hashAndSetPassword(password);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			fail();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			fail();
-		}
-
-		try {
-			user.setDefaultCloudServiceName(cloudServiceName);
-		} catch (ValidationException e) {
-			throw (new SlipStreamRuntimeException(e));
-		}
-
-		return user;
-	}
-
-	public static User storeUser(User user) {
-		return user.store();
-	}
+	protected static User user = UserTest.createUser("test", UserTest.PASSWORD);
 
 	public static void resetAndLoadConnector(
 			Class<? extends Connector> connectorClass)

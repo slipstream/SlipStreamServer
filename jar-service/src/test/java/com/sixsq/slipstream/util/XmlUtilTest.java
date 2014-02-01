@@ -37,6 +37,7 @@ import org.w3c.dom.Element;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.user.UserTest;
 
 public class XmlUtilTest extends ResourceTestBase {
 
@@ -89,10 +90,10 @@ public class XmlUtilTest extends ResourceTestBase {
 
 		Document document = createNewDocument();
 
-		User user1 = createUser("test1");
+		User user1 = UserTest.createUser("test1");
 		user1.setSuper(true);
 
-		User user2 = createUser("test2");
+		User user2 = UserTest.createUser("test2");
 		user2.setSuper(false);
 
 		XmlUtil.addUser(document, user1);

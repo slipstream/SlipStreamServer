@@ -42,7 +42,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 
-public class BasicAuthenticator extends Authenticator {
+public class BasicAuthenticator extends AuthenticatorBase {
 
 	public BasicAuthenticator(Context context) {
 		super(context, false);
@@ -57,6 +57,7 @@ public class BasicAuthenticator extends Authenticator {
 
 		int result = Verifier.RESULT_INVALID;
 		String username = null;
+		com.sixsq.slipstream.persistence.User user = null;
 
 		if (request.getChallengeResponse() == null) {
 			result = Verifier.RESULT_MISSING;
@@ -69,8 +70,6 @@ public class BasicAuthenticator extends Authenticator {
 			if (username == null || password == null) {
 				result = Verifier.RESULT_MISSING;
 			}
-
-			com.sixsq.slipstream.persistence.User user = null;
 
 			try {
 				user = com.sixsq.slipstream.persistence.User
@@ -98,6 +97,7 @@ public class BasicAuthenticator extends Authenticator {
 		if (result == Verifier.RESULT_VALID) {
 			CookieUtils.addAuthnCookie(response, "local", username);
 			setClientInfo(request, username);
+			setLastOnline(user);
 			return true;
 
 		} else {

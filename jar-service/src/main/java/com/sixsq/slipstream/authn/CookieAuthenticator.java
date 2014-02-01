@@ -30,7 +30,6 @@ import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
-import org.restlet.security.Authenticator;
 import org.restlet.security.User;
 import org.restlet.security.Verifier;
 
@@ -38,7 +37,7 @@ import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 
-public class CookieAuthenticator extends Authenticator {
+public class CookieAuthenticator extends AuthenticatorBase {
 
 	public CookieAuthenticator(Context context) {
 		super(context, false);
@@ -55,6 +54,8 @@ public class CookieAuthenticator extends Authenticator {
 
 			setClientInfo(request, cookie);
 			setCloudServiceName(request, cookie);
+
+			setLastOnline(cookie);
 
 			return true;
 

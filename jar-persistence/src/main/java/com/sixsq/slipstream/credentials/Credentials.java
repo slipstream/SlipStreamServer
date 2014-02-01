@@ -21,6 +21,7 @@ package com.sixsq.slipstream.credentials;
  */
 
 import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 
 
 public interface Credentials {
@@ -29,4 +30,5 @@ public interface Credentials {
 	
 	public String getSecret() throws InvalidElementException;
 	
+	public void validate() throws ValidationException;
 }

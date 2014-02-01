@@ -20,18 +20,16 @@ package com.sixsq.slipstream.connector.local;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.connector.CredentialsBase;
 import com.sixsq.slipstream.connector.stratuslab.StratusLabUserParametersFactory;
-import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 
-class LocalCredentials implements Credentials {
-
-	private User user;
+class LocalCredentials extends CredentialsBase {
 
 	public LocalCredentials(User user) {
-		this.user = user;
+		super(user);
 	}
 
 	public String getKey() throws InvalidElementException {

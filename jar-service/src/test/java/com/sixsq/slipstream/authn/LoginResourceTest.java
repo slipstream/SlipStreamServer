@@ -49,6 +49,7 @@ import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
@@ -62,7 +63,7 @@ public class LoginResourceTest extends ResourceTestBase {
 	private void createAndStoreUser() throws NoSuchAlgorithmException,
 			UnsupportedEncodingException, ConfigurationException,
 			ValidationException {
-		user = createUser("test");
+		user = UserTest.createUser("test");
 		user.hashAndSetPassword("password");
 		user.store();
 	}
@@ -103,7 +104,7 @@ public class LoginResourceTest extends ResourceTestBase {
 	@Test
 	public void loginInvalidUserNoCookie() throws ConfigurationException,
 			ValidationException {
-		User invalid = createUser("invalid", "password");
+		User invalid = UserTest.createUser("invalid", "password");
 		Request request = createPostRequest(invalid);
 		Response response = executeRequest(request);
 
@@ -116,7 +117,7 @@ public class LoginResourceTest extends ResourceTestBase {
 	@Test
 	public void loginInvalidUser() throws ConfigurationException,
 			ValidationException {
-		User invalid = createUser("invalid", "password");
+		User invalid = UserTest.createUser("invalid", "password");
 		Request request = createPostRequest(invalid);
 		Response response = executeRequest(request);
 
@@ -126,7 +127,7 @@ public class LoginResourceTest extends ResourceTestBase {
 	@Test
 	public void loginInvalidPasswordNoCookie() throws ConfigurationException,
 			ValidationException {
-		User invalid = createUser(user.getName(), "wrong");
+		User invalid = UserTest.createUser(user.getName(), "wrong");
 		Request request = createPostRequest(invalid);
 		Response response = executeRequest(request);
 
@@ -139,7 +140,7 @@ public class LoginResourceTest extends ResourceTestBase {
 	@Test
 	public void loginWrongPasswordUser() throws ConfigurationException,
 			ValidationException {
-		User wrongPassword = createUser(user.getName(), "wrong");
+		User wrongPassword = UserTest.createUser(user.getName(), "wrong");
 		Request request = createPostRequest(wrongPassword);
 		Response response = executeRequest(request);
 
@@ -181,7 +182,7 @@ public class LoginResourceTest extends ResourceTestBase {
 	private Form createUserLoginForm(User user) {
 		Form form = new Form();
 		form.add("username", user.getName());
-		form.add("password", PASSWORD);
+		form.add("password", UserTest.PASSWORD);
 		return form;
 	}
 

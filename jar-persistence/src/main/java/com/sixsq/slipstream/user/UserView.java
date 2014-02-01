@@ -20,6 +20,7 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
+import java.util.Date;
 import java.util.List;
 
 import org.simpleframework.xml.Attribute;
@@ -37,17 +38,20 @@ public class UserView {
 	@Attribute
 	public final String resourceUri;
 
-	@Attribute(required=false)
+	@Attribute(required = false)
 	public final String firstName;
 
-	@Attribute(required=false)
+	@Attribute(required = false)
 	public final String lastName;
 
-	@Attribute(required=false)
+	@Attribute(required = false)
 	public final User.State state;
 
-	public UserView(String name, String firstName,
-			String lastName, User.State state) {
+	@Attribute(required = false)
+	public final Date lastOnline;
+
+	public UserView(String name, String firstName, String lastName,
+			User.State state, Date lastOnline) {
 
 		this.name = name;
 		this.resourceUri = User.constructResourceUri(name);
@@ -56,7 +60,7 @@ public class UserView {
 		this.lastName = lastName;
 
 		this.state = state;
-
+		this.lastOnline = lastOnline;
 	}
 
 	@Root(name = "list")
@@ -68,6 +72,15 @@ public class UserView {
 		public UserViewList(List<UserView> list) {
 			this.list = list;
 		}
+	}
+
+	@Attribute(required = false)
+	public void setOnline(boolean online) {
+	}
+	
+	@Attribute(required = false)
+	public boolean isOnline() {
+		return User.isOnline(lastOnline);
 	}
 
 }

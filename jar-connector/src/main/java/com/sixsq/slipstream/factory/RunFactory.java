@@ -32,6 +32,7 @@ import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -354,6 +355,7 @@ public abstract class RunFactory {
 	
 	public static Properties describeInstances(User user, Run run)
 			throws ValidationException {
+				
 		Properties describeInstancesStates = new Properties();
 
 		String[] cloudServicesList = null;
@@ -366,6 +368,10 @@ public abstract class RunFactory {
 		for (String cloudServiceName : cloudServicesList) {
 			Connector connector = ConnectorFactory
 					.getConnector(cloudServiceName);
+			
+			Credentials credentials = connector.getCredentials(user);
+			credentials.validate();
+			
 			Properties props;
 			try {
 				props = connector.describeInstances(user);

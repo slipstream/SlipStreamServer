@@ -32,22 +32,22 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.ResourceTestBase;
+import com.sixsq.slipstream.user.UserTest;
 
 public class ImageFormProcesorTest {
 
 	protected static final String PASSWORD = "password";
-	protected static User user = ResourceTestBase.createUser("test", PASSWORD);
+	protected static User user = UserTest.createUser("test", PASSWORD);
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		ResourceTestBase.storeUser(user);
+		UserTest.storeUser(user);
 	}
 
 	@Test
 	public void newNameIllegal() throws BadlyFormedElementException,
 			SlipStreamClientException {
-		User user = ResourceTestBase.createUser("test");
+		User user = UserTest.createUser("test");
 
 		String imageName = "newNameIllegal";
 		Module image = new ImageModule(imageName);

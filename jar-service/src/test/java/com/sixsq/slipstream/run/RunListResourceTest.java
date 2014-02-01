@@ -57,6 +57,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class RunListResourceTest extends ResourceTestBase {
@@ -76,7 +77,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 
 		try {
-			user = storeUser(user);
+			user = UserTest.storeUser(user);
 		} catch (Exception ex) {
 
 		}

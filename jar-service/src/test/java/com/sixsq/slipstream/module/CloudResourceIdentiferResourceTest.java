@@ -42,15 +42,16 @@ import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 
-	protected static User user = createUser("test", PASSWORD);
+	protected static User user = UserTest.createUser("test", UserTest.PASSWORD);
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		storeUser(user);
+		UserTest.storeUser(user);
 	}
 
 	@AfterClass

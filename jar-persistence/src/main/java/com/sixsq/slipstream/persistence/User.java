@@ -22,6 +22,7 @@ package com.sixsq.slipstream.persistence;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -37,6 +38,8 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.simpleframework.xml.Attribute;
 
@@ -56,10 +59,12 @@ import com.sixsq.slipstream.user.UserView;
 @Entity
 @NamedQueries({
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
-		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state) FROM User u") })
+		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
 
 	public final static String RESOURCE_URL_PREFIX = "user/";
+
+	public final static int ACTIVE_TIMEOUT_MINUTES = 1;
 
 	public static final String NEW_NAME = "new";
 
@@ -95,6 +100,10 @@ public class User extends Parameterized<User, UserParameter> {
 	@Enumerated(EnumType.STRING)
 	private State state;
 
+	@Attribute(required = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date lastOnline = null;
+
 	@SuppressWarnings("unused")
 	private User() {
 
@@ -120,6 +129,28 @@ public class User extends Parameterized<User, UserParameter> {
 			throw (new ValidationException("Invalid name"));
 		}
 		validateParameters();
+	}
+
+	public boolean isOnline() {
+		return isOnline(lastOnline);
+	}
+	
+	public static boolean isOnline(Date lastOnline) {
+		if (lastOnline == null) {
+			return false;
+		}
+
+		boolean isOnline = false;
+
+		Date now = new Date();
+		if (millisecondsToMinutes(now.getTime() - lastOnline.getTime()) < ACTIVE_TIMEOUT_MINUTES) {
+			isOnline = true;
+		}
+		return isOnline;
+	}
+
+	private static long millisecondsToMinutes(long milliseconds) {
+		return milliseconds / 1000 / 60;
 	}
 
 	public static String constructResourceUri(String name) {
@@ -253,8 +284,7 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	private String constructCloudServiceKey() {
-		return Parameter.constructKey(
-				ParameterCategory.getDefault(),
+		return Parameter.constructKey(ParameterCategory.getDefault(),
 				UserParameter.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME);
 	}
 
@@ -262,8 +292,7 @@ public class User extends Parameterized<User, UserParameter> {
 			throws ValidationException {
 		UserParameter parameter = getDefaultCloudServiceParameter();
 		if (parameter == null) {
-			parameter = new UserParameter(
-					constructCloudServiceKey());
+			parameter = new UserParameter(constructCloudServiceKey());
 			setParameter(parameter);
 		}
 		parameter.setValue(defaultCloudServiceName);
@@ -333,19 +362,19 @@ public class User extends Parameterized<User, UserParameter> {
 		return load(User.constructResourceUri(name), sc);
 	}
 
-	public static User load(String resourceUrl, ServiceConfiguration sc) throws ConfigurationException,
-			ValidationException {
+	public static User load(String resourceUrl, ServiceConfiguration sc)
+			throws ConfigurationException, ValidationException {
 		User user = load(resourceUrl);
 
-        if (sc != null && user != null) {
-                user.addSystemParametersIntoUser(sc);
-        }
+		if (sc != null && user != null) {
+			user.addSystemParametersIntoUser(sc);
+		}
 
-        return user;
+		return user;
 	}
 
-	public static User load(String resourceUrl)
-			throws ConfigurationException, ValidationException {
+	public static User load(String resourceUrl) throws ConfigurationException,
+			ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		User user = em.find(User.class, resourceUrl);
 		em.close();
@@ -392,6 +421,18 @@ public class User extends Parameterized<User, UserParameter> {
 	@Override
 	public User store() {
 		return (User) super.store();
+	}
+
+	public Date getLastOnline() {
+		return lastOnline;
+	}
+
+	public void setLastOnline(Date date) {
+		this.lastOnline = date;
+	}
+
+	public void setLastOnline() {
+		this.lastOnline = new Date();
 	}
 
 }

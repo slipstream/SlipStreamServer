@@ -2,6 +2,7 @@ package com.sixsq.slipstream.persistence;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.hibernate.LazyInitializationException;
 import org.junit.Test;
@@ -26,6 +27,7 @@ public class RunTest {
 		
 		try {
 			run.getRuntimeParameterValue("ss:key");
+			fail();
 		} catch (LazyInitializationException ex) {
 		}
 		

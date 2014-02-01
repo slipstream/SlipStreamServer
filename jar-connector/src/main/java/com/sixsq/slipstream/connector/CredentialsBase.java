@@ -22,6 +22,8 @@ package com.sixsq.slipstream.connector;
 
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 
@@ -40,6 +42,20 @@ public abstract class CredentialsBase implements Credentials {
 		this.user = user;
 	}
 
+	@Override
+	public void validate() throws ValidationException {
+		try {
+			if(!Parameter.hasValueSet(getKey())) {
+				throw new ValidationException("Invalid credentials: missing key");
+			}
+			if(!Parameter.hasValueSet(getSecret())) {
+				throw new ValidationException("Invalid credentials: missing secret");
+			}
+		} catch (InvalidElementException e) {
+			throw new ValidationException(e.getMessage());
+		}
+	}
+	
 	protected String getParameterValue(String key) throws InvalidElementException {
 		UserParameter parameter = user.getParameter(qualifyKey(key));
 		if (parameter == null) {

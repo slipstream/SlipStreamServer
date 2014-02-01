@@ -3,6 +3,7 @@ package com.sixsq.slipstream.run;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.connector.stratuslab.StratusLabUserParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -18,6 +19,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
 
@@ -74,7 +76,12 @@ public class RunTestBase {
 
 	protected static void createUser() throws ConfigurationException,
 			ValidationException {
+
 		user = CommonTestUtil.createUser("RunTestBaseUser", "password");
+		
+		// Add dummy credentials
+		user.setParameter(new UserParameter(StratusLabUserParametersFactory.KEY_PARAMETER_NAME, "key", ""));
+		user.setParameter(new UserParameter(StratusLabUserParametersFactory.SECRET_PARAMETER_NAME, "secret", ""));
 	}
 
 	protected static void tearDownImages() {

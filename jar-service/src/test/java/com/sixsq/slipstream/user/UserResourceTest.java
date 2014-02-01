@@ -59,9 +59,10 @@ public class UserResourceTest extends ResourceTestBase {
 
 	private static final String NEW_PASSWORD = "newPassword";
 	private static final String SUPER_PASSWORD = "passwordSuper";
-	private static User otherUser = createUser("test2", "password2");
-	private static User superUser = createUser("super", SUPER_PASSWORD);
-
+	private static User otherUser = UserTest.createUser("test2", "password2");
+	private static User superUser = UserTest.createUser("super", SUPER_PASSWORD);
+	private static User user = null;
+	
 	@BeforeClass
 	public static void setupBeforeClass() throws InstantiationException,
 			IllegalAccessException, InvocationTargetException,
@@ -71,10 +72,11 @@ public class UserResourceTest extends ResourceTestBase {
 
 	@Before
 	public void setup() {
-		user = storeUser(user);
-		storeUser(otherUser);
+		user = UserTest.createUser("test");
+		user = UserTest.storeUser(user);
+		UserTest.storeUser(otherUser);
 		superUser.setSuper(true);
-		storeUser(superUser);
+		UserTest.storeUser(superUser);
 	}
 
 	@After
@@ -132,7 +134,7 @@ public class UserResourceTest extends ResourceTestBase {
 		assertThat(getPersistedPassword(user),
 				is(not(Passwords.hash(NEW_PASSWORD))));
 
-		Passwords passwords = createValidPasswords(PASSWORD);
+		Passwords passwords = createValidPasswords(UserTest.PASSWORD);
 		Request request = createPutRequest(user, superUser.getName(), passwords);
 		Response response = executeRequest(request);
 
@@ -189,7 +191,7 @@ public class UserResourceTest extends ResourceTestBase {
 			throws ConfigurationException, NoSuchAlgorithmException,
 			UnsupportedEncodingException {
 
-		Passwords passwords = createValidPasswords(PASSWORD);
+		Passwords passwords = createValidPasswords(UserTest.PASSWORD);
 		passwords.oldPassword = null;
 		Request request = createPutRequest(user, user.getName(), passwords);
 		Response response = executeRequest(request);
@@ -202,9 +204,9 @@ public class UserResourceTest extends ResourceTestBase {
 			throws ConfigurationException, ValidationException,
 			NoSuchAlgorithmException, UnsupportedEncodingException {
 
-		user.hashAndSetPassword(PASSWORD);
+		user.hashAndSetPassword(UserTest.PASSWORD);
 
-		Passwords passwords = createValidPasswords(PASSWORD);
+		Passwords passwords = createValidPasswords(UserTest.PASSWORD);
 		passwords.oldPassword = null;
 		Request request = createPutRequest(user, superUser.getName(), passwords);
 		Response response = executeRequest(request);
@@ -268,7 +270,7 @@ public class UserResourceTest extends ResourceTestBase {
 	public void deleteUser() throws ConfigurationException, ValidationException {
 
 		User toBeDelete = new User("toBeDelete");
-		storeUser(toBeDelete);
+		UserTest.storeUser(toBeDelete);
 
 		Request request = createDeleteRequest(toBeDelete, toBeDelete);
 		Response response = executeRequest(request);
@@ -281,7 +283,7 @@ public class UserResourceTest extends ResourceTestBase {
 			ValidationException {
 
 		User cantBeDeleted = new User("cantBeDeletedByAnotherUser");
-		storeUser(cantBeDeleted);
+		UserTest.storeUser(cantBeDeleted);
 
 		Request request = createDeleteRequest(user, cantBeDeleted);
 		Response response = executeRequest(request);
@@ -296,7 +298,7 @@ public class UserResourceTest extends ResourceTestBase {
 			throws ConfigurationException, ValidationException {
 
 		User cantSelfAssignSuper = new User("cantSelfAssignSuper");
-		storeUser(cantSelfAssignSuper);
+		UserTest.storeUser(cantSelfAssignSuper);
 
 		cantSelfAssignSuper.setSuper(true);
 
@@ -322,7 +324,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		superCanAssignSuperToOthers.setSuper(true);
 
-		storeUser(superCanAssignSuperToOthers);
+		UserTest.storeUser(superCanAssignSuperToOthers);
 
 		superCanAssignSuperToOthers.setSuper(false);
 

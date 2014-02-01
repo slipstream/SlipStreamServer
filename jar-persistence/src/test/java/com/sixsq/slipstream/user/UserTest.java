@@ -26,7 +26,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,23 +43,27 @@ import org.junit.Test;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.persistence.User.State;
-import com.sixsq.slipstream.user.UserView;
-import com.sixsq.slipstream.util.ResourceTestBase;
+import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public class UserTest extends ResourceTestBase {
+public class UserTest {
+
+	protected static User user;
+
+	public static final String PASSWORD = "password";
 
 	@Before
 	public void setup() {
-		try {
-			user = storeUser(user);
-		} catch (Exception ex) {
+		user = createUser("test");
+		user = storeUser(user);
+	}
 
-		}
+	public static User storeUser(User user) {
+		return user.store();
 	}
 
 	@After
@@ -83,7 +91,7 @@ public class UserTest extends ResourceTestBase {
 		String name = "dummy";
 		String resourceUrl = User.constructResourceUri(name);
 
-		User user = createUser(name);
+		User user = UserTest.createUser(name);
 
 		assertEquals(name, user.getName());
 		assertEquals(resourceUrl, user.getResourceUri());
@@ -109,7 +117,7 @@ public class UserTest extends ResourceTestBase {
 		String name = "dummy";
 		String resourceUrl = User.constructResourceUri(name);
 
-		User user = createUser(name);
+		User user = UserTest.createUser(name);
 		user.store();
 
 		User userRestored = User.loadByName(name);
@@ -133,7 +141,7 @@ public class UserTest extends ResourceTestBase {
 
 		String username = "dummy";
 
-		User user = createUser(username);
+		User user = UserTest.createUser(username);
 
 		String resourceUrl = user.getResourceUri();
 
@@ -168,15 +176,15 @@ public class UserTest extends ResourceTestBase {
 	@Test
 	public void verifyUserList() {
 
-		User user1 = createUser("user1");
+		User user1 = UserTest.createUser("user1");
 		user1.setState(State.ACTIVE);
 		user1.store();
 
-		User user2 = createUser("user2");
+		User user2 = UserTest.createUser("user2");
 		user2.setState(State.NEW);
 		user2.store();
 
-		User user3 = createUser("user3");
+		User user3 = UserTest.createUser("user3");
 		user3.setState(State.ACTIVE);
 		user3.store();
 
@@ -205,15 +213,15 @@ public class UserTest extends ResourceTestBase {
 		List<UserView> userViewList = User.viewList();
 		int before = userViewList.size();
 
-		User user1 = createUser("user1");
+		User user1 = UserTest.createUser("user1");
 		user1.setState(State.ACTIVE);
 		user1.store();
 
-		User user2 = createUser("user2");
+		User user2 = UserTest.createUser("user2");
 		user2.setState(State.NEW);
 		user2.store();
 
-		User user3 = createUser("user3");
+		User user3 = UserTest.createUser("user3");
 		user3.setState(State.ACTIVE);
 		user3.store();
 
@@ -233,13 +241,13 @@ public class UserTest extends ResourceTestBase {
 	@Test
 	public void checkUserSerialization() {
 
-		User user1 = createUser("user1");
+		User user1 = UserTest.createUser("user1");
 		user1.setState(State.ACTIVE);
 		user1.store();
 
 		SerializationUtil.toXmlString(user1);
 	}
-	
+
 	@Test(expected = ValidationException.class)
 	public void putEmptyUserFailsValidation() throws ConfigurationException,
 			ValidationException {
@@ -254,6 +262,59 @@ public class UserTest extends ResourceTestBase {
 
 		User user = new User(User.NEW_NAME);
 		user.validate();
+	}
+	
+	@Test
+	public void online() {
+		assertThat(user.isOnline(), is(false));
+		
+		user.setLastOnline();
+		assertThat(user.isOnline(), is(true));
+
+		user.setLastOnline(new Date(1)); // a long time ago
+		assertThat(user.isOnline(), is(false));
+	}
+
+	public static User createUser(String name, String password) {
+		User user = null;
+		try {
+			user = (User) User.loadByName(name);
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+			fail();
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			fail();
+		}
+		if (user != null) {
+			user.remove();
+		}
+		try {
+			user = new User(name);
+		} catch (ValidationException e) {
+			e.printStackTrace();
+		}
+		try {
+			user.hashAndSetPassword(password);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			fail();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			fail();
+		}
+
+		try {
+			user.setDefaultCloudServiceName("local");
+		} catch (ValidationException e) {
+			throw (new SlipStreamRuntimeException(e));
+		}
+
+		return user;
+	}
+
+	public static User createUser(String name) {
+		return createUser(name, PASSWORD);
 	}
 
 }
