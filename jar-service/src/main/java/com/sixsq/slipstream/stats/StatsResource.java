@@ -37,7 +37,7 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class StatsResource extends BaseResource {
 
-	@Get("xml")
+	@Get("xml|html")
 	public Representation toXml() {
 
 		String metadata = SerializationUtil.toXmlString(compute());
