@@ -31,7 +31,6 @@ import org.restlet.Response;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
-import org.restlet.security.Authenticator;
 import org.restlet.security.User;
 import org.restlet.security.Verifier;
 

@@ -40,6 +40,7 @@ import javax.persistence.Lob;
 import javax.persistence.MapKey;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
 import javax.persistence.Query;
 import javax.persistence.Temporal;
@@ -67,7 +68,7 @@ import com.sixsq.slipstream.statemachine.States;
 		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
 		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
-		@NamedQuery(name = "runsByInstanceId", query = "SELECT r FROM Run r JOIN r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
+		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
 
 	private static final int MAX_NO_OF_ENTRIES = 20;
@@ -184,18 +185,26 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return run;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static List<RunView> viewListByInstanceId(User user,
-			String instanceId) throws ConfigurationException,
+	public static RunView loadViewByInstanceId(User user,
+			String instanceId, String cloud) throws ConfigurationException,
 			ValidationException {
+		// TODO: there is a chance that if two clouds have overlaping instanceid,
+		//       this logic will pickup both
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("runsByInstanceId");
-		q.setParameter("user", user.getName());
+		Query q = em.createNamedQuery("runByInstanceId");
 		q.setParameter("instanceid", instanceId);
-		List<Run> runs = q.getResultList();
-		List<RunView> views = convertRunsToRunViews(runs, user);
+		q.setParameter("user", user.getName());
+		Run run = null;
+		try {
+			run = (Run) q.getSingleResult();
+		} catch (NoResultException ex) {
+		}
 		em.close();
-		return views;
+		RunView view = null;
+		if(run != null) {
+			view = convertRunToRunView(run);
+		}
+		return view;
 	}
 
 	private static List<RunView> convertRunsToRunViews(List<Run> runs, User user)
@@ -209,26 +218,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			// create a RunView instance for each
 			String[] cloudServiceNames = r.getCloudServiceNameList();
 
-			runView = new RunView(r.getResourceUri(), r.getUuid(),
-					r.getModuleResourceUrl(), r.getState().toString(),
-					r.getStart(), r.getUser(), r.getType());
-			try {
-				runView.setHostname(r
-						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-								+ RuntimeParameter.HOSTNAME_KEY));
-			} catch (NotFoundException e) {
-			}
-			try {
-				runView.setVmstate(r
-						.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-								+ RuntimeParameter.STATE_VM_KEY));
-			} catch (NotFoundException e) {
-			}
-			try {
-				runView.setTags(r
-						.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
-			} catch (NotFoundException e) {
-			}
+			runView = convertRunToRunView(r);
 
 			// For each cloud service, create a RunView entry
 			for (String csn : cloudServiceNames) {
@@ -238,6 +228,36 @@ public class Run extends Parameterized<Run, RunParameter> {
 			}
 		}
 		return views;
+	}
+
+	private static RunView convertRunToRunView(Run run) {
+		
+		if(run == null) {
+			return null;
+		}
+		
+		RunView runView;
+		runView = new RunView(run.getResourceUri(), run.getUuid(),
+				run.getModuleResourceUrl(), run.getState().toString(),
+				run.getStart(), run.getUser(), run.getType());
+		try {
+			runView.setHostname(run
+					.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
+							+ RuntimeParameter.HOSTNAME_KEY));
+		} catch (NotFoundException e) {
+		}
+		try {
+			runView.setVmstate(run
+					.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
+							+ RuntimeParameter.STATE_VM_KEY));
+		} catch (NotFoundException e) {
+		}
+		try {
+			runView.setTags(run
+					.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
+		} catch (NotFoundException e) {
+		}
+		return runView;
 	}
 
 	@SuppressWarnings("unchecked")

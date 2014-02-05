@@ -28,7 +28,6 @@ import org.restlet.resource.Get;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.run.VmView.VmViewList;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
@@ -51,16 +50,17 @@ public class VmsResource extends BaseResource {
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
-	private VmViewList getVms() {
+	private Vms getVms() {
 	
 		Vms vms = new Vms();
+		
 		try {
 			vms.populate(getUser());
 		} catch (SlipStreamClientException e) {
 		} catch (SlipStreamException e) {
 		}
 	
-		return vms.getVms();
+		return vms;
 	}
 
 	@Override
