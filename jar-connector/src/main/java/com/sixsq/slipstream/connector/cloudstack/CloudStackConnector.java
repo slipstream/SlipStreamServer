@@ -113,9 +113,8 @@ public class CloudStackConnector extends CliConnectorBase {
 				" --instance-name " + wrapInSingleQuotes(getVmName(run)) +
 				" --instance-type " + wrapInSingleQuotes(getInstanceType(run, user)) +
 				" --public-key " + wrapInSingleQuotes(getPublicSshKey(run, user)) +
-				" --network " + getNetwork(run);
-		if (isInOrchestrationContext(run))
-			command += " --context-script " + wrapInSingleQuotes(createContextualizationData(run, user));
+				" --network " + getNetwork(run) + 
+				" --context-script " + wrapInSingleQuotes(createContextualizationData(run, user));
 		 		
 		return command;
 	}
@@ -282,7 +281,7 @@ public class CloudStackConnector extends CliConnectorBase {
 		return new CloudStackUserParametersFactory(getConnectorInstanceName())
 				.constructKey(key);
 	}
-
+	
 	private String createContextualizationData(Run run, User user)
 			throws ConfigurationException, 
 			ServerExecutionEnginePluginException, SlipStreamClientException {
@@ -290,12 +289,19 @@ public class CloudStackConnector extends CliConnectorBase {
 		String bootstrap = "/tmp/slipstream.bootstrap";
 		String username = user.getName();
 		Configuration configuration = Configuration.getInstance();
+		String targetScript = "";
+		String nodename = Run.MACHINE_NAME;
+		
+		if(isInOrchestrationContext(run)){
+			targetScript = "slipstream-orchestrator";
+			nodename = getOrchestratorName(run);
+		}
 
 		String userData = "#!/bin/sh -e \n";
 		userData += "# SlipStream contextualization script for CloudStack. \n";
 		userData += "export SLIPSTREAM_CLOUD=\"" + getCloudServiceName() + "\"\n";
 		userData += "export SLIPSTREAM_CONNECTOR_INSTANCE=\"" + getConnectorInstanceName() + "\"\n";
-		userData += "export SLIPSTREAM_NODENAME=\"" + getOrchestratorName(run) + "\"\n";
+		userData += "export SLIPSTREAM_NODENAME=\"" + nodename + "\"\n";
 		userData += "export SLIPSTREAM_DIID=\"" + run.getName() + "\"\n";
 		userData += "export SLIPSTREAM_REPORT_DIR=\"" + SLIPSTREAM_REPORT_DIR + "\"\n";
 		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"\n";				
@@ -312,7 +318,7 @@ public class CloudStackConnector extends CliConnectorBase {
 				+ "wget --secure-protocol=SSLv3 --no-check-certificate -O " + bootstrap
 				+ " $SLIPSTREAM_BOOTSTRAP_BIN > " + SLIPSTREAM_REPORT_DIR + "/"
 				+ logfilename + " 2>&1 " + "&& chmod 0755 " + bootstrap + "\n"
-				+ bootstrap + " slipstream-orchestrator >> "
+				+ bootstrap + " " + targetScript + " >> "
 				+ SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1\n";
 		
 		return userData;	

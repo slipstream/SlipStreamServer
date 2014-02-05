@@ -1,6 +1,4 @@
-package com.sixsq.slipstream.statemachine;
-
-import com.sixsq.slipstream.persistence.RunType;
+package com.sixsq.slipstream.exceptions;
 
 /*
  * +=================================================================+
@@ -22,26 +20,41 @@ import com.sixsq.slipstream.persistence.RunType;
  * -=================================================================-
  */
 
+@SuppressWarnings("serial")
+public class ProcessException extends SlipStreamRuntimeException {
 
-public class SendingFinalReportState extends SynchronizedState {
-
-	public SendingFinalReportState(ExtrinsicState extrinsicState) {
-		super(extrinsicState);
-		if( extrinsicState.getRun().getType() == RunType.Run){
-			nextState = States.Detached;
-		}else{
-			nextState = States.Finalizing;
-		}
+	String stdout = "";
+	
+	public ProcessException(String message, String stdout, Throwable exception) {
+		super(message, exception);
+		this.stdout = stdout;  
 	}
 	
-	@Override
-	public States getState() {
-		return States.SendingFinalReport;
+	public ProcessException(String message, String stdout) {
+		super(message);
+		this.stdout = stdout;  
 	}
 	
-	@Override
-	public boolean mustSynchronizeOnFailure() {
-		return true;
+	public ProcessException(String message, Throwable exception) {
+		super(message, exception);
 	}
 
+	public ProcessException(Throwable exception) {
+		super(exception);
+	}
+
+	public ProcessException(String message) {
+		super(message);
+	}
+
+	public ProcessException() {
+		super();
+	}
+
+	public String getStdOut(){
+		return stdout;
+	}
+	
 }
+
+

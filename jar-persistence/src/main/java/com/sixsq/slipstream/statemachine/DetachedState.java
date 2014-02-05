@@ -1,7 +1,5 @@
 package com.sixsq.slipstream.statemachine;
 
-import com.sixsq.slipstream.persistence.RunType;
-
 /*
  * +=================================================================+
  * SlipStream Server (WAR)
@@ -23,25 +21,16 @@ import com.sixsq.slipstream.persistence.RunType;
  */
 
 
-public class SendingFinalReportState extends SynchronizedState {
+public class DetachedState extends SynchronizedState {
 
-	public SendingFinalReportState(ExtrinsicState extrinsicState) {
-		super(extrinsicState);
-		if( extrinsicState.getRun().getType() == RunType.Run){
-			nextState = States.Detached;
-		}else{
-			nextState = States.Finalizing;
-		}
-	}
-	
-	@Override
-	public States getState() {
-		return States.SendingFinalReport;
-	}
-	
-	@Override
-	public boolean mustSynchronizeOnFailure() {
-		return true;
-	}
+    public DetachedState(ExtrinsicState extrinsicState) {
+        super(extrinsicState);
+        nextState = States.Terminal;
+    }
+
+    @Override
+    public States getState() {
+        return States.Detached;
+    }
 
 }

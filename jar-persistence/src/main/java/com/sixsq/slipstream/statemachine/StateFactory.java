@@ -51,6 +51,9 @@ public class StateFactory {
         case Terminal:
             newState = new TerminalState(extrinsicState);
             break;
+        case Detached:
+        	newState = new DetachedState(extrinsicState);
+        	break;
         default:
             throw (new InvalidStateException("Unknown state: " + state));
         }

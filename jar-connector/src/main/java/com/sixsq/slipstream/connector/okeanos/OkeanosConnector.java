@@ -11,6 +11,7 @@ import com.sixsq.slipstream.connector.openstack.OpenStackImageParametersFactory;
 import com.sixsq.slipstream.connector.openstack.OpenStackUserParametersFactory;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.*;
+
 import org.jclouds.Constants;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
@@ -177,6 +178,13 @@ public class OkeanosConnector extends OpenStackConnector {
                 "Missing password entry in user profile"));
         }
 
+        String targetScript = "";
+		String nodename = Run.MACHINE_NAME;
+        if(isInOrchestrationContext(run)){
+			targetScript = "slipstream-orchestrator";
+			nodename = getOrchestratorName(run);
+		}
+        
         String userData = "#!/bin/sh -e \n";
 
         userData += "# SlipStream contextualization script for ~Okeanos\n";
@@ -188,7 +196,7 @@ public class OkeanosConnector extends OpenStackConnector {
         }
         userData += "export SLIPSTREAM_CLOUD=\"" + getCloudServiceName() + "\"\n";
         userData += "export SLIPSTREAM_CONNECTOR_INSTANCE=\"" + getConnectorInstanceName() + "\"\n";
-        userData += "export SLIPSTREAM_NODENAME=\"" + getOrchestratorName(run) + "\"\n";
+        userData += "export SLIPSTREAM_NODENAME=\"" + nodename + "\"\n";
         userData += "export SLIPSTREAM_DIID=\"" + run.getName() + "\"\n";
         userData += "export SLIPSTREAM_REPORT_DIR=\"" + SLIPSTREAM_REPORT_DIR + "\"\n";
         userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"\n";
@@ -208,7 +216,7 @@ public class OkeanosConnector extends OpenStackConnector {
             + "wget --secure-protocol=SSLv3 --no-check-certificate -O " + bootstrap
             + " $SLIPSTREAM_BOOTSTRAP_BIN > " + SLIPSTREAM_REPORT_DIR + "/"
             + logfilename + " 2>&1 " + "&& chmod 0755 " + bootstrap + "\n"
-            + bootstrap + " slipstream-orchestrator >> "
+            + bootstrap + " " + targetScript + " >> "
             + SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1\n";
 
         System.out.print(userData);
@@ -303,10 +311,6 @@ public class OkeanosConnector extends OpenStackConnector {
 //                e.printStackTrace();
 //                System.out.println("Ignoring " + e);
 //            }
-
-            if(run.getType() != RunType.Orchestration) {
-                return;
-            }
 
             // Now run the initial script for the Orchestration VM
             final String nodeUsername = "root";

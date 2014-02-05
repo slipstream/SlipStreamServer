@@ -239,8 +239,11 @@ public class StratusLabConnector extends CliConnectorBase {
 			throws ConfigurationException, InvalidElementException,
 			ValidationException {
 
-		if (!isInOrchestrationContext(run)) {
-			return "\"\"";
+		String targetScript = "";
+		String nodename = Run.MACHINE_NAME;
+        if(isInOrchestrationContext(run)){
+			targetScript = "slipstream-orchestrator";
+			nodename = getOrchestratorName(run);
 		}
 
 		Configuration configuration = Configuration.getInstance();
@@ -250,7 +253,7 @@ public class StratusLabConnector extends CliConnectorBase {
 		String contextualization = "SLIPSTREAM_DIID=" + run.getName() + "#";
 		contextualization += "SLIPSTREAM_SERVICEURL=" + configuration.baseUrl
 				+ "#";
-		contextualization += "SLIPSTREAM_NODENAME=" + getOrchestratorName(run)
+		contextualization += "SLIPSTREAM_NODENAME=" + nodename
 				+ "#";
 		contextualization += "SLIPSTREAM_CATEGORY="
 				+ run.getCategory().toString() + "#";
@@ -296,12 +299,12 @@ public class StratusLabConnector extends CliConnectorBase {
 
 		contextualization += "SLIPSTREAM_REPORT_DIR=" + SLIPSTREAM_REPORT_DIR;
 
-		contextualization += "#" + constructScriptExecCommand();
+		contextualization += "#" + constructScriptExecCommand(targetScript);
 
 		return contextualization;
 	}
 
-	private String constructScriptExecCommand() throws ConfigurationException,
+	private String constructScriptExecCommand(String targetScript) throws ConfigurationException,
 			ValidationException {
 
 		Configuration configuration = Configuration.getInstance();
@@ -309,12 +312,12 @@ public class StratusLabConnector extends CliConnectorBase {
 		String bootstrap = "/tmp/slipstream.bootstrap";
 		String bootstrapUrl = configuration
 				.getRequiredProperty("slipstream.update.clientbootstrapurl");
-
+		
 		return "SCRIPT_EXEC=\"sleep 15; mkdir -p " + SLIPSTREAM_REPORT_DIR
 				+ "; wget --secure-protocol=SSLv3 --no-check-certificate -O " + bootstrap + " "
 				+ bootstrapUrl + " > " + SLIPSTREAM_REPORT_DIR
 				+ "/orchestrator.slipstream.log 2>&1 && chmod 0755 "
-				+ bootstrap + "; " + bootstrap + " slipstream-orchestrator >> "
+				+ bootstrap + "; " + bootstrap + " " + targetScript + " >> "
 				+ SLIPSTREAM_REPORT_DIR + "/orchestrator.slipstream.log 2>&1\"";
 
 	}

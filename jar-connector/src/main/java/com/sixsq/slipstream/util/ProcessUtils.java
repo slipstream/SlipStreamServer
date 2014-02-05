@@ -25,13 +25,25 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
+import com.sixsq.slipstream.exceptions.ProcessException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 
 public class ProcessUtils {
 
-	public static String execGetOutput(String[] command) throws IOException,
-			SlipStreamClientException {
+	
+	public static String execGetOutput(String[] command) 
+			throws IOException, SlipStreamClientException {
+		return execGetOutputAsArray(command, true)[0];
+	}
+	
+	public static String execGetOutput(String[] command, boolean stderrToStdout) 
+			throws IOException, SlipStreamClientException {
+		return execGetOutputAsArray(command, stderrToStdout)[0];
+	}
+	
+	public static String[] execGetOutputAsArray(String[] command, boolean stderrToStdout) 
+			throws IOException, SlipStreamClientException {
 
 		String commandMessage = "";
 		for (String part : command) {
@@ -40,17 +52,28 @@ public class ProcessUtils {
 		getLogger().info("Calling: " + commandMessage);
 
 		ProcessBuilder pb = new ProcessBuilder(command);
-		pb.redirectErrorStream(true);
+		pb.redirectErrorStream(stderrToStdout);
 
 		Process p = pb.start();
 
 		StringBuffer outputBuf = new StringBuffer();
 		BufferedReader stdOutErr = new BufferedReader(new InputStreamReader(
 				p.getInputStream()));
+		
+		StringBuffer errBuf = new StringBuffer();
+		BufferedReader stdErrReader = new BufferedReader(new InputStreamReader(
+				p.getErrorStream()));
+		
 		String line;
 		while ((line = stdOutErr.readLine()) != null) {
 			outputBuf.append(line);
 			outputBuf.append("\n");
+			getLogger().info(line);
+		}
+		
+		while ((line = stdErrReader.readLine()) != null) {
+			errBuf.append(line);
+			errBuf.append("\n");
 			getLogger().info(line);
 		}
 
@@ -59,9 +82,11 @@ public class ProcessUtils {
 			if (p.waitFor() != 0) {
 				String error = "Error executing: " + commandMessage
 						+ ". With exit code = " + p.exitValue()
-						+ " and output: " + outputBuf;
+						+ " and stdout: " + outputBuf
+						+ " and stderr: " + errBuf;
 				getLogger().severe(error);
-				throw (new SlipStreamClientException(outputBuf.toString()));
+				String message = (stderrToStdout)? outputBuf.toString() : errBuf.toString();
+				throw (new ProcessException(message, outputBuf.toString()));
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -69,7 +94,8 @@ public class ProcessUtils {
 		} finally {
 			stdOutErr.close();
 		}
-		return outputBuf.toString();
+		
+		return new String[]{outputBuf.toString(),errBuf.toString()};
 	}
 
 	protected static Logger getLogger() {

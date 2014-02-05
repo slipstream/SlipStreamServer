@@ -104,7 +104,7 @@ public class Launcher {
 			Connector connector = ConnectorFactory.getCurrentConnector(user);
 			try {
 				connector.launch(run, user);
-				setSimpleRunState(States.Detached);
+				//setSimpleRunState(States.Detached);
 			} catch (SlipStreamException e) {
 				abortRun(Run.MACHINE_NAME, e);
 			}

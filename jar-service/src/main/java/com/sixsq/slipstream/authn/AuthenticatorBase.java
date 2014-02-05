@@ -1,5 +1,9 @@
 package com.sixsq.slipstream.authn;
 
+import javax.persistence.OptimisticLockException;
+import javax.persistence.RollbackException;
+
+import org.hibernate.StaleObjectStateException;
 import org.restlet.Context;
 import org.restlet.data.Cookie;
 import org.restlet.data.Status;
@@ -18,7 +22,11 @@ public abstract class AuthenticatorBase extends Authenticator {
 
 	protected void setLastOnline(User user) {
 		user.setLastOnline();
-		user = user.store();
+		try {
+			user = user.store();
+		} catch (StaleObjectStateException e){
+		} catch (RollbackException e){
+		} catch (OptimisticLockException e){ }
 	}
 
 	protected void setLastOnline(Cookie cookie) {

@@ -99,14 +99,15 @@ public class PhysicalHostConnector extends ConnectorBase {
 	
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
-		switch (run.getCategory()) {
-		case Image:
-			throw (new ServerExecutionEnginePluginException("Run or build an image is impossible with this connector."));
-		case Deployment:
+		switch (run.getType()) {
+		case Machine:
+			throw (new ServerExecutionEnginePluginException("Build an image is impossible with this connector."));
+		case Orchestration:
+		case Run:
 			launchDeployment(run, user);
 			break;
 		default:
-			throw (new ServerExecutionEnginePluginException("The run category '" + run.getCategory() + "' is unknown by this connector."));
+			throw (new ServerExecutionEnginePluginException("The run type '" + run.getType() + "' is unknown by this connector."));
 		}
 
 		return run;
@@ -195,11 +196,18 @@ public class PhysicalHostConnector extends ConnectorBase {
 		String bootstrap = "/tmp/slipstream.bootstrap";
 		String username = user.getName();
 
+		String targetScript = "";
+		String nodename = Run.MACHINE_NAME;
+        if(isInOrchestrationContext(run)){
+			targetScript = "slipstream-orchestrator";
+			nodename = getOrchestratorName(run);
+		}
+		
 		String sudo = getSudo(username);
 		String userData = "echo '("+sudo+" bash -c '\\''sleep 5; ";
 		userData += "export SLIPSTREAM_CLOUD=\"" + getCloudServiceName() + "\"; ";
 		userData += "export SLIPSTREAM_CONNECTOR_INSTANCE=\"" + getConnectorInstanceName() + "\"; ";
-		userData += "export SLIPSTREAM_NODENAME=\"" + getOrchestratorName(run) + "\"; ";	
+		userData += "export SLIPSTREAM_NODENAME=\"" + nodename + "\"; ";	
 		userData += "export SLIPSTREAM_DIID=\"" + run.getName() + "\"; ";
 		userData += "export SLIPSTREAM_REPORT_DIR=\"" + SLIPSTREAM_REPORT_DIR + "\"; ";
 		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"; ";	
@@ -215,7 +223,7 @@ public class PhysicalHostConnector extends ConnectorBase {
 		userData += "mkdir -p " + SLIPSTREAM_REPORT_DIR + ";";
 		userData += "wget --secure-protocol=SSLv3 --no-check-certificate -O " + bootstrap + " $SLIPSTREAM_BOOTSTRAP_BIN > " + SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1 "
 				+ "&& chmod 0755 " + bootstrap + "; "
-				+ bootstrap + " slipstream-orchestrator >> " + SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1 "
+				+ bootstrap + " " + targetScript + " >> " + SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1 "
 				+ "'\\'') > /dev/null 2>&1 &' | at now";
 
 		System.out.print(userData);
