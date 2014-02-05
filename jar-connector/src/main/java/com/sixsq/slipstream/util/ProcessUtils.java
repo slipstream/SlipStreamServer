@@ -93,9 +93,10 @@ public class ProcessUtils {
 			throw (new SlipStreamInternalException(e));
 		} finally {
 			stdOutErr.close();
+			stdErrReader.close();
 		}
 		
-		return new String[]{outputBuf.toString(),errBuf.toString()};
+		return new String[]{outputBuf.toString(), errBuf.toString()};
 	}
 
 	protected static Logger getLogger() {
