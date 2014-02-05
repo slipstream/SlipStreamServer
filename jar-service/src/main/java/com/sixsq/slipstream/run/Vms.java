@@ -20,70 +20,31 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
-import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
-import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.ConnectorFactory;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.run.VmView.VmViewList;
+import com.sixsq.slipstream.persistence.Vm;
 
 @Root
 public class Vms {
 
-	@Element
-	private VmViewList vms = new VmViewList();
+	@ElementList(inline = true)
+	private List<Vm> vms = new ArrayList<Vm>();
 
-	public VmViewList getVms() {
+	public List<Vm> getVms() {
 		return vms;
 	}
 
 	public void populate(User user) throws SlipStreamException {
-		user.validate();
-		User.validateMinimumInfo(user);
 		populateVms(user);
 	}
 
 	private void populateVms(User user) throws SlipStreamException {
-		for (String cloudServiceName : ConnectorFactory.getCloudServiceNames()) {
-			Connector connector = ConnectorFactory
-					.getConnector(cloudServiceName);
-			Properties props = new Properties();
-			try {
-				props = connector.describeInstances(user);
-			} catch (Exception e) {
-				// swallow the exception, since we don't want to fail if users
-				// have wrong credentials
-			}
-			populateVmsForCloud(user, cloudServiceName, props);
-		}
-	}
-
-	private void populateVmsForCloud(User user, String cloudServiceName,
-			Properties props) throws ConfigurationException,
-			ValidationException {
-		for (String key : props.stringPropertyNames()) {
-			String instanceId = key;
-			String status = (String) props.get(key);
-			String runUuid = fetchRunUuid(user, instanceId);
-			vms.getList().add(
-					new VmView(instanceId, status, runUuid, cloudServiceName));
-		}
-	}
-
-	private String fetchRunUuid(User user, String instanceId)
-			throws ConfigurationException, ValidationException {
-		List<RunView> runs = Run.viewListByInstanceId(user, instanceId);
-		if (runs.size() == 0) {
-			return "Unknown";
-		}
-		return runs.get(0).uuid;
+		vms = Vm.list(user.getName());
 	}
 }

@@ -23,6 +23,7 @@ package com.sixsq.slipstream.factory;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import com.sixsq.slipstream.configuration.Configuration;
@@ -47,14 +48,16 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.FileUtil;
 import com.sixsq.slipstream.util.Logger;
 
 public abstract class RunFactory {
 
-	private static final List<String> VALID_RUNNING_STATE = Arrays.asList("running", "on");
+	private static final List<String> VALID_RUNNING_STATE = Arrays.asList(
+			"running", "on");
 	private static final String RUNNING_STATE = "running";
-	
+
 	public Run createRun(Module module, String cloudService, User user)
 			throws SlipStreamClientException {
 
@@ -81,10 +84,10 @@ public abstract class RunFactory {
 
 	protected void validateRun(Run run, User user, String cloudService)
 			throws SlipStreamClientException {
-	
+
 		validatePublicSshKey(run, user);
 	}
-	
+
 	private void validatePublicSshKey(Run run, User user)
 			throws ValidationException {
 		if (run.getType() != RunType.Run) {
@@ -337,41 +340,31 @@ public abstract class RunFactory {
 		return cloudServicesList;
 	}
 
-	public static String getEffectiveCloudServiceName(String cloudService, Run run) {
+	public static String getEffectiveCloudServiceName(String cloudService,
+			Run run) {
 		return CloudService.isDefaultCloudService(cloudService) ? run
 				.getCloudService() : cloudService;
 	}
-	
-	public static Run updateVmStatus(Run run, User user)
-			throws SlipStreamException {
 
-		return updateVmStatus(run, describeInstances(user, run));
-	}
-
-	public static Properties describeInstances(User user)
-			throws ValidationException {
-		return describeInstances(user, null);
-	}
-	
 	public static Properties describeInstances(User user, Run run)
 			throws ValidationException {
-				
+
 		Properties describeInstancesStates = new Properties();
 
 		String[] cloudServicesList = null;
-		if(run != null){
+		if (run != null) {
 			cloudServicesList = run.getCloudServiceNameList();
-		}else{
+		} else {
 			cloudServicesList = ConnectorFactory.getCloudServiceNames();
 		}
-		
+
 		for (String cloudServiceName : cloudServicesList) {
 			Connector connector = ConnectorFactory
 					.getConnector(cloudServiceName);
-			
+
 			Credentials credentials = connector.getCredentials(user);
 			credentials.validate();
-			
+
 			Properties props;
 			try {
 				props = connector.describeInstances(user);
@@ -386,20 +379,29 @@ public abstract class RunFactory {
 		return describeInstancesStates;
 	}
 
-	public static Run updateVmStatus(Run run, Properties describeInstancesStates)
+	public static Run updateVmStatus(Run run, User user)
 			throws SlipStreamException {
-		run = populateVmStateProperties(run, describeInstancesStates);
+		List<Vm> vms = Vm.list(user.getName());
+		run = populateVmStateProperties(run, vms);
+		return run;
+	}
+
+	public static Run updateVmStatus(Run run, List<Vm> vms)
+			throws SlipStreamException {
+		run = populateVmStateProperties(run, vms);
 		return run;
 	}
 
 	public static Run populateVmStateProperties(Run run,
-			Properties describeInstancesStates) throws NotFoundException,
+			List<Vm> vms) throws NotFoundException,
 			ValidationException {
 
 		List<String> nodes = run.getNodeNameList();
 		String vmIdKey;
 		String vmId;
 		String vmStateKey;
+		
+		Map<String, Vm> map = Vm.toMap(vms);
 
 		for (String nodeName : nodes) {
 			String keyPrefix = nodeName
@@ -408,11 +410,11 @@ public abstract class RunFactory {
 			vmId = run.getRuntimeParameterValueIgnoreAbort(vmIdKey);
 			vmId = vmId == null ? "" : vmId;
 			vmStateKey = keyPrefix + RuntimeParameter.STATE_VM_KEY;
-			String vmState = describeInstancesStates.getProperty(vmId,
-					"Unknown");
-			
+			Vm vm = map.get(vmId);
+			String vmState = vm == null ? "Unknown" : vm.getState();
+
 			vmState = cleanVmState(vmState);
-			
+
 			try {
 				run.updateRuntimeParameter(vmStateKey, vmState);
 			} catch (NotFoundException e) {
@@ -425,13 +427,12 @@ public abstract class RunFactory {
 	}
 
 	private static String cleanVmState(String vmState) {
-		if(vmState != null) {
-			if( VALID_RUNNING_STATE.contains(vmState.toLowerCase())) {
+		if (vmState != null) {
+			if (VALID_RUNNING_STATE.contains(vmState.toLowerCase())) {
 				vmState = RUNNING_STATE;
 			}
 		}
 		return vmState;
 	}
-
 
 }

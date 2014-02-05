@@ -23,7 +23,6 @@ package com.sixsq.slipstream.stats;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.persistence.EntityManager;
 
@@ -42,6 +41,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.Logger;
 
 /**
@@ -65,7 +65,7 @@ public class Measurements implements Serializable {
 	public List<Measurement> populate(User user) throws ConfigurationException,
 			ValidationException, NotFoundException, AbortException {
 
-		Properties describeInstancesStates = RunFactory.describeInstances(user);
+		List<Vm> vms = Vm.list(user.getName());
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 
@@ -74,7 +74,7 @@ public class Measurements implements Serializable {
 
 			for (Run r : runs) {
 				try {
-					RunFactory.updateVmStatus(r, describeInstancesStates);
+					RunFactory.updateVmStatus(r, vms);
 				} catch (SlipStreamException e) {
 					Logger.warning(e.getMessage());
 				}

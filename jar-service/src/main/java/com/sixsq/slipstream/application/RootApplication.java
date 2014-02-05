@@ -37,6 +37,8 @@ import org.restlet.routing.Variable;
 import org.restlet.security.Authenticator;
 import org.restlet.service.MetadataService;
 
+import slipstream.async.Collector;
+
 import com.sixsq.slipstream.action.ActionRouter;
 import com.sixsq.slipstream.authn.BasicAuthenticator;
 import com.sixsq.slipstream.authn.CookieAuthenticator;
@@ -95,6 +97,8 @@ public class RootApplication extends Application {
 		ms.addExtension("tgz", MediaType.APPLICATION_COMPRESS, true);
 		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
 
+		Collector.start();
+		
 		logServerStarted();
 	}
 

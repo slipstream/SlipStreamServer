@@ -1,4 +1,5 @@
 (ns slipstream.async.launcher
+  (:require [slipstream.async.log :as log])
   (:import [com.sixsq.slipstream.connector Launcher])
   (:import [com.sixsq.slipstream.persistence Run])
   (:import [com.sixsq.slipstream.persistence User])
@@ -24,14 +25,6 @@
 (def requested (atom 0))
 (def completed (atom 0))
 
-(defn log-info
-  [& msgs]
-  (Logger/info (apply str msgs)))
-
-(defn log-error
-  [& msgs]
-  (Logger/severe (apply str msgs)))
-
 ; This is the channel for queuing all launch requests
 (def launcher-chan (chan launcher-chan-size))
 
@@ -48,24 +41,24 @@
       (let [[v c] (alts! [ch (timeout timeout-launch)])]
         (if (nil? v)
           (do
-            (log-error "Oops... timeout")
+            (log/log-error "Oops... timeout")
             (swap! errors inc)
             (Run/abort "Timeout launching run" (.getUuid run)))
           (do
-            (log-info "Launched!")
+            (log/log-info "Launched!")
             (swap! completed inc)))))
     (go (>! ch (Launcher/launch run user)))))
 
 ; Start launch readers
 (defn launch-readers
   []
-  (log-info "Starting " number-of-readers " readers...")
+  (log/log-info "Starting " number-of-readers " readers...")
   (doseq [i (range number-of-readers)]
     (go
       (while true
         (let [[[run user] ch] (alts! [launcher-chan (timeout timeout-processing-loop)])]
           (if (nil? run)
-            (log-info "Reader " i " loop idle. Looping...")
+            (log/log-info "Reader " i " loop idle. Looping...")
             (do
               (launch! run user))))))))
 
