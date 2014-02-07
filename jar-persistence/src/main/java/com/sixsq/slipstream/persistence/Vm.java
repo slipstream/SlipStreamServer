@@ -45,7 +45,7 @@ import org.simpleframework.xml.Attribute;
 @Entity
 @NamedQueries({
 			@NamedQuery(name = "byUser", query = "SELECT v FROM Vm v WHERE v.user_ = :user"),
-			@NamedQuery(name = "removeByUser", query = "DELETE Vm WHERE user_ = :user") })
+			@NamedQuery(name = "removeByUser", query = "DELETE Vm WHERE user_ = :user AND cloud = :cloud") })
 public class Vm {
 
 	public final static String RESOURCE_URL_PREFIX = "vms/";
@@ -94,12 +94,13 @@ public class Vm {
 		return vms;
 	}
 
-	public static int update(List<Vm> newVms, String user) {
+	public static int update(List<Vm> newVms, String user, String cloud) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
 		Query q = em.createNamedQuery("removeByUser");
 		q.setParameter("user", user);
+		q.setParameter("cloud", cloud);
 		int removed = q.executeUpdate();
 		for(Vm v : newVms) {
 			em.persist(v);

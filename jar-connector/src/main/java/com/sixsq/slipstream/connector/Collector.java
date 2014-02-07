@@ -84,7 +84,7 @@ public class Collector {
 			}
 			vms.add(vm);
 		}
-		Vm.update(vms, user.getName());
+		Vm.update(vms, user.getName(), cloud);
 		return props.size();
 	}
 
