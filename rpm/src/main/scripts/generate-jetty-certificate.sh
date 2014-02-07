@@ -67,4 +67,5 @@ keytool -importkeystore \
         -deststorepass ${PASSWORD}
 
 # Remove intermediate files.
-rm -f openssl.cfg test-key.pem test.csr test-cert.pem
+#rm -f openssl.cfg test-key.pem test.csr test-cert.pem
+
