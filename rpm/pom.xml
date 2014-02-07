@@ -185,7 +185,7 @@
                                 <argument>-i</argument>
                                 <argument>-r</argument>
                                 <argument>-e</argument>
-                                <argument>s/(start\))/\1\n    stunnel \/etc\/stunnel\/stunnel-slipstream.conf/</argument>
+                                <argument>s/(start\))/\1\n    stunnel \/etc\/slipstream\/stunnel-slipstream.conf/</argument>
                                 <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
                             </arguments>
                         </configuration>
@@ -355,6 +355,14 @@
                                 <source>
                                     <location>src/main/slipstream.conf</location>
                                 </source>
+                                <source>
+                                    <location>${basedir}/src/main/stunnel/stunnel-slipstream.pem</location>
+                                    <destination>stunnel-slipstream.pem</destination>
+                                </source>
+                                <source>
+                                    <location>${basedir}/src/main/stunnel/stunnel-slipstream.conf</location>
+                                    <destination>stunnel-slipstream.conf</destination>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
@@ -367,23 +375,6 @@
                                 <source>
                                     <location>${basedir}/src/main/scripts/etc-default-jetty</location>
                                     <destination>jetty</destination>
-                                </source>
-                            </sources>
-                        </mapping>
-                        <mapping>
-                            <directory>/etc/stunnel/</directory>
-                            <filemode>600</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <directoryIncluded>false</directoryIncluded>
-                            <sources>
-                                <source>
-                                    <location>${basedir}/src/main/stunnel/stunnel-slipstream.pem</location>
-                                    <destination>stunnel-slipstream.pem</destination>
-                                </source>
-                                <source>
-                                    <location>${basedir}/src/main/stunnel/stunnel-slipstream.conf</location>
-                                    <destination>stunnel-slipstream.conf</destination>
                                 </source>
                             </sources>
                         </mapping>
