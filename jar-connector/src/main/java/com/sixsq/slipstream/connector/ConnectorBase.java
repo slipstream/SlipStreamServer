@@ -377,7 +377,9 @@ public abstract class ConnectorBase implements Connector {
 	}
 
 	protected String generateCookie(String identifier) {
-		return CookieUtils.createCookie(identifier, getConnectorInstanceName());
+		Properties extraProperties = new Properties();
+		extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
+		return CookieUtils.createCookie(identifier, getConnectorInstanceName(), extraProperties);
 	}
 
 	protected String getCookieForEnvironmentVariable(String identifier) {

@@ -56,6 +56,7 @@ public class CookieUtils {
 	private static String COOKIE_PATH = "/";
 
 	// Names of fields containing cookie information.
+	public static final String COOKIE_IS_MACHINE = "com.sixsq.isMachine";
 	private static final String COOKIE_IDTYPE = "com.sixsq.idtype";
 	private static final String COOKIE_IDENTIFIER = "com.sixsq.identifier";
 	private static final String COOKIE_EXPIRY_DATE = "com.sixsq.expirydate";
@@ -171,9 +172,17 @@ public class CookieUtils {
 
 		return cookieSetting;
 	}
-
+	
 	public static String createCookie(String username, String cloudServiceName) {
+		return createCookie(username, cloudServiceName, null);
+	}
+
+	public static String createCookie(String username, String cloudServiceName, 
+			Properties extraProperties) {
 		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
+		if (extraProperties != null) {
+			properties.putAll(extraProperties);
+		}
 		return getCookieName() + "="
 				+ CookieUtils.createCookieValue("local", username, properties)
 				+ "; Path:/";
@@ -426,4 +435,9 @@ public class CookieUtils {
 		return COOKIE_NAME;
 	}
 
+	public static boolean isMachine(Cookie cookie){
+		Form f = extractCookieValueAsForm(cookie);
+		return "true".equals(f.getFirstValue(COOKIE_IS_MACHINE, "false"));
+	}
+	
 }
