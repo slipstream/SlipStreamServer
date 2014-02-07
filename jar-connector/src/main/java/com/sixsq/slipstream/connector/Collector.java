@@ -45,6 +45,8 @@ public class Collector {
 			logger.severe(e.getMessage());
 		} catch (ValidationException e) {
 			logger.warning(e.getMessage());
+		} catch (IllegalArgumentException e) {
+			logger.warning(e.getMessage());
 		}
 		return res;
 	}
