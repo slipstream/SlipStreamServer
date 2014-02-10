@@ -31,11 +31,15 @@ import org.restlet.resource.Get;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.measurements.Measurements;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class StatsResource extends BaseResource {
+
+	public static final String USER_QUERY_PARAMETER = "user";
 
 	@Get("xml|html")
 	public Representation toXml() {
@@ -49,8 +53,18 @@ public class StatsResource extends BaseResource {
 
 		Measurements measurements = new Measurements();
 
-		List<User> users = getUser().isSuper() ? User.list() : Arrays
-				.asList(getUser());
+		List<User> users = null;
+
+		if (getUser().isSuper()) {
+			User user = extractUserQuery();
+			if(user != null) {
+				users = Arrays.asList(user);
+			} else {
+				users = User.list();
+			}
+		} else {
+			users = Arrays.asList(getUser());
+		}
 
 		for (User user : users) {
 
@@ -66,6 +80,24 @@ public class StatsResource extends BaseResource {
 
 		}
 		return measurements;
+	}
+
+	private User extractUserQuery() {
+		String username = null;
+		User user = null;
+		if (getRequest().getAttributes().containsKey(USER_QUERY_PARAMETER)) {
+			username = (String) getRequest().getAttributes().get(
+					USER_QUERY_PARAMETER);
+			try {
+				user = User.loadByName(username);
+			} catch (ConfigurationException e) {
+				throwConfigurationException(e);
+			} catch (ValidationException e) {
+				throwClientValidationError(e.getMessage());
+			}
+		}
+		
+		return user;
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.stats;
+package com.sixsq.slipstream.measurements;
 
 /*
  * +=================================================================+
@@ -27,61 +27,56 @@ import org.simpleframework.xml.Root;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
 
 /**
  * Unit test:
  * 
- * @see MeasurementsTest
+ * @see MeasurementTest
  * 
  */
 @Root(name = "measurements")
 @SuppressWarnings("serial")
-public class DeploymentMeasurements extends Measurements {
+public class BuildImageMeasurements extends Measurements {
 
 	@Override
 	protected List<Measurement> populateSingle(Run run)
 			throws ValidationException, NotFoundException, AbortException {
 
-		String cloud;
-		String nodename;
+		// might be 'default'
+		String effectiveCloud = RunFactory.getEffectiveCloudServiceName(run
+				.getCloudService(), run);
 
-		for (String name : run.getOrchestrators()) {
-			String firstPart = name
-					.split(Run.ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR)[0];
-			String lastPart = name.substring(firstPart.length() + 1);
-			cloud = lastPart;
-			fill(run, name, Run.ORCHESTRATOR_NAME, cloud,
-					ORCHESTRATOR_DEFAULT_CPU, ORCHESTRATOR_DEFAULT_RAM,
-					ORCHESTRATOR_DEFAULT_STORAGE, getInstanceId(run, name));
+		Measurement ms;
+
+		// Orchestrator
+		String nodename = Run.constructOrchestratorName(effectiveCloud);
+		String instanceId = "";
+		try {
+			instanceId = getInstanceId(run, nodename);
+		} catch (NotFoundException e) {
 		}
 
-		for (Node node : DeploymentFactory.getNodes(run).values()) {
+		// for builds the orchestrator node is not decorated with the cloud
+		// (there's only one)
+		ms = fill(run, nodename, Run.ORCHESTRATOR_NAME, effectiveCloud,
+				ORCHESTRATOR_DEFAULT_CPU, ORCHESTRATOR_DEFAULT_RAM,
+				ORCHESTRATOR_DEFAULT_STORAGE, instanceId);
+		ms.setType(RunType.Machine);
 
-			ImageModule image = node.getImage();
-			cloud = node.getCloudService();
-			String effectiveCloud = RunFactory.getEffectiveCloudServiceName(cloud, run);
+		// Machine
+		String imagename = run.getModule().getName();
+		nodename = Run.MACHINE_NAME;
 
-			nodename = node.getName();
-
-			Measurement ms;
-			for (int i = 1; i <= node.getMultiplicity(); i++) {
-				ms = fill(run, RuntimeParameter.constructNodeName(nodename, i),
-						image.getName(), effectiveCloud);
-				ms.setIndex(i);
-			}
-		}
+		ms = fill(run, nodename, imagename, effectiveCloud);
+		ms.setType(RunType.Machine);
 
 		return getMeasurments();
 	}
 
 	protected RunType getType() {
-		return RunType.Orchestration;
+		return RunType.Machine;
 	}
 }

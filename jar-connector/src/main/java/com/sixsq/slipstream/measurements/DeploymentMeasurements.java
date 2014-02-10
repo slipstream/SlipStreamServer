@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.stats;
+package com.sixsq.slipstream.measurements;
 
 /*
  * +=================================================================+
@@ -27,56 +27,61 @@ import org.simpleframework.xml.Root;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 
 /**
  * Unit test:
  * 
- * @see MeasurementTest
+ * @see MeasurementsTest
  * 
  */
 @Root(name = "measurements")
 @SuppressWarnings("serial")
-public class BuildImageMeasurements extends Measurements {
+public class DeploymentMeasurements extends Measurements {
 
 	@Override
 	protected List<Measurement> populateSingle(Run run)
 			throws ValidationException, NotFoundException, AbortException {
 
-		// might be 'default'
-		String effectiveCloud = RunFactory.getEffectiveCloudServiceName(run
-				.getCloudService(), run);
+		String cloud;
+		String nodename;
 
-		Measurement ms;
-
-		// Orchestrator
-		String nodename = Run.constructOrchestratorName(effectiveCloud);
-		String instanceId = "";
-		try {
-			instanceId = getInstanceId(run, nodename);
-		} catch (NotFoundException e) {
+		for (String name : run.getOrchestrators()) {
+			String firstPart = name
+					.split(Run.ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR)[0];
+			String lastPart = name.substring(firstPart.length() + 1);
+			cloud = lastPart;
+			fill(run, name, Run.ORCHESTRATOR_NAME, cloud,
+					ORCHESTRATOR_DEFAULT_CPU, ORCHESTRATOR_DEFAULT_RAM,
+					ORCHESTRATOR_DEFAULT_STORAGE, getInstanceId(run, name));
 		}
 
-		// for builds the orchestrator node is not decorated with the cloud
-		// (there's only one)
-		ms = fill(run, nodename, Run.ORCHESTRATOR_NAME, effectiveCloud,
-				ORCHESTRATOR_DEFAULT_CPU, ORCHESTRATOR_DEFAULT_RAM,
-				ORCHESTRATOR_DEFAULT_STORAGE, instanceId);
-		ms.setType(RunType.Machine);
+		for (Node node : DeploymentFactory.getNodes(run).values()) {
 
-		// Machine
-		String imagename = run.getModule().getName();
-		nodename = Run.MACHINE_NAME;
+			ImageModule image = node.getImage();
+			cloud = node.getCloudService();
+			String effectiveCloud = RunFactory.getEffectiveCloudServiceName(cloud, run);
 
-		ms = fill(run, nodename, imagename, effectiveCloud);
-		ms.setType(RunType.Machine);
+			nodename = node.getName();
+
+			Measurement ms;
+			for (int i = 1; i <= node.getMultiplicity(); i++) {
+				ms = fill(run, RuntimeParameter.constructNodeName(nodename, i),
+						image.getName(), effectiveCloud);
+				ms.setIndex(i);
+			}
+		}
 
 		return getMeasurments();
 	}
 
 	protected RunType getType() {
-		return RunType.Machine;
+		return RunType.Orchestration;
 	}
 }

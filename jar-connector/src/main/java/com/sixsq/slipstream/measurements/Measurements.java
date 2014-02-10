@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.stats;
+package com.sixsq.slipstream.measurements;
 
 /*
  * +=================================================================+
@@ -43,6 +43,7 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.Logger;
+import com.sixsq.slipstream.util.SerializationUtil;
 
 /**
  * Unit test:
@@ -86,6 +87,12 @@ public class Measurements implements Serializable {
 		}
 
 		return getMeasurments();
+	}
+
+	public String populateAsString(User user) throws ConfigurationException,
+			ValidationException, NotFoundException, AbortException {
+		populate(user);
+		return SerializationUtil.toXmlString(this);
 	}
 
 	protected List<Measurement> populateSingle(Run run)
@@ -219,4 +226,5 @@ public class Measurements implements Serializable {
 				+ param;
 		return "".equals(cloud) ? param : qualified;
 	}
+
 }
