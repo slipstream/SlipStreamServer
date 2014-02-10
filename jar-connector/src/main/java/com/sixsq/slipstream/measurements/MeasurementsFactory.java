@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.stats;
+package com.sixsq.slipstream.measurements;
 
 import com.sixsq.slipstream.persistence.Run;
 

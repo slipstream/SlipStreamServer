@@ -31,9 +31,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.statemachine.States;
 
 public class Launcher {
 
@@ -104,21 +102,9 @@ public class Launcher {
 			Connector connector = ConnectorFactory.getCurrentConnector(user);
 			try {
 				connector.launch(run, user);
-				//setSimpleRunState(States.Detached);
 			} catch (SlipStreamException e) {
 				abortRun(Run.MACHINE_NAME, e);
 			}
-		}
-
-		private void setSimpleRunState(States state) {
-			run.setState(state);
-			run = run.store();
-			RuntimeParameter machineState = RuntimeParameter
-					.loadFromUuidAndKey(run.getUuid(), RuntimeParameter
-							.constructParamName(Run.MACHINE_NAME,
-									RuntimeParameter.STATE_KEY));
-			machineState.setValue(state.toString());
-			machineState.store();
 		}
 
 		private void runOrchestration()

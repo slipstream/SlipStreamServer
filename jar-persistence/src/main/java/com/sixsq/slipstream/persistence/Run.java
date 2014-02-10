@@ -339,6 +339,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return runs;
 	}
 
+	public static boolean isDefaultCloudService(String cloudServiceName) {
+		return "".equals(cloudServiceName)
+				|| CloudImageIdentifier.DEFAULT_CLOUD_SERVICE
+						.equals(cloudServiceName) || cloudServiceName == null;
+	}
+
 	@Attribute
 	@Id
 	private String resourceUri;

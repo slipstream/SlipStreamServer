@@ -22,6 +22,8 @@ package com.sixsq.slipstream.stats;
 
 import org.restlet.Context;
 import org.restlet.routing.Router;
+import org.restlet.routing.TemplateRoute;
+import org.restlet.routing.Variable;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 
@@ -30,7 +32,17 @@ public class StatsRouter extends Router {
 	public StatsRouter(Context context) throws ConfigurationException {
 		super(context);
 
+		TemplateRoute route = attach("?" + StatsResource.USER_QUERY_PARAMETER + "user={user}", StatsResource.class);
+		route.setMatchingQuery(true);
+		route.getTemplate().getVariables()
+				.put("user", new Variable(Variable.TYPE_URI_QUERY));
+
 		attach("", StatsResource.class);
+
+		route = attach("/?" + StatsResource.USER_QUERY_PARAMETER + "user={user}", StatsResource.class);
+		route.setMatchingQuery(true);
+		route.getTemplate().getVariables()
+				.put("user", new Variable(Variable.TYPE_URI_QUERY));
 
 		attach("/", StatsResource.class);
 	}

@@ -59,12 +59,14 @@ public class Collector {
 		try {
 			props = connector.describeInstances(user);
 		} catch (Exception e) {
-			logger.warning("Failed contecting to cloud: "
-					+ connector.getConnectorInstanceName() + " onbehalf of " + user);
+			logger.warning("Failed contacting to cloud: "
+					+ connector.getConnectorInstanceName() + " onbehalf of "
+					+ user.getName());
 			// swallow the exception, since we don't want to fail if users
 			// have wrong credentials
 		}
-		return populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
+		return populateVmsForCloud(user, connector.getConnectorInstanceName(),
+				props);
 	}
 
 	private static int populateVmsForCloud(User user, String cloud,
