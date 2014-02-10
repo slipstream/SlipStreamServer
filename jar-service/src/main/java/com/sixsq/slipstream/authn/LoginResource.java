@@ -131,7 +131,8 @@ public class LoginResource extends AuthnResource {
 
 		if (isHtmlRequested(request)) {
 			Reference redirectURL = extractRedirectURL(request);
-			response.redirectSeeOther(redirectURL);
+			String absolutePath = RequestUtil.constructAbsolutePath(redirectURL.getPath());
+			response.redirectSeeOther(absolutePath);
 		} else {
 			response.setStatus(SUCCESS_OK);
 		}

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.restlet.Request;
+import org.restlet.data.Reference;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -78,6 +79,16 @@ public class RequestUtil {
 			return (Configuration) value;
 		} catch (ClassCastException e) {
 			throw new SlipStreamRuntimeException(e.getMessage());
+		}
+	}
+	
+	public static String constructAbsolutePath(String relativePath) {
+		try {
+			Configuration configuration = Configuration.getInstance();
+			Reference baseRef = configuration.getBaseRef();
+			return new Reference(baseRef, relativePath).getTargetRef().toString();
+		} catch (ConfigurationException | ValidationException e) { 
+			return relativePath;
 		}
 	}
 

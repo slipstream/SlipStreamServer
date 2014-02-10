@@ -36,6 +36,7 @@ import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.Parameterized;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
+import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
@@ -295,16 +296,21 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected void setResponseCreatedAndViewLocation(String resourceUri) {
 		getResponse().setStatus(Status.SUCCESS_CREATED);
-		String redirectUrl = getRequest().getRootRef() + "/" + resourceUri;
-		getResponse().setLocationRef(redirectUrl);
+
+		String redirectUrl = "/" + resourceUri;
+		String absolutePath = RequestUtil.constructAbsolutePath(redirectUrl);
+
+		getResponse().setLocationRef(absolutePath);
 	}
 
 	protected void setResponseOkAndViewLocation(String resourceUri) {
-		Status status = isExisting() ? Status.SUCCESS_OK
-				: Status.SUCCESS_CREATED;
+		Status status = isExisting() ? Status.SUCCESS_OK : Status.SUCCESS_CREATED;
 		getResponse().setStatus(status);
-		String redirectUrl = getRequest().getRootRef() + "/" + resourceUri;
-		getResponse().setLocationRef(redirectUrl);
+
+		String redirectUrl = "/" + resourceUri;
+		String absolutePath = RequestUtil.constructAbsolutePath(redirectUrl);
+
+		getResponse().setLocationRef(absolutePath);
 	}
 
 	protected void setResponseRedirect(String resourceUri) {

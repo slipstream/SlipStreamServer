@@ -27,7 +27,6 @@ import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Cookie;
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
@@ -36,6 +35,7 @@ import org.restlet.security.Verifier;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 
 public class CookieAuthenticator extends AuthenticatorBase {
@@ -80,9 +80,11 @@ public class CookieAuthenticator extends AuthenticatorBase {
 				Reference redirectRef = new Reference(baseRef,
 						LoginResource.getResourceRoot());
 				redirectRef.setQuery("redirectURL="
-						+ request.getResourceRef().getPath().toString());
+						+ request.getResourceRef().getPath());
 
-				response.redirectTemporary(redirectRef);
+				String absolutePath = RequestUtil.constructAbsolutePath(redirectRef.toString());
+
+				response.redirectTemporary(absolutePath);
 			} else {
 				response.setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
 			}

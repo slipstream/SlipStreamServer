@@ -65,6 +65,7 @@ import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.run.RunView.RunViewList;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
+import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 /**
@@ -180,9 +181,10 @@ public class RunListResource extends BaseResource {
 		}
 
 		String location = "/" + Run.RESOURCE_URI_PREFIX + run.getName();
+		String absolutePath = RequestUtil.constructAbsolutePath(location);
 
 		getResponse().setStatus(Status.SUCCESS_CREATED);
-		getResponse().setLocationRef(location);
+		getResponse().setLocationRef(absolutePath);
 	}
 
 	private String getDefaultCloudService() {

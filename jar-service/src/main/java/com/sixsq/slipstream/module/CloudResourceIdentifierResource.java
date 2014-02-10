@@ -35,6 +35,7 @@ import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.user.FormProcessor;
+import com.sixsq.slipstream.util.RequestUtil;
 
 public class CloudResourceIdentifierResource extends ServerResource {
 
@@ -139,8 +140,9 @@ public class CloudResourceIdentifierResource extends ServerResource {
 
 	protected void setResponseCreated(String resourceUri) {
 		getResponse().setStatus(Status.SUCCESS_CREATED);
-		String redirectUrl = getRequest().getRootRef() + "/" + resourceUri;
-		getResponse().setLocationRef(redirectUrl);
+
+		String absolutePath = RequestUtil.constructAbsolutePath("/" + resourceUri);
+		getResponse().setLocationRef(absolutePath);
 	}
 
 }

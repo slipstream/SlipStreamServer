@@ -68,6 +68,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.run.RunView.RunViewList;
 import com.sixsq.slipstream.util.ModuleUriUtil;
+import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
 
@@ -153,7 +154,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		target.setName(targetFullName);
 		target.store();
 
-		getResponse().setLocationRef("/" + target.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath("/" + target.getResourceUri());
+		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 	}
 
@@ -178,16 +180,15 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		String resourceUri = getParameterized().getResourceUri();
 		String parentResourceUri = ModuleUriUtil
 				.extractParentUriFromResourceUri(resourceUri);
-		String location = getRequest().getRootRef().toString() + "/"
-				+ parentResourceUri;
-		getResponse().setLocationRef(location);
+
+		String absolutePath = RequestUtil.constructAbsolutePath("/" + parentResourceUri);
+		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
 
 	private void redirectToLatest(Module latest) {
-		String location = getRequest().getRootRef().toString() + "/"
-				+ latest.getResourceUri();
-		getResponse().setLocationRef(location);
+		String absolutePath = RequestUtil.constructAbsolutePath("/" + latest.getResourceUri());
+		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
 
@@ -208,7 +209,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		updateOrCreate(module);
 
-		getResponse().setLocationRef("/" + module.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath("/" + module.getResourceUri());
+		getResponse().setLocationRef(absolutePath);
 
 		if (isNew()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
@@ -223,7 +225,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		updateOrCreate(module);
 
-		getResponse().setLocationRef("/" + module.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath("/" + module.getResourceUri());
+		getResponse().setLocationRef(absolutePath);
 
 		if (isNew()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);

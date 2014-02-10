@@ -30,6 +30,7 @@ import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Publish;
+import com.sixsq.slipstream.util.RequestUtil;
 
 public class ModulePublishResource extends ModuleResource {
 
@@ -66,6 +67,7 @@ public class ModulePublishResource extends ModuleResource {
 		module.publish();
 		module.store(false);
 		
-		getResponse().setLocationRef("/");
+		String absolutePath = RequestUtil.constructAbsolutePath("/");
+		getResponse().setLocationRef(absolutePath);
 	}
 }

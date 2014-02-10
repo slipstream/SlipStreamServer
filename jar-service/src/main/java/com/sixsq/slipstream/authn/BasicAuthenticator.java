@@ -39,6 +39,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
+import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 
 public class BasicAuthenticator extends AuthenticatorBase {
@@ -119,7 +120,9 @@ public class BasicAuthenticator extends AuthenticatorBase {
 				redirectRef.setQuery("redirectURL="
 						+ request.getResourceRef().getPath().toString());
 
-				response.redirectTemporary(redirectRef);
+				String absolutePath = RequestUtil.constructAbsolutePath(redirectRef.toString());
+
+				response.redirectTemporary(absolutePath);
 			} else {
 				response.setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
 			}

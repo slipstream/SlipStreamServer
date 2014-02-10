@@ -39,6 +39,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.util.ConfigurationUtil;
+import com.sixsq.slipstream.util.RequestUtil;
 
 public class ServiceConfigurationResource extends
 		ParameterizedResource<ServiceConfiguration> {
@@ -60,8 +61,9 @@ public class ServiceConfigurationResource extends
 		}
 
 		ConnectorFactory.resetConnectors();
-
-		getResponse().redirectSeeOther(CONFIGURATION_PATH);
+		
+		String absolutePath = RequestUtil.constructAbsolutePath(CONFIGURATION_PATH);
+		getResponse().redirectSeeOther(absolutePath);
 	}
 
 	public void processEntityAsForm(Representation entity)
@@ -97,7 +99,9 @@ public class ServiceConfigurationResource extends
 		}
 		configuration.store();
 		ConnectorFactory.resetConnectors();
-		getResponse().setLocationRef(getRequest().getResourceRef());
+		
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest().getResourceRef().getPath());
+		getResponse().setLocationRef(absolutePath);
 	}
 
 	@Override
