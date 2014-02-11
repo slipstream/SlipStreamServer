@@ -5,7 +5,7 @@
   (:import [com.sixsq.slipstream.connector Connector])
   (:import [com.sixsq.slipstream.connector ConnectorFactory])
   (:import [com.sixsq.slipstream.persistence User])
-  (:require [clojure.core.async :as async :refer :all])
+  (:require [clojure.core.async :as async :refer [go timeout thread chan <! >! <!!]])
   (:gen-class
     :name slipstream.async.Collector
     :methods [#^{:static true 
