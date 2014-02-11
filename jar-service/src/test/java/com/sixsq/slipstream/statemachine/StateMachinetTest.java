@@ -76,13 +76,13 @@ public class StateMachinetTest {
 	public static void tearDownAfterClass() throws ValidationException {
 		CommonTestUtil.deleteUser(user);
 		removeRuns();
-		List<RunView> runs = Run.viewListAll(new User("user"));
+		List<RunView> runs = Run.viewListAll();
 		assertEquals(0, runs.size());
 	}
 
 	private static void removeRuns() throws ValidationException {
 		Run run;
-		for (RunView runView : Run.viewListAll(new User("user"))) {
+		for (RunView runView : Run.viewListAll()) {
 			run = Run.load(runView.resourceUri);
 			run.remove();
 		}

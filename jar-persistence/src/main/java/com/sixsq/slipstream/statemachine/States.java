@@ -40,6 +40,10 @@ public enum States {
     Failed,
     Detached;
     
+    public static List<States> inactive() {
+    	return Arrays.asList(States.Cancelled);
+    }
+    
     public static List<States> completed() {
     	return Arrays.asList(States.Cancelled, 
     						 States.Terminal,

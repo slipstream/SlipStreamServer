@@ -31,6 +31,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 public class UserParameter extends Parameter<User> {
 
 	public static String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
+
+	public static String KEY_ON_ERROR_RUN_FOREVER = "On Error Run Forever";
+	public static String KEY_ON_SUCCESS_RUN_FOREVER = "On Success Run Forever";
 	
 	public static UserParameter convert(Parameter<ServiceConfiguration> source)
 			throws ValidationException {

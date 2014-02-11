@@ -88,7 +88,7 @@ public class RunListResourceTest extends ResourceTestBase {
 	public static void teardownClass() throws ConfigurationException,
 			ValidationException {
 
-		for (Run r : Run.viewListAllActive()) {
+		for (Run r : Run.listAll()) {
 			try {
 				r.remove();
 			} catch (Exception ex) {
