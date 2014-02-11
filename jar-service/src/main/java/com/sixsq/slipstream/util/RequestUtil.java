@@ -87,7 +87,9 @@ public class RequestUtil {
 			Configuration configuration = Configuration.getInstance();
 			Reference baseRef = configuration.getBaseRef();
 			return new Reference(baseRef, relativePath).getTargetRef().toString();
-		} catch (ConfigurationException | ValidationException e) { 
+		} catch (ConfigurationException e) { 
+			return relativePath;
+		} catch (ValidationException e) { 
 			return relativePath;
 		}
 	}
