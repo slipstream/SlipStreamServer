@@ -17,7 +17,6 @@
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamUI</artifactId>
       <type>jar</type>
-      <version>${slipstream.version}</version>
     </dependency>
   </dependencies>
 
