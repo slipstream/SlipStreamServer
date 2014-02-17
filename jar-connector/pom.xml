@@ -75,14 +75,12 @@
 		<dependency>
 			<groupId>org.jclouds.driver</groupId>
 			<artifactId>jclouds-slf4j</artifactId>
-			<version>${version.jclouds}</version>
 			<type>jar</type>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jclouds.driver</groupId>
 			<artifactId>jclouds-sshj</artifactId>
-			<version>${version.jclouds}</version>
 			<type>jar</type>
 		</dependency>
 
