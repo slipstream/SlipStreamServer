@@ -25,16 +25,6 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamPersistence</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamConnector</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamUI</artifactId>
 		</dependency>
 
