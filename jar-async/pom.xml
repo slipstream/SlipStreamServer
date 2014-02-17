@@ -23,21 +23,26 @@
 
 	<dependencies>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI</artifactId>
-		</dependency>
+        <dependency>
+                <groupId>com.sixsq.slipstream</groupId>
+                <artifactId>SlipStreamPersistence</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>org.clojure</groupId>
-			<artifactId>clojure</artifactId>
-		</dependency>
+        <dependency>
+                <groupId>com.sixsq.slipstream</groupId>
+                <artifactId>SlipStreamConnector</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>org.clojure</groupId>
-			<artifactId>core.async</artifactId>
-			<version>0.1.267.0-0d7780-alpha</version>
-		</dependency>
+        <dependency>
+                <groupId>org.clojure</groupId>
+                <artifactId>clojure</artifactId>
+        </dependency>
+
+        <dependency>
+                <groupId>org.clojure</groupId>
+                <artifactId>core.async</artifactId>
+                <version>0.1.267.0-0d7780-alpha</version>
+        </dependency>
 
 	</dependencies>
 
