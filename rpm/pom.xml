@@ -185,7 +185,7 @@
                                 <argument>-i</argument>
                                 <argument>-r</argument>
                                 <argument>-e</argument>
-                                <argument>s/(start\))/\1\n    kill -9 $(cat \/var\/run\/redirector.pid) || true\n    sleep 2\n    \/opt\/slipstream\/redirector\/redirector.py\n    echo $? > \/var\/run\/redirector.pid/</argument>
+                                <argument>s/(start\))/\1\n    kill -9 $(cat \/var\/run\/redirector.pid) || true\n    sleep 2\n    \/opt\/slipstream\/redirector\/redirector.py &\n    echo $! > \/var\/run\/redirector.pid/</argument>
                                 <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
                             </arguments>
                         </configuration>

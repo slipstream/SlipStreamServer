@@ -1,12 +1,35 @@
 #!/bin/env python
 
+import re
 import socket
 import SocketServer
 import SimpleHTTPServer
 
-my_ip = socket.gethostbyname(socket.gethostname())
+def find_ip(url = None):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('google.com',80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except:
+        try:
+            return socket.gethostbyname(socket.gethostname())
+        except:
+            return re.findall('^(?:https?://)?([0-9]{1,3}(?:\\.[0-9]{1,3}){3})', url)[0]
+            
 
-redirect_url = 'https://%s/' % my_ip
+def find_redirect_url():
+    try:
+        with open('/etc/slipstream/slipstream.conf', 'r') as f:
+            s = f.read()
+        return re.findall('[ \\t]*slipstream\\.base\\.url[ \\t]*=[ \\t]*([^\\n\\r]+)', s)[0]
+    except:
+        return 'https://%s/' % find_ip()
+
+redirect_url = find_redirect_url()
+my_ip = find_ip(redirect_url)
+
 host = my_ip
 port = 80
 
