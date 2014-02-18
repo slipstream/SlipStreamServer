@@ -149,8 +149,7 @@ public class Measurements implements Serializable {
 
 	protected String getState(Run run, String nodename) throws AbortException,
 			NotFoundException {
-		return getRuntimeParameterValue(RuntimeParameter.STATE_KEY, nodename,
-				run);
+		return run.getState().toString();
 	}
 
 	protected String getVmState(Run run, String nodename)

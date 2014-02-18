@@ -434,5 +434,23 @@ public class User extends Parameterized<User, UserParameter> {
 	public void setLastOnline() {
 		this.lastOnline = new Date();
 	}
+	
+	public boolean onSuccessRunForever() {
+		boolean _default = false;
+		try {
+			return Boolean.parseBoolean(getParameterValue(UserParameter.KEY_ON_SUCCESS_RUN_FOREVER, Boolean.toString(_default)));
+		} catch (ValidationException e) {
+			return _default;
+		}
+	}
+
+	public boolean onErrorRunForever() {
+		boolean _default = false;
+		try {
+			return Boolean.parseBoolean(getParameterValue(UserParameter.KEY_ON_ERROR_RUN_FOREVER, Boolean.toString(_default)));
+		} catch (ValidationException e) {
+			return _default;
+		}
+	}
 
 }

@@ -44,9 +44,11 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 
 public abstract class CommonTestUtil {
 
@@ -207,6 +209,28 @@ public abstract class CommonTestUtil {
 			} catch (Exception ex) {
 			}
 		}
+	}
+
+	// FIME: duplicate from ResourceTestBase
+	public static void setCloudConnector(String connectorClassName)
+			throws ConfigurationException {
+		Configuration configuration = null;
+		try {
+			configuration = Configuration.getInstance();
+		} catch (ValidationException e) {
+			fail();
+		}
+
+		ServiceConfiguration sc = configuration.getParameters();
+		try {
+			sc.setParameter(new ServiceConfigurationParameter(
+					RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
+					connectorClassName));
+		} catch (ValidationException e) {
+			fail();
+		}
+		sc.store();
+		ConnectorFactory.resetConnectors();
 	}
 
 	// Only static methods. Ensure no instances are created.

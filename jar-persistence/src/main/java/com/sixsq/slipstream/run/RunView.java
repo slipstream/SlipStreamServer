@@ -91,7 +91,7 @@ public class RunView {
 
 		if (isSuper) {
 			list = (query != null) ? Run.viewList(query, user) : Run
-					.viewListAll(user);
+					.viewListAll();
 		} else {
 			list = (query != null) ? Run.viewList(query, user) : Run
 					.viewList(user);

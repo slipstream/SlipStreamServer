@@ -26,6 +26,7 @@ import java.util.List;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.ParameterType;
+import com.sixsq.slipstream.persistence.UserParameter;
 
 public class ExecutionControlUserParametersFactory extends
 		UserParametersFactoryBase {
@@ -42,13 +43,13 @@ public class ExecutionControlUserParametersFactory extends
 	protected void initReferenceParameters() throws ValidationException {
 
 		putParameter(
-				"On Error Run Forever",
-				true,
+				UserParameter.KEY_ON_ERROR_RUN_FOREVER,
+				false,
 				"If an error occurs, keep the execution running for investigation.",
 				true);
 		putParameter(
-				"On Success Run Forever",
-				false,
+				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER,
+				true,
 				"If no errors occur, keep the execution running. Useful for deployment or long tests.",
 				true);
 		putParameter(

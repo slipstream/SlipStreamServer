@@ -78,7 +78,7 @@ public class MeasurementsTest extends RunTestBase {
 	}
 
 	private static void removeRuns() throws ValidationException {
-		for (Run r : Run.viewListAllActive()) {
+		for (Run r : Run.listAll()) {
 			r.remove();
 		}
 	}

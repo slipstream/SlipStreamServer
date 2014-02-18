@@ -128,7 +128,7 @@ public class RunListResource extends BaseResource {
 
 		if (user.isSuper()) {
 			list = (query != null) ? Run.viewList(query, user) : Run
-					.viewListAll(user);
+					.viewListAll();
 		} else {
 			list = (query != null) ? Run.viewList(query, user) : Run
 					.viewList(user);

@@ -65,7 +65,7 @@ import com.sixsq.slipstream.statemachine.States;
 		@NamedQuery(name = "allActiveRuns", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "activeRunsByUser", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) AND r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "allRuns", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
-		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user ORDER BY r.startTime DESC"),
+		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r WHERE r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
 		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
@@ -207,7 +207,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return view;
 	}
 
-	private static List<RunView> convertRunsToRunViews(List<Run> runs, User user)
+	private static List<RunView> convertRunsToRunViews(List<Run> runs)
 			throws ConfigurationException, ValidationException {
 		List<RunView> views = new ArrayList<RunView>();
 		RunView runView;
@@ -261,14 +261,24 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<RunView> viewListAll(User user)
+	public static List<RunView> viewListAll()
 			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = createNamedQuery(em, "allRuns");
 		List<Run> runs = q.getResultList();
-		List<RunView> views = convertRunsToRunViews(runs, user);
+		List<RunView> views = convertRunsToRunViews(runs);
 		em.close();
 		return views;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<Run> listAll()
+			throws ConfigurationException, ValidationException {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = createNamedQuery(em, "allRuns");
+		List<Run> runs = q.getResultList();
+		em.close();
+		return runs;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -278,7 +288,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		Query q = createNamedQuery(em, "runsByUser");
 		q.setParameter("user", user.getName());
 		List<Run> runs = q.getResultList();
-		List<RunView> views = convertRunsToRunViews(runs, user);
+		List<RunView> views = convertRunsToRunViews(runs);
 		em.close();
 		return views;
 	}
@@ -301,25 +311,16 @@ public class Run extends Parameterized<Run, RunParameter> {
 		q.setParameter("user", user.getName());
 		q.setParameter("referenceModule", moduleResourceUri);
 		List<Run> runs = q.getResultList();
-		List<RunView> views = convertRunsToRunViews(runs, user);
+		List<RunView> views = convertRunsToRunViews(runs);
 		em.close();
 		return views;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static List<Run> listAllActive(EntityManager em)
-			throws ConfigurationException, ValidationException {
-		Query q = em.createNamedQuery("allActiveRuns");
-		q.setParameter("completed", States.completed());
-		List<Run> runs = q.getResultList();
-		return runs;
 	}
 
 	@SuppressWarnings("unchecked")
 	public static List<Run> listAllActive(EntityManager em, User user)
 			throws ConfigurationException, ValidationException {
 		Query q = em.createNamedQuery("activeRunsByUser");
-		q.setParameter("completed", States.completed());
+		q.setParameter("completed", States.inactive()); // TODO: hack just for now
 		q.setParameter("user", user.getName());
 		List<Run> runs = q.getResultList();
 		return runs;
@@ -329,14 +330,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		Query q = em.createNamedQuery(query);
 		q.setMaxResults(MAX_NO_OF_ENTRIES);
 		return q;
-	}
-
-	public static List<Run> viewListAllActive() throws ConfigurationException,
-			ValidationException {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		List<Run> runs = listAllActive(em);
-		em.close();
-		return runs;
 	}
 
 	public static boolean isDefaultCloudService(String cloudServiceName) {
