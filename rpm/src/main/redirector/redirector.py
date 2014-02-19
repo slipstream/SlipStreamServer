@@ -28,7 +28,7 @@ def find_redirect_url():
         return 'https://%s/' % find_ip()
 
 redirect_url = find_redirect_url()
-my_ip = find_ip(redirect_url)
+my_ip = 0.0.0.0
 
 host = my_ip
 port = 80
