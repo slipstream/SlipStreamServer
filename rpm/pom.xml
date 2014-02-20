@@ -185,7 +185,7 @@
                                 <argument>-i</argument>
                                 <argument>-r</argument>
                                 <argument>-e</argument>
-                                <argument>s/(start\))/\1\n    kill -9 $(cat \/var\/run\/redirector.pid) || true\n    sleep 2\n    \/opt\/slipstream\/redirector\/redirector.py \&amp;\n    echo $! &gt; \/var\/run\/redirector.pid/</argument>
+                                <argument>s/(start\))/\1\n    kill -9 $(cat \/var\/run\/redirector.pid 2&gt;\/dev\/null) &gt; \/dev\/null 2&gt;1 || true\n    sleep 2\n    \/opt\/slipstream\/redirector\/redirector.py \&amp;\n    echo $! &gt; \/var\/run\/redirector.pid/</argument>
                                 <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
                             </arguments>
                         </configuration>
@@ -202,7 +202,7 @@
                                 <argument>-i</argument>
                                 <argument>-r</argument>
                                 <argument>-e</argument>
-                                <argument>s/(stop\))/\1\n    kill -9 $(cat \/var\/run\/redirector.pid) || true/</argument>
+                                <argument>s/(stop\))/\1\n    kill -9 $(cat \/var\/run\/redirector.pid 2&gt;\/dev\/null) &gt; \/dev\/null 2&gt;1 || true/</argument>
                                 <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
                             </arguments>
                         </configuration>
