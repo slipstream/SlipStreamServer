@@ -171,69 +171,6 @@
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>update-initd-redirector-start</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sed</executable>
-                            <arguments>
-                                <argument>-i</argument>
-                                <argument>-r</argument>
-                                <argument>-e</argument>
-                                <argument>s/(start\))/\1\n    kill -9 $(cat \/var\/run\/redirector.pid 2&gt;\/dev\/null) &gt; \/dev\/null 2&gt;1 || true\n    sleep 2\n    \/opt\/slipstream\/redirector\/redirector.py \&amp;\n    echo $! &gt; \/var\/run\/redirector.pid/</argument>
-                                <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>update-initd-redirector-stop</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sed</executable>
-                            <arguments>
-                                <argument>-i</argument>
-                                <argument>-r</argument>
-                                <argument>-e</argument>
-                                <argument>s/(stop\))/\1\n    kill -9 $(cat \/var\/run\/redirector.pid 2&gt;\/dev\/null) &gt; \/dev\/null 2&gt;1 || true/</argument>
-                                <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>update-initd-stunnnel</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sed</executable>
-                            <arguments>
-                                <argument>-i</argument>
-                                <argument>-r</argument>
-                                <argument>-e</argument>
-                                <argument>s/(start\))/\1\n    stunnel \/etc\/slipstream\/stunnel-slipstream.conf/</argument>
-                                <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
                 <artifactId>rpm-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
@@ -252,7 +189,6 @@
                         <require>java-1.7.0-openjdk</require>
                         <require>slipstream-client &gt;= 1.3</require>
                         <require>libcloud-slipstream-downloads</require>
-                        <require>stunnel</require>
                     </requires>
                     <mappings>
                         <mapping>
@@ -379,25 +315,6 @@
                             <groupname>root</groupname>
                         </mapping>
                         <mapping>
-                            <directory>/opt/slipstream/redirector</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                        </mapping>
-                        <mapping>
-                            <directory>/opt/slipstream/redirector</directory>
-                            <filemode>750</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <configuration>true</configuration>
-                            <directoryIncluded>false</directoryIncluded>
-                            <sources>
-                                <source>
-                                    <location>src/main/redirector/redirector.py</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        <mapping>
                             <directory>/etc/slipstream</directory>
                             <filemode>755</filemode>
                             <username>root</username>
@@ -413,14 +330,6 @@
                             <sources>
                                 <source>
                                     <location>src/main/slipstream.conf</location>
-                                </source>
-                                <source>
-                                    <location>${basedir}/src/main/stunnel/stunnel-slipstream.pem</location>
-                                    <destination>stunnel-slipstream.pem</destination>
-                                </source>
-                                <source>
-                                    <location>${basedir}/src/main/stunnel/stunnel-slipstream.conf</location>
-                                    <destination>stunnel-slipstream.conf</destination>
                                 </source>
                             </sources>
                         </mapping>
