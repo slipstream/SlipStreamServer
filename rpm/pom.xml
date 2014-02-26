@@ -163,6 +163,8 @@
                                 <argument>-i</argument>
                                 <argument>-e</argument>
                                 <argument>s/#chkconfig:.*/# chkconfig: 36 80 25/</argument>
+                                <argument>-e</argument>
+                                <argument>s/jetty{,9}/slipstream/</argument>
                                 <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
                             </arguments>
                         </configuration>
@@ -189,13 +191,16 @@
                         <require>java-1.7.0-openjdk</require>
                         <require>slipstream-client &gt;= 1.3</require>
                         <require>libcloud-slipstream-downloads</require>
+                        <require>getent</require>
+                        <require>useradd</require>
+                        <require>userdel</require>
                     </requires>
                     <mappings>
                         <mapping>
                             <directory>${installation.dir}</directory>
                             <filemode>644</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
                                 <source>
@@ -235,8 +240,8 @@
                         <mapping>
                             <directory>${installation.dir}/etc</directory>
                             <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
                                 <source>
@@ -250,8 +255,8 @@
                         <mapping>
                             <directory>${installation.dir}/resources</directory>
                             <filemode>644</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
                                 <source>
@@ -265,8 +270,8 @@
                         <mapping>
                             <directory>${installation.dir}/webapps</directory>
                             <filemode>644</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
                                 <source>
@@ -277,8 +282,8 @@
                         <mapping>
                             <directory>${installation.dir}/lib/logging</directory>
                             <filemode>644</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
                                 <source>
@@ -289,8 +294,8 @@
                         <mapping>
                             <directory>${installation.dir}</directory>
                             <filemode>644</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                             <configuration>true</configuration>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
@@ -305,26 +310,26 @@
                         <mapping>
                             <directory>${installation.dir}/tmp</directory>
                             <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                         </mapping>
                         <mapping>
                             <directory>${slipstream.base.dir}/downloads</directory>
                             <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                         </mapping>
                         <mapping>
                             <directory>/etc/slipstream</directory>
                             <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                         </mapping>
                         <mapping>
                             <directory>/etc/slipstream</directory>
                             <filemode>600</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                             <configuration>true</configuration>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
@@ -341,17 +346,28 @@
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
                                 <source>
-                                    <location>${basedir}/src/main/scripts/etc-default-jetty</location>
-                                    <destination>jetty</destination>
+                                    <location>${basedir}/src/main/scripts/etc-default-slipstream</location>
+                                    <destination>slipstream</destination>
                                 </source>
                             </sources>
                         </mapping>
                     </mappings>
+                    <preinstallScriptlet>
+                        <script>
+/usr/bin/getent group slipstream || /usr/sbin/groupadd -r slipstream
+/usr/bin/getent passwd slipstream || /usr/sbin/useradd -r -d /opt/slipstream -s /bin/false slipstream
+                        </script>
+                    </preinstallScriptlet>
                     <postinstallScriptlet>
                         <script>
 /sbin/chkconfig --add slipstream
                         </script>
                     </postinstallScriptlet>
+                    <postremoveScriptlet>
+                        <script>
+/usr/sbin/userdel slipstream
+                        </script>
+                    </postremoveScriptlet>
                 </configuration>
                 <executions>
                     <execution>
