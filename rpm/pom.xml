@@ -336,6 +336,12 @@
                             </sources>
                         </mapping>
                         <mapping>
+                            <directory>/var/tmp/slipstream</directory>
+                            <filemode>755</filemode>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
+                        </mapping>
+                        <mapping>
                             <directory>/etc/default/</directory>
                             <filemode>644</filemode>
                             <username>root</username>
@@ -352,19 +358,15 @@
                     <preinstallScriptlet>
                         <script>
 /usr/bin/getent group slipstream || /usr/sbin/groupadd -r slipstream
-/usr/bin/getent passwd slipstream || /usr/sbin/useradd -r -d /opt/slipstream -s /bin/false -g slipstream slipstream
+/usr/bin/getent passwd slipstream || /usr/sbin/useradd -r -d ${slipstream.base.dir} -s /bin/false -g slipstream slipstream
                         </script>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
                         <script>
 /sbin/chkconfig --add slipstream
+/bin/chown -R slipstream: ${slipstream.base.dir}
                         </script>
                     </postinstallScriptlet>
-                    <postremoveScriptlet>
-                        <script>
-/usr/sbin/userdel slipstream
-                        </script>
-                    </postremoveScriptlet>
                 </configuration>
                 <executions>
                     <execution>
