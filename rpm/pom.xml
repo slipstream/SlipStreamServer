@@ -191,9 +191,6 @@
                         <require>java-1.7.0-openjdk</require>
                         <require>slipstream-client &gt;= 1.3</require>
                         <require>libcloud-slipstream-downloads</require>
-                        <require>getent</require>
-                        <require>useradd</require>
-                        <require>userdel</require>
                     </requires>
                     <mappings>
                         <mapping>
