@@ -358,7 +358,7 @@
                     <preinstallScriptlet>
                         <script>
 /usr/bin/getent group slipstream || /usr/sbin/groupadd -r slipstream
-/usr/bin/getent passwd slipstream || /usr/sbin/useradd -r -d ${slipstream.base.dir} -g slipstream slipstream
+/usr/bin/getent passwd slipstream || /usr/sbin/useradd -r -d ${installation.dir} -g slipstream slipstream
                         </script>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
