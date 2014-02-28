@@ -5,7 +5,7 @@
   (:import [com.sixsq.slipstream.connector Connector])
   (:import [com.sixsq.slipstream.connector ConnectorFactory])
   (:import [com.sixsq.slipstream.persistence User])
-  (:require [clojure.core.async :as async :refer [go timeout thread chan <! >! <!!]])
+  (:require [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!!]])
   (:gen-class
     :name slipstream.async.Collector
     :methods [#^{:static true 
@@ -16,12 +16,12 @@
   [seconds]
   (* 1000 seconds))
 
-(def collector-chan-size 1000)
+(def collector-chan-size 50)
 (def metrics-update-chan-size 1000)
-(def number-of-readers 100)
+(def number-of-readers 20)
 (def timeout-all-users-loop (seconds-in-msecs 120))
 (def timeout-online-loop (seconds-in-msecs 10))
-(def timeout-collect (seconds-in-msecs 5))
+(def timeout-collect (seconds-in-msecs 9))
 (def timeout-processing-loop (seconds-in-msecs 600))
 
 (defn get-value
@@ -49,10 +49,10 @@
   (.getName user))
 
 ; This is the channel for queuing all collect requests
-(def collector-chan (chan collector-chan-size))
+(def collector-chan (chan (sliding-buffer collector-chan-size)))
 
 ; This is the channel for queuing all metric update requests
-(def update-metric-chan (chan metrics-update-chan-size))
+(def update-metric-chan (chan (sliding-buffer metrics-update-chan-size)))
 
 (defn collect!
   [user connector]
@@ -87,7 +87,6 @@
       (while true
         (let [[[user connector] ch] (alts! [collector-chan (timeout timeout-processing-loop)])]
           (if (nil? user)
-            (log/log-info "Collector reader " i " loop idle. Looping...")
             (collect! user connector)))))))
 
 (defonce ^:dynamic *collect-processor* (collect-readers))
@@ -101,31 +100,20 @@
       (while true
         (let [[[user] ch] (alts! [update-metric-chan (timeout timeout-processing-loop)])]
           (if (nil? user)
-            (log/log-info "Metric update reader " i " loop idle. Looping...")
             (update-metric! user)))))))
 
 (defonce ^:dynamic *update-metric-processor* (update-metric-readers))
 
 (defn insert-collection-requests
-  [users msg]
+  [users]
   (doseq [user users
         connector (connectors)]
-    (log/log-info
-      msg
-      " "
-      (.getName user)
-      " on cloud "
-      (.getCloudServiceName connector))
     (go 
       (>! collector-chan [user connector]))))
 
 (defn insert-update-metric-requests
-  [users msg]
+  [users]
   (doseq [user users]
-    (log/log-info
-      msg
-      " "
-      (.getName user))
     (go 
       (>! update-metric-chan [user]))))
 
@@ -136,14 +124,14 @@
     (while true
       (<!! (timeout timeout-online-loop))
       (let [users (online-users)]
-        (insert-collection-requests users "Inserting request for collecting vms for online users")
-        (insert-update-metric-requests users "Inserting request for metrics collection for online users"))))
+        (insert-collection-requests users)
+        (insert-update-metric-requests users))))
   (thread
     (while true
-      (<!! (timeout timeout-online-loop))
+      (<!! (timeout timeout-all-users-loop))
       (let [users (users)]
-        (insert-collection-requests users "Inserting request for collecting vms for all users"))
-        (insert-update-metric-requests users "Inserting request for metrics collecting for all users"))))
+        (insert-collection-requests users))
+        (insert-update-metric-requests users))))
 
 (defn -start
   []
