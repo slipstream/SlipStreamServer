@@ -41,6 +41,7 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.util.FileUtil;
@@ -251,6 +252,10 @@ public class UserResource extends ParameterizedResource<User> {
 			throwClientBadRequest("The uploaded user does not correspond to the target user uri");
 		}
 
+		if (isNew() && getUser().isSuper()) {
+			user.setState(State.ACTIVE);
+		}
+		
 		user.store();
 
 		setResponseForPut();
