@@ -83,7 +83,8 @@ public class RequestUtil {
 	}
 	
 	public static String constructAbsolutePath(String relativePath) {
-		try {
+		return relativePath;
+		/*try {
 			Configuration configuration = Configuration.getInstance();
 			Reference baseRef = configuration.getBaseRef();
 			return new Reference(baseRef, relativePath).getTargetRef().toString();
@@ -91,7 +92,7 @@ public class RequestUtil {
 			return relativePath;
 		} catch (ValidationException e) { 
 			return relativePath;
-		}
+		}*/
 	}
 
 }
