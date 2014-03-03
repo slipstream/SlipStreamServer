@@ -78,6 +78,8 @@
             (.getName user)))))
     (go (>! ch (updator/update user)))))
 
+(def not-nil? (complement nil?))
+
 ; Start collector readers
 (defn collect-readers
   []
@@ -86,7 +88,7 @@
     (go
       (while true
         (let [[[user connector] ch] (alts! [collector-chan (timeout timeout-processing-loop)])]
-          (if (nil? user)
+          (if (not-nil? user)
             (collect! user connector)))))))
 
 (defonce ^:dynamic *collect-processor* (collect-readers))
@@ -99,7 +101,7 @@
     (go
       (while true
         (let [[[user] ch] (alts! [update-metric-chan (timeout timeout-processing-loop)])]
-          (if (nil? user)
+          (if (not-nil? user)
             (update-metric! user)))))))
 
 (defonce ^:dynamic *update-metric-processor* (update-metric-readers))
