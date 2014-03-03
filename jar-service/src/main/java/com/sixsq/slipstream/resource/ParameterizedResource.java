@@ -185,15 +185,11 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	public void deleteResource() {
 
 		if (!canDelete()) {
-			throwForbidden();
+			throwClientForbiddenError();
 		}
 
 		getParameterized().remove();
 		setStatus(Status.SUCCESS_NO_CONTENT);
-	}
-
-	private void throwForbidden() {
-		throw (new ResourceException(Status.CLIENT_ERROR_FORBIDDEN));
 	}
 
 	@Get("txt")
