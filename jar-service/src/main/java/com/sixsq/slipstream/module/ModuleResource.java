@@ -162,7 +162,13 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	@Delete
 	public void deleteModule() {
 
-		super.deleteResource();
+		if (!canDelete()) {
+			throwClientForbiddenError();
+		}
+
+		getParameterized().setDeleted(true);
+		getParameterized().store();
+
 		Module latest = null;
 		latest = Module.loadLatest(getParameterized().getResourceUri());
 		try {

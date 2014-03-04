@@ -56,11 +56,11 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @NamedQueries({
-		@NamedQuery(name = "moduleLastVersion", query = "SELECT m FROM Module m WHERE m.version = (SELECT MAX(m.version) FROM Module m WHERE m.name = :name)"),
-		@NamedQuery(name = "moduleViewLatestChildren", query = "SELECT NEW com.sixsq.slipstream.module.ModuleView(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.parentUri = :parent AND m.version = (SELECT MAX(c.version) FROM Module c WHERE c.name = m.name)"),
-		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name"),
-		@NamedQuery(name = "moduleAll", query = "SELECT m FROM Module m"),
-		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.published != null") })
+		@NamedQuery(name = "moduleLastVersion", query = "SELECT m FROM Module m WHERE m.version = (SELECT MAX(m.version) FROM Module m WHERE m.name = :name AND m.deleted != TRUE)"),
+		@NamedQuery(name = "moduleViewLatestChildren", query = "SELECT NEW com.sixsq.slipstream.module.ModuleView(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.parentUri = :parent AND m.version = (SELECT MAX(c.version) FROM Module c WHERE c.name = m.name AND m.deleted != TRUE)"),
+		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name AND m.deleted != TRUE"),
+		@NamedQuery(name = "moduleAll", query = "SELECT m FROM Module m WHERE m.deleted != TRUE"),
+		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.published != null AND m.deleted != TRUE") })
 public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	public final static String RESOURCE_URI_PREFIX = "module/";
@@ -191,7 +191,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	@Element(required = false)
 	@Lob
 	private Publish published; // to the marketplace
-
+	
 	/**
 	 * Module reference is a URL.
 	 * <p/>
@@ -432,5 +432,4 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 		return copy;
 	}
-
 }
