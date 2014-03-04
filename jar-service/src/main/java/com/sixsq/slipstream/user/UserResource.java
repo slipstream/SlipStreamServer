@@ -88,10 +88,10 @@ public class UserResource extends ParameterizedResource<User> {
 						UserParameter.convert(p.getValue()));
 			}
 		}
-		mergePulicKeyParameter(user);
+		mergePublicKeyParameter(user);
 	}
 
-	private void mergePulicKeyParameter(User user)
+	private void mergePublicKeyParameter(User user)
 			throws ConfigurationException, ValidationException {
 		String pubKeyParameterName = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY
 				.getName();
