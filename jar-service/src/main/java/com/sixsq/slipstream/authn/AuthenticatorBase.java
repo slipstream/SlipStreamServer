@@ -13,6 +13,7 @@ import org.restlet.security.Authenticator;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.User.State;
 
 public abstract class AuthenticatorBase extends Authenticator {
 
@@ -45,5 +46,9 @@ public abstract class AuthenticatorBase extends Authenticator {
 		}
 
 		setLastOnline(user);
+	}
+	
+	protected boolean isActive(User user) {
+		return State.ACTIVE == user.getState();
 	}
 }
