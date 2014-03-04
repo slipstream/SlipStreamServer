@@ -41,13 +41,20 @@ public enum States {
     Detached;
     
     public static List<States> inactive() {
-    	return Arrays.asList(States.Cancelled);
+    	return Arrays.asList(States.Inactive,
+    						 States.Cancelled,
+							 States.Terminal, // is this really inactive?
+							 States.Aborted,
+    						 States.Failed,
+							 States.Unknown,
+							 States.Done);
     }
     
     public static List<States> completed() {
     	return Arrays.asList(States.Cancelled, 
     						 States.Terminal,
     						 States.Aborted,
+    						 States.Failed,
     						 States.Unknown,
     						 States.Done);
     }
