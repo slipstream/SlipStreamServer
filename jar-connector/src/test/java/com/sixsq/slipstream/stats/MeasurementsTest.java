@@ -42,6 +42,7 @@ import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.run.RunTestBase;
+import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class MeasurementsTest extends RunTestBase {
@@ -182,20 +183,20 @@ public class MeasurementsTest extends RunTestBase {
 
 	private void createACoupleOfImageBuildRuns(Module module)
 			throws SlipStreamException {
-		createAndStoreRun(module, user.getName(), RunType.Machine);
-		createAndStoreRun(module, user.getName(), RunType.Machine);
+		createAndStoreRun(module, user.getName(), RunType.Machine, States.Running);
+		createAndStoreRun(module, user.getName(), RunType.Machine, States.Running);
 	}
 
 	private void createACoupleOfDeploymentRuns(Module module)
 			throws SlipStreamException {
-		createAndStoreRun(module, user.getName(), RunType.Orchestration);
-		createAndStoreRun(module, user.getName(), RunType.Orchestration);
+		createAndStoreRun(module, user.getName(), RunType.Orchestration, States.Running);
+		createAndStoreRun(module, user.getName(), RunType.Orchestration, States.Running);
 	}
 
 	private void createACoupleOfSimpleRuns(Module module)
 			throws SlipStreamException {
-		createAndStoreRun(module, user.getName(), RunType.Run);
-		createAndStoreRun(module, user.getName(), RunType.Run);
+		createAndStoreRun(module, user.getName(), RunType.Run, States.Running);
+		createAndStoreRun(module, user.getName(), RunType.Run, States.Running);
 	}
 
 }

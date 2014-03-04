@@ -167,7 +167,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		}
 
 		getParameterized().setDeleted(true);
-		getParameterized().store();
+		getParameterized().store(false);
 
 		Module latest = null;
 		latest = Module.loadLatest(getParameterized().getResourceUri());

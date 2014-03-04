@@ -253,7 +253,9 @@ public class UserResource extends ParameterizedResource<User> {
 		}
 
 		if (isNew() && getUser().isSuper()) {
-			user.setState(State.ACTIVE);
+			State current = user.getState();
+			State newState = current == State.NEW ? State.ACTIVE : current;
+			user.setState(newState);
 		}
 		
 		user.store();

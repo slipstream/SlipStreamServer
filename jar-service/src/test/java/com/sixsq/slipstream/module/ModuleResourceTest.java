@@ -30,6 +30,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.RollbackException;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -293,7 +295,6 @@ public class ModuleResourceTest extends ResourceTestBase {
 					module.remove();
 				}
 			} catch (NullPointerException ex) {
-
 			}
 		}
 	}

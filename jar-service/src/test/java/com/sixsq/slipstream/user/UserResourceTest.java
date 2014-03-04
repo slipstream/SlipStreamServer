@@ -399,15 +399,65 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void putWithUserState() throws ValidationException,
+	public void superCreatesInActiveState() throws ValidationException,
 			ConfigurationException {
-		User withState = new User("getUserState");
+		User willBeActive = new User("superCreatesInActiveState");
+
+		Request request = createPutRequest(willBeActive, superUser.getName());
+		Response response = executeRequest(request);
+
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+
+		willBeActive = User.loadByName(willBeActive.getName());
+		assertThat(willBeActive.getState(), is(State.ACTIVE));
+
+		willBeActive.remove();
+	}
+
+	@Test
+	public void normalUserCreatesInNewState() throws ValidationException,
+			ConfigurationException {
+		User willBeNew = new User("normalUserCreatesInNewState");
+
+		Request request = createPutRequest(willBeNew, user.getName());
+		Response response = executeRequest(request);
+
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+
+		willBeNew = User.loadByName(willBeNew.getName());
+		assertThat(willBeNew.getState(), is(State.NEW));
+
+		willBeNew.remove();
+	}
+
+	@Test
+	public void createWithUserState() throws ValidationException,
+			ConfigurationException {
+		User withState = new User("createWithUserState");
 		withState.setState(State.SUSPENDED);
 
 		Request request = createPutRequest(withState, superUser.getName());
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+
+		withState = User.loadByName(withState.getName());
+		assertThat(withState.getState(), is(State.SUSPENDED));
+
+		withState.remove();
+	}
+
+	@Test
+	public void putWithUserState() throws ValidationException,
+			ConfigurationException {
+		User withState = new User("putWithUserState");
+		withState = withState.store();
+		withState.setState(State.SUSPENDED);
+
+		Request request = createPutRequest(withState, superUser.getName());
+		Response response = executeRequest(request);
+
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
 		withState = User.loadByName(withState.getName());
 		assertThat(withState.getState(), is(State.SUSPENDED));

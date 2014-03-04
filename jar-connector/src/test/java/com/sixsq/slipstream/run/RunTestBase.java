@@ -160,10 +160,16 @@ public class RunTestBase {
 
 	protected Run createAndStoreRun(Module module, String user, RunType type)
 			throws SlipStreamException {
+		return createAndStoreRun(module, user, type, States.Inactive);
+	}
+
+	protected Run createAndStoreRun(Module module, String user, RunType type, States state)
+			throws SlipStreamException {
 
 		Run run = RunFactory.getRun(module, type, cloudServiceName,
 				RunTestBase.user);
 		run.setUser(user);
+		run.setState(state);
 		run = run.store();
 		run = ConnectorFactory.getConnector(cloudServiceName).launch(run,
 				RunTestBase.user);
