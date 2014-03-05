@@ -233,29 +233,37 @@ public class DeploymentModule extends Module {
 		DeploymentModule deployment = (DeploymentModule) module;
 
 		for (Node node : deployment.getNodes().values()) {
-
-			String nodeRuntimeParameterKeyName = run
-					.nodeRuntimeParameterKeyName(node,
-							RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
-
-			if (run.getParameters().containsKey(nodeRuntimeParameterKeyName)) {
-				node.setMultiplicity(run.getParameter(
-						nodeRuntimeParameterKeyName).getValue());
-			}
-
-			nodeRuntimeParameterKeyName = run.nodeRuntimeParameterKeyName(node,
-					RuntimeParameter.CLOUD_SERVICE_NAME);
-
-			if (run.getParameters().containsKey(nodeRuntimeParameterKeyName)) {
-				String cloudService = run.getParameter(
-						nodeRuntimeParameterKeyName).getValue();
-				node.setCloudService(cloudService);
-				node.getImage().assignBaseImageIdToImageIdFromCloudService(
-						cloudService);
-			}
+			setMultiplicity(run, node);
+			setCloudServiceName(run, node);
 		}
 
 		return deployment;
+	}
+
+	private static void setCloudServiceName(Run run, Node node)
+			throws ValidationException {
+
+		String cloudServiceNameKey = run.nodeRuntimeParameterKeyName(node,
+				RuntimeParameter.CLOUD_SERVICE_NAME);
+
+		if (run.getParameters().containsKey(cloudServiceNameKey)) {
+			String cloudService = run.getParameter(cloudServiceNameKey)
+					.getValue();
+			node.setCloudService(cloudService);
+			node.getImage().assignBaseImageIdToImageIdFromCloudService(
+					cloudService);
+		}
+	}
+
+	private static void setMultiplicity(Run run, Node node)
+			throws ValidationException {
+
+		String multiplicityKey = run.nodeRuntimeParameterKeyName(node,
+				RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+
+		if (run.getParameters().containsKey(multiplicityKey)) {
+			node.setMultiplicity(run.getParameter(multiplicityKey).getValue());
+		}
 	}
 
 	public void postDeserialization() {

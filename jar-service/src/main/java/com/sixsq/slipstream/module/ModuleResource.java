@@ -435,8 +435,9 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		Module module = Module.load(targetParameterizedUri);
 		if (module != null) {
 			if (module.getCategory() == ModuleCategory.Project) {
-				((ProjectModule) module).setChildren(Module.viewList(module
-						.getResourceUri()));
+				List<ModuleView> children = Module.viewList(module
+						.getResourceUri());
+				((ProjectModule) module).setChildren(children);
 			}
 		}
 		return module;
@@ -550,6 +551,9 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			setCanGet(authorizeGet());
 		}
 
+		if (getParameterized() != null && getParameterized().isDeleted() && !getUser().isSuper()) {
+			throwClientForbiddenError("Module deleted");
+		}
 	}
 
 	private boolean authorizeGet() {

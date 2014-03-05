@@ -23,7 +23,7 @@ public class Util {
 	}
 
 	public static void throwClientForbiddenError() {
-		throwClientError(Status.CLIENT_ERROR_FORBIDDEN, "");
+		throwClientError(Status.CLIENT_ERROR_FORBIDDEN, "Forbidden");
 	}
 
 	public static void throwClientForbiddenError(String message) {
