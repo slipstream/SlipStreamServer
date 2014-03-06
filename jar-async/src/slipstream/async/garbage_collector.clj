@@ -28,7 +28,7 @@
   []
   (let [ch (chan 1)]
     (go
-      (let [[[no-of-purged] c] (alts! [ch (timeout timeout-collect)])]
+      (let [[no-of-purged c] (alts! [ch (timeout timeout-collect)])]
         (if (nil? no-of-purged)
           (log/log-error
             "Timeout garbage collecting runs")
@@ -53,15 +53,15 @@
 
 (defn insert-collection-requests
   []
-  (go (>! collector-chan)))
+  (go (>! collector-chan [])))
 
 ; Start collector writers
 (defn collect-writers
   []
   (thread
     (while true
-      (<!! (timeout timeout-processing-loop))
-      (insert-collection-requests))))
+      (insert-collection-requests)
+      (<!! (timeout timeout-processing-loop)))))
 
 (defn -start
   []

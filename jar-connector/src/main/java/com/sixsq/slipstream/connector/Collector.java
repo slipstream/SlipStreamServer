@@ -59,7 +59,7 @@ public class Collector {
 		try {
 			props = connector.describeInstances(user);
 		} catch (Exception e) {
-			logger.warning("Failed contacting to cloud: "
+			logger.warning("Failed contacting cloud: "
 					+ connector.getConnectorInstanceName() + " onbehalf of "
 					+ user.getName());
 			// swallow the exception, since we don't want to fail if users
