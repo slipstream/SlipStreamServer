@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,7 @@ import com.sixsq.slipstream.statemachine.States;
 		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r WHERE r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
 		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
+		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.startTime < :before AND r.state IN (:states)"),
 		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
 
@@ -185,11 +187,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return run;
 	}
 
-	public static RunView loadViewByInstanceId(User user,
-			String instanceId, String cloud) throws ConfigurationException,
-			ValidationException {
-		// TODO: there is a chance that if two clouds have overlaping instanceid,
-		//       this logic will pickup both
+	public static RunView loadViewByInstanceId(User user, String instanceId,
+			String cloud) throws ConfigurationException, ValidationException {
+		// TODO: there is a chance that if two clouds have overlaping
+		// instanceid,
+		// this logic will pickup both
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("runByInstanceId");
 		q.setParameter("instanceid", instanceId);
@@ -201,7 +203,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 		em.close();
 		RunView view = null;
-		if(run != null) {
+		if (run != null) {
 			view = convertRunToRunView(run);
 		}
 		return view;
@@ -231,11 +233,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	private static RunView convertRunToRunView(Run run) {
-		
-		if(run == null) {
+
+		if (run == null) {
 			return null;
 		}
-		
+
 		RunView runView;
 		runView = new RunView(run.getResourceUri(), run.getUuid(),
 				run.getModuleResourceUrl(), run.getState().toString(),
@@ -261,8 +263,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<RunView> viewListAll()
-			throws ConfigurationException, ValidationException {
+	public static List<RunView> viewListAll() throws ConfigurationException,
+			ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = createNamedQuery(em, "allRuns");
 		List<Run> runs = q.getResultList();
@@ -271,14 +273,42 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return views;
 	}
 
-	@SuppressWarnings("unchecked")
+ 	@SuppressWarnings("unchecked")
 	public static List<Run> listAll()
 			throws ConfigurationException, ValidationException {
-		EntityManager em = PersistenceUtil.createEntityManager();
+ 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = createNamedQuery(em, "allRuns");
+ 		List<Run> runs = q.getResultList();
+ 		em.close();
+ 		return runs;
+ 	}
+
+	public static int purge() throws ConfigurationException, ValidationException {
+		List<Run> old = listOldTransient();
+		for (Run r : old) {
+			r.remove();
+		}
+		return old.size();
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<Run> listOldTransient() throws ConfigurationException,
+			ValidationException {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = createNamedQuery(em, "oldInStatesRuns");
+		Date back = aLittleWhileAgo();
+		q.setParameter("before", back);
+		q.setParameter("states", States.transition());
 		List<Run> runs = q.getResultList();
 		em.close();
 		return runs;
+	}
+
+	private static Date aLittleWhileAgo() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.HOUR, -1);
+		Date oneHourBack = calendar.getTime();
+		return oneHourBack;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -320,7 +350,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static List<Run> listAllActive(EntityManager em, User user)
 			throws ConfigurationException, ValidationException {
 		Query q = em.createNamedQuery("activeRunsByUser");
-		q.setParameter("completed", States.inactive()); // TODO: hack just for now
+		q.setParameter("completed", States.inactive()); // TODO: hack just for
+														// now
 		q.setParameter("user", user.getName());
 		List<Run> runs = q.getResultList();
 		return runs;

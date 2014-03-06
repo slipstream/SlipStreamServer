@@ -4,12 +4,17 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 import org.hibernate.LazyInitializationException;
 import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.statemachine.States;
 
 public class RunTest {
 
@@ -34,5 +39,34 @@ public class RunTest {
 		run = Run.loadRunWithRuntimeParameters(run.getUuid());
 
 		assertThat(run.getRuntimeParameterValue("ss:key"), is("value"));
+	}
+
+	@Test
+	public void oldRuns() throws ValidationException, NotFoundException, AbortException {
+
+		Module image = new ImageModule();
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.HOUR, -2);
+		Date twoHourBack = calendar.getTime();
+
+		List<Run> before = Run.listOldTransient();
+		
+		Run done = new Run(image, RunType.Run, "test", new User("user"));
+		done.setStart(twoHourBack);
+		done.setState(States.Done);
+		done.store();
+		
+		Run aborting = new Run(image, RunType.Run, "test", new User("user"));
+		aborting.setStart(twoHourBack);
+		aborting.setState(States.Aborting);
+		aborting.store();
+
+		List<Run> transiant = Run.listOldTransient();
+
+		assertThat(transiant.size(), is(before.size() + 1));
+
+		done.remove();
+		aborting.remove();
 	}
 }
