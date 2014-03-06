@@ -6,7 +6,7 @@
   (:gen-class
     :name slipstream.async.GarbageCollector
     :methods [#^{:static true}
-                [purge [] int]]))
+                [start [] void]]))
 
 (defn seconds-in-msecs
   [seconds]

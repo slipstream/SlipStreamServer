@@ -38,6 +38,7 @@ import org.restlet.security.Authenticator;
 import org.restlet.service.MetadataService;
 
 import slipstream.async.Collector;
+import slipstream.async.GarbageCollector;
 
 import com.sixsq.slipstream.action.ActionRouter;
 import com.sixsq.slipstream.authn.BasicAuthenticator;
@@ -98,6 +99,7 @@ public class RootApplication extends Application {
 		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
 
 		Collector.start();
+		GarbageCollector.start();
 		
 		logServerStarted();
 	}
