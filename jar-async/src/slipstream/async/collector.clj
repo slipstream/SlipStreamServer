@@ -17,8 +17,8 @@
   (* 1000 seconds))
 
 (def collector-chan-size 50)
-(def metrics-update-chan-size 1000)
-(def number-of-readers 20)
+(def metrics-update-chan-size 50)
+(def number-of-readers 25)
 (def timeout-all-users-loop (seconds-in-msecs 120))
 (def timeout-online-loop (seconds-in-msecs 10))
 (def timeout-collect (seconds-in-msecs 9))
