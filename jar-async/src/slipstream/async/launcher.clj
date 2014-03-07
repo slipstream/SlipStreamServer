@@ -16,8 +16,8 @@
   [minutes]
   (* 1000 60 minutes))
 
-(def launcher-chan-size 1000)
-(def number-of-readers 100)
+(def launcher-chan-size 10)
+(def number-of-readers 10)
 (def timeout-processing-loop (minutes-in-msecs 1))
 (def timeout-launch (minutes-in-msecs 5))
 
