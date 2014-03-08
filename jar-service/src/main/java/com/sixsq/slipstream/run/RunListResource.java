@@ -172,7 +172,7 @@ public class RunListResource extends BaseResource {
 			createRepositoryResource(run);
 
 			run.store();
-			
+
 			launch(run);
 
 		} catch (SlipStreamClientException ex) {
@@ -291,15 +291,9 @@ public class RunListResource extends BaseResource {
 
 	private void overrideImage(Form form, ImageModule image)
 			throws ValidationException {
-		// TODO...
-		// Map<String, List<NodeParameter>> parametersPerNode = NodeParameter
-		// .parseNodeNameOverride(form);
-		// for (NodeParameter parameter : parametersPerNode.get(nodename)) {
-		// if (parameter.getName().equals(
-		// RuntimeParameter.CLOUD_SERVICE_NAME)) {
-		// node.setCloudService(parameter.getValue());
-		// continue;
-		// }
+		String cloudInForm = form.getFirstValue("cloudservice");
+		image.setCloudServiceName(cloudInForm == null ? getUser()
+				.getDefaultCloudService() : cloudInForm);
 	}
 
 	private RunType parseType(Form form) {

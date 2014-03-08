@@ -104,6 +104,9 @@ public class ImageModule extends Module {
 
 	private volatile ImageModule parentModule;
 
+	@Transient
+	private volatile String cloudServiceName;
+
 	protected ImageModule() {
 		super();
 	}
@@ -592,6 +595,14 @@ public class ImageModule extends Module {
 		for(CloudImageIdentifier c : getCloudImageIdentifiers()) {
 			c.setContainer(this);
 		}
+	}
+
+	public String getCloudServiceName() {
+		return cloudServiceName;
+	}
+
+	public void setCloudServiceName(String cloudServiceName) {
+		this.cloudServiceName = cloudServiceName;
 	}
 
 
