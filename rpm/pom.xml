@@ -147,12 +147,13 @@
                     </execution>
                 </executions>
             </plugin>
+            
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>update-initd</id>
+                        <id>update-initd-chkconfig</id>
                         <phase>process-resources</phase>
                         <goals>
                             <goal>exec</goal>
@@ -163,6 +164,20 @@
                                 <argument>-i</argument>
                                 <argument>-e</argument>
                                 <argument>s/#chkconfig:.*/# chkconfig: 36 80 25/</argument>
+                                <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>update-initd-etc-default</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sed</executable>
+                            <arguments>
+                                <argument>-i</argument>
                                 <argument>-e</argument>
                                 <argument>s/jetty{,9}/slipstream/</argument>
                                 <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
