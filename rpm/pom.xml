@@ -370,7 +370,7 @@
 
                         <mapping>
                             <directory>${installation.dir}/etc</directory>
-                            <filemode>644</filemode>
+                            <filemode>664</filemode>
                             <username>slipstream</username>
                             <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
