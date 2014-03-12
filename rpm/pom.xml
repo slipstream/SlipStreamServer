@@ -236,19 +236,30 @@
                                 </source>
                             </sources>
                         </mapping>
+
                         <mapping>
-                            <directory>/etc/rc.d/init.d/</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <directory>${installation.dir}/etc</directory>
+                            <filemode>775</filemode>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
                                 <source>
                                     <location>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</location>
-                                    <destination>slipstream</destination>
+                                    <destination>rc.slipstream</destination>
                                 </source>
                             </sources>
                         </mapping>
+                        <mapping>
+                            <directory>/etc/rc.d/init.d</directory>
+                            <sources>
+                                <softlinkSource>
+                                    <destination>slipstream</destination>
+                                    <location>${installation.dir}/etc/rc.slipstream</location>
+                                </softlinkSource>
+                            </sources>
+                        </mapping>
+
                         <mapping>
                             <directory>${installation.dir}/etc</directory>
                             <filemode>755</filemode>
@@ -339,7 +350,7 @@
                         </mapping>
                         <mapping>
                             <directory>/etc/slipstream</directory>
-                            <filemode>600</filemode>
+                            <filemode>660</filemode>
                             <username>slipstream</username>
                             <groupname>slipstream</groupname>
                             <configuration>true</configuration>
@@ -356,20 +367,32 @@
                             <username>slipstream</username>
                             <groupname>slipstream</groupname>
                         </mapping>
+
                         <mapping>
-                            <directory>/etc/default/</directory>
+                            <directory>${installation.dir}/etc</directory>
                             <filemode>644</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
                                 <source>
                                     <location>${basedir}/src/main/scripts/etc-default-slipstream</location>
-                                    <destination>slipstream</destination>
+                                    <destination>default.slipstream</destination>
                                 </source>
                             </sources>
                         </mapping>
+                        <mapping>
+                            <directory>/etc/default</directory>
+                            <sources>
+						                    <softlinkSource>
+                                    <destination>slipstream</destination>
+						                        <location>${installation.dir}/etc/default.slipstream</location>
+						                    </softlinkSource>
+						                </sources>
+						            </mapping>
+
                     </mappings>
+
                     <preinstallScriptlet>
                         <script>
 /usr/bin/getent group slipstream || /usr/sbin/groupadd -r slipstream
