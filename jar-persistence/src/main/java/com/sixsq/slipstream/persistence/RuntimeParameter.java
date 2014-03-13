@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,9 +40,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit tests:
- * 
+ *
  * @see RuntimeParameterTest
- * 
+ *
  */
 @Entity
 @SuppressWarnings("serial")
@@ -72,23 +72,22 @@ public class RuntimeParameter extends Metadata {
 	public final static String ABORT_DESCRIPTION = "Machine abort flag, set when aborting";
 
 	public final static String GLOBAL_NAMESPACE = "ss";
-	public final static String GLOBAL_ABORT_KEY = GLOBAL_NAMESPACE
-			+ NODE_PROPERTY_SEPARATOR + ABORT_KEY;
+    public final static String GLOBAL_NAMESPACE_PREFIX = GLOBAL_NAMESPACE
+            + NODE_PROPERTY_SEPARATOR;
+
+    public final static String GLOBAL_ABORT_KEY = GLOBAL_NAMESPACE_PREFIX + ABORT_KEY;
 	public final static String GLOBAL_ABORT_DESCRIPTION = "Run abort flag, set when aborting";
 
-	public final static String GLOBAL_NAMESPACE_PREFIX = GLOBAL_NAMESPACE
-			+ NODE_PROPERTY_SEPARATOR;
-
-	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ STATE_KEY;
+	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX + STATE_KEY;
 	public final static String GLOBAL_STATE_DESCRIPTION = "Global execution state";
 
-	public final static String GLOBAL_STATE_MESSAGE_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ STATE_MESSAGE_KEY;
+	public final static String GLOBAL_STATE_MESSAGE_KEY = GLOBAL_NAMESPACE_PREFIX + STATE_MESSAGE_KEY;
 	public final static String GLOBAL_STATE_MESSAGE_DESCRIPTION = "Global execution state message";
 
-	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ "category";
+	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX + "category";
+
+    public final static String GLOBAL_URL_SERVICE_KEY = GLOBAL_NAMESPACE_PREFIX + "url.service";
+    public final static String GLOBAL_URL_SERVICE_DESCRIPTION = "Optional service URL for the deployment";
 
 	public static final String TAGS_KEY = "tags";
 	public static final String TAGS_DESCRIPTION = "Tags (comma separated) or annotations for this VM";
@@ -121,7 +120,13 @@ public class RuntimeParameter extends Metadata {
 	public static final String CLOUD_SERVICE_NAME = "cloudservice";
 	public static final String CLOUD_SERVICE_DESCRIPTION = "Cloud Service where the node resides";
 
-	public final static int MULTIPLICITY_NODE_START_INDEX = 1;
+    public static final String URL_SSH_KEY = "url.ssh";
+    public static final String URL_SSH_DESCRIPTION = "SSH URL to connect to virtual machine";
+
+    public static final String URL_SERVICE_KEY = "url.service";
+    public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
+
+    public final static int MULTIPLICITY_NODE_START_INDEX = 1;
 
 	private final static Pattern KEY_PATTERN = Pattern.compile("^(.*?):(.*)$");
 

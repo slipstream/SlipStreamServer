@@ -9,9 +9,9 @@ package com.sixsq.slipstream.factory;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -211,7 +211,7 @@ public abstract class RunFactory {
 	 * Load the module corresponding to the run and set some of its attributes
 	 * (e.g. multiplicity, cloud service) to match the specific configuration of
 	 * the run.
-	 * 
+	 *
 	 * The returned module is transient and not persisted.
 	 */
 	public abstract Module overloadModule(Run run, User user)
@@ -255,10 +255,13 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_MESSAGE_KEY,
 				Run.INITIAL_NODE_STATE_MESSAGE,
 				RuntimeParameter.GLOBAL_STATE_MESSAGE_DESCRIPTION);
-		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY, "",
-				RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION);
+        run.assignRuntimeParameter(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY, "",
+                RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION);
 
-		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
+        run.assignRuntimeParameter(RuntimeParameter.GLOBAL_URL_SERVICE_KEY, "",
+                RuntimeParameter.GLOBAL_URL_SERVICE_DESCRIPTION);
+
+        run.assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
 				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
 
 	}
@@ -282,10 +285,10 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				Run.CPU_PARAMETER_NAME), defaultOrchestratorCpuRam,
 				Run.CPU_PARAMETER_DESCRIPTION);
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				Run.RAM_PARAMETER_NAME), defaultOrchestratorCpuRam,
-				Run.RAM_PARAMETER_DESCRIPTION);
-	}
+        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+                Run.RAM_PARAMETER_NAME), defaultOrchestratorCpuRam,
+                Run.RAM_PARAMETER_DESCRIPTION);
+    }
 
 	/**
 	 * @param nodename
@@ -308,9 +311,14 @@ public abstract class RunFactory {
 				RuntimeParameter.ABORT_DESCRIPTION);
 		run.assignRuntimeParameter(prefix + RuntimeParameter.COMPLETE_KEY,
 				"false", RuntimeParameter.COMPLETE_DESCRIPTION);
-		run.assignRuntimeParameter(prefix + RuntimeParameter.TAGS_KEY, "",
-				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
-	}
+        run.assignRuntimeParameter(prefix + RuntimeParameter.TAGS_KEY, "",
+                RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
+
+        run.assignRuntimeParameter(prefix + RuntimeParameter.URL_SSH_KEY, "",
+                RuntimeParameter.URL_SSH_DESCRIPTION);
+        run.assignRuntimeParameter(prefix + RuntimeParameter.URL_SERVICE_KEY, "",
+                RuntimeParameter.URL_SERVICE_DESCRIPTION);
+    }
 
 	protected void initOrchestratorsNodeNames(Run run)
 			throws ConfigurationException, ValidationException {
@@ -400,7 +408,7 @@ public abstract class RunFactory {
 		String vmIdKey;
 		String vmId;
 		String vmStateKey;
-		
+
 		Map<String, Vm> map = Vm.toMap(vms);
 
 		for (String nodeName : nodes) {
