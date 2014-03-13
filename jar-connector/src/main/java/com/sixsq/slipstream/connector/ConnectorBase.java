@@ -241,7 +241,7 @@ public abstract class ConnectorBase implements Connector {
         } catch (ConfigurationException e) {
             user = "root";
         }
-        String url = "ssh://" + user + "@" + instanceHostname;
+        String url = "ssh://" + user.trim() + "@" + instanceHostname.trim();
         setRuntimeParameterValue(machineInstanceUrlSshKey, url, run);
     }
 
