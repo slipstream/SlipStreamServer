@@ -28,16 +28,16 @@ import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterType;
 
 public abstract class ParametersFactoryBase<S extends Parameter<?>> {
-	
+
 	private String category;
-	
+
 	protected abstract void initReferenceParameters()
 			throws ValidationException;
 
 	public ParametersFactoryBase(String category) {
 		this.category = category;
 	}
-	
+
 	protected String getCategory() {
 		return category;
 	}
@@ -60,8 +60,8 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 	protected abstract S createParameter(String name, boolean value,
 			String description) throws ValidationException;
 
-	protected void addParameter(S parameter,
-			ParameterType type, boolean mandatory) {
+	protected void addParameter(S parameter, ParameterType type,
+			boolean mandatory) {
 		parameter.setType(type);
 		parameter.setMandatory(mandatory);
 		assignParameter(parameter);
@@ -84,8 +84,7 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 	}
 
 	protected void putMandatoryEnumParameter(String name, String description,
-			List<String> options, String value)
-			throws ValidationException {
+			List<String> options, String value) throws ValidationException {
 		putEnumParameter(name, description, options, value, true);
 	}
 
@@ -109,6 +108,21 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 	}
 
 	protected void putMandatoryParameter(String name, String description,
+			ParameterType type, int order) throws ValidationException {
+		S parameter = createParameter(name, null, description, true);
+		parameter.setType(type);
+		parameter.setOrder(order);
+		assignParameter(parameter);
+	}
+
+	protected void putMandatoryParameter(String name, String description,
+			int order) throws ValidationException {
+		S parameter = createParameter(name, null, description, true);
+		parameter.setOrder(order);
+		assignParameter(parameter);
+	}
+
+	protected void putMandatoryParameter(String name, String description,
 			ParameterType type, String instructions) throws ValidationException {
 		S parameter = createParameter(name, null, description, true);
 		parameter.setType(type);
@@ -116,13 +130,15 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		assignParameter(parameter);
 	}
 
-	protected void putMandatoryParameter(String name, String description, String value) throws ValidationException {
+	protected void putMandatoryParameter(String name, String description,
+			String value) throws ValidationException {
 		S parameter = createParameter(name, value, description, true);
 		parameter.setCategory(getCategory());
 		assignParameter(parameter);
 	}
 
-	protected void putMandatoryParameter(String name, String description) throws ValidationException {
+	protected void putMandatoryParameter(String name, String description)
+			throws ValidationException {
 		putMandatoryParameter(name, description, "");
 	}
 
@@ -132,9 +148,10 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		parameter.setType(type);
 		assignParameter(parameter);
 	}
-	
-	protected void putParameter(String name, String description, String instructions,
-			ParameterType type, boolean mandatory) throws ValidationException {
+
+	protected void putParameter(String name, String description,
+			String instructions, ParameterType type, boolean mandatory)
+			throws ValidationException {
 		S parameter = createParameter(name, null, description, mandatory);
 		parameter.setType(type);
 		parameter.setInstructions(instructions);
@@ -154,13 +171,23 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		assignParameter(parameter);
 	}
 
-	protected void putMandatoryPasswordParameter(String name, String description) throws ValidationException {
+	protected void putMandatoryPasswordParameter(String name, String description)
+			throws ValidationException {
 		S parameter = createParameter(name, description, true);
 		parameter.setCategory(getCategory());
 		addParameter(parameter, ParameterType.Password, true);
 	}
 
-	protected void putMandatoryPasswordParameter(String name, String description, String instructions) throws ValidationException {
+	protected void putMandatoryPasswordParameter(String name,
+			String description, int order) throws ValidationException {
+		S parameter = createParameter(name, description, true);
+		parameter.setCategory(getCategory());
+		parameter.setOrder(order);
+		addParameter(parameter, ParameterType.Password, true);
+	}
+
+	protected void putMandatoryPasswordParameter(String name,
+			String description, String instructions) throws ValidationException {
 		S parameter = createParameter(name, description, true);
 		parameter.setCategory(getCategory());
 		parameter.setInstructions(instructions);
