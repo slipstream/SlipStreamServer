@@ -403,6 +403,8 @@
                         <script>
 /sbin/chkconfig --add slipstream
 /bin/chown -R slipstream: ${slipstream.base.dir}
+/bin/chown slipstream: /etc/slipstream/slipstream.conf
+/bin/chmod 0660 /etc/slipstream/slipstream.conf
                         </script>
                     </postinstallScriptlet>
                 </configuration>
