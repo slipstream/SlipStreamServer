@@ -28,7 +28,7 @@ public class LocalUserParametersFactory extends UserParametersFactoryBase {
 
 	public static String KEY_PARAMETER_NAME = "username";
 	public static String SECRET_PARAMETER_NAME = "password";
-	
+
 	public LocalUserParametersFactory() throws ValidationException {
 		super(LocalConnector.CLOUD_SERVICE_NAME);
 	}
@@ -36,11 +36,10 @@ public class LocalUserParametersFactory extends UserParametersFactoryBase {
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 
-		putParameter(KEY_PARAMETER_NAME,
-				"Account username", true,
-				ParameterType.RestrictedString);
+		putMandatoryParameter(KEY_PARAMETER_NAME, "Account username",
+				ParameterType.RestrictedString, 10);
 		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME,
-				"Account password");
+				"Account password", 20);
 
 	}
 }

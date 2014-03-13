@@ -24,22 +24,33 @@ import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ParameterType;
 
-public class PhysicalHostUserParametersFactory extends UserParametersFactoryBase {
-	
+public class PhysicalHostUserParametersFactory extends
+		UserParametersFactoryBase {
+
 	public static String ORCHESTRATOR_USERNAME = "orchestrator.username";
 	public static String ORCHESTRATOR_PASSWORD = "orchestrator.password";
 	public static String ORCHESTRATOR_PRIVATE_KEY = "orchestrator.private.key";
 	public static String ORCHESTRATOR_HOST = "orchestrator.host";
 
-	public PhysicalHostUserParametersFactory(String connectorInstanceName) throws ValidationException {
+	public PhysicalHostUserParametersFactory(String connectorInstanceName)
+			throws ValidationException {
 		super(connectorInstanceName);
 	}
 
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
-		putParameter(ORCHESTRATOR_USERNAME, "", "Orchestrator username", "", true);
-		putParameter(ORCHESTRATOR_PASSWORD, "Orchestrator password", "You need to provide at least a password or a private key. If you provide a password and a private key, the password will be used as password for private key.", ParameterType.Password, false);
-		putParameter(ORCHESTRATOR_PRIVATE_KEY, "Orchestrarot private key", "You need to provide at least a password or a private key. If you provide a password and a private key, the password will be used as password for private key.", ParameterType.Text, false);
+		putParameter(ORCHESTRATOR_USERNAME, "", "Orchestrator username", "",
+				true);
+		putParameter(
+				ORCHESTRATOR_PASSWORD,
+				"Orchestrator password",
+				"You need to provide at least a password or a private key. If you provide a password and a private key, the password will be used as password for private key.",
+				ParameterType.Password, false);
+		putParameter(
+				ORCHESTRATOR_PRIVATE_KEY,
+				"Orchestrarot private key",
+				"You need to provide at least a password or a private key. If you provide a password and a private key, the password will be used as password for private key.",
+				ParameterType.Text, false);
 
 		putMandatoryParameter(constructKey(ORCHESTRATOR_HOST),
 				"Hostname or IP address of the machine where the orchestrator will be install.");

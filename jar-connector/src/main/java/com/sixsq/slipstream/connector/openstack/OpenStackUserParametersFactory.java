@@ -38,10 +38,10 @@ public class OpenStackUserParametersFactory extends UserParametersFactoryBase {
 
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
-		putMandatoryParameter(KEY_PARAMETER_NAME, "Username");
-		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME, "Password");
+		putMandatoryParameter(KEY_PARAMETER_NAME, "Username", 10);
+		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME, "Password", 20);
 		putMandatoryParameter(TENANT_NAME,
-				"Project name (sometime it's called Tenant name)");
+				"Project name (sometimes it's called Tenant name)", 30);
 	}
 
 }

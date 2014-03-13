@@ -40,10 +40,10 @@ public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 	protected void initReferenceParameters() throws ValidationException {
 
 		putMandatoryParameter(KEY_PARAMETER_NAME, "StratusLab account username",
-				ParameterType.RestrictedString);
+				ParameterType.RestrictedString, 10);
 
 		putMandatoryPasswordParameter(SECRET_PARAMETER_NAME,
-				"StratusLab account password");
+				"StratusLab account password", 20);
 
 	}
 
