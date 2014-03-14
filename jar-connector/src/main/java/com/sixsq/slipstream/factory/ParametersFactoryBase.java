@@ -76,16 +76,29 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 	protected void putEnumParameter(String name, String description,
 			List<String> options, String value, boolean mandatory)
 			throws ValidationException {
+		putEnumParameter(name, description, options, value, mandatory, 0);
+	}
+
+	protected void putEnumParameter(String name, String description,
+			List<String> options, String value, boolean mandatory, int order)
+			throws ValidationException {
 		S parameter = createParameter(name, description, mandatory);
 		parameter.setEnumValues(options);
 		parameter.setValue(value);
 		parameter.setCategory(getCategory());
+		parameter.setOrder(order);
 		addParameter(parameter, ParameterType.Enum, mandatory);
 	}
 
 	protected void putMandatoryEnumParameter(String name, String description,
 			List<String> options, String value) throws ValidationException {
 		putEnumParameter(name, description, options, value, true);
+	}
+
+	protected void putMandatoryEnumParameter(String name, String description,
+			List<String> options, String value, int order)
+			throws ValidationException {
+		putEnumParameter(name, description, options, value, true, order);
 	}
 
 	protected void putParameter(String name, boolean value, String description,
@@ -100,6 +113,13 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		assignParameter(parameter);
 	}
 
+	protected void putMandatoryBooleanParameter(String name, boolean value,
+			String description, int order) throws ValidationException {
+		S parameter = createParameter(name, value, description);
+		parameter.setOrder(order);
+		addParameter(parameter, ParameterType.Boolean, true);
+	}
+
 	protected void putMandatoryParameter(String name, String description,
 			ParameterType type) throws ValidationException {
 		S parameter = createParameter(name, null, description, true);
@@ -112,6 +132,14 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		S parameter = createParameter(name, null, description, true);
 		parameter.setType(type);
 		parameter.setOrder(order);
+		assignParameter(parameter);
+	}
+
+	protected void putMandatoryParameter(String name, String description,
+			String value, int order) throws ValidationException {
+		S parameter = createParameter(name, null, description, true);
+		parameter.setOrder(order);
+		parameter.setValue(value);
 		assignParameter(parameter);
 	}
 
