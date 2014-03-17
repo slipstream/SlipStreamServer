@@ -25,6 +25,7 @@ import java.util.Map;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactoryBase;
+import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
 public abstract class SystemConfigurationParametersFactoryBase extends
@@ -40,6 +41,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 
 	protected void initReferenceParameters() throws ValidationException {
 		putMandatoryOrchestrationImageId();
+		putMandatoryQuotaVm();
 	}
 
 	public Map<String, ServiceConfigurationParameter> getParameters() {
@@ -104,6 +106,12 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 				super.constructKey(UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME),
 				"Service endpoint for " + getCategory()
 						+ " (e.g. http://example.com:5000/v2.0)");
+	}
+	
+	protected void putMandatoryQuotaVm() throws ValidationException {
+		putMandatoryParameter(
+				super.constructKey(Run.QUOTA_VM_PARAMETER_NAME),
+				"Default number of VM allowed to run for " + getCategory());
 	}
 
 }

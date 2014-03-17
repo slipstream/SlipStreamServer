@@ -22,6 +22,7 @@ package com.sixsq.slipstream.persistence;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +46,7 @@ import org.simpleframework.xml.Attribute;
 @Entity
 @NamedQueries({
 			@NamedQuery(name = "byUser", query = "SELECT v FROM Vm v WHERE v.user_ = :user"),
+			@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on') GROUP BY v.cloud ORDER BY v.cloud"),
 			@NamedQuery(name = "removeByUser", query = "DELETE Vm WHERE user_ = :user AND cloud = :cloud") })
 public class Vm {
 
@@ -108,6 +110,23 @@ public class Vm {
 		transaction.commit();
 		em.close();
 		return removed;
+	}
+
+	public static Map<String, Integer> usage(String user) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		
+		List<?> res = em.createNamedQuery("usageByUser")
+			.setParameter("user", user)
+			.getResultList();
+		em.close();
+		
+		Map<String, Integer> usageData = new HashMap<String, Integer>(res.size());
+		for (Object object : res) {
+			usageData.put((String)((Object[])object)[0], 
+						  ((Long)((Object[])object)[1]).intValue());
+		}
+		
+		return usageData;
 	}
 
 	public String getCloud() {

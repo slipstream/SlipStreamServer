@@ -157,7 +157,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 	}
 
 	private boolean shouldSetValue(T parameter, String value) {
-		return !parameter.isReadonly();
+		return !parameter.isReadonly() || user.isSuper();
 	}
 
 	protected abstract T createParameter(String name, String value,

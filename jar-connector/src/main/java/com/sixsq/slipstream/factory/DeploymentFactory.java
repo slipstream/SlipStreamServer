@@ -211,7 +211,7 @@ public class DeploymentFactory extends RunFactory {
 					cloudServiceName,
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
-			run.addNodeName(nodename);
+			run.addNodeName(nodename, cloudServiceName);
 		}
 
 		run.addGroup(node.getName(), cloudServiceName);

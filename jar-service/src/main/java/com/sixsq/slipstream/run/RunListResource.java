@@ -61,6 +61,7 @@ import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.run.RunView.RunViewList;
 import com.sixsq.slipstream.util.ConfigurationUtil;
@@ -164,11 +165,15 @@ public class RunListResource extends BaseResource {
 
 			module.validate();
 
-			run = RunFactory.getRun(module, parseType(form), getUser()
-					.getDefaultCloudService(), getUser());
+			User user = getUser(); 
+			
+			run = RunFactory.getRun(module, parseType(form), user
+					.getDefaultCloudService(), user);
 
 			run = addCredentials(run);
 
+			run.validateQuota(Vm.usage(user.getName()));
+			
 			createRepositoryResource(run);
 
 			run.store();

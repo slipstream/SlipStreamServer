@@ -46,7 +46,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Query;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
+import org.hibernate.QueryException;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
@@ -56,6 +58,7 @@ import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.QuotaException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.statemachine.States;
@@ -99,6 +102,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public final static String RAM_PARAMETER_NAME = ImageModule.RAM_KEY;
 	public final static String RAM_PARAMETER_DESCRIPTION = "Amount of RAM, in GB";
+	
+	public static final String QUOTA_VM_PARAMETER_NAME = "quota.vm";
+	public static final String QUOTA_VM_DESCRIPTION = "Number of VMs the user can start for this cloud";
+	public static final String QUOTA_VM_DEFAULT = "20";
 
 	public static Run abortOrReset(String abortMessage, String nodename,
 			String uuid) {
@@ -432,6 +439,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Element(required = false)
 	private transient Module module;
 
+	@Transient
+	private transient Map<String, Integer> cloudServiceUsage = new HashMap<String, Integer>();
+	
 	/**
 	 * List of cloud service names used in the current run
 	 */
@@ -660,10 +670,45 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return new Date();
 	}
 
-	public void addNodeName(String node) {
+	public void addNodeName(String node, String cloudServiceName) {
 		nodeNames += node + ", ";
+		
+		Integer nb = cloudServiceUsage.get(cloudServiceName);
+		if (nb == null){
+			nb = 0;
+		}
+		cloudServiceUsage.put(cloudServiceName, nb + 1);
 	}
 
+	public void validateQuota(Map<String, Integer> usage)
+			throws ConfigurationException, ValidationException, QuotaException {
+		User user = User.loadByName(user_);
+
+		for (Map.Entry<String, Integer> entry : cloudServiceUsage.entrySet()) {
+			String cloud = entry.getKey();
+			int nodesRequested = entry.getValue();
+			/*
+			 * String quotaDefault = Configuration .getInstance()
+			 * .getParameters() .getParameterValue( cloud +
+			 * RuntimeParameter.PARAM_WORD_SEPARATOR +
+			 * Run.QUOTA_VM_PARAMETER_NAME), QUOTA_VM_DEFAULT);
+			 */
+			String quota = user.getParameter(
+					cloud +
+					RuntimeParameter.PARAM_WORD_SEPARATOR + 
+					QUOTA_VM_PARAMETER_NAME, cloud).getValue("0");
+
+			Integer currentUsage = usage.get(cloud);
+			if (currentUsage == null) currentUsage = 0;
+			
+			if ((currentUsage + nodesRequested) > Integer.parseInt(quota)) {
+				throw new QuotaException(
+						"Cannot run because your quota will be exceeded");
+			}
+		}
+
+	}
+	
 	/**
 	 * Return nodenames, including a value for each index from 1 to multiplicity
 	 * (e.g. apache1.1, apache1.2...)

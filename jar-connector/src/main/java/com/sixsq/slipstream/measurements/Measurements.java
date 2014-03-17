@@ -61,7 +61,7 @@ public class Measurements implements Serializable {
 	protected static final int DEFAULT_STORAGE = 1;
 
 	@ElementList(inline = true, name = "vm")
-	private List<Measurement> measurments = new ArrayList<Measurement>();
+	private List<Measurement> measurements = new ArrayList<Measurement>();
 
 	public List<Measurement> populate(User user) throws ConfigurationException,
 			ValidationException, NotFoundException, AbortException {
@@ -97,11 +97,11 @@ public class Measurements implements Serializable {
 
 	protected List<Measurement> populateSingle(Run run)
 			throws ValidationException, NotFoundException, AbortException {
-		return measurments;
+		return measurements;
 	};
 
 	public List<Measurement> getMeasurments() {
-		return measurments;
+		return measurements;
 	}
 
 	protected Measurement fill(Run run, String nodename, String imagename,
