@@ -211,7 +211,7 @@
                     <mappings>
                         <mapping>
                             <directory>${installation.dir}</directory>
-                            <filemode>644</filemode>
+                            <filemode>664</filemode>
                             <username>slipstream</username>
                             <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
@@ -278,7 +278,7 @@
                         </mapping>
                         <mapping>
                             <directory>${installation.dir}/resources</directory>
-                            <filemode>644</filemode>
+                            <filemode>664</filemode>
                             <username>slipstream</username>
                             <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
@@ -293,7 +293,7 @@
                         </mapping>
                         <mapping>
                             <directory>${installation.dir}/webapps</directory>
-                            <filemode>644</filemode>
+                            <filemode>664</filemode>
                             <username>slipstream</username>
                             <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
@@ -305,7 +305,7 @@
                         </mapping>
                         <mapping>
                             <directory>${installation.dir}/lib/logging</directory>
-                            <filemode>644</filemode>
+                            <filemode>664</filemode>
                             <username>slipstream</username>
                             <groupname>slipstream</groupname>
                             <directoryIncluded>false</directoryIncluded>
@@ -317,7 +317,7 @@
                         </mapping>
                         <mapping>
                             <directory>${installation.dir}</directory>
-                            <filemode>644</filemode>
+                            <filemode>664</filemode>
                             <username>slipstream</username>
                             <groupname>slipstream</groupname>
                             <configuration>true</configuration>
