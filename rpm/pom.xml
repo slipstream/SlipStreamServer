@@ -207,7 +207,6 @@
                         <require>slipstream-useradd</require>
                         <require>slipstream-client &gt;= 1.3</require>
                         <require>libcloud-slipstream-downloads</require>
-                        <require>slipstream-server-nginx-conf</require>
                     </requires>
                     <mappings>
                         <mapping>
