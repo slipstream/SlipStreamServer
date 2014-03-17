@@ -325,7 +325,7 @@ public abstract class RunFactory {
 		HashSet<String> cloudServiceList = getCloudServicesList(run);
 		for (String cloudServiceName : cloudServiceList) {
 			String nodename = Run.constructOrchestratorName(cloudServiceName);
-			run.addNodeName(nodename);
+			run.addNodeName(nodename, cloudServiceName);
 			run.assignRuntimeParameter(nodename
 					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,

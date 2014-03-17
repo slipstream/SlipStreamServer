@@ -198,6 +198,13 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		S parameter = createParameter(name, value, description, mandatory);
 		assignParameter(parameter);
 	}
+	
+	protected void putParameter(String name, String value, String description,
+			boolean mandatory, boolean readonly) throws ValidationException {
+		S parameter = createParameter(name, value, description, mandatory);
+		parameter.setReadonly(readonly);
+		assignParameter(parameter);
+	}
 
 	protected void putMandatoryPasswordParameter(String name, String description)
 			throws ValidationException {

@@ -20,10 +20,67 @@ package com.sixsq.slipstream.dashboard;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
+import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.run.Runs;
 
 @Root
 public class Dashboard extends Runs {
+	
+	public static class UsageElement {
+		@Attribute
+		private String cloud;
+		@Attribute
+		private int quota;
+		@Attribute
+		private int currentUsage;
+		
+		public UsageElement(){}
+		
+		public UsageElement(String cloud, int quota, int currentUsage) {
+			this.cloud = cloud;
+			this.quota = quota;
+			this.currentUsage = currentUsage;
+		}
+	}
+	
+	@ElementList
+	private transient List<UsageElement> usage = new ArrayList<UsageElement>(); 
+	
+	public void populate(User user) throws SlipStreamException {
+		super.populate(user);		
+		
+		user = User.loadByName(user.getName());
+		
+		Map<String, Integer> cloudUsage = Vm.usage(user.getName());
+		
+		for (String cloud : ConnectorFactory.getCloudServiceNamesList()) {
+			
+			Parameter<User> quotaParam = user.getParameter(
+					cloud +
+					RuntimeParameter.PARAM_WORD_SEPARATOR + 
+					Run.QUOTA_VM_PARAMETER_NAME, cloud);
+			String quota = (quotaParam == null)? "0" : quotaParam.getValue("0");
+
+			Integer currentUsage = cloudUsage.get(cloud);
+			if (currentUsage == null) currentUsage = 0;
+			
+			usage.add(new UsageElement(cloud, Integer.parseInt(quota), currentUsage));
+		}
+		
+	}
+	
 }

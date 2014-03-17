@@ -164,7 +164,7 @@ public class BuildImageFactory extends RunFactory {
 
 	private static void initNodeNames(Run run, String cloudService)
 			throws ConfigurationException, ValidationException {
-		run.addNodeName(Run.MACHINE_NAME);
+		run.addNodeName(Run.MACHINE_NAME, cloudService);
 		run.addGroup(Run.MACHINE_NAME, cloudService);
 	}
 

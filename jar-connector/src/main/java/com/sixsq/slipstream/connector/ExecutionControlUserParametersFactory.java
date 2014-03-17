@@ -39,6 +39,12 @@ public class ExecutionControlUserParametersFactory extends
 		super(CATEGORY);
 	}
 
+	// Don't add quota parameter for this section
+	@Override
+	protected void initQuotaParameter()	throws ValidationException {
+		return;
+	}
+	
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 
