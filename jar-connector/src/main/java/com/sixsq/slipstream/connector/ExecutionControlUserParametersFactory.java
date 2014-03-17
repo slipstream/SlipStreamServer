@@ -42,37 +42,38 @@ public class ExecutionControlUserParametersFactory extends
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 
-		putParameter(
+		putMandatoryBooleanParameter(
 				UserParameter.KEY_ON_ERROR_RUN_FOREVER,
 				false,
 				"If an error occurs, keep the execution running for investigation.",
-				true);
-		putParameter(
+				30);
+		putMandatoryBooleanParameter(
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER,
 				true,
 				"If no errors occur, keep the execution running. Useful for deployment or long tests.",
-				true);
-		putParameter(
+				20);
+		putMandatoryParameter(
 				"Timeout",
-				"30",
 				"Minutes - When this timeout is reached, the execution is forcefully terminated.",
-				true);
-		putMandatoryParameter(SSHKEY_PARAMETER_NAME,
+				"30",
+				90);
+		putMandatoryParameter(
+				SSHKEY_PARAMETER_NAME,
 				"SSH Public Key(s) (keys must be separated by new line) Warning: Some clouds may take into account only the first key.",
-				ParameterType.RestrictedText);
-		String[] _options = {VERBOSITY_LEVEL_DEFAULT, "1", "2", "3"};
+				ParameterType.RestrictedText, 40);
+		String[] _options = { VERBOSITY_LEVEL_DEFAULT, "1", "2", "3" };
 		List<String> options = Arrays.asList(_options);
-		putEnumParameter(
+		putMandatoryEnumParameter(
 				VERBOSITY_LEVEL,
-				"Level of verbosity. 0 - Actions, 1 - Steps, 2 - Details data, 3 - Debugging.", 
-				options, VERBOSITY_LEVEL_DEFAULT, true);
+				"Level of verbosity. 0 - Actions, 1 - Steps, 2 - Details data, 3 - Debugging.",
+				options, VERBOSITY_LEVEL_DEFAULT, 99);
 
-		List<String> clouds = extractCloudNames(ConnectorFactory.getConnectors());
-		putEnumParameter(
+		List<String> clouds = extractCloudNames(ConnectorFactory
+				.getConnectors());
+		putMandatoryEnumParameter(
 				UserParametersFactoryBase.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME,
-				"Select which cloud you want to use.", 
-				clouds, "", true);
-	
+				"Select which cloud you want to use.", clouds, "", 10);
+
 	}
 
 }

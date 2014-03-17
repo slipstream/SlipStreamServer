@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -182,7 +182,8 @@ public abstract class ConnectorBase implements Connector {
 
 		if (isInOrchestrationContext(run)) {
 			updateOrchestratorInstanceIdOnRun(run, instanceId, orchestratorName);
-			updateOrchestratorInstanceIpOnRun(run, ipAddress, orchestratorName);
+            updateOrchestratorInstanceIpOnRun(run, ipAddress, orchestratorName);
+            updateOrchestratorUrlSshOnRun(run, ipAddress, orchestratorName);
 		} else {
 			updateMachineInstanceIdOnRun(run, instanceId);
 			updateMachineInstanceIpOnRun(run, ipAddress);
@@ -213,16 +214,36 @@ public abstract class ConnectorBase implements Connector {
 		setRuntimeParameterValue(MACHINE_INSTANCE_ID_NAME, instanceId, run);
 	}
 
-	private void updateOrchestratorInstanceIpOnRun(Run run,
-			String instanceHostname, String orchestratorName)
-			throws NotFoundException, ValidationException {
+    private void updateOrchestratorInstanceIpOnRun(Run run,
+                                                   String instanceHostname, String orchestratorName)
+            throws NotFoundException, ValidationException {
 
-		String machineInstanceHostname = orchestratorName
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-				+ RuntimeParameter.HOSTNAME_KEY;
+        String machineInstanceHostname = orchestratorName
+                + RuntimeParameter.NODE_PROPERTY_SEPARATOR
+                + RuntimeParameter.HOSTNAME_KEY;
 
-		setRuntimeParameterValue(machineInstanceHostname, instanceHostname, run);
-	}
+        setRuntimeParameterValue(machineInstanceHostname, instanceHostname, run);
+    }
+
+    private void updateOrchestratorUrlSshOnRun(Run run,
+                                               String instanceHostname, String orchestratorName)
+            throws NotFoundException, ValidationException {
+
+        String machineInstanceUrlSshKey = orchestratorName
+                + RuntimeParameter.NODE_PROPERTY_SEPARATOR
+                + RuntimeParameter.URL_SSH_KEY;
+
+        String user = null;
+        try {
+            user = getLoginUsername(run);
+        } catch (SlipStreamClientException e) {
+            user = "root";
+        } catch (ConfigurationException e) {
+            user = "root";
+        }
+        String url = "ssh://" + user.trim() + "@" + instanceHostname.trim();
+        setRuntimeParameterValue(machineInstanceUrlSshKey, url, run);
+    }
 
 	private void updateMachineInstanceIpOnRun(Run run, String instanceHostname)
 			throws NotFoundException, ValidationException {

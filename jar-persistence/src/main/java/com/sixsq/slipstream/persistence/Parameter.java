@@ -83,6 +83,8 @@ public abstract class Parameter<T> implements Serializable {
 	@ElementArray(required = false)
 	private String[] enumValues;
 
+	private int order_ = 0;
+	
 	protected Parameter() {
 		super();
 	}
@@ -259,6 +261,16 @@ public abstract class Parameter<T> implements Serializable {
 
 	public List<String> getEnumValues() {
 		return (enumValues == null) ? null : Arrays.asList(enumValues);
+	}
+
+	@Attribute(required = false)
+	public int getOrder() {
+		return order_;
+	}
+
+	@Attribute(required = false)
+	public void setOrder(int order) {
+		this.order_ = order;
 	}
 
 	protected boolean isRestrictedValue() {
