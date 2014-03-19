@@ -266,6 +266,9 @@ public abstract class Parameter<T> implements Serializable {
 
 	@Attribute(required = false)
 	public int getOrder() {
+		if (order_ == null) {
+			return 0;
+		}
 		return order_;
 	}
 
