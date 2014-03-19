@@ -68,21 +68,38 @@ public class VmTest {
 
 	@Test
 	public void usage() {
-		List<Vm> vms = new ArrayList<Vm>();
-		vms.add(new Vm("instance1", "cloud1", "running", "user1"));
-		vms.add(new Vm("instance2", "cloud1", "running", "user1"));
-		vms.add(new Vm("instance3", "cloud1", "terminated", "user1"));
+		Vm vm;
+                List<Vm> vms = new ArrayList<Vm>();
+
+		// cloud1
+		vm = new Vm("instance1", "cloud1", "running", "user1");
+		vm.setRunUuid("e06cf0dd-5266-472d-90b4-2a1a27af9dfa");
+		vms.add(vm);
+		vm = new Vm("instance2", "cloud1", "Running", "user1");
+		vm.setRunUuid("10ac7940-6151-4d0f-b90c-0213b094bcd0");
+		vms.add(vm);
+		vm = new Vm("instance3", "cloud1", "terminated", "user1");
+
+                vm.setRunUuid("abf3a90f-c024-411b-8536-164b4617c636");
+		vms.add(vm);
+		vm = new Vm("instance5", "cloud1", "running", "user1");
+		vm.setRunUuid("Unknown");
+		vms.add(vm);
+
 		Vm.update(vms, "user1", "cloud1");
 
+		// cloud2
 		vms.clear();
-		vms.add(new Vm("instance4", "cloud2", "running", "user1"));
+		vm = new Vm("instance4", "cloud2", "on", "user1");
+		vm.setRunUuid("8e519c11-e46b-43d0-a370-c738655e1c06");
+		vms.add(vm);
+
 		Vm.update(vms, "user1", "cloud2");
 
+		// actual tests
 		Map<String, Integer> usage = Vm.usage("user1");
 		assertThat(usage.size(), is(2));
-
 		assertThat(usage.get("cloud1"), is(2));
 		assertThat(usage.get("cloud2"), is(1));
-
 	}
 }
