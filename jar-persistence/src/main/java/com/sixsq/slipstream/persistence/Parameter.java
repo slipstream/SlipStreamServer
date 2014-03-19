@@ -83,7 +83,8 @@ public abstract class Parameter<T> implements Serializable {
 	@ElementArray(required = false)
 	private String[] enumValues;
 
-	private int order_ = 0;
+	@Attribute(required = false)
+	private Integer order_ = 0;
 	
 	protected Parameter() {
 		super();
