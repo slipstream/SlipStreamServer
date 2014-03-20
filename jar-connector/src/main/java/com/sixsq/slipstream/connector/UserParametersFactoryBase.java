@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,11 +69,11 @@ public abstract class UserParametersFactoryBase extends
 	}
 
 	protected void initBaseParameters() throws ValidationException {
-		if(isQuotaEnabled()) {
+		if(Configuration.isQuotaEnabled()) {
 			initQuotaParameter();
 		}
 	}
-		
+
 	protected void initQuotaParameter()	throws ValidationException {
 		putParameter(
 				Run.QUOTA_VM_PARAMETER_NAME,
@@ -81,15 +81,9 @@ public abstract class UserParametersFactoryBase extends
 						.getInstance()
 						.getParameters()
 						.getParameterValue(
-								constructKey(Run.QUOTA_VM_PARAMETER_NAME), 
+								constructKey(Run.QUOTA_VM_PARAMETER_NAME),
 								Run.QUOTA_VM_DEFAULT),
 				Run.QUOTA_VM_DESCRIPTION, true, true);
-	}
-
-	private static boolean isQuotaEnabled() throws ValidationException {
-		return Configuration
-				.isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_QUOTA_ENABLE
-						.getName());
 	}
 
 	public Map<String, UserParameter> getParameters() {
