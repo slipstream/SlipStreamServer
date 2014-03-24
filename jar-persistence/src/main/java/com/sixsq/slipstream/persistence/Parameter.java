@@ -83,7 +83,8 @@ public abstract class Parameter<T> implements Serializable {
 	@ElementArray(required = false)
 	private String[] enumValues;
 
-	private int order_ = 0;
+	@Attribute(required = false)
+	private Integer order_ = 0;
 	
 	protected Parameter() {
 		super();
@@ -265,6 +266,9 @@ public abstract class Parameter<T> implements Serializable {
 
 	@Attribute(required = false)
 	public int getOrder() {
+		if (order_ == null) {
+			return 0;
+		}
 		return order_;
 	}
 

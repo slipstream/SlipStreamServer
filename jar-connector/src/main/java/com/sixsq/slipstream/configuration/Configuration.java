@@ -130,6 +130,11 @@ public class Configuration {
 				.getProperty(key));
 	}
 
+	public static boolean isQuotaEnabled() throws ValidationException {
+		return isEnabled(ServiceConfiguration.RequiredParameters
+			.SLIPSTREAM_QUOTA_ENABLE.getName());
+	}
+
 	/**
 	 * Return the singleton instance of a Configuration object. This method must
 	 * be synchronized to ensure that only one instance of this class is

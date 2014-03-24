@@ -40,6 +40,7 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.credentials.Credentials;
@@ -172,7 +173,9 @@ public class RunListResource extends BaseResource {
 
 			run = addCredentials(run);
 
-			run.validateQuota(Vm.usage(user.getName()));
+			if (Configuration.isQuotaEnabled()) {
+				run.validateQuota(Vm.usage(user.getName()));
+			}
 			
 			createRepositoryResource(run);
 
