@@ -400,6 +400,7 @@
 /bin/chown -R slipstream: ${slipstream.base.dir}
 /bin/chown slipstream: /etc/slipstream/slipstream.conf
 /bin/chmod 0660 /etc/slipstream/slipstream.conf
+/bin/chown -R slipstream: /var/tmp/slipstream
                         </script>
                     </postinstallScriptlet>
                 </configuration>
