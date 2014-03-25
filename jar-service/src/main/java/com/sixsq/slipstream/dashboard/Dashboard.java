@@ -31,7 +31,7 @@ import org.simpleframework.xml.Root;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
@@ -72,7 +72,7 @@ public class Dashboard extends Runs {
 			Parameter<User> quotaParam = user.getParameter(
 					cloud +
 					RuntimeParameter.PARAM_WORD_SEPARATOR + 
-					Run.QUOTA_VM_PARAMETER_NAME, cloud);
+					QuotaParameter.QUOTA_VM_PARAMETER_NAME, cloud);
 			String quota = (quotaParam == null)? "0" : quotaParam.getValue("0");
 
 			Integer currentUsage = cloudUsage.get(cloud);

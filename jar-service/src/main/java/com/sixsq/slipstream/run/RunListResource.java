@@ -174,7 +174,7 @@ public class RunListResource extends BaseResource {
 			run = addCredentials(run);
 
 			if (Configuration.isQuotaEnabled()) {
-				run.validateQuota(Vm.usage(user.getName()));
+				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
 			}
 			
 			createRepositoryResource(run);
