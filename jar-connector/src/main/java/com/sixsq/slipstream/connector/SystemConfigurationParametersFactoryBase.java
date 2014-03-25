@@ -111,7 +111,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 	protected void putMandatoryQuotaVm() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(QuotaParameter.QUOTA_VM_PARAMETER_NAME),
-				"Default number of VM allowed to run for " + getCategory());
+				"VM quota for " + getCategory() + " (i.e. maximum number number of VM allowed)");
 	}
 
 }

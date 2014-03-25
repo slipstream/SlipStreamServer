@@ -33,47 +33,52 @@ import com.sixsq.slipstream.persistence.User;
 
 /**
  * Unit test:
- *
+ * 
  * @see QuotaTest
- *
+ * 
  */
 
 public class Quota {
 
-        public static void validate(User user, Map<String, Integer> request, Map<String, Integer> usage)
-			throws ValidationException, QuotaException {
-		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
-                for (Map.Entry<String, Integer> entry : request.entrySet()) {
+	public static void validate(User user, Map<String, Integer> request,
+			Map<String, Integer> usage) throws ValidationException,
+			QuotaException {
+		for (Map.Entry<String, Integer> entry : request.entrySet()) {
 			String cloud = entry.getKey();
 			int nodesRequested = entry.getValue();
 
-                        Integer quota = Integer.parseInt(getValue(cfg, user, cloud));
+			Integer quota = Integer.parseInt(getValue(user, cloud));
 
 			Integer currentUsage = usage.get(cloud);
-			if (currentUsage == null) currentUsage = 0;
+			if (currentUsage == null)
+				currentUsage = 0;
 
 			if ((currentUsage + nodesRequested) > quota) {
 				throw new QuotaException(
-					"Cannot run because your quota will be exceeded");
+						"Quota exceeded for number of concurrent VMs");
 			}
 		}
 
 	}
 
-	public static String getValue(ServiceConfiguration cfg, User user, String cloud) throws ValidationException {
-		String key = cloud + RuntimeParameter.PARAM_WORD_SEPARATOR + QuotaParameter.QUOTA_VM_PARAMETER_NAME;
+	public static String getValue(User user,
+			String cloud) throws ValidationException {
+		String key = cloud + RuntimeParameter.PARAM_WORD_SEPARATOR
+				+ QuotaParameter.QUOTA_VM_PARAMETER_NAME;
 
-		Parameter parameter = user.getParameter(key, cloud);
+		Parameter<?> parameter = user.getParameter(key, cloud);
 		if (parameter != null && parameter.getValue() != "") {
 			return parameter.getValue();
 		}
 
-                parameter = cfg.getParameter(key, cloud);
-		if (parameter != null && parameter.getValue() != "") {
+		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
+		parameter = cfg.getParameter(key, cloud);
+		
+		if (parameter != null && Parameter.hasValueSet(parameter.getValue())) {
 			return parameter.getValue();
 		}
 
-                return QuotaParameter.QUOTA_VM_DEFAULT;
+		return QuotaParameter.QUOTA_VM_DEFAULT;
 	}
 
 }
