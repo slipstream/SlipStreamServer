@@ -28,48 +28,52 @@ import com.sixsq.slipstream.exceptions.QuotaException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 
 /**
  * Unit test:
- * 
+ *
  * @see QuotaTest
- * 
+ *
  */
 
 public class Quota {
 
         public static void validate(User user, Map<String, Integer> request, Map<String, Integer> usage)
 			throws ValidationException, QuotaException {
-		for (Map.Entry<String, Integer> entry : request.entrySet()) {
+		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
+                for (Map.Entry<String, Integer> entry : request.entrySet()) {
 			String cloud = entry.getKey();
 			int nodesRequested = entry.getValue();
-			
-                        String quota = getValue(user, cloud);
+
+                        Integer quota = Integer.parseInt(getValue(cfg, user, cloud));
 
 			Integer currentUsage = usage.get(cloud);
 			if (currentUsage == null) currentUsage = 0;
 
-			if ((currentUsage + nodesRequested) > Integer.parseInt(quota)) {
+			if ((currentUsage + nodesRequested) > quota) {
 				throw new QuotaException(
-						"Cannot run because your quota will be exceeded");
+					"Cannot run because your quota will be exceeded");
 			}
 		}
 
 	}
 
-	public static String getValue(User user, String cloud) throws ValidationException {
-		Parameter parameter = user.getParameter(
-			cloud + 
-                        RuntimeParameter.PARAM_WORD_SEPARATOR + 
-                        QuotaParameter.QUOTA_VM_PARAMETER_NAME, cloud);
-		if (parameter != null) {
+	public static String getValue(ServiceConfiguration cfg, User user, String cloud) throws ValidationException {
+		String key = cloud + RuntimeParameter.PARAM_WORD_SEPARATOR + QuotaParameter.QUOTA_VM_PARAMETER_NAME;
+
+		Parameter parameter = user.getParameter(key, cloud);
+		if (parameter != null && parameter.getValue() != "") {
 			return parameter.getValue();
-		} else {
-			return Configuration.getInstance().getParameters().getParameterValue(
-				cloud + RuntimeParameter.PARAM_WORD_SEPARATOR + QuotaParameter.QUOTA_VM_PARAMETER_NAME,
-				QuotaParameter.QUOTA_VM_DEFAULT);
 		}
+
+                parameter = cfg.getParameter(key, cloud);
+		if (parameter != null && parameter.getValue() != "") {
+			return parameter.getValue();
+		}
+
+                return QuotaParameter.QUOTA_VM_DEFAULT;
 	}
 
 }

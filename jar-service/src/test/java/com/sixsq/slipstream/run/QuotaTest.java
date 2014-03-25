@@ -152,20 +152,18 @@ public class QuotaTest {
 	public void getValue() throws ValidationException {
 		String cloud = "cloud1";
           	User user = new User("user");
-		user.store();
+		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
 
 		// Default value
-		assertThat(Quota.getValue(user, cloud), is(QuotaParameter.QUOTA_VM_DEFAULT));
+		assertThat(Quota.getValue(cfg, user, cloud), is(QuotaParameter.QUOTA_VM_DEFAULT));
 
 		// Connector value
-		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
 		cfg.setParameter(new ServiceConfigurationParameter(
 			cloud + 
 			RuntimeParameter.PARAM_WORD_SEPARATOR + 
 			QuotaParameter.QUOTA_VM_PARAMETER_NAME, "15"));
-		cfg.store();
 
-		assertThat(Quota.getValue(user, cloud), is("15"));
+		assertThat(Quota.getValue(cfg, user, cloud), is("15"));
 
 		// User value
 		UserParameter parameter = new UserParameter(
@@ -174,9 +172,14 @@ public class QuotaTest {
 			QuotaParameter.QUOTA_VM_PARAMETER_NAME, "10", "");
 		parameter.setCategory(cloud);
 		user.setParameter(parameter);
-		user.store();
  
-		assertThat(Quota.getValue(user, cloud), is("10"));
+		assertThat(Quota.getValue(cfg, user, cloud), is("10"));
+
+                // Empty parameter
+                parameter.setValue("");
+                //user.setParameter(parameter);
+
+                assertThat(Quota.getValue(cfg, user, cloud), is("15"));
 	}
 
 }

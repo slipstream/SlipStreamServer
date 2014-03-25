@@ -166,7 +166,8 @@ public class RunListResource extends BaseResource {
 
 			module.validate();
 
-			User user = getUser(); 
+			User user = getUser();
+			user = User.loadByName(user.getName()); // ensure user is loaded from database
 			
 			run = RunFactory.getRun(module, parseType(form), user
 					.getDefaultCloudService(), user);
