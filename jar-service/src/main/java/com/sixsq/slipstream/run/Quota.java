@@ -67,7 +67,7 @@ public class Quota {
 				+ QuotaParameter.QUOTA_VM_PARAMETER_NAME;
 
 		Parameter<?> parameter = user.getParameter(key, cloud);
-		if (parameter != null && parameter.getValue() != "") {
+		if (parameter != null && Parameter.hasValueSet(parameter.getValue())) {
 			return parameter.getValue();
 		}
 

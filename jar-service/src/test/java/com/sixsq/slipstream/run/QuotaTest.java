@@ -181,15 +181,23 @@ public class QuotaTest {
 
 		assertThat(Quota.getValue(user, cloud), is("10"));
 
-		// Empty parameter
+		// Empty user parameter value
 		parameter.setValue("");
 		assertThat(Quota.getValue(user, cloud), is("15"));
+
+                // Null value for user
+		parameter.setValue(null);
+		assertThat(Quota.getValue(user, cloud), is("15"));
 		
-		// Empty connector parameter
+                // Empty connector parameter value
 		cfgParameter.setValue("");
 		assertThat(Quota.getValue(user, cloud),
 				is(QuotaParameter.QUOTA_VM_DEFAULT));
 		
+                // Null value for connector parameter
+		cfgParameter.setValue(null);
+		assertThat(Quota.getValue(user, cloud),
+				is(QuotaParameter.QUOTA_VM_DEFAULT));
 	}
 
 }
