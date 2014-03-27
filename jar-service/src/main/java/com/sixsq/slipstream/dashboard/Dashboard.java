@@ -35,6 +35,7 @@ import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
+import com.sixsq.slipstream.run.Quota;
 import com.sixsq.slipstream.run.Runs;
 
 @Root
@@ -63,22 +64,15 @@ public class Dashboard extends Runs {
 	public void populate(User user) throws SlipStreamException {
 		super.populate(user);		
 		
-		user = User.loadByName(user.getName());
+		user = User.loadByName(user.getName());  // ensure user is loaded from database
 		
 		Map<String, Integer> cloudUsage = Vm.usage(user.getName());
-		
 		for (String cloud : ConnectorFactory.getCloudServiceNamesList()) {
-			
-			Parameter<User> quotaParam = user.getParameter(
-					cloud +
-					RuntimeParameter.PARAM_WORD_SEPARATOR + 
-					QuotaParameter.QUOTA_VM_PARAMETER_NAME, cloud);
-			String quota = (quotaParam == null)? "0" : quotaParam.getValue("0");
-
+			Integer quota = Integer.parseInt(Quota.getValue(user, cloud));
 			Integer currentUsage = cloudUsage.get(cloud);
 			if (currentUsage == null) currentUsage = 0;
 			
-			usage.add(new UsageElement(cloud, Integer.parseInt(quota), currentUsage));
+			usage.add(new UsageElement(cloud, quota, currentUsage));
 		}
 		
 	}
