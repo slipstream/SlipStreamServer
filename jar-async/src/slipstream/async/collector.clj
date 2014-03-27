@@ -16,12 +16,12 @@
   [seconds]
   (* 1000 seconds))
 
-(def collector-chan-size 50)
-(def metrics-update-chan-size 50)
-(def number-of-readers 25)
+(def collector-chan-size 64)
+(def metrics-update-chan-size 64)
+(def number-of-readers 32)
 (def timeout-all-users-loop (seconds-in-msecs 120))
 (def timeout-online-loop (seconds-in-msecs 10))
-(def timeout-collect (seconds-in-msecs 9))
+(def timeout-collect (seconds-in-msecs 15))
 (def timeout-processing-loop (seconds-in-msecs 600))
 
 (defn get-value
@@ -88,8 +88,11 @@
     (go
       (while true
         (let [[[user connector] ch] (alts! [collector-chan (timeout timeout-processing-loop)])]
-          (if (not-nil? user)
-            (collect! user connector)))))))
+          (if (nil? user)
+            (log/log-info "Collect reader " i " loop idle. Looping...")
+            (try
+              (collect! user connector)
+              (catch Exception e (log/log-error "caught exception: " (.getMessage e))))))))))
 
 (defonce ^:dynamic *collect-processor* (collect-readers))
 
@@ -101,8 +104,11 @@
     (go
       (while true
         (let [[[user] ch] (alts! [update-metric-chan (timeout timeout-processing-loop)])]
-          (if (not-nil? user)
-            (update-metric! user)))))))
+          (if (nil? user)
+            (log/log-info "Metric reader " i " loop idle. Looping...")
+            (try
+              (update-metric! user)
+              (catch Exception e (log/log-error "caught exception: " (.getMessage e))))))))))
 
 (defonce ^:dynamic *update-metric-processor* (update-metric-readers))
 

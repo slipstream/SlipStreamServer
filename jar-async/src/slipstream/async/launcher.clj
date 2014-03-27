@@ -16,10 +16,10 @@
   [minutes]
   (* 1000 60 minutes))
 
-(def launcher-chan-size 10)
-(def number-of-readers 10)
+(def launcher-chan-size 64)
+(def number-of-readers 64)
 (def timeout-processing-loop (minutes-in-msecs 1))
-(def timeout-launch (minutes-in-msecs 5))
+(def timeout-launch (minutes-in-msecs 1))
 
 (def errors (atom 0))
 (def requested (atom 0))
@@ -58,9 +58,10 @@
       (while true
         (let [[[run user] ch] (alts! [launcher-chan (timeout timeout-processing-loop)])]
           (if (nil? run)
-            (log/log-info "Reader " i " loop idle. Looping...")
-            (do
-              (launch! run user))))))))
+            (log/log-info "Launch reader " i " loop idle. Looping...")
+            (try
+              (launch! run user)
+              (catch Exception e (log/log-error "caught exception: " (.getMessage e))))))))))
 
 (defonce ^:dynamic *launch-processor* (launch-readers))
 
