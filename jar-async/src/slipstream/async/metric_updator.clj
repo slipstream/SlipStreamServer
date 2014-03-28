@@ -21,8 +21,8 @@
 (defn- persist
   [measures]
   (let [{:keys [exit out err]}
-        (sh/sh "python" "ss-report-metrics.py" "-" :in measures
-               :dir "/opt/slipstream/server/bin")]
+        (sh/sh 
+          "python" "-m" "slipstream.metering.tasks" "--data" measures)]
     (print-sh exit out err)
     exit))
 
@@ -32,4 +32,4 @@
     (if (empty? measures)
       0
       (persist measures))))
-
+      
