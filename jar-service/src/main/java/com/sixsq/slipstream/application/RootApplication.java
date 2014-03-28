@@ -57,7 +57,7 @@ import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.Users;
-import com.sixsq.slipstream.meter.MeterRouter;
+import com.sixsq.slipstream.metrics.GraphiteRouter;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
@@ -381,7 +381,7 @@ public class RootApplication extends Application {
 	private void attachMetering(RootRouter router)
 			throws ConfigurationException, ValidationException {
 
-		guardAndAttach(router, new MeterRouter(getContext()), MeterRouter.ROOT_URI);
+		guardAndAttach(router, new GraphiteRouter(getContext()), GraphiteRouter.ROOT_URI);
 	}
 
 	public class RootRouter extends Router {
