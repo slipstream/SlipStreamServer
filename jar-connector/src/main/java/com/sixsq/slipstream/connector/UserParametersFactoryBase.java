@@ -30,8 +30,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactoryBase;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.UserParameter;
 
 public abstract class UserParametersFactoryBase extends
@@ -76,14 +75,14 @@ public abstract class UserParametersFactoryBase extends
 
 	protected void initQuotaParameter()	throws ValidationException {
 		putParameter(
-				Run.QUOTA_VM_PARAMETER_NAME,
+				QuotaParameter.QUOTA_VM_PARAMETER_NAME,
 				Configuration
 						.getInstance()
 						.getParameters()
 						.getParameterValue(
-								constructKey(Run.QUOTA_VM_PARAMETER_NAME),
-								Run.QUOTA_VM_DEFAULT),
-				Run.QUOTA_VM_DESCRIPTION, true, true);
+								constructKey(QuotaParameter.QUOTA_VM_PARAMETER_NAME),
+								QuotaParameter.QUOTA_VM_DEFAULT),
+				QuotaParameter.QUOTA_VM_DESCRIPTION, true, true);
 	}
 
 	public Map<String, UserParameter> getParameters() {

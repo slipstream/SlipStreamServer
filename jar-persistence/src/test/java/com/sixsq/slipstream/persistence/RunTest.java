@@ -34,9 +34,7 @@ import org.hibernate.LazyInitializationException;
 import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.AbortException;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.QuotaException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.statemachine.States;
 
@@ -93,97 +91,4 @@ public class RunTest {
 		done.remove();
 		aborting.remove();
 	}
-
-	public void addNodes() throws ValidationException{
-
-
-	}
-
-	private Run testQuotaCreateRun(User user, String cloud) throws ValidationException{
-		Module deployment = new DeploymentModule("deployment1");
-		return new Run(deployment, RunType.Orchestration, cloud, user);
-	}
-
-	private User testQuotaCreateUser() throws ValidationException{
-		User user = new User("user");
-		user.store();
-		return user;
-	}
-
-	private void setQuota(User user, String cloud, String value) throws ValidationException{
-		UserParameter userparam = new UserParameter(
-				cloud +
-				RuntimeParameter.PARAM_WORD_SEPARATOR +
-				Run.QUOTA_VM_PARAMETER_NAME, value, "");
-		userparam.setCategory(cloud);
-		user.setParameter(userparam);
-		user.store();
-	}
-
-	@Test
-	public void validateQuotaOk() throws ValidationException, ConfigurationException, QuotaException{
-		String cloud = "cloud1";
-		User user = testQuotaCreateUser();
-		setQuota(user, cloud, "10");
-
-		Map<String, Integer> usage = new HashMap<String, Integer>();
-		usage.put(cloud, 9);
-
-		Run run1 = testQuotaCreateRun(user, cloud);
-
-		run1.addNodeName("node1", cloud);
-
-		run1.validateQuota(usage);
-	}
-
-	@Test(expected=QuotaException.class)
-	public void validateQuotaFail() throws ValidationException, ConfigurationException, QuotaException{
-		String cloud = "cloud1";
-		User user = testQuotaCreateUser();
-		setQuota(user, cloud, "10");
-
-		Map<String, Integer> usage = new HashMap<String, Integer>();
-		usage.put(cloud, 9);
-
-		Run run1 = testQuotaCreateRun(user, cloud);
-
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
-
-		run1.validateQuota(usage);
-	}
-
-	@Test
-	public void validateQuotaNoUsage() throws ValidationException, ConfigurationException, QuotaException{
-		String cloud = "cloud1";
-		User user = testQuotaCreateUser();
-		setQuota(user, cloud, "10");
-
-		Map<String, Integer> usage = new HashMap<String, Integer>();
-
-		Run run1 = testQuotaCreateRun(user, cloud);
-
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
-
-		run1.validateQuota(usage);
-	}
-
-
-	@Test(expected=QuotaException.class)
-	public void validateQuotaNoQuota() throws ValidationException, ConfigurationException, QuotaException{
-		String cloud = "cloud1";
-		User user = testQuotaCreateUser();
-
-		Map<String, Integer> usage = new HashMap<String, Integer>();
-		usage.put(cloud, 9);
-
-		Run run1 = testQuotaCreateRun(user, cloud);
-
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
-
-		run1.validateQuota(usage);
-	}
 }
-

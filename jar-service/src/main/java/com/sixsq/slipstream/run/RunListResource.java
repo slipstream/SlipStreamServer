@@ -166,7 +166,8 @@ public class RunListResource extends BaseResource {
 
 			module.validate();
 
-			User user = getUser(); 
+			User user = getUser();
+			user = User.loadByName(user.getName()); // ensure user is loaded from database
 			
 			run = RunFactory.getRun(module, parseType(form), user
 					.getDefaultCloudService(), user);
@@ -174,7 +175,7 @@ public class RunListResource extends BaseResource {
 			run = addCredentials(run);
 
 			if (Configuration.isQuotaEnabled()) {
-				run.validateQuota(Vm.usage(user.getName()));
+				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
 			}
 			
 			createRepositoryResource(run);
