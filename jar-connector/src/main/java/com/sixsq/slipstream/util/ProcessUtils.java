@@ -9,9 +9,9 @@ package com.sixsq.slipstream.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,25 +31,25 @@ import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 
 public class ProcessUtils {
 
-	
-	public static String execGetOutput(String[] command) 
+
+	public static String execGetOutput(String[] command)
 			throws IOException, SlipStreamClientException {
 		return execGetOutputAsArray(command, true)[0];
 	}
-	
-	public static String execGetOutput(String[] command, boolean stderrToStdout) 
+
+	public static String execGetOutput(String[] command, boolean stderrToStdout)
 			throws IOException, SlipStreamClientException {
 		return execGetOutputAsArray(command, stderrToStdout)[0];
 	}
-	
-	public static String[] execGetOutputAsArray(String[] command, boolean stderrToStdout) 
+
+	public static String[] execGetOutputAsArray(String[] command, boolean stderrToStdout)
 			throws IOException, SlipStreamClientException {
 
-		String commandMessage = "";
+		StringBuilder commandMessage = new StringBuilder();
 		for (String part : command) {
-			commandMessage += part + " ";
+            commandMessage.append(part).append(" ");
 		}
-		getLogger().info("Calling: " + commandMessage);
+		getLogger().info("Calling: " + commandMessage.toString());
 
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.redirectErrorStream(stderrToStdout);
@@ -59,18 +59,18 @@ public class ProcessUtils {
 		StringBuffer outputBuf = new StringBuffer();
 		BufferedReader stdOutErr = new BufferedReader(new InputStreamReader(
 				p.getInputStream()));
-		
+
 		StringBuffer errBuf = new StringBuffer();
 		BufferedReader stdErrReader = new BufferedReader(new InputStreamReader(
 				p.getErrorStream()));
-		
+
 		String line;
 		while ((line = stdOutErr.readLine()) != null) {
 			outputBuf.append(line);
 			outputBuf.append("\n");
 			getLogger().info(line);
 		}
-		
+
 		while ((line = stdErrReader.readLine()) != null) {
 			errBuf.append(line);
 			errBuf.append("\n");
@@ -95,7 +95,7 @@ public class ProcessUtils {
 			stdOutErr.close();
 			stdErrReader.close();
 		}
-		
+
 		return new String[]{outputBuf.toString(), errBuf.toString()};
 	}
 

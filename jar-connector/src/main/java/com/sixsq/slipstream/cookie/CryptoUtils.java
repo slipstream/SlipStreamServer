@@ -9,9 +9,9 @@ package com.sixsq.slipstream.cookie;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,8 +64,8 @@ public class CryptoUtils {
 	// entirely internal to the application there is no need to have a pair
 	// signed by a recognized external authority. To avoid the key pair from
 	// being invalidating on server restart, store it on the db.
-	public static PrivateKey privateKey;
-	public static PublicKey publicKey;
+	private static PrivateKey privateKey;
+	private static PublicKey publicKey;
 	static {
 		try {
 			setKeyPairFromDb();
@@ -166,10 +166,10 @@ public class CryptoUtils {
 	/**
 	 * Sign the given data and return a String representation of the signature.
 	 * The argument may not be null.
-	 * 
+	 *
 	 * @param data
 	 *            information to sign
-	 * 
+	 *
 	 * @return String representation of the signature.
 	 */
 	public static String sign(String data) {
@@ -194,12 +194,12 @@ public class CryptoUtils {
 
 	/**
 	 * Determine if the given signature matches the given data.
-	 * 
+	 *
 	 * @param signed
 	 *            String representation of signature
 	 * @param data
 	 *            information to check
-	 * 
+	 *
 	 * @return true if the signature matches the given data, false otherwise
 	 */
 	public static boolean verify(String signed, String data) {

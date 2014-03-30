@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector.local;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,19 +51,19 @@ public class LocalConnector extends ConnectorBase {
 
 	public static final String CLOUD_SERVICE_NAME = "local";
 	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.dummy.DummyClientCloud";
-	
+
 	public LocalConnector() {
 		this(CLOUD_SERVICE_NAME);
 	}
-	
+
 	public LocalConnector(String instanceName) {
 		super(instanceName);
 	}
-	
+
 	public Connector copy(){
 		return new LocalConnector(getConnectorInstanceName());
 	}
-	
+
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
@@ -113,7 +113,7 @@ public class LocalConnector extends ConnectorBase {
 				throw (new ServerExecutionEnginePluginException(
 						"Cannot submit type: " + run.getCategory() + " yet!!"));
 			}
-			
+
 			updateInstanceIdAndIpOnRun(run, "instance-id-for-local",
 					"hostname-for-local");
 
@@ -175,34 +175,36 @@ public class LocalConnector extends ConnectorBase {
 	@Override
 	public void terminate(Run run, User user)
 			throws SlipStreamException {
+
 		String ids = run.getRuntimeParameterValue("orchestrator:hostname");
 
 		if (ids == null) {
 			return;
 		}
 
+        StringBuilder nodes = new StringBuilder(ids);
+
 		for (String nodeName : run.getNodeNames().split(",")) {
 			nodeName = nodeName.trim();
-			if("".equals(nodeName)) {
-				continue;
-			}
-			String multiplicity = run
-					.getParameterValue(
-							nodeName
-									+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-									+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME,
-							String.valueOf(RuntimeParameter.MULTIPLICITY_NODE_START_INDEX));
-			for (int i = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX; i <= Integer
-					.valueOf(multiplicity); i++) {
-				String ipKey = nodeName
-						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-						+ RuntimeParameter.INSTANCE_ID_KEY;
+			if (!"".equals(nodeName)) {
+                String multiplicity = run
+                        .getParameterValue(
+                                nodeName
+                                        + RuntimeParameter.NODE_PROPERTY_SEPARATOR
+                                        + RuntimeParameter.MULTIPLICITY_PARAMETER_NAME,
+                                String.valueOf(RuntimeParameter.MULTIPLICITY_NODE_START_INDEX));
+                for (int i = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX; i <= Integer
+                        .valueOf(multiplicity); i++) {
+                    String ipKey = nodeName
+                            + RuntimeParameter.NODE_PROPERTY_SEPARATOR
+                            + RuntimeParameter.INSTANCE_ID_KEY;
 
-				ids += " " + run.getRuntimeParameterValue(ipKey);
+                    nodes.append(" ").append(run.getRuntimeParameterValue(ipKey));
+                }
 			}
 		}
 
-		Logger.getLogger(this.getClass().getName()).info("Terminating: " + ids);
+		Logger.getLogger(this.getClass().getName()).info("Terminating: " + nodes.toString());
 
 	}
 
@@ -216,7 +218,7 @@ public class LocalConnector extends ConnectorBase {
 			throws ValidationException{
 		return new LocalUserParametersFactory().getParameters();
 	}
-	
+
 	@Override
 	protected String constructKey(String key) throws ValidationException {
 		return new LocalUserParametersFactory().constructKey(key);

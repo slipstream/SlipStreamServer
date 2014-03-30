@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,7 +41,7 @@ public class Launcher {
 
 		try {
 			run = storeRunKeepModule(run);
-			SyncLauncher sl = (new Launcher()).new SyncLauncher(run, user);
+			SyncLauncher sl = new SyncLauncher(run, user);
 			sl.run();
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -60,7 +60,7 @@ public class Launcher {
 		return run;
 	}
 
-	public class SyncLauncher {
+	public static class SyncLauncher {
 		private Run run;
 		private final User user;
 

@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector.cloudstack;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ package com.sixsq.slipstream.connector.cloudstack;
  */
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -50,29 +51,29 @@ public class CloudStackConnector extends CliConnectorBase {
 
 	public static final String CLOUD_SERVICE_NAME = "cloudstack";
 	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.cloudstack.CloudStackClientCloud";
-	
+
 	public CloudStackConnector() {
 		this(CLOUD_SERVICE_NAME);
-	}	
+	}
 
-    public CloudStackConnector(String instanceName) { 
+    public CloudStackConnector(String instanceName) {
 		super(instanceName);
 	}
-    
+
     public Connector copy(){
     	return new CloudStackConnector(getConnectorInstanceName());
     }
-	
+
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
 
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
-		
+
 		if(isInOrchestrationContext(run) && run.getCategory() == ModuleCategory.Image)
 			throw new SlipStreamException("Image creation is not yet available for this connector");
-		
+
 		String command;
 		try {
 			command = getRunInstanceCommand(run, user);
@@ -106,52 +107,52 @@ public class CloudStackConnector extends CliConnectorBase {
 			SlipStreamClientException, IOException, ConfigurationException, ServerExecutionEnginePluginException {
 
 		validateLaunch(run, user);
-		
-		String command = "/usr/bin/cloudstack-run-instances " + 
+
+		String command = "/usr/bin/cloudstack-run-instances " +
 				getCommandBaseParams(user) +
-				" --image-id " + wrapInSingleQuotes(getImageId(run, user)) + 
+				" --image-id " + wrapInSingleQuotes(getImageId(run, user)) +
 				" --instance-name " + wrapInSingleQuotes(getVmName(run)) +
 				" --instance-type " + wrapInSingleQuotes(getInstanceType(run, user)) +
 				" --public-key " + wrapInSingleQuotes(getPublicSshKey(run, user)) +
-				" --network " + getNetwork(run) + 
+				" --network " + getNetwork(run) +
 				" --context-script " + wrapInSingleQuotes(createContextualizationData(run, user));
-		 		
+
 		return command;
 	}
 
 	private String getCommandBaseParams(User user) throws ValidationException {
 		return
-			" --key " + getKey(user) + 
-			" --secret " + getSecret(user) + 
+			" --key " + getKey(user) +
+			" --secret " + getSecret(user) +
 			" --endpoint " + getEndpoint(user) +
 			" --zone " + wrapInSingleQuotes(getZone(user));
 	}
-	
+
 	protected String getVmName(Run run){
-		return isInOrchestrationContext(run) ? 
-				getOrchestratorName(run) + "-" + run.getUuid() : 
+		return isInOrchestrationContext(run) ?
+				getOrchestratorName(run) + "-" + run.getUuid() :
 				"machine" + "-" + run.getUuid();
 	}
-	
+
 	protected String getInstanceType(Run run, User user) throws ValidationException{
-		return (isInOrchestrationContext(run)) ? 
+		return (isInOrchestrationContext(run)) ?
 				user.getParameter(constructKey(CloudStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME)).getValue() :
 				getInstanceType( ImageModule.load(run.getModuleResourceUrl()) );
 	}
-	
+
 	private void validateDescribe(User user) throws ValidationException {
 		validateCredentials(user);
 		validateBaseParameters(user);
 	}
-	
+
 	private void validateTerminate(Run run, User user) throws ValidationException {
 		validateCredentials(user);
 		validateBaseParameters(user);
 	}
-	
+
 	protected void validateBaseParameters(User user) throws ValidationException {
 		String errorMessageLastPart = ". Please contact your SlipStream administrator.";
-		
+
 		String endpoint = getEndpoint(user);
 		if (endpoint == null || "".equals(endpoint)) {
 			throw (new ValidationException("Cloud Endpoint cannot be empty. "+ errorMessageLastPart));
@@ -161,12 +162,12 @@ public class CloudStackConnector extends CliConnectorBase {
 			throw (new ValidationException("Cloud Zone cannot be empty. "+ errorMessageLastPart));
 		}
 	}
-	
-	private void validateLaunch(Run run, User user) 
+
+	private void validateLaunch(Run run, User user)
 			throws ConfigurationException, SlipStreamClientException, ServerExecutionEnginePluginException{
 		validateCredentials(user);
 		validateBaseParameters(user);
-		
+
 		String instanceType = getInstanceType(run, user);
 		if (instanceType == null || "".equals(instanceType)){
 			if (isInOrchestrationContext(run)){
@@ -175,7 +176,7 @@ public class CloudStackConnector extends CliConnectorBase {
 				throw (new ValidationException("Instance type cannot be empty. Please update your image parameters"));
 			}
 		}
-		
+
 		String imageId = getImageId(run, user);
 		if (imageId == null  || "".equals(imageId)){
 			if (isInOrchestrationContext(run)){
@@ -185,7 +186,7 @@ public class CloudStackConnector extends CliConnectorBase {
 			}
 		}
 	}
-	
+
 	protected String getNetwork(Run run) throws ValidationException{
 		if (isInOrchestrationContext(run)) {
 			return "Public";
@@ -194,33 +195,36 @@ public class CloudStackConnector extends CliConnectorBase {
 			return machine.getParameterValue(ImageModule.NETWORK_KEY, null);
 		}
 	}
-	
+
 	protected String getZone(User user) throws ValidationException {
 		return user.getParameter(constructKey(
 				CloudStackUserParametersFactory.ZONE_PARAMETER_NAME))
 				.getValue();
 	}
-	
+
 	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {
 
 		validateTerminate(run, user);
-		
+
 		Logger.getLogger(this.getClass().getName()).info(
 				getConnectorInstanceName() + ". Terminating all instances.");
 
 		String command = "/usr/bin/cloudstack-terminate-instances"
 				+ getCommandBaseParams(user);
-		
-		String instances = "";
-		for (String id : getCloudNodeInstanceIds(run)) {
-			instances += " --instance-id " + wrapInSingleQuotes(id);
-		}
-		if(instances.isEmpty()){
+
+        List<String> instanceIds = getCloudNodeInstanceIds(run);
+		if(instanceIds.isEmpty()){
 			throw new SlipStreamClientException("There is no instances to terminate");
 		}
-		
-		String[] commands = { "sh", "-c", command + instances };
+
+        StringBuilder instances = new StringBuilder();
+        for (String id : instanceIds) {
+            instances.append(" --instance-id ")
+                     .append(wrapInSingleQuotes(id));
+        }
+
+        String[] commands = { "sh", "-c", command + instances.toString() };
 		try {
 			ProcessUtils.execGetOutput(commands);
 		} catch (SlipStreamClientException e) {
@@ -231,9 +235,9 @@ public class CloudStackConnector extends CliConnectorBase {
 
 	@Override
 	public Properties describeInstances(User user) throws SlipStreamException {
-		
+
 		validateDescribe(user);
-		
+
 		String command = "/usr/bin/cloudstack-describe-instances"
 				+ getCommandBaseParams(user);
 
@@ -249,7 +253,7 @@ public class CloudStackConnector extends CliConnectorBase {
 
 		return parseDescribeInstanceResult(result);
 	}
-	
+
 	@Override
 	public Credentials getCredentials(User user) {
 		return new CloudStackCredentials(user, getConnectorInstanceName());
@@ -281,9 +285,9 @@ public class CloudStackConnector extends CliConnectorBase {
 		return new CloudStackUserParametersFactory(getConnectorInstanceName())
 				.constructKey(key);
 	}
-	
+
 	private String createContextualizationData(Run run, User user)
-			throws ConfigurationException, 
+			throws ConfigurationException,
 			ServerExecutionEnginePluginException, SlipStreamClientException {
 		String logfilename = "orchestrator.slipstream.log";
 		String bootstrap = "/tmp/slipstream.bootstrap";
@@ -291,7 +295,7 @@ public class CloudStackConnector extends CliConnectorBase {
 		Configuration configuration = Configuration.getInstance();
 		String targetScript = "";
 		String nodename = Run.MACHINE_NAME;
-		
+
 		if(isInOrchestrationContext(run)){
 			targetScript = "slipstream-orchestrator";
 			nodename = getOrchestratorName(run);
@@ -304,7 +308,7 @@ public class CloudStackConnector extends CliConnectorBase {
 		userData += "export SLIPSTREAM_NODENAME=\"" + nodename + "\"\n";
 		userData += "export SLIPSTREAM_DIID=\"" + run.getName() + "\"\n";
 		userData += "export SLIPSTREAM_REPORT_DIR=\"" + SLIPSTREAM_REPORT_DIR + "\"\n";
-		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"\n";				
+		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"\n";
 		userData += "export SLIPSTREAM_BUNDLE_URL=\"" + configuration.getRequiredProperty("slipstream.update.clienturl") + "\"\n";
 		userData += "export SLIPSTREAM_BOOTSTRAP_BIN=\"" + configuration.getRequiredProperty("slipstream.update.clientbootstrapurl") + "\"\n";
 		userData += "export CLOUDCONNECTOR_BUNDLE_URL=\"" + configuration.getRequiredProperty("cloud.connector.library.libcloud.url") + "\"\n";
@@ -313,15 +317,15 @@ public class CloudStackConnector extends CliConnectorBase {
 		userData += "export SLIPSTREAM_USERNAME=\"" + username + "\"\n";
 		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "\n";
 		userData += "export SLIPSTREAM_VERBOSITY_LEVEL=\"" + getVerboseParameterValue(user) + "\"\n";
-		
+
 		userData += "mkdir -p " + SLIPSTREAM_REPORT_DIR + "\n"
 				+ "wget --secure-protocol=SSLv3 --no-check-certificate -O " + bootstrap
 				+ " $SLIPSTREAM_BOOTSTRAP_BIN > " + SLIPSTREAM_REPORT_DIR + "/"
 				+ logfilename + " 2>&1 " + "&& chmod 0755 " + bootstrap + "\n"
 				+ bootstrap + " " + targetScript + " >> "
 				+ SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1\n";
-		
-		return userData;	
+
+		return userData;
 	}
-	
+
 }
