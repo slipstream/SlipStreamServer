@@ -55,6 +55,15 @@
 			</resource>
 		</resources>
 		<plugins>
+                  <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <configuration>
+                      <findbugsXmlOutput>false</findbugsXmlOutput>
+                      <findbugsXmlWithMessages>false</findbugsXmlWithMessages>
+                      <xmlOutput>false</xmlOutput>
+                    </configuration>
+                  </plugin>
 			<plugin>
 				<groupId>com.theoryinpractise</groupId>
 				<artifactId>clojure-maven-plugin</artifactId>
