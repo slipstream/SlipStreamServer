@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -72,9 +72,9 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 /**
  * Unit test:
- * 
+ *
  * @see RunListResourceTest.class
- * 
+ *
  */
 public class RunListResource extends BaseResource {
 
@@ -141,10 +141,10 @@ public class RunListResource extends BaseResource {
 	/**
 	 * We need to merge data from different sources: - the form (entity) - the
 	 * default module
-	 * 
+	 *
 	 * In the case of orchestrator + VM(s) (i.e. deployment and build) we also
 	 * need to merge: - the default from each node
-	 * 
+	 *
 	 * The service cloud is the part that causes most trouble, since it can be
 	 * defined at all levels.
 	 */
@@ -168,7 +168,7 @@ public class RunListResource extends BaseResource {
 
 			User user = getUser();
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
-			
+
 			run = RunFactory.getRun(module, parseType(form), user
 					.getDefaultCloudService(), user);
 
@@ -177,11 +177,11 @@ public class RunListResource extends BaseResource {
 			if (Configuration.isQuotaEnabled()) {
 				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
 			}
-			
+
 			createRepositoryResource(run);
 
 			run.store();
-			
+
 			launch(run);
 
 		} catch (SlipStreamClientException ex) {
@@ -240,14 +240,15 @@ public class RunListResource extends BaseResource {
 				node.setCloudService(defaultCloudService);
 		}
 
-		for (String nodename : parametersPerNode.keySet()) {
+		for (Map.Entry<String, List<NodeParameter>> entry : parametersPerNode.entrySet()) {
+            String nodename = entry.getKey();
 			if (!deployment.getNodes().containsKey(nodename)) {
 				throw new ValidationException("Unknown node: " + nodename);
 			}
 
 			Node node = deployment.getNodes().get(nodename);
 
-			for (NodeParameter parameter : parametersPerNode.get(nodename)) {
+			for (NodeParameter parameter : entry.getValue()) {
 				if (parameter.getName().equals(
 						RuntimeParameter.MULTIPLICITY_PARAMETER_NAME)) {
 					node.setMultiplicity(parameter.getValue());
