@@ -59,9 +59,7 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>findbugs-maven-plugin</artifactId>
                     <configuration>
-                      <findbugsXmlOutput>false</findbugsXmlOutput>
-                      <findbugsXmlWithMessages>false</findbugsXmlWithMessages>
-                      <xmlOutput>false</xmlOutput>
+                      <skip>true</skip>
                     </configuration>
                   </plugin>
 			<plugin>
