@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector.stratuslab;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -312,7 +312,7 @@ public class StratusLabConnector extends CliConnectorBase {
 		String bootstrap = "/tmp/slipstream.bootstrap";
 		String bootstrapUrl = configuration
 				.getRequiredProperty("slipstream.update.clientbootstrapurl");
-		
+
 		return "SCRIPT_EXEC=\"sleep 15; mkdir -p " + SLIPSTREAM_REPORT_DIR
 				+ "; wget --secure-protocol=SSLv3 --no-check-certificate -O " + bootstrap + " "
 				+ bootstrapUrl + " > " + SLIPSTREAM_REPORT_DIR
@@ -323,26 +323,28 @@ public class StratusLabConnector extends CliConnectorBase {
 	}
 
 	private String getExtraDisksCommand(Run run) {
-		if (run.getType() != RunType.Machine) {
-			return "";
-		}
-		String disksParams = "";
-		for (String diskName : EXTRADISK_NAMES) {
-			String extraDiskName = Run.MACHINE_NAME_PREFIX
-					+ ImageModule.EXTRADISK_PARAM_PREFIX + diskName;
-			String extraDiskValue = "";
-			try {
-				extraDiskValue = run.getRuntimeParameterValue(extraDiskName);
-			} catch (NotFoundException e) {
-				continue;
-			} catch (AbortException e) {
-				continue;
-			}
-			if (!extraDiskValue.isEmpty()) {
-				disksParams += " --" + diskName + "-disk " + extraDiskValue;
-			}
-		}
-		return disksParams;
+        if (run.getType() == RunType.Machine) {
+            StringBuilder disksParams = new StringBuilder();
+            for (String diskName : EXTRADISK_NAMES) {
+                String extraDiskName = Run.MACHINE_NAME_PREFIX + ImageModule.EXTRADISK_PARAM_PREFIX + diskName;
+                String extraDiskValue = "";
+                try {
+                    extraDiskValue = run.getRuntimeParameterValue(extraDiskName);
+
+                    if (!extraDiskValue.isEmpty()) {
+                        disksParams.append(" --").append(diskName).append("-disk ").append(extraDiskValue);
+                    }
+
+                } catch (NotFoundException consumed) {
+                    //ignore
+                } catch (AbortException consumed) {
+                    //ignore
+                }
+            }
+            return disksParams.toString();
+        } else {
+            return "";
+        }
 	}
 
 	@Override

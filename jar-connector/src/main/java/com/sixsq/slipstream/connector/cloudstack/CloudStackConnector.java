@@ -230,7 +230,10 @@ public class CloudStackConnector extends CliConnectorBase {
 		} catch (SlipStreamClientException e) {
 			Logger.getLogger(this.getClass().getName()).info(
 					getConnectorInstanceName() + ". Failed to terminate instances");
-		} catch (IOException e) { }
+		} catch (IOException e) {
+            Logger.getLogger(this.getClass().getName()).info(
+                    getConnectorInstanceName() + ". IO error while terminating instances");
+        }
 	}
 
 	@Override

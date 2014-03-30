@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector.openstack;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -67,15 +67,15 @@ public class OpenStackConnector extends
 	public OpenStackConnector() {
 		this(CLOUD_SERVICE_NAME);
 	}
-	
+
 	public OpenStackConnector(String instanceName){
 		super(instanceName);
 	}
-	
+
 	public Connector copy(){
 		return new OpenStackConnector(getConnectorInstanceName());
 	}
-	
+
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
@@ -83,7 +83,7 @@ public class OpenStackConnector extends
 	public String getJcloudsDriverName() {
 		return JCLOUDS_DRIVER_NAME;
 	}
-	
+
 	@Override
 	public Run launch(Run run, User user)
 			throws SlipStreamException {
@@ -120,7 +120,7 @@ public class OpenStackConnector extends
 			throws ValidationException {
 		return new OpenStackImageParametersFactory(getConnectorInstanceName()).getParameters();
 	}
-	
+
 	@Override
 	protected String constructKey(String key) throws ValidationException {
 		return new OpenStackUserParametersFactory(getConnectorInstanceName()).constructKey(key);
@@ -168,7 +168,7 @@ public class OpenStackConnector extends
 		} catch (Exception e) {
 			throw new ServerExecutionEnginePluginException(e.getMessage());
 		}
-		
+
 		for (Server instance : instances) {
 			String status = instance.getStatus().value().toLowerCase();
 			String taskState = (instance.getExtendedStatus().isPresent()) ? instance
@@ -201,16 +201,16 @@ public class OpenStackConnector extends
 		overrides.setProperty(KeystoneProperties.REQUIRES_TENANT, "true");
 		overrides.setProperty(KeystoneProperties.TENANT_NAME, user.getParameterValue(constructKey(OpenStackUserParametersFactory.TENANT_NAME), ""));
 		//overrides.setProperty(Constants.PROPERTY_API_VERSION, "X.X");
-		
+
 		//Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
 		ComputeServiceContext csContext = ContextBuilder.newBuilder(getJcloudsDriverName())
 			//.endpoint(getEndpoint(user))
 			//.modules(modules)
 			.credentials(getKey(user), getSecret(user))
 			.overrides(overrides).buildView(ComputeServiceContext.class);
-		
+
 		this.context = csContext.unwrap();
-		
+
 		return this.context.getApi();
 	}
 
@@ -227,14 +227,14 @@ public class OpenStackConnector extends
 
 		try {
 			Configuration configuration = Configuration.getInstance();
-			ImageModule imageModule = (isInOrchestrationContext(run)) ? null: 
+			ImageModule imageModule = (isInOrchestrationContext(run)) ? null:
 				ImageModule.load(run.getModuleResourceUrl());
 
 			String region = configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
 			String imageId = (isInOrchestrationContext(run))? getOrchestratorImageId(user) : getImageId(run, user);
-			
+
 			String instanceName = (isInOrchestrationContext(run)) ? getOrchestratorName(run) : imageModule.getShortName();
-			
+
 			String flavorName = (isInOrchestrationContext(run)) ? configuration
 					.getRequiredProperty(constructKey(OpenStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME))
 					: getInstanceType(imageModule);
@@ -259,7 +259,7 @@ public class OpenStackConnector extends
 
 			KeyPairApi kpApi = client.getKeyPairExtensionForZone(region).get();
 			kpApi.createWithPublicKey(keyPairName, publicKey);
-			
+
 			ServerCreated server = null;
 			try {
 				server = client.getServerApiForZone(region).create(instanceName, imageId, flavorId, options);
@@ -281,7 +281,7 @@ public class OpenStackConnector extends
 				}
 				ipAddress = getIpAddress(client, region, instanceId);
 			}
-			
+
 			updateInstanceIdAndIpOnRun(run, instanceId, ipAddress);
 
 		} catch (com.google.common.util.concurrent.UncheckedExecutionException e){
@@ -316,7 +316,7 @@ public class OpenStackConnector extends
 			targetScript = "slipstream-orchestrator";
 			nodename = getOrchestratorName(run);
 		}
-		
+
 		String userData = "#!/bin/sh -e \n";
 		userData += "# SlipStream contextualization script for VMs on Amazon. \n";
 		userData += "export SLIPSTREAM_CLOUD=\"" + getCloudServiceName() + "\"\n";
@@ -324,7 +324,7 @@ public class OpenStackConnector extends
 		userData += "export SLIPSTREAM_NODENAME=\"" + nodename + "\"\n";
 		userData += "export SLIPSTREAM_DIID=\"" + run.getName() + "\"\n";
 		userData += "export SLIPSTREAM_REPORT_DIR=\"" + SLIPSTREAM_REPORT_DIR + "\"\n";
-		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"\n";				
+		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"\n";
 		userData += "export SLIPSTREAM_BUNDLE_URL=\"" + configuration.getRequiredProperty("slipstream.update.clienturl") + "\"\n";
 		userData += "export SLIPSTREAM_BOOTSTRAP_BIN=\"" + configuration.getRequiredProperty("slipstream.update.clientbootstrapurl") + "\"\n";
 		userData += "export CLOUDCONNECTOR_BUNDLE_URL=\"" + configuration.getRequiredProperty("cloud.connector.library.libcloud.url") + "\"\n";
@@ -354,22 +354,27 @@ public class OpenStackConnector extends
 		return userData;
 	}
 
-	protected String getFlavorId(NovaApi client, String region, String name)
+	protected String getFlavorId(NovaApi client, String region, String flavorName)
 			throws ConfigurationException, ServerExecutionEnginePluginException {
 
-		String flavorName = name;
-		String flavorListStr = "";
 
 		FluentIterable<? extends Resource> flavors = client.getFlavorApiForZone(region).list().concat();
 		for (Resource flavor : flavors) {
 			if (flavor.getName().equals(flavorName))
 				return flavor.getId();
-			flavorListStr += " - " + flavor.getName() + "\n";
 		}
 
-		throw (new ServerExecutionEnginePluginException(
-				"Provided OpenStack Flavor '" + flavorName + "' doesn't exist"
-						+ "Supported Flavors: \n" + flavorListStr));
+        // ERROR: flavor not found; construct error message
+        StringBuilder flavorListStr = new StringBuilder();
+        for (Resource flavor : flavors) {
+            flavorListStr.append(" - ")
+                         .append(flavor.getName())
+                         .append("\n");
+        }
+
+        String msgFormat = "OpenStack Flavor '%s' doesn't exist%nSupported Flavors: %n%s%n";
+        String msg = String.format(msgFormat, flavorName, flavorListStr.toString());
+		throw new ServerExecutionEnginePluginException(msg);
 	}
 
 	protected String getIpAddress(NovaApi client, String region, String instanceId) {
