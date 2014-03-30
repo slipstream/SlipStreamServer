@@ -169,6 +169,16 @@
 
 		<plugins>
 
+                  <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <configuration>
+                      <findbugsXmlOutput>true</findbugsXmlOutput>
+                      <findbugsXmlWithMessages>true</findbugsXmlWithMessages>
+                      <xmlOutput>true</xmlOutput>
+                    </configuration>
+                  </plugin>
+
 			<plugin>
 				<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
 				<artifactId>serviceloader-maven-plugin</artifactId>
