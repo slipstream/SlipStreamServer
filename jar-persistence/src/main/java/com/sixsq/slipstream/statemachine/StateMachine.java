@@ -9,9 +9,9 @@ package com.sixsq.slipstream.statemachine;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -71,8 +71,7 @@ public class StateMachine {
 
 	public static ExtrinsicState createGlobalExtrinsicState(Run run) {
 		RuntimeParameter globalCompleteRuntimeParameter = run
-				.getRuntimeParameters().get(
-						RuntimeParameter.GLOBAL_COMPLETE_KEY);
+				.getRuntimeParameters().get(RuntimeParameter.GLOBAL_COMPLETE_KEY);
 		RuntimeParameter globalFailingRuntimeParameter = run
 				.getRuntimeParameters().get(RuntimeParameter.GLOBAL_ABORT_KEY);
 		RuntimeParameter globalStateRuntimeParameter = run
@@ -122,10 +121,12 @@ public class StateMachine {
 			attemptToAdvanceState();
 			commitTransaction(em);
 		} catch (RuntimeException ex) {
-			if (em.getTransaction() != null && em.getTransaction().isActive()) {
-				em.getTransaction().rollback();
-			}
-			em.close();
+            if (em != null) {
+                if (em.getTransaction() != null && em.getTransaction().isActive()) {
+                    em.getTransaction().rollback();
+                }
+                em.close();
+            }
 			logger.warning("Error in tryAdvanceState. Retrying...");
 			tryAdvanceState();
 		}
@@ -192,7 +193,7 @@ public class StateMachine {
 		globalState.getExtrinsicState().setState(newState);
 		alineAllNodesStateToGlobalState();
 		resetNodesStateCompleted();
-		
+
 	}
 
 	private State assignNodeState(State state, States newState)

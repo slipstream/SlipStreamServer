@@ -6,8 +6,8 @@ import com.sixsq.slipstream.persistence.ImageModule;
 
 public class CloudStackImageParametersFactory extends ModuleParametersFactoryBase {
 
-	public static String SECURITY_GROUPS = "security.groups";
-	
+	public static final String SECURITY_GROUPS = "security.groups";
+
 	public CloudStackImageParametersFactory(String connectorInstanceName)
 			throws ValidationException {
 		super(connectorInstanceName);

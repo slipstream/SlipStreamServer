@@ -6,9 +6,9 @@ import com.sixsq.slipstream.persistence.ParameterType;
 
 public class PhysicalHostImageParametersFactory extends ModuleParametersFactoryBase {
 
-	public static String SECRET_PARAMETER_NAME = "password";
-	public static String PRIVATE_KEY = "private.key";
-	
+	public static final String SECRET_PARAMETER_NAME = "password";
+	public static final String PRIVATE_KEY = "private.key";
+
 	public PhysicalHostImageParametersFactory(String connectorInstanceName)
 			throws ValidationException {
 		super(connectorInstanceName);

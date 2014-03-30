@@ -588,11 +588,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void removeRuntimeParameter(String key) throws NotFoundException {
-
 		assert (runtimeParameters != null);
-
-		Metadata parameter = extractRuntimeParameter(key);
-		runtimeParameters.remove(parameter);
+		runtimeParameters.remove(key);
 	}
 
 	public boolean isAbort() {

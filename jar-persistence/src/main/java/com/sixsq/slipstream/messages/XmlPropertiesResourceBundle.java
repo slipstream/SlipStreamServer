@@ -9,9 +9,9 @@ package com.sixsq.slipstream.messages;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,10 +39,11 @@ public class XmlPropertiesResourceBundle extends ResourceBundle {
 
 	public XmlPropertiesResourceBundle(String basename) {
 
+        InputStream in = null;
 		try {
 
 			Class<XmlPropertiesResourceBundle> c = XmlPropertiesResourceBundle.class;
-			InputStream in = c.getResourceAsStream(basename);
+			in = c.getResourceAsStream(basename);
 
 			Properties properties = new Properties();
 			properties.loadFromXML(in);
@@ -52,7 +53,15 @@ public class XmlPropertiesResourceBundle extends ResourceBundle {
 			throw new SlipStreamRuntimeException(e.getMessage());
 		} catch (IOException e) {
 			throw new SlipStreamRuntimeException(e.getMessage());
-		}
+		} finally {
+            if (in!=null) {
+                try {
+                    in.close();
+                } catch (IOException consumed) {
+                    // ignored
+                }
+            }
+        }
 
 	}
 

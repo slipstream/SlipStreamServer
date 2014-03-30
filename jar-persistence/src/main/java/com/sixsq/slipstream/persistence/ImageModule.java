@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,9 +39,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test see:
- * 
+ *
  * @see ImageModuleTest
- * 
+ *
  */
 @Entity
 @SuppressWarnings("serial")
@@ -80,7 +80,7 @@ public class ImageModule extends Module {
 	private String recipe = "";
 
 	@Attribute
-	private Boolean isBase = false;
+	private Boolean isBase = Boolean.FALSE;
 
 	private String loginUser = "root";
 
@@ -119,7 +119,7 @@ public class ImageModule extends Module {
 	/**
 	 * Validate for an image run (as opposed to a build or as part of a
 	 * deployment).
-	 * 
+	 *
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -190,7 +190,7 @@ public class ImageModule extends Module {
 	 * Assign to the imageId attribute the value corresponding to the cloud
 	 * service. This saves the client from having to dig in the module to
 	 * retrieve the right image id.
-	 * 
+	 *
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -203,7 +203,7 @@ public class ImageModule extends Module {
 	 * Assign to the imageId attribute the base image id corresponding to the
 	 * cloud service. This should be used when building an image, since we need
 	 * to start the process from the reference image.
-	 * 
+	 *
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -224,7 +224,7 @@ public class ImageModule extends Module {
 
 	/**
 	 * Finds the base image id
-	 * 
+	 *
 	 * @param cloudService
 	 * @return image id
 	 * @throws ValidationException
@@ -338,7 +338,7 @@ public class ImageModule extends Module {
 	}
 
 	public Boolean isBase() {
-		return isBase == null ? false : isBase;
+		return isBase == null ? Boolean.FALSE : isBase;
 	}
 
 	public void setIsBase(Boolean isBase) throws ValidationException {
@@ -546,7 +546,7 @@ public class ImageModule extends Module {
 
 	/**
 	 * Set image id for normal image run
-	 * 
+	 *
 	 * @param run
 	 * @return
 	 * @throws ValidationException
@@ -564,7 +564,7 @@ public class ImageModule extends Module {
 
 	/**
 	 * Set base image id for image build
-	 * 
+	 *
 	 * @param run
 	 * @return
 	 * @throws ValidationException

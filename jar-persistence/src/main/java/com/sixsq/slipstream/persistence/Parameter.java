@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,9 +37,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test see
- * 
+ *
  * @see ParameterTest
- * 
+ *
  */
 @MappedSuperclass
 @SuppressWarnings("serial")
@@ -85,7 +85,7 @@ public abstract class Parameter<T> implements Serializable {
 
 	@Attribute(required = false)
 	private Integer order_ = 0;
-	
+
 	protected Parameter() {
 		super();
 	}
@@ -303,11 +303,12 @@ public abstract class Parameter<T> implements Serializable {
 	}
 
 	public static String constructKey(String category, String... names) {
-	    String newKey = category;
+	    StringBuilder newKey = new StringBuilder(category);
 	    for (String name : names) {
-	            newKey += RuntimeParameter.PARAM_WORD_SEPARATOR + name;
+            newKey.append(RuntimeParameter.PARAM_WORD_SEPARATOR)
+                  .append(name);
 	    }
-	    return newKey;
+	    return newKey.toString();
 	}
 
 }

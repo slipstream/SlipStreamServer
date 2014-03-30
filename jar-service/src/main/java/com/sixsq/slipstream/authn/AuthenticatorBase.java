@@ -24,7 +24,7 @@ public abstract class AuthenticatorBase extends Authenticator {
 	protected void setLastOnline(User user) {
 		user.setLastOnline();
 		try {
-			user = user.store();
+			user.store();
 		} catch (StaleObjectStateException e) {
 		} catch (RollbackException e) {
 		} catch (OptimisticLockException e) {
@@ -47,7 +47,7 @@ public abstract class AuthenticatorBase extends Authenticator {
 
 		setLastOnline(user);
 	}
-	
+
 	protected boolean isActive(User user) {
 		return State.ACTIVE == user.getState();
 	}

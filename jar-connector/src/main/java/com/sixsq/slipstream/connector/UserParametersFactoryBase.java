@@ -36,10 +36,10 @@ import com.sixsq.slipstream.persistence.UserParameter;
 public abstract class UserParametersFactoryBase extends
 		ParametersFactoryBase<UserParameter> {
 
-	public static String KEY_PARAMETER_NAME = "username";
-	public static String SECRET_PARAMETER_NAME = "password";
-	public static String SSHKEY_PARAMETER_NAME = "ssh.public.key";
-	public static String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = UserParameter.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME;
+	public static final String KEY_PARAMETER_NAME = "username";
+	public static final String SECRET_PARAMETER_NAME = "password";
+	public static final String SSHKEY_PARAMETER_NAME = "ssh.public.key";
+	public static final String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = UserParameter.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME;
 	public static final String ENDPOINT_PARAMETER_NAME = "endpoint";
 	public static final String ORCHESTRATOR_IMAGEID_PARAMETER_NAME = "orchestrator.imageid";
 	public static final String ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME = "orchestrator.instance.type";

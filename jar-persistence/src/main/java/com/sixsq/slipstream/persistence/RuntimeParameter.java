@@ -345,7 +345,7 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	public void setValue(String value) {
-		setIsSet((value != "" ? true : false));
+        setIsSet(!"".equals(value));
 		this.value = value;
 		updateMappedRuntimeParameters();
 	}

@@ -6,7 +6,7 @@ import com.sixsq.slipstream.persistence.ParameterType;
 
 public class CloudStackUserParametersFactory extends UserParametersFactoryBase {
 
-	public static String ZONE_PARAMETER_NAME = "zone";
+	public static final String ZONE_PARAMETER_NAME = "zone";
 
 	public CloudStackUserParametersFactory(String connectorInstanceName)
 			throws ValidationException {

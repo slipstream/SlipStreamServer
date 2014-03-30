@@ -9,9 +9,9 @@ package com.sixsq.slipstream.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -77,10 +77,8 @@ public class Notifier {
 			Session session = createSmtpSession(cfg);
 			String password = getMailPassword(cfg);
 
-			StringBuilder sb = new StringBuilder();
-			sb.append("Sending notification to " + email + "\n");
-			sb.append("Message: " + message + "\n");
-			logger.info(sb.toString());
+            String logmsg = String.format("sending notification to %s%nMessage: %s%n", email, message);
+			logger.info(logmsg);
 
 			Message msg = new MimeMessage(session);
 			msg.setFrom(admin);
@@ -97,7 +95,7 @@ public class Notifier {
 			msg.setSentDate(new Date());
 
 			msg.saveChanges();
-			
+
 			// send the thing off
 			try {
 				Transport t = session.getTransport();
@@ -105,23 +103,23 @@ public class Notifier {
 				t.sendMessage(msg, msg.getAllRecipients());
 				logger.info("mail was successfully sent");
 			} catch (AuthenticationFailedException afe) {
-				StringBuilder m = new StringBuilder();
-				m.append("authentication failure\n");
-				m.append(afe.getMessage() + "\n");
-				logger.severe(m.toString());
+                String m = String.format("authentication failure%n%s%n", afe.getMessage());
+				logger.severe(m);
 				sendOk = false;
 			} catch (MessagingException me) {
-				StringBuilder m = new StringBuilder();
-				m.append("error sending message to " + email + "\n");
-				m.append(me.getMessage() + "\n");
-				logger.severe(m.toString());
+                String m = String.format("error sending message to %s%n%s%n", email, me.getMessage());
+				logger.severe(m);
 				sendOk = false;
 			}
 
-		} catch (Exception consumed) {
-			consumed.printStackTrace();
-			sendOk = false;
-
+        } catch (RuntimeException re) {
+            String m = String.format("error sending message to %s%n%s%n", email, re.getMessage());
+            logger.severe(m);
+            sendOk = false;
+        } catch (Exception e) {
+            String m = String.format("error sending message to %s%n%s%n", email, e.getMessage());
+            logger.severe(m);
+            sendOk = false;
 		}
 		return sendOk;
 	}

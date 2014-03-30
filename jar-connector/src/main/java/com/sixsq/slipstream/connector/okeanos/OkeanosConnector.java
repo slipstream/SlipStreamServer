@@ -184,7 +184,7 @@ public class OkeanosConnector extends OpenStackConnector {
 			targetScript = "slipstream-orchestrator";
 			nodename = getOrchestratorName(run);
 		}
-        
+
         String userData = "#!/bin/sh -e \n";
 
         userData += "# SlipStream contextualization script for ~Okeanos\n";
@@ -322,8 +322,8 @@ public class OkeanosConnector extends OpenStackConnector {
 
             System.out.println("++==== INITIAL SCRIPT ========");
             final String extraLines = String.format(
-                "export ORCHESTRATOR_VM_ROOT_PASSWORD=\"%s\"\n" +
-                    "export ORCHESTRATOR_VM_ID=\"%s\"\n",
+                "export ORCHESTRATOR_VM_ROOT_PASSWORD=\"%s\"%n" +
+                    "export ORCHESTRATOR_VM_ID=\"%s\"%n",
                 nodePassword,
                 nodeId
             );

@@ -57,20 +57,15 @@ import com.sixsq.slipstream.util.FileUtil;
 
 public abstract class ConnectorBase implements Connector {
 
-	@Override
 	abstract public String getCloudServiceName();
 
-	@Override
 	abstract public Run launch(Run run, User user) throws SlipStreamException;
 
-	@Override
 	abstract public Credentials getCredentials(User user);
 
-	@Override
 	abstract public void terminate(Run run, User user)
 			throws SlipStreamException;
 
-	@Override
 	abstract public Properties describeInstances(User user)
 			throws SlipStreamException;
 
@@ -83,7 +78,7 @@ public abstract class ConnectorBase implements Connector {
 
 	private static final String MACHINE_INSTANCE_ID_NAME = Run.MACHINE_NAME_PREFIX
 			+ RuntimeParameter.INSTANCE_ID_KEY;
-	protected static String MACHINE_INSTANCE_HOSTNAME = Run.MACHINE_NAME_PREFIX
+	protected static final String MACHINE_INSTANCE_HOSTNAME = Run.MACHINE_NAME_PREFIX
 			+ RuntimeParameter.HOSTNAME_KEY;
 	protected static final String SLIPSTREAM_REPORT_DIR = "/tmp/slipstream/reports";
 

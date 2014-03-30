@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,9 +51,9 @@ import com.sixsq.slipstream.user.UserView;
 
 /**
  * Unit test:
- * 
+ *
  * @see UserTest
- * 
+ *
  */
 @SuppressWarnings("serial")
 @Entity
@@ -62,11 +62,13 @@ import com.sixsq.slipstream.user.UserView;
 		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
 
-	public final static String RESOURCE_URL_PREFIX = "user/";
+	public static final String RESOURCE_URL_PREFIX = "user/";
 
-	public final static int ACTIVE_TIMEOUT_MINUTES = 1;
+	public static final int ACTIVE_TIMEOUT_MINUTES = 1;
 
 	public static final String NEW_NAME = "new";
+
+    private static final Random rnd = new Random();
 
 	public enum State {
 		NEW, ACTIVE, DELETED, SUSPENDED
@@ -134,7 +136,7 @@ public class User extends Parameterized<User, UserParameter> {
 	public boolean isOnline() {
 		return isOnline(lastOnline);
 	}
-	
+
 	public static boolean isOnline(Date lastOnline) {
 		if (lastOnline == null) {
 			return false;
@@ -299,8 +301,11 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	private static String randomPassword() {
-		Random r = new Random();
-		return Long.toString(Math.abs(r.nextLong()), 36);
+        long v = rnd.nextLong();
+        while (v == Long.MIN_VALUE) {
+            v = rnd.nextLong();
+        }
+		return Long.toString(Math.abs(v), 36);
 	}
 
 	public static void validateMinimumInfo(User user)
@@ -434,7 +439,7 @@ public class User extends Parameterized<User, UserParameter> {
 	public void setLastOnline() {
 		this.lastOnline = new Date();
 	}
-	
+
 	public boolean onSuccessRunForever() {
 		boolean _default = false;
 		try {

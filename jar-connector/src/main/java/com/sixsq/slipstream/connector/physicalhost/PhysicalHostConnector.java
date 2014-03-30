@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector.physicalhost;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,14 +50,14 @@ import com.sixsq.slipstream.persistence.UserParameter;
 public class PhysicalHostConnector extends ConnectorBase {
 
 	private static Logger log = Logger.getLogger(PhysicalHostConnector.class.toString());
-	
+
 	public static final String CLOUD_SERVICE_NAME = "physicalhost";
 	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.physicalhost.PhysicalHostClientCloud";
-	
+
 	public PhysicalHostConnector() {
 		this(CLOUD_SERVICE_NAME);
 	}
-	
+
 	public PhysicalHostConnector(String instanceName) {
 		super(instanceName);
 	}
@@ -65,11 +65,11 @@ public class PhysicalHostConnector extends ConnectorBase {
 	public Connector copy() {
 		return new PhysicalHostConnector(getConnectorInstanceName());
 	}
-	
+
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
-	
+
 	@Override
 	public Credentials getCredentials(User user) {
 		return new PhysicalHostCredentials(user, getConnectorInstanceName());
@@ -79,24 +79,24 @@ public class PhysicalHostConnector extends ConnectorBase {
 	protected String constructKey(String key) throws ValidationException {
 		return new PhysicalHostUserParametersFactory(getConnectorInstanceName()).constructKey(key);
 	}
-	
+
 	@Override
 	public Map<String, UserParameter> getUserParametersTemplate() throws ValidationException {
 		return new PhysicalHostUserParametersFactory(getConnectorInstanceName()).getParameters();
 	}
-	
+
 	@Override
-	public Map<String, ServiceConfigurationParameter> getServiceConfigurationParametersTemplate() 
+	public Map<String, ServiceConfigurationParameter> getServiceConfigurationParametersTemplate()
 			throws ValidationException {
 		return new PhysicalHostSystemConfigurationParametersFactory(getConnectorInstanceName()).getParameters();
 	}
-	
+
 	@Override
 	public Map<String, ModuleParameter> getImageParametersTemplate()
 			throws ValidationException {
 		return new PhysicalHostImageParametersFactory(getConnectorInstanceName()).getParameters();
 	}
-	
+
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
 		switch (run.getType()) {
@@ -112,22 +112,22 @@ public class PhysicalHostConnector extends ConnectorBase {
 
 		return run;
 	}
-	
+
 	//TODO: Change terminate to be able to terminate nodes in addition to orchestrator
 	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {
 		Credentials credentials = getCredentials(user);
-		
+
 		String username = credentials.getKey();
-		String password = credentials.getSecret(); 
+		String password = credentials.getSecret();
 		String privateKey = user.getParameterValue(constructKey(PhysicalHostUserParametersFactory.ORCHESTRATOR_PRIVATE_KEY), "");
-		
+
 		String sudo = getSudo(username);
-		String command = sudo+" bash -c '"; 
+		String command = sudo+" bash -c '";
 		command += "kill -9 `ps -Af | grep python | grep slipstream | grep -v grep | awk \"{print $2}\"`; ";
 		command += "rm -R /tmp/slipstream*; rm /tmp/tmp*; rm -R /opt/slipstream;";
 		command += "'";
-		
+
 		for (String host : getCloudNodeInstanceIds(run)) {
 			System.out.println(host);
 			executeViaSsh(username, privateKey, password, host, command, 22);
@@ -139,14 +139,14 @@ public class PhysicalHostConnector extends ConnectorBase {
 	public Properties describeInstances(User user) throws SlipStreamException {
 		String host = getOrchestratorImageId(user);
 		Properties statuses = new Properties();
-		
+
 		InetAddress addr;
 		try {
 			addr = InetAddress.getByName(host);
 			String status = (addr.isReachable(1000))? "Up" : "Down" ;
 			statuses.put(host, status);
 		} catch (UnknownHostException e) {} catch (IOException e) {}
-		
+
 		return statuses;
 	}
 
@@ -160,10 +160,10 @@ public class PhysicalHostConnector extends ConnectorBase {
 
 		Configuration configuration = Configuration.getInstance();
 		Credentials credentials = getCredentials(user);
-		
+
 		String username = "";
 		String password = "";
-		String privateKey = "";		
+		String privateKey = "";
 		try {
 			username = credentials.getKey();
 			password = credentials.getSecret();
@@ -172,16 +172,16 @@ public class PhysicalHostConnector extends ConnectorBase {
 			e1.printStackTrace();
 		}
 		if(privateKey == null) privateKey = "";
-		
+
 		String host = getOrchestratorImageId(user);
-		
+
 		String command = createContextualizationData(run, user, configuration);
-		
+
 		String logInfos = "\nConnecting to physical host " + host + "\n";
 		logInfos += "Username: " + username + "\n";
 		//logInfos += "Password: " + password + "\n";
 		logInfos += "Command: " + command + "\n";
-		log.info(logInfos);		
+		log.info(logInfos);
 		log.info("Return code: " + executeViaSsh(username, privateKey, password, host, command, 22) );
 
 		updateInstanceIdAndIpOnRun(run, host, host);
@@ -202,16 +202,16 @@ public class PhysicalHostConnector extends ConnectorBase {
 			targetScript = "slipstream-orchestrator";
 			nodename = getOrchestratorName(run);
 		}
-		
+
 		String sudo = getSudo(username);
 		String userData = "echo '("+sudo+" bash -c '\\''sleep 5; ";
 		userData += "export SLIPSTREAM_CLOUD=\"" + getCloudServiceName() + "\"; ";
 		userData += "export SLIPSTREAM_CONNECTOR_INSTANCE=\"" + getConnectorInstanceName() + "\"; ";
-		userData += "export SLIPSTREAM_NODENAME=\"" + nodename + "\"; ";	
+		userData += "export SLIPSTREAM_NODENAME=\"" + nodename + "\"; ";
 		userData += "export SLIPSTREAM_DIID=\"" + run.getName() + "\"; ";
 		userData += "export SLIPSTREAM_REPORT_DIR=\"" + SLIPSTREAM_REPORT_DIR + "\"; ";
-		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"; ";	
-		userData += "export SLIPSTREAM_BUNDLE_URL=\"" + configuration.getRequiredProperty("slipstream.update.clienturl") + "\"; ";	
+		userData += "export SLIPSTREAM_SERVICEURL=\"" + configuration.baseUrl + "\"; ";
+		userData += "export SLIPSTREAM_BUNDLE_URL=\"" + configuration.getRequiredProperty("slipstream.update.clienturl") + "\"; ";
 		userData += "export SLIPSTREAM_BOOTSTRAP_BIN=\"" + configuration.getRequiredProperty("slipstream.update.clientbootstrapurl") + "\"; ";
 		userData += "export PHYSICALHOST_ORCHESTRATOR_HOST=\"" + getOrchestratorImageId(user) + "\"; ";
 		userData += "export SLIPSTREAM_CATEGORY=\"" + run.getCategory().toString() + "\"; ";
@@ -231,16 +231,16 @@ public class PhysicalHostConnector extends ConnectorBase {
 		return userData;
 	}
 
-	
+
 	private int executeViaSsh(String user, String privateKey, String password, String host, String command, int port){
 		int exitStatus = -1;
-		
+
 		try{
 			JSch jsch=new JSch();
 
-			if(privateKey == null) privateKey = new String("");
-			if(!privateKey.isEmpty()) jsch.addIdentity("temp", privateKey.getBytes(), new String("").getBytes(), new String("").getBytes());
-			
+			if(privateKey == null) privateKey = "";
+			if(!privateKey.isEmpty()) jsch.addIdentity("temp", privateKey.getBytes(), "".getBytes(), "".getBytes());
+
 			Session session=jsch.getSession(user, host, port);
 
 			UserInfo ui = new SshUserInfo(password);
@@ -261,19 +261,19 @@ public class PhysicalHostConnector extends ConnectorBase {
 					break;
 				}
 			}
-			
+
 			exitStatus = channel.getExitStatus();
-			
+
 			channel.disconnect();
 			session.disconnect();
 
 		}catch(Exception e){
 			System.out.println(e);
 		}
-		
+
 		return exitStatus;
 	}
-	
+
 	private String getSudo(String username){
 		if(username.equals("root")){
 			return "";
@@ -282,7 +282,7 @@ public class PhysicalHostConnector extends ConnectorBase {
 		}
 	}
 
-	
+
 }
 
 

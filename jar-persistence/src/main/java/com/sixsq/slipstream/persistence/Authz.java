@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,9 +41,9 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 
 /**
  * For unit tests
- * 
+ *
  * @see AuthzTest
- * 
+ *
  */
 @Entity
 @SuppressWarnings("serial")
@@ -442,7 +442,7 @@ public class Authz implements Serializable {
 	private Authz getParentAuthz() {
 		Authz defaultAuthz = new Authz();
 		defaultAuthz.setInheritedGroupMembers(false);
-		
+
 		if(getGuardedModule() == null) {
 			return defaultAuthz ;
 		}
@@ -475,16 +475,17 @@ public class Authz implements Serializable {
 
 	@ElementList
 	public void setGroupMembers(List<String> group) {
-		String _group = ", ";
+		StringBuilder _group = new StringBuilder(", ");
 		List<String> processingGroup = new ArrayList<String>();
 		for (String member : group) {
 			if (processingGroup.contains(member)) {
 				continue;
 			}
 			processingGroup.add(member);
-			_group += member.trim() + ", ";
+            _group.append(member.trim())
+                  .append(", ");
 		}
-		this.groupMembers_ = _group;
+		this.groupMembers_ = _group.toString();
 	}
 
 	@ElementList

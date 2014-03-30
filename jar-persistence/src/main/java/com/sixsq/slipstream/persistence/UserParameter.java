@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,11 +30,11 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 @SuppressWarnings("serial")
 public class UserParameter extends Parameter<User> {
 
-	public static String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
+	public static final String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
 
-	public static String KEY_ON_ERROR_RUN_FOREVER = "On Error Run Forever";
-	public static String KEY_ON_SUCCESS_RUN_FOREVER = "On Success Run Forever";
-	
+	public static final String KEY_ON_ERROR_RUN_FOREVER = "On Error Run Forever";
+	public static final String KEY_ON_SUCCESS_RUN_FOREVER = "On Success Run Forever";
+
 	public static UserParameter convert(Parameter<ServiceConfiguration> source)
 			throws ValidationException {
 		UserParameter target = new UserParameter(source.getName(),
