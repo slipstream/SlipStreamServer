@@ -147,7 +147,7 @@ def report_metrics(metrics, host=CARBON_HOST, port=CARBON_PORT):
     now = int(time.time())
     buffer = "\n".join(["{0} {1} {2}".format(name, value, now)
                         for name, value in metrics.items()])
-    s.sendall(buffername)
+    s.sendall(buffer)
 
 
 # TESTS #######################################################################
