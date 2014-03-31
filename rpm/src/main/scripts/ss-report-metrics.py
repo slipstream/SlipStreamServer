@@ -135,8 +135,8 @@ def collect_metrics(xml_str, collectors=COLLECTORS, base_name='slipstream'):
     for instance in get_instances(xml_str):
         for metric in get_metrics(instance, collectors):
             # metric/user/source
-            key = '{0}.{1}.{2}.{3}'.format(base_name, metric.name,
-                                           metric.user_id, metric.source)
+            key = '{0}.{1}.{2}.{3}'.format(base_name, metric.user_id,
+                                           metric.name, metric.source)
             metrics[key] += metric.volume
     return metrics
 
@@ -147,7 +147,7 @@ def report_metrics(metrics, host=CARBON_HOST, port=CARBON_PORT):
     now = int(time.time())
     buffer = "\n".join(["{0} {1} {2}".format(name, value, now)
                         for name, value in metrics.items()])
-    s.sendall(buffer + "\n")
+    s.sendall(buffername)
 
 
 # TESTS #######################################################################
@@ -249,8 +249,8 @@ class TestMetricReporter(unittest.TestCase):
     def test_collect_metrics(self):
         metrics = collect_metrics(TEST_STATS_XML, TEST_COLLECTORS)
         assert metrics == {
-            'slipstream.vcpus.22bb7e29-c888-45b8-aa0d-695c324c7f92.my-cloud': 2,
-            'slipstream.instance.22bb7e29-c888-45b8-aa0d-695c324c7f92.my-cloud': 1,
+            'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.vcpus.my-cloud': 2,
+            'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.instance.my-cloud': 1,
         }
 
 
@@ -320,6 +320,7 @@ if __name__ == '__main__':
         pass
     except AssertionError:
         raise  # don't mess with test errors
+
     except Exception as e:
         sys.stderr.write(str(e) + "\n")
         sys.exit(1)
