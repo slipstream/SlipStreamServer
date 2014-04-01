@@ -135,8 +135,8 @@ def collect_metrics(xml_str, collectors=COLLECTORS, base_name='slipstream'):
     for instance in get_instances(xml_str):
         for metric in get_metrics(instance, collectors):
             # user/metric/source
-            key = '{0}.{1}.{2}.{3}'.format(base_name, metric.user_id,
-                                           metric.name, metric.source)
+            key = '{0}.{1}.usage.{2}.{3}'.format(base_name, metric.user_id,
+                                                 metric.name, metric.source)
             metrics[key] += metric.volume
     return metrics
 
@@ -249,8 +249,8 @@ class TestMetricReporter(unittest.TestCase):
     def test_collect_metrics(self):
         metrics = collect_metrics(TEST_STATS_XML, TEST_COLLECTORS)
         assert metrics == {
-            'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.vcpus.my-cloud': 2,
-            'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.instance.my-cloud': 1,
+            'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.usage.vcpus.my-cloud': 2,
+            'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.usage.instance.my-cloud': 1,
         }
 
 
