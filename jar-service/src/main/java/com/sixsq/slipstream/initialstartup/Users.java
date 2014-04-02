@@ -46,7 +46,11 @@ public class Users {
 	}
 
 	private static void createSuperUser() throws ValidationException {
-		User user = createUser("super");
+		User user = User.loadByName("super");
+		if (user != null) {
+			return;
+		}
+		user = createUser("super");
 		user.setFirstName("Super");
 		user.setLastName("User");
 		user.setEmail("super@sixsq.com");
@@ -90,18 +94,31 @@ public class Users {
 
 		user.store();
 
-        // ensure that user was properly registered
+		// FIXME: do we still need this?
+		// ensure that user was properly registered
 		User.loadByName("test");
+
 	}
 
-	private static void createSixSqUser() throws NoSuchAlgorithmException,
-			UnsupportedEncodingException {
-		User user = createUser(SIXSQ);
+	private static void createSixSqUser() throws ValidationException {
+		User user = User.loadByName(SIXSQ);
+		if (user != null) {
+			return;
+		}
+		user = createUser(SIXSQ);
 		user.setFirstName("SixSq");
 		user.setLastName("Administrator");
 		user.setEmail("slipstream-support@sixsq.com");
 		user.setOrganization("SixSq");
-		user.hashAndSetPassword("siXsQsiXsQ");
+		try {
+			user.hashAndSetPassword("siXsQsiXsQ");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			throw new ValidationException(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			throw new ValidationException(e.getMessage());
+		}
 		user.setState(State.ACTIVE);
 
 		user.store();
