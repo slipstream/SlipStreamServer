@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.restlet.Request;
-import org.restlet.data.Reference;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;

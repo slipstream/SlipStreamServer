@@ -48,7 +48,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.hibernate.QueryException;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
@@ -58,7 +57,6 @@ import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.QuotaException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.statemachine.States;

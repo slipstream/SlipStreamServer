@@ -32,11 +32,15 @@ public class ModuleViewPublished extends ModuleView {
 	@Attribute(required = false)
 	private final boolean published;
 
+	@Attribute(required = false)
+	private final String logoLink;
+
 	public ModuleViewPublished(String resourceUri, String description,
-			ModuleCategory category, String customVersion, Authz authz) {
+			ModuleCategory category, String customVersion, Authz authz, String logoLink) {
 
 		super(resourceUri, description, category, customVersion, authz);
-		this.published = true;
+		this.logoLink = logoLink;
+		published = true;
 	}
 
 	public boolean isPublished() {

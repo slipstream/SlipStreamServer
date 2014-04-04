@@ -81,6 +81,7 @@ public abstract class ModuleFormProcessor extends
 		setParametrized(getOrCreateParameterized(name));
 		getParametrized().setDescription(parseDescription());
 		getParametrized().setCommit(parseCommit());
+		getParametrized().setLogoLink(parseLogoLink());
 	}
 
 	private String parseName() throws ValidationException {
@@ -98,6 +99,10 @@ public abstract class ModuleFormProcessor extends
 
 	private Commit parseCommit() throws ValidationException {
 		return new Commit(getUser().getName(), getForm().getFirstValue("comment"));
+	}
+
+	private String parseLogoLink() throws ValidationException {
+		return getForm().getFirstValue("logoLink");
 	}
 
 	private void validateName(String name) throws ValidationException {
