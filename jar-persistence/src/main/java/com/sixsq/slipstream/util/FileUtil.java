@@ -16,7 +16,7 @@ public class FileUtil {
             byte[] buffer = new byte[(int) f.length()];
             in = new DataInputStream(new FileInputStream(f));
             in.readFully(buffer);
-            result = new String(buffer);
+            result = new String(buffer, "UTF-8");
         } catch (IOException e) {
             throw new RuntimeException("IO problem in fileToString", e);
         } finally {

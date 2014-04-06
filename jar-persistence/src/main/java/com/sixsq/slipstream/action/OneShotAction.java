@@ -9,9 +9,9 @@ package com.sixsq.slipstream.action;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,9 +41,9 @@ import com.sixsq.slipstream.persistence.PersistenceUtil;
 /**
  * Parent class for one shot, asynchronous actions. These include such things as
  * a user confirming an email address or an administrator validating an account.
- * 
+ *
  * Subclasses must call the method setForm only from the constructor.
- * 
+ *
  */
 
 // TODO: split the persistent part from the resource
@@ -77,7 +77,7 @@ public abstract class OneShotAction {
 
 	public OneShotAction(String userResourceUrl) {
 		this();
-		
+
 		Form form = new Form();
 		form.add("userResourceUrl", userResourceUrl);
 		setForm(form);
@@ -101,7 +101,11 @@ public abstract class OneShotAction {
 	}
 
 	public Timestamp getLastModified() {
-		return lastModified;
+        if (lastModified != null) {
+            return (Timestamp) lastModified.clone();
+        } else {
+            return null;
+        }
 	}
 
 	protected void setLastModified() {
@@ -117,7 +121,7 @@ public abstract class OneShotAction {
 	 * Method to save the state necessary to perform the action at some point in
 	 * the future. This method should only be called once from the constructor.
 	 * Once the form information has been set, it cannot be modified.
-	 * 
+	 *
 	 * @param form
 	 */
 	protected void setForm(Form form) {

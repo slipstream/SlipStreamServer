@@ -9,9 +9,9 @@ package com.sixsq.slipstream.user;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,7 +60,12 @@ public class UserView {
 		this.lastName = lastName;
 
 		this.state = state;
-		this.lastOnline = lastOnline;
+
+        if (lastOnline != null) {
+            this.lastOnline = (Date) lastOnline.clone();
+        } else {
+            this.lastOnline = null;
+        }
 	}
 
 	@Root(name = "list")
@@ -77,7 +82,7 @@ public class UserView {
 	@Attribute(required = false)
 	public void setOnline(boolean online) {
 	}
-	
+
 	@Attribute(required = false)
 	public boolean isOnline() {
 		return User.isOnline(lastOnline);
