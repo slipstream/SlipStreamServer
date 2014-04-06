@@ -19,7 +19,7 @@
 (def collector-chan-size 64)
 (def metrics-update-chan-size 64)
 (def number-of-readers 32)
-(def timeout-all-users-loop (seconds-in-msecs 120))
+(def timeout-all-users-loop (seconds-in-msecs 240))
 (def timeout-online-loop (seconds-in-msecs 10))
 (def timeout-collect (seconds-in-msecs 15))
 (def timeout-processing-loop (seconds-in-msecs 600))
@@ -59,12 +59,13 @@
   (let [ch (chan 1)]
     (go
       (let [[v c] (alts! [ch (timeout timeout-collect)])]
-        (when (nil? v)
+        (if (nil? v)
           (log/log-error
             "Timeout collecting vms for user "
             (.getName user)
             " on cloud "
-            (.getConnectorInstanceName connector)))))
+            (.getConnectorInstanceName connector))
+          (log/log-info (str "executed collect request for " (.getName user) " and " (.getConnectorInstanceName connector))))))
     (go (>! ch (Collector/collect user connector)))))
 
 (defn update-metric!
@@ -72,10 +73,11 @@
   (let [ch (chan 1)]
     (go
       (let [[v c] (alts! [ch (timeout timeout-collect)])]
-        (when (nil? v)
+        (if (nil? v)
           (log/log-error
             "Timeout updating metrics for user "
-            (.getName user)))))
+            (.getName user))
+          (log/log-info (str "executed update-metric request for " (.getName user))))))
     (go (>! ch (updator/update user)))))
 
 (def not-nil? (complement nil?))
@@ -91,6 +93,7 @@
           (if (nil? user)
             (log/log-info "Collect reader " i " loop idle. Looping...")
             (try
+              (log/log-info (str "executing collect request for " (.getName user) " and " (.getConnectorInstanceName connector)))
               (collect! user connector)
               (catch Exception e (log/log-error "caught exception: " (.getMessage e))))))))))
 
@@ -107,6 +110,7 @@
           (if (nil? user)
             (log/log-info "Metric reader " i " loop idle. Looping...")
             (try
+              (log/log-info (str "executing update request for " (.getName user)))
               (update-metric! user)
               (catch Exception e (log/log-error "caught exception: " (.getMessage e))))))))))
 
@@ -115,7 +119,7 @@
 (defn insert-collection-requests
   [users]
   (doseq [user users
-        connector (connectors)]
+          connector (connectors)]
     (go 
       (>! collector-chan [user connector]))))
 
@@ -132,12 +136,14 @@
     (while true
       (<!! (timeout timeout-online-loop))
       (let [users (online-users)]
+        (log/log-info "inserting online users requests")
         (insert-collection-requests users)
         (insert-update-metric-requests users))))
   (thread
     (while true
       (<!! (timeout timeout-all-users-loop))
       (let [users (users)]
+        (log/log-info "inserting all users requests")
         (insert-collection-requests users))
         (insert-update-metric-requests users))))
 
