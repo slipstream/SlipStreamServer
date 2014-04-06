@@ -18,7 +18,7 @@
     <module>jar-persistence</module>
     <module>jar-connector</module>
     <module>jar-async</module>
-    <module>jar-myproxy</module>
+    <module>jar-egipki</module>
     <module>jar-service</module>
     <module>static-content</module>
     <module>war</module>
