@@ -21,6 +21,17 @@
       <artifactId>clojure</artifactId>
     </dependency>
 
+    <!-- Pin the bouncycastle version to 1.45.  Later versions
+         notably 1.46 produce errors when used with the MyProxy
+         libraries. -->
+<!--
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk16</artifactId>
+      <version>1.45</version>
+    </dependency>
+-->
+
     <dependency>
       <groupId>org.jglobus</groupId>
       <artifactId>myproxy</artifactId>
@@ -32,7 +43,7 @@
       <artifactId>voms-api-java</artifactId>
       <version>3.0.2</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.axis</groupId>
       <artifactId>axis</artifactId>

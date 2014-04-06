@@ -22,7 +22,7 @@
                           GSSCredential/INITIATE_AND_ACCEPT))))
 
 (defn get-credential
-  "Gets the credental from the MyProxy server.  All of the parameter
+  "Gets the credental from the MyProxy server.  All of the parameters
    are passed as a map with the following keys: :host, :port,
    :username, and :passphrase.  Defaults can be used for all
    parameters except :username and :passphrase."
