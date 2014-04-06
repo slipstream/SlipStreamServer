@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>SlipStreamMyProxy</artifactId>
+  <artifactId>SlipStreamEgiPki</artifactId>
   <packaging>jar</packaging>
-  <name>SlipStreamMyProxy</name>
-  <description>SlipStream MyProxy Credentials (JAR)</description>
+  <name>SlipStreamEgiPki</name>
+  <description>SlipStream EGI PKI Utilities (JAR)</description>
   <url>http://sixsq.com</url>
 
   <parent>
@@ -21,9 +21,10 @@
       <artifactId>clojure</artifactId>
     </dependency>
 
-    <!-- Pin the bouncycastle version to 1.45.  Later versions
-         notably 1.46 produce errors when used with the MyProxy
-         libraries. -->
+<!-- There is a fundamental incompatibility between MyProxy and
+     VOMS.  MyProxy works with bouncycastle 1.45 but not 1.46. 
+     Whereas VOMS works with 1.46 but not 1.45!  A solution must
+     be found for this. -->
 <!--
     <dependency>
       <groupId>org.bouncycastle</groupId>
