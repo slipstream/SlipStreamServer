@@ -60,7 +60,7 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 		@NamedQuery(name = "moduleViewLatestChildren", query = "SELECT NEW com.sixsq.slipstream.module.ModuleView(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.parentUri = :parent AND m.version = (SELECT MAX(c.version) FROM Module c WHERE c.name = m.name AND c.deleted != TRUE)"),
 		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name AND m.deleted != TRUE"),
 		@NamedQuery(name = "moduleAll", query = "SELECT m FROM Module m WHERE m.deleted != TRUE"),
-		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.published != null AND m.deleted != TRUE") })
+		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz, m.logoLink) FROM Module m WHERE m.published != null AND m.deleted != TRUE") })
 public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	public final static String RESOURCE_URI_PREFIX = "module/";
@@ -191,7 +191,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	@Element(required = false)
 	@Lob
 	private Publish published; // to the marketplace
-	
+
 	/**
 	 * Module reference is a URL.
 	 * <p/>
@@ -203,8 +203,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private String moduleReferenceUri;
 
 	/**
-	 * Contains all available cloud services, plus
-	 * 'default'. Used for HTML UI.
+	 * Contains all available cloud services. Used for HTML UI.
 	 */
 	@Transient
 	@ElementArray(required = false)
@@ -213,6 +212,9 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	@Transient
 	@Element(required = false)
 	private RunViewList runs;
+
+	@Attribute(required = false)
+	private String logoLink;
 
 	protected Module() {
 		super();
@@ -233,7 +235,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public void setRuns(RunViewList runs) {
 		this.runs = runs;
 	}
-	
+
 	private void validateName(String name) throws ValidationException {
 		if (name == null || "".equals(name)) {
 			throw new ValidationException("module name cannot be empty");
@@ -386,6 +388,14 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	public void setCloudNames(String[] cloudNames) {
 		this.cloudNames = cloudNames;
+	}
+
+	public String getLogoLink() {
+		return logoLink;
+	}
+
+	public void setLogoLink(String logoLink) {
+		this.logoLink = logoLink;
 	}
 
 	public void publish() {

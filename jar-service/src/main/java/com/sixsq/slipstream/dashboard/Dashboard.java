@@ -30,9 +30,6 @@ import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.QuotaParameter;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.run.Quota;
