@@ -240,18 +240,18 @@ class TestMetricReporter(unittest.TestCase):
 
     def test_get_instances(self):
         instances = list(get_instances(TEST_STATS_XML))
-        assert instances == [TEST_INSTANCE]
+        self.assertListEqual(instances, [TEST_INSTANCE])
 
     def test_get_metrics(self):
         metrics = list(get_metrics(TEST_INSTANCE, TEST_COLLECTORS))
-        assert metrics == [TEST_METRIC_0, TEST_METRIC_1]
+        self.assertListEqual(metrics, [TEST_METRIC_0, TEST_METRIC_1])
 
     def test_collect_metrics(self):
         metrics = collect_metrics(TEST_STATS_XML, TEST_COLLECTORS)
-        assert metrics == {
+        self.assertDictEqual(metrics, {
             'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.usage.vcpus.my-cloud': 2,
             'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.usage.instance.my-cloud': 1,
-        }
+        })
 
 
 def runtests():
