@@ -69,7 +69,12 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	private static Module loadByUri(String uri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		return em.find(Module.class, uri);
+		Module m = em.find(Module.class, uri);
+		
+		Module latestVersion = loadLatest(uri);
+		m.setLastVersion(latestVersion.version);
+		
+		return m;
 	}
 
 	public static Module loadLatest(String resourceUri) {
@@ -81,9 +86,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		Module module;
 		try {
 			module = (Module) q.getSingleResult();
+			module.setLastVersion(module.version);
 		} catch (NoResultException ex) {
 			module = null;
-		}
+		}		
 		return module;
 	}
 
@@ -175,6 +181,14 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	@Attribute(required = true)
 	private int version;
 
+	@Transient
+	@Attribute(required = false)
+	private int lastVersion;
+	
+	@Transient
+	@Attribute(required = false)
+	private boolean isLatestVersion;
+	
 	@Attribute(required = false)
 	@Lob
 	private String tag;
@@ -274,6 +288,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		this.authz = authz;
 	}
 
+	public int getLastVersion(){
+		return lastVersion;
+	}
+	
 	public int getVersion() {
 		return version;
 	}
@@ -368,6 +386,11 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		version = VersionCounter.getNextVersion();
 		resourceUri = Module.constructResourceUri(ModuleUriUtil
 				.extractModuleNameFromResourceUri(resourceUri) + "/" + version);
+	}
+	
+	protected void setLastVersion(int lastVersion) {
+		this.lastVersion = lastVersion;
+		this.isLatestVersion = version == lastVersion;
 	}
 
 	public void setCommit(String author, String commit) {
