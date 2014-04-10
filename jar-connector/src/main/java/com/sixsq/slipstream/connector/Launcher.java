@@ -96,14 +96,21 @@ public class Launcher {
 				throw (new SlipStreamRuntimeException(e));
 			}
 		}
-
+		
+		// TODO: Refactor: merge runImage and runOrchestration
 		private void runImage()
 				throws ValidationException {
-			Connector connector = ConnectorFactory.getCurrentConnector(user);
-			try {
-				connector.launch(run, user);
-			} catch (SlipStreamException e) {
-				abortRun(Run.MACHINE_NAME, e);
+			//Connector connector = ConnectorFactory.getCurrentConnector(user);
+			HashSet<String> cloudServicesList = RunFactory
+					.getCloudServicesList(run);
+			for (String cloudServiceName : cloudServicesList) {
+				Connector connector = ConnectorFactory
+						.getConnector(cloudServiceName);
+				try {
+					connector.launch(run, user);
+				} catch (SlipStreamException e) {
+					abortRun(Run.MACHINE_NAME, e);
+				}
 			}
 		}
 
