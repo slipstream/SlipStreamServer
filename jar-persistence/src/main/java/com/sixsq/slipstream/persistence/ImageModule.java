@@ -102,6 +102,7 @@ public class ImageModule extends Module {
 	@ElementList(required = false)
 	private List<ExtraDisk> extraDisks = new ArrayList<ExtraDisk>();
 
+	@Transient
 	private volatile ImageModule parentModule;
 
 	protected ImageModule() {
