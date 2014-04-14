@@ -20,6 +20,7 @@ CARBON_PORT = 2003
 UNKNOWN_STATUS = 'unknown'
 COLLECTED_STATUS = (
     'running',
+    'active',
 )
 
 METADATA_KEYS = (
@@ -297,9 +298,9 @@ def main():
     parser.add_option('--test', action='test',
                       help="run the test suite and exit")
     parser.add_option('-h', '--host', metavar='HOSTNAME', default=CARBON_HOST,
-                      help="carbon deamon host (default: {})".format(CARBON_HOST))
+                      help="carbon deamon host (default: {0})".format(CARBON_HOST))
     parser.add_option('-p', '--port', type='int', default=CARBON_PORT,
-                      help="carbon daemon port (default: {})".format(CARBON_PORT))
+                      help="carbon daemon port (default: {0})".format(CARBON_PORT))
     options, args = parser.parse_args()
 
     if not args or args[0] == "-":
