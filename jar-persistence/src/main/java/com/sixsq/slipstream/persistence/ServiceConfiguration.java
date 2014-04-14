@@ -144,7 +144,7 @@ public class ServiceConfiguration extends
 				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
 
 		SLIPSTREAM_METERING_HOSTNAME(
-				"Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:8183).",
+				"Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:2005).",
 				ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_METERING_ENABLE("Metering enabled",

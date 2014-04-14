@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.meter;
+package com.sixsq.slipstream.metrics;
 
 /*
  * +=================================================================+
@@ -30,29 +30,26 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
-import com.sixsq.slipstream.resource.MeteringRedirector;
 
-public class MeterRouter extends Router {
+import com.sixsq.slipstream.metrics.GraphiteRedirector;
 
-	public static final String ROOT_URI = "meters";
+public class GraphiteRouter extends Router {
 
-	public MeterRouter(Context context) throws ConfigurationException,
+	public static final String ROOT_URI = "metrics";
+
+	public GraphiteRouter(Context context) throws ConfigurationException,
 			ValidationException {
 		super(context);
 
 		// contains full url, including different port
 		String hostname = Configuration.getInstance().getProperty(
 				RequiredParameters.SLIPSTREAM_METERING_HOSTNAME.getName());
-		String target = hostname + "/" + ROOT_URI
-				+ "/{meter}/statistics?{query}";
-		Redirector redirector = new MeteringRedirector(getContext(), target,
+		String target = hostname + "/render?{query}";
+		Redirector redirector = new GraphiteRedirector(getContext(), target,
 				Redirector.MODE_SERVER_OUTBOUND);
 
-		TemplateRoute route = attach("/{meter}/statistics?{query}",
-				redirector);
+		TemplateRoute route = attach("/render?{query}", redirector);
 		route.setMatchingQuery(true);
-		route.getTemplate().getVariables()
-				.put("meter", new Variable(Variable.TYPE_URI_PATH));
 		route.getTemplate().getVariables()
 				.put("query", new Variable(Variable.TYPE_URI_QUERY));
 	}
