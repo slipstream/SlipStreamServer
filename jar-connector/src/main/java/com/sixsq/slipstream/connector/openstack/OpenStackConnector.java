@@ -388,6 +388,8 @@ public class OpenStackConnector extends
 					return addresses.get("public").iterator().next().getAddr();
 				if (addresses.containsKey("private"))
 					return addresses.get("private").iterator().next().getAddr();
+				if (addresses.size() > 0)
+					return addresses.values().iterator().next().getAddr();
 
 				break;
 			}
