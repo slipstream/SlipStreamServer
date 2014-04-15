@@ -63,7 +63,9 @@ public class DeploymentFactory extends RunFactory {
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 		
 		UserParameter up = user.getParameter(key);
-		run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
+		if (up != null) {
+			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
+		}
 		
 		return run;
 	}
@@ -73,7 +75,9 @@ public class DeploymentFactory extends RunFactory {
 				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
 		
 		UserParameter up = user.getParameter(key);
-		run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
+		if (up != null) {
+			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
+		}
 		
 		return run;
 	}

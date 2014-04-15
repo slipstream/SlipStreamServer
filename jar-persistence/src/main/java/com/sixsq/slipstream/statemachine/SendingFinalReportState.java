@@ -3,6 +3,7 @@ package com.sixsq.slipstream.statemachine;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.UserParameter;
 
@@ -44,7 +45,8 @@ public class SendingFinalReportState extends SynchronizedState {
 	private boolean shouldDetach(Run run) {
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), 
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		return run.getType() == RunType.Run || run.getParameter(key).isTrue();
+		RunParameter rp = run.getParameter(key);
+		return rp != null && (run.getType() == RunType.Run || rp.isTrue());
 	}
 	
 	@Override
