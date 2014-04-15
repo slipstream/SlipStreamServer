@@ -287,7 +287,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static int purge() throws ConfigurationException, ValidationException {
 		List<Run> old = listOldTransient();
 		for (Run r : old) {
-			r.remove();
+			EntityManager em = PersistenceUtil.createEntityManager();
+			r = Run.load(r.resourceUri, em);
+			r.done();
+			r.store();
+			em.close();
 		}
 		return old.size();
 	}
