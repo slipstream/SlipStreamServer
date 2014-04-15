@@ -65,4 +65,13 @@ public enum States {
     						 Aborting,
     						 Failing);
     }
+    
+    public static List<States> canTerminate() {
+    	return Arrays.asList(Aborted,
+    						 Done,
+    						 Terminal,
+    						 Cancelled,
+    						 Detached);
+    }
+
 }
