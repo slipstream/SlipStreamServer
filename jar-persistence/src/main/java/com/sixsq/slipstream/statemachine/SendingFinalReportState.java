@@ -46,7 +46,7 @@ public class SendingFinalReportState extends SynchronizedState {
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), 
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 		RunParameter rp = run.getParameter(key);
-		return rp != null && (run.getType() == RunType.Run || rp.isTrue());
+		return run.getType() == RunType.Run || (rp != null && rp.isTrue());
 	}
 	
 	@Override
