@@ -72,7 +72,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		Module m = em.find(Module.class, uri);
 
 		Module latestVersion = loadLatest(uri);
-		if (latestVersion == null) return m;
+		if (latestVersion == null || m == null) return m;
 		
 		m.setIsLatestVersion(latestVersion.version);
 		return m;
