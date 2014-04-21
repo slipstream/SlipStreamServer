@@ -14,6 +14,8 @@ import com.sixsq.slipstream.persistence.User;
 
 public abstract class CliConnectorBase extends ConnectorBase {
 
+	public static final String CLI_LOCATION = "/usr/bin";
+
 	@Override
 	abstract public String getCloudServiceName();
 
@@ -104,6 +106,10 @@ public abstract class CliConnectorBase extends ConnectorBase {
 					"Cloud Password cannot be empty"
 							+ errorMessageLastPart));
 		}
+	}
+
+	public String getCliLocation() {
+		return CLI_LOCATION;
 	}
 
 }
