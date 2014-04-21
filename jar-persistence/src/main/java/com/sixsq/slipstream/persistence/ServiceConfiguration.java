@@ -366,7 +366,9 @@ public class ServiceConfiguration extends
 	public static ServiceConfiguration load() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("latestConfiguration");
-		return (ServiceConfiguration) q.getSingleResult();
+		ServiceConfiguration sc = (ServiceConfiguration) q.getSingleResult();
+		em.close();
+		return sc;
 	}
 
 	public ServiceConfiguration store() {

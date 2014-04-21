@@ -80,7 +80,9 @@ public class CloudImageIdentifier implements Serializable {
 
 	public static CloudImageIdentifier load(String uri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		return em.find(CloudImageIdentifier.class, uri);
+		CloudImageIdentifier id = em.find(CloudImageIdentifier.class, uri);
+		em.close();
+		return id;
 	}
 
 	public void store() {

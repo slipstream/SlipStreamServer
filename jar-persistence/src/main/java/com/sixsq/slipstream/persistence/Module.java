@@ -69,7 +69,9 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	private static Module loadByUri(String uri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		return em.find(Module.class, uri);
+		Module module = em.find(Module.class, uri);
+		em.close();
+		return module;
 	}
 
 	public static Module loadLatest(String resourceUri) {
@@ -84,6 +86,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		} catch (NoResultException ex) {
 			module = null;
 		}
+		em.close();
 		return module;
 	}
 
@@ -112,7 +115,9 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static List<Module> listAll() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleAll");
-		return q.getResultList();
+		List<Module> list = q.getResultList();
+		em.close();
+		return list;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -121,7 +126,9 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		Query q = em.createNamedQuery("moduleViewLatestChildren");
 		q.setParameter("parent", Module.constructResourceUri(ModuleUriUtil
 				.extractModuleNameFromResourceUri(resourceUri)));
-		return q.getResultList();
+		List<ModuleView> list = q.getResultList();
+		em.close();
+		return list;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -131,14 +138,18 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		String name = ModuleUriUtil
 				.extractModuleNameFromResourceUri(resourceUri);
 		q.setParameter("name", name);
-		return q.getResultList();
+		List<ModuleVersionView> list = q.getResultList();
+		em.close();
+		return list;
 	}
 
 	@SuppressWarnings("unchecked")
 	public static List<ModuleView> viewPublishedList() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleViewPublished");
-		return q.getResultList();
+		List<ModuleView> list = q.getResultList();
+		em.close();
+		return list;
 	}
 
 	public static String constructResourceUri(String name) {

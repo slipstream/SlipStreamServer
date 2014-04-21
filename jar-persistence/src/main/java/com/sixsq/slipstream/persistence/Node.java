@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MapKey;
@@ -57,14 +58,14 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	@Attribute
 	private String cloudService = CloudImageIdentifier.DEFAULT_CLOUD_SERVICE;
 
-	public String getCloudService(){
+	public String getCloudService() {
 		return cloudService;
 	}
-	
-	public void setCloudService(String cloudService){
+
+	public void setCloudService(String cloudService) {
 		this.cloudService = cloudService;
 	}
-	
+
 	@Attribute(required = false)
 	private String imageUri;
 
@@ -85,7 +86,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	 */
 	@ElementMap(required = false)
 	@MapKey(name = "name")
-	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Map<String, NodeParameter> parameterMappings = new HashMap<String, NodeParameter>();
 
 	protected Node() {
@@ -149,9 +150,10 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	 * Look for a value in the local parameter list, otherwise return the value
 	 * from the image parameter list
 	 */
-	private String extractParameterWithOverride(String key) throws ValidationException {		
+	private String extractParameterWithOverride(String key)
+			throws ValidationException {
 		ImageModule image = getImage();
-		if(image != null) {
+		if (image != null) {
 			return getParameterValue(key, image.getParameterValue(key, null));
 		} else {
 			// The image is missing, but this will be picked-up when running
