@@ -69,9 +69,13 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	private static Module loadByUri(String uri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Module module = em.find(Module.class, uri);
+		Module m = em.find(Module.class, uri);
+		Module latestVersion = loadLatest(uri);
 		em.close();
-		return module;
+		if (latestVersion != null && m != null) {
+			m.setIsLatestVersion(latestVersion.version);
+		}
+		return m;
 	}
 
 	public static Module loadLatest(String resourceUri) {
@@ -83,6 +87,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		Module module;
 		try {
 			module = (Module) q.getSingleResult();
+			module.setIsLatestVersion(module.version);
 		} catch (NoResultException ex) {
 			module = null;
 		}
@@ -185,6 +190,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	@Attribute(required = true)
 	private int version;
+
+	@Transient
+	@Attribute(required = false)
+	private boolean isLatestVersion;
 
 	@Attribute(required = false)
 	@Lob
@@ -379,6 +388,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		version = VersionCounter.getNextVersion();
 		resourceUri = Module.constructResourceUri(ModuleUriUtil
 				.extractModuleNameFromResourceUri(resourceUri) + "/" + version);
+	}
+
+	protected void setIsLatestVersion(int lastVersion) {
+		this.isLatestVersion = version == lastVersion;
 	}
 
 	public void setCommit(String author, String commit) {
