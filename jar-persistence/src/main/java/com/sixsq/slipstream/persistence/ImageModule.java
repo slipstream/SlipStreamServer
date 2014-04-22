@@ -97,11 +97,6 @@ public class ImageModule extends Module {
 	@ElementList(required = false, data = true)
 	private List<CloudImageIdentifier> cloudImageIdentifiers = new ArrayList<CloudImageIdentifier>();
 
-	@OneToMany(cascade = CascadeType.ALL)
-	@MapKey(name = "id")
-	@ElementList(required = false)
-	private List<ExtraDisk> extraDisks = new ArrayList<ExtraDisk>();
-
 	@Transient
 	private volatile ImageModule parentModule;
 
@@ -487,10 +482,6 @@ public class ImageModule extends Module {
 			cii.copyTo(copy);
 		}
 
-		for (ExtraDisk disk : getExtraDisks()) {
-			copy.getExtraDisks().add(disk.copy());
-		}
-
 		copy.setIsBase(isBase());
 		copy.setLoginUser(getLoginUser());
 
@@ -535,14 +526,6 @@ public class ImageModule extends Module {
 		CloudImageIdentifier cloudImageIdentifer = getCloudImageIdentifier(cloudService);
 		return cloudImageIdentifer == null ? "" : cloudImageIdentifer
 				.getCloudMachineIdentifer();
-	}
-
-	public void setExtraDisks(List<ExtraDisk> extraDisks) {
-		this.extraDisks = extraDisks;
-	}
-
-	public List<ExtraDisk> getExtraDisks() {
-		return extraDisks;
 	}
 
 	/**
