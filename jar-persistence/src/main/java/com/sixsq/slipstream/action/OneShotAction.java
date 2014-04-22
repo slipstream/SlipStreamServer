@@ -139,7 +139,9 @@ public abstract class OneShotAction {
 
 	public static OneShotAction load(String uuid) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		return em.find(OneShotAction.class, uuid);
+		OneShotAction action = em.find(OneShotAction.class, uuid);
+		em.close();
+		return action;
 	}
 
 	public void update() {
@@ -148,6 +150,7 @@ public abstract class OneShotAction {
 		transaction.begin();
 		em.merge(this);
 		transaction.commit();
+		em.close();
 	}
 
 	public void store() {
@@ -157,6 +160,7 @@ public abstract class OneShotAction {
 		em.persist(this);
 		em.flush();
 		transaction.commit();
+		em.close();
 	}
 
 }

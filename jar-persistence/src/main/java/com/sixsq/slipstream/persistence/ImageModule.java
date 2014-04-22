@@ -21,12 +21,14 @@ package com.sixsq.slipstream.persistence;
  */
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Lob;
-import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
@@ -64,12 +66,12 @@ public class ImageModule extends Module {
 	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
 
 	@ElementList(required = false)
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<Target> targets = new ArrayList<Target>();
+	@OneToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+	private Set<Target> targets = new HashSet<Target>();
 
 	@ElementList(required = false)
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<Package> packages = new ArrayList<Package>();
+	@OneToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+	private Set<Package> packages = new HashSet<Package>();
 
 	@Element(required = false, data = true)
 	@Lob
@@ -93,15 +95,11 @@ public class ImageModule extends Module {
 	@Transient
 	private String imageId;
 
-	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch=FetchType.EAGER)
 	@ElementList(required = false, data = true)
 	private List<CloudImageIdentifier> cloudImageIdentifiers = new ArrayList<CloudImageIdentifier>();
 
-	@OneToMany(cascade = CascadeType.ALL)
-	@MapKey(name = "id")
-	@ElementList(required = false)
-	private List<ExtraDisk> extraDisks = new ArrayList<ExtraDisk>();
-
+	@Transient
 	private volatile ImageModule parentModule;
 
 	protected ImageModule() {
@@ -353,19 +351,19 @@ public class ImageModule extends Module {
 		this.prerecipe = prerecipe;
 	}
 
-	public List<Target> getTargets() {
+	public Set<Target> getTargets() {
 		return targets;
 	}
 
-	public void setTargets(List<Target> targets) {
+	public void setTargets(Set<Target> targets) {
 		this.targets = targets;
 	}
 
-	public List<Package> getPackages() {
+	public Set<Package> getPackages() {
 		return packages;
 	}
 
-	public void setPackages(List<Package> packages) {
+	public void setPackages(Set<Package> packages) {
 		this.packages = packages;
 	}
 
@@ -486,10 +484,6 @@ public class ImageModule extends Module {
 			cii.copyTo(copy);
 		}
 
-		for (ExtraDisk disk : getExtraDisks()) {
-			copy.getExtraDisks().add(disk.copy());
-		}
-
 		copy.setIsBase(isBase());
 		copy.setLoginUser(getLoginUser());
 
@@ -534,14 +528,6 @@ public class ImageModule extends Module {
 		CloudImageIdentifier cloudImageIdentifer = getCloudImageIdentifier(cloudService);
 		return cloudImageIdentifer == null ? "" : cloudImageIdentifer
 				.getCloudMachineIdentifer();
-	}
-
-	public void setExtraDisks(List<ExtraDisk> extraDisks) {
-		this.extraDisks = extraDisks;
-	}
-
-	public List<ExtraDisk> getExtraDisks() {
-		return extraDisks;
 	}
 
 	/**

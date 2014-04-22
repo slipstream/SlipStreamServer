@@ -144,7 +144,7 @@ public class ServiceConfiguration extends
 				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
 
 		SLIPSTREAM_METERING_HOSTNAME(
-				"Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:8183).",
+				"Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:2005).",
 				ParameterCategory.SlipStream_Advanced),
 
 		SLIPSTREAM_METERING_ENABLE("Metering enabled",
@@ -366,7 +366,9 @@ public class ServiceConfiguration extends
 	public static ServiceConfiguration load() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("latestConfiguration");
-		return (ServiceConfiguration) q.getSingleResult();
+		ServiceConfiguration sc = (ServiceConfiguration) q.getSingleResult();
+		em.close();
+		return sc;
 	}
 
 	public ServiceConfiguration store() {

@@ -20,8 +20,7 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.restlet.data.Form;
@@ -78,7 +77,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		// items should be encoded as: package--[index]--[value]
 		Set<String> formitems = form.getNames();
-		List<Package> packages = new ArrayList<Package>();
+		Set<Package> packages = new HashSet<Package>();
 
 		for (String inputName : formitems.toArray(new String[0])) {
 			if (inputName.startsWith("package--")
@@ -109,9 +108,9 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	}
 
-	protected boolean havePackagesChanged(List<Package> packages) {
+	protected boolean havePackagesChanged(Set<Package> packages) {
 		boolean haveChanged = false;
-		List<Package> oldPackages = castToModule().getPackages();
+		Set<Package> oldPackages = castToModule().getPackages();
 		if (packages.size() != oldPackages.size()) {
 			haveChanged = true;
 		} else {
@@ -162,7 +161,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	private void parseTargets(Form form) throws ValidationException {
 
-		List<Target> targets = new ArrayList<Target>();
+		Set<Target> targets = new HashSet<Target>();
 
 		String[] targetNames = { "execute", "report" };
 
@@ -174,7 +173,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	}
 
-	private void addTarget(Form form, List<Target> targets, String targetName) {
+	private void addTarget(Form form, Set<Target> targets, String targetName) {
 		String target = form.getFirstValue(targetName + "--script");
 		if (target != null) {
 			targets.add(new Target(targetName, target));

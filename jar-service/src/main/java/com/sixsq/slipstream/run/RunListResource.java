@@ -169,8 +169,9 @@ public class RunListResource extends BaseResource {
 			User user = getUser();
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
-			run = RunFactory.getRun(module, parseType(form), user
-					.getDefaultCloudService(), user);
+			String defaultCloudService = getDefaultCloudService(form, user);
+			
+			run = RunFactory.getRun(module, parseType(form), defaultCloudService, user);
 
 			run = addCredentials(run);
 
@@ -194,6 +195,17 @@ public class RunListResource extends BaseResource {
 
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 		getResponse().setLocationRef(absolutePath);
+	}
+
+	/**
+	 * If the form contains a cloudservice parameter, use that
+	 * otherwise, use the user default. Builds and Simple Run
+	 * will contain a cloud service, where for deployment this
+	 * is defined per node, which means more processing by the
+	 * factory.
+	 */
+	private String getDefaultCloudService(Form form, User user) {
+		return form.getFirstValue("parameter--cloudservice", user.getDefaultCloudService());
 	}
 
 	private String getDefaultCloudService() {

@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 import org.simpleframework.xml.ElementMap;
@@ -39,7 +40,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 public class DeploymentModule extends Module {
 
 	@ElementMap(required = false)
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Map<String, Node> nodes = new HashMap<String, Node>();
 
 	@SuppressWarnings("unused")

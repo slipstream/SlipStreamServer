@@ -85,14 +85,18 @@ public class ServiceCatalog extends
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("byCloud");
 		q.setParameter("cloud", cloud);
-		return q.getResultList();
+		List<ServiceCatalog> list = q.getResultList();
+		em.close();
+		return list;
 	}
 
 	@SuppressWarnings("unchecked")
 	public static List<ServiceCatalog> listall() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("all");
-		return q.getResultList();
+		List<ServiceCatalog> list = q.getResultList();
+		em.close();
+		return list;
 	}
 
 	@Override

@@ -529,10 +529,10 @@ public class Authz implements Serializable {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
-		em.merge(this);
+		Authz merged = em.merge(this);
 		transaction.commit();
 		em.close();
-		return this;
+		return merged;
 	}
 
 	public Authz copy(Module module) {

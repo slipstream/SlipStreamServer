@@ -62,7 +62,9 @@ public class CookieKeyPair implements Serializable {
 	
 	public static CookieKeyPair load() {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		return em.find(CookieKeyPair.class, ID);
+		CookieKeyPair pair = em.find(CookieKeyPair.class, ID);
+		em.close();
+		return pair;
 	}
 
 	public CookieKeyPair store() {

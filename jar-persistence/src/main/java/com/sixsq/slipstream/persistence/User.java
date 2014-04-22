@@ -408,14 +408,18 @@ public class User extends Parameterized<User, UserParameter> {
 	public static List<User> list() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("activeUsers");
-		return q.getResultList();
+		List<User> list = q.getResultList();
+		em.close();
+		return list;
 	}
 
 	@SuppressWarnings("unchecked")
 	public static List<UserView> viewList() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("userView");
-		return q.getResultList();
+		List<UserView> list = q.getResultList();
+		em.close();
+		return list;
 	}
 
 	@Override

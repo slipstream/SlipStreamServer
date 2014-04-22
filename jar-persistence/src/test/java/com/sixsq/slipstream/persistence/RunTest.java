@@ -26,9 +26,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.hibernate.LazyInitializationException;
 import org.junit.Test;

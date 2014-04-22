@@ -20,9 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.statemachine.States;
@@ -32,16 +29,6 @@ public class RunStates {
 	public static final States SUCCESS = States.Done;
 	public static final States FAILED = States.Aborted;
 	public static final States FAILING = States.Aborting;
-
-	public static final List<States> finalStates = new ArrayList<States>();
-	
-	static {
-		finalStates.add(States.Aborted);
-		finalStates.add(States.Done);
-		finalStates.add(States.Terminal);
-		finalStates.add(States.Cancelled);
-		finalStates.add(States.Detached);
-	}
 	
 	@Attribute
 	private States state;
@@ -64,7 +51,7 @@ public class RunStates {
 	}
 
 	private void init() {
-		boolean isFinal = isFinal(state);
+		boolean isFinal = canTerminate(state);
 		if (isAbort) {
 			if (isFinal) {
 				state = States.Aborted;
@@ -76,10 +63,10 @@ public class RunStates {
 		}
 	}
 
-	private boolean isFinal(States state) {
-		return finalStates.contains(state);
+	private boolean canTerminate(States state) {
+		return States.canTerminate().contains(state);
 	}
-
+	
 	public States getState() {
 		return state;
 	}
@@ -90,7 +77,7 @@ public class RunStates {
 	}
 
 	public void done() {
-		state = isFinal(state) ? States.Terminal
+		state = canTerminate(state) ? States.Terminal
 				: States.Cancelled;
 		init();
 	}

@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>2.1.8-SNAPSHOT</version>
+    <version>2.1.11-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -22,20 +22,43 @@
     </dependency>
 
 <!-- There is a fundamental incompatibility between MyProxy and
-     VOMS.  MyProxy works with bouncycastle 1.45 but not 1.46. 
-     Whereas VOMS works with 1.46 but not 1.45!  A solution must
-     be found for this. -->
-<!--
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk16</artifactId>
-      <version>1.45</version>
-    </dependency>
+     VOMS with the versions in the Maven central repository.
+     MyProxy works with bouncycastle 1.45 but not 1.46. 
+     Whereas VOMS works with 1.46 but not 1.45!
+
+     A workaround for this has been to extract the MyProxy jar
+     files from the EPEL6 packages (which depend on bouncycastle
+     1.46) and to upload them into the SixSq nexus repository.
+     This really needs to be resolved by the upstream providers.
 -->
 
     <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk16</artifactId>
+      <version>1.46</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.jglobus</groupId>
-      <artifactId>myproxy</artifactId>
+      <artifactId>myproxy-bc146</artifactId>
+      <version>2.0.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jglobus</groupId>
+      <artifactId>jsse-bc146</artifactId>
+      <version>2.0.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jglobus</groupId>
+      <artifactId>gss-bc146</artifactId>
+      <version>2.0.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jglobus</groupId>
+      <artifactId>ssl-proxies-bc146</artifactId>
       <version>2.0.6</version>
     </dependency>
 
