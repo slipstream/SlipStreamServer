@@ -8,3 +8,5 @@ bin
 *.iml
 .idea/
 .project
+*.pem
+*.p12
