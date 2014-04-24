@@ -81,7 +81,6 @@ public abstract class ConnectorBase implements Connector {
     // TODO: shouldn't be there!!
     private Map<String, Map<String, String>> extraDisksInfo = new HashMap<String, Map<String, String>>();
 
-    // FIXME: This is not ever assigned; makes deleteTempSshKeyFile() function useless!
     private File tempSshKeyFile;
 
     private final String instanceName;
@@ -306,7 +305,7 @@ public abstract class ConnectorBase implements Connector {
     protected String getPublicSshKeyFileName(Run run, User user) throws IOException, ValidationException {
         String publicSshKey;
         if (run.getType() == RunType.Run) {
-            File tempSshKeyFile = File.createTempFile("sshkey", ".tmp");
+            tempSshKeyFile = File.createTempFile("sshkey", ".tmp");
             BufferedWriter out = new BufferedWriter(new FileWriter(tempSshKeyFile));
             String sshPublicKey = user.getParameter(
                     ExecutionControlUserParametersFactory.CATEGORY + "." + UserParametersFactoryBase

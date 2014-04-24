@@ -20,9 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.statemachine.States;
