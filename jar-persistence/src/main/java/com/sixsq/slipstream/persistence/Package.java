@@ -97,14 +97,24 @@ public class Package implements Serializable {
 		return new Package(getName(), getRepository(), getKey());
 	}
 	
-	public boolean equals(Package other) {
-		if(other == null) {
+	@Override
+	public int hashCode() {
+		if(name == null) {
+			return super.hashCode();
+		}
+	    return name.hashCode();
+	}
+	
+    @Override
+	public boolean equals(Object o) {
+		if(o instanceof Package) {
+			Package other = (Package) o;
+			boolean equalName = (name != null ? name.equals(other.getName()) : other.getName() == null);
+			boolean equalRepository = (repository != null ? repository.equals(other.getRepository()) : other.getRepository() == null);
+			boolean equalKey = (key_ != null ? key_.equals(other.getKey()) : other.getKey() == null);
+			return equalName && equalRepository && equalKey;
+		} else {
 			return false;
 		}
-		boolean equalName = (name != null ? name.equals(other.getName()) : other.getName() == null);
-		boolean equalRepository = (repository != null ? repository.equals(other.getRepository()) : other.getRepository() == null);
-		boolean equalKey = (key_ != null ? key_.equals(other.getKey()) : other.getKey() == null);
-		
-		return equalName && equalRepository && equalKey;
 	}
 }

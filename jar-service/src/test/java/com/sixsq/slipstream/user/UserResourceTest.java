@@ -76,11 +76,11 @@ public class UserResourceTest extends ResourceTestBase {
 		user = UserTest.storeUser(user);
 		UserTest.storeUser(otherUser);
 		superUser.setSuper(true);
-		UserTest.storeUser(superUser);
+		superUser = UserTest.storeUser(superUser);
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws ConfigurationException, ValidationException {
 		user.remove();
 		otherUser.remove();
 		superUser.remove();

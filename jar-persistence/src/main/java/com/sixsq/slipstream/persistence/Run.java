@@ -48,6 +48,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Cascade;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
@@ -405,6 +406,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL)
 	@MapKey(name = "key_")
+	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@ElementMap(name = "runtimeParameters", required = false, data = true, valueType = RuntimeParameter.class)
 	private Map<String, RuntimeParameter> runtimeParameters = new HashMap<String, RuntimeParameter>();
 

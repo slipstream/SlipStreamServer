@@ -20,12 +20,15 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restlet.data.Form;
 
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -33,6 +36,7 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.UserTest;
+import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class ImageFormProcesorTest {
 
@@ -42,6 +46,7 @@ public class ImageFormProcesorTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		UserTest.storeUser(user);
+		ResourceTestBase.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 	}
 
 	@Test
@@ -64,6 +69,95 @@ public class ImageFormProcesorTest {
 			fail("Illegal name not checked");
 		} catch (ValidationException e) {
 		}
+
+		image.remove();
+	}
+
+	@Test
+	public void saveNativeWithImageIdsImage() throws BadlyFormedElementException,
+			SlipStreamClientException {
+		User user = UserTest.createUser("test");
+		String cloudServiceName = LocalConnector.CLOUD_SERVICE_NAME;
+
+		String imageName = "imageWithIds";
+		ImageModule image = new ImageModule(imageName);
+		image.setImageId("image_id", cloudServiceName);
+		image.setIsBase(true);
+		image = image.store();
+
+		ImageFormProcessor processor = new ImageFormProcessor(user);
+
+		Form form = new Form();
+
+		form.add("name", imageName);
+		form.add("isbase", "on");
+		form.add(ImageFormProcessor.constructFormImageIdName(cloudServiceName), "new_image_id");
+
+		processor.processForm(form);			
+
+		String newImageId = ((ImageModule)processor.getParametrized()).getCloudImageId(cloudServiceName);
+		
+		assertThat(newImageId, is("new_image_id"));
+
+		image.remove();
+	}
+
+	@Test
+	public void saveTemplateImageWithChangedCreateStuffCleansImageIds() throws BadlyFormedElementException,
+			SlipStreamClientException {
+		User user = UserTest.createUser("test");
+		String cloudServiceName = LocalConnector.CLOUD_SERVICE_NAME;
+
+		String imageName = "imageWithIds";
+		ImageModule image = new ImageModule(imageName);
+		image.setImageId("image_id", cloudServiceName);
+		image.setIsBase(false);
+		image.setPreRecipe("some pre-recipe");
+		image = image.store();
+
+		ImageFormProcessor processor = new ImageFormProcessor(user);
+
+		Form form = new Form();
+
+		form.add("name", imageName);
+		form.add(ImageFormProcessor.constructFormImageIdName(cloudServiceName), "new_image_id");
+		form.add(ImageFormProcessor.PRERECIPE_SCRIPT_NAME, "modified pre-recipe");
+
+		processor.processForm(form);			
+
+		String newImageId = ((ImageModule)processor.getParametrized()).getCloudImageId(cloudServiceName);
+		
+		assertThat(newImageId, is(""));
+
+		image.remove();
+	}
+
+	@Test
+	public void saveTemplateImageWithoutChangedCreateStuffKeepsOldImageIds() throws BadlyFormedElementException,
+			SlipStreamClientException {
+		User user = UserTest.createUser("test");
+		String cloudServiceName = LocalConnector.CLOUD_SERVICE_NAME;
+
+		String imageName = "imageWithIds";
+		ImageModule image = new ImageModule(imageName);
+		image.setImageId("image_id", cloudServiceName);
+		image.setIsBase(false);
+		image.setPreRecipe("some pre-recipe");
+		image = image.store();
+
+		ImageFormProcessor processor = new ImageFormProcessor(user);
+
+		Form form = new Form();
+
+		form.add("name", imageName);
+		form.add(ImageFormProcessor.constructFormImageIdName(cloudServiceName), "new_image_id");
+		form.add(ImageFormProcessor.PRERECIPE_SCRIPT_NAME, image.getPreRecipe());
+
+		processor.processForm(form);			
+
+		String newImageId = ((ImageModule)processor.getParametrized()).getCloudImageId(cloudServiceName);
+		
+		assertThat(newImageId, is("image_id"));
 
 		image.remove();
 	}

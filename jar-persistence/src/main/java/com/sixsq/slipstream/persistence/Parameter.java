@@ -87,7 +87,6 @@ public abstract class Parameter<T> implements Serializable {
 	private Integer order_ = 0;
 
 	protected Parameter() {
-		super();
 	}
 
 	public Parameter(String name) throws ValidationException {

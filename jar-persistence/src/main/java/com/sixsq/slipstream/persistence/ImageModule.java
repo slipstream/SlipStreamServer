@@ -82,7 +82,7 @@ public class ImageModule extends Module {
 	private String recipe = "";
 
 	@Attribute
-	private Boolean isBase = Boolean.FALSE;
+	private Boolean isBase = false;
 
 	private String loginUser = "root";
 
@@ -336,7 +336,7 @@ public class ImageModule extends Module {
 	}
 
 	public Boolean isBase() {
-		return isBase == null ? Boolean.FALSE : isBase;
+		return isBase == null ? false : isBase;
 	}
 
 	public void setIsBase(Boolean isBase) throws ValidationException {

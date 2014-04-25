@@ -154,7 +154,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		target.setName(targetFullName);
 		target.store();
 
-		String absolutePath = RequestUtil.constructAbsolutePath("/" + target.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath("/"
+				+ target.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 	}
@@ -186,13 +187,15 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		String parentResourceUri = ModuleUriUtil
 				.extractParentUriFromResourceUri(resourceUri);
 
-		String absolutePath = RequestUtil.constructAbsolutePath("/" + parentResourceUri);
+		String absolutePath = RequestUtil.constructAbsolutePath("/"
+				+ parentResourceUri);
 		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
 
 	private void redirectToLatest(Module latest) {
-		String absolutePath = RequestUtil.constructAbsolutePath("/" + latest.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath("/"
+				+ latest.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
@@ -214,7 +217,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		updateOrCreate(module);
 
-		String absolutePath = RequestUtil.constructAbsolutePath("/" + module.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath("/"
+				+ module.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 
 		if (isNew()) {
@@ -230,7 +234,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		updateOrCreate(module);
 
-		String absolutePath = RequestUtil.constructAbsolutePath("/" + module.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath("/"
+				+ module.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 
 		if (isNew()) {
@@ -507,16 +512,16 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			ModuleParameter p = module.getParameter(referenceParameter
 					.getName());
 			if (p == null) {
-				throw (new ValidationException("Missing mandatory parameter: "
-						+ referenceParameter.getName()));
+				module.setParameter(referenceParameter.copy());
+			} else {
+				p.setCategory(referenceParameter.getCategory());
+				p.setDescription(referenceParameter.getDescription());
+				p.setEnumValues(referenceParameter.getEnumValues());
+				p.setInstructions(referenceParameter.getInstructions());
+				p.setMandatory(referenceParameter.isMandatory());
+				p.setReadonly(referenceParameter.isReadonly());
+				p.setType(referenceParameter.getType());
 			}
-			p.setCategory(referenceParameter.getCategory());
-			p.setDescription(referenceParameter.getDescription());
-			p.setEnumValues(referenceParameter.getEnumValues());
-			p.setInstructions(referenceParameter.getInstructions());
-			p.setMandatory(referenceParameter.isMandatory());
-			p.setReadonly(referenceParameter.isReadonly());
-			p.setType(referenceParameter.getType());
 		}
 		return module;
 	}
@@ -550,7 +555,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			setCanGet(authorizeGet());
 		}
 
-		if (getParameterized() != null && getParameterized().isDeleted() && !getUser().isSuper()) {
+		if (getParameterized() != null && getParameterized().isDeleted()
+				&& !getUser().isSuper()) {
 			throwClientForbiddenError("Module deleted");
 		}
 	}

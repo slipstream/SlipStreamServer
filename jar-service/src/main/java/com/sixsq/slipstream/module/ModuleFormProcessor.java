@@ -174,4 +174,8 @@ public abstract class ModuleFormProcessor extends
 		getParametrized().setCreation(older.getCreation());
 		getParametrized().getAuthz().setUser(older.getOwner());
 	}
+	
+	protected Module load(String name) {
+		return Module.loadByName(name);
+	}
 }
