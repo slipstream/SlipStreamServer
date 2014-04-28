@@ -66,6 +66,7 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 	private void parseNodeMapping() throws ValidationException {
 
 		DeploymentModule module = castToModule();
+		module.setNodes(new HashMap<String, Node>());
 
 		Set<String> formitems = getForm().getNames();
 
