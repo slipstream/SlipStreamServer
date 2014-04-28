@@ -1,0 +1,86 @@
+(ns slipstream.credcache.credential
+  "Management functions for credential resources within the database."
+  (:require
+    [clojure.tools.logging :as log]
+    [clj-time.core :as t]
+    [slipstream.credcache.dbutils :as db]
+    [slipstream.credcache.utils :as u]
+    [slipstream.credcache.common :as c]))
+
+;;
+;; Resources can have the following common keys:
+;;
+;; :id (required) -- id of the resource
+;; :name -- short name/title of resource
+;; :description -- longer description of resource
+;; :created (required) -- creation timestamp of resource
+;; :updated (required) -- late update timestamp of resource
+;;
+;; :properties -- string/string map of user information
+;;
+;; All credentials can/must have the following keys:
+;;
+;; :typeURI (required) -- type of the resource/credential
+;; :expiry (optional) -- expiry date of the credential
+;;
+;; For voms-proxy credentials:
+;; :voms -- map of voms information
+;; :myproxy-host -- hostname of myproxy server
+;; :myproxy-port -- port of myproxy server
+;;
+
+(def ^:const prefix "credential/")
+
+(defn uuid->id
+  [uuid]
+  (str prefix uuid))
+
+(defmulti renew
+          "Renews the credential described in the given map.  This
+           method dispatches on the value of the :typeURI key.  Implementations
+           of this method, must return the updated resource or nil if the
+           renewal did not succeed.  The default implementation logs a warning
+           and returns nil."
+          :typeURI)
+
+(defmethod renew :default
+           [{:keys [typeURI]}]
+  (log/warn "cannot renew unknown type of credential:" typeURI)
+  nil)
+
+
+(defn create
+  "Adds a new credential to the database.  Returns the new resource
+   identifier."
+  [cred-template]
+  (let [cred (c/template->resource cred-template)]
+    (->> (u/random-uuid)
+         (uuid->id)
+         (assoc cred :id)
+         (c/update-timestamps)
+         (c/validate)
+         (db/create-resource)
+         (:id))))
+
+(defn retrieve
+  [id]
+  (db/retrieve-resource id))
+
+(defn update
+  "Updates an existing credential in the database.  The identifier
+   must be part of the credential itself under the :id key. Returns
+   the updated resource."
+  [cred]
+  (->> cred
+       (c/update-timestamps)
+       (c/validate)
+       (db/update-resource)))
+
+(defn delete
+  [id]
+  (db/delete-resource id))
+
+
+(defn resource-ids
+  "Provides a list of all of the credential ids in the database."
+  [])

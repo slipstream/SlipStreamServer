@@ -1,9 +1,11 @@
-(ns slipstream.egipki.utils
+(ns slipstream.credcache.utils
   (:require
     [clojure.java.io :as io])
   (:import
     [java.io File]
-    [java.security SecureRandom]))
+    [java.security SecureRandom]
+    [java.util UUID]
+    [javax.xml.bind DatatypeConverter]))
 
 (def rnd (SecureRandom.))
 
@@ -43,3 +45,17 @@
       (with-open [writer (io/output-stream file)]
         (.write writer bytes)))))
 
+(defn bytes->base64
+  "Converts the given byte array into a Base64-encoded string."
+  [bytes]
+  (DatatypeConverter/printBase64Binary bytes))
+
+(defn base64->bytes
+  "Converts the given Base64-encoded string into a byte array."
+  [base64]
+  (DatatypeConverter/parseBase64Binary base64))
+
+(defn random-uuid
+  "Returns the string form of a random UUID."
+  []
+  (str (UUID/randomUUID)))
