@@ -23,7 +23,6 @@ package com.sixsq.slipstream.module;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -174,28 +173,15 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 		// Look for the post-processing entry
 		for (String item : formitems.toArray(new String[0])) {
 			if (item.equals("post-processing")) {
-				if (module.getParameters() == null) {
-					module.setParameters(new HashMap<String, ModuleParameter>());
-				}
-
 				ModuleParameter parameter = new ModuleParameter(item,
 						form.getFirstValue(item), "Post-Processing script");
-
-				setParameter(module, parameter);
+				module.setParameter(parameter);
 			}
 		}
 	}
 
 	private DeploymentModule castToModule() {
 		return (DeploymentModule) getParametrized();
-	}
-
-	private void setParameter(DeploymentModule deploymentVersion,
-			ModuleParameter parameter) {
-		Map<String, ModuleParameter> parameters = (Map<String, ModuleParameter>) deploymentVersion
-				.getParameters();
-		parameters.put(parameter.getName(), parameter);
-		deploymentVersion.setParameters(parameters);
 	}
 
 	private void setCloudService(Form form, String nodeindex, Node node) {
@@ -228,7 +214,8 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 	@Override
 	protected Module getOrCreateParameterized(String name)
 			throws ValidationException {
-		return new DeploymentModule(name);
+		Module loaded = load(name);
+		return loaded == null ? new DeploymentModule(name) : loaded;
 	}
 
 	protected void validate() throws ValidationException {

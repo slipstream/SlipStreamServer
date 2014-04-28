@@ -33,7 +33,8 @@ public class ProjectFormProcessor extends ModuleFormProcessor {
 
 	@Override
 	protected Module getOrCreateParameterized(String name) throws ValidationException {
-		return new ProjectModule(name);
+		Module loaded = load(name);
+		return loaded == null ? new ProjectModule(name) : loaded;
 	}
 
 }

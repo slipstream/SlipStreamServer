@@ -20,6 +20,8 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
+import java.util.HashMap;
+
 import org.restlet.data.Form;
 
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
@@ -90,6 +92,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		// - parameter--[id]--description
 		// - parameter--[id]--value
 		// ...
+		getParametrized().setParameters(new HashMap<String, T>());
 		for (String paramName : form.getNames().toArray(new String[0])) {
 
 			if (isParameterName(paramName)) {

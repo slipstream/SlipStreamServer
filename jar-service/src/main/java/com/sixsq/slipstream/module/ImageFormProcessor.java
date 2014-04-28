@@ -20,6 +20,7 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ import org.restlet.data.Form;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
@@ -38,6 +40,7 @@ import com.sixsq.slipstream.persistence.User;
 
 public class ImageFormProcessor extends ModuleFormProcessor {
 
+	public static final String PRERECIPE_SCRIPT_NAME = "prerecipe--script";
 	boolean needsRebuild = false;
 
 	public ImageFormProcessor(User user) {
@@ -47,7 +50,8 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 	@Override
 	protected Module getOrCreateParameterized(String name)
 			throws ValidationException, NotFoundException {
-		return new ImageModule(name);
+		Module loaded = load(name);
+		return loaded == null ? new ImageModule(name) : loaded;
 	}
 
 	@Override
@@ -56,12 +60,14 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		super.parseForm();
 
 		ImageModule module = castToModule();
+		ParametersFactory.addParametersForEditing(module);
 
 		String moduleReferenceUri = getForm().getFirstValue("moduleReference");
 		if (Parameter.hasValueSet(moduleReferenceUri)) {
 			module.setModuleReference(Module
 					.constructResourceUri(moduleReferenceUri));
 		}
+		
 		module.setIsBase(getBooleanValue(getForm(), "isbase"));
 
 		parsePackages(getForm());
@@ -70,7 +76,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		parseNewImage(getForm());
 		parseTargets(getForm());
 
-		parseImageId(module);
+		parseImageId(getForm());
 	}
 
 	private void parsePackages(Form form) throws ValidationException {
@@ -115,14 +121,9 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 			haveChanged = true;
 		} else {
 			for (Package p : packages) {
-				boolean foundIt = false;
-				for (Package oldP : oldPackages) {
-					if (p.equals(oldP)) {
-						foundIt = true;
-					}
-				}
-				if (!foundIt) {
+				if (!oldPackages.contains(p)) {
 					haveChanged = true;
+					break;
 				}
 			}
 		}
@@ -131,7 +132,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	private void parsePreRecipe(Form form) {
 
-		String prerecipe = form.getFirstValue("prerecipe--script");
+		String prerecipe = form.getFirstValue(PRERECIPE_SCRIPT_NAME);
 		if (prerecipe == null) {
 			prerecipe = "";
 		}
@@ -180,15 +181,27 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		}
 	}
 
-	private void parseImageId(ImageModule module) throws ValidationException {
-		if (needsRebuild) {
+	private void parseImageId(Form form) throws ValidationException {
+		ImageModule module = castToModule();
+		// only clean the image id for template images (i.e. not native) that
+		// don't need rebuilding
+		if (!module.isBase() && needsRebuild) {
+			module.setCloudImageIdentifiers(new ArrayList<CloudImageIdentifier>());
 			return;
 		}
-		for (String cloudServiceName : ConnectorFactory.getCloudServiceNames()) {
-			String imageId = getForm().getFirstValue(
-					"cloudimageid_imageid_" + cloudServiceName);
-			module.setImageId(imageId, cloudServiceName);
+		// take updates for base (native) image
+		if (module.isBase()) {
+			for (String cloudServiceName : ConnectorFactory
+					.getCloudServiceNames()) {
+				String imageId = form
+						.getFirstValue(constructFormImageIdName(cloudServiceName));
+				module.setImageId(imageId, cloudServiceName);
+			}
 		}
+	}
+
+	public static String constructFormImageIdName(String cloudServiceName) {
+		return "cloudimageid_imageid_" + cloudServiceName;
 	}
 
 	private void parseNewImage(Form form) {
@@ -213,25 +226,6 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		castToModule().setPlatform(platform);
 
-	}
-
-	@Override
-	public void adjustModule(Module previous) throws ValidationException {
-		super.adjustModule(previous);
-
-		ImageModule olderImage = (ImageModule) previous;
-		ImageModule newImage = castToModule();
-		if (!newImage.isBase()) {
-			if (!needsRebuild) {
-				for (CloudImageIdentifier cii : olderImage
-						.getCloudImageIdentifiers()) {
-					cii.copyTo(newImage);
-				}
-			}
-		}
-		if (newImage.getPlatform() == null) {
-			newImage.setPlatform(olderImage.getPlatform());
-		}
 	}
 
 	private ImageModule castToModule() {

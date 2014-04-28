@@ -20,7 +20,7 @@ public class GraphiteRedirector extends Redirector {
 		String username = request.getClientInfo().getUser().getName();
 		String[] targets = request.getResourceRef().getQueryAsForm().getValuesArray("target");
 		for (String target : targets) {
-			if (!target.startsWith("slipstream." + username)) {
+			if (!target.replace("keepLastValue(", "").startsWith("slipstream." + username)) {
 				response.setStatus(Status.CLIENT_ERROR_BAD_REQUEST,
 					"target parameter must start with 'slipstream." + username + "'");
 				return;

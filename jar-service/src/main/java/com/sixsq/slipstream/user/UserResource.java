@@ -177,7 +177,7 @@ public class UserResource extends ParameterizedResource<User> {
 		setParameterized(getOrCreateParameterized(getTargetParameterizeUri()));
 
 		try {
-			ParametersFactory.addParametersForEditing(getParameterized());
+			addParametersForEditing();
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		} catch (ConfigurationException e) {
