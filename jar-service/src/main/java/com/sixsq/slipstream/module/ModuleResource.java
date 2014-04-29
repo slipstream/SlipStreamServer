@@ -349,6 +349,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientValidationError(e.getMessage());
 		}
 
+		module.unpublish();
+		
 		module.store();
 
 	}

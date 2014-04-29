@@ -174,7 +174,9 @@ public class UserResource extends ParameterizedResource<User> {
 			throwClientForbiddenError();
 		}
 
-		setParameterized(getOrCreateParameterized(getTargetParameterizeUri()));
+		if(!isExisting()) {
+			setParameterized(getOrCreateParameterized(getTargetParameterizeUri()));
+		}
 
 		try {
 			addParametersForEditing();
