@@ -1,4 +1,4 @@
-(ns slipstream.credcache.voms
+(ns slipstream.credcache.voms-utils
   "Utility functions to deal with VOMS servers and proxies."
   (:require
     [clojure.tools.logging :as log]

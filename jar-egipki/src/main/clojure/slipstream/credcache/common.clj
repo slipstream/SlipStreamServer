@@ -4,36 +4,22 @@
     [clj-time.core :as t]
     [schema.core :as s]))
 
+;;
+;; common schema definitions
+;;
+
 (def CommonAttributes
   {:id                           s/Str
+   :typeURI                      s/Str
    (s/optional-key :name)        s/Str
    (s/optional-key :description) s/Str
    :created                      s/Inst
    :updated                      s/Inst
    (s/optional-key :properties)  {s/Str s/Str}})
 
-(def CredentialAttributes
-  {:typeURI                 s/Str
-   (s/optional-key :expiry) s/Int})
-
-(def Credential
-  (merge CommonAttributes CredentialAttributes))
-
-(def MyProxyVomsCredential
-  {:myproxy-host s/Str
-   :myproxy-port s/Int
-   :credential   s/Str})
-
-(def VomsAttributes
-  {s/Str {(s/optional-key :fqans)   [s/Str]
-          (s/optional-key :targets) [s/Str]}})
-
-(def CredentialTemplate
-  (merge CommonAttributes
-         {:myproxy-host s/Str
-          :myproxy-port s/Int
-          :username     s/Str
-          :password     s/Str}))
+;;
+;; common resource utilities and multimethods
+;;
 
 (defn update-timestamps
   "Sets the :updated timestamp to the current date/time and will set

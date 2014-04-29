@@ -1,8 +1,9 @@
-(ns slipstream.credcache.dbutils
+(ns slipstream.credcache.db-utils
+  "Utilities for interacting with the Couchbase database for resource
+   storage."
   (:require
     [clojure.tools.logging :as log]
     [couchbase-clj.client :as cbc]
-    [slipstream.credcache.voms :as voms]
     [slipstream.credcache.utils :as utils])
   (:import
     [java.net URI]))

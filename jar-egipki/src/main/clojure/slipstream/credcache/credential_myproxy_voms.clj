@@ -4,8 +4,8 @@
     [slipstream.credcache.utils :as u]
     [slipstream.credcache.common :as c]
     [slipstream.credcache.credential :as cred]
-    [slipstream.credcache.myproxy :as myproxy]
-    [slipstream.credcache.voms :as voms]))
+    [slipstream.credcache.myproxy-utils :as myproxy]
+    [slipstream.credcache.voms-utils :as voms]))
 
 (def ^:const resource-type-uri
   "http://schemas.dmtf.org/cimi/1/Credential#myproxy-voms")

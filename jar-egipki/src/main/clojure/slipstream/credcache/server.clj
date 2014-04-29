@@ -3,7 +3,7 @@
   (:require
     [clojure.tools.logging :as log]
     [clojurewerkz.quartzite.scheduler :as qs]
-    [slipstream.credcache.dbutils :as db]))
+    [slipstream.credcache.db-utils :as db]))
 
 (defn- start-quartz
   "Start up the queues for running jobs through the Quartz scheduler."

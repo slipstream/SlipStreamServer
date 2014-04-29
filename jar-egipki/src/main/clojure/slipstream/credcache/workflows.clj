@@ -1,9 +1,9 @@
 (ns slipstream.credcache.workflows
   (:require
     [slipstream.credcache.utils :as u]
-    [slipstream.credcache.dbutils :as db]
-    [slipstream.credcache.voms :as voms]
-    [slipstream.credcache.myproxy :as myproxy])
+    [slipstream.credcache.db-utils :as db]
+    [slipstream.credcache.voms-utils :as voms]
+    [slipstream.credcache.myproxy-utils :as myproxy])
   (:import
     [eu.emi.security.authn.x509 X509Credential]))
 

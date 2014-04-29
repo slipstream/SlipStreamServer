@@ -1,4 +1,4 @@
-(ns slipstream.credcache.myproxy
+(ns slipstream.credcache.myproxy-utils
   "Utility functions for interacting with a MyProxy server."
   (:require
     [clojure.tools.logging :as log]

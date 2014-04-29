@@ -8,7 +8,7 @@
     [clojurewerkz.quartzite.jobs :as j]
     [clojurewerkz.quartzite.schedule.simple :refer [schedule with-repeat-count with-interval-in-milliseconds]]
     [clojurewerkz.quartzite.jobs :refer [defjob]]
-    [slipstream.credcache.dbutils :as db]))
+    [slipstream.credcache.db-utils :as db]))
 
 (def renewal-factor 2/3)              ;; renew 2/3 of way through validity period
 (def renewal-threshold (* 5 60 1000)) ;; 5 minutes
