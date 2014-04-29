@@ -3,7 +3,8 @@
     [slipstream.credcache.utils :as u]
     [slipstream.credcache.db-utils :as db]
     [slipstream.credcache.voms-utils :as voms]
-    [slipstream.credcache.myproxy-utils :as myproxy])
+    [slipstream.credcache.myproxy-utils :as myproxy]
+    [slipstream.credcache.credential :as cred])
   (:import
     [eu.emi.security.authn.x509 X509Credential]))
 
@@ -56,7 +57,7 @@
         proxy (voms/cred-info->proxy cred-info)
         params (assoc cred-info :credential proxy)
         renewed-proxy (myproxy/get-proxy params)
-        new-record (voms/proxy->cred-info renewed-proxy)]
+        new-record (voms/add-proxy-attributes renewed-proxy)]
     (db/update-resource new-record)))
 
 ;; (def passphrase "changeme")
@@ -79,23 +80,6 @@
     (assert ((complement nil?) bootstrap-proxy) "bootstrap proxy retrieval failed")
     (assert ((complement nil?) delegated-proxy) "delegation proxy retrieval failed")))
 
-(defn bootstrap-delegation
-  "Bootstrap the credential delegation process by retrieving a credential
-   stored with a username/password, convert to a voms proxy, and then delete
-   the original credential on the server.  This method requires the :username
-   and :passphrase keys.  The :voms key, if provided, should include the VOMS
-   information to use."
-  [params]
-  (let [id (str "Credential/" (u/random-uuid))
-        gsscred (myproxy/get-proxy params)
-        x509cred (voms/gsscred->x509cred gsscred)
-        voms-info (get params :voms {})
-        vproxy (voms/include-attr-certs x509cred voms-info)
-        cred-info (voms/proxy->cred-info vproxy (dissoc params :username :passphrase))]
-    (myproxy/destroy-proxy (assoc params :credential gsscred))
-    (db/update-resource id cred-info)
-    id))
-
 (defn renew-delegation
   "Renews the given credential."
   [id]
@@ -106,5 +90,5 @@
         x509cred (voms/gsscred->x509cred gsscred)
         voms-info (get cred-info :voms {})
         vproxy (voms/include-attr-certs x509cred voms-info)
-        cred-info (voms/proxy->cred-info vproxy cred-info)]
+        cred-info (voms/add-proxy-attributes vproxy cred-info)]
     (db/update-resource id cred-info)))

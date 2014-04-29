@@ -64,7 +64,7 @@
    are passed as a map with the following keys: :host, :port,
    :username, and :passphrase.  Defaults can be used for all
    parameters except :username and :passphrase."
-  [{:keys [myproxy-host myproxy-port lifetime credential]
+  [{:keys [myproxy-host myproxy-port lifetime proxy]
     :or   {myproxy-host default-myproxy-host
            myproxy-port default-myproxy-port
            lifetime     ttl-4h}
@@ -75,7 +75,7 @@
                  :myproxy-port myproxy-port
                  :lifetime     lifetime})
          (get-params)
-         (.get myproxy credential))))
+         (.get myproxy proxy))))
 
 (defn init-params
   "Creates the InitParams object containing the parameters for initializing
@@ -138,7 +138,7 @@
 
 (defn destroy-proxy
   "Destroys a credential on the MyProxy server."
-  [{:keys [myproxy-host myproxy-port credential]
+  [{:keys [myproxy-host myproxy-port proxy]
     :or   {myproxy-host default-myproxy-host
            myproxy-port default-myproxy-port}
     :as   params}]
@@ -147,4 +147,4 @@
          (merge {:myproxy-host myproxy-host
                  :myproxy-port myproxy-port})
          (destroy-params)
-         (.destroy myproxy credential))))
+         (.destroy myproxy proxy))))

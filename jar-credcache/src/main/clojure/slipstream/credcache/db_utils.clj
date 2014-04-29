@@ -8,7 +8,7 @@
   (:import
     [java.net URI]))
 
-(def ^:dynamic *cb-client* nil)
+(defonce ^:dynamic *cb-client* nil)
 
 (def ^:const cb-timeout-ms 3000)
 
@@ -30,7 +30,7 @@
     (->> (cbc/create-client cb-client-defaults)
          (constantly)
          (alter-var-root #'*cb-client*))
-
+    (log/info "created couchbase client" *cb-client*)
     (catch Exception e
       (log/error "error creating couchbase client" (str e))
       nil)))

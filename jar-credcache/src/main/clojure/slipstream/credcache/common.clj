@@ -2,6 +2,7 @@
   (:require
     [clojure.tools.logging :as log]
     [clj-time.core :as t]
+    [clj-time.format :as tfmt]
     [schema.core :as s]))
 
 ;;
@@ -13,8 +14,8 @@
    :typeURI                      s/Str
    (s/optional-key :name)        s/Str
    (s/optional-key :description) s/Str
-   :created                      s/Inst
-   :updated                      s/Inst
+   :created                      s/Str
+   :updated                      s/Str
    (s/optional-key :properties)  {s/Str s/Str}})
 
 ;;
@@ -26,7 +27,7 @@
    the :created timestamp to the same time if it is not present in the
    input."
   [cred]
-  (let [updated (t/now)
+  (let [updated (tfmt/unparse (:date-time tfmt/formatters) (t/now))
         created (get cred :created updated)]
     (assoc cred :created created :updated updated)))
 
@@ -41,6 +42,11 @@
          (rest)
          (apply str))))
 
+(defn update-resource-typeuri
+  [template]
+  (let [template-typeuri (:typeURI template)
+        resource-typeuri (get-resource-typeuri template-typeuri)]
+    (assoc template :typeURI resource-typeuri)))
 
 (defmulti template->resource
           "Converts a resource template to an instance of the resource.  This
@@ -56,6 +62,17 @@
   (if-let [resource-typeuri (get-resource-typeuri typeURI)]
     (assoc template :typeURI resource-typeuri)
     template))
+
+
+(defmulti validate-template
+          "Validates the given resource template, returning the template itself on success.
+           This method dispatches on the value of :typeURI.  For any unknown
+           :typeURI value the method throws an exception."
+          :typeURI)
+
+(defmethod validate-template :default
+           [{:keys [typeURI] :as template}]
+  (throw (ex-info (str "unknown resource template type: " typeURI) template)))
 
 
 (defmulti validate

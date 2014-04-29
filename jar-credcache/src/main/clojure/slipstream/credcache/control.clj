@@ -1,4 +1,4 @@
-(ns slipstream.credcache.server
+(ns slipstream.credcache.control
   "Utilities to start and stop the credential cache subsystem."
   (:require
     [clojure.tools.logging :as log]
@@ -8,21 +8,30 @@
 (defn- start-quartz
   "Start up the queues for running jobs through the Quartz scheduler."
   []
-  (qs/initialize)
-  (qs/start))
+  (try
+    (qs/initialize)
+    (qs/start)
+    (catch Exception e
+      (log/error "error starting quartz scheduler:" (.getMessage e)))))
 
 (defn- stop-quartz
   "Stop the queues for running jobs through the Quartz scheduler.
    It will wait for running jobs to complete."
   []
-  (qs/shutdown true))
+  (try
+    (qs/shutdown true)
+    (catch Exception e
+      (log/error "error stopping quartz scheduler:" (.getMessage e)))))
 
 (defn start!
   "Starts the credential management subsystem, creating the
    connection to the database and starting job queues."
   []
   (log/info "starting credential cache subsystem")
-  (db/create-client)
+  (try
+    (db/create-client)
+    (catch Exception e
+      (log/error "error creating Couchbase client:" (.getMessage e))))
   (start-quartz))
 
 (defn stop!
@@ -32,4 +41,7 @@
   []
   (log/info "stopping credential cache subsystem")
   (stop-quartz)
-  (db/destroy-client))
+  (try
+    (db/destroy-client)
+    (catch Exception e
+      (log/error "error destroying Couchbase client:" (.getMessage e)))))

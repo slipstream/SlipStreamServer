@@ -6,7 +6,8 @@
     [schema.core :as s]
     [slipstream.credcache.db-utils :as db]
     [slipstream.credcache.utils :as u]
-    [slipstream.credcache.common :as c]))
+    [slipstream.credcache.common :as c]
+    [slipstream.credcache.job :as j]))
 
 ;;
 ;; utilities
@@ -74,13 +75,16 @@
   "Adds a new credential to the database given the information in the
    template; returns the id of the created credential."
   [template]
-  (let [resource (c/template->resource template)]
+  (let [resource (-> template
+                     (c/validate-template)
+                     (c/template->resource))]
     (->> (u/random-uuid)
          (uuid->id)
          (assoc resource :id)
          (c/update-timestamps)
          (c/validate)
          (db/create-resource)
+         (j/schedule-renewal)
          (:id))))
 
 (defn retrieve
@@ -105,24 +109,3 @@
 (defn resource-ids
   "Provides a list of all of the credential ids in the database."
   [])
-
-;;
-;; renewable credentials must be renewed periodically to maintain
-;; a valid credential; implementation of such credentials must provide
-;; an implementation of the 'renew' multimethod
-;;
-
-(defmulti renew
-          "Renews the credential described in the given map.  This
-           method dispatches on the value of the :typeURI key.  Implementations
-           of this method, must return the updated resource or nil if the
-           renewal did not succeed.  The default implementation logs a warning
-           and returns nil."
-          :typeURI)
-
-(defmethod renew :default
-           [{:keys [typeURI]}]
-  (log/warn "cannot renew unknown type of credential:" typeURI)
-  nil)
-
-

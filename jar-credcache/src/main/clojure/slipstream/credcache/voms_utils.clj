@@ -185,23 +185,36 @@
   (with-open [is (ByteArrayInputStream. bytes)]
     (read-proxy is)))
 
-(defn proxy->cred-info
+(defn proxy->base64
+  [proxy]
+  (-> proxy
+      (proxy->bytes)
+      (u/bytes->base64)))
+
+(defn base64->proxy
+  [base64]
+  (-> base64
+      (u/base64->bytes)
+      (bytes->proxy)))
+
+(defn gsscred->vproxy
+  [gsscred voms-info]
+  (-> gsscred
+      (gsscred->x509cred)
+      (include-attr-certs voms-info)))
+
+(defn add-proxy-attributes
   "Creates the map containing the credential information for a VOMS proxy.
    The optional map contains all of the parameters required to review the
    proxy.  Note that the :credential and :expiry values will be overwritten
    if present."
-  [proxy & [renewal-params]]
-  (let [cred-info (or renewal-params {})
-        expiry (expiry-date proxy)
-        base64 (-> proxy
-                   (proxy->bytes)
-                   (u/bytes->base64))]
-    (assoc cred-info :credential base64 :expiry expiry)))
+  [template proxy]
+  (-> template
+      (assoc :expiry (expiry-date proxy))
+      (assoc :proxy (proxy->base64 proxy))))
 
 (defn cred-info->proxy
   "Recovers the VOMS proxy from the given credential information."
   [cred-info]
-  (-> (:credential cred-info)
-      (u/base64->bytes)
-      (bytes->proxy)))
+  (base64->proxy (:proxy cred-info)))
 

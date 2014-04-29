@@ -8,71 +8,79 @@
     [clojurewerkz.quartzite.jobs :as j]
     [clojurewerkz.quartzite.schedule.simple :refer [schedule with-repeat-count with-interval-in-milliseconds]]
     [clojurewerkz.quartzite.jobs :refer [defjob]]
-    [slipstream.credcache.db-utils :as db]))
+    [clj-time.coerce :as tc]
+    [slipstream.credcache.db-utils :as db]
+    [slipstream.credcache.renewal :as r]))
 
-(def renewal-factor 2/3)              ;; renew 2/3 of way through validity period
-(def renewal-threshold (* 5 60 1000)) ;; 5 minutes
+(def renewal-factor 2/3)                                    ;; renew 2/3 of way through validity period
+(def renewal-threshold (* 5 60))                            ;; 5 minutes in seconds!
 
 (defn attempt-renewal
   "Attempts to renew and update the given credential.  Returns nil if the
-   credential could not be found.  Returns the expiry information for the
-   new or current credential depending on whether the credential was
-   actually renewed."
+   credential could not be found.  Returns the original or updated resource,
+   depending on whether the renewal was successful or not."
   [id]
   (log/info "renewing credential:" id)
-  (if-let [cred-info (db/retrieve-resource id)]
+  (if-let [resource (db/retrieve-resource id)]
     (do
-      (if-let [updated-cred-info "" #_(renew cred-info)]       ;; FIXME: Need real call to renewal.
+      (if-let [updated-resource (r/renew resource)]
         (do
-          (db/update-resource id updated-cred-info)
+          (db/update-resource id updated-resource)
           (log/info "credential renewed:" id)
-          (:expiry updated-cred-info))
+          updated-resource)
         (do
           (log/warn "credential not renewed:" id)
-          (:expiry cred-info))))
+          resource)))
     (do
       (log/warn "credential information not found:" id)
       nil)))
 
-(defn calculate-delta
-  "Calculate the delta between now and the expiration time, then
-   apply the renewal factor time and the threshold for the delta.
-   Returns nil if the delta is less than threshold."
+(defn renewal-datetime
+  "Returns the next renewal time for the given expiry date, applying
+   the renewal wait time and threshold.  NOTE: The expiry
+   time is in seconds, not milliseconds!"
   [expiry]
   (if expiry
-    (let [delta (->> (System/currentTimeMillis)
-                     (- expiry)
+    (let [now (quot (System/currentTimeMillis) 1000)
+          delta (->> (- expiry now)
                      (max 0)
                      (* renewal-factor)
                      (int))]
       (if (>= delta renewal-threshold)
-        delta))))
+        (-> delta
+            (+ now)
+            (* 1000)
+            (tc/from-long))))))
 
 (declare schedule-renewal)
 
 (defjob renew-cred-job
         [ctx]
-        (let [m (qc/from-job-data ctx)
-              id (get m "id")]
+        (let [id (-> ctx
+                     (qc/from-job-data)
+                     (get "id"))]
           (log/info "start credential renewal:" id)
           (->> id
                (attempt-renewal)
-               (schedule-renewal id))
+               (schedule-renewal))
           (log/info "finished credential renewal: " id)))
 
 (defn schedule-renewal
-  [id expiry]
-  (if-let [delta (calculate-delta expiry)]
-    (let [job (j/build
-                (j/of-type renew-cred-job)
-                (j/using-job-data {"id" id})
-                (j/with-identity (j/key (str "renewal." id))))
-          trigger (t/build
-                    (t/with-identity (t/key (str "trigger." id)))
-                    (t/start-now)
-                    (t/with-schedule (schedule
-                                       (with-repeat-count 0)
-                                       (with-interval-in-milliseconds delta))))]
-      (qs/schedule job trigger)
-      (log/info ("scheduled next renewal:" id delta)))
+  "Takes a resource (credential) as input and schedules a renewal job
+   for that resource.  If the resource has no :expiry entry, then no
+   renewal job is scheduled."
+  [{:keys [id expiry]}]
+  (if-let [start (renewal-datetime expiry)]
+    (let [job-key (j/key (str "renewal." id))
+          trigger-key (t/key (str "trigger." id))]
+      (qs/delete-job job-key)
+      (let [job (j/build
+                  (j/with-identity job-key)
+                  (j/of-type renew-cred-job)
+                  (j/using-job-data {"id" id}))
+            trigger (t/build
+                      (t/with-identity trigger-key)
+                      (t/start-at start))]
+        (qs/schedule job trigger)
+        (log/info "scheduled next renewal:" id start)))
     (log/info "renewal NOT scheduled:" id)))

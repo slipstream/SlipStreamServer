@@ -1,7 +1,7 @@
-(ns slipstream.credcache.credential-test
+(ns slipstream.credcache.renewal-test
   (:require
     [expectations :refer :all]
-    [slipstream.credcache.credential :refer :all]))
+    [slipstream.credcache.renewal :refer :all]))
 
 ;; default renew implementation
 (expect nil?

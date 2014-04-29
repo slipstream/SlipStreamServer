@@ -3,35 +3,46 @@
     [clojure.tools.logging :as log]
     [slipstream.credcache.utils :as u]
     [slipstream.credcache.common :as c]
-    [slipstream.credcache.credential :as cred]
     [slipstream.credcache.myproxy-utils :as myproxy]
-    [slipstream.credcache.voms-utils :as voms]))
+    [slipstream.credcache.voms-utils :as voms]
+    [slipstream.credcache.renewal :as r]))
 
 (def ^:const resource-type-uri
   "http://schemas.dmtf.org/cimi/1/Credential#myproxy-voms")
 
 (def ^:const resource-template-type-uri
-  (str resource-type-uri "http://schemas.dmtf.org/cimi/1/CredentialTemplate#myproxy-voms"))
+  "http://schemas.dmtf.org/cimi/1/CredentialTemplate#myproxy-voms")
 
-(defmethod c/template->resource resource-type-uri
+(defmethod c/template->resource resource-template-type-uri
            [template]
-  template)
+  (let [gsscred (myproxy/get-proxy template)
+        voms-info (:voms template)
+        vproxy (voms/gsscred->vproxy gsscred voms-info)]
+    (try
+      (myproxy/destroy-proxy (assoc template :proxy gsscred))
+      (catch Exception e
+        (log/warn "unable to delete bootstrap credential:" (.getMessage e))))
+
+    (-> template
+        (voms/add-proxy-attributes vproxy)
+        (c/update-resource-typeuri)
+        (dissoc :username :passphrase))))
+
+(defmethod c/validate-template resource-template-type-uri
+           [resource]
+  resource)
 
 (defmethod c/validate resource-type-uri
            [resource]
-  nil)
+  resource)
 
-(defmethod cred/renew resource-type-uri
+(defmethod r/renew resource-type-uri
            [resource]
-           (try
-             (let [x509 (->> (myproxy/get-proxy resource)
-                             (voms/gsscred->x509cred))
-                   acs (voms/get-acs resource)
-                   vproxy (voms/add-acs x509 acs)
-                   base64 (->> (voms/proxy->bytes vproxy)
-                               (u/bytes->base64 bytes))
-                   expiry (voms/expiry-date vproxy)]
-               (assoc resource :credential base64 :expiry expiry))
-             (catch Exception e
-               (log/warn "exception raised when renewing myproxy-voms credentials:" (.getMessage e))
-               nil)))
+  (try
+    (let [gsscred (myproxy/get-proxy resource)
+          voms-info (:voms resource)
+          vproxy (voms/gsscred->vproxy gsscred voms-info)]
+      (voms/add-proxy-attributes resource vproxy))
+    (catch Exception e
+      (log/warn "exception raised when renewing myproxy-voms credentials:" (.getMessage e))
+      nil)))
