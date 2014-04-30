@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
@@ -53,7 +54,7 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	@MapKey(name = "name")
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-	protected Map<String, T> parameters = new HashMap<String, T>();
+	protected Map<String, T> parameters = new ConcurrentHashMap<String, T>();
 
 	/**
 	 * Do not add parameters to the map directly. Instead use setParameter
