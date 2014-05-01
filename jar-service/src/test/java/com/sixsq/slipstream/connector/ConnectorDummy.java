@@ -85,7 +85,7 @@ public class ConnectorDummy extends ConnectorBase {
 	
 	@Override
 	protected String constructKey(String key) throws ValidationException {
-		return null;
+		return "";
 	}
 
 	@Override
