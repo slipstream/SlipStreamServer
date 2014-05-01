@@ -5,7 +5,8 @@
     [clojure.tools.logging :as log]
     [couchbase-clj.client :as cbc]
     [couchbase-clj.query :as cbq]
-    [slipstream.credcache.utils :as utils])
+    [slipstream.credcache.utils :as utils]
+    [schema.core :as s])
   (:import
     [java.net URI]
     [com.couchbase.client.protocol.views DesignDocument ViewDesign]))
@@ -31,6 +32,12 @@ function(doc, meta) {
   }
 }
 ")
+
+(def cb-client-params-schema
+  {(s/optional-key :uris)     [URI]
+   (s/optional-key :bucket)   s/Str
+   (s/optional-key :username) s/Str
+   (s/optional-key :password) s/Str})
 
 (defn create-design-doc
   []
@@ -58,19 +65,22 @@ function(doc, meta) {
   "Creates a Couchbase client for accessing resources in the database.  This
    is a shared, thread-safe instance stored in a dynamic variable.  This should
    be called before trying to use any other utilities in this namespace."
-  []
+  [& [params]]
 
   ;; force logging to use SLF4J facade
   (System/setProperty "net.spy.log.LoggerImpl" "net.spy.memcached.compat.log.SLF4JLogger")
 
-  (try
-    (->> (cbc/create-client cb-client-defaults)
-         (constantly)
-         (alter-var-root #'*cb-client*))
-    (log/info "created couchbase client" *cb-client*)
-    (catch Exception e
-      (log/error "error creating couchbase client" (str e))
-      nil)))
+  (let [params (or params {})]
+    (s/validate cb-client-params-schema params)
+
+    (try
+      (->> (cbc/create-client (merge cb-client-defaults params))
+           (constantly)
+           (alter-var-root #'*cb-client*))
+      (log/info "created couchbase client" *cb-client*)
+      (catch Exception e
+        (log/error "error creating couchbase client" (str e))
+        nil))))
 
 (defn destroy-client
   "Shutdown and free all resources for the Couchbase client.  This should be
@@ -134,7 +144,7 @@ function(doc, meta) {
   ([resource-type]
    (all-resource-ids resource-type 0))
   ([resource-type skip]
-    (let [chunk (get-resource-ids-chunk resource-type skip)
-          n (count chunk)]
-      (if (pos? n)
-        (concat chunk (lazy-seq (all-resource-ids resource-type (+ n skip))))))))
+   (let [chunk (get-resource-ids-chunk resource-type skip)
+         n (count chunk)]
+     (if (pos? n)
+       (concat chunk (lazy-seq (all-resource-ids resource-type (+ n skip))))))))

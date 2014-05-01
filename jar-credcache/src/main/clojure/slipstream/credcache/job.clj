@@ -10,7 +10,8 @@
     [clojurewerkz.quartzite.jobs :refer [defjob]]
     [clj-time.coerce :as tc]
     [slipstream.credcache.db-utils :as db]
-    [slipstream.credcache.renewal :as r]))
+    [slipstream.credcache.renewal :as r]
+    [slipstream.credcache.notify :as notify]))
 
 (def renewal-factor 2/3)                                    ;; renew 2/3 of way through validity period
 (def renewal-threshold (* 5 60))                            ;; 5 minutes in seconds!
@@ -30,6 +31,7 @@
           updated-resource)
         (do
           (log/warn "credential not renewed:" id)
+          (notify/renewal-failure resource)
           resource)))
     (do
       (log/warn "credential information not found:" id)

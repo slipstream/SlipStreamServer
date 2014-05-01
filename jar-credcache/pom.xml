@@ -57,6 +57,12 @@
       <version>0.1.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.draines</groupId>
+      <artifactId>postal</artifactId>
+      <version>1.11.1</version>
+    </dependency>
+
 <!-- There is a fundamental incompatibility between MyProxy and
      VOMS with the versions in the Maven central repository.
      MyProxy works with bouncycastle 1.45 but not 1.46.
