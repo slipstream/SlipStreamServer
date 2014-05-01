@@ -80,15 +80,8 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	}
 
 	public void setParameter(T parameter) throws ValidationException {
-		T target;
-		if (parameters.containsKey(parameter.getName())) {
-			target = parameters.get(parameter.getName());
-			target.setValue(parameter.getValue());
-		} else {
-			target = parameter;
-			parameters.put(target.getName(), target);
-		}
-		setContainer(target);
+		parameters.put(parameter.getName(), parameter);
+		setContainer(parameter);
 	}
 
 	// This method is necessary because setting the container directly here

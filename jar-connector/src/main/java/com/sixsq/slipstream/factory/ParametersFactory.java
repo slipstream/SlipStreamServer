@@ -93,9 +93,11 @@ public class ParametersFactory {
 		Map<String, UserParameter> existingParameters = user.getParameters();
 
 		for (Entry<String, UserParameter> entry : templateParameters.entrySet()) {
-			if (!existingParameters.containsKey(entry.getKey())) {
-				user.setParameter(entry.getValue());
+			UserParameter p = entry.getValue();
+			if (existingParameters.containsKey(entry.getKey())) {
+				p.setValue(user.getParameter(p.getName()).getValue());
 			}
+			user.setParameter(p);
 		}
 
 		resetCloudServiceNameEnum(user, execParameters);

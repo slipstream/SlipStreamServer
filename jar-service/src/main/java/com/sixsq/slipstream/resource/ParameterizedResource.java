@@ -178,7 +178,6 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected void addParametersForEditing() throws ValidationException,
 			ConfigurationException {
-		setUser(ParametersFactory.addParametersForEditing(getUser()));
 	}
 
 	@Delete
