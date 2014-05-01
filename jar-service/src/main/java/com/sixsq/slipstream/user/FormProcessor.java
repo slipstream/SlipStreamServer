@@ -20,7 +20,7 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.restlet.data.Form;
 
@@ -92,7 +92,11 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		// - parameter--[id]--description
 		// - parameter--[id]--value
 		// ...
-		getParametrized().setParameters(new HashMap<String, T>());
+		S parametrised = getParametrized();
+		if (parametrised != null) {
+			parametrised.setParameters(new ConcurrentHashMap<String, T>(
+					parametrised.getParameters()));
+		}
 		for (String paramName : form.getNames().toArray(new String[0])) {
 
 			if (isParameterName(paramName)) {
@@ -119,7 +123,8 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 			return;
 		}
 	 	
-		boolean exists = getParametrized().getParameters().containsKey(name);
+		boolean exists = (name == null) ? false : getParametrized()
+				.parametersContainKey(name);
 		if (exists) {
 			setExistingParameter(name, value);
 		} else {

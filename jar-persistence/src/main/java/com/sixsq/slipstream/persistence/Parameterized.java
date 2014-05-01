@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
@@ -32,7 +31,6 @@ import javax.persistence.MapKey;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 
-import org.hibernate.annotations.Cascade;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -53,8 +51,7 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	@ElementMap(name = "parameters", required = false, data = true, valueType = Parameter.class)
 	@MapKey(name = "name")
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-	protected Map<String, T> parameters = new ConcurrentHashMap<String, T>();
+	protected Map<String, T> parameters = new HashMap<String, T>();
 
 	/**
 	 * Do not add parameters to the map directly. Instead use setParameter
@@ -81,7 +78,7 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 
 	public void setParameter(T parameter) throws ValidationException {
 		T target;
-		if (parameters.containsKey(parameter.getName())) {
+		if (parametersContainKey(parameter.getName())) {
 			target = parameters.get(parameter.getName());
 			target.setValue(parameter.getValue());
 		} else {
@@ -152,5 +149,10 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 		for(Entry<String, T> p : getParameters().entrySet()) {
 			p.getValue().setContainer((S) this);
 		}
+	}
+
+	public boolean parametersContainKey(String key) {
+		return (key == null) ? false : getParameters().containsKey(key);
+		
 	}
 }

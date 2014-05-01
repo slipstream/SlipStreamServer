@@ -93,7 +93,8 @@ public class ParametersFactory {
 		Map<String, UserParameter> existingParameters = user.getParameters();
 
 		for (Entry<String, UserParameter> entry : templateParameters.entrySet()) {
-			if (!existingParameters.containsKey(entry.getKey())) {
+			if (entry.getKey() != null
+					&& !existingParameters.containsKey(entry.getKey())) {
 				user.setParameter(entry.getValue());
 			}
 		}
@@ -144,7 +145,7 @@ public class ParametersFactory {
 			throws ValidationException {
 		for (Entry<String, ModuleParameter> entry : parameters
 				.entrySet()) {
-			if (!module.getParameters().containsKey(entry.getKey())) {
+			if (!module.parametersContainKey(entry.getKey())) {
 				module.setParameter(entry.getValue());
 			}
 		}

@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -181,15 +182,23 @@ public class Run extends Parameterized<Run, RunParameter> {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Run run = em.find(Run.class, resourceUri);
 		em.close();
+		wrapParametersWithConcurrentHashMap(run);
 		return run;
 	}
 
 	public static Run load(String resourceUri, EntityManager em) {
 		Run run = em.find(Run.class, resourceUri);
+		wrapParametersWithConcurrentHashMap(run);
 		return run;
 	}
 
-	public static RunView loadViewByInstanceId(User user, String instanceId,
+	private static void wrapParametersWithConcurrentHashMap(Run run) {
+		if (run != null) {
+			run.setParameters(new ConcurrentHashMap<String, RunParameter>(run.getParameters()));
+		}
+	}
+
+	public static RunView loadViewByInstanceId(Parameterized<User, UserParameter> user, String instanceId,
 			String cloud) throws ConfigurationException, ValidationException {
 		// TODO: there is a chance that if two clouds have overlaping
 		// instanceid,
@@ -336,6 +345,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		q.setParameter("uuid", uuid);
 		Run run = (Run) q.getSingleResult();
 		em.close();
+		wrapParametersWithConcurrentHashMap(run);
 		return run;
 	}
 
@@ -616,7 +626,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 		// We only test for the first one
 		String parameterName = composeParameterName(node, key, 1);
-		if (getParameters().containsKey(parameterName)) {
+		if (parametersContainKey(parameterName)) {
 			throw new ValidationException("Parameter " + parameterName
 					+ " already exists in node " + node.getName());
 		}

@@ -230,7 +230,7 @@ public class StratusLabConnector extends CliConnectorBase {
 	}
 
 	protected boolean isParameterDefined(User user, String sshParameterName) {
-		return user.getParameters().containsKey(sshParameterName)
+		return user.parametersContainKey(sshParameterName)
 				&& !("".equals(user.getParameter(sshParameterName).getValue()) || user
 						.getParameter(sshParameterName).getValue() == null);
 	}

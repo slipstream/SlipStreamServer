@@ -145,8 +145,8 @@ public class DeploymentModule extends Module {
 								+ nodeParameter.getValue()
 								+ " which referes to a node not defined in the deployment"));
 			}
-			if (!this.getNodes().get(nodeName).getImage().getParameters()
-					.containsKey(paramName)) {
+			if (!this.getNodes().get(nodeName).getImage()
+					.parametersContainKey(paramName)) {
 				throw (new ValidationException(
 						"Failed to find output parameter: "
 								+ nodeParameter.getValue()
@@ -202,8 +202,7 @@ public class DeploymentModule extends Module {
 		for (Parameter<Module> moduleParameter : node.getImage()
 				.getParameters(ParameterCategory.Input.toString()).values()) {
 			if (!moduleParameter.hasValueSet()) {
-				if (!node.getParameterMappings().containsKey(
-						moduleParameter.getName())) {
+				if (!node.getParameterMappings().containsKey(moduleParameter.getName())) {
 					throw (new ValidationException("Missing input parameter "
 							+ moduleParameter.getName() + " in node "
 							+ node.getName()));
@@ -247,7 +246,7 @@ public class DeploymentModule extends Module {
 		String cloudServiceNameKey = run.nodeRuntimeParameterKeyName(node,
 				RuntimeParameter.CLOUD_SERVICE_NAME);
 
-		if (run.getParameters().containsKey(cloudServiceNameKey)) {
+		if (run.parametersContainKey(cloudServiceNameKey)) {
 			String cloudService = run.getParameter(cloudServiceNameKey)
 					.getValue();
 			node.setCloudService(cloudService);
@@ -262,7 +261,7 @@ public class DeploymentModule extends Module {
 		String multiplicityKey = run.nodeRuntimeParameterKeyName(node,
 				RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 
-		if (run.getParameters().containsKey(multiplicityKey)) {
+		if (run.parametersContainKey(multiplicityKey)) {
 			node.setMultiplicity(run.getParameter(multiplicityKey).getValue());
 		}
 	}

@@ -119,7 +119,7 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 
 			Node node = createNode(nodeindex, shortname);
 
-			if (module.getNodes().containsKey(shortname)) {
+			if (module.parametersContainKey(shortname)) {
 				throw (new ValidationException(
 						"Node short names must be unique. '"
 								+ shortname.replace("<", "&lt;")
