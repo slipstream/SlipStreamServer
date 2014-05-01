@@ -31,6 +31,7 @@ import javax.persistence.MapKey;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.Cascade;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -51,6 +52,7 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	@ElementMap(name = "parameters", required = false, data = true, valueType = Parameter.class)
 	@MapKey(name = "name")
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	//@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	protected Map<String, T> parameters = new HashMap<String, T>();
 
 	/**
@@ -77,15 +79,8 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	}
 
 	public void setParameter(T parameter) throws ValidationException {
-		T target;
-		if (parametersContainKey(parameter.getName())) {
-			target = parameters.get(parameter.getName());
-			target.setValue(parameter.getValue());
-		} else {
-			target = parameter;
-			parameters.put(target.getName(), target);
-		}
-		setContainer(target);
+		parameters.put(parameter.getName(), parameter);
+		setContainer(parameter);
 	}
 
 	// This method is necessary because setting the container directly here

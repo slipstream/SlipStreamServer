@@ -9,14 +9,17 @@
 ;; common schema definitions
 ;;
 
-(def CommonAttributes
-  {:id                           s/Str
-   :typeURI                      s/Str
+(def CommonTemplateAttributes
+  {:typeURI                      s/Str
    (s/optional-key :name)        s/Str
    (s/optional-key :description) s/Str
-   :created                      s/Str
-   :updated                      s/Str
    (s/optional-key :properties)  {s/Str s/Str}})
+
+(def CommonResourceAttributes
+  (merge CommonTemplateAttributes
+         {:id      s/Str
+          :created s/Str
+          :updated s/Str}))
 
 ;;
 ;; common resource utilities and multimethods
@@ -48,14 +51,16 @@
         resource-typeuri (get-resource-typeuri template-typeuri)]
     (assoc template :typeURI resource-typeuri)))
 
+(defn resource-type-dispatch
+  [{:keys [typeURI subtypeURI]}]
+  [typeURI subtypeURI])
+
 (defmulti template->resource
           "Converts a resource template to an instance of the resource.  This
-           method dispatches on the :typeURI value in the template.  The default
-           implementation will simply return the template as the resource, removing
-           'Template' from the :typeURI value ignoring any fragment.  If :typeURI
-           does not exist, then the default implementation will return the
-           template unmodified."
-          :typeURI)
+           dispatches on the value [:typeURI :subtypeURI].  The default implementation
+           copies the template with a modified :typeURI field.  The method removes
+           'Template' from the end of the original :typeURI value."
+          resource-type-dispatch)
 
 (defmethod template->resource :default
            [{:keys [typeURI] :as template}]
@@ -66,21 +71,21 @@
 
 (defmulti validate-template
           "Validates the given resource template, returning the template itself on success.
-           This method dispatches on the value of :typeURI.  For any unknown
-           :typeURI value the method throws an exception."
-          :typeURI)
+           This method dispatches on the value of [:typeURI :subtypeURI].  For any unknown
+           dispatch value the method throws an exception."
+          resource-type-dispatch)
 
 (defmethod validate-template :default
-           [{:keys [typeURI] :as template}]
-  (throw (ex-info (str "unknown resource template type: " typeURI) template)))
+           [template]
+  (throw (ex-info (str "unknown resource template type: " (resource-type-dispatch template)) template)))
 
 
 (defmulti validate
           "Validates the given resource, returning the resource itself on success.
-           This method dispatches on the value of :typeURI.  For any unknown
-           :typeURI value the method throws an exception."
-          :typeURI)
+           This method dispatches on the value of [:typeURI :subtypeURI].  For any unknown
+           dispatch value the method throws an exception."
+          resource-type-dispatch)
 
 (defmethod validate :default
-           [{:keys [typeURI] :as resource}]
-  (throw (ex-info (str "unknown resource type: " typeURI) resource)))
+           [resource]
+  (throw (ex-info (str "unknown resource type: " (resource-type-dispatch resource)) resource)))
