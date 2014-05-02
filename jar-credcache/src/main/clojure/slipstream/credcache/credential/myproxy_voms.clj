@@ -1,4 +1,4 @@
-(ns slipstream.credcache.credential-myproxy-voms
+(ns slipstream.credcache.credential.myproxy-voms
   (:require
     [clojure.tools.logging :as log]
     [schema.core :as s]
