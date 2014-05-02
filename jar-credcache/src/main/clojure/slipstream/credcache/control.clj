@@ -5,7 +5,9 @@
     [clojurewerkz.quartzite.scheduler :as qs]
     [slipstream.credcache.db-utils :as db]
     [slipstream.credcache.credential :as cred]
-    [slipstream.credcache.notify :as notify]))
+    [slipstream.credcache.notify :as notify]
+    [slipstream.credcache.credential.myproxy-voms]          ;; FIXME: use dynamic loading
+    ))
 
 (defn- start-quartz
   "Start up the queues for running jobs through the Quartz scheduler."

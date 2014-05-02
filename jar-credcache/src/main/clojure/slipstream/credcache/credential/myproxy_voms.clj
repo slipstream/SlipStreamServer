@@ -1,6 +1,7 @@
 (ns slipstream.credcache.credential.myproxy-voms
   (:require
     [clojure.tools.logging :as log]
+    [me.raynes.fs :as fs]
     [schema.core :as s]
     [slipstream.credcache.utils :as u]
     [slipstream.credcache.common :as c]
@@ -19,8 +20,8 @@
 ;;
 
 (def VomsAttributes
-  {s/Str {(s/optional-key :fqans)   [s/Str]
-          (s/optional-key :targets) [s/Str]}})
+  {(s/either s/Keyword s/Str) {(s/optional-key :fqans)   [s/Str]
+                               (s/optional-key :targets) [s/Str]}})
 
 (def MyProxyVomsCommonAttributes
   {:subtypeURI                    (s/pred (fn [s] (= resource-subtype-uri s)))
@@ -38,6 +39,20 @@
          MyProxyVomsCommonAttributes
          {:username   s/Str
           :passphrase s/Str}))
+
+;;
+;; utility method
+;;
+
+(defn proxy->tfile
+  "Writes the proxy to a temporary file.  The temporary file is returned.
+   The caller of this function is responsible for deleting the temporary
+   file.  Returns null if the proxy could not be written to the file."
+  [resource]
+  (let [proxy (voms/base64->proxy (:proxy resource))
+        tfile (fs/temp-file "proxy-")]
+    (voms/proxy->file proxy tfile)
+    tfile))
 
 ;;
 ;; method definitions
