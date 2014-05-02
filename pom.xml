@@ -69,6 +69,9 @@
     <logger.filepattern>${project.build.directory}/instance/SlipStreamServer/var/log/slipstream.%g
     </logger.filepattern>
 
+    <org.hibernate.version>4.1.7.Final</org.hibernate.version>
+    <hibernate.maven.plugin.version>3.6.10.Final</hibernate.maven.plugin.version>
+
   </properties>
 
 </project>

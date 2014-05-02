@@ -124,14 +124,16 @@
 					<components>
 						<component>
 							<name>hbm2ddl</name>
+							<implementation>jpaconfiguration</implementation>
 						</component>
 					</components>
 					<componentProperties>
-						<implementation>jpaconfiguration</implementation>
-						<drop>false</drop>
+						<!-- <implementation>jpaconfiguration</implementation> -->
 						<create>true</create>
 						<export>false</export>
 						<format>true</format>
+						<drop>false</drop>
+						<jdk5>true</jdk5>
 					</componentProperties>
 				</configuration>
 				<executions>
@@ -149,6 +151,46 @@
 						</configuration>
 					</execution>
 				</executions>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-entitymanager</artifactId>
+                    <version>${hibernate.maven.plugin.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>cglib</groupId>
+                            <artifactId>cglib</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>commons-logging</groupId>
+                            <artifactId>commons-logging</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-core</artifactId>
+                    <version>${hibernate.maven.plugin.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>cglib</groupId>
+                            <artifactId>cglib</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>commons-logging</groupId>
+                            <artifactId>commons-logging</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-validator</artifactId>
+                    <version>4.2.0.Final</version>
+                </dependency>
+
+            </dependencies>
+
 			</plugin>
 			
 		</plugins>
