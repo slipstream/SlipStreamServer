@@ -132,16 +132,16 @@
 ; Start collector writers
 (defn collect-writers
   []
-  (thread
+  (go
     (while true
-      (<!! (timeout timeout-online-loop))
+      (<! (timeout timeout-online-loop))
       (let [users (online-users)]
         (log/log-info "inserting online users requests")
         (insert-collection-requests users)
         (insert-update-metric-requests users))))
-  (thread
+  (go
     (while true
-      (<!! (timeout timeout-all-users-loop))
+      (<! (timeout timeout-all-users-loop))
       (let [users (users)]
         (log/log-info "inserting all users requests")
         (insert-collection-requests users)
