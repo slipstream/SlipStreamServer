@@ -144,8 +144,8 @@
       (<!! (timeout timeout-all-users-loop))
       (let [users (users)]
         (log/log-info "inserting all users requests")
-        (insert-collection-requests users))
-        (insert-update-metric-requests users))))
+        (insert-collection-requests users)
+        (insert-update-metric-requests users)))))
 
 (defn -start
   []
