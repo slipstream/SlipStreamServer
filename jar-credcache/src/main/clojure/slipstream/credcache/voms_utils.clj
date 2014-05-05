@@ -104,7 +104,7 @@
             :or   {:fqans   []
                    :targets []}}]
   (let [service (voms-service)
-        request (voms-request vo fqans targets)]
+        request (voms-request (name vo) fqans targets)]
     (.getVOMSAttributeCertificate service cred request)))
 
 (defn get-acs

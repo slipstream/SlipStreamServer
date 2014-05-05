@@ -356,7 +356,14 @@ public class ImageModule extends Module {
 	}
 
 	public void setTargets(Set<Target> targets) {
-		this.targets = targets;
+		if(this.targets != null) {
+			this.targets.clear();
+			for(Target t : targets) {
+				this.targets.add(t);
+			}
+		} else {
+			this.targets = targets;
+		}
 	}
 
 	public Set<Package> getPackages() {
@@ -364,7 +371,14 @@ public class ImageModule extends Module {
 	}
 
 	public void setPackages(Set<Package> packages) {
-		this.packages = packages;
+		if(this.packages != null) {
+			this.packages.clear();
+			for(Package t : packages) {
+				this.packages.add(t);
+			}
+		} else {
+			this.packages = packages;
+		}
 	}
 
 	public String getRecipe() {

@@ -117,10 +117,9 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 
 		String value = extractValue(form, genericPart);
 
-		if(!shouldProcess(name)) {
+		if (!shouldProcess(name)) {
 			return;
 		}
-	 	
 		boolean exists = (name == null) ? false : existingParameters
 				.containsKey(name);
 		if (exists) {
@@ -131,7 +130,8 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 
 	}
 
-	protected boolean shouldProcess(String paramName) throws ValidationException {
+	protected boolean shouldProcess(String paramName)
+			throws ValidationException {
 		return true;
 	}
 

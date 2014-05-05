@@ -41,11 +41,11 @@ public class OpenStackSystemConfigurationParametersFactory extends
 				"The actual image should support the desired Flavor");
 
 		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.SERVICE_TYPE_PARAMETER_NAME), 
-				"Type-name of the service who provide the instances functionality",
+				"Type-name of the service which provides the instances functionality",
 				"compute");
 		
 		putMandatoryParameter(constructKey(OpenStackUserParametersFactory.SERVICE_NAME_PARAMETER_NAME), 
-				"Name of the service who provide the instances functionality",
+				"Name of the service which provides the instances functionality",
 				"nova");
 				//"('nova' for OpenStack essex&folsom and 'Compute' for HP Cloud)"
 		

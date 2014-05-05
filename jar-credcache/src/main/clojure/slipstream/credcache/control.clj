@@ -4,7 +4,10 @@
     [clojure.tools.logging :as log]
     [clojurewerkz.quartzite.scheduler :as qs]
     [slipstream.credcache.db-utils :as db]
-    [slipstream.credcache.credential :as cred]))
+    [slipstream.credcache.credential :as cred]
+    [slipstream.credcache.notify :as notify]
+    [slipstream.credcache.credential.myproxy-voms]          ;; FIXME: use dynamic loading
+    ))
 
 (defn- start-quartz
   "Start up the queues for running jobs through the Quartz scheduler."
@@ -13,7 +16,7 @@
     (qs/initialize)
     (qs/start)
     (catch Exception e
-      (log/error "error starting quartz scheduler:" (.getMessage e)))))
+      (log/error "error starting quartz scheduler:" (str e)))))
 
 (defn- stop-quartz
   "Stop the queues for running jobs through the Quartz scheduler.
@@ -22,17 +25,21 @@
   (try
     (qs/shutdown true)
     (catch Exception e
-      (log/error "error stopping quartz scheduler:" (.getMessage e)))))
+      (log/error "error stopping quartz scheduler:" (str e)))))
 
 (defn start!
   "Starts the credential management subsystem, creating the
    connection to the database and starting job queues."
-  []
+  [cb-params smtp-params]
   (log/info "starting credential cache subsystem")
   (try
-    (db/create-client)
+    (notify/set-smtp-parameters! smtp-params)
     (catch Exception e
-      (log/error "error creating Couchbase client:" (.getMessage e))))
+      (log/error "error setting SMTP parameters:" (str e))))
+  (try
+    (db/create-client cb-params)
+    (catch Exception e
+      (log/error "error creating Couchbase client:" (str e))))
   (db/add-design-doc)
   (start-quartz)
   (cred/reschedule-all-renewals))
@@ -47,4 +54,4 @@
   (try
     (db/destroy-client)
     (catch Exception e
-      (log/error "error destroying Couchbase client:" (.getMessage e)))))
+      (log/error "error destroying Couchbase client:" (str e)))))
