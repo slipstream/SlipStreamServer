@@ -95,9 +95,8 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		// - parameter--[id]--value
 		// ...
 		existingParameters = getParametrized().getParameters();
-		getParametrized().setParameters(new ConcurrentHashMap<String, T>());
+		getParametrized().getParameters().clear();
 		for (String paramName : form.getNames().toArray(new String[0])) {
-
 			if (isParameterName(paramName)) {
 				processSingleParameter(form, paramName);
 			}
