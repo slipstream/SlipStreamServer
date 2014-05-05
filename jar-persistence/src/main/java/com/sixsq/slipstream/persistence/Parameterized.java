@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
@@ -31,7 +32,8 @@ import javax.persistence.MapKey;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 
-import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CollectionType;
+//import org.hibernate.annotations.Type;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -51,9 +53,9 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 
 	@ElementMap(name = "parameters", required = false, data = true, valueType = Parameter.class)
 	@MapKey(name = "name")
-	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	//@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-	protected Map<String, T> parameters = new HashMap<String, T>();
+	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
+	protected Map<String, T> parameters = new ConcurrentHashMap<String, T>();
 
 	/**
 	 * Do not add parameters to the map directly. Instead use setParameter
@@ -61,10 +63,6 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	 */
 	public Map<String, T> getParameters() {
 		return parameters;
-	}
-
-	public void setParameters(Map<String, T> parameters) {
-		this.parameters = parameters;
 	}
 
 	public T getParameter(String name) {
