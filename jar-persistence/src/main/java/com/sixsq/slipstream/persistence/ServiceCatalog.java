@@ -133,10 +133,6 @@ public class ServiceCatalog extends
 		EntityManager em = PersistenceUtil.createEntityManager();
 		ServiceCatalog sc = em.find(ServiceCatalog.class, resourceUrl);
 		em.close();
-		if (sc != null) {
-			sc.setParameters(new ConcurrentHashMap<String, ServiceCatalogParameter>(
-					sc.getParameters()));
-		}
 		return sc;
 	}
 

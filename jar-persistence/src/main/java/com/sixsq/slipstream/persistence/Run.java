@@ -182,20 +182,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Run run = em.find(Run.class, resourceUri);
 		em.close();
-		wrapParametersWithConcurrentHashMap(run);
 		return run;
 	}
 
 	public static Run load(String resourceUri, EntityManager em) {
 		Run run = em.find(Run.class, resourceUri);
-		wrapParametersWithConcurrentHashMap(run);
 		return run;
-	}
-
-	private static void wrapParametersWithConcurrentHashMap(Run run) {
-		if (run != null) {
-			run.setParameters(new ConcurrentHashMap<String, RunParameter>(run.getParameters()));
-		}
 	}
 
 	public static RunView loadViewByInstanceId(Parameterized<User, UserParameter> user, String instanceId,
@@ -345,7 +337,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		q.setParameter("uuid", uuid);
 		Run run = (Run) q.getSingleResult();
 		em.close();
-		wrapParametersWithConcurrentHashMap(run);
 		return run;
 	}
 

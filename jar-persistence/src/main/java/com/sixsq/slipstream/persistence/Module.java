@@ -21,7 +21,6 @@ package com.sixsq.slipstream.persistence;
  */
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -73,17 +72,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		Module m = em.find(Module.class, uri);
 		Module latestVersion = loadLatest(uri);
 		em.close();
-		wrapParametersWithConcurrentHashMap(m);
 		if (latestVersion != null && m != null) {
 			m.setIsLatestVersion(latestVersion.version);
 		}
 		return m;
-	}
-
-	private static void wrapParametersWithConcurrentHashMap(Module m) {
-		if (m != null) {
-			m.setParameters(new ConcurrentHashMap<String, ModuleParameter>(m.getParameters()));
-		}
 	}
 
 	public static Module loadLatest(String resourceUri) {
@@ -100,7 +92,6 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 			module = null;
 		}
 		em.close();
-		wrapParametersWithConcurrentHashMap(module);
 		return module;
 	}
 

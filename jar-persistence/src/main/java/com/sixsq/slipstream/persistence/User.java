@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import javax.mail.internet.AddressException;
@@ -384,10 +383,6 @@ public class User extends Parameterized<User, UserParameter> {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		User user = em.find(User.class, resourceUrl);
 		em.close();
-		if (user != null) {
-			user.setParameters(new ConcurrentHashMap<String, UserParameter>(
-					user.getParameters()));
-		}
 		return user;
 	}
 
