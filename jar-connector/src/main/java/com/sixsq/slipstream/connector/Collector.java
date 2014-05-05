@@ -63,7 +63,8 @@ public class Collector {
 					+ connector.getConnectorInstanceName() + " onbehalf of "
 					+ user.getName());
 			// swallow the exception, since we don't want to fail if users
-			// have wrong credentials
+			// have wrong credentials. But print stack trace.
+			e.printStackTrace();
 			return 0;
 		}
 		return populateVmsForCloud(user, connector.getConnectorInstanceName(),
