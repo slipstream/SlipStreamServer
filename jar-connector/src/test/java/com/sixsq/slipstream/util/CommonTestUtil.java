@@ -117,7 +117,7 @@ public abstract class CommonTestUtil {
 				"xxx");
 		user.setParameter(userKey);
 
-		String publicSshKey = "cloud.connector.orchestrator.publicsshkey";
+		String publicSshKey = ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY;
 		Configuration config = Configuration.getInstance();
 
 		config.getParameters().setParameter(
@@ -155,18 +155,15 @@ public abstract class CommonTestUtil {
 		Node node;
 
 		node = new Node("node1", imageForDeployment1);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		node = new Node("node2", imageForDeployment2);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		return deployment.store();
 	}
 
 	public static void deleteDeployment(DeploymentModule deployment) {
-		for (Node n : deployment.getNodes().values()) {
-			n.getImage().remove();
-		}
 		deployment.remove();
 	}
 

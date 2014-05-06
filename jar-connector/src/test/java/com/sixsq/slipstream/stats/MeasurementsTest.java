@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -70,11 +71,11 @@ public class MeasurementsTest extends RunTestBase {
 		imageForDeployment2 = imageForDeployment2.store();
 
 		createUser();
-		
+
 		CommonTestUtil.addSshKeys(user);
-		
+
 		removeRuns();
-		
+
 		CommonTestUtil.createDeployment();
 	}
 
@@ -99,8 +100,16 @@ public class MeasurementsTest extends RunTestBase {
 	private static ImageModule updateImageForDeployment(ImageModule image,
 			int cpu, int ram) throws ValidationException {
 		image = updateImageForLocalConnector(image, cpu, ram);
-		image.getCloudImageIdentifiers().add(
-				new CloudImageIdentifier(image, cloudServiceName, "abc"));
+		boolean foundit = false;
+		for (CloudImageIdentifier iid : image.getCloudImageIdentifiers()) {
+			if (iid.getCloudServiceName().equals(cloudServiceName)) {
+				foundit = true;
+				break;
+			}
+		}
+		if (!foundit) {
+			image.setImageId("abc", cloudServiceName);
+		}
 		return image.store();
 	}
 
@@ -183,14 +192,18 @@ public class MeasurementsTest extends RunTestBase {
 
 	private void createACoupleOfImageBuildRuns(Module module)
 			throws SlipStreamException {
-		createAndStoreRun(module, user.getName(), RunType.Machine, States.Running);
-		createAndStoreRun(module, user.getName(), RunType.Machine, States.Running);
+		createAndStoreRun(module, user.getName(), RunType.Machine,
+				States.Running);
+		createAndStoreRun(module, user.getName(), RunType.Machine,
+				States.Running);
 	}
 
 	private void createACoupleOfDeploymentRuns(Module module)
 			throws SlipStreamException {
-		createAndStoreRun(module, user.getName(), RunType.Orchestration, States.Running);
-		createAndStoreRun(module, user.getName(), RunType.Orchestration, States.Running);
+		createAndStoreRun(module, user.getName(), RunType.Orchestration,
+				States.Running);
+		createAndStoreRun(module, user.getName(), RunType.Orchestration,
+				States.Running);
 	}
 
 	private void createACoupleOfSimpleRuns(Module module)

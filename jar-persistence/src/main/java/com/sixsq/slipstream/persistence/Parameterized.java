@@ -139,13 +139,13 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	public void postDeserialization() {
 		super.postDeserialization();
 		// Assign containers inside parameters
-		for(Entry<String, T> p : getParameters().entrySet()) {
+		for (Entry<String, T> p : getParameters().entrySet()) {
 			p.getValue().setContainer((S) this);
 		}
 	}
 
 	public boolean parametersContainKey(String key) {
 		return (key == null) ? false : getParameters().containsKey(key);
-		
+
 	}
 }

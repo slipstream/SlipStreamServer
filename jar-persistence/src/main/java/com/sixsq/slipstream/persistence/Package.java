@@ -26,6 +26,7 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 import org.simpleframework.xml.Attribute;
 
@@ -41,10 +42,15 @@ public class Package implements Serializable {
 
 	@Attribute
 	private String name;
+	
 	@Attribute(required = false)
 	private String repository;
+
 	@Attribute(required = false, name = "key")
 	private String key_;
+
+	@ManyToOne
+	private ImageModule module;
 
 	@SuppressWarnings("unused")
 	private Package() {
@@ -83,6 +89,14 @@ public class Package implements Serializable {
 
 	public void setRepository(String repository) {
 		this.repository = repository;
+	}
+
+	public ImageModule getModule() {
+		return module;
+	}
+
+	public void setModule(ImageModule module) {
+		this.module = module;
 	}
 
 	public String getKey() {

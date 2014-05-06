@@ -47,6 +47,7 @@ import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.FileUtil;
@@ -92,7 +93,7 @@ public abstract class RunFactory {
 			throws ValidationException {
 		if (run.getType() != RunType.Run) {
 			String publicSshKeyFile = Configuration.getInstance().getProperty(
-					"cloud.connector.orchestrator.publicsshkey", null);
+					ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY, null);
 
 			if (publicSshKeyFile == null || "".equals(publicSshKeyFile)) {
 				throw new ValidationException(

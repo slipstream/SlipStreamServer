@@ -21,7 +21,6 @@ package com.sixsq.slipstream.persistence;
  */
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;

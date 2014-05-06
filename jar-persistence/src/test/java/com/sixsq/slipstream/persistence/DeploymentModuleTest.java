@@ -153,6 +153,7 @@ public class DeploymentModuleTest {
 		image.store();
 
 		Node node = new Node("node1", image);
+		node = (Node) node.store();
 
 		String parameterName = "name";
 		String description = "description";
@@ -160,8 +161,9 @@ public class DeploymentModuleTest {
 
 		NodeParameter np = new NodeParameter(parameterName, value, description);
 		node.setParameterMapping(np);
+		node = (Node) node.store();
 
-		module.getNodes().put(node.getName(), node);
+		module.setNode(node);
 
 		module.store();
 
@@ -214,7 +216,7 @@ public class DeploymentModuleTest {
 		NodeParameter np = new NodeParameter(parameterName, value, description);
 		node.setParameterMapping(np);
 
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		try {
 			deployment.validate();
@@ -265,7 +267,7 @@ public class DeploymentModuleTest {
 		np = new NodeParameter(parameterName, value);
 		node.setParameterMapping(np);
 
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		try {
 			deployment.validate();
