@@ -207,7 +207,7 @@ public class RunFactoryTest extends RunTest {
 		DeploymentModule deploymentwithimagenoref = new DeploymentModule(
 				"deploymentWithImageWithoutReference");
 		Node node = new Node("node1", imagenoref);
-		deploymentwithimagenoref.getNodes().put(node.getName(), node);
+		deploymentwithimagenoref.setNode(node);
 
 		deploymentwithimagenoref.store();
 		try {
@@ -282,13 +282,14 @@ public class RunFactoryTest extends RunTest {
 		NodeParameter parameter;
 
 		node = new Node("node1", imageWithOutputParameter);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		node = new Node("node2", imageWithInputParameter);
+
 		parameter = new NodeParameter("pi1", "node1:po1", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		deployment.store();
 
@@ -323,13 +324,13 @@ public class RunFactoryTest extends RunTest {
 		parameter = new NodeParameter("pi1", "node2:po2", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		node = new Node("node2", imageForDeployment2);
 		parameter = new NodeParameter("pi2", "node1:po1", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 	}
 
@@ -390,7 +391,7 @@ public class RunFactoryTest extends RunTest {
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
 
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		Run run = getDeploymentRun(deployment);
 
@@ -407,13 +408,13 @@ public class RunFactoryTest extends RunTest {
 		parameter = new NodeParameter("pi1", "node2:po2", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		node = new Node("node2", imageForDeployment2);
 		parameter = new NodeParameter("pi2", "\"astring\"", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		Run run = getDeploymentRun(deployment);
 
@@ -433,13 +434,13 @@ public class RunFactoryTest extends RunTest {
 		parameter = new NodeParameter("pi1", "node2:po2", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		node = new Node("node2", imageForDeployment2);
 		parameter = new NodeParameter("pi2", "\"astring\"", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		Run run = getDeploymentRun(deployment);
 		run.store();

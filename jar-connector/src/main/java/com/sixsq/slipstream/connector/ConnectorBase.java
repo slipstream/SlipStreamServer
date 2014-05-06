@@ -20,6 +20,18 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Logger;
+
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.credentials.Credentials;
@@ -38,26 +50,15 @@ import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.FileUtil;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Logger;
-
 public abstract class ConnectorBase implements Connector {
 
-    abstract public String getCloudServiceName();
+	abstract public String getCloudServiceName();
 
     abstract public Run launch(Run run, User user) throws SlipStreamException;
 
@@ -315,7 +316,7 @@ public abstract class ConnectorBase implements Connector {
             out.close();
             publicSshKey = tempSshKeyFile.getPath();
         } else {
-            publicSshKey = Configuration.getInstance().getProperty("cloud.connector.orchestrator.publicsshkey");
+            publicSshKey = Configuration.getInstance().getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY);
         }
         return publicSshKey;
     }

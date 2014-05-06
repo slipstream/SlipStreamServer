@@ -48,7 +48,6 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Authz;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Metadata;
@@ -411,9 +410,9 @@ public class RunTest extends RunTestBase {
 		NodeParameter parameter;
 
 		Node node1 = new Node("node1", image);
-		deployment.getNodes().put(node1.getName(), node1);
+		deployment.setNode(node1);
 		Node node2 = new Node("node2", image);
-		deployment.getNodes().put(node2.getName(), node2);
+		deployment.setNode(node2);
 
 		parameter = new NodeParameter("pi1", "node2:po1", null);
 		parameter.setContainer(node1);
@@ -463,8 +462,8 @@ public class RunTest extends RunTestBase {
 	public void done() throws ConfigurationException, SlipStreamClientException {
 
 		ImageModule image = new ImageModule("doneImage");
-		image.getCloudImageIdentifiers().add(
-				new CloudImageIdentifier(image, cloudServiceName, "123"));
+
+		image.setImageId("123", cloudServiceName);
 
 		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
 

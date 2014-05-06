@@ -31,6 +31,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -43,7 +44,6 @@ import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
@@ -250,9 +250,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		image.setParameter(new ModuleParameter(PARAMETER_NAME, "default value",
 				""));
 
-		image.getCloudImageIdentifiers().add(
-				new CloudImageIdentifier(image,
-						LocalConnector.CLOUD_SERVICE_NAME, "abc"));
+		image.setImageId("abc", LocalConnector.CLOUD_SERVICE_NAME);
 
 		image.getAuthz().setPublicGet(true);
 		image.getAuthz().setUser(user.getName());
@@ -266,9 +264,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		privateImage.setParameter(new ModuleParameter(PARAMETER_NAME, "default value",
 				""));
 
-		privateImage.getCloudImageIdentifiers().add(
-				new CloudImageIdentifier(privateImage,
-						LocalConnector.CLOUD_SERVICE_NAME, "abc"));
+		image.setImageId("abc", LocalConnector.CLOUD_SERVICE_NAME);
 
 		privateImage.getAuthz().setGroupGet(false);
 		privateImage.getAuthz().setUser(user.getName());
@@ -280,7 +276,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		node.setParameter(new NodeParameter(PARAMETER_NAME, "'default value'"));
 
 		deployment = new DeploymentModule(moduleName + "Deployment");
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 		deployment.store();
 	}
 

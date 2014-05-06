@@ -70,7 +70,7 @@ public class RunTestBase {
 		imagenoref = imagenoref.store();
 
 		createUser();
-		
+
 		CommonTestUtil.addSshKeys(user);
 	}
 
@@ -78,10 +78,13 @@ public class RunTestBase {
 			ValidationException {
 
 		user = CommonTestUtil.createUser("RunTestBaseUser", "password");
-		
+
 		// Add dummy credentials
-		user.setParameter(new UserParameter(StratusLabUserParametersFactory.KEY_PARAMETER_NAME, "key", ""));
-		user.setParameter(new UserParameter(StratusLabUserParametersFactory.SECRET_PARAMETER_NAME, "secret", ""));
+		user.setParameter(new UserParameter(
+				StratusLabUserParametersFactory.KEY_PARAMETER_NAME, "key", ""));
+		user.setParameter(new UserParameter(
+				StratusLabUserParametersFactory.SECRET_PARAMETER_NAME,
+				"secret", ""));
 	}
 
 	protected static void tearDownImages() {
@@ -122,11 +125,11 @@ public class RunTestBase {
 
 		node = new Node("node1",
 				ImageModule.constructResourceUri(imageForDeployment1.getName()));
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		node = new Node("node2",
 				ImageModule.constructResourceUri(imageForDeployment2.getName()));
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		deployment = deployment.store();
 	}
@@ -163,8 +166,8 @@ public class RunTestBase {
 		return createAndStoreRun(module, user, type, States.Inactive);
 	}
 
-	protected Run createAndStoreRun(Module module, String user, RunType type, States state)
-			throws SlipStreamException {
+	protected Run createAndStoreRun(Module module, String user, RunType type,
+			States state) throws SlipStreamException {
 
 		Run run = RunFactory.getRun(module, type, cloudServiceName,
 				RunTestBase.user);

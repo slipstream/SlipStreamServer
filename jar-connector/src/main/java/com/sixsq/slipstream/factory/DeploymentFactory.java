@@ -147,7 +147,7 @@ public class DeploymentFactory extends RunFactory {
 			throw new ValidationException(image.getName()
 					+ " missing an image id for cloud: " + cloudServiceName
 					+ ". Did you build it?");
-		} else if ("".equals(image.getModuleReference())) {
+		} else if (image.getModuleReference() == null || "".equals(image.getModuleReference())) {
 			throw new ValidationException(image.getName()
 					+ " missing a machine image reference");
 		} else {

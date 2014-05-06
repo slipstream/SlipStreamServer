@@ -40,7 +40,7 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 public class ModuleVersionView {
 
 	@Element(required = false)
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private Authz authz;
 
 	@Attribute
@@ -51,7 +51,7 @@ public class ModuleVersionView {
 		return ModuleUriUtil.extractShortNameFromResourceUri(resourceUri);
 	}
 
-	@Attribute(required=false)
+	@Attribute(required = false)
 	public final Date lastModified;
 
 	@Attribute
@@ -63,7 +63,9 @@ public class ModuleVersionView {
 	@Element(required = false)
 	public final Commit commit;
 
-	public ModuleVersionView(String resourceUri, int version, Date lastModified, Commit commit, Authz authz, ModuleCategory category) {
+	public ModuleVersionView(String resourceUri, int version,
+			Date lastModified, Commit commit, Authz authz,
+			ModuleCategory category) {
 
 		this.resourceUri = resourceUri;
 		this.version = version;
@@ -71,11 +73,11 @@ public class ModuleVersionView {
 		this.authz = authz;
 		this.category = category;
 
-        if (lastModified != null) {
-            this.lastModified = (Date) lastModified.clone();
-        } else {
-            this.lastModified = null;
-        }
+		if (lastModified != null) {
+			this.lastModified = (Date) lastModified.clone();
+		} else {
+			this.lastModified = null;
+		}
 	}
 
 	@Root(name = "versionList")

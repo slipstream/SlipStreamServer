@@ -25,12 +25,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.CollectionType;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -40,8 +44,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 public class DeploymentModule extends Module {
 
 	@ElementMap(required = false)
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private Map<String, Node> nodes = new HashMap<String, Node>();
+	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
+	private Map<String, Node> nodes = new ConcurrentHashMap<String, Node>();
 
 	@SuppressWarnings("unused")
 	private DeploymentModule() {
@@ -58,6 +63,11 @@ public class DeploymentModule extends Module {
 
 	public void setNodes(HashMap<String, Node> nodes) {
 		this.nodes = nodes;
+	}
+	
+	public void setNode(Node node) {
+		node.setModule(this);
+		getNodes().put(node.getName(), node);
 	}
 
 	/**
@@ -221,7 +231,7 @@ public class DeploymentModule extends Module {
 				getName()));
 
 		for (Node node : getNodes().values()) {
-			copy.getNodes().put(node.getName(), node.copy());
+			copy.setNode(node.copy());
 		}
 
 		return copy;
@@ -278,7 +288,33 @@ public class DeploymentModule extends Module {
 	}
 
 	public DeploymentModule store() {
+//		EntityManager em = PersistenceUtil.createEntityManager();
+//		EntityTransaction transaction = em.getTransaction();
+//		transaction.begin();
+////		for(Node n : getNodes().values()) {
+////			em.merge(n);
+////		}
+//		Metadata obj = em.merge(this);
+//		transaction.commit();
+//		em.close();
+//		return (DeploymentModule) obj;
 		return (DeploymentModule) store(true);
 	}
 
+	public void remove() {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
+		DeploymentModule fromDb = em.find(this.getClass(), getResourceUri());
+		if (fromDb != null) {
+			for(Node n : fromDb.getNodes().values()) {
+				n.getParameters().clear();
+				n.getParameterMappings().clear();
+				em.remove(n);
+			}
+			em.remove(fromDb);
+		}
+		transaction.commit();
+		em.close();
+	}
 }

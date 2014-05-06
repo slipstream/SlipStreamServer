@@ -26,6 +26,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
@@ -51,6 +52,9 @@ public class Target implements Serializable {
 	@Attribute
 	private String name;
 
+	@ManyToOne
+	private ImageModule module;
+	
 	@SuppressWarnings("unused")
 	private Target() {
 	}
@@ -68,6 +72,14 @@ public class Target implements Serializable {
 		this.name = name;
 		this.script = script;
 		this.runInBackground = runInBackground;
+	}
+
+	public ImageModule getModule() {
+		return module;
+	}
+
+	public void setModule(ImageModule module) {
+		this.module = module;
 	}
 
 	public Long getId() {

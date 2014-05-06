@@ -23,6 +23,7 @@ package com.sixsq.slipstream.persistence;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -39,8 +40,11 @@ public class CookieKeyPair implements Serializable {
 	Long id = ID;
 
 	@Lob
+	@Column(length=1000)
 	private String privateKey = null;
+
 	@Lob
+	@Column(length=1000)
 	private String publicKey = null;
 
 	@SuppressWarnings("unused")

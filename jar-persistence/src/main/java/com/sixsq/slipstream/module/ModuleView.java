@@ -38,7 +38,7 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 public class ModuleView {
 
 	@Element(required = false)
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private Authz authz;
 
 	@Attribute

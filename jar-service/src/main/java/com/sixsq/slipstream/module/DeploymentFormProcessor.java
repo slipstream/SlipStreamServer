@@ -153,7 +153,7 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 
 			setCloudService(getForm(), nodeindex, node);
 
-			module.getNodes().put(shortname, node);
+			module.setNode(node);
 		}
 	}
 
