@@ -16,13 +16,12 @@
   [seconds]
   (* 1000 seconds))
 
-(def collector-chan-size 64)
-(def metrics-update-chan-size 64)
+(def collector-chan-size 512)
 (def number-of-readers 32)
 (def timeout-all-users-loop (seconds-in-msecs 240))
 (def timeout-online-loop (seconds-in-msecs 10))
 (def timeout-collect (seconds-in-msecs 15))
-(def timeout-processing-loop (seconds-in-msecs 600))
+(def timeout-processing-loop (seconds-in-msecs 60))
 
 (defn get-value
   [entry]
@@ -48,11 +47,11 @@
   [user]
   (.getName user))
 
-; This is the channel for queuing all collect requests
-(def collector-chan (chan (sliding-buffer collector-chan-size)))
+; This is the channel for queuing the online user requests
+(def online-collector-chan (chan (sliding-buffer collector-chan-size)))
 
-; This is the channel for queuing all metric update requests
-(def update-metric-chan (chan (sliding-buffer metrics-update-chan-size)))
+; This is the channel for queuing all user requests
+(def all-collector-chan (chan (sliding-buffer collector-chan-size)))
 
 (defn collect!
   [user connector]
@@ -84,68 +83,54 @@
 
 ; Start collector readers
 (defn collect-readers
-  []
+  [chan]
   (log/log-info "Starting " number-of-readers " collector readers...")
   (doseq [i (range number-of-readers)]
     (go
       (while true
-        (let [[[user connector] ch] (alts! [collector-chan (timeout timeout-processing-loop)])]
+        (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
           (if (nil? user)
             (log/log-info "Collect reader " i " loop idle. Looping...")
             (try
               (log/log-info (str "executing collect request for " (.getName user) " and " (.getConnectorInstanceName connector)))
               (collect! user connector)
-              (catch Exception e (log/log-error "caught exception: " (.getMessage e))))))))))
-
-(defonce ^:dynamic *collect-processor* (collect-readers))
-
-; Start metric update readers
-(defn update-metric-readers
-  []
-  (log/log-info "Starting " number-of-readers " metric update readers...")
-  (doseq [i (range number-of-readers)]
-    (go
-      (while true
-        (let [[[user] ch] (alts! [update-metric-chan (timeout timeout-processing-loop)])]
-          (if (nil? user)
-            (log/log-info "Metric reader " i " loop idle. Looping...")
-            (try
-              (log/log-info (str "executing update request for " (.getName user)))
               (update-metric! user)
-              (catch Exception e (log/log-error "caught exception: " (.getMessage e))))))))))
+              (catch Exception e (log/log-warn "caught exception executing collect request: " (.getMessage e))))))))))
 
-(defonce ^:dynamic *update-metric-processor* (update-metric-readers))
+(defonce ^:dynamic *online-collect-processor* (collect-readers online-collector-chan))
+(defonce ^:dynamic *all-collect-processor* (collect-readers all-collector-chan))
+
+(defn check-channel-size
+  [users connectors]
+  (let [users-count (count users)
+        connectors-count (count connectors)]
+    (when (> (* users-count connectors-count) collector-chan-size)
+      (log/log-error (str "The number of users x connectors: " users-count " x " connectors-count " exceeds the channel size: " collector-chan-size)))))
 
 (defn insert-collection-requests
-  [users]
-  (doseq [user users
-          connector (connectors)]
-    (go 
-      (>! collector-chan [user connector]))))
-
-(defn insert-update-metric-requests
-  [users]
-  (doseq [user users]
-    (go 
-      (>! update-metric-chan [user]))))
+  [users chan]
+  (let [connectors (connectors)]
+    (check-channel-size users connectors)
+    (doseq [u users
+            c connectors]
+      (go 
+        (>! chan [u c])))))
 
 ; Start collector writers
 (defn collect-writers
   []
-  (thread
-    (while true
-      (<!! (timeout timeout-online-loop))
-      (let [users (online-users)]
-        (log/log-info "inserting online users requests")
-        (insert-collection-requests users)
-        (insert-update-metric-requests users))))
-  (thread
-    (while true
-      (<!! (timeout timeout-all-users-loop))
-      (let [users (users)]
-        (log/log-info "inserting all users requests")
-        (insert-collection-requests users))
-        (insert-update-metric-requests users))))
+  (go
+	  (while true
+	    (<! (timeout timeout-online-loop))
+	    (let [users (online-users)]
+	      (log/log-info "inserting online users requests")
+	      (insert-collection-requests users online-collector-chan))))
+  (go
+	  (while true
+	    (<! (timeout timeout-all-users-loop))
+	    (let [users (users)]
+	      (log/log-info "inserting all users requests")
+	      (insert-collection-requests users all-collector-chan)))))
 
 (defn -start
   []

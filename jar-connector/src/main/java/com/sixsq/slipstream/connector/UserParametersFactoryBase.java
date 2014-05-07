@@ -38,7 +38,7 @@ public abstract class UserParametersFactoryBase extends
 
 	public static final String KEY_PARAMETER_NAME = "username";
 	public static final String SECRET_PARAMETER_NAME = "password";
-	public static final String SSHKEY_PARAMETER_NAME = "ssh.public.key";
+	public static final String SSHKEY_PARAMETER_NAME = UserParameter.SSHKEY_PARAMETER_NAME;
 	public static final String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = UserParameter.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME;
 	public static final String ENDPOINT_PARAMETER_NAME = "endpoint";
 	public static final String ORCHESTRATOR_IMAGEID_PARAMETER_NAME = "orchestrator.imageid";

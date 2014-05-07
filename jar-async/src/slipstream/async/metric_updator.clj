@@ -6,8 +6,10 @@
 
 (defn- get-measurements
   [user]
-  (let [measurements (Measurements.)
+  (let [begin (System/currentTimeMillis)
+        measurements (Measurements.)
         measures (.populateAsString measurements user)]
+    (log/log-info (str "update took: " (- (System/currentTimeMillis) begin)))
     measures))
 
 (defn print-sh
@@ -31,5 +33,10 @@
   (let [measures (get-measurements user)]
     (if (empty? measures)
       0
-      (persist measures))))
+      (try
+        (persist measures)
+        (catch Exception e 
+          (do
+            (log/log-warn "caught exception executing update: " (.getMessage e))
+            -1))))))
 

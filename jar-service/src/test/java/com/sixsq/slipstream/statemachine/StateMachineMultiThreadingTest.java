@@ -233,7 +233,7 @@ public class StateMachineMultiThreadingTest extends
 		node.setMultiplicity(MULTIPLICITY);
 
 		deployment = new DeploymentModule("createAndStoreRunDeployment");
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 
 		deployment.store();
 

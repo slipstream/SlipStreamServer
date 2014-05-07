@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>2.1.16-SNAPSHOT</version>
+    <version>2.1.17-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -55,6 +55,18 @@
       <groupId>org.clojure</groupId>
       <artifactId>data.codec</artifactId>
       <version>0.1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.draines</groupId>
+      <artifactId>postal</artifactId>
+      <version>1.11.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>me.raynes</groupId>
+      <artifactId>fs</artifactId>
+      <version>1.4.5</version>
     </dependency>
 
 <!-- There is a fundamental incompatibility between MyProxy and

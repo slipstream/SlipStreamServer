@@ -316,7 +316,7 @@ public class Configuration {
 		for (ServiceConfigurationParameter p : connectorsParameters.values()) {
 
 			ServiceConfigurationParameter parameter = p;
-			if (serviceConfiguration.getParameters().containsKey(p.getName())) {
+			if (serviceConfiguration.parametersContainKey(p.getName())) {
 				parameter = serviceConfiguration.getParameters().get(
 						p.getName());
 				parameter.setDescription(p.getDescription());
@@ -366,8 +366,8 @@ public class Configuration {
 		String cloudConnectorClassNameParameterKey = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_CLASS
 				.getName();
 
-		if (!serviceConfiguration.getParameters().containsKey(
-				cloudConnectorClassNameParameterKey)) {
+		if (!serviceConfiguration
+				.parametersContainKey(cloudConnectorClassNameParameterKey)) {
 			throw (new ConfigurationException(
 					"Missing from the configuration file mandatory system configuration parameter: "
 							+ cloudConnectorClassNameParameterKey));

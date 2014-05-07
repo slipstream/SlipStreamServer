@@ -30,11 +30,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.AfterClass;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
@@ -47,7 +47,6 @@ import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.ModuleParameter;
@@ -205,9 +204,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		image.setParameter(new ModuleParameter(PARAMETER_NAME, "default value",
 				""));
-		image.getCloudImageIdentifiers().add(
-				new CloudImageIdentifier(image,
-						LocalConnector.CLOUD_SERVICE_NAME, "abc"));
+		image.setImageId("abc", LocalConnector.CLOUD_SERVICE_NAME);
 
 		image = image.store();
 
@@ -216,7 +213,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		node.setParameter(new NodeParameter(PARAMETER_NAME, "'default value'"));
 
 		deployment = new DeploymentModule(moduleName + "Deployment");
-		deployment.getNodes().put(node.getName(), node);
+		deployment.setNode(node);
 		deployment = (DeploymentModule) deployment.store();
 	}
 

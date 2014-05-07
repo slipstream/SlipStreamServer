@@ -216,15 +216,12 @@ public class RuntimeParameterResourceTest extends
 		storeRuntimeParameter(key, value, run);
 
 		EntityManager em = PersistenceUtil.createEntityManager();
-		EntityTransaction transaction = em.getTransaction();
-		transaction.begin();
 
 		run = Run.loadFromUuid(run.getUuid(), em);
 
 		assertNotNull(run);
 		assertEquals("value of key", run.getRuntimeParameterValue(key));
 
-		transaction.commit();
 		em.close();
 
 		run.remove();

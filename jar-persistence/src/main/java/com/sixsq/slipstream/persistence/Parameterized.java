@@ -32,7 +32,8 @@ import javax.persistence.MapKey;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 
-import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CollectionType;
+//import org.hibernate.annotations.Type;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -52,8 +53,8 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 
 	@ElementMap(name = "parameters", required = false, data = true, valueType = Parameter.class)
 	@MapKey(name = "name")
-	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
 	protected Map<String, T> parameters = new ConcurrentHashMap<String, T>();
 
 	/**
@@ -62,10 +63,6 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	 */
 	public Map<String, T> getParameters() {
 		return parameters;
-	}
-
-	public void setParameters(Map<String, T> parameters) {
-		this.parameters = parameters;
 	}
 
 	public T getParameter(String name) {
@@ -80,15 +77,8 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	}
 
 	public void setParameter(T parameter) throws ValidationException {
-		T target;
-		if (parameters.containsKey(parameter.getName())) {
-			target = parameters.get(parameter.getName());
-			target.setValue(parameter.getValue());
-		} else {
-			target = parameter;
-			parameters.put(target.getName(), target);
-		}
-		setContainer(target);
+		parameters.put(parameter.getName(), parameter);
+		setContainer(parameter);
 	}
 
 	// This method is necessary because setting the container directly here
@@ -149,8 +139,13 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	public void postDeserialization() {
 		super.postDeserialization();
 		// Assign containers inside parameters
-		for(Entry<String, T> p : getParameters().entrySet()) {
+		for (Entry<String, T> p : getParameters().entrySet()) {
 			p.getValue().setContainer((S) this);
 		}
+	}
+
+	public boolean parametersContainKey(String key) {
+		return (key == null) ? false : getParameters().containsKey(key);
+
 	}
 }

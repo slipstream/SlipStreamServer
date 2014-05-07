@@ -18,7 +18,7 @@
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamServer</artifactId>
-		<version>2.1.16-SNAPSHOT</version>
+		<version>2.1.17-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -116,40 +116,6 @@
 				</executions>
 			</plugin>
 
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>hibernate3-maven-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<components>
-						<component>
-							<name>hbm2ddl</name>
-						</component>
-					</components>
-					<componentProperties>
-						<implementation>jpaconfiguration</implementation>
-						<drop>false</drop>
-						<create>true</create>
-						<export>false</export>
-						<format>true</format>
-					</componentProperties>
-				</configuration>
-				<executions>
-					<execution>
-						<id>hsqldb-schema-generation</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>hbm2ddl</goal>
-						</goals>
-						<configuration>
-							<componentProperties>
-								<persistenceunit>hsqldb-schema</persistenceunit>
-								<outputfilename>slipstream.hsqldb.ddl</outputfilename>
-							</componentProperties>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			
 		</plugins>
 

@@ -20,7 +20,7 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.restlet.data.Form;
 
@@ -36,6 +36,7 @@ import com.sixsq.slipstream.persistence.User;
 public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Parameter<S>> {
 
 	private S parametrized;
+	private Map<String, T> existingParameters;
 	private User user;
 	private Form form;
 
@@ -92,9 +93,9 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		// - parameter--[id]--description
 		// - parameter--[id]--value
 		// ...
-		getParametrized().setParameters(new HashMap<String, T>());
+		existingParameters = getParametrized().getParameters();
+		getParametrized().getParameters().clear();
 		for (String paramName : form.getNames().toArray(new String[0])) {
-
 			if (isParameterName(paramName)) {
 				processSingleParameter(form, paramName);
 			}
@@ -115,11 +116,11 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 
 		String value = extractValue(form, genericPart);
 
-		if(!shouldProcess(name)) {
+		if (!shouldProcess(name)) {
 			return;
 		}
-	 	
-		boolean exists = getParametrized().getParameters().containsKey(name);
+		boolean exists = (name == null) ? false : existingParameters
+				.containsKey(name);
 		if (exists) {
 			setExistingParameter(name, value);
 		} else {
@@ -128,19 +129,21 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 
 	}
 
-	protected boolean shouldProcess(String paramName) throws ValidationException {
+	protected boolean shouldProcess(String paramName)
+			throws ValidationException {
 		return true;
 	}
 
 	protected void setExistingParameter(String name, String value)
 			throws ValidationException {
 		T parameter;
-		parameter = getParametrized().getParameter(name);
+		parameter = existingParameters.get(name);
 		boolean overwrite = shouldSetValue(parameter, value);
 
 		if (overwrite) {
 			parameter.setValue(value);
 		}
+		getParametrized().setParameter(parameter);
 	}
 
 	protected void setNewParameter(Form form, String genericPart, String name,

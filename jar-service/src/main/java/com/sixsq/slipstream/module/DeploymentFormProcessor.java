@@ -66,7 +66,7 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 	private void parseNodeMapping() throws ValidationException {
 
 		DeploymentModule module = castToModule();
-		module.setNodes(new HashMap<String, Node>());
+		module.getNodes().clear();
 
 		Set<String> formitems = getForm().getNames();
 
@@ -119,7 +119,7 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 
 			Node node = createNode(nodeindex, shortname);
 
-			if (module.getNodes().containsKey(shortname)) {
+			if (module.parametersContainKey(shortname)) {
 				throw (new ValidationException(
 						"Node short names must be unique. '"
 								+ shortname.replace("<", "&lt;")
@@ -153,7 +153,7 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 
 			setCloudService(getForm(), nodeindex, node);
 
-			module.getNodes().put(shortname, node);
+			module.setNode(node);
 		}
 	}
 

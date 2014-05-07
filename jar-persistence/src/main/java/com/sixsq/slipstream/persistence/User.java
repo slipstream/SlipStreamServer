@@ -24,7 +24,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -388,11 +387,10 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public void addSystemParametersIntoUser(ServiceConfiguration sc)
 			throws ConfigurationException, ValidationException {
-		for (Map.Entry<String, ServiceConfigurationParameter> entry : sc
-				.getParameters().entrySet()) {
+		for (ServiceConfigurationParameter p : sc.getParameters().values()) {
 			try {
-				UserParameter userParam = new UserParameter(entry.getKey(),
-						entry.getValue().getValue(""), "");
+				UserParameter userParam = new UserParameter(p.getName(),
+						p.getValue(""), "");
 				userParam.setCategory("System");
 				setParameter(userParam);
 			} catch (ValidationException e) {

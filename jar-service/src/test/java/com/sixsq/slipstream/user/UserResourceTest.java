@@ -246,10 +246,13 @@ public class UserResourceTest extends ResourceTestBase {
 	public void passwordSerializedForNormalUserAsSuper()
 			throws SlipStreamClientException {
 
-		Request request = createGetRequest(user, superUser.getName());
+		Request request = createGetRequest(superUser, superUser.getName());
 		Response response = executeRequest(request);
 
-		User user = (User) SerializationUtil.fromXml(response.toString(),
+		assertThat(response.getStatus(),  is(Status.SUCCESS_OK));
+
+		String xml = response.toString();
+		User user = (User) SerializationUtil.fromXml(xml,
 				User.class);
 		assertNotNull(user.getPassword());
 	}

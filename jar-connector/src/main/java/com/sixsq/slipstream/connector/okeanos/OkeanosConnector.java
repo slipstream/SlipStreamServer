@@ -22,7 +22,6 @@ import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.NodeMetadataBuilder;
 import org.jclouds.domain.Credentials;
 import org.jclouds.domain.LoginCredentials;
-import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.openstack.keystone.v2_0.config.CredentialTypes;
 import org.jclouds.openstack.keystone.v2_0.config.KeystoneProperties;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
@@ -69,7 +68,6 @@ public class OkeanosConnector extends OpenStackConnector {
 
     protected Iterable<com.google.inject.Module> getContextBuilderModules() {
         return ImmutableSet.<com.google.inject.Module>of(
-            new SLF4JLoggingModule(),
             new SshjSshClientModule()
         );
     }

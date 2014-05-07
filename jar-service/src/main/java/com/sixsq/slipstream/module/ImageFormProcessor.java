@@ -67,7 +67,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 			module.setModuleReference(Module
 					.constructResourceUri(moduleReferenceUri));
 		}
-		
+
 		module.setIsBase(getBooleanValue(getForm(), "isbase"));
 
 		parsePackages(getForm());
@@ -83,7 +83,9 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		// items should be encoded as: package--[index]--[value]
 		Set<String> formitems = form.getNames();
-		Set<Package> packages = new HashSet<Package>();
+
+		ImageModule image = castToModule();
+		image.getPackages().clear();
 
 		for (String inputName : formitems.toArray(new String[0])) {
 			if (inputName.startsWith("package--")
@@ -95,22 +97,18 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 						+ "repository");
 				String key = form.getFirstValue(genericPart + "key");
 				Package package_ = new Package(name, repository, key);
-				for (Package p : packages) {
-					if (package_.getName().equals(p.getName())) {
-						throw (new ValidationException(
-								"Cannot specify the same package multiply times: "
-										+ package_.getName()));
-					}
+				if (image.getPackages().contains(package_)) {
+					throw (new ValidationException(
+							"Cannot specify the same package multiply times: "
+									+ package_.getName()));
 				}
-				packages.add(package_);
+				image.setPackage(package_);
 			}
 		}
 
-		if (havePackagesChanged(packages)) {
+		if (havePackagesChanged(image.getPackages())) {
 			needsRebuild = true;
 		}
-
-		castToModule().setPackages(packages);
 
 	}
 

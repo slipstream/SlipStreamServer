@@ -160,6 +160,8 @@ public class RunListResource extends BaseResource {
 		try {
 			Module module = loadReferenceModule();
 
+			authorizePost(module);
+			
 			updateReference(module);
 
 			overrideModule(form, module);
@@ -195,6 +197,12 @@ public class RunListResource extends BaseResource {
 
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 		getResponse().setLocationRef(absolutePath);
+	}
+
+	private void authorizePost(Module module) {
+		if(!module.getAuthz().canPost(getUser())) {
+			throwClientForbiddenError("User does not have the rights to execute this module");
+		}
 	}
 
 	/**

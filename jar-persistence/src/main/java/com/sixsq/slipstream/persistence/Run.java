@@ -30,12 +30,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.MapKey;
@@ -48,7 +51,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CollectionType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
@@ -189,7 +192,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return run;
 	}
 
-	public static RunView loadViewByInstanceId(User user, String instanceId,
+	public static RunView loadViewByInstanceId(Parameterized<User, UserParameter> user, String instanceId,
 			String cloud) throws ConfigurationException, ValidationException {
 		// TODO: there is a chance that if two clouds have overlaping
 		// instanceid,
@@ -404,11 +407,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	private transient Credentials credentials;
 
-	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@MapKey(name = "key_")
-	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
 	@ElementMap(name = "runtimeParameters", required = false, data = true, valueType = RuntimeParameter.class)
-	private Map<String, RuntimeParameter> runtimeParameters = new HashMap<String, RuntimeParameter>();
+	private Map<String, RuntimeParameter> runtimeParameters = new ConcurrentHashMap<String, RuntimeParameter>();
 
 	@Attribute
 	@Temporal(TemporalType.TIMESTAMP)
@@ -424,6 +427,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 */
 	@Attribute
 	@Lob
+	@Column(length=1024)
 	private String nodeNames = "";
 
 	/**
@@ -437,10 +441,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private String user_;
 
 	@Element(required = false)
-	private transient Module module;
+	@Transient
+	private Module module;
 
 	@Transient
-	private transient Map<String, Integer> cloudServiceUsage = new HashMap<String, Integer>();
+	private Map<String, Integer> cloudServiceUsage = new HashMap<String, Integer>();
 
 	/**
 	 * List of cloud service names used in the current run
@@ -616,7 +621,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 		// We only test for the first one
 		String parameterName = composeParameterName(node, key, 1);
-		if (getParameters().containsKey(parameterName)) {
+		if (parametersContainKey(parameterName)) {
 			throw new ValidationException("Parameter " + parameterName
 					+ " already exists in node " + node.getName());
 		}
@@ -721,6 +726,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public RuntimeParameter assignRuntimeParameter(String key, String value,
 			String description, ParameterType type) throws ValidationException {
+		if (key == null) {
+			throw new ValidationException("Key cannot be null");
+		}
 		if (runtimeParameters.containsKey(key)) {
 			throw new ValidationException("Key " + key
 					+ " already exists, cannot re-define");

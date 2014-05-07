@@ -35,6 +35,8 @@ public class UserParameter extends Parameter<User> {
 	public static final String KEY_ON_ERROR_RUN_FOREVER = "On Error Run Forever";
 	public static final String KEY_ON_SUCCESS_RUN_FOREVER = "On Success Run Forever";
 
+	public static final String SSHKEY_PARAMETER_NAME = "ssh.public.key";
+
 	public static UserParameter convert(Parameter<ServiceConfiguration> source)
 			throws ValidationException {
 		UserParameter target = new UserParameter(source.getName(),

@@ -42,6 +42,7 @@ public class ServiceConfiguration extends
 		Parameterized<ServiceConfiguration, ServiceConfigurationParameter> {
 
 	public final static String RESOURCE_URI_PREFIX = "configuration/";
+    public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY = "cloud.connector.orchestrator.publicsshkey";
 
 	public enum ParameterCategory {
 		SlipStream_Support, SlipStream_Basics, SlipStream_Advanced

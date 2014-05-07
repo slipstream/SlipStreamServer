@@ -13,59 +13,29 @@
 ;; utilities
 ;;
 
-(def ^:const prefix "credential/")
+(def ^:const resource-type "Credential")
+
+(def ^:const resource-type-uri "http://schemas.dmtf.org/cimi/1/Credential")
+
+(def ^:const resource-template-type-uri "http://schemas.dmtf.org/cimi/1/CredentialTemplate")
 
 (defn uuid->id
   [uuid]
-  (str prefix uuid))
+  (str resource-type "/" uuid))
 
 ;;
 ;; credential schema
 ;;
 
-;;
-;; Resources can have the following common keys:
-;;
-;; :id (required) -- id of the resource
-;; :name -- short name/title of resource
-;; :description -- longer description of resource
-;; :created (required) -- creation timestamp of resource
-;; :updated (required) -- late update timestamp of resource
-;;
-;; :properties -- string/string map of user information
-;;
-;; All credentials can/must have the following keys:
-;;
-;; :typeURI (required) -- type of the resource/credential
-;; :expiry (optional) -- expiry date of the credential
-;;
-;; For voms-proxy credentials:
-;; :voms -- map of voms information
-;; :myproxy-host -- hostname of myproxy server
-;; :myproxy-port -- port of myproxy server
-;;
-
-(def CredentialAttributes
-  {(s/optional-key :expiry) s/Int})
+(def CommonCredentialAttributes
+  {:subtypeURI              s/Str
+   (s/optional-key :expiry) s/Int})
 
 (def Credential
-  (merge c/CommonAttributes CredentialAttributes))
-
-(def MyProxyVomsCredential
-  {:myproxy-host s/Str
-   :myproxy-port s/Int
-   :credential   s/Str})
-
-(def VomsAttributes
-  {s/Str {(s/optional-key :fqans)   [s/Str]
-          (s/optional-key :targets) [s/Str]}})
+  (merge c/CommonResourceAttributes CommonCredentialAttributes))
 
 (def CredentialTemplate
-  (merge c/CommonAttributes
-         {:myproxy-host s/Str
-          :myproxy-port s/Int
-          :username     s/Str
-          :password     s/Str}))
+  (merge c/CommonTemplateAttributes CommonCredentialAttributes))
 
 ;;
 ;; standard CRUD functions for credentials
@@ -108,4 +78,19 @@
 
 (defn resource-ids
   "Provides a list of all of the credential ids in the database."
-  [])
+  []
+  (db/all-resource-ids resource-type))
+
+;;
+;; utility function for recreating all renewal jobs on startup
+;;
+
+(defn reschedule-all-renewals
+  "Should be called on system startup to read all of the defined credentials
+   and reschedule the renewal jobs."
+  []
+  (doall
+    (->> (resource-ids)
+         (map retrieve)
+         (remove nil?)
+         (map j/schedule-renewal))))

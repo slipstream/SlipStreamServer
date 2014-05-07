@@ -41,9 +41,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test see:
- *
+ * 
  * @see ImageModuleTest
- *
+ * 
  */
 @Entity
 @SuppressWarnings("serial")
@@ -61,16 +61,16 @@ public class ImageModule extends Module {
 	public static final String EXTRADISK_PARAM_PREFIX = "extra.disk";
 	private static final String EXTRADISK_NAME_VOLATILE = "volatile";
 	public static final String EXTRADISK_VOLATILE_PARAM = EXTRADISK_PARAM_PREFIX
-											+ "." + EXTRADISK_NAME_VOLATILE;
+			+ "." + EXTRADISK_NAME_VOLATILE;
 	private static final String VOLATILE_DISK_VALUE_REGEX = "^[0-9]*$";
 	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
 
 	@ElementList(required = false)
-	@OneToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Target> targets = new HashSet<Target>();
 
 	@ElementList(required = false)
-	@OneToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Package> packages = new HashSet<Package>();
 
 	@Element(required = false, data = true)
@@ -95,7 +95,7 @@ public class ImageModule extends Module {
 	@Transient
 	private String imageId;
 
-	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@ElementList(required = false, data = true)
 	private List<CloudImageIdentifier> cloudImageIdentifiers = new ArrayList<CloudImageIdentifier>();
 
@@ -117,7 +117,7 @@ public class ImageModule extends Module {
 	/**
 	 * Validate for an image run (as opposed to a build or as part of a
 	 * deployment).
-	 *
+	 * 
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -145,11 +145,11 @@ public class ImageModule extends Module {
 			validateBaseImage(cloudService, true);
 			return;
 		}
-		if(isVirtual()) {
+		if (isVirtual()) {
 			extractBaseImageId(cloudService);
 			return;
 		}
-		if(getImageId(cloudService) == null) {
+		if (getImageId(cloudService) == null) {
 			throw new ValidationException(getName()
 					+ " missing an image id for cloud: " + cloudService
 					+ ". Did you build it?");
@@ -188,7 +188,7 @@ public class ImageModule extends Module {
 	 * Assign to the imageId attribute the value corresponding to the cloud
 	 * service. This saves the client from having to dig in the module to
 	 * retrieve the right image id.
-	 *
+	 * 
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -201,7 +201,7 @@ public class ImageModule extends Module {
 	 * Assign to the imageId attribute the base image id corresponding to the
 	 * cloud service. This should be used when building an image, since we need
 	 * to start the process from the reference image.
-	 *
+	 * 
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -222,7 +222,7 @@ public class ImageModule extends Module {
 
 	/**
 	 * Finds the base image id
-	 *
+	 * 
 	 * @param cloudService
 	 * @return image id
 	 * @throws ValidationException
@@ -356,7 +356,14 @@ public class ImageModule extends Module {
 	}
 
 	public void setTargets(Set<Target> targets) {
-		this.targets = targets;
+		if (this.targets != null) {
+			this.targets.clear();
+			for (Target t : targets) {
+				this.targets.add(t);
+			}
+		} else {
+			this.targets = targets;
+		}
 	}
 
 	public Set<Package> getPackages() {
@@ -364,7 +371,14 @@ public class ImageModule extends Module {
 	}
 
 	public void setPackages(Set<Package> packages) {
-		this.packages = packages;
+		if (this.packages != null) {
+			this.packages.clear();
+			for (Package t : packages) {
+				this.packages.add(t);
+			}
+		} else {
+			this.packages = packages;
+		}
 	}
 
 	public String getRecipe() {
@@ -441,6 +455,7 @@ public class ImageModule extends Module {
 	}
 
 	public void setPackage(Package package_) {
+		package_.setModule(this);
 		packages.add(package_);
 	}
 
@@ -532,7 +547,7 @@ public class ImageModule extends Module {
 
 	/**
 	 * Set image id for normal image run
-	 *
+	 * 
 	 * @param run
 	 * @return
 	 * @throws ValidationException
@@ -542,15 +557,14 @@ public class ImageModule extends Module {
 
 		ImageModule module = ImageModule.load(run.getModuleResourceUrl());
 
-		module.assignBaseImageIdToImageIdFromCloudService(run
-				.getCloudService());
+		module.assignBaseImageIdToImageIdFromCloudService(run.getCloudService());
 
 		return module;
 	}
 
 	/**
 	 * Set base image id for image build
-	 *
+	 * 
 	 * @param run
 	 * @return
 	 * @throws ValidationException
@@ -575,10 +589,9 @@ public class ImageModule extends Module {
 
 	public void postDeserialization() {
 		super.postDeserialization();
-		for(CloudImageIdentifier c : getCloudImageIdentifiers()) {
+		for (CloudImageIdentifier c : getCloudImageIdentifiers()) {
 			c.setContainer(this);
 		}
 	}
-
 
 }

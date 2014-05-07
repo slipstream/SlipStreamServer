@@ -10,7 +10,8 @@
     [clojurewerkz.quartzite.jobs :refer [defjob]]
     [clj-time.coerce :as tc]
     [slipstream.credcache.db-utils :as db]
-    [slipstream.credcache.renewal :as r]))
+    [slipstream.credcache.renewal :as r]
+    [slipstream.credcache.notify :as notify]))
 
 (def renewal-factor 2/3)                                    ;; renew 2/3 of way through validity period
 (def renewal-threshold (* 5 60))                            ;; 5 minutes in seconds!
@@ -30,6 +31,7 @@
           updated-resource)
         (do
           (log/warn "credential not renewed:" id)
+          (notify/renewal-failure resource)
           resource)))
     (do
       (log/warn "credential information not found:" id)
@@ -68,8 +70,9 @@
 (defn schedule-renewal
   "Takes a resource (credential) as input and schedules a renewal job
    for that resource.  If the resource has no :expiry entry, then no
-   renewal job is scheduled."
-  [{:keys [id expiry]}]
+   renewal job is scheduled.  This function returns the original resource
+   in all cases."
+  [{:keys [id expiry] :as resource}]
   (if-let [start (renewal-datetime expiry)]
     (let [job-key (j/key (str "renewal." id))
           trigger-key (t/key (str "trigger." id))]
@@ -83,4 +86,5 @@
                       (t/start-at start))]
         (qs/schedule job trigger)
         (log/info "scheduled next renewal:" id start)))
-    (log/info "renewal NOT scheduled:" id)))
+    (log/info "renewal NOT scheduled:" id))
+  resource)

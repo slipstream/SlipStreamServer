@@ -29,7 +29,6 @@ import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 
 public class ModuleCloudImageIdInheritanceTest {
@@ -47,15 +46,12 @@ public class ModuleCloudImageIdInheritanceTest {
 	public static void setupClass() throws ValidationException,
 			ConfigurationException {
 		baseImage = new ImageModule("baseImage");
-		baseImage.getCloudImageIdentifiers().add(
-				new CloudImageIdentifier(baseImage, cloudName, "", "baseId"));
+		baseImage.setImageId("baseId", cloudName);
 		baseImage.setIsBase(true);
 		baseImage = baseImage.store();
 
 		notBaseBaseImage = new ImageModule("notBaseBaseImage");
-		notBaseBaseImage.getCloudImageIdentifiers().add(
-				new CloudImageIdentifier(notBaseBaseImage, cloudName, "",
-						"notBaseBaseImageId"));
+		notBaseBaseImage.setImageId("notBaseBaseImageId", cloudName);
 		notBaseBaseImage = notBaseBaseImage.store();
 
 		notBaseImage = new ImageModule("notBaseImage");
@@ -63,9 +59,7 @@ public class ModuleCloudImageIdInheritanceTest {
 
 		builtImage = new ImageModule("builtImage");
 		builtImage.setModuleReference(baseImage);
-		builtImage.getCloudImageIdentifiers().add(
-				new CloudImageIdentifier(builtImage, cloudName, "",
-						"builtImageId"));
+		builtImage.setImageId("builtImageId", cloudName);
 		builtImage = builtImage.store();
 
 		notBuiltImage = new ImageModule("notBuiltImage");
