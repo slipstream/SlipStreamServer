@@ -64,7 +64,7 @@ public class DeploymentFactory extends RunFactory {
 		
 		UserParameter up = user.getParameter(key);
 		if (up != null) {
-			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
+			run.setParameter(new RunParameter(up.getName(), up.getValue("false"), up.getDescription()));
 		}
 		
 		return run;
