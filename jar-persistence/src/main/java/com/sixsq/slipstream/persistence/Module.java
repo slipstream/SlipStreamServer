@@ -200,11 +200,6 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private String tag;
 
 	@Element(required = false)
-	@Lob
-	@Deprecated()
-	private String comment;
-
-	@Element(required = false)
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private Commit commit = new Commit();
 
