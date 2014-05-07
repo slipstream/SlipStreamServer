@@ -23,6 +23,7 @@ package com.sixsq.slipstream.persistence;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -197,6 +198,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	@Attribute(required = false)
 	@Lob
+	@Column(length=1024)
 	private String tag;
 
 	@Element(required = false)
@@ -205,6 +207,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	@Element(required = false)
 	@Lob
+	@Column(length=1024)
 	private Publish published; // to the marketplace
 
 	/**

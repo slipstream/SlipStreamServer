@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -93,6 +94,7 @@ public class Authz implements Serializable {
 	private boolean publicCreateChildren = false;
 
 	@Lob
+	@Column(length=1024)
 	private String groupMembers_ = ", ";
 
 	@Attribute

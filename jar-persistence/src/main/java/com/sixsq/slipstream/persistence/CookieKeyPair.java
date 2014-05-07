@@ -40,11 +40,11 @@ public class CookieKeyPair implements Serializable {
 	Long id = ID;
 
 	@Lob
-	@Column(length=1000)
+	@Column(length=1024)
 	private String privateKey = null;
 
 	@Lob
-	@Column(length=1000)
+	@Column(length=1024)
 	private String publicKey = null;
 
 	@SuppressWarnings("unused")

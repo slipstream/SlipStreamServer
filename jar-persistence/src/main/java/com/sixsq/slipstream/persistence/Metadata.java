@@ -23,6 +23,7 @@ package com.sixsq.slipstream.persistence;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Lob;
@@ -53,6 +54,7 @@ public abstract class Metadata implements Serializable {
 
 	@Attribute(required = false)
 	@Lob
+	@Column(length=1024)
 	protected String description;
 
 	@Attribute(required = false)

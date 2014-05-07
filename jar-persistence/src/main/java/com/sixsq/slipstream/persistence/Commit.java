@@ -23,6 +23,7 @@ package com.sixsq.slipstream.persistence;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -50,6 +51,7 @@ public class Commit implements Serializable {
 
 	@Element(required=false)
 	@Lob
+	@Column(length=1024)
 	private String comment;
 
 	public Commit() {

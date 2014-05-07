@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -64,6 +65,7 @@ public abstract class OneShotAction {
 	private Timestamp lastModified;
 
 	@Lob
+	@Column(length=1024)
 	private String encodedForm;
 
 	protected OneShotAction() {

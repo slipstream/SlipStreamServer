@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Lob;
@@ -75,10 +76,12 @@ public class ImageModule extends Module {
 
 	@Element(required = false, data = true)
 	@Lob
+	@Column(length=65536)
 	private String prerecipe = "";
 
 	@Element(required = false, data = true)
 	@Lob
+	@Column(length=65536)
 	private String recipe = "";
 
 	@Attribute

@@ -22,6 +22,7 @@ package com.sixsq.slipstream.persistence;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -44,6 +45,7 @@ public class Target implements Serializable {
 
 	@Text(required = false, data = true)
 	@Lob
+	@Column(length=65536)
 	private String script = "";
 
 	@Attribute(required = false)

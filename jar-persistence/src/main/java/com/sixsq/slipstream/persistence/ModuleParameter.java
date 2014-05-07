@@ -20,6 +20,7 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -138,6 +139,7 @@ public class ModuleParameter extends Parameter<Module> {
 
 	@Element(required = false, data = true)
 	@Lob
+	@Column(length=1024)
 	public void setDefaultValue(String defaultValue) {
 	}
 
@@ -146,6 +148,7 @@ public class ModuleParameter extends Parameter<Module> {
 	 */
 	@Element(required = false, data = true)
 	@Lob
+	@Column(length=1024)
 	public String getDefaultValue() throws ValidationException {
 		String defaultValue = null;
 		String value = super.getValue();

@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
@@ -54,10 +55,12 @@ public abstract class Parameter<T> implements Serializable {
 	private String name;
 
 	@Lob
+	@Column(length=1024)
 	private String value;
 
 	@Attribute(required = false)
 	@Lob
+	@Column(length=1024)
 	private String description;
 
 	@Attribute(required = false)
@@ -78,6 +81,7 @@ public abstract class Parameter<T> implements Serializable {
 
 	@Element(data = true, required = false)
 	@Lob
+	@Column(length=1024)
 	private String instructions = null;
 
 	@ElementArray(required = false)
