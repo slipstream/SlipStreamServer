@@ -1,0 +1,15 @@
+-- Target versions: pre v2.1.17
+-- MUST be executed when upgrading to SlipStream v2.1.17 and BEFORE restarting SlipStream server
+
+-- Migrating MAPKEY and MODULE_RESOURCE_URI fields from MODULE_NODE
+update NODE set MAPKEY = (select MAPKEY from MODULE_NODE where MODULE_NODE.NODES_ID = NODE.ID);
+update NODE set MODULE_RESOURCEURI = (select MODULE_RESOURCEURI from MODULE_NODE where MODULE_NODE.NODES_ID = NODE.ID);
+drop table MODULE_NODE;
+
+-- Migrating MODULE_RESOURCE_URI field from MODULE_PACKAGE
+update PACKAGE set MODULE_RESOURCEURI = (select MODULE_RESOURCEURI from MODULE_PACKAGE where MODULE_PACKAGE.PACKAGES_ID = PACKAGE.ID);
+drop table MODULE_PACKAGE;
+
+-- Migrating MODULE_RESOURCE_URI field from MODULE_TARGET
+update TARGET set MODULE_RESOURCEURI = (select MODULE_RESOURCEURI from MODULE_TARGET where MODULE_TARGET.TARGETS_ID = TARGET.ID);
+drop table MODULE_TARGET;
