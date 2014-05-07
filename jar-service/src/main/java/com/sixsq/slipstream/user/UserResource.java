@@ -178,6 +178,8 @@ public class UserResource extends ParameterizedResource<User> {
 			setParameterized(getOrCreateParameterized(getTargetParameterizeUri()));
 		}
 
+		processEntityAsForm(entity);
+
 		try {
 			addParametersForEditing();
 		} catch (ValidationException e) {
@@ -185,8 +187,6 @@ public class UserResource extends ParameterizedResource<User> {
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		}
-
-		processEntityAsForm(entity);
 
 		try {
 			updateOrCreate(getParameterized());
