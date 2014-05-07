@@ -92,11 +92,14 @@ public class ParametersFactory {
 
 		Map<String, UserParameter> existingParameters = user.getParameters();
 
-		for (Entry<String, UserParameter> template : templateParameters.entrySet()) {
+		for (Entry<String, UserParameter> template : templateParameters
+				.entrySet()) {
 			UserParameter templateParam = template.getValue();
-			UserParameter existingParam = user.getParameter(templateParam.getName());
+			UserParameter existingParam = user.getParameter(templateParam
+					.getName());
 			if (template.getKey() != null
-					&& !existingParameters.containsKey(template.getKey()) && existingParam != null) {
+					&& !existingParameters.containsKey(template.getKey())
+					&& existingParam != null) {
 				templateParam.setValue(existingParam.getValue());
 			}
 			user.setParameter(templateParam);
@@ -110,9 +113,10 @@ public class ParametersFactory {
 	protected static void resetCloudServiceNameEnum(User user,
 			Map<String, UserParameter> execParameters) {
 		// Reset enum for cloud service name (in case connectors changed since)
-		String cloudServiceNameKey = Parameter.constructKey(
-				ParameterCategory.General.toString(),
-				ExecutionControlUserParametersFactory.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME);
+		String cloudServiceNameKey = Parameter
+				.constructKey(
+						ParameterCategory.General.toString(),
+						ExecutionControlUserParametersFactory.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME);
 		UserParameter cloudServiceParameter = user
 				.getParameter(cloudServiceNameKey);
 		cloudServiceParameter.setEnumValues(execParameters.get(
@@ -144,14 +148,12 @@ public class ParametersFactory {
 	}
 
 	private static void setParameters(Module module,
-			Map<String, ModuleParameter> parameters)
-			throws ValidationException {
-		for (Entry<String, ModuleParameter> entry : parameters
-				.entrySet()) {
+			Map<String, ModuleParameter> parameters) throws ValidationException {
+		for (Entry<String, ModuleParameter> entry : parameters.entrySet()) {
 			if (!module.parametersContainKey(entry.getKey())) {
 				module.setParameter(entry.getValue());
 			}
 		}
 	}
-	
+
 }

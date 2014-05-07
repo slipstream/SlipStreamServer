@@ -350,7 +350,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		}
 
 		module.unpublish();
-		
+
 		module.store();
 
 	}
