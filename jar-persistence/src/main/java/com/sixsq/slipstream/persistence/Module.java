@@ -206,7 +206,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	@Element(required = false)
 	@Lob
-	private Publish published; // to the marketplace
+	private Publish published; // to the app store
 
 	/**
 	 * Module reference is a URL.
