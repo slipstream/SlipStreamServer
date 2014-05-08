@@ -64,7 +64,7 @@ public class Target implements Serializable {
 	}
 
 	public Target(String name, String script) {
-		this.name = name;
+		this(name);
 		this.script = script;
 	}
 
