@@ -100,7 +100,7 @@ public class RootApplication extends Application {
 
 		Collector.start();
 		GarbageCollector.start();
-		
+
 		logServerStarted();
 	}
 
@@ -116,7 +116,7 @@ public class RootApplication extends Application {
 				.load(Connector.class);
 
 		for (Connector c : connectorLoader) {
-			getLogger().info("Connctor name: " + c.getCloudServiceName());
+			getLogger().info("Connector name: " + c.getCloudServiceName());
 		}
 	}
 
