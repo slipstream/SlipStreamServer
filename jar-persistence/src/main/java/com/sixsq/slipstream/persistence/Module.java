@@ -197,7 +197,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private boolean isLatestVersion;
 
 	@Attribute(required = false)
-	@Column(length=1024)
+	@Column(length = 1024)
 	private String tag;
 
 	@Element(required = false)
