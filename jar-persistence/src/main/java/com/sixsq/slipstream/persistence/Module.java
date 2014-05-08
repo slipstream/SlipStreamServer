@@ -29,7 +29,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
@@ -201,11 +200,11 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private String tag;
 
 	@Element(required = false)
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Commit commit = new Commit();
+	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true)
+	private Commit commit;
 
 	@Element(required = false)
-	@Lob
+	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Publish published; // to the app store
 
 	/**
@@ -391,7 +390,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	}
 
 	public void setCommit(String author, String commit) {
-		this.commit = new Commit(author, commit);
+		this.commit = new Commit(author, commit, this);
 	}
 
 	public void setCommit(Commit commit) {
@@ -419,7 +418,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	}
 
 	public void publish() {
-		published = new Publish();
+		published = new Publish(this);
 	}
 
 	public void unpublish() {
@@ -451,7 +450,9 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	protected Module copyTo(Module copy) throws ValidationException {
 		copy = (Module) super.copyTo(copy);
 
-		copy.setCommit(getCommit().copy());
+		if(getCommit() != null) {
+			copy.setCommit(getCommit().copy());
+		}
 		copy.setCustomVersion(getCustomVersion());
 
 		copy.setCloudNames((cloudNames == null ? null : cloudNames.clone()));

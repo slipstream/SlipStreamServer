@@ -52,17 +52,19 @@ public class Commit implements Serializable {
 	@Column(length=1024)
 	private String comment;
 
-	public Commit() {
+	private Commit() {
 		author = "";
 		comment = "";
 	}
 
-	public Commit(String author, String comment) {
+	public Commit(String author, String comment, Module module) {
+		this();
 		this.author = author;
 		this.comment = comment;
+		guardedModule = module;
 	}
 
-	public Metadata getGuardedModule() {
+	public Module getGuardedModule() {
 		return guardedModule;
 	}
 
@@ -77,7 +79,7 @@ public class Commit implements Serializable {
 	}
 
 	public Commit copy() {
-		return new Commit(getAuthor(), getComment());
+		return new Commit(getAuthor(), getComment(), getGuardedModule());
 	}
 
 	private String getAuthor() {
