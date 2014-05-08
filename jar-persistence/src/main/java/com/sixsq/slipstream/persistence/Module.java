@@ -197,7 +197,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private boolean isLatestVersion;
 
 	@Attribute(required = false)
-	@Column(length=1024)
+	@Column(length = 1024)
 	private String tag;
 
 	@Element(required = false)
@@ -206,7 +206,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	@Element(required = false)
 	@Lob
-	private Publish published; // to the marketplace
+	private Publish published; // to the app store
 
 	/**
 	 * Module reference is a URL.
