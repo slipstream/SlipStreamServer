@@ -33,7 +33,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.Lob;
 
 import org.restlet.data.Form;
 
@@ -64,7 +63,6 @@ public abstract class OneShotAction {
 
 	private Timestamp lastModified;
 
-	@Lob
 	@Column(length=1024)
 	private String encodedForm;
 

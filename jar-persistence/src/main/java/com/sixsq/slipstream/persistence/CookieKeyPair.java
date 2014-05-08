@@ -28,7 +28,6 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 
 @Entity
 @SuppressWarnings("serial")
@@ -39,11 +38,9 @@ public class CookieKeyPair implements Serializable {
 	@Id
 	Long id = ID;
 
-	@Lob
 	@Column(length=1024)
 	private String privateKey = null;
 
-	@Lob
 	@Column(length=1024)
 	private String publicKey = null;
 

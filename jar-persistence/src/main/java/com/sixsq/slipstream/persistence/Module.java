@@ -197,7 +197,6 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private boolean isLatestVersion;
 
 	@Attribute(required = false)
-	@Lob
 	@Column(length=1024)
 	private String tag;
 
@@ -207,7 +206,6 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	@Element(required = false)
 	@Lob
-	@Column(length=1024)
 	private Publish published; // to the marketplace
 
 	/**

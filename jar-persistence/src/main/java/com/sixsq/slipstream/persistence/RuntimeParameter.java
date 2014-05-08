@@ -189,7 +189,6 @@ public class RuntimeParameter extends Metadata {
 	private String key_;
 
 	@Text(required = false, data = true)
-	@Lob
 	@Column(length=1024)
 	private String value = "";
 
@@ -206,7 +205,6 @@ public class RuntimeParameter extends Metadata {
 	private ParameterType type = ParameterType.String;
 
 	@Attribute(required = false)
-	@Lob
 	@Column(length=1024)
 	private String mappedRuntimeParameterNames = "";
 

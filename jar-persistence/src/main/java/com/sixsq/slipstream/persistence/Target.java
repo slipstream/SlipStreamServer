@@ -26,7 +26,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
 import org.simpleframework.xml.Attribute;
@@ -44,8 +43,7 @@ public class Target implements Serializable {
 	Long id;
 
 	@Text(required = false, data = true)
-	@Lob
-	@Column(length=65536)
+	@Column(length = 65536)
 	private String script = "";
 
 	@Attribute(required = false)
@@ -56,7 +54,7 @@ public class Target implements Serializable {
 
 	@ManyToOne
 	private ImageModule module;
-	
+
 	@SuppressWarnings("unused")
 	private Target() {
 	}

@@ -26,7 +26,6 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -53,7 +52,6 @@ public abstract class Metadata implements Serializable {
 	protected ModuleCategory category;
 
 	@Attribute(required = false)
-	@Lob
 	@Column(length=1024)
 	protected String description;
 
