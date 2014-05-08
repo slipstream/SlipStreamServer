@@ -74,11 +74,11 @@ public class ImageModule extends Module {
 	private Set<Package> packages = new HashSet<Package>();
 
 	@Element(required = false, data = true)
-	@Column(length=65536)
+	@Column(length = 65536)
 	private String prerecipe = "";
 
 	@Element(required = false, data = true)
-	@Column(length=65536)
+	@Column(length = 65536)
 	private String recipe = "";
 
 	@Attribute
