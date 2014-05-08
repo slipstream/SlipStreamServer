@@ -1,3 +1,6 @@
+-- Target versions: pre v2.2.0
+-- SHOULD be executed when upgrading to SlipStream v2.2.0
+
 alter table AUTHZ alter column GROUPMEMBERS_ varchar(1024);
 
 alter table COMMIT alter column COMMENT varchar(1024);

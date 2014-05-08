@@ -1,5 +1,5 @@
--- Target versions: pre v2.1.17
--- MUST be executed when upgrading to SlipStream v2.1.17 and BEFORE restarting SlipStream server
+-- Target versions: pre v2.2.0
+-- MUST be executed when upgrading to SlipStream v2.2.0 and BEFORE restarting SlipStream server
 
 -- Migrating MAPKEY and MODULE_RESOURCE_URI fields from MODULE_NODE
 update NODE set MAPKEY = (select MAPKEY from MODULE_NODE where MODULE_NODE.NODES_ID = NODE.ID);
