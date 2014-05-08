@@ -209,8 +209,12 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected boolean isTrue(String value) {
-		return ("true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || "on"
-				.equalsIgnoreCase(value));
+		if(value == null) {
+			return false;
+		}
+		String trimmed = value.trim().toLowerCase();
+		return ("true".equals(trimmed) || "yes".equals(trimmed) || "on"
+				.equals(trimmed));
 	}
 
 	private String getQueryValue(String key) {

@@ -38,9 +38,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test see
- *
+ * 
  * @see ParameterTest
- *
+ * 
  */
 @MappedSuperclass
 @SuppressWarnings("serial")
@@ -55,12 +55,12 @@ public abstract class Parameter<T> implements Serializable {
 	private String name;
 
 	@Lob
-	@Column(length=1024)
+	@Column(length = 1024)
 	private String value;
 
 	@Attribute(required = false)
 	@Lob
-	@Column(length=1024)
+	@Column(length = 1024)
 	private String description;
 
 	@Attribute(required = false)
@@ -81,7 +81,7 @@ public abstract class Parameter<T> implements Serializable {
 
 	@Element(data = true, required = false)
 	@Lob
-	@Column(length=1024)
+	@Column(length = 1024)
 	private String instructions = null;
 
 	@ElementArray(required = false)
@@ -142,8 +142,7 @@ public abstract class Parameter<T> implements Serializable {
 	@Element(required = false, data = true)
 	public void setValue(String value) throws ValidationException {
 		if (type == ParameterType.Boolean) {
-			this.value = "on".equals(value) ? Boolean.TRUE.toString()
-					: Boolean.FALSE.toString();
+			this.value = Boolean.toString(isTrue(value));
 		} else {
 			this.value = value;
 		}
@@ -164,7 +163,7 @@ public abstract class Parameter<T> implements Serializable {
 	private void validateEnum(String value) throws ValidationException {
 		boolean found = false;
 
-		if (enumValues == null || "".equals(value)) {
+		if (value == null || enumValues == null || "".equals(value)) {
 			return;
 		}
 		for (String v : enumValues) {
@@ -302,16 +301,19 @@ public abstract class Parameter<T> implements Serializable {
 	}
 
 	public boolean isTrue() {
-		return Boolean.parseBoolean(getValue());
+		return isTrue(getValue());
+	}
+
+	private static boolean isTrue(String value) {
+		return Boolean.parseBoolean(value);
 	}
 
 	public static String constructKey(String category, String... names) {
-	    StringBuilder newKey = new StringBuilder(category);
-	    for (String name : names) {
-            newKey.append(RuntimeParameter.PARAM_WORD_SEPARATOR)
-                  .append(name);
-	    }
-	    return newKey.toString();
+		StringBuilder newKey = new StringBuilder(category);
+		for (String name : names) {
+			newKey.append(RuntimeParameter.PARAM_WORD_SEPARATOR).append(name);
+		}
+		return newKey.toString();
 	}
 
 }

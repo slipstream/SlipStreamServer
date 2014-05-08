@@ -85,21 +85,18 @@ public class ParametersFactory {
 				.getParameters();
 
 		Map<String, Connector> connectors = ConnectorFactory.getConnectors();
+
 		Map<String, UserParameter> templateParameters = ParametersFactory
 				.getUserParametersTemplate(connectors);
 
 		templateParameters.putAll(execParameters);
-
-		Map<String, UserParameter> existingParameters = user.getParameters();
 
 		for (Entry<String, UserParameter> template : templateParameters
 				.entrySet()) {
 			UserParameter templateParam = template.getValue();
 			UserParameter existingParam = user.getParameter(templateParam
 					.getName());
-			if (template.getKey() != null
-					&& !existingParameters.containsKey(template.getKey())
-					&& existingParam != null) {
+			if (existingParam != null) {
 				templateParam.setValue(existingParam.getValue());
 			}
 			user.setParameter(templateParam);

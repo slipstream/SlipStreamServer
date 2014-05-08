@@ -21,6 +21,7 @@ package com.sixsq.slipstream.user;
  */
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.restlet.data.Form;
 
@@ -93,7 +94,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		// - parameter--[id]--description
 		// - parameter--[id]--value
 		// ...
-		existingParameters = getParametrized().getParameters();
+		existingParameters = new ConcurrentHashMap<String, T>(getParametrized().getParameters());
 		getParametrized().getParameters().clear();
 		for (String paramName : form.getNames().toArray(new String[0])) {
 			if (isParameterName(paramName)) {
@@ -141,9 +142,17 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		boolean overwrite = shouldSetValue(parameter, value);
 
 		if (overwrite) {
-			parameter.setValue(value);
+			parameter.setValue(parseValue(value, parameter));
 		}
 		getParametrized().setParameter(parameter);
+	}
+
+	private String parseValue(String value, T parameter) {
+		String parsed = value;
+		if(parameter.getType() == ParameterType.Boolean) {
+			parsed = Boolean.toString("on".equals(value));
+		}
+		return parsed;
 	}
 
 	protected void setNewParameter(Form form, String genericPart, String name,
