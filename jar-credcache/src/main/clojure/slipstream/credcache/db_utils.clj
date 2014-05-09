@@ -3,148 +3,79 @@
    storage."
   (:require
     [clojure.tools.logging :as log]
-    [couchbase-clj.client :as cbc]
-    [couchbase-clj.query :as cbq]
+    [clojure.data.json :as json]
     [slipstream.credcache.utils :as utils]
-    [schema.core :as s])
+    [schema.core :as s]
+    [me.raynes.fs :as fs])
   (:import
-    [java.net URI]
-    [com.couchbase.client.protocol.views DesignDocument ViewDesign]))
+    [java.net URI]))
 
-(defonce ^:dynamic *cb-client* nil)
+(def ^:dynamic *cache-dir* "/opt/slipstream/server/credcache")
 
-(def ^:const cb-timeout-ms 3000)
+(defn set-cache-dir!
+  "Set the cache directory used to store cached credentials to a
+   non-default value.  This is normally intended only for testing."
+  [dir]
+  (alter-var-root #'*cache-dir* (constantly dir)))
 
-(def cb-client-defaults {:uris     [(URI/create "http://localhost:8091/pools")]
-                         :bucket   "default"
-                         :username ""
-                         :password ""})
-
-(def ^:const design-doc-name "credcache.0")
-
-(def ^:const doc-id-view-name "doc-id")
-
-(def ^:const doc-id-view
-  "
-function(doc, meta) {
-  if (meta.type==\"json\" && meta.id) {
-    emit(meta.id,null);
-  }
-}
-")
-
-(def cb-client-params-schema
-  {(s/optional-key :uris)     [URI]
-   (s/optional-key :bucket)   s/Str
-   (s/optional-key :username) s/Str
-   (s/optional-key :password) s/Str})
-
-(defn create-design-doc
+(defn create-cache-dir
   []
-  (let [view-design (ViewDesign. "doc-id" doc-id-view)]
-    (DesignDocument. design-doc-name [view-design] nil)))
+  (fs/mkdirs *cache-dir*))
 
-(defn add-design-doc
-  []
-  (if *cb-client*
-    (let [java-cb-client (cbc/get-client *cb-client*)]
-      (try
-        (.getDesignDocument java-cb-client design-doc-name)
-        false
-        (catch Exception e
-          (log/warn "creating design document" design-doc-name "->" (str e))
-          (->> (create-design-doc)
-               (.createDesignDoc java-cb-client)))))))
+(defn credential-file
+  "Creates the filename for the saved credential based on the id."
+  [id]
+  (str *cache-dir* "/" id))
 
-(defn get-doc-id-view
-  []
-  (if *cb-client*
-    (cbc/get-view *cb-client* design-doc-name doc-id-view-name)))
+(defn spit-json
+  "Write the json document to the cache.  This takes a map of the
+   information to write."
+  [id json]
+  (let [fname (credential-file id)]
+    (->> (json/write-str json)
+         (spit fname))))
 
-(defn create-client
-  "Creates a Couchbase client for accessing resources in the database.  This
-   is a shared, thread-safe instance stored in a dynamic variable.  This should
-   be called before trying to use any other utilities in this namespace."
-  [& [params]]
+(defn slurp-json
+  "Read a json document from the cache.  Returns a clojure map of
+   the credential."
+  [id]
+  (let [fname (credential-file id)]
+    (-> (slurp fname)
+        (json/read-str :key-fn keyword))))
 
-  ;; force logging to use SLF4J facade
-  (System/setProperty "net.spy.log.LoggerImpl" "net.spy.memcached.compat.log.SLF4JLogger")
-
-  (let [params (or params {})]
-    (s/validate cb-client-params-schema params)
-
-    (try
-      (->> (cbc/create-client (merge cb-client-defaults params))
-           (constantly)
-           (alter-var-root #'*cb-client*))
-      (log/info "created couchbase client" *cb-client*)
-      (catch Exception e
-        (log/error "error creating couchbase client" (str e))
-        nil))))
-
-(defn destroy-client
-  "Shutdown and free all resources for the Couchbase client.  This should be
-   called when shutting down the system to cleanly shutdown connections to
-   the database."
-  []
-  (cbc/shutdown *cb-client* cb-timeout-ms)
-  (->> (constantly nil)
-       (alter-var-root #'*cb-client*)))
+(defn delete-json
+  "Deletes the json document from the cache."
+  [id]
+  (let [fname (credential-file id)]
+    (fs/delete fname)))
 
 (defn create-resource
-  "Creates a new resource within the database using the :id and :expiry keys. If the
-   :expiry key is given (in milliseconds since the epoch), then the expiry value is
-   set for the Couchbase document.  If not, then the document does not expire.
+  "Creates a new resource within the cache using the :id key.
    Returns the resource that was passed in."
-  [{:keys [id expiry] :or {:expiry -1} :as resource}]
-  (let [opts {:expiry expiry}]
-    (cbc/add-json *cb-client* id resource opts)
-    resource))
+  [{:keys [id] :as resource}]
+  (spit-json id resource)
+  resource)
 
 (defn retrieve-resource
   "Retrieves the document associated with the given id."
   [id]
-  (cbc/get-json *cb-client* id))
+  (slurp-json id))
 
 (defn update-resource
-  "Updates an existing resource within the database using the :id and :expiry keys.
-   If the :expiry key is given (in milliseconds since the epoch), then the expiry
-   value is set for the Couchbase document.  If not, the document does not expire.
+  "Updates an existing resource within the cache using the :id key.
    Returns the resource that was passed in."
-  [{:keys [id expiry] :or {:expiry -1} :as resource}]
-  (let [opts (if expiry {:expiry expiry} {})]
-    (cbc/set-json *cb-client* id resource opts)
-    resource))
+  [{:keys [id] :as resource}]
+  (spit-json id resource)
+  resource)
 
 (defn delete-resource
   "Deletes the credential information associated with the given id.  Returns nil."
   [id]
-  (cbc/delete *cb-client* id))
-
-(defn get-resource-ids-chunk
-  "Returns a chunk of resource ids skipping 'skip' entries.  The chunk size is 100."
-  [resource-type skip]
-  (let [start-key (str resource-type "/")
-        end-key (str start-key "\uefff")
-        q (cbq/create-query {:include-docs false
-                             :range-start  start-key
-                             :range-end    end-key
-                             :limit        100
-                             :skip         skip
-                             :stale        false
-                             :on-error     :continue})
-        v (get-doc-id-view)]
-    (->> (cbc/query *cb-client* v q)
-         (map cbc/view-id))))
+  (delete-json id))
 
 (defn all-resource-ids
   "Returns a lazy sequence of all of the resource ids associated with the given
    resource type.  Internally this will chunk the queries to the underlying
    database."
-  ([resource-type]
-   (all-resource-ids resource-type 0))
-  ([resource-type skip]
-   (let [chunk (get-resource-ids-chunk resource-type skip)
-         n (count chunk)]
-     (if (pos? n)
-       (concat chunk (lazy-seq (all-resource-ids resource-type (+ n skip))))))))
+  [resource-type]
+  (fs/find-files (fs/list-dir *cache-dir*) (re-pattern (str "^" resource-type ".*"))))

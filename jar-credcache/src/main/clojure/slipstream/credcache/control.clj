@@ -6,8 +6,7 @@
     [slipstream.credcache.db-utils :as db]
     [slipstream.credcache.credential :as cred]
     [slipstream.credcache.notify :as notify]
-    [slipstream.credcache.credential.myproxy-voms]          ;; FIXME: use dynamic loading
-    ))
+    [slipstream.credcache.credential.myproxy-voms]))
 
 (defn- start-quartz
   "Start up the queues for running jobs through the Quartz scheduler."
@@ -28,30 +27,17 @@
       (log/error "error stopping quartz scheduler:" (str e)))))
 
 (defn start!
-  "Starts the credential management subsystem, creating the
-   connection to the database and starting job queues."
-  [cb-params smtp-params]
+  "Starts the credential management subsystem, starting job queues."
+  []
   (log/info "starting credential cache subsystem")
-  (try
-    (notify/set-smtp-parameters! smtp-params)
-    (catch Exception e
-      (log/error "error setting SMTP parameters:" (str e))))
-  (try
-    (db/create-client cb-params)
-    (catch Exception e
-      (log/error "error creating Couchbase client:" (str e))))
-  (db/add-design-doc)
+  (db/create-cache-dir)
   (start-quartz)
+  (cred/schedule-cleanup)
   (cred/reschedule-all-renewals))
 
 (defn stop!
-  "Stops the credential management subsystem, freeing the
-   resources for the Couchbase client and stopping the job
+  "Stops the credential management subsystem, stopping the job
    queues."
   []
   (log/info "stopping credential cache subsystem")
-  (stop-quartz)
-  (try
-    (db/destroy-client)
-    (catch Exception e
-      (log/error "error destroying Couchbase client:" (str e)))))
+  (stop-quartz))

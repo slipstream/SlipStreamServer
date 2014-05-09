@@ -31,8 +31,8 @@ alter table RUNPARAMETER alter column DESCRIPTION varchar(1024);
 alter table RUNPARAMETER alter column VALUE varchar(1024);
 
 alter table RUNTIMEPARAMETER alter column DESCRIPTION varchar(1024);
-alter table RUNTIMEPARAMETER alter column VALUE varchar(1024);
-alter table RUNTIMEPARAMETER alter column MAPPEDRUNTIMEPARAMETERNAMES varchar(1024);
+alter table RUNTIMEPARAMETER alter column VALUE varchar(65536);
+alter table RUNTIMEPARAMETER alter column MAPPEDRUNTIMEPARAMETERNAMES varchar(65536);
 
 alter table SERVICECATALOG alter column DESCRIPTION varchar(1024);
 
@@ -49,4 +49,4 @@ alter table TARGET alter column SCRIPT varchar(65536);
 alter table USER alter column DESCRIPTION varchar(1024);
 
 alter table USERPARAMETER alter column DESCRIPTION varchar(1024);
-alter table USERPARAMETER alter column VALUE varchar(1024);
+alter table USERPARAMETER alter column VALUE varchar(65536);

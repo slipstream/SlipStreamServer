@@ -6,7 +6,7 @@
     [clojurewerkz.quartzite.conversion :as qc]
     [clojurewerkz.quartzite.triggers :as t]
     [clojurewerkz.quartzite.jobs :as j]
-    [clojurewerkz.quartzite.schedule.simple :refer [schedule with-repeat-count with-interval-in-milliseconds]]
+    [clojurewerkz.quartzite.schedule.simple :as ss :refer [schedule with-repeat-count with-interval-in-milliseconds]]
     [clojurewerkz.quartzite.jobs :refer [defjob]]
     [clj-time.coerce :as tc]
     [slipstream.credcache.db-utils :as db]
@@ -15,6 +15,7 @@
 
 (def renewal-factor 2/3)                                    ;; renew 2/3 of way through validity period
 (def renewal-threshold (* 5 60))                            ;; 5 minutes in seconds!
+(def clean-interval 2)                                      ;; 2 hours
 
 (defn attempt-renewal
   "Attempts to renew and update the given credential.  Returns nil if the
@@ -37,6 +38,14 @@
       (log/warn "credential information not found:" id)
       nil)))
 
+(defn expired?
+  [{:keys [expiry]}]
+  (if expiry
+    (->> (quot (System/currentTimeMillis) 1000)
+         (- expiry)
+         (max 0)
+         (zero?))))
+
 (defn renewal-datetime
   "Returns the next renewal time for the given expiry date, applying
    the renewal wait time and threshold.  NOTE: The expiry
@@ -53,6 +62,17 @@
             (+ now)
             (* 1000)
             (tc/from-long))))))
+
+(defn delete-expired-credentials
+  "Delete expired credentials from cache."
+  [resource-type]
+  (doall
+    (->> (db/all-resource-ids resource-type)
+         (map db/retrieve-resource)
+         (remove nil?)
+         (filter expired?)
+         (map :id)
+         (map db/delete-resource))))
 
 (declare schedule-renewal)
 
@@ -88,3 +108,31 @@
         (log/info "scheduled next renewal:" id start)))
     (log/info "renewal NOT scheduled:" id))
   resource)
+
+(defjob cleanup-cache
+        [ctx]
+        (let [resource-type (-> ctx
+                                (qc/from-job-data)
+                                (get "resource-type"))]
+          (log/info "start cleanup:" resource-type)
+          (delete-expired-credentials resource-type)
+          (log/info "finished cleanup: " resource-type)))
+
+(defn schedule-cache-cleanup
+  "Defines the job for cleaning up the credential cache."
+  [resource-type]
+  (let [job-key (j/key (str "cleanup." resource-type))
+        trigger-key (t/key (str "trigger." resource-type))]
+    (qs/delete-job job-key)
+    (let [job (j/build
+                (j/with-identity job-key)
+                (j/of-type cleanup-cache)
+                (j/using-job-data {"resource-type" resource-type}))
+          trigger (t/build
+                    (t/with-identity trigger-key)
+                    (t/start-now)
+                    (ss/repeat-forever)
+                    (ss/with-interval-in-hours clean-interval)
+                    (ss/with-misfire-handling-instruction-now-with-remaining-count))]
+      (qs/schedule job trigger)
+      (log/info "scheduled cache cleanup job"))))
