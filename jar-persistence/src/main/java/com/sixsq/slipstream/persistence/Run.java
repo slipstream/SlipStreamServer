@@ -91,9 +91,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 			+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 
 	// The initial state of each node
-	public final static String INITIAL_NODE_STATE_MESSAGE = States.Inactive
+	public final static String INITIAL_NODE_STATE_MESSAGE = States.Initializing
 			.toString();
-	public final static String INITIAL_NODE_STATE = States.Inactive.toString();
+	public final static String INITIAL_NODE_STATE = States.Initializing.toString();
 
 	public final static String RESOURCE_URI_PREFIX = "run/";
 
@@ -359,8 +359,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static List<Run> listAllActive(EntityManager em, User user)
 			throws ConfigurationException, ValidationException {
 		Query q = em.createNamedQuery("activeRunsByUser");
-		q.setParameter("completed", States.inactive()); // TODO: hack just for
-														// now
+		q.setParameter("completed", States.Done); // TODO: hack just for
+												  // now
 		q.setParameter("user", user.getName());
 		List<Run> runs = q.getResultList();
 		return runs;
@@ -400,7 +400,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@Attribute(required = false)
 	@Enumerated
-	private States state = States.Inactive;
+	private States state = States.Unknown;
 
 	@Attribute
 	private String moduleResourceUri;

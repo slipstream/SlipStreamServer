@@ -127,8 +127,8 @@ public class StateMachineMultiThreadingTest extends
 	private static final String NODE_NAME = "node1";
 	private static final boolean MULTI_THREADED = true;
 
-	private States initialState = States.Running;
-	private States finalState = States.SendingFinalReport;
+	private States initialState = States.Executing;
+	private States finalState = States.SendingReports;
 
 	@Test
 	public void testMultipleStateTransitions() throws FileNotFoundException,

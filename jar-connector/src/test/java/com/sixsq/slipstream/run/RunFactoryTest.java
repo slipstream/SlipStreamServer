@@ -224,9 +224,9 @@ public class RunFactoryTest extends RunTest {
 		Run run = getDeploymentRun(deployment);
 
 		assertThat(run.getRuntimeParameterValue("node1.1:state"),
-				is("Inactive"));
+				is("Initializing"));
 		assertThat(run.getRuntimeParameterValue("node1.1:statemessage"),
-				is("Inactive"));
+				is("Initializing"));
 
 	}
 

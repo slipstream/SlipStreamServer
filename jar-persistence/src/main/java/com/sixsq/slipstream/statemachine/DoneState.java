@@ -21,19 +21,19 @@ package com.sixsq.slipstream.statemachine;
  */
 
 
-public class TerminalState extends State {
+public class DoneState extends SynchronizedState {
 
-    public TerminalState(ExtrinsicState extrinsicState) {
+    public DoneState(ExtrinsicState extrinsicState) {
         super(extrinsicState);
     }
 
     @Override
     public States getState() {
-        return States.Terminal;
+        return States.Done;
     }
-
+    
     public boolean isFinal() {
-        return true;
+    	return true;
     }
 
 }

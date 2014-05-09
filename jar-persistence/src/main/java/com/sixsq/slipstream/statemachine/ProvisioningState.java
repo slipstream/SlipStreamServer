@@ -21,16 +21,16 @@ package com.sixsq.slipstream.statemachine;
  */
 
 
-public class DetachedState extends SynchronizedState {
+public class ProvisioningState extends SynchronizedState {
 
-    public DetachedState(ExtrinsicState extrinsicState) {
-        super(extrinsicState);
-        nextState = States.Terminal;
-    }
+	public ProvisioningState(ExtrinsicState extrinsicState) {
+		super(extrinsicState);
+		nextState = States.Executing;
+	}
 
-    @Override
-    public States getState() {
-        return States.Detached;
-    }
+	@Override
+	public States getState() {
+		return States.Provisioning;
+	}
 
 }

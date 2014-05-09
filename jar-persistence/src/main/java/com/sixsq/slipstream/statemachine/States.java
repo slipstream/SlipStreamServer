@@ -25,53 +25,39 @@ import java.util.List;
  */
 
 public enum States {
-    Inactive,
     Initializing,
-    Running,
-    SendingFinalReport,
-    Disconnected,
+    Provisioning,
+    Executing,
+    SendingReports,
+    Ready,
     Finalizing,
-    Terminal, 
-    Unknown,
     Done,
     Cancelled,
+    Unknown,
     Aborting,
-    Aborted,
-    Failing,
-    Failed,
-    Detached;
-    
-    public static List<States> inactive() {
-    	List<States> list = new ArrayList<States>(completed());
-    	list.add(States.Inactive);
-    	return list;
-    }
+    Aborted;
     
     public static List<States> completed() {
-    	return Arrays.asList(States.Cancelled, 
-    						 States.Terminal,
+    	return Arrays.asList(States.Cancelled,
     						 States.Aborted,
-    						 States.Failed,
     						 States.Unknown,
     						 States.Done);
     }
 
     public static List<States> transition() {
     	return Arrays.asList(Initializing,
-    						 Running,
-    						 SendingFinalReport,
+    						 Executing,
+    						 SendingReports,
     						 Finalizing,
     						 Unknown,
-    						 Aborting,
-    						 Failing);
+    						 Aborting);
     }
     
     public static List<States> canTerminate() {
     	return Arrays.asList(Aborted,
     						 Done,
-    						 Terminal,
     						 Cancelled,
-    						 Detached);
+    						 Ready);
     }
 
 }

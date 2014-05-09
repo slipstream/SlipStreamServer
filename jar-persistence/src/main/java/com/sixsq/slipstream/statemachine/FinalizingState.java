@@ -21,16 +21,21 @@ package com.sixsq.slipstream.statemachine;
  */
 
 
-public class FinalizingState extends SynchronizedState {
+public class FinalizingState extends State {
 
     public FinalizingState(ExtrinsicState extrinsicState) {
         super(extrinsicState);
-        nextState = States.Terminal;
+        nextState = States.Done;
     }
 
     @Override
     public States getState() {
         return States.Finalizing;
     }
-
+    
+    @Override
+	public boolean mustSynchronizeOnFailure() {
+		return true;
+	}
+    
 }

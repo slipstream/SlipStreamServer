@@ -58,7 +58,7 @@ public class RunStates {
 			} else {
 				state = States.Aborting;
 			}
-		} else if (state == States.Terminal) {
+		} else if (state == States.Done) {
 			state = SUCCESS;
 		}
 	}
@@ -77,7 +77,7 @@ public class RunStates {
 	}
 
 	public void done() {
-		state = canTerminate(state) ? States.Terminal
+		state = canTerminate(state) ? States.Done
 				: States.Cancelled;
 		init();
 	}

@@ -1,5 +1,12 @@
 package com.sixsq.slipstream.statemachine;
 
+import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
+import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.UserParameter;
+
 /*
  * +=================================================================+
  * SlipStream Server (WAR)
@@ -21,16 +28,28 @@ package com.sixsq.slipstream.statemachine;
  */
 
 
-public class RunningState extends SynchronizedState {
+public class SendingReportsState extends SynchronizedState {
 
-	public RunningState(ExtrinsicState extrinsicState) {
-		super(extrinsicState);
-		nextState = States.SendingFinalReport;
+	public SendingReportsState(ExtrinsicState extrinsicState) {
+		super(extrinsicState);		
+		nextState = States.Ready;
 	}
 
+	private boolean shouldDetach(Run run) {
+		String key = Parameter.constructKey(ParameterCategory.General.toString(), 
+				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+		RunParameter rp = run.getParameter(key);
+		return run.getType() == RunType.Run || (rp != null && rp.isTrue());
+	}
+	
 	@Override
 	public States getState() {
-		return States.Running;
+		return States.SendingReports;
+	}
+	
+	@Override
+	public boolean mustSynchronizeOnFailure() {
+		return true;
 	}
 
 }

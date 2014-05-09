@@ -172,6 +172,7 @@ public class StateMachine {
 		try {
 			if (checkSynchronizedConditionMet()) {
 				setState(globalState.nextState);
+				// Remark LS: I think that the 2 lines below are already executed in the above call
 				alineAllNodesStateToGlobalState();
 				resetNodesStateCompleted();
 			}
@@ -287,7 +288,7 @@ public class StateMachine {
 		State state = nodeStates.get(nodeName);
 		state.setFailing(true);
 		globalState.setFailing(true);
-		setState(States.SendingFinalReport);
+		setState(States.SendingReports);
 		alineAllNodesStateToGlobalState();
 		commitTransaction(em);
 	}

@@ -75,39 +75,49 @@ public class RuntimeParameterStateMachineTest extends
 				cloudServiceName, user);
 		run = run.store();
 
-		States newState = States.Inactive;
-
-		assertState(run, States.Inactive, newState);
-
-		newState = completeCurrentState(orchestratorStateKey, run);
-
-		assertState(run, States.Initializing, newState);
-
-		newState = completeCurrentState(node1CompleteKey, run);
-		newState = completeCurrentState(node2CompleteKey, run);
+		States newState = States.Initializing;
 
 		assertState(run, States.Initializing, newState);
 
 		newState = completeCurrentState(orchestratorStateKey, run);
 
-		assertState(run, States.Running, newState);
+		assertState(run, States.Provisioning, newState);
 
 		newState = completeCurrentState(node1CompleteKey, run);
 		newState = completeCurrentState(node2CompleteKey, run);
 
-		assertState(run, States.Running, newState);
+		assertState(run, States.Provisioning, newState);
 
 		newState = completeCurrentState(orchestratorStateKey, run);
 
-		assertState(run, States.SendingFinalReport, newState);
+		assertState(run, States.Executing, newState);
 
 		newState = completeCurrentState(node1CompleteKey, run);
 		newState = completeCurrentState(node2CompleteKey, run);
 
-		assertState(run, States.SendingFinalReport, newState);
+		assertState(run, States.Executing, newState);
 
 		newState = completeCurrentState(orchestratorStateKey, run);
 
+		assertState(run, States.SendingReports, newState);
+
+		newState = completeCurrentState(node1CompleteKey, run);
+		newState = completeCurrentState(node2CompleteKey, run);
+
+		assertState(run, States.SendingReports, newState);
+
+		newState = completeCurrentState(orchestratorStateKey, run);
+
+		assertState(run, States.Ready, newState);
+
+		newState = completeCurrentState(node1CompleteKey, run);
+		newState = completeCurrentState(node2CompleteKey, run);
+
+		assertState(run, States.Ready, newState);
+
+		newState = completeCurrentState(orchestratorStateKey, run);
+		
+		
 		assertState(run, States.Finalizing, newState);
 
 		newState = completeCurrentState(node1CompleteKey, run);
@@ -116,8 +126,9 @@ public class RuntimeParameterStateMachineTest extends
 		assertState(run, States.Finalizing, newState);
 
 		newState = completeCurrentState(orchestratorStateKey, run);
+		
 
-		assertState(run, States.Terminal, newState);
+		assertState(run, States.Done, newState);
 
 		newState = completeCurrentState(node1CompleteKey, run,
 				Status.CLIENT_ERROR_CONFLICT);

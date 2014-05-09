@@ -21,16 +21,16 @@ package com.sixsq.slipstream.statemachine;
  */
 
 
-public class InitializingState extends State {
+public class ExecutingState extends SynchronizedState {
 
-	public InitializingState(ExtrinsicState extrinsicState) {
+	public ExecutingState(ExtrinsicState extrinsicState) {
 		super(extrinsicState);
-		nextState = States.Provisioning;
+		nextState = States.SendingReports;
 	}
 
 	@Override
 	public States getState() {
-		return States.Initializing;
+		return States.Executing;
 	}
 
 }

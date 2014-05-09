@@ -467,11 +467,11 @@ public class RunTest extends RunTestBase {
 
 		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
 
-		run.setState(States.Inactive);
+		run.setState(States.Initializing);
 		run.done();
 		assertThat(run.getState(), is(States.Cancelled));
 
-		run.setState(States.Running);
+		run.setState(States.Executing);
 		run.done();
 		assertThat(run.getState(), is(States.Cancelled));
 
