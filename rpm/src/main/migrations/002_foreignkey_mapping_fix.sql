@@ -4,6 +4,7 @@
 -- Migrating MAPKEY and MODULE_RESOURCE_URI fields from MODULE_NODE
 alter table NODE add column NODES_KEY varchar(255);
 update NODE set NODES_KEY = (select MAPKEY from MODULE_NODE where MODULE_NODE.NODES_ID = NODE.ID);
+alter table NODE add column MODULE_RESOURCEURI varchar(255);
 update NODE set MODULE_RESOURCEURI = (select MODULE_RESOURCEURI from MODULE_NODE where MODULE_NODE.NODES_ID = NODE.ID);
 drop table MODULE_NODE;
 
