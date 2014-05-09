@@ -6,9 +6,21 @@
     [schema.core :as s]
     [clj-time.core :as t]
     [clj-time.coerce :as tc]
-    [clj-time.format :as tf]))
+    [clj-time.format :as tf])
+  (:import
+    [com.sixsq.slipstream.persistence
+     ServiceConfiguration
+     ServiceConfiguration$ParameterCategory
+     ServiceConfiguration$RequiredParameters]))
 
-(def ^:dynamic *smtp* nil)
+(def email-parameters-category (str ServiceConfiguration$ParameterCategory/SlipStream_Support))
+
+(def param-mapping
+  {(.getName ServiceConfiguration$RequiredParameters/SLIPSTREAM_MAIL_HOST)     :host
+   (.getName ServiceConfiguration$RequiredParameters/SLIPSTREAM_MAIL_PORT)     :port
+   (.getName ServiceConfiguration$RequiredParameters/SLIPSTREAM_MAIL_USERNAME) :user
+   (.getName ServiceConfiguration$RequiredParameters/SLIPSTREAM_MAIL_PASSWORD) :pass
+   (.getName ServiceConfiguration$RequiredParameters/SLIPSTREAM_MAIL_SSL)      :ssl})
 
 ;;
 ;; smtp parameter schema
@@ -22,15 +34,27 @@
    :pass                  s/Str
    (s/optional-key :ssl)  s/Str})
 
-(defn set-smtp-parameters!
-  "Sets the SMTP parameters used to send mail as defined in the
-   given map.  If the parameters are not valid, an exception will
-   be thrown."
-  [m]
-  (s/validate SmtpParameters m)
-  (->> m
-       (constantly)
-       (alter-var-root #'*smtp*)))
+(defn key-fn
+  [key]
+  (get param-mapping key))
+
+(defn value-fn
+  [value]
+  (.getValue value))
+
+(defn get-smtp-parameters
+  "Retrieves the SMTP parameters from the SlipStream service
+   configuration."
+  []
+  (try
+    (->> email-parameters-category
+         (.getParameters (ServiceConfiguration/load))
+         (remove (fn [[k _]] (key-fn k)))
+         (map (fn [[k v]] [(key-fn k) (value-fn v)]))
+         (into {})
+         (s/validate SmtpParameters))
+    (catch Exception e
+      (log/warn "invalid SMTP parameters: " (str e)))))
 
 (def fmt-renewal-failure-msg "
 An attempt to renew your credential on the SlipStream server
@@ -49,11 +73,11 @@ expires, then you will need to initialize a new credential in
 your user account via the SlipStream server.
 ")
 
-(defn get-from-value
-  []
-  (if *smtp*
-    (or (:from *smtp*)
-        (str (:user *smtp*) "@" (:host *smtp*)))))
+(defn get-sender
+  [smtp]
+  (if smtp
+    (or (:from smtp)
+        (str (:user smtp) "@" (:host smtp)))))
 
 (defn get-body
   [{:keys [id subtypeURI expiry]}]
@@ -65,12 +89,13 @@ your user account via the SlipStream server.
 
 (defn renewal-failure
   [{:keys [id email] :as credential}]
-  (if (and *smtp* email)
-    (let [msg {:from    (get-from-value)
-               :to      [email]
-               :subject "SlipStream credential renewal failure"
-               :body    (get-body credential)}
-          result (postal/send-message *smtp* msg)]
-      (if-not (zero? (:code result))
-        (log/error "error sending notification:" id (:error result) (:message result))
-        (log/info "notification sent for renewal failure:" id)))))
+  (if email
+    (if-let [smtp (get-smtp-parameters)]
+      (let [msg {:from    (get-sender smtp)
+                 :to      [email]
+                 :subject "SlipStream credential renewal failure"
+                 :body    (get-body credential)}
+            result (postal/send-message smtp msg)]
+        (if-not (zero? (:code result))
+          (log/error "error sending notification:" id (:error result) (:message result))
+          (log/info "notification sent for renewal failure:" id))))))

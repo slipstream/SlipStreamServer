@@ -12,10 +12,8 @@
               #^{:static true} [retrieve [String] java.io.File]]))
 
 (defn -start
-  [couchbase smtp]
-  (let [cb-params (walk/keywordize-keys couchbase)
-        smtp-params (walk/keywordize-keys smtp)]
-    (ctl/start! cb-params smtp-params)))
+  [smtp]
+  (ctl/start!))
 
 (defn -stop
   []

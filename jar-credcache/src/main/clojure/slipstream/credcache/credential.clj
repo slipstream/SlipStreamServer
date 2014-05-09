@@ -21,7 +21,7 @@
 
 (defn uuid->id
   [uuid]
-  (str resource-type "/" uuid))
+  (str resource-type "-" uuid))
 
 ;;
 ;; credential schema
@@ -82,7 +82,7 @@
   (db/all-resource-ids resource-type))
 
 ;;
-;; utility function for recreating all renewal jobs on startup
+;; utility functions
 ;;
 
 (defn reschedule-all-renewals
@@ -94,3 +94,7 @@
          (map retrieve)
          (remove nil?)
          (map j/schedule-renewal))))
+
+(defn schedule-cleanup
+  []
+  (j/schedule-cache-cleanup resource-type))

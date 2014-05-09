@@ -17,6 +17,12 @@
   <dependencies>
 
     <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamPersistence</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
     </dependency>
@@ -25,6 +31,12 @@
       <groupId>org.clojure</groupId>
       <artifactId>tools.logging</artifactId>
       <version>0.2.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>data.json</artifactId>
+      <version>0.2.4</version>
     </dependency>
 
     <dependency>
@@ -37,12 +49,6 @@
       <groupId>prismatic</groupId>
       <artifactId>schema</artifactId>
       <version>0.2.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>couchbase-clj</groupId>
-      <artifactId>couchbase-clj</artifactId>
-      <version>0.1.3</version>
     </dependency>
 
     <dependency>
