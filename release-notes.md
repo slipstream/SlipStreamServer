@@ -20,6 +20,10 @@ IMPORTANT: v2.2.0 requires data migration from v2.1.x. The following steps MUST 
 - Removed dependency on jclouds-slf4j
 - Removed hibernate3 maven plugin
 - Added SQL migration scripts
+- Removed Nexus tasks for repo generation
+- Migrate to Hibernate 4.3.5
+- Fix checkbox not set correctly in edit mode for user
+- Fix several minor bugs
 
 [Commits](https://github.com/slipstream/SlipStreamServer/compare/SlipStreamServer-2.1.16...SlipStreamServer-2.2.0)
 
