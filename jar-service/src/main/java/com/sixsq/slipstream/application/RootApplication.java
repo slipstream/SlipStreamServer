@@ -22,6 +22,8 @@ package com.sixsq.slipstream.application;
 
 import java.util.ServiceLoader;
 
+import java.util.HashMap;
+
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -39,6 +41,8 @@ import org.restlet.service.MetadataService;
 
 import slipstream.async.Collector;
 import slipstream.async.GarbageCollector;
+
+import slipstream.credcache.JavaWrapper;
 
 import com.sixsq.slipstream.action.ActionRouter;
 import com.sixsq.slipstream.authn.BasicAuthenticator;
@@ -153,6 +157,24 @@ public class RootApplication extends Application {
 		Configuration.getInstance();
 
 	}
+
+    @Override
+    public void start() throws Exception {
+        super.start();
+        Logger.info("restlet application started");
+
+        // TODO: Uncomment to initialize credential cache.
+        //JavaWrapper.start(new HashMap<String, String>(), new HashMap<String, String>());
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        Logger.info("restlet application stopped");
+
+        // TODO: Uncomment to shutdown credential cache.
+        //JavaWrapper.stop();
+    }
 
 	@Override
 	public Restlet createInboundRoot() {

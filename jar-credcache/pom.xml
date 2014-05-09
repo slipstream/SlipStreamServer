@@ -149,17 +149,26 @@
       <scope>provided</scope>
     </dependency>
 
+<!--
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.7</version>
     </dependency>
+-->
 
+<!--
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.7</version>
       <scope>test</scope>
+    </dependency>
+-->
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
     </dependency>
 
   </dependencies>
@@ -167,6 +176,25 @@
   <build>
 
     <plugins>
+
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>slipstream/credcache/JavaWrapper*</include>
+                <include>slipstream/credcache/**/*.clj</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

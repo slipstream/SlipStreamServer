@@ -42,6 +42,11 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamCredCache</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamConnector</artifactId>
 		</dependency>
 
