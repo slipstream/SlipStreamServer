@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
@@ -74,11 +74,11 @@ public class ImageModule extends Module {
 	private Set<Package> packages = new HashSet<Package>();
 
 	@Element(required = false, data = true)
-	@Lob
+	@Column(length = 65536)
 	private String prerecipe = "";
 
 	@Element(required = false, data = true)
-	@Lob
+	@Column(length = 65536)
 	private String recipe = "";
 
 	@Attribute
@@ -356,14 +356,15 @@ public class ImageModule extends Module {
 	}
 
 	public void setTargets(Set<Target> targets) {
-		if (this.targets != null) {
-			this.targets.clear();
-			for (Target t : targets) {
-				this.targets.add(t);
-			}
-		} else {
-			this.targets = targets;
+		this.targets.clear();
+		for (Target t : targets) {
+			setTarget(t);
 		}
+	}
+
+	private void setTarget(Target target) {
+		target.setModule(this);
+		targets.add(target);
 	}
 
 	public Set<Package> getPackages() {
@@ -371,14 +372,15 @@ public class ImageModule extends Module {
 	}
 
 	public void setPackages(Set<Package> packages) {
-		if (this.packages != null) {
-			this.packages.clear();
-			for (Package t : packages) {
-				this.packages.add(t);
-			}
-		} else {
-			this.packages = packages;
+		this.packages.clear();
+		for (Package p : packages) {
+			setPackage(p);
 		}
+	}
+
+	public void setPackage(Package package_) {
+		package_.setModule(this);
+		packages.add(package_);
 	}
 
 	public String getRecipe() {
@@ -452,11 +454,6 @@ public class ImageModule extends Module {
 
 	private boolean isPackagesEmpty() {
 		return getPackages().isEmpty() ? true : false;
-	}
-
-	public void setPackage(Package package_) {
-		package_.setModule(this);
-		packages.add(package_);
 	}
 
 	public ImageModule store() {

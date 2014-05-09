@@ -161,7 +161,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	@Override
 	protected void setIsEdit() throws ConfigurationException,
-	ValidationException {
+			ValidationException {
 		setIsEdit(isEdit() || isEditFlagTrue() || isNew());
 	}
 
@@ -298,7 +298,8 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	}
 
 	protected void setResponseOkAndViewLocation(String resourceUri) {
-		Status status = isExisting() ? Status.SUCCESS_OK : Status.SUCCESS_CREATED;
+		Status status = isExisting() ? Status.SUCCESS_OK
+				: Status.SUCCESS_CREATED;
 		getResponse().setStatus(status);
 
 		String redirectUrl = "/" + resourceUri;

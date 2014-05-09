@@ -174,7 +174,7 @@ public class UserResource extends ParameterizedResource<User> {
 			throwClientForbiddenError();
 		}
 
-		if(!isExisting()) {
+		if (!isExisting()) {
 			setParameterized(getOrCreateParameterized(getTargetParameterizeUri()));
 		}
 
@@ -224,8 +224,7 @@ public class UserResource extends ParameterizedResource<User> {
 
 		User user = null;
 		try {
-			user = (User) SerializationUtil.fromXml(denormalized,
-					User.class);
+			user = (User) SerializationUtil.fromXml(denormalized, User.class);
 		} catch (SlipStreamClientException e) {
 			throwClientBadRequest("Invalid xml user: " + e.getMessage());
 		}
@@ -239,7 +238,6 @@ public class UserResource extends ParameterizedResource<User> {
 		return getRequest().getEntityAsText();
 	}
 
-
 	private void updateOrCreate(User user) throws ValidationException {
 
 		checkCanPut();
@@ -250,7 +248,8 @@ public class UserResource extends ParameterizedResource<User> {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex);
 		}
 
-		if (!getTargetParameterizeUri().equals(user.getName()) && !getUser().isSuper()) {
+		if (!getTargetParameterizeUri().equals(user.getName())
+				&& !getUser().isSuper()) {
 			throwClientBadRequest("The uploaded user does not correspond to the target user uri");
 		}
 
@@ -259,7 +258,7 @@ public class UserResource extends ParameterizedResource<User> {
 			State newState = current == State.NEW ? State.ACTIVE : current;
 			user.setState(newState);
 		}
-		
+
 		user.store();
 
 		setResponseForPut();

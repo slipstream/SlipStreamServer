@@ -23,12 +23,12 @@ package com.sixsq.slipstream.persistence;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
@@ -196,21 +196,16 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private boolean isLatestVersion;
 
 	@Attribute(required = false)
-	@Lob
+	@Column(length = 1024)
 	private String tag;
 
 	@Element(required = false)
-	@Lob
-	@Deprecated()
-	private String comment;
+	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true)
+	private Commit commit;
 
 	@Element(required = false)
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Commit commit = new Commit();
-
-	@Element(required = false)
-	@Lob
-	private Publish published; // to the marketplace
+	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true)
+	private Publish published; // to the app store
 
 	/**
 	 * Module reference is a URL.
@@ -395,7 +390,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	}
 
 	public void setCommit(String author, String commit) {
-		this.commit = new Commit(author, commit);
+		this.commit = new Commit(author, commit, this);
 	}
 
 	public void setCommit(Commit commit) {
@@ -423,7 +418,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	}
 
 	public void publish() {
-		published = new Publish();
+		published = new Publish(this);
 	}
 
 	public void unpublish() {
@@ -455,7 +450,9 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	protected Module copyTo(Module copy) throws ValidationException {
 		copy = (Module) super.copyTo(copy);
 
-		copy.setCommit(getCommit().copy());
+		if(getCommit() != null) {
+			copy.setCommit(getCommit().copy());
+		}
 		copy.setCustomVersion(getCustomVersion());
 
 		copy.setCloudNames((cloudNames == null ? null : cloudNames.clone()));

@@ -20,10 +20,10 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
@@ -137,7 +137,7 @@ public class ModuleParameter extends Parameter<Module> {
 	}
 
 	@Element(required = false, data = true)
-	@Lob
+	@Column(length=1024)
 	public void setDefaultValue(String defaultValue) {
 	}
 
@@ -145,7 +145,7 @@ public class ModuleParameter extends Parameter<Module> {
 	 * Inherited from parent or current value
 	 */
 	@Element(required = false, data = true)
-	@Lob
+	@Column(length=1024)
 	public String getDefaultValue() throws ValidationException {
 		String defaultValue = null;
 		String value = super.getValue();
