@@ -1,5 +1,5 @@
--- Target versions: pre v2.1.6
--- MUST be executed when upgrading to SlipStream v2.1.6 and BEFORE restarting SlipStream server
+-- Target versions: pre v2.2.0
+-- MUST be executed when upgrading to SlipStream v2.2.0 and BEFORE restarting SlipStream server
 
 update MODULEPARAMETER set ORDER_ = 0;
 alter table MODULEPARAMETER alter column ORDER_ set not null;
