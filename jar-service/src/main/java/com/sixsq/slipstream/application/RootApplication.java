@@ -22,8 +22,6 @@ package com.sixsq.slipstream.application;
 
 import java.util.ServiceLoader;
 
-import java.util.HashMap;
-
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -41,8 +39,6 @@ import org.restlet.service.MetadataService;
 
 import slipstream.async.Collector;
 import slipstream.async.GarbageCollector;
-
-import slipstream.credcache.JavaWrapper;
 
 import com.sixsq.slipstream.action.ActionRouter;
 import com.sixsq.slipstream.authn.BasicAuthenticator;
