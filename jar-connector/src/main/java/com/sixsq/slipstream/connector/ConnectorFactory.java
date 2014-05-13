@@ -184,7 +184,6 @@ public class ConnectorFactory {
 		for(ServiceCatalog sc : scs.getList()) {
 			if(!cloudServiceNames.contains(sc.getCloud())) {
 				sc.remove();
-				scs.getList().remove(sc);
 			}
 		}
 		for(String cloud : cloudServiceNames) {
