@@ -44,7 +44,9 @@ public class ModuleUriUtil {
 		String[] slices = resourceUri.split("/");
 		int version = extractVersion(resourceUri);
 		int index;
-		if (version != DEFAULT_VERSION) {
+		String last = slices[slices.length - 1];
+		if (version != DEFAULT_VERSION
+				|| last.equals(Integer.toString(DEFAULT_VERSION))) {
 			index = slices.length - 2;
 		} else {
 			index = slices.length - 1;
@@ -112,15 +114,26 @@ public class ModuleUriUtil {
 			throw (new ValidationException("Resource URI not starting with "
 					+ Module.RESOURCE_URI_PREFIX));
 		}
+
+		String strippedResourceUri = stripDefaultVersionIfPresent(resourceUri);
+
 		boolean hasParent = (resourceUri.split("/").length > 2);
-		String moduleUrl = extractModuleUriFromResourceUri(resourceUri);
+		String moduleUrl = extractModuleUriFromResourceUri(strippedResourceUri);
 		if (!hasParent) {
 			return Module.RESOURCE_URI_PREFIX;
 		}
 		boolean hasVersion = (extractVersion(resourceUri) != -1);
 		String moduleName = (hasVersion ? moduleUrl.substring(0,
-				moduleUrl.lastIndexOf('/')) : resourceUri);
+				moduleUrl.lastIndexOf('/')) : strippedResourceUri);
 		return moduleName.substring(0, moduleName.lastIndexOf('/'));
+	}
+
+	private static String stripDefaultVersionIfPresent(String resourceUri) {
+		String defaultEnd = "/" + String.valueOf(DEFAULT_VERSION);
+		String strippedResourceUri = resourceUri.endsWith(defaultEnd) ? resourceUri
+				.substring(0, resourceUri.length() - defaultEnd.length())
+				: resourceUri;
+		return strippedResourceUri;
 	}
 
 }

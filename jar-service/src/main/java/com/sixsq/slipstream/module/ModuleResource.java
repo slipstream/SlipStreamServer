@@ -285,10 +285,11 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		updateOrCreate(module);
 
 		if (isExisting()) {
-			getResponse().setStatus(Status.SUCCESS_ACCEPTED);
+			getResponse().setStatus(Status.SUCCESS_OK);
 		} else {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
+		getResponse().setLocationRef("/" + module.getResourceUri());		
 	}
 
 	private Module xmlToModule() {
