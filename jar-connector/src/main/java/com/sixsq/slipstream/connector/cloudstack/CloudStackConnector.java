@@ -50,7 +50,8 @@ import com.sixsq.slipstream.util.ProcessUtils;
 public class CloudStackConnector extends CliConnectorBase {
 
 	public static final String CLOUD_SERVICE_NAME = "cloudstack";
-	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.cloudstack.CloudStackClientCloud";
+	public static final String ZONE_TYPE = "Basic";
+	public String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.cloudstack.CloudStackClientCloud";
 
 	public CloudStackConnector() {
 		this(CLOUD_SERVICE_NAME);
@@ -64,6 +65,10 @@ public class CloudStackConnector extends CliConnectorBase {
     	return new CloudStackConnector(getConnectorInstanceName());
     }
 
+    protected String getZoneType(){
+		return ZONE_TYPE;
+	}
+    
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
@@ -71,9 +76,8 @@ public class CloudStackConnector extends CliConnectorBase {
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
 
-		if(isInOrchestrationContext(run) && run.getCategory() == ModuleCategory.Image)
-			throw new SlipStreamException("Image creation is not yet available for this connector");
-
+		validateLaunch(run, user);
+		
 		String command;
 		try {
 			command = getRunInstanceCommand(run, user);
@@ -106,15 +110,15 @@ public class CloudStackConnector extends CliConnectorBase {
 			throws InvalidElementException, ValidationException,
 			SlipStreamClientException, IOException, ConfigurationException, ServerExecutionEnginePluginException {
 
-		validateLaunch(run, user);
-
 		String command = "/usr/bin/cloudstack-run-instances " +
 				getCommandBaseParams(user) +
 				" --image-id " + wrapInSingleQuotes(getImageId(run, user)) +
 				" --instance-name " + wrapInSingleQuotes(getVmName(run)) +
 				" --instance-type " + wrapInSingleQuotes(getInstanceType(run, user)) +
+				" --zone-type " + getZoneType() + 
 				" --public-key " + wrapInSingleQuotes(getPublicSshKey(run, user)) +
-				" --network " + getNetwork(run) +
+				" --network-type " + getNetwork(run) +
+				" --networks " + wrapInSingleQuotes(getNetworks(run, user)) + 
 				" --context-script " + wrapInSingleQuotes(createContextualizationData(run, user));
 
 		return command;
@@ -134,6 +138,10 @@ public class CloudStackConnector extends CliConnectorBase {
 				"machine" + "-" + run.getUuid();
 	}
 
+	protected String getNetworks(Run run, User user) throws ValidationException{	
+		return "";
+	}
+	
 	protected String getInstanceType(Run run, User user) throws ValidationException{
 		return (isInOrchestrationContext(run)) ?
 				user.getParameter(constructKey(CloudStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME)).getValue() :
@@ -162,11 +170,17 @@ public class CloudStackConnector extends CliConnectorBase {
 			throw (new ValidationException("Cloud Zone cannot be empty. "+ errorMessageLastPart));
 		}
 	}
+	
+	protected void validateCapabilities(Run run) throws SlipStreamException{
+		if(isInOrchestrationContext(run) && run.getCategory() == ModuleCategory.Image)
+			throw new SlipStreamException("Image creation is not yet available for this connector");
+	}
 
-	private void validateLaunch(Run run, User user)
-			throws ConfigurationException, SlipStreamClientException, ServerExecutionEnginePluginException{
+	protected void validateLaunch(Run run, User user)
+			throws ConfigurationException, SlipStreamException{
 		validateCredentials(user);
 		validateBaseParameters(user);
+		validateCapabilities(run);
 
 		String instanceType = getInstanceType(run, user);
 		if (instanceType == null || "".equals(instanceType)){
