@@ -1,9 +1,10 @@
 package com.sixsq.slipstream.connector.okeanos;
-
+/*
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+*/
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.openstack.OpenStackConnector;
@@ -11,7 +12,7 @@ import com.sixsq.slipstream.connector.openstack.OpenStackImageParametersFactory;
 import com.sixsq.slipstream.connector.openstack.OpenStackUserParametersFactory;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.*;
-
+/*
 import org.jclouds.Constants;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
@@ -32,7 +33,7 @@ import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.openstack.nova.v2_0.options.CreateServerOptions;
 import org.jclouds.ssh.SshClient;
 import org.jclouds.sshj.config.SshjSshClientModule;
-
+*/
 import java.util.*;
 
 /**
@@ -60,7 +61,7 @@ public class OkeanosConnector extends OpenStackConnector {
     public String getCloudServiceName() {
         return OkeanosConnector.CLOUD_SERVICE_NAME;
     }
-
+/*
     public String getJcloudsDriverName() {
         return OkeanosConnector.JCLOUDS_DRIVER_NAME;
     }
@@ -78,7 +79,7 @@ public class OkeanosConnector extends OpenStackConnector {
 
     protected ContextBuilder updateContextBuilder(ContextBuilder contextBuilder, User user, Properties overrides) {
         overrides.put("jclouds.ssh.max-retries", "1");
-        overrides.put("jclouds.compute.timeout.script-complete", 1000L/*ms*/ * 60 /*sec*/ * 20 /*min*/);
+        overrides.put("jclouds.compute.timeout.script-complete", 1000L/*ms* * 60 /*sec* * 20 /*min*);
         overrides.put(Constants.PROPERTY_PRETTY_PRINT_PAYLOADS, "true");
         overrides.put(Constants.PROPERTY_CONNECTION_TIMEOUT, "0");
         overrides.put(Constants.PROPERTY_SO_TIMEOUT, "0");
@@ -437,4 +438,5 @@ public class OkeanosConnector extends OpenStackConnector {
 
         System.out.println("--terminate()");
     }
+    */
 }

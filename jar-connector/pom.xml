@@ -65,25 +65,7 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>org.jclouds</groupId>
-			<artifactId>jclouds-all</artifactId>
-			<type>jar</type>
-		</dependency>
-
-<!-- 		<dependency>
-			<groupId>org.jclouds.driver</groupId>
-			<artifactId>jclouds-slf4j</artifactId>
-			<type>jar</type>
-		</dependency>
- -->
-		<dependency>
-			<groupId>org.jclouds.driver</groupId>
-			<artifactId>jclouds-sshj</artifactId>
-			<type>jar</type>
-		</dependency>
-
+		
 		<dependency>
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>

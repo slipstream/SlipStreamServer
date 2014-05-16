@@ -103,13 +103,7 @@
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>org.jclouds</groupId>
-      <artifactId>jclouds-all</artifactId>
-      <type>jar</type>
-    </dependency>
-
+    
     <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
