@@ -1,0 +1,6 @@
+com.sixsq.slipstream.connector.stratuslab.StratusLabConnectorStub
+com.sixsq.slipstream.connector.physicalhost.PhysicalHostConnectorStub
+com.sixsq.slipstream.connector.cloudstack.CloudStackConnectorStub
+com.sixsq.slipstream.connector.local.LocalConnectorStub
+com.sixsq.slipstream.connector.okeanos.OkeanosConnectorStub
+com.sixsq.slipstream.connector.openstack.OpenStackConnectorStub
