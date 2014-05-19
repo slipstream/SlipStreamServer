@@ -1,10 +1,10 @@
 package com.sixsq.slipstream.connector;
 
-public abstract class AbstractDiscoveryConnectorService implements DiscoveryConnectorService {
+public abstract class AbstractDiscoverableConnectorService implements DiscoverableConnectorService {
 
     public final String cloudServiceName;
 
-    public AbstractDiscoveryConnectorService(String cloudServiceName) {
+    public AbstractDiscoverableConnectorService(String cloudServiceName) {
         this.cloudServiceName = cloudServiceName;
     }
 

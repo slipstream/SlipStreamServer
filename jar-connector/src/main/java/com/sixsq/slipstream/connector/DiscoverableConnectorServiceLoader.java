@@ -41,11 +41,11 @@ import java.util.ServiceLoader;
  * This file contains a list (newline separated) of concrete class names that implement this interface.  This file must
  * be UTF-8 encoded.
  */
-public final class DiscoveryConnectorServiceLoader {
+public final class DiscoverableConnectorServiceLoader {
 
-    private static final ServiceLoader<DiscoveryConnectorService> loader = ServiceLoader.load(DiscoveryConnectorService.class);
+    private static final ServiceLoader<DiscoverableConnectorService> loader = ServiceLoader.load(DiscoverableConnectorService.class);
 
-    private static final Map<String, DiscoveryConnectorService> stubs;
+    private static final Map<String, DiscoverableConnectorService> stubs;
 
     private static final List<String> cloudServiceNames;
 
@@ -56,10 +56,10 @@ public final class DiscoveryConnectorServiceLoader {
     static {
 
         // Create map of ConnectorStub objects keyed by the cloud service name.
-        Map<String, DiscoveryConnectorService> impls = new HashMap<String, DiscoveryConnectorService>();
-        for (DiscoveryConnectorService stub : loader) {
+        Map<String, DiscoverableConnectorService> impls = new HashMap<String, DiscoverableConnectorService>();
+        for (DiscoverableConnectorService stub : loader) {
             String key = stub.getCloudServiceName();
-            DiscoveryConnectorService existing = impls.put(key, stub);
+            DiscoverableConnectorService existing = impls.put(key, stub);
             if (existing != null) {
                 Logger.warning(String.format(removedMessageFmt, existing.getClass().getName(), key));
             }
@@ -76,18 +76,18 @@ public final class DiscoveryConnectorServiceLoader {
     }
 
     public static void initializeAllStubs() {
-        for (DiscoveryConnectorService stub : stubs.values()) {
+        for (DiscoverableConnectorService stub : stubs.values()) {
             stub.initialize();
         }
     }
 
     public static void shutdownAllStubs() {
-        for (DiscoveryConnectorService stub : stubs.values()) {
+        for (DiscoverableConnectorService stub : stubs.values()) {
             stub.shutdown();
         }
     }
 
-    public static DiscoveryConnectorService getConnectorStub(String cloudServiceName) {
+    public static DiscoverableConnectorService getConnectorStub(String cloudServiceName) {
         return stubs.get(cloudServiceName);
     }
 

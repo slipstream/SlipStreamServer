@@ -1,11 +1,11 @@
 package com.sixsq.slipstream.connector.openstack;
 
-import com.sixsq.slipstream.connector.AbstractDiscoveryConnectorService;
+import com.sixsq.slipstream.connector.AbstractDiscoverableConnectorService;
 import com.sixsq.slipstream.connector.Connector;
 
-public class OpenStackDiscoveryConnectorService extends AbstractDiscoveryConnectorService {
+public class OpenStackDiscoverableConnectorService extends AbstractDiscoverableConnectorService {
 
-    public OpenStackDiscoveryConnectorService() {
+    public OpenStackDiscoverableConnectorService() {
         super(OpenStackConnector.CLOUD_SERVICE_NAME);
     }
 

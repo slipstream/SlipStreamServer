@@ -1,11 +1,11 @@
 package com.sixsq.slipstream.connector.stratuslab;
 
-import com.sixsq.slipstream.connector.AbstractDiscoveryConnectorService;
+import com.sixsq.slipstream.connector.AbstractDiscoverableConnectorService;
 import com.sixsq.slipstream.connector.Connector;
 
-public class StratusLabDiscoveryConnectorService extends AbstractDiscoveryConnectorService {
+public class StratusLabDiscoverableConnectorService extends AbstractDiscoverableConnectorService {
 
-    public StratusLabDiscoveryConnectorService() {
+    public StratusLabDiscoverableConnectorService() {
         super(StratusLabConnector.CLOUD_SERVICE_NAME);
     }
 

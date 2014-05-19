@@ -1,6 +1,0 @@
-com.sixsq.slipstream.connector.stratuslab.StratusLabDiscoveryConnectorService
-com.sixsq.slipstream.connector.physicalhost.PhysicalHostDiscoveryConnectorService
-com.sixsq.slipstream.connector.cloudstack.CloudStackDiscoveryConnectorService
-com.sixsq.slipstream.connector.local.LocalDiscoveryConnectorService
-com.sixsq.slipstream.connector.okeanos.OkeanosDiscoveryConnectorService
-com.sixsq.slipstream.connector.openstack.OpenStackDiscoveryConnectorService

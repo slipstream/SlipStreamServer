@@ -102,7 +102,7 @@ public class ConnectorFactory {
     private static Connector loadConnector(String cloudServiceName, String instanceName) throws ConfigurationException {
         try {
 
-            DiscoveryConnectorService stub = DiscoveryConnectorServiceLoader.getConnectorStub(cloudServiceName);
+            DiscoverableConnectorService stub = DiscoverableConnectorServiceLoader.getConnectorStub(cloudServiceName);
             if (stub != null) {
                 return stub.getInstance(instanceName);
             } else {
