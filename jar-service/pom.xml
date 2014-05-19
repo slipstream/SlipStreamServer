@@ -89,6 +89,11 @@
 
 		<dependency>
 			<groupId>org.restlet.jee</groupId>
+			<artifactId>org.restlet.ext.httpclient</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.restlet.jee</groupId>
 			<artifactId>org.restlet.ext.fileupload</artifactId>
 		</dependency>
 
