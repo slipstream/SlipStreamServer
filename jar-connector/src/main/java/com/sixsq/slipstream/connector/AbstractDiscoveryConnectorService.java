@@ -1,12 +1,10 @@
 package com.sixsq.slipstream.connector;
 
-import com.sixsq.slipstream.connector.stratuslab.StratusLabConnector;
-
-public abstract class AbstractConnectorStub implements ConnectorStub {
+public abstract class AbstractDiscoveryConnectorService implements DiscoveryConnectorService {
 
     public final String cloudServiceName;
 
-    public AbstractConnectorStub(String cloudServiceName) {
+    public AbstractDiscoveryConnectorService(String cloudServiceName) {
         this.cloudServiceName = cloudServiceName;
     }
 

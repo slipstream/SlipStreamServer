@@ -1,11 +1,11 @@
 package com.sixsq.slipstream.connector.local;
 
-import com.sixsq.slipstream.connector.AbstractConnectorStub;
+import com.sixsq.slipstream.connector.AbstractDiscoveryConnectorService;
 import com.sixsq.slipstream.connector.Connector;
 
-public class LocalConnectorStub extends AbstractConnectorStub {
+public class LocalDiscoveryConnectorService extends AbstractDiscoveryConnectorService {
 
-    public LocalConnectorStub() {
+    public LocalDiscoveryConnectorService() {
         super(LocalConnector.CLOUD_SERVICE_NAME);
     }
 

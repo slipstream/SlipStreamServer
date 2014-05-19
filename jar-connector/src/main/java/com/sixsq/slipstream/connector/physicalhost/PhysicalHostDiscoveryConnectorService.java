@@ -1,11 +1,11 @@
 package com.sixsq.slipstream.connector.physicalhost;
 
-import com.sixsq.slipstream.connector.AbstractConnectorStub;
+import com.sixsq.slipstream.connector.AbstractDiscoveryConnectorService;
 import com.sixsq.slipstream.connector.Connector;
 
-public class PhysicalHostConnectorStub extends AbstractConnectorStub {
+public class PhysicalHostDiscoveryConnectorService extends AbstractDiscoveryConnectorService {
 
-    public PhysicalHostConnectorStub() {
+    public PhysicalHostDiscoveryConnectorService() {
         super(PhysicalHostConnector.CLOUD_SERVICE_NAME);
     }
 

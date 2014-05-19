@@ -41,11 +41,11 @@ import java.util.ServiceLoader;
  * This file contains a list (newline separated) of concrete class names that implement this interface.  This file must
  * be UTF-8 encoded.
  */
-public final class ConnectorStubLoader {
+public final class DiscoveryConnectorServiceLoader {
 
-    private static final ServiceLoader<ConnectorStub> loader = ServiceLoader.load(ConnectorStub.class);
+    private static final ServiceLoader<DiscoveryConnectorService> loader = ServiceLoader.load(DiscoveryConnectorService.class);
 
-    private static final Map<String, ConnectorStub> stubs;
+    private static final Map<String, DiscoveryConnectorService> stubs;
 
     private static final List<String> cloudServiceNames;
 
@@ -56,10 +56,10 @@ public final class ConnectorStubLoader {
     static {
 
         // Create map of ConnectorStub objects keyed by the cloud service name.
-        Map<String, ConnectorStub> impls = new HashMap<String, ConnectorStub>();
-        for (ConnectorStub stub : loader) {
+        Map<String, DiscoveryConnectorService> impls = new HashMap<String, DiscoveryConnectorService>();
+        for (DiscoveryConnectorService stub : loader) {
             String key = stub.getCloudServiceName();
-            ConnectorStub existing = impls.put(key, stub);
+            DiscoveryConnectorService existing = impls.put(key, stub);
             if (existing != null) {
                 Logger.warning(String.format(removedMessageFmt, existing.getClass().getName(), key));
             }
@@ -76,18 +76,18 @@ public final class ConnectorStubLoader {
     }
 
     public static void initializeAllStubs() {
-        for (ConnectorStub stub : stubs.values()) {
+        for (DiscoveryConnectorService stub : stubs.values()) {
             stub.initialize();
         }
     }
 
     public static void shutdownAllStubs() {
-        for (ConnectorStub stub : stubs.values()) {
+        for (DiscoveryConnectorService stub : stubs.values()) {
             stub.shutdown();
         }
     }
 
-    public static ConnectorStub getConnectorStub(String cloudServiceName) {
+    public static DiscoveryConnectorService getConnectorStub(String cloudServiceName) {
         return stubs.get(cloudServiceName);
     }
 

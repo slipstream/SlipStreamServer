@@ -26,7 +26,7 @@ package com.sixsq.slipstream.connector;
  *
  * Classes implementing this interface _must_ be immutable for thread safety.
  */
-public interface ConnectorStub {
+public interface DiscoveryConnectorService {
 
     /**
      * Returns the name of the cloud service that can be accessed via the Connectors created by this stub.  This method

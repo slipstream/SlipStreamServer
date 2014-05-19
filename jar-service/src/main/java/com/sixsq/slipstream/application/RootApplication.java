@@ -22,7 +22,7 @@ package com.sixsq.slipstream.application;
 
 import java.util.ServiceLoader;
 
-import com.sixsq.slipstream.connector.ConnectorStubLoader;
+import com.sixsq.slipstream.connector.DiscoveryConnectorServiceLoader;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -198,12 +198,12 @@ public class RootApplication extends Application {
     @Override
     public void start() throws Exception {
         super.start();
-        ConnectorStubLoader.initializeAllStubs();
+        DiscoveryConnectorServiceLoader.initializeAllStubs();
     }
 
     @Override
     public void stop() throws Exception {
-        ConnectorStubLoader.shutdownAllStubs();
+        DiscoveryConnectorServiceLoader.shutdownAllStubs();
         super.stop();
     }
 

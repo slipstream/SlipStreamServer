@@ -1,11 +1,11 @@
 package com.sixsq.slipstream.connector.okeanos;
 
-import com.sixsq.slipstream.connector.AbstractConnectorStub;
+import com.sixsq.slipstream.connector.AbstractDiscoveryConnectorService;
 import com.sixsq.slipstream.connector.Connector;
 
-public class OkeanosConnectorStub extends AbstractConnectorStub {
+public class OkeanosDiscoveryConnectorService extends AbstractDiscoveryConnectorService {
 
-    public OkeanosConnectorStub() {
+    public OkeanosDiscoveryConnectorService() {
         super(OkeanosConnector.CLOUD_SERVICE_NAME);
     }
 
