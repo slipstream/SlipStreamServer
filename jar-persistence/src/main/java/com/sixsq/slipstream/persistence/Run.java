@@ -40,7 +40,6 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.MapKey;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -395,7 +394,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 * Cloud service names (only applies to deployment type run) comma separated
 	 */
 	@Attribute(required = false)
-	@Lob
+	@Column(length=1024)
 	private String cloudServiceNames;
 
 	@Attribute(required = false)
@@ -426,8 +425,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 * Including the orchestrator: orchestrator-local, ...
 	 */
 	@Attribute
-	@Lob
-	@Column(length=1024)
+	@Column(length=65536)
 	private String nodeNames = "";
 
 	/**
@@ -826,7 +824,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@Attribute
-	@Lob
+	@Column(length=1024)
 	public String getGroups() {
 		getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY)
 				.setValue(groups);
@@ -834,7 +832,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	@Attribute
-	@Lob
+	@Column(length=1024)
 	public void setGroups(String groups) {
 		this.groups = groups;
 	}

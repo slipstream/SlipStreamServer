@@ -23,15 +23,27 @@ package com.sixsq.slipstream.persistence;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
+@Entity
 public class Publish implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue
+	Long id;
+
+	@OneToOne
+	private Module module;
 
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -43,8 +55,13 @@ public class Publish implements Serializable {
 	@Text
 	private String comment = "";
 
-	public Publish() {
+	private Publish() {
 		publicationDate = new Date();
+	}
+
+	public Publish(Module module) {
+		this();
+		this.module = module;
 	}
 
 	public Date getPublicationDate() {
@@ -65,6 +82,10 @@ public class Publish implements Serializable {
 
 	public String getPublisher() {
 		return publisher;
+	}
+
+	public void setModule(Module module) {
+		this.module = module;
 	}
 	
 }

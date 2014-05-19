@@ -26,12 +26,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 
 import org.simpleframework.xml.Attribute;
@@ -92,7 +92,7 @@ public class Authz implements Serializable {
 	@Attribute
 	private boolean publicCreateChildren = false;
 
-	@Lob
+	@Column(length=1024)
 	private String groupMembers_ = ", ";
 
 	@Attribute

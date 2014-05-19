@@ -98,7 +98,8 @@ public abstract class ModuleFormProcessor extends
 	}
 
 	private Commit parseCommit() throws ValidationException {
-		return new Commit(getUser().getName(), getForm().getFirstValue("comment"));
+		return new Commit(getUser().getName(), getForm().getFirstValue(
+				"comment"), getParametrized());
 	}
 
 	private String parseLogoLink() throws ValidationException {
@@ -174,7 +175,7 @@ public abstract class ModuleFormProcessor extends
 		getParametrized().setCreation(older.getCreation());
 		getParametrized().getAuthz().setUser(older.getOwner());
 	}
-	
+
 	protected Module load(String name) {
 		return Module.loadByName(name);
 	}

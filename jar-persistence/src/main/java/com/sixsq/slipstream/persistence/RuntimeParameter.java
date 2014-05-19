@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -188,7 +188,7 @@ public class RuntimeParameter extends Metadata {
 	private String key_;
 
 	@Text(required = false, data = true)
-	@Lob
+	@Column(length=1024)
 	private String value = "";
 
 	@Attribute
@@ -204,7 +204,7 @@ public class RuntimeParameter extends Metadata {
 	private ParameterType type = ParameterType.String;
 
 	@Attribute(required = false)
-	@Lob
+	@Column(length=1024)
 	private String mappedRuntimeParameterNames = "";
 
 	@ManyToOne

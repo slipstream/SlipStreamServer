@@ -32,7 +32,7 @@ public class StatsRouter extends Router {
 	public StatsRouter(Context context) throws ConfigurationException {
 		super(context);
 
-		TemplateRoute route = attach("?" + StatsResource.USER_QUERY_PARAMETER + "user={user}", StatsResource.class);
+		TemplateRoute route = attach("?" + StatsResource.USER_QUERY_PARAMETER + "={user}", StatsResource.class);
 		route.setMatchingQuery(true);
 		route.getTemplate().getVariables()
 				.put("user", new Variable(Variable.TYPE_URI_QUERY));

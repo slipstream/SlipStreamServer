@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -32,7 +33,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.Lob;
 
 import org.restlet.data.Form;
 
@@ -63,7 +63,7 @@ public abstract class OneShotAction {
 
 	private Timestamp lastModified;
 
-	@Lob
+	@Column(length=1024)
 	private String encodedForm;
 
 	protected OneShotAction() {

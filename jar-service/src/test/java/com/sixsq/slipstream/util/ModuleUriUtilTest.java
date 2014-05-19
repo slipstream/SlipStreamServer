@@ -44,6 +44,8 @@ public class ModuleUriUtilTest {
 				.extractShortNameFromResourceUri(testUri));
 		assertEquals("gamma", ModuleUriUtil
 				.extractShortNameFromResourceUri(testUriNoVersion));
+		assertEquals("gamma", ModuleUriUtil
+				.extractShortNameFromResourceUri(testUriDefaultVersion));
 	}
 
 	@Test
@@ -60,6 +62,8 @@ public class ModuleUriUtilTest {
 				.extractVersionFromResourceUri(testUriNoVersion));
 		assertEquals(-1, ModuleUriUtil
 				.extractVersionFromResourceUri(testUriRoot));
+		assertEquals(-1, ModuleUriUtil
+				.extractVersionFromResourceUri(testUriDefaultVersion));
 	}
 
 	@Test
@@ -100,6 +104,8 @@ public class ModuleUriUtilTest {
 				.extractParentUriFromResourceUri(testUri));
 		assertEquals(Module.RESOURCE_URI_PREFIX + "alpha/beta", ModuleUriUtil
 				.extractParentUriFromResourceUri(testUriNoVersion));
+		assertEquals(Module.RESOURCE_URI_PREFIX + "alpha/beta", ModuleUriUtil
+				.extractParentUriFromResourceUri(testUriDefaultVersion));
 	}
 
 	@Test
