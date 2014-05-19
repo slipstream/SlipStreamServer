@@ -20,6 +20,7 @@ package com.sixsq.slipstream.authz;
  * -=================================================================-
  */
 
+import org.restlet.Application;
 import org.restlet.data.ClientInfo;
 import org.restlet.security.Enroler;
 import org.restlet.security.Role;
@@ -31,8 +32,12 @@ import com.sixsq.slipstream.persistence.User;
 
 public class SuperEnroler implements Enroler {
 
-	public final static Role SUPER = new Role("super",
-			"Privileged user (i.e. administrator)");
+	public static Role Super;
+
+	public SuperEnroler(Application application) {
+		Super = new Role(application,
+				"Privileged user (i.e. administrator)");
+	}
 
 	public void enrole(ClientInfo clientInfo) {
 		User user = null;
@@ -44,7 +49,7 @@ public class SuperEnroler implements Enroler {
 			Util.throwClientValidationError(e.getMessage());
 		}
 		if (user != null && user.isSuper()) {
-			clientInfo.getRoles().add(SUPER);
+			clientInfo.getRoles().add(Super);
 		}
 
 	}

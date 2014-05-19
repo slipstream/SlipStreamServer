@@ -171,8 +171,8 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 						.extractShortNameFromResourceUri(getParameterized()
 								.getName()));
 		boolean newInQuery = extractNewFlagFromQuery();
-		boolean doesntExists = !isExisting();
-		return newInQuery || newInUri || doesntExists;
+		boolean exists = isExisting();
+		return newInQuery || newInUri || !exists;
 	}
 
 	protected void addParametersForEditing() throws ValidationException,

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Map.Entry;
 
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
@@ -193,6 +194,8 @@ public class UserResource extends ParameterizedResource<User> {
 		} catch (ValidationException e) {
 			throwClientBadRequest(e.getMessage());
 		}
+		
+		getResponse().setEntity(null, MediaType.APPLICATION_WWW_FORM);
 	}
 
 	@Put("xml")
@@ -212,6 +215,8 @@ public class UserResource extends ParameterizedResource<User> {
 		} else {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
+
+		getResponse().setEntity(null, MediaType.APPLICATION_XML);
 	}
 
 	private User xmlToUser() {

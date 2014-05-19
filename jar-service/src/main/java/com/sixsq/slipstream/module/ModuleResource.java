@@ -365,10 +365,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		// Check that the new proposed module doesn't already exists.
 		// We need to do this here since the standard AA process runs before
 		// the module name is extracted from the request.
-		if (isNew()) {
-			if (loadModule(moduleUri) != null) {
-				throwClientForbiddenError("Cannot create this resource. Does it already exist?");
-			}
+		if (isExisting()) {
+			throwClientForbiddenError("Cannot create this resource. Does it already exist?");
 		}
 	}
 
