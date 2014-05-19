@@ -120,10 +120,10 @@ public class RuntimeParameterStateMachineTest extends
 		
 		assertState(run, States.Finalizing, newState);
 
-		newState = completeCurrentState(node1CompleteKey, run);
-		newState = completeCurrentState(node2CompleteKey, run);
+		//newState = completeCurrentState(node1CompleteKey, run);
+		//newState = completeCurrentState(node2CompleteKey, run);
 
-		assertState(run, States.Finalizing, newState);
+		//assertState(run, States.Finalizing, newState);
 
 		newState = completeCurrentState(orchestratorStateKey, run);
 		

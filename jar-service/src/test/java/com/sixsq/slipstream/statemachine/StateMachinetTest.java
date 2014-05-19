@@ -184,14 +184,10 @@ public class StateMachinetTest {
 		em = PersistenceUtil.createEntityManager();
 		run = em.find(Run.class, run.getResourceUri());
 		assertThat(run.getRuntimeParameterValue("ss:state"),
-				is(States.Finalizing.toString()));
+				is(States.Done.toString()));
 		assertThat(run.getRuntimeParameterValue("n1.1:state"),
-				is(States.Finalizing.toString()));
+				is(States.Done.toString()));
 		em.close();
-
-		assertState(sc, States.Finalizing);
-
-		sc.updateState("n2.1");
 
 		assertState(sc, States.Done);
 
