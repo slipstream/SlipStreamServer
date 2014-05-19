@@ -89,8 +89,7 @@
     (go
       (while true
         (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
-          (if (nil? user)
-            (log/log-info "Collect reader " i " loop idle. Looping...")
+          (when (not-nil? user)
             (try
               (log/log-info (str "executing collect request for " (.getName user) " and " (.getConnectorInstanceName connector)))
               (collect! user connector)
@@ -123,13 +122,11 @@
 	  (while true
 	    (<! (timeout timeout-online-loop))
 	    (let [users (online-users)]
-	      (log/log-info "inserting online users requests")
 	      (insert-collection-requests users online-collector-chan))))
   (go
 	  (while true
 	    (<! (timeout timeout-all-users-loop))
 	    (let [users (users)]
-	      (log/log-info "inserting all users requests")
 	      (insert-collection-requests users all-collector-chan)))))
 
 (defn -start
