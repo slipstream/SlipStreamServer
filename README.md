@@ -1,1 +1,1 @@
-See [SlipStreamParent](https://github.com/slipstream/SlipStreamParent)
+See [SlipStream](https://github.com/slipstream/SlipStream)
