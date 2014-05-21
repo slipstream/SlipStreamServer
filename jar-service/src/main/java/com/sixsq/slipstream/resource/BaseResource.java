@@ -217,10 +217,6 @@ public abstract class BaseResource extends ServerResource {
 				.equals(trimmed));
 	}
 
-	private String getQueryValue(String key) {
-		return (String) getRequest().getAttributes().get(key);
-	}
-
 	boolean isSetInQuery(String key) {
 		Reference resourceRef = getRequest().getResourceRef();
 		Form form = resourceRef.getQueryAsForm();

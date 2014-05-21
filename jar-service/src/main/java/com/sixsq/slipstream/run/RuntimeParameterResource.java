@@ -147,7 +147,7 @@ public class RuntimeParameterResource extends ServerResource {
 		runtimeParameter.setIsSet(false);
 		runtimeParameter.store();
 
-		getResponse().setStatus(Status.SUCCESS_OK);
+		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
 
 	@Get
@@ -189,6 +189,7 @@ public class RuntimeParameterResource extends ServerResource {
 
 		transaction.commit();
 		em.close();
+		getResponse().setEntity(null, MediaType.ALL);
 	}
 
 	private String extractValueFromEntity(Representation entity) {

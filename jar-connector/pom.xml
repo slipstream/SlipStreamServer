@@ -67,26 +67,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.jclouds</groupId>
-			<artifactId>jclouds-all</artifactId>
-                        <version>1.5.5</version>
-			<type>jar</type>
-		</dependency>
-
-<!-- 		<dependency>
-			<groupId>org.jclouds.driver</groupId>
-			<artifactId>jclouds-slf4j</artifactId>
-			<type>jar</type>
-		</dependency>
- -->
-		<dependency>
-			<groupId>org.jclouds.driver</groupId>
-			<artifactId>jclouds-sshj</artifactId>
-                        <version>1.5.5</version>
-			<type>jar</type>
-		</dependency>
-
-		<dependency>
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
 			<type>jar</type>

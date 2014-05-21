@@ -47,7 +47,7 @@ public class ReportsAuthorizer extends Authorizer {
 	}
 
 	private boolean isSuperRole(Request request) {
-		return request.getClientInfo().getRoles().contains(SuperEnroler.SUPER);
+		return request.getClientInfo().getRoles().contains(SuperEnroler.Super);
 	}
 
 }

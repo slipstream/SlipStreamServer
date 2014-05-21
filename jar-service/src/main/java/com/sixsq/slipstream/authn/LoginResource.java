@@ -134,6 +134,7 @@ public class LoginResource extends AuthnResource {
 			String absolutePath = RequestUtil.constructAbsolutePath(redirectURL.getPath());
 			response.redirectSeeOther(absolutePath);
 		} else {
+			response.setEntity(null, MediaType.ALL);
 			response.setStatus(SUCCESS_OK);
 		}
 	}

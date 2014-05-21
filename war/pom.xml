@@ -105,13 +105,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jclouds</groupId>
-      <artifactId>jclouds-all</artifactId>
-      <version>1.5.5</version>
-      <type>jar</type>
-    </dependency>
-
-    <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
       <version>0.1.49</version>
