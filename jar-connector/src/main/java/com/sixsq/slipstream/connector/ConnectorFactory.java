@@ -108,8 +108,8 @@ public class ConnectorFactory {
             } else {
                 throw new SlipStreamRuntimeException(
                         "cannot load cloud connector for " + cloudServiceName + " using key " +
-                                DiscoverableConnectorServiceLoader
-                                .convertClassNameToServiceName(cloudServiceName));
+                                DiscoverableConnectorServiceLoader.convertClassNameToServiceName(cloudServiceName)
+                );
             }
 
         } catch (Exception e) {
@@ -157,16 +157,18 @@ public class ConnectorFactory {
         Map<String, String> instanceMap = new HashMap<String, String>();
 
         for (String c : instances) {
-            String[] nameAndClassName = c.split(":");
 
-            boolean isNamed = nameAndClassName.length > 1;
+            // A connector ID (either cloud service name or class name) with an optional instance name.
+            String[] namePair = c.split(":");
+
+            boolean isNamed = namePair.length > 1;
 
             // The loader will maintain compatibility for configurations with raw class names
             // rather than just the service names.
-            String cloudServiceName = (isNamed) ? nameAndClassName[1].trim() : nameAndClassName[0].trim();
+            String cloudServiceName = (isNamed) ? namePair[1].trim() : namePair[0].trim();
 
-            // Default to cloud service name for instance name.
-            String instanceName = (isNamed) ? nameAndClassName[0].trim() : cloudServiceName;
+            // Default to cloud service name if no instance name is given.
+            String instanceName = (isNamed) ? namePair[0].trim() : convertClassNameToServiceName(cloudServiceName);
 
             instanceMap.put(instanceName, cloudServiceName);
         }
@@ -179,7 +181,16 @@ public class ConnectorFactory {
     private static String convertClassNameToServiceName(String className) {
         String[] elements = className.split(".");
         if (elements.length > 1) {
-            return elements[elements.length - 2];
+            String name = elements[elements.length - 2];
+
+            // Special case for the EC2 connector which doesn't follow the usual naming scheme of
+            // residing is a directory named after the cloud service name.  (Directory is 'aws' but
+            // the cloud service name is 'ec2'.)
+            if ("aws".equals(name)) {
+                return "ec2";
+            } else {
+                return name;
+            }
         } else {
             return className;
         }
