@@ -31,7 +31,7 @@
 (defn update
   [user]
   (let [xml-str (get-measurements user)
-        tmp-file (java.io.File/createTempFile (.getName user) ".xml")]
+        tmp-file (java.io.File/createTempFile (str "measures-" (.getName user)) ".xml")]
     (try
       (do
         (with-open [w (clojure.java.io/writer tmp-file)]
