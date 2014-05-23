@@ -34,8 +34,7 @@
         tmp-file (java.io.File/createTempFile (str "measures-" (.getName user)) ".xml")]
     (try
       (do
-        (with-open [w (clojure.java.io/writer tmp-file)]
-          (.write w xml-str))
+        (spit tmp-file xml-str)
         (report-metrics (.getAbsolutePath tmp-file)))
       (catch Exception e
         (do
