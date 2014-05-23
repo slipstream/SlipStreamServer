@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ServerResource;
@@ -222,8 +223,9 @@ public class ModuleResourceTest extends ResourceTestBase {
 		Module project = new ProjectModule(projectName);
 		String content = SerializationUtil.toXmlString(project);
 
+		StringRepresentation stringRepresentation = new StringRepresentation(content, MediaType.APPLICATION_XML);
 		Request request = createPutRequest(projectName,
-				new StringRepresentation(content), user);
+				stringRepresentation, user);
 
 		Response response = executeRequest(request);
 

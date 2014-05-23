@@ -418,9 +418,9 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void normalUserCreatesInNewState() throws ValidationException,
+	public void normalUserCreatedInNewState() throws ValidationException,
 			ConfigurationException {
-		User willBeNew = new User("normalUserCreatesInNewState");
+		User willBeNew = new User("normalUserCreatedInNewState");
 
 		Request request = createPutRequest(willBeNew, user.getName());
 		Response response = executeRequest(request);

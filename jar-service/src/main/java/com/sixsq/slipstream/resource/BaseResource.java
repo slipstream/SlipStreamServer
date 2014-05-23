@@ -217,13 +217,13 @@ public abstract class BaseResource extends ServerResource {
 				.equals(trimmed));
 	}
 
-	boolean isSetInQuery(String key) {
+	private boolean isSetInQuery(String key) {
 		Reference resourceRef = getRequest().getResourceRef();
 		Form form = resourceRef.getQueryAsForm();
 		return isTrue(form.getFirstValue(key));
 	}
 
-	boolean extractNewFlagFromQuery() {
+	protected boolean extractNewFlagFromQuery() {
 		return isQueryValueSetTrue("new");
 	}
 

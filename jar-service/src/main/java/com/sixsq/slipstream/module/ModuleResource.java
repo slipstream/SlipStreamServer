@@ -221,7 +221,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 				+ module.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 
-		if (isNew()) {
+		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
 	}
@@ -238,7 +238,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 				+ module.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 
-		if (isNew()) {
+		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
 	}
@@ -366,7 +366,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		// We need to do this here since the standard AA process runs before
 		// the module name is extracted from the request.
 		if (isExisting()) {
-			throwClientForbiddenError("Cannot create this resource. Does it already exist?");
+			throwClientForbiddenError("Cannot create this resource. It already exist.");
 		}
 	}
 
@@ -493,7 +493,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientError(e);
 		}
 
-		if (!isNew()) {
+		if (newInQuery() && !isExisting()) {
 			processor.adjustModule(previous);
 		}
 
@@ -563,7 +563,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	private boolean authorizeGet() {
-		if (getUser().isSuper() || isNew()) {
+		if (getUser().isSuper() || newTemplateResource()) {
 			return true;
 		}
 		return getParameterized().getAuthz().canGet(getUser());
@@ -578,10 +578,15 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	protected boolean authorizePut() {
 
+		if (newTemplateResource()) {
+			return false;
+		}
+		
 		if (getUser().isSuper()) {
 			return true;
 		}
-		if (isNew()) {
+		
+		if (newInQuery() && !isExisting()) {
 			// check parent
 			String parentResourceUri = null;
 			try {
@@ -598,9 +603,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 				return parent.getAuthz().canCreateChildren(getUser());
 			}
 		}
-		boolean isExisting = isExisting(); // also true for isNew
 
-		return isExisting ? Module
+		return isExisting() ? Module
 				.loadLatest(getParameterized().getResourceUri()).getAuthz()
 				.canPut(getUser()) : true;
 	}
