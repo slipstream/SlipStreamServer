@@ -71,8 +71,8 @@
   [user]
   (let [ch (chan 1)]
     (go
-      (let [[v c] (alts! [ch (timeout timeout-collect)])]
-        (if (nil? v)
+      (let [res (alts! [ch (timeout timeout-collect)])]
+        (if (nil? res)
           (log/log-error
             "Timeout updating metrics for user "
             (.getName user))
