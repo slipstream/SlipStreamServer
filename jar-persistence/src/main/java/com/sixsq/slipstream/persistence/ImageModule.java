@@ -458,6 +458,16 @@ public class ImageModule extends Module {
 
 	public ImageModule store() {
 		setVersion();
+		if(targets != null) {
+			for(Target t : targets) {
+				t.setModule(this);
+			}
+		}
+		if(packages != null) {
+			for(Package p : packages) {
+				p.setModule(this);
+			}
+		}
 		for (CloudImageIdentifier id : getCloudImageIdentifiers()) {
 			id.setResourceUri(getResourceUri() + "/" + id.getCloudServiceName());
 		}
