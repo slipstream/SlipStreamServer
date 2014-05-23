@@ -106,7 +106,10 @@ public class ConnectorFactory {
             if (stub != null) {
                 return stub.getInstance(instanceName);
             } else {
-                throw new SlipStreamRuntimeException("cannot load cloud connector for " + cloudServiceName);
+                throw new SlipStreamRuntimeException(
+                        "cannot load cloud connector for " + cloudServiceName + " using key " +
+                                DiscoverableConnectorServiceLoader
+                                .convertClassNameToServiceName(cloudServiceName));
             }
 
         } catch (Exception e) {
@@ -158,9 +161,9 @@ public class ConnectorFactory {
 
             boolean isNamed = nameAndClassName.length > 1;
 
-            // For compatibility with old configurations, convert the class name to a service name.
+            // The loader will maintain compatibility for configurations with raw class names
+            // rather than just the service names.
             String cloudServiceName = (isNamed) ? nameAndClassName[1].trim() : nameAndClassName[0].trim();
-            cloudServiceName = convertClassNameToServiceName(cloudServiceName);
 
             // Default to cloud service name for instance name.
             String instanceName = (isNamed) ? nameAndClassName[0].trim() : cloudServiceName;

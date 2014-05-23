@@ -58,7 +58,7 @@ public final class DiscoverableConnectorServiceLoader {
         // Create map of ConnectorStub objects keyed by the cloud service name.
         Map<String, DiscoverableConnectorService> impls = new HashMap<String, DiscoverableConnectorService>();
         for (DiscoverableConnectorService stub : loader) {
-            String key = stub.getCloudServiceName();
+            String key = stub.getCloudServiceName().toLowerCase();
             DiscoverableConnectorService existing = impls.put(key, stub);
             if (existing != null) {
                 Logger.warning(String.format(removedMessageFmt, existing.getClass().getName(), key));
@@ -88,11 +88,24 @@ public final class DiscoverableConnectorServiceLoader {
     }
 
     public static DiscoverableConnectorService getConnectorStub(String cloudServiceName) {
-        return stubs.get(cloudServiceName);
+        String key = convertClassNameToServiceName(cloudServiceName).toLowerCase();
+        return stubs.get(key);
     }
 
     public static List<String> getCloudServiceNames() {
         return cloudServiceNames;
+    }
+
+    // If the argument looks to be a class name, then derive the cloud service name from the class name.  The cloud
+    // service name will be the penultimate value when split on periods.  If there are no periods in the value,
+    // then just return the value itself.
+    public static String convertClassNameToServiceName(String className) {
+        String[] elements = className.split("\\.");
+        if (elements.length > 1) {
+            return elements[elements.length - 2];
+        } else {
+            return className;
+        }
     }
 
 }
