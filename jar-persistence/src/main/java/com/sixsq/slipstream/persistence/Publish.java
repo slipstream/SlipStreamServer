@@ -52,7 +52,7 @@ public class Publish implements Serializable {
 	@Attribute(required = false)
 	private String publisher;
 	
-	@Text
+	@Text(required=false)
 	private String comment = "";
 
 	private Publish() {
