@@ -50,7 +50,7 @@ public class OkeanosConnector extends OpenStackConnector {
     }
 
     public OkeanosConnector(String instanceName) {
-        super(instanceName);
+        super(instanceName != null ? instanceName : CLOUD_SERVICE_NAME);
     }
 
     @Override
