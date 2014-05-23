@@ -178,8 +178,8 @@ public class ConnectorFactory {
     // If the argument looks to be a class name, then derive the cloud service name from the class name.  The cloud
     // service name will be the penultimate value when split on periods.  If there are no periods in the value,
     // then just return the value itself.
-    private static String convertClassNameToServiceName(String className) {
-        String[] elements = className.split(".");
+    public static String convertClassNameToServiceName(String configConnectorName) {
+        String[] elements = configConnectorName.split("\\.");
         if (elements.length > 1) {
             String name = elements[elements.length - 2];
 
@@ -192,7 +192,7 @@ public class ConnectorFactory {
                 return name;
             }
         } else {
-            return className;
+            return configConnectorName;
         }
     }
 

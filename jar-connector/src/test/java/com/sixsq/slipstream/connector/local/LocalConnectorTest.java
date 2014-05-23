@@ -20,13 +20,59 @@ package com.sixsq.slipstream.connector.local;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.stratuslab.StratusLabConnector;
+import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
+import com.sixsq.slipstream.util.CommonTestUtil;
 import org.junit.Test;
 
+import java.util.List;
+
+import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getCloudServiceNames;
+import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getConnectorStub;
+import static com.sixsq.slipstream.connector.local.LocalConnector.CLOUD_SERVICE_NAME;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 public class LocalConnectorTest {
+
+    @Test
+    public void ensureConnectorIsLoaded() throws Exception {
+
+        List<String> cloudServiceNames = getCloudServiceNames();
+        assertThat(cloudServiceNames.size(), greaterThan(0));
+        assert (cloudServiceNames.contains(CLOUD_SERVICE_NAME));
+
+        assertThat(getConnectorStub(CLOUD_SERVICE_NAME), notNullValue());
+    }
+
+    @Test
+    public void ensureConnectorFactoryFindsConnectorWithName() throws Exception {
+
+        String configConnectorName = CLOUD_SERVICE_NAME;
+        String cloudServiceName = CLOUD_SERVICE_NAME;
+        SystemConfigurationParametersFactoryBase factory = new LocalSystemConfigurationParametersFactory();
+
+        CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
+
+        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+
+        ConnectorFactory.resetConnectors();
+    }
+
+    @Test
+    public void ensureConnectorFactoryFindsConnectorWithClassName() throws Exception {
+
+        String configConnectorName = LocalConnector.class.getCanonicalName();
+        String cloudServiceName = CLOUD_SERVICE_NAME;
+        SystemConfigurationParametersFactoryBase factory = new LocalSystemConfigurationParametersFactory();
+
+        CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
+
+        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+
+        ConnectorFactory.resetConnectors();
+    }
 
     @Test
     public void checkConstructors() {
