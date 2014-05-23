@@ -88,24 +88,12 @@ public final class DiscoverableConnectorServiceLoader {
     }
 
     public static DiscoverableConnectorService getConnectorStub(String cloudServiceName) {
-        String key = convertClassNameToServiceName(cloudServiceName).toLowerCase();
+        String key = ConnectorFactory.convertClassNameToServiceName(cloudServiceName).toLowerCase();
         return stubs.get(key);
     }
 
     public static List<String> getCloudServiceNames() {
         return cloudServiceNames;
-    }
-
-    // If the argument looks to be a class name, then derive the cloud service name from the class name.  The cloud
-    // service name will be the penultimate value when split on periods.  If there are no periods in the value,
-    // then just return the value itself.
-    public static String convertClassNameToServiceName(String className) {
-        String[] elements = className.split("\\.");
-        if (elements.length > 1) {
-            return elements[elements.length - 2];
-        } else {
-            return className;
-        }
     }
 
 }

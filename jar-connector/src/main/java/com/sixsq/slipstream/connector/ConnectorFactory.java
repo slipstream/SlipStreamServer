@@ -108,7 +108,7 @@ public class ConnectorFactory {
             } else {
                 throw new SlipStreamRuntimeException(
                         "cannot load cloud connector for " + cloudServiceName + " using key " +
-                                DiscoverableConnectorServiceLoader.convertClassNameToServiceName(cloudServiceName)
+                                convertClassNameToServiceName(cloudServiceName)
                 );
             }
 
