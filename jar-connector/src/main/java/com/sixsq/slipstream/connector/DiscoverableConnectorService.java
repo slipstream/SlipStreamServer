@@ -21,15 +21,15 @@ package com.sixsq.slipstream.connector;
  */
 
 /**
- * Classes that implement this interface can instantiate a cloud connector for a particular cloud service.  These stub
- * classes are intended to be discovered automatically via the ConnectorStubLoader class.
+ * Classes that implement this interface can instantiate a cloud connector for a particular cloud service.  These
+ * classes are intended to be discovered automatically via the DiscoverableConnectorServiceLoader class.
  *
  * Classes implementing this interface _must_ be immutable for thread safety.
  */
 public interface DiscoverableConnectorService {
 
     /**
-     * Returns the name of the cloud service that can be accessed via the Connectors created by this stub.  This method
+     * Returns the name of the cloud service that can be accessed via the Connectors created by this class.  This method
      * must return a non-empty String.
      *
      * @return cloud service name (non-empty string)
@@ -46,15 +46,15 @@ public interface DiscoverableConnectorService {
     public Connector getInstance(String instanceName);
 
     /**
-     * Initializes the ConnectorStub at service initialization time.  The stub should perform any global initialization
-     * needed by cloud connector instances.  This will be called only once per ConnectorStub.
+     * Initializes the binding for the service at service initialization time.  The binding should perform any global
+     * initialization needed by cloud connector instances.  This will be called only once per connector..
      */
     public void initialize();
 
     /**
-     * Shuts down and frees any allocated resources associated with the ConnectorStub.  This method will be called once
-     * just before the shutdown of the SlipStream service.  Connectors generated from the ConnectorStub should not be
-     * used after a call to this method.
+     * Shuts down and frees any allocated resources associated with the connector.  This method will be called once just
+     * before the shutdown of the SlipStream service.  Connectors generated from the binding classes should not be used
+     * after a call to this method.
      */
     public void shutdown();
 }

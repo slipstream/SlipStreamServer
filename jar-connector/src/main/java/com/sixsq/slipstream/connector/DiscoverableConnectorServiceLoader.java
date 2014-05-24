@@ -30,22 +30,23 @@ import java.util.Map;
 import java.util.ServiceLoader;
 
 /**
- * This class will dynamically load all ConnectorStub implementations available from the classpath via the standard
- * ServiceLoader facilities of the JVM (1.6+).
+ * This class will dynamically load all DiscoverableConnectorService implementations available from the classpath via
+ * the standard ServiceLoader facilities of the JVM (1.6+).
  *
- * To be visible, the containing jar file must be correctly configured.  Each jar file with ConnectorStub
+ * To be visible, the containing jar file must be correctly configured.  Each jar file with DiscoverableConnectorService
  * implementations must contain the file:
  *
- * META-INF/services/com.sixsq.slipstream.connector.ConnectorStub
+ * META-INF/services/com.sixsq.slipstream.connector.DiscoverableConnectorService
  *
  * This file contains a list (newline separated) of concrete class names that implement this interface.  This file must
  * be UTF-8 encoded.
  */
 public final class DiscoverableConnectorServiceLoader {
 
-    private static final ServiceLoader<DiscoverableConnectorService> loader = ServiceLoader.load(DiscoverableConnectorService.class);
+    private static final ServiceLoader<DiscoverableConnectorService> loader = ServiceLoader
+            .load(DiscoverableConnectorService.class);
 
-    private static final Map<String, DiscoverableConnectorService> stubs;
+    private static final Map<String, DiscoverableConnectorService> svcs;
 
     private static final List<String> cloudServiceNames;
 
@@ -55,41 +56,41 @@ public final class DiscoverableConnectorServiceLoader {
 
     static {
 
-        // Create map of ConnectorStub objects keyed by the cloud service name.
+        // Create map of DiscoverableConnectorService objects keyed by the cloud service name.
         Map<String, DiscoverableConnectorService> impls = new HashMap<String, DiscoverableConnectorService>();
-        for (DiscoverableConnectorService stub : loader) {
-            String key = stub.getCloudServiceName().toLowerCase();
-            DiscoverableConnectorService existing = impls.put(key, stub);
+        for (DiscoverableConnectorService svc : loader) {
+            String key = svc.getCloudServiceName().toLowerCase();
+            DiscoverableConnectorService existing = impls.put(key, svc);
             if (existing != null) {
                 Logger.warning(String.format(removedMessageFmt, existing.getClass().getName(), key));
             }
-            Logger.info(String.format(loadMessageFmt, stub.getClass().getName(), key));
+            Logger.info(String.format(loadMessageFmt, svc.getClass().getName(), key));
         }
-        stubs = Collections.unmodifiableMap(impls);
+        svcs = Collections.unmodifiableMap(impls);
 
         // Create an immutable, sorted list of all cloud service names.
         List<String> names = new ArrayList<String>();
-        names.addAll(stubs.keySet());
+        names.addAll(svcs.keySet());
         Collections.sort(names);
         cloudServiceNames = Collections.unmodifiableList(names);
 
     }
 
-    public static void initializeAllStubs() {
-        for (DiscoverableConnectorService stub : stubs.values()) {
-            stub.initialize();
+    public static void initializeAll() {
+        for (DiscoverableConnectorService svc : svcs.values()) {
+            svc.initialize();
         }
     }
 
-    public static void shutdownAllStubs() {
-        for (DiscoverableConnectorService stub : stubs.values()) {
-            stub.shutdown();
+    public static void shutdownAll() {
+        for (DiscoverableConnectorService svc : svcs.values()) {
+            svc.shutdown();
         }
     }
 
-    public static DiscoverableConnectorService getConnectorStub(String cloudServiceName) {
+    public static DiscoverableConnectorService getConnectorService(String cloudServiceName) {
         String key = ConnectorFactory.convertClassNameToServiceName(cloudServiceName).toLowerCase();
-        return stubs.get(key);
+        return svcs.get(key);
     }
 
     public static List<String> getCloudServiceNames() {

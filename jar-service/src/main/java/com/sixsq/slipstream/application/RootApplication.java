@@ -198,12 +198,12 @@ public class RootApplication extends Application {
     @Override
     public void start() throws Exception {
         super.start();
-        DiscoverableConnectorServiceLoader.initializeAllStubs();
+        DiscoverableConnectorServiceLoader.initializeAll();
     }
 
     @Override
     public void stop() throws Exception {
-        DiscoverableConnectorServiceLoader.shutdownAllStubs();
+        DiscoverableConnectorServiceLoader.shutdownAll();
         super.stop();
     }
 

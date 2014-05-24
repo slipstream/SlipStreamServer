@@ -28,7 +28,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getCloudServiceNames;
-import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getConnectorStub;
+import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getConnectorService;
 import static com.sixsq.slipstream.connector.cloudstack.CloudStackConnector.CLOUD_SERVICE_NAME;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
@@ -43,7 +43,7 @@ public class CloudStackConnectorTest {
         assertThat(cloudServiceNames.size(), greaterThan(0));
         assert (cloudServiceNames.contains(CLOUD_SERVICE_NAME));
 
-        assertThat(getConnectorStub(CLOUD_SERVICE_NAME), notNullValue());
+        assertThat(getConnectorService(CLOUD_SERVICE_NAME), notNullValue());
     }
 
     @Test

@@ -102,9 +102,9 @@ public class ConnectorFactory {
     private static Connector loadConnector(String cloudServiceName, String instanceName) throws ConfigurationException {
         try {
 
-            DiscoverableConnectorService stub = DiscoverableConnectorServiceLoader.getConnectorStub(cloudServiceName);
-            if (stub != null) {
-                return stub.getInstance(instanceName);
+            DiscoverableConnectorService svc = DiscoverableConnectorServiceLoader.getConnectorService(cloudServiceName);
+            if (svc != null) {
+                return svc.getInstance(instanceName);
             } else {
                 throw new SlipStreamRuntimeException(
                         "cannot load cloud connector for " + cloudServiceName + " using key " +
