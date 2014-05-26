@@ -203,7 +203,7 @@ public class UserResource extends ParameterizedResource<User> {
 			throwClientBadRequest(e.getMessage());
 		}
 
-		getResponse().setEntity(null, MediaType.APPLICATION_WWW_FORM);
+		setEmptyEntity(MediaType.APPLICATION_WWW_FORM);
 	}
 
 	@Put("xml")
@@ -224,7 +224,7 @@ public class UserResource extends ParameterizedResource<User> {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
 
-		getResponse().setEntity(null, MediaType.APPLICATION_XML);
+		setEmptyEntity(MediaType.APPLICATION_XML);
 	}
 
 	private User xmlToUser() {

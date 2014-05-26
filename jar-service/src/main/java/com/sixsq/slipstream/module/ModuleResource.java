@@ -224,6 +224,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
+
+		setEmptyEntity(MediaType.APPLICATION_WWW_FORM);
 	}
 
 	@Put("multipart")
@@ -241,6 +243,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
+		setEmptyEntity(MediaType.MULTIPART_ALL);
 	}
 
 	private Module xmlMultipartToModule() {
@@ -284,12 +287,11 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		updateOrCreate(module);
 
-		if (isExisting()) {
-			getResponse().setStatus(Status.SUCCESS_OK);
-		} else {
+		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
-		getResponse().setLocationRef("/" + module.getResourceUri());		
+		getResponse().setLocationRef("/" + module.getResourceUri());
+		setEmptyEntity(MediaType.APPLICATION_XML);
 	}
 
 	private Module xmlToModule() {
