@@ -363,13 +363,6 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		if (!targetUri.equals(moduleUri)) {
 			throwClientBadRequest("The uploaded module does not correspond to the target module uri");
 		}
-
-		// Check that the new proposed module doesn't already exists.
-		// We need to do this here since the standard AA process runs before
-		// the module name is extracted from the request.
-		if (isExisting()) {
-			throwClientForbiddenError("Cannot create this resource. It already exist.");
-		}
 	}
 
 	@SuppressWarnings("unchecked")

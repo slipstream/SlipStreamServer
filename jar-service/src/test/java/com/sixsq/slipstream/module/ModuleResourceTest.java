@@ -167,7 +167,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void putNewModuleOnExistingModuleIsForbiden()
+	public void putNewModuleOnExistingModule()
 			throws ValidationException {
 		String projectName = "existingProject";
 		Module project = createAndStoreProject(projectName);
@@ -175,7 +175,20 @@ public class ModuleResourceTest extends ResourceTestBase {
 		Form form = createForm(projectName, category);
 		Request request = createPutRequest("existingProject",
 				form.getWebRepresentation(), user);
-		request.getAttributes().put("new", "true");
+		Response response = executeRequest(request);
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
+		project.remove();
+	}
+
+	@Test
+	public void putNewModuleOnExistingModuleIsForbiden()
+			throws ValidationException {
+		String projectName = "existingProject";
+		Module project = createAndStoreProject(projectName);
+		ModuleCategory category = ModuleCategory.Project;
+		Form form = createForm(projectName, category);
+		Request request = createPutRequest("existingProject",
+				form.getWebRepresentation(), user, TEST_REQUEST_NAME + "?new=true");
 		Response response = executeRequest(request);
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 		project.remove();
@@ -214,7 +227,6 @@ public class ModuleResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	@Ignore
 	public void putModuleProjectAsXml() throws ConfigurationException,
 			SlipStreamClientException {
 
