@@ -32,7 +32,6 @@ import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
