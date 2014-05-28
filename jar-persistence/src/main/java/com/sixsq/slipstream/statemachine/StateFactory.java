@@ -54,6 +54,12 @@ public class StateFactory {
         case Done:
         	newState = new DoneState(extrinsicState);
         	break;
+        case Cancelled:
+        	newState = new CancelledState(extrinsicState);
+        	break;
+        case Aborted:
+        	newState = new AbortedState(extrinsicState);
+        	break;
         default:
             throw (new InvalidStateException("Unknown state: " + state));
         }

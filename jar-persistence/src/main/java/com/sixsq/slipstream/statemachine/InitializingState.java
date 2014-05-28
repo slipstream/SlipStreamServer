@@ -21,7 +21,7 @@ package com.sixsq.slipstream.statemachine;
  */
 
 
-public class InitializingState extends State {
+public class InitializingState extends OrchestratorsSynchronizedState {
 
 	public InitializingState(ExtrinsicState extrinsicState) {
 		super(extrinsicState);

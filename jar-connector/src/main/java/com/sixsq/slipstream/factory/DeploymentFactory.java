@@ -52,41 +52,14 @@ public class DeploymentFactory extends RunFactory {
 			throws ValidationException {
 		Run run = new Run(module, RunType.Orchestration, cloudService, user);
 		
-		run = addOnSuccessRunForeverToParameters(run, user);
-		run = addOnErrorRunForeverToParameters(run, user);
-		
-		return run;
-	}
-
-	private Run addOnSuccessRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
-				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		
-		UserParameter up = user.getParameter(key);
-		if (up != null) {
-			run.setParameter(new RunParameter(up.getName(), up.getValue("false"), up.getDescription()));
-		}
-		
-		return run;
-	}
-	
-	private Run addOnErrorRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
-				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		
-		UserParameter up = user.getParameter(key);
-		if (up != null) {
-			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
-		}
-		
 		return run;
 	}
 	
 	@Override
-	protected void initialize(Module module, Run run, String cloudService)
+	protected void initialize(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
 
-		super.initialize(module, run, cloudService);
+		super.initialize(module, run, user, cloudService);
 
 		initializeVmRuntimeParameters(run);
 		initializeOrchestrtorRuntimeParameters(run);

@@ -27,12 +27,19 @@ public class ExtrinsicState {
 
 	RuntimeParameter completed;
 	RuntimeParameter failing;
+	RuntimeParameter orchestrator;
 	RuntimeParameter state;
 
 	public ExtrinsicState(RuntimeParameter completed,
 			RuntimeParameter failing, RuntimeParameter state) {
+		this(completed, failing, null, state);
+	}
+	
+	public ExtrinsicState(RuntimeParameter completed,
+			RuntimeParameter failing, RuntimeParameter isOrchestrator, RuntimeParameter state) {
 		this.completed = completed;
 		this.failing = failing;
+		this.orchestrator = isOrchestrator;
 		this.state = state;
 	}
 
@@ -42,6 +49,14 @@ public class ExtrinsicState {
 	
 	public boolean isFailing() {
 		return getParameterValueAsBoolean(failing);
+	}
+	
+	public boolean isOrchestrator() {
+		boolean result = false;
+		if (orchestrator != null){
+			result = getParameterValueAsBoolean(orchestrator);
+		}
+		return result;
 	}
 
 	public void setFailing(boolean failing) {

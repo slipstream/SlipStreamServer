@@ -27,11 +27,13 @@ import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PersistenceException;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.simpleframework.xml.Attribute;
 
+import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 @MappedSuperclass
@@ -134,13 +136,22 @@ public abstract class Metadata implements Serializable {
 		}
 	}
 
-	public Metadata store() {
+	public Metadata store() throws SlipStreamDatabaseException {
+		Metadata obj = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
-		EntityTransaction transaction = em.getTransaction();
-		transaction.begin();
-		Metadata obj = em.merge(this);
-		transaction.commit();
-		em.close();
+		EntityTransaction transaction = null;
+		try {
+			transaction = em.getTransaction();
+			transaction.begin();
+			obj = em.merge(this);
+			transaction.commit();
+		} catch (PersistenceException e) {
+			//transaction.rollback();
+			throw new SlipStreamDatabaseException(e.getMessage());
+		} finally {
+			
+			em.close();
+		}
 		return obj;
 	}
 

@@ -79,7 +79,7 @@ public class RunTest {
 
 		Run aborting = new Run(image, RunType.Run, "test", new User("user"));
 		aborting.setStart(twoHourBack);
-		aborting.setState(States.Aborting);
+//		aborting.setState(States.Aborting);
 		aborting.store();
 
 		List<Run> transiant = Run.listOldTransient();

@@ -2,7 +2,7 @@
   (:require [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!!]])
   (:require [slipstream.async.log :as log])
   (:require [slipstream.async.metric-updator :as updator])
-  (:import [com.sixsq.slipstream.persistence Run])
+  (:import [com.sixsq.slipstream.util Terminator])
   (:gen-class
     :name slipstream.async.GarbageCollector
     :methods [#^{:static true}
@@ -19,7 +19,7 @@
 
 (defn purge
   []
-  (Run/purge))
+  (Terminator/purge))
 
 ; This is the channel for queuing all collect requests
 (def collector-chan (chan (sliding-buffer collector-chan-size)))

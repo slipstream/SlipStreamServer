@@ -108,6 +108,9 @@ public class RuntimeParameter extends Metadata {
 			+ COMPLETE_KEY;
 	public static final String GLOBAL_COMPLETE_DESCRIPTION = "Global complete flag, set when run completed";
 
+	public final static String GLOBAL_RECOVERY_MODE_KEY = GLOBAL_NAMESPACE_PREFIX + "recovery.mode";
+	public final static String GLOBAL_RECOVERY_MDDE_DESCRIPTION = "Run abort flag, set when aborting";
+	
 	public final static String MULTIPLICITY_PARAMETER_NAME = "multiplicity";
 	public final static String MULTIPLICITY_PARAMETER_DESCRIPTION = "Multiplicity number";
 
@@ -125,6 +128,9 @@ public class RuntimeParameter extends Metadata {
 
     public static final String URL_SERVICE_KEY = "url.service";
     public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
+    
+    public static final String IS_ORCHESTRATOR_KEY = "is.orchestrator";
+    public static final String IS_ORCHESTRATOR_DESCRIPTION = "True if it's an orchestrator";
 
     public final static int MULTIPLICITY_NODE_START_INDEX = 1;
 

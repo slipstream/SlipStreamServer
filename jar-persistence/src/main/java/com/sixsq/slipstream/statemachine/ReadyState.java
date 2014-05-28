@@ -1,5 +1,12 @@
 package com.sixsq.slipstream.statemachine;
 
+import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
+import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.UserParameter;
+
 /*
  * +=================================================================+
  * SlipStream Server (WAR)
@@ -25,9 +32,30 @@ public class ReadyState extends SynchronizedState {
 
     public ReadyState(ExtrinsicState extrinsicState) {
         super(extrinsicState);
-        nextState = States.Finalizing;
+        
+        Run run = extrinsicState.getRun();
+        
+        if (shouldStayInReady(run)) {
+        	nextState = States.Ready;
+        } else { 
+        	nextState = States.Finalizing;
+        }
     }
 
+	private boolean shouldStayInReady(Run run) {
+		String key = Parameter.constructKey(ParameterCategory.General.toString(),
+				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+		RunParameter onSuccessKeepRunning = run.getParameter(key);
+		
+		key = Parameter.constructKey(ParameterCategory.General.toString(),
+				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
+		RunParameter onErrorKeepRunning = run.getParameter(key);
+		
+		return run.getType() == RunType.Run || 
+				(onSuccessKeepRunning != null && onSuccessKeepRunning.isTrue()) ||
+				(onErrorKeepRunning != null && onErrorKeepRunning.isTrue());
+	}
+	    
     @Override
     public States getState() {
         return States.Ready;

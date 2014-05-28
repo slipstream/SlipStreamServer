@@ -34,6 +34,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
@@ -56,6 +58,7 @@ import com.sixsq.slipstream.user.UserView;
  */
 @SuppressWarnings("serial")
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @NamedQueries({
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
 		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline) FROM User u") })
@@ -458,6 +461,26 @@ public class User extends Parameterized<User, UserParameter> {
 		} catch (ValidationException e) {
 			return _default;
 		}
+	}
+	
+	public void setOnSuccessRunForever(boolean on) throws ValidationException {
+		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+		UserParameter parameter = getParameter(key);
+		if (parameter == null) {
+			parameter = new UserParameter(key);
+			setParameter(parameter);
+		}
+		parameter.setValue(Boolean.toString(on));
+	}
+
+	public void setOnErrorRunForever(boolean on) throws ValidationException {
+		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_ON_ERROR_RUN_FOREVER);
+		UserParameter parameter = getParameter(key);
+		if (parameter == null) {
+			parameter = new UserParameter(key);
+			setParameter(parameter);
+		}
+		parameter.setValue(Boolean.toString(on));
 	}
 
 }

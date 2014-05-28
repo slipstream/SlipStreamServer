@@ -101,6 +101,9 @@ public abstract class CommonTestUtil {
 		} catch (ValidationException e) {
 			throw (new SlipStreamRuntimeException(e));
 		}
+		
+		user.setOnSuccessRunForever(false);
+		user.setOnErrorRunForever(false);
 
 		return user.store();
 	}

@@ -34,22 +34,10 @@ public class SendingReportsState extends SynchronizedState {
 		super(extrinsicState);		
 		nextState = States.Ready;
 	}
-
-	private boolean shouldDetach(Run run) {
-		String key = Parameter.constructKey(ParameterCategory.General.toString(), 
-				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		RunParameter rp = run.getParameter(key);
-		return run.getType() == RunType.Run || (rp != null && rp.isTrue());
-	}
 	
 	@Override
 	public States getState() {
 		return States.SendingReports;
-	}
-	
-	@Override
-	public boolean mustSynchronizeOnFailure() {
-		return true;
 	}
 
 }

@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
@@ -103,6 +104,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public final static String RAM_PARAMETER_NAME = ImageModule.RAM_KEY;
 	public final static String RAM_PARAMETER_DESCRIPTION = "Amount of RAM, in GB";
+	
+	public final static String GARBAGE_COLLECTED_PARAMETER_NAME = "garbage_collected";
+	public final static String GARBAGE_COLLECTED_PARAMETER_DESCRIPTION = "true if the Run was already garbage collected";
+	
 
 	public static Run abortOrReset(String abortMessage, String nodename,
 			String uuid) {
@@ -130,10 +135,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 			if (nodeAbort != null) {
 				nodeAbort.reset();
 			}
+			resetRecoveryMode(run);
 		} else if (!globalAbort.isSet()) {
 			setGlobalAbortState(abortMessage, globalAbort);
 			if (nodeAbort != null) {
 				nodeAbort.setValue(abortMessage);
+			}
+			if (run.state == States.Provisioning) {
+				setRecoveryMode(run);
 			}
 		}
 
@@ -154,6 +163,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		if (!globalAbort.isSet()) {
 			setGlobalAbortState(abortMessage, globalAbort);
 		}
+		if (run.state == States.Provisioning) {
+			setRecoveryMode(run);
+		}
 		em.close();
 		return run;
 	}
@@ -168,7 +180,77 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR
 				+ RuntimeParameter.ABORT_KEY;
 	}
+	
+	private static RuntimeParameter getRecoveryModeParameter(Run run) {
+		return run.getRuntimeParameters().get(
+				RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY);
+	}
+	
+	public static void setRecoveryMode(Run run) {
+		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
+		recoveryModeParam.setValue("true");
+		recoveryModeParam.store();
+	}
+	
+	public static void resetRecoveryMode(Run run) {
+		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
+		recoveryModeParam.setValue("false");
+		recoveryModeParam.store();
+	}
 
+	public static boolean isInRecoveryMode(Run run) {
+		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
+		boolean result = false;
+		if (recoveryModeParam != null) {
+			String recoveryMode = recoveryModeParam.getValue();
+			result = ! ("".equals(recoveryMode) || "false".equalsIgnoreCase(recoveryMode));
+		}
+		return result;
+	}
+	
+	private static RunParameter getGarbageCollectedParameter(Run run) {
+		return run.getParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME);
+	}
+	
+	public static void setGarbageCollected(Run run) throws ValidationException {
+		RunParameter garbageCollected = getGarbageCollectedParameter(run);
+		garbageCollected.setValue("true");
+	}
+	
+	public static boolean isGarbageCollected(Run run) {
+		RunParameter garbageCollected = getGarbageCollectedParameter(run);
+		boolean result = false;
+		if (garbageCollected != null) {
+			String recoveryMode = garbageCollected.getValue();
+			result = Boolean.parseBoolean(recoveryMode);
+		}
+		return result;
+	}
+	
+	public static Run updateRunState(Run run, States newState, boolean retry) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
+		try {
+			run = Run.loadFromUuid(run.getUuid(), em);
+			run.setState(newState);
+			transaction.commit();
+			em.close();
+		} catch (Exception e) {
+			String error = "error setting run state: " + newState;
+			if (retry) {
+				Logger.getLogger("restlet").warning(error + " retrying...");
+			} else {
+				Logger.getLogger("restlet").severe(error);
+			}
+			// retry once
+			if (retry) {
+				updateRunState(run, newState, false);
+			}
+		}
+		return run;
+	}
+	
 	public static Run loadFromUuid(String uuid) {
 		String resourceUri = RESOURCE_URI_PREFIX + uuid;
 		return load(resourceUri);
@@ -265,7 +347,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 		return runView;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public static List<RunView> viewListAll() throws ConfigurationException,
 			ValidationException {
@@ -286,18 +368,6 @@ public class Run extends Parameterized<Run, RunParameter> {
  		em.close();
  		return runs;
  	}
-
-	public static int purge() throws ConfigurationException, ValidationException {
-		List<Run> old = listOldTransient();
-		for (Run r : old) {
-			EntityManager em = PersistenceUtil.createEntityManager();
-			r = Run.load(r.resourceUri, em);
-			r.done();
-			r.store();
-			em.close();
-		}
-		return old.size();
-	}
 
 	@SuppressWarnings("unchecked")
 	public static List<Run> listOldTransient() throws ConfigurationException,
@@ -399,7 +469,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@Attribute(required = false)
 	@Enumerated
-	private States state = States.Unknown;
+	private States state = States.Initializing;
 
 	@Attribute
 	private String moduleResourceUri;
@@ -785,8 +855,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setState(States state) {
-		RunStates rState = new RunStates(state, isAbort());
-		this.state = rState.getState();
+		this.state = state;
 	}
 
 	public int getMultiplicity(String nodeName) throws NotFoundException {
@@ -888,16 +957,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			image.assignImageIdFromCloudService(getCloudService());
 		}
 	}
-
-	public void done() {
-		RunStates state = new RunStates(this);
-		state.done();
-		this.state = state.getState();
-		getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY).setValue(
-				state.toString());
-		setEnd();
-	}
-
+	
 	public static String constructOrchestratorName(String cloudService) {
 		return ORCHESTRATOR_NAME + ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR
 				+ cloudService;

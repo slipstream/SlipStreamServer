@@ -44,11 +44,14 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.Node;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.FileUtil;
 import com.sixsq.slipstream.util.Logger;
@@ -70,7 +73,7 @@ public abstract class RunFactory {
 
 		validateRun(run, user, cloudService);
 
-		initialize(module, run, cloudService);
+		initialize(module, run, user, cloudService);
 
 		return run;
 	}
@@ -128,9 +131,15 @@ public abstract class RunFactory {
 		}
 	}
 
-	protected void initialize(Module module, Run run, String cloudService)
+	protected void initialize(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
-
+		
+		run = addOnSuccessRunForeverToParameters(run, user);
+		run = addOnErrorRunForeverToParameters(run, user);
+		
+		run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "false", 
+				Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
+		
 		initializeGlobalParameters(run);
 		initCloudServices(run);
 
@@ -173,6 +182,30 @@ public abstract class RunFactory {
 		return new Run(module, type, cloudService, user);
 	}
 
+	private Run addOnSuccessRunForeverToParameters(Run run, User user) throws ValidationException {
+		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
+				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+
+		UserParameter up = user.getParameter(key);
+		if (up != null) {
+			run.setParameter(new RunParameter(up.getName(), up.getValue("false"), up.getDescription()));
+		}
+		
+		return run;
+	}
+	
+	private Run addOnErrorRunForeverToParameters(Run run, User user) throws ValidationException {
+		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
+				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
+		
+		UserParameter up = user.getParameter(key);
+		if (up != null) {
+			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
+		}
+		
+		return run;
+	}
+	
 	public static void terminate(Run run) {
 
 	}
@@ -264,7 +297,9 @@ public abstract class RunFactory {
 
         run.assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
 				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
-
+        
+        run.assignRuntimeParameter(RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY, "false",
+				RuntimeParameter.GLOBAL_RECOVERY_MDDE_DESCRIPTION);
 	}
 
 	private static void initializeOrchestratorParameters(Run run,
@@ -279,7 +314,11 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.INSTANCE_ID_KEY),
 				RuntimeParameter.INSTANCE_ID_DESCRIPTION);
-
+		
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.IS_ORCHESTRATOR_KEY), "true",
+				RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
+		
 		// Hack: hardcode the cpu and ram
 		// need to get this from the connector?
 		String defaultOrchestratorCpuRam = "1";
@@ -299,8 +338,6 @@ public abstract class RunFactory {
 	public static void assignRuntimeParameters(Run run, String nodename)
 			throws ValidationException {
 		String prefix = nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
-		run.assignRuntimeParameter(prefix + RuntimeParameter.STATE_KEY,
-				Run.INITIAL_NODE_STATE, RuntimeParameter.STATE_DESCRIPTION);
 		run.assignRuntimeParameter(prefix + RuntimeParameter.STATE_MESSAGE_KEY,
 				Run.INITIAL_NODE_STATE,
 				RuntimeParameter.STATE_MESSAGE_DESCRIPTION);
@@ -324,13 +361,15 @@ public abstract class RunFactory {
 	protected void initOrchestratorsNodeNames(Run run)
 			throws ConfigurationException, ValidationException {
 		HashSet<String> cloudServiceList = getCloudServicesList(run);
-		for (String cloudServiceName : cloudServiceList) {
-			String nodename = Run.constructOrchestratorName(cloudServiceName);
-			run.addNodeName(nodename, cloudServiceName);
-			run.assignRuntimeParameter(nodename
-					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
-					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+		if (withOrchestrator(run)){
+			for (String cloudServiceName : cloudServiceList) {
+				String nodename = Run.constructOrchestratorName(cloudServiceName);
+				run.addNodeName(nodename, cloudServiceName);
+				run.assignRuntimeParameter(nodename
+						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+						+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
+						RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+			}
 		}
 	}
 

@@ -105,7 +105,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 		putMandatoryParameter(
 				super.constructKey(UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME),
 				"Service endpoint for " + getCategory()
-						+ " (e.g. http://example.com:5000/v2.0)");
+						+ " (e.g. http://example.com:5000)");
 	}
 	
 	protected void putMandatoryQuotaVm() throws ValidationException {

@@ -37,21 +37,24 @@ import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.resource.BaseResource;
+import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.Terminator;
 
 public class RunResource extends BaseResource {
 
@@ -177,44 +180,17 @@ public class RunResource extends BaseResource {
 	@Delete
 	public void terminate() {
 
-		EntityManager em = PersistenceUtil.createEntityManager();
-
-		Run run = Run.load(this.run.getResourceUri(), em);
-
 		try {
-			if (run.getCategory() == ModuleCategory.Deployment) {
-				HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
-				for (String cloudServiceName : cloudServicesList) {
-					Connector connector = ConnectorFactory
-							.getConnector(cloudServiceName);
-					try {
-						connector.terminate(run, getUser());
-					} catch (SlipStreamException e) {
-						throw new ResourceException(
-								Status.CLIENT_ERROR_CONFLICT,
-								"Failed terminating VMs", e);
-					}
-				}
-			} else {
-				Connector connector = ConnectorFactory.getConnector(run
-						.getCloudService());
-				try {
-					connector.terminate(run, getUser());
-				} catch (SlipStreamException e) {
-					throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-							"Failed terminating VMs", e);
-				}
-			}
-		} catch (ConfigurationException e) {
-			throwConfigurationException(e);
+			
+			Terminator.terminate(this.run.getResourceUri());
+			
+		} catch (CannotAdvanceFromTerminalStateException e) {
+		} catch (InvalidStateException e){
+			throwClientConflicError(e.getMessage());
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
 
-		run.done();
-
-		run.store();
-
-		em.close();
 	}
+	
 }

@@ -124,7 +124,6 @@ public class RuntimeParameterResource extends ServerResource {
 	private void abortOrReset(String abortMessage, EntityManager em) {
 		String nodename = RuntimeParameter.extractNodeNamePart(key);
 		Run.abortOrReset(abortMessage, nodename, em, uuid);
-
 	}
 
 	private RuntimeParameter getGlobalAbort() {
@@ -209,39 +208,16 @@ public class RuntimeParameterResource extends ServerResource {
 
 		newState = attemptCompleteCurrentNodeState(nodeName);
 
-		updateRunState(newState, true);
+		Run run = Run.loadFromUuid(uuid);
 
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
 
 	}
 
-	private void updateRunState(States newState, boolean retry) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		EntityTransaction transaction = em.getTransaction();
-		transaction.begin();
-		try {
-			Run run = Run.loadFromUuid(uuid, em);
-			run.setState(newState);
-			transaction.commit();
-			em.close();
-		} catch (Exception e) {
-			String error = "error setting run state: " + newState;
-			if (retry) {
-				Logger.getLogger("restlet").warning(error + " retrying...");
-			} else {
-				Logger.getLogger("restlet").severe(error);
-			}
-			// retry once
-			if (retry) {
-				updateRunState(newState, false);
-			}
-		}
-	}
-
 	private States attemptCompleteCurrentNodeState(String nodeName) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Run run = Run.loadFromUuid(uuid, em);
-		StateMachine sc = createStateMachine(run);
+		StateMachine sc = StateMachine.createStateMachine(run);
 		em.close();
 		return completeCurrentNodeState(nodeName, sc);
 	}
@@ -261,60 +237,6 @@ public class RuntimeParameterResource extends ServerResource {
 					e.getMessage());
 		}
 		return state;
-	}
-
-	protected StateMachine createStateMachine(Run run) {
-		StateMachine sc;
-		try {
-			sc = getStateMachine(run);
-		} catch (InvalidStateException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					e.getMessage());
-		} catch (SlipStreamClientException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					e.getMessage());
-		}
-		return sc;
-	}
-
-	private StateMachine getStateMachine(Run run) throws ValidationException,
-			InvalidStateException, NotFoundException {
-		String nodeNames = run.getNodeNames();
-		String[] nodes = nodeNames.split(", ");
-
-		Map<String, State> nodeStates = new HashMap<String, State>();
-		String key;
-		for (String node : nodes) {
-			String nodePrefix = node + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
-			key = nodePrefix + RuntimeParameter.COMPLETE_KEY;
-			RuntimeParameter completed = run.getRuntimeParameters().get(key);
-
-			key = nodePrefix + RuntimeParameter.ABORT_KEY;
-			RuntimeParameter failing = run.getRuntimeParameters().get(key);
-
-			RuntimeParameter state = run.getRuntimeParameters().get(
-					nodePrefix + RuntimeParameter.STATE_KEY);
-
-			ExtrinsicState extrinsicState = new ExtrinsicState(completed,
-					failing, state);
-			State nodeState = StateFactory.createInstance(extrinsicState);
-
-			nodeStates.put(node, nodeState);
-		}
-
-		RuntimeParameter globalFailing = run.getRuntimeParameters().get(
-				RuntimeParameter.GLOBAL_ABORT_KEY);
-		RuntimeParameter globalState = run.getRuntimeParameters().get(
-				RuntimeParameter.GLOBAL_STATE_KEY);
-
-		ExtrinsicState globalExtrinsicState = new ExtrinsicState(null,
-				globalFailing, globalState);
-		State globalNodeState = StateFactory
-				.createInstance(globalExtrinsicState);
-
-		StateMachine sc = new StateMachine(nodeStates, globalNodeState);
-
-		return sc;
 	}
 
 }

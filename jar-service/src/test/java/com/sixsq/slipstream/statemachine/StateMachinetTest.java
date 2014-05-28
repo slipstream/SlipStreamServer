@@ -347,7 +347,7 @@ public class StateMachinetTest {
 
 		State globalState = StateFactory.createInstance(
 				globalExtrinsicState.getState(), globalExtrinsicState);
-		StateMachine sc = new StateMachine(nodeStates, globalState);
+		StateMachine sc = new StateMachine(nodeStates, globalState, run);
 		return sc;
 	}
 

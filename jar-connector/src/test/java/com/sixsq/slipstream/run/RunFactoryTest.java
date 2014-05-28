@@ -223,7 +223,7 @@ public class RunFactoryTest extends RunTest {
 
 		Run run = getDeploymentRun(deployment);
 
-		assertThat(run.getRuntimeParameterValue("node1.1:state"),
+		assertThat(run.getRuntimeParameterValue("ss:state"),
 				is("Initializing"));
 		assertThat(run.getRuntimeParameterValue("node1.1:statemessage"),
 				is("Initializing"));
@@ -303,8 +303,7 @@ public class RunFactoryTest extends RunTest {
 	private void commonRuntimeParameters(Run run, String[] nodePrefixes)
 			throws AbortException, NotFoundException {
 		String[] keys = { RuntimeParameter.COMPLETE_KEY,
-				RuntimeParameter.ABORT_KEY, RuntimeParameter.STATE_KEY,
-				RuntimeParameter.STATE_MESSAGE_KEY };
+				RuntimeParameter.ABORT_KEY,	RuntimeParameter.STATE_MESSAGE_KEY };
 
 		for (String prefix : nodePrefixes) {
 			for (String key : keys) {
