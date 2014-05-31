@@ -33,6 +33,8 @@ import javax.persistence.TemporalType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
+import flexjson.JSON;
+
 @Entity
 public class Publish implements Serializable {
 	
@@ -43,6 +45,7 @@ public class Publish implements Serializable {
 	Long id;
 
 	@OneToOne
+	@JSON(include=false)
 	private Module module;
 
 	@Attribute(required = false)

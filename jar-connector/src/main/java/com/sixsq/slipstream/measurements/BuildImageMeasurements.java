@@ -47,7 +47,7 @@ public class BuildImageMeasurements extends Measurements {
 
 		// might be 'default'
 		String effectiveCloud = RunFactory.getEffectiveCloudServiceName(run
-				.getCloudService(), run);
+				.getCloudServiceName(), run);
 
 		Measurement ms;
 

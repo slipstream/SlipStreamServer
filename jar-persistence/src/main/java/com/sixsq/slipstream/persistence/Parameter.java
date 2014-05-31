@@ -35,6 +35,8 @@ import org.simpleframework.xml.ElementArray;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
+import flexjson.JSON;
+
 /**
  * Unit test see
  * 
@@ -48,6 +50,7 @@ public abstract class Parameter<T> implements Serializable {
 	private static final CharSequence INVALID_RESTRICTED_CHAR = "'";
 
 	@ManyToOne
+	@JSON(include=false)
 	private T container;
 
 	@Attribute

@@ -68,6 +68,15 @@ public class ModuleVersionListResource extends BaseResource {
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
 
+	@Get("json")
+	public Representation toJson() {
+
+		ModuleVersionViewList list = new ModuleVersionViewList(
+				Module.viewListAllVersions(resourceUri));
+		String result = SerializationUtil.toJsonString(list);
+		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
+	}
+
 	@Get("html")
 	public Representation toHtml() {
 

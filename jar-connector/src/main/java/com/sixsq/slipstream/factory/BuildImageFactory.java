@@ -141,7 +141,7 @@ public class BuildImageFactory extends RunFactory {
 		for (ParameterCategory c : ParameterCategory.values()) {
 			filter.add(c.toString());
 		}
-		String cloudService = run.getCloudService();
+		String cloudService = run.getCloudServiceName();
 		filter.add(cloudService);
 
 		if (image.getParameters() != null) {
@@ -155,7 +155,7 @@ public class BuildImageFactory extends RunFactory {
 		}
 
 		// Add cloud service name to orchestrator and machine
-		String cloudServiceName = run.getCloudService();
+		String cloudServiceName = run.getCloudServiceName();
 		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX
 				+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);

@@ -43,6 +43,8 @@ import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
+import flexjson.JSON;
+
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @SuppressWarnings("serial")
@@ -96,6 +98,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	private Map<String, NodeParameter> parameterMappings = new ConcurrentHashMap<String, NodeParameter>();
 
 	@ManyToOne
+	@JSON(include=false)
 	private DeploymentModule module;
 	
 	protected Node() {

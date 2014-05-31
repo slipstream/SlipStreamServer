@@ -49,6 +49,14 @@ public class StatsResource extends BaseResource {
 
 	}
 
+	@Get("json")
+	public Representation toJson() {
+
+		String metadata = SerializationUtil.toJsonString(compute());
+		return new StringRepresentation(metadata, MediaType.APPLICATION_JSON);
+
+	}
+
 	private Measurements compute() {
 
 		Measurements measurements = new Measurements();

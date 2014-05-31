@@ -802,7 +802,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.cloudServiceName = cloudServiceName;
 	}
 
-	public String getCloudService() {
+	public String getCloudServiceName() {
 		return cloudServiceName;
 	}
 
@@ -883,9 +883,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private void populateImageModule(ImageModule image)
 			throws ValidationException {
 		if (type == RunType.Orchestration) {
-			image.assignBaseImageIdToImageIdFromCloudService(getCloudService());
+			image.assignBaseImageIdToImageIdFromCloudService(getCloudServiceName());
 		} else {
-			image.assignImageIdFromCloudService(getCloudService());
+			image.assignImageIdFromCloudService(getCloudServiceName());
 		}
 	}
 

@@ -38,6 +38,8 @@ import org.simpleframework.xml.Text;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
+import flexjson.JSON;
+
 /**
  * Unit tests:
  *
@@ -212,6 +214,7 @@ public class RuntimeParameter extends Metadata {
 	private String mappedRuntimeParameterNames = "";
 
 	@ManyToOne
+	@JSON(include=false)
 	private Run container;
 
 	/**
@@ -238,6 +241,11 @@ public class RuntimeParameter extends Metadata {
 
 	public boolean isSet() {
 		return isSet;
+	}
+
+	// required by flexjson
+	public boolean getIsSet() {
+		return isSet();
 	}
 
 	public void setIsSet(boolean isSet) {

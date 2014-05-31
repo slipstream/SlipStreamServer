@@ -22,7 +22,7 @@ public class CloudService {
 			cloudServicesList = DeploymentFactory.getCloudServicesList(run);
 		} else {
 			cloudServicesList = new HashSet<String>();
-			cloudServicesList.add(run.getCloudService());
+			cloudServicesList.add(run.getCloudServiceName());
 		}
 
 		return cloudServicesList;

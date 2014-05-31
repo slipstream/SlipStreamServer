@@ -34,11 +34,11 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
@@ -60,9 +60,10 @@ public class UserResourceTest extends ResourceTestBase {
 	private static final String NEW_PASSWORD = "newPassword";
 	private static final String SUPER_PASSWORD = "passwordSuper";
 	private static User otherUser = UserTest.createUser("test2", "password2");
-	private static User superUser = UserTest.createUser("super", SUPER_PASSWORD);
+	private static User superUser = UserTest
+			.createUser("super", SUPER_PASSWORD);
 	private static User user = null;
-	
+
 	@BeforeClass
 	public static void setupBeforeClass() throws InstantiationException,
 			IllegalAccessException, InvocationTargetException,
@@ -234,7 +235,10 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void passwordBlankedForNormalUser() throws SlipStreamClientException {
 		Request request = createGetRequest(user, user.getName());
+		request.getClientInfo().accept(MediaType.APPLICATION_XML);
 		Response response = executeRequest(request);
+
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
 		User user = (User) SerializationUtil.fromXml(
 				response.getEntityAsText(), User.class);
@@ -242,19 +246,18 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	@Ignore
-	public void passwordSerializedForNormalUserAsSuper()
+	public void passwordBlankedForNormalUserAsSuper()
 			throws SlipStreamClientException {
 
 		Request request = createGetRequest(superUser, superUser.getName());
+		request.getClientInfo().accept(MediaType.APPLICATION_JSON);
 		Response response = executeRequest(request);
 
-		assertThat(response.getStatus(),  is(Status.SUCCESS_OK));
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		String xml = response.toString();
-		User user = (User) SerializationUtil.fromXml(xml,
-				User.class);
-		assertNotNull(user.getPassword());
+		String json = response.getEntityAsText();
+		User user = (User) SerializationUtil.fromJson(json, User.class);
+		assertNull(user.getPassword());
 	}
 
 	@Test
@@ -262,9 +265,12 @@ public class UserResourceTest extends ResourceTestBase {
 			throws SlipStreamClientException {
 
 		Request request = createGetRequest(superUser, superUser.getName());
+		request.getClientInfo().accept(MediaType.APPLICATION_JSON);
 		Response response = executeRequest(request);
 
-		User user = (User) SerializationUtil.fromXml(
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
+
+		User user = (User) SerializationUtil.fromJson(
 				response.getEntityAsText(), User.class);
 		assertNull(user.getPassword());
 	}
@@ -483,6 +489,7 @@ public class UserResourceTest extends ResourceTestBase {
 		// we're not going through the CookieAuthenticator
 		request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME,
 				cookieCategory);
+		request.getClientInfo().accept(MediaType.APPLICATION_XML);
 		Response response = executeRequest(request);
 
 		String denormalized = XmlUtil.denormalize(response.getEntityAsText());

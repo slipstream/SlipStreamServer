@@ -20,6 +20,7 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -81,14 +82,20 @@ public class ModuleVersionView {
 	}
 
 	@Root(name = "versionList")
-	public static class ModuleVersionViewList {
+	@SuppressWarnings("serial")
+	public static class ModuleVersionViewList implements Serializable {
 
 		@ElementList(inline = true, required = false)
-		private final List<ModuleVersionView> list;
+		private List<ModuleVersionView> list;
 
 		public ModuleVersionViewList(List<ModuleVersionView> list) {
 			this.list = list;
 		}
+		
+		public List<ModuleVersionView> getList() {
+			return list;
+		}
+
 	}
 
 	public Authz getAuthz() {

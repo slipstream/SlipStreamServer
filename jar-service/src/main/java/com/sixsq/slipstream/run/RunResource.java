@@ -86,6 +86,26 @@ public class RunResource extends BaseResource {
 
 	}
 
+	@Get("json")
+	public Representation toJson() throws NotFoundException,
+			ValidationException, ConfigurationException {
+
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Run run;
+		String json;
+		try {
+			run = constructRun(em, true);
+			json = SerializationUtil.toJsonString(run);
+		} catch (SlipStreamClientException e) {
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
+					e.getMessage());
+		} finally {
+			em.close();
+		}
+
+		return new StringRepresentation(json, MediaType.APPLICATION_JSON);
+	}
+
 	@Get("xml")
 	public Representation toXml() throws NotFoundException,
 			ValidationException, ConfigurationException {
@@ -197,7 +217,7 @@ public class RunResource extends BaseResource {
 				}
 			} else {
 				Connector connector = ConnectorFactory.getConnector(run
-						.getCloudService());
+						.getCloudServiceName());
 				try {
 					connector.terminate(run, getUser());
 				} catch (SlipStreamException e) {

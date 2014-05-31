@@ -109,7 +109,7 @@ public abstract class ConnectorBase implements Connector {
         if (isInOrchestrationContext(run)) {
             imageId = getOrchestratorImageId(user);
         } else {
-            imageId = ((ImageModule) run.getModule()).extractBaseImageId(run.getCloudService());
+            imageId = ((ImageModule) run.getModule()).extractBaseImageId(run.getCloudServiceName());
         }
         return imageId;
     }

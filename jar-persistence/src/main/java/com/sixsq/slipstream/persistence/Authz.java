@@ -20,7 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,11 +38,13 @@ import org.simpleframework.xml.ElementList;
 
 import com.sixsq.slipstream.exceptions.NotFoundException;
 
+import flexjson.JSON;
+
 /**
  * For unit tests
- *
+ * 
  * @see AuthzTest
- *
+ * 
  */
 @Entity
 @SuppressWarnings("serial")
@@ -54,6 +55,7 @@ public class Authz implements Serializable {
 	Long id;
 
 	@OneToOne
+	@JSON(include = false)
 	private Module guardedModule;
 
 	@Attribute
@@ -92,7 +94,7 @@ public class Authz implements Serializable {
 	@Attribute
 	private boolean publicCreateChildren = false;
 
-	@Column(length=1024)
+	@Column(length = 1024)
 	private String groupMembers_ = ", ";
 
 	@Attribute
@@ -109,6 +111,10 @@ public class Authz implements Serializable {
 
 	public Metadata getGuardedModule() {
 		return guardedModule;
+	}
+
+	public void setGuardedModule(Module guardedModule) {
+		this.guardedModule = guardedModule;
 	}
 
 	public String getUser() {
@@ -336,7 +342,7 @@ public class Authz implements Serializable {
 		if (user.isSuper()) {
 			return true;
 		}
-		if(groupGet) {
+		if (groupGet) {
 			return isUserInInheritedGroup(user);
 		}
 		return publicGet;
@@ -352,7 +358,7 @@ public class Authz implements Serializable {
 		if (user.isSuper()) {
 			return true;
 		}
-		if(groupPut) {
+		if (groupPut) {
 			return isUserInInheritedGroup(user);
 		}
 		return publicPut;
@@ -368,7 +374,7 @@ public class Authz implements Serializable {
 		if (user.isSuper()) {
 			return true;
 		}
-		if(groupPost) {
+		if (groupPost) {
 			return isUserInInheritedGroup(user);
 		}
 		return publicPost;
@@ -384,7 +390,7 @@ public class Authz implements Serializable {
 		if (user.isSuper()) {
 			return true;
 		}
-		if(groupDelete) {
+		if (groupDelete) {
 			return isUserInInheritedGroup(user);
 		}
 		return publicDelete;
@@ -400,11 +406,11 @@ public class Authz implements Serializable {
 		if (user.isSuper()) {
 			return true;
 		}
-		if(groupCreateChildren) {
+		if (groupCreateChildren) {
 			if (getGroupMembers().contains(user.getName())) {
 				return true;
 			} else {
-				if(inheritedGroupMembers) {
+				if (inheritedGroupMembers) {
 					return isInInheritedGroup(user);
 				}
 			}
@@ -416,7 +422,7 @@ public class Authz implements Serializable {
 		if (getGroupMembers().contains(user.getName())) {
 			return true;
 		} else {
-			if(inheritedGroupMembers) {
+			if (inheritedGroupMembers) {
 				return isInInheritedGroup(user);
 			} else {
 				return false;
@@ -433,23 +439,24 @@ public class Authz implements Serializable {
 	}
 
 	private Authz inheritedAuthz(Authz authz) {
-		if(authz.isInheritedGroupMembers()) {
+		if (authz.isInheritedGroupMembers()) {
 			return inheritedAuthz(authz.getParentAuthz());
 		}
 		return authz;
 	}
 
+	@JSON(include = false)
 	private Authz getParentAuthz() {
 		Authz defaultAuthz = new Authz();
 		defaultAuthz.setInheritedGroupMembers(false);
 
-		if(getGuardedModule() == null) {
-			return defaultAuthz ;
+		if (getGuardedModule() == null) {
+			return defaultAuthz;
 		}
 		String parentUri = getGuardedModule().getParent();
 		Module parent = Module.load(parentUri);
-		if(parent == null) {
-			return defaultAuthz ;
+		if (parent == null) {
+			return defaultAuthz;
 		}
 		return parent.getAuthz();
 	}
@@ -482,15 +489,14 @@ public class Authz implements Serializable {
 				continue;
 			}
 			processingGroup.add(member);
-            _group.append(member.trim())
-                  .append(", ");
+			_group.append(member.trim()).append(", ");
 		}
 		this.groupMembers_ = _group.toString();
 	}
 
 	@ElementList
 	public List<String> getGroupMembers() {
-		if(inheritedGroupMembers) {
+		if (inheritedGroupMembers) {
 			return getParentAuthz().getGroupMembers();
 		}
 		if ("".equals(groupMembers_)) {

@@ -48,7 +48,7 @@ public class SimpleRunMeasurements extends Measurements {
 
 		ImageModule image = (ImageModule) Module.load(run
 				.getModuleResourceUrl());
-		String cloud = run.getCloudService();
+		String cloud = run.getCloudServiceName();
 
 		fill(run, Run.MACHINE_NAME, image.getName(), cloud);
 		return getMeasurments();

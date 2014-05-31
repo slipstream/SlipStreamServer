@@ -138,7 +138,7 @@ public abstract class RunFactory {
 	}
 
 	protected void initCloudServices(Run run) throws ValidationException {
-		run.setCloudServiceNames(run.getCloudService());
+		run.setCloudServiceNames(run.getCloudServiceName());
 	}
 
 	public static Run getRun(Module module, RunType type, String cloudService,
@@ -353,7 +353,7 @@ public abstract class RunFactory {
 			cloudServicesList = DeploymentFactory.getCloudServicesList(run);
 		} else {
 			cloudServicesList = new HashSet<String>();
-			cloudServicesList.add(run.getCloudService());
+			cloudServicesList.add(run.getCloudServiceName());
 		}
 
 		return cloudServicesList;
@@ -362,7 +362,7 @@ public abstract class RunFactory {
 	public static String getEffectiveCloudServiceName(String cloudService,
 			Run run) {
 		return CloudService.isDefaultCloudService(cloudService) ? run
-				.getCloudService() : cloudService;
+				.getCloudServiceName() : cloudService;
 	}
 
 	public static Properties describeInstances(User user, Run run)

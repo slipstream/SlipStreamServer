@@ -212,10 +212,17 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		return new StringRepresentation(result);
 	}
 
-	@Get("xml")
-	public Representation toXml() {
+	@Get("json")
+	public Representation toJson() {
 		checkCanGet();
 
+		S prepared = prepareForSerialisation();
+
+		String result = SerializationUtil.toJsonString(prepared);
+		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
+	}
+
+	private S prepareForSerialisation() {
 		S prepared = null;
 		try {
 			prepared = prepareForSerialization();
@@ -224,6 +231,14 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		}
+		return prepared;
+	}
+
+	@Get("xml")
+	public Representation toXml() {
+		checkCanGet();
+
+		S prepared = prepareForSerialisation();
 
 		String result = SerializationUtil.toXmlString(prepared);
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
@@ -243,14 +258,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 			}
 		}
 
-		S prepared = null;
-		try {
-			prepared = prepareForSerialization();
-		} catch (ValidationException e) {
-			throwClientValidationError(e.getMessage());
-		} catch (ConfigurationException e) {
-			throwConfigurationException(e);
-		}
+		S prepared = prepareForSerialisation();
 
 		String html = HtmlUtil.toHtml(prepared, getPageRepresentation(),
 				getTransformationType(), getUser());
@@ -324,6 +332,10 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected void setResponseRedirect(String resourceUri) {
 		getResponse().redirectSeeOther(resourceUri);
+	}
+
+	protected String extractEntityAsText() {
+		return getRequest().getEntityAsText();
 	}
 
 }

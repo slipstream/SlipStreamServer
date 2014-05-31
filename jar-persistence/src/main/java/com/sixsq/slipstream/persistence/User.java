@@ -48,14 +48,16 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.user.UserView;
 
+import flexjson.JSON;
+
 /**
  * Unit test:
- *
+ * 
  * @see UserTest
- *
+ * 
  */
 @SuppressWarnings("serial")
-@Entity(name="User")
+@Entity(name = "User")
 @NamedQueries({
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
 		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline) FROM User u") })
@@ -67,7 +69,7 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public static final String NEW_NAME = "new";
 
-    private static final Random rnd = new Random();
+	private static final Random rnd = new Random();
 
 	public enum State {
 		NEW, ACTIVE, DELETED, SUSPENDED
@@ -92,6 +94,7 @@ public class User extends Parameterized<User, UserParameter> {
 	@Attribute(required = false)
 	private String organization;
 
+	@JSON(include = false)
 	private String password;
 
 	@Attribute(required = false, name = "issuper")
@@ -300,10 +303,10 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	private static String randomPassword() {
-        long v = rnd.nextLong();
-        while (v == Long.MIN_VALUE) {
-            v = rnd.nextLong();
-        }
+		long v = rnd.nextLong();
+		while (v == Long.MIN_VALUE) {
+			v = rnd.nextLong();
+		}
 		return Long.toString(Math.abs(v), 36);
 	}
 
@@ -445,7 +448,9 @@ public class User extends Parameterized<User, UserParameter> {
 	public boolean onSuccessRunForever() {
 		boolean _default = false;
 		try {
-			return Boolean.parseBoolean(getParameterValue(UserParameter.KEY_ON_SUCCESS_RUN_FOREVER, Boolean.toString(_default)));
+			return Boolean.parseBoolean(getParameterValue(
+					UserParameter.KEY_ON_SUCCESS_RUN_FOREVER,
+					Boolean.toString(_default)));
 		} catch (ValidationException e) {
 			return _default;
 		}
@@ -454,7 +459,9 @@ public class User extends Parameterized<User, UserParameter> {
 	public boolean onErrorRunForever() {
 		boolean _default = false;
 		try {
-			return Boolean.parseBoolean(getParameterValue(UserParameter.KEY_ON_ERROR_RUN_FOREVER, Boolean.toString(_default)));
+			return Boolean.parseBoolean(getParameterValue(
+					UserParameter.KEY_ON_ERROR_RUN_FOREVER,
+					Boolean.toString(_default)));
 		} catch (ValidationException e) {
 			return _default;
 		}
