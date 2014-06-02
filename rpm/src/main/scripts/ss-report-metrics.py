@@ -79,7 +79,7 @@ def make_metric_from_instance(instance, name, unit, volume,
         name=name,
         unit=unit,
         volume=volume,
-        user_id=instance['user_id'],
+        user_id=instance['user_id'].replace('.', '_'),
         run_id=instance['run_id'],
         instance_id=instance['instance_id'],
         metadata=metadata,
@@ -166,13 +166,13 @@ TEST_STATS_XML = """<?xml version="1.0" encoding="utf-8"?>
     created_at="2013-10-09T07:38:44" deleted_at="" vmstate="running"
     run_id="791c3b221a2346668e07b5e1c19b4b75"
     image_id="2c3c8d1a-30b7-11e3-aeba-080027880ca6"
-    user_id="22bb7e29-c888-45b8-aa0d-695c324c7f92" cpu="2" ram="4" type="m1.small"
+    user_id="john.doe" cpu="2" ram="4" type="m1.small"
     disk="100" cloud="my-cloud" />
   <vm instance_id="Unknown" name="test1.1" index="1"
     created_at="2013-10-09T07:38:44" deleted_at="" vmstate="running"
     run_id="791c3b221a2346668e07b5e1c19b4b75"
     image_id="32fb56ce-6f50-4e98-baa7-0ba2ac7d69a2"
-    user_id="22bb7e29-c888-45b8-aa0d-695c324c7f92" cpu="1" ram="1" type="m1.tiniy"
+    user_id="john.doe" cpu="1" ram="1" type="m1.tiniy"
     disk="10" cloud="my-other-cloud" />
   <vm instance_id="57f8f2a0-dd8e-4fa8-a844-820464575c31" name="apache1.1" index="1"
     created_at="2013-10-09T07:38:44" deleted_at=""
@@ -191,7 +191,7 @@ TEST_INSTANCE = {
     'vmstate': "running",
     'run_id': "791c3b221a2346668e07b5e1c19b4b75",
     'image_id': "2c3c8d1a-30b7-11e3-aeba-080027880ca6",
-    'user_id': "22bb7e29-c888-45b8-aa0d-695c324c7f92",
+    'user_id': "john.doe",
     'cpu': "2",
     'ram': "4",
     'type': "m1.small",
@@ -203,7 +203,7 @@ TEST_METRIC_0 = Metric(
     name='vcpus',
     unit='vcpu',
     volume=2,
-    user_id="22bb7e29-c888-45b8-aa0d-695c324c7f92",
+    user_id="john_doe",
     run_id="791c3b221a2346668e07b5e1c19b4b75",
     instance_id="1f422ae5-a6b2-427a-9529-b23b944786ae",
     metadata={
@@ -222,7 +222,7 @@ TEST_METRIC_1 = Metric(
     name='instance',
     unit='instance',
     volume=1,
-    user_id="22bb7e29-c888-45b8-aa0d-695c324c7f92",
+    user_id="john_doe",
     run_id="791c3b221a2346668e07b5e1c19b4b75",
     instance_id="1f422ae5-a6b2-427a-9529-b23b944786ae",
     metadata={
@@ -251,8 +251,8 @@ class TestMetricReporter(unittest.TestCase):
     def test_collect_metrics(self):
         metrics = collect_metrics(TEST_STATS_XML, TEST_COLLECTORS)
         self.assertDictEqual(metrics, {
-            'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.usage.vcpus.my-cloud': 2,
-            'slipstream.22bb7e29-c888-45b8-aa0d-695c324c7f92.usage.instance.my-cloud': 1,
+            'slipstream.john_doe.usage.vcpus.my-cloud': 2,
+            'slipstream.john_doe.usage.instance.my-cloud': 1,
         })
 
 
