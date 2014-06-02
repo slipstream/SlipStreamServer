@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ServerResource;
@@ -166,7 +167,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void putNewModuleOnExistingModuleIsForbiden()
+	public void putNewModuleOnExistingModule()
 			throws ValidationException {
 		String projectName = "existingProject";
 		Module project = createAndStoreProject(projectName);
@@ -174,7 +175,20 @@ public class ModuleResourceTest extends ResourceTestBase {
 		Form form = createForm(projectName, category);
 		Request request = createPutRequest("existingProject",
 				form.getWebRepresentation(), user);
-		request.getAttributes().put("new", "true");
+		Response response = executeRequest(request);
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
+		project.remove();
+	}
+
+	@Test
+	public void putNewModuleOnExistingModuleIsForbiden()
+			throws ValidationException {
+		String projectName = "existingProject";
+		Module project = createAndStoreProject(projectName);
+		ModuleCategory category = ModuleCategory.Project;
+		Form form = createForm(projectName, category);
+		Request request = createPutRequest("existingProject",
+				form.getWebRepresentation(), user, TEST_REQUEST_NAME + "?new=true");
 		Response response = executeRequest(request);
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 		project.remove();
@@ -222,8 +236,9 @@ public class ModuleResourceTest extends ResourceTestBase {
 		Module project = new ProjectModule(projectName);
 		String content = SerializationUtil.toXmlString(project);
 
+		StringRepresentation stringRepresentation = new StringRepresentation(content, MediaType.APPLICATION_XML);
 		Request request = createPutRequest(projectName,
-				new StringRepresentation(content), user);
+				stringRepresentation, user);
 
 		Response response = executeRequest(request);
 

@@ -61,7 +61,7 @@ public class UserRouter extends Router {
 
 	private void attachPathsWithSuper(String[] paths,
 			Class<? extends ServerResource> resourceClass) {
-		attachPathsWithRole(paths, resourceClass, SuperEnroler.SUPER);
+		attachPathsWithRole(paths, resourceClass, SuperEnroler.Super);
 	}
 
 	private void attachPathsWithRole(String[] paths,

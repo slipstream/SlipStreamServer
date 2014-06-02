@@ -21,6 +21,7 @@ UNKNOWN_STATUS = 'unknown'
 COLLECTED_STATUS = (
     'running',
     'active',
+    'on'
 )
 
 METADATA_KEYS = (

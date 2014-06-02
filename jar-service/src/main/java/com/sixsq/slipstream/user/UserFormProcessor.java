@@ -147,27 +147,31 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 
 	private boolean shouldChangePassword(Passwords passwords, User dbUser)
 			throws ValidationException {
-
 		if (!isSet(passwords.newPassword1) && !isSet(passwords.newPassword2)) {
 			return false;
 		}
 
 		compareNewPasswords(passwords);
 
-		boolean notNew = !isNewUser(dbUser);
-		boolean notSuper = !getUser().isSuper();
-		boolean superChangingSuper = false;
+		boolean superChangingItself = false;
+		boolean isNew = isNewUser(dbUser);
+		boolean isSuper = getUser().isSuper();
 
-		if (notNew) {
-			superChangingSuper = (!notSuper && dbUser.isSuper());
+		if (!isNew) {
+			superChangingItself = isSuper && dbUser.isSuper()
+					&& isItself(dbUser);
 		}
 
-		if (notNew && (notSuper || superChangingSuper)) {
+		if ((!isNew && !isSuper) || superChangingItself) {
 			compareOldAndNewPasswords(passwords.oldPassword,
 					dbUser.getPassword());
 		}
 
 		return true;
+	}
+
+	private boolean isItself(User dbUser) {
+		return getUser().getName().equals(dbUser.getName());
 	}
 
 	private boolean isNewUser(User dbUser) {

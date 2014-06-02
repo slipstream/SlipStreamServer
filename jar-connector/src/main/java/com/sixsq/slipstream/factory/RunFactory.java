@@ -48,6 +48,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.FileUtil;
@@ -279,6 +280,15 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.INSTANCE_ID_KEY),
 				RuntimeParameter.INSTANCE_ID_DESCRIPTION);
+
+		Configuration conf = Configuration.getInstance();
+		String maxJaasWorkers = conf.getProperty(ServiceConfigurationParameter
+				.constructKey(cloudService,
+						RuntimeParameter.MAX_JAAS_WORKERS_KEY),
+				RuntimeParameter.MAX_JAAS_WORKERS_DEFAULT);
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.MAX_JAAS_WORKERS_KEY), maxJaasWorkers,
+				RuntimeParameter.MAX_JAAS_WORKERS_DESCRIPTION);
 
 		// Hack: hardcode the cpu and ram
 		// need to get this from the connector?

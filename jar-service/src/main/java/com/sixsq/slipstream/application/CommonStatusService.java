@@ -140,7 +140,7 @@ public class CommonStatusService extends StatusService {
 
 		json.append("{\n");
 		json.append("   \"error\": \"" + status.getCode() + "\",\n");
-		json.append("   \"reason\": \"" + status.getName() + "\",\n");
+		json.append("   \"reason\": \"" + status.getReasonPhrase() + "\",\n");
 		json.append("   \"detail\": \"" + status.getDescription() + "\"\n");
 		json.append("}\n");
 
@@ -182,7 +182,7 @@ public class CommonStatusService extends StatusService {
 	private String statusToString(Status status) {
 
 		return "Error: " + status.getDescription() + " (" + status.getCode()
-				+ " - " + status.getName() + ")";
+				+ " - " + status.getReasonPhrase() + ")";
 
 	}
 }

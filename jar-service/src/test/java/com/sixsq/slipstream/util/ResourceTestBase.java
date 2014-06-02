@@ -52,6 +52,8 @@ import com.sixsq.slipstream.user.UserTest;
 
 public class ResourceTestBase extends RunTestBase {
 
+	protected static final String TEST_REQUEST_NAME = "/test/request";
+
 	// Need to set cloudServiceName before the status user is
 	// created, since the createUser method uses it
 	public static String cloudServiceName = new LocalConnector()
@@ -90,7 +92,7 @@ public class ResourceTestBase extends RunTestBase {
 
 	public Request createRequest(Map<String, Object> attributes, Method method,
 			Representation entity) throws ConfigurationException {
-		return createRequest(attributes, method, entity, "/test/request");
+		return createRequest(attributes, method, entity, TEST_REQUEST_NAME);
 	}
 
 	public Request createRequest(Map<String, Object> attributes, Method method,
@@ -179,6 +181,13 @@ public class ResourceTestBase extends RunTestBase {
 		project.setAuthz(new Authz(user.getName(), project));
 		project.store();
 		return project;
+	}
+
+	protected Request createPutRequest(String name, Representation entity,
+			User user, String targetUrl) throws ConfigurationException {
+		Request request = createPutRequest(createModuleAttributes(name), entity, targetUrl);
+		addUserToRequest(user.getName(), request);
+		return request;
 	}
 
 	protected Request createPutRequest(String name, Representation entity,

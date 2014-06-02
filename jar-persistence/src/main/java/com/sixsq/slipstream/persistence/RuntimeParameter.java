@@ -126,6 +126,10 @@ public class RuntimeParameter extends Metadata {
     public static final String URL_SERVICE_KEY = "url.service";
     public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
 
+    public static final String MAX_JAAS_WORKERS_KEY = "max.iaas.workers";
+    public static final String MAX_JAAS_WORKERS_DESCRIPTION = "Max number of concurrently provisioned VMs by orchestrator";
+    public static final String MAX_JAAS_WORKERS_DEFAULT = "20";
+
     public final static int MULTIPLICITY_NODE_START_INDEX = 1;
 
 	private final static Pattern KEY_PATTERN = Pattern.compile("^(.*?):(.*)$");
