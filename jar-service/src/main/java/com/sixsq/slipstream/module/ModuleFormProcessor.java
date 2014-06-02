@@ -172,8 +172,10 @@ public abstract class ModuleFormProcessor extends
 	}
 
 	public void adjustModule(Module older) throws ValidationException {
-		getParametrized().setCreation(older.getCreation());
-		getParametrized().getAuthz().setUser(older.getOwner());
+		if (older != null) {
+			getParametrized().setCreation(older.getCreation());
+			getParametrized().getAuthz().setUser(older.getOwner());
+		}
 	}
 
 	protected Module load(String name) {
