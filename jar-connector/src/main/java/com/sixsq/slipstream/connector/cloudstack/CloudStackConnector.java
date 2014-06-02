@@ -32,6 +32,7 @@ import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.ProcessException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -89,10 +90,16 @@ public class CloudStackConnector extends CliConnectorBase {
 		String result;
 		String[] commands = { "sh", "-c", command };
 		try {
-			result = ProcessUtils.execGetOutput(commands);
+			result = ProcessUtils.execGetOutput(commands, false);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw (new SlipStreamInternalException(e));
+		} catch (ProcessException e) {
+			try {
+				String[] instanceData = parseRunInstanceResult(e.getStdOut());
+				updateInstanceIdAndIpOnRun(run, instanceData[0], instanceData[1]);
+			} catch (Exception ex) { }
+			throw e;
 		} finally {
 			deleteTempSshKeyFile();
 		}
