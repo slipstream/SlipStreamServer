@@ -161,7 +161,7 @@ public class RunListResource extends BaseResource {
 			Module module = loadReferenceModule();
 
 			authorizePost(module);
-			
+
 			updateReference(module);
 
 			overrideModule(form, module);
@@ -172,10 +172,12 @@ public class RunListResource extends BaseResource {
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
 			String defaultCloudService = getDefaultCloudService(form, user);
-			
+
 			run = RunFactory.getRun(module, parseType(form), defaultCloudService, user);
 
 			run = addCredentials(run);
+
+			setElasticity(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
 				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
@@ -197,6 +199,16 @@ public class RunListResource extends BaseResource {
 
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 		getResponse().setLocationRef(absolutePath);
+	}
+
+	private void setElasticity(Run run, Form form) {
+		String elastic = form.getFirstValue("elastic");
+		if (elastic == null) {
+			return;
+		}
+		if (elastic.trim().equals("true")) {
+			run.setElasticity(true);
+		}
 	}
 
 	private void authorizePost(Module module) {

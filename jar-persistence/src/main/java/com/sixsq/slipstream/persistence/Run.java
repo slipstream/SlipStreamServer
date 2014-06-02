@@ -442,6 +442,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Transient
 	private Module module;
 
+	@Attribute
+	private boolean elastic = false;
+
 	@Transient
 	private Map<String, Integer> cloudServiceUsage = new HashMap<String, Integer>();
 
@@ -911,4 +914,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.cloudServiceNames = cloudServiceNames;
 	}
 
+	public boolean isElastic() {
+		return elastic;
+	}
+
+	public void setElasticity(boolean elastic) {
+		this.elastic = elastic;
+	}
 }
