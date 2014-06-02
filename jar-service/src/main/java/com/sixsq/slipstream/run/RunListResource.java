@@ -79,6 +79,7 @@ import com.sixsq.slipstream.util.SerializationUtil;
 public class RunListResource extends BaseResource {
 
 	public static final String REFQNAME = "refqname";
+	public static final String MUTABLE_RUN_KEY = "mutable";
 	public static final String IGNORE_ABORT_QUERY = "ignoreabort";
 	String refqname = null;
 
@@ -177,7 +178,7 @@ public class RunListResource extends BaseResource {
 
 			run = addCredentials(run);
 
-			setElasticity(run, form);
+			setRunMutability(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
 				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
@@ -201,13 +202,13 @@ public class RunListResource extends BaseResource {
 		getResponse().setLocationRef(absolutePath);
 	}
 
-	private void setElasticity(Run run, Form form) {
-		String elastic = form.getFirstValue("elastic");
-		if (elastic == null) {
+	private void setRunMutability(Run run, Form form) {
+		String mutable = form.getFirstValue(MUTABLE_RUN_KEY);
+		if (mutable == null) {
 			return;
 		}
-		if (elastic.trim().equals("true")) {
-			run.setElasticity(true);
+		if (mutable.trim().equals("true")) {
+			run.setMutable();
 		}
 	}
 
@@ -309,11 +310,11 @@ public class RunListResource extends BaseResource {
 			Form form) throws ValidationException {
 		Map<String, List<NodeParameter>> parametersPerNode = new HashMap<String, List<NodeParameter>>();
 		for (Entry<String, String> entry : form.getValuesMap().entrySet()) {
-			// parameter--node--[nodename]--[paramname]
-			String[] parts = entry.getKey().split("--");
-			if (RunListResource.REFQNAME.equals(entry.getKey())) {
+			if (notNodeParameter(entry)) {
 				continue;
 			}
+			// parameter--node--[nodename]--[paramname]
+			String[] parts = entry.getKey().split("--");
 			if (parts.length != 4) {
 				throw new ValidationException("Invalid key format: "
 						+ entry.getKey());
@@ -329,6 +330,15 @@ public class RunListResource extends BaseResource {
 			parametersPerNode.get(nodename).add(parameter);
 		}
 		return parametersPerNode;
+	}
+
+	private static boolean notNodeParameter(Entry<String, String> entry) {
+		String entryKey = entry.getKey();
+		if (entryKey.equals(RunListResource.REFQNAME)
+				|| entryKey.equals(RunListResource.MUTABLE_RUN_KEY)) {
+			return true;
+		}
+		return false;
 	}
 
 	private void overrideImage(Form form, ImageModule image)

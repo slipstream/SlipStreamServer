@@ -443,7 +443,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private Module module;
 
 	@Attribute
-	private boolean elastic = false;
+	private boolean mutable = false;
 
 	@Transient
 	private Map<String, Integer> cloudServiceUsage = new HashMap<String, Integer>();
@@ -914,11 +914,15 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.cloudServiceNames = cloudServiceNames;
 	}
 
-	public boolean isElastic() {
-		return elastic;
+	public boolean isMutable() {
+		return mutable;
 	}
 
-	public void setElasticity(boolean elastic) {
-		this.elastic = elastic;
+	public void setMutable() {
+		this.mutable = true;
+	}
+
+	public void setImmutable() {
+		this.mutable = false;
 	}
 }
