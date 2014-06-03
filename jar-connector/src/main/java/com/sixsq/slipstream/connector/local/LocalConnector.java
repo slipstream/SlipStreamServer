@@ -57,7 +57,7 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	public LocalConnector(String instanceName) {
-		super(instanceName);
+		super(instanceName != null ? instanceName : CLOUD_SERVICE_NAME);
 	}
 
 	public Connector copy(){

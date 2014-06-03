@@ -66,7 +66,7 @@ import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.statemachine.States;
 
 @SuppressWarnings("serial")
-@Entity
+@Entity(name="Run")
 @NamedQueries({
 		@NamedQuery(name = "allActiveRuns", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "activeRunsByUser", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) AND r.user_ = :user ORDER BY r.startTime DESC"),

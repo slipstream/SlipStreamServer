@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Map.Entry;
 
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
@@ -45,6 +46,7 @@ import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.util.FileUtil;
+import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
 
@@ -139,14 +141,21 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected void authorize() {
-
-		setCanPut(getUser().isSuper() || isNew() || isItSelf());
+		setCanPut(!newTemplateResource()
+				&& (getUser().isSuper() || !isExisting() || (newInQuery() && !isExisting()) || isItSelf()));
 		setCanDelete(getUser().isSuper() || isItSelf());
+		setCanGet(getUser().isSuper() || newTemplateResource() || isItSelf());
+	}
 
-		if (getUser().isSuper() || isNew() || isItSelf()) {
-			setCanGet(true);
-		}
+	protected boolean newInQuery() {
+		return extractNewFlagFromQuery();
+	}
 
+	protected boolean newTemplateResource() {
+		return isExisting()
+				&& NEW_NAME.equals(ModuleUriUtil
+						.extractShortNameFromResourceUri(getParameterized()
+								.getName()));
 	}
 
 	private boolean isItSelf() {
@@ -193,6 +202,8 @@ public class UserResource extends ParameterizedResource<User> {
 		} catch (ValidationException e) {
 			throwClientBadRequest(e.getMessage());
 		}
+
+		setEmptyEntity(MediaType.APPLICATION_WWW_FORM);
 	}
 
 	@Put("xml")
@@ -212,6 +223,8 @@ public class UserResource extends ParameterizedResource<User> {
 		} else {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
+
+		setEmptyEntity(MediaType.APPLICATION_XML);
 	}
 
 	private User xmlToUser() {
@@ -253,7 +266,8 @@ public class UserResource extends ParameterizedResource<User> {
 			throwClientBadRequest("The uploaded user does not correspond to the target user uri");
 		}
 
-		if (isNew() && getUser().isSuper()) {
+		// super users forces new users to become active
+		if (!isExisting() && getUser().isSuper()) {
 			State current = user.getState();
 			State newState = current == State.NEW ? State.ACTIVE : current;
 			user.setState(newState);

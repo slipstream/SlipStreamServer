@@ -162,17 +162,31 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	@Override
 	protected void setIsEdit() throws ConfigurationException,
 			ValidationException {
-		setIsEdit(isEdit() || isEditFlagTrue() || isNew());
+		setIsEdit(isEdit() || isEditFlagTrue() || newTemplateResource());
 	}
 
-	protected boolean isNew() {
-		boolean newInUri = isExisting()
+	protected boolean newInQuery() {
+		return extractNewFlagFromQuery();
+	}
+
+	protected boolean newTemplateResource() {
+		return isExisting()
 				&& NEW_NAME.equals(ModuleUriUtil
 						.extractShortNameFromResourceUri(getParameterized()
 								.getName()));
+	}
+	
+	/**
+	 * User requested the creation of a new resource. This means that
+	 * if the resource already exists, for example, creation should
+	 * be forbidden.
+	 */
+	protected boolean xxrequestingNew() {
+		boolean newInUri = isExisting() && NEW_NAME.equals(ModuleUriUtil
+						.extractShortNameFromResourceUri(getParameterized()
+								.getName()));
 		boolean newInQuery = extractNewFlagFromQuery();
-		boolean doesntExists = !isExisting();
-		return newInQuery || newInUri || doesntExists;
+		return newInQuery || newInUri;
 	}
 
 	protected void addParametersForEditing() throws ValidationException,
@@ -254,7 +268,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		if (isEdit()) {
 			type = "edit";
 		}
-		if (isNew()) {
+		if (newTemplateResource()) {
 			type = "new";
 		}
 		if (isChooser()) {
@@ -276,8 +290,8 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected void checkCanPut() {
 		if (canPut()) {
-			if (isNew() && isExisting()) {
-				throwClientForbiddenError("Cannot create this resource. Does it already exist?");
+			if (newInQuery() && isExisting()) {
+				throwClientForbiddenError("Cannot create this resource. It already exists.");
 			}
 		} else {
 			throwClientForbiddenError("Forbidden to update this resource.");

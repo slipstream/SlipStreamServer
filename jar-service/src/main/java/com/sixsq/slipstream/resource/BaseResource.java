@@ -217,17 +217,13 @@ public abstract class BaseResource extends ServerResource {
 				.equals(trimmed));
 	}
 
-	private String getQueryValue(String key) {
-		return (String) getRequest().getAttributes().get(key);
-	}
-
-	boolean isSetInQuery(String key) {
+	private boolean isSetInQuery(String key) {
 		Reference resourceRef = getRequest().getResourceRef();
 		Form form = resourceRef.getQueryAsForm();
 		return isTrue(form.getFirstValue(key));
 	}
 
-	boolean extractNewFlagFromQuery() {
+	protected boolean extractNewFlagFromQuery() {
 		return isQueryValueSetTrue("new");
 	}
 
@@ -253,5 +249,9 @@ public abstract class BaseResource extends ServerResource {
 
 	protected boolean isSuper() {
 		return getUser().isSuper();
+	}
+
+	protected void setEmptyEntity(MediaType mt) {
+		getResponse().setEntity(null, mt);
 	}
 }

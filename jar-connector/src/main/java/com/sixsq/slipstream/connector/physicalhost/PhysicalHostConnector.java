@@ -59,7 +59,7 @@ public class PhysicalHostConnector extends ConnectorBase {
 	}
 
 	public PhysicalHostConnector(String instanceName) {
-		super(instanceName);
+		super(instanceName != null ? instanceName : CLOUD_SERVICE_NAME);
 	}
 
 	public Connector copy() {

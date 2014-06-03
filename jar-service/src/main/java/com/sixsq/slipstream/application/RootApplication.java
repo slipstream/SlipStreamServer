@@ -22,6 +22,7 @@ package com.sixsq.slipstream.application;
 
 import java.util.ServiceLoader;
 
+import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -194,6 +195,18 @@ public class RootApplication extends Application {
 		return new TrimmedMediaTypesFilter(getContext(), router);
 	}
 
+    @Override
+    public void start() throws Exception {
+        super.start();
+        DiscoverableConnectorServiceLoader.initializeAll();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        DiscoverableConnectorServiceLoader.shutdownAll();
+        super.stop();
+    }
+
 	/**
 	 * During dev, set static content to local dir (e.g.
 	 * "file:///Users/meb/Documents/workspace/SlipStream/SlipStreamServer/src/main/webapp/static-content/"
@@ -219,14 +232,14 @@ public class RootApplication extends Application {
 
 	private void attachReports(RootRouter router)
 			throws ConfigurationException, ValidationException {
-		router.attach("/reports", new ReportRouter(getContext()));
+		router.attach("/reports", new ReportRouter(getContext(), router.getApplication()));
 	}
 
 	private void attachConfiguration(RootRouter router) {
 		TemplateRoute route;
 		Authenticator authenticator = new CookieAuthenticator(getContext());
 		authenticator.setNext(ServiceConfigurationResource.class);
-		authenticator.setEnroler(new SuperEnroler());
+		authenticator.setEnroler(new SuperEnroler(router.getApplication()));
 		route = router.attach(ServiceConfigurationResource.CONFIGURATION_PATH,
 				authenticator);
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
@@ -276,14 +289,14 @@ public class RootApplication extends Application {
 	private void guardAndAttach(Router rootRouter, Router router, String rootUri)
 			throws ConfigurationException {
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler());
+		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
 
 		Authenticator cookieAuthenticator = new CookieAuthenticator(
 				getContext());
 		cookieAuthenticator.setOptional(true);
 
 		cookieAuthenticator.setNext(basicAuthenticator);
-		cookieAuthenticator.setEnroler(new SuperEnroler());
+		cookieAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
 
 		basicAuthenticator.setNext(router);
 
@@ -296,7 +309,7 @@ public class RootApplication extends Application {
 		TemplateRoute route;
 
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler());
+		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
 
 		Authenticator cookieAuthenticator = new CookieAuthenticator(
 				getContext());
@@ -313,7 +326,7 @@ public class RootApplication extends Application {
 	private void attachModule(RootRouter router) {
 
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler());
+		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
 
 		Authenticator cookieAuthenticator = new CookieAuthenticator(
 				getContext());
@@ -347,7 +360,7 @@ public class RootApplication extends Application {
 
 	private void attachWelcome(RootRouter router) {
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler());
+		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
 
 		Authenticator cookieAuthenticator = new CookieAuthenticator(
 				getContext());

@@ -8,9 +8,9 @@
   [user]
   (let [begin (System/currentTimeMillis)
         measurements (Measurements.)
-        measures (.populateAsString measurements user)]
+        xml-str (.populateAsString measurements user)]
     (log/log-info (str "update took: " (- (System/currentTimeMillis) begin)))
-    measures))
+    xml-str))
 
 (defn print-sh
   [exit out err]
@@ -20,23 +20,25 @@
   (when (not-empty err)
     (log/log-error err)))
 
-(defn- persist
-  [measures]
+(defn- report-metrics
+  [path]
   (let [{:keys [exit out err]}
-        (sh/sh "python" "ss-report-metrics.py" "-" :in measures
+        (sh/sh "python" "ss-report-metrics.py" path
                :dir "/opt/slipstream/server/bin")]
     (print-sh exit out err)
     exit))
 
 (defn update
   [user]
-  (let [measures (get-measurements user)]
-    (if (empty? measures)
-      0
-      (try
-        (persist measures)
-        (catch Exception e 
-          (do
-            (log/log-warn "caught exception executing update: " (.getMessage e))
-            -1))))))
+  (let [xml-str (get-measurements user)
+        tmp-file (java.io.File/createTempFile (str "measures-" (.getName user)) ".xml")]
+    (try
+      (do
+        (spit tmp-file xml-str)
+        (report-metrics (.getAbsolutePath tmp-file)))
+      (catch Exception e
+        (do
+          (log/log-warn "caught exception executing update: " (.getMessage e))
+          -1))
+      (finally (.delete tmp-file)))))
 

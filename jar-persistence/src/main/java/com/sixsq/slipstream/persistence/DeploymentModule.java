@@ -288,16 +288,11 @@ public class DeploymentModule extends Module {
 	}
 
 	public DeploymentModule store() {
-//		EntityManager em = PersistenceUtil.createEntityManager();
-//		EntityTransaction transaction = em.getTransaction();
-//		transaction.begin();
-////		for(Node n : getNodes().values()) {
-////			em.merge(n);
-////		}
-//		Metadata obj = em.merge(this);
-//		transaction.commit();
-//		em.close();
-//		return (DeploymentModule) obj;
+		if(nodes != null) {
+			for(Node n : nodes.values()) {
+				n.setModule(this);
+			}
+		}
 		return (DeploymentModule) store(true);
 	}
 

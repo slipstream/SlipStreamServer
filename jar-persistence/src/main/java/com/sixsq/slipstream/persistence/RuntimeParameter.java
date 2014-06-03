@@ -132,6 +132,10 @@ public class RuntimeParameter extends Metadata {
     public static final String IS_ORCHESTRATOR_KEY = "is.orchestrator";
     public static final String IS_ORCHESTRATOR_DESCRIPTION = "True if it's an orchestrator";
 
+    public static final String MAX_JAAS_WORKERS_KEY = "max.iaas.workers";
+    public static final String MAX_JAAS_WORKERS_DESCRIPTION = "Max number of concurrently provisioned VMs by orchestrator";
+    public static final String MAX_JAAS_WORKERS_DEFAULT = "20";
+
     public final static int MULTIPLICITY_NODE_START_INDEX = 1;
 
 	private final static Pattern KEY_PATTERN = Pattern.compile("^(.*?):(.*)$");

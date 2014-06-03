@@ -242,7 +242,7 @@ public class RuntimeParameterResourceTest extends
 		Request request = createDeleteRequest(run.getUuid(), key);
 		Response response = executeRequest(request);
 
-		assertEquals(Status.SUCCESS_OK, response.getStatus());
+		assertEquals(Status.SUCCESS_NO_CONTENT, response.getStatus());
 
 		assertRuntimeParameterWasReset(run, key);
 

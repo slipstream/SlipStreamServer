@@ -26,6 +26,8 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
+import com.sixsq.slipstream.persistence.Parameter;
+
 public class Passwords {
 
 	public String newPassword1 = null;
@@ -47,13 +49,13 @@ public class Passwords {
 	public void hash() throws NoSuchAlgorithmException,
 			UnsupportedEncodingException {
 		if (!hashed) {
-			if (newPassword1 != null) {
+			if (Parameter.hasValueSet(newPassword1)) {
 				newPassword1 = hash(newPassword1);
 			}
-			if (newPassword2 != null) {
+			if (Parameter.hasValueSet(newPassword2)) {
 				newPassword2 = hash(newPassword2);
 			}
-			if (oldPassword != null) {
+			if (Parameter.hasValueSet(oldPassword)) {
 				oldPassword = hash(oldPassword);
 			}
 		}

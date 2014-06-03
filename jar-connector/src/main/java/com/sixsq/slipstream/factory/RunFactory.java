@@ -50,6 +50,7 @@ import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.persistence.Vm;
@@ -314,11 +315,19 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.INSTANCE_ID_KEY),
 				RuntimeParameter.INSTANCE_ID_DESCRIPTION);
-		
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.IS_ORCHESTRATOR_KEY), "true",
 				RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
-		
+
+		Configuration conf = Configuration.getInstance();
+		String maxJaasWorkers = conf.getProperty(ServiceConfigurationParameter
+				.constructKey(cloudService,
+						RuntimeParameter.MAX_JAAS_WORKERS_KEY),
+				RuntimeParameter.MAX_JAAS_WORKERS_DEFAULT);
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.MAX_JAAS_WORKERS_KEY), maxJaasWorkers,
+				RuntimeParameter.MAX_JAAS_WORKERS_DESCRIPTION);
+
 		// Hack: hardcode the cpu and ram
 		// need to get this from the connector?
 		String defaultOrchestratorCpuRam = "1";

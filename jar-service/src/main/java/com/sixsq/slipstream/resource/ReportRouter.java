@@ -20,6 +20,7 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
+import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.routing.Filter;
 import org.restlet.routing.Router;
@@ -36,7 +37,7 @@ import com.sixsq.slipstream.filter.ReportDecorator;
 
 public class ReportRouter extends Router {
 
-	public ReportRouter(Context context) throws ConfigurationException,
+	public ReportRouter(Context context, Application application) throws ConfigurationException,
 			ValidationException {
 		super(context);
 
@@ -46,7 +47,7 @@ public class ReportRouter extends Router {
 		Authorizer authorizer = new ReportsAuthorizer();
 		Authenticator authenticator = new CookieAuthenticator(getContext());
 		authenticator.setNext(authorizer);
-		authenticator.setEnroler(new SuperEnroler());
+		authenticator.setEnroler(new SuperEnroler(application));
 
 		ResultsDirectory directory = new ResultsDirectory(getContext(),
 				"file://" + reportsLocation);

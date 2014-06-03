@@ -32,6 +32,7 @@ import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.ProcessException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -58,7 +59,7 @@ public class CloudStackConnector extends CliConnectorBase {
 	}
 
     public CloudStackConnector(String instanceName) {
-		super(instanceName);
+		super(instanceName != null ? instanceName : CLOUD_SERVICE_NAME);
 	}
 
     public Connector copy(){
@@ -68,7 +69,7 @@ public class CloudStackConnector extends CliConnectorBase {
     protected String getZoneType(){
 		return ZONE_TYPE;
 	}
-    
+
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
@@ -77,7 +78,7 @@ public class CloudStackConnector extends CliConnectorBase {
 	public Run launch(Run run, User user) throws SlipStreamException {
 
 		validateLaunch(run, user);
-		
+
 		String command;
 		try {
 			command = getRunInstanceCommand(run, user);
@@ -89,10 +90,16 @@ public class CloudStackConnector extends CliConnectorBase {
 		String result;
 		String[] commands = { "sh", "-c", command };
 		try {
-			result = ProcessUtils.execGetOutput(commands);
+			result = ProcessUtils.execGetOutput(commands, false);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw (new SlipStreamInternalException(e));
+		} catch (ProcessException e) {
+			try {
+				String[] instanceData = parseRunInstanceResult(e.getStdOut());
+				updateInstanceIdAndIpOnRun(run, instanceData[0], instanceData[1]);
+			} catch (Exception ex) { }
+			throw e;
 		} finally {
 			deleteTempSshKeyFile();
 		}
@@ -115,10 +122,10 @@ public class CloudStackConnector extends CliConnectorBase {
 				" --image-id " + wrapInSingleQuotes(getImageId(run, user)) +
 				" --instance-name " + wrapInSingleQuotes(getVmName(run)) +
 				" --instance-type " + wrapInSingleQuotes(getInstanceType(run, user)) +
-				" --zone-type " + getZoneType() + 
+				" --zone-type " + getZoneType() +
 				" --public-key " + wrapInSingleQuotes(getPublicSshKey(run, user)) +
 				" --network-type " + getNetwork(run) +
-				" --networks " + wrapInSingleQuotes(getNetworks(run, user)) + 
+				" --networks " + wrapInSingleQuotes(getNetworks(run, user)) +
 				" --context-script " + wrapInSingleQuotes(createContextualizationData(run, user));
 
 		return command;
@@ -138,10 +145,10 @@ public class CloudStackConnector extends CliConnectorBase {
 				"machine" + "-" + run.getUuid();
 	}
 
-	protected String getNetworks(Run run, User user) throws ValidationException{	
+	protected String getNetworks(Run run, User user) throws ValidationException{
 		return "";
 	}
-	
+
 	protected String getInstanceType(Run run, User user) throws ValidationException{
 		return (isInOrchestrationContext(run)) ?
 				user.getParameter(constructKey(CloudStackUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME)).getValue() :
@@ -170,7 +177,7 @@ public class CloudStackConnector extends CliConnectorBase {
 			throw (new ValidationException("Cloud Zone cannot be empty. "+ errorMessageLastPart));
 		}
 	}
-	
+
 	protected void validateCapabilities(Run run) throws SlipStreamException{
 		if(isInOrchestrationContext(run) && run.getCategory() == ModuleCategory.Image)
 			throw new SlipStreamException("Image creation is not yet available for this connector");

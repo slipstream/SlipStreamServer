@@ -57,8 +57,7 @@ import com.sixsq.slipstream.user.UserView;
  *
  */
 @SuppressWarnings("serial")
-@Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Entity(name="User")
 @NamedQueries({
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
 		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline) FROM User u") })

@@ -221,9 +221,11 @@ public class ModuleResource extends ParameterizedResource<Module> {
 				+ module.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 
-		if (isNew()) {
+		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
+
+		setEmptyEntity(MediaType.APPLICATION_WWW_FORM);
 	}
 
 	@Put("multipart")
@@ -238,9 +240,10 @@ public class ModuleResource extends ParameterizedResource<Module> {
 				+ module.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 
-		if (isNew()) {
+		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
+		setEmptyEntity(MediaType.MULTIPART_ALL);
 	}
 
 	private Module xmlMultipartToModule() {
@@ -284,12 +287,11 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		updateOrCreate(module);
 
-		if (isExisting()) {
-			getResponse().setStatus(Status.SUCCESS_OK);
-		} else {
+		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
-		getResponse().setLocationRef("/" + module.getResourceUri());		
+		getResponse().setLocationRef("/" + module.getResourceUri());
+		setEmptyEntity(MediaType.APPLICATION_XML);
 	}
 
 	private Module xmlToModule() {
@@ -360,15 +362,6 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throws ValidationException {
 		if (!targetUri.equals(moduleUri)) {
 			throwClientBadRequest("The uploaded module does not correspond to the target module uri");
-		}
-
-		// Check that the new proposed module doesn't already exists.
-		// We need to do this here since the standard AA process runs before
-		// the module name is extracted from the request.
-		if (isNew()) {
-			if (loadModule(moduleUri) != null) {
-				throwClientForbiddenError("Cannot create this resource. Does it already exist?");
-			}
 		}
 	}
 
@@ -495,7 +488,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientError(e);
 		}
 
-		if (!isNew()) {
+		if (newInQuery() && !isExisting()) {
 			processor.adjustModule(previous);
 		}
 
@@ -565,7 +558,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	private boolean authorizeGet() {
-		if (getUser().isSuper() || isNew()) {
+		if (getUser().isSuper() || newTemplateResource()) {
 			return true;
 		}
 		return getParameterized().getAuthz().canGet(getUser());
@@ -580,10 +573,15 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	protected boolean authorizePut() {
 
+		if (newTemplateResource()) {
+			return false;
+		}
+		
 		if (getUser().isSuper()) {
 			return true;
 		}
-		if (isNew()) {
+		
+		if (newInQuery() && !isExisting()) {
 			// check parent
 			String parentResourceUri = null;
 			try {
@@ -600,9 +598,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 				return parent.getAuthz().canCreateChildren(getUser());
 			}
 		}
-		boolean isExisting = isExisting(); // also true for isNew
 
-		return isExisting ? Module
+		return isExisting() ? Module
 				.loadLatest(getParameterized().getResourceUri()).getAuthz()
 				.canPut(getUser()) : true;
 	}
