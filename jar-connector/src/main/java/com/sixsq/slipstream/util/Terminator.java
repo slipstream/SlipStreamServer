@@ -1,5 +1,7 @@
 package com.sixsq.slipstream.util;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
@@ -10,6 +12,7 @@ import javax.persistence.EntityManager;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
@@ -30,19 +33,29 @@ public class Terminator {
 	/* I WILL BE BACK */
 	
 	public static int purge() throws ConfigurationException, ValidationException {
-		List<Run> old = Run.listOldTransient();
-		for (Run r : old) {
-			EntityManager em = PersistenceUtil.createEntityManager();
-			try {
-				r = Run.load(r.getResourceUri(), em);
-				purgeRun(r);
-			} catch (SlipStreamException e) {
-				Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
-			} finally {
-				em.close();
+		int runPurged =0;
+		
+		List<User> users = User.list();
+		for (User u: users) {
+			u = User.loadByName(u.getName());
+			int timeout = u.getTimeout();
+			
+			List<Run> old = Run.listOldTransient(u, timeout);
+			for (Run r : old) {
+				EntityManager em = PersistenceUtil.createEntityManager();
+				try {
+					r = Run.load(r.getResourceUri(), em);
+					purgeRun(r);
+				} catch (SlipStreamException e) {
+					Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
+				} finally {
+					em.close();
+				}
 			}
+			runPurged += old.size();
 		}
-		return old.size();
+		
+		return runPurged;
 	}
 	
 	public static void purgeRun(Run run) throws SlipStreamException {
@@ -77,8 +90,8 @@ public class Terminator {
 		StateMachine sc = StateMachine.createStateMachine(run);
 		
 		if (sc.canCancel()) {
-			terminateInstances(run, user);
 			sc.tryAdvanceToCancelled();
+			terminateInstances(run, user);
 		} else {
 			if (sc.getState() == States.Ready) {
 				sc.tryAdvanceToFinalizing();
@@ -91,6 +104,8 @@ public class Terminator {
 	}
 	
 	public static void terminateInstances(Run run, User user) throws ValidationException {
+		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
+		
 		HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
 		for (String cloudServiceName : cloudServicesList) {
 			Connector connector = ConnectorFactory.getConnector(cloudServiceName);

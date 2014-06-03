@@ -70,8 +70,12 @@ public class RunTest {
 		calendar.add(Calendar.HOUR, -2);
 		Date twoHourBack = calendar.getTime();
 
-		List<Run> before = Run.listOldTransient();
-
+		User user = new User("user");
+		user.setParameter(new UserParameter(UserParameter.KEY_TIMEOUT, "60", ""));
+		user.store();
+		
+		List<Run> before = Run.listOldTransient(user);
+		
 		Run done = new Run(image, RunType.Run, "test", new User("user"));
 		done.setStart(twoHourBack);
 		done.setState(States.Done);
@@ -82,7 +86,7 @@ public class RunTest {
 //		aborting.setState(States.Aborting);
 		aborting.store();
 
-		List<Run> transiant = Run.listOldTransient();
+		List<Run> transiant = Run.listOldTransient(user);
 
 		assertThat(transiant.size(), is(before.size() + 1));
 

@@ -52,8 +52,8 @@ public class ReadyState extends SynchronizedState {
 		RunParameter onErrorKeepRunning = run.getParameter(key);
 		
 		return run.getType() == RunType.Run || 
-				(onSuccessKeepRunning != null && onSuccessKeepRunning.isTrue()) ||
-				(onErrorKeepRunning != null && onErrorKeepRunning.isTrue());
+				(onSuccessKeepRunning != null && onSuccessKeepRunning.isTrue() && !extrinsicState.isFailing()) ||
+				(onErrorKeepRunning != null && onErrorKeepRunning.isTrue() && extrinsicState.isFailing());
 	}
 	    
     @Override

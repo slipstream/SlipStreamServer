@@ -200,7 +200,8 @@ public class StateMachine {
 	}
 	
 	public boolean canCancel() {
-		return ! States.canTerminate().contains(globalState);
+		
+		return ! States.canTerminate().contains(globalState.getState());
 	}
 	
 	private void tryAdvanceToState(States state, boolean force) 

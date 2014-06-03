@@ -445,7 +445,15 @@ public class User extends Parameterized<User, UserParameter> {
 		this.lastOnline = new Date();
 	}
 
-	public boolean onSuccessRunForever() {
+	public int getTimeout() {
+		try {
+			return  Integer.parseInt(getParameterValue(UserParameter.KEY_TIMEOUT, "0"));
+		} catch (ValidationException e) {
+			return 0;
+		}
+	}
+	
+	public boolean getOnSuccessRunForever() {
 		boolean _default = false;
 		try {
 			return Boolean.parseBoolean(getParameterValue(UserParameter.KEY_ON_SUCCESS_RUN_FOREVER, Boolean.toString(_default)));
@@ -454,7 +462,7 @@ public class User extends Parameterized<User, UserParameter> {
 		}
 	}
 
-	public boolean onErrorRunForever() {
+	public boolean getOnErrorRunForever() {
 		boolean _default = false;
 		try {
 			return Boolean.parseBoolean(getParameterValue(UserParameter.KEY_ON_ERROR_RUN_FOREVER, Boolean.toString(_default)));

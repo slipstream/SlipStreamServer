@@ -74,10 +74,12 @@ import com.sixsq.slipstream.statemachine.States;
 		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r WHERE r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
 		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
-		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.startTime < :before AND r.state IN (:states)"),
+		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.startTime < :before AND r.state IN (:states)"),
 		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
 
+	private static final int DEFAULT_TIMEOUT = 60; // In minutes
+	
 	private static final int MAX_NO_OF_ENTRIES = 20;
 	public static final String ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR = "-";
 	public static final String NODE_NAME_PARAMETER_SEPARATOR = "--";
@@ -152,6 +154,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private static void setGlobalAbortState(String abortMessage,
 			RuntimeParameter globalAbort) {
 		globalAbort.setValue(abortMessage);
+		globalAbort.store();
 		Run run = globalAbort.getContainer();
 		run.setState(run.getState());
 	}
@@ -369,24 +372,29 @@ public class Run extends Parameterized<Run, RunParameter> {
  		return runs;
  	}
 
+ 	public static List<Run> listOldTransient(User user) throws ConfigurationException,
+ 			ValidationException {
+ 		return listOldTransient(user, 0);
+ 	}
+ 	
 	@SuppressWarnings("unchecked")
-	public static List<Run> listOldTransient() throws ConfigurationException,
+	public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException,
 			ValidationException {
+		if (timeout <= 0) {
+			timeout = 60;
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.MINUTE, -timeout);
+		Date back = calendar.getTime();
+		
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = createNamedQuery(em, "oldInStatesRuns");
-		Date back = aLittleWhileAgo();
+		q.setParameter("user", user.getName());
 		q.setParameter("before", back);
 		q.setParameter("states", States.transition());
 		List<Run> runs = q.getResultList();
 		em.close();
 		return runs;
-	}
-
-	private static Date aLittleWhileAgo() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.HOUR, -1);
-		Date oneHourBack = calendar.getTime();
-		return oneHourBack;
 	}
 
 	@SuppressWarnings("unchecked")
