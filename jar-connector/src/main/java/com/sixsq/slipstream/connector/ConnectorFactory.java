@@ -143,7 +143,7 @@ public class ConnectorFactory {
             String instanceName = entry.getKey();
             String cloudServiceName = entry.getValue();
 
-            Connector connector = loadConnector(cloudServiceName);
+            Connector connector = loadConnector(cloudServiceName, instanceName);
             connectors.put(instanceName, connector);
         }
 
