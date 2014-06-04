@@ -25,10 +25,13 @@ import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -120,6 +123,25 @@ public class ConnectorFactoryTest {
         assertTrue(names.contains("CS2"));
         assertTrue(names.contains("stratuslab"));
         assertTrue(names.contains("cloudstack"));
+    }
+
+    @Test
+    public void checkConnectorsWithAliasesAndSpaces() throws Exception {
+
+        CommonTestUtil.setCloudConnector(
+                " SL : com.sixsq.slipstream.connector.stratuslab.StratusLabConnector , " + " SL2:stratuslab , " +
+                        " CS:com.sixsq.slipstream.connector.cloudstack.CloudStackConnector , " + " CS2:cloudstack , " +
+                        " stratuslab , " + " cloudstack ");
+
+        assertThat(ConnectorFactory.getConnector("SL"), notNullValue());
+        assertThat(ConnectorFactory.getConnector("SL2"), notNullValue());
+        assertThat(ConnectorFactory.getConnector("CS"), notNullValue());
+        assertThat(ConnectorFactory.getConnector("CS2"), notNullValue());
+        assertThat(ConnectorFactory.getConnector("stratuslab"), notNullValue());
+        assertThat(ConnectorFactory.getConnector("cloudstack"), notNullValue());
+
+        Map<String, Connector> connectors = ConnectorFactory.getConnectors();
+        assertEquals(connectors.get("openstack"), null);
     }
 
     @Test
