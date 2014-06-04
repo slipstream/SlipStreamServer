@@ -20,17 +20,29 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.util.CommonTestUtil;
 import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class ConnectorFactoryTest {
 
     @Test
     public void splitConnectorClassNames() {
         assertThat(ConnectorFactory.splitConnectorClassNames(null), is(new String[0]));
+        assertThat(ConnectorFactory.splitConnectorClassNames(""), is(new String[0]));
+        assertThat(ConnectorFactory.splitConnectorClassNames("\t\f "), is(new String[0]));
+        assertThat(ConnectorFactory.splitConnectorClassNames("a,b,c"), is(new String[]{"a", "b", "c"}));
+        assertThat(ConnectorFactory.splitConnectorClassNames("a,b,c "), is(new String[]{"a", "b", "c "}));
+        assertThat(ConnectorFactory.splitConnectorClassNames("a,b, ,c,"), is(new String[]{"a", "b", " ", "c"}));
+        assertThat(ConnectorFactory.splitConnectorClassNames("a:one,b:two,c"), is(new String[]{"a:one", "b:two", "c"}));
     }
 
     @Test
@@ -38,12 +50,90 @@ public class ConnectorFactoryTest {
         assertThat(ConnectorFactory.convertClassNameToServiceName("stratuslab"), equalTo("stratuslab"));
         assertThat(ConnectorFactory
                         .convertClassNameToServiceName("com.sixsq.slipstream.connector.stratuslab.StratusLabConnector"),
-                equalTo("stratuslab")
-        );
+                equalTo("stratuslab"));
         assertThat(ConnectorFactory.convertClassNameToServiceName("stratuslab.alpha"), equalTo("stratuslab"));
         assertThat(ConnectorFactory.convertClassNameToServiceName("com.sixsq.slipstream.connector.aws.Ec2Connector"),
                 equalTo("ec2"));
         assertThat(ConnectorFactory.convertClassNameToServiceName("aws.Ec2Connector"), equalTo("ec2"));
 
+    }
+
+    @Test
+    public void checkConnectorNames() throws Exception {
+
+        CommonTestUtil.setCloudConnector("stratuslab, cloudstack, okeanos, openstack, physicalhost");
+        List<String> names = ConnectorFactory.getCloudServiceNamesList();
+
+        assertTrue(names.contains("cloudstack"));
+        assertTrue(names.contains("okeanos"));
+        assertTrue(names.contains("openstack"));
+        assertTrue(names.contains("physicalhost"));
+        assertTrue(names.contains("stratuslab"));
+    }
+
+    @Test
+    public void checkConnectorClassNames() throws Exception {
+
+        CommonTestUtil.setCloudConnector("com.sixsq.slipstream.connector.okeanos.OkeanosConnector," +
+                "com.sixsq.slipstream.connector.cloudstack.CloudStackConnector," +
+                "com.sixsq.slipstream.connector.openstack.OpenStackConnector," +
+                "com.sixsq.slipstream.connector.physicalhost.PhysicalHostConnector," +
+                "com.sixsq.slipstream.connector.stratuslab.StratusLabConnector");
+        List<String> names = ConnectorFactory.getCloudServiceNamesList();
+
+        assertTrue(names.contains("cloudstack"));
+        assertTrue(names.contains("okeanos"));
+        assertTrue(names.contains("openstack"));
+        assertTrue(names.contains("physicalhost"));
+        assertTrue(names.contains("stratuslab"));
+    }
+
+    @Test
+    public void checkConnectorNamesWithAliases() throws Exception {
+
+        CommonTestUtil.setCloudConnector(
+                "SL:com.sixsq.slipstream.connector.stratuslab.StratusLabConnector," + "SL2:stratuslab, " +
+                        "CS:com.sixsq.slipstream.connector.cloudstack.CloudStackConnector," + "CS2:cloudstack," +
+                        "stratuslab," + "cloudstack");
+        List<String> names = ConnectorFactory.getCloudServiceNamesList();
+
+        assertTrue(names.contains("SL"));
+        assertTrue(names.contains("SL2"));
+        assertTrue(names.contains("CS"));
+        assertTrue(names.contains("CS2"));
+        assertTrue(names.contains("stratuslab"));
+        assertTrue(names.contains("cloudstack"));
+    }
+
+    @Test
+    public void checkConnectorNamesWithAliasesAndSpaces() throws Exception {
+
+        CommonTestUtil.setCloudConnector(
+                " SL : com.sixsq.slipstream.connector.stratuslab.StratusLabConnector , " + " SL2:stratuslab , " +
+                        " CS:com.sixsq.slipstream.connector.cloudstack.CloudStackConnector , " + " CS2:cloudstack , " +
+                        " stratuslab , " + " cloudstack ");
+        List<String> names = ConnectorFactory.getCloudServiceNamesList();
+
+        assertTrue(names.contains("SL"));
+        assertTrue(names.contains("SL2"));
+        assertTrue(names.contains("CS"));
+        assertTrue(names.contains("CS2"));
+        assertTrue(names.contains("stratuslab"));
+        assertTrue(names.contains("cloudstack"));
+    }
+
+    @Test
+    public void checkListAndArrayAreIdentical() throws Exception {
+        CommonTestUtil.setCloudConnector("stratuslab, cloudstack, okeanos, openstack, physicalhost");
+
+        List<String> names = ConnectorFactory.getCloudServiceNamesList();
+        String[] namesArray = ConnectorFactory.getCloudServiceNames();
+
+        Set<String> namesSet = new HashSet<String>(names);
+        Set<String> namesArraySet = new HashSet<String>();
+        for (String name : namesArray) {
+            namesArraySet.add(name);
+        }
+        assertTrue(namesSet.equals(namesArraySet));
     }
 }

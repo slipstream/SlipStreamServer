@@ -55,6 +55,11 @@ public abstract class CommonTestUtil {
 
     protected static final String PASSWORD = "password";
 
+    // Only static methods. Ensure no instances are created.
+    private CommonTestUtil() {
+
+    }
+
     // Need to set cloudServiceName before the status user is
     // created, since the createUser method uses it
     public static final String cloudServiceName = new LocalConnector().getCloudServiceName();
@@ -233,11 +238,6 @@ public abstract class CommonTestUtil {
         }
         sc.store();
         ConnectorFactory.resetConnectors();
-    }
-
-    // Only static methods. Ensure no instances are created.
-    public CommonTestUtil() {
-
     }
 
 }
