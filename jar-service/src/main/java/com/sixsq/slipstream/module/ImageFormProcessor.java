@@ -20,7 +20,6 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -184,7 +183,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		// only clean the image id for template images (i.e. not native) that
 		// don't need rebuilding
 		if (!module.isBase() && needsRebuild) {
-			module.setCloudImageIdentifiers(new ArrayList<CloudImageIdentifier>());
+			module.setCloudImageIdentifiers(new HashSet<CloudImageIdentifier>());
 			return;
 		}
 		// take updates for base (native) image
