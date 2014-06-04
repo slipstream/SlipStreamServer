@@ -23,6 +23,7 @@ package com.sixsq.slipstream.connector;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +143,40 @@ public class ConnectorFactoryTest {
 
         Map<String, Connector> connectors = ConnectorFactory.getConnectors();
         assertEquals(connectors.get("openstack"), null);
+    }
+
+    @Test
+    public void checkConnectorInstanceAndCloudServiceNames() throws Exception {
+
+        CommonTestUtil.setCloudConnector(
+                " SL : com.sixsq.slipstream.connector.stratuslab.StratusLabConnector , " + " SL2:stratuslab , " +
+                        " CS:com.sixsq.slipstream.connector.cloudstack.CloudStackConnector , " + " CS2:cloudstack , " +
+                        " stratuslab , " + " cloudstack ");
+
+        String[] instanceNames = new String[]{"SL", "SL2", "CS", "CS2", "stratuslab", "cloudstack"};
+        for (String name : instanceNames) {
+            Connector connector = ConnectorFactory.getConnector(name);
+            assertThat(connector, notNullValue());
+
+            String instanceName = connector.getConnectorInstanceName();
+            assertEquals(name, instanceName);
+        }
+
+        Map<String, String> cloudServiceNames = new HashMap<String, String>();
+        cloudServiceNames.put("SL", "stratuslab");
+        cloudServiceNames.put("SL2", "stratuslab");
+        cloudServiceNames.put("CS", "cloudstack");
+        cloudServiceNames.put("CS2", "cloudstack");
+        cloudServiceNames.put("stratuslab", "stratuslab");
+        cloudServiceNames.put("cloudstack", "cloudstack");
+
+        for (String name : cloudServiceNames.keySet()) {
+            Connector connector = ConnectorFactory.getConnector(name);
+            assertThat(connector, notNullValue());
+
+            String cloudServiceName = connector.getCloudServiceName();
+            assertEquals(cloudServiceNames.get(name), cloudServiceName);
+        }
     }
 
     @Test
