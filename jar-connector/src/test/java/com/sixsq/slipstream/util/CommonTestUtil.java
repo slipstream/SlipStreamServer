@@ -52,7 +52,7 @@ import java.util.Map;
 import static org.junit.Assert.fail;
 
 public abstract class CommonTestUtil {
-
+	
 	protected static final String PASSWORD = "password";
 
 	// Need to set cloudServiceName before the status user is
