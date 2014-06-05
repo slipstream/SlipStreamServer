@@ -135,12 +135,14 @@ public class StateMachine {
 		globalState = StateFactory.createInstance(globalExtrinsicState);
 	}
 	
+	// Note: Used only for unit tests
 	public void start() throws SlipStreamException {
 		EntityManager em = beginTransation();
 		completeAllNodesState();
 		commitTransaction(em);
 	}
 
+	// Note: Used only for unit tests
 	private void completeAllNodesState() throws SlipStreamClientException {
 		for (String nodeName : nodeStates.keySet()) {
 			setNodeStateCompleted(nodeName);
@@ -155,7 +157,7 @@ public class StateMachine {
 
 		tryAdvanceState();
 
-		return nodeStates.get(nodeName).getState();
+		return globalState.getState();
 	}
 
 	private void completeCurrentState(String nodeName)
@@ -230,6 +232,9 @@ public class StateMachine {
 			} else {
 				throw ex;
 			}
+		}
+		if (em.isOpen()) {
+			em.close();
 		}
 	}
 
@@ -356,10 +361,6 @@ public class StateMachine {
 
 	public States getState() {
 		return globalState.getState();
-	}
-
-	public States getNodeState(String nodeName) {
-		return nodeStates.get(nodeName).getState();
 	}
 
 	public void fail(String nodeName) throws InvalidStateException {

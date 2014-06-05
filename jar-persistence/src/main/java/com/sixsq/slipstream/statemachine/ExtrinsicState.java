@@ -48,7 +48,7 @@ public class ExtrinsicState {
 	}
 	
 	public boolean isFailing() {
-		return getParameterValueAsBoolean(failing);
+		return failing.isSet();
 	}
 	
 	public boolean isOrchestrator() {

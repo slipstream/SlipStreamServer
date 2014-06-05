@@ -34,8 +34,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
@@ -445,8 +443,9 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	public int getTimeout() {
+		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_TIMEOUT);
 		try {
-			return  Integer.parseInt(getParameterValue(UserParameter.KEY_TIMEOUT, "0"));
+			return Integer.parseInt(getParameterValue(key, "0"));
 		} catch (ValidationException e) {
 			return 0;
 		}
@@ -454,8 +453,9 @@ public class User extends Parameterized<User, UserParameter> {
 	
 	public boolean getOnSuccessRunForever() {
 		boolean _default = false;
+		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 		try {
-			return Boolean.parseBoolean(getParameterValue(UserParameter.KEY_ON_SUCCESS_RUN_FOREVER, Boolean.toString(_default)));
+			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
 		} catch (ValidationException e) {
 			return _default;
 		}
@@ -463,8 +463,9 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public boolean getOnErrorRunForever() {
 		boolean _default = false;
+		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_ERROR_RUN_FOREVER);
 		try {
-			return Boolean.parseBoolean(getParameterValue(UserParameter.KEY_ON_ERROR_RUN_FOREVER, Boolean.toString(_default)));
+			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
 		} catch (ValidationException e) {
 			return _default;
 		}

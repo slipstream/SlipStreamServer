@@ -381,7 +381,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException,
 			ValidationException {
 		if (timeout <= 0) {
-			timeout = 60;
+			timeout = DEFAULT_TIMEOUT;
 		}
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.MINUTE, -timeout);

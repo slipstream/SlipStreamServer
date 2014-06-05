@@ -209,10 +209,7 @@ public class RuntimeParameterResource extends ServerResource {
 
 		newState = attemptCompleteCurrentNodeState(nodeName);
 
-		Run run = Run.loadFromUuid(uuid);
-
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
-
 	}
 
 	private States attemptCompleteCurrentNodeState(String nodeName) {

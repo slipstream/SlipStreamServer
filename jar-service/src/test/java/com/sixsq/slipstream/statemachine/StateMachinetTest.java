@@ -185,8 +185,6 @@ public class StateMachinetTest {
 		run = em.find(Run.class, run.getResourceUri());
 		assertThat(run.getRuntimeParameterValue("ss:state"),
 				is(States.Done.toString()));
-		assertThat(run.getRuntimeParameterValue("n1.1:state"),
-				is(States.Done.toString()));
 		em.close();
 
 		assertState(sc, States.Done);
@@ -204,8 +202,6 @@ public class StateMachinetTest {
 
 	private void assertState(StateMachine sc, States state) {
 		assertEquals(state, sc.getState());
-		assertEquals(state, sc.getNodeState("n1.1"));
-		assertEquals(state, sc.getNodeState("n2.1"));
 	}
 
 	@Test(expected = SlipStreamClientException.class)
@@ -237,8 +233,14 @@ public class StateMachinetTest {
 		assertTrue(done.isFinal());
 	}
 
+	// TODO: LS
+	/*@Test
+	public void failureDuringInitializing() {
+		
+	}*/
+	
 	@Test
-	public void failureDuringInitialization() throws IllegalArgumentException,
+	public void failureDuringProvisioning() throws IllegalArgumentException,
 			SecurityException, ClassNotFoundException, InstantiationException,
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, SlipStreamException {
@@ -251,14 +253,11 @@ public class StateMachinetTest {
 		assertEquals(States.Provisioning, sc.getState());
 
 		sc.updateState("n1.1");
-		assertEquals(States.Provisioning, sc.getNodeState("n1.1"));
-		assertEquals(States.Provisioning, sc.getNodeState("n2.1"));
+		assertEquals(States.Provisioning, sc.getState());
 
 		sc.fail("n2.1");
 
 		assertEquals(States.SendingReports, sc.getState());
-		assertEquals(States.SendingReports, sc.getNodeState("n1.1"));
-		assertEquals(States.SendingReports, sc.getNodeState("n2.1"));
 		sc.updateState("n2.1");
 	}
 
@@ -285,20 +284,28 @@ public class StateMachinetTest {
 		assertTrue(sc.isFailing());
 
 		sc.updateState("n2.1");
+		
+		assertEquals(States.Executing, sc.getState());
+		assertTrue(sc.isFailing());
+		
+		sc.updateState(failingNodeName);
 
 		assertEquals(States.SendingReports, sc.getState());
 		sc.updateState(failingNodeName);
+		
+		assertEquals(States.SendingReports, sc.getState());
 		sc.updateState("n2.1");
 		
 		assertEquals(States.Ready, sc.getState());
 		sc.updateState(failingNodeName);
+		
+		assertEquals(States.Ready, sc.getState());
+		sc.updateState("n2.1");
+		
 		assertEquals(States.Finalizing, sc.getState());
 		sc.updateState("n2.1");
-		assertEquals(States.Finalizing, sc.getState());
-		
-		sc.updateState(failingNodeName);
 
-		assertEquals(States.Done, sc.getState());
+		assertEquals(States.Aborted, sc.getState());
 	}
 
 	@Test(expected = CannotAdvanceFromTerminalStateException.class)
@@ -319,13 +326,10 @@ public class StateMachinetTest {
 		sc.commitTransaction(em);
 
 		assertThat(sc.getState(), is(States.Done));
-		assertThat(sc.getNodeState("n1.1"), is(States.Done));
 
 		em = PersistenceUtil.createEntityManager();
 		run = em.find(Run.class, run.getResourceUri());
 		assertThat(run.getRuntimeParameterValue("ss:state"),
-				is(States.Done.toString()));
-		assertThat(run.getRuntimeParameterValue("n1.1:state"),
 				is(States.Done.toString()));
 		em.close();
 

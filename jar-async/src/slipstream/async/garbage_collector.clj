@@ -15,7 +15,7 @@
 (def collector-chan-size 4)
 (def number-of-readers 2)
 (def timeout-collect (seconds-in-msecs 5))
-(def timeout-processing-loop (seconds-in-msecs 600))
+(def timeout-processing-loop (seconds-in-msecs 300))
 
 (defn purge
   []
