@@ -219,8 +219,4 @@ public class RunResource extends BaseResource {
 		em.close();
 	}
 
-	@Patch("application/json")
-	public void patchUpdate(Representation entity) {
-		Form form = new Form(entity);
-	}
 }
