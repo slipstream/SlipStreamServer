@@ -33,7 +33,6 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.Put;
-import org.restlet.resource.Patch;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.connector.Connector;
