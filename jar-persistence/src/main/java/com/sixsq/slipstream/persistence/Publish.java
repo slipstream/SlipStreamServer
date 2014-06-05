@@ -33,11 +33,10 @@ import javax.persistence.TemporalType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
+@SuppressWarnings("serial")
 @Entity
 public class Publish implements Serializable {
 	
-	private static final long serialVersionUID = 1L;
-
 	@Id
 	@GeneratedValue
 	Long id;
