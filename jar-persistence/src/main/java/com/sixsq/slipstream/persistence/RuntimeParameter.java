@@ -61,7 +61,6 @@ public class RuntimeParameter extends Metadata {
 
 	public final static String STATE_KEY = "state";
 	public static final String STATE_DESCRIPTION = "Machine state";
-	public final static String STATE_MESSAGE_KEY = "statemessage";
 	public static final String STATE_MESSAGE_DESCRIPTION = "Machine state message";
 	public final static String STATE_CUSTOM_KEY = "statecustom";
 	public static final String STATE_CUSTOM_DESCRIPTION = "Custom state";
@@ -80,9 +79,6 @@ public class RuntimeParameter extends Metadata {
 
 	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX + STATE_KEY;
 	public final static String GLOBAL_STATE_DESCRIPTION = "Global execution state";
-
-	public final static String GLOBAL_STATE_MESSAGE_KEY = GLOBAL_NAMESPACE_PREFIX + STATE_MESSAGE_KEY;
-	public final static String GLOBAL_STATE_MESSAGE_DESCRIPTION = "Global execution state message";
 
 	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX + "category";
 

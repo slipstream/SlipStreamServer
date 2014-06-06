@@ -287,9 +287,6 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_KEY,
 				Run.INITIAL_NODE_STATE,
 				RuntimeParameter.GLOBAL_STATE_DESCRIPTION);
-		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_MESSAGE_KEY,
-				Run.INITIAL_NODE_STATE_MESSAGE,
-				RuntimeParameter.GLOBAL_STATE_MESSAGE_DESCRIPTION);
         run.assignRuntimeParameter(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY, "",
                 RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION);
 
@@ -309,15 +306,16 @@ public abstract class RunFactory {
 		String prefix = Run.constructOrchestratorName(cloudService);
 
 		assignRuntimeParameters(run, prefix);
+		
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.HOSTNAME_KEY),
 				RuntimeParameter.HOSTNAME_DESCRIPTION);
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.INSTANCE_ID_KEY),
 				RuntimeParameter.INSTANCE_ID_DESCRIPTION);
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.IS_ORCHESTRATOR_KEY), "true",
-				RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
+		
+		run.getRuntimeParameters().get(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.IS_ORCHESTRATOR_KEY)).setValue("true");
 
 		Configuration conf = Configuration.getInstance();
 		String maxJaasWorkers = conf.getProperty(ServiceConfigurationParameter
@@ -346,25 +344,34 @@ public abstract class RunFactory {
 	 */
 	public static void assignRuntimeParameters(Run run, String nodename)
 			throws ValidationException {
-		String prefix = nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
-		run.assignRuntimeParameter(prefix + RuntimeParameter.STATE_MESSAGE_KEY,
-				Run.INITIAL_NODE_STATE,
-				RuntimeParameter.STATE_MESSAGE_DESCRIPTION);
-		run.assignRuntimeParameter(prefix + RuntimeParameter.STATE_CUSTOM_KEY,
-				"", RuntimeParameter.STATE_CUSTOM_DESCRIPTION);
-		run.assignRuntimeParameter(prefix + RuntimeParameter.STATE_VM_KEY, "",
+		String prefix = nodename;
+		
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.STATE_CUSTOM_KEY), "", 
+				RuntimeParameter.STATE_CUSTOM_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.STATE_VM_KEY), "",
 				RuntimeParameter.STATE_VM_DESCRIPTION);
-		run.assignRuntimeParameter(prefix + RuntimeParameter.ABORT_KEY, "",
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.ABORT_KEY), "",
 				RuntimeParameter.ABORT_DESCRIPTION);
-		run.assignRuntimeParameter(prefix + RuntimeParameter.COMPLETE_KEY,
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.COMPLETE_KEY),
 				"false", RuntimeParameter.COMPLETE_DESCRIPTION);
-        run.assignRuntimeParameter(prefix + RuntimeParameter.TAGS_KEY, "",
+        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+        		RuntimeParameter.TAGS_KEY), "",
                 RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
 
-        run.assignRuntimeParameter(prefix + RuntimeParameter.URL_SSH_KEY, "",
+        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+        		RuntimeParameter.URL_SSH_KEY), "",
                 RuntimeParameter.URL_SSH_DESCRIPTION);
-        run.assignRuntimeParameter(prefix + RuntimeParameter.URL_SERVICE_KEY, "",
+        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+        		RuntimeParameter.URL_SERVICE_KEY), "",
                 RuntimeParameter.URL_SERVICE_DESCRIPTION);
+        
+        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.IS_ORCHESTRATOR_KEY), "false",
+				RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
     }
 
 	protected void initOrchestratorsNodeNames(Run run)
