@@ -33,6 +33,7 @@ import static com.sixsq.slipstream.connector.local.LocalConnector.CLOUD_SERVICE_
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class LocalConnectorTest {
 
@@ -41,7 +42,7 @@ public class LocalConnectorTest {
 
         List<String> cloudServiceNames = getCloudServiceNames();
         assertThat(cloudServiceNames.size(), greaterThan(0));
-        assert (cloudServiceNames.contains(CLOUD_SERVICE_NAME));
+        assertTrue(cloudServiceNames.contains(CLOUD_SERVICE_NAME));
 
         assertThat(getConnectorService(CLOUD_SERVICE_NAME), notNullValue());
     }
@@ -69,7 +70,7 @@ public class LocalConnectorTest {
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof LocalConnector);
 
         ConnectorFactory.resetConnectors();
     }

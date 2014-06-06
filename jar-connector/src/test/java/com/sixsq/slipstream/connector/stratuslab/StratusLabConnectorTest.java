@@ -33,6 +33,7 @@ import static com.sixsq.slipstream.connector.stratuslab.StratusLabConnector.CLOU
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class StratusLabConnectorTest {
 
@@ -41,7 +42,7 @@ public class StratusLabConnectorTest {
 
         List<String> cloudServiceNames = getCloudServiceNames();
         assertThat(cloudServiceNames.size(), greaterThan(0));
-        assert (cloudServiceNames.contains(CLOUD_SERVICE_NAME));
+        assertTrue(cloudServiceNames.contains(CLOUD_SERVICE_NAME));
 
         assertThat(getConnectorService(CLOUD_SERVICE_NAME), notNullValue());
     }
@@ -71,7 +72,7 @@ public class StratusLabConnectorTest {
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof StratusLabConnector);
 
         ConnectorFactory.resetConnectors();
     }

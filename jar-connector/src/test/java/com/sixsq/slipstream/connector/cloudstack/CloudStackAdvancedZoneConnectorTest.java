@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.connector.openstack;
+package com.sixsq.slipstream.connector.cloudstack;
 
 /*
  * +=================================================================+
@@ -29,13 +29,13 @@ import java.util.List;
 
 import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getCloudServiceNames;
 import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getConnectorService;
-import static com.sixsq.slipstream.connector.openstack.OpenStackConnector.CLOUD_SERVICE_NAME;
+import static com.sixsq.slipstream.connector.cloudstack.CloudStackAdvancedZoneConnector.CLOUD_SERVICE_NAME;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class OpenStackConnectorTest {
+public class CloudStackAdvancedZoneConnectorTest {
 
     @Test
     public void ensureConnectorIsLoaded() throws Exception {
@@ -52,36 +52,37 @@ public class OpenStackConnectorTest {
 
         String configConnectorName = CLOUD_SERVICE_NAME;
         String cloudServiceName = CLOUD_SERVICE_NAME;
-        SystemConfigurationParametersFactoryBase factory = new OpenStackSystemConfigurationParametersFactory(
+        SystemConfigurationParametersFactoryBase factory = new
+                CloudStackAdvancedZoneSystemConfigurationParametersFactory(
                 CLOUD_SERVICE_NAME);
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof CloudStackAdvancedZoneConnector);
 
         ConnectorFactory.resetConnectors();
     }
 
-    @Test
-    public void ensureConnectorFactoryFindsConnectorWithClassName() throws Exception {
-
-        String configConnectorName = OpenStackConnector.class.getCanonicalName();
-        String cloudServiceName = CLOUD_SERVICE_NAME;
-        SystemConfigurationParametersFactoryBase factory = new OpenStackSystemConfigurationParametersFactory(
-                CLOUD_SERVICE_NAME);
-
-        CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
-
-        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof OpenStackConnector);
-
-        ConnectorFactory.resetConnectors();
-    }
+    //    @Test
+    //    public void ensureConnectorFactoryFindsConnectorWithClassName() throws Exception {
+    //
+    //        String configConnectorName = CloudStackConnector.class.getCanonicalName();
+    //        String cloudServiceName = CLOUD_SERVICE_NAME;
+    //        SystemConfigurationParametersFactoryBase factory = new CloudStackSystemConfigurationParametersFactory(
+    //                CLOUD_SERVICE_NAME);
+    //
+    //        CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
+    //
+    //        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof CloudStackAdvancedZoneConnector);
+    //
+    //        ConnectorFactory.resetConnectors();
+    //    }
 
 
     @Test
     public void checkConstructors() {
-        assertThat(new OpenStackConnector().getConnectorInstanceName(), notNullValue());
-        assertThat(new OpenStackConnector(null).getConnectorInstanceName(), notNullValue());
-        assertThat(new OpenStackConnector("MyID").getConnectorInstanceName(), notNullValue());
+        assertThat(new CloudStackAdvancedZoneConnector().getConnectorInstanceName(), notNullValue());
+        assertThat(new CloudStackAdvancedZoneConnector(null).getConnectorInstanceName(), notNullValue());
+        assertThat(new CloudStackAdvancedZoneConnector("MyID").getConnectorInstanceName(), notNullValue());
     }
 }

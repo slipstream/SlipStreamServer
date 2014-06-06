@@ -33,6 +33,7 @@ import static com.sixsq.slipstream.connector.physicalhost.PhysicalHostConnector.
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class PhysicalHostConnectorTest {
 
@@ -41,7 +42,7 @@ public class PhysicalHostConnectorTest {
 
         List<String> cloudServiceNames = getCloudServiceNames();
         assertThat(cloudServiceNames.size(), greaterThan(0));
-        assert (cloudServiceNames.contains(CLOUD_SERVICE_NAME));
+        assertTrue(cloudServiceNames.contains(CLOUD_SERVICE_NAME));
 
         assertThat(getConnectorService(CLOUD_SERVICE_NAME), notNullValue());
     }
@@ -71,7 +72,7 @@ public class PhysicalHostConnectorTest {
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof PhysicalHostConnector);
 
         ConnectorFactory.resetConnectors();
     }

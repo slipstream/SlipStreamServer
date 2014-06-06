@@ -33,6 +33,7 @@ import static com.sixsq.slipstream.connector.cloudstack.CloudStackConnector.CLOU
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class CloudStackConnectorTest {
 
@@ -56,7 +57,7 @@ public class CloudStackConnectorTest {
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof CloudStackConnector);
 
         ConnectorFactory.resetConnectors();
     }
