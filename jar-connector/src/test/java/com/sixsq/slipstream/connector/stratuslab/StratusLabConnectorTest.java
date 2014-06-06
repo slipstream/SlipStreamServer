@@ -20,6 +20,7 @@ package com.sixsq.slipstream.connector.stratuslab;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.util.CommonTestUtil;
@@ -32,7 +33,9 @@ import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.
 import static com.sixsq.slipstream.connector.stratuslab.StratusLabConnector.CLOUD_SERVICE_NAME;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class StratusLabConnectorTest {
 
@@ -41,9 +44,9 @@ public class StratusLabConnectorTest {
 
         List<String> cloudServiceNames = getCloudServiceNames();
         assertThat(cloudServiceNames.size(), greaterThan(0));
-        assert (cloudServiceNames.contains(CLOUD_SERVICE_NAME));
+        assertTrue(cloudServiceNames.contains(CLOUD_SERVICE_NAME));
 
-        assertThat(getConnectorService(CLOUD_SERVICE_NAME), notNullValue());
+        assertTrue(getConnectorService(CLOUD_SERVICE_NAME) instanceof StratusLabDiscoverableConnectorService);
     }
 
     @Test
@@ -56,7 +59,9 @@ public class StratusLabConnectorTest {
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+        Connector c = ConnectorFactory.getConnector(cloudServiceName);
+        assertTrue(c instanceof StratusLabConnector);
+        assertEquals(StratusLabConnector.CLOUD_SERVICE_NAME, c.getCloudServiceName());
 
         ConnectorFactory.resetConnectors();
     }
@@ -71,7 +76,7 @@ public class StratusLabConnectorTest {
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof StratusLabConnector);
 
         ConnectorFactory.resetConnectors();
     }
