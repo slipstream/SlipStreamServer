@@ -36,8 +36,6 @@ import java.util.logging.Logger;
 
 public class OpenStackConnector extends CliConnectorBase {
 
-	private static Logger log = Logger.getLogger(OpenStackConnector.class.toString());
-
 	public static final String CLOUD_SERVICE_NAME = "openstack";
 	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.openstack.OpenStackClientCloud";
 

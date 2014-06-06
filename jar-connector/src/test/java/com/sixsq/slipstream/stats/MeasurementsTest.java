@@ -26,7 +26,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.junit.After;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;

@@ -21,9 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -46,9 +44,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.statemachine.ExtrinsicState;
-import com.sixsq.slipstream.statemachine.State;
-import com.sixsq.slipstream.statemachine.StateFactory;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 

@@ -1,12 +1,5 @@
 package com.sixsq.slipstream.statemachine;
 
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.UserParameter;
-
 /*
  * +=================================================================+
  * SlipStream Server (WAR)
