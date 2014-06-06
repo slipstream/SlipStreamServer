@@ -20,6 +20,7 @@ package com.sixsq.slipstream.connector.physicalhost;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.util.CommonTestUtil;
@@ -31,8 +32,11 @@ import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.
 import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getConnectorService;
 import static com.sixsq.slipstream.connector.physicalhost.PhysicalHostConnector.CLOUD_SERVICE_NAME;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class PhysicalHostConnectorTest {
 
@@ -41,9 +45,9 @@ public class PhysicalHostConnectorTest {
 
         List<String> cloudServiceNames = getCloudServiceNames();
         assertThat(cloudServiceNames.size(), greaterThan(0));
-        assert (cloudServiceNames.contains(CLOUD_SERVICE_NAME));
+        assertTrue(cloudServiceNames.contains(CLOUD_SERVICE_NAME));
 
-        assertThat(getConnectorService(CLOUD_SERVICE_NAME), notNullValue());
+        assertTrue(getConnectorService(CLOUD_SERVICE_NAME) instanceof PhysicalHostDiscoverableConnectorService);
     }
 
     @Test
@@ -56,7 +60,9 @@ public class PhysicalHostConnectorTest {
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+        Connector c = ConnectorFactory.getConnector(cloudServiceName);
+        assertTrue(c instanceof PhysicalHostConnector);
+        assertEquals(PhysicalHostConnector.CLOUD_SERVICE_NAME, c.getCloudServiceName());
 
         ConnectorFactory.resetConnectors();
     }
@@ -71,7 +77,7 @@ public class PhysicalHostConnectorTest {
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertThat(ConnectorFactory.getConnector(cloudServiceName), notNullValue());
+        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof PhysicalHostConnector);
 
         ConnectorFactory.resetConnectors();
     }
