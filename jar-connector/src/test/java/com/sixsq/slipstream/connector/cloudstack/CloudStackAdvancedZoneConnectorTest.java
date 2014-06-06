@@ -20,6 +20,7 @@ package com.sixsq.slipstream.connector.cloudstack;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.util.CommonTestUtil;
@@ -32,6 +33,7 @@ import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.
 import static com.sixsq.slipstream.connector.cloudstack.CloudStackAdvancedZoneConnector.CLOUD_SERVICE_NAME;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -44,7 +46,8 @@ public class CloudStackAdvancedZoneConnectorTest {
         assertThat(cloudServiceNames.size(), greaterThan(0));
         assertTrue(cloudServiceNames.contains(CLOUD_SERVICE_NAME));
 
-        assertThat(getConnectorService(CLOUD_SERVICE_NAME), notNullValue());
+        assertTrue(
+                getConnectorService(CLOUD_SERVICE_NAME) instanceof CloudStackAdvancedZoneDiscoverableConnectorService);
     }
 
     @Test
@@ -58,7 +61,9 @@ public class CloudStackAdvancedZoneConnectorTest {
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
-        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof CloudStackAdvancedZoneConnector);
+        Connector c = ConnectorFactory.getConnector(cloudServiceName);
+        assertTrue(c instanceof CloudStackAdvancedZoneConnector);
+        assertEquals(CloudStackAdvancedZoneConnector.CLOUD_SERVICE_NAME, c.getCloudServiceName());
 
         ConnectorFactory.resetConnectors();
     }
