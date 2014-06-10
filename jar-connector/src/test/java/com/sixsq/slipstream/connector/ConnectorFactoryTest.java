@@ -76,6 +76,19 @@ public class ConnectorFactoryTest {
     }
 
     @Test
+    public void checkCaseInsensitivityOfConnectorNames() throws Exception {
+
+        CommonTestUtil.setCloudConnector("StratusLab, CloudStack, Okeanos, OpenStack, PhysicalHost");
+        List<String> names = ConnectorFactory.getCloudServiceNamesList();
+
+        assertTrue(names.contains("cloudstack"));
+        assertTrue(names.contains("okeanos"));
+        assertTrue(names.contains("openstack"));
+        assertTrue(names.contains("physicalhost"));
+        assertTrue(names.contains("stratuslab"));
+    }
+
+    @Test
     public void checkConnectorClassNames() throws Exception {
 
         CommonTestUtil.setCloudConnector("com.sixsq.slipstream.connector.okeanos.OkeanosConnector," +
