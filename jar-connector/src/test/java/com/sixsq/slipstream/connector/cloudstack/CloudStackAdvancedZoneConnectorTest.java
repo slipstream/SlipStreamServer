@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.connector.local;
+package com.sixsq.slipstream.connector.cloudstack;
 
 /*
  * +=================================================================+
@@ -30,14 +30,14 @@ import java.util.List;
 
 import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getCloudServiceNames;
 import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getConnectorService;
-import static com.sixsq.slipstream.connector.local.LocalConnector.CLOUD_SERVICE_NAME;
+import static com.sixsq.slipstream.connector.cloudstack.CloudStackAdvancedZoneConnector.CLOUD_SERVICE_NAME;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class LocalConnectorTest {
+public class CloudStackAdvancedZoneConnectorTest {
 
     @Test
     public void ensureConnectorIsLoaded() throws Exception {
@@ -46,7 +46,8 @@ public class LocalConnectorTest {
         assertThat(cloudServiceNames.size(), greaterThan(0));
         assertTrue(cloudServiceNames.contains(CLOUD_SERVICE_NAME));
 
-        assertTrue(getConnectorService(CLOUD_SERVICE_NAME) instanceof LocalDiscoverableConnectorService);
+        assertTrue(
+                getConnectorService(CLOUD_SERVICE_NAME) instanceof CloudStackAdvancedZoneDiscoverableConnectorService);
     }
 
     @Test
@@ -54,35 +55,39 @@ public class LocalConnectorTest {
 
         String configConnectorName = CLOUD_SERVICE_NAME;
         String cloudServiceName = CLOUD_SERVICE_NAME;
-        SystemConfigurationParametersFactoryBase factory = new LocalSystemConfigurationParametersFactory();
+        SystemConfigurationParametersFactoryBase factory = new
+                CloudStackAdvancedZoneSystemConfigurationParametersFactory(
+                CLOUD_SERVICE_NAME);
 
         CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
 
         Connector c = ConnectorFactory.getConnector(cloudServiceName);
-        assertTrue(c instanceof LocalConnector);
-        assertEquals(LocalConnector.CLOUD_SERVICE_NAME, c.getCloudServiceName());
+        assertTrue(c instanceof CloudStackAdvancedZoneConnector);
+        assertEquals(CloudStackAdvancedZoneConnector.CLOUD_SERVICE_NAME, c.getCloudServiceName());
 
         ConnectorFactory.resetConnectors();
     }
 
-    @Test
-    public void ensureConnectorFactoryFindsConnectorWithClassName() throws Exception {
+    //    @Test
+    //    public void ensureConnectorFactoryFindsConnectorWithClassName() throws Exception {
+    //
+    //        String configConnectorName = CloudStackConnector.class.getCanonicalName();
+    //        String cloudServiceName = CLOUD_SERVICE_NAME;
+    //        SystemConfigurationParametersFactoryBase factory = new CloudStackSystemConfigurationParametersFactory(
+    //                CLOUD_SERVICE_NAME);
+    //
+    //        CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
+    //
+    //        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof CloudStackAdvancedZoneConnector);
+    //
+    //        ConnectorFactory.resetConnectors();
+    //    }
 
-        String configConnectorName = LocalConnector.class.getCanonicalName();
-        String cloudServiceName = CLOUD_SERVICE_NAME;
-        SystemConfigurationParametersFactoryBase factory = new LocalSystemConfigurationParametersFactory();
-
-        CommonTestUtil.lockAndLoadConnector(configConnectorName, cloudServiceName, factory);
-
-        assertTrue(ConnectorFactory.getConnector(cloudServiceName) instanceof LocalConnector);
-
-        ConnectorFactory.resetConnectors();
-    }
 
     @Test
     public void checkConstructors() {
-        assertThat(new LocalConnector().getConnectorInstanceName(), notNullValue());
-        assertThat(new LocalConnector(null).getConnectorInstanceName(), notNullValue());
-        assertThat(new LocalConnector("MyID").getConnectorInstanceName(), notNullValue());
+        assertThat(new CloudStackAdvancedZoneConnector().getConnectorInstanceName(), notNullValue());
+        assertThat(new CloudStackAdvancedZoneConnector(null).getConnectorInstanceName(), notNullValue());
+        assertThat(new CloudStackAdvancedZoneConnector("MyID").getConnectorInstanceName(), notNullValue());
     }
 }

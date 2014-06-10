@@ -181,7 +181,7 @@ public class ConnectorFactory {
     public static String convertClassNameToServiceName(String configConnectorName) {
         String[] elements = configConnectorName.split("\\.");
         if (elements.length > 1) {
-            String name = elements[elements.length - 2];
+            String name = elements[elements.length - 2].toLowerCase();
 
             // Special case for the EC2 connector which doesn't follow the usual naming scheme of
             // residing is a directory named after the cloud service name.  (Directory is 'aws' but
@@ -192,7 +192,7 @@ public class ConnectorFactory {
                 return name;
             }
         } else {
-            return configConnectorName;
+            return configConnectorName.toLowerCase();
         }
     }
 
