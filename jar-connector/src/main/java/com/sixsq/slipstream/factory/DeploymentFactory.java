@@ -9,9 +9,9 @@ package com.sixsq.slipstream.factory;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -51,55 +52,56 @@ public class DeploymentFactory extends RunFactory {
 	protected Run constructRun(Module module, String cloudService, User user)
 			throws ValidationException {
 		Run run = new Run(module, RunType.Orchestration, cloudService, user);
-		
+
 		run = addOnSuccessRunForeverToParameters(run, user);
 		run = addOnErrorRunForeverToParameters(run, user);
-		
+
 		return run;
 	}
 
 	private Run addOnSuccessRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
+		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		
+
 		UserParameter up = user.getParameter(key);
 		if (up != null) {
 			run.setParameter(new RunParameter(up.getName(), up.getValue("false"), up.getDescription()));
 		}
-		
+
 		return run;
 	}
-	
+
 	private Run addOnErrorRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
+		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
 				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		
+
 		UserParameter up = user.getParameter(key);
 		if (up != null) {
 			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
 		}
-		
+
 		return run;
 	}
-	
+
 	@Override
 	protected void initialize(Module module, Run run, String cloudService)
 			throws ValidationException, NotFoundException {
 
 		super.initialize(module, run, cloudService);
 
-		initializeVmRuntimeParameters(run);
+		initializeNodeRunParameters(run);
 		initializeOrchestrtorRuntimeParameters(run);
 		initOrchestratorsNodeNames(run);
+		initNodeInstanceRuntimeParameters(run);
 		initNodeRuntimeParameters(run);
 	}
 
 	@Override
 	protected void validateRun(Run run, User user, String cloudService)
 			throws SlipStreamClientException {
-		
+
 		super.validateRun(run, user, cloudService);
-		
+
 		checkIsDeploymentModule(run);
 
 		checkAllImagesHaveReferenceOrImageId(run);
@@ -163,7 +165,7 @@ public class DeploymentFactory extends RunFactory {
 		}
 	}
 
-	private void initNodeRuntimeParameters(Run run) throws ValidationException,
+	private void initNodeInstanceRuntimeParameters(Run run) throws ValidationException,
 			NotFoundException {
 
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
@@ -190,6 +192,27 @@ public class DeploymentFactory extends RunFactory {
 			}
 		}
 
+	}
+
+	private void initNodeRuntimeParameters(Run run) throws ValidationException {
+
+		DeploymentModule deployment = (DeploymentModule) run.getModule();
+		for (Node node : deployment.getNodes().values()) {
+
+			int multiplicity = node.getMultiplicity();
+
+			String nodeRunParameterKeyName = run.nodeRuntimeParameterKeyName(node,
+					RuntimeParameter.IDS_PARAMETER_NAME);
+			ArrayList<String> ids = new ArrayList<String>();
+			int maxIndex = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX == 0 ? (multiplicity - 1)
+					: multiplicity;
+			for (int i = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX; i <= maxIndex; i++) {
+				ids.add(String.valueOf(i));
+			}
+			run.setParameter(new RunParameter(nodeRunParameterKeyName,
+					StringUtils.join(ids.toArray(), ","),
+					RuntimeParameter.IDS_PARAMETER_DESCRIPTION));
+		}
 	}
 
 	private static void addParameterMapping(Run run, NodeParameter param, int i) {
@@ -298,28 +321,28 @@ public class DeploymentFactory extends RunFactory {
 		return deployment;
 	}
 
-	protected static void initializeVmRuntimeParameters(Run run)
+	protected static void initializeNodeRunParameters(Run run)
 			throws ValidationException {
 
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 		for (Node node : deployment.getNodes().values()) {
 
-			String nodeRuntimeParameterKeyName = run
+			String nodeRunParameterKeyName = run
 					.nodeRuntimeParameterKeyName(node,
 							RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
-			run.setParameter(new RunParameter(nodeRuntimeParameterKeyName,
+			run.setParameter(new RunParameter(nodeRunParameterKeyName,
 					String.valueOf(node.getMultiplicity()),
 					RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION));
 
-			nodeRuntimeParameterKeyName = run.nodeRuntimeParameterKeyName(node,
+			nodeRunParameterKeyName = run.nodeRuntimeParameterKeyName(node,
 					RuntimeParameter.CLOUD_SERVICE_NAME);
-			run.setParameter(new RunParameter(nodeRuntimeParameterKeyName,
+			run.setParameter(new RunParameter(nodeRunParameterKeyName,
 					String.valueOf(node.getCloudService()),
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
 
-			nodeRuntimeParameterKeyName = run.nodeRuntimeParameterKeyName(node,
+			nodeRunParameterKeyName = run.nodeRuntimeParameterKeyName(node,
 					RuntimeParameter.TAGS_KEY);
-			run.setParameter(new RunParameter(nodeRuntimeParameterKeyName, "",
+			run.setParameter(new RunParameter(nodeRunParameterKeyName, "",
 					RuntimeParameter.GLOBAL_TAGS_DESCRIPTION));
 		}
 	}
