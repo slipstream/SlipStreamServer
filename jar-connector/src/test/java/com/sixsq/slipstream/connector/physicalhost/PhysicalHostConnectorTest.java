@@ -32,7 +32,6 @@ import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.
 import static com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader.getConnectorService;
 import static com.sixsq.slipstream.connector.physicalhost.PhysicalHostConnector.CLOUD_SERVICE_NAME;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;

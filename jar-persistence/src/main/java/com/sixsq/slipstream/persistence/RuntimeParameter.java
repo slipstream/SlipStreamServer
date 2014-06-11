@@ -61,7 +61,6 @@ public class RuntimeParameter extends Metadata {
 
 	public final static String STATE_KEY = "state";
 	public static final String STATE_DESCRIPTION = "Machine state";
-	public final static String STATE_MESSAGE_KEY = "statemessage";
 	public static final String STATE_MESSAGE_DESCRIPTION = "Machine state message";
 	public final static String STATE_CUSTOM_KEY = "statecustom";
 	public static final String STATE_CUSTOM_DESCRIPTION = "Custom state";
@@ -80,9 +79,6 @@ public class RuntimeParameter extends Metadata {
 
 	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX + STATE_KEY;
 	public final static String GLOBAL_STATE_DESCRIPTION = "Global execution state";
-
-	public final static String GLOBAL_STATE_MESSAGE_KEY = GLOBAL_NAMESPACE_PREFIX + STATE_MESSAGE_KEY;
-	public final static String GLOBAL_STATE_MESSAGE_DESCRIPTION = "Global execution state message";
 
 	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX + "category";
 
@@ -108,6 +104,9 @@ public class RuntimeParameter extends Metadata {
 			+ COMPLETE_KEY;
 	public static final String GLOBAL_COMPLETE_DESCRIPTION = "Global complete flag, set when run completed";
 
+	public final static String GLOBAL_RECOVERY_MODE_KEY = GLOBAL_NAMESPACE_PREFIX + "recovery.mode";
+	public final static String GLOBAL_RECOVERY_MDDE_DESCRIPTION = "Run abort flag, set when aborting";
+	
 	public final static String MULTIPLICITY_PARAMETER_NAME = "multiplicity";
 	public final static String MULTIPLICITY_PARAMETER_DESCRIPTION = "Multiplicity number";
 
@@ -128,6 +127,9 @@ public class RuntimeParameter extends Metadata {
 
     public static final String URL_SERVICE_KEY = "url.service";
     public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
+    
+    public static final String IS_ORCHESTRATOR_KEY = "is.orchestrator";
+    public static final String IS_ORCHESTRATOR_DESCRIPTION = "True if it's an orchestrator";
 
     public static final String MAX_JAAS_WORKERS_KEY = "max.iaas.workers";
     public static final String MAX_JAAS_WORKERS_DESCRIPTION = "Max number of concurrently provisioned VMs by orchestrator";

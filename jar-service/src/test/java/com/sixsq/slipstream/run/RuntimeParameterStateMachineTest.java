@@ -29,33 +29,23 @@ import com.sixsq.slipstream.util.CommonTestUtil;
 public class RuntimeParameterStateMachineTest extends
 		RuntimeParameterResourceTestBase {
 
-	private static String orchestratorStateKey;
-	private static String node1StateKey;
-	private static String node2StateKey;
 	private static String node1CompleteKey;
 	private static String node2CompleteKey;
+	private static String orchestratorCompleteKey;
 
 	@Before
 	public void setupClass() throws ValidationException, NotFoundException {
 		setupDeployments();
 
-		orchestratorStateKey = RuntimeParameter.constructParamName(
+		orchestratorCompleteKey = RuntimeParameter.constructParamName(
 				Run.constructOrchestratorName(cloudServiceName),
-				RuntimeParameter.STATE_KEY);
+				RuntimeParameter.COMPLETE_KEY);
 
 		String nodeName = deployment.getNodes().get("node1").getName();
-
-		node1StateKey = RuntimeParameter.constructParamName(nodeName, 1,
-				RuntimeParameter.STATE_KEY);
-
 		node1CompleteKey = RuntimeParameter.constructParamName(nodeName, 1,
 				RuntimeParameter.COMPLETE_KEY);
 
 		nodeName = deployment.getNodes().get("node2").getName();
-
-		node2StateKey = RuntimeParameter.constructParamName(nodeName, 1,
-				RuntimeParameter.STATE_KEY);
-
 		node2CompleteKey = RuntimeParameter.constructParamName(nodeName, 1,
 				RuntimeParameter.COMPLETE_KEY);
 
@@ -75,53 +65,64 @@ public class RuntimeParameterStateMachineTest extends
 				cloudServiceName, user);
 		run = run.store();
 
-		States newState = States.Inactive;
-
-		assertState(run, States.Inactive, newState);
-
-		newState = completeCurrentState(orchestratorStateKey, run);
+		States newState = States.Initializing;
 
 		assertState(run, States.Initializing, newState);
 
-		newState = completeCurrentState(node1CompleteKey, run);
-		newState = completeCurrentState(node2CompleteKey, run);
+		newState = completeCurrentState(orchestratorCompleteKey, run);
 
-		assertState(run, States.Initializing, newState);
-
-		newState = completeCurrentState(orchestratorStateKey, run);
-
-		assertState(run, States.Running, newState);
+		assertState(run, States.Provisioning, newState);
 
 		newState = completeCurrentState(node1CompleteKey, run);
 		newState = completeCurrentState(node2CompleteKey, run);
 
-		assertState(run, States.Running, newState);
+		assertState(run, States.Provisioning, newState);
 
-		newState = completeCurrentState(orchestratorStateKey, run);
+		newState = completeCurrentState(orchestratorCompleteKey, run);
 
-		assertState(run, States.SendingFinalReport, newState);
+		assertState(run, States.Executing, newState);
 
 		newState = completeCurrentState(node1CompleteKey, run);
 		newState = completeCurrentState(node2CompleteKey, run);
 
-		assertState(run, States.SendingFinalReport, newState);
+		assertState(run, States.Executing, newState);
 
-		newState = completeCurrentState(orchestratorStateKey, run);
+		newState = completeCurrentState(orchestratorCompleteKey, run);
 
+		assertState(run, States.SendingReports, newState);
+
+		newState = completeCurrentState(node1CompleteKey, run);
+		newState = completeCurrentState(node2CompleteKey, run);
+
+		assertState(run, States.SendingReports, newState);
+
+		newState = completeCurrentState(orchestratorCompleteKey, run);
+
+		assertState(run, States.Ready, newState);
+
+		newState = completeCurrentState(node1CompleteKey, run);
+		newState = completeCurrentState(node2CompleteKey, run);
+
+		assertState(run, States.Ready, newState);
+
+		newState = completeCurrentState(orchestratorCompleteKey, run);
+		
+		
 		assertState(run, States.Finalizing, newState);
 
-		newState = completeCurrentState(node1CompleteKey, run);
-		newState = completeCurrentState(node2CompleteKey, run);
+		//newState = completeCurrentState(node1CompleteKey, run);
+		//newState = completeCurrentState(node2CompleteKey, run);
 
-		assertState(run, States.Finalizing, newState);
+		//assertState(run, States.Finalizing, newState);
 
-		newState = completeCurrentState(orchestratorStateKey, run);
+		newState = completeCurrentState(orchestratorCompleteKey, run);
+		
 
-		assertState(run, States.Terminal, newState);
+		assertState(run, States.Done, newState);
 
 		newState = completeCurrentState(node1CompleteKey, run,
 				Status.CLIENT_ERROR_CONFLICT);
-		newState = completeCurrentState(orchestratorStateKey, run,
+		newState = completeCurrentState(orchestratorCompleteKey, run,
 				Status.CLIENT_ERROR_CONFLICT);
 
 		run.remove();
@@ -152,18 +153,5 @@ public class RuntimeParameterStateMachineTest extends
 		RuntimeParameter state = RuntimeParameter.loadFromUuidAndKey(
 				run.getUuid(), globalStateKey);
 		assertThat(state.getValue(), is(expectedState.toString()));
-
-		state = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-				orchestratorStateKey);
-		assertThat(state.getValue(), is(expectedState.toString()));
-
-		state = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-				node1StateKey);
-		assertThat(state.getValue(), is(expectedState.toString()));
-
-		state = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-				node2StateKey);
-		assertThat(state.getValue(), is(expectedState.toString()));
-
 	}
 }

@@ -41,7 +41,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunStates;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
@@ -80,10 +80,6 @@ public class LocalConnector extends ConnectorBase {
 
 	public void abort(Run run, User user) {
 		return;
-	}
-
-	public RunStates getStatus(Run run) {
-		return new RunStates(run);
 	}
 
 	public Run launch(Run run, User user)
@@ -153,12 +149,12 @@ public class LocalConnector extends ConnectorBase {
 
 	}
 
-	private RunStates launchImage(Run run) {
-		return null;
+	private void launchImage(Run run) {
+		return;
 	}
 
-	private RunStates launchBuild(Run run) {
-		return null;
+	private void launchBuild(Run run) {
+		return;
 	}
 
 	@Override
@@ -176,7 +172,12 @@ public class LocalConnector extends ConnectorBase {
 	public void terminate(Run run, User user)
 			throws SlipStreamException {
 
-		String ids = run.getRuntimeParameterValue("orchestrator:hostname");
+		if (run.getType() != RunType.Orchestration) {
+			Logger.getLogger(this.getClass().getName()).info("Terminating: " + run.getNodeNames());
+			return;
+		}
+		
+		String ids = run.getRuntimeParameterValue("orchestrator-local:hostname");
 
 		if (ids == null) {
 			return;

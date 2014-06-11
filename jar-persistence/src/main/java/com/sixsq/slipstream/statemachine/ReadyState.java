@@ -28,35 +28,37 @@ import com.sixsq.slipstream.persistence.UserParameter;
  */
 
 
-public class SendingFinalReportState extends SynchronizedState {
+public class ReadyState extends SynchronizedState {
 
-	public SendingFinalReportState(ExtrinsicState extrinsicState) {
-		super(extrinsicState);
-		
-		Run run = extrinsicState.getRun();
-		
-		if (shouldDetach(run)) {
-			nextState = States.Detached;
-		} else {
-			nextState = States.Finalizing;
-		}
-	}
+    public ReadyState(ExtrinsicState extrinsicState) {
+        super(extrinsicState);
+        
+        Run run = extrinsicState.getRun();
+        
+        if (shouldStayInReady(run)) {
+        	nextState = States.Ready;
+        } else { 
+        	nextState = States.Finalizing;
+        }
+    }
 
-	private boolean shouldDetach(Run run) {
-		String key = Parameter.constructKey(ParameterCategory.General.toString(), 
+	private boolean shouldStayInReady(Run run) {
+		String key = Parameter.constructKey(ParameterCategory.General.toString(),
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		RunParameter rp = run.getParameter(key);
-		return run.getType() == RunType.Run || (rp != null && rp.isTrue());
+		RunParameter onSuccessKeepRunning = run.getParameter(key);
+		
+		key = Parameter.constructKey(ParameterCategory.General.toString(),
+				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
+		RunParameter onErrorKeepRunning = run.getParameter(key);
+		
+		return run.getType() == RunType.Run || 
+				(onSuccessKeepRunning != null && onSuccessKeepRunning.isTrue() && !extrinsicState.isFailing()) ||
+				(onErrorKeepRunning != null && onErrorKeepRunning.isTrue() && extrinsicState.isFailing());
 	}
-	
-	@Override
-	public States getState() {
-		return States.SendingFinalReport;
-	}
-	
-	@Override
-	public boolean mustSynchronizeOnFailure() {
-		return true;
-	}
+	    
+    @Override
+    public States getState() {
+        return States.Ready;
+    }
 
 }

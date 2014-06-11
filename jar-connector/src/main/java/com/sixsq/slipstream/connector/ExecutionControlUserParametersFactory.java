@@ -59,7 +59,7 @@ public class ExecutionControlUserParametersFactory extends
 				"If no errors occur, keep the execution running. Useful for deployment or long tests.",
 				20);
 		putMandatoryParameter(
-				"Timeout",
+				UserParameter.KEY_TIMEOUT,
 				"Minutes - When this timeout is reached, the execution is forcefully terminated.",
 				"30",
 				90);

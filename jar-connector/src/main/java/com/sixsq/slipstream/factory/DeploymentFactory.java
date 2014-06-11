@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
@@ -38,13 +37,11 @@ import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
 
 public class DeploymentFactory extends RunFactory {
 
@@ -52,42 +49,14 @@ public class DeploymentFactory extends RunFactory {
 	protected Run constructRun(Module module, String cloudService, User user)
 			throws ValidationException {
 		Run run = new Run(module, RunType.Orchestration, cloudService, user);
-
-		run = addOnSuccessRunForeverToParameters(run, user);
-		run = addOnErrorRunForeverToParameters(run, user);
-
-		return run;
-	}
-
-	private Run addOnSuccessRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
-				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-
-		UserParameter up = user.getParameter(key);
-		if (up != null) {
-			run.setParameter(new RunParameter(up.getName(), up.getValue("false"), up.getDescription()));
-		}
-
-		return run;
-	}
-
-	private Run addOnErrorRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
-				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-
-		UserParameter up = user.getParameter(key);
-		if (up != null) {
-			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
-		}
-
 		return run;
 	}
 
 	@Override
-	protected void initialize(Module module, Run run, String cloudService)
+	protected void initialize(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
 
-		super.initialize(module, run, cloudService);
+		super.initialize(module, run, user, cloudService);
 
 		initializeNodeRunParameters(run);
 		initializeOrchestrtorRuntimeParameters(run);

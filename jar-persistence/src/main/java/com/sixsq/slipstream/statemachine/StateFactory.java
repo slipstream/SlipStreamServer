@@ -33,31 +33,38 @@ public class StateFactory {
             ExtrinsicState extrinsicState) throws InvalidStateException {
         State newState = null;
         switch (state) {
-        case Inactive:
-            newState = new InactiveState(extrinsicState);
-            break;
         case Initializing:
             newState = new InitializingState(extrinsicState);
             break;
-        case Running:
-            newState = new RunningState(extrinsicState);
+        case Provisioning:
+            newState = new ProvisioningState(extrinsicState);
             break;
-        case SendingFinalReport:
-            newState = new SendingFinalReportState(extrinsicState);
+        case Executing:
+            newState = new ExecutingState(extrinsicState);
             break;
+        case SendingReports:
+            newState = new SendingReportsState(extrinsicState);
+            break;
+        case Ready:
+        	newState = new ReadyState(extrinsicState);
+        	break;
         case Finalizing:
             newState = new FinalizingState(extrinsicState);
             break;
-        case Terminal:
-            newState = new TerminalState(extrinsicState);
-            break;
-        case Detached:
-        	newState = new DetachedState(extrinsicState);
+        case Done:
+        	newState = new DoneState(extrinsicState);
+        	break;
+        case Cancelled:
+        	newState = new CancelledState(extrinsicState);
+        	break;
+        case Aborted:
+        	newState = new AbortedState(extrinsicState);
         	break;
         default:
             throw (new InvalidStateException("Unknown state: " + state));
         }
 
+        // TODO: LS: I think it's useless. Check.
         newState.getExtrinsicState().setState(state);
 
         return newState;

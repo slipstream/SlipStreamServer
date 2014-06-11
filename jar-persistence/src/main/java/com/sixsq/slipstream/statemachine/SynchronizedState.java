@@ -31,7 +31,7 @@ public abstract class SynchronizedState extends State {
 	}
 
 	@Override
-	public boolean mustSynchronizeNormalCondition() {
+	public boolean synchronizedForEveryone() {
 		return true;
 	}
 		

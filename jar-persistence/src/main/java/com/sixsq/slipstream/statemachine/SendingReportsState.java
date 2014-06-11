@@ -1,8 +1,5 @@
 package com.sixsq.slipstream.statemachine;
 
-import java.util.Arrays;
-import java.util.List;
-
 /*
  * +=================================================================+
  * SlipStream Server (WAR)
@@ -23,39 +20,17 @@ import java.util.List;
  * -=================================================================-
  */
 
-public enum States {
-    Initializing,
-    Provisioning,
-    Executing,
-    SendingReports,
-    Ready,
-    Finalizing,
-    Done,
-    Cancelled,
-    Aborted,
-    Unknown;
-    
-    public static List<States> completed() {
-    	return Arrays.asList(States.Cancelled,
-    						 States.Aborted,
-    						 States.Unknown,
-    						 States.Done);
-    }
 
-    public static List<States> transition() {
-    	return Arrays.asList(Initializing,
-    						 Provisioning,
-    						 Executing,
-    						 SendingReports,
-    						 Finalizing,
-    						 Unknown);
-    }
-    
-    public static List<States> canTerminate() {
-    	return Arrays.asList(Aborted,
-    						 Done,
-    						 Cancelled,
-    						 Ready);
-    }
+public class SendingReportsState extends SynchronizedState {
+
+	public SendingReportsState(ExtrinsicState extrinsicState) {
+		super(extrinsicState);		
+		nextState = States.Ready;
+	}
+	
+	@Override
+	public States getState() {
+		return States.SendingReports;
+	}
 
 }

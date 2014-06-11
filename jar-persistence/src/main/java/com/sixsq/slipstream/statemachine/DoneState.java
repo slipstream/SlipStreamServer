@@ -21,16 +21,19 @@ package com.sixsq.slipstream.statemachine;
  */
 
 
-public class RunningState extends SynchronizedState {
+public class DoneState extends OrchestratorsSynchronizedState {
 
-	public RunningState(ExtrinsicState extrinsicState) {
-		super(extrinsicState);
-		nextState = States.SendingFinalReport;
-	}
+    public DoneState(ExtrinsicState extrinsicState) {
+        super(extrinsicState);
+    }
 
-	@Override
-	public States getState() {
-		return States.Running;
-	}
+    @Override
+    public States getState() {
+        return States.Done;
+    }
+    
+    public boolean isFinal() {
+    	return true;
+    }
 
 }

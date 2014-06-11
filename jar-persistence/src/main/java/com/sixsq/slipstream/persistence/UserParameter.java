@@ -32,6 +32,8 @@ public class UserParameter extends Parameter<User> {
 
 	public static final String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
 
+	public static final String KEY_TIMEOUT = "Timeout";
+	
 	public static final String KEY_ON_ERROR_RUN_FOREVER = "On Error Run Forever";
 	public static final String KEY_ON_SUCCESS_RUN_FOREVER = "On Success Run Forever";
 
