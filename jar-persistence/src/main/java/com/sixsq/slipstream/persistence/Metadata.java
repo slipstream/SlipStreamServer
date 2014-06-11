@@ -146,7 +146,7 @@ public abstract class Metadata implements Serializable {
 			obj = em.merge(this);
 			transaction.commit();
 		} catch (PersistenceException e) {
-			//transaction.rollback();
+			transaction.rollback();
 			throw new SlipStreamDatabaseException(e.getMessage());
 		} finally {
 			
