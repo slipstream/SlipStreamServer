@@ -282,7 +282,6 @@ public class StateMachine {
 		
 		globalState = assignNodeState(globalState, newState);
 		
-		globalState.getExtrinsicState().setState(newState);
 		run.setState(globalState.getState());
 		
 		resetNodesStateCompleted();

@@ -43,19 +43,32 @@ public class ReadyState extends SynchronizedState {
     }
 
 	private boolean shouldStayInReady(Run run) {
+		
+		return run.getType() == RunType.Run || 
+				(shouldKeepRunningForSuccess(run) && run.getType() != RunType.Machine) ||
+				(shouldKeepRunningForError(run) && run.getType() != RunType.Machine);
+	}
+	
+	private boolean shouldKeepRunningForSuccess(Run run) {
 		String key = Parameter.constructKey(ParameterCategory.General.toString(),
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 		RunParameter onSuccessKeepRunning = run.getParameter(key);
 		
-		key = Parameter.constructKey(ParameterCategory.General.toString(),
+		return onSuccessKeepRunning != null && 
+				onSuccessKeepRunning.isTrue() && 
+				!extrinsicState.isFailing();
+	}
+	
+	private boolean shouldKeepRunningForError(Run run) {
+		String key = Parameter.constructKey(ParameterCategory.General.toString(),
 				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
 		RunParameter onErrorKeepRunning = run.getParameter(key);
 		
-		return run.getType() == RunType.Run || 
-				(onSuccessKeepRunning != null && onSuccessKeepRunning.isTrue() && !extrinsicState.isFailing()) ||
-				(onErrorKeepRunning != null && onErrorKeepRunning.isTrue() && extrinsicState.isFailing());
+		return onErrorKeepRunning != null && 
+				onErrorKeepRunning.isTrue() && 
+				extrinsicState.isFailing();
 	}
-	    
+	
     @Override
     public States getState() {
         return States.Ready;

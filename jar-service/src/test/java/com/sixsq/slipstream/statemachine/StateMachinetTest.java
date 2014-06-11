@@ -232,12 +232,6 @@ public class StateMachinetTest {
 
 		assertTrue(done.isFinal());
 	}
-
-	// TODO: LS
-	/*@Test
-	public void failureDuringInitializing() {
-		
-	}*/
 	
 	@Test
 	public void failureDuringProvisioning() throws IllegalArgumentException,

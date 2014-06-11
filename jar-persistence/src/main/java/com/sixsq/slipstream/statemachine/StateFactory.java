@@ -64,7 +64,6 @@ public class StateFactory {
             throw (new InvalidStateException("Unknown state: " + state));
         }
 
-        // TODO: LS: I think it's useless. Check.
         newState.getExtrinsicState().setState(state);
 
         return newState;

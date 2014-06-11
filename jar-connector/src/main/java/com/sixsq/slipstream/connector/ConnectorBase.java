@@ -392,7 +392,6 @@ public abstract class ConnectorBase implements Connector {
     }
 
     protected String getInstanceType() {
-        // TODO Auto-generated method stub
         return null;
     }
 
