@@ -27,8 +27,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -46,7 +48,10 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
+import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.Package;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -300,6 +305,106 @@ public class StateMachinetTest {
 		sc.updateState("n2.1");
 
 		assertEquals(States.Aborted, sc.getState());
+	}
+	
+	@Test
+	public void onErrorKeepRunningInBuildImage() throws InvalidStateException,
+			SlipStreamException {
+		
+		User user = CommonTestUtil.createUser("user1");
+		user.setOnErrorRunForever(true);
+		user.setOnSuccessRunForever(true);
+		user.store();
+		
+		ImageModule parent = new ImageModule("test/parent");
+		Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
+		cloudImageIdentifiers.add(new CloudImageIdentifier(parent, cloudServiceName, "image-id"));
+		parent.setCloudImageIdentifiers(cloudImageIdentifiers);
+		parent.store();
+		
+		ImageModule module = new ImageModule("test/image-module");
+		module.setModuleReference(parent);
+		module.setPackage(new Package("hello"));
+		
+		Run run = RunFactory.getRun(module, RunType.Machine, cloudServiceName, user);
+		run.store();
+
+		StateMachine sc = StateMachine.getStateMachine(run);
+		assertEquals(States.Initializing, sc.getState());
+		sc.start();
+		
+		assertEquals(States.Provisioning, sc.getState());
+		sc.tryAdvanceState(true);
+		
+		assertEquals(States.Executing, sc.getState());
+		run = Run.abort("Error in build image", run.getUuid());
+		sc = StateMachine.getStateMachine(run);
+		assertTrue(sc.isFailing());
+		sc.tryAdvanceState(true);
+		
+		assertEquals(States.SendingReports, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Ready, sc.getState());
+		sc.tryAdvanceState(true);
+		
+		assertEquals(States.Finalizing, sc.getState());
+		sc.tryAdvanceState(true);
+		
+		assertEquals(States.Aborted, sc.getState());
+		
+		run.remove();
+		parent.remove();
+		user.remove();
+	}
+	
+	@Test
+	public void onSuccessKeepRunningInBuildImage() throws InvalidStateException,
+			SlipStreamException {
+		
+		User user = CommonTestUtil.createUser("user1");
+		user.setOnErrorRunForever(true);
+		user.setOnSuccessRunForever(true);
+		user.store();
+		
+		ImageModule parent = new ImageModule("test/parent");
+		Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
+		cloudImageIdentifiers.add(new CloudImageIdentifier(parent, cloudServiceName, "image-id"));
+		parent.setCloudImageIdentifiers(cloudImageIdentifiers);
+		parent.store();
+		
+		ImageModule module = new ImageModule("test/image-module");
+		module.setModuleReference(parent);
+		module.setPackage(new Package("hello"));
+		
+		Run run = RunFactory.getRun(module, RunType.Machine, cloudServiceName, user);
+		run.store();
+
+		StateMachine sc = StateMachine.getStateMachine(run);
+		assertEquals(States.Initializing, sc.getState());
+		sc.start();
+		
+		assertEquals(States.Provisioning, sc.getState());
+		sc.tryAdvanceState(true);
+		
+		assertEquals(States.Executing, sc.getState());
+		assertTrue(!sc.isFailing());
+		sc.tryAdvanceState(true);
+		
+		assertEquals(States.SendingReports, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Ready, sc.getState());
+		sc.tryAdvanceState(true);
+		
+		assertEquals(States.Finalizing, sc.getState());
+		sc.tryAdvanceState(true);
+		
+		assertEquals(States.Done, sc.getState());
+		
+		run.remove();
+		parent.remove();
+		user.remove();
 	}
 
 	@Test(expected = CannotAdvanceFromTerminalStateException.class)
