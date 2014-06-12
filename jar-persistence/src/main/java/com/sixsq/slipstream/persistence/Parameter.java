@@ -311,5 +311,10 @@ public abstract class Parameter<T> implements Serializable {
 		}
 		return newKey.toString();
 	}
+	
+	@Override
+	public String toString() {
+		return value;
+	}
 
 }
