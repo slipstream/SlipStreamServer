@@ -20,7 +20,9 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -36,6 +38,7 @@ import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
@@ -136,15 +139,25 @@ public class DeploymentFactory extends RunFactory {
 	private void initNodeRuntimeParameters(Run run) throws ValidationException,
 			NotFoundException {
 
+		List<String> filter = new ArrayList<String>();
+		for (ParameterCategory c : ParameterCategory.values()) {
+			filter.add(c.toString());
+		}
+		
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 
 		for (Node node : deployment.getNodes().values()) {
 			run = initMachineState(node, run);
+			String cloudService = node.getCloudService();
+			
 			Module image = node.getImage();
 			for (ModuleParameter param : image.getParameterList()) {
-				String initialValue = extractInitialValue(param, node);
-				run.createRuntimeParameter(node, param.getName(), initialValue,
-						param.getDescription(), param.getType());
+				String category = param.getCategory();
+				if (filter.contains(category) || cloudService.equals(category))	{
+					String initialValue = extractInitialValue(param, node);
+					run.createRuntimeParameter(node, param.getName(), initialValue,
+							param.getDescription(), param.getType());
+				}
 			}
 		}
 
