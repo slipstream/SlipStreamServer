@@ -79,7 +79,7 @@ import com.sixsq.slipstream.statemachine.States;
 public class Run extends Parameterized<Run, RunParameter> {
 
 	private static final int DEFAULT_TIMEOUT = 60; // In minutes
-	
+
 	private static final int MAX_NO_OF_ENTRIES = 20;
 	public static final String ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR = "-";
 	public static final String NODE_NAME_PARAMETER_SEPARATOR = "--";
@@ -106,10 +106,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public final static String RAM_PARAMETER_NAME = ImageModule.RAM_KEY;
 	public final static String RAM_PARAMETER_DESCRIPTION = "Amount of RAM, in GB";
-	
+
 	public final static String GARBAGE_COLLECTED_PARAMETER_NAME = "garbage_collected";
 	public final static String GARBAGE_COLLECTED_PARAMETER_DESCRIPTION = "true if the Run was already garbage collected";
-	
+
 
 	public static Run abortOrReset(String abortMessage, String nodename,
 			String uuid) {
@@ -183,18 +183,18 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR
 				+ RuntimeParameter.ABORT_KEY;
 	}
-	
+
 	private static RuntimeParameter getRecoveryModeParameter(Run run) {
 		return run.getRuntimeParameters().get(
 				RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY);
 	}
-	
+
 	public static void setRecoveryMode(Run run) {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("true");
 		recoveryModeParam.store();
 	}
-	
+
 	public static void resetRecoveryMode(Run run) {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("false");
@@ -210,16 +210,16 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 		return result;
 	}
-	
+
 	private static RunParameter getGarbageCollectedParameter(Run run) {
 		return run.getParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME);
 	}
-	
+
 	public static void setGarbageCollected(Run run) throws ValidationException {
 		RunParameter garbageCollected = getGarbageCollectedParameter(run);
 		garbageCollected.setValue("true");
 	}
-	
+
 	public static boolean isGarbageCollected(Run run) {
 		RunParameter garbageCollected = getGarbageCollectedParameter(run);
 		boolean result = false;
@@ -229,7 +229,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 		return result;
 	}
-	
+
 	public static Run updateRunState(Run run, States newState, boolean retry) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
@@ -253,7 +253,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 		return run;
 	}
-	
+
 	public static Run loadFromUuid(String uuid) {
 		String resourceUri = RESOURCE_URI_PREFIX + uuid;
 		return load(resourceUri);
@@ -350,7 +350,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 		return runView;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static List<RunView> viewListAll() throws ConfigurationException,
 			ValidationException {
@@ -376,7 +376,7 @@ public class Run extends Parameterized<Run, RunParameter> {
  			ValidationException {
  		return listOldTransient(user, 0);
  	}
- 	
+
 	@SuppressWarnings("unchecked")
 	public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException,
 			ValidationException {
@@ -386,7 +386,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.MINUTE, -timeout);
 		Date back = calendar.getTime();
-		
+
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = createNamedQuery(em, "oldInStatesRuns");
 		q.setParameter("user", user.getName());
@@ -501,8 +501,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 	/**
 	 * Comma separated list of node names - e.g. apache1.1, apache1.2, ...
 	 * Including the orchestrator: orchestrator-local, ...
+	 *
+	 * FIXME: Should be changed to instanceNames (or nodeInstanceNames).
+	 *        NB: orchestrator is part of this list as well.
 	 */
-	@Attribute
 	@Column(length=65536)
 	private String nodeNames = "";
 
@@ -775,9 +777,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return Arrays.asList(getNodeNames().split(", "));
 	}
 
-        public Map<String, Integer> getCloudServiceUsage() {
-          return cloudServiceUsage;
-        }
+	public Map<String, Integer> getCloudServiceUsage() {
+		return cloudServiceUsage;
+	}
 
 	@Override
 	public String getResourceUri() {
@@ -968,7 +970,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			image.assignImageIdFromCloudService(getCloudService());
 		}
 	}
-	
+
 	public static String constructOrchestratorName(String cloudService) {
 		return ORCHESTRATOR_NAME + ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR
 				+ cloudService;
