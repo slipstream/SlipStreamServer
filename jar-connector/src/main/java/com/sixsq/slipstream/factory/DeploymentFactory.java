@@ -168,9 +168,10 @@ public class DeploymentFactory extends RunFactory {
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 		for (Node node : deployment.getNodes().values()) {
 
+			String nodeName = node.getName();
 			int multiplicity = node.getMultiplicity();
 
-			String nodeRunParameterKeyName = run.nodeRuntimeParameterKeyName(node,
+			String nodeRunParameterKeyName = constructParamName(nodeName,
 					RuntimeParameter.IDS_PARAMETER_NAME);
 			ArrayList<String> ids = new ArrayList<String>();
 			int maxIndex = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX == 0 ? (multiplicity - 1)
@@ -178,9 +179,15 @@ public class DeploymentFactory extends RunFactory {
 			for (int i = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX; i <= maxIndex; i++) {
 				ids.add(String.valueOf(i));
 			}
-			run.setParameter(new RunParameter(nodeRunParameterKeyName,
+			run.assignRuntimeParameter(nodeRunParameterKeyName,
 					StringUtils.join(ids.toArray(), ","),
-					RuntimeParameter.IDS_PARAMETER_DESCRIPTION));
+					RuntimeParameter.IDS_PARAMETER_DESCRIPTION);
+
+			run.assignRuntimeParameter(
+					constructParamName(nodeName,
+							RuntimeParameter.MULTIPLICITY_PARAMETER_NAME),
+					String.valueOf(multiplicity),
+					RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION	);
 		}
 	}
 

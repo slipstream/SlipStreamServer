@@ -845,6 +845,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return getRuntimeParameters().get(key);
 	}
 
+	public void updateRuntimeParameters(Map<String, RuntimeParameter> runtimeParameters) {
+		for (String key : runtimeParameters.keySet()) {
+			this.runtimeParameters.put(key, runtimeParameters.get(key));
+		}
+	}
+
 	private void throwNotFoundException(String key) throws NotFoundException {
 		throw new NotFoundException("Couldn't find key '" + key
 				+ "' in execution instance: '" + getName() + "'");
