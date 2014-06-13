@@ -494,10 +494,21 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		Module module = processor.getParametrized();
 
+		module = copyAllParameters(module);
+		
 		category = module.getCategory();
 
 		module = resetMandatoryParameters(module);
 
+		return module;
+	}
+	
+	private Module copyAllParameters(Module module) throws ValidationException 
+	{
+		for (ModuleParameter p : module.getParameterList()) {
+			module.setParameter(p.copy());
+		}
+		
 		return module;
 	}
 
@@ -507,17 +518,11 @@ public class ModuleResource extends ParameterizedResource<Module> {
 				"reference").getParameterList()) {
 			ModuleParameter p = module.getParameter(referenceParameter
 					.getName());
-			if (p == null) {
-				module.setParameter(referenceParameter.copy());
-			} else {
-				p.setCategory(referenceParameter.getCategory());
-				p.setDescription(referenceParameter.getDescription());
-				p.setEnumValues(referenceParameter.getEnumValues());
-				p.setInstructions(referenceParameter.getInstructions());
-				p.setMandatory(referenceParameter.isMandatory());
-				p.setReadonly(referenceParameter.isReadonly());
-				p.setType(referenceParameter.getType());
+			
+			if (p != null) {
+				referenceParameter.setValue(p.getValue());
 			}
+			module.setParameter(referenceParameter);			
 		}
 		return module;
 	}

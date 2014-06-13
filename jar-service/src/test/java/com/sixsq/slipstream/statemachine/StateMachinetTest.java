@@ -9,9 +9,9 @@ package com.sixsq.slipstream.statemachine;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,8 +27,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -46,7 +48,10 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
+import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.Package;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -68,7 +73,7 @@ public class StateMachinetTest {
 	public static void beforeClass() throws ConfigurationException,
 			ValidationException {
 		user = CommonTestUtil.createTestUser();
-		
+
 		CommonTestUtil.addSshKeys(user);
 	}
 
@@ -174,9 +179,9 @@ public class StateMachinetTest {
 		sc.updateState("n1.1");
 
 		assertState(sc, States.Ready);
-		
+
 		sc.updateState("n2.1");
-		
+
 		assertState(sc, States.Finalizing);
 
 		sc.updateState("n1.1");
@@ -233,12 +238,6 @@ public class StateMachinetTest {
 		assertTrue(done.isFinal());
 	}
 
-	// TODO: LS
-	/*@Test
-	public void failureDuringInitializing() {
-		
-	}*/
-	
 	@Test
 	public void failureDuringProvisioning() throws IllegalArgumentException,
 			SecurityException, ClassNotFoundException, InstantiationException,
@@ -284,28 +283,128 @@ public class StateMachinetTest {
 		assertTrue(sc.isFailing());
 
 		sc.updateState("n2.1");
-		
+
 		assertEquals(States.Executing, sc.getState());
 		assertTrue(sc.isFailing());
-		
+
 		sc.updateState(failingNodeName);
 
 		assertEquals(States.SendingReports, sc.getState());
 		sc.updateState(failingNodeName);
-		
+
 		assertEquals(States.SendingReports, sc.getState());
 		sc.updateState("n2.1");
-		
+
 		assertEquals(States.Ready, sc.getState());
 		sc.updateState(failingNodeName);
-		
+
 		assertEquals(States.Ready, sc.getState());
 		sc.updateState("n2.1");
-		
+
 		assertEquals(States.Finalizing, sc.getState());
 		sc.updateState("n2.1");
 
 		assertEquals(States.Aborted, sc.getState());
+	}
+
+	@Test
+	public void onErrorKeepRunningInBuildImage() throws InvalidStateException,
+			SlipStreamException {
+
+		User user = CommonTestUtil.createUser("user1");
+		user.setOnErrorRunForever(true);
+		user.setOnSuccessRunForever(true);
+		user.store();
+
+		ImageModule parent = new ImageModule("test/parent");
+		Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
+		cloudImageIdentifiers.add(new CloudImageIdentifier(parent, cloudServiceName, "image-id"));
+		parent.setCloudImageIdentifiers(cloudImageIdentifiers);
+		parent.store();
+
+		ImageModule module = new ImageModule("test/image-module");
+		module.setModuleReference(parent);
+		module.setPackage(new Package("hello"));
+
+		Run run = RunFactory.getRun(module, RunType.Machine, cloudServiceName, user);
+		run.store();
+
+		StateMachine sc = StateMachine.getStateMachine(run);
+		assertEquals(States.Initializing, sc.getState());
+		sc.start();
+
+		assertEquals(States.Provisioning, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Executing, sc.getState());
+		run = Run.abort("Error in build image", run.getUuid());
+		sc = StateMachine.getStateMachine(run);
+		assertTrue(sc.isFailing());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.SendingReports, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Ready, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Finalizing, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Aborted, sc.getState());
+
+		run.remove();
+		parent.remove();
+		user.remove();
+	}
+
+	@Test
+	public void onSuccessKeepRunningInBuildImage() throws InvalidStateException,
+			SlipStreamException {
+
+		User user = CommonTestUtil.createUser("user1");
+		user.setOnErrorRunForever(true);
+		user.setOnSuccessRunForever(true);
+		user.store();
+
+		ImageModule parent = new ImageModule("test/parent");
+		Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
+		cloudImageIdentifiers.add(new CloudImageIdentifier(parent, cloudServiceName, "image-id"));
+		parent.setCloudImageIdentifiers(cloudImageIdentifiers);
+		parent.store();
+
+		ImageModule module = new ImageModule("test/image-module");
+		module.setModuleReference(parent);
+		module.setPackage(new Package("hello"));
+
+		Run run = RunFactory.getRun(module, RunType.Machine, cloudServiceName, user);
+		run.store();
+
+		StateMachine sc = StateMachine.getStateMachine(run);
+		assertEquals(States.Initializing, sc.getState());
+		sc.start();
+
+		assertEquals(States.Provisioning, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Executing, sc.getState());
+		assertTrue(!sc.isFailing());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.SendingReports, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Ready, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Finalizing, sc.getState());
+		sc.tryAdvanceState(true);
+
+		assertEquals(States.Done, sc.getState());
+
+		run.remove();
+		parent.remove();
+		user.remove();
 	}
 
 	@Test(expected = CannotAdvanceFromTerminalStateException.class)

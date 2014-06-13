@@ -137,8 +137,7 @@ public class OpenStackConnector extends CliConnectorBase {
 	}
 
 	protected String getVmName(Run run) {
-		return run.getType() == RunType.Orchestration ? getOrchestratorName(run)
-				+ "-" + run.getUuid()
+		return isInOrchestrationContext(run) ? getOrchestratorName(run) + "-" + run.getUuid()
 				: "machine" + "-" + run.getUuid();
 	}
 
@@ -150,7 +149,7 @@ public class OpenStackConnector extends CliConnectorBase {
 	}
 
 	protected String getNetwork(Run run) throws ValidationException{
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			return "";
 		} else {
 			ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
@@ -279,15 +278,16 @@ public class OpenStackConnector extends CliConnectorBase {
 
 		Configuration configuration = Configuration.getInstance();
 
-		String logfilename = "orchestrator.slipstream.log";
 		String bootstrap = "/tmp/slipstream.bootstrap";
 		String username = user.getName();
 
 		String targetScript = "";
 		String nodename = Run.MACHINE_NAME;
+		String logfilename = nodename + ".slipstream.log";
         if(isInOrchestrationContext(run)){
 			targetScript = "slipstream-orchestrator";
 			nodename = getOrchestratorName(run);
+			logfilename = "orchestrator.slipstream.log";
 		}
 
 		String userData = "#!/bin/sh -e \n";

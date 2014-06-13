@@ -35,6 +35,7 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
@@ -52,7 +53,7 @@ import java.util.Map;
 import static org.junit.Assert.fail;
 
 public abstract class CommonTestUtil {
-	
+
 	protected static final String PASSWORD = "password";
 
 	// Need to set cloudServiceName before the status user is
@@ -66,7 +67,7 @@ public abstract class CommonTestUtil {
 
 	public static User createUser(String name) throws ConfigurationException,
 			ValidationException {
-		return CommonTestUtil.createUser(name, null);
+		return CommonTestUtil.createUser(name, "");
 	}
 
 	public static User createUser(String name, String password)
@@ -101,9 +102,13 @@ public abstract class CommonTestUtil {
 		} catch (ValidationException e) {
 			throw (new SlipStreamRuntimeException(e));
 		}
-		
+
 		user.setOnSuccessRunForever(false);
 		user.setOnErrorRunForever(false);
+
+		String key = Parameter.constructKey(ParameterCategory.General.toString(),
+				UserParameter.SSHKEY_PARAMETER_NAME);
+		user.setParameter(new UserParameter(key, "ssh-rsa xx", ""));
 
 		return user.store();
 	}

@@ -16,9 +16,9 @@ import com.sixsq.slipstream.persistence.UserParameter;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,30 +32,42 @@ public class ReadyState extends SynchronizedState {
 
     public ReadyState(ExtrinsicState extrinsicState) {
         super(extrinsicState);
-        
+
         Run run = extrinsicState.getRun();
-        
+
         if (shouldStayInReady(run)) {
         	nextState = States.Ready;
-        } else { 
+        } else {
         	nextState = States.Finalizing;
         }
     }
 
 	private boolean shouldStayInReady(Run run) {
+		return run.getType() == RunType.Run ||
+				(shouldKeepRunningForSuccess(run) && run.getType() != RunType.Machine) ||
+				(shouldKeepRunningForError(run) && run.getType() != RunType.Machine);
+	}
+
+	private boolean shouldKeepRunningForSuccess(Run run) {
 		String key = Parameter.constructKey(ParameterCategory.General.toString(),
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 		RunParameter onSuccessKeepRunning = run.getParameter(key);
-		
-		key = Parameter.constructKey(ParameterCategory.General.toString(),
+
+		return onSuccessKeepRunning != null &&
+				onSuccessKeepRunning.isTrue() &&
+				!extrinsicState.isFailing();
+	}
+
+	private boolean shouldKeepRunningForError(Run run) {
+		String key = Parameter.constructKey(ParameterCategory.General.toString(),
 				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
 		RunParameter onErrorKeepRunning = run.getParameter(key);
-		
-		return run.getType() == RunType.Run || 
-				(onSuccessKeepRunning != null && onSuccessKeepRunning.isTrue() && !extrinsicState.isFailing()) ||
-				(onErrorKeepRunning != null && onErrorKeepRunning.isTrue() && extrinsicState.isFailing());
+
+		return onErrorKeepRunning != null &&
+				onErrorKeepRunning.isTrue() &&
+				extrinsicState.isFailing();
 	}
-	    
+
     @Override
     public States getState() {
         return States.Ready;
