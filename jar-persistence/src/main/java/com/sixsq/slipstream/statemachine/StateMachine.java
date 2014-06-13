@@ -59,7 +59,7 @@ public class StateMachine {
 		this.nodeStates = nodeStates;
 		this.run = run;
 	}
-	
+
 	public StateMachine(Run run) throws InvalidStateException {
 		recreateStateFromRun(run);
 	}
@@ -72,7 +72,7 @@ public class StateMachine {
 
 		key = nodePrefix + RuntimeParameter.ABORT_KEY;
 		RuntimeParameter failing = run.getRuntimeParameters().get(key);
-		
+
 		key = nodePrefix + RuntimeParameter.IS_ORCHESTRATOR_KEY;
 		RuntimeParameter isOrchestrator = run.getRuntimeParameters().get(key);
 
@@ -113,18 +113,15 @@ public class StateMachine {
 
 	public static StateMachine getStateMachine(Run run) throws ValidationException,
 			InvalidStateException, NotFoundException {
-		
+
 		return new StateMachine(run);
 	}
-	
-	private void recreateStateFromRun(Run run) throws InvalidStateException {
-		String nodeNames = run.getNodeNames();
-		String[] nodes = nodeNames.split(", ");
 
+	private void recreateStateFromRun(Run run) throws InvalidStateException {
 		this.run = run;
-		
+
 		nodeStates = new HashMap<String, State>();
-		for (String node : nodes) {
+		for (String node : run.getNodeNameList()) {
 			ExtrinsicState extrinsicState = createNodeExtrinsicState(run, node);
 			State nodeState = StateFactory.createInstance(extrinsicState);
 
@@ -134,7 +131,7 @@ public class StateMachine {
 		ExtrinsicState globalExtrinsicState = createGlobalExtrinsicState(run);
 		globalState = StateFactory.createInstance(globalExtrinsicState);
 	}
-	
+
 	// Note: Used only for unit tests
 	public void start() throws SlipStreamException {
 		EntityManager em = beginTransation();
@@ -166,17 +163,17 @@ public class StateMachine {
 		setNodeStateCompleted(nodeName);
 		commitTransaction(em);
 	}
-	
-	private void tryAdvanceState() 
+
+	private void tryAdvanceState()
 			throws InvalidStateException, CannotAdvanceFromTerminalStateException {
 		tryAdvanceState(false);
 	}
-	
-	public void tryAdvanceState(boolean force) 
+
+	public void tryAdvanceState(boolean force)
 			throws InvalidStateException, CannotAdvanceFromTerminalStateException {
 		tryAdvanceToState(globalState.nextState, force);
 	}
-	
+
 	public void tryAdvanceToFinalizing() throws InvalidStateException,
 			CannotAdvanceFromTerminalStateException {
 		if (canCancel()){
@@ -184,7 +181,7 @@ public class StateMachine {
 		}
 		tryAdvanceToState(States.Finalizing, true);
 	}
-	
+
 	public void tryAdvanceToDone() throws InvalidStateException,
 			CannotAdvanceFromTerminalStateException {
 		if (canCancel()){
@@ -192,7 +189,7 @@ public class StateMachine {
 		}
 		tryAdvanceToState(States.Done, true);
 	}
-	
+
 	public void tryAdvanceToCancelled() throws InvalidStateException,
 	CannotAdvanceFromTerminalStateException {
 		if (! canCancel()){
@@ -200,18 +197,18 @@ public class StateMachine {
 		}
 		tryAdvanceToState(States.Cancelled, true);
 	}
-	
+
 	public boolean canCancel() {
-		
+
 		return ! States.canTerminate().contains(globalState.getState());
 	}
-	
-	private void tryAdvanceToState(States state, boolean force) 
+
+	private void tryAdvanceToState(States state, boolean force)
 			throws InvalidStateException, CannotAdvanceFromTerminalStateException {
 		tryAdvanceToState(state, force, MAX_RECURSION);
 	}
-	
-	private void tryAdvanceToState(States state, boolean force, int recursions) 
+
+	private void tryAdvanceToState(States state, boolean force, int recursions)
 			throws InvalidStateException, CannotAdvanceFromTerminalStateException {
 		EntityManager em = null;
 		try {
@@ -225,7 +222,7 @@ public class StateMachine {
                 }
                 em.close();
             }
-			
+
 			if (recursions > 0) {
 				logger.warning("Error in tryAdvanceToState " + state + ". Retrying...");
 				tryAdvanceToState(state, force, recursions - 1);
@@ -251,12 +248,12 @@ public class StateMachine {
 					+ nodeName));
 		}
 	}
-	
+
 	private void attemptToAdvanceState()
 			throws CannotAdvanceFromTerminalStateException {
 		attemptToAdvanceToState(globalState.nextState, false);
 	}
-		
+
 	private void attemptToAdvanceToState(States nextState, boolean force)
 			throws CannotAdvanceFromTerminalStateException {
 
@@ -279,13 +276,13 @@ public class StateMachine {
 
 	protected void setState(States newState, boolean force)
 			throws InvalidStateException {
-		
+
 		globalState = assignNodeState(globalState, newState);
-		
+
 		run.setState(globalState.getState());
-		
+
 		resetNodesStateCompleted();
-		
+
 		if (globalState.isFinal()) {
 			run.setEnd();
 		}
@@ -298,19 +295,19 @@ public class StateMachine {
 
 	private boolean checkSynchronizedConditionMet()
 			throws InvalidStateException {
-		
+
 		boolean onlyOrch = globalState.synchronizedForOrchestrators();
 		boolean recoveryMode = Run.isInRecoveryMode(run);
-		
+
 		if (globalState.synchronizedForEveryone() || onlyOrch) {
 			for (Map.Entry<String, State> node : nodeStates.entrySet()) {
-				if ((!onlyOrch && !recoveryMode) || 
+				if ((!onlyOrch && !recoveryMode) ||
 					((onlyOrch || recoveryMode) && node.getValue().isOrchestrator())) {
 					checkStateCompleted(node.getKey());
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
