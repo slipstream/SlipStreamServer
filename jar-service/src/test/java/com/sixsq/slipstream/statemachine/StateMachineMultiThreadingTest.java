@@ -102,7 +102,7 @@ public class StateMachineMultiThreadingTest extends
 			Map<String, Object> attributes = new HashMap<String, Object>();
 			attributes.put("uuid", run.getUuid());
 			attributes.put("key",
-					createParameterName(RuntimeParameter.STATE_KEY));
+					createParameterName(RuntimeParameter.COMPLETE_KEY));
 
 			Request request = createPostRequest(attributes,
 					new StringRepresentation(""));
@@ -127,8 +127,8 @@ public class StateMachineMultiThreadingTest extends
 	private static final String NODE_NAME = "node1";
 	private static final boolean MULTI_THREADED = true;
 
-	private States initialState = States.Running;
-	private States finalState = States.SendingFinalReport;
+	private States initialState = States.Executing;
+	private States finalState = States.SendingReports;
 
 	@Test
 	public void testMultipleStateTransitions() throws FileNotFoundException,
@@ -168,17 +168,6 @@ public class StateMachineMultiThreadingTest extends
 		Run run = createRunDeployment("testMultipleStateTransitions");
 		run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY)
 				.setValue(initialState.name());
-		run = em.merge(run);
-		for (int i = 1; i <= MULTIPLICITY; i++) {
-			run.getRuntimeParameters()
-					.get(createParameterName(RuntimeParameter.STATE_KEY,
-							createQualifiedNodeName(NODE_NAME, i)))
-					.setValue(initialState.name());
-			run = em.merge(run);
-		}
-		run.getRuntimeParameters()
-				.get(createParameterName(RuntimeParameter.STATE_KEY,
-						ORCHESTRATOR_NAME)).setValue(initialState.name());
 		run = em.merge(run);
 		transaction.commit();
 		return run;
@@ -259,12 +248,6 @@ public class StateMachineMultiThreadingTest extends
 					createQualifiedNodeName(NODE_NAME, i));
 			String complete = run.getRuntimeParameterValue(key);
 			assertThat(complete, is("false"));
-			String completeKey = createParameterName(
-					RuntimeParameter.STATE_KEY,
-					createQualifiedNodeName(NODE_NAME, i));
-			assertThat(
-					States.valueOf(run.getRuntimeParameterValue(completeKey)),
-					is(expectedState));
 		}
 
 		String key = createParameterName(RuntimeParameter.COMPLETE_KEY,

@@ -38,13 +38,10 @@ public class SimpleRunFactory extends BuildImageFactory {
 	}
 
 	@Override
-	protected void initialize(Module module, Run run, String cloudService)
+	protected void initialize(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
 
-		initializeGlobalParameters(run);
-		initRuntimeParameters(module, run);
-		initMachineState(run);
-		initNodeNames(run, cloudService);
+		super.initialize(module, run, user, cloudService);
 	}
 
 	@Override
@@ -58,7 +55,8 @@ public class SimpleRunFactory extends BuildImageFactory {
 		image.validateForRun(cloudService);
 	}
 	
-	private static void initNodeNames(Run run, String cloudService) {
+	@Override
+	protected void initNodeNames(Run run, String cloudService) {
 		run.addNodeName(Run.MACHINE_NAME, cloudService);
 		run.addGroup(Run.MACHINE_NAME, cloudService);
 	}

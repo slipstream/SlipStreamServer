@@ -43,7 +43,6 @@ import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
@@ -65,6 +64,7 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.Terminator;
 
 public class RunTest extends RunTestBase {
 
@@ -123,6 +123,8 @@ public class RunTest extends RunTestBase {
 
 		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
 
+		int initialNumberOfParameters = run.getParameters().size();
+		
 		String resourceUrl = run.getResourceUri();
 
 		String parameterName = "name";
@@ -140,7 +142,7 @@ public class RunTest extends RunTestBase {
 
 		Map<String, RunParameter> parameters = runRestored.getParameters();
 		assertNotNull(parameters);
-		assertEquals(1, parameters.size());
+		assertEquals(1 + initialNumberOfParameters, parameters.size());
 
 		parameter = parameters.get(parameterName);
 		assertNotNull(parameter);
@@ -159,6 +161,8 @@ public class RunTest extends RunTestBase {
 
 		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
 
+		int initialNumberOfParameters = run.getParameters().size();
+		
 		String resourceUrl = run.getResourceUri();
 
 		String parameterName1 = "p1";
@@ -183,7 +187,7 @@ public class RunTest extends RunTestBase {
 
 		Map<String, RunParameter> parameters = runRestored.getParameters();
 		assertNotNull(parameters);
-		assertEquals(2, parameters.size());
+		assertEquals(2 + initialNumberOfParameters, parameters.size());
 
 		parameter = parameters.get(parameterName1);
 		assertNotNull(parameter);
@@ -458,37 +462,61 @@ public class RunTest extends RunTestBase {
 		assertThat(run.isAbort(), is(false));
 	}
 
+	private Run setRunState(Run run, States state){
+		EntityManager em = PersistenceUtil.createEntityManager();
+		em.getTransaction().begin();
+		run = Run.load(run.getResourceUri(), em);
+		
+		RuntimeParameter globalState = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY);
+		globalState.setValue(state.toString());
+		globalState.store();
+		
+		run.setState(state);
+		run.store();
+		
+		em.getTransaction().commit();
+		em.close();
+		
+		return run;
+	}
+	
 	@Test
-	public void done() throws ConfigurationException, SlipStreamClientException {
+	public void purge() throws ConfigurationException, SlipStreamException {
 
 		ImageModule image = new ImageModule("doneImage");
-
 		image.setImageId("123", cloudServiceName);
 
 		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		run.store();
+		String resourceUri = run.getResourceUri();
 
-		run.setState(States.Inactive);
-		run.done();
+		run = setRunState(run, States.Initializing);
+		Terminator.purgeRun(run);
+		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Cancelled));
 
-		run.setState(States.Running);
-		run.done();
+		run = setRunState(run, States.Executing);
+		Terminator.purgeRun(run);
+		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Cancelled));
 
+		run = setRunState(run, States.Ready);
+		Terminator.purgeRun(run);
+		run = Run.load(resourceUri);
+		assertThat(run.getState(), is(States.Done));
+		
+		run = setRunState(run, States.Ready);
 		run.getRuntimeParameters().put(
 				RuntimeParameter.GLOBAL_ABORT_KEY,
 				new RuntimeParameter(run, RuntimeParameter.GLOBAL_ABORT_KEY,
 						"Kaboom", ""));
-
-		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
-				States.Aborting);
-		run.done();
+		run.store();
+//		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY, States.Aborting);
+		Terminator.purgeRun(run);
+		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Aborted));
-
-		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY,
-				States.Aborted);
-		run.done();
-		assertThat(run.getState(), is(States.Aborted));
+		
+		run.remove();
 	}
 
 }

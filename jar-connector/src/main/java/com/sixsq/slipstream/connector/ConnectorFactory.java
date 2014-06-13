@@ -95,6 +95,7 @@ public class ConnectorFactory {
         return user.getDefaultCloudService();
     }
 
+    @SuppressWarnings("unused")
     private static Connector loadConnector(String cloudServiceName) throws ConfigurationException {
         return loadConnector(cloudServiceName, null);
     }
