@@ -134,13 +134,13 @@ public abstract class RunFactory {
 
 	protected void initialize(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
-		
+
 		run = addOnSuccessRunForeverToParameters(run, user);
 		run = addOnErrorRunForeverToParameters(run, user);
-		
-		run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "false", 
+
+		run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "false",
 				Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
-		
+
 		initializeGlobalParameters(run);
 		initCloudServices(run);
 
@@ -184,29 +184,29 @@ public abstract class RunFactory {
 	}
 
 	private Run addOnSuccessRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
+		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 
 		UserParameter up = user.getParameter(key);
 		if (up != null) {
 			run.setParameter(new RunParameter(up.getName(), up.getValue("false"), up.getDescription()));
 		}
-		
+
 		return run;
 	}
-	
+
 	private Run addOnErrorRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
+		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
 				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		
+
 		UserParameter up = user.getParameter(key);
 		if (up != null) {
 			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
 		}
-		
+
 		return run;
 	}
-	
+
 	public static void terminate(Run run) {
 
 	}
@@ -295,7 +295,7 @@ public abstract class RunFactory {
 
         run.assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
 				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
-        
+
         run.assignRuntimeParameter(RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY, "false",
 				RuntimeParameter.GLOBAL_RECOVERY_MDDE_DESCRIPTION);
 	}
@@ -306,14 +306,14 @@ public abstract class RunFactory {
 		String prefix = Run.constructOrchestratorName(cloudService);
 
 		assignRuntimeParameters(run, prefix);
-		
+
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.HOSTNAME_KEY),
 				RuntimeParameter.HOSTNAME_DESCRIPTION);
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.INSTANCE_ID_KEY),
 				RuntimeParameter.INSTANCE_ID_DESCRIPTION);
-		
+
 		run.getRuntimeParameters().get(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.IS_ORCHESTRATOR_KEY)).setValue("true");
 
@@ -345,9 +345,9 @@ public abstract class RunFactory {
 	public static void assignRuntimeParameters(Run run, String nodename)
 			throws ValidationException {
 		String prefix = nodename;
-		
+
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.STATE_CUSTOM_KEY), "", 
+				RuntimeParameter.STATE_CUSTOM_KEY), "",
 				RuntimeParameter.STATE_CUSTOM_DESCRIPTION);
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.STATE_VM_KEY), "",
@@ -365,7 +365,7 @@ public abstract class RunFactory {
         run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
         		RuntimeParameter.URL_SERVICE_KEY), "",
                 RuntimeParameter.URL_SERVICE_DESCRIPTION);
-        
+
         run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.IS_ORCHESTRATOR_KEY), "false",
 				RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
