@@ -78,14 +78,14 @@ public class DeploymentFactory extends RunFactory {
 		checkAllImagesHaveReferenceOrImageId(run);
 	}
 
-	private void checkIsDeploymentModule(Run run) throws ValidationException {
+	private static void checkIsDeploymentModule(Run run) throws ValidationException {
 		if (!(run.getModule() instanceof DeploymentModule)) {
 			throw new ValidationException(
 					"Only deployment modules can be deployed");
 		}
 	}
 
-	private void checkAllImagesHaveReferenceOrImageId(Run run)
+	private static void checkAllImagesHaveReferenceOrImageId(Run run)
 			throws ValidationException {
 
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
@@ -108,7 +108,7 @@ public class DeploymentFactory extends RunFactory {
 		}
 	}
 
-	private void checkImageHasReferenceOrImageId(ImageModule image,
+	private static void checkImageHasReferenceOrImageId(ImageModule image,
 			String cloudServiceName) throws ValidationException {
 
 		if (!"".equals(image.getCloudImageId(cloudServiceName))) {
@@ -136,7 +136,7 @@ public class DeploymentFactory extends RunFactory {
 		}
 	}
 
-	private void initNodeInstanceRuntimeParameters(Run run) throws ValidationException,
+	private static void initNodeInstanceRuntimeParameters(Run run) throws ValidationException,
 			NotFoundException {
 
 		List<String> filter = new ArrayList<String>();
@@ -175,7 +175,7 @@ public class DeploymentFactory extends RunFactory {
 
 	}
 
-	private void initNodeRuntimeParameters(Run run) throws ValidationException {
+	private static void initNodeRuntimeParameters(Run run) throws ValidationException {
 
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 		for (Node node : deployment.getNodes().values()) {
@@ -226,7 +226,7 @@ public class DeploymentFactory extends RunFactory {
 				+ index + RuntimeParameter.NODE_PROPERTY_SEPARATOR + parts[1];
 	}
 
-	private Run initMachineState(Node node, Run run)
+	private static Run initMachineState(Node node, Run run)
 			throws ValidationException, NotFoundException {
 
 		int multiplicity = node.getMultiplicity();
