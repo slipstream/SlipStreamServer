@@ -358,9 +358,6 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.COMPLETE_KEY),
 				"false", RuntimeParameter.COMPLETE_DESCRIPTION);
-        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-        		RuntimeParameter.TAGS_KEY), "",
-                RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
 
         run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
         		RuntimeParameter.URL_SSH_KEY), "",

@@ -160,18 +160,6 @@ public class RunResource extends BaseResource {
 		// FIXME: This should either do something or be moved to guard.
 	}
 
-	@Put("form")
-	public void update(Representation entity) {
-		Form form = new Form(entity);
-		String tags = form.getFirstValue(RuntimeParameter.TAGS_KEY, null);
-		if (tags != null) {
-			RuntimeParameter rtp = RuntimeParameter.loadFromUuidAndKey(
-					run.getUuid(), RuntimeParameter.GLOBAL_TAGS_KEY);
-			rtp.setValue(tags);
-			rtp.store();
-		}
-	}
-
 	@Delete
 	public void terminate() {
 

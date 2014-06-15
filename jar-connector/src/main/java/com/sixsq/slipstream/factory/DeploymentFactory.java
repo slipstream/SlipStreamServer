@@ -327,11 +327,6 @@ public class DeploymentFactory extends RunFactory {
 			run.setParameter(new RunParameter(nodeRunParameterKeyName,
 					String.valueOf(node.getCloudService()),
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
-
-			nodeRunParameterKeyName = run.nodeRuntimeParameterKeyName(node,
-					RuntimeParameter.TAGS_KEY);
-			run.setParameter(new RunParameter(nodeRunParameterKeyName, "",
-					RuntimeParameter.GLOBAL_TAGS_DESCRIPTION));
 		}
 	}
 
