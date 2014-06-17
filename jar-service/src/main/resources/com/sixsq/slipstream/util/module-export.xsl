@@ -31,6 +31,8 @@
 						</xsl:when>
 						<xsl:when test="name(.) = 'name'">
 						</xsl:when>
+						<xsl:when test="name(.) = 'class'">
+						</xsl:when>
 						<xsl:otherwise>
 							<xsl:attribute name="{name(.)}">
 								<xsl:value-of select="." />
@@ -53,6 +55,8 @@
 	<xsl:template match="@*">
 		<xsl:choose>
 			<xsl:when test="name(.) = 'resourceUri'">
+			</xsl:when>
+			<xsl:when test="name(.) = 'class'">
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:attribute name="{name(.)}">

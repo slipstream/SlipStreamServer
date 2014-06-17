@@ -33,13 +33,15 @@ import javax.persistence.TemporalType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
+<<<<<<< .merge_file_1GAuxX
 import flexjson.JSON;
 
+=======
+@SuppressWarnings("serial")
+>>>>>>> .merge_file_INhDFs
 @Entity
 public class Publish implements Serializable {
 	
-	private static final long serialVersionUID = 1L;
-
 	@Id
 	@GeneratedValue
 	Long id;

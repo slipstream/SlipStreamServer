@@ -20,7 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -99,7 +98,7 @@ public class ImageModule extends Module {
 
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@ElementList(required = false, data = true)
-	private List<CloudImageIdentifier> cloudImageIdentifiers = new ArrayList<CloudImageIdentifier>();
+	private Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
 
 	@Transient
 	@JSON(include=false)
@@ -534,11 +533,11 @@ public class ImageModule extends Module {
 	}
 
 	public void setCloudImageIdentifiers(
-			List<CloudImageIdentifier> cloudImageIdentifiers) {
+			Set<CloudImageIdentifier> cloudImageIdentifiers) {
 		this.cloudImageIdentifiers = cloudImageIdentifiers;
 	}
 
-	public List<CloudImageIdentifier> getCloudImageIdentifiers() {
+	public Set<CloudImageIdentifier> getCloudImageIdentifiers() {
 		return cloudImageIdentifiers;
 	}
 

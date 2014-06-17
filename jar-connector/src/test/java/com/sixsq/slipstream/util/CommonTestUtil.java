@@ -9,9 +9,9 @@ package com.sixsq.slipstream.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,18 +20,10 @@ package com.sixsq.slipstream.util;
  * -=================================================================-
  */
 
-import static org.junit.Assert.fail;
-
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -43,21 +35,30 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
+
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.fail;
 
 public abstract class CommonTestUtil {
-
+	
 	protected static final String PASSWORD = "password";
 
 	// Need to set cloudServiceName before the status user is
 	// created, since the createUser method uses it
-	public static final String cloudServiceName = new LocalConnector()
-			.getCloudServiceName();
+	public static final String cloudServiceName = new LocalConnector().getCloudServiceName();
 
 	public static User createTestUser() throws ConfigurationException,
 			ValidationException {
@@ -66,7 +67,7 @@ public abstract class CommonTestUtil {
 
 	public static User createUser(String name) throws ConfigurationException,
 			ValidationException {
-		return CommonTestUtil.createUser(name, null);
+		return CommonTestUtil.createUser(name, "");
 	}
 
 	public static User createUser(String name, String password)
@@ -101,6 +102,13 @@ public abstract class CommonTestUtil {
 		} catch (ValidationException e) {
 			throw (new SlipStreamRuntimeException(e));
 		}
+		
+		user.setOnSuccessRunForever(false);
+		user.setOnErrorRunForever(false);
+		
+		String key = Parameter.constructKey(ParameterCategory.General.toString(), 
+				UserParameter.SSHKEY_PARAMETER_NAME);
+		user.setParameter(new UserParameter(key, "ssh-rsa xx", ""));
 
 		return user.store();
 	}
@@ -112,41 +120,33 @@ public abstract class CommonTestUtil {
 	}
 
 	public static void addSshKeys(User user) throws ValidationException {
-		UserParameter userKey = new UserParameter(
-				UserParametersFactoryBase.getPublicKeyParameterName(), "xxx",
-				"xxx");
+		UserParameter userKey = new UserParameter(UserParametersFactoryBase.getPublicKeyParameterName(), "xxx", "xxx");
 		user.setParameter(userKey);
 
 		String publicSshKey = ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY;
 		Configuration config = Configuration.getInstance();
 
-		config.getParameters().setParameter(
-				new ServiceConfigurationParameter(publicSshKey, "/dev/null"));
+		config.getParameters().setParameter(new ServiceConfigurationParameter(publicSshKey, "/dev/null"));
 		config.store();
 	}
 
-	public static DeploymentModule createDeployment()
-			throws ValidationException, NotFoundException {
+	public static DeploymentModule createDeployment() throws ValidationException, NotFoundException {
 
 		ImageModule imageForDeployment1 = new ImageModule("imagefordeployment1");
-		imageForDeployment1
-				.setParameter(new ModuleParameter("pi1", "pi1 init value",
-						"pi1 parameter desc", ParameterCategory.Input));
-		imageForDeployment1.setParameter(new ModuleParameter("po1",
-				"po1 init value", "po1 parameter desc",
-				ParameterCategory.Output));
+		imageForDeployment1.setParameter(
+				new ModuleParameter("pi1", "pi1 init value", "pi1 parameter desc", ParameterCategory.Input));
+		imageForDeployment1.setParameter(
+				new ModuleParameter("po1", "po1 init value", "po1 parameter desc", ParameterCategory.Output));
 
 		imageForDeployment1.setIsBase(true);
 		imageForDeployment1.setImageId("123", CommonTestUtil.cloudServiceName);
 		imageForDeployment1 = imageForDeployment1.store();
 
 		ImageModule imageForDeployment2 = new ImageModule("imagefordeployment2");
-		imageForDeployment2
-				.setParameter(new ModuleParameter("pi2", "pi2 init value",
-						"pi2 parameter desc", ParameterCategory.Input));
-		imageForDeployment2.setParameter(new ModuleParameter("po2",
-				"po2 init value", "po2 parameter desc",
-				ParameterCategory.Output));
+		imageForDeployment2.setParameter(
+				new ModuleParameter("pi2", "pi2 init value", "pi2 parameter desc", ParameterCategory.Input));
+		imageForDeployment2.setParameter(
+				new ModuleParameter("po2", "po2 init value", "po2 parameter desc", ParameterCategory.Output));
 		imageForDeployment2.setImageId("123", CommonTestUtil.cloudServiceName);
 		imageForDeployment2 = imageForDeployment2.store();
 
@@ -167,11 +167,9 @@ public abstract class CommonTestUtil {
 		deployment.remove();
 	}
 
-	public static void resetAndLoadConnector(
-			Class<? extends Connector> connectorClass, String instanceName)
-			throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException,
-			ClassNotFoundException, ConfigurationException, ValidationException {
+	public static void resetAndLoadConnector(Class<? extends Connector> connectorClass, String instanceName) throws
+	InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException,
+	ClassNotFoundException, ConfigurationException, ValidationException {
 
 		// Instantiate the configuration force loading from disk
 		// This is required otherwise the first loading from
@@ -179,21 +177,17 @@ public abstract class CommonTestUtil {
 		Configuration.getInstance();
 
 		Map<String, Connector> connectors = new HashMap<String, Connector>();
-		Connector connector = ConnectorFactory
-				.instantiateConnectorFromName(connectorClass.getName());
+		Connector connector = ConnectorFactory.instantiateConnectorFromName(connectorClass.getName());
 
-		String connectorName = instanceName == null ? connector
-				.getCloudServiceName() : instanceName;
+		String connectorName = instanceName == null ? connector.getCloudServiceName() : instanceName;
 
 		connectors.put(connectorName, connector);
 		ConnectorFactory.setConnectors(connectors);
 	}
 
-	public static void resetAndLoadConnector(
-			Class<? extends Connector> connectorClass)
-			throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException,
-			ClassNotFoundException, ConfigurationException, ValidationException {
+	public static void resetAndLoadConnector(Class<? extends Connector> connectorClass) throws InstantiationException,
+	IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException,
+	ConfigurationException, ValidationException {
 
 		resetAndLoadConnector(connectorClass, null);
 	}
@@ -208,9 +202,32 @@ public abstract class CommonTestUtil {
 		}
 	}
 
-	// FIME: duplicate from ResourceTestBase
-	public static void setCloudConnector(String connectorClassName)
-			throws ConfigurationException {
+	public static Connector lockAndLoadConnector(String configConnectorName, String cloudServiceName,
+			SystemConfigurationParametersFactoryBase systemConfigurationFactory)
+					throws
+					Exception {
+
+		// forces loading the configuration, such that we can override it
+		ConnectorFactory.getConnectors();
+
+		// update the configuration
+		setCloudConnector(configConnectorName);
+		updateServiceConfigurationParameters(systemConfigurationFactory);
+
+		// return the loaded connector
+		return ConnectorFactory.getConnector(cloudServiceName);
+	}
+
+	// FIXME: duplicate from ResourceTestBase
+	public static void updateServiceConfigurationParameters(
+			SystemConfigurationParametersFactoryBase connectorSystemConfigFactory) throws ValidationException {
+		ServiceConfiguration sc = Configuration.getInstance().getParameters();
+		sc.setParameters(connectorSystemConfigFactory.getParameters());
+		sc.store();
+	}
+
+	// FIXME: duplicate from ResourceTestBase
+	public static void setCloudConnector(String connectorClassName) throws ConfigurationException {
 		Configuration configuration = null;
 		try {
 			configuration = Configuration.getInstance();
@@ -220,8 +237,7 @@ public abstract class CommonTestUtil {
 
 		ServiceConfiguration sc = configuration.getParameters();
 		try {
-			sc.setParameter(new ServiceConfigurationParameter(
-					RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
+			sc.setParameter(new ServiceConfigurationParameter(RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
 					connectorClassName));
 		} catch (ValidationException e) {
 			fail();

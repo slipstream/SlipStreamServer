@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
@@ -73,10 +74,12 @@ import com.sixsq.slipstream.statemachine.States;
 		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r WHERE r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
 		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
-		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.startTime < :before AND r.state IN (:states)"),
+		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.startTime < :before AND r.state IN (:states)"),
 		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
 
+	private static final int DEFAULT_TIMEOUT = 60; // In minutes
+	
 	private static final int MAX_NO_OF_ENTRIES = 20;
 	public static final String ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR = "-";
 	public static final String NODE_NAME_PARAMETER_SEPARATOR = "--";
@@ -90,9 +93,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 			+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 
 	// The initial state of each node
-	public final static String INITIAL_NODE_STATE_MESSAGE = States.Inactive
+	public final static String INITIAL_NODE_STATE_MESSAGE = States.Initializing
 			.toString();
-	public final static String INITIAL_NODE_STATE = States.Inactive.toString();
+	public final static String INITIAL_NODE_STATE = States.Initializing.toString();
 
 	public final static String RESOURCE_URI_PREFIX = "run/";
 
@@ -103,6 +106,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public final static String RAM_PARAMETER_NAME = ImageModule.RAM_KEY;
 	public final static String RAM_PARAMETER_DESCRIPTION = "Amount of RAM, in GB";
+	
+	public final static String GARBAGE_COLLECTED_PARAMETER_NAME = "garbage_collected";
+	public final static String GARBAGE_COLLECTED_PARAMETER_DESCRIPTION = "true if the Run was already garbage collected";
+	
 
 	public static Run abortOrReset(String abortMessage, String nodename,
 			String uuid) {
@@ -130,10 +137,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 			if (nodeAbort != null) {
 				nodeAbort.reset();
 			}
+			resetRecoveryMode(run);
 		} else if (!globalAbort.isSet()) {
 			setGlobalAbortState(abortMessage, globalAbort);
 			if (nodeAbort != null) {
 				nodeAbort.setValue(abortMessage);
+			}
+			if (run.state == States.Provisioning) {
+				setRecoveryMode(run);
 			}
 		}
 
@@ -143,6 +154,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private static void setGlobalAbortState(String abortMessage,
 			RuntimeParameter globalAbort) {
 		globalAbort.setValue(abortMessage);
+		globalAbort.store();
 		Run run = globalAbort.getContainer();
 		run.setState(run.getState());
 	}
@@ -153,6 +165,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		RuntimeParameter globalAbort = getGlobalAbort(run);
 		if (!globalAbort.isSet()) {
 			setGlobalAbortState(abortMessage, globalAbort);
+		}
+		if (run.state == States.Provisioning) {
+			setRecoveryMode(run);
 		}
 		em.close();
 		return run;
@@ -168,7 +183,77 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR
 				+ RuntimeParameter.ABORT_KEY;
 	}
+	
+	private static RuntimeParameter getRecoveryModeParameter(Run run) {
+		return run.getRuntimeParameters().get(
+				RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY);
+	}
+	
+	public static void setRecoveryMode(Run run) {
+		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
+		recoveryModeParam.setValue("true");
+		recoveryModeParam.store();
+	}
+	
+	public static void resetRecoveryMode(Run run) {
+		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
+		recoveryModeParam.setValue("false");
+		recoveryModeParam.store();
+	}
 
+	public static boolean isInRecoveryMode(Run run) {
+		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
+		boolean result = false;
+		if (recoveryModeParam != null) {
+			String recoveryMode = recoveryModeParam.getValue();
+			result = ! ("".equals(recoveryMode) || "false".equalsIgnoreCase(recoveryMode));
+		}
+		return result;
+	}
+	
+	private static RunParameter getGarbageCollectedParameter(Run run) {
+		return run.getParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME);
+	}
+	
+	public static void setGarbageCollected(Run run) throws ValidationException {
+		RunParameter garbageCollected = getGarbageCollectedParameter(run);
+		garbageCollected.setValue("true");
+	}
+	
+	public static boolean isGarbageCollected(Run run) {
+		RunParameter garbageCollected = getGarbageCollectedParameter(run);
+		boolean result = false;
+		if (garbageCollected != null) {
+			String recoveryMode = garbageCollected.getValue();
+			result = Boolean.parseBoolean(recoveryMode);
+		}
+		return result;
+	}
+	
+	public static Run updateRunState(Run run, States newState, boolean retry) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
+		try {
+			run = Run.loadFromUuid(run.getUuid(), em);
+			run.setState(newState);
+			transaction.commit();
+			em.close();
+		} catch (Exception e) {
+			String error = "error setting run state: " + newState;
+			if (retry) {
+				Logger.getLogger("restlet").warning(error + " retrying...");
+			} else {
+				Logger.getLogger("restlet").severe(error);
+			}
+			// retry once
+			if (retry) {
+				updateRunState(run, newState, false);
+			}
+		}
+		return run;
+	}
+	
 	public static Run loadFromUuid(String uuid) {
 		String resourceUri = RESOURCE_URI_PREFIX + uuid;
 		return load(resourceUri);
@@ -265,7 +350,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 		return runView;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public static List<RunView> viewListAll() throws ConfigurationException,
 			ValidationException {
@@ -287,36 +372,29 @@ public class Run extends Parameterized<Run, RunParameter> {
  		return runs;
  	}
 
-	public static int purge() throws ConfigurationException, ValidationException {
-		List<Run> old = listOldTransient();
-		for (Run r : old) {
-			EntityManager em = PersistenceUtil.createEntityManager();
-			r = Run.load(r.resourceUri, em);
-			r.done();
-			r.store();
-			em.close();
-		}
-		return old.size();
-	}
-
+ 	public static List<Run> listOldTransient(User user) throws ConfigurationException,
+ 			ValidationException {
+ 		return listOldTransient(user, 0);
+ 	}
+ 	
 	@SuppressWarnings("unchecked")
-	public static List<Run> listOldTransient() throws ConfigurationException,
+	public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException,
 			ValidationException {
+		if (timeout <= 0) {
+			timeout = DEFAULT_TIMEOUT;
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.MINUTE, -timeout);
+		Date back = calendar.getTime();
+		
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = createNamedQuery(em, "oldInStatesRuns");
-		Date back = aLittleWhileAgo();
+		q.setParameter("user", user.getName());
 		q.setParameter("before", back);
 		q.setParameter("states", States.transition());
 		List<Run> runs = q.getResultList();
 		em.close();
 		return runs;
-	}
-
-	private static Date aLittleWhileAgo() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.HOUR, -1);
-		Date oneHourBack = calendar.getTime();
-		return oneHourBack;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -358,8 +436,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static List<Run> listAllActive(EntityManager em, User user)
 			throws ConfigurationException, ValidationException {
 		Query q = em.createNamedQuery("activeRunsByUser");
-		q.setParameter("completed", States.inactive()); // TODO: hack just for
-														// now
+		q.setParameter("completed", States.Done); // TODO: hack just for
+												  // now
 		q.setParameter("user", user.getName());
 		List<Run> runs = q.getResultList();
 		return runs;
@@ -399,7 +477,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@Attribute(required = false)
 	@Enumerated
-	private States state = States.Inactive;
+	private States state = States.Initializing;
 
 	@Attribute
 	private String moduleResourceUri;
@@ -785,8 +863,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setState(States state) {
-		RunStates rState = new RunStates(state, isAbort());
-		this.state = rState.getState();
+		this.state = state;
 	}
 
 	public int getMultiplicity(String nodeName) throws NotFoundException {
@@ -888,16 +965,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			image.assignImageIdFromCloudService(getCloudServiceName());
 		}
 	}
-
-	public void done() {
-		RunStates state = new RunStates(this);
-		state.done();
-		this.state = state.getState();
-		getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY).setValue(
-				state.toString());
-		setEnd();
-	}
-
+	
 	public static String constructOrchestratorName(String cloudService) {
 		return ORCHESTRATOR_NAME + ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR
 				+ cloudService;

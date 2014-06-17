@@ -1,17 +1,20 @@
 package com.sixsq.slipstream.connector.okeanos;
+
 /*
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 */
-import com.sixsq.slipstream.configuration.Configuration;
+//import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.openstack.OpenStackConnector;
+/*
 import com.sixsq.slipstream.connector.openstack.OpenStackImageParametersFactory;
 import com.sixsq.slipstream.connector.openstack.OpenStackUserParametersFactory;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.*;
+*/
 /*
 import org.jclouds.Constants;
 import org.jclouds.ContextBuilder;
@@ -34,7 +37,7 @@ import org.jclouds.openstack.nova.v2_0.options.CreateServerOptions;
 import org.jclouds.ssh.SshClient;
 import org.jclouds.sshj.config.SshjSshClientModule;
 */
-import java.util.*;
+//import java.util.*;
 
 /**
  * @author Christos KK Loverdos <loverdos@gmail.com>
@@ -50,7 +53,7 @@ public class OkeanosConnector extends OpenStackConnector {
     }
 
     public OkeanosConnector(String instanceName) {
-        super(instanceName);
+        super(instanceName != null ? instanceName : CLOUD_SERVICE_NAME);
     }
 
     @Override

@@ -36,8 +36,6 @@ import java.util.logging.Logger;
 
 public class OpenStackConnector extends CliConnectorBase {
 
-	private static Logger log = Logger.getLogger(OpenStackConnector.class.toString());
-
 	public static final String CLOUD_SERVICE_NAME = "openstack";
 	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.openstack.OpenStackClientCloud";
 
@@ -46,7 +44,7 @@ public class OpenStackConnector extends CliConnectorBase {
 	}
 
 	public OpenStackConnector(String instanceName){
-		super(instanceName);
+		super(instanceName != null ? instanceName : CLOUD_SERVICE_NAME);
 	}
 
 	public Connector copy(){
@@ -56,7 +54,7 @@ public class OpenStackConnector extends CliConnectorBase {
 	public String getCloudServiceName() {
 		return CLOUD_SERVICE_NAME;
 	}
-	
+
 	@Override
 	public Run launch(Run run, User user) throws SlipStreamException {
 
@@ -99,48 +97,47 @@ public class OpenStackConnector extends CliConnectorBase {
 			SlipStreamClientException, IOException, ConfigurationException, ServerExecutionEnginePluginException {
 
 		validate(run, user);
-		
-		String command = "/usr/bin/openstack-run-instances " + 
+
+		String command = "/usr/bin/openstack-run-instances " +
 				getCommandUserParams(user) +
 				" --instance-type " + wrapInSingleQuotes(getInstanceType(run)) +
-				" --image-id " + wrapInSingleQuotes(getImageId(run, user)) + 
+				" --image-id " + wrapInSingleQuotes(getImageId(run, user)) +
 				" --instance-name " + wrapInSingleQuotes(getVmName(run)) +
 				" --network-type " + getNetwork(run) +
-				" --security-groups " + wrapInSingleQuotes(getSecurityGroups(run)) + 
+				" --security-groups " + wrapInSingleQuotes(getSecurityGroups(run)) +
 				" --public-key " + wrapInSingleQuotes(getPublicSshKey(run, user)) +
 		 		" --context-script " + wrapInSingleQuotes(createContextualizationData(run, user));
-		 		
+
 		return command;
 	}
 
 	private String getCommandUserParams(User user) throws ValidationException {
 		validate(user);
 		return
-		" --username " + getKey(user) + 
-		" --password " + getSecret(user) + 
+		" --username " + getKey(user) +
+		" --password " + getSecret(user) +
 		" --project " + wrapInSingleQuotes(getProject(user)) +
 		" --endpoint " + getEndpoint(user) +
 		" --region " + wrapInSingleQuotes(getRegion()) +
 		" --service-type " + wrapInSingleQuotes(getServiceType()) +
 		" --service-name " + wrapInSingleQuotes(getServiceName());
-		
+
 	}
-	
+
 	protected String getServiceType() throws ConfigurationException, ValidationException {
 		return Configuration.getInstance().getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_TYPE_PARAMETER_NAME));
 	}
-	
+
 	protected String getServiceName() throws ConfigurationException, ValidationException {
 		return Configuration.getInstance().getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_NAME_PARAMETER_NAME));
 	}
-	
+
 	protected String getRegion() throws ConfigurationException, ValidationException {
 		return Configuration.getInstance().getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME));
 	}
 
 	protected String getVmName(Run run) {
-		return run.getType() == RunType.Orchestration ? getOrchestratorName(run)
-				+ "-" + run.getUuid()
+		return isInOrchestrationContext(run) ? getOrchestratorName(run) + "-" + run.getUuid()
 				: "machine" + "-" + run.getUuid();
 	}
 
@@ -152,62 +149,62 @@ public class OpenStackConnector extends CliConnectorBase {
 	}
 
 	protected String getNetwork(Run run) throws ValidationException{
-		if (run.getType() == RunType.Orchestration) {
+		if (isInOrchestrationContext(run)) {
 			return "";
 		} else {
 			ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
 			return machine.getParameterValue(ImageModule.NETWORK_KEY, null);
 		}
 	}
-	
+
 	protected String getSecurityGroups(Run run) throws ValidationException{
 		return (isInOrchestrationContext(run)) ? "default"
 				: getParameterValue(OpenStackImageParametersFactory.SECURITY_GROUPS, ImageModule.load(run.getModuleResourceUrl()));
 	}
-	
+
 	protected String getProject(User user) throws ValidationException {
 		return user.getParameter(constructKey(
 				OpenStackUserParametersFactory.TENANT_NAME)).getValue(null);
 	}
-	
+
 	private void validate(User user) throws ValidationException {
 		validateCredentials(user);
 	}
-	
-	private void validate(Run run, User user) 
+
+	private void validate(Run run, User user)
 			throws ConfigurationException, SlipStreamClientException, ServerExecutionEnginePluginException {
 		validateRun(run, user);
 	}
-	
+
 	protected void validateCredentials(User user) throws ValidationException {
 		super.validateCredentials(user);
-		
+
 		String endpoint = getEndpoint(user);
 		if (endpoint == null || "".equals(endpoint)) {
 			throw (new ValidationException("Cloud Endpoint cannot be empty. Please contact your SlipStream administrator."));
 		}
 	}
-	
-	private void validateRun(Run run, User user) 
+
+	private void validateRun(Run run, User user)
 			throws ConfigurationException, SlipStreamClientException, ServerExecutionEnginePluginException{
-		
+
 		String instanceSize = getInstanceType(run);
 		if (instanceSize == null || instanceSize.isEmpty() || "".equals(instanceSize) ){
 				throw (new ValidationException("Instance type cannot be empty."));
 		}
-		
+
 		String imageId = getImageId(run, user);
 		if (imageId == null  || "".equals(imageId)){
 			throw (new ValidationException("Image ID cannot be empty"));
 		}
-		
+
 	}
-	
+
 	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {
 
 		validateCredentials(user);
-		
+
 		Logger.getLogger(this.getClass().getName()).info(
 				getConnectorInstanceName() + ". Terminating all instances.");
 
@@ -215,7 +212,7 @@ public class OpenStackConnector extends CliConnectorBase {
 				+ getCommandUserParams(user);
 
 		for (String id : getCloudNodeInstanceIds(run)) {
-			String[] commands = { "sh", "-c", command + 
+			String[] commands = { "sh", "-c", command +
 					" --instance-id " + wrapInSingleQuotes(id) };
 			try {
 				ProcessUtils.execGetOutput(commands);
@@ -228,9 +225,9 @@ public class OpenStackConnector extends CliConnectorBase {
 
 	@Override
 	public Properties describeInstances(User user) throws SlipStreamException {
-		
+
 		validateCredentials(user);
-		
+
 		String command = "/usr/bin/openstack-describe-instances"
 				+ getCommandUserParams(user);
 
@@ -280,16 +277,17 @@ public class OpenStackConnector extends CliConnectorBase {
 			ServerExecutionEnginePluginException, SlipStreamClientException {
 
 		Configuration configuration = Configuration.getInstance();
-		
-		String logfilename = "orchestrator.slipstream.log";
+
 		String bootstrap = "/tmp/slipstream.bootstrap";
 		String username = user.getName();
 
 		String targetScript = "";
 		String nodename = Run.MACHINE_NAME;
+		String logfilename = nodename + ".slipstream.log";
         if(isInOrchestrationContext(run)){
 			targetScript = "slipstream-orchestrator";
 			nodename = getOrchestratorName(run);
+			logfilename = "orchestrator.slipstream.log";
 		}
 
 		String userData = "#!/bin/sh -e \n";

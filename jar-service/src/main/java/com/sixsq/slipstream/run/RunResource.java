@@ -20,8 +20,6 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import java.util.HashSet;
-
 import javax.persistence.EntityManager;
 
 import org.restlet.Request;
@@ -35,16 +33,15 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
@@ -52,6 +49,7 @@ import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.Terminator;
 
 public class RunResource extends BaseResource {
 
@@ -182,26 +180,11 @@ public class RunResource extends BaseResource {
 		// FIXME: This should either do something or be moved to guard.
 	}
 
-	@Put("form")
-	public void update(Representation entity) {
-		Form form = new Form(entity);
-		String tags = form.getFirstValue(RuntimeParameter.TAGS_KEY, null);
-		if (tags != null) {
-			RuntimeParameter rtp = RuntimeParameter.loadFromUuidAndKey(
-					run.getUuid(), RuntimeParameter.GLOBAL_TAGS_KEY);
-			rtp.setValue(tags);
-			rtp.store();
-		}
-	}
-
 	@Delete
 	public void terminate() {
 
-		EntityManager em = PersistenceUtil.createEntityManager();
-
-		Run run = Run.load(this.run.getResourceUri(), em);
-
 		try {
+<<<<<<< .merge_file_2PfQlC
 			if (run.getCategory() == ModuleCategory.Deployment) {
 				HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
 				for (String cloudServiceName : cloudServicesList) {
@@ -227,14 +210,18 @@ public class RunResource extends BaseResource {
 			}
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
+=======
+			
+			Terminator.terminate(this.run.getResourceUri());
+			
+		} catch (CannotAdvanceFromTerminalStateException e) {
+		} catch (InvalidStateException e){
+			throwClientConflicError(e.getMessage());
+>>>>>>> .merge_file_xX8a4q
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
 
-		run.done();
-
-		run.store();
-
-		em.close();
 	}
+	
 }

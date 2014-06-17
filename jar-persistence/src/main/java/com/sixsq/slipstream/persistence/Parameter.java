@@ -56,7 +56,7 @@ public abstract class Parameter<T> implements Serializable {
 	@Attribute
 	private String name;
 
-	@Column(length = 1024)
+	@Column(length = 65536)
 	private String value;
 
 	@Attribute(required = false)
@@ -303,7 +303,7 @@ public abstract class Parameter<T> implements Serializable {
 		return isTrue(getValue());
 	}
 
-	private static boolean isTrue(String value) {
+	public static boolean isTrue(String value) {
 		return Boolean.parseBoolean(value);
 	}
 
@@ -313,6 +313,11 @@ public abstract class Parameter<T> implements Serializable {
 			newKey.append(RuntimeParameter.PARAM_WORD_SEPARATOR).append(name);
 		}
 		return newKey.toString();
+	}
+	
+	@Override
+	public String toString() {
+		return value;
 	}
 
 }

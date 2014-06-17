@@ -1,7 +1,6 @@
 package com.sixsq.slipstream.connector.cloudstack;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ImageModule;
 
 public class CloudStackAdvancedZoneImageParametersFactory extends CloudStackImageParametersFactory {
 

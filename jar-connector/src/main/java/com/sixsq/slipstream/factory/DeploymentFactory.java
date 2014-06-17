@@ -20,12 +20,13 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
@@ -37,13 +38,12 @@ import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
 
 public class DeploymentFactory extends RunFactory {
 
@@ -52,41 +52,14 @@ public class DeploymentFactory extends RunFactory {
 			throws ValidationException {
 		Run run = new Run(module, RunType.Orchestration, cloudService, user);
 		
-		run = addOnSuccessRunForeverToParameters(run, user);
-		run = addOnErrorRunForeverToParameters(run, user);
-		
-		return run;
-	}
-
-	private Run addOnSuccessRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
-				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		
-		UserParameter up = user.getParameter(key);
-		if (up != null) {
-			run.setParameter(new RunParameter(up.getName(), up.getValue("false"), up.getDescription()));
-		}
-		
-		return run;
-	}
-	
-	private Run addOnErrorRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY, 
-				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		
-		UserParameter up = user.getParameter(key);
-		if (up != null) {
-			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
-		}
-		
 		return run;
 	}
 	
 	@Override
-	protected void initialize(Module module, Run run, String cloudService)
+	protected void initialize(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
 
-		super.initialize(module, run, cloudService);
+		super.initialize(module, run, user, cloudService);
 
 		initializeVmRuntimeParameters(run);
 		initializeOrchestrtorRuntimeParameters(run);
@@ -166,15 +139,25 @@ public class DeploymentFactory extends RunFactory {
 	private void initNodeRuntimeParameters(Run run) throws ValidationException,
 			NotFoundException {
 
+		List<String> filter = new ArrayList<String>();
+		for (ParameterCategory c : ParameterCategory.values()) {
+			filter.add(c.toString());
+		}
+		
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 
 		for (Node node : deployment.getNodes().values()) {
 			run = initMachineState(node, run);
+			String cloudService = node.getCloudService();
+			
 			Module image = node.getImage();
 			for (ModuleParameter param : image.getParameterList()) {
-				String initialValue = extractInitialValue(param, node);
-				run.createRuntimeParameter(node, param.getName(), initialValue,
-						param.getDescription(), param.getType());
+				String category = param.getCategory();
+				if (filter.contains(category) || cloudService.equals(category))	{
+					String initialValue = extractInitialValue(param, node);
+					run.createRuntimeParameter(node, param.getName(), initialValue,
+							param.getDescription(), param.getType());
+				}
 			}
 		}
 
@@ -316,11 +299,6 @@ public class DeploymentFactory extends RunFactory {
 			run.setParameter(new RunParameter(nodeRuntimeParameterKeyName,
 					String.valueOf(node.getCloudService()),
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
-
-			nodeRuntimeParameterKeyName = run.nodeRuntimeParameterKeyName(node,
-					RuntimeParameter.TAGS_KEY);
-			run.setParameter(new RunParameter(nodeRuntimeParameterKeyName, "",
-					RuntimeParameter.GLOBAL_TAGS_DESCRIPTION));
 		}
 	}
 

@@ -163,7 +163,7 @@ public class RunTestBase {
 
 	protected Run createAndStoreRun(Module module, String user, RunType type)
 			throws SlipStreamException {
-		return createAndStoreRun(module, user, type, States.Inactive);
+		return createAndStoreRun(module, user, type, States.Initializing);
 	}
 
 	protected Run createAndStoreRun(Module module, String user, RunType type,

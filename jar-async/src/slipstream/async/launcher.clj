@@ -19,7 +19,7 @@
 (def launcher-chan-size 64)
 (def number-of-readers 64)
 (def timeout-processing-loop (minutes-in-msecs 1))
-(def timeout-launch (minutes-in-msecs 1))
+(def timeout-launch (minutes-in-msecs 5))
 
 (def errors (atom 0))
 (def requested (atom 0))

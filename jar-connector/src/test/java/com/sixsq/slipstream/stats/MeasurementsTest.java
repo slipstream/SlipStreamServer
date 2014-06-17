@@ -26,7 +26,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.junit.After;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -193,23 +192,23 @@ public class MeasurementsTest extends RunTestBase {
 	private void createACoupleOfImageBuildRuns(Module module)
 			throws SlipStreamException {
 		createAndStoreRun(module, user.getName(), RunType.Machine,
-				States.Running);
+				States.Executing);
 		createAndStoreRun(module, user.getName(), RunType.Machine,
-				States.Running);
+				States.Executing);
 	}
 
 	private void createACoupleOfDeploymentRuns(Module module)
 			throws SlipStreamException {
 		createAndStoreRun(module, user.getName(), RunType.Orchestration,
-				States.Running);
+				States.Executing);
 		createAndStoreRun(module, user.getName(), RunType.Orchestration,
-				States.Running);
+				States.Executing);
 	}
 
 	private void createACoupleOfSimpleRuns(Module module)
 			throws SlipStreamException {
-		createAndStoreRun(module, user.getName(), RunType.Run, States.Running);
-		createAndStoreRun(module, user.getName(), RunType.Run, States.Running);
+		createAndStoreRun(module, user.getName(), RunType.Run, States.Executing);
+		createAndStoreRun(module, user.getName(), RunType.Run, States.Executing);
 	}
 
 }

@@ -35,11 +35,11 @@ public abstract class State {
 		return extrinsicState;
 	}
 
-	public boolean mustSynchronizeNormalCondition() {
+	public boolean synchronizedForEveryone() {
 		return false;
 	}
 
-	public boolean mustSynchronizeOnFailure() {
+	public boolean synchronizedForOrchestrators() {
 		return false;
 	}
 
@@ -56,6 +56,10 @@ public abstract class State {
 
 	public boolean isStateCompleted() {
 		return extrinsicState.isCompleted();
+	}
+	
+	public boolean isOrchestrator() {
+		return extrinsicState.isOrchestrator();
 	}
 
 	public void setStateCompleted(boolean completed) {

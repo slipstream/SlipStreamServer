@@ -1,6 +1,5 @@
 package com.sixsq.slipstream.statemachine;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,53 +24,38 @@ import java.util.List;
  */
 
 public enum States {
-    Inactive,
     Initializing,
-    Running,
-    SendingFinalReport,
-    Disconnected,
+    Provisioning,
+    Executing,
+    SendingReports,
+    Ready,
     Finalizing,
-    Terminal, 
-    Unknown,
     Done,
     Cancelled,
-    Aborting,
     Aborted,
-    Failing,
-    Failed,
-    Detached;
-    
-    public static List<States> inactive() {
-    	List<States> list = new ArrayList<States>(completed());
-    	list.add(States.Inactive);
-    	return list;
-    }
+    Unknown;
     
     public static List<States> completed() {
-    	return Arrays.asList(States.Cancelled, 
-    						 States.Terminal,
+    	return Arrays.asList(States.Cancelled,
     						 States.Aborted,
-    						 States.Failed,
     						 States.Unknown,
     						 States.Done);
     }
 
     public static List<States> transition() {
     	return Arrays.asList(Initializing,
-    						 Running,
-    						 SendingFinalReport,
+    						 Provisioning,
+    						 Executing,
+    						 SendingReports,
     						 Finalizing,
-    						 Unknown,
-    						 Aborting,
-    						 Failing);
+    						 Unknown);
     }
     
     public static List<States> canTerminate() {
     	return Arrays.asList(Aborted,
     						 Done,
-    						 Terminal,
     						 Cancelled,
-    						 Detached);
+    						 Ready);
     }
 
 }

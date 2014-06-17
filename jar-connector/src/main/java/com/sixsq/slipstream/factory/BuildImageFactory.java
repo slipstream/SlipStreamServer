@@ -111,10 +111,10 @@ public class BuildImageFactory extends RunFactory {
 	}
 
 	@Override
-	protected void initialize(Module module, Run run, String cloudService)
+	protected void initialize(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
 
-		super.initialize(module, run, cloudService);
+		super.initialize(module, run, user, cloudService);
 
 		initializeOrchestrtorRuntimeParameters(run);
 		initRuntimeParameters((ImageModule) module, run);
@@ -162,7 +162,7 @@ public class BuildImageFactory extends RunFactory {
 
 	}
 
-	private static void initNodeNames(Run run, String cloudService)
+	protected void initNodeNames(Run run, String cloudService)
 			throws ConfigurationException, ValidationException {
 		run.addNodeName(Run.MACHINE_NAME, cloudService);
 		run.addGroup(Run.MACHINE_NAME, cloudService);

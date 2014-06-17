@@ -445,26 +445,65 @@ public class User extends Parameterized<User, UserParameter> {
 		this.lastOnline = new Date();
 	}
 
-	public boolean onSuccessRunForever() {
-		boolean _default = false;
+	public int getTimeout() {
+		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_TIMEOUT);
 		try {
+			return Integer.parseInt(getParameterValue(key, "0"));
+		} catch (ValidationException e) {
+			return 0;
+		}
+	}
+	
+	public boolean getOnSuccessRunForever() {
+		boolean _default = false;
+		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+		try {
+<<<<<<< .merge_file_ebFhcq
 			return Boolean.parseBoolean(getParameterValue(
 					UserParameter.KEY_ON_SUCCESS_RUN_FOREVER,
 					Boolean.toString(_default)));
+=======
+			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
+>>>>>>> .merge_file_L3O9hl
 		} catch (ValidationException e) {
 			return _default;
 		}
 	}
 
-	public boolean onErrorRunForever() {
+	public boolean getOnErrorRunForever() {
 		boolean _default = false;
+		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_ERROR_RUN_FOREVER);
 		try {
+<<<<<<< .merge_file_ebFhcq
 			return Boolean.parseBoolean(getParameterValue(
 					UserParameter.KEY_ON_ERROR_RUN_FOREVER,
 					Boolean.toString(_default)));
+=======
+			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
+>>>>>>> .merge_file_L3O9hl
 		} catch (ValidationException e) {
 			return _default;
 		}
+	}
+	
+	public void setOnSuccessRunForever(boolean on) throws ValidationException {
+		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+		UserParameter parameter = getParameter(key);
+		if (parameter == null) {
+			parameter = new UserParameter(key);
+			setParameter(parameter);
+		}
+		parameter.setValue(Boolean.toString(on));
+	}
+
+	public void setOnErrorRunForever(boolean on) throws ValidationException {
+		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_ON_ERROR_RUN_FOREVER);
+		UserParameter parameter = getParameter(key);
+		if (parameter == null) {
+			parameter = new UserParameter(key);
+			setParameter(parameter);
+		}
+		parameter.setValue(Boolean.toString(on));
 	}
 
 }
