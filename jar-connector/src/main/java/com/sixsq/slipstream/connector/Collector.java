@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
@@ -65,6 +66,10 @@ public class Collector {
 					+ connector.getConnectorInstanceName() + " on behalf of "
 					+ user.getName() + " with '" + e.getMessage() + "'");
 			return 0;
+		} catch (SlipStreamRuntimeException e) {
+			logger.warning("Failed contacting cloud: "
+					+ connector.getConnectorInstanceName() + " on behalf of "
+					+ user.getName() + " with '" + e.getMessage() + "'");
 		} catch (Exception e) {
 			logger.log(
 					Level.SEVERE,
