@@ -23,14 +23,12 @@ package com.sixsq.slipstream.run;
 import javax.persistence.EntityManager;
 
 import org.restlet.Request;
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
-import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
@@ -44,7 +42,7 @@ import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
@@ -132,10 +130,11 @@ public class RunResource extends BaseResource {
 			throws SlipStreamClientException {
 
 		Run run = Run.load(this.run.getResourceUri(), em);
+		User user = User.loadByName(run.getUser());
 
 		if (withVmState) {
 			try {
-				run = updateVmStatus(run);
+				run = updateVmStatus(run, user);
 			} catch (SlipStreamClientException e) {
 				run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
 			} catch (SlipStreamException e) {
@@ -145,15 +144,14 @@ public class RunResource extends BaseResource {
 			}
 		}
 
-		Module module = RunFactory.selectFactory(run.getType()).overloadModule(
-				run, getUser());
+		Module module = RunFactory.selectFactory(run.getType()).overloadModule(run, user);
 		run.setModule(module, true);
 
 		return run;
 	}
 
-	private Run updateVmStatus(Run run) throws SlipStreamException {
-		return RunFactory.updateVmStatus(run, getUser());
+	private Run updateVmStatus(Run run, User user) throws SlipStreamException {
+		return RunFactory.updateVmStatus(run, user);
 	}
 
 	private void validateUser() {

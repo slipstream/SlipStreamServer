@@ -217,7 +217,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public static void setGarbageCollected(Run run) throws ValidationException {
 		RunParameter garbageCollected = getGarbageCollectedParameter(run);
-		garbageCollected.setValue("true");
+
+		if (garbageCollected == null) {
+			run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "true",
+					Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
+		} else {
+			garbageCollected.setValue("true");
+		}
 	}
 
 	public static boolean isGarbageCollected(Run run) {

@@ -19,6 +19,8 @@ import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
@@ -27,17 +29,17 @@ import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 
 public class Terminator {
-	
+
 	/* I WILL BE BACK */
-	
+
 	public static int purge() throws ConfigurationException, ValidationException {
 		int runPurged =0;
-		
+
 		List<User> users = User.list();
 		for (User u: users) {
 			u = User.loadByName(u.getName());
 			int timeout = u.getTimeout();
-			
+
 			List<Run> old = Run.listOldTransient(u, timeout);
 			for (Run r : old) {
 				EntityManager em = PersistenceUtil.createEntityManager();
@@ -52,41 +54,42 @@ public class Terminator {
 			}
 			runPurged += old.size();
 		}
-		
+
 		return runPurged;
 	}
-	
+
 	public static void purgeRun(Run run) throws SlipStreamException {
 		Run.abort("The run has timed out", run.getUuid());
-		
+
 		boolean isGarbageCollected = Run.isGarbageCollected(run);
 		Run.setGarbageCollected(run);
 		run = run.store();
-		
-		String onErrorKeepRunning = run.getParameterValue(
-				UserParameter.KEY_ON_ERROR_RUN_FOREVER, "false");
-		
-		if (! Boolean.parseBoolean(onErrorKeepRunning) && 
+
+		String onErrorKeepRunning = run.getParameterValue(Parameter
+				.constructKey(ParameterCategory.General.toString(),
+						UserParameter.KEY_ON_ERROR_RUN_FOREVER), "false");
+
+		if (! Boolean.parseBoolean(onErrorKeepRunning) &&
 				(run.getState() == States.Initializing || isGarbageCollected)) {
 			terminate(run.getResourceUri());
 		}
-		
+
 		/* else {
 			StateMachine sm = StateMachine.getStateMachine(run);
 			sm.tryAdvanceState(true);
 		}*/
 	}
 
-	public static void terminate(String runResourceUri) throws ValidationException, 
+	public static void terminate(String runResourceUri) throws ValidationException,
 			CannotAdvanceFromTerminalStateException, InvalidStateException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 
 		Run run = Run.load(runResourceUri, em);
 		User user = User.loadByName(run.getUser());
-		
+
 		StateMachine sc = StateMachine.createStateMachine(run);
-		
+
 		if (sc.canCancel()) {
 			sc.tryAdvanceToCancelled();
 			terminateInstances(run, user);
@@ -97,13 +100,13 @@ public class Terminator {
 			terminateInstances(run, user);
 			sc.tryAdvanceState(true);
 		}
-		
+
 		em.close();
 	}
-	
+
 	public static void terminateInstances(Run run, User user) throws ValidationException {
 		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
-		
+
 		HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
 		for (String cloudServiceName : cloudServicesList) {
 			Connector connector = ConnectorFactory.getConnector(cloudServiceName);
@@ -115,5 +118,5 @@ public class Terminator {
 			}
 		}
 	}
-	
+
 }
