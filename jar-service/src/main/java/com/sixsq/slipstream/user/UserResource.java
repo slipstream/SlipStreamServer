@@ -9,9 +9,9 @@ package com.sixsq.slipstream.user;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,8 @@ package com.sixsq.slipstream.user;
 import java.io.IOException;
 import java.util.Map.Entry;
 
+import org.restlet.Request;
+import org.restlet.data.Cookie;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -76,6 +78,13 @@ public class UserResource extends ParameterizedResource<User> {
 		}
 
 		return super.toXml();
+	}
+
+	@Override
+	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
+		//User user = (User) getParameterized();
+		//return user.getName().equals(CookieUtils.getCookieUsername(cookie));
+		return true;
 	}
 
 	private void mergeCloudSystemParameters(User user)
@@ -141,6 +150,9 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected void authorize() {
+
+		super.authorize();
+
 		setCanPut(!newTemplateResource()
 				&& (getUser().isSuper() || !isExisting() || (newInQuery() && !isExisting()) || isItSelf()));
 		setCanDelete(getUser().isSuper() || isItSelf());

@@ -259,7 +259,7 @@ public class StratusLabConnector extends CliConnectorBase {
 				+ run.getCategory().toString() + "#";
 		contextualization += "SLIPSTREAM_USERNAME=" + user.getName() + "#";
 		contextualization += "SLIPSTREAM_COOKIE="
-				+ getCookieForEnvironmentVariable(user.getName()) + "#";
+				+ getCookieForEnvironmentVariable(user.getName(), run.getUuid()) + "#";
 		contextualization += "SLIPSTREAM_VERBOSITY_LEVEL=" + verbosityLevel
 				+ "#";
 		contextualization += "SLIPSTREAM_CLOUD=" + getCloudServiceName() + "#";

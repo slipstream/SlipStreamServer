@@ -9,9 +9,9 @@ package com.sixsq.slipstream.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -74,9 +74,9 @@ import com.sixsq.slipstream.util.XmlUtil;
 
 /**
  * Unit test see
- * 
+ *
  * @see ModuleResourceTest
- * 
+ *
  */
 public class ModuleResource extends ParameterizedResource<Module> {
 
@@ -495,20 +495,20 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		Module module = processor.getParametrized();
 
 		module = copyAllParameters(module);
-		
+
 		category = module.getCategory();
 
 		module = resetMandatoryParameters(module);
 
 		return module;
 	}
-	
-	private Module copyAllParameters(Module module) throws ValidationException 
+
+	private Module copyAllParameters(Module module) throws ValidationException
 	{
 		for (ModuleParameter p : module.getParameterList()) {
 			module.setParameter(p.copy());
 		}
-		
+
 		return module;
 	}
 
@@ -518,11 +518,11 @@ public class ModuleResource extends ParameterizedResource<Module> {
 				"reference").getParameterList()) {
 			ModuleParameter p = module.getParameter(referenceParameter
 					.getName());
-			
+
 			if (p != null) {
 				referenceParameter.setValue(p.getValue());
 			}
-			module.setParameter(referenceParameter);			
+			module.setParameter(referenceParameter);
 		}
 		return module;
 	}
@@ -545,6 +545,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	@Override
 	protected void authorize() {
+
+		super.authorize();
 
 		setCanPut(authorizePut());
 
@@ -581,11 +583,11 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		if (newTemplateResource()) {
 			return false;
 		}
-		
+
 		if (getUser().isSuper()) {
 			return true;
 		}
-		
+
 		if (newInQuery() && !isExisting()) {
 			// check parent
 			String parentResourceUri = null;

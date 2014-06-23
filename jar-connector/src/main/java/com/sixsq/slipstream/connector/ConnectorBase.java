@@ -363,14 +363,16 @@ public abstract class ConnectorBase implements Connector {
         return new HashMap<String, ModuleParameter>();
     }
 
-    protected String generateCookie(String identifier) {
+    protected String generateCookie(String identifier, String runId) {
         Properties extraProperties = new Properties();
         extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
+        extraProperties.put(CookieUtils.COOKIE_RUN_ID, runId);
+        extraProperties.put("com.sixsq.expirydate", "0");
         return CookieUtils.createCookie(identifier, getConnectorInstanceName(), extraProperties);
     }
 
-    protected String getCookieForEnvironmentVariable(String identifier) {
-        return "\"" + generateCookie(identifier) + "\"";
+    protected String getCookieForEnvironmentVariable(String identifier, String runId) {
+        return "\"" + generateCookie(identifier, runId) + "\"";
     }
 
     protected abstract String constructKey(String key) throws ValidationException;

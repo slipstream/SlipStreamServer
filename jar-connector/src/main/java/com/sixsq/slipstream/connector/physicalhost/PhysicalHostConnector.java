@@ -216,7 +216,7 @@ public class PhysicalHostConnector extends ConnectorBase {
 		userData += "export PHYSICALHOST_ORCHESTRATOR_HOST=\"" + getOrchestratorImageId(user) + "\"; ";
 		userData += "export SLIPSTREAM_CATEGORY=\"" + run.getCategory().toString() + "\"; ";
 		userData += "export SLIPSTREAM_USERNAME=\"" + username + "\"; ";
-		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "; ";
+		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username, run.getUuid()) + "; ";
 		userData += "export SLIPSTREAM_VERBOSITY_LEVEL=\"" + getVerboseParameterValue(user) + "\"; ";
 		userData += "export CLOUDCONNECTOR_PYTHON_MODULENAME=\"" + CLOUDCONNECTOR_PYTHON_MODULENAME + "\"; ";
 

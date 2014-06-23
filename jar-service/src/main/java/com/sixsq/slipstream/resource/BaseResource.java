@@ -9,9 +9,9 @@ package com.sixsq.slipstream.resource;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,28 +22,24 @@ package com.sixsq.slipstream.resource;
 
 import java.io.IOException;
 
+import org.restlet.Request;
 import org.restlet.data.Form;
+import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
-import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.Empty;
-import com.sixsq.slipstream.persistence.Metadata;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ConfigurationUtil;
-import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
 
 public abstract class BaseResource extends ServerResource {
 
@@ -54,44 +50,31 @@ public abstract class BaseResource extends ServerResource {
 
 	@Override
 	protected void doInit() throws ResourceException {
+		Request request = getRequest();
+
+		authorize();
+
 		try {
-			setUser(RequestUtil.getUserFromRequest(getRequest()));
+			setUser(RequestUtil.getUserFromRequest(request));
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
-		configuration = ConfigurationUtil
-				.getServiceConfigurationFromRequest(getRequest());
+		configuration = ConfigurationUtil.getServiceConfigurationFromRequest(request);
 	}
 
-	@Get("xml|txt")
-	public Representation toXml() throws NotFoundException,
-			ValidationException, ConfigurationException {
+	protected void authorize() {
+		Request request = getRequest();
+		Cookie cookie = CookieUtils.extractAuthnCookie(request);
 
-		String result = "";
-		User user = getUser();
-		if (user != null) {
-			result = SerializationUtil.toXmlString(getUser());
+		if (cookie != null && CookieUtils.isMachine(cookie) && !isMachineAllowedToAccessThisResource(request, cookie)) {
+			throwClientForbiddenError();
 		}
-		return new StringRepresentation(result);
 	}
 
-	@Get("html")
-	public Representation toHtml() throws ConfigurationException,
-			ValidationException {
-
-		Metadata metadata;
-		User user = getUser();
-		if (user == null) {
-			metadata = new Empty();
-		} else {
-			metadata = user;
-		}
-		return new StringRepresentation(HtmlUtil.toHtml(metadata,
-				getPageRepresentation(), getTransformationType(), getUser()),
-				MediaType.TEXT_HTML);
-
+	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
+		return false;
 	}
 
 	protected abstract String getPageRepresentation();
@@ -229,7 +212,7 @@ public abstract class BaseResource extends ServerResource {
 
 	protected Form extractFormFromEntity(Representation entity)
 			throws ResourceException {
-			
+
 				Form form = null;
 				try {
 					form = new Form(entity.getText());

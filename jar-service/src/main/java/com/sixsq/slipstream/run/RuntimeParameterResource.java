@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
+import org.restlet.Request;
+import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -34,8 +36,8 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 
+import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -44,10 +46,11 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 
-public class RuntimeParameterResource extends ServerResource {
+public class RuntimeParameterResource extends BaseResource {
 
 	private String uuid;
 
@@ -60,11 +63,19 @@ public class RuntimeParameterResource extends ServerResource {
 	@Override
 	public void doInit() throws ResourceException {
 
+		super.doInit();
+
 		parseRequest();
 
 		fetchRepresentation();
 
 		raiseConflictIfAbortIsSet();
+	}
+
+	@Override
+	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
+		String uuid = getRequest().getAttributes().get("uuid").toString();
+		return uuid.equals(CookieUtils.getRunId(cookie));
 	}
 
 	private void parseRequest() {
@@ -230,6 +241,12 @@ public class RuntimeParameterResource extends ServerResource {
 					e.getMessage());
 		}
 		return state;
+	}
+
+	@Override
+	protected String getPageRepresentation() {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
 	}
 
 }
