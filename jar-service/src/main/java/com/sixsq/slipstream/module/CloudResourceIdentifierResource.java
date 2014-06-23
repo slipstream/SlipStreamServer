@@ -158,7 +158,7 @@ public class CloudResourceIdentifierResource extends BaseResource {
 
 	@Override
 	protected String getPageRepresentation() {
-		// TODO Stub de la méthode généré automatiquement
+		// TODO Stub
 		return null;
 	}
 
