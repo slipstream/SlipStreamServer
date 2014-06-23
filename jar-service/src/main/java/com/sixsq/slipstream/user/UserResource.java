@@ -82,8 +82,6 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
-		//User user = (User) getParameterized();
-		//return user.getName().equals(CookieUtils.getCookieUsername(cookie));
 		return true;
 	}
 
