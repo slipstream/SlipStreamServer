@@ -172,11 +172,7 @@ public abstract class ModuleFormProcessor extends
 	}
 
 	public void adjustModule(Module older) throws ValidationException {
-<<<<<<< .merge_file_OjTOFN
-		if(older != null) {
-=======
 		if (older != null) {
->>>>>>> .merge_file_mEQNH1
 			getParametrized().setCreation(older.getCreation());
 			getParametrized().getAuthz().setUser(older.getOwner());
 		}

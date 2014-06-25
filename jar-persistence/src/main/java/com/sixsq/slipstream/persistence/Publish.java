@@ -33,21 +33,18 @@ import javax.persistence.TemporalType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
-<<<<<<< .merge_file_1GAuxX
 import flexjson.JSON;
 
-=======
 @SuppressWarnings("serial")
->>>>>>> .merge_file_INhDFs
 @Entity
 public class Publish implements Serializable {
-	
+
 	@Id
 	@GeneratedValue
 	Long id;
 
 	@OneToOne
-	@JSON(include=false)
+	@JSON(include = false)
 	private Module module;
 
 	@Attribute(required = false)
@@ -56,8 +53,8 @@ public class Publish implements Serializable {
 
 	@Attribute(required = false)
 	private String publisher;
-	
-	@Text(required=false)
+
+	@Text(required = false)
 	private String comment = "";
 
 	private Publish() {
@@ -92,5 +89,5 @@ public class Publish implements Serializable {
 	public void setModule(Module module) {
 		this.module = module;
 	}
-	
+
 }

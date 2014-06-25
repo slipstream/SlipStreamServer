@@ -458,13 +458,7 @@ public class User extends Parameterized<User, UserParameter> {
 		boolean _default = false;
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 		try {
-<<<<<<< .merge_file_ebFhcq
-			return Boolean.parseBoolean(getParameterValue(
-					UserParameter.KEY_ON_SUCCESS_RUN_FOREVER,
-					Boolean.toString(_default)));
-=======
 			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
->>>>>>> .merge_file_L3O9hl
 		} catch (ValidationException e) {
 			return _default;
 		}
@@ -474,13 +468,7 @@ public class User extends Parameterized<User, UserParameter> {
 		boolean _default = false;
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_ERROR_RUN_FOREVER);
 		try {
-<<<<<<< .merge_file_ebFhcq
-			return Boolean.parseBoolean(getParameterValue(
-					UserParameter.KEY_ON_ERROR_RUN_FOREVER,
-					Boolean.toString(_default)));
-=======
 			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
->>>>>>> .merge_file_L3O9hl
 		} catch (ValidationException e) {
 			return _default;
 		}

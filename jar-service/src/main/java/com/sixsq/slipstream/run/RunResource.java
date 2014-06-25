@@ -126,7 +126,7 @@ public class RunResource extends BaseResource {
 
 	@Get("html")
 	public Representation toHtml() throws ConfigurationException,
-			 ValidationException {
+			ValidationException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 		String html;
@@ -184,44 +184,16 @@ public class RunResource extends BaseResource {
 	public void terminate() {
 
 		try {
-<<<<<<< .merge_file_2PfQlC
-			if (run.getCategory() == ModuleCategory.Deployment) {
-				HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
-				for (String cloudServiceName : cloudServicesList) {
-					Connector connector = ConnectorFactory
-							.getConnector(cloudServiceName);
-					try {
-						connector.terminate(run, getUser());
-					} catch (SlipStreamException e) {
-						throw new ResourceException(
-								Status.CLIENT_ERROR_CONFLICT,
-								"Failed terminating VMs", e);
-					}
-				}
-			} else {
-				Connector connector = ConnectorFactory.getConnector(run
-						.getCloudServiceName());
-				try {
-					connector.terminate(run, getUser());
-				} catch (SlipStreamException e) {
-					throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-							"Failed terminating VMs", e);
-				}
-			}
-		} catch (ConfigurationException e) {
-			throwConfigurationException(e);
-=======
-			
+
 			Terminator.terminate(this.run.getResourceUri());
-			
+
 		} catch (CannotAdvanceFromTerminalStateException e) {
-		} catch (InvalidStateException e){
+		} catch (InvalidStateException e) {
 			throwClientConflicError(e.getMessage());
->>>>>>> .merge_file_xX8a4q
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
 
 	}
-	
+
 }
