@@ -56,9 +56,7 @@ public class RunResource extends BaseResource {
 	private Run run = null;
 
 	@Override
-	public void doInit() throws ResourceException {
-
-		super.doInit();
+	public void initialize() throws ResourceException {
 
 		Request request = getRequest();
 
@@ -71,7 +69,6 @@ public class RunResource extends BaseResource {
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 		}
 
-		authorize();
 	}
 
 	@Override
@@ -82,8 +79,6 @@ public class RunResource extends BaseResource {
 
 	@Override
 	protected void authorize() {
-
-		super.authorize();
 
 		if (getUser().isSuper()) {
 			return;

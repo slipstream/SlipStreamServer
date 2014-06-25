@@ -52,21 +52,12 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	private boolean canDelete = false;
 
 	@Override
-	public void doInit() throws ResourceException {
-
-		try {
-			super.doInit();
-		} catch (Exception e) {
-			throwServerError(e.getMessage());
-		}
-
+	public void initialize() throws ResourceException {
 		try {
 			loadTargetParameterized();
 		} catch (ValidationException e) {
 			throwClientError(e);
 		}
-
-		authorize();
 
 		try {
 			setIsEdit();

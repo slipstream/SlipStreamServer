@@ -48,12 +48,9 @@ public class CloudResourceIdentifierResource extends BaseResource {
 	private String region;
 
 	@Override
-	public void doInit() throws ResourceException {
-
-		super.doInit();
+	public void initialize() throws ResourceException {
 
 		extractTargetUriFromRequest();
-
 		fetchRepresentation();
 	}
 

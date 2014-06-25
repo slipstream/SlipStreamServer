@@ -52,8 +52,6 @@ public abstract class BaseResource extends ServerResource {
 	protected void doInit() throws ResourceException {
 		Request request = getRequest();
 
-		authorize();
-
 		try {
 			setUser(RequestUtil.getUserFromRequest(request));
 		} catch (ConfigurationException e) {
@@ -62,15 +60,36 @@ public abstract class BaseResource extends ServerResource {
 			throwClientValidationError(e.getMessage());
 		}
 		configuration = ConfigurationUtil.getServiceConfigurationFromRequest(request);
+
+		initialize();
+
+		authorizeMachine();
+
+		authorize();
 	}
 
-	protected void authorize() {
+	private void authorizeMachine() {
 		Request request = getRequest();
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
 
-		if (cookie != null && CookieUtils.isMachine(cookie) && !isMachineAllowedToAccessThisResource(request, cookie)) {
+		if (isMachine(cookie) && !isMachineAllowedToAccessThisResource(request, cookie)) {
 			throwClientForbiddenError();
 		}
+	}
+
+	protected void authorize() {}
+
+	protected void initialize() {}
+
+	protected boolean isMachine(){
+		Request request = getRequest();
+		Cookie cookie = CookieUtils.extractAuthnCookie(request);
+
+		return isMachine(cookie);
+	}
+
+	protected boolean isMachine(Cookie cookie){
+		return cookie != null && CookieUtils.isMachine(cookie);
 	}
 
 	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){

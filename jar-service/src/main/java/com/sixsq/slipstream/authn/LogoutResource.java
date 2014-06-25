@@ -9,9 +9,9 @@ package com.sixsq.slipstream.authn;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,7 @@ import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.util.RequestUtil;
 
 /**
- * The DELETE action on this resource will remove any authentication cookies from 
+ * The DELETE action on this resource will remove any authentication cookies from
  * the client's cache.
  * The confirmation of deletion is expected to take place in the browser.
  * The user is redirected to the login page by default, or the redirect

@@ -133,8 +133,6 @@ public class ServiceConfigurationResource extends
 	@Override
 	protected void authorize() {
 
-		super.authorize();
-
 		if (!getClientInfo().getRoles().contains(SuperEnroler.Super)) {
 			throw (new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,
 					"Only administrators can access this resource"));

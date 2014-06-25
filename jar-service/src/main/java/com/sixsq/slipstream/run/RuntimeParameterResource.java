@@ -61,9 +61,7 @@ public class RuntimeParameterResource extends BaseResource {
 	private boolean ignoreAbort;
 
 	@Override
-	public void doInit() throws ResourceException {
-
-		super.doInit();
+	public void initialize() throws ResourceException {
 
 		parseRequest();
 

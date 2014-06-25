@@ -546,8 +546,6 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	@Override
 	protected void authorize() {
 
-		super.authorize();
-
 		setCanPut(authorizePut());
 
 		if (isExisting()) {

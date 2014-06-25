@@ -148,12 +148,11 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected void authorize() {
+		boolean isMachine = isMachine();
 
-		super.authorize();
-
-		setCanPut(!newTemplateResource()
+		setCanPut(!newTemplateResource() && !isMachine
 				&& (getUser().isSuper() || !isExisting() || (newInQuery() && !isExisting()) || isItSelf()));
-		setCanDelete(getUser().isSuper() || isItSelf());
+		setCanDelete((getUser().isSuper() || isItSelf()) && !isMachine);
 		setCanGet(getUser().isSuper() || newTemplateResource() || isItSelf());
 	}
 

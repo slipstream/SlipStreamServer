@@ -9,9 +9,9 @@ package com.sixsq.slipstream.action;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,19 +43,18 @@ public class ActionResource extends SimpleRepresentationBaseResource {
 	private OneShotActionPerformer actionPerformer;
 
 	@Override
-	protected void doInit() throws ResourceException {
-		super.doInit();
+	protected void initialize() throws ResourceException {
 
 		Map<String, Object> attributes = getRequest().getAttributes();
 
 		uuid = attributes.get("uuid").toString();
 
 		OneShotAction action = OneShotAction.load(uuid);
-		
+
 		if(action == null) {
 			throwNotFoundResource();
 		}
-		
+
 		actionPerformer = OneShotActionPerformer.getPerformer(action);
 
 		if (actionPerformer == null) {
@@ -82,7 +81,7 @@ public class ActionResource extends SimpleRepresentationBaseResource {
 		} catch (IOException e) {
 			handleError(e);
 		}
-		
+
 		return new StringRepresentation(generateHtml(), MediaType.TEXT_HTML);
 	}
 
