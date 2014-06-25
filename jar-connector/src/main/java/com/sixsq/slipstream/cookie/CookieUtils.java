@@ -52,15 +52,15 @@ public class CookieUtils {
 	private static final int COOKIE_DEFAULT_AGE = 60 * 60 * 12; // 12 hours
 
 	// Name used to identify the authentication cookie.
-	private static String COOKIE_NAME = "com.sixsq.slipstream.cookie";
+	public static String COOKIE_NAME = "com.sixsq.slipstream.cookie";
 	private static String COOKIE_PATH = "/";
 
 	// Names of fields containing cookie information.
 	public static final String COOKIE_RUN_ID = "com.sixsq.runId";
 	public static final String COOKIE_IS_MACHINE = "com.sixsq.isMachine";
+	public static final String COOKIE_EXPIRY_DATE = "com.sixsq.expirydate";
 	private static final String COOKIE_IDTYPE = "com.sixsq.idtype";
 	private static final String COOKIE_IDENTIFIER = "com.sixsq.identifier";
-	private static final String COOKIE_EXPIRY_DATE = "com.sixsq.expirydate";
 	private static final String COOKIE_SIGNATURE = "com.sixsq.signature";
 	private static final String COOKIE_DEFAULT_IDTYPE = "local";
 
@@ -171,6 +171,8 @@ public class CookieUtils {
 		cookieSetting.setPath("/");
 
 		cookieSetting.setDomain("");
+
+		cookieSetting.setMaxAge(COOKIE_DEFAULT_AGE);
 
 		return cookieSetting;
 	}

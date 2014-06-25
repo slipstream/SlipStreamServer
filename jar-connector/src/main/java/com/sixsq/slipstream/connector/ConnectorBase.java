@@ -367,7 +367,7 @@ public abstract class ConnectorBase implements Connector {
         Properties extraProperties = new Properties();
         extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
         extraProperties.put(CookieUtils.COOKIE_RUN_ID, runId);
-        extraProperties.put("com.sixsq.expirydate", "0");
+        extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
         return CookieUtils.createCookie(identifier, getConnectorInstanceName(), extraProperties);
     }
 
