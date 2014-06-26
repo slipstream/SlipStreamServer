@@ -29,7 +29,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.pattern.RelativeTimePatternConverter;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
