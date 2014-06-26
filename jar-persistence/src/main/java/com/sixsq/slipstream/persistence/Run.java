@@ -531,8 +531,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Transient
 	private Module module;
 
-	@Attribute
-	private boolean mutable = false;
+	@Attribute(required = false)
+	@Column(nullable=false, columnDefinition="boolean default false")
+	private boolean mutable;
 
 	@Transient
 	private Map<String, Integer> cloudServiceUsage = new HashMap<String, Integer>();
