@@ -9,9 +9,9 @@ package com.sixsq.slipstream.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,10 +28,12 @@ import java.util.Map;
 
 import org.restlet.Request;
 import org.restlet.Response;
+import org.restlet.data.Cookie;
 import org.restlet.data.Method;
 import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
+import org.restlet.util.Series;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
@@ -92,17 +94,46 @@ public class ResourceTestBase extends RunTestBase {
 
 	public Request createRequest(Map<String, Object> attributes, Method method,
 			Representation entity) throws ConfigurationException {
-		return createRequest(attributes, method, entity, TEST_REQUEST_NAME);
+		return createRequest(attributes, method, entity, null);
 	}
 
 	public Request createRequest(Map<String, Object> attributes, Method method,
 			Representation entity, String targetUrl)
 			throws ConfigurationException {
-		Request request = new Request(method, "http://something.org"
-				+ targetUrl);
+		return createRequest(attributes, method, entity, targetUrl, null);
+	}
+
+	public Request createRequest(Method method, Cookie cookie)
+			throws ConfigurationException {
+		return createRequest(null, method, null, null, cookie);
+	}
+
+	public Request createRequest(Method method, String targetUrl, Cookie cookie)
+			throws ConfigurationException {
+		return createRequest(null, method, null, targetUrl, cookie);
+	}
+
+	public Request createRequest(Map<String, Object> attributes, Method method,
+			Representation entity, String targetUrl, Cookie cookie)
+			throws ConfigurationException {
+		if (targetUrl == null) {
+			targetUrl = TEST_REQUEST_NAME;
+		}
+
+		Request request = new Request(method, "http://something.org" + targetUrl);
 		request.setRootRef(new Reference("http://something.org"));
-		request.setEntity(entity);
-		request.setAttributes(attributes);
+
+		if (attributes != null) {
+			request.setAttributes(attributes);
+		}
+		if (entity != null) {
+			request.setEntity(entity);
+		}
+		if (cookie != null) {
+			Series<Cookie> cookies = new Series<Cookie>(Cookie.class);
+			cookies.add(cookie);
+			request.setCookies(cookies);
+		}
 
 		try {
 			ConfigurationUtil.addConfigurationToRequest(request);

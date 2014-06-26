@@ -21,6 +21,7 @@ package com.sixsq.slipstream.user;
  */
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.restlet.Request;
@@ -34,12 +35,14 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
@@ -98,6 +101,26 @@ public class UserResource extends ParameterizedResource<User> {
 			}
 		}
 		mergePublicKeyParameter(user);
+	}
+
+	@Override
+	protected User prepareForSerialization() throws ConfigurationException, ValidationException {
+		User user = getParameterized();
+
+		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
+		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
+		if (cloudServiceName != null && CookieUtils.isMachine(cookie) == true) {
+			Map<String, Parameter<User>> params = user.getParameters(ParameterCategory.General.name());
+			params.putAll(user.getParameters(cloudServiceName));
+
+			Map<String, UserParameter> userParameters = user.getParameters();
+			userParameters.clear();
+			for (Map.Entry<String,Parameter<User>> entry : params.entrySet()) {
+				userParameters.put(entry.getKey(), (UserParameter)entry.getValue());
+			}
+		}
+
+		return user;
 	}
 
 	private void mergePublicKeyParameter(User user)
