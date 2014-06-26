@@ -160,6 +160,10 @@ public class RuntimeParameter extends Metadata {
 	public static final String NODE_NAME = "nodename";
 	public static final String NODE_INDEX = "index";
 
+	public static final String SCALE_STATE_KEY = "scale.state";
+	public static final String SCALE_STATE_DEFAULT_VALUE = "creating";
+	public static final String SCALE_STATE_DESCRIPTION = "Defined scalability state";
+
 	public static String extractNodeNamePart(String name) {
 		if (!name.contains(NODE_PROPERTY_SEPARATOR)) {
 			return null;
@@ -181,12 +185,12 @@ public class RuntimeParameter extends Metadata {
 
 	public static String constructParamName(String groupname, int index,
 			String paramname) {
-		String prefix = constructNodeName(groupname, index)
+		String prefix = constructNodeInstanceName(groupname, index)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 		return prefix + paramname;
 	}
 
-	public static String constructNodeName(String groupname, int index) {
+	public static String constructNodeInstanceName(String groupname, int index) {
 		return groupname + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR
 				+ index;
 	}

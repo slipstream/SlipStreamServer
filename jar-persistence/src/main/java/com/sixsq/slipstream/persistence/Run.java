@@ -30,8 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -51,6 +52,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CollectionType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
@@ -109,7 +111,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public final static String GARBAGE_COLLECTED_PARAMETER_NAME = "garbage_collected";
 	public final static String GARBAGE_COLLECTED_PARAMETER_DESCRIPTION = "true if the Run was already garbage collected";
-
 
 	public static Run abortOrReset(String abortMessage, String nodename,
 			String uuid) {
@@ -512,7 +513,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 *        NB: orchestrator is part of this list as well.
 	 */
 	@Column(length=65536)
+	@Attribute
 	private String nodeNames = "";
+	private static final String NODE_NAMES_SEPARATOR = ", ";
 
 	/**
 	 * Comma separated list of nodes, including the associated orchestror name -
@@ -719,7 +722,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 	}
 
-	private String composeParameterName(Node node, String key, int i) {
+	public String composeParameterName(Node node, String key, int i) {
 		return composeNodeName(node, i)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR + key;
 	}
@@ -760,13 +763,31 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void addNodeName(String node, String cloudServiceName) {
-		nodeNames += node + ", ";
+		List<String> nodeNamesList = new ArrayList<String>(getNodeNameList());
+		nodeNamesList.remove("");
+		if (!nodeNamesList.contains(node)) {
+			nodeNamesList.add(node);
+			nodeNames = StringUtils.join(nodeNamesList, NODE_NAMES_SEPARATOR);
+
+			Integer nb = cloudServiceUsage.get(cloudServiceName);
+			if (nb == null){
+				nb = 0;
+			}
+			cloudServiceUsage.put(cloudServiceName, nb + 1);
+		}
+	}
+
+	public void removeNodeName(String nodeInstanceName, String cloudServiceName) {
+		List<String> nodeNamesList = new ArrayList<String>(getNodeNameList());
+		while (nodeNamesList.contains(nodeInstanceName)) {
+			nodeNamesList.remove(nodeInstanceName);
+		}
+		nodeNames = StringUtils.join(nodeNamesList, NODE_NAMES_SEPARATOR);
 
 		Integer nb = cloudServiceUsage.get(cloudServiceName);
-		if (nb == null){
-			nb = 0;
+		if (nb != null && nb > 0){
+			cloudServiceUsage.put(cloudServiceName, nb - 1);
 		}
-		cloudServiceUsage.put(cloudServiceName, nb + 1);
 	}
 
 	/**
@@ -780,7 +801,17 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public List<String> getNodeNameList() {
-		return Arrays.asList(getNodeNames().split(", "));
+		return Arrays.asList(getNodeNames().split(NODE_NAMES_SEPARATOR));
+	}
+
+	public List<String> getNodeInstanceNames(String nodeName) {
+		Pattern INSTANCENAME = Pattern.compile("^(" + nodeName + "\\.\\d+)$");
+		List<String> requested = new ArrayList<String>();
+		for (String instanceName : getNodeNameList()) {
+			if (INSTANCENAME.matcher(instanceName).matches())
+				requested.add(instanceName);
+		}
+		return requested;
 	}
 
 	public Map<String, Integer> getCloudServiceUsage() {

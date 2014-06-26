@@ -369,6 +369,11 @@ public abstract class RunFactory {
         run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.IS_ORCHESTRATOR_KEY), "false",
 				RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
+
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.SCALE_STATE_KEY),
+				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
+				RuntimeParameter.SCALE_STATE_DESCRIPTION);
     }
 
 	protected void initOrchestratorsNodeNames(Run run)

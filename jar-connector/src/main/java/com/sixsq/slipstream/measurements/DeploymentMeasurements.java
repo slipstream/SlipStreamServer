@@ -72,7 +72,7 @@ public class DeploymentMeasurements extends Measurements {
 
 			Measurement ms;
 			for (int i = 1; i <= node.getMultiplicity(); i++) {
-				ms = fill(run, RuntimeParameter.constructNodeName(nodename, i),
+				ms = fill(run, RuntimeParameter.constructNodeInstanceName(nodename, i),
 						image.getName(), effectiveCloud);
 				ms.setIndex(i);
 			}

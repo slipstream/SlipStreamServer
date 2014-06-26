@@ -147,7 +147,7 @@ public class DeploymentFactory extends RunFactory {
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 
 		for (Node node : deployment.getNodes().values()) {
-			run = initMachineState(node, run);
+			run = initNodeInstancesState(node, run);
 			String cloudService = node.getCloudService();
 
 			Module image = node.getImage();
@@ -204,7 +204,7 @@ public class DeploymentFactory extends RunFactory {
 		}
 	}
 
-	private static void addParameterMapping(Run run, NodeParameter param, int i) {
+	public static void addParameterMapping(Run run, NodeParameter param, int i) {
 		String name = insertMultiplicityIndexInParameterName(param.getValue(),
 				1);
 		RuntimeParameter input = run.getRuntimeParameters().get(name);
@@ -226,7 +226,7 @@ public class DeploymentFactory extends RunFactory {
 				+ index + RuntimeParameter.NODE_PROPERTY_SEPARATOR + parts[1];
 	}
 
-	private static Run initMachineState(Node node, Run run)
+	private static Run initNodeInstancesState(Node node, Run run)
 			throws ValidationException, NotFoundException {
 
 		int multiplicity = node.getMultiplicity();
@@ -234,28 +234,7 @@ public class DeploymentFactory extends RunFactory {
 				node.getCloudService(), run);
 
 		for (int i = 1; i <= multiplicity; i++) {
-
-			String nodename = constructNodeName(node.getName(), i);
-			assignRuntimeParameters(run, nodename);
-			run.assignRuntimeParameter(
-					constructParamName(nodename,
-							RuntimeParameter.MULTIPLICITY_PARAMETER_NAME),
-					String.valueOf(multiplicity),
-					"Multiplicity value for this node");
-			String paramname = RuntimeParameter.NODE_NAME;
-			run.assignRuntimeParameter(constructParamName(nodename, paramname),
-					node.getName(), "Nodename");
-			run.assignRuntimeParameter(
-					constructParamName(nodename, RuntimeParameter.NODE_INDEX),
-					String.valueOf(i), "Node index");
-
-			run.assignRuntimeParameter(
-					constructParamName(nodename,
-							RuntimeParameter.CLOUD_SERVICE_NAME),
-					cloudServiceName,
-					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-
-			run.addNodeName(nodename, cloudServiceName);
+			initNodeInstanceState(run, node.getName(), i, cloudServiceName);
 		}
 
 		run.addGroup(node.getName(), cloudServiceName);
@@ -263,15 +242,36 @@ public class DeploymentFactory extends RunFactory {
 		return run;
 	}
 
-	private static String constructNodeName(String groupname, int index) {
-		return RuntimeParameter.constructNodeName(groupname, index);
+	public static void initNodeInstanceState(Run run, String nodename,
+			int index, String cloudServiceName) throws ValidationException {
+
+		String instanceName = constructNodeInstanceName(nodename, index);
+		assignRuntimeParameters(run, instanceName);
+		run.assignRuntimeParameter(
+				constructParamName(instanceName, RuntimeParameter.NODE_NAME),
+				nodename, "Nodename");
+		run.assignRuntimeParameter(
+				constructParamName(instanceName, RuntimeParameter.NODE_INDEX),
+				String.valueOf(index), "Node instance index");
+
+		run.assignRuntimeParameter(
+				constructParamName(instanceName,
+						RuntimeParameter.CLOUD_SERVICE_NAME),
+				cloudServiceName,
+				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+
+		run.addNodeName(instanceName, cloudServiceName);
+	}
+
+	private static String constructNodeInstanceName(String groupname, int index) {
+		return RuntimeParameter.constructNodeInstanceName(groupname, index);
 	}
 
 	private static String constructParamName(String nodename, String paramname) {
 		return RuntimeParameter.constructParamName(nodename, paramname);
 	}
 
-	private static String extractInitialValue(ModuleParameter parameter,
+	public static String extractInitialValue(ModuleParameter parameter,
 			Node node) {
 
 		String initialNodeValue = extractInitialValue(node
