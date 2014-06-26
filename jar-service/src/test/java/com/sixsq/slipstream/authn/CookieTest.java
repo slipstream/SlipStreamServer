@@ -159,7 +159,7 @@ public class CookieTest extends ResourceTestBase {
 	@Test
 	public void checkMachineCookieCloudCredentialsFiltering(){
 
-		Map<String, Object> attributes = new HashMap<>();
+		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("user", user.getName());
 
 		Request request = createRequest(attributes, Method.GET, null, null, cookieRunA);
@@ -185,7 +185,7 @@ public class CookieTest extends ResourceTestBase {
 
 		String value = "http://sixsq.com/";
 
-		Map<String, Object> attributes = new HashMap<>();
+		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("key", RuntimeParameter.GLOBAL_URL_SERVICE_KEY);
 		attributes.put("uuid", runA.getUuid());
 
@@ -226,7 +226,7 @@ public class CookieTest extends ResourceTestBase {
 	}
 
 	private Response getAndPostUser(Cookie cookie){
-		Map<String, Object> attributes = new HashMap<>();
+		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("user", user.getName());
 
 		Request request = createRequest(attributes, Method.GET, null, null, cookie);
