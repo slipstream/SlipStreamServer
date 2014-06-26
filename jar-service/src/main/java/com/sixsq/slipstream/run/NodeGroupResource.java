@@ -31,6 +31,7 @@ import javax.persistence.EntityTransaction;
 import org.apache.commons.lang.StringUtils;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
+import org.restlet.data.Method;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -59,8 +60,17 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 public class NodeGroupResource extends ServerResource {
 
+	private final static String NUMBER_INSTANCES_ADD_FORM_PARAM = "n";
+	private final static String NUMBER_INSTANCES_ADD_DEFAULT = "1";
+
+	private final static String INSTANCE_IDS_REMOVE_FORM_PARAM = "ids";
+
+	private final static List<Method> IGNORE_ABORT_HTTP_METHODS = new ArrayList<Method>(
+			Arrays.asList(Method.GET));
+
 	private String runUuid;
 	private String nodename;
+	private boolean ignoreAbort;
 
 	private String nodeMultiplicityRunParam;
 	private String nodeMultiplicityRuntimeParam;
@@ -77,44 +87,21 @@ public class NodeGroupResource extends ServerResource {
 	}
 
 	private void parseRequest() {
+		parseRequestQuery();
 
 		Map<String, Object> attributes = getRequest().getAttributes();
 		runUuid = attributes.get("uuid").toString();
 		nodename = attributes.get("node").toString();
 	}
 
-	private void raiseConflictIfAbortIsSet() {
-		if (isAbortSet()) {
-			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					"Abort flag raised!"));
-		}
+	private void parseRequestQuery() {
+		extractAndSetIgnoreAbort();
 	}
 
-	private boolean isAbortSet() {
-		return getGlobalAbort().isSet();
-	}
-
-	private RuntimeParameter getGlobalAbort() {
-		return loadRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY);
-	}
-
-	private RuntimeParameter loadRuntimeParameter(String key) {
-		RuntimeParameter param = RuntimeParameter.loadFromUuidAndKey(runUuid,
-				key);
-		if (param == null) {
-			Run run = Run.loadFromUuid(runUuid);
-			if (run == null) {
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-						"Unknown run id " + runUuid);
-			} else {
-				String error = "Unknown key " + key;
-				String nodename = RuntimeParameter.extractNodeNamePart(key);
-				Run.abortOrReset(error, nodename, runUuid);
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-						error);
-			}
-		}
-		return param;
+	private void extractAndSetIgnoreAbort() {
+		String ignoreAbortVal = (String) getRequest().getAttributes().get(
+				RunListResource.IGNORE_ABORT_QUERY);
+		ignoreAbort = Boolean.parseBoolean(ignoreAbortVal);
 	}
 
 	private void initNodeParameters() {
@@ -183,7 +170,7 @@ public class NodeGroupResource extends ServerResource {
 			transaction.begin();
 
 			Form form = new Form(entity);
-			String ids = form.getFirstValue("ids", "");
+			String ids = form.getFirstValue(INSTANCE_IDS_REMOVE_FORM_PARAM, "");
 			if (ids.isEmpty()) {
 				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
 						"Provide list of node instance IDs to be removed from the Run.");
@@ -219,6 +206,50 @@ public class NodeGroupResource extends ServerResource {
 		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
 
+	private void raiseConflictIfAbortIsSet() {
+		// Let certain methods to succeed if 'ignore abort' is set.
+		if (!isIgnoreAbort() && isAbortSet()) {
+			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
+					"Abort flag raised!"));
+		}
+	}
+
+	private boolean isIgnoreAbort() {
+		Method httpMethod = getMethod();
+		if (ignoreAbort && IGNORE_ABORT_HTTP_METHODS.contains(httpMethod)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private boolean isAbortSet() {
+		return getGlobalAbort().isSet();
+	}
+
+	private RuntimeParameter getGlobalAbort() {
+		return loadRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY);
+	}
+
+	private RuntimeParameter loadRuntimeParameter(String key) {
+		RuntimeParameter param = RuntimeParameter.loadFromUuidAndKey(runUuid,
+				key);
+		if (param == null) {
+			Run run = Run.loadFromUuid(runUuid);
+			if (run == null) {
+				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
+						"Unknown run id " + runUuid);
+			} else {
+				String error = "Unknown key " + key;
+				String nodename = RuntimeParameter.extractNodeNamePart(key);
+				Run.abortOrReset(error, nodename, runUuid);
+				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
+						error);
+			}
+		}
+		return param;
+	}
+
 	private String getCloudServiceName(Run run) {
 		Node node = getNode(run, nodename);
 		return node.getCloudService();
@@ -227,7 +258,8 @@ public class NodeGroupResource extends ServerResource {
 	private int getNumberOfInstancesToAdd(Representation entity) {
 		Form form = new Form(entity);
 		try {
-			return Integer.parseInt(form.getFirstValue("n", "1"));
+			return Integer.parseInt(form.getFirstValue(NUMBER_INSTANCES_ADD_FORM_PARAM,
+					NUMBER_INSTANCES_ADD_DEFAULT));
 		} catch (NumberFormatException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
 					"Number of instances to add should be an integer.");
