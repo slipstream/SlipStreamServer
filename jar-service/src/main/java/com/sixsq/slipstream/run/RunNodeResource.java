@@ -23,7 +23,6 @@ package com.sixsq.slipstream.run;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -39,7 +38,6 @@ import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -58,7 +56,7 @@ import com.sixsq.slipstream.statemachine.States;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
-public class RunNodeResource extends ServerResource {
+public class RunNodeResource extends RunBaseResource {
 
 	private final static String NUMBER_INSTANCES_ADD_FORM_PARAM = "n";
 	private final static String NUMBER_INSTANCES_ADD_DEFAULT = "1";
@@ -68,16 +66,14 @@ public class RunNodeResource extends ServerResource {
 	private final static List<Method> IGNORE_ABORT_HTTP_METHODS = new ArrayList<Method>(
 			Arrays.asList(Method.GET));
 
-	private String runUuid;
 	private String nodename;
-	private boolean ignoreAbort;
 
 	private String nodeMultiplicityRunParam;
 	private String nodeMultiplicityRuntimeParam;
 	private String nodeIndicesRuntimeParam;
 
 	@Override
-	public void doInit() throws ResourceException {
+	public void initializeSubResource() throws ResourceException {
 
 		parseRequest();
 
@@ -87,21 +83,9 @@ public class RunNodeResource extends ServerResource {
 	}
 
 	private void parseRequest() {
-		parseRequestQuery();
-
-		Map<String, Object> attributes = getRequest().getAttributes();
-		runUuid = attributes.get("uuid").toString();
-		nodename = attributes.get("node").toString();
-	}
-
-	private void parseRequestQuery() {
 		extractAndSetIgnoreAbort();
-	}
 
-	private void extractAndSetIgnoreAbort() {
-		String ignoreAbortVal = (String) getRequest().getAttributes().get(
-				RunListResource.IGNORE_ABORT_QUERY);
-		ignoreAbort = Boolean.parseBoolean(ignoreAbortVal);
+		nodename = getAttribute("node");
 	}
 
 	private void initNodeParameters() {
@@ -117,7 +101,7 @@ public class RunNodeResource extends ServerResource {
 
 	@Get
 	public Representation represent(Representation entity) {
-		Run run = Run.loadFromUuid(runUuid);
+		Run run = Run.loadFromUuid(getUuid());
 		List<String> instanceNames = run.getNodeInstanceNames(nodename);
 		return new StringRepresentation(StringUtils.join(instanceNames, ","),
 				MediaType.TEXT_PLAIN);
@@ -129,7 +113,7 @@ public class RunNodeResource extends ServerResource {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
-		Run run = Run.loadFromUuid(runUuid, em);
+		Run run = Run.loadFromUuid(getUuid(), em);
 		List<String> instanceNames = new ArrayList<String>();
 		try {
 			validateRun(run);
@@ -164,7 +148,7 @@ public class RunNodeResource extends ServerResource {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
-		Run run = Run.loadFromUuid(runUuid, em);
+		Run run = Run.loadFromUuid(getUuid(), em);
 		try {
 			validateRun(run);
 			transaction.begin();
@@ -216,38 +200,11 @@ public class RunNodeResource extends ServerResource {
 
 	private boolean isIgnoreAbort() {
 		Method httpMethod = getMethod();
-		if (ignoreAbort && IGNORE_ABORT_HTTP_METHODS.contains(httpMethod)) {
+		if (getIgnoreAbort() && IGNORE_ABORT_HTTP_METHODS.contains(httpMethod)) {
 			return true;
 		} else {
 			return false;
 		}
-	}
-
-	private boolean isAbortSet() {
-		return getGlobalAbort().isSet();
-	}
-
-	private RuntimeParameter getGlobalAbort() {
-		return loadRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY);
-	}
-
-	private RuntimeParameter loadRuntimeParameter(String key) {
-		RuntimeParameter param = RuntimeParameter.loadFromUuidAndKey(runUuid,
-				key);
-		if (param == null) {
-			Run run = Run.loadFromUuid(runUuid);
-			if (run == null) {
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-						"Unknown run id " + runUuid);
-			} else {
-				String error = "Unknown key " + key;
-				String nodename = RuntimeParameter.extractNodeNamePart(key);
-				Run.abortOrReset(error, nodename, runUuid);
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-						error);
-			}
-		}
-		return param;
 	}
 
 	private String getCloudServiceName(Run run) {
