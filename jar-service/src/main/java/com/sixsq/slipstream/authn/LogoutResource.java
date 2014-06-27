@@ -50,8 +50,7 @@ public class LogoutResource extends AuthnResource {
 	public void removeCookie(Representation entity) {
         CookieUtils.removeAuthnCookie(getResponse());
 		Reference redirectURL = extractRedirectURL(getRequest(), "login");
-		String absolutePath = RequestUtil.constructAbsolutePath(redirectURL.getPath());
-		getResponse().redirectSeeOther(absolutePath);
+		getResponse().redirectSeeOther(redirectURL);
 	}
 
 }
