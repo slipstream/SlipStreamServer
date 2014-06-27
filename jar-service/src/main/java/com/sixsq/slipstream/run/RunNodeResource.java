@@ -58,7 +58,7 @@ import com.sixsq.slipstream.statemachine.States;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
-public class NodeGroupResource extends ServerResource {
+public class RunNodeResource extends ServerResource {
 
 	private final static String NUMBER_INSTANCES_ADD_FORM_PARAM = "n";
 	private final static String NUMBER_INSTANCES_ADD_DEFAULT = "1";

@@ -37,12 +37,12 @@ public class RunRouter extends Router {
 		attach("/", RunListResource.class);
 
 		TemplateRoute routeNode = attach(
-				"/{uuid}/{node}", NodeGroupResource.class);
+				"/{uuid}/{node}", RunNodeResource.class);
 		routeNode.setMatchingQuery(true);
 		routeNode.getTemplate().getVariables()
 				.put("node", new Variable(Variable.TYPE_WORD));
 		TemplateRoute routeNodeIngoreAbort = attach(
-				"/{uuid}/{node}?ignoreabort={ignoreabort}", NodeGroupResource.class);
+				"/{uuid}/{node}?ignoreabort={ignoreabort}", RunNodeResource.class);
 		routeNodeIngoreAbort.setMatchingQuery(true);
 		routeNodeIngoreAbort.getTemplate().getVariables()
 			.put("node", new Variable(Variable.TYPE_WORD));
