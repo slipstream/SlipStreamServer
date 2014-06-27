@@ -339,7 +339,7 @@ public class CloudStackConnector extends CliConnectorBase {
 		userData += "export CLOUDCONNECTOR_PYTHON_MODULENAME=\"" + CLOUDCONNECTOR_PYTHON_MODULENAME + "\"\n";
 		userData += "export SLIPSTREAM_CATEGORY=\"" + run.getCategory().toString() + "\"\n";
 		userData += "export SLIPSTREAM_USERNAME=\"" + username + "\"\n";
-		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "\n";
+		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username, run.getUuid()) + "\n";
 		userData += "export SLIPSTREAM_VERBOSITY_LEVEL=\"" + getVerboseParameterValue(user) + "\"\n";
 
 		userData += "mkdir -p " + SLIPSTREAM_REPORT_DIR + "\n"

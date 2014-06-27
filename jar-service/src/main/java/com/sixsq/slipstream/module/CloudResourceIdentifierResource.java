@@ -22,22 +22,24 @@ package com.sixsq.slipstream.module;
 
 import java.io.IOException;
 
+import org.restlet.Request;
+import org.restlet.data.Cookie;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.user.FormProcessor;
 import com.sixsq.slipstream.util.RequestUtil;
 
-public class CloudResourceIdentifierResource extends ServerResource {
+public class CloudResourceIdentifierResource extends BaseResource {
 
 	CloudImageIdentifier cloudImage;
 	private String moduleUri;
@@ -46,11 +48,17 @@ public class CloudResourceIdentifierResource extends ServerResource {
 	private String region;
 
 	@Override
-	public void doInit() throws ResourceException {
+	public void initialize() throws ResourceException {
 
 		extractTargetUriFromRequest();
-
 		fetchRepresentation();
+	}
+
+	@Override
+	protected boolean isMachineAllowedToAccessThisResource(Request request,
+			Cookie cookie) {
+		// TODO: LS: Check if the Run of the cookie is associated to the image.
+		return true;
 	}
 
 	protected void extractTargetUriFromRequest() {
@@ -143,6 +151,12 @@ public class CloudResourceIdentifierResource extends ServerResource {
 
 		String absolutePath = RequestUtil.constructAbsolutePath("/" + resourceUri);
 		getResponse().setLocationRef(absolutePath);
+	}
+
+	@Override
+	protected String getPageRepresentation() {
+		// TODO Stub
+		return null;
 	}
 
 }
