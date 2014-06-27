@@ -42,7 +42,7 @@ public class ServiceConfiguration extends
 		Parameterized<ServiceConfiguration, ServiceConfigurationParameter> {
 
 	public final static String RESOURCE_URI_PREFIX = "configuration/";
-    public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY = "cloud.connector.orchestrator.publicsshkey";
+	public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY = "cloud.connector.orchestrator.publicsshkey";
 
 	public enum ParameterCategory {
 		SlipStream_Support, SlipStream_Basics, SlipStream_Advanced
@@ -140,8 +140,7 @@ public class ServiceConfiguration extends
 				"Allow user self registration. If checked, user will be able to create accounts themselves.",
 				ParameterCategory.SlipStream_Basics, ParameterType.Boolean),
 
-		SLIPSTREAM_SERVICE_CATALOG_ENABLE(
-				"Enable service catalog feature.",
+		SLIPSTREAM_SERVICE_CATALOG_ENABLE("Enable service catalog feature.",
 				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
 
 		SLIPSTREAM_METERING_HOSTNAME(
@@ -151,8 +150,17 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_METERING_ENABLE("Metering enabled",
 				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
 
-		SLIPSTREAM_QUOTA_ENABLE("Quota enforcement enabled",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean);
+		SLIPSTREAM_STATIC_HTML_TEMPLATE_NAMESPACE(
+				"HTML namespace. Empty by default, it can be set to an alternative / separated string.",
+				ParameterCategory.SlipStream_Advanced,
+				"The corresponding namespace must be available in the CLASSPATH and the service must restarted once the value is saved.",
+				ParameterType.String),
+
+				SLIPSTREAM_QUOTA_ENABLE("Quota enforcement enabled",
+						ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+
+		SLIPSTREAM_STATIC_CONTENT_LOCATION("Location of the static content (e.g. css, js, images). Empty by default.",
+				ParameterCategory.SlipStream_Advanced, "Expects a 'file:///' type value", ParameterType.String);
 
 		private final String description;
 		private final ParameterCategory category;
@@ -312,7 +320,8 @@ public class ServiceConfiguration extends
 	public Parameter<ServiceConfiguration> getParameter(String name,
 			ParameterCategory category) {
 		Parameter<ServiceConfiguration> parameter = getParameter(name);
-		if (parameter != null && parameter.getCategory().equals(category.name())) {
+		if (parameter != null
+				&& parameter.getCategory().equals(category.name())) {
 			return parameter;
 		} else {
 			return null;

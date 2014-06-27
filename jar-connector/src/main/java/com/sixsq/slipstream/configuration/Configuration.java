@@ -39,12 +39,14 @@ import javax.persistence.NoResultException;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
 
+import slipstream.ui.Config;
 import slipstream.ui.views.Representation;
 
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactory;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
@@ -131,8 +133,8 @@ public class Configuration {
 	}
 
 	public static boolean isQuotaEnabled() throws ValidationException {
-		return isEnabled(ServiceConfiguration.RequiredParameters
-			.SLIPSTREAM_QUOTA_ENABLE.getName());
+		return isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_QUOTA_ENABLE
+				.getName());
 	}
 
 	/**
@@ -179,6 +181,9 @@ public class Configuration {
 
 	private void postProcessParameters() throws ConfigurationException,
 			ValidationException {
+		// Extract the HTML template location and set it if set.
+		extractAndSetHtmlNamespace();
+
 		// Extract the SlipStream version number from the tag. Add this as a
 		// property in the configuration. Do this at the end so that a user
 		// cannot override the value.
@@ -206,6 +211,17 @@ public class Configuration {
 		baseUrl = initializeBaseUrl(baseRef);
 
 		setMandatoryToAllParameters();
+	}
+
+	private void extractAndSetHtmlNamespace() throws ConfigurationException,
+			ValidationException {
+		String namespace = serviceConfiguration.getParameterValue(
+				RequiredParameters.SLIPSTREAM_STATIC_HTML_TEMPLATE_NAMESPACE.getName(), null);
+
+		if (Parameter.hasValueSet(namespace)) {
+			Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+			Config.setHtmlTemplateNamespace(namespace);
+		}
 	}
 
 	private void extractAndSetVersion() throws ValidationException {

@@ -23,6 +23,7 @@ package com.sixsq.slipstream.application;
 import java.util.ServiceLoader;
 
 import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
+
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -61,6 +62,8 @@ import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.metrics.GraphiteRouter;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.DocumentationResource;
 import com.sixsq.slipstream.resource.ReportRouter;
@@ -178,43 +181,57 @@ public class RootApplication extends Application {
 			attachServiceCatalog(router); // needs to be after configuration
 			attachDocumentation(router);
 			attachReports(router);
+			attachStaticContent(router);
+			attachDownloads(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
 			Util.throwConfigurationException(e);
 		}
 
-		Directory directoryStaticContent = attachStaticContent();
-		router.attachDefault(directoryStaticContent);
-
-		Directory directoryDownloads = attachDownloadsDirectory();
-		router.attach("/downloads", directoryDownloads);
-
 		// Some browsers need to have their media types preferences trimmed.
 		// Create a filter and put this in front of the application router.
 		return new TrimmedMediaTypesFilter(getContext(), router);
 	}
 
-    @Override
-    public void start() throws Exception {
-        super.start();
-        DiscoverableConnectorServiceLoader.initializeAll();
-    }
+	private void attachDownloads(RootRouter router) {
+		Directory directoryDownloads = attachDownloadsDirectory();
+		router.attach("/downloads", directoryDownloads);
+	}
 
-    @Override
-    public void stop() throws Exception {
-        DiscoverableConnectorServiceLoader.shutdownAll();
-        super.stop();
-    }
+	private void attachStaticContent(RootRouter router)
+			throws ConfigurationException, ValidationException {
+		Directory directoryStaticContent = attachStaticContent();
+		router.attachDefault(directoryStaticContent);
+	}
+
+	@Override
+	public void start() throws Exception {
+		super.start();
+		DiscoverableConnectorServiceLoader.initializeAll();
+	}
+
+	@Override
+	public void stop() throws Exception {
+		DiscoverableConnectorServiceLoader.shutdownAll();
+		super.stop();
+	}
 
 	/**
-	 * During dev, set static content to local dir (e.g.
-	 * "file:///Users/meb/Documents/workspace/SlipStream/SlipStreamServer/src/main/webapp/static-content/"
-	 * )
+	 * During dev, set static content to local dir - e.g.
+	 * "file:///Users/meb/code/SlipStream/SlipStreamUI/clj/src/slipstream/ui/views/"
 	 */
-	private Directory attachStaticContent() {
-		String staticContentLocation = System.getProperty(
+	private Directory attachStaticContent() throws ConfigurationException,
+			ValidationException {
+		String sysStaticContentLocation = System.getProperty(
 				"static.content.location", "war:///static-content");
+		String staticContentLocation = Configuration
+				.getInstance()
+				.getProperty(
+						ServiceConfiguration.RequiredParameters.SLIPSTREAM_STATIC_CONTENT_LOCATION
+								.getName(), sysStaticContentLocation);
+		staticContentLocation = Parameter.hasValueSet(staticContentLocation) ? staticContentLocation
+				: sysStaticContentLocation;
 		Directory directory = new Directory(getContext(), staticContentLocation);
 		directory.setModifiable(false);
 		directory.setListingAllowed(true);
@@ -232,7 +249,8 @@ public class RootApplication extends Application {
 
 	private void attachReports(RootRouter router)
 			throws ConfigurationException, ValidationException {
-		router.attach("/reports", new ReportRouter(getContext(), router.getApplication()));
+		router.attach("/reports",
+				new ReportRouter(getContext(), router.getApplication()));
 	}
 
 	private void attachConfiguration(RootRouter router) {
@@ -289,14 +307,16 @@ public class RootApplication extends Application {
 	private void guardAndAttach(Router rootRouter, Router router, String rootUri)
 			throws ConfigurationException {
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
+		basicAuthenticator
+				.setEnroler(new SuperEnroler(router.getApplication()));
 
 		Authenticator cookieAuthenticator = new CookieAuthenticator(
 				getContext());
 		cookieAuthenticator.setOptional(true);
 
 		cookieAuthenticator.setNext(basicAuthenticator);
-		cookieAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
+		cookieAuthenticator
+				.setEnroler(new SuperEnroler(router.getApplication()));
 
 		basicAuthenticator.setNext(router);
 
@@ -309,7 +329,8 @@ public class RootApplication extends Application {
 		TemplateRoute route;
 
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
+		basicAuthenticator
+				.setEnroler(new SuperEnroler(router.getApplication()));
 
 		Authenticator cookieAuthenticator = new CookieAuthenticator(
 				getContext());
@@ -326,7 +347,8 @@ public class RootApplication extends Application {
 	private void attachModule(RootRouter router) {
 
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
+		basicAuthenticator
+				.setEnroler(new SuperEnroler(router.getApplication()));
 
 		Authenticator cookieAuthenticator = new CookieAuthenticator(
 				getContext());
@@ -360,7 +382,8 @@ public class RootApplication extends Application {
 
 	private void attachWelcome(RootRouter router) {
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
+		basicAuthenticator
+				.setEnroler(new SuperEnroler(router.getApplication()));
 
 		Authenticator cookieAuthenticator = new CookieAuthenticator(
 				getContext());
@@ -394,7 +417,8 @@ public class RootApplication extends Application {
 	private void attachMetering(RootRouter router)
 			throws ConfigurationException, ValidationException {
 
-		guardAndAttach(router, new GraphiteRouter(getContext()), GraphiteRouter.ROOT_URI);
+		guardAndAttach(router, new GraphiteRouter(getContext()),
+				GraphiteRouter.ROOT_URI);
 	}
 
 	public class RootRouter extends Router {
