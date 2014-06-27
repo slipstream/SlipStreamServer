@@ -70,12 +70,6 @@ public class RuntimeParameterResource extends BaseResource {
 		raiseConflictIfAbortIsSet();
 	}
 
-	@Override
-	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
-		String uuid = getRequest().getAttributes().get("uuid").toString();
-		return uuid.equals(CookieUtils.getRunId(cookie));
-	}
-
 	private void parseRequest() {
 
 		parseRequestQuery();

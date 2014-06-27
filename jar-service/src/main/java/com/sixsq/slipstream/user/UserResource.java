@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.restlet.Request;
 import org.restlet.data.Cookie;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -84,7 +83,7 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Override
-	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
+	protected boolean isMachineAllowedToAccessThisResource(){
 		return true;
 	}
 

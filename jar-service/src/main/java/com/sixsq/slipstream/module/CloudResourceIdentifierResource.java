@@ -55,8 +55,7 @@ public class CloudResourceIdentifierResource extends BaseResource {
 	}
 
 	@Override
-	protected boolean isMachineAllowedToAccessThisResource(Request request,
-			Cookie cookie) {
+	protected boolean isMachineAllowedToAccessThisResource() {
 		// TODO: LS: Check if the Run of the cookie is associated to the image.
 		return true;
 	}

@@ -72,12 +72,6 @@ public class RunResource extends BaseResource {
 	}
 
 	@Override
-	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
-		String resourceUri = ResourceUriUtil.extractResourceUri(request);
-		return resourceUri.equals("run/"+CookieUtils.getRunId(cookie));
-	}
-
-	@Override
 	protected void authorize() {
 
 		if (getUser().isSuper()) {

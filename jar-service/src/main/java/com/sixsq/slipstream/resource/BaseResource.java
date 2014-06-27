@@ -69,10 +69,9 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	private void authorizeMachine() {
-		Request request = getRequest();
-		Cookie cookie = CookieUtils.extractAuthnCookie(request);
+		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
 
-		if (isMachine(cookie) && !isMachineAllowedToAccessThisResource(request, cookie)) {
+		if (isMachine(cookie) && !isMachineAllowedToAccessThisResource()) {
 			throwClientForbiddenError();
 		}
 	}
@@ -92,7 +91,7 @@ public abstract class BaseResource extends ServerResource {
 		return cookie != null && CookieUtils.isMachine(cookie);
 	}
 
-	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
+	protected boolean isMachineAllowedToAccessThisResource(){
 		return false;
 	}
 
