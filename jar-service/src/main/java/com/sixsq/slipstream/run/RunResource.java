@@ -23,6 +23,7 @@ package com.sixsq.slipstream.run;
 import javax.persistence.EntityManager;
 
 import org.restlet.Request;
+import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -31,6 +32,7 @@ import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
@@ -54,9 +56,7 @@ public class RunResource extends BaseResource {
 	private Run run = null;
 
 	@Override
-	public void doInit() throws ResourceException {
-
-		super.doInit();
+	public void initialize() throws ResourceException {
 
 		Request request = getRequest();
 
@@ -69,10 +69,17 @@ public class RunResource extends BaseResource {
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 		}
 
-		authorize();
 	}
 
-	private void authorize() {
+	@Override
+	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
+		String resourceUri = ResourceUriUtil.extractResourceUri(request);
+		return resourceUri.equals("run/"+CookieUtils.getRunId(cookie));
+	}
+
+	@Override
+	protected void authorize() {
+
 		if (getUser().isSuper()) {
 			return;
 		}

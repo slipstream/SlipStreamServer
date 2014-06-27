@@ -307,7 +307,7 @@ public class OpenStackConnector extends CliConnectorBase {
 		userData += "export OPENSTACK_SERVICE_REGION=\"" + configuration.getRequiredProperty(constructKey(OpenStackUserParametersFactory.SERVICE_REGION_PARAMETER_NAME)) + "\"\n";
 		userData += "export SLIPSTREAM_CATEGORY=\"" + run.getCategory().toString() + "\"\n";
 		userData += "export SLIPSTREAM_USERNAME=\"" + username + "\"\n";
-		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username) + "\n";
+		userData += "export SLIPSTREAM_COOKIE=" + getCookieForEnvironmentVariable(username,run.getUuid()) + "\n";
 		userData += "export SLIPSTREAM_VERBOSITY_LEVEL=\"" + getVerboseParameterValue(user) + "\"\n";
 
 		/*userData += "mkdir -p ~/.ssh\n"
