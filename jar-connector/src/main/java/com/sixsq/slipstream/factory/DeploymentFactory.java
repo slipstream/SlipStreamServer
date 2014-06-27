@@ -39,6 +39,7 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
@@ -150,7 +151,12 @@ public class DeploymentFactory extends RunFactory {
 			run = initNodeInstancesState(node, run);
 			String cloudService = node.getCloudService();
 
-			Module image = node.getImage();
+			ImageModule image = node.getImage();
+
+			String imageId = image.extractBaseImageId(cloudService);
+			run.createRuntimeParameter(node, RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
+					RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
+
 			for (ModuleParameter param : image.getParameterList()) {
 				String category = param.getCategory();
 				if (filter.contains(category) || cloudService.equals(category))	{

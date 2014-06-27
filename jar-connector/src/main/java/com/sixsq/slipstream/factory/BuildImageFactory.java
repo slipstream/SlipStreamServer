@@ -9,9 +9,9 @@ package com.sixsq.slipstream.factory;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,6 +32,7 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
@@ -129,7 +130,7 @@ public class BuildImageFactory extends RunFactory {
 		assignRuntimeParameters(run, Run.MACHINE_NAME);
 	}
 
-	protected static void initRuntimeParameters(Module image, Run run)
+	protected static void initRuntimeParameters(ImageModule image, Run run)
 			throws ValidationException, NotFoundException {
 
 		// Add default values for the params as set in the image
@@ -159,6 +160,10 @@ public class BuildImageFactory extends RunFactory {
 		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX
 				+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+
+		String imageId = image.extractBaseImageId(cloudService);
+		run.assignRuntimeParameter(RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
+				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
 
 	}
 

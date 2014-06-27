@@ -107,6 +107,9 @@ public class RuntimeParameter extends Metadata {
 	public final static String GLOBAL_RECOVERY_MODE_KEY = GLOBAL_NAMESPACE_PREFIX + "recovery.mode";
 	public final static String GLOBAL_RECOVERY_MDDE_DESCRIPTION = "Run abort flag, set when aborting";
 
+	public final static String IMAGE_ID_PARAMETER_NAME = "image.id";
+	public final static String IMAGE_ID_PARAMETER_DESCRIPTION = "Cloud image id";
+
 	public final static String MULTIPLICITY_PARAMETER_NAME = "multiplicity";
 	public final static String MULTIPLICITY_PARAMETER_DESCRIPTION = "Multiplicity number";
 
