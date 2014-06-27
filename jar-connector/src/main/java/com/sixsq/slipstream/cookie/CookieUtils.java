@@ -9,9 +9,9 @@ package com.sixsq.slipstream.cookie;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,9 +41,9 @@ import com.sixsq.slipstream.persistence.User;
 
 /**
  * Contains utilities for handling authentication cookies.
- * 
+ *
  * @author loomis
- * 
+ *
  */
 public class CookieUtils {
 
@@ -52,16 +52,18 @@ public class CookieUtils {
 	private static final int COOKIE_DEFAULT_AGE = 60 * 60 * 12; // 12 hours
 
 	// Name used to identify the authentication cookie.
-	private static String COOKIE_NAME = "com.sixsq.slipstream.cookie";
+	public static String COOKIE_NAME = "com.sixsq.slipstream.cookie";
 	private static String COOKIE_PATH = "/";
 
 	// Names of fields containing cookie information.
+	public static final String COOKIE_RUN_ID = "com.sixsq.runId";
 	public static final String COOKIE_IS_MACHINE = "com.sixsq.isMachine";
+	public static final String COOKIE_EXPIRY_DATE = "com.sixsq.expirydate";
 	private static final String COOKIE_IDTYPE = "com.sixsq.idtype";
 	private static final String COOKIE_IDENTIFIER = "com.sixsq.identifier";
-	private static final String COOKIE_EXPIRY_DATE = "com.sixsq.expirydate";
 	private static final String COOKIE_SIGNATURE = "com.sixsq.signature";
 	private static final String COOKIE_DEFAULT_IDTYPE = "local";
+
 
 	private static final Set<String> requiredCookieKeys = new TreeSet<String>();
 	static {
@@ -73,7 +75,7 @@ public class CookieUtils {
 
 	/**
 	 * Insert a new authentication cookie into a Response using default id type.
-	 * 
+	 *
 	 * @param response
 	 * @param identifier
 	 */
@@ -84,7 +86,7 @@ public class CookieUtils {
 	/**
 	 * Insert a new authentication cookie into a Response using the given
 	 * values. None of the arguments can be null.
-	 * 
+	 *
 	 * @param response
 	 * @param idType
 	 * @param identifier
@@ -102,7 +104,7 @@ public class CookieUtils {
 	/**
 	 * Insert a new authentication cookie into a Request using the given values.
 	 * None of the arguments can be null.
-	 * 
+	 *
 	 * @param identifier
 	 * @param response
 	 */
@@ -118,7 +120,7 @@ public class CookieUtils {
 	/**
 	 * Insert a new authentication cookie into a Request using the given values.
 	 * None of the arguments can be null.
-	 * 
+	 *
 	 * @param request
 	 * @param identifier
 	 * @param cloudServiceName
@@ -136,11 +138,11 @@ public class CookieUtils {
 	/**
 	 * Creates a new authentication cookie using the provided information. None
 	 * of the arguments may be null.
-	 * 
+	 *
 	 * @param request
 	 * @param idType
 	 * @param identifier
-	 * 
+	 *
 	 * @return new authentication cookie
 	 */
 	private static CookieSetting createAuthnCookieSetting(String idType,
@@ -152,11 +154,11 @@ public class CookieUtils {
 	/**
 	 * Creates a new authentication cookie using the provided information. None
 	 * of the arguments may be null.
-	 * 
+	 *
 	 * @param request
 	 * @param idType
 	 * @param identifier
-	 * 
+	 *
 	 * @return new authentication cookie
 	 */
 	private static CookieSetting createAuthnCookieSetting(String idType,
@@ -170,14 +172,16 @@ public class CookieUtils {
 
 		cookieSetting.setDomain("");
 
+		cookieSetting.setMaxAge(COOKIE_DEFAULT_AGE);
+
 		return cookieSetting;
 	}
-	
+
 	public static String createCookie(String username, String cloudServiceName) {
 		return createCookie(username, cloudServiceName, null);
 	}
 
-	public static String createCookie(String username, String cloudServiceName, 
+	public static String createCookie(String username, String cloudServiceName,
 			Properties extraProperties) {
 		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
 		if (extraProperties != null) {
@@ -230,7 +234,7 @@ public class CookieUtils {
 	 * Force the authentication cookie to be deleted from the client's cache.
 	 * This inserts an invalid cookie into the Response that expires immediately
 	 * (max. age = 0).
-	 * 
+	 *
 	 * @param response
 	 */
 	public static void removeAuthnCookie(Response response) {
@@ -248,9 +252,9 @@ public class CookieUtils {
 
 	/**
 	 * Convenience method to create a CookieSetting object from a Response.
-	 * 
+	 *
 	 * @param response
-	 * 
+	 *
 	 * @return CookieSetting object that will remove authentication cookie from
 	 *         client's cache
 	 */
@@ -261,7 +265,7 @@ public class CookieUtils {
 	/**
 	 * Creates a CookieSetting object that will clear an authentication cookie
 	 * from the client's cache.
-	 * 
+	 *
 	 * @param request
 	 * @return CookieSetting object to remove authentication cookie
 	 */
@@ -285,9 +289,9 @@ public class CookieUtils {
 
 	/**
 	 * Convenience method to extract an authentication cookie from a request.
-	 * 
+	 *
 	 * @param request
-	 * 
+	 *
 	 * @return authentication cookie if the request has one, null otherwise
 	 */
 	public static Cookie extractAuthnCookie(Request request) {
@@ -298,9 +302,9 @@ public class CookieUtils {
 	 * Verify that the given authentication cookie is valid. This checks that
 	 * the name is correct, information is complete, the signature is correct,
 	 * and that the cookie has not yet expired.
-	 * 
+	 *
 	 * @param cookie
-	 * 
+	 *
 	 * @return status code indicating whether the cookie is valid
 	 */
 	public static int verifyAuthnCookie(Cookie cookie) {
@@ -335,12 +339,15 @@ public class CookieUtils {
 		// Create the expiration date.
 		Date expiryDate = dateFromExpiryString(expiryString);
 
-		// Check that the cookie has not yet expired.
-		if (expiryDate.before(new Date())) {
-			return Verifier.RESULT_STALE;
-		} else {
-			return Verifier.RESULT_VALID;
+		if (!CookieUtils.isMachine(cookie)) {
+			// Check that the cookie has not yet expired.
+			if (expiryDate.before(new Date())) {
+				return Verifier.RESULT_STALE;
+			} else {
+				return Verifier.RESULT_VALID;
+			}
 		}
+		return Verifier.RESULT_VALID;
 
 	}
 
@@ -439,5 +446,10 @@ public class CookieUtils {
 		Form f = extractCookieValueAsForm(cookie);
 		return "true".equals(f.getFirstValue(COOKIE_IS_MACHINE, "false"));
 	}
-	
+
+	public static String getRunId(Cookie cookie){
+		Form f = extractCookieValueAsForm(cookie);
+		return f.getFirstValue(COOKIE_RUN_ID, null);
+	}
+
 }

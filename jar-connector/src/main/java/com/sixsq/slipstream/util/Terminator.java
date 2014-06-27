@@ -74,10 +74,6 @@ public class Terminator {
 			terminate(run.getResourceUri());
 		}
 
-		/* else {
-			StateMachine sm = StateMachine.getStateMachine(run);
-			sm.tryAdvanceState(true);
-		}*/
 	}
 
 	public static void terminate(String runResourceUri) throws ValidationException,
