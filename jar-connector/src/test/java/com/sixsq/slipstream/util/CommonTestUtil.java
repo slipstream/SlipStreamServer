@@ -155,9 +155,11 @@ public abstract class CommonTestUtil {
 		Node node;
 
 		node = new Node("node1", imageForDeployment1);
+		node.setCloudService(CommonTestUtil.cloudServiceName);
 		deployment.setNode(node);
 
 		node = new Node("node2", imageForDeployment2);
+		node.setCloudService(CommonTestUtil.cloudServiceName);
 		deployment.setNode(node);
 
 		return deployment.store();

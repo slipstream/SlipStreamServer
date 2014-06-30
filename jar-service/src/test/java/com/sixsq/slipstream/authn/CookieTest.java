@@ -140,16 +140,19 @@ public class CookieTest extends ResourceTestBase {
 
 
 	@Test
-	public void checkMachineCookieBindToOneRun()
-			throws ConfigurationException, ValidationException {
+	public void checkMachineCookieBindToOneRun() throws ConfigurationException, ValidationException {
 
-		Request request = createRequest(Method.GET, "/" + runA.getResourceUri(), cookieRunA);
+		Map<String, Object> attributes = new HashMap<String, Object>();
+
+		attributes.put("uuid", runA.getUuid());
+		Request request = createRequest(attributes, Method.GET, null, null, cookieRunA);
 		request.setClientInfo(getClientInfo());
 		Response response = executeRequest(request, new RunResource());
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		request = createRequest(Method.GET, "/" + runB.getResourceUri(), cookieRunA);
+		attributes.put("uuid", runB.getUuid());
+		request = createRequest(attributes, Method.GET, null, null, cookieRunA);
 		request.setClientInfo(getClientInfo());
 		response = executeRequest(request, new RunResource());
 

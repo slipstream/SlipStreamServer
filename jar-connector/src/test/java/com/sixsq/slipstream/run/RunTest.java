@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -124,7 +124,7 @@ public class RunTest extends RunTestBase {
 		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
 
 		int initialNumberOfParameters = run.getParameters().size();
-		
+
 		String resourceUrl = run.getResourceUri();
 
 		String parameterName = "name";
@@ -162,7 +162,7 @@ public class RunTest extends RunTestBase {
 		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
 
 		int initialNumberOfParameters = run.getParameters().size();
-		
+
 		String resourceUrl = run.getResourceUri();
 
 		String parameterName1 = "p1";
@@ -414,8 +414,10 @@ public class RunTest extends RunTestBase {
 		NodeParameter parameter;
 
 		Node node1 = new Node("node1", image);
+		node1.setCloudService(cloudServiceName);
 		deployment.setNode(node1);
 		Node node2 = new Node("node2", image);
+		node2.setCloudService(cloudServiceName);
 		deployment.setNode(node2);
 
 		parameter = new NodeParameter("pi1", "node2:po1", null);
@@ -466,20 +468,20 @@ public class RunTest extends RunTestBase {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		em.getTransaction().begin();
 		run = Run.load(run.getResourceUri(), em);
-		
+
 		RuntimeParameter globalState = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY);
 		globalState.setValue(state.toString());
 		globalState.store();
-		
+
 		run.setState(state);
 		run.store();
-		
+
 		em.getTransaction().commit();
 		em.close();
-		
+
 		return run;
 	}
-	
+
 	@Test
 	public void purge() throws ConfigurationException, SlipStreamException {
 
@@ -504,7 +506,7 @@ public class RunTest extends RunTestBase {
 		Terminator.purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Done));
-		
+
 		run = setRunState(run, States.Ready);
 		run.getRuntimeParameters().put(
 				RuntimeParameter.GLOBAL_ABORT_KEY,
@@ -515,7 +517,7 @@ public class RunTest extends RunTestBase {
 		Terminator.purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Aborted));
-		
+
 		run.remove();
 	}
 

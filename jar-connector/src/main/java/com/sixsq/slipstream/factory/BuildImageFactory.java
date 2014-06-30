@@ -162,7 +162,7 @@ public class BuildImageFactory extends RunFactory {
 				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
 		String imageId = image.extractBaseImageId(cloudService);
-		run.assignRuntimeParameter(RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
+		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX + RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
 				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
 
 	}
