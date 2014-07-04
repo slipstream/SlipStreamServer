@@ -44,11 +44,8 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
@@ -232,13 +229,14 @@ public class RunNodeResource extends RunBaseResource {
 
 		String instanceName = getNodeInstanceName(newId);
 
-		setCreatingNodeInstance(run, instanceName);
+		//setCreatingNodeInstance(run, instanceName);
 
 		return instanceName;
 	}
 
 	private void createNodeInstanceRuntimeParameters(Run run, Node node,
-			int newId) throws ValidationException {
+			int newId) throws ValidationException, NotFoundException {
+		/*
 		String cloudService = node.getCloudService();
 		List<String> filter = new ArrayList<String>();
 		for (ParameterCategory c : ParameterCategory.values()) {
@@ -256,9 +254,15 @@ public class RunNodeResource extends RunBaseResource {
 				run.assignRuntimeParameter(
 						run.composeParameterName(node, param.getName(), newId),
 						initialValue, param.getDescription(), param.getType());
-				;
 			}
 		}
+		*/
+		String cloudService = node.getCloudService();
+
+		DeploymentFactory.initNodeInstanceState(run, nodename, newId, cloudService);
+		DeploymentFactory.initNodeInstanceRuntimeParameters(run, node);
+
+		//TODO: LS: check this part
 		// add mapping parameters
 		for (NodeParameter param : node.getParameterMappings().values()) {
 			if (!param.isStringValue()) {
@@ -313,18 +317,21 @@ public class RunNodeResource extends RunBaseResource {
 	private int addNodeInstanceIndex(Run run) throws NotFoundException,
 			AbortException, ValidationException {
 
-		List<String> nodeIds = Arrays.asList(getNodeInstanceIndices(run).split(
-				"\\s*,\\s*"));
+		List<String> nodeIds = Arrays.asList(getNodeInstanceIndices(run).split("\\s*,\\s*"));
 		List<Integer> nodeIdsInt = new ArrayList<Integer>();
 		for (String id : nodeIds) {
 			nodeIdsInt.add(Integer.parseInt(id));
 		}
 		Collections.sort(nodeIdsInt);
+
 		int last = nodeIdsInt.get(nodeIdsInt.size() - 1);
 		int newId = last + 1;
+
 		nodeIdsInt.add(newId);
 		String newNodeIds = StringUtils.join(nodeIdsInt, ",");
+
 		setNodeInstanceIndices(run, newNodeIds);
+
 		return newId;
 	}
 

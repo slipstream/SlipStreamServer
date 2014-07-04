@@ -39,7 +39,6 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
@@ -56,16 +55,13 @@ public class DeploymentFactory extends RunFactory {
 	}
 
 	@Override
-	protected void initialize(Module module, Run run, User user, String cloudService)
+	protected void init(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
 
-		super.initialize(module, run, user, cloudService);
-
 		initializeNodeRunParameters(run);
-		initializeOrchestrtorRuntimeParameters(run);
-		initOrchestratorsNodeNames(run);
-		initNodeInstanceRuntimeParameters(run);
-		initNodeRuntimeParameters(run);
+		//initializeOrchestratorRuntimeParameters(run);
+		initNodesInstancesRuntimeParameters(run);
+		initNodesRuntimeParameters(run);
 	}
 
 	@Override
@@ -81,8 +77,7 @@ public class DeploymentFactory extends RunFactory {
 
 	private static void checkIsDeploymentModule(Run run) throws ValidationException {
 		if (!(run.getModule() instanceof DeploymentModule)) {
-			throw new ValidationException(
-					"Only deployment modules can be deployed");
+			throw new ValidationException("Only deployment modules can be deployed");
 		}
 	}
 
@@ -96,8 +91,7 @@ public class DeploymentFactory extends RunFactory {
 					node.getCloudService(), run);
 			ImageModule image = node.getImage();
 			if (image == null) {
-				throw new ValidationException("Unknown image: "
-						+ node.getImageUri());
+				throw new ValidationException("Unknown image: " + node.getImageUri());
 			}
 
 			try {
@@ -137,7 +131,7 @@ public class DeploymentFactory extends RunFactory {
 		}
 	}
 
-	private static void initNodeInstanceRuntimeParameters(Run run) throws ValidationException,
+	private static void initNodesInstancesRuntimeParameters(Run run) throws ValidationException,
 			NotFoundException {
 
 		List<String> filter = new ArrayList<String>();
@@ -149,22 +143,7 @@ public class DeploymentFactory extends RunFactory {
 
 		for (Node node : deployment.getNodes().values()) {
 			run = initNodeInstancesState(node, run);
-			String cloudService = node.getCloudService();
-
-			ImageModule image = node.getImage();
-
-			String imageId = image.extractBaseImageId(cloudService);
-			run.createRuntimeParameter(node, RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
-					RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
-
-			for (ModuleParameter param : image.getParameterList()) {
-				String category = param.getCategory();
-				if (filter.contains(category) || cloudService.equals(category))	{
-					String initialValue = extractInitialValue(param, node);
-					run.createRuntimeParameter(node, param.getName(), initialValue,
-							param.getDescription(), param.getType());
-				}
-			}
+			initNodeInstanceRuntimeParameters(run, node);
 		}
 
 		// mapping
@@ -181,7 +160,37 @@ public class DeploymentFactory extends RunFactory {
 
 	}
 
-	private static void initNodeRuntimeParameters(Run run) throws ValidationException {
+	public static void initNodeInstanceRuntimeParameters(Run run, Node node)
+			throws ValidationException, NotFoundException {
+
+		List<String> filter = new ArrayList<String>();
+		for (ParameterCategory c : ParameterCategory.values()) {
+			filter.add(c.toString());
+		}
+
+		String cloudService = node.getCloudService();
+		ImageModule image = node.getImage();
+
+		String imageId = image.extractBaseImageId(cloudService);
+		run.createRuntimeParameter(node, RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
+				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION);
+
+		run.createRuntimeParameter(node,
+				RuntimeParameter.SCALE_STATE_KEY,
+				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
+				RuntimeParameter.SCALE_STATE_DESCRIPTION);
+
+		for (ModuleParameter param : image.getParameterList()) {
+			String category = param.getCategory();
+			if (filter.contains(category) || cloudService.equals(category))	{
+				String initialValue = extractInitialValue(param, node);
+				run.createRuntimeParameter(node, param.getName(), initialValue,
+						param.getDescription(), param.getType());
+			}
+		}
+	}
+
+	private static void initNodesRuntimeParameters(Run run) throws ValidationException {
 
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 		for (Node node : deployment.getNodes().values()) {
@@ -211,8 +220,7 @@ public class DeploymentFactory extends RunFactory {
 	}
 
 	public static void addParameterMapping(Run run, NodeParameter param, int i) {
-		String name = insertMultiplicityIndexInParameterName(param.getValue(),
-				1);
+		String name = insertMultiplicityIndexInParameterName(param.getValue(), 1);
 		RuntimeParameter input = run.getRuntimeParameters().get(name);
 		input.setMapsOthers(true);
 		input.addMappedRuntimeParameterName(insertMultiplicityIndexInParameterName(

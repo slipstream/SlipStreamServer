@@ -132,7 +132,7 @@ public abstract class RunFactory {
 		}
 	}
 
-	protected void initialize(Module module, Run run, User user, String cloudService)
+	protected final void initialize(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
 
 		run = addOnSuccessRunForeverToParameters(run, user);
@@ -144,7 +144,15 @@ public abstract class RunFactory {
 		initializeGlobalParameters(run);
 		initCloudServices(run);
 
+		init(module, run, user, cloudService);
+
+		initializeOrchestratorRuntimeParameters(run);
+		initOrchestratorsNodeNames(run);
+
 	}
+
+	protected abstract void init(Module module, Run run, User user, String cloudService)
+			throws ValidationException, NotFoundException;
 
 	protected void initCloudServices(Run run) throws ValidationException {
 		run.setCloudServiceNames(run.getCloudService());
@@ -261,7 +269,7 @@ public abstract class RunFactory {
 		return module;
 	}
 
-	protected void initializeOrchestrtorRuntimeParameters(Run run)
+	protected void initializeOrchestratorRuntimeParameters(Run run)
 			throws ValidationException {
 
 		if (withOrchestrator(run)) {
@@ -370,10 +378,6 @@ public abstract class RunFactory {
 				RuntimeParameter.IS_ORCHESTRATOR_KEY), "false",
 				RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.SCALE_STATE_KEY),
-				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
-				RuntimeParameter.SCALE_STATE_DESCRIPTION);
     }
 
 	protected void initOrchestratorsNodeNames(Run run)

@@ -515,7 +515,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Column(length=65536)
 	@Attribute
 	private String nodeNames = "";
-	private static final String NODE_NAMES_SEPARATOR = ", ";
+	private static final String NODE_NAMES_SEPARATOR = ",";
 
 	/**
 	 * Comma separated list of nodes, including the associated orchestror name -
@@ -705,6 +705,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public void createRuntimeParameter(Node node, String key, String value)
 			throws ValidationException {
 		createRuntimeParameter(node, key, value, "", ParameterType.String);
+	}
+
+	public void createRuntimeParameter(Node node, String key, String value, String description)
+			throws ValidationException {
+		createRuntimeParameter(node, key, value, description, ParameterType.String);
 	}
 
 	public void createRuntimeParameter(Node node, String key, String value,
