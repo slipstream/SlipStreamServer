@@ -39,6 +39,7 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -48,10 +49,11 @@ import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.statemachine.States;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class RunNodeResource extends RunBaseResource {
 
@@ -125,6 +127,11 @@ public class RunNodeResource extends RunBaseResource {
 			incrementNodeMultiplicityOnRun(noOfInst, run);
 			udpateRunState(run);
 
+			if (Configuration.isQuotaEnabled()) {
+				User user = User.loadByName(run.getUser());
+				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
+			}
+
 			transaction.commit();
 		} catch (Exception ex) {
 			if (transaction.isActive()) {
@@ -157,15 +164,13 @@ public class RunNodeResource extends RunBaseResource {
 						"Provide list of node instance IDs to be removed from the Run.");
 			} else {
 				String cloudServiceName = getCloudServiceName(run);
-				List<String> instanceIds = Arrays
-						.asList(ids.split("\\s*,\\s*"));
+				List<String> instanceIds = Arrays.asList(ids.split("\\s*,\\s*"));
 				for (String _id : instanceIds) {
 					int id = Integer.parseInt(_id);
 					setRemovingNodeInstance(run, getNodeInstanceName(id));
 
-					// remove instances with id
 					String instanceName = getNodeInstanceName(id);
-					run.removeNodeName(instanceName, cloudServiceName);
+					run.removeNodeInstanceName(instanceName, cloudServiceName);
 				}
 				// update instance ids
 				removeNodeInstanceIndices(run, instanceIds);
@@ -223,7 +228,7 @@ public class RunNodeResource extends RunBaseResource {
 	private String createNodeInstanceOnRun(Run run, Node node)
 			throws NotFoundException, AbortException, ValidationException {
 
-		int newId = addNodeInstanceIndex(run);
+		int newId = addNodeInstanceIndex(run, node);
 
 		createNodeInstanceRuntimeParameters(run, node, newId);
 
@@ -257,10 +262,7 @@ public class RunNodeResource extends RunBaseResource {
 			}
 		}
 		*/
-		String cloudService = node.getCloudService();
-
-		DeploymentFactory.initNodeInstanceState(run, nodename, newId, cloudService);
-		DeploymentFactory.initNodeInstanceRuntimeParameters(run, node);
+		DeploymentFactory.initNodeInstanceRuntimeParameters(run, node, newId);
 
 		//TODO: LS: check this part
 		// add mapping parameters
@@ -314,31 +316,24 @@ public class RunNodeResource extends RunBaseResource {
 		}
 	}
 
-	private int addNodeInstanceIndex(Run run) throws NotFoundException,
+	private int addNodeInstanceIndex(Run run, Node node) throws NotFoundException,
 			AbortException, ValidationException {
 
-		List<String> nodeIds = Arrays.asList(getNodeInstanceIndices(run).split("\\s*,\\s*"));
-		List<Integer> nodeIdsInt = new ArrayList<Integer>();
-		for (String id : nodeIds) {
-			nodeIdsInt.add(Integer.parseInt(id));
+		String ids = getNodeInstanceIndices(run);
+
+		String key = run.nodeRuntimeParameterKeyName(node, RunParameter.NODE_INCREMENT_KEY);
+		RunParameter nodeInscrement = run.getParameter(key);
+
+		int newId = Integer.parseInt(nodeInscrement.getValue("0"));
+		nodeInscrement.setValue(String.valueOf(newId + 1));
+
+		if (!ids.isEmpty()) {
+			ids += ",";
 		}
-		Collections.sort(nodeIdsInt);
-
-		int last = nodeIdsInt.get(nodeIdsInt.size() - 1);
-		int newId = last + 1;
-
-		nodeIdsInt.add(newId);
-		String newNodeIds = StringUtils.join(nodeIdsInt, ",");
-
-		setNodeInstanceIndices(run, newNodeIds);
+		ids += newId;
+		setNodeInstanceIndices(run, ids);
 
 		return newId;
-	}
-
-	private void setCreatingNodeInstance(Run run, String instanceName)
-			throws NotFoundException, ValidationException {
-		setScaleActionOnNodeInstance(run, instanceName,
-				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE);
 	}
 
 	private void setRemovingNodeInstance(Run run, String instanceName)
@@ -352,9 +347,17 @@ public class RunNodeResource extends RunBaseResource {
 				instanceName, RuntimeParameter.SCALE_STATE_KEY), action);
 	}
 
-	private String getNodeInstanceIndices(Run run) throws NotFoundException,
-			AbortException {
+	private String getNodeInstanceIndices(Run run) throws NotFoundException, AbortException {
 		return run.getRuntimeParameterValue(nodeIndicesRuntimeParam);
+	}
+
+	private boolean isSetNodeInstanceIndices(Run run) throws NotFoundException, AbortException {
+		boolean result = false;
+		RuntimeParameter rt = run.getRuntimeParameters().get(nodeIndicesRuntimeParam);
+		if (rt != null) {
+			result = rt.isSet();
+		}
+		return result;
 	}
 
 	private void setNodeInstanceIndices(Run run, String indices)

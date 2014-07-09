@@ -76,10 +76,12 @@ public class StateMachine {
 		key = nodePrefix + RuntimeParameter.IS_ORCHESTRATOR_KEY;
 		RuntimeParameter isOrchestrator = run.getRuntimeParameters().get(key);
 
+		key = nodePrefix + RuntimeParameter.SCALE_STATE_KEY;
+		RuntimeParameter scaleState = run.getRuntimeParameters().get(key);
+
 		RuntimeParameter state = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY);
 
-		ExtrinsicState extrinsicState = new ExtrinsicState(completed, failing,
-				isOrchestrator, state);
+		ExtrinsicState extrinsicState = new ExtrinsicState(completed, failing, isOrchestrator, state, scaleState);
 		return extrinsicState;
 	}
 
@@ -92,7 +94,8 @@ public class StateMachine {
 				.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY);
 
 		ExtrinsicState globalExtrinsicState = new ExtrinsicState(
-				globalCompleteRuntimeParameter, globalFailingRuntimeParameter,
+				globalCompleteRuntimeParameter,
+				globalFailingRuntimeParameter,
 				globalStateRuntimeParameter);
 		return globalExtrinsicState;
 	}
@@ -300,8 +303,10 @@ public class StateMachine {
 
 		if (globalState.synchronizedForEveryone() || onlyOrch) {
 			for (Map.Entry<String, State> node : nodeStates.entrySet()) {
-				if ((!onlyOrch && !recoveryMode) ||
-					((onlyOrch || recoveryMode) && node.getValue().isOrchestrator())) {
+				if (!node.getValue().isRemoved() &&
+					((!onlyOrch && !recoveryMode) ||
+					((onlyOrch || recoveryMode) && node.getValue().isOrchestrator()))
+				) {
 					checkStateCompleted(node.getKey());
 				}
 			}

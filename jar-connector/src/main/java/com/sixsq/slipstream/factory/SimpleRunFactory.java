@@ -49,7 +49,7 @@ public class SimpleRunFactory extends BuildImageFactory {
 
 	@Override
 	protected void initNodeNames(Run run, String cloudService) {
-		run.addNodeName(Run.MACHINE_NAME, cloudService);
+		run.addNodeInstanceName(Run.MACHINE_NAME, cloudService);
 		run.addGroup(Run.MACHINE_NAME, cloudService);
 	}
 

@@ -58,7 +58,7 @@ public class DeploymentFactory extends RunFactory {
 	protected void init(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
 
-		initializeNodeRunParameters(run);
+		initNodeRunParameters(run);
 		//initializeOrchestratorRuntimeParameters(run);
 		initNodesInstancesRuntimeParameters(run);
 		initNodesRuntimeParameters(run);
@@ -87,8 +87,7 @@ public class DeploymentFactory extends RunFactory {
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 
 		for (Node node : deployment.getNodes().values()) {
-			String cloudServiceName = getEffectiveCloudServiceName(
-					node.getCloudService(), run);
+			String cloudServiceName = run.getEffectiveCloudServiceName(node);
 			ImageModule image = node.getImage();
 			if (image == null) {
 				throw new ValidationException("Unknown image: " + node.getImageUri());
@@ -142,8 +141,10 @@ public class DeploymentFactory extends RunFactory {
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 
 		for (Node node : deployment.getNodes().values()) {
-			run = initNodeInstancesState(node, run);
-			initNodeInstanceRuntimeParameters(run, node);
+			for (int i = 1; i <= node.getMultiplicity(); i++) {
+				initNodeInstanceRuntimeParameters(run, node, i);
+			}
+			run.addGroup(node.getName(), run.getEffectiveCloudServiceName(node));
 		}
 
 		// mapping
@@ -160,34 +161,73 @@ public class DeploymentFactory extends RunFactory {
 
 	}
 
-	public static void initNodeInstanceRuntimeParameters(Run run, Node node)
+	public static Run initNodeInstanceRuntimeParameters(Run run, Node node, int nodeInstanceId)
 			throws ValidationException, NotFoundException {
+
+		String cloudServiceName = run.getEffectiveCloudServiceName(node);
+
+		initNodeInstanceCommonRuntimeParameters(run, node, nodeInstanceId);
+
+		run.createRuntimeParameter(node, nodeInstanceId,
+				RuntimeParameter.NODE_NAME_KEY, node.getName(),
+				RuntimeParameter.NODE_NAME_DESCRIPTION);
+
+		run.createRuntimeParameter(node, nodeInstanceId,
+				RuntimeParameter.NODE_ID_KEY, String.valueOf(nodeInstanceId),
+				RuntimeParameter.NODE_ID_DESCRIPTION);
+
+		run.createRuntimeParameter(node, nodeInstanceId,
+				RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
+				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+
+		ImageModule image = node.getImage();
+		String imageId = image.extractBaseImageId(cloudServiceName);
+		run.createRuntimeParameter(node, nodeInstanceId,
+				RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
+				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION);
+
+		run.createRuntimeParameter(node, nodeInstanceId,
+				RuntimeParameter.SCALE_STATE_KEY,
+				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
+				RuntimeParameter.SCALE_STATE_DESCRIPTION);
+
+		run = initNodeInstanceRuntimeParametersFromCloudParameters(run, node, nodeInstanceId);
+
+		run.addNodeInstanceName(node, nodeInstanceId);
+
+		return run;
+	}
+
+	public static void initNodeInstanceCommonRuntimeParameters(Run run, Node node, int nodeInstanceId)
+			throws ValidationException {
+		assignRuntimeParameters(run, Run.composeNodeInstanceName(node, nodeInstanceId));
+	}
+
+
+	private static Run initNodeInstanceRuntimeParametersFromCloudParameters(Run run, Node node, int nodeInstanceId)
+			throws ValidationException {
 
 		List<String> filter = new ArrayList<String>();
 		for (ParameterCategory c : ParameterCategory.values()) {
 			filter.add(c.toString());
 		}
 
-		String cloudService = node.getCloudService();
+		String cloudService = run.getEffectiveCloudServiceName(node);
 		ImageModule image = node.getImage();
-
-		String imageId = image.extractBaseImageId(cloudService);
-		run.createRuntimeParameter(node, RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
-				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION);
-
-		run.createRuntimeParameter(node,
-				RuntimeParameter.SCALE_STATE_KEY,
-				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
-				RuntimeParameter.SCALE_STATE_DESCRIPTION);
 
 		for (ModuleParameter param : image.getParameterList()) {
 			String category = param.getCategory();
 			if (filter.contains(category) || cloudService.equals(category))	{
 				String initialValue = extractInitialValue(param, node);
-				run.createRuntimeParameter(node, param.getName(), initialValue,
-						param.getDescription(), param.getType());
+				run.createRuntimeParameter(node, nodeInstanceId,
+						param.getName(),
+						initialValue,
+						param.getDescription(),
+						param.getType());
 			}
 		}
+
+		return run;
 	}
 
 	private static void initNodesRuntimeParameters(Run run) throws ValidationException {
@@ -240,47 +280,6 @@ public class DeploymentFactory extends RunFactory {
 				+ index + RuntimeParameter.NODE_PROPERTY_SEPARATOR + parts[1];
 	}
 
-	private static Run initNodeInstancesState(Node node, Run run)
-			throws ValidationException, NotFoundException {
-
-		int multiplicity = node.getMultiplicity();
-		String cloudServiceName = getEffectiveCloudServiceName(
-				node.getCloudService(), run);
-
-		for (int i = 1; i <= multiplicity; i++) {
-			initNodeInstanceState(run, node.getName(), i, cloudServiceName);
-		}
-
-		run.addGroup(node.getName(), cloudServiceName);
-
-		return run;
-	}
-
-	public static void initNodeInstanceState(Run run, String nodename,
-			int index, String cloudServiceName) throws ValidationException {
-
-		String instanceName = constructNodeInstanceName(nodename, index);
-		assignRuntimeParameters(run, instanceName);
-		run.assignRuntimeParameter(
-				constructParamName(instanceName, RuntimeParameter.NODE_NAME),
-				nodename, "Nodename");
-		run.assignRuntimeParameter(
-				constructParamName(instanceName, RuntimeParameter.NODE_INDEX),
-				String.valueOf(index), "Node instance index");
-
-		run.assignRuntimeParameter(
-				constructParamName(instanceName,
-						RuntimeParameter.CLOUD_SERVICE_NAME),
-				cloudServiceName,
-				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-
-		run.addNodeName(instanceName, cloudServiceName);
-	}
-
-	private static String constructNodeInstanceName(String groupname, int index) {
-		return RuntimeParameter.constructNodeInstanceName(groupname, index);
-	}
-
 	private static String constructParamName(String nodename, String paramname) {
 		return RuntimeParameter.constructParamName(nodename, paramname);
 	}
@@ -324,24 +323,27 @@ public class DeploymentFactory extends RunFactory {
 		return deployment;
 	}
 
-	protected static void initializeNodeRunParameters(Run run)
+	protected static void initNodeRunParameters(Run run)
 			throws ValidationException {
 
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 		for (Node node : deployment.getNodes().values()) {
 
-			String nodeRunParameterKeyName = run
-					.nodeRuntimeParameterKeyName(node,
-							RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
-			run.setParameter(new RunParameter(nodeRunParameterKeyName,
+			String key = run.nodeRuntimeParameterKeyName(node, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+			run.setParameter(new RunParameter(key,
 					String.valueOf(node.getMultiplicity()),
 					RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION));
 
-			nodeRunParameterKeyName = run.nodeRuntimeParameterKeyName(node,
-					RuntimeParameter.CLOUD_SERVICE_NAME);
-			run.setParameter(new RunParameter(nodeRunParameterKeyName,
+			key = run.nodeRuntimeParameterKeyName(node, RuntimeParameter.CLOUD_SERVICE_NAME);
+			run.setParameter(new RunParameter(key,
 					String.valueOf(node.getCloudService()),
 					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
+
+			key = run.nodeRuntimeParameterKeyName(node, RunParameter.NODE_INCREMENT_KEY);
+			run.setParameter(new RunParameter(key,
+					String.valueOf(node.getMultiplicity() + 1),
+					RunParameter.NODE_INCREMENT_DESCRIPTION));
+
 		}
 	}
 
@@ -365,8 +367,7 @@ public class DeploymentFactory extends RunFactory {
 		HashSet<String> cloudServicesList = new HashSet<String>();
 		for (Node n : getNodes(run).values()) {
 			String cloudServiceName = n.getCloudService();
-			cloudServicesList.add(getEffectiveCloudServiceName(
-					cloudServiceName, run));
+			cloudServicesList.add(run.getEffectiveCloudServiceName(cloudServiceName));
 		}
 		return cloudServicesList;
 	}

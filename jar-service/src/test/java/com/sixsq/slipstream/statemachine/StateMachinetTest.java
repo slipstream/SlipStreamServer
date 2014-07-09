@@ -199,7 +199,7 @@ public class StateMachinetTest {
 	private Run updateRun(String[] nodes) throws ValidationException {
 		for (String node : nodes) {
 			RunFactory.assignRuntimeParameters(run, node);
-			run.addNodeName(node, "dummy");
+			run.addNodeInstanceName(node, "dummy");
 		}
 		run = run.store();
 		return run;

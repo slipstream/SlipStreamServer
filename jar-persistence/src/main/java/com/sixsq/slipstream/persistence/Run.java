@@ -702,40 +702,29 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return abort.isSet();
 	}
 
-	public void createRuntimeParameter(Node node, String key, String value)
+	public void createRuntimeParameter(Node node, int nodeInstanceId, String key, String value)
 			throws ValidationException {
-		createRuntimeParameter(node, key, value, "", ParameterType.String);
+		createRuntimeParameter(node, nodeInstanceId, key, value, "", ParameterType.String);
 	}
 
-	public void createRuntimeParameter(Node node, String key, String value, String description)
+	public void createRuntimeParameter(Node node, int nodeInstanceId, String key, String value, String description)
 			throws ValidationException {
-		createRuntimeParameter(node, key, value, description, ParameterType.String);
+		createRuntimeParameter(node, nodeInstanceId, key, value, description, ParameterType.String);
 	}
 
-	public void createRuntimeParameter(Node node, String key, String value,
+	public void createRuntimeParameter(Node node, int nodeInstanceId, String key, String value,
 			String description, ParameterType type) throws ValidationException {
 
-		// We only test for the first one
-		String parameterName = composeParameterName(node, key, 1);
-		if (parametersContainKey(parameterName)) {
-			throw new ValidationException("Parameter " + parameterName
-					+ " already exists in node " + node.getName());
-		}
-
-		for (int i = 1; i <= node.getMultiplicity(); i++) {
-			assignRuntimeParameter(composeParameterName(node, key, i), value,
-					description, type);
-		}
+		String parameterName = composeNodeInstanceParameterName(node, nodeInstanceId, key);
+		assignRuntimeParameter(parameterName, value, description, type);
 	}
 
-	public String composeParameterName(Node node, String key, int i) {
-		return composeNodeName(node, i)
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR + key;
+	public static String composeNodeInstanceParameterName(Node node, int nodeInstanceId, String key) {
+		return composeNodeInstanceName(node, nodeInstanceId) + RuntimeParameter.NODE_PROPERTY_SEPARATOR + key;
 	}
 
-	private String composeNodeName(Node node, int i) {
-		return node.getName()
-				+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + i;
+	public static String composeNodeInstanceName(Node node, int nodeInstanceId) {
+		return RuntimeParameter.constructNodeInstanceName(node.getName(), nodeInstanceId);
 	}
 
 	public Date getStart() {
@@ -768,11 +757,26 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return new Date();
 	}
 
-	public void addNodeName(String node, String cloudServiceName) {
+	public String getEffectiveCloudServiceName(Node node) {
+		return getEffectiveCloudServiceName(node.getCloudService());
+	}
+
+	public String getEffectiveCloudServiceName(String cloudService) {
+		return isDefaultCloudService(cloudService) ? getCloudService() : cloudService;
+	}
+
+	public void addNodeInstanceName(Node node, int nodeInstanceId) {
+		String nodeInstanceName = composeNodeInstanceName(node, nodeInstanceId);
+		String cloudServiceName = getEffectiveCloudServiceName(node);
+
+		addNodeInstanceName(nodeInstanceName, cloudServiceName);
+	}
+
+	public void addNodeInstanceName(String nodeInstanceName, String cloudServiceName) {
 		List<String> nodeNamesList = new ArrayList<String>(getNodeNameList());
 		nodeNamesList.remove("");
-		if (!nodeNamesList.contains(node)) {
-			nodeNamesList.add(node);
+		if (!nodeNamesList.contains(nodeInstanceName)) {
+			nodeNamesList.add(nodeInstanceName);
 			nodeNames = StringUtils.join(nodeNamesList, NODE_NAMES_SEPARATOR);
 
 			Integer nb = cloudServiceUsage.get(cloudServiceName);
@@ -783,13 +787,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 	}
 
-	public void removeNodeName(String nodeInstanceName, String cloudServiceName) {
-		List<String> nodeNamesList = new ArrayList<String>(getNodeNameList());
+	public void removeNodeInstanceName(String nodeInstanceName, String cloudServiceName) {
+		/*List<String> nodeNamesList = new ArrayList<String>(getNodeNameList());
 		while (nodeNamesList.contains(nodeInstanceName)) {
 			nodeNamesList.remove(nodeInstanceName);
 		}
 		nodeNames = StringUtils.join(nodeNamesList, NODE_NAMES_SEPARATOR);
-
+		*/
 		Integer nb = cloudServiceUsage.get(cloudServiceName);
 		if (nb != null && nb > 0){
 			cloudServiceUsage.put(cloudServiceName, nb - 1);
@@ -853,12 +857,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 		if (key == null) {
 			throw new ValidationException("Key cannot be null");
 		}
+
 		if (runtimeParameters.containsKey(key)) {
-			throw new ValidationException("Key " + key
-					+ " already exists, cannot re-define");
+			throw new ValidationException("Key " + key + " already exists, cannot re-define");
 		}
-		RuntimeParameter parameter = new RuntimeParameter(this, key, value,
-				description);
+
+		RuntimeParameter parameter = new RuntimeParameter(this, key, value, description);
 
 		parameter.setType(type);
 		runtimeParameters.put(key, parameter);
@@ -950,15 +954,16 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void addGroup(String group, String serviceName) {
-		this.groups += serviceName + SERVICENAME_NODENAME_SEPARATOR + group
-				+ ", ";
+		if (!this.groups.isEmpty()) {
+			this.groups += Run.NODE_NAMES_SEPARATOR;
+		}
+		this.groups += serviceName + SERVICENAME_NODENAME_SEPARATOR + group;
 	}
 
 	@Attribute
 	@Column(length=1024)
 	public String getGroups() {
-		getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY)
-				.setValue(groups);
+		getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY).setValue(groups);
 		return groups;
 	}
 
@@ -985,7 +990,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public List<String> getGroupNameList() {
-		return Arrays.asList(getGroups().split(", "));
+		return Arrays.asList(getGroups().split(","));
 	}
 
 	private void populateDeploymentModule(DeploymentModule deployment)
@@ -1005,10 +1010,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 	}
 
-	public String nodeRuntimeParameterKeyName(Node node,
-			String nodeParameterName) {
-		return node.getName() + NODE_NAME_PARAMETER_SEPARATOR
-				+ nodeParameterName;
+	public String nodeRuntimeParameterKeyName(Node node, String nodeParameterName) {
+		return node.getName() + NODE_NAME_PARAMETER_SEPARATOR + nodeParameterName;
 	}
 
 	private void populateImageModule(ImageModule image)

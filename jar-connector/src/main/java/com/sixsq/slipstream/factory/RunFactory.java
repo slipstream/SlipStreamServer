@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.connector.CloudService;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.ConnectorFactory;
@@ -336,6 +335,8 @@ public abstract class RunFactory {
 
 		// Hack: hardcode the cpu and ram
 		// need to get this from the connector?
+		// LS: Metering doesn't use these values anymore
+		/*
 		String defaultOrchestratorCpuRam = "1";
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				Run.CPU_PARAMETER_NAME), defaultOrchestratorCpuRam,
@@ -343,6 +344,7 @@ public abstract class RunFactory {
         run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
                 Run.RAM_PARAMETER_NAME), defaultOrchestratorCpuRam,
                 Run.RAM_PARAMETER_DESCRIPTION);
+        */
     }
 
 	/**
@@ -357,19 +359,23 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.STATE_CUSTOM_KEY), "",
 				RuntimeParameter.STATE_CUSTOM_DESCRIPTION);
+
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.STATE_VM_KEY), "",
 				RuntimeParameter.STATE_VM_DESCRIPTION);
+
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.ABORT_KEY), "",
 				RuntimeParameter.ABORT_DESCRIPTION);
+
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.COMPLETE_KEY),
-				"false", RuntimeParameter.COMPLETE_DESCRIPTION);
+				RuntimeParameter.COMPLETE_KEY), "false",
+				RuntimeParameter.COMPLETE_DESCRIPTION);
 
         run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
         		RuntimeParameter.URL_SSH_KEY), "",
                 RuntimeParameter.URL_SSH_DESCRIPTION);
+
         run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
         		RuntimeParameter.URL_SERVICE_KEY), "",
                 RuntimeParameter.URL_SERVICE_DESCRIPTION);
@@ -386,7 +392,7 @@ public abstract class RunFactory {
 		if (withOrchestrator(run)){
 			for (String cloudServiceName : cloudServiceList) {
 				String nodename = Run.constructOrchestratorName(cloudServiceName);
-				run.addNodeName(nodename, cloudServiceName);
+				run.addNodeInstanceName(nodename, cloudServiceName);
 				run.assignRuntimeParameter(nodename
 						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 						+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
@@ -408,12 +414,6 @@ public abstract class RunFactory {
 		}
 
 		return cloudServicesList;
-	}
-
-	public static String getEffectiveCloudServiceName(String cloudService,
-			Run run) {
-		return CloudService.isDefaultCloudService(cloudService) ? run
-				.getCloudService() : cloudService;
 	}
 
 	public static Properties describeInstances(User user, Run run)

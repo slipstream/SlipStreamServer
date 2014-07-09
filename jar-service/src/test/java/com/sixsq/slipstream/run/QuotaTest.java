@@ -79,7 +79,7 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
+		run1.addNodeInstanceName("node1", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -96,8 +96,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
+		run1.addNodeInstanceName("node1", cloud);
+		run1.addNodeInstanceName("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -113,8 +113,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
+		run1.addNodeInstanceName("node1", cloud);
+		run1.addNodeInstanceName("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -130,8 +130,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
+		run1.addNodeInstanceName("node1", cloud);
+		run1.addNodeInstanceName("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -147,8 +147,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
+		run1.addNodeInstanceName("node1", cloud);
+		run1.addNodeInstanceName("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}

@@ -159,11 +159,22 @@ public class RuntimeParameter extends Metadata {
 	private static final Pattern NAME_PATTERN = Pattern
 			.compile("\\w[\\w\\d\\.-]*");
 
-	public static final String NODE_NAME = "nodename";
-	public static final String NODE_INDEX = "index";
+	public static final String NODE_NAME_KEY = "nodename";
+	public static final String NODE_NAME_DESCRIPTION = "Nodename";
+	public static final String NODE_ID_KEY = "id";
+	public static final String NODE_ID_DESCRIPTION = "Node instance id";
+
+	public enum ScaleStates {
+	    creating,
+	    created,
+	    operational,
+	    removing,
+	    removed,
+	    gone
+	}
 
 	public static final String SCALE_STATE_KEY = "scale.state";
-	public static final String SCALE_STATE_DEFAULT_VALUE = "creating";
+	public static final String SCALE_STATE_DEFAULT_VALUE = ScaleStates.creating.name();
 	public static final String SCALE_STATE_DESCRIPTION = "Defined scalability state";
 
 	public static String extractNodeNamePart(String name) {
@@ -180,21 +191,19 @@ public class RuntimeParameter extends Metadata {
 		return name.split(NODE_PROPERTY_SEPARATOR)[1];
 	}
 
-	public static String constructParamName(String nodename, String paramname) {
-		String prefix = nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+	public static String constructParamName(String nodeName, String paramname) {
+		String prefix = nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 		return prefix + paramname;
 	}
 
-	public static String constructParamName(String groupname, int index,
-			String paramname) {
-		String prefix = constructNodeInstanceName(groupname, index)
+	public static String constructParamName(String nodeName, int nodeInstanceId, String paramname) {
+		String prefix = constructNodeInstanceName(nodeName, nodeInstanceId)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 		return prefix + paramname;
 	}
 
-	public static String constructNodeInstanceName(String groupname, int index) {
-		return groupname + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR
-				+ index;
+	public static String constructNodeInstanceName(String nodeName, int nodeInstanceId) {
+		return nodeName + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + nodeInstanceId;
 	}
 
 	@Id
