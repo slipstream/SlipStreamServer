@@ -162,7 +162,7 @@ public class BuildImageFactory extends RunFactory {
 		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX + RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
 				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(Run.MACHINE_NAME_PREFIX,
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(Run.MACHINE_NAME,
 				RuntimeParameter.SCALE_STATE_KEY),
 				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
 				RuntimeParameter.SCALE_STATE_DESCRIPTION);

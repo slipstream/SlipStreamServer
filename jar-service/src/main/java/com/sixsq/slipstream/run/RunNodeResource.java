@@ -351,15 +351,6 @@ public class RunNodeResource extends RunBaseResource {
 		return run.getRuntimeParameterValue(nodeIndicesRuntimeParam);
 	}
 
-	private boolean isSetNodeInstanceIndices(Run run) throws NotFoundException, AbortException {
-		boolean result = false;
-		RuntimeParameter rt = run.getRuntimeParameters().get(nodeIndicesRuntimeParam);
-		if (rt != null) {
-			result = rt.isSet();
-		}
-		return result;
-	}
-
 	private void setNodeInstanceIndices(Run run, String indices)
 			throws ValidationException, NotFoundException {
 		run.updateRuntimeParameter(nodeIndicesRuntimeParam, indices);
