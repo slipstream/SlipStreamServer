@@ -4,7 +4,6 @@ import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.connector.local.LocalConnector;
-import com.sixsq.slipstream.connector.stratuslab.StratusLabUserParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;

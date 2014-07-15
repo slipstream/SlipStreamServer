@@ -9,9 +9,9 @@ package com.sixsq.slipstream.stats;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,7 +32,6 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.measurements.Measurement;
 import com.sixsq.slipstream.measurements.Measurements;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
@@ -127,6 +126,7 @@ public class MeasurementsTest extends RunTestBase {
 
 		assertEquals(4, ms.getMeasurments().size());
 
+		/* CPU and RAM currently disabled
 		// first orchestrator
 		Measurement m = ms.getMeasurments().get(0);
 
@@ -144,6 +144,7 @@ public class MeasurementsTest extends RunTestBase {
 
 		assertEquals(2, m.getCpu());
 		assertEquals(4, m.getRam());
+		*/
 	}
 
 	@Test
@@ -157,6 +158,7 @@ public class MeasurementsTest extends RunTestBase {
 		// 2 x (2 VMs + 1 orchestrator)
 		assertEquals(6, ms.getMeasurments().size());
 
+		/* CPU and RAM currently disabled
 		Measurement m = ms.getMeasurments().get(0);
 
 		assertEquals(1, m.getCpu());
@@ -171,6 +173,7 @@ public class MeasurementsTest extends RunTestBase {
 
 		assertEquals(44, m.getCpu());
 		assertEquals(88, m.getRam());
+		*/
 	}
 
 	@Test
@@ -183,10 +186,12 @@ public class MeasurementsTest extends RunTestBase {
 
 		assertEquals(2, ms.getMeasurments().size());
 
+		/* CPU and RAM currently disabled
 		Measurement m = ms.getMeasurments().get(1);
 
 		assertEquals(22, m.getCpu());
 		assertEquals(44, m.getRam());
+		*/
 	}
 
 	private void createACoupleOfImageBuildRuns(Module module)

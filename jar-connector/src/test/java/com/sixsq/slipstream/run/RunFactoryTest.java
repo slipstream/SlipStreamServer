@@ -379,7 +379,7 @@ public class RunFactoryTest extends RunTest {
 		Run run = getDeploymentRun(deployment);
 
 		int ORCHESTRATOR_AND_2_NODES = 3;
-		assertThat(run.getNodeNames().split(", ").length,
+		assertThat(run.getNodeNames().split(",").length,
 				is(ORCHESTRATOR_AND_2_NODES));
 	}
 

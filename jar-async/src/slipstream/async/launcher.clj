@@ -7,7 +7,7 @@
   (:require [clojure.core.async :as async :refer [go timeout thread chan <! >! <!!]])
   (:gen-class
     :name slipstream.async.Launcher
-    :methods [#^{:static true 
+    :methods [#^{:static true
                  :doc "Takes: run user"}
                 [launch [com.sixsq.slipstream.persistence.Run
                          com.sixsq.slipstream.persistence.User] void]]))
@@ -19,7 +19,7 @@
 (def launcher-chan-size 64)
 (def number-of-readers 64)
 (def timeout-processing-loop (minutes-in-msecs 1))
-(def timeout-launch (minutes-in-msecs 5))
+(def timeout-launch (minutes-in-msecs 10))
 
 (def errors (atom 0))
 (def requested (atom 0))
