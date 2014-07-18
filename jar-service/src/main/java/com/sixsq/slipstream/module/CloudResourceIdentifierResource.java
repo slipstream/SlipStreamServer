@@ -22,8 +22,6 @@ package com.sixsq.slipstream.module;
 
 import java.io.IOException;
 
-import org.restlet.Request;
-import org.restlet.data.Cookie;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;

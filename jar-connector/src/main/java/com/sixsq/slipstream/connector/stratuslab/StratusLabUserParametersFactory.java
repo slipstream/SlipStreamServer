@@ -27,9 +27,7 @@ import com.sixsq.slipstream.persistence.ParameterType;
 public class StratusLabUserParametersFactory extends UserParametersFactoryBase {
 
 	public static final String MARKETPLACE_ENDPOINT_PARAMETER_NAME = "marketplace.endpoint";
-	public static final String MESSAGING_TYPE_PARAMETER_NAME = "messaging.type";
-	public static final String MESSAGING_ENDPOINT_PARAMETER_NAME = "messaging.endpoint";
-	public static final String MESSAGING_QUEUE_PARAMETER_NAME = "messaging.queue";
+	public static final String PDISK_ENDPOINT_PARAMETER_NAME = "pdisk.endpoint";
 
 
 	public StratusLabUserParametersFactory(String connectorInstanceName) throws ValidationException {
