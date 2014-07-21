@@ -93,7 +93,8 @@
             (try
               (log/log-debug (str "executing collect request for " (.getName user) " and " (.getConnectorInstanceName connector)))
               (collect! user connector)
-              (update-metric! user)
+              (if (updator/metering-enabled?)
+                (update-metric! user))
               (catch Exception e (log/log-warn "caught exception executing collect request: " (.getMessage e))))))))))
 
 (defonce ^:dynamic *online-collect-processor* (collect-readers online-collector-chan))
