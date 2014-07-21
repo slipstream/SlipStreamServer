@@ -35,7 +35,6 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -68,6 +67,13 @@ public class Measurements implements Serializable {
 
 		List<Vm> vms = Vm.list(user.getName());
 
+		for (Vm vm: vms) {
+			if (! "Unknown".equals(vm.getRunUuid())) {
+				fill(vm);
+			}
+		}
+
+/*
 		EntityManager em = PersistenceUtil.createEntityManager();
 
 		try {
@@ -85,6 +91,7 @@ public class Measurements implements Serializable {
 		} finally {
 			em.close();
 		}
+*/
 
 		return getMeasurments();
 	}
@@ -191,6 +198,18 @@ public class Measurements implements Serializable {
 		m.setType(getType());
 
 		getMeasurments().add(m);
+
+		return m;
+	}
+
+	protected Measurement fill(Vm vm) {
+		Measurement m = new Measurement();
+
+		m.setCloud(vm.getCloud());
+		m.setVmState(vm.getState());
+		m.setInstanceId(vm.getInstanceId());
+		m.setRun(vm.getRunUuid());
+		m.setUser(vm.getUser());
 
 		return m;
 	}

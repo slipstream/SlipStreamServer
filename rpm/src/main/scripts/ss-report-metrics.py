@@ -125,10 +125,10 @@ def get_memory_metric(instance, timestamp=None):
 
 COLLECTORS = (
     # (name, collector function)
-    ('cpu', get_cpu_metric),
-    ('disk', get_disk_metric),
+    #('cpu', get_cpu_metric),
+    #('disk', get_disk_metric),
     ('instance', get_instance_metric),
-    ('memory', get_memory_metric),
+    #('memory', get_memory_metric),
 )
 
 
