@@ -434,6 +434,14 @@ public abstract class ConnectorBase implements Connector {
         }
     }
 
+    @Override
+    public boolean isCredentialsSet(User user) {
+    	String key = getKey(user);
+    	String secret = getSecret(user);
+
+    	return !(key == null || "".equals(key) || secret == null || "".equals(secret));
+    }
+
     protected String getLoginUsername(Run run) throws SlipStreamClientException {
         if (isInOrchestrationContext(run)) {
             return getOrchestratorImageLoginUsername();
