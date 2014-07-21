@@ -8,7 +8,7 @@
   (:require [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!!]])
   (:gen-class
     :name slipstream.async.Collector
-    :methods [#^{:static true 
+    :methods [#^{:static true
                  :doc "Takes: run user"}
                 [start [] void]]))
 
@@ -91,7 +91,7 @@
         (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
           (when (not-nil? user)
             (try
-              (log/log-info (str "executing collect request for " (.getName user) " and " (.getConnectorInstanceName connector)))
+              (log/log-debug (str "executing collect request for " (.getName user) " and " (.getConnectorInstanceName connector)))
               (collect! user connector)
               (update-metric! user)
               (catch Exception e (log/log-warn "caught exception executing collect request: " (.getMessage e))))))))))
@@ -112,7 +112,7 @@
     (check-channel-size users connectors)
     (doseq [u users
             c connectors]
-      (go 
+      (go
         (>! chan [u c])))))
 
 ; Start collector writers
