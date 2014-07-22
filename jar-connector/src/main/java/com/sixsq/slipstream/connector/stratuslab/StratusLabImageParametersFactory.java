@@ -41,8 +41,8 @@ public class StratusLabImageParametersFactory extends ModuleParametersFactoryBas
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 
-		putMandatoryParameter(Run.RAM_PARAMETER_NAME, Run.RAM_PARAMETER_NAME);
-		putMandatoryParameter(Run.CPU_PARAMETER_NAME, Run.CPU_PARAMETER_NAME);
+		putMandatoryParameter(Run.RAM_PARAMETER_NAME, Run.RAM_PARAMETER_DESCRIPTION);
+		putMandatoryParameter(Run.CPU_PARAMETER_NAME, Run.CPU_PARAMETER_DESCRIPTION);
 		putEnumParameter(ImageModule.INSTANCE_TYPE_KEY, "Cloud instance type",
 				InstanceType.getValues(), INSTANCE_TYPE_DEFAULT, true);
 		putEnumParameter(DISKSBUS_TYPE_KEY, "VM disks bus type",

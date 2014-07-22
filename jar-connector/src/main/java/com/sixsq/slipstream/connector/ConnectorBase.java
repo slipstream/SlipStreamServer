@@ -294,7 +294,7 @@ public abstract class ConnectorBase implements Connector {
 
     protected String getPrivateSshKeyFileName() throws ConfigurationException, ValidationException {
         String privateSshKeyFile = Configuration.getInstance()
-                                                .getProperty("cloud.connector.orchestrator.privatesshkey");
+                                                .getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY);
         return privateSshKeyFile;
     }
 
