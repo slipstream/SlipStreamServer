@@ -137,12 +137,51 @@ public class StratusLabConnector extends CliConnectorBase {
 
 		String extraDisksCommand = getExtraDisksCommand(run);
 
+		String instanceSizeCommand = getInstanceSizeCommand(run);
+
 		return "/usr/bin/stratus-run-instance " + imageId + " --quiet --key "
 				+ publicSshKey + " -u " + getKey(user) + " -p "
 				+ getSecret(user) + " --endpoint " + getEndpoint(user)
 				+ " --marketplace-endpoint " + getMarketplaceEndpoint(user)
 				+ " --context " + context + " --vm-name " + vmName + ":"
-				+ run.getName() + extraDisksCommand;
+				+ run.getName() + extraDisksCommand + instanceSizeCommand;
+	}
+
+	private String getInstanceSizeCommand(Run run) throws ValidationException {
+		if (run.getType() == RunType.Run) {
+			ImageModule image = ImageModule.load(run.getModuleResourceUrl());
+			try {
+				String cpu = getCpu(image);
+				String ram = getRamMb(image);
+				if (cpu == null || cpu.isEmpty() || ram == null || ram.isEmpty()) {
+					return " --type " + getInstanceType(image);
+				} else {
+					return " --cpu " + cpu + " --ram " + ram;
+				}
+			} catch (ValidationException e) {
+				return " --type " + getInstanceType(image);
+			}
+		} else {
+			String instanceType = Configuration
+					.getInstance()
+					.getRequiredProperty(
+							constructKey(StratusLabUserParametersFactory.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME));
+			return " --type " + instanceType;
+		}
+	}
+
+	private String getRamMb(ImageModule image) throws ValidationException {
+		String ramGb = getRam(image);
+		if (ramGb == null || ramGb.isEmpty()) {
+			return "";
+		}
+		Integer ramMb;
+		try {
+			ramMb = Integer.parseInt(ramGb) * 1024;
+		} catch (NumberFormatException ex) {
+			throw new ValidationException("Failed to parse RAM value.");
+		}
+		return ramMb.toString();
 	}
 
 	protected String getMarketplaceEndpoint(User user)
