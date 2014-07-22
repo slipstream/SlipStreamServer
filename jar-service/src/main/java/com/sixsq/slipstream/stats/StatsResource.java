@@ -32,7 +32,7 @@ import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.measurements.Measurements;
+import com.sixsq.slipstream.metering.Metering;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -49,9 +49,9 @@ public class StatsResource extends BaseResource {
 
 	}
 
-	private Measurements compute() {
+	private Metering compute() {
 
-		Measurements measurements = new Measurements();
+		Metering measurements = new Metering();
 
 		List<User> users = null;
 

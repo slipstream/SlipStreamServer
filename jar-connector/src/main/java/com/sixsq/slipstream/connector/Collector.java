@@ -83,8 +83,7 @@ public class Collector {
 		return populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
 	}
 
-	private static int populateVmsForCloud(User user, String cloud,
-			Properties props) {
+	private static int populateVmsForCloud(User user, String cloud, Properties props) {
 		List<Vm> vms = new ArrayList<Vm>();
 		for (String key : props.stringPropertyNames()) {
 			String instanceId = key;

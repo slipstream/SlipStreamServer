@@ -145,38 +145,36 @@ public class RunTestBase {
 		super();
 	}
 
-	protected Run createAndStoreRun(Module module) throws SlipStreamException {
+	protected static Run createAndStoreRun(Module module) throws SlipStreamException {
 
 		return createAndStoreRun(module, USER_DEFAULT);
 	}
 
-	protected Run createAndStoreRun(Module module, RunType type)
+	protected static Run createAndStoreRun(Module module, RunType type)
 			throws SlipStreamException {
 
 		return createAndStoreRun(module, USER_DEFAULT, type);
 	}
 
-	protected Run createAndStoreRun(Module module, String user)
+	protected static Run createAndStoreRun(Module module, String user)
 			throws SlipStreamException {
 
 		return createAndStoreRun(module, user, RunType.Orchestration);
 	}
 
-	protected Run createAndStoreRun(Module module, String user, RunType type)
+	protected static Run createAndStoreRun(Module module, String user, RunType type)
 			throws SlipStreamException {
 		return createAndStoreRun(module, user, type, States.Initializing);
 	}
 
-	protected Run createAndStoreRun(Module module, String user, RunType type,
-			States state) throws SlipStreamException {
+	protected static Run createAndStoreRun(Module module, String user, RunType type, States state)
+			throws SlipStreamException {
 
-		Run run = RunFactory.getRun(module, type, cloudServiceName,
-				RunTestBase.user);
+		Run run = RunFactory.getRun(module, type, cloudServiceName, RunTestBase.user);
 		run.setUser(user);
 		run.setState(state);
 		run = run.store();
-		run = ConnectorFactory.getConnector(cloudServiceName).launch(run,
-				RunTestBase.user);
+		run = ConnectorFactory.getConnector(cloudServiceName).launch(run, RunTestBase.user);
 		return run;
 	}
 
