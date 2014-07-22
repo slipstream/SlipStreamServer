@@ -44,6 +44,7 @@ public class ReadyState extends SynchronizedState {
 
 	private boolean shouldStayInReady(Run run) {
 		return run.getType() == RunType.Run ||
+				run.isMutable() ||
 				(shouldKeepRunningForSuccess(run) && run.getType() != RunType.Machine) ||
 				(shouldKeepRunningForError(run) && run.getType() != RunType.Machine);
 	}

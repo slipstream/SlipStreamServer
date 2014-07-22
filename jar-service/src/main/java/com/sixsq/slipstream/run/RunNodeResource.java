@@ -42,6 +42,8 @@ import org.restlet.resource.ResourceException;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.persistence.DeploymentModule;
@@ -53,6 +55,7 @@ import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
+import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 
 public class RunNodeResource extends RunBaseResource {
@@ -102,12 +105,28 @@ public class RunNodeResource extends RunBaseResource {
 	public Representation represent(Representation entity) {
 		Run run = Run.loadFromUuid(getUuid());
 		List<String> instanceNames = run.getNodeInstanceNames(nodename);
-		return new StringRepresentation(StringUtils.join(instanceNames, ","),
-				MediaType.TEXT_PLAIN);
+		return new StringRepresentation(StringUtils.join(instanceNames, ","), MediaType.TEXT_PLAIN);
 	}
 
 	@Post
 	public Representation addNodeInstances(Representation entity)
+			throws ResourceException {
+		Representation result = null;
+		try {
+			result = addNodeInstancesInTransaction(entity);
+		} catch (ResourceException e) {
+			throw e;
+		} catch (SlipStreamClientException e) {
+			throwClientConflicError(e.getMessage());
+		} catch (SlipStreamException e) {
+			throwServerError(e.getMessage());
+		} catch (Exception e) {
+			throwServerError(e.getMessage());
+		}
+		return result;
+	}
+
+	private Representation addNodeInstancesInTransaction(Representation entity)
 			throws Exception {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -125,7 +144,7 @@ public class RunNodeResource extends RunBaseResource {
 				instanceNames.add(createNodeInstanceOnRun(run, node));
 			}
 			incrementNodeMultiplicityOnRun(noOfInst, run);
-			udpateRunState(run);
+			StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
 
 			if (Configuration.isQuotaEnabled()) {
 				User user = User.loadByName(run.getUser());
@@ -143,13 +162,25 @@ public class RunNodeResource extends RunBaseResource {
 		}
 
 		getResponse().setStatus(Status.SUCCESS_CREATED);
-		return new StringRepresentation(StringUtils.join(instanceNames, ","),
-				MediaType.TEXT_PLAIN);
+		return new StringRepresentation(StringUtils.join(instanceNames, ","), MediaType.TEXT_PLAIN);
 	}
 
 	@Delete
 	public void deleteNodeInstances(Representation entity) throws Exception {
+		try {
+			deleteNodeInstancesInTransaction(entity);
+		} catch (ResourceException e) {
+			throw e;
+		} catch (SlipStreamClientException e) {
+			throwClientConflicError(e.getMessage());
+		} catch (SlipStreamException e) {
+			throwServerError(e.getMessage());
+		} catch (Exception e) {
+			throwServerError(e.getMessage());
+		}
+	}
 
+	private void deleteNodeInstancesInTransaction(Representation entity) throws Exception {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		Run run = Run.loadFromUuid(getUuid(), em);
@@ -177,7 +208,7 @@ public class RunNodeResource extends RunBaseResource {
 				decrementNodeMultiplicityOnRun(instanceIds.size(), run);
 			}
 
-			udpateRunState(run);
+			StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
 
 			transaction.commit();
 		} catch (Exception ex) {
@@ -282,13 +313,6 @@ public class RunNodeResource extends RunBaseResource {
 		}
 		throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Node "
 				+ nodename + " doesn't exist.");
-	}
-
-	private void udpateRunState(Run run) throws NotFoundException,
-			ValidationException {
-		// TODO: consider using StateMachine built from the Run.
-		run.updateRuntimeParameter("ss:state", States.Provisioning.toString());
-		run.setState(States.Provisioning);
 	}
 
 	private void removeNodeInstanceIndices(Run run, List<String> ids)

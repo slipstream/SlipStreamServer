@@ -177,8 +177,17 @@ public class StateMachine {
 		tryAdvanceToState(globalState.nextState, force);
 	}
 
-	public void tryAdvanceToFinalizing() throws InvalidStateException,
-			CannotAdvanceFromTerminalStateException {
+	public void tryAdvanceToProvisionning() throws InvalidStateException, CannotAdvanceFromTerminalStateException {
+		if (!States.Ready.equals(globalState.getState())) {
+			throw new InvalidStateException("Transition from " + globalState + " to Provisioning not allowed.");
+		} else if (!run.isMutable()) {
+			throw new InvalidStateException(
+					"Transition from " + globalState + " to Provisioning not allowed in an imutable Run");
+		}
+		attemptToAdvanceToState(States.Provisioning, true);
+	}
+
+	public void tryAdvanceToFinalizing() throws InvalidStateException, CannotAdvanceFromTerminalStateException {
 		if (canCancel()){
 			throw new InvalidStateException("Transition from " + globalState + " to Finalizing not allowed.");
 		}
@@ -193,8 +202,7 @@ public class StateMachine {
 		tryAdvanceToState(States.Done, true);
 	}
 
-	public void tryAdvanceToCancelled() throws InvalidStateException,
-	CannotAdvanceFromTerminalStateException {
+	public void tryAdvanceToCancelled() throws InvalidStateException, CannotAdvanceFromTerminalStateException {
 		if (! canCancel()){
 			throw new InvalidStateException("Transition from " + globalState + " to Cancelled not allowed.");
 		}
@@ -277,12 +285,12 @@ public class StateMachine {
 		setState(newState, false);
 	}
 
-	protected void setState(States newState, boolean force)
-			throws InvalidStateException {
+	protected void setState(States newState, boolean force) throws InvalidStateException {
 
 		globalState = assignNodeState(globalState, newState);
 
 		run.setState(globalState.getState());
+		run.setLastStateChange();
 
 		resetNodesStateCompleted();
 

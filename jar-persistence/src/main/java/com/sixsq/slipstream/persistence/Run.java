@@ -76,7 +76,7 @@ import com.sixsq.slipstream.statemachine.States;
 		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r WHERE r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
 		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
-		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.startTime < :before AND r.state IN (:states)"),
+		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.lastStateChangeTime < :before AND r.state IN (:states)"),
 		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.key_ LIKE '%:instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
 
@@ -505,6 +505,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endTime;
 
+	@Attribute(required = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date lastStateChangeTime = new Date();
+
 	/**
 	 * Comma separated list of node names - e.g. apache1.1, apache1.2, ...
 	 * Including the orchestrator: orchestrator-local, ...
@@ -922,6 +926,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public void setState(States state) {
 		this.state = state;
+	}
+
+	public Date getLastStateChange() {
+		return this.lastStateChangeTime;
+	}
+
+	public void setLastStateChange() {
+		this.lastStateChangeTime  = now();
 	}
 
 	public int getMultiplicity(String nodeName) throws NotFoundException {
