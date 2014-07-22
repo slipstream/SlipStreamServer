@@ -211,6 +211,8 @@ public class Measurements implements Serializable {
 		m.setRun(vm.getRunUuid());
 		m.setUser(vm.getUser());
 
+		getMeasurments().add(m);
+
 		return m;
 	}
 

@@ -9,9 +9,9 @@ package com.sixsq.slipstream.measurements;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,18 +30,18 @@ import com.sixsq.slipstream.persistence.RunType;
 
 /**
  * Unit test:
- * 
+ *
  * @see MeasurementTest
- * 
+ *
  */
 @Root(name="vm")
 @SuppressWarnings("serial")
 public class Measurement implements Serializable {
 
-	@Attribute(name = "instance_id",required=false)
+	@Attribute(name = "instance_id", required=true)
 	private String instanceId;
 
-	@Attribute(name = "run_id")
+	@Attribute(name = "run_id", required=true)
 	private String run;
 
 	@Attribute(name = "index", required = false)
@@ -50,19 +50,19 @@ public class Measurement implements Serializable {
 	@Attribute(name="node", required=false)
 	private String nodeName;
 
-	@Attribute(name = "name")
+	@Attribute(name = "name", required=false)
 	private String module;
 
-	@Attribute(name = "image_id")
+	@Attribute(name = "image_id", required=false)
 	private String image;
 
-	@Attribute(name = "user_id")
+	@Attribute(name = "user_id", required=true)
 	private String user;
-	
-	@Attribute
+
+	@Attribute(required=false)
 	private RunType type;
 
-	@Attribute
+	@Attribute(required=true)
 	private String cloud;
 
 	@Attribute(required=false)
@@ -74,12 +74,12 @@ public class Measurement implements Serializable {
 	@Attribute(required=false, name = "disk")
 	private int storage; // in GB
 
-	@Attribute(name = "created_at")
+	@Attribute(name = "created_at", required=false)
 	private Date startTime;
 
 	@Attribute(name = "deleted_at", required = false)
 	private Date endTime;
-	
+
 	@Attribute(required=false)
 	private String state = "Unknown";
 
