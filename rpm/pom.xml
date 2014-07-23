@@ -382,18 +382,6 @@
                             </sources>
                         </mapping>
                         <mapping>
-                          <directory>${installation.dir}/bin</directory>
-                          <filemode>664</filemode>
-                          <username>slipstream</username>
-                          <groupname>slipstream</groupname>
-                          <directoryIncluded>false</directoryIncluded>
-                          <sources>
-                            <source>
-                              <location>${basedir}/src/main/scripts/ss-report-metrics.py</location>
-                            </source>
-                          </sources>
-                        </mapping>
-                        <mapping>
                           <directory>${installation.dir}/migrations</directory>
                           <filemode>664</filemode>
                           <username>slipstream</username>

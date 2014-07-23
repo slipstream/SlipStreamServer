@@ -20,23 +20,22 @@ package com.sixsq.slipstream.metering;
  * -=================================================================-
  */
 
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.metering.Metering;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.run.RunTestBase;
 import com.sixsq.slipstream.util.CommonTestUtil;
 
 
-@Ignore
 public class MeteringTest extends RunTestBase {
 
 	private static String CLOUD_A = "local";
@@ -50,16 +49,10 @@ public class MeteringTest extends RunTestBase {
 		createUser();
 		String username = user.getName();
 
-		//CommonTestUtil.addSshKeys(user);
-
 		CommonTestUtil.setCloudConnector(CLOUD_A + ":local," +
 										 CLOUD_B + ":cloudstack," +
 										 CLOUD_C + ":openstack");
-/*
-		setupDeployments();
-		Run run = createAndStoreRun(deployment, username);
-		String runId = run.getUuid();
- */
+
 		String runId = "xxx";
 
 		List<Vm> vms = new ArrayList<Vm>();
@@ -69,6 +62,7 @@ public class MeteringTest extends RunTestBase {
 		vms.add(createVm("id_3", CLOUD_A, "Terminated", username, runId));
 		Vm.update(vms, username, CLOUD_A);
 
+		vms.clear();
 		vms.add(createVm("id_1", CLOUD_B, "Pending", username, runId));
 		vms.add(createVm("id_2", CLOUD_B, RUNNING_VM_STATE, username, runId));
 		vms.add(createVm("id_3", CLOUD_B, "Terminated", username, runId));
@@ -91,10 +85,10 @@ public class MeteringTest extends RunTestBase {
 		String cloudBdata = getCloudData(CLOUD_B, "1");
 		String cloudCdata = getCloudData(CLOUD_C, "0");
 
-		assertEquals(true, data.contains(cloudAdata));
-		assertEquals(true, data.contains(cloudBdata));
-		assertEquals(true, data.contains(cloudCdata));
-		assertEquals(true, data.endsWith("\n"));
+		assertTrue(data.contains(cloudAdata));
+		assertTrue(data.contains(cloudBdata));
+		assertTrue(data.contains(cloudCdata));
+		assertTrue(data.endsWith("\n"));
 
 	}
 
