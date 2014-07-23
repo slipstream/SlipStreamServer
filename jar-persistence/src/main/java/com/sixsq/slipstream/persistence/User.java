@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -41,6 +42,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
@@ -119,6 +121,18 @@ public class User extends Parameterized<User, UserParameter> {
 	public User(String name) throws ValidationException {
 		setName(name);
 		this.state = State.NEW;
+	}
+
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
+	protected void setParameters(Map<String, UserParameter> parameters) {
+		this.parameters = parameters;
+	}
+	
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
+	public Map<String, UserParameter> getParameters() {
+		return parameters;
 	}
 
 	@Override

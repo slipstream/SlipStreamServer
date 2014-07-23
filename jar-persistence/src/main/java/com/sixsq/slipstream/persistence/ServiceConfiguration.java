@@ -33,6 +33,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
 
+import org.simpleframework.xml.ElementMap;
+
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 
 @SuppressWarnings("serial")
@@ -281,10 +283,14 @@ public class ServiceConfiguration extends
 		setId();
 	}
 
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ServiceConfigurationParameter.class)
 	public Map<String, ServiceConfigurationParameter> getParameters() {
 		return parameters;
 	}
 
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ServiceConfigurationParameter.class)
 	public void setParameters(
 			Map<String, ServiceConfigurationParameter> parameters) {
 		if (parameters == null) {

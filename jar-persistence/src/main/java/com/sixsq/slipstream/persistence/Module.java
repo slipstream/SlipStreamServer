@@ -21,6 +21,7 @@ package com.sixsq.slipstream.persistence;
  */
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -39,6 +40,7 @@ import javax.persistence.Transient;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
+import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleVersionView;
@@ -235,6 +237,18 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		super();
 	}
 
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ModuleParameter.class)
+	protected void setParameters(Map<String, ModuleParameter> parameters) {
+		this.parameters = parameters;
+	}
+	
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ModuleParameter.class)
+	public Map<String, ModuleParameter> getParameters() {
+		return parameters;
+	}
+	
 	public Module(String name, ModuleCategory category)
 			throws ValidationException {
 
