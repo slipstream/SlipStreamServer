@@ -38,11 +38,8 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
@@ -58,12 +55,17 @@ import com.sixsq.slipstream.util.Logger;
 
 public abstract class RunFactory {
 
-	private static final List<String> VALID_RUNNING_STATE = Arrays.asList(
-			"running", "on");
+	private static final List<String> VALID_RUNNING_STATE = Arrays.asList("running", "on");
 	private static final String RUNNING_STATE = "running";
 
-	public Run createRun(Module module, String cloudService, User user)
+
+	public final Run createRun(Module module, String cloudService, User user)
 			throws SlipStreamClientException {
+		return createRun(module, cloudService, user, null);
+	}
+
+	public final Run createRun(Module module, String cloudService, User user,
+			Map<String, List<Parameter<?>>> userChoices) throws SlipStreamClientException {
 
 		checkCloudServiceDefined(cloudService, user);
 
@@ -71,12 +73,19 @@ public abstract class RunFactory {
 
 		Run run = constructRun(module, cloudService, user);
 
+		if (userChoices != null) {
+			addUserFormParametersAsRunParameters(module, run, userChoices);
+		}
+
 		validateRun(run, user, cloudService);
 
 		initialize(module, run, user, cloudService);
 
 		return run;
 	}
+
+	protected abstract void addUserFormParametersAsRunParameters(Module module, Run run,
+			Map<String, List<Parameter<?>>> userChoices) throws ValidationException;
 
 	protected abstract Run constructRun(Module module, String cloudService,
 			User user) throws ValidationException;
@@ -122,12 +131,9 @@ public abstract class RunFactory {
 		}
 	}
 
-	private void checkCloudServiceDefined(String cloudService, User user)
-			throws SlipStreamClientException {
+	private void checkCloudServiceDefined(String cloudService, User user) throws SlipStreamClientException {
 		if ("".equals(cloudService)) {
-			throw new SlipStreamClientException(
-					ConnectorFactory
-							.incompleteCloudConfigurationErrorMessage(user));
+			throw new SlipStreamClientException(ConnectorFactory.incompleteCloudConfigurationErrorMessage(user));
 		}
 	}
 
@@ -157,9 +163,14 @@ public abstract class RunFactory {
 		run.setCloudServiceNames(run.getCloudService());
 	}
 
-	public static Run getRun(Module module, RunType type, String cloudService,
-			User user) throws SlipStreamClientException {
-		return selectFactory(type).createRun(module, cloudService, user);
+	public static Run getRun(Module module, RunType type, String cloudService, User user)
+			throws SlipStreamClientException {
+		return getRun(module, type, cloudService, user, null);
+	}
+
+	public static Run getRun(Module module, RunType type, String cloudService, User user, Map<String, List<Parameter<?>>> userChoices)
+			throws SlipStreamClientException {
+		return selectFactory(type).createRun(module, cloudService, user, userChoices);
 	}
 
 	public static RunFactory selectFactory(RunType type)
@@ -218,52 +229,10 @@ public abstract class RunFactory {
 
 	}
 
-	// FIXME: move down to specific factories
-	public static void resolveImageIdIfAppropriate(Module module, User user)
-			throws ConfigurationException, ValidationException {
-		if (module != null && module.getCategory() == ModuleCategory.Image) {
-			Connector connector = ConnectorFactory.getCurrentConnector(user);
-			setImageId(module, connector);
-		}
-		if (module != null && module.getCategory() == ModuleCategory.Deployment) {
-			for (Node n : ((DeploymentModule) module).getNodes().values()) {
-				ImageModule imageModule = n.getImage();
-				if (imageModule != null) {
-					Connector connector = ConnectorFactory.getConnector(
-							n.getCloudService(), user);
-					setImageId(imageModule, connector);
-				}
-			}
-		}
-	}
-
-	private static void setImageId(Module module, Connector connector)
-			throws ValidationException {
-		try {
-			((ImageModule) module)
-					.assignBaseImageIdToImageIdFromCloudService(connector
-							.getConnectorInstanceName());
-		} catch (ValidationException e) {
-			// it's ok not to have an image id. Validation will handle this
-			// later.
-		}
-	}
-
-	/**
-	 * Load the module corresponding to the run and set some of its attributes
-	 * (e.g. multiplicity, cloud service) to match the specific configuration of
-	 * the run.
-	 *
-	 * The returned module is transient and not persisted.
-	 */
-	public abstract Module overloadModule(Run run, User user)
-			throws ValidationException;
-
-	protected Module loadModule(Run run) throws ValidationException {
+	public static Module loadModule(Run run) throws ValidationException {
 		Module module = Module.load(run.getModuleResourceUrl());
 		if (module == null) {
-			throw new ValidationException("Unknown module: "
-					+ run.getModuleResourceUrl());
+			throw new ValidationException("Unknown module: " + run.getModuleResourceUrl());
 		}
 		return module;
 	}
@@ -312,7 +281,7 @@ public abstract class RunFactory {
 
 		String prefix = Run.constructOrchestratorName(cloudService);
 
-		assignRuntimeParameters(run, prefix);
+		assignCommonRuntimeParameters(run, prefix);
 
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.HOSTNAME_KEY),
@@ -321,8 +290,8 @@ public abstract class RunFactory {
 				RuntimeParameter.INSTANCE_ID_KEY),
 				RuntimeParameter.INSTANCE_ID_DESCRIPTION);
 
-		run.getRuntimeParameters().get(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.IS_ORCHESTRATOR_KEY)).setValue("true");
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+				RuntimeParameter.IS_ORCHESTRATOR_KEY), "true", RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
 
 		Configuration conf = Configuration.getInstance();
 		String maxJaasWorkers = conf.getProperty(ServiceConfigurationParameter
@@ -332,19 +301,6 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
 				RuntimeParameter.MAX_JAAS_WORKERS_KEY), maxJaasWorkers,
 				RuntimeParameter.MAX_JAAS_WORKERS_DESCRIPTION);
-
-		// Hack: hardcode the cpu and ram
-		// need to get this from the connector?
-		// LS: Metering doesn't use these values anymore
-		/*
-		String defaultOrchestratorCpuRam = "1";
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				Run.CPU_PARAMETER_NAME), defaultOrchestratorCpuRam,
-				Run.CPU_PARAMETER_DESCRIPTION);
-        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-                Run.RAM_PARAMETER_NAME), defaultOrchestratorCpuRam,
-                Run.RAM_PARAMETER_DESCRIPTION);
-        */
     }
 
 	/**
@@ -352,7 +308,7 @@ public abstract class RunFactory {
 	 *            Example (< nodename>.< index>)
 	 * @throws ValidationException
 	 */
-	public static void assignRuntimeParameters(Run run, String nodename)
+	public static void assignCommonRuntimeParameters(Run run, String nodename)
 			throws ValidationException {
 		String prefix = nodename;
 
@@ -380,11 +336,23 @@ public abstract class RunFactory {
         		RuntimeParameter.URL_SERVICE_KEY), "",
                 RuntimeParameter.URL_SERVICE_DESCRIPTION);
 
-        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
+    }
+
+	protected static void assignCommonNodeRuntimeParameters(Run run, String nodename)
+			throws ValidationException {
+
+		assignCommonRuntimeParameters(run, nodename);
+
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename,
 				RuntimeParameter.IS_ORCHESTRATOR_KEY), "false",
 				RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
 
-    }
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename,
+				RuntimeParameter.SCALE_STATE_KEY),
+				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
+				RuntimeParameter.SCALE_STATE_DESCRIPTION);
+
+	}
 
 	protected void initOrchestratorsNodeNames(Run run)
 			throws ConfigurationException, ValidationException {
@@ -414,39 +382,6 @@ public abstract class RunFactory {
 		}
 
 		return cloudServicesList;
-	}
-
-	public static Properties describeInstances(User user, Run run)
-			throws ValidationException {
-
-		Properties describeInstancesStates = new Properties();
-
-		String[] cloudServicesList = null;
-		if (run != null) {
-			cloudServicesList = run.getCloudServiceNameList();
-		} else {
-			cloudServicesList = ConnectorFactory.getCloudServiceNames();
-		}
-
-		for (String cloudServiceName : cloudServicesList) {
-			Connector connector = ConnectorFactory
-					.getConnector(cloudServiceName);
-
-			Credentials credentials = connector.getCredentials(user);
-			credentials.validate();
-
-			Properties props;
-			try {
-				props = connector.describeInstances(user);
-			} catch (SlipStreamException e) {
-				Logger.warning(e.getMessage());
-				continue;
-			}
-			for (String key : props.stringPropertyNames()) {
-				describeInstancesStates.put(key, props.getProperty(key));
-			}
-		}
-		return describeInstancesStates;
 	}
 
 	public static Run updateVmStatus(Run run, User user)
@@ -503,6 +438,10 @@ public abstract class RunFactory {
 			}
 		}
 		return vmState;
+	}
+
+	public static String constructParamName(String nodename, String paramname) {
+		return RuntimeParameter.constructParamName(nodename, paramname);
 	}
 
 }

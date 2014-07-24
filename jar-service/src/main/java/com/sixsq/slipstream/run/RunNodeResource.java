@@ -91,14 +91,11 @@ public class RunNodeResource extends RunBaseResource {
 	}
 
 	private void initNodeParameters() {
-		nodeMultiplicityRunParam = nodename + Run.NODE_NAME_PARAMETER_SEPARATOR
-				+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME;
-		nodeMultiplicityRuntimeParam = nodename
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-				+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME;
-		nodeIndicesRuntimeParam = nodename
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-				+ RuntimeParameter.IDS_PARAMETER_NAME;
+		nodeMultiplicityRunParam = DeploymentFactory.constructParamName(nodename,
+				RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+		nodeMultiplicityRuntimeParam = DeploymentFactory.constructParamName(nodename,
+				RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+		nodeIndicesRuntimeParam = DeploymentFactory.constructParamName(nodename, RuntimeParameter.IDS_PARAMETER_NAME);
 	}
 
 	@Get
@@ -117,11 +114,11 @@ public class RunNodeResource extends RunBaseResource {
 		} catch (ResourceException e) {
 			throw e;
 		} catch (SlipStreamClientException e) {
-			throwClientConflicError(e.getMessage());
+			throwClientConflicError(e.getMessage(), e);
 		} catch (SlipStreamException e) {
-			throwServerError(e.getMessage());
+			throwServerError(e.getMessage(), e);
 		} catch (Exception e) {
-			throwServerError(e.getMessage());
+			throwServerError(e.getMessage(), e);
 		}
 		return result;
 	}
@@ -172,11 +169,11 @@ public class RunNodeResource extends RunBaseResource {
 		} catch (ResourceException e) {
 			throw e;
 		} catch (SlipStreamClientException e) {
-			throwClientConflicError(e.getMessage());
+			throwClientConflicError(e.getMessage(), e);
 		} catch (SlipStreamException e) {
-			throwServerError(e.getMessage());
+			throwServerError(e.getMessage(), e);
 		} catch (Exception e) {
-			throwServerError(e.getMessage());
+			throwServerError(e.getMessage(), e);
 		}
 	}
 
@@ -194,7 +191,7 @@ public class RunNodeResource extends RunBaseResource {
 				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
 						"Provide list of node instance IDs to be removed from the Run.");
 			} else {
-				String cloudServiceName = getCloudServiceName(run);
+				String cloudServiceName = run.getCloudServiceNameForNode(nodename);
 				List<String> instanceIds = Arrays.asList(ids.split("\\s*,\\s*"));
 				for (String _id : instanceIds) {
 					int id = Integer.parseInt(_id);
@@ -240,11 +237,6 @@ public class RunNodeResource extends RunBaseResource {
 		}
 	}
 
-	private String getCloudServiceName(Run run) {
-		Node node = getNode(run, nodename);
-		return node.getCloudService();
-	}
-
 	private int getNumberOfInstancesToAdd(Representation entity) {
 		Form form = new Form(entity);
 		try {
@@ -265,34 +257,12 @@ public class RunNodeResource extends RunBaseResource {
 
 		String instanceName = getNodeInstanceName(newId);
 
-		//setCreatingNodeInstance(run, instanceName);
-
 		return instanceName;
 	}
 
 	private void createNodeInstanceRuntimeParameters(Run run, Node node,
 			int newId) throws ValidationException, NotFoundException {
-		/*
-		String cloudService = node.getCloudService();
-		List<String> filter = new ArrayList<String>();
-		for (ParameterCategory c : ParameterCategory.values()) {
-			filter.add(c.toString());
-		}
-		// add runtime parameters
-		DeploymentFactory.initNodeInstanceState(run, nodename, newId,
-				cloudService);
-		Module image = node.getImage();
-		for (ModuleParameter param : image.getParameterList()) {
-			String category = param.getCategory();
-			if (filter.contains(category) || cloudService.equals(category)) {
-				String initialValue = DeploymentFactory.extractInitialValue(
-						param, node);
-				run.assignRuntimeParameter(
-						run.composeParameterName(node, param.getName(), newId),
-						initialValue, param.getDescription(), param.getType());
-			}
-		}
-		*/
+
 		DeploymentFactory.initNodeInstanceRuntimeParameters(run, node, newId);
 
 		//TODO: LS: check this part
@@ -345,7 +315,7 @@ public class RunNodeResource extends RunBaseResource {
 
 		String ids = getNodeInstanceIndices(run);
 
-		String key = run.nodeRuntimeParameterKeyName(node, RunParameter.NODE_INCREMENT_KEY);
+		String key = DeploymentFactory.constructNodeParamName(node, RunParameter.NODE_INCREMENT_KEY);
 		RunParameter nodeInscrement = run.getParameter(key);
 
 		int newId = Integer.parseInt(nodeInscrement.getValue("0"));
@@ -397,17 +367,14 @@ public class RunNodeResource extends RunBaseResource {
 		if (newMultiplicity < 0) {
 			newMultiplicity = 0;
 		}
-		run.getParameter(nodeMultiplicityRunParam, "General").setValue(
-				Integer.toString(newMultiplicity));
 
 		// node_name:multiplicity - Runtime Parameter
 		run.updateRuntimeParameter(nodeMultiplicityRuntimeParam,
 				Integer.toString(newMultiplicity));
 	}
 
-	private int getNodeGroupMulptilicity(Run run) {
-		return Integer.parseInt(run.getParameter(nodeMultiplicityRunParam,
-				"General").getValue());
+	private int getNodeGroupMulptilicity(Run run) throws NumberFormatException, NotFoundException {
+		return Integer.parseInt(run.getRuntimeParameterValueIgnoreAbort(nodeMultiplicityRunParam));
 	}
 
 }

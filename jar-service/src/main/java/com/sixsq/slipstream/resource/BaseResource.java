@@ -138,6 +138,10 @@ public abstract class BaseResource extends ServerResource {
 		Util.throwClientConflicError(message);
 	}
 
+	protected void throwClientConflicError(String message, Throwable e) {
+		Util.throwClientConflicError(message, e);
+	}
+
 	protected void throwClientForbiddenError() {
 		Util.throwClientForbiddenError();
 	}
@@ -184,6 +188,10 @@ public abstract class BaseResource extends ServerResource {
 
 	protected void throwServerError(String message) {
 		Util.throwServerError(message);
+	}
+
+	protected void throwServerError(String message, Throwable e) {
+		Util.throwServerError(message, e);
 	}
 
 	protected void setIsEdit() throws ConfigurationException,

@@ -53,9 +53,4 @@ public class SimpleRunFactory extends BuildImageFactory {
 		run.addGroup(Run.MACHINE_NAME, cloudService);
 	}
 
-	@Override
-	public Module overloadModule(Run run, User user) throws ValidationException {
-		Module module = loadModule(run);
-		return ImageModule.populateForImageRun(run, module);
-	}
 }

@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,12 +38,12 @@ import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-// The mapping between a parameterized class and its associated 
+// The mapping between a parameterized class and its associated
 // parameter type must be given here.
 //
 // Type S = the subclass of Parameterized and
 // Type T = the corresponding subclass of Parameter
-// 
+//
 // For example, use <User, UserParameter> for the user parameter
 // mapping.
 //
@@ -69,11 +69,9 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 		return getParameters().get(name);
 	}
 
-	public String getParameterValue(String name, String defaultValue)
-			throws ValidationException {
+	public String getParameterValue(String name, String defaultValue) {
 		T parameter = getParameter(name);
-		return parameter == null ? defaultValue : parameter
-				.getValue(defaultValue);
+		return parameter == null ? defaultValue : parameter.getValue(defaultValue);
 	}
 
 	public void setParameter(T parameter) throws ValidationException {

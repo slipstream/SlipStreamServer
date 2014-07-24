@@ -96,16 +96,13 @@ public class Launcher {
 				throw (new SlipStreamRuntimeException(e));
 			}
 		}
-		
+
 		// TODO: Refactor: merge runImage and runOrchestration
-		private void runImage()
-				throws ValidationException {
-			//Connector connector = ConnectorFactory.getCurrentConnector(user);
-			HashSet<String> cloudServicesList = RunFactory
-					.getCloudServicesList(run);
+		private void runImage() throws ValidationException {
+			// Connector connector = ConnectorFactory.getCurrentConnector(user);
+			HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
 			for (String cloudServiceName : cloudServicesList) {
-				Connector connector = ConnectorFactory
-						.getConnector(cloudServiceName);
+				Connector connector = ConnectorFactory.getConnector(cloudServiceName);
 				try {
 					connector.launch(run, user);
 				} catch (SlipStreamException e) {
@@ -114,13 +111,10 @@ public class Launcher {
 			}
 		}
 
-		private void runOrchestration()
-				throws ValidationException {
-			HashSet<String> cloudServicesList = RunFactory
-					.getCloudServicesList(run);
+		private void runOrchestration() throws ValidationException {
+			HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
 			for (String cloudServiceName : cloudServicesList) {
-				Connector connector = ConnectorFactory
-						.getConnector(cloudServiceName);
+				Connector connector = ConnectorFactory.getConnector(cloudServiceName);
 				try {
 					connector.launch(run, user);
 				} catch (SlipStreamException e) {

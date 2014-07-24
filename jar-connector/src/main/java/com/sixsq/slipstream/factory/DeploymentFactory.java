@@ -38,6 +38,7 @@ import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
@@ -59,7 +60,6 @@ public class DeploymentFactory extends RunFactory {
 			throws ValidationException, NotFoundException {
 
 		initNodeRunParameters(run);
-		//initializeOrchestratorRuntimeParameters(run);
 		initNodesInstancesRuntimeParameters(run);
 		initNodesRuntimeParameters(run);
 	}
@@ -186,12 +186,7 @@ public class DeploymentFactory extends RunFactory {
 				RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
 				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION);
 
-		run.createRuntimeParameter(node, nodeInstanceId,
-				RuntimeParameter.SCALE_STATE_KEY,
-				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
-				RuntimeParameter.SCALE_STATE_DESCRIPTION);
-
-		run = initNodeInstanceRuntimeParametersFromCloudParameters(run, node, nodeInstanceId);
+		run = initNodeInstanceRuntimeParametersFromImageParameters(run, node, nodeInstanceId);
 
 		run.addNodeInstanceName(node, nodeInstanceId);
 
@@ -200,11 +195,11 @@ public class DeploymentFactory extends RunFactory {
 
 	public static void initNodeInstanceCommonRuntimeParameters(Run run, Node node, int nodeInstanceId)
 			throws ValidationException {
-		assignRuntimeParameters(run, Run.composeNodeInstanceName(node, nodeInstanceId));
+		assignCommonNodeRuntimeParameters(run, Run.composeNodeInstanceName(node, nodeInstanceId));
 	}
 
 
-	private static Run initNodeInstanceRuntimeParametersFromCloudParameters(Run run, Node node, int nodeInstanceId)
+	private static Run initNodeInstanceRuntimeParametersFromImageParameters(Run run, Node node, int nodeInstanceId)
 			throws ValidationException {
 
 		List<String> filter = new ArrayList<String>();
@@ -218,7 +213,7 @@ public class DeploymentFactory extends RunFactory {
 		for (ModuleParameter param : image.getParameterList()) {
 			String category = param.getCategory();
 			if (filter.contains(category) || cloudService.equals(category))	{
-				String initialValue = extractInitialValue(param, node);
+				String initialValue = extractInitialValue(param, node, run);
 				run.createRuntimeParameter(node, nodeInstanceId,
 						param.getName(),
 						initialValue,
@@ -280,19 +275,18 @@ public class DeploymentFactory extends RunFactory {
 				+ index + RuntimeParameter.NODE_PROPERTY_SEPARATOR + parts[1];
 	}
 
-	private static String constructParamName(String nodename, String paramname) {
-		return RuntimeParameter.constructParamName(nodename, paramname);
-	}
+	public static String extractInitialValue(ModuleParameter parameter, Node node, Run run) {
+		String parameterName = parameter.getName();
 
-	public static String extractInitialValue(ModuleParameter parameter,
-			Node node) {
+		String value = run.getParameterValue(constructNodeParamName(node, parameterName), null);
+		if (value == null) {
+			value = extractInitialValue(node.getParameter(parameterName));
+			if (value == null) {
+				value = parameter.getValue();
+			}
+		}
 
-		String initialNodeValue = extractInitialValue(node
-				.getParameter(parameter.getName()));
-		String defaultModuleParameter = parameter.getValue();
-
-		return initialNodeValue == null ? defaultModuleParameter
-				: initialNodeValue;
+		return value;
 	}
 
 	private static String extractInitialValue(NodeParameter parameter) {
@@ -310,48 +304,25 @@ public class DeploymentFactory extends RunFactory {
 		return value;
 	}
 
-	@Override
-	public Module overloadModule(Run run, User user) throws ValidationException {
-
-		DeploymentModule deployment = DeploymentModule.populateFromRun(run,
-				loadModule(run), user);
-
-		for (Node node : deployment.getNodes().values()) {
-			RunFactory.resolveImageIdIfAppropriate(node.getImage(), user);
-		}
-
-		return deployment;
-	}
-
-	protected static void initNodeRunParameters(Run run)
-			throws ValidationException {
+	protected static void initNodeRunParameters(Run run) throws ValidationException {
 
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 		for (Node node : deployment.getNodes().values()) {
 
-			String key = run.nodeRuntimeParameterKeyName(node, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
-			run.setParameter(new RunParameter(key,
-					String.valueOf(node.getMultiplicity()),
-					RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION));
-
-			key = run.nodeRuntimeParameterKeyName(node, RuntimeParameter.CLOUD_SERVICE_NAME);
-			run.setParameter(new RunParameter(key,
-					String.valueOf(node.getCloudService()),
-					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION));
-
-			key = run.nodeRuntimeParameterKeyName(node, RunParameter.NODE_INCREMENT_KEY);
-			run.setParameter(new RunParameter(key,
-					String.valueOf(node.getMultiplicity() + 1),
+			String key = constructNodeParamName(node, RunParameter.NODE_INCREMENT_KEY);
+			run.setParameter(new RunParameter(key, String.valueOf(node.getMultiplicity() + 1),
 					RunParameter.NODE_INCREMENT_DESCRIPTION));
-
 		}
+	}
+
+	public static String constructNodeParamName(Node node, String parameterName) {
+		return constructParamName(node.getName(), parameterName);
 	}
 
 	public static Map<String, Node> getNodes(Run run) throws ValidationException {
 		Module module = run.getModule(false);
 		if (module == null) {
-			module = new DeploymentFactory().overloadModule(run,
-					User.loadByName(run.getUser()));
+			module = loadModule(run);
 		}
 
 		if (module.getCategory() != ModuleCategory.Deployment) {
@@ -362,20 +333,67 @@ public class DeploymentFactory extends RunFactory {
 		return ((DeploymentModule) module).getNodes();
 	}
 
-	public static HashSet<String> getCloudServicesList(Run run)
-			throws ValidationException {
+	public static HashSet<String> getCloudServicesList(Run run) throws ValidationException {
+
 		HashSet<String> cloudServicesList = new HashSet<String>();
-		for (Node n : getNodes(run).values()) {
-			String cloudServiceName = n.getCloudService();
-			cloudServicesList.add(run.getEffectiveCloudServiceName(cloudServiceName));
+
+		for (Node node : getNodes(run).values()) {
+			String cloudServiceName = run.getCloudServiceNameForNode(node.getName());
+
+			cloudServicesList.add(cloudServiceName);
 		}
+
 		return cloudServicesList;
 	}
 
 	@Override
 	protected void initCloudServices(Run run) throws ValidationException {
-		run.setCloudServiceNames(StringUtils.join(getCloudServicesList(run),
-				","));
+		run.setCloudServiceNames(StringUtils.join(getCloudServicesList(run), ","));
+	}
+
+	@Override
+	protected void addUserFormParametersAsRunParameters(Module module, Run run,
+			Map<String, List<Parameter<?>>> userChoices) throws ValidationException {
+
+		Map<String, List<Parameter<?>>> parametersPerNode = userChoices;
+
+		DeploymentModule deployment = (DeploymentModule) module;
+
+		for (Map.Entry<String, List<Parameter<?>>> entry : parametersPerNode.entrySet()) {
+			String nodeInstanceName = entry.getKey();
+			if (!deployment.getNodes().containsKey(nodeInstanceName)) {
+				throw new ValidationException("Unknown node: " + nodeInstanceName);
+			}
+
+			Node node = deployment.getNodes().get(nodeInstanceName);
+
+			for (Parameter<?> parameter : entry.getValue()) {
+				if (parameter.getName().equals(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME)) {
+					String key = constructNodeParamName(node, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+					RunParameter rp = new RunParameter(key, extractInitialValue((NodeParameter)parameter),
+							RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION);
+					run.setParameter(rp);
+					continue;
+				}
+				if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
+					String key = constructNodeParamName(node, RuntimeParameter.CLOUD_SERVICE_NAME);
+					String value = extractInitialValue((NodeParameter)parameter);
+					RunParameter rp = new RunParameter(key, run.getEffectiveCloudServiceName(value),
+							RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+					run.setParameter(rp);
+					continue;
+				}
+				if (!node.getParameters().containsKey(parameter.getName())) {
+					throw new ValidationException("Unknown parameter: " + parameter.getName() + " in node: "
+							+ nodeInstanceName);
+				}
+				String key = constructNodeParamName(node, parameter.getName());
+				RunParameter rp = new RunParameter(key, extractInitialValue((NodeParameter)parameter), "");
+				run.setParameter(rp);
+			}
+
+		}
+
 	}
 
 }

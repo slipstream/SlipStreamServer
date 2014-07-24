@@ -22,6 +22,7 @@ package com.sixsq.slipstream.factory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
@@ -31,9 +32,11 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
@@ -115,7 +118,6 @@ public class BuildImageFactory extends RunFactory {
 	protected void init(Module module, Run run, User user, String cloudService)
 			throws ValidationException, NotFoundException {
 
-		//initializeOrchestratorRuntimeParameters(run);
 		initRuntimeParameters((ImageModule) module, run);
 		initMachineState(run);
 		initNodeNames(run, cloudService);
@@ -124,7 +126,7 @@ public class BuildImageFactory extends RunFactory {
 	protected static void initMachineState(Run run) throws ValidationException,
 			NotFoundException {
 
-		assignRuntimeParameters(run, Run.MACHINE_NAME);
+		assignCommonNodeRuntimeParameters(run, Run.MACHINE_NAME);
 	}
 
 	protected static void initRuntimeParameters(ImageModule image, Run run)
@@ -162,10 +164,6 @@ public class BuildImageFactory extends RunFactory {
 		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX + RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
 				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(Run.MACHINE_NAME,
-				RuntimeParameter.SCALE_STATE_KEY),
-				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
-				RuntimeParameter.SCALE_STATE_DESCRIPTION);
 	}
 
 	protected void initNodeNames(Run run, String cloudService)
@@ -175,9 +173,34 @@ public class BuildImageFactory extends RunFactory {
 	}
 
 	@Override
-	public Module overloadModule(Run run, User user) throws ValidationException {
-		Module module = loadModule(run);
-		return ImageModule.populateBaseImageIdFromRun(run, module);
+	protected void addUserFormParametersAsRunParameters(Module module, Run run,
+			Map<String, List<Parameter<?>>> userChoices) throws ValidationException {
+
+		ImageModule image = (ImageModule) module;
+
+		for (Map.Entry<String, List<Parameter<?>>> entry : userChoices.entrySet()) {
+			String nodeInstanceName = entry.getKey();
+
+			for (Parameter<?> parameter : entry.getValue()) {
+
+				if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
+					String key = constructParamName(nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME);
+					RunParameter rp = new RunParameter(key, parameter.getValue(), "");
+					run.setParameter(rp);
+					continue;
+				}
+
+				if (!image.getParameters().containsKey(parameter.getName())) {
+					throw new ValidationException("Unknown parameter: " + parameter.getName() + " in node: "
+							+ nodeInstanceName);
+				}
+
+				String key = constructParamName(nodeInstanceName, parameter.getName());
+				RunParameter rp = new RunParameter(key, parameter.getValue(), "");
+				run.setParameter(rp);
+			}
+		}
 	}
 
 }
+

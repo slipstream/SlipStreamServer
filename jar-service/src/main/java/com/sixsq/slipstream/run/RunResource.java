@@ -137,8 +137,8 @@ public class RunResource extends RunBaseResource {
 			}
 		}
 
-		Module module = RunFactory.selectFactory(run.getType()).overloadModule(run, user);
-		run.setModule(module, true);
+		Module module = RunFactory.loadModule(run);
+		run.setModule(module);
 
 		return run;
 	}

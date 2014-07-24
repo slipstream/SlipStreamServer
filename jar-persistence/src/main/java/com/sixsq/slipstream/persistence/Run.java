@@ -589,16 +589,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return getModule(true);
 	}
 
-	public void setModule(Module module) throws ValidationException {
-		setModule(module, false);
-	}
 
-	public void setModule(Module module, boolean populate)
-			throws ValidationException {
+	public void setModule(Module module) throws ValidationException {
 		this.module = module;
-		if (populate) {
-			populateModule();
-		}
 	}
 
 	@Override
@@ -681,8 +674,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return runtimeParameters.get(key);
 	}
 
-	public String getRuntimeParameterValue(String key) throws AbortException,
-			NotFoundException {
+	public String getRuntimeParameterValue(String key) throws AbortException, NotFoundException {
 
 		if (isAbort()) {
 			throw new AbortException("Abort flag raised!");
@@ -762,7 +754,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public String getEffectiveCloudServiceName(Node node) {
-		return getEffectiveCloudServiceName(node.getCloudService());
+		String cloudService = getCloudServiceNameForNode(node.getName());
+		return getEffectiveCloudServiceName(cloudService);
 	}
 
 	public String getEffectiveCloudServiceName(String cloudService) {
@@ -985,59 +978,16 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.groups = groups;
 	}
 
-	/**
-	 * Populate a volatile module and override its parameter (e.g. cloud
-	 * service, multiplicity)
-	 *
-	 * @throws ValidationException
-	 */
-	private void populateModule() throws ValidationException {
-
-		if (module.getCategory() == ModuleCategory.Deployment) {
-			populateDeploymentModule((DeploymentModule) module);
-		}
-		if (module.getCategory() == ModuleCategory.Image) {
-			populateImageModule((ImageModule) module);
-		}
-	}
-
 	public List<String> getGroupNameList() {
 		return Arrays.asList(getGroups().split(","));
-	}
-
-	private void populateDeploymentModule(DeploymentModule deployment)
-			throws ValidationException {
-		for (Node node : deployment.getNodes().values()) {
-
-			RunParameter runParameter;
-
-			runParameter = getParameter(nodeRuntimeParameterKeyName(node,
-					RuntimeParameter.MULTIPLICITY_PARAMETER_NAME));
-			if (runParameter != null) {
-				node.setMultiplicity(runParameter.getValue());
-			}
-
-			node.getImage().assignImageIdFromCloudService(
-					node.getCloudService());
-		}
 	}
 
 	public String nodeRuntimeParameterKeyName(Node node, String nodeParameterName) {
 		return node.getName() + NODE_NAME_PARAMETER_SEPARATOR + nodeParameterName;
 	}
 
-	private void populateImageModule(ImageModule image)
-			throws ValidationException {
-		if (type == RunType.Orchestration) {
-			image.assignBaseImageIdToImageIdFromCloudService(getCloudService());
-		} else {
-			image.assignImageIdFromCloudService(getCloudService());
-		}
-	}
-
 	public static String constructOrchestratorName(String cloudService) {
-		return ORCHESTRATOR_NAME + ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR
-				+ cloudService;
+		return ORCHESTRATOR_NAME + ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR + cloudService;
 	}
 
 	public String getCloudServiceNames() {
@@ -1046,6 +996,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public void setCloudServiceNames(String cloudServiceNames) {
 		this.cloudServiceNames = cloudServiceNames;
+	}
+
+	public String getCloudServiceNameForNode(String nodeName) {
+		String key = RuntimeParameter.constructParamName(nodeName, RuntimeParameter.CLOUD_SERVICE_NAME);
+		return getParameter(key).getValue();
 	}
 
 	public boolean isMutable() {

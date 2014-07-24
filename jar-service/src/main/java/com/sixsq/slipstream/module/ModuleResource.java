@@ -413,21 +413,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	protected Module loadParameterized(String targetParameterizedUri)
 			throws ValidationException {
 
-		Module module = loadModule(targetParameterizedUri);
-
-		resolveImageIdIfAppropriate(module);
-
-		return module;
-
-	}
-
-	private void resolveImageIdIfAppropriate(Module module)
-			throws ConfigurationException, ValidationException {
-		try {
-			RunFactory.resolveImageIdIfAppropriate(module, getUser());
-		} catch (ValidationException ex) {
-			// ok, the user might not be fully configured
-		}
+		return loadModule(targetParameterizedUri);
 	}
 
 	public Module loadModule(String targetParameterizedUri)
