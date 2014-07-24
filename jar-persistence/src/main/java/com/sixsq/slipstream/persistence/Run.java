@@ -507,7 +507,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date lastStateChangeTime = new Date();
+	protected Date lastStateChangeTime = new Date();
 
 	/**
 	 * Comma separated list of node names - e.g. apache1.1, apache1.2, ...
@@ -926,7 +926,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setLastStateChange() {
-		this.lastStateChangeTime  = now();
+		setLastStateChange(now());
+	}
+
+	public void setLastStateChange(Date date){
+		this.lastStateChangeTime = date;
 	}
 
 	public int getMultiplicity(String nodeName) throws NotFoundException {

@@ -36,6 +36,7 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.statemachine.States;
 
+
 public class RunTest {
 
 	@Test
@@ -73,17 +74,16 @@ public class RunTest {
 		User user = new User("user");
 		user.setParameter(new UserParameter(UserParameter.KEY_TIMEOUT, "60", ""));
 		user.store();
-		
+
 		List<Run> before = Run.listOldTransient(user);
-		
+
 		Run done = new Run(image, RunType.Run, "test", new User("user"));
 		done.setStart(twoHourBack);
 		done.setState(States.Done);
 		done.store();
 
 		Run aborting = new Run(image, RunType.Run, "test", new User("user"));
-		aborting.setStart(twoHourBack);
-//		aborting.setState(States.Aborting);
+		aborting.setLastStateChange(twoHourBack);
 		aborting.store();
 
 		List<Run> transiant = Run.listOldTransient(user);
