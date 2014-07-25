@@ -37,9 +37,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test see
- * 
+ *
  * @see ParameterTest
- * 
+ *
  */
 @MappedSuperclass
 @SuppressWarnings("serial")
@@ -311,7 +311,7 @@ public abstract class Parameter<T> implements Serializable {
 		}
 		return newKey.toString();
 	}
-	
+
 	@Override
 	public String toString() {
 		return value;
