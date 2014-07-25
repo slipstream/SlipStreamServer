@@ -21,36 +21,25 @@ package com.sixsq.slipstream.factory;
  */
 
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.User;
 
 public class SimpleRunFactory extends BuildImageFactory {
 
 	@Override
-	protected Run constructRun(Module module, String cloudService, User user)
-			throws ValidationException {
-		return new Run(module, RunType.Run, cloudService, user);
+	protected RunType getRunType() {
+		return RunType.Run;
 	}
 
 	@Override
-	protected void validateModule(Module module, String cloudService)
-			throws SlipStreamClientException {
+	protected void validateModule(Module module, String cloudService) throws SlipStreamClientException {
 
 		ImageModule image = (ImageModule) module;
 
 		checkNoCircularDependencies(image);
 
 		image.validateForRun(cloudService);
-	}
-
-	@Override
-	protected void initNodeNames(Run run, String cloudService) {
-		run.addNodeInstanceName(Run.MACHINE_NAME, cloudService);
-		run.addGroup(Run.MACHINE_NAME, cloudService);
 	}
 
 }

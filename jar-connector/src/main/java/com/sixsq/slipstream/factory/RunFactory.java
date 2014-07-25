@@ -24,22 +24,19 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Set;
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
-import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
@@ -51,7 +48,6 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.FileUtil;
-import com.sixsq.slipstream.util.Logger;
 
 public abstract class RunFactory {
 
@@ -59,40 +55,84 @@ public abstract class RunFactory {
 	private static final String RUNNING_STATE = "running";
 
 
-	public final Run createRun(Module module, String cloudService, User user)
-			throws SlipStreamClientException {
-		return createRun(module, cloudService, user, null);
+	public final Run createRun(Module module, User user) throws SlipStreamClientException {
+		return createRun(module, user, null);
 	}
 
-	public final Run createRun(Module module, String cloudService, User user,
+	public final Run createRun(Module module, User user,
 			Map<String, List<Parameter<?>>> userChoices) throws SlipStreamClientException {
 
-		checkCloudServiceDefined(cloudService, user);
+		//checkCloudServiceDefined(cloudService, user);
 
-		validateModule(module, cloudService);
+		//validateModule(module, cloudService);
 
-		Run run = constructRun(module, cloudService, user);
+		Map<String, String> cloudServicePerNode = resolveCloudServiceNames(module, user, userChoices);
+		Set<String> cloudServiceNames = new HashSet<String>(cloudServicePerNode.values());
 
+		Run run = new Run(module, getRunType(), cloudServiceNames, user);
+
+		initCloudServices(run, cloudServicePerNode);
+
+		initDefaultRunParameters(run, user);
+		initExtraRunParameters(module, run);
 		if (userChoices != null) {
 			addUserFormParametersAsRunParameters(module, run, userChoices);
+			updateExtraRunParameters(module, run, userChoices);
 		}
 
-		validateRun(run, user, cloudService);
+		//validateRun(run, user, cloudService);
 
-		initialize(module, run, user, cloudService);
+		initialize(module, run, user);
 
 		return run;
 	}
 
+	private void initDefaultRunParameters(Run run, User user) throws ValidationException {
+		run = addOnSuccessRunForeverToParameters(run, user);
+		run = addOnErrorRunForeverToParameters(run, user);
+
+		run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "false",
+				Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
+	}
+
+	private void initialize(Module module, Run run, User user)
+			throws ValidationException, NotFoundException {
+
+		initializeGlobalParameters(run);
+
+		init(module, run, user);
+
+		initializeOrchestratorRuntimeParameters(run);
+		initOrchestratorsNodeNames(run);
+
+	}
+
+	protected abstract RunType getRunType();
+
+	protected abstract void init(Module module, Run run, User user)
+			throws ValidationException, NotFoundException;
+
+	protected abstract Map<String, String> resolveCloudServiceNames(Module module, User user,
+			Map<String, List<Parameter<?>>> userChoices);
+
 	protected abstract void addUserFormParametersAsRunParameters(Module module, Run run,
 			Map<String, List<Parameter<?>>> userChoices) throws ValidationException;
 
-	protected abstract Run constructRun(Module module, String cloudService,
-			User user) throws ValidationException;
+	private void initCloudServices(Run run, Map<String, String> cloudServicePerNode) throws ValidationException {
+		for (Map.Entry<String, String> entry: cloudServicePerNode.entrySet()) {
+			String key = constructParamName(entry.getKey(), RuntimeParameter.CLOUD_SERVICE_NAME);
+			RunParameter rp = new RunParameter(key, entry.getValue(), RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+			run.setParameter(rp);
+		}
+	}
 
-	protected void validateModule(Module module, String cloudService)
-			throws SlipStreamClientException {
+	protected abstract void initExtraRunParameters(Module module, Run run) throws ValidationException;
 
+	protected abstract void updateExtraRunParameters(Module module, Run run,
+			Map<String, List<Parameter<?>>> userChoices) throws ValidationException;
+
+	protected void validateModule(Module module, String cloudService) throws SlipStreamClientException {
+		return;
 	}
 
 	protected void validateRun(Run run, User user, String cloudService)
@@ -137,40 +177,14 @@ public abstract class RunFactory {
 		}
 	}
 
-	protected final void initialize(Module module, Run run, User user, String cloudService)
-			throws ValidationException, NotFoundException {
-
-		run = addOnSuccessRunForeverToParameters(run, user);
-		run = addOnErrorRunForeverToParameters(run, user);
-
-		run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "false",
-				Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
-
-		initializeGlobalParameters(run);
-		initCloudServices(run);
-
-		init(module, run, user, cloudService);
-
-		initializeOrchestratorRuntimeParameters(run);
-		initOrchestratorsNodeNames(run);
-
-	}
-
-	protected abstract void init(Module module, Run run, User user, String cloudService)
-			throws ValidationException, NotFoundException;
-
-	protected void initCloudServices(Run run) throws ValidationException {
-		run.setCloudServiceNames(run.getCloudService());
-	}
-
-	public static Run getRun(Module module, RunType type, String cloudService, User user)
+	public static Run getRun(Module module, RunType type, User user)
 			throws SlipStreamClientException {
-		return getRun(module, type, cloudService, user, null);
+		return getRun(module, type, user, null);
 	}
 
-	public static Run getRun(Module module, RunType type, String cloudService, User user, Map<String, List<Parameter<?>>> userChoices)
+	public static Run getRun(Module module, RunType type, User user, Map<String, List<Parameter<?>>> userChoices)
 			throws SlipStreamClientException {
-		return selectFactory(type).createRun(module, cloudService, user, userChoices);
+		return selectFactory(type).createRun(module, user, userChoices);
 	}
 
 	public static RunFactory selectFactory(RunType type)
@@ -194,11 +208,6 @@ public abstract class RunFactory {
 			throw (new SlipStreamClientException("Unknown module type: " + type));
 		}
 		return factory;
-	}
-
-	protected static Run constructRun(Module module, RunType type,
-			String cloudService, User user) throws ValidationException {
-		return new Run(module, type, cloudService, user);
 	}
 
 	private Run addOnSuccessRunForeverToParameters(Run run, User user) throws ValidationException {
@@ -241,7 +250,7 @@ public abstract class RunFactory {
 			throws ValidationException {
 
 		if (withOrchestrator(run)) {
-			HashSet<String> cloudServiceList = getCloudServicesList(run);
+			Set<String> cloudServiceList = getCloudServicesList(run);
 			for (String cloudServiceName : cloudServiceList) {
 				initializeOrchestratorParameters(run, cloudServiceName);
 			}
@@ -356,7 +365,7 @@ public abstract class RunFactory {
 
 	protected void initOrchestratorsNodeNames(Run run)
 			throws ConfigurationException, ValidationException {
-		HashSet<String> cloudServiceList = getCloudServicesList(run);
+		Set<String> cloudServiceList = getCloudServicesList(run);
 		if (withOrchestrator(run)){
 			for (String cloudServiceName : cloudServiceList) {
 				String nodename = Run.constructOrchestratorName(cloudServiceName);
@@ -369,19 +378,9 @@ public abstract class RunFactory {
 		}
 	}
 
-	public static HashSet<String> getCloudServicesList(Run run)
+	public static Set<String> getCloudServicesList(Run run)
 			throws ValidationException {
-
-		HashSet<String> cloudServicesList;
-
-		if (run.getCategory() == ModuleCategory.Deployment) {
-			cloudServicesList = DeploymentFactory.getCloudServicesList(run);
-		} else {
-			cloudServicesList = new HashSet<String>();
-			cloudServicesList.add(run.getCloudService());
-		}
-
-		return cloudServicesList;
+		return run.getCloudServiceNamesList();
 	}
 
 	public static Run updateVmStatus(Run run, User user)

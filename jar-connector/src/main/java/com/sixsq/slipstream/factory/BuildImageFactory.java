@@ -21,9 +21,11 @@ package com.sixsq.slipstream.factory;
  */
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sixsq.slipstream.connector.CloudService;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -44,9 +46,8 @@ import com.sixsq.slipstream.persistence.User;
 public class BuildImageFactory extends RunFactory {
 
 	@Override
-	protected Run constructRun(Module module, String cloudService, User user)
-			throws ValidationException {
-		return new Run(module, RunType.Machine, cloudService, user);
+	protected RunType getRunType() {
+		return RunType.Machine;
 	}
 
 	@Override
@@ -115,11 +116,13 @@ public class BuildImageFactory extends RunFactory {
 	}
 
 	@Override
-	protected void init(Module module, Run run, User user, String cloudService)
+	protected void init(Module module, Run run, User user)
 			throws ValidationException, NotFoundException {
 
 		initRuntimeParameters((ImageModule) module, run);
 		initMachineState(run);
+
+		String cloudService = run.getCloudServiceNameForNode(Run.MACHINE_NAME);
 		initNodeNames(run, cloudService);
 	}
 
@@ -141,8 +144,8 @@ public class BuildImageFactory extends RunFactory {
 		for (ParameterCategory c : ParameterCategory.values()) {
 			filter.add(c.toString());
 		}
-		String cloudService = run.getCloudService();
-		filter.add(cloudService);
+		String cloudServiceName = run.getCloudServiceNameForNode(Run.MACHINE_NAME);
+		filter.add(cloudServiceName);
 
 		if (image.getParameters() != null) {
 			for (ModuleParameter param : image.getParameterList()) {
@@ -155,12 +158,11 @@ public class BuildImageFactory extends RunFactory {
 		}
 
 		// Add cloud service name to orchestrator and machine
-		String cloudServiceName = run.getCloudService();
 		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX
 				+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
-		String imageId = image.extractBaseImageId(cloudService);
+		String imageId = image.extractBaseImageId(cloudServiceName);
 		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX + RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
 				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
 
@@ -178,28 +180,59 @@ public class BuildImageFactory extends RunFactory {
 
 		ImageModule image = (ImageModule) module;
 
-		for (Map.Entry<String, List<Parameter<?>>> entry : userChoices.entrySet()) {
-			String nodeInstanceName = entry.getKey();
+		List<Parameter<?>> userChoicesForMachine = userChoices.get(Run.MACHINE_NAME);
+		String nodeInstanceName = Run.MACHINE_NAME;
 
-			for (Parameter<?> parameter : entry.getValue()) {
+		for (Parameter<?> parameter : userChoicesForMachine) {
+			checkParameterIsValid(image, parameter);
 
-				if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
-					String key = constructParamName(nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME);
-					RunParameter rp = new RunParameter(key, parameter.getValue(), "");
-					run.setParameter(rp);
-					continue;
-				}
+			String key = constructParamName(nodeInstanceName, parameter.getName());
+			RunParameter rp = new RunParameter(key, parameter.getValue(), "");
+			run.setParameter(rp);
+		}
+	}
 
-				if (!image.getParameters().containsKey(parameter.getName())) {
-					throw new ValidationException("Unknown parameter: " + parameter.getName() + " in node: "
-							+ nodeInstanceName);
-				}
+	private void checkParameterIsValid(ImageModule image, Parameter<?> parameter) throws ValidationException {
+		List<String> paramsToFilter = new ArrayList<String>();
+		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+		paramsToFilter.add(RuntimeParameter.CLOUD_SERVICE_NAME);
 
-				String key = constructParamName(nodeInstanceName, parameter.getName());
-				RunParameter rp = new RunParameter(key, parameter.getValue(), "");
-				run.setParameter(rp);
+		String paramName = parameter.getName();
+		if (!image.getParameters().containsKey(paramName) && !paramsToFilter.contains(paramName)) {
+			throw new ValidationException("Unknown parameter: " + parameter.getName() + " in node: "
+					+ Run.MACHINE_NAME);
+		}
+	}
+
+	@Override
+	protected Map<String, String> resolveCloudServiceNames(Module module, User user,
+			Map<String, List<Parameter<?>>> userChoices) {
+		Map<String, String> cloudServiceNamesPerNode = new HashMap<String, String>();
+		String cloudService = null;
+
+		for (Parameter<?> parameter : userChoices.get(Run.MACHINE_NAME)) {
+			if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)){
+				cloudService = parameter.getValue();
+				break;
 			}
 		}
+
+		if (CloudService.isDefaultCloudService(cloudService)) {
+			cloudService = user.getDefaultCloudService();
+		}
+
+		cloudServiceNamesPerNode.put(Run.MACHINE_NAME, cloudService);
+
+		return cloudServiceNamesPerNode;
+	}
+
+	@Override
+	protected void initExtraRunParameters(Module module, Run run) throws ValidationException {
+	}
+
+	@Override
+	protected void updateExtraRunParameters(Module module, Run run, Map<String, List<Parameter<?>>> userChoices)
+			throws ValidationException {
 	}
 
 }

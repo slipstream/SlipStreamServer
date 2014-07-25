@@ -20,7 +20,8 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -31,6 +32,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
 
 public class Launcher {
@@ -75,18 +77,11 @@ public class Launcher {
 
 		private void launch() {
 			try {
-				logger.info("Submitting asynchronous launch operation for run: "
-						+ run.getUuid());
+				logger.info("Submitting asynchronous launch operation for run: " + run.getUuid());
 
-				switch (run.getType()) {
-				case Orchestration:
-				case Machine:
-					runOrchestration();
-					break;
-				case Run:
-					runImage();
-					break;
-				default:
+				if (Arrays.asList(RunType.values()).contains(run.getType())) {
+					launchRun();
+				} else {
 					throw (new ServerExecutionEnginePluginException(
 							"Cannot submit type: " + run.getType() + " yet!!"));
 				}
@@ -97,28 +92,16 @@ public class Launcher {
 			}
 		}
 
-		// TODO: Refactor: merge runImage and runOrchestration
-		private void runImage() throws ValidationException {
-			// Connector connector = ConnectorFactory.getCurrentConnector(user);
-			HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
+		private void launchRun() throws ValidationException {
+			Set<String> cloudServicesList = RunFactory.getCloudServicesList(run);
 			for (String cloudServiceName : cloudServicesList) {
 				Connector connector = ConnectorFactory.getConnector(cloudServiceName);
 				try {
 					connector.launch(run, user);
 				} catch (SlipStreamException e) {
-					abortRun(Run.MACHINE_NAME, e);
-				}
-			}
-		}
-
-		private void runOrchestration() throws ValidationException {
-			HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
-			for (String cloudServiceName : cloudServicesList) {
-				Connector connector = ConnectorFactory.getConnector(cloudServiceName);
-				try {
-					connector.launch(run, user);
-				} catch (SlipStreamException e) {
-					abortRun(connector.getOrchestratorName(run), e);
+					String orchestratorName = (run.getType() == RunType.Run) ? Run.MACHINE_NAME :
+						connector.getOrchestratorName(run);
+					abortRun(orchestratorName, e);
 				}
 			}
 		}

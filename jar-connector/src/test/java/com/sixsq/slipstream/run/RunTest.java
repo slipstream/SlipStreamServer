@@ -266,8 +266,7 @@ public class RunTest extends RunTestBase {
 	public void createAndRetreive() throws FileNotFoundException, IOException,
 			SlipStreamException {
 
-		Run run = new Run(new ImageModule("createAndRetreive"),
-				RunType.Orchestration, cloudServiceName, user);
+		Run run = new Run(new ImageModule("createAndRetreive"), RunType.Orchestration, cloudServiceName, user);
 		run.store();
 
 		Run runRestored = Run.loadFromUuid(run.getUuid());
@@ -430,8 +429,7 @@ public class RunTest extends RunTestBase {
 
 		deployment = deployment.store();
 
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				cloudServiceName, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, cloudServiceName, user);
 
 		try {
 			run.updateRuntimeParameter("node1.1:notthere", null);

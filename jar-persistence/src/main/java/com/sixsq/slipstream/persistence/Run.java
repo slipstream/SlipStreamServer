@@ -27,8 +27,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -56,7 +58,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CollectionType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementArray;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.credentials.Credentials;
@@ -314,7 +316,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			// this info in held in getCloudServiceNameList()
 			// so if the list is not empty, use it and
 			// create a RunView instance for each
-			String[] cloudServiceNames = r.getCloudServiceNameList();
+			Set<String> cloudServiceNames = r.getCloudServiceNamesList();
 
 			runView = convertRunToRunView(r);
 
@@ -456,12 +458,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return q;
 	}
 
-	public static boolean isDefaultCloudService(String cloudServiceName) {
-		return "".equals(cloudServiceName)
-				|| CloudImageIdentifier.DEFAULT_CLOUD_SERVICE
-						.equals(cloudServiceName) || cloudServiceName == null;
-	}
-
 	@Attribute
 	@Id
 	private String resourceUri;
@@ -472,14 +468,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Attribute(empty = "Orchestration")
 	private RunType type = RunType.Orchestration;
 
-	@Attribute
-	private String cloudServiceName;
-
 	/**
-	 * Cloud service names (only applies to deployment type run) comma separated
+	 * Cloud service names comma separated
 	 */
-	@Attribute(required = false)
-	@Column(length=1024)
+	@Attribute(required = true)
+	@Column(length=65536)
 	private String cloudServiceNames;
 
 	@Attribute(required = false)
@@ -545,21 +538,21 @@ public class Run extends Parameterized<Run, RunParameter> {
 	/**
 	 * List of cloud service names used in the current run
 	 */
-	@ElementArray(required = false)
-	public String[] getCloudServiceNameList() {
-		return cloudServiceNames == null ? new String[] { cloudServiceName }
-				: cloudServiceNames.split(",");
+	@ElementList(required = false)
+	public Set<String> getCloudServiceNamesList() {
+		return new HashSet<String>(Arrays.asList(cloudServiceNames.split(",")));
 	}
 
-	@ElementArray(required = false)
-	public void setCloudServiceNameList(String[] names) {
+	@ElementList(required = false)
+	private void setCloudServiceNamesList(Set<String> cloudServiceNames) {
+		this.cloudServiceNames = StringUtils.join(cloudServiceNames, ",");
 	}
 
 	@SuppressWarnings("unused")
 	private Run() throws NotFoundException {
 	}
 
-	public Run(Module module, RunType type, String cloudServiceName, User user)
+	public Run(Module module, RunType type, Set<String> cloudServiceNames, User user)
 			throws ValidationException {
 
 		uuid = UUID.randomUUID().toString();
@@ -568,9 +561,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.category = module.getCategory();
 		this.moduleResourceUri = module.getResourceUri();
 		this.type = type;
-		this.cloudServiceName = (CloudImageIdentifier.DEFAULT_CLOUD_SERVICE
-				.equals(cloudServiceName) ? user.getDefaultCloudService()
-				: cloudServiceName);
+		this.cloudServiceNames = StringUtils.join(cloudServiceNames, ",");
 		this.user_ = user.getName();
 
 		this.module = module;
@@ -753,18 +744,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return new Date();
 	}
 
-	public String getEffectiveCloudServiceName(Node node) {
-		String cloudService = getCloudServiceNameForNode(node.getName());
-		return getEffectiveCloudServiceName(cloudService);
-	}
-
-	public String getEffectiveCloudServiceName(String cloudService) {
-		return isDefaultCloudService(cloudService) ? getCloudService() : cloudService;
-	}
-
 	public void addNodeInstanceName(Node node, int nodeInstanceId) {
 		String nodeInstanceName = composeNodeInstanceName(node, nodeInstanceId);
-		String cloudServiceName = getEffectiveCloudServiceName(node);
+		String cloudServiceName = getCloudServiceNameForNode(node.getName());
 
 		addNodeInstanceName(nodeInstanceName, cloudServiceName);
 	}
@@ -940,14 +922,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 				+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		return Integer.parseInt(multiplicity);
-	}
-
-	public void setCloudServiceName(String cloudServiceName) {
-		this.cloudServiceName = cloudServiceName;
-	}
-
-	public String getCloudService() {
-		return cloudServiceName;
 	}
 
 	public List<String> getOrchestrators() {

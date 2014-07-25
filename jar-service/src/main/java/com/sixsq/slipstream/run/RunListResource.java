@@ -167,11 +167,9 @@ public class RunListResource extends BaseResource {
 			User user = getUser();
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
-			String defaultCloudService = getDefaultCloudService(form, user);
-
 			Map<String, List<Parameter<?>>> userChoices = getUserChoicesFromForm(module.getCategory(), form);
 
-			run = RunFactory.getRun(module, parseType(form), defaultCloudService, user, userChoices);
+			run = RunFactory.getRun(module, parseType(form), user, userChoices);
 
 			run = addCredentials(run);
 
@@ -210,18 +208,6 @@ public class RunListResource extends BaseResource {
 		if(!module.getAuthz().canPost(getUser())) {
 			throwClientForbiddenError("User does not have the rights to execute this module");
 		}
-	}
-
-	/**
-	 * If the form contains a cloudservice parameter, use that
-	 * otherwise, use the user default. Builds and Simple Run
-	 * will contain a cloud service, where for deployment this
-	 * is defined per node, which means more processing by the
-	 * factory.
-	 */
-	private String getDefaultCloudService(Form form, User user) {
-		String cloudService = form.getFirstValue("parameter--cloudservice", user.getDefaultCloudService());
-		return Run.isDefaultCloudService(cloudService) ? user.getDefaultCloudService() : cloudService;
 	}
 
 	private void setReference(Form form) {
