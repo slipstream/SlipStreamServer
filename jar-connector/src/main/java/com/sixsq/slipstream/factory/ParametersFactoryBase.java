@@ -9,9 +9,9 @@ package com.sixsq.slipstream.factory;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		this.category = category;
 	}
 
-	protected String getCategory() {
+	public String getCategory() {
 		return category;
 	}
 
@@ -198,7 +198,7 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		S parameter = createParameter(name, value, description, mandatory);
 		assignParameter(parameter);
 	}
-	
+
 	protected void putParameter(String name, String value, String description,
 			boolean mandatory, boolean readonly) throws ValidationException {
 		S parameter = createParameter(name, value, description, mandatory);
