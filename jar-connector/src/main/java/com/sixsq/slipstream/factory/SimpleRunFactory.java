@@ -20,6 +20,8 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
+import java.util.Map;
+
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
@@ -33,13 +35,15 @@ public class SimpleRunFactory extends BuildImageFactory {
 	}
 
 	@Override
-	protected void validateModule(Module module, String cloudService) throws SlipStreamClientException {
+	protected void validateModule(Module module, Map<String, String> cloudServicePerNode)
+	        throws SlipStreamClientException {
 
 		ImageModule image = (ImageModule) module;
 
 		checkNoCircularDependencies(image);
 
-		image.validateForRun(cloudService);
+		String cloudServiceName = cloudServicePerNode.get(nodeInstanceName);
+		image.validateForRun(cloudServiceName);
 	}
 
 }

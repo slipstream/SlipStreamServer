@@ -61,10 +61,10 @@ public class DeploymentFactory extends RunFactory {
 	}
 
 	@Override
-	protected void validateRun(Run run, User user, String cloudService)
+	protected void validateRun(Run run, User user)
 			throws SlipStreamClientException {
 
-		super.validateRun(run, user, cloudService);
+		super.validateRun(run, user);
 
 		checkIsDeploymentModule(run);
 

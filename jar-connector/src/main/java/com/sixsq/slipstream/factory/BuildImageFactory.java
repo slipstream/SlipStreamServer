@@ -45,13 +45,16 @@ import com.sixsq.slipstream.persistence.User;
 
 public class BuildImageFactory extends RunFactory {
 
+	protected final static String nodeInstanceName = Run.MACHINE_NAME;
+	protected final static String nodeInstanceNamePrefix = Run.MACHINE_NAME_PREFIX;
+
 	@Override
 	protected RunType getRunType() {
 		return RunType.Machine;
 	}
 
 	@Override
-	protected void validateModule(Module module, String cloudService)
+	protected void validateModule(Module module, Map<String, String> cloudServicePerNode)
 			throws SlipStreamClientException {
 
 		ImageModule image = (ImageModule) module;
@@ -63,10 +66,11 @@ public class BuildImageFactory extends RunFactory {
 
 		checkHasSomethingToBuild(image);
 
-		checkNotAlreadyBuilt(image, cloudService);
+		String cloudServiceName = cloudServicePerNode.get(nodeInstanceName);
+		checkNotAlreadyBuilt(image, cloudServiceName);
 
 		// Finding an image id will validate that one exists
-		image.extractBaseImageId(cloudService);
+		image.extractBaseImageId(cloudServiceName);
 	}
 
 	protected static void checkNoCircularDependencies(ImageModule image)
@@ -122,14 +126,14 @@ public class BuildImageFactory extends RunFactory {
 		initRuntimeParameters((ImageModule) module, run);
 		initMachineState(run);
 
-		String cloudService = run.getCloudServiceNameForNode(Run.MACHINE_NAME);
+		String cloudService = run.getCloudServiceNameForNode(nodeInstanceName);
 		initNodeNames(run, cloudService);
 	}
 
 	protected static void initMachineState(Run run) throws ValidationException,
 			NotFoundException {
 
-		assignCommonNodeRuntimeParameters(run, Run.MACHINE_NAME);
+		assignCommonNodeRuntimeParameters(run, nodeInstanceName);
 	}
 
 	protected static void initRuntimeParameters(ImageModule image, Run run)
@@ -144,44 +148,46 @@ public class BuildImageFactory extends RunFactory {
 		for (ParameterCategory c : ParameterCategory.values()) {
 			filter.add(c.toString());
 		}
-		String cloudServiceName = run.getCloudServiceNameForNode(Run.MACHINE_NAME);
+		String cloudServiceName = run.getCloudServiceNameForNode(nodeInstanceName);
 		filter.add(cloudServiceName);
 
 		if (image.getParameters() != null) {
 			for (ModuleParameter param : image.getParameterList()) {
 				if (filter.contains(param.getCategory())) {
 					run.assignRuntimeParameter(
-							Run.MACHINE_NAME_PREFIX + param.getName(),
+							nodeInstanceNamePrefix + param.getName(),
 							param.getValue(), param.getDescription());
 				}
 			}
 		}
 
 		// Add cloud service name to orchestrator and machine
-		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX
+		run.assignRuntimeParameter(nodeInstanceNamePrefix
 				+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
 		String imageId = image.extractBaseImageId(cloudServiceName);
-		run.assignRuntimeParameter(Run.MACHINE_NAME_PREFIX + RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
+		run.assignRuntimeParameter(nodeInstanceNamePrefix + RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
 				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
 
 	}
 
 	protected void initNodeNames(Run run, String cloudService)
 			throws ConfigurationException, ValidationException {
-		run.addNodeInstanceName(Run.MACHINE_NAME, cloudService);
-		run.addGroup(Run.MACHINE_NAME, cloudService);
+		run.addNodeInstanceName(nodeInstanceName, cloudService);
+		run.addGroup(nodeInstanceName, cloudService);
 	}
 
 	@Override
 	protected void addUserFormParametersAsRunParameters(Module module, Run run,
 			Map<String, List<Parameter<?>>> userChoices) throws ValidationException {
 
-		ImageModule image = (ImageModule) module;
+		if (!isProvidedUserChoicesForNodeInstance(userChoices, nodeInstanceName)) {
+				return;
+		}
 
-		List<Parameter<?>> userChoicesForMachine = userChoices.get(Run.MACHINE_NAME);
-		String nodeInstanceName = Run.MACHINE_NAME;
+		ImageModule image = (ImageModule) module;
+		List<Parameter<?>> userChoicesForMachine = userChoices.get(nodeInstanceName);
 
 		for (Parameter<?> parameter : userChoicesForMachine) {
 			checkParameterIsValid(image, parameter);
@@ -192,6 +198,19 @@ public class BuildImageFactory extends RunFactory {
 		}
 	}
 
+	// TODO: pull this method up to be used in other factories.
+	public static boolean isProvidedUserChoicesForNodeInstance(Map<String, List<Parameter<?>>> userChoices,
+	        String nodeInstanceName) {
+		if (userChoices == null || userChoices.isEmpty())
+			return false;
+
+		List<Parameter<?>> paramsForNodeInstance = userChoices.get(nodeInstanceName);
+		if (paramsForNodeInstance == null || paramsForNodeInstance.isEmpty())
+			return false;
+
+		return true;
+	}
+
 	private void checkParameterIsValid(ImageModule image, Parameter<?> parameter) throws ValidationException {
 		List<String> paramsToFilter = new ArrayList<String>();
 		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
@@ -200,7 +219,7 @@ public class BuildImageFactory extends RunFactory {
 		String paramName = parameter.getName();
 		if (!image.getParameters().containsKey(paramName) && !paramsToFilter.contains(paramName)) {
 			throw new ValidationException("Unknown parameter: " + parameter.getName() + " in node: "
-					+ Run.MACHINE_NAME);
+					+ nodeInstanceName);
 		}
 	}
 
@@ -210,18 +229,20 @@ public class BuildImageFactory extends RunFactory {
 		Map<String, String> cloudServiceNamesPerNode = new HashMap<String, String>();
 		String cloudService = null;
 
-		for (Parameter<?> parameter : userChoices.get(Run.MACHINE_NAME)) {
-			if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)){
-				cloudService = parameter.getValue();
-				break;
-			}
+		if (isProvidedUserChoicesForNodeInstance(userChoices, nodeInstanceName)) {
+    		for (Parameter<?> parameter : userChoices.get(nodeInstanceName)) {
+    			if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
+    				cloudService = parameter.getValue();
+    				break;
+    			}
+    		}
 		}
 
 		if (CloudService.isDefaultCloudService(cloudService)) {
 			cloudService = user.getDefaultCloudService();
 		}
 
-		cloudServiceNamesPerNode.put(Run.MACHINE_NAME, cloudService);
+		cloudServiceNamesPerNode.put(nodeInstanceName, cloudService);
 
 		return cloudServiceNamesPerNode;
 	}

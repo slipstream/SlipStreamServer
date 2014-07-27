@@ -62,12 +62,10 @@ public abstract class RunFactory {
 	public final Run createRun(Module module, User user,
 			Map<String, List<Parameter<?>>> userChoices) throws SlipStreamClientException {
 
-		//checkCloudServiceDefined(cloudService, user);
-
-		//validateModule(module, cloudService);
-
 		Map<String, String> cloudServicePerNode = resolveCloudServiceNames(module, user, userChoices);
 		Set<String> cloudServiceNames = new HashSet<String>(cloudServicePerNode.values());
+
+		validateModule(module, cloudServicePerNode);
 
 		Run run = new Run(module, getRunType(), cloudServiceNames, user);
 
@@ -75,12 +73,12 @@ public abstract class RunFactory {
 
 		initDefaultRunParameters(run, user);
 		initExtraRunParameters(module, run);
-		if (userChoices != null) {
+		if (userChoices != null && !userChoices.isEmpty()) {
 			addUserFormParametersAsRunParameters(module, run, userChoices);
 			updateExtraRunParameters(module, run, userChoices);
 		}
 
-		//validateRun(run, user, cloudService);
+		validateRun(run, user);
 
 		initialize(module, run, user);
 
@@ -131,11 +129,12 @@ public abstract class RunFactory {
 	protected abstract void updateExtraRunParameters(Module module, Run run,
 			Map<String, List<Parameter<?>>> userChoices) throws ValidationException;
 
-	protected void validateModule(Module module, String cloudService) throws SlipStreamClientException {
+	protected void validateModule(Module module, Map<String, String> cloudServicePerNode)
+	        throws SlipStreamClientException {
 		return;
 	}
 
-	protected void validateRun(Run run, User user, String cloudService)
+	protected void validateRun(Run run, User user)
 			throws SlipStreamClientException {
 
 		validatePublicSshKey(run, user);
