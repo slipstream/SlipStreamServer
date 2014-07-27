@@ -36,44 +36,55 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.Logger;
 
-
 public class Metering {
 
-	public static String populate(User user) throws ConfigurationException,
-			ValidationException, NotFoundException, AbortException {
+	public static String populate(User user) throws ConfigurationException, ValidationException, NotFoundException,
+	        AbortException {
+		Map<String, Integer> usageData = produceCloudUsageData(user);
+		String usages = sendToGraphite(user, usageData);
+		return usages;
+	}
 
+	public static Map<String, Integer> produceCloudUsageData(User user) throws ConfigurationException,
+	        ValidationException {
 		Map<String, Integer> cloudUsage = new HashMap<String, Integer>();
 		Map<String, Integer> vmUsage = Vm.usage(user.getName());
 
 		for (String cloud : ConnectorFactory.getCloudServiceNamesList()) {
 			Integer currentUsage = vmUsage.get(cloud);
-			if (currentUsage == null) currentUsage = 0;
-
+			if (currentUsage == null) {
+				currentUsage = 0;
+			}
 			cloudUsage.put(cloud, currentUsage);
 		}
-
-		return sendToGraphite(user, cloudUsage);
+		return cloudUsage;
 	}
 
-	private static String sendToGraphite(User user, Map<String, Integer> usages) {
-		String buffer = "";
+	public static String sendToGraphite(User user, Map<String, Integer> usages) {
+		String usageData = "";
+		String errMsgBase = "Mesurements. Failed to send usage data to Graphite.";
 		try {
 			Socket conn = new Socket("localhost", 2003);
 			DataOutputStream out = new DataOutputStream(conn.getOutputStream());
-
-			for (Map.Entry<String, Integer> usage: usages.entrySet()) {
-				String cloud = usage.getKey();
-				String metricName = "slipstream." + user.getName() + ".usage.instance." + cloud;
-				int timestamp = (int) (System.currentTimeMillis() / 1000L);
-				int value = usage.getValue();
-				buffer += metricName + " " + String.valueOf(value) + " " + String.valueOf(timestamp) + "\n";
-			}
-			out.writeBytes(buffer);
+			usageData = transformUsageDataForGraphite(user, usages);
+			out.writeBytes(usageData);
 			conn.close();
 		} catch (UnknownHostException e) {
-			Logger.severe("Mesurements - Unknown host: " + e.getMessage());
+			Logger.severe(errMsgBase + " 'Unknown host' : " + e.getMessage());
 		} catch (IOException e) {
-			Logger.severe("Mesurements - IO exception: " + e.getMessage());
+			Logger.severe(errMsgBase + " 'IO exception' : " + e.getMessage());
+		}
+		return usageData;
+	}
+
+	public static String transformUsageDataForGraphite(User user, Map<String, Integer> usages) {
+		String buffer = "";
+		for (Map.Entry<String, Integer> usage : usages.entrySet()) {
+			String cloud = usage.getKey();
+			String metricName = "slipstream." + user.getName() + ".usage.instance." + cloud;
+			int timestamp = (int) (System.currentTimeMillis() / 1000L);
+			int value = usage.getValue();
+			buffer += metricName + " " + String.valueOf(value) + " " + String.valueOf(timestamp) + "\n";
 		}
 		return buffer;
 	}

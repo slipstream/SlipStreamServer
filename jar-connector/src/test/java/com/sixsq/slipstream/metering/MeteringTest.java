@@ -21,10 +21,13 @@ package com.sixsq.slipstream.metering;
  */
 
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -77,22 +80,33 @@ public class MeteringTest extends RunTestBase {
 	}
 
 	@Test
-	public void computeImageBuildRun() throws SlipStreamException {
+	public void cloudUsageData() throws SlipStreamException {
 
-		String data = Metering.populate(user);
+		Map<String, Integer> data = Metering.produceCloudUsageData(user);
 
-		String cloudAdata = getCloudData(CLOUD_A, "2");
-		String cloudBdata = getCloudData(CLOUD_B, "1");
-		String cloudCdata = getCloudData(CLOUD_C, "0");
-
-		assertTrue(data.contains(cloudAdata));
-		assertTrue(data.contains(cloudBdata));
-		assertTrue(data.contains(cloudCdata));
-		assertTrue(data.endsWith("\n"));
-
+		assertThat(2, is(data.get(CLOUD_A)));
+		assertThat(1, is(data.get(CLOUD_B)));
+		assertThat(0, is(data.get(CLOUD_C)));
 	}
 
-	private String getCloudData(String cloudServiceName, String numberOfInstances) {
+	@Test
+	public void cloudUsageDataForGraphite() throws SlipStreamException {
+
+		Map<String, Integer> usageData = Metering.produceCloudUsageData(user);
+		String graphiteData = Metering.transformUsageDataForGraphite(user, usageData);
+
+		String cloudAdata = getCloudDataForGraphite(CLOUD_A, "2");
+		String cloudBdata = getCloudDataForGraphite(CLOUD_B, "1");
+		String cloudCdata = getCloudDataForGraphite(CLOUD_C, "0");
+
+		assertTrue(graphiteData.contains(cloudAdata));
+		assertTrue(graphiteData.contains(cloudBdata));
+		assertTrue(graphiteData.contains(cloudCdata));
+		assertTrue(graphiteData.endsWith("\n"));
+	}
+
+
+	private String getCloudDataForGraphite(String cloudServiceName, String numberOfInstances) {
 		return "slipstream." + user.getName() + ".usage.instance." + cloudServiceName + " " + numberOfInstances;
 	}
 
