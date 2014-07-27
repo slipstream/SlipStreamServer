@@ -58,7 +58,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CollectionType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.credentials.Credentials;
@@ -316,7 +316,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			// this info in held in getCloudServiceNameList()
 			// so if the list is not empty, use it and
 			// create a RunView instance for each
-			List<String> cloudServiceNames = r.getCloudServiceNamesList();
+			String[] cloudServiceNames = r.getCloudServiceNamesList();
 
 			runView = convertRunToRunView(r);
 
@@ -538,15 +538,17 @@ public class Run extends Parameterized<Run, RunParameter> {
 	/**
 	 * List of cloud service names used in the current run
 	 */
-	@ElementList(required = false)
-	public List<String> getCloudServiceNamesList() {
+	@ElementArray(required = false)
+	public String[] getCloudServiceNamesList() {
 		Set<String> uniqueCloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceNames.split(",")));
-		return new ArrayList<String>(uniqueCloudServiceNames);
+		return uniqueCloudServiceNames.toArray(new String[uniqueCloudServiceNames.size()]);
 	}
 
-	@ElementList(required = false)
-	private void setCloudServiceNamesList(Set<String> cloudServiceNames) {
-		this.cloudServiceNames = StringUtils.join(cloudServiceNames, ",");
+	@ElementArray(required = false)
+	private void setCloudServiceNamesList(String[] cloudServiceNames) {
+		Set<String> uniqueCloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceNames));
+		this.cloudServiceNames = StringUtils.join(
+		        uniqueCloudServiceNames.toArray(new String[uniqueCloudServiceNames.size()]), ",");
 	}
 
 	@SuppressWarnings("unused")
