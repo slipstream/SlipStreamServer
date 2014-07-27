@@ -364,7 +364,7 @@ public class DeploymentFactory extends RunFactory {
 	protected Map<String, String> resolveCloudServiceNames(Module module, User user,
 			Map<String, List<Parameter<?>>> userChoices) {
 		Map<String, String> cloudServiceNamesPerNode = new HashMap<String, String>();
-		DeploymentModule deployment = (DeploymentModule) module;
+		DeploymentModule deployment = castToRequiredModuleType(module);
 
 		for (Node node: deployment.getNodes().values()) {
 			String nodeName = node.getName();
@@ -374,6 +374,11 @@ public class DeploymentFactory extends RunFactory {
 		}
 
 		return cloudServiceNamesPerNode;
+	}
+
+	@Override
+	protected DeploymentModule castToRequiredModuleType(Module module) {
+		return (DeploymentModule) module;
 	}
 
 	private String resolveCloudServiceNameForNode(Module module, User user, List<Parameter<?>> userChoicesForNode,

@@ -57,7 +57,7 @@ public class BuildImageFactory extends RunFactory {
 	protected void validateModule(Module module, Map<String, String> cloudServicePerNode)
 			throws SlipStreamClientException {
 
-		ImageModule image = (ImageModule) module;
+		ImageModule image = castToRequiredModuleType(module);
 		if (image.isBase()) {
 			throw new SlipStreamClientException("A base image cannot be built");
 		}
@@ -255,6 +255,11 @@ public class BuildImageFactory extends RunFactory {
 	protected void updateExtraRunParameters(Module module, Run run, Map<String, List<Parameter<?>>> userChoices)
 			throws ValidationException {
 	}
+
+	@Override
+    protected ImageModule castToRequiredModuleType(Module module) {
+	    return (ImageModule) module;
+    }
 
 }
 

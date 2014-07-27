@@ -62,6 +62,8 @@ public abstract class RunFactory {
 	public final Run createRun(Module module, User user,
 			Map<String, List<Parameter<?>>> userChoices) throws SlipStreamClientException {
 
+		validateModuleForRun(module);
+
 		Map<String, String> cloudServicePerNode = resolveCloudServiceNames(module, user, userChoices);
 		Set<String> cloudServiceNames = new HashSet<String>(cloudServicePerNode.values());
 
@@ -83,6 +85,14 @@ public abstract class RunFactory {
 		initialize(module, run, user);
 
 		return run;
+	}
+
+	private void validateModuleForRun(Module module) throws ValidationException {
+		try {
+			castToRequiredModuleType(module);
+		} catch (ClassCastException e) {
+			throw new ValidationException("Module validation failed: " + e.getMessage());
+		}
 	}
 
 	private void initDefaultRunParameters(Run run, User user) throws ValidationException {
@@ -115,6 +125,8 @@ public abstract class RunFactory {
 
 	protected abstract void addUserFormParametersAsRunParameters(Module module, Run run,
 			Map<String, List<Parameter<?>>> userChoices) throws ValidationException;
+
+	protected abstract Module castToRequiredModuleType(Module module);
 
 	private void initCloudServices(Run run, Map<String, String> cloudServicePerNode) throws ValidationException {
 		for (Map.Entry<String, String> entry: cloudServicePerNode.entrySet()) {
