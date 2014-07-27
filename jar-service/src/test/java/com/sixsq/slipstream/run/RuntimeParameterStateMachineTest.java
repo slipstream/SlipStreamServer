@@ -61,8 +61,7 @@ public class RuntimeParameterStateMachineTest extends
 	@Test
 	public void completeCurrentState() throws FileNotFoundException,
 			IOException, SlipStreamException {
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				cloudServiceName, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 		run = run.store();
 
 		States newState = States.Initializing;
@@ -106,8 +105,8 @@ public class RuntimeParameterStateMachineTest extends
 		assertState(run, States.Ready, newState);
 
 		newState = completeCurrentState(orchestratorCompleteKey, run);
-		
-		
+
+
 		assertState(run, States.Finalizing, newState);
 
 		//newState = completeCurrentState(node1CompleteKey, run);
@@ -116,7 +115,7 @@ public class RuntimeParameterStateMachineTest extends
 		//assertState(run, States.Finalizing, newState);
 
 		newState = completeCurrentState(orchestratorCompleteKey, run);
-		
+
 
 		assertState(run, States.Done, newState);
 

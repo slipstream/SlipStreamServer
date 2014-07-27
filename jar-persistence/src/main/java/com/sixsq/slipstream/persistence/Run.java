@@ -316,7 +316,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			// this info in held in getCloudServiceNameList()
 			// so if the list is not empty, use it and
 			// create a RunView instance for each
-			Set<String> cloudServiceNames = r.getCloudServiceNamesList();
+			List<String> cloudServiceNames = r.getCloudServiceNamesList();
 
 			runView = convertRunToRunView(r);
 
@@ -539,8 +539,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 * List of cloud service names used in the current run
 	 */
 	@ElementList(required = false)
-	public Set<String> getCloudServiceNamesList() {
-		return new HashSet<String>(Arrays.asList(cloudServiceNames.split(",")));
+	public List<String> getCloudServiceNamesList() {
+		Set<String> uniqueCloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceNames.split(",")));
+		return new ArrayList<String>(uniqueCloudServiceNames);
 	}
 
 	@ElementList(required = false)

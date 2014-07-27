@@ -103,8 +103,7 @@ public class Terminator {
 	public static void terminateInstances(Run run, User user) throws ValidationException {
 		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
 
-		Set<String> cloudServicesList = RunFactory.getCloudServicesList(run);
-		for (String cloudServiceName : cloudServicesList) {
+		for (String cloudServiceName : run.getCloudServiceNamesList()) {
 			Connector connector = ConnectorFactory.getConnector(cloudServiceName);
 			try {
 				connector.terminate(run, user);

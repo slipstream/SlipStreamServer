@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -55,9 +56,9 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.run.RunResource;
 import com.sixsq.slipstream.run.RuntimeParameterResource;
@@ -125,9 +126,9 @@ public class CookieTest extends ResourceTestBase {
 	}
 
 	private void createAndStoreRuns() throws SlipStreamClientException {
-		runA = RunFactory.getRun(deployment, RunType.Orchestration, cloudServiceName, user);
+		runA = RunFactory.getRun(deployment, RunType.Orchestration, user);
 		runA.store();
-		runB = RunFactory.getRun(deployment, RunType.Orchestration, cloudServiceName, user);
+		runB = RunFactory.getRun(deployment, RunType.Orchestration, user);
 		runB.store();
 	}
 
@@ -253,7 +254,11 @@ public class CookieTest extends ResourceTestBase {
         extraProperties.put(CookieUtils.COOKIE_RUN_ID, run.getUuid());
         extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
 
-        String value = CookieUtils.createCookie(user.getName(), run.getCloudService(), extraProperties);
+        List<String> cloudServiceNames = run.getCloudServiceNamesList();
+		String cloudName = (cloudServiceNames == null || cloudServiceNames.isEmpty()) ? cloudServiceName
+		        : cloudServiceNames.get(0);
+
+        String value = CookieUtils.createCookie(user.getName(), cloudName, extraProperties);
 
 		return new Cookie(CookieUtils.COOKIE_NAME, value);
 	}

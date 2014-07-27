@@ -87,7 +87,7 @@ public class RunTest extends RunTestBase {
 	public void verifyCorrectParameters() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		assertEquals(image.getResourceUri(), run.getModuleResourceUrl());
 		assertEquals(ModuleCategory.Image, run.getCategory());
@@ -99,7 +99,7 @@ public class RunTest extends RunTestBase {
 	public void storeRetrieveAndDelete() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 		run.store();
 
 		String resourceUrl = run.getResourceUri();
@@ -121,7 +121,7 @@ public class RunTest extends RunTestBase {
 	public void runWithOneParameter() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		int initialNumberOfParameters = run.getParameters().size();
 
@@ -159,7 +159,7 @@ public class RunTest extends RunTestBase {
 	public void runWithTwoParameters() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		int initialNumberOfParameters = run.getParameters().size();
 
@@ -210,7 +210,7 @@ public class RunTest extends RunTestBase {
 	public void assignRuntimeParameters() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		int initialParameterNo = run.getRuntimeParameters().size();
 
@@ -266,7 +266,7 @@ public class RunTest extends RunTestBase {
 	public void createAndRetreive() throws FileNotFoundException, IOException,
 			SlipStreamException {
 
-		Run run = new Run(new ImageModule("createAndRetreive"), RunType.Orchestration, cloudServiceName, user);
+		Run run = new Run(new ImageModule("createAndRetreive"), RunType.Orchestration, cloudServiceNames, user);
 		run.store();
 
 		Run runRestored = Run.loadFromUuid(run.getUuid());
@@ -343,7 +343,7 @@ public class RunTest extends RunTestBase {
 	public void checkRunSerialization() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		SerializationUtil.toXmlString(run);
 	}
@@ -352,7 +352,7 @@ public class RunTest extends RunTestBase {
 	public void testParameters() throws SlipStreamException,
 			FileNotFoundException, IOException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		run.setParameter(new RunParameter("k1", "v1", ""));
 		run.setParameter(new RunParameter("k2", "v2", ""));
@@ -373,7 +373,7 @@ public class RunTest extends RunTestBase {
 	public void updateRuntimeParameters() throws SlipStreamException,
 			FileNotFoundException, IOException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		run.assignRuntimeParameter("node.1:k1", "v1 init", "v1 desc");
 		run.assignRuntimeParameter("node.1:k2", "v2 init", "v2 desc");
@@ -429,7 +429,7 @@ public class RunTest extends RunTestBase {
 
 		deployment = deployment.store();
 
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration, cloudServiceName, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 
 		try {
 			run.updateRuntimeParameter("node1.1:notthere", null);
@@ -444,7 +444,7 @@ public class RunTest extends RunTestBase {
 
 		ImageModule image = new ImageModule("abort");
 
-		Run run = new Run(image, RunType.Orchestration, cloudServiceName, user);
+		Run run = new Run(image, RunType.Orchestration, cloudServiceNames, user);
 
 		assertThat(run.isAbort(), is(false));
 
@@ -486,7 +486,7 @@ public class RunTest extends RunTestBase {
 		ImageModule image = new ImageModule("doneImage");
 		image.setImageId("123", cloudServiceName);
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 		run.store();
 		String resourceUri = run.getResourceUri();
 

@@ -24,9 +24,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.LazyInitializationException;
 import org.junit.Test;
@@ -39,11 +42,13 @@ import com.sixsq.slipstream.statemachine.States;
 
 public class RunTest {
 
+	private static final Set<String> cloudServiceNames = new HashSet<String>(Arrays.asList("test"));
+
 	@Test
 	public void loadWithRuntimeParameters() throws ValidationException, NotFoundException, AbortException {
 		Module image = new ImageModule();
 
-		Run run = new Run(image, RunType.Run, "test", new User("user"));
+		Run run = new Run(image, RunType.Run, cloudServiceNames, new User("user"));
 
 		run.assignRuntimeParameter("ss:key", "value", "description");
 
@@ -77,12 +82,12 @@ public class RunTest {
 
 		List<Run> before = Run.listOldTransient(user);
 
-		Run done = new Run(image, RunType.Run, "test", new User("user"));
+		Run done = new Run(image, RunType.Run, cloudServiceNames, new User("user"));
 		done.setStart(twoHourBack);
 		done.setState(States.Done);
 		done.store();
 
-		Run aborting = new Run(image, RunType.Run, "test", new User("user"));
+		Run aborting = new Run(image, RunType.Run, cloudServiceNames, new User("user"));
 		aborting.setLastStateChange(twoHourBack);
 		aborting.store();
 

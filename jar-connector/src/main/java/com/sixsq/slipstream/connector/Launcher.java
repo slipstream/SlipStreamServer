@@ -21,7 +21,6 @@ package com.sixsq.slipstream.connector;
  */
 
 import java.util.Arrays;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -29,7 +28,6 @@ import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -93,8 +91,7 @@ public class Launcher {
 		}
 
 		private void launchRun() throws ValidationException {
-			Set<String> cloudServicesList = RunFactory.getCloudServicesList(run);
-			for (String cloudServiceName : cloudServicesList) {
+			for (String cloudServiceName : run.getCloudServiceNamesList()) {
 				Connector connector = ConnectorFactory.getConnector(cloudServiceName);
 				try {
 					connector.launch(run, user);

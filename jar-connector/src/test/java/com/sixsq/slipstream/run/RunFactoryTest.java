@@ -185,20 +185,18 @@ public class RunFactoryTest extends RunTest {
 
 	private Run getBuildImageRun(ImageModule image)
 			throws SlipStreamClientException {
-		return RunFactory
-				.getRun(image, RunType.Machine, cloudServiceName, user);
+		return RunFactory.getRun(image, RunType.Machine, user);
 	}
 
 	private Run getDeploymentRun(DeploymentModule deployment)
 			throws SlipStreamClientException {
-		return RunFactory.getRun(deployment, RunType.Orchestration,
-				cloudServiceName, user);
+		return RunFactory.getRun(deployment, RunType.Orchestration, user);
 	}
 
 	@Test(expected = ValidationException.class)
 	public void cannotCreateDeploymentWithImageModule()
 			throws SlipStreamClientException {
-		RunFactory.getRun(image, RunType.Orchestration, cloudServiceName, user);
+		RunFactory.getRun(image, RunType.Orchestration, user);
 	}
 
 	@Test(expected = ValidationException.class)

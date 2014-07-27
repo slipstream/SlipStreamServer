@@ -1,5 +1,9 @@
 package com.sixsq.slipstream.run;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
@@ -33,8 +37,9 @@ public class RunTestBase {
 	protected static ImageModule imagenoref = null;
 	protected static ImageModule imagebuildme = null;
 	protected static Connector localConnector = new LocalConnector();
-	protected static String cloudServiceName = localConnector
-			.getCloudServiceName();
+	protected static final String cloudServiceName = localConnector.getCloudServiceName();
+	protected static final Set<String> cloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceName));
+
 	public static DeploymentModule deployment = null;
 	protected static ImageModule imageForDeployment1 = null;
 	protected static ImageModule imageForDeployment2 = null;
@@ -170,7 +175,7 @@ public class RunTestBase {
 	protected static Run createAndStoreRun(Module module, String user, RunType type, States state)
 			throws SlipStreamException {
 
-		Run run = RunFactory.getRun(module, type, cloudServiceName, RunTestBase.user);
+		Run run = RunFactory.getRun(module, type, RunTestBase.user);
 		run.setUser(user);
 		run.setState(state);
 		run = run.store();

@@ -95,7 +95,7 @@ public class StateMachinetTest {
 
 	@Before
 	public void setUp() throws SlipStreamException {
-		run = RunFactory.getRun(new DeploymentModule("setUp"), RunType.Orchestration, cloudServiceName, user);
+		run = RunFactory.getRun(new DeploymentModule("setUp"), RunType.Orchestration, user);
 		run = run.store();
 	}
 
@@ -326,7 +326,7 @@ public class StateMachinetTest {
 		module.setModuleReference(parent);
 		module.setPackage(new Package("hello"));
 
-		Run run = RunFactory.getRun(module, RunType.Machine, cloudServiceName, user);
+		Run run = RunFactory.getRun(module, RunType.Machine, user);
 		run.store();
 
 		StateMachine sc = StateMachine.getStateMachine(run);
@@ -377,7 +377,7 @@ public class StateMachinetTest {
 		module.setModuleReference(parent);
 		module.setPackage(new Package("hello"));
 
-		Run run = RunFactory.getRun(module, RunType.Machine, cloudServiceName, user);
+		Run run = RunFactory.getRun(module, RunType.Machine, user);
 		run.store();
 
 		StateMachine sc = StateMachine.getStateMachine(run);

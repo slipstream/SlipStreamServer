@@ -227,8 +227,7 @@ public class StateMachineMultiThreadingTest extends
 
 		deployment.store();
 
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				cloudServiceName, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 		return run;
 	}
 

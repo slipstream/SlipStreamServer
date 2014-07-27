@@ -28,7 +28,6 @@ import java.util.Set;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ConnectorBase;
-import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -171,12 +170,6 @@ public abstract class RunFactory {
 		}
 	}
 
-	private void checkCloudServiceDefined(String cloudService, User user) throws SlipStreamClientException {
-		if ("".equals(cloudService)) {
-			throw new SlipStreamClientException(ConnectorFactory.incompleteCloudConfigurationErrorMessage(user));
-		}
-	}
-
 	public static Run getRun(Module module, RunType type, User user)
 			throws SlipStreamClientException {
 		return getRun(module, type, user, null);
@@ -250,8 +243,7 @@ public abstract class RunFactory {
 			throws ValidationException {
 
 		if (withOrchestrator(run)) {
-			Set<String> cloudServiceList = getCloudServicesList(run);
-			for (String cloudServiceName : cloudServiceList) {
+			for (String cloudServiceName : getCloudServiceNames(run)) {
 				initializeOrchestratorParameters(run, cloudServiceName);
 			}
 		}
@@ -365,9 +357,8 @@ public abstract class RunFactory {
 
 	protected void initOrchestratorsNodeNames(Run run)
 			throws ConfigurationException, ValidationException {
-		Set<String> cloudServiceList = getCloudServicesList(run);
 		if (withOrchestrator(run)){
-			for (String cloudServiceName : cloudServiceList) {
+			for (String cloudServiceName : getCloudServiceNames(run)) {
 				String nodename = Run.constructOrchestratorName(cloudServiceName);
 				run.addNodeInstanceName(nodename, cloudServiceName);
 				run.assignRuntimeParameter(nodename
@@ -378,7 +369,7 @@ public abstract class RunFactory {
 		}
 	}
 
-	public static Set<String> getCloudServicesList(Run run)
+	public static List<String> getCloudServiceNames(Run run)
 			throws ValidationException {
 		return run.getCloudServiceNamesList();
 	}
