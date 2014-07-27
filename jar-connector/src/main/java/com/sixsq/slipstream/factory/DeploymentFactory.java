@@ -368,8 +368,9 @@ public class DeploymentFactory extends RunFactory {
 
 		for (Node node: deployment.getNodes().values()) {
 			String nodeName = node.getName();
-			String cloudServiceName = resolveCloudServiceNameForNode(module, user, userChoices.get(nodeName), node);
-			cloudServiceNamesPerNode.put(node.getName(), cloudServiceName);
+			List<Parameter<?>> userChoicesForNode = userChoices.get(nodeName);
+			String cloudServiceName = resolveCloudServiceNameForNode(module, user, userChoicesForNode, node);
+			cloudServiceNamesPerNode.put(nodeName, cloudServiceName);
 		}
 
 		return cloudServiceNamesPerNode;
@@ -379,10 +380,12 @@ public class DeploymentFactory extends RunFactory {
 			Node node) {
 		String cloudService = null;
 
-		for (Parameter<?> parameter : userChoicesForNode) {
-			if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)){
-				cloudService = extractNodeParameterValue((NodeParameter)parameter);
-				break;
+		if (userChoicesForNode != null) {
+			for (Parameter<?> parameter : userChoicesForNode) {
+				if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
+					cloudService = extractNodeParameterValue((NodeParameter) parameter);
+					break;
+				}
 			}
 		}
 

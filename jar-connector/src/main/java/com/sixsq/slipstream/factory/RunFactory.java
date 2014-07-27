@@ -21,6 +21,7 @@ package com.sixsq.slipstream.factory;
  */
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +178,9 @@ public abstract class RunFactory {
 
 	public static Run getRun(Module module, RunType type, User user, Map<String, List<Parameter<?>>> userChoices)
 			throws SlipStreamClientException {
+		if (userChoices == null) {
+			userChoices = new HashMap<String, List<Parameter<?>>>();
+		}
 		return selectFactory(type).createRun(module, user, userChoices);
 	}
 

@@ -80,8 +80,6 @@ public class RuntimeParameterTest {
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
 
 		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
-		// Run run = new Run("nullParameterName", ModuleCategory.Deployment,
-		// new LocalConnector().getCloudServiceName());
 		run.assignRuntimeParameter(null, "ok", null);
 
 		CommonTestUtil.deleteDeployment(deployment);
