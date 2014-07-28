@@ -36,7 +36,6 @@ import javax.persistence.EntityManager;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -51,6 +50,7 @@ import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.Package;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
@@ -65,6 +65,8 @@ public class StateMachinetTest {
 	private Map<String, ExtrinsicState> nodeExtrinsicStates = new HashMap<String, ExtrinsicState>();
 	private Run run = null;
 	private static User user = null;
+	private final String cloudName = "dummy";
+	private final String orchName = "orchestrator-" + cloudName;
 
 	protected static String cloudServiceName = new LocalConnector()
 			.getCloudServiceName();
@@ -93,59 +95,95 @@ public class StateMachinetTest {
 		}
 	}
 
-	@Before
-	public void setUp() throws SlipStreamException {
-		run = RunFactory.getRun(new DeploymentModule("setUp"), RunType.Orchestration, user);
+	private void generateDeploymentAndRun(String[] nodeNames) throws SlipStreamException {
+
+		// Run can be created only on a deployment module with nodes.
+		DeploymentModule module = generateDummyDeploymentModuleWithNode(nodeNames);
+		run = RunFactory.getRun(module, RunType.Orchestration, user);
 		run = run.store();
+	}
+
+	private DeploymentModule generateDummyDeploymentModuleWithNode(String[] nodeNames) throws ValidationException,
+	        ConfigurationException {
+
+		DeploymentModule module = new DeploymentModule("setUp");
+
+
+		ImageModule image = new ImageModule("foo_image");
+		image.setIsBase(true);
+		image.setImageId("123", cloudName);
+		image.store();
+
+		if (nodeNames.length > 0) {
+			for (String nodename : nodeNames) {
+				Node node = new Node(nodename, image);
+				node.setCloudService(cloudName);
+				node = (Node) node.store();
+				module.setNode(node);
+			}
+		} else {
+			// Add fake node if none were provided.  Run needs nodes on the deployment module.
+    		Node node = new Node("fake", image);
+    		node.setCloudService(cloudName);
+    		node = (Node) node.store();
+    		module.setNode(node);
+		}
+
+		return module;
+	}
+
+	private StateMachine createStateMachine(String[] nodeInstanceNames) throws SlipStreamException {
+		generateDeploymentAndRun(nodeInstanceNamesToNodeNames(nodeInstanceNames));
+		StateMachine sc = createStateContext(nodeInstanceNames);
+		return sc;
+	}
+
+	private String[] nodeInstanceNamesToNodeNames(String[] nodeInstanceNames) {
+		String[] nodeNames = new String[nodeInstanceNames.length];
+		for (int i = 0; i < nodeNames.length; i++) {
+			nodeNames[i] = nodeInstanceNames[i].replaceAll("\\.[0-9]$", "");
+        }
+		return nodeNames;
 	}
 
 	@After
 	public void tearDown() {
 		globalExtrinsicState = null;
+		if (run != null) {
+			run.remove();
+			run = null;
+		}
 	}
 
 	@Test
-	public void initialeEmptyState() throws IllegalArgumentException,
+	public void initialEmptyState() throws IllegalArgumentException,
 			SecurityException, ClassNotFoundException, InstantiationException,
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, SlipStreamException {
-		String[] nodes = {};
-		StateMachine sc = createStateContext(nodes);
+		StateMachine sc = createStateMachine(new String[] {});
 
 		assertEquals(States.Initializing, sc.getState());
 	}
 
 	@Test
-	public void initialeState() throws InvalidStateException,
+	public void initialState() throws InvalidStateException,
 			SlipStreamException {
-		String[] nodes = { "n1.1" };
-		updateRun(nodes);
-		StateMachine sc = createStateContext(nodes);
+		StateMachine sc = createStateMachine(new String[] { "n1.1" });
 
 		assertEquals(States.Initializing, sc.getState());
 	}
 
 	@Test
 	public void globalProvisioningState() throws SlipStreamException {
-		String[] nodes = { "n1.1" };
-		updateRun(nodes);
-		StateMachine sc = createStateContext(nodes);
-
+		StateMachine sc = createStateMachine(new String[] { "n1.1" });
 		sc.start();
 
 		assertEquals(States.Provisioning, sc.getState());
-
 	}
 
 	@Test
 	public void fullNominalWorkflow() throws SlipStreamException {
-		String[] nodes = { "n1.1", "n2.1" };
-
-		updateRun(nodes);
-
-		StateMachine sc;
-		sc = createStateContext(nodes);
-
+		StateMachine sc = createStateMachine(new String[] { "n1.1", "n2.1" });
 		sc.start();
 
 		assertState(sc, States.Provisioning);
@@ -157,6 +195,7 @@ public class StateMachinetTest {
 		assertState(sc, States.Provisioning);
 
 		sc.updateState("n2.1");
+		sc.updateState(orchName);
 
 		assertState(sc, States.Executing);
 
@@ -165,6 +204,7 @@ public class StateMachinetTest {
 		assertState(sc, States.Executing);
 
 		sc.updateState("n2.1");
+		sc.updateState(orchName);
 
 		assertState(sc, States.SendingReports);
 
@@ -173,6 +213,7 @@ public class StateMachinetTest {
 		assertState(sc, States.SendingReports);
 
 		sc.updateState("n2.1");
+		sc.updateState(orchName);
 
 		assertState(sc, States.Ready);
 
@@ -181,10 +222,12 @@ public class StateMachinetTest {
 		assertState(sc, States.Ready);
 
 		sc.updateState("n2.1");
+		sc.updateState(orchName);
 
 		assertState(sc, States.Finalizing);
 
 		sc.updateState("n1.1");
+		sc.updateState(orchName);
 
 		em = PersistenceUtil.createEntityManager();
 		run = em.find(Run.class, run.getResourceUri());
@@ -196,40 +239,26 @@ public class StateMachinetTest {
 
 	}
 
-	private Run updateRun(String[] nodes) throws ValidationException {
-		for (String node : nodes) {
-			RunFactory.assignCommonRuntimeParameters(run, node);
-			run.addNodeInstanceName(node, "dummy");
-		}
-		run = run.store();
-		return run;
-	}
-
 	private void assertState(StateMachine sc, States state) {
 		assertEquals(state, sc.getState());
 	}
 
 	@Test(expected = SlipStreamClientException.class)
 	public void inexistantNodeName() throws SlipStreamException {
-		String[] nodes = { "n1.1", "n2.1" };
-		updateRun(nodes);
-		StateMachine sc = createStateContext(nodes);
+		StateMachine sc = createStateMachine(new String[] { "n1.1", "n2.1" });
 
 		sc.updateState("doesn-t-exist");
 	}
 
 	@Test
 	public void invalidNodeName() throws SlipStreamException {
-		String[] nodes = { "111_starting_with_int.1" };
-		updateRun(nodes);
-		createStateContext(nodes);
+		createStateMachine(new String[] { "111_starting_with_int.1" });
 	}
 
 	@Test
 	public void doneIsFinal() throws SlipStreamException {
 
-		String[] nodes = { "n1.1" };
-		updateRun(nodes);
+		createStateMachine(new String[] { "n1.1"});
 
 		ExtrinsicState extrinsicState = getNodeExtrinsicState("n1.1");
 
@@ -243,10 +272,7 @@ public class StateMachinetTest {
 			SecurityException, ClassNotFoundException, InstantiationException,
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, SlipStreamException {
-		String[] nodes = { "n1.1", "n2.1" };
-		updateRun(nodes);
-		StateMachine sc = createStateContext(nodes);
-
+		StateMachine sc = createStateMachine(new String[] { "n1.1", "n2.1" });
 		sc.start();
 
 		assertEquals(States.Provisioning, sc.getState());
@@ -263,17 +289,16 @@ public class StateMachinetTest {
 	@Test
 	public void failureDuringExecuting() throws InvalidStateException,
 			SlipStreamException {
-		String failingNodeName = "n1_will_fail.1";
-		String[] nodes = { failingNodeName, "n2.1" };
-		updateRun(nodes);
-
-		StateMachine sc = createStateContext(nodes);
+		String failingNodeName = "n1.1";
+		StateMachine sc = createStateMachine(new String[] { failingNodeName, "n2.1" });
 		assertEquals(States.Initializing, sc.getState());
 		sc.start();
+
 		assertEquals(States.Provisioning, sc.getState());
 		sc.updateState(failingNodeName);
 		assertEquals(States.Provisioning, sc.getState());
 		sc.updateState("n2.1");
+		sc.updateState(orchName);
 		assertEquals(States.Executing, sc.getState());
 
 		sc.failCurrentState(failingNodeName);
@@ -283,6 +308,7 @@ public class StateMachinetTest {
 		assertTrue(sc.isFailing());
 
 		sc.updateState("n2.1");
+		sc.updateState(orchName);
 
 		assertEquals(States.Executing, sc.getState());
 		assertTrue(sc.isFailing());
@@ -294,15 +320,18 @@ public class StateMachinetTest {
 
 		assertEquals(States.SendingReports, sc.getState());
 		sc.updateState("n2.1");
+		sc.updateState(orchName);
 
 		assertEquals(States.Ready, sc.getState());
 		sc.updateState(failingNodeName);
 
 		assertEquals(States.Ready, sc.getState());
 		sc.updateState("n2.1");
+		sc.updateState(orchName);
 
 		assertEquals(States.Finalizing, sc.getState());
 		sc.updateState("n2.1");
+		sc.updateState(orchName);
 
 		assertEquals(States.Aborted, sc.getState());
 	}
@@ -414,10 +443,7 @@ public class StateMachinetTest {
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, SlipStreamException {
 
-		String[] nodes = { "n1.1" };
-		updateRun(nodes);
-		StateMachine sc = createStateContext(nodes);
-
+		StateMachine sc = createStateMachine(new String[] { "n1.1" });
 		sc.start();
 
 		EntityManager em = sc.beginTransation();
