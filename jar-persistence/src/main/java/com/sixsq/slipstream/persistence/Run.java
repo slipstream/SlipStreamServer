@@ -575,6 +575,18 @@ public class Run extends Parameterized<Run, RunParameter> {
 		setStart();
 	}
 
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = RunParameter.class)
+	protected void setParameters(Map<String, RunParameter> parameters) {
+		this.parameters = parameters;
+	}
+	
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = RunParameter.class)
+	public Map<String, RunParameter> getParameters() {
+		return parameters;
+	}
+
 	public Module getModule(boolean load) {
 		if (module == null && load) {
 			module = Module.load(getModuleResourceUrl());

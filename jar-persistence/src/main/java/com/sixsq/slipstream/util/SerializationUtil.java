@@ -53,7 +53,7 @@ public class SerializationUtil {
 			Serializer serializer = new Persister();
 			return serializer.read(resultClass, contents);
 		} catch (Exception e) {
-			throw new SlipStreamClientException("cannot deserialize object", e);
+			throw new SlipStreamClientException("cannot deserialize object, with detail: " + e.getMessage(), e);
 		}
 
 	}

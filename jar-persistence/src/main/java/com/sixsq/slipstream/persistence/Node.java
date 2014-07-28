@@ -111,6 +111,18 @@ public class Node extends Parameterized<Node, NodeParameter> {
 		this.image = image;
 	}
 
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = NodeParameter.class)
+	protected void setParameters(Map<String, NodeParameter> parameters) {
+		this.parameters = parameters;
+	}
+	
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = NodeParameter.class)
+	public Map<String, NodeParameter> getParameters() {
+		return parameters;
+	}
+
 	public DeploymentModule getModule() {
 		return module;
 	}
