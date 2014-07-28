@@ -58,13 +58,12 @@
   (let [ch (chan 1)]
     (go
       (let [[v c] (alts! [ch (timeout timeout-collect)])]
-        (if (nil? v)
+        (when (nil? v)
           (log/log-error
             "Timeout collecting vms for user "
             (.getName user)
             " on cloud "
-            (.getConnectorInstanceName connector))
-          (log/log-info (str "executed collect request for " (.getName user) " and " (.getConnectorInstanceName connector))))))
+            (.getConnectorInstanceName connector)))))
     (go (>! ch (Collector/collect user connector)))))
 
 (defn update-metric!

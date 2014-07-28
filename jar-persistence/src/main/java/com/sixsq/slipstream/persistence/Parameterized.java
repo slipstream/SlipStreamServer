@@ -51,19 +51,30 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 @SuppressWarnings("serial")
 public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata {
 
-	@ElementMap(name = "parameters", required = false, data = true, valueType = Parameter.class)
 	@MapKey(name = "name")
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
 	protected Map<String, T> parameters = new ConcurrentHashMap<String, T>();
 
+	
+	/**
+	 * parameters accessors have to be overriden to set the valueType value of
+	 * the decorator for xml serialization:
+	 * 	@ElementMap(name = "parameters", required = false, valueType = ?)
+	 */
+	@ElementMap(name = "parameters", required = false)
+	abstract protected void setParameters(Map<String, T> parameters);
+	
 	/**
 	 * Do not add parameters to the map directly. Instead use setParameter
 	 * method
+	 * 
+	 * parameters accessors have to be overriden to set the valueType value of
+	 * the decorator for xml serialization:
+	 * 	@ElementMap(name = "parameters", required = false, valueType = ?)
 	 */
-	public Map<String, T> getParameters() {
-		return parameters;
-	}
+	@ElementMap(name = "parameters", required = false)
+	abstract public Map<String, T> getParameters();
 
 	public T getParameter(String name) {
 		return getParameters().get(name);
