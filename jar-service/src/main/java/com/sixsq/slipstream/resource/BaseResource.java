@@ -239,6 +239,9 @@ public abstract class BaseResource extends ServerResource {
 	protected Form extractFormFromEntity(Representation entity)
 			throws ResourceException {
 
+				if (entity == null) {
+					throwClientBadRequest("No data provided (Entity is empty)");
+				}
 				Form form = null;
 				try {
 					form = new Form(entity.getText());
