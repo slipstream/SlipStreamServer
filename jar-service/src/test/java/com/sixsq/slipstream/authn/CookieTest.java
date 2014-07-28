@@ -254,9 +254,9 @@ public class CookieTest extends ResourceTestBase {
         extraProperties.put(CookieUtils.COOKIE_RUN_ID, run.getUuid());
         extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
 
-        List<String> cloudServiceNames = run.getCloudServiceNamesList();
-		String cloudName = (cloudServiceNames == null || cloudServiceNames.isEmpty()) ? cloudServiceName
-		        : cloudServiceNames.get(0);
+        String[] cloudServiceNames = run.getCloudServiceNamesList();
+		String cloudName = (cloudServiceNames == null || cloudServiceNames.length == 0) ? cloudServiceName
+		        : cloudServiceNames[0];
 
         String value = CookieUtils.createCookie(user.getName(), cloudName, extraProperties);
 
