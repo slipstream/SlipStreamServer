@@ -87,7 +87,7 @@ public abstract class RunFactory {
 		return run;
 	}
 
-	private void validateModuleForRun(Module module) throws ValidationException {
+	protected void validateModuleForRun(Module module) throws ValidationException {
 		try {
 			castToRequiredModuleType(module);
 		} catch (ClassCastException e) {
@@ -149,8 +149,15 @@ public abstract class RunFactory {
 	protected void validateRun(Run run, User user)
 			throws SlipStreamClientException {
 
+		validateCloudServicesSet(run);
 		validatePublicSshKey(run, user);
 	}
+
+	private void validateCloudServicesSet(Run run) throws ValidationException {
+		if (run.getCloudServiceNamesList().length == 0) {
+			throw new ValidationException("No cloud service names set on the run.");
+		}
+    }
 
 	private void validatePublicSshKey(Run run, User user)
 			throws ValidationException {
@@ -274,6 +281,8 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_CATEGORY_KEY, run
 				.getCategory().toString(), "Module category");
 
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_COMPLETE_KEY, "",
+				RuntimeParameter.GLOBAL_COMPLETE_DESCRIPTION);
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY, "",
 				RuntimeParameter.GLOBAL_ABORT_DESCRIPTION);
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_KEY,
@@ -294,6 +303,10 @@ public abstract class RunFactory {
 
 	private static void initializeOrchestratorParameters(Run run,
 			String cloudService) throws ValidationException {
+
+		if (cloudService.isEmpty()) {
+			throw new ValidationException("Failed to intialise orchestrator parameters: empty cloud service name.");
+		}
 
 		String prefix = Run.constructOrchestratorName(cloudService);
 
@@ -354,7 +367,7 @@ public abstract class RunFactory {
 
     }
 
-	protected static void assignCommonNodeRuntimeParameters(Run run, String nodename)
+	protected static void assignCommonNodeInstanceRuntimeParameters(Run run, String nodename)
 			throws ValidationException {
 
 		assignCommonRuntimeParameters(run, nodename);

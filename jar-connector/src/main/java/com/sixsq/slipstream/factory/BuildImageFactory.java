@@ -133,7 +133,7 @@ public class BuildImageFactory extends RunFactory {
 	protected static void initMachineState(Run run) throws ValidationException,
 			NotFoundException {
 
-		assignCommonNodeRuntimeParameters(run, nodeInstanceName);
+		assignCommonNodeInstanceRuntimeParameters(run, nodeInstanceName);
 	}
 
 	protected static void initRuntimeParameters(ImageModule image, Run run)

@@ -191,7 +191,7 @@ public class DeploymentFactory extends RunFactory {
 
 	public static void initNodeInstanceCommonRuntimeParameters(Run run, Node node, int nodeInstanceId)
 			throws ValidationException {
-		assignCommonNodeRuntimeParameters(run, Run.composeNodeInstanceName(node, nodeInstanceId));
+		assignCommonNodeInstanceRuntimeParameters(run, Run.composeNodeInstanceName(node, nodeInstanceId));
 	}
 
 
@@ -369,7 +369,7 @@ public class DeploymentFactory extends RunFactory {
 		for (Node node: deployment.getNodes().values()) {
 			String nodeName = node.getName();
 			List<Parameter<?>> userChoicesForNode = userChoices.get(nodeName);
-			String cloudServiceName = resolveCloudServiceNameForNode(module, user, userChoicesForNode, node);
+			String cloudServiceName = resolveCloudServiceNameForNode(user, userChoicesForNode, node);
 			cloudServiceNamesPerNode.put(nodeName, cloudServiceName);
 		}
 
@@ -381,7 +381,7 @@ public class DeploymentFactory extends RunFactory {
 		return (DeploymentModule) module;
 	}
 
-	private String resolveCloudServiceNameForNode(Module module, User user, List<Parameter<?>> userChoicesForNode,
+	private String resolveCloudServiceNameForNode(User user, List<Parameter<?>> userChoicesForNode,
 			Node node) {
 		String cloudService = null;
 
@@ -441,6 +441,16 @@ public class DeploymentFactory extends RunFactory {
 					}
 				}
 			}
+		}
+	}
+
+	protected void validateModuleForRun(Module module) throws ValidationException {
+		super.validateModuleForRun(module);
+
+		// Deployment module that is ready for run should define nodes on itself.
+		DeploymentModule deploymentModule = castToRequiredModuleType(module);
+		if (deploymentModule.getNodes().isEmpty()) {
+			throw new ValidationException("Deployment module provided for run is missing nodes.");
 		}
 	}
 

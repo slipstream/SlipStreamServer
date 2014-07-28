@@ -540,6 +540,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 */
 	@ElementArray(required = false)
 	public String[] getCloudServiceNamesList() {
+		if (cloudServiceNames == null) {
+			return new String[] {};
+		}
 		Set<String> uniqueCloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceNames.split(",")));
 		return uniqueCloudServiceNames.toArray(new String[uniqueCloudServiceNames.size()]);
 	}
@@ -770,16 +773,19 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void removeNodeInstanceName(String nodeInstanceName, String cloudServiceName) {
-		/*List<String> nodeNamesList = new ArrayList<String>(getNodeNameList());
-		while (nodeNamesList.contains(nodeInstanceName)) {
-			nodeNamesList.remove(nodeInstanceName);
-		}
-		nodeNames = StringUtils.join(nodeNamesList, NODE_NAMES_SEPARATOR);
-		*/
+		// removeNodeInstanceName(nodeInstanceName);
 		Integer nb = cloudServiceUsage.get(cloudServiceName);
 		if (nb != null && nb > 0){
 			cloudServiceUsage.put(cloudServiceName, nb - 1);
 		}
+	}
+
+	public void removeNodeInstanceName(String nodeInstanceName) {
+		List<String> nodeNamesList = new ArrayList<String>(getNodeNameList());
+		while (nodeNamesList.contains(nodeInstanceName)) {
+			nodeNamesList.remove(nodeInstanceName);
+		}
+		nodeNames = StringUtils.join(nodeNamesList, NODE_NAMES_SEPARATOR);
 	}
 
 	/**
