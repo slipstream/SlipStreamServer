@@ -58,17 +58,25 @@ public class RunResource extends BaseResource {
 	@Override
 	public void initialize() throws ResourceException {
 
+		long start = System.currentTimeMillis();
+		long before;
+
 		Request request = getRequest();
 
-		validateUser();
-
 		String resourceUri = ResourceUriUtil.extractResourceUri(request);
+		before = System.currentTimeMillis();
 		run = Run.load(resourceUri);
+		logTimeDiff("load", before);
 
 		if (run == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 		}
 
+		before = System.currentTimeMillis();
+		authorize();
+		logTimeDiff("authorize", before);
+
+		logTimeDiff("initialize on run", start);
 	}
 
 	@Override
@@ -93,12 +101,19 @@ public class RunResource extends BaseResource {
 	public Representation toXml() throws NotFoundException,
 			ValidationException, ConfigurationException {
 
+		long start = System.currentTimeMillis();
+		long before;
+
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run;
+		
 		String xml;
 		try {
-			run = constructRun(em, true);
+			before = System.currentTimeMillis();
+			Run run = constructRun(em, true);
+			logTimeDiff("constructRun", before);
+			before = System.currentTimeMillis();
 			xml = SerializationUtil.toXmlString(run);
+			logTimeDiff("xml serialisation", before);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
@@ -106,6 +121,8 @@ public class RunResource extends BaseResource {
 			em.close();
 		}
 
+		logTimeDiff("processing get on run", start);
+		
 		return new StringRepresentation(xml, MediaType.APPLICATION_XML);
 	}
 
@@ -113,17 +130,26 @@ public class RunResource extends BaseResource {
 	public Representation toHtml() throws ConfigurationException,
 			 ValidationException {
 
+		long start = System.currentTimeMillis();
+		long before;
+
 		EntityManager em = PersistenceUtil.createEntityManager();
 		String html;
 		try {
+			before = System.currentTimeMillis();
 			Run run = constructRun(em, false);
+			logTimeDiff("constructRun", before);
+			before = System.currentTimeMillis();
 			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
+			logTimeDiff("html generation", before);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
 		} finally {
 			em.close();
 		}
+
+		logTimeDiff("processing get on run", start);
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 
@@ -137,11 +163,10 @@ public class RunResource extends BaseResource {
 			throws SlipStreamClientException {
 
 		Run run = Run.load(this.run.getResourceUri(), em);
-		User user = User.loadByName(run.getUser());
 
 		if (withVmState) {
 			try {
-				run = updateVmStatus(run, user);
+				run = updateVmStatus(run, run.getUser());
 			} catch (SlipStreamClientException e) {
 				run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
 			} catch (SlipStreamException e) {
@@ -151,18 +176,14 @@ public class RunResource extends BaseResource {
 			}
 		}
 
-		Module module = RunFactory.selectFactory(run.getType()).overloadModule(run, user);
+		Module module = RunFactory.selectFactory(run.getType()).overloadModule(run, getUser());
 		run.setModule(module, true);
 
 		return run;
 	}
 
-	private Run updateVmStatus(Run run, User user) throws SlipStreamException {
-		return RunFactory.updateVmStatus(run, user);
-	}
-
-	private void validateUser() {
-		// FIXME: This should either do something or be moved to guard.
+	private Run updateVmStatus(Run run, String username) throws SlipStreamException {
+		return RunFactory.updateVmStatus(run, User.loadByName(username));
 	}
 
 	@Delete

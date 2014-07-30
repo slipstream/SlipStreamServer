@@ -36,7 +36,13 @@ public class DashboardResource extends BaseResource {
 	@Get("xml")
 	public Representation toXml() {
 
-		String metadata = SerializationUtil.toXmlString(computeDashboard());
+		long before = System.currentTimeMillis();
+		Dashboard dashboard = computeDashboard();
+		logTimeDiff("computing dashboard", before);
+
+		before = System.currentTimeMillis();
+		String metadata = SerializationUtil.toXmlString(dashboard);
+		logTimeDiff("xml serilization", before);
 		return new StringRepresentation(metadata, MediaType.APPLICATION_XML);
 
 	}
@@ -44,8 +50,14 @@ public class DashboardResource extends BaseResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		String html = HtmlUtil.toHtml(computeDashboard(),
+		long before = System.currentTimeMillis();
+		Dashboard dashboard = computeDashboard();
+		logTimeDiff("computing dashboard", before);
+
+		before = System.currentTimeMillis();
+		String html = HtmlUtil.toHtml(dashboard,
 				getPageRepresentation(), getUser());
+		logTimeDiff("html generation", before);
 		
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
@@ -60,7 +72,7 @@ public class DashboardResource extends BaseResource {
 		} catch (SlipStreamException e) {
 			throwClientConflicError(e.getMessage());
 		}
-	
+
 		return dashboard;
 	}
 
