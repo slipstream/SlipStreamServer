@@ -44,7 +44,6 @@ import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
@@ -71,10 +70,6 @@ public class RunResource extends BaseResource {
 		if (run == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 		}
-
-		before = System.currentTimeMillis();
-		authorize();
-		logTimeDiff("authorize", before);
 
 		logTimeDiff("initialize on run", start);
 	}
@@ -183,7 +178,7 @@ public class RunResource extends BaseResource {
 	}
 
 	private Run updateVmStatus(Run run, String username) throws SlipStreamException {
-		return RunFactory.updateVmStatus(run, User.loadByName(username));
+		return RunFactory.updateVmStatus(run, username);
 	}
 
 	@Delete

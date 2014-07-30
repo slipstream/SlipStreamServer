@@ -16,14 +16,7 @@ public class RequestUtil {
 
 	public static User getUserFromRequest(Request request)
 			throws ConfigurationException, ValidationException {
-		User user = null;
-		try {
-			user = User.loadByName(request.getClientInfo().getUser().getName(),
-					RequestUtil.getConfigurationFromRequest(request).getParameters());
-		} catch (NullPointerException ex) {
-			// user not authenticated
-		}
-		return user;
+		return (User) request.getAttributes().get(User.REQUEST_KEY);
 	}
 
 	public static void addServiceConfigurationToRequest(

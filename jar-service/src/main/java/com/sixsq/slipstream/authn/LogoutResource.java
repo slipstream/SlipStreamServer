@@ -26,7 +26,6 @@ import org.restlet.resource.Delete;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.util.RequestUtil;
 
 /**
  * The DELETE action on this resource will remove any authentication cookies from

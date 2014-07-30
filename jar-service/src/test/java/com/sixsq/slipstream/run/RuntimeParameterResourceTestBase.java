@@ -56,14 +56,14 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 		baseImage.store();
 
 		user = CommonTestUtil.createTestUser();
-		
+
 		CommonTestUtil.addSshKeys(user);
 	}
 
 	public static void classTearDown() throws ValidationException {
 		baseImage.remove();
 		try {
-		CommonTestUtil.deleteUser(user);
+			CommonTestUtil.deleteUser(user);
 		} catch (Exception ex) {
 			// ok ... FIXME
 		}
@@ -94,7 +94,7 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 	}
 
 	protected Response executeDecrementRequest(String key, Run run)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		Form form = new Form();
 		form.add("decrement", "true");
 
@@ -105,7 +105,7 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 	}
 
 	protected String executeGetRequestAndAssertValueSet(Run run, String key)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		Request request = createGetRequest(run.getUuid(), key);
 		Response response = executeRequest(request);
 
@@ -114,7 +114,8 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 	}
 
 	protected void executeGetRequestAndAssertValue(Run run, String key,
-			String expectedValue) throws ConfigurationException {
+			String expectedValue) throws ConfigurationException,
+			ValidationException {
 		String actualValue = executeGetRequestAndAssertValueSet(run, key);
 		assertEquals(expectedValue, actualValue);
 	}
@@ -134,22 +135,24 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 	}
 
 	protected Request createGetRequest(String uuid, String key)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		return createGetRequest(createRequestAttributes(uuid, key));
 	}
 
 	protected Request createPutRequest(String uuid, String key,
-			Representation entity) throws ConfigurationException {
+			Representation entity) throws ConfigurationException,
+			ValidationException {
 		return createPutRequest(createRequestAttributes(uuid, key), entity);
 	}
 
 	protected Request createDeleteRequest(String uuid, String key)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		return createDeleteRequest(createRequestAttributes(uuid, key));
 	}
 
 	protected Request createPostRequest(String uuid, String key,
-			Representation entity) throws ConfigurationException {
+			Representation entity) throws ConfigurationException,
+			ValidationException {
 		return createPostRequest(createRequestAttributes(uuid, key), entity);
 	}
 

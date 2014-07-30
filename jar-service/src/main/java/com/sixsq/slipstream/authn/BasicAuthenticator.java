@@ -97,6 +97,7 @@ public class BasicAuthenticator extends AuthenticatorBase {
 		if (result == Verifier.RESULT_VALID) {
 			CookieUtils.addAuthnCookie(response, "local", username);
 			setClientInfo(request, username);
+			setUserInRequest(user, request);
 			setLastOnline(user);
 			return true;
 
@@ -120,7 +121,8 @@ public class BasicAuthenticator extends AuthenticatorBase {
 				redirectRef.setQuery("redirectURL="
 						+ request.getResourceRef().getPath().toString());
 
-				String absolutePath = RequestUtil.constructAbsolutePath(redirectRef.toString());
+				String absolutePath = RequestUtil
+						.constructAbsolutePath(redirectRef.toString());
 
 				response.redirectTemporary(absolutePath);
 			} else {

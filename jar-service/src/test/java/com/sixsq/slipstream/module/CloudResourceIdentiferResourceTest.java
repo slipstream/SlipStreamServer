@@ -184,13 +184,15 @@ public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 		module.remove();
 	}
 
-	protected Request createGetRequest(Module module, String cloudServiceName) {
+	protected Request createGetRequest(Module module, String cloudServiceName)
+			throws ConfigurationException, ValidationException {
 		return createGetRequest(module.getName(), module.getVersion(),
 				cloudServiceName);
 	}
 
 	protected Request createGetRequest(String moduleUri, int version,
-			String cloudResourceUri) throws ConfigurationException {
+			String cloudResourceUri) throws ConfigurationException,
+			ValidationException {
 		Request request = createGetRequest(createModuleAttributes(moduleUri));
 		Map<String, Object> attributes = createAttributes("cloudservice",
 				cloudResourceUri);
@@ -201,14 +203,15 @@ public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 	}
 
 	protected Request createPutRequest(Module module, String cloudServiceName,
-			String region, String value) {
+			String region, String value) throws ConfigurationException,
+			ValidationException {
 		return createPutRequest(module.getName(), module.getVersion(),
 				cloudServiceName, region, value);
 	}
 
 	protected Request createPutRequest(String moduleUri, int version,
 			String cloudServiceName, String region, String value)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		Representation entity = new StringRepresentation(value);
 		Request request = createPutRequest(createModuleAttributes(moduleUri),
 				entity);

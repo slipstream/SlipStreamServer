@@ -60,6 +60,7 @@ import com.sixsq.slipstream.util.XmlUtil;
  */
 public class UserResource extends ParameterizedResource<User> {
 
+	public static final String USERNAME_URI_ATTRIBUTE = "user";
 	private static final String resourceRoot = User.RESOURCE_URL_PREFIX;
 
 	@Get("txt")
@@ -152,7 +153,7 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected String extractTargetUriFromRequest() {
-		return (String) getRequest().getAttributes().get("user");
+		return (String) getRequest().getAttributes().get(USERNAME_URI_ATTRIBUTE);
 	}
 
 	@Override
