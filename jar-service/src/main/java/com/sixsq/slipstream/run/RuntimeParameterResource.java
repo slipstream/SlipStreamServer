@@ -22,6 +22,7 @@ package com.sixsq.slipstream.run;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -247,4 +248,11 @@ public class RuntimeParameterResource extends ServerResource {
 		return state;
 	}
 
+	private void logTimeDiff(String msg, long before, long after) {
+		Logger.getLogger("Timing").info("took to execute " + msg + ": " + (after - before));
+	}
+
+	protected void logTimeDiff(String msg, long before) {
+		logTimeDiff(msg, before, System.currentTimeMillis());
+	}
 }
