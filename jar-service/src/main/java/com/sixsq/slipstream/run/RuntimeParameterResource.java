@@ -60,11 +60,22 @@ public class RuntimeParameterResource extends ServerResource {
 	@Override
 	public void doInit() throws ResourceException {
 
+		long start = System.currentTimeMillis();
+		long before;
+
+		before = System.currentTimeMillis();
 		parseRequest();
+		logTimeDiff("parseRequest", before);
 
+		before = System.currentTimeMillis();
 		fetchRepresentation();
+		logTimeDiff("fetchRepresentation", before);
 
+		before = System.currentTimeMillis();
 		raiseConflictIfAbortIsSet();
+		logTimeDiff("raiseConflictIfAbortIsSet", before);
+		
+		logTimeDiff("initialize on runtime parameter", start);
 	}
 
 	private void parseRequest() {
@@ -148,11 +159,15 @@ public class RuntimeParameterResource extends ServerResource {
 	public String represent() throws ResourceException, NotFoundException,
 			ValidationException {
 
+		long start = System.currentTimeMillis();
+
 		if (!runtimeParameter.isSet()) {
 			throw new ResourceException(
 					Status.CLIENT_ERROR_PRECONDITION_FAILED, "key " + key
 							+ " not yet set");
 		}
+
+		logTimeDiff("processing get on runtime parameter", start);
 		return runtimeParameter.getValue();
 	}
 
