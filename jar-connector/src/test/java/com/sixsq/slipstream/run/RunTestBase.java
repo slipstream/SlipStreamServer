@@ -3,7 +3,7 @@ package com.sixsq.slipstream.run;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.local.LocalConnector;
-import com.sixsq.slipstream.connector.stratuslab.StratusLabUserParametersFactory;
+import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -81,9 +81,9 @@ public class RunTestBase {
 
 		// Add dummy credentials
 		user.setParameter(new UserParameter(
-				StratusLabUserParametersFactory.KEY_PARAMETER_NAME, "key", ""));
+				LocalUserParametersFactory.KEY_PARAMETER_NAME, "key", ""));
 		user.setParameter(new UserParameter(
-				StratusLabUserParametersFactory.SECRET_PARAMETER_NAME,
+				LocalUserParametersFactory.SECRET_PARAMETER_NAME,
 				"secret", ""));
 	}
 

@@ -14,7 +14,6 @@
 
   <modules>
     <module>cloudstack</module>
-    <module>local</module>
     <module>okeanos</module>
     <module>openstack</module>
     <module>physicalhost</module>

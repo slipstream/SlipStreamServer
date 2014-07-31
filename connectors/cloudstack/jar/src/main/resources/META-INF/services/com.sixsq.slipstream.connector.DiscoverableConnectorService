@@ -1,0 +1,2 @@
+com.sixsq.slipstream.connector.cloudstack.CloudStackDiscoverableConnectorService
+com.sixsq.slipstream.connector.cloudstack.CloudStackAdvancedZoneDiscoverableConnectorService

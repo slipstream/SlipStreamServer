@@ -19,6 +19,14 @@
       <artifactId>SlipStreamConnector</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Needs to be before junit -->
     <dependency>
       <groupId>org.hamcrest</groupId>
