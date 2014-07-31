@@ -30,7 +30,7 @@ import org.junit.Test;
 import com.sixsq.slipstream.connector.stratuslab.StratusLabConnector;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 
-public class StratusLabConnectorTest extends StratusLabConnector {
+public class StratusLabConnectorTest2 extends StratusLabConnector {
 
 	@Test
 	public void parseDescribeInstanceTest() throws SlipStreamException {

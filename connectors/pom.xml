@@ -18,7 +18,7 @@
     <module>okeanos</module>
     <module>openstack</module>
     <module>physicalhost</module>
-    <module>slipstream</module>
+    <module>stratuslab</module>
   </modules>
 
 </project>
