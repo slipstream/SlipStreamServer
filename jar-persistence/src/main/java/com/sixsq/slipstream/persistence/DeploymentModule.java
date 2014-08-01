@@ -70,6 +70,15 @@ public class DeploymentModule extends Module {
 		getNodes().put(node.getName(), node);
 	}
 
+	public Node getNode(String nodename) {
+		for (Node node : getNodes().values()) {
+			if (node.getName().equals(nodename)) {
+				return node;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Validates the integrity of the object. For example, checks that the
 	 * mapping for deployment instances is complete and no input parameter is

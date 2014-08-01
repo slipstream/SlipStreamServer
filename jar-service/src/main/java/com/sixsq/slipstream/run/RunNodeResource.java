@@ -194,10 +194,8 @@ public class RunNodeResource extends RunBaseResource {
 				String cloudServiceName = run.getCloudServiceNameForNode(nodename);
 				List<String> instanceIds = Arrays.asList(ids.split("\\s*,\\s*"));
 				for (String _id : instanceIds) {
-					int id = Integer.parseInt(_id);
-					setRemovingNodeInstance(run, getNodeInstanceName(id));
-
-					String instanceName = getNodeInstanceName(id);
+					String instanceName = getNodeInstanceName(Integer.parseInt(_id));
+					setRemovingNodeInstance(run, instanceName);
 					run.removeNodeInstanceName(instanceName, cloudServiceName);
 				}
 				// update instance ids
@@ -276,13 +274,13 @@ public class RunNodeResource extends RunBaseResource {
 
 	private Node getNode(Run run, String nodename) {
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
-		for (Node node : deployment.getNodes().values()) {
-			if (node.getName().equals(nodename)) {
-				return node;
-			}
+		Node node = deployment.getNode(nodename);
+		if (node != null) {
+			return node;
+		} else {
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+					"Node " + nodename + " doesn't exist.");
 		}
-		throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Node "
-				+ nodename + " doesn't exist.");
 	}
 
 	private void removeNodeInstanceIndices(Run run, List<String> ids)
