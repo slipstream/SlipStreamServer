@@ -13,6 +13,7 @@ public class GraphiteRedirector extends Redirector {
 		super(context, targetPattern, mode);
 	}
 
+	@Override
 	protected void outboundServerRedirect(Reference targetRef, Request request,
 			Response response) {
 		// Ensure all target parameter begins with 'slipstream.{username}'
