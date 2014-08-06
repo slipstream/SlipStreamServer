@@ -60,9 +60,10 @@ public class UserResourceTest extends ResourceTestBase {
 	private static final String NEW_PASSWORD = "newPassword";
 	private static final String SUPER_PASSWORD = "passwordSuper";
 	private static User otherUser = UserTest.createUser("test2", "password2");
-	private static User superUser = UserTest.createUser("super", SUPER_PASSWORD);
+	private static User superUser = UserTest
+			.createUser("super", SUPER_PASSWORD);
 	private static User user = null;
-	
+
 	@BeforeClass
 	public static void setupBeforeClass() throws InstantiationException,
 			IllegalAccessException, InvocationTargetException,
@@ -87,7 +88,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void getUser() throws ConfigurationException {
+	public void getUser() throws ConfigurationException, ValidationException {
 
 		Request request = createGetRequest(user);
 		Response response = executeRequest(request);
@@ -97,7 +98,8 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void normalUserCantAccessOthers() throws ConfigurationException {
+	public void normalUserCantAccessOthers() throws ConfigurationException,
+			ValidationException {
 
 		Request request = createGetRequest(user, otherUser.getName());
 		Response response = executeRequest(request);
@@ -106,7 +108,8 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void getUserAsSuperUser() throws ConfigurationException {
+	public void getUserAsSuperUser() throws ConfigurationException,
+			ValidationException {
 
 		Request request = createGetRequest(superUser, otherUser.getName());
 		Response response = executeRequest(request);
@@ -115,7 +118,8 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void getInexistantUser() throws ConfigurationException {
+	public void getInexistantUser() throws ConfigurationException,
+			ValidationException {
 
 		Request request = createGetRequest(user, "inexistant");
 		Response response = executeRequest(request);
@@ -189,7 +193,7 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void changePasswordMissingOldPassword()
 			throws ConfigurationException, NoSuchAlgorithmException,
-			UnsupportedEncodingException {
+			UnsupportedEncodingException, ValidationException {
 
 		Passwords passwords = createValidPasswords(UserTest.PASSWORD);
 		passwords.oldPassword = null;
@@ -249,11 +253,10 @@ public class UserResourceTest extends ResourceTestBase {
 		Request request = createGetRequest(superUser, superUser.getName());
 		Response response = executeRequest(request);
 
-		assertThat(response.getStatus(),  is(Status.SUCCESS_OK));
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
 		String xml = response.toString();
-		User user = (User) SerializationUtil.fromXml(xml,
-				User.class);
+		User user = (User) SerializationUtil.fromXml(xml, User.class);
 		assertNotNull(user.getPassword());
 	}
 
@@ -359,7 +362,8 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void getNewToRetrieveTemplate() throws ConfigurationException {
+	public void getNewToRetrieveTemplate() throws ConfigurationException,
+			ValidationException {
 
 		Request request = createGetRequest(user, "new");
 		Response response = executeRequest(request);
@@ -368,7 +372,8 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void editRedirectsToView() throws ConfigurationException {
+	public void editRedirectsToView() throws ConfigurationException,
+			ValidationException {
 
 		Passwords passwords = new Passwords();
 
@@ -494,12 +499,12 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	private Request createDeleteRequest(User targetUser, User user)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		return createDeleteRequest(targetUser, user.getName());
 	}
 
 	private Request createDeleteRequest(User user, String targetUsername)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		Map<String, Object> attributes = createUserAttributes(targetUsername);
 		Request request = createDeleteRequest(attributes);
 		addUserToRequest(user, request);
@@ -507,13 +512,14 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	private Request createPutRequest(User targetUser, String username)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		Passwords passwords = new Passwords();
 		return createPutRequest(targetUser, username, passwords);
 	}
 
 	private Request createPutRequest(User targetUser, String username,
-			Passwords passwords) throws ConfigurationException {
+			Passwords passwords) throws ConfigurationException,
+			ValidationException {
 		Form form = new Form();
 		form.add("name", targetUser.getName());
 		form.add("firstName", targetUser.getFirstName());
@@ -543,12 +549,13 @@ public class UserResourceTest extends ResourceTestBase {
 		return request;
 	}
 
-	private Request createGetRequest(User user) throws ConfigurationException {
+	private Request createGetRequest(User user) throws ConfigurationException,
+			ValidationException {
 		return createGetRequest(user, user.getName());
 	}
 
 	private Request createGetRequest(User user, String targetUsername)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		Map<String, Object> attributes = createUserAttributes(targetUsername);
 		Request request = createGetRequest(attributes);
 		addUserToRequest(user, request);

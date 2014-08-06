@@ -21,6 +21,7 @@ package com.sixsq.slipstream.resource;
  */
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.restlet.Request;
 import org.restlet.data.Form;
@@ -265,5 +266,13 @@ public abstract class BaseResource extends ServerResource {
 
 	protected void setEmptyEntity(MediaType mt) {
 		getResponse().setEntity(null, mt);
+	}
+
+	private void logTimeDiff(String msg, long before, long after) {
+		Logger.getLogger("Timing").info("took to execute " + msg + ": " + (after - before));
+	}
+
+	protected void logTimeDiff(String msg, long before) {
+		logTimeDiff(msg, before, System.currentTimeMillis());
 	}
 }

@@ -27,6 +27,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -172,7 +173,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private String resourceUri;
 
 	@Element(required = false)
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Authz authz = new Authz("Unknown", this);
 
 	@Attribute(required = false)
@@ -202,11 +203,11 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private String tag;
 
 	@Element(required = false)
-	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Commit commit;
 
 	@Element(required = false)
-	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Publish published; // to the app store
 
 	/**

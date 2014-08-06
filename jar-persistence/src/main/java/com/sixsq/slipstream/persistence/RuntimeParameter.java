@@ -46,7 +46,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
  */
 @Entity
 @SuppressWarnings("serial")
-@NamedQueries({ @NamedQuery(name = "getParameterByInstanceId", query = "SELECT p FROM RuntimeParameter p WHERE p.key_ = 'instanceid' AND p.value = :instanceid") })
+@NamedQueries({
+		@NamedQuery(name = "getParameterByInstanceId", query = "SELECT p FROM RuntimeParameter p WHERE p.key_ = 'instanceid' AND p.value = :instanceid"),
+		@NamedQuery(name = "getValueByResourceUri", query = "SELECT p.value FROM RuntimeParameter p WHERE p.resourceUri = ':resourceuri'") })
 public class RuntimeParameter extends Metadata {
 
 	// Define the constants for properties:
@@ -71,19 +73,23 @@ public class RuntimeParameter extends Metadata {
 	public final static String ABORT_DESCRIPTION = "Machine abort flag, set when aborting";
 
 	public final static String GLOBAL_NAMESPACE = "ss";
-    public final static String GLOBAL_NAMESPACE_PREFIX = GLOBAL_NAMESPACE
-            + NODE_PROPERTY_SEPARATOR;
+	public final static String GLOBAL_NAMESPACE_PREFIX = GLOBAL_NAMESPACE
+			+ NODE_PROPERTY_SEPARATOR;
 
-    public final static String GLOBAL_ABORT_KEY = GLOBAL_NAMESPACE_PREFIX + ABORT_KEY;
+	public final static String GLOBAL_ABORT_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ ABORT_KEY;
 	public final static String GLOBAL_ABORT_DESCRIPTION = "Run abort flag, set when aborting";
 
-	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX + STATE_KEY;
+	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ STATE_KEY;
 	public final static String GLOBAL_STATE_DESCRIPTION = "Global execution state";
 
-	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX + "category";
+	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ "category";
 
-    public final static String GLOBAL_URL_SERVICE_KEY = GLOBAL_NAMESPACE_PREFIX + "url.service";
-    public final static String GLOBAL_URL_SERVICE_DESCRIPTION = "Optional service URL for the deployment";
+	public final static String GLOBAL_URL_SERVICE_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ "url.service";
+	public final static String GLOBAL_URL_SERVICE_DESCRIPTION = "Optional service URL for the deployment";
 
 	public static final String TAGS_KEY = "tags";
 	public static final String TAGS_DESCRIPTION = "Tags (comma separated) or annotations for this VM";
@@ -104,7 +110,8 @@ public class RuntimeParameter extends Metadata {
 			+ COMPLETE_KEY;
 	public static final String GLOBAL_COMPLETE_DESCRIPTION = "Global complete flag, set when run completed";
 
-	public final static String GLOBAL_RECOVERY_MODE_KEY = GLOBAL_NAMESPACE_PREFIX + "recovery.mode";
+	public final static String GLOBAL_RECOVERY_MODE_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ "recovery.mode";
 	public final static String GLOBAL_RECOVERY_MDDE_DESCRIPTION = "Run abort flag, set when aborting";
 
 	public final static String IMAGE_ID_PARAMETER_NAME = "image.id";
@@ -125,20 +132,20 @@ public class RuntimeParameter extends Metadata {
 	public static final String CLOUD_SERVICE_NAME = "cloudservice";
 	public static final String CLOUD_SERVICE_DESCRIPTION = "Cloud Service where the node resides";
 
-    public static final String URL_SSH_KEY = "url.ssh";
-    public static final String URL_SSH_DESCRIPTION = "SSH URL to connect to virtual machine";
+	public static final String URL_SSH_KEY = "url.ssh";
+	public static final String URL_SSH_DESCRIPTION = "SSH URL to connect to virtual machine";
 
     public static final String URL_SERVICE_KEY = "url.service";
     public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
 
-    public static final String IS_ORCHESTRATOR_KEY = "is.orchestrator";
-    public static final String IS_ORCHESTRATOR_DESCRIPTION = "True if it's an orchestrator";
+	public static final String IS_ORCHESTRATOR_KEY = "is.orchestrator";
+	public static final String IS_ORCHESTRATOR_DESCRIPTION = "True if it's an orchestrator";
 
-    public static final String MAX_JAAS_WORKERS_KEY = "max.iaas.workers";
-    public static final String MAX_JAAS_WORKERS_DESCRIPTION = "Max number of concurrently provisioned VMs by orchestrator";
-    public static final String MAX_JAAS_WORKERS_DEFAULT = "20";
+	public static final String MAX_JAAS_WORKERS_KEY = "max.iaas.workers";
+	public static final String MAX_JAAS_WORKERS_DESCRIPTION = "Max number of concurrently provisioned VMs by orchestrator";
+	public static final String MAX_JAAS_WORKERS_DEFAULT = "20";
 
-    public final static int MULTIPLICITY_NODE_START_INDEX = 1;
+	public final static int MULTIPLICITY_NODE_START_INDEX = 1;
 
 	private final static Pattern KEY_PATTERN = Pattern.compile("^(.*?):(.*)$");
 
@@ -213,7 +220,7 @@ public class RuntimeParameter extends Metadata {
 	private String key_;
 
 	@Text(required = false, data = true)
-	@Column(length=1024)
+	@Column(length = 1024)
 	private String value = "";
 
 	@Attribute
@@ -229,7 +236,7 @@ public class RuntimeParameter extends Metadata {
 	private ParameterType type = ParameterType.String;
 
 	@Attribute(required = false)
-	@Column(length=1024)
+	@Column(length = 1024)
 	private String mappedRuntimeParameterNames = "";
 
 	@ManyToOne
@@ -370,7 +377,7 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	public void setValue(String value) {
-        setIsSet(!"".equals(value));
+		setIsSet(!"".equals(value));
 		this.value = value;
 		updateMappedRuntimeParameters();
 	}
@@ -437,5 +444,15 @@ public class RuntimeParameter extends Metadata {
 	public ParameterType getType() {
 		return type;
 	}
+
+//	public static String queryValue(
+//			String resourceUri) {
+//		EntityManager em = PersistenceUtil.createEntityManager();
+//		Query q = em.createNamedQuery("getValueByResourceUri");
+//		q.setParameter("resourceuri", resourceUri);
+//		String res = (String) q.getSingleResult();
+//		em.close();
+//		return res;
+//	}
 
 }

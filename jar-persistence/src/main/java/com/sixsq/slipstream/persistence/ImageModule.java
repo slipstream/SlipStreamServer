@@ -348,17 +348,15 @@ public class ImageModule extends Module {
 	}
 
 	@Attribute
-	public String getLoginUser() {
+	public String getLoginUser() throws ValidationException {
 		if (isBase()) {
 			return loginUser;
 		}
 		if (getModuleReference() == null) {
 			return "";
 		}
-		ImageModule parentModule = (ImageModule) Module
-				.load(getModuleReference());
-		if (parentModule != null) {
-			return parentModule.getLoginUser();
+		if (getParentModule() != null) {
+			return getParentModule().getLoginUser();
 		} else {
 			return "";
 		}
@@ -375,17 +373,15 @@ public class ImageModule extends Module {
 	}
 
 	@Attribute
-	public String getPlatform() {
+	public String getPlatform() throws ValidationException {
 		if (isBase()) {
 			return platform;
 		}
 		if (getModuleReference() == null) {
 			return "";
 		}
-		ImageModule parentModule = (ImageModule) Module
-				.load(getModuleReference());
-		if (parentModule != null) {
-			return parentModule.getPlatform();
+		if (getParentModule() != null) {
+			return getParentModule().getPlatform();
 		} else {
 			return "";
 		}

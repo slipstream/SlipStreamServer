@@ -63,6 +63,8 @@ import com.sixsq.slipstream.user.UserView;
 		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
 
+	public static final String REQUEST_KEY = "authenticated_user";
+	
 	public static final String RESOURCE_URL_PREFIX = "user/";
 
 	public static final int ACTIVE_TIMEOUT_MINUTES = 1;

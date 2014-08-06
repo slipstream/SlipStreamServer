@@ -34,6 +34,8 @@ import org.restlet.security.User;
 import org.restlet.security.Verifier;
 
 import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
@@ -50,54 +52,77 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
 
 		int result = CookieUtils.verifyAuthnCookie(cookie);
+		boolean isAuthenticated;
 
 		if (result == Verifier.RESULT_VALID) {
-
-			setClientInfo(request, cookie);
-			setCloudServiceName(request, cookie);
-
-			if (!CookieUtils.isMachine(cookie)) {
-				setLastOnline(cookie);
-			}
-
-			return true;
-
+			isAuthenticated = handleValid(request, cookie);
 		} else {
-
-			if (result == Verifier.RESULT_INVALID) {
-				CookieUtils.removeAuthnCookie(response);
-			}
-
-			List<MediaType> supported = new ArrayList<MediaType>();
-			supported.add(MediaType.APPLICATION_XML);
-			supported.add(MediaType.TEXT_HTML);
-			MediaType prefered = request.getClientInfo().getPreferredMediaType(
-					supported);
-
-			if (prefered != null && prefered.isCompatible(MediaType.TEXT_HTML)) {
-				Reference baseRef = ResourceUriUtil.getBaseRef(request);
-
-				Reference redirectRef = new Reference(baseRef,
-						LoginResource.getResourceRoot());
-				redirectRef.setQuery("redirectURL="
-						+ request.getResourceRef().getPath());
-
-				String absolutePath = RequestUtil.constructAbsolutePath(redirectRef.toString());
-
-				response.redirectTemporary(absolutePath);
-			} else {
-				response.setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
-			}
-
+			handleNotValid(request, response, result);
+			isAuthenticated = false;
 		}
 
-		return false;
+		return isAuthenticated;
 	}
 
-	private void setClientInfo(Request request, Cookie cookie) {
+	private boolean handleValid(Request request, Cookie cookie) {
+		String username = setClientInfo(request, cookie);
+		com.sixsq.slipstream.persistence.User user = null;
+		
+		try {
+			user = com.sixsq.slipstream.persistence.User.loadByName(username);
+		} catch (ConfigurationException e) {
+			return false;
+		} catch (ValidationException e) {
+			return false;
+		}
+		
+		if(user == null) {
+			return false;
+		}
+		setCloudServiceName(request, cookie);
+		setUserInRequest(user, request);
+
+		if (!CookieUtils.isMachine(cookie)) {
+			setLastOnline(cookie);
+		}
+		
+		return true;
+	}
+
+	private void handleNotValid(Request request, Response response, int result) {
+		if (result == Verifier.RESULT_INVALID) {
+			CookieUtils.removeAuthnCookie(response);
+		}
+
+		List<MediaType> supported = new ArrayList<MediaType>();
+		supported.add(MediaType.APPLICATION_XML);
+		supported.add(MediaType.TEXT_HTML);
+		MediaType prefered = request.getClientInfo().getPreferredMediaType(
+				supported);
+
+		if (prefered != null && prefered.isCompatible(MediaType.TEXT_HTML)) {
+			Reference baseRef = ResourceUriUtil.getBaseRef(request);
+
+			Reference redirectRef = new Reference(baseRef,
+					LoginResource.getResourceRoot());
+			redirectRef.setQuery("redirectURL="
+					+ request.getResourceRef().getPath());
+
+			String absolutePath = RequestUtil.constructAbsolutePath(redirectRef
+					.toString());
+
+			response.redirectTemporary(absolutePath);
+		} else {
+			response.setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
+		}
+	}
+
+	private String setClientInfo(Request request, Cookie cookie) {
 		request.getClientInfo().setAuthenticated(true);
-		request.getClientInfo().setUser(
-				new User(CookieUtils.getCookieUsername(cookie)));
+		String username = CookieUtils.getCookieUsername(cookie);
+		User user = new User(username);
+		request.getClientInfo().setUser(user);
+		return username;
 	}
 
 	private void setCloudServiceName(Request request, Cookie cookie) {

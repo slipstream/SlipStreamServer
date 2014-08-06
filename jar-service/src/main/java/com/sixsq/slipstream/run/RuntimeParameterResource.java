@@ -21,6 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -54,11 +55,22 @@ public class RuntimeParameterResource extends RunBaseResource {
 	@Override
 	public void initializeSubResource() throws ResourceException {
 
+		long start = System.currentTimeMillis();
+		long before;
+
+		before = System.currentTimeMillis();
 		parseRequest();
+		logTimeDiff("parseRequest", before);
 
+		before = System.currentTimeMillis();
 		fetchRepresentation();
+		logTimeDiff("fetchRepresentation", before);
 
+		before = System.currentTimeMillis();
 		raiseConflictIfAbortIsSet();
+		logTimeDiff("raiseConflictIfAbortIsSet", before);
+
+		logTimeDiff("initialize on runtime parameter", start);
 	}
 
 	private void parseRequest() {
@@ -104,11 +116,15 @@ public class RuntimeParameterResource extends RunBaseResource {
 	public String represent() throws ResourceException, NotFoundException,
 			ValidationException {
 
+		long start = System.currentTimeMillis();
+
 		if (!runtimeParameter.isSet()) {
 			throw new ResourceException(
 					Status.CLIENT_ERROR_PRECONDITION_FAILED, "key " + key
 							+ " not yet set");
 		}
+
+		logTimeDiff("processing get on runtime parameter", start);
 		return runtimeParameter.getValue();
 	}
 
@@ -194,4 +210,11 @@ public class RuntimeParameterResource extends RunBaseResource {
 		return null;
 	}
 
+	private void logTimeDiff(String msg, long before, long after) {
+		Logger.getLogger("Timing").info("took to execute " + msg + ": " + (after - before));
+	}
+
+	protected void logTimeDiff(String msg, long before) {
+		logTimeDiff(msg, before, System.currentTimeMillis());
+	}
 }
