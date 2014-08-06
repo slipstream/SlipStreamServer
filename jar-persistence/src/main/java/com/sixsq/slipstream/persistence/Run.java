@@ -580,7 +580,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	protected void setParameters(Map<String, RunParameter> parameters) {
 		this.parameters = parameters;
 	}
-	
+
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = RunParameter.class)
 	public Map<String, RunParameter> getParameters() {
