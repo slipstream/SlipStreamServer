@@ -22,8 +22,6 @@ package com.sixsq.slipstream.run;
 
 import javax.persistence.EntityManager;
 
-import org.restlet.Request;
-import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -32,7 +30,6 @@ import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
@@ -44,27 +41,22 @@ import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.Terminator;
 
-public class RunResource extends BaseResource {
+public class RunResource extends RunBaseResource {
 
 	private Run run = null;
 
 	@Override
-	public void initialize() throws ResourceException {
+	public void initializeSubResource() throws ResourceException {
 
 		long start = System.currentTimeMillis();
 		long before;
 
-		Request request = getRequest();
-
-		String resourceUri = ResourceUriUtil.extractResourceUri(request);
 		before = System.currentTimeMillis();
-		run = Run.load(resourceUri);
+		run = Run.loadFromUuid(getUuid());
 		logTimeDiff("load", before);
 
 		if (run == null) {
@@ -72,12 +64,6 @@ public class RunResource extends BaseResource {
 		}
 
 		logTimeDiff("initialize on run", start);
-	}
-
-	@Override
-	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
-		String resourceUri = ResourceUriUtil.extractResourceUri(request);
-		return resourceUri.equals("run/"+CookieUtils.getRunId(cookie));
 	}
 
 	@Override
@@ -100,7 +86,7 @@ public class RunResource extends BaseResource {
 		long before;
 
 		EntityManager em = PersistenceUtil.createEntityManager();
-		
+
 		String xml;
 		try {
 			before = System.currentTimeMillis();
@@ -117,7 +103,7 @@ public class RunResource extends BaseResource {
 		}
 
 		logTimeDiff("processing get on run", start);
-		
+
 		return new StringRepresentation(xml, MediaType.APPLICATION_XML);
 	}
 
@@ -171,8 +157,8 @@ public class RunResource extends BaseResource {
 			}
 		}
 
-		Module module = RunFactory.selectFactory(run.getType()).overloadModule(run, getUser());
-		run.setModule(module, true);
+		Module module = RunFactory.loadModule(run);
+		run.setModule(module);
 
 		return run;
 	}
@@ -196,5 +182,4 @@ public class RunResource extends BaseResource {
 		}
 
 	}
-
 }

@@ -23,7 +23,9 @@ package com.sixsq.slipstream.run;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.junit.Test;
@@ -48,7 +50,7 @@ public class QuotaTest {
 	private Run testQuotaCreateRun(User user, String cloud)
 			throws ValidationException {
 		Module deployment = new DeploymentModule("deployment1");
-		return new Run(deployment, RunType.Orchestration, cloud, user);
+		return new Run(deployment, RunType.Orchestration, new HashSet<String>(Arrays.asList(cloud)), user);
 	}
 
 	private User testQuotaCreateUser() throws ValidationException {
@@ -79,7 +81,7 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
+		run1.addNodeInstanceName("node1", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -96,8 +98,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
+		run1.addNodeInstanceName("node1", cloud);
+		run1.addNodeInstanceName("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -113,8 +115,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
+		run1.addNodeInstanceName("node1", cloud);
+		run1.addNodeInstanceName("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -130,8 +132,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
+		run1.addNodeInstanceName("node1", cloud);
+		run1.addNodeInstanceName("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -147,8 +149,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeName("node1", cloud);
-		run1.addNodeName("node2", cloud);
+		run1.addNodeInstanceName("node1", cloud);
+		run1.addNodeInstanceName("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -188,12 +190,12 @@ public class QuotaTest {
                 // Null value for user
 		parameter.setValue(null);
 		assertThat(Quota.getValue(user, cloud), is("15"));
-		
+
                 // Empty connector parameter value
 		cfgParameter.setValue("");
 		assertThat(Quota.getValue(user, cloud),
 				is(QuotaParameter.QUOTA_VM_DEFAULT));
-		
+
                 // Null value for connector parameter
 		cfgParameter.setValue(null);
 		assertThat(Quota.getValue(user, cloud),

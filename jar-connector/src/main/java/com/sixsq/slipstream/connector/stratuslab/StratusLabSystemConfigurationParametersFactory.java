@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector.stratuslab;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,14 +43,8 @@ public class StratusLabSystemConfigurationParametersFactory extends
 		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.MARKETPLACE_ENDPOINT_PARAMETER_NAME),
 				"Marketplace endpoint");
 
-		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.MESSAGING_TYPE_PARAMETER_NAME),
-				"Messaging type: amazaonsqs, rest, dirq");
-
-		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.MESSAGING_ENDPOINT_PARAMETER_NAME),
-				"Messaging endpoint");
-
-		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.MESSAGING_QUEUE_PARAMETER_NAME),
-				"Messaging queue");
+		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.PDISK_ENDPOINT_PARAMETER_NAME),
+				"PDisk endpoint");
 
 		putMandatoryParameter(constructKey(StratusLabUserParametersFactory.UPDATE_CLIENTURL_PARAMETER_NAME),
 				"URL with the cloud client specific connector");

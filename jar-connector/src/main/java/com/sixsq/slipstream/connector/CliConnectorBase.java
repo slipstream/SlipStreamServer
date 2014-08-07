@@ -30,7 +30,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	@Override
 	abstract public Properties describeInstances(User user) throws SlipStreamException;
-	
+
 	public static Properties parseDescribeInstanceResult(String result)
 			throws SlipStreamException {
 		Properties states = new Properties();
@@ -41,7 +41,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 			String[] parts = line.trim().split("\\s+");
 			if (parts.length < 2) {
 				throw (new SlipStreamException(
-						"Error returned by launch command. Got: " + result));
+						"Error returned by describe command. Got: " + result));
 			}
 			String instanceIdKey = parts[0];
 			String status = parts[1];
@@ -52,7 +52,13 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	public static String[] parseRunInstanceResult(String result)
 			throws SlipStreamClientException {
-		String[] parts = result.trim().split(",");
+		String[] lines = result.split("\n");
+		if (lines.length < 1) {
+			throw (new SlipStreamClientException(
+					"Error returned by launch command. Got: " + result));
+		}
+		String line = lines[lines.length-1];
+		String[] parts = line.trim().split(",");
 		if (parts.length != 2) {
 			throw (new SlipStreamClientException(
 					"Error returned by launch command. Got: " + result));
@@ -67,7 +73,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	protected String getKey(User user) {
 		return wrapInSingleQuotesOrNull(super.getKey(user));
 	}
-	
+
 	protected String getSecret(User user) {
 		return wrapInSingleQuotesOrNull(super.getSecret(user));
 	}
@@ -79,11 +85,11 @@ public abstract class CliConnectorBase extends ConnectorBase {
 			return wrapInSingleQuotes(value);
 		}
 	}
-	
+
 	protected String wrapInSingleQuotes(String value) {
 		return "'" + value.replaceAll("'","'\\\\''") + "'";
 	}
-	
+
 	protected String getEndpoint(User user) {
 		return wrapInSingleQuotes(super.getEndpoint(user));
 	}

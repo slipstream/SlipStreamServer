@@ -460,33 +460,21 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public int getTimeout() {
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_TIMEOUT);
-		try {
-			return Integer.parseInt(getParameterValue(key, "0"));
-		} catch (ValidationException e) {
-			return 0;
-		}
+		return Integer.parseInt(getParameterValue(key, "0"));
 	}
-	
+
 	public boolean getOnSuccessRunForever() {
 		boolean _default = false;
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		try {
-			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
-		} catch (ValidationException e) {
-			return _default;
-		}
+		return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
 	}
 
 	public boolean getOnErrorRunForever() {
 		boolean _default = false;
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		try {
-			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
-		} catch (ValidationException e) {
-			return _default;
-		}
+		return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
 	}
-	
+
 	public void setOnSuccessRunForever(boolean on) throws ValidationException {
 		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 		UserParameter parameter = getParameter(key);

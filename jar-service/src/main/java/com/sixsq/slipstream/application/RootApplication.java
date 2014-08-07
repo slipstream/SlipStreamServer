@@ -22,7 +22,6 @@ package com.sixsq.slipstream.application;
 
 import java.util.ServiceLoader;
 
-import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -51,6 +50,7 @@ import com.sixsq.slipstream.authn.ResetPasswordResource;
 import com.sixsq.slipstream.authz.SuperEnroler;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
 import com.sixsq.slipstream.dashboard.DashboardRouter;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -69,7 +69,6 @@ import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
-import com.sixsq.slipstream.stats.StatsRouter;
 import com.sixsq.slipstream.user.UserRouter;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.Logger;
@@ -170,7 +169,6 @@ public class RootApplication extends Application {
 			attachDashboard(router);
 			attachVms(router);
 			attachRun(router);
-			attachStats(router);
 			attachWelcome(router);
 			attachLogin(router);
 			attachLogout(router);
@@ -265,10 +263,6 @@ public class RootApplication extends Application {
 
 	private void attachRun(RootRouter router) throws ConfigurationException {
 		guardAndAttach(router, new RunRouter(getContext()), "run");
-	}
-
-	private void attachStats(RootRouter router) throws ConfigurationException {
-		guardAndAttach(router, new StatsRouter(getContext()), "stats");
 	}
 
 	private void attachDashboard(RootRouter router)

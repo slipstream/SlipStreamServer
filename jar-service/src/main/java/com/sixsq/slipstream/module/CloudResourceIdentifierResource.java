@@ -22,8 +22,6 @@ package com.sixsq.slipstream.module;
 
 import java.io.IOException;
 
-import org.restlet.Request;
-import org.restlet.data.Cookie;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
@@ -55,8 +53,7 @@ public class CloudResourceIdentifierResource extends BaseResource {
 	}
 
 	@Override
-	protected boolean isMachineAllowedToAccessThisResource(Request request,
-			Cookie cookie) {
+	protected boolean isMachineAllowedToAccessThisResource() {
 		// TODO: LS: Check if the Run of the cookie is associated to the image.
 		return true;
 	}

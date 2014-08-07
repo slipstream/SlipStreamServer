@@ -109,7 +109,8 @@ public abstract class ConnectorBase implements Connector {
         if (isInOrchestrationContext(run)) {
             imageId = getOrchestratorImageId(user);
         } else {
-            imageId = ((ImageModule) run.getModule()).extractBaseImageId(run.getCloudService());
+        	String cloudService = run.getCloudServiceNameForNode(Run.MACHINE_NAME);
+            imageId = ((ImageModule) run.getModule()).extractBaseImageId(cloudService);
         }
         return imageId;
     }
@@ -294,7 +295,7 @@ public abstract class ConnectorBase implements Connector {
 
     protected String getPrivateSshKeyFileName() throws ConfigurationException, ValidationException {
         String privateSshKeyFile = Configuration.getInstance()
-                                                .getProperty("cloud.connector.orchestrator.privatesshkey");
+                                                .getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY);
         return privateSshKeyFile;
     }
 
@@ -432,6 +433,14 @@ public abstract class ConnectorBase implements Connector {
         } catch (ConfigurationException e) {
             return null;
         }
+    }
+
+    @Override
+    public boolean isCredentialsSet(User user) {
+    	String key = getKey(user);
+    	String secret = getSecret(user);
+
+    	return !(key == null || "".equals(key) || secret == null || "".equals(secret));
     }
 
     protected String getLoginUsername(Run run) throws SlipStreamClientException {
