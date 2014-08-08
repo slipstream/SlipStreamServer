@@ -61,7 +61,7 @@
         (when (nil? v)
           (log/log-error
             "Timeout collecting vms for user "
-            (.getName user)
+            (get-name user)
             " on cloud "
             (.getConnectorInstanceName connector)))))
     (go (>! ch (Collector/collect user connector)))))
@@ -74,8 +74,8 @@
         (if (nil? res)
           (log/log-error
             "Timeout updating metrics for user "
-            (.getName user))
-          (log/log-info (str "executed update-metric request for " (.getName user))))))
+            (get-name user))
+          (log/log-info (str "executed update-metric request for " (get-name user))))))
     (go (>! ch (updator/update user)))))
 
 (def not-nil? (complement nil?))
@@ -90,7 +90,7 @@
         (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
           (when (not-nil? user)
             (try
-              (log/log-debug (str "executing collect request for " (.getName user) " and " (.getConnectorInstanceName connector)))
+              (log/log-debug (str "executing collect request for " (get-name user) " and " (.getConnectorInstanceName connector)))
               (collect! user connector)
               (if (updator/metering-enabled?)
                 (update-metric! user))
