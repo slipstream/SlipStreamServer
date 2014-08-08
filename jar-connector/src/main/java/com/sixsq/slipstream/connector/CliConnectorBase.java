@@ -90,7 +90,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return "'" + value.replaceAll("'","'\\\\''") + "'";
 	}
 
-	protected String getEndpoint(User user) {
+	protected String getEndpoint(User user) throws ValidationException {
 		return wrapInSingleQuotes(super.getEndpoint(user));
 	}
 
