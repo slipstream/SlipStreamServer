@@ -487,8 +487,12 @@ public abstract class ConnectorBase implements Connector {
         return password;
     }
 
-    protected String getEndpoint(User user) {
-        return user.getParameter(getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME
-        ).getValue();
+    protected String getEndpoint(User user) throws ValidationException {
+    	String paramName = getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME;
+    	UserParameter endpointParam = user.getParameter(paramName);
+    	if (endpointParam != null) {
+    		return endpointParam.getValue();
+    	}
+    	throw new ValidationException("Failed to get endpoint. Parameter not found: " + paramName);
     }
 }
