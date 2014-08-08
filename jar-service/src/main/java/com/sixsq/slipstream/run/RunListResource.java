@@ -292,7 +292,9 @@ public class RunListResource extends BaseResource {
 	}
 
 	private Run launch(Run run) throws SlipStreamException {
-		slipstream.async.Launcher.launch(run, getUser());
+		User user = getUser();
+		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
+		slipstream.async.Launcher.launch(run, user);
 		return run;
 	}
 
