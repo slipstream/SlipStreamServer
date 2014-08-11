@@ -812,7 +812,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public List<String> getNodeNameList() {
 		String[] rawNodeNames = getNodeNames().split(NODE_NAMES_SEPARATOR);
-		List<String> nodeNames = new ArrayList<>(rawNodeNames.length);
+		List<String> nodeNames = new ArrayList<String>(rawNodeNames.length);
 
 		for (int i=0; i < rawNodeNames.length; i++) {
 			String nodeName = rawNodeNames[i].trim();
