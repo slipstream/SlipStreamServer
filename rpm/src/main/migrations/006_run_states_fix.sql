@@ -1,5 +1,5 @@
 -- Target versions: pre v2.2.4
--- SHOULD be executed when upgrading to SlipStream v2.2.4
+-- SHOULD be executed ONLY ONCE when upgrading to SlipStream v2.2.4
 
 UPDATE RUN SET STATE = 6 WHERE STATE = 8;
 UPDATE RUN SET STATE = 20 WHERE STATE = 9;
