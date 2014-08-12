@@ -74,18 +74,21 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 
 		anotherUser = new User("anotherUser");
-		anotherUser.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
+		anotherUser
+				.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
 		UserTest.storeUser(anotherUser);
-		
+
 		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
 		user = (User) user.store();
-		
-		publicProject = new ProjectModule("ModuleResourceCopyToTestPublicProject");
+
+		publicProject = new ProjectModule(
+				"ModuleResourceCopyToTestPublicProject");
 		publicProject.getAuthz().setPublicCreateChildren(true);
 		publicProject.getAuthz().setUser(user.getName());
 		publicProject = publicProject.store();
-		
-		privateProjectAnother = new ProjectModule("ModuleResourceCopyToTestPrivateProject");
+
+		privateProjectAnother = new ProjectModule(
+				"ModuleResourceCopyToTestPrivateProject");
 		privateProjectAnother.getAuthz().setGroupCreateChildren(false);
 		privateProjectAnother.getAuthz().setUser(anotherUser.getName());
 		privateProjectAnother = privateProjectAnother.store();
@@ -94,23 +97,23 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		try {
-			user.remove();			
-		} catch(Exception ex) {
+			user.remove();
+		} catch (Exception ex) {
 			// ok
 		}
 		try {
 			anotherUser.remove();
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			// ok
 		}
 		try {
 			publicProject.remove();
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			// ok
 		}
 		try {
 			privateProjectAnother.remove();
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			// ok
 		}
 	}
@@ -119,38 +122,40 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 	public void setup() throws ValidationException {
 		createModules("copy_to");
 	}
-	
+
 	@After
 	public void tearDown() {
 		image.remove();
 		deployment.remove();
 		privateImage.remove();
 	}
-	
+
 	@Test
 	public void copySourceFormParameterMissing() throws ConfigurationException,
 			SlipStreamClientException {
 
 		Form form = new Form();
-		Request request = createPostRequest(publicProject.getName(), form.getWebRepresentation(), user);
-		addUserToRequest(user.getName(), request);
+		Request request = createPostRequest(publicProject.getName(),
+				form.getWebRepresentation(), user);
+		addUserToRequest(user, request);
 
 		Response response = executeRequest(request);
-		
+
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
 	}
 
 	@Test
-	public void copyTargetNameFormParameterMissing() throws ConfigurationException,
-			SlipStreamClientException {
+	public void copyTargetNameFormParameterMissing()
+			throws ConfigurationException, SlipStreamClientException {
 
 		Form form = new Form();
 		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME, "something");
-		Request request = createPostRequest(publicProject.getName(), form.getWebRepresentation(), user);
-		addUserToRequest(user.getName(), request);
+		Request request = createPostRequest(publicProject.getName(),
+				form.getWebRepresentation(), user);
+		addUserToRequest(user, request);
 
 		Response response = executeRequest(request);
-		
+
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
 	}
 
@@ -161,11 +166,12 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		Form form = new Form();
 		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME, "DoesntExist");
 
-		Request request = createPostRequest(image.getName(), form.getWebRepresentation(), user);
-		addUserToRequest(user.getName(), request);
+		Request request = createPostRequest(image.getName(),
+				form.getWebRepresentation(), user);
+		addUserToRequest(user, request);
 
 		Response response = executeRequest(request);
-		
+
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
 	}
 
@@ -174,16 +180,18 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 			SlipStreamClientException {
 
 		Form form = new Form();
-		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME, image.getResourceUri());
+		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME,
+				image.getResourceUri());
 
-		Request request = createPostRequest(image.getName(), form.getWebRepresentation(), user);
-		addUserToRequest(user.getName(), request);
+		Request request = createPostRequest(image.getName(),
+				form.getWebRepresentation(), user);
+		addUserToRequest(user, request);
 
 		Response response = executeRequest(request);
-		
+
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
 	}
-		
+
 	@Test
 	public void allGood() throws ConfigurationException,
 			SlipStreamClientException {
@@ -191,19 +199,23 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		String targetName = "allGood";
 
 		Form form = new Form();
-		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME, image.getResourceUri());
+		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME,
+				image.getResourceUri());
 		form.add(ModuleResource.COPY_TARGET_FORM_PARAMETER_NAME, targetName);
 
-		Request request = createPostRequest(publicProject.getName(), form.getWebRepresentation(), user);
-		addUserToRequest(user.getName(), request);
+		Request request = createPostRequest(publicProject.getName(),
+				form.getWebRepresentation(), user);
+		addUserToRequest(user, request);
 
 		Response response = executeRequest(request);
-		
+
 		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
-		
-		Module.load(Module.constructResourceUri(publicProject.getName() + "/" + targetName)).remove();
+
+		Module.load(
+				Module.constructResourceUri(publicProject.getName() + "/"
+						+ targetName)).remove();
 	}
-		
+
 	@Test
 	public void noReadRightOnSource() throws ConfigurationException,
 			SlipStreamClientException {
@@ -211,17 +223,19 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		String targetName = "noReadRightOnSource";
 
 		Form form = new Form();
-		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME, privateImage.getResourceUri());
+		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME,
+				privateImage.getResourceUri());
 		form.add(ModuleResource.COPY_TARGET_FORM_PARAMETER_NAME, targetName);
 
-		Request request = createPostRequest(privateProjectAnother.getName(), form.getWebRepresentation(), user);
-		addUserToRequest(anotherUser.getName(), request);
+		Request request = createPostRequest(privateProjectAnother.getName(),
+				form.getWebRepresentation(), user);
+		addUserToRequest(anotherUser, request);
 
 		Response response = executeRequest(request);
-		
+
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 	}
-		
+
 	@Test
 	public void noReadRightOnTarget() throws ConfigurationException,
 			SlipStreamClientException {
@@ -229,17 +243,19 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		String targetName = "noReadRightOnTarget";
 
 		Form form = new Form();
-		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME, image.getResourceUri());
+		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME,
+				image.getResourceUri());
 		form.add(ModuleResource.COPY_TARGET_FORM_PARAMETER_NAME, targetName);
 
-		Request request = createPostRequest(privateProjectAnother.getName(), form.getWebRepresentation(), user);
-		addUserToRequest(user.getName(), request);
+		Request request = createPostRequest(privateProjectAnother.getName(),
+				form.getWebRepresentation(), user);
+		addUserToRequest(user, request);
 
 		Response response = executeRequest(request);
-		
+
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 	}
-		
+
 	private void createModules(String moduleName) throws ValidationException {
 
 		image = new ImageModule(moduleName);
@@ -260,14 +276,14 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 
 		privateImage.setImageId("123", cloudServiceName);
 
-		privateImage.setParameter(new ModuleParameter(PARAMETER_NAME, "default value",
-				""));
+		privateImage.setParameter(new ModuleParameter(PARAMETER_NAME,
+				"default value", ""));
 
 		image.setImageId("abc", LocalConnector.CLOUD_SERVICE_NAME);
 
 		privateImage.getAuthz().setGroupGet(false);
 		privateImage.getAuthz().setUser(user.getName());
-		
+
 		privateImage.store();
 
 		Node node = new Node(NODE_NAME, image);
@@ -279,11 +295,11 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		deployment.store();
 	}
 
-
 	private Request createPostRequest(String name, Representation entity,
-			User user) throws ConfigurationException {
-		Request request = createPostRequest(createModuleAttributes(name), entity);
-		addUserToRequest(user.getName(), request);
+			User user) throws ConfigurationException, ValidationException {
+		Request request = createPostRequest(createModuleAttributes(name),
+				entity);
+		addUserToRequest(user, request);
 		return request;
 	}
 

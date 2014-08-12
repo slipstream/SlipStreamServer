@@ -70,10 +70,9 @@ public class RuntimeParameterResourceTest extends
 		super.tearDown();
 	}
 
-
 	@Test
 	public void runtimeParameterResourceGetUnknownUuid()
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 
 		Request request = createGetRequest("unknownUuid", "aKey");
 
@@ -326,12 +325,13 @@ public class RuntimeParameterResourceTest extends
 	public void errorSetsNodeAndGlobalAbort() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase() + RuntimeParameter.ABORT_KEY;
+		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase()
+				+ RuntimeParameter.ABORT_KEY;
 		String globalAbortKey = RuntimeParameter.GLOBAL_ABORT_KEY;
 		String abortMessage = "machine abort";
 
 		Run run = createAndStoreRunImage("errorSetsNodeAndGlobalAbort");
-		
+
 		Request request = createPutRequest(run.getUuid(), machineAbortKey,
 				new StringRepresentation(abortMessage));
 		Response response = executeRequest(request);
@@ -351,7 +351,8 @@ public class RuntimeParameterResourceTest extends
 	public void cancelAbort() throws FileNotFoundException, IOException,
 			SlipStreamException {
 
-		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase() + RuntimeParameter.ABORT_KEY;
+		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase()
+				+ RuntimeParameter.ABORT_KEY;
 		String globalAbortKey = RuntimeParameter.GLOBAL_ABORT_KEY;
 		String abortMessage = "machine abort";
 

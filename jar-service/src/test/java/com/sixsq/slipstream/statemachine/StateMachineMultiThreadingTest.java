@@ -9,9 +9,9 @@ package com.sixsq.slipstream.statemachine;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ package com.sixsq.slipstream.statemachine;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-
+import static org.junit.Assert.fail;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -42,6 +42,7 @@ import org.restlet.Response;
 import org.restlet.representation.StringRepresentation;
 
 import com.sixsq.slipstream.exceptions.AbortException;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -104,8 +105,15 @@ public class StateMachineMultiThreadingTest extends
 			attributes.put("key",
 					createParameterName(RuntimeParameter.COMPLETE_KEY));
 
-			Request request = createPostRequest(attributes,
-					new StringRepresentation(""));
+			Request request= null;
+			try {
+				request = createPostRequest(attributes,
+						new StringRepresentation(""));
+			} catch (ConfigurationException e) {
+				fail();
+			} catch (ValidationException e) {
+				fail();
+			}
 
 			Response response = executeRequest(request);
 

@@ -440,9 +440,9 @@ public abstract class RunFactory {
 		return describeInstancesStates;
 	}
 
-	public static Run updateVmStatus(Run run, User user)
+	public static Run updateVmStatus(Run run, String username)
 			throws SlipStreamException {
-		List<Vm> vms = Vm.list(user.getName());
+		List<Vm> vms = Vm.list(username);
 		run = populateVmStateProperties(run, vms);
 		return run;
 	}

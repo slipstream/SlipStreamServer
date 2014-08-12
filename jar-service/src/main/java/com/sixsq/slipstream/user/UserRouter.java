@@ -49,7 +49,7 @@ public class UserRouter extends Router {
 	public UserRouter(Context context) {
 		super(context);
 
-		attachPaths(new String[] { "/{user}" }, UserResource.class);
+		attachPaths(new String[] { "/{" + UserResource.USERNAME_URI_ATTRIBUTE + "}" }, UserResource.class);
 
 		attachPathsWithSuper(new String[] { "" }, UserListResource.class);
 	}
