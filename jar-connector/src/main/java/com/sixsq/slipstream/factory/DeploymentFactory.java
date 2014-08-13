@@ -137,7 +137,7 @@ public class DeploymentFactory extends RunFactory {
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 
 		for (Node node : deployment.getNodes().values()) {
-			for (int i = 1; i <= node.getMultiplicity(); i++) {
+			for (int i = 1; i <= getNodeMultiplicity(run, node); i++) {
 				initNodeInstanceRuntimeParameters(run, node, i);
 			}
 			run.addGroup(node.getName(), run.getCloudServiceNameForNode(node.getName()));
@@ -145,7 +145,7 @@ public class DeploymentFactory extends RunFactory {
 
 		// mapping
 		for (Node node : deployment.getNodes().values()) {
-			int multiplicity = node.getMultiplicity();
+			int multiplicity = getNodeMultiplicity(run, node);
 			for (NodeParameter param : node.getParameterMappings().values()) {
 				for (int i = 1; i <= multiplicity; i++) {
 					if (!param.isStringValue()) {
@@ -221,13 +221,13 @@ public class DeploymentFactory extends RunFactory {
 		return run;
 	}
 
-	private static void initNodesRuntimeParameters(Run run) throws ValidationException {
+	private static void initNodesRuntimeParameters(Run run) throws ValidationException, NotFoundException {
 
 		DeploymentModule deployment = (DeploymentModule) run.getModule();
 		for (Node node : deployment.getNodes().values()) {
 
 			String nodeName = node.getName();
-			int multiplicity = node.getMultiplicity();
+			int multiplicity = getNodeMultiplicity(run, node);
 			int multStartIndex = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX;
 
 			String nodeRunParameterKeyName = constructParamName(nodeName,
@@ -452,6 +452,11 @@ public class DeploymentFactory extends RunFactory {
 		if (deploymentModule.getNodes().isEmpty()) {
 			throw new ValidationException("Deployment module provided for run is missing nodes.");
 		}
+	}
+
+	private static int getNodeMultiplicity(Run run, Node node) throws NotFoundException {
+		String key = constructNodeParamName(node, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+		return Integer.parseInt(run.getParameterValue(key, null));
 	}
 
 }
