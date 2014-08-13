@@ -161,7 +161,7 @@ public class RunListResource extends BaseResource {
 			Module module = loadReferenceModule();
 
 			authorizePost(module);
-			
+
 			updateReference(module);
 
 			overrideModule(form, module);
@@ -172,7 +172,7 @@ public class RunListResource extends BaseResource {
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
 			String defaultCloudService = getDefaultCloudService(form, user);
-			
+
 			run = RunFactory.getRun(module, parseType(form), defaultCloudService, user);
 
 			run = addCredentials(run);
@@ -344,7 +344,9 @@ public class RunListResource extends BaseResource {
 	}
 
 	private Run launch(Run run) throws SlipStreamException {
-		slipstream.async.Launcher.launch(run, getUser());
+        User user = getUser();
+        user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
+        slipstream.async.Launcher.launch(run, user);
 		return run;
 	}
 
