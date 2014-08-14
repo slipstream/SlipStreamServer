@@ -60,11 +60,11 @@ import com.sixsq.slipstream.user.UserView;
 @Entity(name="User")
 @NamedQueries({
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
-		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline) FROM User u") })
+		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline, u.organization) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
 
 	public static final String REQUEST_KEY = "authenticated_user";
-	
+
 	public static final String RESOURCE_URL_PREFIX = "user/";
 
 	public static final int ACTIVE_TIMEOUT_MINUTES = 1;
@@ -130,7 +130,7 @@ public class User extends Parameterized<User, UserParameter> {
 	protected void setParameters(Map<String, UserParameter> parameters) {
 		this.parameters = parameters;
 	}
-	
+
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
 	public Map<String, UserParameter> getParameters() {

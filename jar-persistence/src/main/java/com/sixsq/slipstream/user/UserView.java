@@ -50,8 +50,11 @@ public class UserView {
 	@Attribute(required = false)
 	public final Date lastOnline;
 
+	@Attribute(required = false)
+	private String organization;
+
 	public UserView(String name, String firstName, String lastName,
-			User.State state, Date lastOnline) {
+			User.State state, Date lastOnline, String organization) {
 
 		this.name = name;
 		this.resourceUri = User.constructResourceUri(name);
@@ -66,6 +69,8 @@ public class UserView {
         } else {
             this.lastOnline = null;
         }
+
+        this.organization = organization;
 	}
 
 	@Root(name = "list")
