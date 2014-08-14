@@ -437,6 +437,11 @@ public class DeploymentFactory extends RunFactory {
 						String key = constructNodeParamName(node, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 						String multiplicity = extractNodeParameterValue((NodeParameter)parameter);
 						run.getParameter(key).setValue(multiplicity);
+
+						key = constructNodeParamName(node, RunParameter.NODE_INCREMENT_KEY);
+						String increment = String.valueOf(Integer.parseInt(multiplicity) + 1);
+						run.getParameter(key).setValue(increment);
+
 						break;
 					}
 				}
