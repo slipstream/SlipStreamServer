@@ -946,15 +946,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.lastStateChangeTime = date;
 	}
 
-	public int getMultiplicity(String nodeName) throws NotFoundException {
-		String multiplicity = getRuntimeParameterValueIgnoreAbort(nodeName
-				+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR
-				+ RuntimeParameter.MULTIPLICITY_NODE_START_INDEX
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-				+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
-		return Integer.parseInt(multiplicity);
-	}
-
 	public List<String> getOrchestrators() {
 		List<String> orchestrators = new ArrayList<String>();
 
