@@ -32,6 +32,7 @@ import javax.persistence.Transient;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
+import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
@@ -43,6 +44,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
  */
 @MappedSuperclass
 @SuppressWarnings("serial")
+@Root(name = "parameter")
 public abstract class Parameter<T> implements Serializable {
 
 	private static final CharSequence INVALID_RESTRICTED_CHAR = "'";
@@ -127,7 +129,7 @@ public abstract class Parameter<T> implements Serializable {
 		return value;
 	}
 
-	public String getValue(String defaultValue) throws ValidationException {
+	public String getValue(String defaultValue) {
 		return hasValueSet() ? value : defaultValue;
 	}
 

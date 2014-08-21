@@ -9,9 +9,9 @@ package com.sixsq.slipstream.factory;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,50 +20,30 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.exceptions.NotFoundException;
+import java.util.Map;
+
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.User;
 
 public class SimpleRunFactory extends BuildImageFactory {
 
 	@Override
-	protected Run constructRun(Module module, String cloudService, User user)
-			throws ValidationException {
-		return new Run(module, RunType.Run, cloudService, user);
+	protected RunType getRunType() {
+		return RunType.Run;
 	}
 
 	@Override
-	protected void initialize(Module module, Run run, User user, String cloudService)
-			throws ValidationException, NotFoundException {
-
-		super.initialize(module, run, user, cloudService);
-	}
-
-	@Override
-	protected void validateModule(Module module, String cloudService)
-			throws SlipStreamClientException {
+	protected void validateModule(Module module, Map<String, String> cloudServicePerNode)
+	        throws SlipStreamClientException {
 
 		ImageModule image = (ImageModule) module;
 
 		checkNoCircularDependencies(image);
 
-		image.validateForRun(cloudService);
-	}
-	
-	@Override
-	protected void initNodeNames(Run run, String cloudService) {
-		run.addNodeName(Run.MACHINE_NAME, cloudService);
-		run.addGroup(Run.MACHINE_NAME, cloudService);
+		String cloudServiceName = cloudServicePerNode.get(nodeInstanceName);
+		image.validateForRun(cloudServiceName);
 	}
 
-	@Override
-	public Module overloadModule(Run run, User user) throws ValidationException {
-		Module module = loadModule(run);
-		return ImageModule.populateForImageRun(run, module);
-	}
 }

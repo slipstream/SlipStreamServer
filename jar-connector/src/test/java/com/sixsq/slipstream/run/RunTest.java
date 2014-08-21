@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -87,7 +87,7 @@ public class RunTest extends RunTestBase {
 	public void verifyCorrectParameters() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		assertEquals(image.getResourceUri(), run.getModuleResourceUrl());
 		assertEquals(ModuleCategory.Image, run.getCategory());
@@ -99,7 +99,7 @@ public class RunTest extends RunTestBase {
 	public void storeRetrieveAndDelete() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 		run.store();
 
 		String resourceUrl = run.getResourceUri();
@@ -121,10 +121,10 @@ public class RunTest extends RunTestBase {
 	public void runWithOneParameter() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		int initialNumberOfParameters = run.getParameters().size();
-		
+
 		String resourceUrl = run.getResourceUri();
 
 		String parameterName = "name";
@@ -159,10 +159,10 @@ public class RunTest extends RunTestBase {
 	public void runWithTwoParameters() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		int initialNumberOfParameters = run.getParameters().size();
-		
+
 		String resourceUrl = run.getResourceUri();
 
 		String parameterName1 = "p1";
@@ -210,7 +210,7 @@ public class RunTest extends RunTestBase {
 	public void assignRuntimeParameters() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		int initialParameterNo = run.getRuntimeParameters().size();
 
@@ -266,8 +266,7 @@ public class RunTest extends RunTestBase {
 	public void createAndRetreive() throws FileNotFoundException, IOException,
 			SlipStreamException {
 
-		Run run = new Run(new ImageModule("createAndRetreive"),
-				RunType.Orchestration, cloudServiceName, user);
+		Run run = new Run(new ImageModule("createAndRetreive"), RunType.Orchestration, cloudServiceNames, user);
 		run.store();
 
 		Run runRestored = Run.loadFromUuid(run.getUuid());
@@ -344,7 +343,7 @@ public class RunTest extends RunTestBase {
 	public void checkRunSerialization() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		SerializationUtil.toXmlString(run);
 	}
@@ -353,7 +352,7 @@ public class RunTest extends RunTestBase {
 	public void testParameters() throws SlipStreamException,
 			FileNotFoundException, IOException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		run.setParameter(new RunParameter("k1", "v1", ""));
 		run.setParameter(new RunParameter("k2", "v2", ""));
@@ -374,7 +373,7 @@ public class RunTest extends RunTestBase {
 	public void updateRuntimeParameters() throws SlipStreamException,
 			FileNotFoundException, IOException {
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 
 		run.assignRuntimeParameter("node.1:k1", "v1 init", "v1 desc");
 		run.assignRuntimeParameter("node.1:k2", "v2 init", "v2 desc");
@@ -414,8 +413,10 @@ public class RunTest extends RunTestBase {
 		NodeParameter parameter;
 
 		Node node1 = new Node("node1", image);
+		node1.setCloudService(cloudServiceName);
 		deployment.setNode(node1);
 		Node node2 = new Node("node2", image);
+		node2.setCloudService(cloudServiceName);
 		deployment.setNode(node2);
 
 		parameter = new NodeParameter("pi1", "node2:po1", null);
@@ -428,8 +429,7 @@ public class RunTest extends RunTestBase {
 
 		deployment = deployment.store();
 
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				cloudServiceName, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 
 		try {
 			run.updateRuntimeParameter("node1.1:notthere", null);
@@ -444,7 +444,7 @@ public class RunTest extends RunTestBase {
 
 		ImageModule image = new ImageModule("abort");
 
-		Run run = new Run(image, RunType.Orchestration, cloudServiceName, user);
+		Run run = new Run(image, RunType.Orchestration, cloudServiceNames, user);
 
 		assertThat(run.isAbort(), is(false));
 
@@ -466,27 +466,27 @@ public class RunTest extends RunTestBase {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		em.getTransaction().begin();
 		run = Run.load(run.getResourceUri(), em);
-		
+
 		RuntimeParameter globalState = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY);
 		globalState.setValue(state.toString());
 		globalState.store();
-		
+
 		run.setState(state);
 		run.store();
-		
+
 		em.getTransaction().commit();
 		em.close();
-		
+
 		return run;
 	}
-	
+
 	@Test
 	public void purge() throws ConfigurationException, SlipStreamException {
 
 		ImageModule image = new ImageModule("doneImage");
 		image.setImageId("123", cloudServiceName);
 
-		Run run = RunFactory.getRun(image, RunType.Run, cloudServiceName, user);
+		Run run = RunFactory.getRun(image, RunType.Run, user);
 		run.store();
 		String resourceUri = run.getResourceUri();
 
@@ -504,7 +504,7 @@ public class RunTest extends RunTestBase {
 		Terminator.purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Done));
-		
+
 		run = setRunState(run, States.Ready);
 		run.getRuntimeParameters().put(
 				RuntimeParameter.GLOBAL_ABORT_KEY,
@@ -515,7 +515,7 @@ public class RunTest extends RunTestBase {
 		Terminator.purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Aborted));
-		
+
 		run.remove();
 	}
 

@@ -43,7 +43,9 @@ public class Collector {
 	public static int collect(User user, Connector connector) {
 		int res = 0;
 		try {
-			res = describeInstances(user, connector);
+			if (connector.isCredentialsSet(user)) {
+				res = describeInstances(user, connector);
+			}
 		} catch (ConfigurationException e) {
 			logger.severe(e.getMessage());
 		} catch (ValidationException e) {
@@ -81,8 +83,7 @@ public class Collector {
 		return populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
 	}
 
-	private static int populateVmsForCloud(User user, String cloud,
-			Properties props) {
+	private static int populateVmsForCloud(User user, String cloud, Properties props) {
 		List<Vm> vms = new ArrayList<Vm>();
 		for (String key : props.stringPropertyNames()) {
 			String instanceId = key;

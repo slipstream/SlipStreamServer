@@ -1,9 +1,13 @@
 package com.sixsq.slipstream.run;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.connector.local.LocalConnector;
-import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -33,8 +37,9 @@ public class RunTestBase {
 	protected static ImageModule imagenoref = null;
 	protected static ImageModule imagebuildme = null;
 	protected static Connector localConnector = new LocalConnector();
-	protected static String cloudServiceName = localConnector
-			.getCloudServiceName();
+	protected static final String cloudServiceName = localConnector.getCloudServiceName();
+	protected static final Set<String> cloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceName));
+
 	public static DeploymentModule deployment = null;
 	protected static ImageModule imageForDeployment1 = null;
 	protected static ImageModule imageForDeployment2 = null;
@@ -81,10 +86,11 @@ public class RunTestBase {
 
 		// Add dummy credentials
 		user.setParameter(new UserParameter(
-				LocalUserParametersFactory.KEY_PARAMETER_NAME, "key", ""));
+				UserParametersFactoryBase.KEY_PARAMETER_NAME, "key", ""));
 		user.setParameter(new UserParameter(
-				LocalUserParametersFactory.SECRET_PARAMETER_NAME,
-				"secret", ""));
+				UserParametersFactoryBase.SECRET_PARAMETER_NAME, "secret", ""));
+		user.setParameter(new UserParameter(
+				UserParametersFactoryBase.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME, cloudServiceName, ""));
 	}
 
 	protected static void tearDownImages() {
@@ -144,38 +150,36 @@ public class RunTestBase {
 		super();
 	}
 
-	protected Run createAndStoreRun(Module module) throws SlipStreamException {
+	protected static Run createAndStoreRun(Module module) throws SlipStreamException {
 
 		return createAndStoreRun(module, USER_DEFAULT);
 	}
 
-	protected Run createAndStoreRun(Module module, RunType type)
+	protected static Run createAndStoreRun(Module module, RunType type)
 			throws SlipStreamException {
 
 		return createAndStoreRun(module, USER_DEFAULT, type);
 	}
 
-	protected Run createAndStoreRun(Module module, String user)
+	protected static Run createAndStoreRun(Module module, String user)
 			throws SlipStreamException {
 
 		return createAndStoreRun(module, user, RunType.Orchestration);
 	}
 
-	protected Run createAndStoreRun(Module module, String user, RunType type)
+	protected static Run createAndStoreRun(Module module, String user, RunType type)
 			throws SlipStreamException {
 		return createAndStoreRun(module, user, type, States.Initializing);
 	}
 
-	protected Run createAndStoreRun(Module module, String user, RunType type,
-			States state) throws SlipStreamException {
+	protected static Run createAndStoreRun(Module module, String user, RunType type, States state)
+			throws SlipStreamException {
 
-		Run run = RunFactory.getRun(module, type, cloudServiceName,
-				RunTestBase.user);
+		Run run = RunFactory.getRun(module, type, RunTestBase.user);
 		run.setUser(user);
 		run.setState(state);
 		run = run.store();
-		run = ConnectorFactory.getConnector(cloudServiceName).launch(run,
-				RunTestBase.user);
+		run = ConnectorFactory.getConnector(cloudServiceName).launch(run, RunTestBase.user);
 		return run;
 	}
 

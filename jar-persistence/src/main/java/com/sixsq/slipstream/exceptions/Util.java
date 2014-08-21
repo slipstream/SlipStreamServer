@@ -22,6 +22,10 @@ public class Util {
 		throwClientError(Status.CLIENT_ERROR_CONFLICT, message);
 	}
 
+	public static void throwClientConflicError(String message, Throwable e) {
+		throwClientError(Status.CLIENT_ERROR_CONFLICT, message, e);
+	}
+
 	public static void throwClientForbiddenError() {
 		throwClientError(Status.CLIENT_ERROR_FORBIDDEN, "Forbidden");
 	}
@@ -59,12 +63,20 @@ public class Util {
 		throw new ResourceException(status, e);
 	}
 
+	public static void throwClientError(Status status, String message, Throwable e) {
+		throw new ResourceException(status, message, e);
+	}
+
 	public static void throwServerError(Throwable e) {
 		throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
 	}
 
 	public static void throwServerError(String message) {
 		throw new ResourceException(Status.SERVER_ERROR_INTERNAL, message);
+	}
+
+	public static void throwServerError(String message, Throwable e) {
+		throw new ResourceException(Status.SERVER_ERROR_INTERNAL, message, e);
 	}
 
 	public static void throwConfigurationException(Throwable e) {

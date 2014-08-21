@@ -21,14 +21,11 @@ package com.sixsq.slipstream.run;
  */
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-import org.restlet.Request;
-import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -38,7 +35,6 @@ import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -47,22 +43,17 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 
-public class RuntimeParameterResource extends BaseResource {
-
-	private String uuid;
+public class RuntimeParameterResource extends RunBaseResource {
 
 	private RuntimeParameter runtimeParameter;
 
 	private String key;
 
-	private boolean ignoreAbort;
-
 	@Override
-	public void initialize() throws ResourceException {
+	public void initializeSubResource() throws ResourceException {
 
 		long start = System.currentTimeMillis();
 		long before;
@@ -78,58 +69,23 @@ public class RuntimeParameterResource extends BaseResource {
 		before = System.currentTimeMillis();
 		raiseConflictIfAbortIsSet();
 		logTimeDiff("raiseConflictIfAbortIsSet", before);
-		
+
 		logTimeDiff("initialize on runtime parameter", start);
 	}
 
-	@Override
-	protected boolean isMachineAllowedToAccessThisResource(Request request, Cookie cookie){
-		String uuid = getRequest().getAttributes().get("uuid").toString();
-		return uuid.equals(CookieUtils.getRunId(cookie));
-	}
-
 	private void parseRequest() {
-
-		parseRequestQuery();
-
-		Map<String, Object> attributes = getRequest().getAttributes();
-		uuid = attributes.get("uuid").toString();
-		key = attributes.get("key").toString();
-	}
-
-	private void parseRequestQuery() {
 		extractAndSetIgnoreAbort();
-	}
 
-	private void extractAndSetIgnoreAbort() {
-		ignoreAbort = getRequest().getAttributes().containsKey(
-				RunListResource.IGNORE_ABORT_QUERY);
+		key = getAttribute("key");
 	}
 
 	private void fetchRepresentation() {
-		loadRuntimeParameter();
+		runtimeParameter = loadRuntimeParameter(key);
 		setExisting(runtimeParameter != null);
 	}
 
-	private void loadRuntimeParameter() {
-		runtimeParameter = RuntimeParameter.loadFromUuidAndKey(uuid, key);
-		if (runtimeParameter == null) {
-			Run run = Run.loadFromUuid(uuid);
-			if (run == null) {
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-						"Unknown run id " + uuid);
-			} else {
-				String error = "Unknown key " + key;
-				String nodename = RuntimeParameter.extractNodeNamePart(key);
-				Run.abortOrReset(error, nodename, uuid);
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-						error);
-			}
-		}
-	}
-
 	private void raiseConflictIfAbortIsSet() {
-		if (!ignoreAbort) {
+		if (!getIgnoreAbort()) {
 			if (isAbortSet()) {
 				throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 						"Abort flag raised!"));
@@ -139,18 +95,9 @@ public class RuntimeParameterResource extends BaseResource {
 
 	private void abortOrReset(String abortMessage, EntityManager em) {
 		String nodename = RuntimeParameter.extractNodeNamePart(key);
-		Run.abortOrReset(abortMessage, nodename, em, uuid);
+		Run.abortOrReset(abortMessage, nodename, em, getUuid());
 	}
 
-	private RuntimeParameter getGlobalAbort() {
-		RuntimeParameter abort = RuntimeParameter.loadFromUuidAndKey(uuid,
-				RuntimeParameter.GLOBAL_ABORT_KEY);
-		return abort;
-	}
-
-	private boolean isAbortSet() {
-		return getGlobalAbort().isSet();
-	}
 
 	@Delete
 	public void resetRuntimeParameter() throws ResourceException {
@@ -198,7 +145,7 @@ public class RuntimeParameterResource extends BaseResource {
 				.equals(key);
 
 		if (isGlobalAbort || isNodeAbort) {
-			if (ignoreAbort || !runtimeParameter.isSet()) {
+			if (getIgnoreAbort() || !runtimeParameter.isSet()) {
 				abortOrReset(value, em);
 				runtimeParameter.setValue(value);
 			}
@@ -234,7 +181,7 @@ public class RuntimeParameterResource extends BaseResource {
 
 	private States attemptCompleteCurrentNodeState(String nodeName) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run = Run.loadFromUuid(uuid, em);
+		Run run = Run.loadFromUuid(getUuid(), em);
 		StateMachine sc = StateMachine.createStateMachine(run);
 		em.close();
 		return completeCurrentNodeState(nodeName, sc);

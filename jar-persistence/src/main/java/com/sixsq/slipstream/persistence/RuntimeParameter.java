@@ -40,9 +40,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit tests:
- * 
+ *
  * @see RuntimeParameterTest
- * 
+ *
  */
 @Entity
 @SuppressWarnings("serial")
@@ -114,8 +114,14 @@ public class RuntimeParameter extends Metadata {
 			+ "recovery.mode";
 	public final static String GLOBAL_RECOVERY_MDDE_DESCRIPTION = "Run abort flag, set when aborting";
 
+	public final static String IMAGE_ID_PARAMETER_NAME = "image.id";
+	public final static String IMAGE_ID_PARAMETER_DESCRIPTION = "Cloud image id";
+
 	public final static String MULTIPLICITY_PARAMETER_NAME = "multiplicity";
 	public final static String MULTIPLICITY_PARAMETER_DESCRIPTION = "Multiplicity number";
+
+	public final static String IDS_PARAMETER_NAME = "ids";
+	public final static String IDS_PARAMETER_DESCRIPTION = "IDs of the machines in a mutable deployment.";
 
 	public static final String INSTANCE_ID_KEY = "instanceid";
 	public static final String INSTANCE_ID_DESCRIPTION = "Cloud instance id";
@@ -129,8 +135,8 @@ public class RuntimeParameter extends Metadata {
 	public static final String URL_SSH_KEY = "url.ssh";
 	public static final String URL_SSH_DESCRIPTION = "SSH URL to connect to virtual machine";
 
-	public static final String URL_SERVICE_KEY = "url.service";
-	public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
+    public static final String URL_SERVICE_KEY = "url.service";
+    public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
 
 	public static final String IS_ORCHESTRATOR_KEY = "is.orchestrator";
 	public static final String IS_ORCHESTRATOR_DESCRIPTION = "True if it's an orchestrator";
@@ -152,7 +158,7 @@ public class RuntimeParameter extends Metadata {
 			+ "(-\\w[-\\w]*)?";
 
 	private final static Pattern NODE_NAME_PART_PATTERN = Pattern
-			.compile("(" + NODE_NAME_REGEX + "\\.\\d+)|("
+			.compile("(" + NODE_NAME_REGEX + "(\\.\\d+)?)|("
 					+ RuntimeParameter.GLOBAL_NAMESPACE + ")|("
 					+ ORCHESTRATOR_INSTANCE_NAME_REGEX + ")|("
 					+ Run.MACHINE_NAME + ")");
@@ -160,8 +166,23 @@ public class RuntimeParameter extends Metadata {
 	private static final Pattern NAME_PATTERN = Pattern
 			.compile("\\w[\\w\\d\\.-]*");
 
-	public static final String NODE_NAME = "nodename";
-	public static final String NODE_INDEX = "index";
+	public static final String NODE_NAME_KEY = "nodename";
+	public static final String NODE_NAME_DESCRIPTION = "Nodename";
+	public static final String NODE_ID_KEY = "id";
+	public static final String NODE_ID_DESCRIPTION = "Node instance id";
+
+	public enum ScaleStates {
+	    creating,
+	    created,
+	    operational,
+	    removing,
+	    removed,
+	    gone
+	}
+
+	public static final String SCALE_STATE_KEY = "scale.state";
+	public static final String SCALE_STATE_DEFAULT_VALUE = ScaleStates.creating.name();
+	public static final String SCALE_STATE_DESCRIPTION = "Defined scalability state";
 
 	public static String extractNodeNamePart(String name) {
 		if (!name.contains(NODE_PROPERTY_SEPARATOR)) {
@@ -177,21 +198,19 @@ public class RuntimeParameter extends Metadata {
 		return name.split(NODE_PROPERTY_SEPARATOR)[1];
 	}
 
-	public static String constructParamName(String nodename, String paramname) {
-		String prefix = nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+	public static String constructParamName(String nodeName, String paramname) {
+		String prefix = nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 		return prefix + paramname;
 	}
 
-	public static String constructParamName(String groupname, int index,
-			String paramname) {
-		String prefix = constructNodeName(groupname, index)
+	public static String constructParamName(String nodeName, int nodeInstanceId, String paramname) {
+		String prefix = constructNodeInstanceName(nodeName, nodeInstanceId)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 		return prefix + paramname;
 	}
 
-	public static String constructNodeName(String groupname, int index) {
-		return groupname + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR
-				+ index;
+	public static String constructNodeInstanceName(String nodeName, int nodeInstanceId) {
+		return nodeName + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + nodeInstanceId;
 	}
 
 	@Id
@@ -425,7 +444,7 @@ public class RuntimeParameter extends Metadata {
 	public ParameterType getType() {
 		return type;
 	}
-	
+
 //	public static String queryValue(
 //			String resourceUri) {
 //		EntityManager em = PersistenceUtil.createEntityManager();
@@ -435,5 +454,5 @@ public class RuntimeParameter extends Metadata {
 //		em.close();
 //		return res;
 //	}
-	
+
 }

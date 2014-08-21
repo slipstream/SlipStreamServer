@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,6 +35,19 @@ public class RunRouter extends Router {
 		attach("", RunListResource.class);
 
 		attach("/", RunListResource.class);
+
+		TemplateRoute routeNode = attach(
+				"/{uuid}/{node}", RunNodeResource.class);
+		routeNode.setMatchingQuery(true);
+		routeNode.getTemplate().getVariables()
+				.put("node", new Variable(Variable.TYPE_WORD));
+		TemplateRoute routeNodeIngoreAbort = attach(
+				"/{uuid}/{node}?ignoreabort={ignoreabort}", RunNodeResource.class);
+		routeNodeIngoreAbort.setMatchingQuery(true);
+		routeNodeIngoreAbort.getTemplate().getVariables()
+			.put("node", new Variable(Variable.TYPE_WORD));
+		routeNodeIngoreAbort.getTemplate().getVariables()
+			.put(RunListResource.IGNORE_ABORT_QUERY, new Variable(Variable.TYPE_URI_QUERY));
 
 		TemplateRoute route = attach("/{uuid}/{key}?ignoreabort={ignoreabort}", RuntimeParameterResource.class);
 		route.setMatchingQuery(true);
