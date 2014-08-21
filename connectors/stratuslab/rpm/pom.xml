@@ -59,6 +59,8 @@
 
           <requires>
             <require>java-1.7.0-openjdk</require>
+            <require>stratuslab-slipstream-downloads</require>
+            <require>stratuslab-cli-user</require>
           </requires>
 
           <mappings>
