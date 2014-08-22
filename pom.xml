@@ -33,6 +33,7 @@
       </activation>
       <modules>
         <module>rpm</module>
+        <module>nginx-proxy</module>
       </modules>
     </profile>
   </profiles>
