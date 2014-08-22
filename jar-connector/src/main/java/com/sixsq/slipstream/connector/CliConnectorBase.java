@@ -1,11 +1,17 @@
 package com.sixsq.slipstream.connector;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.credentials.Credentials;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -30,6 +36,83 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	@Override
 	abstract public Properties describeInstances(User user) throws SlipStreamException;
+
+	protected String getCloudConnectorBundleUrl(User user)
+			throws ValidationException, ServerExecutionEnginePluginException {
+		return getCloudParameterValue(user, UserParametersFactoryBase.UPDATE_CLIENTURL_PARAMETER_NAME);
+	}
+
+	/*abstract*/ protected String getCloudConnectorPythonModule(){return "";}//;
+
+	protected Map<String, String> getCommandEnvironment(Run run, User user)
+			throws ConfigurationException, ServerExecutionEnginePluginException, ValidationException {
+		Map<String, String> environment = getCommonEnvironment(user);
+		environment.putAll(getContextualizationEnvironment(run, user));
+		environment.putAll(getCliParamsEnvironment(run, user));
+		return environment;
+	}
+
+
+	private Map<String, String> getContextualizationEnvironment(Run run, User user)
+			throws ConfigurationException, ServerExecutionEnginePluginException, ValidationException {
+
+		Configuration configuration = Configuration.getInstance();
+		String username = user.getName();
+		String verbosityLevel = user
+				.getParameterValue(
+						new ExecutionControlUserParametersFactory()
+								.constructKey(ExecutionControlUserParametersFactory.VERBOSITY_LEVEL),
+				ExecutionControlUserParametersFactory.VERBOSITY_LEVEL_DEFAULT);
+
+		String nodeInstanceName = (isInOrchestrationContext(run)) ? getOrchestratorName(run) : Run.MACHINE_NAME;
+
+		Map<String,String> environment = new HashMap<String,String>();
+
+		environment.put("SLIPSTREAM_DIID", run.getName());
+		environment.put("SLIPSTREAM_SERVICEURL", configuration.baseUrl);
+		environment.put("SLIPSTREAM_NODE_INSTANCE_NAME", nodeInstanceName);
+		environment.put("SLIPSTREAM_REPORT_DIR", SLIPSTREAM_REPORT_DIR);
+		environment.put("SLIPSTREAM_CLOUD", getCloudServiceName());
+		environment.put("SLIPSTREAM_BUNDLE_URL", configuration.getRequiredProperty("slipstream.update.clienturl"));
+		environment.put("SLIPSTREAM_BOOTSTRAP_BIN", configuration.getRequiredProperty("slipstream.update.clientbootstrapurl"));
+
+		environment.put("SLIPSTREAM_USERNAME", username);
+		environment.put("SLIPSTREAM_COOKIE", generateCookie(username, run.getUuid()));
+		environment.put("SLIPSTREAM_VERBOSITY_LEVEL", verbosityLevel);
+
+		environment.put("CLOUDCONNECTOR_BUNDLE_URL", getCloudConnectorBundleUrl(user));
+		environment.put("CLOUDCONNECTOR_PYTHON_MODULENAME", getCloudConnectorPythonModule());
+
+		return environment;
+	}
+
+	protected Map<String, String> getCommonEnvironment(User user)
+			throws ConfigurationException, ServerExecutionEnginePluginException, ValidationException {
+		Map<String,String> environment = new HashMap<String,String>();
+
+		environment.put("SLIPSTREAM_CONNECTOR_INSTANCE", getConnectorInstanceName());
+
+		return environment;
+	}
+
+	private Map<String, String> getCliParamsEnvironment(Run run, User user)
+			throws ConfigurationException, ServerExecutionEnginePluginException, ValidationException {
+		String isOrchestrator = (isInOrchestrationContext(run)) ? "True" : "False";
+		String publicSshKey;
+
+		try {
+			publicSshKey = getPublicSshKey(run, user);
+		} catch (IOException e) {
+			throw new ValidationException(e.getMessage());
+		}
+
+		Map<String,String> environment = new HashMap<String,String>();
+
+		environment.put("__SLIPSTREAM_SSH_PUB_KEY", publicSshKey);
+		environment.put("IS_ORCHESTRATOR", isOrchestrator);
+
+		return environment;
+	}
 
 	public static Properties parseDescribeInstanceResult(String result)
 			throws SlipStreamException {

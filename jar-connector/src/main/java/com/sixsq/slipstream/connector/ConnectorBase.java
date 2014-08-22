@@ -299,27 +299,34 @@ public abstract class ConnectorBase implements Connector {
         return privateSshKeyFile;
     }
 
+    private String getUserPublicSshKey(User user) throws ValidationException, IOException {
+		return user.getParameter(
+				ExecutionControlUserParametersFactory.CATEGORY + "." + UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
+				.getValue();
+    }
+
     protected String getPublicSshKey(Run run, User user) throws ValidationException, IOException {
-        String publicSshKeyFile = getPublicSshKeyFileName(run, user);
-        return FileUtil.fileToString(publicSshKeyFile);
+    	if (run.getType() == RunType.Run) {
+    		return getUserPublicSshKey(user);
+    	} else {
+    		String publicSshKeyFile = getPublicSshKeyFileName(run, user);
+    		return FileUtil.fileToString(publicSshKeyFile);
+    	}
     }
 
     protected String getPublicSshKeyFileName(Run run, User user) throws IOException, ValidationException {
-        String publicSshKey;
+        String publicSshKeyFilename;
         if (run.getType() == RunType.Run) {
             tempSshKeyFile = File.createTempFile("sshkey", ".tmp");
             BufferedWriter out = new BufferedWriter(new FileWriter(tempSshKeyFile));
-            String sshPublicKey = user.getParameter(
-                    ExecutionControlUserParametersFactory.CATEGORY + "." + UserParametersFactoryBase
-                            .SSHKEY_PARAMETER_NAME
-            ).getValue();
+            String sshPublicKey = getUserPublicSshKey(user);
             out.write(sshPublicKey);
             out.close();
-            publicSshKey = tempSshKeyFile.getPath();
+            publicSshKeyFilename = tempSshKeyFile.getPath();
         } else {
-            publicSshKey = Configuration.getInstance().getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY);
+            publicSshKeyFilename = Configuration.getInstance().getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY);
         }
-        return publicSshKey;
+        return publicSshKeyFilename;
     }
 
     protected void deleteTempSshKeyFile() {
