@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,7 +58,7 @@ public class RuntimeParameterTest {
 		user = CommonTestUtil.createTestUser();
 
 		CommonTestUtil.addSshKeys(user);
-		
+
 		CommonTestUtil
 				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 	}
@@ -79,10 +79,7 @@ public class RuntimeParameterTest {
 	public void nullParameterName() throws SlipStreamException {
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
 
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				CommonTestUtil.cloudServiceName, user);
-		// Run run = new Run("nullParameterName", ModuleCategory.Deployment,
-		// new LocalConnector().getCloudServiceName());
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 		run.assignRuntimeParameter(null, "ok", null);
 
 		CommonTestUtil.deleteDeployment(deployment);
@@ -91,9 +88,8 @@ public class RuntimeParameterTest {
 	@Test
 	public void serializationWorks() throws SlipStreamException {
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
-		
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				CommonTestUtil.cloudServiceName, user);
+
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 		Metadata parameter = run.assignRuntimeParameter("node.1:dummy", "ok",
 				null);
 
@@ -119,8 +115,7 @@ public class RuntimeParameterTest {
 				"host1.2:with.dots", "host1.2:with-dash",
 				"host1.2:with_underscore" };
 
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				CommonTestUtil.cloudServiceName, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 		for (String name : validNames) {
 			new RuntimeParameter(run, name, "", "");
 		}
