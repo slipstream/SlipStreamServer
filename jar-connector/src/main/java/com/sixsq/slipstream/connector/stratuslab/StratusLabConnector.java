@@ -213,7 +213,7 @@ public class StratusLabConnector extends CliConnectorBase {
 		}
 	}
 
-	private void validateLaunch(Run run, User user)
+	protected void validateLaunch(Run run, User user)
 			throws ValidationException {
 		if (run.getCategory() == ModuleCategory.Image) {
 			ImageModule image = ImageModule.load(run.getModuleResourceUrl());
@@ -444,6 +444,26 @@ public class StratusLabConnector extends CliConnectorBase {
 	public String constructKey(String key) throws ValidationException {
 		return new StratusLabUserParametersFactory(getConnectorInstanceName())
 				.constructKey(key);
+	}
+
+	@Override
+	protected String getCloudConnectorPythonModule() {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
+	}
+
+	@Override
+	protected Map<String, String> getConnectorSpecificUserParams(User user) throws ValidationException,
+			ServerExecutionEnginePluginException {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
+	}
+
+	@Override
+	protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user) throws ConfigurationException,
+			ValidationException, ServerExecutionEnginePluginException {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
 	}
 
 }

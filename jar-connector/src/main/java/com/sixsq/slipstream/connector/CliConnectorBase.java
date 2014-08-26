@@ -7,48 +7,202 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ProcessException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.ProcessUtils;
 
 public abstract class CliConnectorBase extends ConnectorBase {
 
 	public static final String CLI_LOCATION = "/usr/bin";
 
-	@Override
-	abstract public String getCloudServiceName();
-
-	@Override
-	abstract public Run launch(Run run, User user) throws SlipStreamException;
+	protected Logger log;
 
 	@Override
 	abstract public Credentials getCredentials(User user);
 
 	@Override
-	abstract public void terminate(Run run, User user) throws SlipStreamException;
+	abstract public String getCloudServiceName();
+
+	abstract protected String getCloudConnectorPythonModule();
+
+	abstract protected Map<String, String> getConnectorSpecificUserParams(User user)
+			throws ValidationException, ServerExecutionEnginePluginException;
+
+	abstract protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user)
+			throws ConfigurationException, ValidationException, ServerExecutionEnginePluginException;
+
+	protected Map<String, String> getConnectorSpecificEnvironment(Run run, User user) {
+		return new HashMap<String, String>();
+	}
+
+	protected void validateLaunch(Run run, User user) throws ConfigurationException, SlipStreamException{
+		validateCredentials(user);
+	}
+
+	protected void validateDescribe(User user) throws ValidationException {
+		validateCredentials(user);
+	}
+
+	protected void validateTerminate(Run run, User user) throws ValidationException {
+		validateCredentials(user);
+	}
+
+	public CliConnectorBase(String instanceName) {
+		super(instanceName);
+		this.log = Logger.getLogger(this.getClass().getName());
+	}
 
 	@Override
-	abstract public Properties describeInstances(User user) throws SlipStreamException;
+	public Run launch(Run run, User user) throws SlipStreamException {
+		validateLaunch(run, user);
+
+		String command = getCommandRunInstances() + createCliParameters(getLaunchParams(run, user));
+
+		String result;
+		String[] commands = { "sh", "-c", command };
+		try {
+			result = ProcessUtils.execGetOutput(commands, false, getCommandEnvironment(run, user));
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw (new SlipStreamInternalException(e));
+		} catch (ProcessException e) {
+			try {
+				String[] instanceData = parseRunInstanceResult(e.getStdOut());
+				updateInstanceIdAndIpOnRun(run, instanceData[0], instanceData[1]);
+			} catch (Exception ex) { }
+			throw e;
+		} finally {
+			deleteTempSshKeyFile();
+		}
+
+		String[] instanceData = parseRunInstanceResult(result);
+		String instanceId = instanceData[0];
+		String ipAddress = instanceData[1];
+
+		updateInstanceIdAndIpOnRun(run, instanceId, ipAddress);
+
+		return run;
+	}
+
+	@Override
+	public Properties describeInstances(User user) throws SlipStreamException {
+		validateCredentials(user);
+
+		String command = getCommandDescribeInstances() + createCliParameters(getUserParams(user));
+
+		String result;
+		String[] commands = { "sh", "-c", command };
+
+		try {
+			result = ProcessUtils.execGetOutput(commands, getCommonEnvironment(user));
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw (new SlipStreamInternalException(e));
+		}
+
+		return parseDescribeInstanceResult(result);
+	}
+
+	@Override
+	public void terminate(Run run, User user) throws SlipStreamException {
+
+		validateCredentials(user);
+
+		List<String> instanceIds = getCloudNodeInstanceIds(run);
+		if(instanceIds.isEmpty()){
+			throw new SlipStreamClientException("There is no instances to terminate");
+		}
+
+		StringBuilder instances = new StringBuilder();
+        for (String id : instanceIds) {
+            instances.append(" --instance-id ")
+                     .append(wrapInSingleQuotes(id));
+        }
+
+		log.info(getConnectorInstanceName() + ". Terminating all instances.");
+
+		String command = getCommandTerminateInstances() +
+				createCliParameters(getUserParams(user)) +
+				instances;
+
+		String[] commands = { "sh", "-c", command};
+		try {
+			ProcessUtils.execGetOutput(commands, getCommonEnvironment(user));
+		} catch (SlipStreamClientException e) {
+			log.info(getConnectorInstanceName() + ". Failed to terminate instances");
+		} catch (IOException e) {
+			log.info(getConnectorInstanceName() + ". IO error while terminating instances");
+		}
+	}
+
+	private String createCliParameters(Map<String, String> params) {
+		String cliParams = "";
+		for (Map.Entry<String, String> param: params.entrySet()) {
+			cliParams += "--" + param.getKey() + " " + wrapInSingleQuotes(param.getValue()) + " ";
+		}
+		return cliParams;
+	}
+
+	private Map<String, String> getLaunchParams(Run run, User user)
+			throws ServerExecutionEnginePluginException, ConfigurationException, SlipStreamClientException {
+		Map<String, String> launchParams = new HashMap<String, String>();
+		launchParams.putAll(getUserParams(user));
+		launchParams.putAll(getGenericLaunchParams(run, user));
+		launchParams.putAll(getConnectorSpecificLaunchParams(run, user));
+		return launchParams;
+	}
+
+	private Map<String, String> getGenericLaunchParams(Run run, User user)
+			throws ConfigurationException, SlipStreamClientException, ServerExecutionEnginePluginException{
+		Map<String, String> launchParams = new HashMap<String, String>();
+		launchParams.put("image-id", getImageId(run, user));
+		return launchParams;
+	}
+
+	private Map<String, String> getUserParams(User user)
+			throws ValidationException, ServerExecutionEnginePluginException {
+		Map<String, String> userParams = new HashMap<String, String>();
+		userParams.putAll(getGenericUserParams(user));
+		userParams.putAll(getConnectorSpecificUserParams(user));
+		return userParams;
+	}
+
+	private Map<String, String> getGenericUserParams(User user) {
+		Map<String, String> userParams = new HashMap<String, String>();
+		userParams.put("access-id", getKey(user));
+		userParams.put("secret-key", getSecret(user));
+		return userParams;
+	}
 
 	protected String getCloudConnectorBundleUrl(User user)
 			throws ValidationException, ServerExecutionEnginePluginException {
 		return getCloudParameterValue(user, UserParametersFactoryBase.UPDATE_CLIENTURL_PARAMETER_NAME);
 	}
 
-	/*abstract*/ protected String getCloudConnectorPythonModule(){return "";}//;
+	private String getVerbosityLevel(User user) throws ValidationException {
+		String key = ExecutionControlUserParametersFactory.VERBOSITY_LEVEL;
+		String qualifiedKey = new ExecutionControlUserParametersFactory().constructKey(key);
+		String defaultValue = ExecutionControlUserParametersFactory.VERBOSITY_LEVEL_DEFAULT;
+		return user.getParameterValue(qualifiedKey, defaultValue);
+	}
 
 	protected Map<String, String> getCommandEnvironment(Run run, User user)
 			throws ConfigurationException, ServerExecutionEnginePluginException, ValidationException {
 		Map<String, String> environment = getCommonEnvironment(user);
 		environment.putAll(getContextualizationEnvironment(run, user));
 		environment.putAll(getCliParamsEnvironment(run, user));
+		environment.putAll(getConnectorSpecificEnvironment(run, user));
 		return environment;
 	}
 
@@ -58,11 +212,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 		Configuration configuration = Configuration.getInstance();
 		String username = user.getName();
-		String verbosityLevel = user
-				.getParameterValue(
-						new ExecutionControlUserParametersFactory()
-								.constructKey(ExecutionControlUserParametersFactory.VERBOSITY_LEVEL),
-				ExecutionControlUserParametersFactory.VERBOSITY_LEVEL_DEFAULT);
+		String verbosityLevel = getVerbosityLevel(user);
 
 		String nodeInstanceName = (isInOrchestrationContext(run)) ? getOrchestratorName(run) : Run.MACHINE_NAME;
 
@@ -149,18 +299,6 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return parts;
 	}
 
-	public CliConnectorBase(String instanceName) {
-		super(instanceName);
-	}
-
-	protected String getKey(User user) {
-		return wrapInSingleQuotesOrNull(super.getKey(user));
-	}
-
-	protected String getSecret(User user) {
-		return wrapInSingleQuotesOrNull(super.getSecret(user));
-	}
-
 	protected String wrapInSingleQuotesOrNull(String value) {
 		if (value == null || value.isEmpty()) {
 			return null;
@@ -200,5 +338,24 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	public String getCliLocation() {
 		return CLI_LOCATION;
 	}
+
+	private String getCommandGenericPart(){
+		return getCliLocation() + "/" + getCloudServiceName();
+	}
+
+	protected String getCommandRunInstances() {
+		return getCommandGenericPart() + "-run-instances ";
+	}
+
+	protected String getCommandTerminateInstances() {
+		return getCommandGenericPart() + "-terminate-instances ";
+	}
+
+	protected String getCommandDescribeInstances() {
+		return getCommandGenericPart() + "-describe-instances ";
+	}
+
+
+
 
 }

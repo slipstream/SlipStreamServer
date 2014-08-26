@@ -155,12 +155,12 @@ public class CloudStackConnector extends CliConnectorBase {
 				getInstanceType( ImageModule.load(run.getModuleResourceUrl()) );
 	}
 
-	private void validateDescribe(User user) throws ValidationException {
+	protected void validateDescribe(User user) throws ValidationException {
 		validateCredentials(user);
 		validateBaseParameters(user);
 	}
 
-	private void validateTerminate(Run run, User user) throws ValidationException {
+	protected void validateTerminate(Run run, User user) throws ValidationException {
 		validateCredentials(user);
 		validateBaseParameters(user);
 	}
@@ -350,6 +350,26 @@ public class CloudStackConnector extends CliConnectorBase {
 				+ SLIPSTREAM_REPORT_DIR + "/" + logfilename + " 2>&1\n";
 
 		return userData;
+	}
+
+	@Override
+	protected String getCloudConnectorPythonModule() {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
+	}
+
+	@Override
+	protected Map<String, String> getConnectorSpecificUserParams(User user) throws ValidationException,
+			ServerExecutionEnginePluginException {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
+	}
+
+	@Override
+	protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user) throws ConfigurationException,
+			ValidationException, ServerExecutionEnginePluginException {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
 	}
 
 }

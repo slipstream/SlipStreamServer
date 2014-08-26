@@ -327,4 +327,24 @@ public class OpenStackConnector extends CliConnectorBase {
 		return userData;
 	}
 
+	@Override
+	protected String getCloudConnectorPythonModule() {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
+	}
+
+	@Override
+	protected Map<String, String> getConnectorSpecificUserParams(User user) throws ValidationException,
+			ServerExecutionEnginePluginException {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
+	}
+
+	@Override
+	protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user) throws ConfigurationException,
+			ValidationException, ServerExecutionEnginePluginException {
+		// TODO Stub de la méthode généré automatiquement
+		return null;
+	}
+
 }
