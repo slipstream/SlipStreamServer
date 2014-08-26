@@ -39,6 +39,20 @@ public class UsersTest {
 	public void passwordIsPersisted() throws ValidationException,
 			NotFoundException, ConfigurationException,
 			NoSuchAlgorithmException, UnsupportedEncodingException {
+
+        // The create function will not initialize the accounts if they
+        // already exist.  Ensure that all of the standard accounts have
+        // been removed from the database.
+        if (User.loadByName("super") != null) {
+            User.removeNamedUser("super");
+        }
+        if (User.loadByName("test") != null) {
+            User.removeNamedUser("test");
+        }
+        if (User.loadByName("sixsq") != null) {
+            User.removeNamedUser("sixsq");
+        }
+
 		Users.create();
 
 		User userSuper = User.loadByName("super");
