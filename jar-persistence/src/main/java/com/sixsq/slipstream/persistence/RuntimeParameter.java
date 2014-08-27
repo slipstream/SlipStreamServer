@@ -195,7 +195,11 @@ public class RuntimeParameter extends Metadata {
 		if (!name.contains(NODE_PROPERTY_SEPARATOR)) {
 			return null;
 		}
-		return name.split(NODE_PROPERTY_SEPARATOR)[1];
+		try {
+			return name.split(NODE_PROPERTY_SEPARATOR)[1];
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return null;
+		}
 	}
 
 	public static String constructParamName(String nodeName, String paramname) {
@@ -225,6 +229,9 @@ public class RuntimeParameter extends Metadata {
 
 	@Attribute
 	private boolean isSet = false;
+
+	@Attribute(required = false, name = "name")
+	private String name_ = null;
 
 	@Attribute(required = false, name = "group")
 	private String group_ = "Global";
@@ -353,16 +360,6 @@ public class RuntimeParameter extends Metadata {
 		return rp;
 	}
 
-	@Override
-	public String getName() {
-		return key_;
-	}
-
-	@Override
-	public void setName(String name) {
-		this.key_ = name;
-	}
-
 	public String getNodeName() {
 		return key_.split(NODE_PROPERTY_SEPARATOR)[0];
 	}
@@ -443,6 +440,19 @@ public class RuntimeParameter extends Metadata {
 
 	public ParameterType getType() {
 		return type;
+	}
+
+	@Column
+	public void setName(String name) {
+		this.name_ = name;
+	}
+
+	@Column
+	public String getName() {
+		if (this.name_ == null) {
+			this.name_ = extractParamNamePart(this.key_);
+		}
+		return this.name_;
 	}
 
 //	public static String queryValue(

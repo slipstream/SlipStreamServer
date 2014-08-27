@@ -145,7 +145,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 				.equals(key);
 
 		if (isGlobalAbort || isNodeAbort) {
-			if (getIgnoreAbort() || !runtimeParameter.isSet()) {
+			if (!runtimeParameter.isSet()) {
 				abortOrReset(value, em);
 				runtimeParameter.setValue(value);
 			}
