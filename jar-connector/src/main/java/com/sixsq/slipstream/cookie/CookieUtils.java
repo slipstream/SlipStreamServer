@@ -212,7 +212,9 @@ public class CookieUtils {
 		Form form = new Form();
 		form.add(COOKIE_IDTYPE, idType);
 		form.add(COOKIE_IDENTIFIER, identifier);
-		form.add(COOKIE_EXPIRY_DATE, expiryDate);
+		if (!properties.containsKey(COOKIE_EXPIRY_DATE)) {
+			form.add(COOKIE_EXPIRY_DATE, expiryDate);
+		}
 
 		// Add all parameters
 		for (Entry<Object, Object> entry : properties.entrySet()) {
