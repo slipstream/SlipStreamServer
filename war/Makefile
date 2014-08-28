@@ -9,6 +9,14 @@ re-run-with-db:
 run:
 	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/src/slipstream/ui/views/ -Dpersistence.unit=hsqldb-mem-schema
 
+new-ui: install-ui install run-with-db
+
+install:
+	(cd ..; mvn clean install -Dmaven.test.skip=true) 
+
+install-ui:
+	(cd ../../SlipStreamUI; mvn clean install -Dmaven.test.skip=true)
+
 start-db-ui: start-db
 	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.util.DatabaseManagerSwing -user sa -url jdbc:hsqldb:hsql://localhost/slipstream
 
