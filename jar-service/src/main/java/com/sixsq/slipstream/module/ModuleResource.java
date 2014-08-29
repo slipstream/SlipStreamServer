@@ -54,7 +54,6 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactory;
-import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Authz;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
@@ -413,21 +412,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	protected Module loadParameterized(String targetParameterizedUri)
 			throws ValidationException {
 
-		Module module = loadModule(targetParameterizedUri);
-
-		resolveImageIdIfAppropriate(module);
-
-		return module;
-
-	}
-
-	private void resolveImageIdIfAppropriate(Module module)
-			throws ConfigurationException, ValidationException {
-		try {
-			RunFactory.resolveImageIdIfAppropriate(module, getUser());
-		} catch (ValidationException ex) {
-			// ok, the user might not be fully configured
-		}
+		return loadModule(targetParameterizedUri);
 	}
 
 	public Module loadModule(String targetParameterizedUri)

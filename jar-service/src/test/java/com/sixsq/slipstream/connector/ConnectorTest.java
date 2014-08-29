@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -65,25 +65,24 @@ public class ConnectorTest extends ConnectorDummy {
 				com.sixsq.slipstream.connector.local.LocalConnector.class,
 				INSTANCE_NAME);
 
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				INSTANCE_NAME, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 
 		run = run.store();
-		
+
 		updateInstanceIdAndIpOnRun(run, "foo", "bar");
 
 		RuntimeParameter instanceId = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), Run
 				.constructOrchestratorName(INSTANCE_NAME)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 				+ RuntimeParameter.INSTANCE_ID_KEY);
-		
+
 		assertThat(instanceId.getValue(), is("foo"));
 
 		RuntimeParameter hostname = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), Run
 				.constructOrchestratorName(INSTANCE_NAME)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
 				+ RuntimeParameter.HOSTNAME_KEY);
-		
+
 		assertThat(hostname.getValue(), is("bar"));
 
 		CommonTestUtil.deleteUser(user);

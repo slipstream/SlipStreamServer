@@ -218,10 +218,16 @@ public class StratusLabConnector extends CliConnectorBase {
 		if (run.getCategory() == ModuleCategory.Image) {
 			ImageModule image = ImageModule.load(run.getModuleResourceUrl());
 			validateImageModule(image, user);
+
+			String pdiskEndpoint =
+					Configuration.getInstance().getRequiredProperty(
+							constructKey(StratusLabUserParametersFactory.PDISK_ENDPOINT_PARAMETER_NAME));
+			if (pdiskEndpoint == null || "".equals(pdiskEndpoint) || pdiskEndpoint.isEmpty()){
+				throw new ValidationException("Missing PDisk endpoint. Please contact you SlipStream administrator");
+			}
 		}
 		if (run.getCategory() == ModuleCategory.Deployment) {
-			for (Node node : DeploymentModule.load(run.getModuleResourceUrl())
-					.getNodes().values()) {
+			for (Node node : DeploymentModule.load(run.getModuleResourceUrl()).getNodes().values()) {
 				validateImageModule(node.getImage(), user);
 			}
 		}
@@ -242,15 +248,13 @@ public class StratusLabConnector extends CliConnectorBase {
 
 		String instanceType = getInstanceType(image);
 
-		if (image.isBase()
-				&& ImageModule.INSTANCE_TYPE_INHERITED.equals(instanceType)) {
+		if (image.isBase() && ImageModule.INSTANCE_TYPE_INHERITED.equals(instanceType)) {
 			throw (new ValidationException(
 					"Base image cannot have inherited instance type. Please review the instance type under Parameters -> "
 							+ getConnectorInstanceName()));
 		}
 
-		if (instanceType == null
-				&& (getRam(image) == null && getCpu(image) == null)) {
+		if (instanceType == null && (getRam(image) == null && getCpu(image) == null)) {
 			throw new ValidationException(
 					"Missing instance type or ram/cpu information. Please review the instance type under Parameters -> "
 							+ getConnectorInstanceName() + " or it's parents.");
@@ -323,17 +327,9 @@ public class StratusLabConnector extends CliConnectorBase {
 						.getRequiredProperty("slipstream.update.clientbootstrapurl")
 				+ "#";
 
-		contextualization += "SLIPSTREAM_MESSAGING_TYPE="
+		contextualization += "SLIPSTREAM_PDISK_ENDPOINT="
 				+ configuration
-						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.MESSAGING_TYPE_PARAMETER_NAME))
-				+ "#";
-		contextualization += "SLIPSTREAM_MESSAGING_ENDPOINT="
-				+ configuration
-						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.MESSAGING_ENDPOINT_PARAMETER_NAME))
-				+ "#";
-		contextualization += "SLIPSTREAM_MESSAGING_QUEUE="
-				+ configuration
-						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.MESSAGING_QUEUE_PARAMETER_NAME))
+						.getRequiredProperty(constructKey(StratusLabUserParametersFactory.PDISK_ENDPOINT_PARAMETER_NAME))
 				+ "#";
 
 		contextualization += "SLIPSTREAM_REPORT_DIR=" + SLIPSTREAM_REPORT_DIR;

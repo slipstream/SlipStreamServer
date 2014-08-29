@@ -1,9 +1,9 @@
 package com.sixsq.slipstream.util;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 
@@ -103,8 +103,7 @@ public class Terminator {
 	public static void terminateInstances(Run run, User user) throws ValidationException {
 		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
 
-		HashSet<String> cloudServicesList = RunFactory.getCloudServicesList(run);
-		for (String cloudServiceName : cloudServicesList) {
+		for (String cloudServiceName : run.getCloudServiceNamesList()) {
 			Connector connector = ConnectorFactory.getConnector(cloudServiceName);
 			try {
 				connector.terminate(run, user);

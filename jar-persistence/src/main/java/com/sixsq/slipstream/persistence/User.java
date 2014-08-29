@@ -60,11 +60,11 @@ import com.sixsq.slipstream.user.UserView;
 @Entity(name="User")
 @NamedQueries({
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
-		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline) FROM User u") })
+		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline, u.organization) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
 
 	public static final String REQUEST_KEY = "authenticated_user";
-	
+
 	public static final String RESOURCE_URL_PREFIX = "user/";
 
 	public static final int ACTIVE_TIMEOUT_MINUTES = 1;
@@ -130,7 +130,7 @@ public class User extends Parameterized<User, UserParameter> {
 	protected void setParameters(Map<String, UserParameter> parameters) {
 		this.parameters = parameters;
 	}
-	
+
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
 	public Map<String, UserParameter> getParameters() {
@@ -460,33 +460,21 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public int getTimeout() {
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_TIMEOUT);
-		try {
-			return Integer.parseInt(getParameterValue(key, "0"));
-		} catch (ValidationException e) {
-			return 0;
-		}
+		return Integer.parseInt(getParameterValue(key, "0"));
 	}
-	
+
 	public boolean getOnSuccessRunForever() {
 		boolean _default = false;
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		try {
-			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
-		} catch (ValidationException e) {
-			return _default;
-		}
+		return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
 	}
 
 	public boolean getOnErrorRunForever() {
 		boolean _default = false;
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		try {
-			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
-		} catch (ValidationException e) {
-			return _default;
-		}
+		return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
 	}
-	
+
 	public void setOnSuccessRunForever(boolean on) throws ValidationException {
 		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 		UserParameter parameter = getParameter(key);

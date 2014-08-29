@@ -12,3 +12,7 @@
 (defn log-error
   [& msgs]
   (Logger/severe (apply str msgs)))
+
+(defn log-debug
+  [& msgs]
+  (Logger/debug (apply str msgs)))

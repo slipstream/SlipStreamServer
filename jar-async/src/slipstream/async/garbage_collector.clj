@@ -12,9 +12,9 @@
   [seconds]
   (* 1000 seconds))
 
-(def collector-chan-size 4)
-(def number-of-readers 2)
-(def timeout-collect (seconds-in-msecs 5))
+(def collector-chan-size 1)
+(def number-of-readers 1)
+(def timeout-collect (seconds-in-msecs 60))
 (def timeout-processing-loop (seconds-in-msecs 300))
 
 (defn purge

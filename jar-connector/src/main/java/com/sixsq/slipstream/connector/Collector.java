@@ -43,7 +43,9 @@ public class Collector {
 	public static int collect(User user, Connector connector) {
 		int res = 0;
 		try {
-			res = describeInstances(user, connector);
+			if (connector.isCredentialsSet(user)) {
+				res = describeInstances(user, connector);
+			}
 		} catch (ConfigurationException e) {
 			logger.severe(e.getMessage());
 		} catch (ValidationException e) {
@@ -81,12 +83,11 @@ public class Collector {
 		return populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
 	}
 
-	private static int populateVmsForCloud(User user, String cloud,
-			Properties props) {
+	private static int populateVmsForCloud(User user, String cloud, Properties idsAndStates) {
 		List<Vm> vms = new ArrayList<Vm>();
-		for (String key : props.stringPropertyNames()) {
+		for (String key : idsAndStates.stringPropertyNames()) {
 			String instanceId = key;
-			String state = (String) props.get(key);
+			String state = (String) idsAndStates.get(key);
 			Vm vm = new Vm(instanceId, cloud, state, user.getName());
 			try {
 				String runUuid = fetchRunUuid(user, cloud, instanceId);
@@ -101,7 +102,7 @@ public class Collector {
 			vms.add(vm);
 		}
 		Vm.update(vms, user.getName(), cloud);
-		return props.size();
+		return idsAndStates.size();
 	}
 
 	private static String fetchRunUuid(User user, String cloud,

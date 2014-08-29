@@ -109,7 +109,8 @@ public abstract class ConnectorBase implements Connector {
         if (isInOrchestrationContext(run)) {
             imageId = getOrchestratorImageId(user);
         } else {
-            imageId = ((ImageModule) run.getModule()).extractBaseImageId(run.getCloudService());
+        	String cloudService = run.getCloudServiceNameForNode(Run.MACHINE_NAME);
+            imageId = ((ImageModule) run.getModule()).extractBaseImageId(cloudService);
         }
         return imageId;
     }
@@ -294,7 +295,7 @@ public abstract class ConnectorBase implements Connector {
 
     protected String getPrivateSshKeyFileName() throws ConfigurationException, ValidationException {
         String privateSshKeyFile = Configuration.getInstance()
-                                                .getProperty("cloud.connector.orchestrator.privatesshkey");
+                                                .getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY);
         return privateSshKeyFile;
     }
 
@@ -434,6 +435,14 @@ public abstract class ConnectorBase implements Connector {
         }
     }
 
+    @Override
+    public boolean isCredentialsSet(User user) {
+    	String key = getKey(user);
+    	String secret = getSecret(user);
+
+    	return !(key == null || "".equals(key) || secret == null || "".equals(secret));
+    }
+
     protected String getLoginUsername(Run run) throws SlipStreamClientException {
         if (isInOrchestrationContext(run)) {
             return getOrchestratorImageLoginUsername();
@@ -478,8 +487,12 @@ public abstract class ConnectorBase implements Connector {
         return password;
     }
 
-    protected String getEndpoint(User user) {
-        return user.getParameter(getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME
-        ).getValue();
+    protected String getEndpoint(User user) throws ValidationException {
+    	String paramName = getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME;
+    	UserParameter endpointParam = user.getParameter(paramName);
+    	if (endpointParam != null) {
+    		return endpointParam.getValue();
+    	}
+    	throw new ValidationException("Failed to get endpoint. Parameter not found: " + paramName);
     }
 }

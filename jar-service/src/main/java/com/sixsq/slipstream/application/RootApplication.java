@@ -71,7 +71,6 @@ import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
-import com.sixsq.slipstream.stats.StatsRouter;
 import com.sixsq.slipstream.user.UserRouter;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.Logger;
@@ -167,7 +166,6 @@ public class RootApplication extends Application {
 			attachDashboard(router);
 			attachVms(router);
 			attachRun(router);
-			attachStats(router);
 			attachWelcome(router);
 			attachLogin(router);
 			attachLogout(router);
@@ -261,11 +259,8 @@ public class RootApplication extends Application {
 		guardAndAttach(router, new RunRouter(getContext()), "run");
 	}
 
-	private void attachStats(RootRouter router) throws ConfigurationException {
-		guardAndAttach(router, new StatsRouter(getContext()), "stats");
-	}
-
-	private void attachDashboard(RootRouter router) throws ConfigurationException {
+	private void attachDashboard(RootRouter router)
+			throws ConfigurationException {
 		guardAndAttach(router, new DashboardRouter(getContext()), "dashboard");
 	}
 

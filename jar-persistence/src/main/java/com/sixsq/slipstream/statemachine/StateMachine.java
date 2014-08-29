@@ -76,10 +76,12 @@ public class StateMachine {
 		key = nodePrefix + RuntimeParameter.IS_ORCHESTRATOR_KEY;
 		RuntimeParameter isOrchestrator = run.getRuntimeParameters().get(key);
 
+		key = nodePrefix + RuntimeParameter.SCALE_STATE_KEY;
+		RuntimeParameter scaleState = run.getRuntimeParameters().get(key);
+
 		RuntimeParameter state = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY);
 
-		ExtrinsicState extrinsicState = new ExtrinsicState(completed, failing,
-				isOrchestrator, state);
+		ExtrinsicState extrinsicState = new ExtrinsicState(completed, failing, isOrchestrator, state, scaleState);
 		return extrinsicState;
 	}
 
@@ -92,7 +94,8 @@ public class StateMachine {
 				.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY);
 
 		ExtrinsicState globalExtrinsicState = new ExtrinsicState(
-				globalCompleteRuntimeParameter, globalFailingRuntimeParameter,
+				globalCompleteRuntimeParameter,
+				globalFailingRuntimeParameter,
 				globalStateRuntimeParameter);
 		return globalExtrinsicState;
 	}
@@ -174,8 +177,17 @@ public class StateMachine {
 		tryAdvanceToState(globalState.nextState, force);
 	}
 
-	public void tryAdvanceToFinalizing() throws InvalidStateException,
-			CannotAdvanceFromTerminalStateException {
+	public void tryAdvanceToProvisionning() throws InvalidStateException, CannotAdvanceFromTerminalStateException {
+		if (!States.Ready.equals(globalState.getState())) {
+			throw new InvalidStateException("Transition from " + globalState + " to Provisioning not allowed.");
+		} else if (!run.isMutable()) {
+			throw new InvalidStateException(
+					"Transition from " + globalState + " to Provisioning not allowed in an imutable Run");
+		}
+		attemptToAdvanceToState(States.Provisioning, true);
+	}
+
+	public void tryAdvanceToFinalizing() throws InvalidStateException, CannotAdvanceFromTerminalStateException {
 		if (canCancel()){
 			throw new InvalidStateException("Transition from " + globalState + " to Finalizing not allowed.");
 		}
@@ -190,8 +202,7 @@ public class StateMachine {
 		tryAdvanceToState(States.Done, true);
 	}
 
-	public void tryAdvanceToCancelled() throws InvalidStateException,
-	CannotAdvanceFromTerminalStateException {
+	public void tryAdvanceToCancelled() throws InvalidStateException, CannotAdvanceFromTerminalStateException {
 		if (! canCancel()){
 			throw new InvalidStateException("Transition from " + globalState + " to Cancelled not allowed.");
 		}
@@ -274,12 +285,12 @@ public class StateMachine {
 		setState(newState, false);
 	}
 
-	protected void setState(States newState, boolean force)
-			throws InvalidStateException {
+	protected void setState(States newState, boolean force) throws InvalidStateException {
 
 		globalState = assignNodeState(globalState, newState);
 
 		run.setState(globalState.getState());
+		run.setLastStateChange();
 
 		resetNodesStateCompleted();
 
@@ -295,14 +306,15 @@ public class StateMachine {
 
 	private boolean checkSynchronizedConditionMet()
 			throws InvalidStateException {
-
 		boolean onlyOrch = globalState.synchronizedForOrchestrators();
 		boolean recoveryMode = Run.isInRecoveryMode(run);
 
 		if (globalState.synchronizedForEveryone() || onlyOrch) {
 			for (Map.Entry<String, State> node : nodeStates.entrySet()) {
-				if ((!onlyOrch && !recoveryMode) ||
-					((onlyOrch || recoveryMode) && node.getValue().isOrchestrator())) {
+				if (!node.getValue().isRemoved() &&
+					((!onlyOrch && !recoveryMode) ||
+					((onlyOrch || recoveryMode) && node.getValue().isOrchestrator()))
+				) {
 					checkStateCompleted(node.getKey());
 				}
 			}
