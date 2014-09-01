@@ -20,6 +20,7 @@
     <module>jar-async</module>
     <module>jar-service</module>
     <module>static-content</module>
+    <module>connectors</module>
     <module>war</module>
   </modules>
 

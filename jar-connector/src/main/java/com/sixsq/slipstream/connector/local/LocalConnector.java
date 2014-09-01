@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
-import com.sixsq.slipstream.connector.stratuslab.StratusLabSystemConfigurationParametersFactory;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ClientExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.ClientHttpException;
@@ -71,7 +70,7 @@ public class LocalConnector extends ConnectorBase {
 	@Override
 	public Map<String, ServiceConfigurationParameter> getServiceConfigurationParametersTemplate()
 			throws ValidationException {
-		return new StratusLabSystemConfigurationParametersFactory(getConnectorInstanceName())
+		return new LocalSystemConfigurationParametersFactory()
 				.getParameters();
 	}
 
