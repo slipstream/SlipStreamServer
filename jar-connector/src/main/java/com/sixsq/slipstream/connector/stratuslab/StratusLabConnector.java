@@ -453,15 +453,14 @@ public class StratusLabConnector extends CliConnectorBase {
 	}
 
 	@Override
-	protected Map<String, String> getConnectorSpecificUserParams(User user) throws ValidationException,
-			ServerExecutionEnginePluginException {
+	protected Map<String, String> getConnectorSpecificUserParams(User user) throws ValidationException {
 		// TODO Stub de la méthode généré automatiquement
 		return null;
 	}
 
 	@Override
-	protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user) throws ConfigurationException,
-			ValidationException, ServerExecutionEnginePluginException {
+	protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user)
+			throws ConfigurationException, ValidationException {
 		// TODO Stub de la méthode généré automatiquement
 		return null;
 	}

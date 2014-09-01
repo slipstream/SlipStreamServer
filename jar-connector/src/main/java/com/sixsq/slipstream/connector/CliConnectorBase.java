@@ -13,11 +13,11 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ProcessException;
-import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ProcessUtils;
@@ -37,16 +37,17 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	abstract protected String getCloudConnectorPythonModule();
 
 	abstract protected Map<String, String> getConnectorSpecificUserParams(User user)
-			throws ValidationException, ServerExecutionEnginePluginException;
+			throws ConfigurationException, ValidationException;
 
 	abstract protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user)
-			throws ConfigurationException, ValidationException, ServerExecutionEnginePluginException;
+			throws ConfigurationException, ValidationException;
 
-	protected Map<String, String> getConnectorSpecificEnvironment(Run run, User user) {
+	protected Map<String, String> getConnectorSpecificEnvironment(Run run, User user)
+			throws ConfigurationException, ValidationException {
 		return new HashMap<String, String>();
 	}
 
-	protected void validateLaunch(Run run, User user) throws ConfigurationException, SlipStreamException{
+	protected void validateLaunch(Run run, User user) throws ValidationException {
 		validateCredentials(user);
 	}
 
@@ -56,6 +57,10 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	protected void validateTerminate(Run run, User user) throws ValidationException {
 		validateCredentials(user);
+	}
+
+	protected String getCloudConnectorBundleUrl(User user) throws ValidationException {
+		return getCloudParameterValue(user, UserParametersFactoryBase.UPDATE_CLIENTURL_PARAMETER_NAME);
 	}
 
 	public CliConnectorBase(String instanceName) {
@@ -155,7 +160,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	private Map<String, String> getLaunchParams(Run run, User user)
-			throws ServerExecutionEnginePluginException, ConfigurationException, SlipStreamClientException {
+			throws ConfigurationException, SlipStreamClientException {
 		Map<String, String> launchParams = new HashMap<String, String>();
 		launchParams.putAll(getUserParams(user));
 		launchParams.putAll(getGenericLaunchParams(run, user));
@@ -164,30 +169,26 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	private Map<String, String> getGenericLaunchParams(Run run, User user)
-			throws ConfigurationException, SlipStreamClientException, ServerExecutionEnginePluginException{
+			throws ConfigurationException, SlipStreamClientException {
 		Map<String, String> launchParams = new HashMap<String, String>();
 		launchParams.put("image-id", getImageId(run, user));
+		launchParams.put("network-type", getNetwork(run));
 		return launchParams;
 	}
 
 	private Map<String, String> getUserParams(User user)
-			throws ValidationException, ServerExecutionEnginePluginException {
+			throws ValidationException {
 		Map<String, String> userParams = new HashMap<String, String>();
 		userParams.putAll(getGenericUserParams(user));
 		userParams.putAll(getConnectorSpecificUserParams(user));
 		return userParams;
 	}
 
-	private Map<String, String> getGenericUserParams(User user) {
+	protected Map<String, String> getGenericUserParams(User user) {
 		Map<String, String> userParams = new HashMap<String, String>();
-		userParams.put("access-id", getKey(user));
-		userParams.put("secret-key", getSecret(user));
+		userParams.put(UserParametersFactoryBase.KEY_PARAMETER_NAME, getKey(user));
+		userParams.put(UserParametersFactoryBase.SECRET_PARAMETER_NAME, getSecret(user));
 		return userParams;
-	}
-
-	protected String getCloudConnectorBundleUrl(User user)
-			throws ValidationException, ServerExecutionEnginePluginException {
-		return getCloudParameterValue(user, UserParametersFactoryBase.UPDATE_CLIENTURL_PARAMETER_NAME);
 	}
 
 	private String getVerbosityLevel(User user) throws ValidationException {
@@ -198,7 +199,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	protected Map<String, String> getCommandEnvironment(Run run, User user)
-			throws ConfigurationException, ServerExecutionEnginePluginException, ValidationException {
+			throws ConfigurationException, ValidationException {
 		Map<String, String> environment = getCommonEnvironment(user);
 		environment.putAll(getContextualizationEnvironment(run, user));
 		environment.putAll(getCliParamsEnvironment(run, user));
@@ -208,7 +209,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 
 	private Map<String, String> getContextualizationEnvironment(Run run, User user)
-			throws ConfigurationException, ServerExecutionEnginePluginException, ValidationException {
+			throws ConfigurationException, ValidationException {
 
 		Configuration configuration = Configuration.getInstance();
 		String username = user.getName();
@@ -237,7 +238,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	protected Map<String, String> getCommonEnvironment(User user)
-			throws ConfigurationException, ServerExecutionEnginePluginException, ValidationException {
+			throws ConfigurationException, ValidationException {
 		Map<String,String> environment = new HashMap<String,String>();
 
 		environment.put("SLIPSTREAM_CONNECTOR_INSTANCE", getConnectorInstanceName());
@@ -246,7 +247,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	private Map<String, String> getCliParamsEnvironment(Run run, User user)
-			throws ConfigurationException, ServerExecutionEnginePluginException, ValidationException {
+			throws ConfigurationException, ValidationException {
 		String isOrchestrator = (isInOrchestrationContext(run)) ? "True" : "False";
 		String publicSshKey;
 
@@ -311,8 +312,13 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return "'" + value.replaceAll("'","'\\\\''") + "'";
 	}
 
-	protected String getEndpoint(User user) throws ValidationException {
-		return wrapInSingleQuotes(super.getEndpoint(user));
+	protected String getNetwork(Run run) throws ValidationException {
+		if (isInOrchestrationContext(run)) {
+			return "Public";
+		} else {
+			ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
+			return machine.getParameterValue(ImageModule.NETWORK_KEY, null);
+		}
 	}
 
 	protected String getErrorMessageLastPart(User user) {

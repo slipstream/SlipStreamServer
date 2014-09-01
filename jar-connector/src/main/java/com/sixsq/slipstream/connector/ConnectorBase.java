@@ -101,9 +101,7 @@ public abstract class ConnectorBase implements Connector {
         return ConnectorFactory.getCurrentConnector(user).getCredentials(user);
     }
 
-    protected String getImageId(Run run, User user) throws SlipStreamClientException, ConfigurationException,
-            ServerExecutionEnginePluginException {
-
+    protected String getImageId(Run run, User user) throws ConfigurationException, ValidationException {
         String imageId;
 
         if (isInOrchestrationContext(run)) {
@@ -115,17 +113,16 @@ public abstract class ConnectorBase implements Connector {
         return imageId;
     }
 
-    protected String getOrchestratorImageId(User user) throws ValidationException,
-            ServerExecutionEnginePluginException {
+    protected String getOrchestratorImageId(User user) throws ValidationException {
         return getCloudParameterValue(user, UserParametersFactoryBase.ORCHESTRATOR_IMAGEID_PARAMETER_NAME);
     }
 
-    protected String getCloudParameterValue(User user, String paramName) throws ServerExecutionEnginePluginException,
-            ValidationException {
+    protected String getCloudParameterValue(User user, String paramName)
+    		throws ConfigurationException, ValidationException {
         String qualifiedParamName = constructKey(paramName);
         String paramValue = user.getParameterValue(qualifiedParamName, null);
         if (paramValue == null) {
-            throw (new ServerExecutionEnginePluginException("Missing parameter '" + qualifiedParamName + "'."));
+            throw (new ConfigurationException("Missing parameter '" + qualifiedParamName + "'."));
         }
         return paramValue;
     }
@@ -138,9 +135,6 @@ public abstract class ConnectorBase implements Connector {
         return instanceName;
     }
 
-    public void abort(Run run, User user) throws ServerExecutionEnginePluginException {
-    }
-
     public void checkCredentials(Credentials credentials) throws InvalidElementException {
         if (credentials.getKey() == null) {
             throw (new InvalidElementException("Missing Cloud account key."));
@@ -150,14 +144,13 @@ public abstract class ConnectorBase implements Connector {
         }
     }
 
-    protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress) throws NotFoundException,
-            ValidationException, ServerExecutionEnginePluginException {
+    protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress)
+    		throws NotFoundException, ValidationException, ServerExecutionEnginePluginException {
         return updateInstanceIdAndIpOnRun(run, instanceId, ipAddress, getOrchestratorName(run));
     }
 
-    protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress,
-                                             String orchestratorName) throws NotFoundException, ValidationException,
-            ServerExecutionEnginePluginException {
+    protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress, String orchestratorName)
+    		throws NotFoundException, ValidationException, ServerExecutionEnginePluginException {
 
         if (isInOrchestrationContext(run)) {
             updateOrchestratorInstanceIdOnRun(run, instanceId, orchestratorName);
@@ -385,7 +378,7 @@ public abstract class ConnectorBase implements Connector {
 
     protected abstract String constructKey(String key) throws ValidationException;
 
-    protected String getVerboseParameterValue(User user) throws ValidationException {
+    protected String getVerboseParameterValue(User user) {
         return user.getParameterValue(Parameter.constructKey(ExecutionControlUserParametersFactory.VERBOSITY_LEVEL),
                 ExecutionControlUserParametersFactory.VERBOSITY_LEVEL_DEFAULT
         );

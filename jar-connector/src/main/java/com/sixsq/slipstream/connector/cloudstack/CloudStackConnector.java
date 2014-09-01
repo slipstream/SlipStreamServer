@@ -178,13 +178,12 @@ public class CloudStackConnector extends CliConnectorBase {
 		}
 	}
 
-	protected void validateCapabilities(Run run) throws SlipStreamException{
+	protected void validateCapabilities(Run run) throws ValidationException {
 		if(isInOrchestrationContext(run) && run.getCategory() == ModuleCategory.Image)
-			throw new SlipStreamException("Image creation is not yet available for this connector");
+			throw new ValidationException("Image creation is not yet available for this connector");
 	}
 
-	protected void validateLaunch(Run run, User user)
-			throws ConfigurationException, SlipStreamException{
+	protected void validateLaunch(Run run, User user) throws ValidationException{
 		validateCredentials(user);
 		validateBaseParameters(user);
 		validateCapabilities(run);
@@ -359,15 +358,14 @@ public class CloudStackConnector extends CliConnectorBase {
 	}
 
 	@Override
-	protected Map<String, String> getConnectorSpecificUserParams(User user) throws ValidationException,
-			ServerExecutionEnginePluginException {
+	protected Map<String, String> getConnectorSpecificUserParams(User user) throws ValidationException {
 		// TODO Stub de la méthode généré automatiquement
 		return null;
 	}
 
 	@Override
-	protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user) throws ConfigurationException,
-			ValidationException, ServerExecutionEnginePluginException {
+	protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user)
+			throws ConfigurationException, ValidationException {
 		// TODO Stub de la méthode généré automatiquement
 		return null;
 	}
