@@ -5,7 +5,7 @@
 Configure and deploy the SlipStream web application in $(jetty.home)/webapps/root
 ===================================================================== -->
 
-<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+<Configure id="webAppContext" class="org.eclipse.jetty.webapp.WebAppContext">
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Required minimal context configuration :                        -->
@@ -22,31 +22,28 @@ Configure and deploy the SlipStream web application in $(jetty.home)/webapps/roo
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
   <New class="java.io.File">
-    <Arg><SystemProperty name="jetty.home" default="."/>/lib/connectors/</Arg>
-    <Call id="connectorDirURI" name="toURI"/>
-  </New>
-
-  <New id="connectorResource" class="org.eclipse.jetty.util.resource.FileResource">
-    <Arg><Ref refid="connectorDirURI"/></Arg>
+    <Arg><SystemProperty name="jetty.home" default="/opt/slipstream/server"/>/lib/connectors</Arg>
+    <Call id="connectorDirectoryURL" name="toURL"/>
   </New>
 
   <Call name="getClass">
     <Call id="parentClassLoader" name="getClassLoader"/>
   </Call>
 
-  <New id="connectorClassLoader" class="org.eclipse.jetty.webapp.WebAppClassLoader">
-    <Arg><Ref refid="parentClassLoader"/></Arg>
-    <Arg><Ref refid="webAppContext"/></Arg>
-
-    <Call name="addJars">
-      <Arg><Ref refid="connectorResource"/></Arg>
-    </Call>
-  </New>
-
   <Set name="ClassLoader">
-    <Ref refid="connectorClassLoader"/>
+    <New id="connectorClassLoader" class="org.eclipse.jetty.webapp.WebAppClassLoader">
+      <Arg><Ref refid="parentClassLoader"/></Arg>
+      <Arg><Ref refid="webAppContext"/></Arg>
+      
+      <Call name="addJars">
+	<Arg>
+	  <New class="org.eclipse.jetty.util.resource.FileResource">
+	    <Arg><Ref refid="connectorDirectoryURL"/></Arg>
+	  </New>
+	</Arg>
+      </Call>
+    </New>
   </Set>
-
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- define persistence properties for hsqldb database               -->
