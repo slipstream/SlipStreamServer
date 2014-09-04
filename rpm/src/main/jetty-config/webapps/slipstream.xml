@@ -15,26 +15,43 @@ Configure and deploy the SlipStream web application in $(jetty.home)/webapps/roo
   <Set name="contextPath">/</Set>
   <Set name="tempDirectory"><SystemProperty name="jetty.home" default="."/>/tmp/war</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/slipstream.war</Set>
-  
-  <!-- Require SSL connections.  This will force redirect from port 80. 
-  <Set name="securityHandler">
-    <New class="org.eclipse.jetty.security.ConstraintSecurityHandler">
-      <Call name="addConstraintMapping">
-        <Arg>
-          <New class="org.eclipse.jetty.security.ConstraintMapping">
-            <Set name="pathSpec">/*</Set>
-            <Set name="constraint">
-              <New class="org.eclipse.jetty.util.security.Constraint">
-                <!- 2 means CONFIDENTIAL. 1 means INTEGRITY ->
-                <Set name="dataConstraint">2</Set>
-              </New>
-            </Set>
-          </New>
-        </Arg>
-      </Call>
-    </New>
+
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- add lib/connector/ directory to classloader for auto-loading    -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <New class="java.io.File">
+    <Arg><SystemProperty name="jetty.home" default="."/>/lib/connectors/</Arg>
+    <Call id="connectorDirURI" name="toURI"/>
+  </New>
+
+  <New id="connectorResource" class="org.eclipse.jetty.util.resource.FileResource">
+    <Arg><Ref refid="connectorDirURI"/></Arg>
+  </New>
+
+  <Call name="getClass">
+    <Call id="parentClassLoader" name="getClassLoader"/>
+  </Call>
+
+  <New id="connectorClassLoader" class="org.eclipse.jetty.webapp.WebAppClassLoader">
+    <Arg><Ref refid="parentClassLoader"/></Arg>
+    <Arg><Ref refid="webAppContext"/></Arg>
+
+    <Call name="addJars">
+      <Arg><Ref refid="connectorResource"/></Arg>
+    </Call>
+  </New>
+
+  <Set name="ClassLoader">
+    <Ref refid="connectorClassLoader"/>
   </Set>
-  -->
+
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- define persistence properties for hsqldb database               -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
   <Call class="java.lang.System" name="setProperties">
     <Arg>
       <New class="java.util.Properties">
