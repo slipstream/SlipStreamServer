@@ -304,7 +304,7 @@ public class UserFormProcessorTest {
 	public void randomPassword() throws ValidationException {
 		user = new User("randomPasswordUser");
 		user.randomizePassword();
-		assertThat(user.getPassword(), is(not("0")));
+		assertThat(user.getHashedPassword(), is(not("0")));
 
 	}
 

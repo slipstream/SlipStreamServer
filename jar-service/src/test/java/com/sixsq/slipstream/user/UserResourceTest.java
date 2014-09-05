@@ -218,7 +218,7 @@ public class UserResourceTest extends ResourceTestBase {
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
 		user = User.load(user.getResourceUri());
-		assertThat(user.getPassword(), is(Passwords.hash(NEW_PASSWORD)));
+		assertThat(user.getHashedPassword(), is(Passwords.hash(NEW_PASSWORD)));
 	}
 
 	@Test
@@ -242,7 +242,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User user = (User) SerializationUtil.fromXml(
 				response.getEntityAsText(), User.class);
-		assertNull(user.getPassword());
+		assertNull(user.getHashedPassword());
 	}
 
 	@Test
@@ -257,7 +257,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		String xml = response.toString();
 		User user = (User) SerializationUtil.fromXml(xml, User.class);
-		assertNotNull(user.getPassword());
+		assertNotNull(user.getHashedPassword());
 	}
 
 	@Test
@@ -269,7 +269,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User user = (User) SerializationUtil.fromXml(
 				response.getEntityAsText(), User.class);
-		assertNull(user.getPassword());
+		assertNull(user.getHashedPassword());
 	}
 
 	@Test
@@ -351,7 +351,7 @@ public class UserResourceTest extends ResourceTestBase {
 	private String getPersistedPassword(User user)
 			throws ConfigurationException, ValidationException {
 		User restoredUser = User.load(user.getResourceUri());
-		return restoredUser.getPassword();
+		return restoredUser.getHashedPassword();
 	}
 
 	private Passwords createValidPasswords(String oldPassword)

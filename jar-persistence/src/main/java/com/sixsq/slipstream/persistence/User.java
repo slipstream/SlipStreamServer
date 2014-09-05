@@ -236,17 +236,27 @@ public class User extends Parameterized<User, UserParameter> {
 		this.firstName = firstName;
 	}
 
-	public String getPassword() {
+	public String getHashedPassword() {
 		return password;
 	}
 
-	public void hashAndSetPassword(String password)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		this.password = Passwords.hash(password);
+	public void setHashedPassword(String password) {
+		this.password = password;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void hashAndSetPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		setHashedPassword(Passwords.hash(password));
+	}
+
+	@Attribute(name = "password", required = false)
+	public String getPassword() {
+		// We don't want to serialize the password into the XML.
+		return null;
+	}
+
+	@Attribute(name = "password", required = false)
+	public void setPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		hashAndSetPassword(password);
 	}
 
 	public String randomizePassword() {
@@ -350,7 +360,7 @@ public class User extends Parameterized<User, UserParameter> {
 
 		// For security reasons, the password must not be null or the empty
 		// string.
-		String password = user.getPassword();
+		String password = user.getHashedPassword();
 		if (password == null || "".equals(password)) {
 			throw new InvalidElementException("Password cannot be empty.");
 		}
