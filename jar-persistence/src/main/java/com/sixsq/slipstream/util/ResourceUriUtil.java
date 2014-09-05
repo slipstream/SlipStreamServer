@@ -46,7 +46,7 @@ public class ResourceUriUtil {
         String scheme = null;
         String authority = null;
         if (headers != null) {
-            scheme = headers.getFirstValue("X-Forwarded-Proto");
+            scheme = headers.getFirstValue("X-Forwarded-Proto", true);
             authority = headers.getFirstValue("Host");
         }
 
