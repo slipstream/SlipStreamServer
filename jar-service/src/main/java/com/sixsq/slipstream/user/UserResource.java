@@ -307,6 +307,10 @@ public class UserResource extends ParameterizedResource<User> {
 
 		user.store();
 
+		if (!isExisting()) {
+			setParameterized(user);
+		}
+
 		setResponseForPut();
 	}
 
@@ -314,8 +318,7 @@ public class UserResource extends ParameterizedResource<User> {
 		if (isExisting()) {
 			setResponseOkAndViewLocation(getParameterized().getResourceUri());
 		} else {
-			setResponseCreatedAndViewLocation(getParameterized()
-					.getResourceUri());
+			setResponseCreatedAndViewLocation(getParameterized().getResourceUri());
 		}
 	}
 
