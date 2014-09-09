@@ -9,9 +9,9 @@ package com.sixsq.slipstream.user;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,7 +47,6 @@ import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -481,13 +480,6 @@ public class UserResourceTest extends ResourceTestBase {
 		String category = "SlipStream_Support";
 		CookieUtils.addAuthnCookie(request, otherUser.getName(), category);
 
-		String cookieCategory = CookieUtils.getCookieCloudServiceName(request
-				.getCookies().getFirst(CookieUtils.getCookieName()));
-
-		// need to add the cloud service name directly as an attribute, since
-		// we're not going through the CookieAuthenticator
-		request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME,
-				cookieCategory);
 		Response response = executeRequest(request);
 
 		String denormalized = XmlUtil.denormalize(response.getEntityAsText());

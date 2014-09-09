@@ -360,6 +360,14 @@ public abstract class ConnectorBase implements Connector {
         throw (new NotImplementedException());
     }
 
+    /**
+     * Implement in connector class if extra parameters are required to be set during
+     * XML serialization of the User object when UserResource is called to get XML.
+     */
+    @Override
+    public void setExtraUserParameters(User user) throws ValidationException {
+    }
+
     public Map<String, ModuleParameter> getImageParametersTemplate() throws ValidationException {
         return new HashMap<String, ModuleParameter>();
     }
