@@ -155,7 +155,22 @@ public class ServiceConfiguration extends
 				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
 
 		SLIPSTREAM_QUOTA_ENABLE("Quota enforcement enabled",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean);
+				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+
+		SLIPSTREAM_RING_HOSTNAME(
+				"Ring server (e.g. used for connector resources).",
+				ParameterCategory.SlipStream_Advanced),
+
+		SLIPSTREAM_STATIC_HTML_TEMPLATE_NAMESPACE(
+				"HTML namespace. Empty by default, it can be set to an alternative / separated string.",
+				ParameterCategory.SlipStream_Advanced,
+				"The corresponding namespace must be available in the CLASSPATH and the service must restarted once the value is saved.",
+				ParameterType.String),
+
+		SLIPSTREAM_STATIC_CONTENT_LOCATION(
+				"Location of the static content (e.g. css, js, images). Empty by default.",
+				ParameterCategory.SlipStream_Advanced,
+				"Expects a 'file:///' type value", ParameterType.String);
 
 		private final String description;
 		private final ParameterCategory category;

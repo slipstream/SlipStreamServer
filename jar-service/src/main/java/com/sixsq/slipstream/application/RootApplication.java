@@ -62,6 +62,8 @@ import com.sixsq.slipstream.metrics.GraphiteRouter;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.resource.ConnectorClassRouter;
+import com.sixsq.slipstream.resource.ConnectorInstanceRouter;
 import com.sixsq.slipstream.resource.DocumentationResource;
 import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.ServiceCatalogRouter;
@@ -112,27 +114,23 @@ public class RootApplication extends Application {
 	}
 
 	protected void loadConnectors() {
-		ServiceLoader<Connector> connectorLoader = ServiceLoader
-				.load(Connector.class);
+		ServiceLoader<Connector> connectorLoader = ServiceLoader.load(Connector.class);
 
 		for (Connector c : connectorLoader) {
 			getLogger().info("Connector name: " + c.getCloudServiceName());
 		}
 	}
 
-	private void createStartupMetadata() throws ValidationException,
-			NotFoundException, ConfigurationException {
+	private void createStartupMetadata() throws ValidationException, NotFoundException, ConfigurationException {
 
 		try {
 			Users.create();
 		} catch (Exception ex) {
-			getLogger().warning(
-					"Error creating default users... already existing?");
+			getLogger().warning("Error creating default users... already existing?");
 		}
 	}
 
-	private void initializeStatusServiceToHandleErrors()
-			throws ConfigurationException {
+	private void initializeStatusServiceToHandleErrors() throws ConfigurationException {
 
 		CommonStatusService statusService = new CommonStatusService();
 
@@ -140,8 +138,7 @@ public class RootApplication extends Application {
 
 	}
 
-	private static void verifyMinimumDatabaseInfo()
-			throws ConfigurationException, ValidationException {
+	private static void verifyMinimumDatabaseInfo() throws ConfigurationException, ValidationException {
 
 		User user = User.loadByName("super");
 		if (user == null) {
@@ -176,6 +173,8 @@ public class RootApplication extends Application {
 			attachServiceCatalog(router); // needs to be after configuration
 			attachDocumentation(router);
 			attachReports(router);
+			attachConnectorInstance(router);
+			attachConnectorClass(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -228,8 +227,7 @@ public class RootApplication extends Application {
 		return directory;
 	}
 
-	private void attachReports(RootRouter router)
-			throws ConfigurationException, ValidationException {
+	private void attachReports(RootRouter router) throws ConfigurationException, ValidationException {
 		router.attach("/reports", new ReportRouter(getContext(), router.getApplication()));
 	}
 
@@ -238,8 +236,7 @@ public class RootApplication extends Application {
 		Authenticator authenticator = new CookieAuthenticator(getContext());
 		authenticator.setNext(ServiceConfigurationResource.class);
 		authenticator.setEnroler(new SuperEnroler(router.getApplication()));
-		route = router.attach(ServiceConfigurationResource.CONFIGURATION_PATH,
-				authenticator);
+		route = router.attach(ServiceConfigurationResource.CONFIGURATION_PATH, authenticator);
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 	}
 
@@ -250,15 +247,12 @@ public class RootApplication extends Application {
 	}
 
 	private void attachLogin(RootRouter router) {
-		TemplateRoute route = router.attach(LoginResource.getResourceRoot(),
-				LoginResource.class);
+		TemplateRoute route = router.attach(LoginResource.getResourceRoot(), LoginResource.class);
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 
-		router.attach(RegistrationResource.getResourceRoot(),
-				RegistrationResource.class);
+		router.attach(RegistrationResource.getResourceRoot(), RegistrationResource.class);
 
-		router.attach(ResetPasswordResource.getResourceRoot(),
-				ResetPasswordResource.class);
+		router.attach(ResetPasswordResource.getResourceRoot(), ResetPasswordResource.class);
 	}
 
 	private void attachRun(RootRouter router) throws ConfigurationException {
@@ -270,23 +264,19 @@ public class RootApplication extends Application {
 		guardAndAttach(router, new DashboardRouter(getContext()), "dashboard");
 	}
 
-	private void attachServiceCatalog(RootRouter router)
-			throws ConfigurationException, ValidationException {
-		guardAndAttach(router, new ServiceCatalogRouter(getContext()),
-				"service_catalog");
+	private void attachServiceCatalog(RootRouter router) throws ConfigurationException, ValidationException {
+		guardAndAttach(router, new ServiceCatalogRouter(getContext()), "service_catalog");
 	}
 
 	private void attachVms(RootRouter router) throws ConfigurationException {
 		guardAndAttach(router, new VmsRouter(getContext()), "vms");
 	}
 
-	private void guardAndAttach(Router rootRouter, Router router, String rootUri)
-			throws ConfigurationException {
+	private void guardAndAttach(Router rootRouter, Router router, String rootUri) throws ConfigurationException {
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
 		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
 
-		Authenticator cookieAuthenticator = new CookieAuthenticator(
-				getContext());
+		Authenticator cookieAuthenticator = new CookieAuthenticator(getContext());
 		cookieAuthenticator.setOptional(true);
 
 		cookieAuthenticator.setNext(basicAuthenticator);
@@ -294,8 +284,7 @@ public class RootApplication extends Application {
 
 		basicAuthenticator.setNext(router);
 
-		TemplateRoute route = rootRouter.attach(convertToRouterRoot(rootUri),
-				cookieAuthenticator);
+		TemplateRoute route = rootRouter.attach(convertToRouterRoot(rootUri), cookieAuthenticator);
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 	}
 
@@ -305,15 +294,13 @@ public class RootApplication extends Application {
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
 		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
 
-		Authenticator cookieAuthenticator = new CookieAuthenticator(
-				getContext());
+		Authenticator cookieAuthenticator = new CookieAuthenticator(getContext());
 		cookieAuthenticator.setOptional(true);
 
 		cookieAuthenticator.setNext(basicAuthenticator);
 
 		basicAuthenticator.setNext(new UserRouter(getContext()));
-		route = router.attach(convertToRouterRoot(User.RESOURCE_URL_PREFIX),
-				cookieAuthenticator);
+		route = router.attach(convertToRouterRoot(User.RESOURCE_URL_PREFIX), cookieAuthenticator);
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 	}
 
@@ -322,24 +309,19 @@ public class RootApplication extends Application {
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
 		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
 
-		Authenticator cookieAuthenticator = new CookieAuthenticator(
-				getContext());
+		Authenticator cookieAuthenticator = new CookieAuthenticator(getContext());
 		cookieAuthenticator.setOptional(true);
 
 		cookieAuthenticator.setNext(basicAuthenticator);
 
 		basicAuthenticator.setNext(new ModuleRouter(getContext()));
 
-		TemplateRoute route = router.attach(
-				convertToRouterRoot(Module.RESOURCE_URI_PREFIX),
-				cookieAuthenticator);
+		TemplateRoute route = router.attach(convertToRouterRoot(Module.RESOURCE_URI_PREFIX), cookieAuthenticator);
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 	}
 
 	private String convertToRouterRoot(String prefix) {
-		return "/"
-				+ (prefix.endsWith("/") ? prefix.substring(0,
-						prefix.length() - 1) : prefix);
+		return "/" + (prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix);
 	}
 
 	private void attachAction(RootRouter router) {
@@ -356,21 +338,26 @@ public class RootApplication extends Application {
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
 		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
 
-		Authenticator cookieAuthenticator = new CookieAuthenticator(
-				getContext());
+		Authenticator cookieAuthenticator = new CookieAuthenticator(getContext());
 		cookieAuthenticator.setOptional(true);
 
 		cookieAuthenticator.setNext(basicAuthenticator);
 
 		basicAuthenticator.setNext(WelcomeResource.class);
 
-		TemplateRoute route = router.attach("/?chooser={chooser}",
-				cookieAuthenticator);
+		TemplateRoute route = router.attach("/?chooser={chooser}", cookieAuthenticator);
 		route.setMatchingQuery(true);
-		route.getTemplate().getVariables()
-				.put("chooser", new Variable(Variable.TYPE_URI_QUERY));
+		route.getTemplate().getVariables().put("chooser", new Variable(Variable.TYPE_URI_QUERY));
 
 		router.attach("/", cookieAuthenticator);
+	}
+
+	private void attachConnectorInstance(RootRouter router) throws ConfigurationException, ValidationException {
+		guardAndAttach(router, new ConnectorInstanceRouter(getContext()), "conninst");
+	}
+
+	private void attachConnectorClass(RootRouter router) throws ConfigurationException, ValidationException {
+		guardAndAttach(router, new ConnectorClassRouter(getContext()), "connclass");
 	}
 
 	private void enableTunnelService() {
@@ -378,15 +365,13 @@ public class RootApplication extends Application {
 		getTunnelService().setEnabled(true);
 	}
 
-	public void addConfigurationToRequest(Request request)
-			throws ConfigurationException, ValidationException {
+	public void addConfigurationToRequest(Request request) throws ConfigurationException, ValidationException {
 
 		ConfigurationUtil.addConfigurationToRequest(request);
 
 	}
 
-	private void attachMetering(RootRouter router)
-			throws ConfigurationException, ValidationException {
+	private void attachMetering(RootRouter router) throws ConfigurationException, ValidationException {
 
 		guardAndAttach(router, new GraphiteRouter(getContext()), GraphiteRouter.ROOT_URI);
 	}

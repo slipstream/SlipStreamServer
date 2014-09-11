@@ -41,7 +41,7 @@ public class ResourceUriUtil {
     //
     public static String getBaseUrlSlash(Request request) {
 
-        Series headers = (Series) request.getAttributes().get("org.restlet.http.headers");
+        Series<?> headers = (Series<?>) request.getAttributes().get("org.restlet.http.headers");
 
         String scheme = null;
         String authority = null;
