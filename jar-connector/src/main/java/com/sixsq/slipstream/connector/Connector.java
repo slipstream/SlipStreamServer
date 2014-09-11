@@ -99,6 +99,16 @@ public interface Connector {
 			throws ValidationException;
 
 	/**
+	 * A hook to allow connector to set any extra user parameters.  This is primarily to be called before
+	 * serialization of the object for Orchestrator.  This is useful in the case where connector related
+	 * user parameters might come from external resources/locations (e.g., VOMS proxy material from
+	 * credentials cache).
+	 * @param User
+	 * @throws ValidationException
+	 */
+	void setExtraUserParameters(User user) throws ValidationException;
+
+	/**
 	 * @return map of service configuration parameters available to the system
 	 *         administrator to configure the connector.
 	 * @throws ValidationException

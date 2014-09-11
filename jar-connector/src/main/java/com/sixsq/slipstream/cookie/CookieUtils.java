@@ -155,9 +155,9 @@ public class CookieUtils {
 	 * Creates a new authentication cookie using the provided information. None
 	 * of the arguments may be null.
 	 *
-	 * @param request
 	 * @param idType
 	 * @param identifier
+	 * @param properties
 	 *
 	 * @return new authentication cookie
 	 */
