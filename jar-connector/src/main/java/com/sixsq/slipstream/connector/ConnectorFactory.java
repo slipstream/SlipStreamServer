@@ -20,6 +20,14 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
@@ -29,16 +37,6 @@ import com.sixsq.slipstream.persistence.ServiceCatalog;
 import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
-import com.sun.xml.internal.fastinfoset.util.StringArray;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ConnectorFactory {
 
