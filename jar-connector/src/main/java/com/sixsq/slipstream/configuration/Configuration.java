@@ -472,7 +472,7 @@ public class Configuration {
 					Properties connectorProps = loadPropertiesFromURL(f.toURI(), props);
 					String connectorInstance = connectorProps.getProperty(connectorInstancePropName);
 					if (Parameter.hasValueSet(connectorInstance)) {
-						newConnectorsInstances.add(connectorInstance.trim());
+						newConnectorsInstances.add(connectorInstance);
 					}
 				}
 			}
