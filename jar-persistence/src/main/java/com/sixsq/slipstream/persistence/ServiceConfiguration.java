@@ -275,6 +275,14 @@ public class ServiceConfiguration extends
 		public String getName() {
 			return name().replace("_", ".").toLowerCase();
 		}
+
+		/**
+		 * Convert string to enum name where word separators are
+		 * converted from . to _ and upper cased.
+		 */
+		public static String getEnum(String name) {
+			return name.replace(".", "_").toUpperCase();
+		}
 	}
 
 	@Id
