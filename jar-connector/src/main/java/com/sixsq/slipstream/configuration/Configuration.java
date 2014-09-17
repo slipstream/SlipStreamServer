@@ -535,6 +535,19 @@ public class Configuration {
 			}
 		}
 
+		// Remove read only entries
+		for(Entry<Object, Object> e : properties.entrySet()) {
+			String k = (String) e.getKey();
+			try {
+				RequiredParameters required = RequiredParameters.valueOf(RequiredParameters.getEnum(k));
+				if(required.isReadonly() && defaults != null && defaults.containsKey(k)) {
+					properties.put(k, defaults.get(k));
+				}
+			} catch (IllegalArgumentException ex) {  
+				// ok
+			}
+		}
+		
 		return properties;
 	}
 
