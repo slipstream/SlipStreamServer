@@ -469,8 +469,8 @@ public class Configuration {
 			File[] files = connectorsDir.listFiles();
 			for (File f : files) {
 				if (f.getName().endsWith(".conf")) {
-					Properties connectorProps = loadPropertiesFromURL(f.toURI(), props);
-					String connectorInstance = connectorProps.getProperty(connectorInstancePropName);
+					props = loadPropertiesFromURL(f.toURI(), props);
+					String connectorInstance = props.getProperty(connectorInstancePropName);
 					if (Parameter.hasValueSet(connectorInstance)) {
 						newConnectorsInstances.add(connectorInstance);
 					}
