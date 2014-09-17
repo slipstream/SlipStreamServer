@@ -20,6 +20,14 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
@@ -30,17 +38,10 @@ import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class ConnectorFactory {
 
-    private static Map<String, Connector> connectors = null;
+    private static final String CONNECTOR_CLASS_SEPARATOR = ",";
+	private static Map<String, Connector> connectors = null;
 
     public static Connector getCurrentConnector(User user) throws ConfigurationException, ValidationException {
         String cloudServiceName = getDefaultCloudServiceName(user);
@@ -236,7 +237,16 @@ public class ConnectorFactory {
         if (connectorsClassNames == null || connectorsClassNames.trim().isEmpty()) {
             return new String[0];
         }
-        return connectorsClassNames.split(",");
+        return connectorsClassNames.split(CONNECTOR_CLASS_SEPARATOR);
+    }
+
+    public static String assembleConnectorClassString(String[] connectorsClassNames) {
+    	StringBuilder sb = new StringBuilder();
+    	for(String c : connectorsClassNames) {
+    		sb.append(c);
+    		sb.append(CONNECTOR_CLASS_SEPARATOR);
+    	}
+        return sb.toString();
     }
 
     public static List<String> getCloudServiceNamesList() throws ConfigurationException, ValidationException {
