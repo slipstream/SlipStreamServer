@@ -322,6 +322,9 @@ public class DeploymentFactory extends RunFactory {
 	protected void addUserFormParametersAsRunParameters(Module module, Run run,
 			Map<String, List<Parameter<?>>> userChoices) throws ValidationException {
 
+		List<String> ignoreList = new ArrayList<String>();
+		ignoreList.add(RuntimeParameter.CLOUD_SERVICE_NAME);
+
 		Map<String, List<Parameter<?>>> parametersPerNode = userChoices;
 
 		DeploymentModule deployment = (DeploymentModule) module;
@@ -337,14 +340,13 @@ public class DeploymentFactory extends RunFactory {
 			for (Parameter<?> parameter : entry.getValue()) {
 				checkParameterIsValid(node, parameter);
 
-				String key = constructNodeParamName(node, parameter.getName());
-				RunParameter rp = new RunParameter(key, extractNodeParameterValue((NodeParameter)parameter), "");
-				run.setParameter(rp);
+				String value = extractNodeParameterValue((NodeParameter)parameter);
+				insertNewRunParameterForNode(run, node, parameter.getName(), value, "", ignoreList);
 			}
-
 		}
-
 	}
+
+
 
 	private void checkParameterIsValid(Node node, Parameter<?> parameter) throws ValidationException {
 		List<String> paramsToFilter = new ArrayList<String>();
@@ -412,15 +414,13 @@ public class DeploymentFactory extends RunFactory {
 		for (Node node : deployment.getNodes().values()) {
 			int multiplicity = node.getMultiplicity();
 
-			String key = constructNodeParamName(node, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
-			RunParameter rp = new RunParameter(key, String.valueOf(multiplicity),
+			insertNewRunParameterForNode(run, node,
+					RuntimeParameter.MULTIPLICITY_PARAMETER_NAME, String.valueOf(multiplicity),
 					RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION);
-			run.setParameter(rp);
 
-			key = constructNodeParamName(node, RunParameter.NODE_INCREMENT_KEY);
-			rp = new RunParameter(key, String.valueOf(multiplicity + 1),
+			insertNewRunParameterForNode(run, node,
+					RunParameter.NODE_INCREMENT_KEY, String.valueOf(multiplicity + 1),
 					RunParameter.NODE_INCREMENT_DESCRIPTION);
-			run.setParameter(rp);
 		}
 	}
 
@@ -462,6 +462,21 @@ public class DeploymentFactory extends RunFactory {
 	private static int getNodeMultiplicity(Run run, Node node) throws NotFoundException {
 		String key = constructNodeParamName(node, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		return Integer.parseInt(run.getParameterValue(key, null));
+	}
+
+	private static void insertNewRunParameterForNode(Run run, Node node, String name, String value, String description)
+			throws ValidationException {
+		insertNewRunParameterForNode(run, node, name, value, description, new ArrayList<String>());
+	}
+
+	private static void insertNewRunParameterForNode(Run run, Node node, String name, String value, String description,
+			List<String> ignore) throws ValidationException {
+		if (ignore.contains(name)) {
+			return;
+		}
+		String key = constructNodeParamName(node, name);
+		RunParameter rp = new RunParameter(key, value, description);
+		run.setParameter(rp);
 	}
 
 }
