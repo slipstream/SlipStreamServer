@@ -98,6 +98,9 @@ public class RootApplication extends Application {
 		ms.addExtension("tgz", MediaType.APPLICATION_COMPRESS, true);
 		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
 
+		// Load the configuration early
+		Configuration.getInstance();
+		
 		Collector.start();
 		GarbageCollector.start();
 
