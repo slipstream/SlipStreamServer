@@ -60,33 +60,33 @@ import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
  * from the UI, which purges the persisted configuration in the db. When the
  * service is started for the first time, the configuration files are loaded and
  * persisted.
- * 
+ *
  * The system first reads a set of default values. These may be overridden by a
  * user specified configuration file.
- * 
+ *
  * After setting the defaults, this class check if the "slipstream.config.file"
  * system property is set. If it is, it will be used as a filename to find the
  * configuration file. Users should probably use an absolute path when setting
  * the system property. A relative name will be resolved via the JVM and may not
  * have the desired effect.
- * 
+ *
  * If the system property is not set, then the file "slipstream.conf" is
  * searched for in the current working directory and then in the user's home
  * area.
- * 
+ *
  * Extra configuration files can be provided to configure connectors. These must
  * be in a directory called "connectors" in the same directory as the main
  * configurationas file and contain .conf files.
- * 
+ *
  * If no configuration file is found, then just the default configuration is
  * used. The default configuration is likely to be incomplete (some critical
  * properties will not have reasonable default values) and will likely to cause
  * the service to fail during initialization elsewhere.
- * 
+ *
  * The singleton instance of this class is immutable, so clients are encouraged
  * to cache a copy of instance returned by getInstance() rather than reinvoking
  * the method.
- * 
+ *
  */
 public class Configuration {
 
@@ -164,9 +164,9 @@ public class Configuration {
 	 * Return the singleton instance of a Configuration object. This method must
 	 * be synchronized to ensure that only one instance of this class is
 	 * constructed.
-	 * 
+	 *
 	 * @return singleton Configuration instance
-	 * 
+	 *
 	 * @throws ConfigurationException
 	 *             if there is an error when reading the configuration
 	 * @throws ValidationException
@@ -182,7 +182,7 @@ public class Configuration {
 	 * Private constructor, called only from getInstance(), ensures that this is
 	 * a singleton class. The constructor will first load the default properties
 	 * and then search for the user-specified configuration file.
-	 * 
+	 *
 	 * @throws ConfigurationException
 	 *             if an error occurs during the default initialization or when
 	 *             searching for user-specified configuration file
@@ -302,7 +302,7 @@ public class Configuration {
 	 * the ServiceConfiguration.AllowedParameter.CLOUD_CONNECTOR_CLASS property
 	 * of the config file. Since connector class names can be added at anytime
 	 * during the lifetime of a SlipStream server instance.
-	 * 
+	 *
 	 * @param properties
 	 *            (e.g. loaded from the configuration file)
 	 */
@@ -387,12 +387,12 @@ public class Configuration {
 	/**
 	 * Utility method to search through possible locations of the configuration
 	 * file and to load the configuration from the first existing file.
-	 * 
+	 *
 	 * @param defaults
 	 *            Properties object containing default values or null
-	 * 
+	 *
 	 * @return Properties object containing configuration parameters
-	 * 
+	 *
 	 * @throws ConfigurationException
 	 *             if any error occurs while reading configuration files
 	 */
@@ -438,14 +438,14 @@ public class Configuration {
 	 * Utility method to load configuration files, from a uri. First load the
 	 * main slipstream config file, then look for connector specific config
 	 * files.
-	 * 
+	 *
 	 * Assumes that the configuration file behind uri exists and is a file.
-	 * 
+	 *
 	 * A special treatment occurs for the cloud.connector.class key/value pair
 	 * in connector configuration, where the value is accumulated over each
 	 * connector file and merged with the comma separated value in the main
 	 * configuration file.
-	 * 
+	 *
 	 * @param uri
 	 *            URI of the main configuration file (i.e. slipstream.conf)
 	 * @param defaults
@@ -467,12 +467,14 @@ public class Configuration {
 		File connectorsDir = new File(configDir + File.separator + CONNECTORS_CONFIG_DIR);
 		if (connectorsDir != null) {
 			File[] files = connectorsDir.listFiles();
-			for (File f : files) {
-				if (f.getName().endsWith(".conf")) {
-					props = loadPropertiesFromURL(f.toURI(), props);
-					String connectorInstance = props.getProperty(connectorInstancePropName);
-					if (Parameter.hasValueSet(connectorInstance)) {
-						newConnectorsInstances.add(connectorInstance);
+			if (files != null) {
+				for (File f : files) {
+					if (f.getName().endsWith(".conf")) {
+						props = loadPropertiesFromURL(f.toURI(), props);
+						String connectorInstance = props.getProperty(connectorInstancePropName);
+						if (Parameter.hasValueSet(connectorInstance)) {
+							newConnectorsInstances.add(connectorInstance);
+						}
 					}
 				}
 			}
@@ -491,15 +493,15 @@ public class Configuration {
 	/**
 	 * Create a Properties object from the given URI which falls back to the
 	 * given set of default values.
-	 * 
+	 *
 	 * @param uri
 	 *            URI identifying the configuration file
 	 * @param defaults
 	 *            Properties object containing default values or null if there
 	 *            are none
-	 * 
+	 *
 	 * @return Properties object with read configuration parameters
-	 * 
+	 *
 	 * @throws ConfigurationException
 	 *             if there is any error when reading configuration files
 	 */
@@ -543,11 +545,11 @@ public class Configuration {
 				if(required.isReadonly() && defaults != null && defaults.containsKey(k)) {
 					properties.put(k, defaults.get(k));
 				}
-			} catch (IllegalArgumentException ex) {  
+			} catch (IllegalArgumentException ex) {
 				// ok
 			}
 		}
-		
+
 		return properties;
 	}
 
@@ -558,10 +560,10 @@ public class Configuration {
 	/**
 	 * Retrieve the configuration value associated with the given key. Will
 	 * return null if the key does not exist.
-	 * 
+	 *
 	 * @param key
 	 *            parameter name
-	 * 
+	 *
 	 * @return value associated with key or null if the key does not exist
 	 */
 	public String getProperty(String key) {
@@ -572,11 +574,11 @@ public class Configuration {
 	/**
 	 * Retrieve the configuration value associated with the given key. Will
 	 * return defaultValue if the key does not exist or is set to null.
-	 * 
+	 *
 	 * @param key
 	 *            parameter name
 	 * @param defaultValue
-	 * 
+	 *
 	 * @return value associated with key or null if the key does not exist
 	 */
 	public String getProperty(String key, String defaultValue) {
@@ -587,11 +589,11 @@ public class Configuration {
 	/**
 	 * Retrieve the configuration value associated with the given key or throw
 	 * an exception if it does not exist.
-	 * 
+	 *
 	 * @param key
-	 * 
+	 *
 	 * @return value associated with the key
-	 * 
+	 *
 	 * @throws ConfigurationException
 	 *             if there is no value associated with the given key
 	 */
@@ -607,7 +609,7 @@ public class Configuration {
 	 * Returns a Reference containing a copy of the base Reference. Because
 	 * Reference objects are mutable, copies of the internal object must be
 	 * returned to guarantee consistency of the Configuration object.
-	 * 
+	 *
 	 * @return copy of the base Reference for the service
 	 */
 	public Reference getBaseRef() {
@@ -617,14 +619,14 @@ public class Configuration {
 	/**
 	 * Retrieve the property containing the base URL, validate it, and return a
 	 * Reference containing the value.
-	 * 
+	 *
 	 * The path in the returned reference will always have a trailing slash.
-	 * 
+	 *
 	 * @param propertyName
 	 *            name of the property holding the base URL
-	 * 
+	 *
 	 * @return Reference containing the validated base URL
-	 * 
+	 *
 	 * @throws ConfigurationException
 	 *             if the property does not exist or the contained value is
 	 *             invalid
@@ -697,7 +699,7 @@ public class Configuration {
 	/**
 	 * Create a string representation of the base URL. This value will have all
 	 * trailing slashes removed.
-	 * 
+	 *
 	 * @param baseRef
 	 * @return
 	 */
@@ -716,11 +718,11 @@ public class Configuration {
 
 	/**
 	 * Constructs a URL to a service from configuration information.
-	 * 
+	 *
 	 * @param configServiceName
 	 *            name of service section in configuration file
 	 * @return complete URL
-	 * 
+	 *
 	 * @throws ConfigurationException
 	 */
 	public String getServiceUrl(String configServiceName) throws ConfigurationException {
@@ -737,7 +739,7 @@ public class Configuration {
 	/**
 	 * Constructs a url to the default service root based on configuration
 	 * information.
-	 * 
+	 *
 	 * @param configServiceName
 	 *            name of service section in configuration file
 	 * @return complete url
@@ -754,7 +756,7 @@ public class Configuration {
 	 * Forces to re-read the configuration from file, removing all persisted
 	 * state. Re-load the default parameters from the configured connectors and
 	 * validate that the required parameters are present.
-	 * 
+	 *
 	 * @throws ConfigurationException
 	 * @throws ValidationException
 	 */
@@ -771,7 +773,7 @@ public class Configuration {
 	 * First load config file (just in case there are new required parameters)
 	 * The overwrite them with content from the db (if previously persisted)
 	 * Then process and validate
-	 * 
+	 *
 	 * @throws ValidationException
 	 * @throws ConfigurationException
 	 */
