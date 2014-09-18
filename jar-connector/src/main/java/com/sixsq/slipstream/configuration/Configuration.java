@@ -465,7 +465,7 @@ public class Configuration {
 		List<String> newConnectorsInstances = new ArrayList<String>();
 
 		File connectorsDir = new File(configDir + File.separator + CONNECTORS_CONFIG_DIR);
-		if (connectorsDir != null) {
+		if (connectorsDir != null && connectorsDir.exists()) {
 			File[] files = connectorsDir.listFiles();
 			if (files != null) {
 				for (File f : files) {
