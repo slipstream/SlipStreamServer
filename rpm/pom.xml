@@ -143,7 +143,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -373,6 +373,13 @@
                                     <location>src/main/slipstream.conf</location>
                                 </source>
                             </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/etc/slipstream/connectors</directory>
+                            <filemode>755</filemode>
+                            <username>slipstream</username>
+                            <groupname>slipstream</groupname>
+                            <configuration>true</configuration>
                         </mapping>
                         <mapping>
                             <directory>/var/tmp/slipstream</directory>
