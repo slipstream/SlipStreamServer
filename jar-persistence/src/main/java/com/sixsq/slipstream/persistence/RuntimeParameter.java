@@ -224,7 +224,7 @@ public class RuntimeParameter extends Metadata {
 	private String key_;
 
 	@Text(required = false, data = true)
-	@Column(length = 1024)
+	@Column(length = 4096)
 	private String value = "";
 
 	@Attribute

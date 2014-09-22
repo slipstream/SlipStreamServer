@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
@@ -64,7 +65,7 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name AND m.deleted != TRUE"),
 		@NamedQuery(name = "moduleAll", query = "SELECT m FROM Module m WHERE m.deleted != TRUE"),
 		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz, m.logoLink) FROM Module m WHERE m.published != null AND m.deleted != TRUE") })
-public abstract class Module extends Parameterized<Module, ModuleParameter> {
+public abstract class Module extends Parameterized<Module, ModuleParameter> implements Guarded {
 
 	public final static String RESOURCE_URI_PREFIX = "module/";
 
@@ -84,8 +85,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static Module loadLatest(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleLastVersion");
-		String name = ModuleUriUtil
-				.extractModuleNameFromResourceUri(resourceUri);
+		String name = ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri);
 		q.setParameter("name", name);
 		Module module;
 		try {
@@ -115,8 +115,12 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static Module load(String uri) {
 		String resourceUri = uri;
 		int version = ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
-		return (version == DEFAULT_VERSION ? loadLatest(resourceUri)
-				: loadByUri(resourceUri));
+		Module module = (version == DEFAULT_VERSION ? loadLatest(resourceUri) : loadByUri(resourceUri));
+		if (module != null) {
+			// set authz to bind them
+			module.getAuthz().setGuarded(module);
+		}
+		return module;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -132,8 +136,8 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static List<ModuleView> viewList(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleViewLatestChildren");
-		q.setParameter("parent", Module.constructResourceUri(ModuleUriUtil
-				.extractModuleNameFromResourceUri(resourceUri)));
+		q.setParameter("parent",
+				Module.constructResourceUri(ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri)));
 		List<ModuleView> list = q.getResultList();
 		em.close();
 		return list;
@@ -143,8 +147,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static List<ModuleVersionView> viewListAllVersions(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleViewAllVersions");
-		String name = ModuleUriUtil
-				.extractModuleNameFromResourceUri(resourceUri);
+		String name = ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri);
 		q.setParameter("name", name);
 		List<ModuleVersionView> list = q.getResultList();
 		em.close();
@@ -173,8 +176,11 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private String resourceUri;
 
 	@Element(required = false)
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@Embedded
 	private Authz authz = new Authz("Unknown", this);
+
+	@Transient
+	private Module parent = null;
 
 	@Attribute(required = false)
 	private String customVersion;
@@ -256,6 +262,19 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		this.category = category;
 
 		setName(name);
+	}
+
+	public Guarded getGuardedParent() {
+		if (parent == null) {
+			if (parentUri != null) {
+				parent = Module.load(parentUri);
+			}
+		}
+		return parent;
+	}
+
+	public void clearGuardedParent() {
+		parent = null;
 	}
 
 	public RunViewList getRuns() {
@@ -396,8 +415,8 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	protected void setVersion() {
 		version = VersionCounter.getNextVersion();
-		resourceUri = Module.constructResourceUri(ModuleUriUtil
-				.extractModuleNameFromResourceUri(resourceUri) + "/" + version);
+		resourceUri = Module.constructResourceUri(ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri) + "/"
+				+ version);
 	}
 
 	protected void setIsLatestVersion(int lastVersion) {
@@ -444,8 +463,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		return published;
 	}
 
-	protected String computeParameterValue(String key)
-			throws ValidationException {
+	protected String computeParameterValue(String key) throws ValidationException {
 		ModuleParameter parameter = getParameter(key);
 		String value = (parameter == null ? null : parameter.getValue());
 		if (value == null) {
@@ -465,7 +483,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	protected Module copyTo(Module copy) throws ValidationException {
 		copy = (Module) super.copyTo(copy);
 
-		if(getCommit() != null) {
+		if (getCommit() != null) {
 			copy.setCommit(getCommit().copy());
 		}
 		copy.setCustomVersion(getCustomVersion());

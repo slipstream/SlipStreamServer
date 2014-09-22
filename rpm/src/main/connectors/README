@@ -1,0 +1,5 @@
+
+This subdirectory contains the jar files for SlipStream cloud connectors.
+To activate a new connector, put the jar file for the connector here and
+then restart the SlipStream server.  To deactivate a connector, remove it
+and then restart the server.

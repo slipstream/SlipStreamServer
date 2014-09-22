@@ -81,7 +81,7 @@ public class BasicAuthenticator extends AuthenticatorBase {
 			}
 
 			if (user != null) {
-				String userPass = user.getPassword();
+				String userPass = user.getHashedPassword();
 				if (userPass == null) {
 					response.setStatus(Status.SERVER_ERROR_INTERNAL,
 					        "Password is not set on the user '" + user.getName() + "'");

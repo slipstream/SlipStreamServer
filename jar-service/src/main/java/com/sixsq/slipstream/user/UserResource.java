@@ -34,6 +34,8 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -42,7 +44,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
@@ -74,6 +75,7 @@ public class UserResource extends ParameterizedResource<User> {
 
 		try {
 			mergeCloudSystemParameters(user);
+			mergeCloudConnectorParameters(user);
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -90,8 +92,8 @@ public class UserResource extends ParameterizedResource<User> {
 
 	private void mergeCloudSystemParameters(User user)
 			throws ConfigurationException, ValidationException {
-		String cloudServiceName = (String) getRequest().getAttributes().get(
-				RuntimeParameter.CLOUD_SERVICE_NAME);
+		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
+		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
 		if (cloudServiceName != null) {
 			for (Entry<String, Parameter<ServiceConfiguration>> p : Configuration
 					.getInstance().getParameters()
@@ -101,6 +103,15 @@ public class UserResource extends ParameterizedResource<User> {
 			}
 		}
 		mergePublicKeyParameter(user);
+	}
+
+	private void mergeCloudConnectorParameters(User user) throws ConfigurationException, ValidationException {
+		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
+		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
+		if (cloudServiceName != null && CookieUtils.isMachine(cookie) == true) {
+			Connector connector = ConnectorFactory.getConnector(cloudServiceName);
+			connector.setExtraUserParameters(user);
+		}
 	}
 
 	@Override
@@ -307,6 +318,10 @@ public class UserResource extends ParameterizedResource<User> {
 
 		user.store();
 
+		if (!isExisting()) {
+			setParameterized(user);
+		}
+
 		setResponseForPut();
 	}
 
@@ -314,8 +329,7 @@ public class UserResource extends ParameterizedResource<User> {
 		if (isExisting()) {
 			setResponseOkAndViewLocation(getParameterized().getResourceUri());
 		} else {
-			setResponseCreatedAndViewLocation(getParameterized()
-					.getResourceUri());
+			setResponseCreatedAndViewLocation(getParameterized().getResourceUri());
 		}
 	}
 

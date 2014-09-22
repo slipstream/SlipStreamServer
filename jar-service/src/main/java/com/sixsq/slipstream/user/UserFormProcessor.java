@@ -9,9 +9,9 @@ package com.sixsq.slipstream.user;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,9 +36,9 @@ import com.sixsq.slipstream.persistence.UserParameter;
 
 /**
  * For tests documentation
- * 
+ *
  * @see UserFormProcessorTest
- * 
+ *
  */
 public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 
@@ -129,9 +129,9 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 		if (changePassword) {
 			password = passwords.newPassword1;
 		} else {
-			password = (isNewUser(dbUser) ? null : dbUser.getPassword());
+			password = (isNewUser(dbUser) ? null : dbUser.getHashedPassword());
 		}
-		getParametrized().setPassword(password);
+		getParametrized().setHashedPassword(password);
 	}
 
 	private Passwords extractPasswords(Form form)
@@ -164,7 +164,7 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 
 		if ((!isNew && !isSuper) || superChangingItself) {
 			compareOldAndNewPasswords(passwords.oldPassword,
-					dbUser.getPassword());
+					dbUser.getHashedPassword());
 		}
 
 		return true;

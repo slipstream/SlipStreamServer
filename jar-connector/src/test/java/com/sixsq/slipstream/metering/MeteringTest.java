@@ -53,8 +53,8 @@ public class MeteringTest extends RunTestBase {
 		String username = user.getName();
 
 		CommonTestUtil.setCloudConnector(CLOUD_A + ":local," +
-										 CLOUD_B + ":cloudstack," +
-										 CLOUD_C + ":openstack");
+										 CLOUD_B + ":local," +
+										 CLOUD_C + ":local");
 
 		String runId = "xxx";
 

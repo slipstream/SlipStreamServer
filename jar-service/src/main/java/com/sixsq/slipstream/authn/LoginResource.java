@@ -103,7 +103,7 @@ public class LoginResource extends AuthnResource {
 			throwUnauthorizedWithMessage("Authentication failure. No such user: " + username);
 		}
 
-		String realPassword = dbUser.getPassword();
+		String realPassword = dbUser.getHashedPassword();
 		if (realPassword == null) {
 			// TODO: Something is wrong. Allow the user to reset the password.
 			throwUnauthorizedWithMessage("Authentication failure. Password is not set in DB for user: " + username);
