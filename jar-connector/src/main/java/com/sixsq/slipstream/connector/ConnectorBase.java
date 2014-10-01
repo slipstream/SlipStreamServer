@@ -451,7 +451,7 @@ public abstract class ConnectorBase implements Connector {
     	return !(key == null || "".equals(key) || secret == null || "".equals(secret));
     }
 
-    protected String getLoginUsername(Run run) throws SlipStreamClientException {
+    protected String getLoginUsername(Run run) throws ConfigurationException, ValidationException {
         if (isInOrchestrationContext(run)) {
             return getOrchestratorImageLoginUsername();
         } else {
@@ -463,17 +463,17 @@ public abstract class ConnectorBase implements Connector {
         return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.ssh.username"));
     }
 
-    private String getMachineImageLoginUsername(Run run) throws SlipStreamClientException {
+    private String getMachineImageLoginUsername(Run run) throws ValidationException {
 
         ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
         String username = machine.getLoginUser();
         if (username == null) {
-            throw (new SlipStreamClientException("Module " + machine.getName() + " is missing login username"));
+            throw new ValidationException("Module " + machine.getName() + " is missing login username");
         }
         return username;
     }
 
-    protected String getLoginPassword(Run run) throws ConfigurationException, SlipStreamClientException {
+    protected String getLoginPassword(Run run) throws ConfigurationException, ValidationException {
         if (isInOrchestrationContext(run)) {
             return getOrchestratorImageLoginPassword();
         } else {
@@ -485,12 +485,12 @@ public abstract class ConnectorBase implements Connector {
         return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.ssh.password"));
     }
 
-    private String getMachineImageLoginPassword(Run run) throws SlipStreamClientException {
+    private String getMachineImageLoginPassword(Run run) throws ValidationException {
 
         ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
         String password = machine.getParameterValue(constructKey(ImageModule.LOGINPASSWORD_KEY), null);
         if (password == null) {
-            throw (new SlipStreamClientException("Module " + machine.getName() + " is missing ssh login password"));
+            throw new ValidationException("Module " + machine.getName() + " is missing ssh login password");
         }
         return password;
     }

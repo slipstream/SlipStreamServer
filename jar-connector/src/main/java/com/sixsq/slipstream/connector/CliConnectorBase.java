@@ -168,7 +168,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return launchParams;
 	}
 
-	private Map<String, String> getGenericLaunchParams(Run run, User user)
+	protected Map<String, String> getGenericLaunchParams(Run run, User user)
 			throws ConfigurationException, SlipStreamClientException {
 		Map<String, String> launchParams = new HashMap<String, String>();
 		launchParams.put("image-id", getImageId(run, user));
@@ -345,7 +345,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return CLI_LOCATION;
 	}
 
-	private String getCommandGenericPart(){
+	protected String getCommandGenericPart(){
 		return getCliLocation() + "/" + getCloudServiceName();
 	}
 
