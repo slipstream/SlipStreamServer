@@ -66,6 +66,9 @@ public class ProcessUtils {
             commandMessage.append(part).append(" ");
 		}
 		getLogger().info("Calling: " + commandMessage.toString());
+		if (environment != null) {
+			getLogger().fine("  with the following environment: " + environment.toString());
+		}
 
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.redirectErrorStream(stderrToStdout);
