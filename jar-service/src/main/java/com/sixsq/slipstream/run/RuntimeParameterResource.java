@@ -101,11 +101,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	@Delete
 	public void resetRuntimeParameter() throws ResourceException {
-
-		if (RuntimeParameter.GLOBAL_ABORT_KEY.equals(key)) {
-			runtimeParameter.setValue("");
-		}
-
+		runtimeParameter.setValue("");
 		runtimeParameter.setIsSet(false);
 		runtimeParameter.store();
 
