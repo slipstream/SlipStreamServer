@@ -23,6 +23,9 @@ start-db-ui: start-db
 start-db: check-sql-tool-file
 	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.server.Server --database.0 file:slipstreamdb --dbname.0 slipstream &
 
+stop-db:
+	java -jar /opt/hsqldb/lib/sqltool.jar --sql 'SHUTDOWN;' slipstream
+
 check-sql-tool-file:
 ifneq ("$(SQLTOOL_FILE_PRESENT)","ok")
 	$(info To create the ${SQLTOOL_FILENAME} execute following lines:)
@@ -36,4 +39,9 @@ ifneq ("$(SQLTOOL_FILE_PRESENT)","ok")
 	$(info )
 	$(error File $(DB_SQLITE_FILENAME) missing...)
 endif
+
+list: goals
+
+goals:
+	@cat Makefile | egrep "^[[:alpha:]-]+:"
 
