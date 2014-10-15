@@ -207,7 +207,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	private void logTimeDiff(String msg, long before, long after) {
-		Logger.getLogger("Timing").info("took to execute " + msg + ": " + (after - before));
+		Logger.getLogger("Timing").finest("took to execute " + msg + ": " + (after - before));
 	}
 
 	protected void logTimeDiff(String msg, long before) {
