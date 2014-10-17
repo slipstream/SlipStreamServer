@@ -41,8 +41,6 @@ public class Users {
 			ConfigurationException, NoSuchAlgorithmException,
 			UnsupportedEncodingException {
 		createSuperUser();
-		createTestUser();
-		createSixSqUser();
 	}
 
 	private static void createSuperUser() throws ValidationException {
@@ -66,60 +64,6 @@ public class Users {
 		}
 		user.setState(State.ACTIVE);
 		user.setSuper(true);
-
-		user.store();
-	}
-
-	private static void createTestUser() throws ValidationException {
-		User user = User.loadByName("test");
-		if (user != null) {
-			return;
-		}
-		user = createUser("test");
-		user.setFirstName("Test");
-		user.setLastName("User");
-		user.setEmail("test@sixsq.com");
-		user.setOrganization("SixSq");
-		try {
-			user.hashAndSetPassword("tesTtesT");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			throw new ValidationException(e.getMessage());
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			throw new ValidationException(e.getMessage());
-		}
-		user.setState(State.ACTIVE);
-		user.setSuper(false);
-
-		user.store();
-
-		// FIXME: do we still need this?
-		// ensure that user was properly registered
-		User.loadByName("test");
-
-	}
-
-	private static void createSixSqUser() throws ValidationException {
-		User user = User.loadByName(SIXSQ);
-		if (user != null) {
-			return;
-		}
-		user = createUser(SIXSQ);
-		user.setFirstName("SixSq");
-		user.setLastName("Administrator");
-		user.setEmail("slipstream-support@sixsq.com");
-		user.setOrganization("SixSq");
-		try {
-			user.hashAndSetPassword("siXsQsiXsQ");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			throw new ValidationException(e.getMessage());
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			throw new ValidationException(e.getMessage());
-		}
-		user.setState(State.ACTIVE);
 
 		user.store();
 	}
