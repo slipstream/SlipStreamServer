@@ -224,6 +224,33 @@
           </properties>
         </configuration>
 
+        <dependencies>
+          <dependency>
+              <groupId>com.sixsq.slipstream</groupId>
+              <artifactId>SlipStreamConnector-CloudStack-jar</artifactId>
+              <version>${project.version}</version>
+          </dependency>
+
+          <dependency>
+              <groupId>com.sixsq.slipstream</groupId>
+              <artifactId>SlipStreamConnector-OpenStack-jar</artifactId>
+              <version>${project.version}</version>
+          </dependency>
+
+          <dependency>
+              <groupId>com.sixsq.slipstream</groupId>
+              <artifactId>SlipStreamConnector-PhysicalHost-jar</artifactId>
+              <version>${project.version}</version>
+          </dependency>
+
+          <dependency>
+              <groupId>com.sixsq.slipstream</groupId>
+              <artifactId>SlipStreamConnector-StratusLab-jar</artifactId>
+              <version>${project.version}</version>
+          </dependency>
+
+        </dependencies>
+
       </plugin>
 
       <plugin>
