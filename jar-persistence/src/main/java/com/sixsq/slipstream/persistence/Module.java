@@ -177,7 +177,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	@Element(required = false)
 	@Embedded
-	private Authz authz = new Authz("Unknown", this);
+	private Authz authz = new Authz(null, this);
 
 	@Transient
 	private Module parent = null;

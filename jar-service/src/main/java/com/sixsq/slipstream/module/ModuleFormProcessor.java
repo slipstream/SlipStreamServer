@@ -119,7 +119,11 @@ public abstract class ModuleFormProcessor extends
 
 		// Save authz section
 		Module module = getParametrized();
-		Authz authz = new Authz(getUser().getName(), module);
+		String owner = module.getAuthz().getUser();
+		if (owner == null) {
+			owner = getUser().getName();
+		}
+		Authz authz = new Authz(owner, module);
 		authz.clear();
 
 		Form form = getForm();
@@ -139,16 +143,12 @@ public abstract class ModuleFormProcessor extends
 		authz.setPublicDelete(getBooleanValue(form, "publicDelete"));
 
 		authz.setGroupMembers(form.getFirstValue("groupmembers", ""));
-		authz.setInheritedGroupMembers(getBooleanValue(form,
-				"inheritedGroupMembers"));
+		authz.setInheritedGroupMembers(getBooleanValue(form, "inheritedGroupMembers"));
 
 		if (module.getCategory() == ModuleCategory.Project) {
-			authz.setOwnerCreateChildren(getBooleanValue(form,
-					"ownerCreateChildren"));
-			authz.setGroupCreateChildren(getBooleanValue(form,
-					"groupCreateChildren"));
-			authz.setPublicCreateChildren(getBooleanValue(form,
-					"publicCreateChildren"));
+			authz.setOwnerCreateChildren(getBooleanValue(form, "ownerCreateChildren"));
+			authz.setGroupCreateChildren(getBooleanValue(form, "groupCreateChildren"));
+			authz.setPublicCreateChildren(getBooleanValue(form, "publicCreateChildren"));
 		}
 
 		getParametrized().setAuthz(authz);
