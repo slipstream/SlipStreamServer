@@ -120,7 +120,7 @@ public abstract class ModuleFormProcessor extends
 		// Save authz section
 		Module module = getParametrized();
 		String owner = module.getAuthz().getUser();
-		if (owner == null) {
+		if (owner == null || owner.isEmpty()) {
 			owner = getUser().getName();
 		}
 		Authz authz = new Authz(owner, module);
