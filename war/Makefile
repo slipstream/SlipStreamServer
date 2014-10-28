@@ -1,4 +1,7 @@
-SQLTOOL_FILENAME=~/sqltool.rc
+SQLTOOL_RC_FILENAME=~/sqltool.rc
+SQLTOOL_RC_FILE_PRESENT=$(shell [ -f $(SQLTOOL_RC_FILENAME) ] && echo ok || echo missing )
+
+SQLTOOL_FILENAME=hsqldb/hsqldb-2.3.2/hsqldb/lib/sqltool.jar
 SQLTOOL_FILE_PRESENT=$(shell [ -f $(SQLTOOL_FILENAME) ] && echo ok || echo missing )
 
 run-with-db: start-db re-run-with-db
@@ -23,11 +26,22 @@ start-db-ui: start-db
 start-db: check-sql-tool-file
 	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.server.Server --database.0 file:slipstreamdb --dbname.0 slipstream &
 
-check-sql-tool-file:
-ifneq ("$(SQLTOOL_FILE_PRESENT)","ok")
-	$(info To create the ${SQLTOOL_FILENAME} execute following lines:)
+stop-db:
+ifeq ("$(SQLTOOL_FILE_PRESENT)","ok")
+	java -jar ${SQLTOOL_FILENAME} --sql 'SHUTDOWN;' slipstream
+else
+	$(info sqltool.jar is not found at ${SQLTOOL_FILENAME})
+	$(info hsqldb tools can be istalled following the instruction here:)
+	$(info   - http://hsqldb.org/doc/guide/ch03.html)
 	$(info )
-	$(info cat << EOF > ${SQLTOOL_FILENAME})
+	$(error File ${SQLTOOL_FILENAME} missing...)
+endif
+
+check-sql-tool-file:
+ifneq ("$(SQLTOOL_RC_FILE_PRESENT)","ok")
+	$(info To create the ${SQLTOOL_RC_FILENAME} execute following lines:)
+	$(info )
+	$(info cat << EOF > ${SQLTOOL_RC_FILENAME})
 	$(info urlid slipstream)
 	$(info url jdbc:hsqldb:hsql://localhost/slipstream)
 	$(info username SA)
@@ -36,4 +50,9 @@ ifneq ("$(SQLTOOL_FILE_PRESENT)","ok")
 	$(info )
 	$(error File $(DB_SQLITE_FILENAME) missing...)
 endif
+
+list: goals
+
+goals:
+	@cat Makefile | egrep "^[[:alpha:]-]+:"
 

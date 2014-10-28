@@ -91,13 +91,13 @@ public class ProcessUtils {
 		while ((line = stdOutErr.readLine()) != null) {
 			outputBuf.append(line);
 			outputBuf.append("\n");
-			getLogger().info(line);
+			getLogger().fine(line);
 		}
 
 		while ((line = stdErrReader.readLine()) != null) {
 			errBuf.append(line);
 			errBuf.append("\n");
-			getLogger().info(line);
+			getLogger().fine(line);
 		}
 
 		// Check for failure

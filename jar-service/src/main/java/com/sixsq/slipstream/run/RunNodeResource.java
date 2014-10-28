@@ -180,6 +180,7 @@ public class RunNodeResource extends RunBaseResource {
 	private void deleteNodeInstancesInTransaction(Representation entity) throws Exception {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
+
 		Run run = Run.loadFromUuid(getUuid(), em);
 		try {
 			validateRun(run);
@@ -191,10 +192,20 @@ public class RunNodeResource extends RunBaseResource {
 				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
 						"Provide list of node instance IDs to be removed from the Run.");
 			} else {
-				String cloudServiceName = run.getCloudServiceNameForNode(nodename);
+				String cloudServiceName = "";
+				try{
+					cloudServiceName = run.getCloudServiceNameForNode(nodename);
+				} catch (NullPointerException ex) {
+					throwClientBadRequest("Invalid nodename: " + nodename);
+				}
 				List<String> instanceIds = Arrays.asList(ids.split("\\s*,\\s*"));
 				for (String _id : instanceIds) {
-					String instanceName = getNodeInstanceName(Integer.parseInt(_id));
+					String instanceName = "";
+					try {
+						instanceName = getNodeInstanceName(Integer.parseInt(_id));
+					} catch (NumberFormatException ex) {
+						throwClientBadRequest("Invalid instance name: " + _id);
+					}
 					setRemovingNodeInstance(run, instanceName);
 					run.removeNodeInstanceName(instanceName, cloudServiceName);
 				}
@@ -303,7 +314,7 @@ public class RunNodeResource extends RunBaseResource {
 		if (currentState != States.Ready) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					"Can't add/remove instances. Incompatible state "
-							+ currentState.toString() + ". Allowed state "
+							+ currentState.toString() + ". This can only be performed on state "
 							+ States.Ready.toString());
 		}
 	}

@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,9 +52,9 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 
 /**
  * Unit test see:
- * 
+ *
  * @see ModuleTest
- * 
+ *
  */
 @SuppressWarnings("serial")
 @Entity
@@ -177,7 +177,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	@Element(required = false)
 	@Embedded
-	private Authz authz = new Authz("Unknown", this);
+	private Authz authz = new Authz("", this);
 
 	@Transient
 	private Module parent = null;
@@ -249,13 +249,13 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	protected void setParameters(Map<String, ModuleParameter> parameters) {
 		this.parameters = parameters;
 	}
-	
+
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = ModuleParameter.class)
 	public Map<String, ModuleParameter> getParameters() {
 		return parameters;
 	}
-	
+
 	public Module(String name, ModuleCategory category)
 			throws ValidationException {
 
@@ -367,20 +367,24 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	}
 
 	public void setModuleReference(Module reference) throws ValidationException {
-		if (getResourceUri().equals(reference.getResourceUri())) {
-			throw new ValidationException("Module reference cannot be itself");
-		}
-		this.moduleReferenceUri = reference.getResourceUri();
+		setModuleReference(reference.getResourceUri());
 	}
 
-	public void setModuleReference(String moduleReferenceUri) {
+	public void setModuleReference(String moduleReferenceUri) throws ValidationException {
+		if (moduleReferenceUri != null){
+			String moduleReferenceUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(moduleReferenceUri);
+			String moduleUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(getResourceUri());
+			if (moduleUriVersionLess.equals(moduleReferenceUriVersionLess)) {
+				throw new ValidationException("Module reference cannot be itself");
+			}
+		}
 		this.moduleReferenceUri = moduleReferenceUri;
 	}
 
 	/**
 	 * A virtual module is a module that doesn't require to be explicitly built,
 	 * since it only defines runtime behavior
-	 * 
+	 *
 	 * @return true if the module is virtual, false if not
 	 */
 	public boolean isVirtual() {
