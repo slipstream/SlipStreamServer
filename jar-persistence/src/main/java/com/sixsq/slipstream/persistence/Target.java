@@ -4,7 +4,7 @@ package com.sixsq.slipstream.persistence;
  * +=================================================================+
  * SlipStream Server (WAR)
  * =====
- * Copyright (C) 2013 SixSq Sarl (sixsq.com)
+ * Copyright (C) 2014 SixSq Sarl (sixsq.com)
  * =====
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,6 @@ public class Target implements Serializable {
 	@Column(length = 65536)
 	private String script = "";
 
-	@Attribute(required = false)
-	private Boolean runInBackground = false;
-
 	@Attribute
 	private String name;
 
@@ -68,12 +65,6 @@ public class Target implements Serializable {
 	public Target(String name, String script) {
 		this(name);
 		this.script = script;
-	}
-
-	public Target(String name, String script, Boolean runInBackground) {
-		this.name = name;
-		this.script = script;
-		this.runInBackground = runInBackground;
 	}
 
 	public ImageModule getModule() {
@@ -100,16 +91,9 @@ public class Target implements Serializable {
 		this.script = script;
 	}
 
-	public Boolean getRunInBackground() {
-		return runInBackground;
-	}
-
-	public void setRunInBackground(Boolean runInBackground) {
-		this.runInBackground = runInBackground;
-	}
 
 	public Target copy() {
-		return new Target(getName(), getScript(), getRunInBackground());
+		return new Target(getName(), getScript());
 	}
 
 }
