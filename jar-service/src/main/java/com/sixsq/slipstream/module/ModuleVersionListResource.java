@@ -50,6 +50,23 @@ public class ModuleVersionListResource extends BaseResource {
 		}
 	}
 
+	@Override
+	protected void authorize() {
+
+		Module m = Module.loadLatest(resourceUri);
+
+		if (getUser().isSuper()) {
+			return;
+		}
+
+		if (m.getAuthz().canGet(getUser())) {
+			return;
+
+		}
+
+		throwClientForbiddenError("Not allowed to access: " + resourceUri);
+	}
+
 	@Get("txt")
 	public Representation toTxt() {
 
