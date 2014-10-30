@@ -71,6 +71,13 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	public final static int DEFAULT_VERSION = -1;
 
+	private static void bindModuleToAuthz(Module module) {
+		if (module != null) {
+			// set authz to bind them
+			module.getAuthz().setGuarded(module);
+		}
+	}
+
 	private static Module loadByUri(String uri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Module m = em.find(Module.class, uri);
@@ -79,6 +86,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		if (latestVersion != null && m != null) {
 			m.setIsLatestVersion(latestVersion.version);
 		}
+		bindModuleToAuthz(m);
 		return m;
 	}
 
@@ -95,6 +103,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 			module = null;
 		}
 		em.close();
+		bindModuleToAuthz(module);
 		return module;
 	}
 
@@ -116,10 +125,6 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		String resourceUri = uri;
 		int version = ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
 		Module module = (version == DEFAULT_VERSION ? loadLatest(resourceUri) : loadByUri(resourceUri));
-		if (module != null) {
-			// set authz to bind them
-			module.getAuthz().setGuarded(module);
-		}
 		return module;
 	}
 
