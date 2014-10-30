@@ -10,3 +10,4 @@ bin
 .project
 *.pem
 *.p12
+hsql*
