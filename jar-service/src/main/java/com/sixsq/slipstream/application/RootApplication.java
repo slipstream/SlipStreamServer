@@ -100,7 +100,7 @@ public class RootApplication extends Application {
 
 		// Load the configuration early
 		Configuration.getInstance();
-		
+
 		Collector.start();
 		GarbageCollector.start();
 
@@ -352,7 +352,18 @@ public class RootApplication extends Application {
 	}
 
 	private void attachDocumentation(RootRouter router) {
-		router.attach("/documentation", DocumentationResource.class);
+		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
+		basicAuthenticator.setEnroler(new SuperEnroler(router.getApplication()));
+
+		Authenticator cookieAuthenticator = new CookieAuthenticator(getContext());
+
+		cookieAuthenticator.setOptional(true);
+		cookieAuthenticator.setNext(basicAuthenticator);
+
+		basicAuthenticator.setOptional(true);
+		basicAuthenticator.setNext(DocumentationResource.class);
+
+		router.attach("/documentation", cookieAuthenticator);
 	}
 
 	private void attachWelcome(RootRouter router) {
