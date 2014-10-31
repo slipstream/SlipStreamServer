@@ -53,6 +53,7 @@ import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public class CommonStatusService extends StatusService {
 
@@ -131,6 +132,7 @@ public class CommonStatusService extends StatusService {
 
 		if (user != null) {
 			Document doc = SerializationUtil.toXmlDocument(user);
+			XmlUtil.addUser(doc, user);
 			metadata = SerializationUtil.documentToString(doc);
 		}
 
