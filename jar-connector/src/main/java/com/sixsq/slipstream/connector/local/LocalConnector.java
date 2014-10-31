@@ -70,8 +70,7 @@ public class LocalConnector extends ConnectorBase {
 	@Override
 	public Map<String, ServiceConfigurationParameter> getServiceConfigurationParametersTemplate()
 			throws ValidationException {
-		return new LocalSystemConfigurationParametersFactory()
-				.getParameters();
+		return new LocalSystemConfigurationParametersFactory(getConnectorInstanceName()).getParameters();
 	}
 
 	public void setCredentials(Credentials credentials) {
@@ -214,13 +213,12 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	@Override
-	public Map<String, UserParameter> getUserParametersTemplate()
-			throws ValidationException{
-		return new LocalUserParametersFactory().getParameters();
+	public Map<String, UserParameter> getUserParametersTemplate() throws ValidationException {
+		return new LocalUserParametersFactory(getConnectorInstanceName()).getParameters();
 	}
 
 	@Override
 	protected String constructKey(String key) throws ValidationException {
-		return new LocalUserParametersFactory().constructKey(key);
+		return new LocalUserParametersFactory(getConnectorInstanceName()).constructKey(key);
 	}
 }

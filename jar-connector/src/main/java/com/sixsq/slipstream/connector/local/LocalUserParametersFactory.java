@@ -29,8 +29,13 @@ public class LocalUserParametersFactory extends UserParametersFactoryBase {
 	public static final String KEY_PARAMETER_NAME = "username";
 	public static final String SECRET_PARAMETER_NAME = "password";
 
+	// For unittests only
 	public LocalUserParametersFactory() throws ValidationException {
 		super(LocalConnector.CLOUD_SERVICE_NAME);
+	}
+
+	public LocalUserParametersFactory(String connectorInstanceName) throws ValidationException {
+		super(connectorInstanceName);
 	}
 
 	@Override
