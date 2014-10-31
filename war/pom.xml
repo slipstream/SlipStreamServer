@@ -224,6 +224,18 @@
           </properties>
         </configuration>
 
+<!-- 
+  Adding these dependencies will cause the connector loading
+  to fail when running the server via jetty:run-war.  If you 
+  want more than the local connector, then add them in the 
+  module dependencies above.
+
+  This problem is apparently due to a difference in the class
+  loading scheme between the plugin and a deployment in a 
+  standalone jetty container.
+-->
+
+<!--
         <dependencies>
           <dependency>
               <groupId>com.sixsq.slipstream</groupId>
@@ -250,7 +262,7 @@
           </dependency>
 
         </dependencies>
-
+-->
       </plugin>
 
       <plugin>
