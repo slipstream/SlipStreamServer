@@ -59,6 +59,14 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	abstract protected Map<String, String> getConnectorSpecificUserParams(User user)
 			throws ConfigurationException, ValidationException;
 
+	/**
+	 * The items in the CLI parameters/options Map are interpreted and processed as follows.
+	 * - item <String, String> indicates a parameter.  E.g., --endpoint <URL>.
+	 *   When provided to the CLI, the values of the items will be wrapped into
+	 *   single quotes. E.g., --endpoint 'https://exmpale.com'.  This allows empty
+	 *   strings for values as well.
+	 * - item <String, null> indicates an option. E.g, --public-ip.
+	 */
 	abstract protected Map<String, String> getConnectorSpecificLaunchParams(Run run, User user)
 			throws ConfigurationException, ValidationException;
 
@@ -108,7 +116,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 			} catch (Exception ex) { }
 			throw e;
 		} finally {
-			deleteTempSshKeyFile();
+			cleanupAfterLaunch();
 		}
 
 		String[] instanceData = parseRunInstanceResult(result);
@@ -134,6 +142,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw (new SlipStreamInternalException(e));
+		} finally {
+			cleanupAfterDescribeInstances();
 		}
 
 		return parseDescribeInstanceResult(result);
@@ -152,10 +162,10 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		StringBuilder instances = new StringBuilder();
         for (String id : instanceIds) {
             instances.append(" --instance-id ")
-                     .append(wrapInSingleQuotes(id));
+            	.append(wrapInSingleQuotes(id.trim()));
         }
 
-		log.info(getConnectorInstanceName() + ". Terminating all instances.");
+		log.info(getConnectorInstanceName() + ". Terminating all instances on run " + run.getUuid());
 
 		String command = getCommandTerminateInstances() +
 				createCliParameters(getUserParams(user)) +
@@ -165,16 +175,39 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		try {
 			ProcessUtils.execGetOutput(commands, getCommonEnvironment(user));
 		} catch (SlipStreamClientException e) {
-			log.info(getConnectorInstanceName() + ". Failed to terminate instances");
+			log.info(getConnectorInstanceName() + ". Failed to terminate instances on run " + run.getUuid());
 		} catch (IOException e) {
-			log.info(getConnectorInstanceName() + ". IO error while terminating instances");
+			log.info(getConnectorInstanceName() + ". IO error while terminating instances on run " + run.getUuid());
+		} finally {
+			cleanupAfterTerminate();
 		}
+	}
+
+	private void cleanupAfterLaunch() {
+		deleteTempSshKeyFile();
+		connectorCleanupAfterCliCall();
+	}
+
+	private void cleanupAfterDescribeInstances() {
+		connectorCleanupAfterCliCall();
+	}
+
+	private void cleanupAfterTerminate() {
+		connectorCleanupAfterCliCall();
+	}
+
+	protected void connectorCleanupAfterCliCall() {
+		//
 	}
 
 	private String createCliParameters(Map<String, String> params) {
 		String cliParams = "";
 		for (Map.Entry<String, String> param: params.entrySet()) {
-			cliParams += "--" + param.getKey() + " " + wrapInSingleQuotes(param.getValue()) + " ";
+			String value = param.getValue();
+			cliParams += "--" + param.getKey() + " ";
+			if (value != null) {
+				cliParams += wrapInSingleQuotes(value) + " ";
+			}
 		}
 		return cliParams;
 	}
@@ -227,15 +260,13 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return environment;
 	}
 
-
 	private Map<String, String> getContextualizationEnvironment(Run run, User user)
 			throws ConfigurationException, ValidationException {
 
 		Configuration configuration = Configuration.getInstance();
 		String username = user.getName();
 		String verbosityLevel = getVerbosityLevel(user);
-
-		String nodeInstanceName = (isInOrchestrationContext(run)) ? getOrchestratorName(run) : Run.MACHINE_NAME;
+		String nodeInstanceName = getInstanceName(run);
 
 		Map<String,String> environment = new HashMap<String,String>();
 
