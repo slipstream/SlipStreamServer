@@ -380,12 +380,12 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	protected void validateCredentials(User user) throws ValidationException {
 		String errorMessageLastPart = getErrorMessageLastPart(user);
 
-		if (getKey(user) == null) {
+		if (getKey(user) == null || getKey(user).isEmpty()) {
 			throw (new ValidationException(
 					"Cloud Username cannot be empty"
 							+ errorMessageLastPart));
 		}
-		if (getSecret(user) == null) {
+		if (getSecret(user) == null || getKey(user).isEmpty()) {
 			throw (new ValidationException(
 					"Cloud Password cannot be empty"
 							+ errorMessageLastPart));
