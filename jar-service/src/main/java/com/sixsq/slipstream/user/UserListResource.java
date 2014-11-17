@@ -35,10 +35,16 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class UserListResource extends BaseResource {
 
-	@Get("txt")
+	@Get("csv")
 	public Representation toTxt() {
-		String viewList = serializedUserViewList(User.viewList());
-		return new StringRepresentation(viewList);
+		String result = "firstname, lastname, email, organisation, activesince, lastonine, lastexecute\n";
+		for (UserView u : User.viewList()) {
+			result += String.format("%s, %s, %s, %s, %s, %s, %s\n", u.firstName, u.lastName, u.email, u.organization,
+					u.activeSince, u.lastOnline, u.lastExecute);
+		}
+		StringRepresentation response = new StringRepresentation(result);
+		response.setMediaType(MediaType.TEXT_CSV);
+		return response;
 	}
 
 	@Get("xml")
@@ -46,7 +52,7 @@ public class UserListResource extends BaseResource {
 		String viewList = serializedUserViewList(User.viewList());
 		return new StringRepresentation(viewList, MediaType.APPLICATION_XML);
 	}
-	
+
 	private String serializedUserViewList(List<UserView> viewList) {
 		UserViewList userViewList = new UserViewList(viewList);
 		return SerializationUtil.toXmlString(userViewList);
@@ -57,9 +63,8 @@ public class UserListResource extends BaseResource {
 
 		UserViewList userViewList = new UserViewList(User.viewList());
 
-		String html = HtmlUtil.toHtml(userViewList,
-				getPageRepresentation(), getUser());
-		
+		String html = HtmlUtil.toHtml(userViewList, getPageRepresentation(), getUser());
+
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 

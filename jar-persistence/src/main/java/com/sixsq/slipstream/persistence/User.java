@@ -60,7 +60,7 @@ import com.sixsq.slipstream.user.UserView;
 @Entity(name="User")
 @NamedQueries({
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
-		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline, u.organization) FROM User u") })
+		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
 
 	public static final String REQUEST_KEY = "authenticated_user";
@@ -108,6 +108,14 @@ public class User extends Parameterized<User, UserParameter> {
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastOnline = null;
+
+	@Attribute(required = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date lastExecute = null;
+
+	@Attribute(required = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date activeSince = null;
 
 	@SuppressWarnings("unused")
 	private User() {
@@ -299,6 +307,9 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public void setState(State state) {
 		this.state = state;
+		if(state == State.ACTIVE) {
+			activeSince = new Date();
+		}
 	}
 
 	public String getDefaultCloudService() {
@@ -466,6 +477,10 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public void setLastOnline() {
 		this.lastOnline = new Date();
+	}
+
+	public void setLastExecute() {
+		this.lastExecute = new Date();
 	}
 
 	public int getTimeout() {
