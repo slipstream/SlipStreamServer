@@ -24,6 +24,8 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+
 import com.sixsq.slipstream.persistence.Parameter;
 
 public class Passwords {
