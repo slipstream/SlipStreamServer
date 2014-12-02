@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +45,8 @@ import org.restlet.data.Method;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
@@ -62,8 +66,11 @@ import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.run.RunResource;
 import com.sixsq.slipstream.run.RuntimeParameterResource;
 import com.sixsq.slipstream.user.UserResource;
+import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
+import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public class CookieTest extends ResourceTestBase {
 
@@ -228,34 +235,35 @@ public class CookieTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void checkStdCookieCanGetSetUserParam()
-			throws ConfigurationException, ValidationException {
+	public void checkStdCookieCanGetSetUserParam() throws ConfigurationException, ValidationException, SAXException,
+			ParserConfigurationException, IOException {
 
 		Response response = getAndPostUser(cookieStd);
 		assertThat(response.getStatus(), is(Status.SUCCESS_ACCEPTED));
 	}
 
 	@Test
-	public void ensureMachineCookieCanotSetUserParam()
-			throws ConfigurationException, ValidationException {
+	public void ensureMachineCookieCanotSetUserParam() throws ConfigurationException, ValidationException,
+			SAXException, ParserConfigurationException, IOException {
 
 		Response response = getAndPostUser(cookieRunA);
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 	}
 
-	private Response getAndPostUser(Cookie cookie)
-			throws ConfigurationException, ValidationException {
+	private Response getAndPostUser(Cookie cookie) throws ConfigurationException, ValidationException, SAXException,
+			ParserConfigurationException, IOException {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("user", user.getName());
 
-		Request request = createRequest(attributes, Method.GET, null, null,
-				cookie);
+		Request request = createRequest(attributes, Method.GET, null, null, cookie);
 		request.setClientInfo(getClientInfo());
 		Response response = executeRequest(request, new UserResource());
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		String value = response.getEntityAsText();
+		Document XmlDocument = XmlUtil.stringToDom(response.getEntityAsText());
+		XmlDocument.getDocumentElement().setAttribute("password", UserTest.PASSWORD);
+		String value = SerializationUtil.documentToString(XmlDocument);
 
 		Representation entity = new StringRepresentation(value);
 		entity.setMediaType(MediaType.APPLICATION_XML);
