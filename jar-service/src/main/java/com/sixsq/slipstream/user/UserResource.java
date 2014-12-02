@@ -39,6 +39,7 @@ import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactory;
@@ -301,7 +302,13 @@ public class UserResource extends ParameterizedResource<User> {
 		try {
 			user.validate();
 		} catch (ValidationException ex) {
-			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex);
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex.getMessage());
+		}
+
+		try {
+			User.validateMinimumInfo(user);
+		} catch (InvalidElementException ex) {
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex.getMessage());
 		}
 
 		if (!getTargetParameterizeUri().equals(user.getName())
