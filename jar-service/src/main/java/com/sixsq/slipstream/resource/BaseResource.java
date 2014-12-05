@@ -27,6 +27,7 @@ import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
+import org.restlet.data.Parameter;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -274,5 +275,39 @@ public abstract class BaseResource extends ServerResource {
 
 	protected void logTimeDiff(String msg, long before) {
 		logTimeDiff(msg, before, System.currentTimeMillis());
+	}
+
+	protected int getOffset() {
+		Parameter offsetAttr = getRequest().getResourceRef().getQueryAsForm().getFirst("offset");
+
+		int offset = 0;
+		if (offsetAttr != null) {
+			try {
+				offset = Integer.parseInt(offsetAttr.getValue());
+			} catch (NumberFormatException e) {
+				throwClientBadRequest("Invalid format for the offset attribute");
+			}
+			if (offset < 0) {
+				throwClientBadRequest("The value for the offset attribute should be positive");
+			}
+		}
+		return offset;
+	}
+
+	protected int getLimit() {
+		Parameter limitAttr = getRequest().getResourceRef().getQueryAsForm().getFirst("limit");
+
+		int limit = 20;
+		if (limitAttr != null) {
+			try {
+				limit = Integer.parseInt(limitAttr.getValue());
+			} catch (NumberFormatException e) {
+				throwClientBadRequest("Invalid format for the limit attribute");
+			}
+			if (limit < 1 || limit > 20) {
+				throwClientBadRequest("The value for the limit attribute should be between 1 and 20");
+			}
+		}
+		return limit;
 	}
 }

@@ -45,6 +45,7 @@ import org.simpleframework.xml.Attribute;
 @Entity
 @NamedQueries({
 			@NamedQuery(name = "byUser", query = "SELECT v FROM Vm v WHERE v.user_ = :user"),
+			@NamedQuery(name = "byUserCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user"),
 			@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on', 'active', 'Active') AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
 			@NamedQuery(name = "removeByUser", query = "DELETE Vm WHERE user_ = :user AND cloud = :cloud") })
 public class Vm {
@@ -85,14 +86,33 @@ public class Vm {
 		measurement = new Date();
 	}
 
-	@SuppressWarnings("unchecked")
 	public static List<Vm> list(String user) {
+		return list(user, null, null);
+	}
+
+	public static List<Vm> list(String user, Integer offset, Integer limit) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("byUser");
+		if (offset != null) {
+			q.setFirstResult(offset);
+		}
+		if (limit != null) {
+			q.setMaxResults(limit);
+		}
 		q.setParameter("user", user);
+		@SuppressWarnings("unchecked")
 		List<Vm> vms = q.getResultList();
 		em.close();
 		return vms;
+	}
+
+	public static int listCount(String user) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = em.createNamedQuery("byUserCount");
+		q.setParameter("user", user);
+		long count = (long)(Long) q.getSingleResult();
+		em.close();
+		return (int)count;
 	}
 
 	public static int update(List<Vm> newVms, String user, String cloud) {
