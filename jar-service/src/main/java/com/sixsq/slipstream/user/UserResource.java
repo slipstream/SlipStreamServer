@@ -9,9 +9,9 @@ package com.sixsq.slipstream.user;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,10 @@ package com.sixsq.slipstream.user;
  */
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Map.Entry;
 
+import org.restlet.data.Cookie;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -32,13 +34,17 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
@@ -55,6 +61,7 @@ import com.sixsq.slipstream.util.XmlUtil;
  */
 public class UserResource extends ParameterizedResource<User> {
 
+	public static final String USERNAME_URI_ATTRIBUTE = "user";
 	private static final String resourceRoot = User.RESOURCE_URL_PREFIX;
 
 	@Get("txt")
@@ -84,6 +91,7 @@ public class UserResource extends ParameterizedResource<User> {
 
 		try {
 			mergeCloudSystemParameters(user);
+			mergeCloudConnectorParameters(user);
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -93,10 +101,15 @@ public class UserResource extends ParameterizedResource<User> {
 		return super.toXml();
 	}
 
+	@Override
+	protected boolean isMachineAllowedToAccessThisResource(){
+		return true;
+	}
+
 	private void mergeCloudSystemParameters(User user)
 			throws ConfigurationException, ValidationException {
-		String cloudServiceName = (String) getRequest().getAttributes().get(
-				RuntimeParameter.CLOUD_SERVICE_NAME);
+		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
+		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
 		if (cloudServiceName != null) {
 			for (Entry<String, Parameter<ServiceConfiguration>> p : Configuration
 					.getInstance().getParameters()
@@ -106,6 +119,35 @@ public class UserResource extends ParameterizedResource<User> {
 			}
 		}
 		mergePublicKeyParameter(user);
+	}
+
+	private void mergeCloudConnectorParameters(User user) throws ConfigurationException, ValidationException {
+		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
+		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
+		if (cloudServiceName != null && CookieUtils.isMachine(cookie) == true) {
+			Connector connector = ConnectorFactory.getConnector(cloudServiceName);
+			connector.setExtraUserParameters(user);
+		}
+	}
+
+	@Override
+	protected User prepareForSerialization() throws ConfigurationException, ValidationException {
+		User user = getParameterized();
+
+		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
+		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
+		if (cloudServiceName != null && CookieUtils.isMachine(cookie) == true) {
+			Map<String, Parameter<User>> params = user.getParameters(ParameterCategory.General.name());
+			params.putAll(user.getParameters(cloudServiceName));
+
+			Map<String, UserParameter> userParameters = user.getParameters();
+			userParameters.clear();
+			for (Map.Entry<String,Parameter<User>> entry : params.entrySet()) {
+				userParameters.put(entry.getKey(), (UserParameter)entry.getValue());
+			}
+		}
+
+		return user;
 	}
 
 	private void mergePublicKeyParameter(User user)
@@ -137,7 +179,7 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected String extractTargetUriFromRequest() {
-		return (String) getRequest().getAttributes().get("user");
+		return (String) getRequest().getAttributes().get(USERNAME_URI_ATTRIBUTE);
 	}
 
 	@Override
@@ -156,9 +198,11 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected void authorize() {
-		setCanPut(!newTemplateResource()
+		boolean isMachine = isMachine();
+
+		setCanPut(!newTemplateResource() && !isMachine
 				&& (getUser().isSuper() || !isExisting() || (newInQuery() && !isExisting()) || isItSelf()));
-		setCanDelete(getUser().isSuper() || isItSelf());
+		setCanDelete((getUser().isSuper() || isItSelf()) && !isMachine);
 		setCanGet(getUser().isSuper() || newTemplateResource() || isItSelf());
 	}
 
@@ -308,7 +352,13 @@ public class UserResource extends ParameterizedResource<User> {
 		try {
 			user.validate();
 		} catch (ValidationException ex) {
-			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex);
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex.getMessage());
+		}
+
+		try {
+			User.validateMinimumInfo(user);
+		} catch (InvalidElementException ex) {
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex.getMessage());
 		}
 
 		if (!getTargetParameterizeUri().equals(user.getName())
@@ -325,6 +375,10 @@ public class UserResource extends ParameterizedResource<User> {
 
 		user.store();
 
+		if (!isExisting()) {
+			setParameterized(user);
+		}
+
 		setResponseForPut();
 	}
 
@@ -332,8 +386,7 @@ public class UserResource extends ParameterizedResource<User> {
 		if (isExisting()) {
 			setResponseOkAndViewLocation(getParameterized().getResourceUri());
 		} else {
-			setResponseCreatedAndViewLocation(getParameterized()
-					.getResourceUri());
+			setResponseCreatedAndViewLocation(getParameterized().getResourceUri());
 		}
 	}
 

@@ -9,9 +9,9 @@ package com.sixsq.slipstream.application;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,15 +31,18 @@ import java.util.List;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.ClientInfo;
+import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Preference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
+import org.restlet.security.Verifier;
 import org.restlet.service.StatusService;
 import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -48,9 +51,9 @@ import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public class CommonStatusService extends StatusService {
 
@@ -69,12 +72,14 @@ public class CommonStatusService extends StatusService {
 		Representation representation = null;
 
 		User user = null;
-		try {
-			user = RequestUtil.getUserFromRequest(request);
-		} catch (ConfigurationException e) {
-			Util.throwConfigurationException(e);
-		} catch (ValidationException e) {
-			Util.throwClientValidationError(e.getMessage());
+		Cookie cookie = CookieUtils.extractAuthnCookie(request);
+		if (CookieUtils.verifyAuthnCookie(cookie) == Verifier.RESULT_VALID) {
+			String username = CookieUtils.getCookieUsername(cookie);
+			try {
+				user = User.loadByName(username);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(request);
@@ -127,6 +132,7 @@ public class CommonStatusService extends StatusService {
 
 		if (user != null) {
 			Document doc = SerializationUtil.toXmlDocument(user);
+			XmlUtil.addUser(doc, user);
 			metadata = SerializationUtil.documentToString(doc);
 		}
 

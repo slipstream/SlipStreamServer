@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,9 +38,9 @@ import org.simpleframework.xml.Attribute;
 
 /**
  * Unit test:
- * 
+ *
  * @see VmTest
- * 
+ *
  */
 @Entity
 @NamedQueries({
@@ -54,7 +54,7 @@ public class Vm {
 	@Id
 	@GeneratedValue
 	Long id;
-	
+
 	@Attribute
 	private String cloud;
 
@@ -69,10 +69,10 @@ public class Vm {
 
 	@Attribute
 	private Date measurement;
-	
+
 	@Attribute
 	private String runUuid;
-	
+
 	@SuppressWarnings("unused")
 	private Vm() {
 	}
@@ -113,18 +113,18 @@ public class Vm {
 
 	public static Map<String, Integer> usage(String user) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		
+
 		List<?> res = em.createNamedQuery("usageByUser")
 			.setParameter("user", user)
 			.getResultList();
 		em.close();
-		
+
 		Map<String, Integer> usageData = new HashMap<String, Integer>(res.size());
 		for (Object object : res) {
-			usageData.put((String)((Object[])object)[0], 
+			usageData.put((String)((Object[])object)[0],
 				      ((Long)((Object[])object)[1]).intValue());
 		}
-		
+
 		return usageData;
 	}
 
@@ -155,7 +155,7 @@ public class Vm {
 	public void setRunUuid(String runUuid) {
 		this.runUuid = runUuid;
 	}
-	
+
 	public static Map<String, Vm> toMap(List<Vm> vms) {
 		Map<String, Vm> map = new HashMap<String, Vm>();
 		for(Vm v : vms) {

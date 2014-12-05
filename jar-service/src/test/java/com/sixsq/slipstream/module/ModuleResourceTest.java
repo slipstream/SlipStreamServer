@@ -9,9 +9,9 @@ package com.sixsq.slipstream.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -80,13 +80,13 @@ public class ModuleResourceTest extends ResourceTestBase {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		try {
-			user.remove();			
-		} catch(Exception ex) {
+			user.remove();
+		} catch (Exception ex) {
 			// ok
 		}
 		try {
 			anotherUser.remove();
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			// ok
 		}
 	}
@@ -103,11 +103,11 @@ public class ModuleResourceTest extends ResourceTestBase {
 		Response response = executeRequest(request);
 
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
-		
+
 		String externalFormatXml = response.getEntityAsText();
 		String internalFormatXml = XmlUtil.denormalize(externalFormatXml);
-		Module project = (Module) SerializationUtil.fromXml(
-				internalFormatXml, ProjectModule.class);
+		Module project = (Module) SerializationUtil.fromXml(internalFormatXml,
+				ProjectModule.class);
 
 		assertEquals(projectName, project.getName());
 
@@ -140,7 +140,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 	}
 
 	private Response putModuleAsForm(String projectName, String description)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		ModuleCategory category = ModuleCategory.Project;
 		Form form = createForm(projectName, category);
 
@@ -150,6 +150,25 @@ public class ModuleResourceTest extends ResourceTestBase {
 				form.getWebRepresentation(), user);
 
 		return executeRequest(request);
+	}
+
+	@Test
+	public void putExistingModuleWithCircularReference() throws ValidationException {
+		String moduleName = "examples/imageCircularRef";
+
+		Module image = new ImageModule(moduleName);
+		image.setAuthz(new Authz(user.getName(), image));
+		image.store();
+
+		ModuleCategory category = ModuleCategory.Image;
+		Form form = createForm(moduleName, category);
+		form.add("moduleReference", moduleName);
+		Request request = createPutRequest(moduleName, form.getWebRepresentation(), user);
+		Response response = executeRequest(request);
+
+		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
+
+		image.remove();
 	}
 
 	@Test
@@ -167,8 +186,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void putNewModuleOnExistingModule()
-			throws ValidationException {
+	public void putNewModuleOnExistingModule() throws ValidationException {
 		String projectName = "existingProject";
 		Module project = createAndStoreProject(projectName);
 		ModuleCategory category = ModuleCategory.Project;
@@ -188,7 +206,8 @@ public class ModuleResourceTest extends ResourceTestBase {
 		ModuleCategory category = ModuleCategory.Project;
 		Form form = createForm(projectName, category);
 		Request request = createPutRequest("existingProject",
-				form.getWebRepresentation(), user, TEST_REQUEST_NAME + "?new=true");
+				form.getWebRepresentation(), user, TEST_REQUEST_NAME
+						+ "?new=true");
 		Response response = executeRequest(request);
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 		project.remove();
@@ -236,22 +255,24 @@ public class ModuleResourceTest extends ResourceTestBase {
 		Module project = new ProjectModule(projectName);
 		String content = SerializationUtil.toXmlString(project);
 
-		StringRepresentation stringRepresentation = new StringRepresentation(content, MediaType.APPLICATION_XML);
-		Request request = createPutRequest(projectName,
-				stringRepresentation, user);
+		StringRepresentation stringRepresentation = new StringRepresentation(
+				content, MediaType.APPLICATION_XML);
+		Request request = createPutRequest(projectName, stringRepresentation,
+				user);
 
 		Response response = executeRequest(request);
 
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
-		Module persistedProject = (Module) ProjectModule
-				.load("module/" + projectName);
+		Module persistedProject = (Module) ProjectModule.load("module/"
+				+ projectName);
 		assertEquals(projectName, persistedProject.getName());
 
 		persistedProject.remove();
 	}
 
 	@Test
-	public void getNewProjectToRetrieveTemplate() throws ConfigurationException {
+	public void getNewProjectToRetrieveTemplate()
+			throws ConfigurationException, ValidationException {
 
 		Map<String, Object> attributes = createAttributes("category",
 				ModuleCategory.Project.toString());
@@ -263,7 +284,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 
 	@Test
 	public void getNewMachineImageToRetrieveTemplate()
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 
 		Map<String, Object> attributes = createAttributes("category",
 				ModuleCategory.Image.toString());
@@ -274,7 +295,8 @@ public class ModuleResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void invalideCategory() throws ConfigurationException {
+	public void invalideCategory() throws ConfigurationException,
+			ValidationException {
 
 		Map<String, Object> attributes = createAttributes("category",
 				"UnknownCategory");
@@ -361,10 +383,11 @@ public class ModuleResourceTest extends ResourceTestBase {
 	}
 
 	private Request createGetRequest(String module, User user,
-			Map<String, Object> attributes) throws ConfigurationException {
+			Map<String, Object> attributes) throws ConfigurationException,
+			ValidationException {
 		attributes.putAll(createModuleAttributes(module));
 		Request request = createGetRequest(attributes);
-		addUserToRequest(user.getName(), request);
+		addUserToRequest(user, request);
 		return request;
 	}
 
@@ -382,7 +405,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 	}
 
 	protected Request createDeleteRequest(String module)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		return createDeleteRequest(createRequestAttributes(module), user);
 	}
 

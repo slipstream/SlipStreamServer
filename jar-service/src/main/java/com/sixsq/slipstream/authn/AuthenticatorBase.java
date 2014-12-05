@@ -5,6 +5,7 @@ import javax.persistence.RollbackException;
 
 import org.hibernate.StaleObjectStateException;
 import org.restlet.Context;
+import org.restlet.Request;
 import org.restlet.data.Cookie;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
@@ -24,7 +25,7 @@ public abstract class AuthenticatorBase extends Authenticator {
 	protected void setLastOnline(User user) {
 		user.setLastOnline();
 		try {
-			user.store();
+			user = user.store();
 		} catch (StaleObjectStateException e) {
 		} catch (RollbackException e) {
 		} catch (OptimisticLockException e) {
@@ -33,7 +34,7 @@ public abstract class AuthenticatorBase extends Authenticator {
 
 	protected void setLastOnline(Cookie cookie) {
 
-		com.sixsq.slipstream.persistence.User user = null;
+		User user = null;
 
 		try {
 			user = CookieUtils.getCookieUser(cookie);
@@ -50,5 +51,9 @@ public abstract class AuthenticatorBase extends Authenticator {
 
 	protected boolean isActive(User user) {
 		return State.ACTIVE == user.getState();
+	}
+
+	static public void setUserInRequest(User user, Request request) {
+		request.getAttributes().put(User.REQUEST_KEY, user);
 	}
 }

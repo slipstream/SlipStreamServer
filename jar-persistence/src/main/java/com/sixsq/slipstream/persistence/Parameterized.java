@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +45,7 @@ import flexjson.JSON;
 //
 // Type S = the subclass of Parameterized and
 // Type T = the corresponding subclass of Parameter
-// 
+//
 // For example, use <User, UserParameter> for the user parameter
 // mapping.
 //
@@ -53,29 +53,38 @@ import flexjson.JSON;
 @SuppressWarnings("serial")
 public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata {
 
-	@ElementMap(name = "parameters", required = false, data = true, valueType = Parameter.class)
 	@MapKey(name = "name")
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
 	protected Map<String, T> parameters = new ConcurrentHashMap<String, T>();
 
+	
+	/**
+	 * parameters accessors have to be overriden to set the valueType value of
+	 * the decorator for xml serialization:
+	 * 	@ElementMap(name = "parameters", required = false, valueType = ?)
+	 */
+	@ElementMap(name = "parameters", required = false)
+	abstract protected void setParameters(Map<String, T> parameters);
+	
 	/**
 	 * Do not add parameters to the map directly. Instead use setParameter
 	 * method
+	 * 
+	 * parameters accessors have to be overriden to set the valueType value of
+	 * the decorator for xml serialization:
+	 * 	@ElementMap(name = "parameters", required = false, valueType = ?)
 	 */
-	public Map<String, T> getParameters() {
-		return parameters;
-	}
+	@ElementMap(name = "parameters", required = false)
+	abstract public Map<String, T> getParameters();
 
 	public T getParameter(String name) {
 		return getParameters().get(name);
 	}
 
-	public String getParameterValue(String name, String defaultValue)
-			throws ValidationException {
+	public String getParameterValue(String name, String defaultValue) {
 		T parameter = getParameter(name);
-		return parameter == null ? defaultValue : parameter
-				.getValue(defaultValue);
+		return parameter == null ? defaultValue : parameter.getValue(defaultValue);
 	}
 
 	public void setParameter(T parameter) throws ValidationException {

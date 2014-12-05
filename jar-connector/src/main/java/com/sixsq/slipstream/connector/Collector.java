@@ -23,10 +23,13 @@ package com.sixsq.slipstream.connector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
@@ -40,7 +43,9 @@ public class Collector {
 	public static int collect(User user, Connector connector) {
 		int res = 0;
 		try {
-			res = describeInstances(user, connector);
+			if (connector.isCredentialsSet(user)) {
+				res = describeInstances(user, connector);
+			}
 		} catch (ConfigurationException e) {
 			logger.severe(e.getMessage());
 		} catch (ValidationException e) {
@@ -58,22 +63,31 @@ public class Collector {
 		Properties props = new Properties();
 		try {
 			props = connector.describeInstances(user);
-		} catch (Exception e) {
+		} catch (SlipStreamException e) {
 			logger.warning("Failed contacting cloud: "
 					+ connector.getConnectorInstanceName() + " on behalf of "
 					+ user.getName() + " with '" + e.getMessage() + "'");
 			return 0;
+		} catch (SlipStreamRuntimeException e) {
+			logger.warning("Failed contacting cloud: "
+					+ connector.getConnectorInstanceName() + " on behalf of "
+					+ user.getName() + " with '" + e.getMessage() + "'");
+		} catch (Exception e) {
+			logger.log(
+					Level.SEVERE,
+					"Error in describeInstances "
+							+ "(cloud: " + connector.getConnectorInstanceName()
+							+ ", user: " + user.getName() + "): " + e.getMessage(), e);
 		}
-		return populateVmsForCloud(user, connector.getConnectorInstanceName(),
-				props);
+
+		return populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
 	}
 
-	private static int populateVmsForCloud(User user, String cloud,
-			Properties props) {
+	private static int populateVmsForCloud(User user, String cloud, Properties idsAndStates) {
 		List<Vm> vms = new ArrayList<Vm>();
-		for (String key : props.stringPropertyNames()) {
+		for (String key : idsAndStates.stringPropertyNames()) {
 			String instanceId = key;
-			String state = (String) props.get(key);
+			String state = (String) idsAndStates.get(key);
 			Vm vm = new Vm(instanceId, cloud, state, user.getName());
 			try {
 				String runUuid = fetchRunUuid(user, cloud, instanceId);
@@ -88,7 +102,7 @@ public class Collector {
 			vms.add(vm);
 		}
 		Vm.update(vms, user.getName(), cloud);
-		return props.size();
+		return idsAndStates.size();
 	}
 
 	private static String fetchRunUuid(User user, String cloud,

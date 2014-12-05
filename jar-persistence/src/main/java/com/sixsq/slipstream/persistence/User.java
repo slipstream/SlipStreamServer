@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -41,6 +42,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
@@ -60,8 +62,10 @@ import flexjson.JSON;
 @Entity(name = "User")
 @NamedQueries({
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
-		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline) FROM User u") })
+		@NamedQuery(name = "userView", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.state, u.lastOnline, u.organization) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
+
+	public static final String REQUEST_KEY = "authenticated_user";
 
 	public static final String RESOURCE_URL_PREFIX = "user/";
 
@@ -122,6 +126,18 @@ public class User extends Parameterized<User, UserParameter> {
 	public User(String name) throws ValidationException {
 		setName(name);
 		this.state = State.NEW;
+	}
+
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
+	protected void setParameters(Map<String, UserParameter> parameters) {
+		this.parameters = parameters;
+	}
+
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
+	public Map<String, UserParameter> getParameters() {
+		return parameters;
 	}
 
 	@Override
@@ -223,17 +239,28 @@ public class User extends Parameterized<User, UserParameter> {
 		this.firstName = firstName;
 	}
 
-	public String getPassword() {
+	@JSON(include = false)
+	public String getHashedPassword() {
 		return password;
 	}
 
-	public void hashAndSetPassword(String password)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		this.password = Passwords.hash(password);
+	public void setHashedPassword(String password) {
+		this.password = password;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void hashAndSetPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		setHashedPassword(Passwords.hash(password));
+	}
+
+	@Attribute(name = "password", required = false)
+	public String getPassword() {
+		// We don't want to serialize the password.
+		return null;
+	}
+
+	@Attribute(name = "password", required = false)
+	public void setPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		hashAndSetPassword(password);
 	}
 
 	public String randomizePassword() {
@@ -337,7 +364,7 @@ public class User extends Parameterized<User, UserParameter> {
 
 		// For security reasons, the password must not be null or the empty
 		// string.
-		String password = user.getPassword();
+		String password = user.getHashedPassword();
 		if (password == null || "".equals(password)) {
 			throw new InvalidElementException("Password cannot be empty.");
 		}
@@ -447,33 +474,21 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public int getTimeout() {
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_TIMEOUT);
-		try {
-			return Integer.parseInt(getParameterValue(key, "0"));
-		} catch (ValidationException e) {
-			return 0;
-		}
+		return Integer.parseInt(getParameterValue(key, "0"));
 	}
-	
+
 	public boolean getOnSuccessRunForever() {
 		boolean _default = false;
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		try {
-			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
-		} catch (ValidationException e) {
-			return _default;
-		}
+		return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
 	}
 
 	public boolean getOnErrorRunForever() {
 		boolean _default = false;
 		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		try {
-			return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
-		} catch (ValidationException e) {
-			return _default;
-		}
+		return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
 	}
-	
+
 	public void setOnSuccessRunForever(boolean on) throws ValidationException {
 		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
 		UserParameter parameter = getParameter(key);

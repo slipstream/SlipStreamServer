@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -185,20 +185,18 @@ public class RunFactoryTest extends RunTest {
 
 	private Run getBuildImageRun(ImageModule image)
 			throws SlipStreamClientException {
-		return RunFactory
-				.getRun(image, RunType.Machine, cloudServiceName, user);
+		return RunFactory.getRun(image, RunType.Machine, user);
 	}
 
 	private Run getDeploymentRun(DeploymentModule deployment)
 			throws SlipStreamClientException {
-		return RunFactory.getRun(deployment, RunType.Orchestration,
-				cloudServiceName, user);
+		return RunFactory.getRun(deployment, RunType.Orchestration, user);
 	}
 
 	@Test(expected = ValidationException.class)
 	public void cannotCreateDeploymentWithImageModule()
 			throws SlipStreamClientException {
-		RunFactory.getRun(image, RunType.Orchestration, cloudServiceName, user);
+		RunFactory.getRun(image, RunType.Orchestration, user);
 	}
 
 	@Test(expected = ValidationException.class)
@@ -282,9 +280,11 @@ public class RunFactoryTest extends RunTest {
 		NodeParameter parameter;
 
 		node = new Node("node1", imageWithOutputParameter);
+		node.setCloudService(cloudServiceName);
 		deployment.setNode(node);
 
 		node = new Node("node2", imageWithInputParameter);
+		node.setCloudService(cloudServiceName);
 
 		parameter = new NodeParameter("pi1", "node1:po1", null);
 		parameter.setContainer(node);
@@ -320,12 +320,14 @@ public class RunFactoryTest extends RunTest {
 		NodeParameter parameter;
 
 		node = new Node("node1", imageForDeployment1);
+		node.setCloudService(cloudServiceName);
 		parameter = new NodeParameter("pi1", "node2:po2", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
 		deployment.setNode(node);
 
 		node = new Node("node2", imageForDeployment2);
+		node.setCloudService(cloudServiceName);
 		parameter = new NodeParameter("pi2", "node1:po1", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
@@ -375,7 +377,7 @@ public class RunFactoryTest extends RunTest {
 		Run run = getDeploymentRun(deployment);
 
 		int ORCHESTRATOR_AND_2_NODES = 3;
-		assertThat(run.getNodeNames().split(", ").length,
+		assertThat(run.getNodeNames().split(",").length,
 				is(ORCHESTRATOR_AND_2_NODES));
 	}
 
@@ -389,6 +391,7 @@ public class RunFactoryTest extends RunTest {
 		parameter = new NodeParameter("pi1", "\"astring\"", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
+		node.setCloudService(cloudServiceName);
 
 		deployment.setNode(node);
 
@@ -404,12 +407,14 @@ public class RunFactoryTest extends RunTest {
 		NodeParameter parameter;
 
 		node = new Node("node1", imageForDeployment1);
+		node.setCloudService(cloudServiceName);
 		parameter = new NodeParameter("pi1", "node2:po2", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
 		deployment.setNode(node);
 
 		node = new Node("node2", imageForDeployment2);
+		node.setCloudService(cloudServiceName);
 		parameter = new NodeParameter("pi2", "\"astring\"", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
@@ -430,12 +435,14 @@ public class RunFactoryTest extends RunTest {
 		NodeParameter parameter;
 
 		node = new Node("node1", imageForDeployment1);
+		node.setCloudService(cloudServiceName);
 		parameter = new NodeParameter("pi1", "node2:po2", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);
 		deployment.setNode(node);
 
 		node = new Node("node2", imageForDeployment2);
+		node.setCloudService(cloudServiceName);
 		parameter = new NodeParameter("pi2", "\"astring\"", null);
 		parameter.setContainer(node);
 		node.setParameterMapping(parameter, deployment);

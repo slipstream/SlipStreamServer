@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,17 +64,26 @@ public class DeploymentModule extends Module {
 	public void setNodes(HashMap<String, Node> nodes) {
 		this.nodes = nodes;
 	}
-	
+
 	public void setNode(Node node) {
 		node.setModule(this);
 		getNodes().put(node.getName(), node);
+	}
+
+	public Node getNode(String nodename) {
+		for (Node node : getNodes().values()) {
+			if (node.getName().equals(nodename)) {
+				return node;
+			}
+		}
+		return null;
 	}
 
 	/**
 	 * Validates the integrity of the object. For example, checks that the
 	 * mapping for deployment instances is complete and no input parameter is
 	 * left unresolved.
-	 * 
+	 *
 	 * @throws ValidationException
 	 */
 	public void validate() throws ValidationException {
@@ -235,45 +244,6 @@ public class DeploymentModule extends Module {
 		}
 
 		return copy;
-	}
-
-	public static DeploymentModule populateFromRun(Run run, Module module,
-			User user) throws ValidationException {
-
-		DeploymentModule deployment = (DeploymentModule) module;
-
-		for (Node node : deployment.getNodes().values()) {
-			setMultiplicity(run, node);
-			setCloudServiceName(run, node);
-		}
-
-		return deployment;
-	}
-
-	private static void setCloudServiceName(Run run, Node node)
-			throws ValidationException {
-
-		String cloudServiceNameKey = run.nodeRuntimeParameterKeyName(node,
-				RuntimeParameter.CLOUD_SERVICE_NAME);
-
-		if (run.parametersContainKey(cloudServiceNameKey)) {
-			String cloudService = run.getParameter(cloudServiceNameKey)
-					.getValue();
-			node.setCloudService(cloudService);
-			node.getImage().assignBaseImageIdToImageIdFromCloudService(
-					cloudService);
-		}
-	}
-
-	private static void setMultiplicity(Run run, Node node)
-			throws ValidationException {
-
-		String multiplicityKey = run.nodeRuntimeParameterKeyName(node,
-				RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
-
-		if (run.parametersContainKey(multiplicityKey)) {
-			node.setMultiplicity(run.getParameter(multiplicityKey).getValue());
-		}
 	}
 
 	public void postDeserialization() {

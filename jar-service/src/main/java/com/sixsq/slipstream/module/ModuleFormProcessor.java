@@ -9,9 +9,9 @@ package com.sixsq.slipstream.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -119,7 +119,11 @@ public abstract class ModuleFormProcessor extends
 
 		// Save authz section
 		Module module = getParametrized();
-		Authz authz = new Authz(getUser().getName(), module);
+		String owner = module.getAuthz().getUser();
+		if (owner == null || owner.isEmpty()) {
+			owner = getUser().getName();
+		}
+		Authz authz = new Authz(owner, module);
 		authz.clear();
 
 		Form form = getForm();
@@ -139,16 +143,12 @@ public abstract class ModuleFormProcessor extends
 		authz.setPublicDelete(getBooleanValue(form, "publicDelete"));
 
 		authz.setGroupMembers(form.getFirstValue("groupmembers", ""));
-		authz.setInheritedGroupMembers(getBooleanValue(form,
-				"inheritedGroupMembers"));
+		authz.setInheritedGroupMembers(getBooleanValue(form, "inheritedGroupMembers"));
 
 		if (module.getCategory() == ModuleCategory.Project) {
-			authz.setOwnerCreateChildren(getBooleanValue(form,
-					"ownerCreateChildren"));
-			authz.setGroupCreateChildren(getBooleanValue(form,
-					"groupCreateChildren"));
-			authz.setPublicCreateChildren(getBooleanValue(form,
-					"publicCreateChildren"));
+			authz.setOwnerCreateChildren(getBooleanValue(form, "ownerCreateChildren"));
+			authz.setGroupCreateChildren(getBooleanValue(form, "groupCreateChildren"));
+			authz.setPublicCreateChildren(getBooleanValue(form, "publicCreateChildren"));
 		}
 
 		getParametrized().setAuthz(authz);

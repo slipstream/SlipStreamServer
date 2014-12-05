@@ -48,7 +48,9 @@ import flexjson.JSON;
  */
 @Entity
 @SuppressWarnings("serial")
-@NamedQueries({ @NamedQuery(name = "getParameterByInstanceId", query = "SELECT p FROM RuntimeParameter p WHERE p.key_ = 'instanceid' AND p.value = :instanceid") })
+@NamedQueries({
+		@NamedQuery(name = "getParameterByInstanceId", query = "SELECT p FROM RuntimeParameter p WHERE p.key_ = 'instanceid' AND p.value = :instanceid"),
+		@NamedQuery(name = "getValueByResourceUri", query = "SELECT p.value FROM RuntimeParameter p WHERE p.resourceUri = ':resourceuri'") })
 public class RuntimeParameter extends Metadata {
 
 	// Define the constants for properties:
@@ -73,19 +75,23 @@ public class RuntimeParameter extends Metadata {
 	public final static String ABORT_DESCRIPTION = "Machine abort flag, set when aborting";
 
 	public final static String GLOBAL_NAMESPACE = "ss";
-    public final static String GLOBAL_NAMESPACE_PREFIX = GLOBAL_NAMESPACE
-            + NODE_PROPERTY_SEPARATOR;
+	public final static String GLOBAL_NAMESPACE_PREFIX = GLOBAL_NAMESPACE
+			+ NODE_PROPERTY_SEPARATOR;
 
-    public final static String GLOBAL_ABORT_KEY = GLOBAL_NAMESPACE_PREFIX + ABORT_KEY;
+	public final static String GLOBAL_ABORT_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ ABORT_KEY;
 	public final static String GLOBAL_ABORT_DESCRIPTION = "Run abort flag, set when aborting";
 
-	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX + STATE_KEY;
+	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ STATE_KEY;
 	public final static String GLOBAL_STATE_DESCRIPTION = "Global execution state";
 
-	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX + "category";
+	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ "category";
 
-    public final static String GLOBAL_URL_SERVICE_KEY = GLOBAL_NAMESPACE_PREFIX + "url.service";
-    public final static String GLOBAL_URL_SERVICE_DESCRIPTION = "Optional service URL for the deployment";
+	public final static String GLOBAL_URL_SERVICE_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ "url.service";
+	public final static String GLOBAL_URL_SERVICE_DESCRIPTION = "Optional service URL for the deployment";
 
 	public static final String TAGS_KEY = "tags";
 	public static final String TAGS_DESCRIPTION = "Tags (comma separated) or annotations for this VM";
@@ -106,11 +112,18 @@ public class RuntimeParameter extends Metadata {
 			+ COMPLETE_KEY;
 	public static final String GLOBAL_COMPLETE_DESCRIPTION = "Global complete flag, set when run completed";
 
-	public final static String GLOBAL_RECOVERY_MODE_KEY = GLOBAL_NAMESPACE_PREFIX + "recovery.mode";
+	public final static String GLOBAL_RECOVERY_MODE_KEY = GLOBAL_NAMESPACE_PREFIX
+			+ "recovery.mode";
 	public final static String GLOBAL_RECOVERY_MDDE_DESCRIPTION = "Run abort flag, set when aborting";
-	
+
+	public final static String IMAGE_ID_PARAMETER_NAME = "image.id";
+	public final static String IMAGE_ID_PARAMETER_DESCRIPTION = "Cloud image id";
+
 	public final static String MULTIPLICITY_PARAMETER_NAME = "multiplicity";
 	public final static String MULTIPLICITY_PARAMETER_DESCRIPTION = "Multiplicity number";
+
+	public final static String IDS_PARAMETER_NAME = "ids";
+	public final static String IDS_PARAMETER_DESCRIPTION = "IDs of the machines in a mutable deployment.";
 
 	public static final String INSTANCE_ID_KEY = "instanceid";
 	public static final String INSTANCE_ID_DESCRIPTION = "Cloud instance id";
@@ -121,20 +134,20 @@ public class RuntimeParameter extends Metadata {
 	public static final String CLOUD_SERVICE_NAME = "cloudservice";
 	public static final String CLOUD_SERVICE_DESCRIPTION = "Cloud Service where the node resides";
 
-    public static final String URL_SSH_KEY = "url.ssh";
-    public static final String URL_SSH_DESCRIPTION = "SSH URL to connect to virtual machine";
+	public static final String URL_SSH_KEY = "url.ssh";
+	public static final String URL_SSH_DESCRIPTION = "SSH URL to connect to virtual machine";
 
     public static final String URL_SERVICE_KEY = "url.service";
     public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
-    
-    public static final String IS_ORCHESTRATOR_KEY = "is.orchestrator";
-    public static final String IS_ORCHESTRATOR_DESCRIPTION = "True if it's an orchestrator";
 
-    public static final String MAX_JAAS_WORKERS_KEY = "max.iaas.workers";
-    public static final String MAX_JAAS_WORKERS_DESCRIPTION = "Max number of concurrently provisioned VMs by orchestrator";
-    public static final String MAX_JAAS_WORKERS_DEFAULT = "20";
+	public static final String IS_ORCHESTRATOR_KEY = "is.orchestrator";
+	public static final String IS_ORCHESTRATOR_DESCRIPTION = "True if it's an orchestrator";
 
-    public final static int MULTIPLICITY_NODE_START_INDEX = 1;
+	public static final String MAX_JAAS_WORKERS_KEY = "max.iaas.workers";
+	public static final String MAX_JAAS_WORKERS_DESCRIPTION = "Max number of concurrently provisioned VMs by orchestrator";
+	public static final String MAX_JAAS_WORKERS_DEFAULT = "20";
+
+	public final static int MULTIPLICITY_NODE_START_INDEX = 1;
 
 	private final static Pattern KEY_PATTERN = Pattern.compile("^(.*?):(.*)$");
 
@@ -147,7 +160,7 @@ public class RuntimeParameter extends Metadata {
 			+ "(-\\w[-\\w]*)?";
 
 	private final static Pattern NODE_NAME_PART_PATTERN = Pattern
-			.compile("(" + NODE_NAME_REGEX + "\\.\\d+)|("
+			.compile("(" + NODE_NAME_REGEX + "(\\.\\d+)?)|("
 					+ RuntimeParameter.GLOBAL_NAMESPACE + ")|("
 					+ ORCHESTRATOR_INSTANCE_NAME_REGEX + ")|("
 					+ Run.MACHINE_NAME + ")");
@@ -155,8 +168,23 @@ public class RuntimeParameter extends Metadata {
 	private static final Pattern NAME_PATTERN = Pattern
 			.compile("\\w[\\w\\d\\.-]*");
 
-	public static final String NODE_NAME = "nodename";
-	public static final String NODE_INDEX = "index";
+	public static final String NODE_NAME_KEY = "nodename";
+	public static final String NODE_NAME_DESCRIPTION = "Nodename";
+	public static final String NODE_ID_KEY = "id";
+	public static final String NODE_ID_DESCRIPTION = "Node instance id";
+
+	public enum ScaleStates {
+	    creating,
+	    created,
+	    operational,
+	    removing,
+	    removed,
+	    gone
+	}
+
+	public static final String SCALE_STATE_KEY = "scale.state";
+	public static final String SCALE_STATE_DEFAULT_VALUE = ScaleStates.creating.name();
+	public static final String SCALE_STATE_DESCRIPTION = "Defined scalability state";
 
 	public static String extractNodeNamePart(String name) {
 		if (!name.contains(NODE_PROPERTY_SEPARATOR)) {
@@ -169,24 +197,26 @@ public class RuntimeParameter extends Metadata {
 		if (!name.contains(NODE_PROPERTY_SEPARATOR)) {
 			return null;
 		}
-		return name.split(NODE_PROPERTY_SEPARATOR)[1];
+		try {
+			return name.split(NODE_PROPERTY_SEPARATOR)[1];
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return null;
+		}
 	}
 
-	public static String constructParamName(String nodename, String paramname) {
-		String prefix = nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+	public static String constructParamName(String nodeName, String paramname) {
+		String prefix = nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 		return prefix + paramname;
 	}
 
-	public static String constructParamName(String groupname, int index,
-			String paramname) {
-		String prefix = constructNodeName(groupname, index)
+	public static String constructParamName(String nodeName, int nodeInstanceId, String paramname) {
+		String prefix = constructNodeInstanceName(nodeName, nodeInstanceId)
 				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 		return prefix + paramname;
 	}
 
-	public static String constructNodeName(String groupname, int index) {
-		return groupname + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR
-				+ index;
+	public static String constructNodeInstanceName(String nodeName, int nodeInstanceId) {
+		return nodeName + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + nodeInstanceId;
 	}
 
 	@Id
@@ -196,11 +226,14 @@ public class RuntimeParameter extends Metadata {
 	private String key_;
 
 	@Text(required = false, data = true)
-	@Column(length=1024)
+	@Column(length = 4096)
 	private String value = "";
 
 	@Attribute
 	private boolean isSet = false;
+
+	@Attribute(required = false, name = "name")
+	private String name_ = null;
 
 	@Attribute(required = false, name = "group")
 	private String group_ = "Global";
@@ -212,7 +245,7 @@ public class RuntimeParameter extends Metadata {
 	private ParameterType type = ParameterType.String;
 
 	@Attribute(required = false)
-	@Column(length=1024)
+	@Column(length = 1024)
 	private String mappedRuntimeParameterNames = "";
 
 	@ManyToOne
@@ -335,16 +368,6 @@ public class RuntimeParameter extends Metadata {
 		return rp;
 	}
 
-	@Override
-	public String getName() {
-		return key_;
-	}
-
-	@Override
-	public void setName(String name) {
-		this.key_ = name;
-	}
-
 	public String getNodeName() {
 		return key_.split(NODE_PROPERTY_SEPARATOR)[0];
 	}
@@ -359,7 +382,7 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	public void setValue(String value) {
-        setIsSet(!"".equals(value));
+		setIsSet(!"".equals(value));
 		this.value = value;
 		updateMappedRuntimeParameters();
 	}
@@ -426,5 +449,28 @@ public class RuntimeParameter extends Metadata {
 	public ParameterType getType() {
 		return type;
 	}
+
+	@Column
+	public void setName(String name) {
+		this.name_ = name;
+	}
+
+	@Column
+	public String getName() {
+		if (this.name_ == null) {
+			this.name_ = extractParamNamePart(this.key_);
+		}
+		return this.name_;
+	}
+
+//	public static String queryValue(
+//			String resourceUri) {
+//		EntityManager em = PersistenceUtil.createEntityManager();
+//		Query q = em.createNamedQuery("getValueByResourceUri");
+//		q.setParameter("resourceuri", resourceUri);
+//		String res = (String) q.getSingleResult();
+//		em.close();
+//		return res;
+//	}
 
 }

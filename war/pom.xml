@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>2.2.5-SNAPSHOT</version>
+    <version>2.3.8-SNAPSHOT</version>
   </parent>
   
   <dependencies>
@@ -31,6 +31,44 @@
       <artifactId>SlipStreamConnector</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+<!--
+  These cannot be added to WAR because it creates a circular dependency
+  between the SlipStreamServer module (which contains the connector 
+  interface) and the SlipStreamConnector module.
+-->
+
+<!--
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-CloudStack-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-Okeanos-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-OpenStack-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-PhysicalHost-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-StratusLab-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+--> 
 
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
@@ -174,7 +212,7 @@
       </plugin>
 
       <plugin>
-        <groupId>org.mortbay.jetty</groupId>
+        <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
 
         <configuration>
@@ -186,6 +224,45 @@
           </properties>
         </configuration>
 
+<!-- 
+  Adding these dependencies will cause the connector loading
+  to fail when running the server via jetty:run-war.  If you 
+  want more than the local connector, then add them in the 
+  module dependencies above.
+
+  This problem is apparently due to a difference in the class
+  loading scheme between the plugin and a deployment in a 
+  standalone jetty container.
+-->
+
+<!--
+        <dependencies>
+          <dependency>
+              <groupId>com.sixsq.slipstream</groupId>
+              <artifactId>SlipStreamConnector-CloudStack-jar</artifactId>
+              <version>${project.version}</version>
+          </dependency>
+
+          <dependency>
+              <groupId>com.sixsq.slipstream</groupId>
+              <artifactId>SlipStreamConnector-OpenStack-jar</artifactId>
+              <version>${project.version}</version>
+          </dependency>
+
+          <dependency>
+              <groupId>com.sixsq.slipstream</groupId>
+              <artifactId>SlipStreamConnector-PhysicalHost-jar</artifactId>
+              <version>${project.version}</version>
+          </dependency>
+
+          <dependency>
+              <groupId>com.sixsq.slipstream</groupId>
+              <artifactId>SlipStreamConnector-StratusLab-jar</artifactId>
+              <version>${project.version}</version>
+          </dependency>
+
+        </dependencies>
+-->
       </plugin>
 
       <plugin>

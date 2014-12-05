@@ -4,7 +4,7 @@ package com.sixsq.slipstream.util;
  * +=================================================================+
  * SlipStream Server (WAR)
  * =====
- * Copyright (C) 2013 SixSq Sarl (sixsq.com)
+ * Copyright (C) 2014 SixSq Sarl (sixsq.com)
  * =====
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package com.sixsq.slipstream.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.exceptions.ProcessException;
@@ -37,22 +38,44 @@ public class ProcessUtils {
 		return execGetOutputAsArray(command, true)[0];
 	}
 
+	public static String execGetOutput(String[] command, Map<String, String> environment)
+			throws IOException, SlipStreamClientException {
+		return execGetOutputAsArray(command, true, environment)[0];
+	}
+
 	public static String execGetOutput(String[] command, boolean stderrToStdout)
 			throws IOException, SlipStreamClientException {
 		return execGetOutputAsArray(command, stderrToStdout)[0];
 	}
 
+	public static String execGetOutput(String[] command, boolean stderrToStdout, Map<String, String> environment)
+			throws IOException, SlipStreamClientException {
+		return execGetOutputAsArray(command, stderrToStdout, environment)[0];
+	}
+
 	public static String[] execGetOutputAsArray(String[] command, boolean stderrToStdout)
 			throws IOException, SlipStreamClientException {
+		return execGetOutputAsArray(command, stderrToStdout, null);
+	}
+
+	public static String[] execGetOutputAsArray(String[] command, boolean stderrToStdout,
+			Map<String, String> environment) throws IOException, SlipStreamClientException {
 
 		StringBuilder commandMessage = new StringBuilder();
 		for (String part : command) {
             commandMessage.append(part).append(" ");
 		}
 		getLogger().info("Calling: " + commandMessage.toString());
+		if (environment != null) {
+			getLogger().fine("  with the following environment: " + environment.toString());
+		}
 
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.redirectErrorStream(stderrToStdout);
+
+		if (environment != null) {
+			pb.environment().putAll(environment);
+		}
 
 		Process p = pb.start();
 
@@ -68,13 +91,13 @@ public class ProcessUtils {
 		while ((line = stdOutErr.readLine()) != null) {
 			outputBuf.append(line);
 			outputBuf.append("\n");
-			getLogger().info(line);
+			getLogger().fine(line);
 		}
 
 		while ((line = stdErrReader.readLine()) != null) {
 			errBuf.append(line);
 			errBuf.append("\n");
-			getLogger().info(line);
+			getLogger().fine(line);
 		}
 
 		// Check for failure

@@ -8,7 +8,7 @@
   (:require [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!!]])
   (:gen-class
     :name slipstream.async.Collector
-    :methods [#^{:static true 
+    :methods [#^{:static true
                  :doc "Takes: run user"}
                 [start [] void]]))
 
@@ -61,10 +61,12 @@
         (if (nil? v)
           (log/log-error
             "Timeout collecting vms for user "
-            (.getName user)
+            (get-name user)
             " on cloud "
             (.getConnectorInstanceName connector))
-          (log/log-info (str "executed collect request for " (.getName user) " and " (.getConnectorInstanceName connector))))))
+          (log/log-info "Number of VMs collected for user " (get-name user)
+            " on cloud "
+            (.getConnectorInstanceName connector) ": " v))))
     (go (>! ch (Collector/collect user connector)))))
 
 (defn update-metric!
@@ -75,8 +77,8 @@
         (if (nil? res)
           (log/log-error
             "Timeout updating metrics for user "
-            (.getName user))
-          (log/log-info (str "executed update-metric request for " (.getName user))))))
+            (get-name user))
+          (log/log-info (str "executed update-metric request for " (get-name user))))))
     (go (>! ch (updator/update user)))))
 
 (def not-nil? (complement nil?))
@@ -91,9 +93,10 @@
         (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
           (when (not-nil? user)
             (try
-              (log/log-info (str "executing collect request for " (.getName user) " and " (.getConnectorInstanceName connector)))
+              (log/log-debug (str "executing collect request for " (get-name user) " and " (.getConnectorInstanceName connector)))
               (collect! user connector)
-              (update-metric! user)
+              (if (updator/metering-enabled?)
+                (update-metric! user))
               (catch Exception e (log/log-warn "caught exception executing collect request: " (.getMessage e))))))))))
 
 (defonce ^:dynamic *online-collect-processor* (collect-readers online-collector-chan))
@@ -112,7 +115,7 @@
     (check-channel-size users connectors)
     (doseq [u users
             c connectors]
-      (go 
+      (go
         (>! chan [u c])))))
 
 ; Start collector writers

@@ -218,12 +218,13 @@ public class RunListResourceTest extends ResourceTestBase {
 	}
 
 	private Request createPostRequest(List<NodeParameter> parameters,
-			int multiplicity, String moduleUri) throws ConfigurationException {
+			int multiplicity, String moduleUri) throws ConfigurationException,
+			ValidationException {
 		Form form = createRunForm(parameters, multiplicity);
 		form.add(RunListResource.REFQNAME, moduleUri);
 
 		Request request = createPostRequest(form.getWebRepresentation());
-		addUserToRequest(user.getName(), request);
+		addUserToRequest(user, request);
 		return request;
 	}
 
@@ -248,7 +249,7 @@ public class RunListResourceTest extends ResourceTestBase {
 	}
 
 	private Request createPostRequest(Representation entity)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		return createPostRequest(new HashMap<String, Object>(), entity);
 	}
 

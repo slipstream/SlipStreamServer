@@ -53,7 +53,7 @@ import java.util.Map;
 import static org.junit.Assert.fail;
 
 public abstract class CommonTestUtil {
-	
+
 	protected static final String PASSWORD = "password";
 
 	// Need to set cloudServiceName before the status user is
@@ -97,16 +97,20 @@ public abstract class CommonTestUtil {
 			fail();
 		}
 
+		user.setFirstName("Te");
+		user.setLastName("st");
+		user.setEmail("test@example.com");
+
 		try {
 			user.setDefaultCloudServiceName(cloudServiceName);
 		} catch (ValidationException e) {
 			throw (new SlipStreamRuntimeException(e));
 		}
-		
+
 		user.setOnSuccessRunForever(false);
 		user.setOnErrorRunForever(false);
-		
-		String key = Parameter.constructKey(ParameterCategory.General.toString(), 
+
+		String key = Parameter.constructKey(ParameterCategory.General.toString(),
 				UserParameter.SSHKEY_PARAMETER_NAME);
 		user.setParameter(new UserParameter(key, "ssh-rsa xx", ""));
 
@@ -155,9 +159,11 @@ public abstract class CommonTestUtil {
 		Node node;
 
 		node = new Node("node1", imageForDeployment1);
+		node.setCloudService(CommonTestUtil.cloudServiceName);
 		deployment.setNode(node);
 
 		node = new Node("node2", imageForDeployment2);
+		node.setCloudService(CommonTestUtil.cloudServiceName);
 		deployment.setNode(node);
 
 		return deployment.store();

@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,10 +70,9 @@ public class RuntimeParameterResourceTest extends
 		super.tearDown();
 	}
 
-
 	@Test
 	public void runtimeParameterResourceGetUnknownUuid()
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 
 		Request request = createGetRequest("unknownUuid", "aKey");
 
@@ -326,12 +325,13 @@ public class RuntimeParameterResourceTest extends
 	public void errorSetsNodeAndGlobalAbort() throws FileNotFoundException,
 			IOException, SlipStreamException {
 
-		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase() + RuntimeParameter.ABORT_KEY;
+		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase()
+				+ RuntimeParameter.ABORT_KEY;
 		String globalAbortKey = RuntimeParameter.GLOBAL_ABORT_KEY;
 		String abortMessage = "machine abort";
 
 		Run run = createAndStoreRunImage("errorSetsNodeAndGlobalAbort");
-		
+
 		Request request = createPutRequest(run.getUuid(), machineAbortKey,
 				new StringRepresentation(abortMessage));
 		Response response = executeRequest(request);
@@ -357,35 +357,39 @@ public class RuntimeParameterResourceTest extends
 
 		Run run = createAndStoreRunImage("errorSetsNodeAndGlobalAbort");
 
-		Request request = createPutRequest(run.getUuid(), machineAbortKey,
-				new StringRepresentation(abortMessage));
+		Request request = createPutRequest(run.getUuid(), machineAbortKey, new StringRepresentation(abortMessage));
 		Response response = executeRequest(request);
 
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
 
-		RuntimeParameter nodeAbort = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), machineAbortKey);
+		RuntimeParameter nodeAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), machineAbortKey);
 		assertThat(nodeAbort.getValue(), is(abortMessage));
+		assertThat(nodeAbort.isSet(), is(true));
 
-		RuntimeParameter globalAbort = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), RuntimeParameter.GLOBAL_ABORT_KEY);
+		RuntimeParameter globalAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), globalAbortKey);
 		assertThat(globalAbort.getValue(), is(abortMessage));
+		assertThat(globalAbort.isSet(), is(true));
 
-		Map<String, Object> attributes = createRequestAttributes(run.getUuid(),
-				machineAbortKey);
+		Map<String, Object> attributes = createRequestAttributes(run.getUuid(), "");
 		attributes.put(RunListResource.IGNORE_ABORT_QUERY, "true");
-		request = createPutRequest(attributes, new StringRepresentation(""));
 
+		attributes.put("key", machineAbortKey);
+		request = createDeleteRequest(attributes);
 		response = executeRequest(request);
+		assertEquals(Status.SUCCESS_NO_CONTENT, response.getStatus());
 
-		assertEquals(Status.SUCCESS_OK, response.getStatus());
+		attributes.put("key", globalAbortKey);
+		request = createDeleteRequest(attributes);
+		response = executeRequest(request);
+		assertEquals(Status.SUCCESS_NO_CONTENT, response.getStatus());
 
-		nodeAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-				machineAbortKey);
+		nodeAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), machineAbortKey);
 		assertThat(nodeAbort.getValue(), is(""));
-		globalAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
-				globalAbortKey);
+		assertThat(nodeAbort.isSet(), is(false));
+
+		globalAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), globalAbortKey);
 		assertThat(globalAbort.getValue(), is(""));
+		assertThat(globalAbort.isSet(), is(false));
 	}
 
 }

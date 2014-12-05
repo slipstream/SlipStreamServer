@@ -149,6 +149,10 @@ public class ModuleRouter extends Router {
 				.put("module", new Variable(Variable.TYPE_URI_FRAGMENT));
 		route.getTemplate().getVariables()
 				.put("version", new Variable(Variable.TYPE_DIGIT));
+		route = attach("/{module}/publish",
+				ModulePublishResource.class);
+		route.getTemplate().getVariables()
+				.put("module", new Variable(Variable.TYPE_URI_FRAGMENT));
 	}
 
 }

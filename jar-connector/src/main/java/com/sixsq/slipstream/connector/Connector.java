@@ -9,9 +9,9 @@ package com.sixsq.slipstream.connector;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,7 @@ public interface Connector {
 
 	/**
 	 * Launch Orchestrator virtual machine.
-	 * 
+	 *
 	 * @param run
 	 *            for which corresponding virtual machines must be launched
 	 * @param user
@@ -54,7 +54,7 @@ public interface Connector {
 	/**
 	 * This object provides a convenience mapping from the user parameters from
 	 * which we can simplify access to the abstracted cloud.
-	 * 
+	 *
 	 * @param user
 	 *            for which to extract the credentials object.
 	 * @return credentials object providing an abstraction for accessing the the
@@ -64,7 +64,7 @@ public interface Connector {
 
 	/**
 	 * Terminate all running virtual machines associated with the run.
-	 * 
+	 *
 	 * @param run
 	 *            for which corresponding virtual machines must be terminated.
 	 * @param user
@@ -99,6 +99,16 @@ public interface Connector {
 			throws ValidationException;
 
 	/**
+	 * A hook to allow connector to set any extra user parameters.  This is primarily to be called before
+	 * serialization of the object for Orchestrator.  This is useful in the case where connector related
+	 * user parameters might come from external resources/locations (e.g., VOMS proxy material from
+	 * credentials cache).
+	 * @param User
+	 * @throws ValidationException
+	 */
+	void setExtraUserParameters(User user) throws ValidationException;
+
+	/**
 	 * @return map of service configuration parameters available to the system
 	 *         administrator to configure the connector.
 	 * @throws ValidationException
@@ -118,14 +128,16 @@ public interface Connector {
 	 * @return name of the cloud service the connector interfaces with.
 	 */
 	String getCloudServiceName();
-	
+
 	/**
 	 * @return instance name of the cloud connector.
 	 */
 	String getConnectorInstanceName();
-	
+
 	String getOrchestratorName(Run run);
 
 	Connector copy();
-	
+
+	boolean isCredentialsSet(User user);
+
 }

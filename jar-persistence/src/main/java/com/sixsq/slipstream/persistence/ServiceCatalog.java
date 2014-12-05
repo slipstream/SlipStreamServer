@@ -21,6 +21,7 @@ package com.sixsq.slipstream.persistence;
  */
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -30,6 +31,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Query;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -69,6 +71,18 @@ public class ServiceCatalog extends
 
 	public ServiceCatalog(String cloud) {
 		setName(cloud);
+	}
+
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ServiceCatalogParameter.class)
+	protected void setParameters(Map<String, ServiceCatalogParameter> parameters) {
+		this.parameters = parameters;
+	}
+	
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ServiceCatalogParameter.class)
+	public Map<String, ServiceCatalogParameter> getParameters() {
+		return parameters;
 	}
 
 	public String getCloud() {

@@ -4,7 +4,7 @@ package com.sixsq.slipstream.connector;
  * +=================================================================+
  * SlipStream Server (WAR)
  * =====
- * Copyright (C) 2013 SixSq Sarl (sixsq.com)
+ * Copyright (C) 2014 SixSq Sarl (sixsq.com)
  * =====
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,30 +101,28 @@ public abstract class ConnectorBase implements Connector {
         return ConnectorFactory.getCurrentConnector(user).getCredentials(user);
     }
 
-    protected String getImageId(Run run, User user) throws SlipStreamClientException, ConfigurationException,
-            ServerExecutionEnginePluginException {
-
+    protected String getImageId(Run run, User user) throws ConfigurationException, ValidationException {
         String imageId;
 
         if (isInOrchestrationContext(run)) {
             imageId = getOrchestratorImageId(user);
         } else {
-            imageId = ((ImageModule) run.getModule()).extractBaseImageId(run.getCloudServiceName());
+        	String cloudService = run.getCloudServiceNameForNode(Run.MACHINE_NAME);
+            imageId = ((ImageModule) run.getModule()).extractBaseImageId(cloudService);
         }
         return imageId;
     }
 
-    protected String getOrchestratorImageId(User user) throws ValidationException,
-            ServerExecutionEnginePluginException {
+    protected String getOrchestratorImageId(User user) throws ValidationException {
         return getCloudParameterValue(user, UserParametersFactoryBase.ORCHESTRATOR_IMAGEID_PARAMETER_NAME);
     }
 
-    protected String getCloudParameterValue(User user, String paramName) throws ServerExecutionEnginePluginException,
-            ValidationException {
+    protected String getCloudParameterValue(User user, String paramName)
+    		throws ConfigurationException, ValidationException {
         String qualifiedParamName = constructKey(paramName);
         String paramValue = user.getParameterValue(qualifiedParamName, null);
         if (paramValue == null) {
-            throw (new ServerExecutionEnginePluginException("Missing parameter '" + qualifiedParamName + "'."));
+            throw (new ConfigurationException("Missing parameter '" + qualifiedParamName + "'."));
         }
         return paramValue;
     }
@@ -137,9 +135,6 @@ public abstract class ConnectorBase implements Connector {
         return instanceName;
     }
 
-    public void abort(Run run, User user) throws ServerExecutionEnginePluginException {
-    }
-
     public void checkCredentials(Credentials credentials) throws InvalidElementException {
         if (credentials.getKey() == null) {
             throw (new InvalidElementException("Missing Cloud account key."));
@@ -149,14 +144,13 @@ public abstract class ConnectorBase implements Connector {
         }
     }
 
-    protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress) throws NotFoundException,
-            ValidationException, ServerExecutionEnginePluginException {
+    protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress)
+    		throws NotFoundException, ValidationException, ServerExecutionEnginePluginException {
         return updateInstanceIdAndIpOnRun(run, instanceId, ipAddress, getOrchestratorName(run));
     }
 
-    protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress,
-                                             String orchestratorName) throws NotFoundException, ValidationException,
-            ServerExecutionEnginePluginException {
+    protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress, String orchestratorName)
+    		throws NotFoundException, ValidationException, ServerExecutionEnginePluginException {
 
         if (isInOrchestrationContext(run)) {
             updateOrchestratorInstanceIdOnRun(run, instanceId, orchestratorName);
@@ -294,31 +288,38 @@ public abstract class ConnectorBase implements Connector {
 
     protected String getPrivateSshKeyFileName() throws ConfigurationException, ValidationException {
         String privateSshKeyFile = Configuration.getInstance()
-                                                .getProperty("cloud.connector.orchestrator.privatesshkey");
+                                                .getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY);
         return privateSshKeyFile;
     }
 
+    private String getUserPublicSshKey(User user) throws ValidationException, IOException {
+		return user.getParameter(
+				ExecutionControlUserParametersFactory.CATEGORY + "." + UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
+				.getValue();
+    }
+
     protected String getPublicSshKey(Run run, User user) throws ValidationException, IOException {
-        String publicSshKeyFile = getPublicSshKeyFileName(run, user);
-        return FileUtil.fileToString(publicSshKeyFile);
+    	if (run.getType() == RunType.Run) {
+    		return getUserPublicSshKey(user);
+    	} else {
+    		String publicSshKeyFile = getPublicSshKeyFileName(run, user);
+    		return FileUtil.fileToString(publicSshKeyFile);
+    	}
     }
 
     protected String getPublicSshKeyFileName(Run run, User user) throws IOException, ValidationException {
-        String publicSshKey;
+        String publicSshKeyFilename;
         if (run.getType() == RunType.Run) {
             tempSshKeyFile = File.createTempFile("sshkey", ".tmp");
             BufferedWriter out = new BufferedWriter(new FileWriter(tempSshKeyFile));
-            String sshPublicKey = user.getParameter(
-                    ExecutionControlUserParametersFactory.CATEGORY + "." + UserParametersFactoryBase
-                            .SSHKEY_PARAMETER_NAME
-            ).getValue();
+            String sshPublicKey = getUserPublicSshKey(user);
             out.write(sshPublicKey);
             out.close();
-            publicSshKey = tempSshKeyFile.getPath();
+            publicSshKeyFilename = tempSshKeyFile.getPath();
         } else {
-            publicSshKey = Configuration.getInstance().getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY);
+            publicSshKeyFilename = Configuration.getInstance().getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY);
         }
-        return publicSshKey;
+        return publicSshKeyFilename;
     }
 
     protected void deleteTempSshKeyFile() {
@@ -359,26 +360,39 @@ public abstract class ConnectorBase implements Connector {
         throw (new NotImplementedException());
     }
 
+    /**
+     * Implement in connector class if extra parameters are required to be set during
+     * XML serialization of the User object when UserResource is called to get XML.
+     */
+    public void setExtraUserParameters(User user) throws ValidationException {
+    }
+
     public Map<String, ModuleParameter> getImageParametersTemplate() throws ValidationException {
         return new HashMap<String, ModuleParameter>();
     }
 
-    protected String generateCookie(String identifier) {
+    protected String generateCookie(String identifier, String runId) {
         Properties extraProperties = new Properties();
         extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
+        extraProperties.put(CookieUtils.COOKIE_RUN_ID, runId);
+        extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
         return CookieUtils.createCookie(identifier, getConnectorInstanceName(), extraProperties);
     }
 
-    protected String getCookieForEnvironmentVariable(String identifier) {
-        return "\"" + generateCookie(identifier) + "\"";
+    protected String getCookieForEnvironmentVariable(String identifier, String runId) {
+        return "\"" + generateCookie(identifier, runId) + "\"";
     }
 
     protected abstract String constructKey(String key) throws ValidationException;
 
-    protected String getVerboseParameterValue(User user) throws ValidationException {
+    protected String getVerboseParameterValue(User user) {
         return user.getParameterValue(Parameter.constructKey(ExecutionControlUserParametersFactory.VERBOSITY_LEVEL),
                 ExecutionControlUserParametersFactory.VERBOSITY_LEVEL_DEFAULT
         );
+    }
+
+    protected String getInstanceName(Run run) {
+    	return (isInOrchestrationContext(run)) ? getOrchestratorName(run) : Run.MACHINE_NAME;
     }
 
     public String getOrchestratorName(Run run) {
@@ -432,7 +446,14 @@ public abstract class ConnectorBase implements Connector {
         }
     }
 
-    protected String getLoginUsername(Run run) throws SlipStreamClientException {
+    public boolean isCredentialsSet(User user) {
+    	String key = getKey(user);
+    	String secret = getSecret(user);
+
+    	return !(key == null || "".equals(key) || secret == null || "".equals(secret));
+    }
+
+    protected String getLoginUsername(Run run) throws ConfigurationException, ValidationException {
         if (isInOrchestrationContext(run)) {
             return getOrchestratorImageLoginUsername();
         } else {
@@ -444,17 +465,17 @@ public abstract class ConnectorBase implements Connector {
         return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.ssh.username"));
     }
 
-    private String getMachineImageLoginUsername(Run run) throws SlipStreamClientException {
+    private String getMachineImageLoginUsername(Run run) throws ValidationException {
 
         ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
         String username = machine.getLoginUser();
         if (username == null) {
-            throw (new SlipStreamClientException("Module " + machine.getName() + " is missing login username"));
+            throw new ValidationException("Module " + machine.getName() + " is missing login username");
         }
         return username;
     }
 
-    protected String getLoginPassword(Run run) throws ConfigurationException, SlipStreamClientException {
+    protected String getLoginPassword(Run run) throws ConfigurationException, ValidationException {
         if (isInOrchestrationContext(run)) {
             return getOrchestratorImageLoginPassword();
         } else {
@@ -466,18 +487,22 @@ public abstract class ConnectorBase implements Connector {
         return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.ssh.password"));
     }
 
-    private String getMachineImageLoginPassword(Run run) throws SlipStreamClientException {
+    private String getMachineImageLoginPassword(Run run) throws ValidationException {
 
         ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
         String password = machine.getParameterValue(constructKey(ImageModule.LOGINPASSWORD_KEY), null);
         if (password == null) {
-            throw (new SlipStreamClientException("Module " + machine.getName() + " is missing ssh login password"));
+            throw new ValidationException("Module " + machine.getName() + " is missing ssh login password");
         }
         return password;
     }
 
-    protected String getEndpoint(User user) {
-        return user.getParameter(getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME
-        ).getValue();
+    protected String getEndpoint(User user) throws ValidationException {
+    	String paramName = getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME;
+    	UserParameter endpointParam = user.getParameter(paramName);
+    	if (endpointParam != null) {
+    		return endpointParam.getValue();
+    	}
+    	throw new ValidationException("Failed to get endpoint. Parameter not found: " + paramName);
     }
 }

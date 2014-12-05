@@ -9,9 +9,9 @@ package com.sixsq.slipstream.authn;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,6 +45,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.Passwords;
+import com.sixsq.slipstream.util.Logger;
 import com.sixsq.slipstream.util.RequestUtil;
 
 public class LoginResource extends AuthnResource {
@@ -92,17 +93,21 @@ public class LoginResource extends AuthnResource {
 	private void validateUser(String username, String password)
 			throws ConfigurationException, ValidationException {
 
-		if (username == null || password == null) {
+		if (username == null || username.isEmpty() || password == null) {
 			throwUnauthorizedWithMessage();
 		}
 
 		User dbUser = User.loadByName(username);
 
 		if (dbUser == null) {
-			throwUnauthorizedWithMessage();
+			throwUnauthorizedWithMessage("Authentication failure. No such user: " + username);
 		}
 
-		String realPassword = dbUser.getPassword();
+		String realPassword = dbUser.getHashedPassword();
+		if (realPassword == null) {
+			// TODO: Something is wrong. Allow the user to reset the password.
+			throwUnauthorizedWithMessage("Authentication failure. Password is not set in DB for user: " + username);
+		}
 		String hashedPassword = null;
 		try {
 			hashedPassword = Passwords.hash(password);
@@ -114,11 +119,18 @@ public class LoginResource extends AuthnResource {
 			throwUnauthorized();
 		}
 		if (!realPassword.equals(hashedPassword)) {
-			throwUnauthorizedWithMessage();
+			throwUnauthorizedWithMessage("Authentication failure. Password mismatch for user: " + username);
 		}
 	}
 
 	private void throwUnauthorizedWithMessage() {
+		throwUnauthorizedWithMessage("");
+	}
+
+	private void throwUnauthorizedWithMessage(String logMessage) {
+		if (logMessage != null && !logMessage.isEmpty()) {
+			Logger.warning(logMessage);
+		}
 		throw new ResourceException(CLIENT_ERROR_UNAUTHORIZED,
 				"Username/password combination not valid");
 	}
@@ -131,8 +143,7 @@ public class LoginResource extends AuthnResource {
 
 		if (isHtmlRequested(request)) {
 			Reference redirectURL = extractRedirectURL(request);
-			String absolutePath = RequestUtil.constructAbsolutePath(redirectURL.getPath());
-			response.redirectSeeOther(absolutePath);
+			response.redirectSeeOther(redirectURL);
 		} else {
 			response.setEntity(null, MediaType.ALL);
 			response.setStatus(SUCCESS_OK);

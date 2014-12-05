@@ -9,9 +9,9 @@ package com.sixsq.slipstream.resource;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,21 +52,12 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	private boolean canDelete = false;
 
 	@Override
-	public void doInit() throws ResourceException {
-
-		try {
-			super.doInit();
-		} catch (Exception e) {
-			throwServerError(e.getMessage());
-		}
-
+	public void initialize() throws ResourceException {
 		try {
 			loadTargetParameterized();
 		} catch (ValidationException e) {
 			throwClientError(e);
 		}
-
-		authorize();
 
 		try {
 			setIsEdit();
@@ -117,8 +108,6 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	public void setCanPost(boolean canPost) {
 		this.canPost = canPost;
 	}
-
-	abstract protected void authorize();
 
 	public void setParameterized(S parameterized) {
 		this.parameterized = parameterized;
@@ -175,7 +164,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 						.extractShortNameFromResourceUri(getParameterized()
 								.getName()));
 	}
-	
+
 	/**
 	 * User requested the creation of a new resource. This means that
 	 * if the resource already exists, for example, creation should

@@ -32,13 +32,15 @@ import org.restlet.Response;
 import org.restlet.data.Status;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class UserListResourceTest extends ResourceTestBase {
 
 	@Test
-	public void listUserAsNormalUser() throws ConfigurationException {
+	public void listUserAsNormalUser() throws ConfigurationException,
+			ValidationException {
 
 		Request request = createGetRequest();
 		Response response = executeRequest(request);
@@ -46,11 +48,13 @@ public class UserListResourceTest extends ResourceTestBase {
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 	}
 
-	private Request createGetRequest() throws ConfigurationException {
+	private Request createGetRequest() throws ConfigurationException,
+			ValidationException {
 		return createGetRequest(user);
 	}
 
-	private Request createGetRequest(User user) throws ConfigurationException {
+	private Request createGetRequest(User user) throws ConfigurationException,
+			ValidationException {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		Request request = createGetRequest(attributes);
 		request.getClientInfo().setUser(

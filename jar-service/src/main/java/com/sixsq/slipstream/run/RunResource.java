@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,15 +22,12 @@ package com.sixsq.slipstream.run;
 
 import javax.persistence.EntityManager;
 
-import org.restlet.Request;
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
-import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
@@ -44,37 +41,34 @@ import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.Terminator;
 
-public class RunResource extends BaseResource {
+public class RunResource extends RunBaseResource {
 
 	private Run run = null;
 
 	@Override
-	public void doInit() throws ResourceException {
+	public void initializeSubResource() throws ResourceException {
 
-		super.doInit();
+		long start = System.currentTimeMillis();
+		long before;
 
-		Request request = getRequest();
-
-		validateUser();
-
-		String resourceUri = ResourceUriUtil.extractResourceUri(request);
-		run = Run.load(resourceUri);
+		before = System.currentTimeMillis();
+		run = Run.loadFromUuid(getUuid());
+		logTimeDiff("load", before);
 
 		if (run == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 		}
 
-		authorize();
+		logTimeDiff("initialize on run", start);
 	}
 
-	private void authorize() {
+	@Override
+	protected void authorize() {
+
 		if (getUser().isSuper()) {
 			return;
 		}
@@ -108,18 +102,27 @@ public class RunResource extends BaseResource {
 	public Representation toXml() throws NotFoundException,
 			ValidationException, ConfigurationException {
 
+		long start = System.currentTimeMillis();
+		long before;
+
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run;
+
 		String xml;
 		try {
-			run = constructRun(em, true);
+			before = System.currentTimeMillis();
+			Run run = constructRun(em, true);
+			logTimeDiff("constructRun", before);
+			before = System.currentTimeMillis();
 			xml = SerializationUtil.toXmlString(run);
+			logTimeDiff("xml serialisation", before);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
 		} finally {
 			em.close();
 		}
+
+		logTimeDiff("processing get on run", start);
 
 		return new StringRepresentation(xml, MediaType.APPLICATION_XML);
 	}
@@ -128,17 +131,26 @@ public class RunResource extends BaseResource {
 	public Representation toHtml() throws ConfigurationException,
 			ValidationException {
 
+		long start = System.currentTimeMillis();
+		long before;
+
 		EntityManager em = PersistenceUtil.createEntityManager();
 		String html;
 		try {
+			before = System.currentTimeMillis();
 			Run run = constructRun(em, false);
+			logTimeDiff("constructRun", before);
+			before = System.currentTimeMillis();
 			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
+			logTimeDiff("html generation", before);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());
 		} finally {
 			em.close();
 		}
+
+		logTimeDiff("processing get on run", start);
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 
@@ -155,7 +167,7 @@ public class RunResource extends BaseResource {
 
 		if (withVmState) {
 			try {
-				run = updateVmStatus(run);
+				run = updateVmStatus(run, run.getUser());
 			} catch (SlipStreamClientException e) {
 				run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
 			} catch (SlipStreamException e) {
@@ -165,19 +177,14 @@ public class RunResource extends BaseResource {
 			}
 		}
 
-		Module module = RunFactory.selectFactory(run.getType()).overloadModule(
-				run, getUser());
-		run.setModule(module, true);
+		Module module = RunFactory.loadModule(run);
+		run.setModule(module);
 
 		return run;
 	}
 
-	private Run updateVmStatus(Run run) throws SlipStreamException {
-		return RunFactory.updateVmStatus(run, getUser());
-	}
-
-	private void validateUser() {
-		// FIXME: This should either do something or be moved to guard.
+	private Run updateVmStatus(Run run, String username) throws SlipStreamException {
+		return RunFactory.updateVmStatus(run, username);
 	}
 
 	@Delete
@@ -195,5 +202,4 @@ public class RunResource extends BaseResource {
 		}
 
 	}
-
 }

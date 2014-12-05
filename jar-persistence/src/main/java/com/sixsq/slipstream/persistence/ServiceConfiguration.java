@@ -33,6 +33,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
 
+import org.simpleframework.xml.ElementMap;
+
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 
 @SuppressWarnings("serial")
@@ -43,6 +45,7 @@ public class ServiceConfiguration extends
 
 	public final static String RESOURCE_URI_PREFIX = "configuration/";
     public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY = "cloud.connector.orchestrator.publicsshkey";
+    public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY = "cloud.connector.orchestrator.privatesshkey";
 
 	public enum ParameterCategory {
 		SlipStream_Support, SlipStream_Basics, SlipStream_Advanced
@@ -272,6 +275,14 @@ public class ServiceConfiguration extends
 		public String getName() {
 			return name().replace("_", ".").toLowerCase();
 		}
+
+		/**
+		 * Convert string to enum name where word separators are
+		 * converted from . to _ and upper cased.
+		 */
+		public static String getEnum(String name) {
+			return name.replace(".", "_").toUpperCase();
+		}
 	}
 
 	@Id
@@ -281,10 +292,14 @@ public class ServiceConfiguration extends
 		setId();
 	}
 
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ServiceConfigurationParameter.class)
 	public Map<String, ServiceConfigurationParameter> getParameters() {
 		return parameters;
 	}
 
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ServiceConfigurationParameter.class)
 	public void setParameters(
 			Map<String, ServiceConfigurationParameter> parameters) {
 		if (parameters == null) {

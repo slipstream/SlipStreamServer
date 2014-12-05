@@ -27,17 +27,18 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.user.FormProcessor;
+import com.sixsq.slipstream.util.Logger;
 import com.sixsq.slipstream.util.RequestUtil;
 
-public class CloudResourceIdentifierResource extends ServerResource {
+public class CloudResourceIdentifierResource extends BaseResource {
 
 	CloudImageIdentifier cloudImage;
 	private String moduleUri;
@@ -46,11 +47,16 @@ public class CloudResourceIdentifierResource extends ServerResource {
 	private String region;
 
 	@Override
-	public void doInit() throws ResourceException {
+	public void initialize() throws ResourceException {
 
 		extractTargetUriFromRequest();
-
 		fetchRepresentation();
+	}
+
+	@Override
+	protected boolean isMachineAllowedToAccessThisResource() {
+		// TODO: LS: Check if the Run of the cookie is associated to the image.
+		return true;
 	}
 
 	protected void extractTargetUriFromRequest() {
@@ -109,21 +115,41 @@ public class CloudResourceIdentifierResource extends ServerResource {
 	@Put("text")
 	public void update(Representation entity) {
 
+		checkExisting();
+
+		setCloudImageId(entity);
+
+		setResponseCreated(cloudImage.getResourceUri());
+	}
+
+	private void checkExisting() {
 		if (isExisting()) {
 			throw (new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,
 					"An image for this cloud service is already registered"));
 		}
+	}
 
-		try {
-			cloudImage.setCloudMachineIdentifer(entity.getText());
-		} catch (IOException e) {
-			e.printStackTrace();
-			throwClientError("Missing or invalid entity");
+	private void setCloudImageId(Representation entity) {
+
+		// Entity is null if content-length in PUT request either doesn't exist or of size 0 bytes.
+		if (entity == null) {
+			String msg = "Image ID was not provided.";
+			Logger.debug("'" + msg + "' when setting new image ID on " + cloudImage.getResourceUri());
+			throwClientError(msg);
 		}
 
-		cloudImage.store();
+		String newImageId = "";
+		try {
+			newImageId = entity.getText();
+		} catch (IOException e) {
+			String msg = "Failed to get image ID from the request.";
+			Logger.debug("'" + msg + "' when setting new image ID on " + cloudImage.getResourceUri()
+			        + ". Exception: " + e.getMessage());
+			throwClientError(msg);
+		}
+		cloudImage.setCloudMachineIdentifer(newImageId);
 
-		setResponseCreated(cloudImage.getResourceUri());
+		cloudImage.store();
 	}
 
 	protected void throwClientError(String message) {
@@ -143,6 +169,12 @@ public class CloudResourceIdentifierResource extends ServerResource {
 
 		String absolutePath = RequestUtil.constructAbsolutePath("/" + resourceUri);
 		getResponse().setLocationRef(absolutePath);
+	}
+
+	@Override
+	protected String getPageRepresentation() {
+		// TODO Stub
+		return null;
 	}
 
 }

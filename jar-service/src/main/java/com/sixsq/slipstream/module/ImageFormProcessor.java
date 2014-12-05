@@ -39,6 +39,7 @@ import com.sixsq.slipstream.persistence.User;
 
 public class ImageFormProcessor extends ModuleFormProcessor {
 
+	public static final String[] TARGET_SCRIPT_NAMES = { "execute", "report", "onvmadd", "onvmremove" };
 	public static final String PRERECIPE_SCRIPT_NAME = "prerecipe--script";
 	boolean needsRebuild = false;
 
@@ -161,9 +162,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		Set<Target> targets = new HashSet<Target>();
 
-		String[] targetNames = { "execute", "report" };
-
-		for (String targetName : targetNames) {
+		for (String targetName : TARGET_SCRIPT_NAMES) {
 			addTarget(form, targets, targetName);
 		}
 

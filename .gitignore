@@ -10,3 +10,9 @@ bin
 .project
 *.pem
 *.p12
+hsql*
+
+pom.xml.next
+pom.xml.releaseBackup
+pom.xml.tag
+release.properties

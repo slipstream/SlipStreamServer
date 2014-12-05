@@ -4,14 +4,14 @@ package com.sixsq.slipstream.persistence;
  * +=================================================================+
  * SlipStream Server (WAR)
  * =====
- * Copyright (C) 2013 SixSq Sarl (sixsq.com)
+ * Copyright (C) 2014 SixSq Sarl (sixsq.com)
  * =====
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +39,8 @@ public class Target implements Serializable {
 
 	public static final String EXECUTE_TARGET = "execute";
 	public static final String REPORT_TARGET = "report";
+	public static final String ONVMADD_TARGET = "onvmadd";
+	public static final String ONVMREMOVE_TARGET = "onvmremove";
 
 	@Id
 	@GeneratedValue
@@ -47,9 +49,6 @@ public class Target implements Serializable {
 	@Text(required = false, data = true)
 	@Column(length = 65536)
 	private String script = "";
-
-	@Attribute(required = false)
-	private Boolean runInBackground = false;
 
 	@Attribute
 	private String name;
@@ -69,12 +68,6 @@ public class Target implements Serializable {
 	public Target(String name, String script) {
 		this(name);
 		this.script = script;
-	}
-
-	public Target(String name, String script, Boolean runInBackground) {
-		this.name = name;
-		this.script = script;
-		this.runInBackground = runInBackground;
 	}
 
 	public ImageModule getModule() {
@@ -101,16 +94,9 @@ public class Target implements Serializable {
 		this.script = script;
 	}
 
-	public Boolean getRunInBackground() {
-		return runInBackground;
-	}
-
-	public void setRunInBackground(Boolean runInBackground) {
-		this.runInBackground = runInBackground;
-	}
 
 	public Target copy() {
-		return new Target(getName(), getScript(), getRunInBackground());
+		return new Target(getName(), getScript());
 	}
 
 }

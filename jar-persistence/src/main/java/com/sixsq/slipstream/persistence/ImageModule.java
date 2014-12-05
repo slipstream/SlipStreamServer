@@ -42,9 +42,9 @@ import flexjson.JSON;
 
 /**
  * Unit test see:
- * 
+ *
  * @see ImageModuleTest
- * 
+ *
  */
 @Entity
 @SuppressWarnings("serial")
@@ -89,13 +89,6 @@ public class ImageModule extends Module {
 
 	private String platform = "other";
 
-	/**
-	 * Only set by resource, once a cloud service name is known. This is a hack!
-	 */
-	@Attribute(required = false)
-	@Transient
-	private String imageId;
-
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@ElementList(required = false, data = true)
 	private Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
@@ -119,7 +112,7 @@ public class ImageModule extends Module {
 	/**
 	 * Validate for an image run (as opposed to a build or as part of a
 	 * deployment).
-	 * 
+	 *
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -187,44 +180,8 @@ public class ImageModule extends Module {
 	}
 
 	/**
-	 * Assign to the imageId attribute the value corresponding to the cloud
-	 * service. This saves the client from having to dig in the module to
-	 * retrieve the right image id.
-	 * 
-	 * @param cloudService
-	 * @throws ValidationException
-	 */
-	public void assignImageIdFromCloudService(String cloudService)
-			throws ValidationException {
-		imageId = extractBaseImageId(cloudService);
-	}
-
-	/**
-	 * Assign to the imageId attribute the base image id corresponding to the
-	 * cloud service. This should be used when building an image, since we need
-	 * to start the process from the reference image.
-	 * 
-	 * @param cloudService
-	 * @throws ValidationException
-	 */
-	public void assignBaseImageIdToImageIdFromCloudService(String cloudService)
-			throws ValidationException {
-		imageId = getBaseImageId(cloudService);
-	}
-
-	private String getBaseImageId(String cloudService)
-			throws ValidationException {
-
-		try {
-			return extractBaseImageId(cloudService);
-		} catch (ValidationException e) {
-			return "";
-		}
-	}
-
-	/**
 	 * Finds the base image id
-	 * 
+	 *
 	 * @param cloudService
 	 * @return image id
 	 * @throws ValidationException
@@ -399,17 +356,15 @@ public class ImageModule extends Module {
 	}
 
 	@Attribute
-	public String getLoginUser() {
+	public String getLoginUser() throws ValidationException {
 		if (isBase()) {
 			return loginUser;
 		}
 		if (getModuleReference() == null) {
 			return "";
 		}
-		ImageModule parentModule = (ImageModule) Module
-				.load(getModuleReference());
-		if (parentModule != null) {
-			return parentModule.getLoginUser();
+		if (getParentModule() != null) {
+			return getParentModule().getLoginUser();
 		} else {
 			return "";
 		}
@@ -426,17 +381,15 @@ public class ImageModule extends Module {
 	}
 
 	@Attribute
-	public String getPlatform() {
+	public String getPlatform() throws ValidationException {
 		if (isBase()) {
 			return platform;
 		}
 		if (getModuleReference() == null) {
 			return "";
 		}
-		ImageModule parentModule = (ImageModule) Module
-				.load(getModuleReference());
-		if (parentModule != null) {
-			return parentModule.getPlatform();
+		if (getParentModule() != null) {
+			return getParentModule().getPlatform();
 		} else {
 			return "";
 		}
@@ -557,48 +510,6 @@ public class ImageModule extends Module {
 		CloudImageIdentifier cloudImageIdentifer = getCloudImageIdentifier(cloudService);
 		return cloudImageIdentifer == null ? "" : cloudImageIdentifer
 				.getCloudMachineIdentifer();
-	}
-
-	/**
-	 * Set image id for normal image run
-	 * 
-	 * @param run
-	 * @return
-	 * @throws ValidationException
-	 */
-	public static Module populateImageIdFromRun(Run run)
-			throws ValidationException {
-
-		ImageModule module = ImageModule.load(run.getModuleResourceUrl());
-
-		module.assignBaseImageIdToImageIdFromCloudService(run.getCloudServiceName());
-
-		return module;
-	}
-
-	/**
-	 * Set base image id for image build
-	 * 
-	 * @param run
-	 * @return
-	 * @throws ValidationException
-	 */
-	public static Module populateBaseImageIdFromRun(Run run, Module module)
-			throws ValidationException {
-
-		((ImageModule) module).assignBaseImageIdToImageIdFromCloudService(run
-				.getCloudServiceName());
-
-		return module;
-	}
-
-	public static Module populateForImageRun(Run run, Module module)
-			throws ValidationException {
-
-		((ImageModule) module).assignImageIdFromCloudService(run
-				.getCloudServiceName());
-
-		return module;
 	}
 
 	public void postDeserialization() {

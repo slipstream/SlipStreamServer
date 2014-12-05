@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -34,7 +34,6 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
 
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
@@ -47,68 +46,46 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 
-public class RuntimeParameterResource extends ServerResource {
-
-	private String uuid;
+public class RuntimeParameterResource extends RunBaseResource {
 
 	private RuntimeParameter runtimeParameter;
 
 	private String key;
 
-	private boolean ignoreAbort;
-
 	@Override
-	public void doInit() throws ResourceException {
+	public void initializeSubResource() throws ResourceException {
 
+		long start = System.currentTimeMillis();
+		long before;
+
+		before = System.currentTimeMillis();
 		parseRequest();
+		logTimeDiff("parseRequest", before);
 
+		before = System.currentTimeMillis();
 		fetchRepresentation();
+		logTimeDiff("fetchRepresentation", before);
 
+		before = System.currentTimeMillis();
 		raiseConflictIfAbortIsSet();
+		logTimeDiff("raiseConflictIfAbortIsSet", before);
+
+		logTimeDiff("initialize on runtime parameter", start);
 	}
 
 	private void parseRequest() {
-
-		parseRequestQuery();
-
-		Map<String, Object> attributes = getRequest().getAttributes();
-		uuid = attributes.get("uuid").toString();
-		key = attributes.get("key").toString();
-	}
-
-	private void parseRequestQuery() {
 		extractAndSetIgnoreAbort();
-	}
 
-	private void extractAndSetIgnoreAbort() {
-		ignoreAbort = getRequest().getAttributes().containsKey(
-				RunListResource.IGNORE_ABORT_QUERY);
+		key = getAttribute("key");
 	}
 
 	private void fetchRepresentation() {
-		loadRuntimeParameter();
+		runtimeParameter = loadRuntimeParameter(key);
 		setExisting(runtimeParameter != null);
 	}
 
-	private void loadRuntimeParameter() {
-		runtimeParameter = RuntimeParameter.loadFromUuidAndKey(uuid, key);
-		if (runtimeParameter == null) {
-			Run run = Run.loadFromUuid(uuid);
-			if (run == null) {
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-						"Unknown run id " + uuid);
-			} else {
-				String error = "Unknown key " + key;
-				String nodename = RuntimeParameter.extractNodeNamePart(key);
-				Run.abortOrReset(error, nodename, uuid);
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-						error);
-			}
-		}
-	}
-
 	private void raiseConflictIfAbortIsSet() {
-		if (!ignoreAbort) {
+		if (!getIgnoreAbort()) {
 			if (isAbortSet()) {
 				throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 						"Abort flag raised!"));
@@ -118,26 +95,13 @@ public class RuntimeParameterResource extends ServerResource {
 
 	private void abortOrReset(String abortMessage, EntityManager em) {
 		String nodename = RuntimeParameter.extractNodeNamePart(key);
-		Run.abortOrReset(abortMessage, nodename, em, uuid);
+		Run.abortOrReset(abortMessage, nodename, em, getUuid());
 	}
 
-	private RuntimeParameter getGlobalAbort() {
-		RuntimeParameter abort = RuntimeParameter.loadFromUuidAndKey(uuid,
-				RuntimeParameter.GLOBAL_ABORT_KEY);
-		return abort;
-	}
-
-	private boolean isAbortSet() {
-		return getGlobalAbort().isSet();
-	}
 
 	@Delete
 	public void resetRuntimeParameter() throws ResourceException {
-
-		if (RuntimeParameter.GLOBAL_ABORT_KEY.equals(key)) {
-			runtimeParameter.setValue("");
-		}
-
+		runtimeParameter.setValue("");
 		runtimeParameter.setIsSet(false);
 		runtimeParameter.store();
 
@@ -148,11 +112,15 @@ public class RuntimeParameterResource extends ServerResource {
 	public String represent() throws ResourceException, NotFoundException,
 			ValidationException {
 
+		long start = System.currentTimeMillis();
+
 		if (!runtimeParameter.isSet()) {
 			throw new ResourceException(
 					Status.CLIENT_ERROR_PRECONDITION_FAILED, "key " + key
 							+ " not yet set");
 		}
+
+		logTimeDiff("processing get on runtime parameter", start);
 		return runtimeParameter.getValue();
 	}
 
@@ -173,7 +141,7 @@ public class RuntimeParameterResource extends ServerResource {
 				.equals(key);
 
 		if (isGlobalAbort || isNodeAbort) {
-			if (ignoreAbort || !runtimeParameter.isSet()) {
+			if (!runtimeParameter.isSet()) {
 				abortOrReset(value, em);
 				runtimeParameter.setValue(value);
 			}
@@ -209,7 +177,7 @@ public class RuntimeParameterResource extends ServerResource {
 
 	private States attemptCompleteCurrentNodeState(String nodeName) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run = Run.loadFromUuid(uuid, em);
+		Run run = Run.loadFromUuid(getUuid(), em);
 		StateMachine sc = StateMachine.createStateMachine(run);
 		em.close();
 		return completeCurrentNodeState(nodeName, sc);
@@ -232,4 +200,17 @@ public class RuntimeParameterResource extends ServerResource {
 		return state;
 	}
 
+	@Override
+	protected String getPageRepresentation() {
+		// TODO Stub
+		return null;
+	}
+
+	private void logTimeDiff(String msg, long before, long after) {
+		Logger.getLogger("Timing").finest("took to execute " + msg + ": " + (after - before));
+	}
+
+	protected void logTimeDiff(String msg, long before) {
+		logTimeDiff(msg, before, System.currentTimeMillis());
+	}
 }

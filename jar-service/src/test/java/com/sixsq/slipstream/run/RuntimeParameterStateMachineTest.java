@@ -61,8 +61,7 @@ public class RuntimeParameterStateMachineTest extends
 	@Test
 	public void completeCurrentState() throws FileNotFoundException,
 			IOException, SlipStreamException {
-		Run run = RunFactory.getRun(deployment, RunType.Orchestration,
-				cloudServiceName, user);
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 		run = run.store();
 
 		States newState = States.Initializing;
@@ -106,17 +105,15 @@ public class RuntimeParameterStateMachineTest extends
 		assertState(run, States.Ready, newState);
 
 		newState = completeCurrentState(orchestratorCompleteKey, run);
-		
-		
+
 		assertState(run, States.Finalizing, newState);
 
-		//newState = completeCurrentState(node1CompleteKey, run);
-		//newState = completeCurrentState(node2CompleteKey, run);
+		// newState = completeCurrentState(node1CompleteKey, run);
+		// newState = completeCurrentState(node2CompleteKey, run);
 
-		//assertState(run, States.Finalizing, newState);
+		// assertState(run, States.Finalizing, newState);
 
 		newState = completeCurrentState(orchestratorCompleteKey, run);
-		
 
 		assertState(run, States.Done, newState);
 
@@ -129,12 +126,12 @@ public class RuntimeParameterStateMachineTest extends
 	}
 
 	private States completeCurrentState(String key, Run run)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		return completeCurrentState(key, run, Status.SUCCESS_OK);
 	}
 
 	private States completeCurrentState(String key, Run run, Status expected)
-			throws ConfigurationException {
+			throws ConfigurationException, ValidationException {
 		Request request = createPostRequest(run.getUuid(), key,
 				new StringRepresentation(""));
 		Response response = executeRequest(request);

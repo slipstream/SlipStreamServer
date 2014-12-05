@@ -72,7 +72,7 @@ public class ResetPasswordActionPerformer extends OneShotActionPerformer {
 			String userResourceUrl) throws NoSuchAlgorithmException,
 			UnsupportedEncodingException {
 		String username = user.getName();
-		String password = user.getPassword();
+		String password = user.getHashedPassword();
 		String url = baseUrlSlash + userResourceUrl;
 
 		String msg = MessageUtils.format(MSG_PASSWORD_RESET, username,
@@ -80,7 +80,7 @@ public class ResetPasswordActionPerformer extends OneShotActionPerformer {
 
 		// now that the random password has been sent to the user
 		// hash it before it is stored
-		user.hashAndSetPassword(user.getPassword());
+		user.hashAndSetPassword(user.getHashedPassword());
 
 		Notifier.sendNotification(user.getEmail(), msg);
 	}

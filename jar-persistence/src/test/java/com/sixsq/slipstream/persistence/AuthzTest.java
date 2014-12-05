@@ -165,6 +165,8 @@ public class AuthzTest {
 		// reset parent group members
 		parentAuthz.setGroupMembers("");
 		parents.add(parent.store());
+		// The parent is cached in the child, so we clear it
+		((Module)moduleAuthz.getGuarded()).clearGuardedParent();
 		assertThat(moduleAuthz.canGet(user), is(false));
 
 		for(Metadata p : parents) {
@@ -191,6 +193,7 @@ public class AuthzTest {
 		Module module = new ImageModule("parent/project/module");
 		Authz moduleAuthz = new Authz(owner.getName(), module);
 		moduleAuthz.setGroupGet(true);
+		module.store();
 		
 		// group can view but user not in parent group
 		assertThat(moduleAuthz.canGet(user), is(false));
@@ -198,10 +201,13 @@ public class AuthzTest {
 		// add to parent group
 		parent.getAuthz().addGroupMember("user");
 		parent.store();
+		
+		module = Module.load(module.getResourceUri());
 
 		// now user can view
-		assertThat(moduleAuthz.canGet(user), is(true));
+		assertThat(module.getAuthz().canGet(user), is(true));
 
+		module.remove();
 		project.remove();
 		parent.remove();
 		

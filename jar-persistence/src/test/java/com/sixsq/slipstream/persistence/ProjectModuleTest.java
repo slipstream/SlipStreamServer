@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,7 +59,7 @@ public class ProjectModuleTest {
 	public void storeRetrieveAndDelete() throws SlipStreamClientException {
 
 		String name = "dummy";
-		String resourceUrl = Module.RESOURCE_URI_PREFIX + name;
+		String resourceUrl = Module.constructResourceUri(name);
 
 		Module module = new ProjectModule(name);
 		module.store();
@@ -119,7 +119,7 @@ public class ProjectModuleTest {
 
 		// clean-up
 		ModuleTestUtil.cleanupModules();
-		
+
 		Module module1 = new ProjectModule("module1");
 		module1.store();
 

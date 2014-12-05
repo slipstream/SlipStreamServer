@@ -26,12 +26,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.Embeddable;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
@@ -46,13 +45,9 @@ import flexjson.JSON;
  * @see AuthzTest
  * 
  */
-@Entity
 @SuppressWarnings("serial")
+@Embeddable
 public class Authz implements Serializable {
-
-	@Id
-	@GeneratedValue
-	Long id;
 
 	@OneToOne
 	@JSON(include = false)
@@ -100,17 +95,32 @@ public class Authz implements Serializable {
 	@Attribute
 	private boolean inheritedGroupMembers = true;
 
-	private Authz() {
+	@Transient
+	private Guarded guarded;
+
+	protected Authz() {
 	}
 
-	public Authz(String owner, Module guardedModule) {
+	protected Authz(String owner) {
+		this();
 		this.owner = owner;
-		this.guardedModule = guardedModule;
-		this.guardedModule.setAuthz(this);
 	}
 
-	public Metadata getGuardedModule() {
-		return guardedModule;
+	public Authz(String owner, Guarded guarded) {
+		this(owner);
+		guarded.setAuthz(this);
+		this.guarded = guarded;
+	}
+
+	public Guarded getGuarded() {
+		return guarded;
+	}
+
+	void setGuarded(Guarded guarded) {
+		if (guarded != null) {
+			guarded.setAuthz(this);
+		}
+		this.guarded = guarded;
 	}
 
 	public void setGuardedModule(Module guardedModule) {
@@ -450,15 +460,14 @@ public class Authz implements Serializable {
 		Authz defaultAuthz = new Authz();
 		defaultAuthz.setInheritedGroupMembers(false);
 
-		if (getGuardedModule() == null) {
+		if (getGuarded() == null) {
 			return defaultAuthz;
 		}
-		String parentUri = getGuardedModule().getParent();
-		Module parent = Module.load(parentUri);
-		if (parent == null) {
+		Guarded parentGuard = getGuarded().getGuardedParent();
+		if(parentGuard == null) {
 			return defaultAuthz;
 		}
-		return parent.getAuthz();
+		return parentGuard.getAuthz();
 	}
 
 	public void addGroupMember(String groupMember) {
@@ -524,8 +533,7 @@ public class Authz implements Serializable {
 		return inheritedGroupMembers;
 	}
 
-	public static Authz loadByGuardedModuleResourceUrl(String resourceUrl)
-			throws NotFoundException {
+	public static Authz loadByGuardedModuleResourceUrl(String resourceUrl) throws NotFoundException {
 
 		// FIXME: Add real implementation of the method.
 		throw (new NotFoundException());

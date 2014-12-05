@@ -50,16 +50,13 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.persistence.Node;
+import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.NodeParameter;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
@@ -78,7 +75,9 @@ import com.sixsq.slipstream.util.SerializationUtil;
  */
 public class RunListResource extends BaseResource {
 
+	public static final String TYPE = "type";
 	public static final String REFQNAME = "refqname";
+	public static final String MUTABLE_RUN_KEY = "mutable";
 	public static final String IGNORE_ABORT_QUERY = "ignoreabort";
 	String refqname = null;
 
@@ -169,21 +168,20 @@ public class RunListResource extends BaseResource {
 			Module module = loadReferenceModule();
 
 			authorizePost(module);
-			
+
 			updateReference(module);
-
-			overrideModule(form, module);
-
 			module.validate();
 
 			User user = getUser();
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
-			String defaultCloudService = getDefaultCloudService(form, user);
-			
-			run = RunFactory.getRun(module, parseType(form), defaultCloudService, user);
+			Map<String, List<Parameter<?>>> userChoices = getUserChoicesFromForm(module.getCategory(), form);
+
+			run = RunFactory.getRun(module, parseType(form), user, userChoices);
 
 			run = addCredentials(run);
+
+			setRunMutability(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
 				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
@@ -207,32 +205,17 @@ public class RunListResource extends BaseResource {
 		getResponse().setLocationRef(absolutePath);
 	}
 
+	private void setRunMutability(Run run, Form form) {
+		String mutable = form.getFirstValue(MUTABLE_RUN_KEY, "");
+		if (mutable.trim().equals("true")) {
+			run.setMutable();
+		}
+	}
+
 	private void authorizePost(Module module) {
 		if(!module.getAuthz().canPost(getUser())) {
 			throwClientForbiddenError("User does not have the rights to execute this module");
 		}
-	}
-
-	/**
-	 * If the form contains a cloudservice parameter, use that
-	 * otherwise, use the user default. Builds and Simple Run
-	 * will contain a cloud service, where for deployment this
-	 * is defined per node, which means more processing by the
-	 * factory.
-	 */
-	private String getDefaultCloudService(Form form, User user) {
-		return form.getFirstValue("parameter--cloudservice", user.getDefaultCloudService());
-	}
-
-	private String getDefaultCloudService() {
-		String cloudServiceName = getUser().getDefaultCloudService();
-		if (cloudServiceName == null || "".equals(cloudServiceName)) {
-			throw (new ResourceException(
-					Status.CLIENT_ERROR_CONFLICT,
-					ConnectorFactory
-							.incompleteCloudConfigurationErrorMessage(getUser())));
-		}
-		return cloudServiceName;
 	}
 
 	private void setReference(Form form) {
@@ -245,114 +228,81 @@ public class RunListResource extends BaseResource {
 		refqname = refqname.trim();
 	}
 
-	private void overrideModule(Form form, Module module)
-			throws ValidationException {
-		if (module.getCategory() == ModuleCategory.Deployment) {
-			overrideNodes(form, (DeploymentModule) module);
-		}
-		if (module.getCategory() == ModuleCategory.Image) {
-			overrideImage(form, (ImageModule) module);
-		}
-	}
+	public static Map<String, List<Parameter<?>>> getUserChoicesFromForm(ModuleCategory category, Form form) throws ValidationException {
 
-	private void overrideNodes(Form form, DeploymentModule deployment)
-			throws ValidationException {
+		Map<String, List<Parameter<?>>> parametersPerNode = new HashMap<String, List<Parameter<?>>>();
 
-		Map<String, List<NodeParameter>> parametersPerNode = parseNodeNameOverride(form);
-
-		String defaultCloudService = getDefaultCloudService();
-
-		for (Node node : deployment.getNodes().values()) {
-			if (CloudImageIdentifier.DEFAULT_CLOUD_SERVICE.equals(node
-					.getCloudService()))
-				node.setCloudService(defaultCloudService);
-		}
-
-		for (Map.Entry<String, List<NodeParameter>> entry : parametersPerNode.entrySet()) {
-            String nodename = entry.getKey();
-			if (!deployment.getNodes().containsKey(nodename)) {
-				throw new ValidationException("Unknown node: " + nodename);
-			}
-
-			Node node = deployment.getNodes().get(nodename);
-
-			for (NodeParameter parameter : entry.getValue()) {
-				if (parameter.getName().equals(
-						RuntimeParameter.MULTIPLICITY_PARAMETER_NAME)) {
-					node.setMultiplicity(parameter.getValue());
-					continue;
-				}
-				if (parameter.getName().equals(
-						RuntimeParameter.CLOUD_SERVICE_NAME)) {
-					String cloudService = (CloudImageIdentifier.DEFAULT_CLOUD_SERVICE
-							.equals(parameter.getValue()) ? defaultCloudService
-							: parameter.getValue());
-					node.setCloudService(cloudService);
-					continue;
-				}
-				if (!node.getParameters().containsKey(parameter.getName())) {
-					throw new ValidationException("Unknown parameter: "
-							+ parameter.getName() + " in node: " + nodename);
-				}
-				node.getParameters().get(parameter.getName())
-						.setValue("'" + parameter.getValue() + "'");
-			}
-
-		}
-	}
-
-	public static Map<String, List<NodeParameter>> parseNodeNameOverride(
-			Form form) throws ValidationException {
-		Map<String, List<NodeParameter>> parametersPerNode = new HashMap<String, List<NodeParameter>>();
 		for (Entry<String, String> entry : form.getValuesMap().entrySet()) {
-			// parameter--node--[nodename]--[paramname]
-			String[] parts = entry.getKey().split("--");
-			if (RunListResource.REFQNAME.equals(entry.getKey())) {
+			if (notUserChoiceForNode(entry)) {
 				continue;
 			}
-			if (parts.length != 4) {
-				throw new ValidationException("Invalid key format: "
-						+ entry.getKey());
+
+			// parameter--node--[nodename]--[paramname]
+			String[] parts = entry.getKey().split("--");
+			String nodeName = "";
+			String parameterName = "";
+
+			if (category == ModuleCategory.Deployment) {
+				if (parts.length != 4) {
+					throw new ValidationException("Invalid key format: " + entry.getKey());
+				}
+				nodeName = parts[2];
+				parameterName = parts[3];
+			} else {
+				if (parts.length != 2) {
+					throw new ValidationException("Invalid key format: " + entry.getKey());
+				}
+				nodeName = Run.MACHINE_NAME;
+				parameterName = parts[1];
 			}
-			String nodename = parts[2];
-			String parameterName = parts[3];
+
 			String value = entry.getValue();
-			if (!parametersPerNode.containsKey(nodename)) {
-				parametersPerNode.put(nodename, new ArrayList<NodeParameter>());
+			if (category == ModuleCategory.Deployment) {
+				if (!parametersPerNode.containsKey(nodeName)) {
+					parametersPerNode.put(nodeName, new ArrayList<Parameter<?>>());
+				}
+				Parameter<?> parameter = new NodeParameter(parameterName);
+				value = NodeParameter.isStringValue(value) ? value : "'" + value + "'";
+				parameter.setValue(value);
+				parametersPerNode.get(nodeName).add(parameter);
+			} else {
+				if (!parametersPerNode.containsKey(nodeName)) {
+					parametersPerNode.put(nodeName, new ArrayList<Parameter<?>>());
+				}
+				Parameter<?> parameter = new ModuleParameter(parameterName);
+				parameter.setValue(value);
+				parametersPerNode.get(nodeName).add(parameter);
 			}
-			NodeParameter parameter = new NodeParameter(parameterName);
-			parameter.setUnsafeValue(value);
-			parametersPerNode.get(nodename).add(parameter);
 		}
+
 		return parametersPerNode;
 	}
 
-	private void overrideImage(Form form, ImageModule image)
-			throws ValidationException {
-		// TODO...
-		// Map<String, List<NodeParameter>> parametersPerNode = NodeParameter
-		// .parseNodeNameOverride(form);
-		// for (NodeParameter parameter : parametersPerNode.get(nodename)) {
-		// if (parameter.getName().equals(
-		// RuntimeParameter.CLOUD_SERVICE_NAME)) {
-		// node.setCloudService(parameter.getValue());
-		// continue;
-		// }
+	private static boolean notUserChoiceForNode(Entry<String, String> entry) {
+		List<String> keysToFilter = new ArrayList<String>();
+		keysToFilter.add(RunListResource.REFQNAME);
+		keysToFilter.add(RunListResource.MUTABLE_RUN_KEY);
+		keysToFilter.add(RunListResource.TYPE);
+
+		if (keysToFilter.contains(entry.getKey())) {
+			return true;
+		}
+		return false;
 	}
 
 	private RunType parseType(Form form) {
-		String type = form.getFirstValue("type", true,
-				RunType.Orchestration.toString());
+		String type = form.getFirstValue(RunListResource.TYPE, true, RunType.Orchestration.toString());
 		try {
 			return RunType.valueOf(type);
 		} catch (IllegalArgumentException e) {
-			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-					"Unknown run type: " + type));
+			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Unknown run type: " + type));
 		}
 	}
 
 	private Run launch(Run run) throws SlipStreamException {
-		slipstream.async.Launcher.launch(run, getUser());
+		User user = getUser();
+		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
+		slipstream.async.Launcher.launch(run, user);
 		return run;
 	}
 

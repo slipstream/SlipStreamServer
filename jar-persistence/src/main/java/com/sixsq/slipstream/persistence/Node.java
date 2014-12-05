@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -100,7 +100,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	@ManyToOne
 	@JSON(include=false)
 	private DeploymentModule module;
-	
+
 	protected Node() {
 	}
 
@@ -112,6 +112,18 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	public Node(String name, ImageModule image) throws ValidationException {
 		this(name, image.getResourceUri());
 		this.image = image;
+	}
+
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = NodeParameter.class)
+	protected void setParameters(Map<String, NodeParameter> parameters) {
+		this.parameters = parameters;
+	}
+	
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = NodeParameter.class)
+	public Map<String, NodeParameter> getParameters() {
+		return parameters;
 	}
 
 	public DeploymentModule getModule() {
@@ -150,7 +162,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	}
 
 	public void setMultiplicity(int multiplicity) throws ValidationException {
-		if (multiplicity <= 0) {
+		if (multiplicity < 0) {
 			throw (new ValidationException(
 					"Invalid multiplicity, it must be positive"));
 		}

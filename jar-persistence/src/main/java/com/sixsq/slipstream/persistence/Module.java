@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,11 +21,14 @@ package com.sixsq.slipstream.persistence;
  */
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -39,6 +42,7 @@ import javax.persistence.Transient;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
+import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleVersionView;
@@ -48,9 +52,9 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 
 /**
  * Unit test see:
- * 
+ *
  * @see ModuleTest
- * 
+ *
  */
 @SuppressWarnings("serial")
 @Entity
@@ -61,11 +65,18 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name AND m.deleted != TRUE"),
 		@NamedQuery(name = "moduleAll", query = "SELECT m FROM Module m WHERE m.deleted != TRUE"),
 		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz, m.logoLink) FROM Module m WHERE m.published != null AND m.deleted != TRUE") })
-public abstract class Module extends Parameterized<Module, ModuleParameter> {
+public abstract class Module extends Parameterized<Module, ModuleParameter> implements Guarded {
 
 	public final static String RESOURCE_URI_PREFIX = "module/";
 
 	public final static int DEFAULT_VERSION = -1;
+
+	private static void bindModuleToAuthz(Module module) {
+		if (module != null) {
+			// set authz to bind them
+			module.getAuthz().setGuarded(module);
+		}
+	}
 
 	private static Module loadByUri(String uri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -75,14 +86,14 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		if (latestVersion != null && m != null) {
 			m.setIsLatestVersion(latestVersion.version);
 		}
+		bindModuleToAuthz(m);
 		return m;
 	}
 
 	public static Module loadLatest(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleLastVersion");
-		String name = ModuleUriUtil
-				.extractModuleNameFromResourceUri(resourceUri);
+		String name = ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri);
 		q.setParameter("name", name);
 		Module module;
 		try {
@@ -92,6 +103,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 			module = null;
 		}
 		em.close();
+		bindModuleToAuthz(module);
 		return module;
 	}
 
@@ -112,8 +124,8 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static Module load(String uri) {
 		String resourceUri = uri;
 		int version = ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
-		return (version == DEFAULT_VERSION ? loadLatest(resourceUri)
-				: loadByUri(resourceUri));
+		Module module = (version == DEFAULT_VERSION ? loadLatest(resourceUri) : loadByUri(resourceUri));
+		return module;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -129,8 +141,8 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static List<ModuleView> viewList(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleViewLatestChildren");
-		q.setParameter("parent", Module.constructResourceUri(ModuleUriUtil
-				.extractModuleNameFromResourceUri(resourceUri)));
+		q.setParameter("parent",
+				Module.constructResourceUri(ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri)));
 		List<ModuleView> list = q.getResultList();
 		em.close();
 		return list;
@@ -140,8 +152,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	public static List<ModuleVersionView> viewListAllVersions(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleViewAllVersions");
-		String name = ModuleUriUtil
-				.extractModuleNameFromResourceUri(resourceUri);
+		String name = ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri);
 		q.setParameter("name", name);
 		List<ModuleVersionView> list = q.getResultList();
 		em.close();
@@ -170,8 +181,11 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private String resourceUri;
 
 	@Element(required = false)
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Authz authz = new Authz("Unknown", this);
+	@Embedded
+	private Authz authz = new Authz("", this);
+
+	@Transient
+	private Module parent = null;
 
 	@Attribute(required = false)
 	private String customVersion;
@@ -200,11 +214,11 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	private String tag;
 
 	@Element(required = false)
-	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Commit commit;
 
 	@Element(required = false)
-	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Publish published; // to the app store
 
 	/**
@@ -235,12 +249,37 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		super();
 	}
 
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ModuleParameter.class)
+	protected void setParameters(Map<String, ModuleParameter> parameters) {
+		this.parameters = parameters;
+	}
+
+	@Override
+	@ElementMap(name = "parameters", required = false, valueType = ModuleParameter.class)
+	public Map<String, ModuleParameter> getParameters() {
+		return parameters;
+	}
+
 	public Module(String name, ModuleCategory category)
 			throws ValidationException {
 
 		this.category = category;
 
 		setName(name);
+	}
+
+	public Guarded getGuardedParent() {
+		if (parent == null) {
+			if (parentUri != null) {
+				parent = Module.load(parentUri);
+			}
+		}
+		return parent;
+	}
+
+	public void clearGuardedParent() {
+		parent = null;
 	}
 
 	public RunViewList getRuns() {
@@ -333,20 +372,24 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	}
 
 	public void setModuleReference(Module reference) throws ValidationException {
-		if (getResourceUri().equals(reference.getResourceUri())) {
-			throw new ValidationException("Module reference cannot be itself");
-		}
-		this.moduleReferenceUri = reference.getResourceUri();
+		setModuleReference(reference.getResourceUri());
 	}
 
-	public void setModuleReference(String moduleReferenceUri) {
+	public void setModuleReference(String moduleReferenceUri) throws ValidationException {
+		if (moduleReferenceUri != null){
+			String moduleReferenceUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(moduleReferenceUri);
+			String moduleUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(getResourceUri());
+			if (moduleUriVersionLess.equals(moduleReferenceUriVersionLess)) {
+				throw new ValidationException("Module reference cannot be itself");
+			}
+		}
 		this.moduleReferenceUri = moduleReferenceUri;
 	}
 
 	/**
 	 * A virtual module is a module that doesn't require to be explicitly built,
 	 * since it only defines runtime behavior
-	 * 
+	 *
 	 * @return true if the module is virtual, false if not
 	 */
 	public boolean isVirtual() {
@@ -381,8 +424,8 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 
 	protected void setVersion() {
 		version = VersionCounter.getNextVersion();
-		resourceUri = Module.constructResourceUri(ModuleUriUtil
-				.extractModuleNameFromResourceUri(resourceUri) + "/" + version);
+		resourceUri = Module.constructResourceUri(ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri) + "/"
+				+ version);
 	}
 
 	protected void setIsLatestVersion(int lastVersion) {
@@ -429,8 +472,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 		return published;
 	}
 
-	protected String computeParameterValue(String key)
-			throws ValidationException {
+	protected String computeParameterValue(String key) throws ValidationException {
 		ModuleParameter parameter = getParameter(key);
 		String value = (parameter == null ? null : parameter.getValue());
 		if (value == null) {
@@ -450,7 +492,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> {
 	protected Module copyTo(Module copy) throws ValidationException {
 		copy = (Module) super.copyTo(copy);
 
-		if(getCommit() != null) {
+		if (getCommit() != null) {
 			copy.setCommit(getCommit().copy());
 		}
 		copy.setCustomVersion(getCustomVersion());
