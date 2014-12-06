@@ -299,8 +299,7 @@ public class RunTest extends RunTestBase {
 		dontfindit.store();
 		Metadata run3 = createAndStoreRun(dontfindit, RunType.Machine);
 
-		List<RunView> runList = Run.viewList(findit.getResourceUri(), new User(
-				"user"));
+		List<RunView> runList = Run.viewList(new User("user"), findit.getResourceUri());
 
 		assertEquals(2, runList.size());
 
@@ -327,8 +326,7 @@ public class RunTest extends RunTestBase {
 		Run myOtherRun = createAndStoreRun(image, RunType.Machine);
 		Run notMyRun = createAndStoreRun(image, "other", RunType.Machine);
 
-		List<RunView> runList = Run.viewList(image.getResourceUri(), new User(
-				"user"));
+		List<RunView> runList = Run.viewList(new User("user"), image.getResourceUri());
 
 		assertEquals(2, runList.size());
 

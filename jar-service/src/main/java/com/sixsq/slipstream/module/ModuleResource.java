@@ -65,7 +65,7 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.ProjectModule;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.resource.ParameterizedResource;
-import com.sixsq.slipstream.run.RunView.RunViewList;
+import com.sixsq.slipstream.run.RunViewList;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -651,19 +651,16 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@Override
-	protected void addParametersForEditing() throws ValidationException,
-			ConfigurationException {
-
+	protected void addParametersForEditing() throws ValidationException, ConfigurationException {
 		ParametersFactory.addParametersForEditing(getParameterized());
 	}
 
 	@Override
-	protected Module prepareForSerialization() throws ConfigurationException,
-			ValidationException {
+	protected Module prepareForSerialization() throws ConfigurationException, ValidationException {
 		Module module = getParameterized();
 		// Add runs for this specific module version (will not apply to project)
-		RunViewList runs = new RunViewList(Run.viewList(
-				module.getResourceUri(), getUser()));
+		RunViewList runs = new RunViewList();
+		runs.populate(getUser(), module.getResourceUri(), 0, Run.MAX_NO_OF_ENTRIES);
 		module.setRuns(runs);
 		return module;
 	}

@@ -20,39 +20,57 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import org.simpleframework.xml.Element;
+import java.util.List;
+
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.run.RunView.RunViewList;
+import com.sixsq.slipstream.run.RunView;
 
-@Root
-public class Runs {
 
-	@Element(required=false)
-	private RunViewList runs;
+@Root(name = "runs")
+public class RunViewList {
 
-	public RunViewList getRuns() {
+	@Attribute(required=false)
+	private int offset;
+
+	@Attribute(required=false)
+	private int limit;
+
+	@Attribute(required=false)
+	private int count;
+
+	@ElementList(inline = true, required = false)
+	private List<RunView> runs;
+
+	public RunViewList() {
+	}
+
+	public List<RunView> getRuns() {
 		return runs;
 	}
 
-	public void populate(User user) throws SlipStreamException {
-		user.validate();
-		populateRuns(user, user.isSuper());
+	public void populate(User user, int offset, int limit) throws ConfigurationException, ValidationException {
+		populate(user, null, offset, limit);
 	}
 
-	public void populateRuns(User user, boolean isSuper)
+	public void populate(User user, String moduleResourceUri, int offset, int limit)
 			throws ConfigurationException, ValidationException {
-		runs = RunView.fetchListView(user, isSuper);
+		user.validate();
+		populateRuns(user, moduleResourceUri, offset, limit);
 	}
 
-	public void populateRuns(User user, boolean isSuper,
-			String moduleResourceUri) throws ConfigurationException,
-			ValidationException {
-		runs = RunView.fetchListView(moduleResourceUri, user, isSuper);
+	private void populateRuns(User user, String moduleResourceUri, int offset, int limit)
+			throws ConfigurationException, ValidationException {
+		this.offset = offset;
+		this.limit = limit;
+
+		count = RunView.fetchListViewCount(user, moduleResourceUri);
+		runs = RunView.fetchListView(user, moduleResourceUri, offset, limit);
 	}
 
 }

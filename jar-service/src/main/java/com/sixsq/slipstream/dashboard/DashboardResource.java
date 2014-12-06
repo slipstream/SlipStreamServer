@@ -9,9 +9,9 @@ package com.sixsq.slipstream.dashboard;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,15 +58,15 @@ public class DashboardResource extends BaseResource {
 		String html = HtmlUtil.toHtml(dashboard,
 				getPageRepresentation(), getUser());
 		logTimeDiff("html generation", before);
-		
+
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
 	private Dashboard computeDashboard() {
-	
+
 		Dashboard dashboard = new Dashboard();
 		try {
-			dashboard.populate(getUser());
+			dashboard.populate(getUser(), getOffset(), getLimit());
 		} catch (SlipStreamClientException e) {
 			throwClientConflicError(e.getMessage());
 		} catch (SlipStreamException e) {

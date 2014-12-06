@@ -56,7 +56,6 @@ import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class StateMachinetTest {
@@ -83,14 +82,12 @@ public class StateMachinetTest {
 	public static void tearDownAfterClass() throws ValidationException {
 		CommonTestUtil.deleteUser(user);
 		removeRuns();
-		List<RunView> runs = Run.viewListAll();
+		List<Run> runs = Run.listAll();
 		assertEquals(0, runs.size());
 	}
 
 	private static void removeRuns() throws ValidationException {
-		Run run;
-		for (RunView runView : Run.viewListAll()) {
-			run = Run.load(runView.resourceUri);
+		for (Run run : Run.listAll()) {
 			run.remove();
 		}
 	}

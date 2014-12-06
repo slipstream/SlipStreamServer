@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -85,23 +84,24 @@ public class RunView {
         }
 	}
 
-	public static RunViewList fetchListView(User user, boolean isSuper)
+	public static List<RunView> fetchListView(User user, int offset, int limit)
 			throws ConfigurationException, ValidationException {
-		return fetchListView(null, user, isSuper);
+		return fetchListView(user, null, offset, limit);
 	}
 
-	public static RunViewList fetchListView(String query, User user,
-			boolean isSuper) throws ConfigurationException, ValidationException {
-		List<RunView> list;
+	public static List<RunView> fetchListView(User user, String moduleResourceUri, int offset, int limit)
+			throws ConfigurationException, ValidationException {
+		return Run.viewList(user, moduleResourceUri, offset, limit);
+	}
 
-		if (isSuper) {
-			list = (query != null) ? Run.viewList(query, user) : Run
-					.viewListAll();
-		} else {
-			list = (query != null) ? Run.viewList(query, user) : Run
-					.viewList(user);
-		}
-		return new RunViewList(list);
+	public static int fetchListViewCount(User user)
+			throws ConfigurationException, ValidationException {
+		return fetchListViewCount(user, null);
+	}
+
+	public static int fetchListViewCount(User user, String moduleResourceUri)
+			throws ConfigurationException, ValidationException {
+		return Run.viewListCount(user, moduleResourceUri);
 	}
 
 	public RunView copy() {
@@ -152,26 +152,6 @@ public class RunView {
 
 	public String getTags() {
 		return tags;
-	}
-
-	@Root(name = "runs")
-	public static class RunViewList {
-
-		@ElementList(inline = true, required = false)
-		private List<RunView> list;
-
-		@SuppressWarnings("unused")
-		private RunViewList() {
-		}
-
-		public RunViewList(List<RunView> list) {
-			this.list = list;
-		}
-
-		public List<RunView> getList() {
-			return list;
-		}
-
 	}
 
 }

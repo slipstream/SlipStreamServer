@@ -25,18 +25,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.run.Quota;
-import com.sixsq.slipstream.run.Runs;
+import com.sixsq.slipstream.run.RunViewList;
 
 @Root
-public class Dashboard extends Runs {
+public class Dashboard {
 
 	public static class UsageElement {
 		@Attribute
@@ -68,11 +71,13 @@ public class Dashboard extends Runs {
         }
     }
 
+	@Element(required=false)
+	private RunViewList runs;
+
 	@ElementList
 	private transient List<UsageElement> usage = new ArrayList<UsageElement>();
 
-	public void populate(User user) throws SlipStreamException {
-		super.populate(user);
+	public void populate(User user, int offset, int limit) throws SlipStreamException {
 
 		user = User.loadByName(user.getName());  // ensure user is loaded from database
 
@@ -84,6 +89,14 @@ public class Dashboard extends Runs {
 
 			usage.add(new UsageElement(cloud, quota, currentUsage));
 		}
+
+		runs = getRuns(user, offset, limit);
+	}
+
+	private RunViewList getRuns(User user, int offset, int limit) throws ConfigurationException, ValidationException{
+		RunViewList runViewList = new RunViewList();
+		runViewList.populate(user, offset, limit);
+		return runViewList;
 	}
 
 }
