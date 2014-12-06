@@ -34,7 +34,6 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -245,7 +244,6 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	@Ignore
 	public void passwordSerializedForNormalUserAsSuper()
 			throws SlipStreamClientException {
 
@@ -254,9 +252,9 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		String xml = response.toString();
+		String xml = response.getEntityAsText();
 		User user = (User) SerializationUtil.fromXml(xml, User.class);
-		assertNotNull(user.getHashedPassword());
+		assertNull(user.getHashedPassword());
 	}
 
 	@Test

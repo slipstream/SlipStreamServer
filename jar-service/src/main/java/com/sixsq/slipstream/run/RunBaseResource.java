@@ -54,11 +54,7 @@ public abstract class RunBaseResource extends BaseResource {
 	}
 
 	protected boolean isAbortSet() {
-		return getGlobalAbort().isSet();
-	}
-
-	private RuntimeParameter getGlobalAbort() {
-		return loadRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY);
+		return RuntimeParameter.isAbort(getUuid());
 	}
 
 	protected RuntimeParameter loadRuntimeParameter(String key) {

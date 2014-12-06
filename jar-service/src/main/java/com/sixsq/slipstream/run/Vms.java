@@ -41,10 +41,6 @@ public class Vms {
 	}
 
 	public void populate(User user) throws SlipStreamException {
-		populateVms(user);
-	}
-
-	private void populateVms(User user) throws SlipStreamException {
 		vms = Vm.list(user.getName());
 	}
 }

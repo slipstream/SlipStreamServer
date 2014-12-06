@@ -20,7 +20,9 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +33,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.simpleframework.xml.Attribute;
@@ -40,15 +43,17 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit tests:
- *
+ * 
  * @see RuntimeParameterTest
- *
+ * 
  */
 @Entity
 @SuppressWarnings("serial")
 @NamedQueries({
 		@NamedQuery(name = "getParameterByInstanceId", query = "SELECT p FROM RuntimeParameter p WHERE p.key_ = 'instanceid' AND p.value = :instanceid"),
-		@NamedQuery(name = "getValueByResourceUri", query = "SELECT p.value FROM RuntimeParameter p WHERE p.resourceUri = ':resourceuri'") })
+		@NamedQuery(name = "isSet", query = "SELECT p.isSet FROM RuntimeParameter p WHERE p.resourceUri = :resourceuri"),
+		@NamedQuery(name = "getValueAndSet", query = "SELECT p.value, p.isSet FROM RuntimeParameter p WHERE p.resourceUri = :resourceuri"),
+		@NamedQuery(name = "getValueByResourceUri", query = "SELECT p.value FROM RuntimeParameter p WHERE p.resourceUri = :resourceuri") })
 public class RuntimeParameter extends Metadata {
 
 	// Define the constants for properties:
@@ -73,45 +78,36 @@ public class RuntimeParameter extends Metadata {
 	public final static String ABORT_DESCRIPTION = "Machine abort flag, set when aborting";
 
 	public final static String GLOBAL_NAMESPACE = "ss";
-	public final static String GLOBAL_NAMESPACE_PREFIX = GLOBAL_NAMESPACE
-			+ NODE_PROPERTY_SEPARATOR;
+	public final static String GLOBAL_NAMESPACE_PREFIX = GLOBAL_NAMESPACE + NODE_PROPERTY_SEPARATOR;
 
-	public final static String GLOBAL_ABORT_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ ABORT_KEY;
+	public final static String GLOBAL_ABORT_KEY = GLOBAL_NAMESPACE_PREFIX + ABORT_KEY;
 	public final static String GLOBAL_ABORT_DESCRIPTION = "Run abort flag, set when aborting";
 
-	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ STATE_KEY;
+	public final static String GLOBAL_STATE_KEY = GLOBAL_NAMESPACE_PREFIX + STATE_KEY;
 	public final static String GLOBAL_STATE_DESCRIPTION = "Global execution state";
 
-	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ "category";
+	public final static String GLOBAL_CATEGORY_KEY = GLOBAL_NAMESPACE_PREFIX + "category";
 
-	public final static String GLOBAL_URL_SERVICE_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ "url.service";
+	public final static String GLOBAL_URL_SERVICE_KEY = GLOBAL_NAMESPACE_PREFIX + "url.service";
 	public final static String GLOBAL_URL_SERVICE_DESCRIPTION = "Optional service URL for the deployment";
 
 	public static final String TAGS_KEY = "tags";
 	public static final String TAGS_DESCRIPTION = "Tags (comma separated) or annotations for this VM";
 
-	public static final String GLOBAL_TAGS_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ TAGS_KEY;
+	public static final String GLOBAL_TAGS_KEY = GLOBAL_NAMESPACE_PREFIX + TAGS_KEY;
 	public static final String GLOBAL_TAGS_DESCRIPTION = "Comma separated tag values";
 
 	public static final String NODE_GROUPS_KEY = "groups";
-	public static final String GLOBAL_NODE_GROUPS_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ NODE_GROUPS_KEY;
+	public static final String GLOBAL_NODE_GROUPS_KEY = GLOBAL_NAMESPACE_PREFIX + NODE_GROUPS_KEY;
 	public static final String GLOBAL_NODE_GROUPS_DESCRIPTION = "Comma separated node groups";
 
 	public static final String COMPLETE_KEY = "complete";
 	public static final String COMPLETE_DESCRIPTION = "'true' when current state is completed";
 
-	public static final String GLOBAL_COMPLETE_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ COMPLETE_KEY;
+	public static final String GLOBAL_COMPLETE_KEY = GLOBAL_NAMESPACE_PREFIX + COMPLETE_KEY;
 	public static final String GLOBAL_COMPLETE_DESCRIPTION = "Global complete flag, set when run completed";
 
-	public final static String GLOBAL_RECOVERY_MODE_KEY = GLOBAL_NAMESPACE_PREFIX
-			+ "recovery.mode";
+	public final static String GLOBAL_RECOVERY_MODE_KEY = GLOBAL_NAMESPACE_PREFIX + "recovery.mode";
 	public final static String GLOBAL_RECOVERY_MDDE_DESCRIPTION = "Run abort flag, set when aborting";
 
 	public final static String IMAGE_ID_PARAMETER_NAME = "image.id";
@@ -123,7 +119,7 @@ public class RuntimeParameter extends Metadata {
 	public final static String IDS_PARAMETER_NAME = "ids";
 	public final static String IDS_PARAMETER_DESCRIPTION = "IDs of the machines in a mutable deployment.";
 
-	public static final String INSTANCE_ID_KEY = "instanceid";
+	public static final String INSTANCE_ID_KEY = SpecialValues.instanceid.name();
 	public static final String INSTANCE_ID_DESCRIPTION = "Cloud instance id";
 
 	public static final String HOSTNAME_KEY = "hostname";
@@ -135,8 +131,8 @@ public class RuntimeParameter extends Metadata {
 	public static final String URL_SSH_KEY = "url.ssh";
 	public static final String URL_SSH_DESCRIPTION = "SSH URL to connect to virtual machine";
 
-    public static final String URL_SERVICE_KEY = "url.service";
-    public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
+	public static final String URL_SERVICE_KEY = "url.service";
+	public static final String URL_SERVICE_DESCRIPTION = "Optional service URL for virtual machine";
 
 	public static final String IS_ORCHESTRATOR_KEY = "is.orchestrator";
 	public static final String IS_ORCHESTRATOR_DESCRIPTION = "True if it's an orchestrator";
@@ -151,20 +147,15 @@ public class RuntimeParameter extends Metadata {
 
 	public final static String NODE_NAME_REGEX = "\\w+[\\w\\d]*";
 
-	public final static Pattern NODE_NAME_ONLY_PATTERN = Pattern.compile("^("
-			+ NODE_NAME_REGEX + ")*$");
+	public final static Pattern NODE_NAME_ONLY_PATTERN = Pattern.compile("^(" + NODE_NAME_REGEX + ")*$");
 
-	private final static String ORCHESTRATOR_INSTANCE_NAME_REGEX = Run.ORCHESTRATOR_NAME
-			+ "(-\\w[-\\w]*)?";
+	private final static String ORCHESTRATOR_INSTANCE_NAME_REGEX = Run.ORCHESTRATOR_NAME + "(-\\w[-\\w]*)?";
 
-	private final static Pattern NODE_NAME_PART_PATTERN = Pattern
-			.compile("(" + NODE_NAME_REGEX + "(\\.\\d+)?)|("
-					+ RuntimeParameter.GLOBAL_NAMESPACE + ")|("
-					+ ORCHESTRATOR_INSTANCE_NAME_REGEX + ")|("
-					+ Run.MACHINE_NAME + ")");
+	private final static Pattern NODE_NAME_PART_PATTERN = Pattern.compile("(" + NODE_NAME_REGEX + "(\\.\\d+)?)|("
+			+ RuntimeParameter.GLOBAL_NAMESPACE + ")|(" + ORCHESTRATOR_INSTANCE_NAME_REGEX + ")|(" + Run.MACHINE_NAME
+			+ ")");
 
-	private static final Pattern NAME_PATTERN = Pattern
-			.compile("\\w[\\w\\d\\.-]*");
+	private static final Pattern NAME_PATTERN = Pattern.compile("\\w[\\w\\d\\.-]*");
 
 	public static final String NODE_NAME_KEY = "nodename";
 	public static final String NODE_NAME_DESCRIPTION = "Nodename";
@@ -172,17 +163,18 @@ public class RuntimeParameter extends Metadata {
 	public static final String NODE_ID_DESCRIPTION = "Node instance id";
 
 	public enum ScaleStates {
-	    creating,
-	    created,
-	    operational,
-	    removing,
-	    removed,
-	    gone
+		creating, created, operational, removing, removed, gone
+	}
+
+	public enum SpecialValues {
+		instanceid
 	}
 
 	public static final String SCALE_STATE_KEY = "scale.state";
 	public static final String SCALE_STATE_DEFAULT_VALUE = ScaleStates.creating.name();
 	public static final String SCALE_STATE_DESCRIPTION = "Defined scalability state";
+
+	public static final List<String> SPECIAL_PARAMETERS = Arrays.asList(RuntimeParameter.INSTANCE_ID_KEY);
 
 	public static String extractNodeNamePart(String name) {
 		if (!name.contains(NODE_PROPERTY_SEPARATOR)) {
@@ -208,8 +200,7 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	public static String constructParamName(String nodeName, int nodeInstanceId, String paramname) {
-		String prefix = constructNodeInstanceName(nodeName, nodeInstanceId)
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+		String prefix = constructNodeInstanceName(nodeName, nodeInstanceId) + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 		return prefix + paramname;
 	}
 
@@ -260,8 +251,7 @@ public class RuntimeParameter extends Metadata {
 	private RuntimeParameter() {
 	}
 
-	public RuntimeParameter(Run run, String key, String value,
-			String description) throws ValidationException {
+	public RuntimeParameter(Run run, String key, String value, String description) throws ValidationException {
 		this.container = run;
 		this.key_ = key;
 		this.value = value;
@@ -297,9 +287,8 @@ public class RuntimeParameter extends Metadata {
 
 		Matcher matcher = KEY_PATTERN.matcher(key_);
 		if (!matcher.matches()) {
-			String error = String
-					.format("invalid runtime parameter name: %s.  Should match the following regex: %s",
-							key_, KEY_PATTERN);
+			String error = String.format("invalid runtime parameter name: %s.  Should match the following regex: %s",
+					key_, KEY_PATTERN);
 			throwValidationException(error);
 		}
 
@@ -308,14 +297,12 @@ public class RuntimeParameter extends Metadata {
 
 		matcher = NODE_NAME_PART_PATTERN.matcher(nodeNamePart);
 		if (!matcher.matches()) {
-			throwValidationException("invalid node specification: "
-					+ nodeNamePart);
+			throwValidationException("invalid node specification: " + nodeNamePart);
 		}
 
 		matcher = NAME_PATTERN.matcher(keyNamePart);
 		if (!matcher.matches()) {
-			throwValidationException("invalid parameter name specification: "
-					+ keyNamePart);
+			throwValidationException("invalid parameter name specification: " + keyNamePart);
 		}
 
 	}
@@ -329,6 +316,7 @@ public class RuntimeParameter extends Metadata {
 		if (GLOBAL_NAMESPACE.equals(group_)) {
 			group_ = "Global";
 		}
+		setValue(value);
 	}
 
 	public boolean isMappedValue() {
@@ -376,7 +364,13 @@ public class RuntimeParameter extends Metadata {
 	public void setValue(String value) {
 		setIsSet(!"".equals(value));
 		this.value = value;
-		updateMappedRuntimeParameters();
+		processValue();
+	}
+
+	private void processValue() {
+		if (isMapsOthers()) {
+			updateMappedRuntimeParameters();
+		}
 	}
 
 	public void setGroup(String group) {
@@ -410,22 +404,15 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	private void updateMappedRuntimeParameters() {
-		if (!isMapsOthers()) {
-			return;
-		}
-
-		for (String mappedRuntimaParameterName : getMappedRuntimeParameterNames()
-				.split(",")) {
-			RuntimeParameter mappedRuntimeParameter = getContainer()
-					.getRuntimeParameters().get(
-							mappedRuntimaParameterName.trim());
+		for (String mappedRuntimaParameterName : getMappedRuntimeParameterNames().split(",")) {
+			RuntimeParameter mappedRuntimeParameter = getContainer().getRuntimeParameters().get(
+					mappedRuntimaParameterName.trim());
 			mappedRuntimeParameter.setValue(getValue());
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<RuntimeParameter> listRuntimeParameterByInstanceId(
-			String instanceId) {
+	public static List<RuntimeParameter> listRuntimeParameterByInstanceId(String instanceId) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("getParameterByInstanceId");
 		q.setParameter("instanceid", instanceId);
@@ -455,14 +442,32 @@ public class RuntimeParameter extends Metadata {
 		return this.name_;
 	}
 
-//	public static String queryValue(
-//			String resourceUri) {
-//		EntityManager em = PersistenceUtil.createEntityManager();
-//		Query q = em.createNamedQuery("getValueByResourceUri");
-//		q.setParameter("resourceuri", resourceUri);
-//		String res = (String) q.getSingleResult();
-//		em.close();
-//		return res;
-//	}
+	public static boolean isAbort(String runId) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = em.createNamedQuery("isSet");
+		q.setParameter("resourceuri", "run/" + runId + "/ss:abort");
+		boolean res = (Boolean) q.getSingleResult();
+		em.close();
+		return res;
+	}
+
+	public static Properties getValueAndSet(String runId, String key) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = em.createNamedQuery("getValueAndSet");
+		q.setParameter("resourceuri", "run/" + runId + "/" + key);
+		Properties valueAndSet = null;
+		try {
+			Object res = q.getSingleResult();
+			valueAndSet = new Properties();
+			Object[] objs = (Object[]) res;
+			String value = (String) objs[0];
+			boolean isSet = (Boolean) objs[1];
+			valueAndSet.put("value", value);
+			valueAndSet.put("isSet", isSet);
+		} catch (NoResultException ex) {
+		}
+		em.close();
+		return valueAndSet;
+	}
 
 }
