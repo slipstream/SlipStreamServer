@@ -88,6 +88,14 @@ public class RunListResource extends BaseResource {
 		return new StringRepresentation(result);
 	}
 
+	@Get("json")
+	public Representation toJson() {
+
+		RunViewList runViewList = fetchListView();
+		String result = SerializationUtil.toJsonString(runViewList);
+		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
+	}
+
 	@Get("xml")
 	public Representation toXml() {
 

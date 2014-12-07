@@ -34,6 +34,8 @@ import javax.persistence.OneToOne;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
+import flexjson.JSON;
+
 @Entity
 @SuppressWarnings("serial")
 public class Commit implements Serializable {
@@ -43,6 +45,7 @@ public class Commit implements Serializable {
 	Long id;
 
 	@OneToOne
+	@JSON(include=false)
 	private Module guardedModule;
 
 	@Attribute(required=false)

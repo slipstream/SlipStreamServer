@@ -399,6 +399,7 @@ public abstract class RunFactory {
 
 	public static String[] getCloudServiceNames(Run run)
 			throws ValidationException {
+		
 		return run.getCloudServiceNamesList();
 	}
 

@@ -20,13 +20,7 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -43,9 +37,6 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
@@ -297,22 +288,41 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		setEmptyEntity(MediaType.APPLICATION_XML);
 	}
 
+	@Put("json")
+	public void updateOrCreateFromJson(Representation entity)
+			throws ResourceException {
+
+		Module module = jsonToModule();
+
+		updateOrCreate(module);
+
+		if (!isExisting()) {
+			getResponse().setStatus(Status.SUCCESS_CREATED);
+		}
+		getResponse().setLocationRef("/" + module.getResourceUri());
+		setEmptyEntity(MediaType.APPLICATION_JSON);
+	}
+
 	private Module xmlToModule() {
-		return xmlToModule(extractXml());
+		return xmlToModule(extractEntityAsText());
 	}
 
 	private Module xmlToModule(String xml) {
 
+		String category = null;
+		try {
+			category = SerializationUtil.extractCategoryFromXmlEntity(xml);
+		} catch (SlipStreamClientException e) {
+			throwClientBadRequest(e.getMessage());
+		}
+		Class<? extends Module> moduleClass = getModuleClass(category);
+
 		String denormalized = XmlUtil.denormalize(xml);
-
-		Class<? extends Module> moduleClass = getModuleClass(denormalized);
-
 		Module module = null;
 		try {
 			module = (Module) SerializationUtil.fromXml(denormalized,
 					moduleClass);
 		} catch (SlipStreamClientException e) {
-			e.printStackTrace();
 			throwClientBadRequest("Invalid xml module: " + e.getMessage());
 		}
 
@@ -324,8 +334,33 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		return module;
 	}
 
-	private String extractXml() {
-		return getRequest().getEntityAsText();
+	private Module jsonToModule() {
+		return jsonToModule(extractEntityAsText());
+	}
+
+	private Module jsonToModule(String json) {
+
+		String category = null;
+		try {
+			category = SerializationUtil.extractCategoryFromXmlEntity(json);
+		} catch (SlipStreamClientException e) {
+			throwClientBadRequest(e.getMessage());
+		}
+		Class<? extends Module> moduleClass = getModuleClass(category);
+
+		Module module = null;
+		try {
+			module = (Module) SerializationUtil.fromJson(json, moduleClass);
+		} catch (SlipStreamClientException e) {
+			throwClientBadRequest("Invalid json module: " + e.getMessage());
+		}
+
+		// Reset user
+		module.getAuthz().setUser(getUser().getName());
+
+		module.postDeserialization();
+
+		return module;
 	}
 
 	private void updateOrCreate(Module module) {
@@ -369,21 +404,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Class<? extends Module> getModuleClass(String moduleAsXml) {
-
-		String category = null;
-		try {
-			category = extractCategory(moduleAsXml);
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-			throwServerError("Failed to parse module");
-		} catch (SAXException e) {
-			e.printStackTrace();
-			throwClientBadRequest("Invalid xml document");
-		} catch (IOException e) {
-			e.printStackTrace();
-			throwServerError("Failed to parse module");
-		}
+	private Class<? extends Module> getModuleClass(String category) {
 
 		String className = "com.sixsq.slipstream.persistence." + category
 				+ "Module";
@@ -394,18 +415,6 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientBadRequest("Unknown category");
 		}
 		return moduleClass;
-	}
-
-	protected String extractCategory(String moduleAsXml)
-			throws ParserConfigurationException, SAXException, IOException {
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db;
-		db = dbf.newDocumentBuilder();
-		StringReader reader = new StringReader(moduleAsXml);
-		Document document = db.parse(new InputSource(reader));
-
-		return document.getDocumentElement().getAttributes()
-				.getNamedItem("category").getNodeValue();
 	}
 
 	protected String getContent(FileItem fi) {
