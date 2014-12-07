@@ -20,6 +20,7 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -154,8 +155,9 @@ public class RunView {
 		return tags;
 	}
 
+	@SuppressWarnings("serial")
 	@Root(name = "runs")
-	public static class RunViewList {
+	public static class RunViewList implements Serializable {
 
 		@ElementList(inline = true, required = false)
 		private List<RunView> list;

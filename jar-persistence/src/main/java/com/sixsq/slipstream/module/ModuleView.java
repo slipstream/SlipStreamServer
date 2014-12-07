@@ -20,6 +20,7 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -73,8 +74,9 @@ public class ModuleView {
 		this.authz = authz;
 	}
 
+	@SuppressWarnings("serial")
 	@Root(name = "list")
-	public static class ModuleViewList {
+	public static class ModuleViewList implements Serializable {
 
 		@ElementList(inline = true, required = false)
 		private final List<ModuleView> list;

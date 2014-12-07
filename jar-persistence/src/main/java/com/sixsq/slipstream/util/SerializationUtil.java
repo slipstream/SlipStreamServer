@@ -22,6 +22,7 @@ package com.sixsq.slipstream.util;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -50,8 +51,8 @@ import flexjson.JSONSerializer;
 
 public class SerializationUtil {
 
-	public static Metadata fromXml(String contents,
-			Class<? extends Metadata> resultClass)
+	public static Serializable fromXml(String contents,
+			Class<? extends Serializable> resultClass)
 			throws SlipStreamClientException {
 
 		try {
@@ -171,8 +172,8 @@ public class SerializationUtil {
 
 	}
 
-	public static Metadata fromJson(String contents,
-			Class<? extends Metadata> resultClass)
+	public static Serializable fromJson(String contents,
+			Class<? extends Serializable> resultClass)
 			throws SlipStreamClientException {
 
 		try {
@@ -184,7 +185,7 @@ public class SerializationUtil {
 
 	}
 
-	public static String toJsonString(Object obj) {
+	public static String toJsonString(Serializable obj) {
 		JSONSerializer serializer = new JSONSerializer();
 		return serializer.exclude("*.class").deepSerialize(obj);
 	}

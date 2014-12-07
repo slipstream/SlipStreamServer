@@ -20,6 +20,7 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,8 +31,9 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 
+@SuppressWarnings("serial")
 @Root
-public class Vms {
+public class Vms implements Serializable {
 
 	@ElementList(inline = true)
 	private List<Vm> vms = new ArrayList<Vm>();
