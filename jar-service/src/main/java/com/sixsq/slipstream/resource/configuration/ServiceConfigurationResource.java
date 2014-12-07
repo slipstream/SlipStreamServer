@@ -48,7 +48,7 @@ public class ServiceConfigurationResource extends
 
 	private Configuration configuration;
 
-	@Put
+	@Put("form")
 	public void update(Representation entity) {
 
 		try {

@@ -38,7 +38,9 @@ import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-// The mapping between a parameterized class and its associated
+import flexjson.JSON;
+
+// The mapping between a parameterized class and its associated 
 // parameter type must be given here.
 //
 // Type S = the subclass of Parameterized and
@@ -115,6 +117,7 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 		return filteredParameters;
 	}
 
+	@JSON(include = false)
 	public Collection<T> getParameterList() {
 		return getParameters().values();
 	}

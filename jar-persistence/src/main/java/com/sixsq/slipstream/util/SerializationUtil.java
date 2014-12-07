@@ -22,6 +22,7 @@ package com.sixsq.slipstream.util;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,6 +34,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.w3c.dom.Document;
@@ -43,10 +46,13 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.persistence.Metadata;
 
+import flexjson.JSONDeserializer;
+import flexjson.JSONSerializer;
+
 public class SerializationUtil {
 
-	public static Metadata fromXml(String contents,
-			Class<? extends Metadata> resultClass)
+	public static Serializable fromXml(String contents,
+			Class<? extends Serializable> resultClass)
 			throws SlipStreamClientException {
 
 		try {
@@ -69,7 +75,8 @@ public class SerializationUtil {
 
 		} catch (Exception e) {
 			throw new SlipStreamInternalException(
-					"cannot serialize object to string, with detail: " + e.getMessage(), e);
+					"cannot serialize object to string, with detail: "
+							+ e.getMessage(), e);
 		} finally {
 			writer.close();
 		}
@@ -128,5 +135,58 @@ public class SerializationUtil {
 			writer.close();
 		}
 
+	}
+
+	public static String extractCategoryFromXmlEntity(String xml)
+			throws SlipStreamClientException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db;
+		Document document = null;
+		try {
+			db = dbf.newDocumentBuilder();
+			StringReader reader = new StringReader(xml);
+			document = db.parse(new InputSource(reader));
+		} catch (ParserConfigurationException e) {
+			throw new SlipStreamClientException(e.getMessage());
+		} catch (SAXException e) {
+			throw new SlipStreamClientException(e.getMessage());
+		} catch (IOException e) {
+			throw new SlipStreamClientException(e.getMessage());
+		}
+
+		return document.getDocumentElement().getAttributes()
+				.getNamedItem("category").getNodeValue();
+	}
+
+	public static String extractCategoryFromJsonEntity(String json)
+			throws SlipStreamClientException {
+
+		JSONObject obj = new JSONObject(json);
+		String category = null;
+		try {
+			category = obj.getString("category");
+		} catch (JSONException e) {
+			throw new SlipStreamClientException(e.getMessage());
+		}
+		return category;
+
+	}
+
+	public static Serializable fromJson(String contents,
+			Class<? extends Serializable> resultClass)
+			throws SlipStreamClientException {
+
+		try {
+			return new JSONDeserializer<Metadata>().use(null, resultClass)
+					.deserialize(contents);
+		} catch (Exception e) {
+			throw new SlipStreamClientException("cannot deserialize object", e);
+		}
+
+	}
+
+	public static String toJsonString(Serializable obj) {
+		JSONSerializer serializer = new JSONSerializer();
+		return serializer.exclude("*.class").deepSerialize(obj);
 	}
 }

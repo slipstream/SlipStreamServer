@@ -364,7 +364,6 @@ public abstract class ConnectorBase implements Connector {
      * Implement in connector class if extra parameters are required to be set during
      * XML serialization of the User object when UserResource is called to get XML.
      */
-    @Override
     public void setExtraUserParameters(User user) throws ValidationException {
     }
 
@@ -447,7 +446,6 @@ public abstract class ConnectorBase implements Connector {
         }
     }
 
-    @Override
     public boolean isCredentialsSet(User user) {
     	String key = getKey(user);
     	String secret = getSecret(user);

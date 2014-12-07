@@ -78,6 +78,26 @@ public class RunResource extends RunBaseResource {
 
 	}
 
+	@Get("json")
+	public Representation toJson() throws NotFoundException,
+			ValidationException, ConfigurationException {
+
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Run run;
+		String json;
+		try {
+			run = constructRun(em, true);
+			json = SerializationUtil.toJsonString(run);
+		} catch (SlipStreamClientException e) {
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
+					e.getMessage());
+		} finally {
+			em.close();
+		}
+
+		return new StringRepresentation(json, MediaType.APPLICATION_JSON);
+	}
+
 	@Get("xml")
 	public Representation toXml() throws NotFoundException,
 			ValidationException, ConfigurationException {
@@ -109,7 +129,7 @@ public class RunResource extends RunBaseResource {
 
 	@Get("html")
 	public Representation toHtml() throws ConfigurationException,
-			 ValidationException {
+			ValidationException {
 
 		long start = System.currentTimeMillis();
 		long before;
@@ -175,7 +195,7 @@ public class RunResource extends RunBaseResource {
 			Terminator.terminate(this.run.getResourceUri());
 
 		} catch (CannotAdvanceFromTerminalStateException e) {
-		} catch (InvalidStateException e){
+		} catch (InvalidStateException e) {
 			throwClientConflicError(e.getMessage());
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());

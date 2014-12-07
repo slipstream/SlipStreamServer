@@ -29,10 +29,8 @@ import com.sixsq.slipstream.persistence.UserParameter;
 
 public abstract class CredentialsBase implements Credentials {
 
-	@Override
 	abstract public String getKey() throws InvalidElementException;
 
-	@Override
 	abstract public String getSecret() throws InvalidElementException;
 
 	protected User user;
@@ -42,7 +40,6 @@ public abstract class CredentialsBase implements Credentials {
 		this.user = user;
 	}
 
-	@Override
 	public void validate() throws ValidationException {
 		try {
 			if(!Parameter.hasValueSet(getKey())) {

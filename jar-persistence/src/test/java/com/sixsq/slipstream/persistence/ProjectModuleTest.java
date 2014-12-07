@@ -38,7 +38,6 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleView;
 import com.sixsq.slipstream.util.ModuleTestUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ProjectModuleTest {
 
@@ -187,17 +186,6 @@ public class ProjectModuleTest {
 		module2.remove();
 		module3.remove();
 		parent.remove();
-	}
-
-	@Test
-	public void checkModuleSerialization() throws ValidationException {
-
-		Module module = new ProjectModule("module1");
-		module.store();
-
-		SerializationUtil.toXmlString(module);
-
-		module.remove();
 	}
 
 	@Test

@@ -257,6 +257,7 @@ public class CookieTest extends ResourceTestBase {
 
 		Request request = createRequest(attributes, Method.GET, null, null, cookie);
 		request.setClientInfo(getClientInfo());
+		request.getClientInfo().accept(MediaType.APPLICATION_XML);
 		Response response = executeRequest(request, new UserResource());
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));

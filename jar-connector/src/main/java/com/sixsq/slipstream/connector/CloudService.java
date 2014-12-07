@@ -9,5 +9,4 @@ public class CloudService {
 				|| CloudImageIdentifier.DEFAULT_CLOUD_SERVICE.equals(cloudServiceName)
 				|| cloudServiceName == null;
 	}
-
 }
