@@ -123,6 +123,7 @@ public class VmRuntimeParameterMappingTest {
 		Vm.update(Arrays.asList(vm), user.getName(), cloudName);
 		mapping = VmRuntimeParameterMapping.findRuntimeParameter("local", instanceId);
 		assertThat(mapping.getRunUuid(), is(run.getUuid()));
+		assertThat(vm.getRunUuid(), is(run.getUuid()));
 		assertThat(mapping.getRuntimeParameter().getValue(), is(instanceId));
 		assertThat(
 				RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
