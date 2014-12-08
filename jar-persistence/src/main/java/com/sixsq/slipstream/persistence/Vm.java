@@ -46,6 +46,8 @@ import org.simpleframework.xml.Attribute;
 @NamedQueries({
 			@NamedQuery(name = "byUser", query = "SELECT v FROM Vm v WHERE v.user_ = :user"),
 			@NamedQuery(name = "byUserCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user"),
+			@NamedQuery(name = "byUserByCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
+			@NamedQuery(name = "byUserByCloudCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
 			@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on', 'active', 'Active') AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
 			@NamedQuery(name = "removeByUser", query = "DELETE Vm WHERE user_ = :user AND cloud = :cloud") })
 public class Vm {
@@ -87,17 +89,21 @@ public class Vm {
 	}
 
 	public static List<Vm> list(String user) {
-		return list(user, null, null);
+		return list(user, null, null, null);
 	}
 
-	public static List<Vm> list(String user, Integer offset, Integer limit) {
+	public static List<Vm> list(String user, Integer offset, Integer limit, String cloudServiceName) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("byUser");
+		String queryName = (cloudServiceName != null) ? "byUserByCloud" : "byUser";
+		Query q = em.createNamedQuery(queryName);
 		if (offset != null) {
 			q.setFirstResult(offset);
 		}
 		if (limit != null) {
 			q.setMaxResults(limit);
+		}
+		if (cloudServiceName != null) {
+			q.setParameter("cloud", cloudServiceName);
 		}
 		q.setParameter("user", user);
 		@SuppressWarnings("unchecked")
@@ -106,10 +112,14 @@ public class Vm {
 		return vms;
 	}
 
-	public static int listCount(String user) {
+	public static int listCount(String user, String cloudServiceName) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("byUserCount");
+		String queryName = (cloudServiceName != null) ? "byUserByCloudCount" : "byUserCount";
+		Query q = em.createNamedQuery(queryName);
 		q.setParameter("user", user);
+		if (cloudServiceName != null) {
+			q.setParameter("cloud", cloudServiceName);
+		}
 		long count = (long)(Long) q.getSingleResult();
 		em.close();
 		return (int)count;

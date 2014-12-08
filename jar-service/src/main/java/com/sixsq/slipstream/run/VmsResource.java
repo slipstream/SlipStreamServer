@@ -53,7 +53,7 @@ public class VmsResource extends BaseResource {
 		Vms vms = new Vms();
 
 		try {
-			vms.populate(getUser(), getOffset(), getLimit());
+			vms.populate(getUser(), getOffset(), getLimit(), getCloud());
 		} catch (SlipStreamClientException e) {
 		} catch (SlipStreamException e) {
 		}

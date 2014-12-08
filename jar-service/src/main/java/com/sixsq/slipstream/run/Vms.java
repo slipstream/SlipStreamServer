@@ -43,6 +43,9 @@ public class Vms {
 	@Attribute(required=false)
 	private int count;
 
+	@Attribute(required=false)
+	private String cloud;
+
 	@ElementList(inline = true)
 	private List<Vm> vms = new ArrayList<Vm>();
 
@@ -50,15 +53,16 @@ public class Vms {
 		return vms;
 	}
 
-	public void populate(User user, int offset, int limit) throws SlipStreamException {
-		populateVms(user, offset, limit);
+	public void populate(User user, int offset, int limit, String cloudServiceName) throws SlipStreamException {
+		populateVms(user, offset, limit, cloudServiceName);
 	}
 
-	private void populateVms(User user, int offset, int limit) throws SlipStreamException {
+	private void populateVms(User user, int offset, int limit, String cloudServiceName) throws SlipStreamException {
 		this.offset = offset;
 		this.limit = limit;
+		this.cloud = cloudServiceName;
 
-		count = Vm.listCount(user.getName());
-		vms = Vm.list(user.getName(), offset, limit);
+		count = Vm.listCount(user.getName(), cloudServiceName);
+		vms = Vm.list(user.getName(), offset, limit, cloudServiceName);
 	}
 }

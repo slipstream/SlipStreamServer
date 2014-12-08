@@ -54,23 +54,27 @@ public class RunViewList {
 		return runs;
 	}
 
-	public void populate(User user, int offset, int limit) throws ConfigurationException, ValidationException {
-		populate(user, null, offset, limit);
+	public void populate(User user, int offset, int limit, String cloudServiceName) throws ConfigurationException, ValidationException {
+		populate(user, null, offset, limit, cloudServiceName);
 	}
 
-	public void populate(User user, String moduleResourceUri, int offset, int limit)
+	public void populate(User user, String moduleResourceUri, int offset, int limit) throws ConfigurationException, ValidationException {
+		populate(user, moduleResourceUri, offset, limit, null);
+	}
+
+	public void populate(User user, String moduleResourceUri, int offset, int limit, String cloudServiceName)
 			throws ConfigurationException, ValidationException {
 		user.validate();
-		populateRuns(user, moduleResourceUri, offset, limit);
+		populateRuns(user, moduleResourceUri, offset, limit, cloudServiceName);
 	}
 
-	private void populateRuns(User user, String moduleResourceUri, int offset, int limit)
+	private void populateRuns(User user, String moduleResourceUri, int offset, int limit, String cloudServiceName)
 			throws ConfigurationException, ValidationException {
 		this.offset = offset;
 		this.limit = limit;
 
-		count = RunView.fetchListViewCount(user, moduleResourceUri);
-		runs = RunView.fetchListView(user, moduleResourceUri, offset, limit);
+		count = RunView.fetchListViewCount(user, moduleResourceUri, cloudServiceName);
+		runs = RunView.fetchListView(user, moduleResourceUri, offset, limit, cloudServiceName);
 	}
 
 }

@@ -86,22 +86,22 @@ public class RunView {
 
 	public static List<RunView> fetchListView(User user, int offset, int limit)
 			throws ConfigurationException, ValidationException {
-		return fetchListView(user, null, offset, limit);
+		return fetchListView(user, null, offset, limit, null);
 	}
 
-	public static List<RunView> fetchListView(User user, String moduleResourceUri, int offset, int limit)
-			throws ConfigurationException, ValidationException {
-		return Run.viewList(user, moduleResourceUri, offset, limit);
+	public static List<RunView> fetchListView(User user, String moduleResourceUri, int offset, int limit,
+			String cloudServiceName) throws ConfigurationException, ValidationException {
+		return Run.viewList(user, moduleResourceUri, offset, limit, cloudServiceName);
 	}
 
 	public static int fetchListViewCount(User user)
 			throws ConfigurationException, ValidationException {
-		return fetchListViewCount(user, null);
+		return fetchListViewCount(user, null, null);
 	}
 
-	public static int fetchListViewCount(User user, String moduleResourceUri)
+	public static int fetchListViewCount(User user, String moduleResourceUri, String cloudServiceName)
 			throws ConfigurationException, ValidationException {
-		return Run.viewListCount(user, moduleResourceUri);
+		return Run.viewListCount(user, moduleResourceUri, cloudServiceName);
 	}
 
 	public RunView copy() {

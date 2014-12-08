@@ -310,4 +310,9 @@ public abstract class BaseResource extends ServerResource {
 		}
 		return limit;
 	}
+
+	protected String getCloud() {
+		Parameter cloud = getRequest().getResourceRef().getQueryAsForm().getFirst("cloud");
+		return (cloud != null)? cloud.getValue(): null;
+	}
 }
