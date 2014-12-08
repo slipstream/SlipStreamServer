@@ -54,6 +54,7 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.run.RuntimeParameterMediator;
 import com.sixsq.slipstream.util.FileUtil;
 
 public abstract class ConnectorBase implements Connector {
@@ -195,6 +196,7 @@ public abstract class ConnectorBase implements Connector {
     private void setRuntimeParameterValue(String key, String value, Run run) {
         RuntimeParameter p = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
         p.setValue(value);
+        RuntimeParameterMediator.processSpecialValue(p);
         p.store();
     }
 

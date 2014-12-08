@@ -39,9 +39,9 @@ import org.simpleframework.xml.Attribute;
 
 /**
  * Unit test:
- * 
+ *
  * @see VmTest
- * 
+ *
  */
 @Entity
 @NamedQueries({
@@ -120,12 +120,22 @@ public class Vm {
 		}
 		for (Vm v : newVmsMap.values()) {
 			Vm old = filteredOldVmMap.get(v.getInstanceId());
+			VmRuntimeParameterMapping m = getMapping(v);
 			if (old == null) {
-				setRunValues(v);
+				setRunValues(m, v);
+				setRunUuid(m, v);
 				em.persist(v);
 			} else {
+				boolean merge = false;
 				if (!v.getState().equals(old.getState())) {
 					old.setState(v.getState());
+					merge = true;
+				}
+				if (old.getRunUuid() == null) {
+					setRunUuid(m, old);
+					merge = true;
+				}
+				if (merge) {
 					old = em.merge(old);
 				}
 			}
@@ -135,10 +145,22 @@ public class Vm {
 		return removed;
 	}
 
-	private static void setRunValues(Vm v) {
-		VmRuntimeParameterMapping m = VmRuntimeParameterMapping.findRuntimeParameter(v.getCloud(), v.getInstanceId());
+	private static VmRuntimeParameterMapping getMapping(Vm v) {
+		return VmRuntimeParameterMapping.findRuntimeParameter(v.getCloud(), v.getInstanceId());
+	}
+
+	private static void setRunValues(VmRuntimeParameterMapping m, Vm v) {
 		if (m != null) {
 			m.getRuntimeParameter().setValue(v.getState());
+		}
+	}
+
+	private static void setRunUuid(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			RuntimeParameter rp = m.getRuntimeParameter();
+			if (rp != null) {
+				v.setRunUuid(rp.getContainer().getUuid());
+			}
 		}
 	}
 
@@ -159,7 +181,7 @@ public class Vm {
 	/**
 	 * This method assumes that the input VMs correspond to a single cloud.
 	 * Otherwise, duplicate instance ids would overwrite each other.
-	 * 
+	 *
 	 * @param vms
 	 *            for a single cloud
 	 * @return mapped VMs by instance id
@@ -174,7 +196,7 @@ public class Vm {
 
 	/**
 	 * Maps the VMs into list per cloud.
-	 * 
+	 *
 	 * @param vms
 	 *            for all or any cloud
 	 * @return map of VMs where the key is a cloud, and the value a list of
@@ -195,7 +217,7 @@ public class Vm {
 
 	/**
 	 * Extract for a give run id, the VMs, grouped by cloud
-	 * 
+	 *
 	 * @param runUuid
 	 * @return map of vms grouped by cloud
 	 */
