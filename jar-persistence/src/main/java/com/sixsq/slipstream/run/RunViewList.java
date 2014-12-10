@@ -44,6 +44,9 @@ public class RunViewList {
 	@Attribute(required=false)
 	private int count;
 
+	@Attribute(required=false)
+	private String cloud;
+
 	@ElementList(inline = true, required = false)
 	private List<RunView> runs;
 
@@ -72,6 +75,7 @@ public class RunViewList {
 			throws ConfigurationException, ValidationException {
 		this.offset = offset;
 		this.limit = limit;
+		this.cloud = cloudServiceName;
 
 		count = RunView.fetchListViewCount(user, moduleResourceUri, cloudServiceName);
 		runs = RunView.fetchListView(user, moduleResourceUri, offset, limit, cloudServiceName);

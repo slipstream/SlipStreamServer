@@ -57,7 +57,7 @@ public class RunView {
 	private String hostname;
 
 	@Attribute(required = false)
-	private String cloudServiceName;
+	private String cloudServiceNames;
 
 	@Attribute(required = false)
 	private String username;
@@ -69,13 +69,14 @@ public class RunView {
 	public String tags;
 
 	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
-			String status, Date startTime, String username, RunType type) {
+			String status, Date startTime, String username, RunType type, String cloudServiceNames) {
 		this.resourceUri = resourceUrl;
 		this.uuid = uuid;
 		this.moduleResourceUri = moduleResourceUri;
 		this.status = status;
 		this.username = username;
 		this.type = type;
+		this.cloudServiceNames = cloudServiceNames;
 
         if (startTime != null) {
             this.startTime = (Date) startTime.clone();
@@ -106,20 +107,19 @@ public class RunView {
 
 	public RunView copy() {
 		RunView copy = new RunView(resourceUri, uuid, moduleResourceUri,
-				status, startTime, username, type);
+				status, startTime, username, type, cloudServiceNames);
 		copy.setHostname(hostname);
 		copy.setTags(tags);
 		copy.setVmstate(vmstate);
-		copy.setCloudServiceName(cloudServiceName);
 		return copy;
 	}
 
-	public String getCloudServiceName() {
-		return cloudServiceName;
+	public String getCloudServiceNames() {
+		return cloudServiceNames;
 	}
 
-	public void setCloudServiceName(String cloudServiceName) {
-		this.cloudServiceName = cloudServiceName;
+	public void setCloudServiceNames(String cloudServiceNames) {
+		this.cloudServiceNames = cloudServiceNames;
 	}
 
 	public String getUsername() {

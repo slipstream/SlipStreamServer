@@ -82,7 +82,7 @@ public class RunListResource extends BaseResource {
 
 	@Get("txt")
 	public Representation toTxt() {
-		RunViewList runViewList = getRunViewList(getOffset(), getLimit());
+		RunViewList runViewList = getRunViewList();
 		String result = SerializationUtil.toXmlString(runViewList);
 		return new StringRepresentation(result);
 	}
@@ -90,7 +90,7 @@ public class RunListResource extends BaseResource {
 	@Get("xml")
 	public Representation toXml() {
 
-		RunViewList runViewList = getRunViewList(getOffset(), getLimit());
+		RunViewList runViewList = getRunViewList();
 		String result = SerializationUtil.toXmlString(runViewList);
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
@@ -98,19 +98,19 @@ public class RunListResource extends BaseResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		RunViewList runViewList = getRunViewList(getOffset(), getLimit());
+		RunViewList runViewList = getRunViewList();
 
 		return new StringRepresentation(HtmlUtil.toHtml(runViewList,
 				getPageRepresentation(), getTransformationType(), getUser()),
 				MediaType.TEXT_HTML);
 	}
 
-	private RunViewList getRunViewList(int offset, int limit) {
+	private RunViewList getRunViewList() {
 		String moduleResourceUri = getRequest().getResourceRef().getQueryAsForm().getFirstValue("moduleResourceUri");
 
 		RunViewList list = new RunViewList();
 		try {
-			list.populate(getUser(), moduleResourceUri, offset, limit, getCloud());
+			list.populate(getUser(), moduleResourceUri, getOffset(), getLimit(), getCloud());
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		} catch (ValidationException e) {

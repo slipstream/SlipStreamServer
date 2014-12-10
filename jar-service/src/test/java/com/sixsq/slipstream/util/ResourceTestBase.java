@@ -160,6 +160,12 @@ public class ResourceTestBase extends RunTestBase {
 		return createRequest(attributes, method);
 	}
 
+	protected Request createGetRequest(String targetUrl, Map<String, Object> attributes)
+			throws ConfigurationException, ValidationException {
+		Method method = Method.GET;
+		return createRequest(attributes, method, null, targetUrl);
+	}
+
 	protected Request createPutRequest(Map<String, Object> attributes,
 			Representation entity) throws ConfigurationException,
 			ValidationException {

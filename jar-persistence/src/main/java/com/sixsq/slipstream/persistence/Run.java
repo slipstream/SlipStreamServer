@@ -314,20 +314,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 		List<RunView> views = new ArrayList<RunView>();
 		RunView runView;
 		for (Run r : runs) {
-			// Deployment runs can span several clouds
-			// this info in held in getCloudServiceNameList()
-			// so if the list is not empty, use it and
-			// create a RunView instance for each
-			String[] cloudServiceNames = r.getCloudServiceNamesList();
-
 			runView = convertRunToRunView(r);
-
-			// For each cloud service, create a RunView entry
-			for (String csn : cloudServiceNames) {
-				RunView rv = runView.copy();
-				rv.setCloudServiceName(csn);
-				views.add(rv);
-			}
+			views.add(runView);
 		}
 		return views;
 	}
@@ -339,24 +327,20 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 
 		RunView runView;
-		runView = new RunView(run.getResourceUri(), run.getUuid(),
-				run.getModuleResourceUrl(), run.getState().toString(),
-				run.getStart(), run.getUser(), run.getType());
+		runView = new RunView(run.getResourceUri(), run.getUuid(), run.getModuleResourceUrl(), run.getState()
+				.toString(), run.getStart(), run.getUser(), run.getType(), run.getCloudServiceNames());
 		try {
-			runView.setHostname(run
-					.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-							+ RuntimeParameter.HOSTNAME_KEY));
+			runView.setHostname(run.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
+					+ RuntimeParameter.HOSTNAME_KEY));
 		} catch (NotFoundException e) {
 		}
 		try {
-			runView.setVmstate(run
-					.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-							+ RuntimeParameter.STATE_VM_KEY));
+			runView.setVmstate(run.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
+					+ RuntimeParameter.STATE_VM_KEY));
 		} catch (NotFoundException e) {
 		}
 		try {
-			runView.setTags(run
-					.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
+			runView.setTags(run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
 		} catch (NotFoundException e) {
 		}
 		return runView;
@@ -429,6 +413,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("moduleResourceUri"), moduleResourceUri));
 		}
 		if (cloudServiceName != null && !"".equals(cloudServiceName)) {
+			// TODO: Replace the 'like' by an 'equals'
 			where = andPredicate(builder, where, builder.like(rootQuery.<String>get("cloudServiceNames"), "%" + cloudServiceName + "%"));
 		}
 		return where;
