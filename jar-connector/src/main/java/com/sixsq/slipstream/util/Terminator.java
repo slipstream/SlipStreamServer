@@ -17,6 +17,8 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
@@ -30,27 +32,34 @@ public class Terminator {
 
 	/* I WILL BE BACK */
 
+	private static MetricsTimer purgeTimer = Metrics.newTimer(Terminator.class, "purge");
+
 	public static int purge() throws ConfigurationException, ValidationException {
 		int runPurged =0;
 
-		List<User> users = User.list();
-		for (User u: users) {
-			u = User.loadByName(u.getName());
-			int timeout = u.getTimeout();
+		purgeTimer.start();
+		try {
+			List<User> users = User.list();
+			for (User u: users) {
+				u = User.loadByName(u.getName());
+				int timeout = u.getTimeout();
 
-			List<Run> old = Run.listOldTransient(u, timeout);
-			for (Run r : old) {
-				EntityManager em = PersistenceUtil.createEntityManager();
-				try {
-					r = Run.load(r.getResourceUri(), em);
-					purgeRun(r);
-				} catch (SlipStreamException e) {
-					Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
-				} finally {
-					em.close();
+				List<Run> old = Run.listOldTransient(u, timeout);
+				for (Run r : old) {
+					EntityManager em = PersistenceUtil.createEntityManager();
+					try {
+						r = Run.load(r.getResourceUri(), em);
+						purgeRun(r);
+					} catch (SlipStreamException e) {
+						Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
+					} finally {
+						em.close();
+					}
 				}
+				runPurged += old.size();
 			}
-			runPurged += old.size();
+		} finally {
+			purgeTimer.stop();
 		}
 
 		return runPurged;
