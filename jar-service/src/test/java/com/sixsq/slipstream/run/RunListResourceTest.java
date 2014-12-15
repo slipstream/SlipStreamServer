@@ -93,10 +93,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 	}
 
-	@AfterClass
-	public static void teardownClass() throws ConfigurationException,
-			ValidationException {
-
+	private static void removeAllRuns() throws ConfigurationException, ValidationException {
 		for (Run r : Run.listAll()) {
 			try {
 				r.remove();
@@ -104,6 +101,13 @@ public class RunListResourceTest extends ResourceTestBase {
 
 			}
 		}
+	}
+
+	@AfterClass
+	public static void teardownClass() throws ConfigurationException,
+			ValidationException {
+
+		removeAllRuns();
 
 	}
 
@@ -144,6 +148,8 @@ public class RunListResourceTest extends ResourceTestBase {
 
 	@Test
 	public void testPagination() throws ValidationException, SAXException, ParserConfigurationException, IOException {
+		removeAllRuns();
+
 		Set<String> cloudServiceNamesA = new HashSet<String>();
 		cloudServiceNamesA.add("CloudA");
 		Set<String> cloudServiceNamesB = new HashSet<String>();
