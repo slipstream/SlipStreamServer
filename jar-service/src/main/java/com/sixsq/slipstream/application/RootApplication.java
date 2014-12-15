@@ -59,6 +59,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.metrics.GraphiteRouter;
+import com.sixsq.slipstream.metrics.Metrics;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
@@ -103,6 +104,8 @@ public class RootApplication extends Application {
 
 		Collector.start();
 		GarbageCollector.start();
+
+		Metrics.addGraphiteReporter();
 
 		logServerStarted();
 	}
