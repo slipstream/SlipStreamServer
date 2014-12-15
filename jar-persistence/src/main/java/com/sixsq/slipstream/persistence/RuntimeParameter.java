@@ -243,7 +243,7 @@ public class RuntimeParameter extends Metadata {
 	private ParameterType type = ParameterType.String;
 
 	@Attribute(required = false)
-	@Column(length = 1024)
+	@Column(length = 65536)
 	private String mappedRuntimeParameterNames = "";
 
 	@ManyToOne
