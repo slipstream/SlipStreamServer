@@ -71,6 +71,8 @@ import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.statemachine.States;
 
@@ -275,10 +277,18 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return load(resourceUri, em);
 	}
 
+	private static final MetricsTimer loadTimer = Metrics.newTimer(Run.class, "load");
+
 	public static Run load(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run = em.find(Run.class, resourceUri);
-		em.close();
+		Run run = null;
+		try {
+			loadTimer.start();
+			run = load(resourceUri, em);
+		} finally {
+			loadTimer.stop();
+			em.close();
+		}
 		return run;
 	}
 
@@ -355,6 +365,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return viewList(user, moduleResourceUri, null, null, null);
 	}
 
+	private static final MetricsTimer viewListTimer = Metrics.newTimer(Run.class, "viewList");
+
 	public static List<RunView> viewList(User user, String moduleResourceUri, Integer offset,
 			Integer limit, String cloudServiceName) throws ConfigurationException, ValidationException {
 		List<RunView> views = null;
@@ -374,13 +386,20 @@ public class Run extends Parameterized<Run, RunParameter> {
 				query.setFirstResult(offset);
 			}
 			query.setMaxResults((limit != null)? limit : MAX_NO_OF_ENTRIES);
-			List<Run> runs = query.getResultList();
-			views = convertRunsToRunViews(runs);
+			try {
+				viewListTimer.start();
+				List<Run> runs = query.getResultList();
+				views = convertRunsToRunViews(runs);
+			} finally {
+				viewListTimer.stop();
+			}
 		} finally {
 			em.close();
 		}
 		return views;
 	}
+
+	private static final MetricsTimer viewListCountTimer = Metrics.newTimer(Run.class, "viewListCount");
 
 	public static int viewListCount(User user, String moduleResourceUri, String cloudServiceName)
 			throws ConfigurationException, ValidationException {
@@ -396,7 +415,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 				critQuery.where(where);
 			}
 			TypedQuery<Long> query = em.createQuery(critQuery);
-			count = (int)(long) query.getSingleResult();
+			try {
+				viewListCountTimer.start();
+				count = (int)(long) query.getSingleResult();
+			} finally {
+				viewListCountTimer.stop();
+			}
 		} finally {
 			em.close();
 		}
