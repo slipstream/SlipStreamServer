@@ -40,6 +40,8 @@ import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
@@ -54,23 +56,35 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	@Override
 	public void initializeSubResource() throws ResourceException {
+		getMetricsTimer().start();
+		try {
+			long start = System.currentTimeMillis();
+			long before;
 
-		long start = System.currentTimeMillis();
-		long before;
+			before = System.currentTimeMillis();
+			parseRequest();
+			logTimeDiff("parseRequest", before);
 
-		before = System.currentTimeMillis();
-		parseRequest();
-		logTimeDiff("parseRequest", before);
+			before = System.currentTimeMillis();
+			fetchRepresentation();
+			logTimeDiff("fetchRepresentation", before);
 
-		before = System.currentTimeMillis();
-		fetchRepresentation();
-		logTimeDiff("fetchRepresentation", before);
+			before = System.currentTimeMillis();
+			raiseConflictIfAbortIsSet();
+			logTimeDiff("raiseConflictIfAbortIsSet", before);
 
-		before = System.currentTimeMillis();
-		raiseConflictIfAbortIsSet();
-		logTimeDiff("raiseConflictIfAbortIsSet", before);
+			logTimeDiff("initialize on runtime parameter", start);
+		} catch(ResourceException e) {
+			getMetricsTimer().stop();
+			throw e;
+		} catch(RuntimeException e) {
+			getMetricsTimer().stop();
+			throw e;
+		}
+	}
 
-		logTimeDiff("initialize on runtime parameter", start);
+	private MetricsTimer getMetricsTimer() {
+		return Metrics.getTimer(this, "runtimeParameter" + getRequest().getMethod().getName());
 	}
 
 	private void parseRequest() {
@@ -98,60 +112,73 @@ public class RuntimeParameterResource extends RunBaseResource {
 		Run.abortOrReset(abortMessage, nodename, em, getUuid());
 	}
 
-
 	@Delete
 	public void resetRuntimeParameter() throws ResourceException {
-		runtimeParameter.setValue("");
-		runtimeParameter.setIsSet(false);
-		runtimeParameter.store();
+		//getMetricsTimer().start();
+		try {
+			runtimeParameter.setValue("");
+			runtimeParameter.setIsSet(false);
+			runtimeParameter.store();
 
-		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
+			getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
+		} finally {
+			getMetricsTimer().stop();
+		}
 	}
 
 	@Get
 	public String represent() throws ResourceException, NotFoundException,
 			ValidationException {
+		//getMetricsTimer().start();
+		try {
+			long start = System.currentTimeMillis();
 
-		long start = System.currentTimeMillis();
+			if (!runtimeParameter.isSet()) {
+				throw new ResourceException(
+						Status.CLIENT_ERROR_PRECONDITION_FAILED, "key " + key
+								+ " not yet set");
+			}
 
-		if (!runtimeParameter.isSet()) {
-			throw new ResourceException(
-					Status.CLIENT_ERROR_PRECONDITION_FAILED, "key " + key
-							+ " not yet set");
+			logTimeDiff("processing get on runtime parameter", start);
+		} finally  {
+			getMetricsTimer().stop();
 		}
 
-		logTimeDiff("processing get on runtime parameter", start);
 		return runtimeParameter.getValue();
 	}
 
 	@Put
 	public void update(Representation entity) throws ResourceException,
 			NotFoundException, ValidationException {
+		//getMetricsTimer().start();
+		try {
+			EntityManager em = PersistenceUtil.createEntityManager();
+			EntityTransaction transaction = em.getTransaction();
+			transaction.begin();
+			runtimeParameter = em.merge(runtimeParameter);
 
-		EntityManager em = PersistenceUtil.createEntityManager();
-		EntityTransaction transaction = em.getTransaction();
-		transaction.begin();
-		runtimeParameter = em.merge(runtimeParameter);
+			String value = (entity == null ? "" : extractValueFromEntity(entity));
 
-		String value = (entity == null ? "" : extractValueFromEntity(entity));
+			boolean isGlobalAbort = RuntimeParameter.GLOBAL_ABORT_KEY.equals(key);
+			boolean isNodeAbort = (runtimeParameter.getNodeName()
+					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.ABORT_KEY)
+					.equals(key);
 
-		boolean isGlobalAbort = RuntimeParameter.GLOBAL_ABORT_KEY.equals(key);
-		boolean isNodeAbort = (runtimeParameter.getNodeName()
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.ABORT_KEY)
-				.equals(key);
-
-		if (isGlobalAbort || isNodeAbort) {
-			if (!runtimeParameter.isSet()) {
-				abortOrReset(value, em);
+			if (isGlobalAbort || isNodeAbort) {
+				if (!runtimeParameter.isSet()) {
+					abortOrReset(value, em);
+					runtimeParameter.setValue(value);
+				}
+			} else {
 				runtimeParameter.setValue(value);
 			}
-		} else {
-			runtimeParameter.setValue(value);
-		}
 
-		transaction.commit();
-		em.close();
-		getResponse().setEntity(null, MediaType.ALL);
+			transaction.commit();
+			em.close();
+			getResponse().setEntity(null, MediaType.ALL);
+		} finally {
+			getMetricsTimer().stop();
+		}
 	}
 
 	private String extractValueFromEntity(Representation entity) {
@@ -166,13 +193,17 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	@Post
 	public void completeCurrentNodeState(Representation entity) {
+		//getMetricsTimer().start();
+		try {
+			String nodeName = runtimeParameter.getNodeName();
+			States newState = null;
 
-		String nodeName = runtimeParameter.getNodeName();
-		States newState = null;
+			newState = attemptCompleteCurrentNodeState(nodeName);
 
-		newState = attemptCompleteCurrentNodeState(nodeName);
-
-		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
+			getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
+		} finally {
+			getMetricsTimer().stop();
+		}
 	}
 
 	private States attemptCompleteCurrentNodeState(String nodeName) {
