@@ -64,7 +64,7 @@
             (get-name user)
             " on cloud "
             (.getConnectorInstanceName connector))
-          (log/log-info "Number of VMs collected for user " (get-name user)
+          (log/log-debug "Number of VMs collected for user " (get-name user)
             " on cloud "
             (.getConnectorInstanceName connector) ": " v))))
     (go (>! ch (Collector/collect user connector)))))

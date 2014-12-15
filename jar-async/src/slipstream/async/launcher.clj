@@ -58,7 +58,7 @@
       (while true
         (let [[[run user] ch] (alts! [launcher-chan (timeout timeout-processing-loop)])]
           (if (nil? run)
-            (log/log-info "Launch reader " i " loop idle. Looping...")
+            (log/log-debug "Launch reader " i " loop idle. Looping...")
             (try
               (launch! run user)
               (catch Exception e (log/log-error "caught exception: " (.getMessage e))))))))))
