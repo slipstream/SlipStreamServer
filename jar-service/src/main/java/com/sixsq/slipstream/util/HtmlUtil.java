@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,8 @@ import slipstream.ui.views.Representation;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.User;
 
 public class HtmlUtil {
@@ -36,9 +38,11 @@ public class HtmlUtil {
 		return toHtml(metadata, page, null, user);
 	}
 
+	private static final MetricsTimer toHtmlTimer = Metrics.newTimer(HtmlUtil.class, "toHtml");
+
 	public static String toHtml(Object metadata, String page, String type,
 			User user) {
-		
+
 		Document doc = SerializationUtil.toXmlDocument(metadata);
 
 		XmlUtil.addUser(doc, user);
@@ -54,10 +58,13 @@ public class HtmlUtil {
 
 		String xml = SerializationUtil.documentToString(doc);
 		try {
+			toHtmlTimer.start();
 			return Representation.toHtml(xml, page, type);
 		} catch (IllegalArgumentException ex) {
 			throw (new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
 					"Unknown resource: " + page));
+		} finally {
+			toHtmlTimer.stop();
 		}
 	}
 
