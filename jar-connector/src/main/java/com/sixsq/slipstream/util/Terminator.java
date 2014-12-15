@@ -68,6 +68,7 @@ public class Terminator {
 						UserParameter.KEY_ON_ERROR_RUN_FOREVER), "false");
 
 		if (! Boolean.parseBoolean(onErrorKeepRunning) &&
+				! run.isMutable() &&
 				(run.getState() == States.Initializing || isGarbageCollected)) {
 			terminate(run.getResourceUri());
 		}
