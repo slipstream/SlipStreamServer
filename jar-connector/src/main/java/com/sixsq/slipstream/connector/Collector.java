@@ -31,6 +31,8 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
@@ -39,9 +41,11 @@ import com.sixsq.slipstream.run.RunView;
 public class Collector {
 
 	private static Logger logger = Logger.getLogger(Collector.class.getName());
+	private static MetricsTimer collectTimer = Metrics.newTimer(Collector.class, "collect");
 
 	public static int collect(User user, Connector connector) {
 		int res = 0;
+		collectTimer.start();
 		try {
 			if (connector.isCredentialsSet(user)) {
 				res = describeInstances(user, connector);
@@ -52,6 +56,8 @@ public class Collector {
 			logger.warning(e.getMessage());
 		} catch (IllegalArgumentException e) {
 			logger.warning(e.getMessage());
+		} finally {
+			collectTimer.stop();
 		}
 		return res;
 	}
