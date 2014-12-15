@@ -41,7 +41,10 @@ import org.xml.sax.SAXException;
 
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.Metadata;
+import com.sixsq.slipstream.persistence.Run;
 
 public class SerializationUtil {
 
@@ -58,11 +61,13 @@ public class SerializationUtil {
 
 	}
 
+	private static final MetricsTimer toXmlStringTimer = Metrics.newTimer(Run.class, "toXmlString");
+
 	public static String toXmlString(Object object) {
 
 		CharArrayWriter writer = new CharArrayWriter();
 		try {
-
+			toXmlStringTimer.start();
 			Serializer serializer = new Persister();
 			serializer.write(object, writer);
 			return writer.toString();
@@ -71,35 +76,44 @@ public class SerializationUtil {
 			throw new SlipStreamInternalException(
 					"cannot serialize object to string, with detail: " + e.getMessage(), e);
 		} finally {
+			toXmlStringTimer.stop();
 			writer.close();
 		}
 
 	}
 
+	private static final MetricsTimer toXmlDocumentTimer = Metrics.newTimer(Run.class, "toXmlDocument");
+
 	public static Document toXmlDocument(Object object) {
 
-		String serialization = toXmlString(object);
+		try{
+			toXmlDocumentTimer.start();
 
-		StringReader reader = new StringReader(serialization);
+			String serialization = toXmlString(object);
 
-		try {
+			StringReader reader = new StringReader(serialization);
 
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			return db.parse(new InputSource(reader));
+			try {
 
-		} catch (ParserConfigurationException e) {
-			throw new SlipStreamInternalException(
-					"error converting to XML document", e);
-		} catch (SAXException e) {
-			throw new SlipStreamInternalException(
-					"error converting to XML document", e);
-		} catch (IOException e) {
-			throw new SlipStreamInternalException(
-					"error converting to XML document", e);
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				return db.parse(new InputSource(reader));
 
+			} catch (ParserConfigurationException e) {
+				throw new SlipStreamInternalException(
+						"error converting to XML document", e);
+			} catch (SAXException e) {
+				throw new SlipStreamInternalException(
+						"error converting to XML document", e);
+			} catch (IOException e) {
+				throw new SlipStreamInternalException(
+						"error converting to XML document", e);
+
+			} finally {
+				reader.close();
+			}
 		} finally {
-			reader.close();
+			toXmlDocumentTimer.stop();
 		}
 
 	}
