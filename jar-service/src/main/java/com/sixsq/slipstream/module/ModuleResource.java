@@ -147,11 +147,15 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientForbiddenError("You do not have rights to create modules in this project");
 		}
 
-		target = source.copy();
-		target.getAuthz().setUser(getUser().getName());
-		target.getAuthz().clear();
-		target.setName(targetFullName);
-		target.store();
+		try {
+			target = source.copy();
+			target.getAuthz().setUser(getUser().getName());
+			target.getAuthz().clear();
+			target.setName(targetFullName);
+			target.store();
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
 
 		String absolutePath = RequestUtil.constructAbsolutePath("/"
 				+ target.getResourceUri());

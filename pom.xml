@@ -46,10 +46,10 @@
   </repositories>
 
   <scm>
-    <connection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</connection>
-    <url>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</url>
-    <developerConnection>scm:git:ssh://git@github.com/slipstream/SlipStreamServer.git</developerConnection>
-    <tag>SlipStreamServer-2.0.0</tag>
+    <connection>${scm.read}/SlipStreamServer.git</connection>
+    <developerConnection>${scm.write}/SlipStreamServer.git</developerConnection>
+    <url>${scm.public}/SlipStreamServer.git</url>
+    <tag>HEAD</tag>
   </scm>
 
   <reporting>
@@ -57,7 +57,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.5.14-SNAPSHOT</version>
       </plugin>
     </plugins>
   </reporting>

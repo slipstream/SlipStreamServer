@@ -97,6 +97,10 @@ public abstract class CommonTestUtil {
 			fail();
 		}
 
+		user.setFirstName("Te");
+		user.setLastName("st");
+		user.setEmail("test@example.com");
+
 		try {
 			user.setDefaultCloudServiceName(cloudServiceName);
 		} catch (ValidationException e) {

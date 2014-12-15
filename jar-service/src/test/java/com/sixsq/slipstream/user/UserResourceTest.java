@@ -300,7 +300,7 @@ public class UserResourceTest extends ResourceTestBase {
 	public void cantSelfAssignSuperUnlessAlreadySuper()
 			throws ConfigurationException, ValidationException {
 
-		User cantSelfAssignSuper = new User("cantSelfAssignSuper");
+		User cantSelfAssignSuper = UserTest.createUser("cantSelfAssignSuper");
 		UserTest.storeUser(cantSelfAssignSuper);
 
 		cantSelfAssignSuper.setSuper(true);
@@ -322,7 +322,7 @@ public class UserResourceTest extends ResourceTestBase {
 	public void superCanAssignSuperToOthers() throws ConfigurationException,
 			ValidationException {
 
-		User superCanAssignSuperToOthers = new User(
+		User superCanAssignSuperToOthers = UserTest.createUser(
 				"superCanAssignSuperToOthers");
 
 		superCanAssignSuperToOthers.setSuper(true);
@@ -406,9 +406,10 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void superCreatesInActiveState() throws ValidationException,
 			ConfigurationException {
-		User willBeActive = new User("superCreatesInActiveState");
+		User willBeActive = UserTest.createUser("superCreatesInActiveState");
+		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
 
-		Request request = createPutRequest(willBeActive, superUser.getName());
+		Request request = createPutRequest(willBeActive, superUser.getName(), passwords);
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
@@ -422,9 +423,10 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void normalUserCreatedInNewState() throws ValidationException,
 			ConfigurationException {
-		User willBeNew = new User("normalUserCreatedInNewState");
+		User willBeNew = UserTest.createUser("normalUserCreatedInNewState");
+		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
 
-		Request request = createPutRequest(willBeNew, user.getName());
+		Request request = createPutRequest(willBeNew, user.getName(), passwords);
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
@@ -438,10 +440,11 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void createWithUserState() throws ValidationException,
 			ConfigurationException {
-		User withState = new User("createWithUserState");
+		User withState = UserTest.createUser("createWithUserState");
 		withState.setState(State.SUSPENDED);
+		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
 
-		Request request = createPutRequest(withState, superUser.getName());
+		Request request = createPutRequest(withState, superUser.getName(), passwords);
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
@@ -455,7 +458,7 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void putWithUserState() throws ValidationException,
 			ConfigurationException {
-		User withState = new User("putWithUserState");
+		User withState = UserTest.createUser("putWithUserState");
 		withState = withState.store();
 		withState.setState(State.SUSPENDED);
 
@@ -512,12 +515,19 @@ public class UserResourceTest extends ResourceTestBase {
 			ValidationException {
 		Form form = new Form();
 		form.add("name", targetUser.getName());
-		form.add("firstName", targetUser.getFirstName());
-		form.add("lastName", targetUser.getLastName());
+		form.add("firstname", targetUser.getFirstName());
+		form.add("lastname", targetUser.getLastName());
+		form.add("email", targetUser.getEmail());
 
-		form.add("password1", passwords.newPassword1);
-		form.add("password2", passwords.newPassword2);
-		form.add("oldPassword", passwords.oldPassword);
+		if (passwords.newPassword1 != null) {
+			form.add("password1", passwords.newPassword1);
+		}
+		if (passwords.newPassword2 != null) {
+			form.add("password2", passwords.newPassword2);
+		}
+		if (passwords.oldPassword != null) {
+			form.add("oldPassword", passwords.oldPassword);
+		}
 
 		if (targetUser.isSuper()) {
 			form.add("super", "on");
