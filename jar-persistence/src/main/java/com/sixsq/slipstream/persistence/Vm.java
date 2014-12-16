@@ -122,13 +122,14 @@ public class Vm {
 			Vm old = filteredOldVmMap.get(v.getInstanceId());
 			VmRuntimeParameterMapping m = getMapping(v);
 			if (old == null) {
-				setRunValues(m, v);
+				setRunValues(em, m, v);
 				setRunUuid(m, v);
 				em.persist(v);
 			} else {
 				boolean merge = false;
 				if (!v.getState().equals(old.getState())) {
 					old.setState(v.getState());
+					setRunValues(em, m, v);
 					merge = true;
 				}
 				if (old.getRunUuid() == null) {
@@ -146,18 +147,20 @@ public class Vm {
 	}
 
 	private static VmRuntimeParameterMapping getMapping(Vm v) {
-		return VmRuntimeParameterMapping.findRuntimeParameter(v.getCloud(), v.getInstanceId());
+		return VmRuntimeParameterMapping.find(v.getCloud(), v.getInstanceId());
 	}
 
-	private static void setRunValues(VmRuntimeParameterMapping m, Vm v) {
+	private static void setRunValues(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
 		if (m != null) {
-			m.getRuntimeParameter().setValue(v.getState());
+			RuntimeParameter rp = m.getVmstateRuntimeParameter();
+			rp.setValue(v.getState());
+			em.merge(rp);
 		}
 	}
 
 	private static void setRunUuid(VmRuntimeParameterMapping m, Vm v) {
 		if (m != null) {
-			RuntimeParameter rp = m.getRuntimeParameter();
+			RuntimeParameter rp = m.getVmstateRuntimeParameter();
 			if (rp != null) {
 				v.setRunUuid(rp.getContainer().getUuid());
 			}
