@@ -34,6 +34,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
@@ -150,6 +152,16 @@ public class RuntimeParameterTest {
 		assertThat(RuntimeParameter.extractParamNamePart("node:param"),
 				is("param"));
 		assertNull(RuntimeParameter.extractParamNamePart("something"));
+	}
+
+
+	@Test
+	public void isInitiallyNotSet() throws SlipStreamClientException {
+		DeploymentModule deployment = CommonTestUtil.createDeployment();
+
+		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
+		RuntimeParameter rp = run.getRuntimeParameters().get("ss:complete");
+		assertFalse(rp.isSet());
 	}
 
 }
