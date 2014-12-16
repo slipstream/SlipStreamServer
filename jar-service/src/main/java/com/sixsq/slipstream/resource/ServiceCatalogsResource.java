@@ -42,7 +42,7 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ServiceCatalogsResource extends SimpleResource {
 
-	private ServiceCatalogs sc = new ServiceCatalogs();
+	private ServiceCatalogs scs = new ServiceCatalogs();
 
 	@Override
 	public void initialize() throws ResourceException {
@@ -55,6 +55,12 @@ public class ServiceCatalogsResource extends SimpleResource {
 			}
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
+		
+		try {
+			scs.loadAll();
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
@@ -111,7 +117,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 			throwClientValidationError(e.getMessage());
 		}
 
-		sc.store();
+		scs.store();
 
 		getResponse().setLocationRef("/service_catalog");
 	}
@@ -123,7 +129,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 		Form form = (entity == null) ? new Form()
 				: extractFormFromEntity(entity);
 
-		for (ServiceCatalog s : sc.getList()) {
+		for (ServiceCatalog s : scs.getList()) {
 
 			ServiceCatalogFormProcessor processor = new ServiceCatalogFormProcessor(
 					getUser(), s.getCloud());
@@ -138,7 +144,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 
 			ServiceCatalog proposedServiceCatalog = processor.getParametrized();
 
-			sc.update(proposedServiceCatalog);
+			scs.update(proposedServiceCatalog);
 		}
 	}
 
