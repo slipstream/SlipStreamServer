@@ -382,7 +382,7 @@ public abstract class RunFactory {
 
 		Map<String, String> instanceToNodeName = new HashMap<String, String>();
 		for (String n : nodes) {
-			instanceToNodeName.put(n, getNodeRuntimeParameterValue(run, n, RuntimeParameter.INSTANCE_ID_KEY));
+			instanceToNodeName.put(getNodeRuntimeParameterValue(run, n, RuntimeParameter.INSTANCE_ID_KEY), n);
 		}
 
 		for (Entry<String, List<Vm>> vmEntry : map.entrySet()) {
@@ -408,7 +408,7 @@ public abstract class RunFactory {
 
 	private static String getNodeRuntimeParameterValue(Run run, String nodeName, String key) throws NotFoundException {
 		String keyPrefix = nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
-		String qualifiedKey = keyPrefix + RuntimeParameter.NODE_NAME_KEY;
+		String qualifiedKey = keyPrefix + key;
 		return run.getRuntimeParameterValueIgnoreAbort(qualifiedKey);
 	}
 
