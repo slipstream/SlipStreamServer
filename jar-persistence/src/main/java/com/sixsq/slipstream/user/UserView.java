@@ -53,8 +53,11 @@ public class UserView {
 	@Attribute(required = false)
 	private String organization;
 
+	@Attribute(required = false, name = "issuper")
+	private boolean isSuperUser;
+
 	public UserView(String name, String firstName, String lastName,
-			User.State state, Date lastOnline, String organization) {
+			User.State state, Date lastOnline, String organization, Boolean isSuperUser) {
 
 		this.name = name;
 		this.resourceUri = User.constructResourceUri(name);
@@ -71,6 +74,7 @@ public class UserView {
         }
 
         this.organization = organization;
+        this.isSuperUser = isSuperUser;
 	}
 
 	@Root(name = "list")
