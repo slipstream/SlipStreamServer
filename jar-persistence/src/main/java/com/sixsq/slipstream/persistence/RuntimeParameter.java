@@ -43,9 +43,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit tests:
- * 
+ *
  * @see RuntimeParameterTest
- * 
+ *
  */
 @Entity
 @SuppressWarnings("serial")
@@ -307,11 +307,13 @@ public class RuntimeParameter extends Metadata {
 
 	}
 
+	private boolean isNullOrEmpty(String value) {
+		return (value == null || "".equals(value));
+	}
+
 	private void init() {
 		resourceUri = container.getResourceUri() + "/" + key_;
-		if (value != null && !"".equals(value)) {
-			setIsSet(true);
-		}
+		setIsSet(!isNullOrEmpty(value));
 		group_ = RuntimeParameter.extractNodeNamePart(key_);
 		if (GLOBAL_NAMESPACE.equals(group_)) {
 			group_ = "Global";
@@ -362,7 +364,7 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	public void setValue(String value) {
-		setIsSet(!"".equals(value));
+		setIsSet(!isNullOrEmpty(value));
 		this.value = value;
 		processValue();
 	}
