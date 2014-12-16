@@ -22,7 +22,6 @@ package com.sixsq.slipstream.persistence;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +32,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.simpleframework.xml.Attribute;
@@ -449,25 +447,6 @@ public class RuntimeParameter extends Metadata {
 		boolean res = (Boolean) q.getSingleResult();
 		em.close();
 		return res;
-	}
-
-	public static Properties getValueAndSet(String runId, String key) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("getValueAndSet");
-		q.setParameter("resourceuri", "run/" + runId + "/" + key);
-		Properties valueAndSet = null;
-		try {
-			Object res = q.getSingleResult();
-			valueAndSet = new Properties();
-			Object[] objs = (Object[]) res;
-			String value = (String) objs[0];
-			boolean isSet = (Boolean) objs[1];
-			valueAndSet.put("value", value);
-			valueAndSet.put("isSet", isSet);
-		} catch (NoResultException ex) {
-		}
-		em.close();
-		return valueAndSet;
 	}
 
 }
