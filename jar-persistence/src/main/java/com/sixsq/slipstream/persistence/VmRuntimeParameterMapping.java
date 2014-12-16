@@ -31,10 +31,10 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
 import com.sixsq.slipstream.util.Logger;
@@ -45,7 +45,8 @@ import com.sixsq.slipstream.util.Logger;
 		@NamedQuery(name = "getAll", query = "SELECT m FROM VmRuntimeParameterMapping m"),
 		@NamedQuery(name = "getByCloudAndInstanceId", query = "SELECT m FROM VmRuntimeParameterMapping m WHERE m.instanceId = :instanceid AND m.cloud = :cloud"),
 		@NamedQuery(name = "getMappingsByRun", query = "SELECT m FROM VmRuntimeParameterMapping m WHERE m.runUuid = :runuuid") })
-@Table(indexes = { @Index(name="instanceId_ix", columnList = "instanceId"), @Index(name="cloud_ix", columnList = "cloud"), @Index(name="runUuid_ix", columnList = "runUuid") }) 
+@Table(indexes = { @Index(name = "instanceId_ix", columnList = "instanceId"),
+		@Index(name = "cloud_ix", columnList = "cloud"), @Index(name = "runUuid_ix", columnList = "runUuid") })
 public class VmRuntimeParameterMapping implements Serializable {
 
 	@Id
@@ -56,8 +57,10 @@ public class VmRuntimeParameterMapping implements Serializable {
 	private String cloud;
 	private String runUuid;
 
-	@OneToOne(optional = true)
-	private RuntimeParameter runtimeParameter = null;
+	@Transient
+	volatile private RuntimeParameter runtimeParameter = null;
+
+	private String runtimeParameterUri;
 
 	public static VmRuntimeParameterMapping findRuntimeParameter(String cloud, String instanceId) {
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -118,6 +121,7 @@ public class VmRuntimeParameterMapping implements Serializable {
 		this.instanceId = instanceId;
 		this.cloud = cloud;
 		this.runtimeParameter = runtimeParameter;
+		this.runtimeParameterUri = runtimeParameter.getResourceUri();
 		this.runUuid = runtimeParameter.getContainer().getUuid();
 	}
 
@@ -126,6 +130,9 @@ public class VmRuntimeParameterMapping implements Serializable {
 	}
 
 	public RuntimeParameter getRuntimeParameter() {
+		if(runtimeParameter == null) {
+			runtimeParameter = RuntimeParameter.load(runtimeParameterUri);
+		}
 		return runtimeParameter;
 	}
 
