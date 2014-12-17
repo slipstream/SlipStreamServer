@@ -21,14 +21,22 @@ package com.sixsq.slipstream.connector.local;
  */
 
 import com.sixsq.slipstream.connector.CredentialsBase;
+import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
 
-class LocalCredentials extends CredentialsBase {
+class LocalCredentials extends CredentialsBase implements Credentials {
 
-	public LocalCredentials(User user) {
+	public LocalCredentials(User user, String connectorInstanceName) {
 		super(user);
+		try {
+			cloudParametersFactory = new LocalUserParametersFactory(connectorInstanceName);
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			throw (new SlipStreamRuntimeException(e));
+		}
 	}
 
 	public String getKey() throws InvalidElementException {
@@ -37,22 +45,6 @@ class LocalCredentials extends CredentialsBase {
 
 	public String getSecret() throws InvalidElementException {
 		return getParameterValue(LocalUserParametersFactory.SECRET_PARAMETER_NAME);
-	}
-
-	public String getParameterValue(String key) throws InvalidElementException {
-		UserParameter parameter = user.getParameter(key);
-		if (parameter == null) {
-			throwInvalidElementException(key);
-		}
-		return parameter.getValue();
-	}
-
-	private void throwInvalidElementException(String key)
-			throws InvalidElementException {
-		String error = "Missing mandatory user parameter: " + key;
-		throw (new InvalidElementException(error
-				+ ". Consider editing your <a href='" + "/user/"
-				+ user.getName() + "'>user account</a>"));
 	}
 
 }
