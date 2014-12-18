@@ -14,10 +14,15 @@ run:
 
 new-ui: install-ui run-with-db
 
+new-ui-fast: install-ui-fast run-with-db
+
 install:
 	(cd ..; mvn clean install -Dmaven.test.skip=true) 
 
 install-ui:
+	(cd ../../SlipStreamUI; mvn clean install -Dmaven.test.skip=true)
+
+install-ui-fast:
 	(cd ../../SlipStreamUI; mvn install -Dmaven.test.skip=true)
 
 start-db-ui: start-db
