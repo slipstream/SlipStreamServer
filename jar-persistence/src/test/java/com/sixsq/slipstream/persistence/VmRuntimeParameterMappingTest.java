@@ -43,6 +43,8 @@ public class VmRuntimeParameterMappingTest {
 	private static User user;
 	private String instanceIdParameterName = RuntimeParameter.constructParamName(Run.MACHINE_NAME,
 			RuntimeParameter.INSTANCE_ID_KEY);
+	private String vmstateParameterName = RuntimeParameter.constructParamName(Run.MACHINE_NAME,
+			RuntimeParameter.STATE_VM_KEY);
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
@@ -86,10 +88,10 @@ public class VmRuntimeParameterMappingTest {
 		mapping = new VmRuntimeParameterMapping("instanceId1", "cloud2", rp);
 		mapping.store();
 
-		mapping = VmRuntimeParameterMapping.findRuntimeParameter("cloud1", "instanceId2");
-		assertThat(mapping.getRuntimeParameter().getName(), is("key21"));
-		mapping = VmRuntimeParameterMapping.findRuntimeParameter("cloud2", "instanceId1");
-		assertThat(mapping.getRuntimeParameter().getName(), is("key12"));
+		mapping = VmRuntimeParameterMapping.find("cloud1", "instanceId2");
+		assertThat(mapping.getVmstateRuntimeParameter().getName(), is("key21"));
+		mapping = VmRuntimeParameterMapping.find("cloud2", "instanceId1");
+		assertThat(mapping.getVmstateRuntimeParameter().getName(), is("key12"));
 
 		for (VmRuntimeParameterMapping m : VmRuntimeParameterMapping.getMappings()) {
 			m.remove();
@@ -107,24 +109,26 @@ public class VmRuntimeParameterMappingTest {
 		// Configure run with cloud name
 		String instanceId = "1234";
 
+		String vmstate = "new state";
+
 		Run run = createAndStoreRun(image, instanceId, cloudName);
 
 		// set the runtime parameter instance in the vm mapping
 		RuntimeParameter instanceIdRuntimeParameter = new RuntimeParameter(run, instanceIdParameterName, instanceId, "");
 		RuntimeParameterMediator.processSpecialValue(instanceIdRuntimeParameter);
 
-		VmRuntimeParameterMapping mapping = VmRuntimeParameterMapping.findRuntimeParameter("local", instanceId);
+		VmRuntimeParameterMapping mapping = VmRuntimeParameterMapping.find("local", instanceId);
 
 		assertThat(mapping.getRunUuid(), is(run.getUuid()));
 		assertThat(mapping.getInstanceId(), is(instanceId));
 
 		// Updating the vm state sets the corresponding runtime parameter
-		Vm vm = new Vm(instanceId, cloudName, "new state", user.getName());
+		Vm vm = new Vm(instanceId, cloudName, vmstate, user.getName());
 		Vm.update(Arrays.asList(vm), user.getName(), cloudName);
-		mapping = VmRuntimeParameterMapping.findRuntimeParameter("local", instanceId);
+		mapping = VmRuntimeParameterMapping.find("local", instanceId);
 		assertThat(mapping.getRunUuid(), is(run.getUuid()));
 		assertThat(vm.getRunUuid(), is(run.getUuid()));
-		assertThat(mapping.getRuntimeParameter().getValue(), is(instanceId));
+		assertThat(mapping.getVmstateRuntimeParameter().getValue(), is(vmstate));
 		assertThat(
 				RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
 						RuntimeParameter.constructParamName(Run.MACHINE_NAME, RuntimeParameter.INSTANCE_ID_KEY))
@@ -147,6 +151,9 @@ public class VmRuntimeParameterMappingTest {
 
 		RuntimeParameter instanceIdRuntimeParameter = new RuntimeParameter(run, instanceIdParameterName, instanceId, "");
 		run.getRuntimeParameters().put(instanceIdParameterName, instanceIdRuntimeParameter);
+
+		RuntimeParameter vmstateRuntimeParameter = new RuntimeParameter(run, vmstateParameterName, "", "");
+		run.getRuntimeParameters().put(vmstateParameterName, vmstateRuntimeParameter);
 
 		run.store();
 		return run;

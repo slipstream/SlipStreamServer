@@ -20,12 +20,10 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sixsq.slipstream.configuration.Configuration;
@@ -35,7 +33,6 @@ import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Parameter;
@@ -47,13 +44,9 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.FileUtil;
 
 public abstract class RunFactory {
-
-	private static final List<String> VALID_RUNNING_STATE = Arrays.asList("running", "on");
-	private static final String RUNNING_STATE = "running";
 
 	public final Run createRun(Module module, User user) throws SlipStreamClientException {
 		return createRun(module, user, null);
@@ -365,60 +358,6 @@ public abstract class RunFactory {
 
 	public static String[] getCloudServiceNames(Run run) throws ValidationException {
 		return run.getCloudServiceNamesList();
-	}
-
-	public static Run updateVmStatus(Run run, String username) throws SlipStreamException {
-		Map<String, List<Vm>> vms = Vm.listByRun(run.getUuid());
-		run = populateVmStateProperties(run, vms);
-		return run;
-	}
-
-	public static Run populateVmStateProperties(Run run, Map<String, List<Vm>> vms) throws NotFoundException,
-			ValidationException {
-
-		List<String> nodes = run.getNodeNameList();
-
-		Map<String, List<Vm>> map = Vm.listByRun(run.getUuid());
-
-		Map<String, String> instanceToNodeName = new HashMap<String, String>();
-		for (String n : nodes) {
-			instanceToNodeName.put(getNodeRuntimeParameterValue(run, n, RuntimeParameter.INSTANCE_ID_KEY), n);
-		}
-
-		for (Entry<String, List<Vm>> vmEntry : map.entrySet()) {
-			for (Vm vm : vmEntry.getValue()) {
-				String vmState = vm == null ? "Unknown" : vm.getState();
-				vmState = sanitizeVmState(vmState);
-
-				// Convert instance id to node name to build runtime parameter
-				String vmStateKey = RuntimeParameter.constructParamName(instanceToNodeName.get(vm.getInstanceId()),
-						RuntimeParameter.STATE_VM_KEY);
-
-				try {
-					run.updateRuntimeParameter(vmStateKey, vmState);
-				} catch (NotFoundException e) {
-					run.assignRuntimeParameter(vmStateKey, vmState, RuntimeParameter.STATE_VM_DESCRIPTION);
-				}
-
-			}
-		}
-
-		return run;
-	}
-
-	private static String getNodeRuntimeParameterValue(Run run, String nodeName, String key) throws NotFoundException {
-		String keyPrefix = nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
-		String qualifiedKey = keyPrefix + key;
-		return run.getRuntimeParameterValueIgnoreAbort(qualifiedKey);
-	}
-
-	private static String sanitizeVmState(String vmState) {
-		if (vmState != null) {
-			if (VALID_RUNNING_STATE.contains(vmState.toLowerCase())) {
-				vmState = RUNNING_STATE;
-			}
-		}
-		return vmState;
 	}
 
 	public static String constructParamName(String nodename, String paramname) {

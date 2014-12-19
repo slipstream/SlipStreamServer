@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,11 +58,11 @@ public class VmRuntimeParameterMapping implements Serializable {
 	private String runUuid;
 
 	@Transient
-	volatile private RuntimeParameter runtimeParameter = null;
+	volatile private RuntimeParameter vmstateRuntimeParameter = null;
 
-	private String runtimeParameterUri;
+	private String vmstateRuntimeParameterUri;
 
-	public static VmRuntimeParameterMapping findRuntimeParameter(String cloud, String instanceId) {
+	public static VmRuntimeParameterMapping find(String cloud, String instanceId) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("getByCloudAndInstanceId");
 		q.setParameter("cloud", cloud);
@@ -108,8 +108,12 @@ public class VmRuntimeParameterMapping implements Serializable {
 				RuntimeParameter.CLOUD_SERVICE_NAME);
 		RuntimeParameter cloudParameter = RuntimeParameter.loadFromUuidAndKey(instanceId.getContainer().getUuid(),
 				cloudParameterName);
+		String vmstateParameterName = RuntimeParameter.constructParamName(nodeInstanceName,
+				RuntimeParameter.STATE_VM_KEY);
+		RuntimeParameter vmstateParameter = RuntimeParameter.loadFromUuidAndKey(instanceId.getContainer().getUuid(),
+				vmstateParameterName);
 		VmRuntimeParameterMapping m = new VmRuntimeParameterMapping(instanceId.getValue(), cloudParameter.getValue(),
-				instanceId);
+				vmstateParameter);
 		m.store();
 	}
 
@@ -117,23 +121,23 @@ public class VmRuntimeParameterMapping implements Serializable {
 
 	}
 
-	public VmRuntimeParameterMapping(String instanceId, String cloud, RuntimeParameter runtimeParameter) {
+	public VmRuntimeParameterMapping(String instanceId, String cloud, RuntimeParameter vmstateRuntimeParameter) {
 		this.instanceId = instanceId;
 		this.cloud = cloud;
-		this.runtimeParameter = runtimeParameter;
-		this.runtimeParameterUri = runtimeParameter.getResourceUri();
-		this.runUuid = runtimeParameter.getContainer().getUuid();
+		this.vmstateRuntimeParameter = vmstateRuntimeParameter;
+		this.vmstateRuntimeParameterUri = vmstateRuntimeParameter.getResourceUri();
+		this.runUuid = vmstateRuntimeParameter.getContainer().getUuid();
 	}
 
 	public String getCloud() {
 		return cloud;
 	}
 
-	public RuntimeParameter getRuntimeParameter() {
-		if(runtimeParameter == null) {
-			runtimeParameter = RuntimeParameter.load(runtimeParameterUri);
+	public RuntimeParameter getVmstateRuntimeParameter() {
+		if(vmstateRuntimeParameter == null) {
+			vmstateRuntimeParameter = RuntimeParameter.load(vmstateRuntimeParameterUri);
 		}
-		return runtimeParameter;
+		return vmstateRuntimeParameter;
 	}
 
 	public String getRunUuid() {

@@ -90,7 +90,7 @@ public class RunResource extends RunBaseResource {
 		String xml;
 		try {
 			before = System.currentTimeMillis();
-			Run run = constructRun(em, true);
+			Run run = constructRun(em);
 			logTimeDiff("constructRun", before);
 			before = System.currentTimeMillis();
 			xml = SerializationUtil.toXmlString(run);
@@ -118,7 +118,7 @@ public class RunResource extends RunBaseResource {
 		String html;
 		try {
 			before = System.currentTimeMillis();
-			Run run = constructRun(em, false);
+			Run run = constructRun(em);
 			logTimeDiff("constructRun", before);
 			before = System.currentTimeMillis();
 			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
@@ -140,31 +140,15 @@ public class RunResource extends RunBaseResource {
 		return "run";
 	}
 
-	private Run constructRun(EntityManager em, boolean withVmState)
+	private Run constructRun(EntityManager em)
 			throws SlipStreamClientException {
 
 		Run run = Run.load(this.run.getResourceUri(), em);
-
-		if (withVmState) {
-			try {
-				run = updateVmStatus(run, run.getUser());
-			} catch (SlipStreamClientException e) {
-				run = Run.abortOrReset(e.getMessage(), "", em, run.getUuid());
-			} catch (SlipStreamException e) {
-				getLogger().warning(
-						"Error updating vm status for run " + run.getName()
-								+ ": " + e.getMessage());
-			}
-		}
 
 		Module module = RunFactory.loadModule(run);
 		run.setModule(module);
 
 		return run;
-	}
-
-	private Run updateVmStatus(Run run, String username) throws SlipStreamException {
-		return RunFactory.updateVmStatus(run, username);
 	}
 
 	@Delete
