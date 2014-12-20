@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.persistence.OptimisticLockException;
+import javax.persistence.RollbackException;
+
+import org.hibernate.StaleObjectStateException;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
@@ -185,6 +189,8 @@ public class RunListResource extends BaseResource {
 
 			launch(run);
 
+			setLastExecute(user);
+			
 		} catch (SlipStreamClientException ex) {
 			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					ex.getMessage()));
@@ -196,6 +202,17 @@ public class RunListResource extends BaseResource {
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 		getResponse().setLocationRef(absolutePath);
 	}
+
+	private void setLastExecute(User user) {
+		user.setLastExecute();
+		try {
+			user = user.store();
+		} catch (StaleObjectStateException e) {
+		} catch (RollbackException e) {
+		} catch (OptimisticLockException e) {
+		}
+	}
+
 
 	private void setRunMutability(Run run, Form form) {
 		String mutable = form.getFirstValue(MUTABLE_RUN_KEY, "");
