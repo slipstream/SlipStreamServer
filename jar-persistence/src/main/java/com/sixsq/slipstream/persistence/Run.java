@@ -316,19 +316,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		RunView runView;
 		runView = new RunView(run.getResourceUri(), run.getUuid(),
 				run.getModuleResourceUrl(), run.getState().toString(),
-				run.getStart(), run.getUser(), run.getType());
-		try {
-			runView.setHostname(run
-					.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-							+ RuntimeParameter.HOSTNAME_KEY));
-		} catch (NotFoundException e) {
-		}
-		try {
-			runView.setVmstate(run
-					.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-							+ RuntimeParameter.STATE_VM_KEY));
-		} catch (NotFoundException e) {
-		}
+				run.getStart(), run.getUser(), run.getType(), Run.getGlobalAbort(run).getValue());
 		try {
 			runView.setTags(run
 					.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
