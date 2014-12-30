@@ -424,8 +424,8 @@ public abstract class ConnectorBase implements Connector {
     }
 
     protected String getParameterValue(String parameterName, ImageModule image) throws ValidationException {
-        ModuleParameter instanceTypeParameter = image.getParameter(constructKey(parameterName));
-        return instanceTypeParameter == null ? null : instanceTypeParameter.getValue();
+        ModuleParameter parameter = image.getParameter(constructKey(parameterName));
+        return parameter == null ? null : parameter.getValue();
     }
 
     protected String getKey(User user) {
