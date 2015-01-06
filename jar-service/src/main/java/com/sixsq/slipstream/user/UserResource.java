@@ -323,7 +323,7 @@ public class UserResource extends ParameterizedResource<User> {
 			user.setState(newState);
 		}
 
-		user.store();
+		user = user.store();
 
 		if (!isExisting()) {
 			setParameterized(user);

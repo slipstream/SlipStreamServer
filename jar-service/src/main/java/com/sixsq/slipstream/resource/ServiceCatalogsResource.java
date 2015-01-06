@@ -42,7 +42,7 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ServiceCatalogsResource extends SimpleResource {
 
-	private ServiceCatalogs sc = new ServiceCatalogs();
+	private ServiceCatalogs scs = new ServiceCatalogs();
 
 	@Override
 	public void initialize() throws ResourceException {
@@ -55,6 +55,12 @@ public class ServiceCatalogsResource extends SimpleResource {
 			}
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
+
+		try {
+			scs.loadAll();
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
@@ -78,8 +84,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 		StringRepresentation result = null;
 
 		try {
-			result = new StringRepresentation(HtmlUtil.toHtml(
-					retrieveServiceCatalogs(), getPageRepresentation(),
+			result = new StringRepresentation(HtmlUtil.toHtml(retrieveServiceCatalogs(), getPageRepresentation(),
 					getTransformationType(), getUser()), MediaType.TEXT_HTML);
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
@@ -111,22 +116,19 @@ public class ServiceCatalogsResource extends SimpleResource {
 			throwClientValidationError(e.getMessage());
 		}
 
-		sc.store();
+		scs.store();
 
 		getResponse().setLocationRef("/service_catalog");
 	}
 
-	public void processEntityAsForm(Representation entity)
-			throws ResourceException, ConfigurationException,
+	public void processEntityAsForm(Representation entity) throws ResourceException, ConfigurationException,
 			ValidationException {
 
-		Form form = (entity == null) ? new Form()
-				: extractFormFromEntity(entity);
+		Form form = (entity == null) ? new Form() : extractFormFromEntity(entity);
 
-		for (ServiceCatalog s : sc.getList()) {
+		for (ServiceCatalog s : scs.getList()) {
 
-			ServiceCatalogFormProcessor processor = new ServiceCatalogFormProcessor(
-					getUser(), s.getCloud());
+			ServiceCatalogFormProcessor processor = new ServiceCatalogFormProcessor(getUser(), s.getCloud());
 
 			try {
 				processor.processForm(form);
@@ -138,7 +140,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 
 			ServiceCatalog proposedServiceCatalog = processor.getParametrized();
 
-			sc.update(proposedServiceCatalog);
+			scs.update(proposedServiceCatalog);
 		}
 	}
 
@@ -146,16 +148,12 @@ public class ServiceCatalogsResource extends SimpleResource {
 		return "service_catalog";
 	}
 
-	public static boolean serviceCatalogsEnabled()
-			throws ConfigurationException, ValidationException {
+	public static boolean serviceCatalogsEnabled() throws ConfigurationException, ValidationException {
 		return isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_SERVICE_CATALOG_ENABLE);
 	}
 
-	private static boolean isEnabled(
-			RequiredParameters slipstreamServiceCatalogEnable)
-			throws ValidationException {
-		return Configuration
-				.isEnabled(slipstreamServiceCatalogEnable.getName());
+	private static boolean isEnabled(RequiredParameters slipstreamServiceCatalogEnable) throws ValidationException {
+		return Configuration.isEnabled(slipstreamServiceCatalogEnable.getName());
 	}
 
 }

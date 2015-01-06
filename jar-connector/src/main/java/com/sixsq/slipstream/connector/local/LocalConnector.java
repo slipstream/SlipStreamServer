@@ -23,8 +23,11 @@ package com.sixsq.slipstream.connector.local;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.connector.Connector;
@@ -45,8 +48,33 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.persistence.Vm;
 
 public class LocalConnector extends ConnectorBase {
+
+	private static List<Vm> vms;
+	private static String[] states = { "running", "terminated", "initializing" };
+	private static Random random = new Random();
+
+	static {
+		getLog().info("Generating dummy VMs...");
+//		int MAX_VMS = 5000;
+		int MAX_VMS = 3;
+		String username = "super";
+		String cloud = "local";
+		vms = new ArrayList<Vm>();
+		for (int i = 0; i < MAX_VMS; i++) {
+			String randomState = randomState();
+			Vm vm = new Vm("instance_" + i, cloud, randomState, username);
+			vms.add(vm);
+		}
+		Vm.update(vms, username, cloud);
+		getLog().info("Done generating dummy VMs");
+	}
+
+	private static String randomState() {
+		return states[random.nextInt(states.length)];
+	}
 
 	public static final String CLOUD_SERVICE_NAME = "local";
 	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.dummy.DummyClientCloud";
@@ -59,7 +87,7 @@ public class LocalConnector extends ConnectorBase {
 		super(instanceName != null ? instanceName : CLOUD_SERVICE_NAME);
 	}
 
-	public Connector copy(){
+	public Connector copy() {
 		return new LocalConnector(getConnectorInstanceName());
 	}
 
@@ -80,8 +108,7 @@ public class LocalConnector extends ConnectorBase {
 		return;
 	}
 
-	public Run launch(Run run, User user)
-			throws ServerExecutionEnginePluginException,
+	public Run launch(Run run, User user) throws ServerExecutionEnginePluginException,
 			ClientExecutionEnginePluginException {
 
 		Logger logger = Logger.getLogger(this.getClass().toString());
@@ -104,45 +131,45 @@ public class LocalConnector extends ConnectorBase {
 				launchImage(run);
 				break;
 			default:
-				throw (new ServerExecutionEnginePluginException(
-						"Cannot submit type: " + run.getCategory() + " yet!!"));
+				throw (new ServerExecutionEnginePluginException("Cannot submit type: " + run.getCategory() + " yet!!"));
 			}
 
-			updateInstanceIdAndIpOnRun(run, "instance-id-for-local",
-					"hostname-for-local");
-
+			updateInstanceIdAndIpOnRun(run, "instance-id-for-local", "hostname-for-local");
 
 		} catch (ClientHttpException e) {
-			throw (new ClientExecutionEnginePluginException(e.getMessage()
-					+ " (HTTP error: " + e.getStatus() + ")"));
+			throw (new ClientExecutionEnginePluginException(e.getMessage() + " (HTTP error: " + e.getStatus() + ")"));
 		} catch (SlipStreamException e) {
-			throw (new ServerExecutionEnginePluginException(
-					"Error setting execution instance. Detail: "
-							+ e.getMessage()));
+			throw (new ServerExecutionEnginePluginException("Error setting execution instance. Detail: "
+					+ e.getMessage()));
 		} catch (IOException e) {
-			throw (new ServerExecutionEnginePluginException(
-					"Error setting execution instance. Detail: "
-							+ e.getMessage()));
+			throw (new ServerExecutionEnginePluginException("Error setting execution instance. Detail: "
+					+ e.getMessage()));
 		}
 
 		return run;
 	}
 
-	private void launchDeployment(Run run) throws SlipStreamException,
-			FileNotFoundException, IOException, SerializationException {
-		String deploymentdir = "/tmp/slipstream/localexecution/"
-				+ run.getName();
+	private void launchDeployment(Run run) throws SlipStreamException, FileNotFoundException, IOException,
+			SerializationException {
+		String deploymentdir = "/tmp/slipstream/localexecution/" + run.getName();
 		boolean status = new File(deploymentdir).mkdirs();
 		if (!status) {
-			throw (new ServerExecutionEnginePluginException(
-					"Error creating local resource: " + deploymentdir));
+			throw (new ServerExecutionEnginePluginException("Error creating local resource: " + deploymentdir));
 		}
 
-		DeploymentModule deployment = (DeploymentModule) DeploymentModule
-				.load(run.getRefqname());
+		DeploymentModule deployment = (DeploymentModule) DeploymentModule.load(run.getRefqname());
 		if (deployment.getNodes() == null) {
 			// Empty deployment, nothing to
 			throw (new SlipStreamClientException("Empty deployment, nothing to"));
+		}
+		for (String n : run.getNodeNameList()) {
+			int multiplicity = Integer.valueOf(run.getRuntimeParameterValue(RuntimeParameter.constructParamName(n,
+					RuntimeParameter.MULTIPLICITY_PARAMETER_NAME)));
+			for (int i = 1; i <= multiplicity; i++) {
+				run.updateRuntimeParameter(RuntimeParameter.constructParamName(n
+						+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + i, RuntimeParameter.INSTANCE_ID_KEY),
+						"running");
+			}
 		}
 
 	}
@@ -156,50 +183,43 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	@Override
-	public Map<String, ModuleParameter> getImageParametersTemplate()
-			throws ValidationException {
+	public Map<String, ModuleParameter> getImageParametersTemplate() throws ValidationException {
 		return new LocalImageParametersFactory(getConnectorInstanceName()).getParameters();
 	}
 
 	@Override
 	public Credentials getCredentials(User user) {
-		return new LocalCredentials(user);
+		return new LocalCredentials(user, getConnectorInstanceName());
 	}
 
 	@Override
-	public void terminate(Run run, User user)
-			throws SlipStreamException {
+	public void terminate(Run run, User user) throws SlipStreamException {
 
 		if (run.getType() != RunType.Orchestration) {
 			Logger.getLogger(this.getClass().getName()).info("Terminating: " + run.getNodeNames());
 			return;
 		}
-		
+
 		String ids = run.getRuntimeParameterValue("orchestrator-local:hostname");
 
 		if (ids == null) {
 			return;
 		}
 
-        StringBuilder nodes = new StringBuilder(ids);
+		StringBuilder nodes = new StringBuilder(ids);
 
 		for (String nodeName : run.getNodeNames().split(",")) {
 			nodeName = nodeName.trim();
 			if (!"".equals(nodeName)) {
-                String multiplicity = run
-                        .getParameterValue(
-                                nodeName
-                                        + RuntimeParameter.NODE_PROPERTY_SEPARATOR
-                                        + RuntimeParameter.MULTIPLICITY_PARAMETER_NAME,
-                                String.valueOf(RuntimeParameter.MULTIPLICITY_NODE_START_INDEX));
-                for (int i = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX; i <= Integer
-                        .valueOf(multiplicity); i++) {
-                    String ipKey = nodeName
-                            + RuntimeParameter.NODE_PROPERTY_SEPARATOR
-                            + RuntimeParameter.INSTANCE_ID_KEY;
+				String multiplicity = run.getParameterValue(nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR
+						+ RuntimeParameter.MULTIPLICITY_PARAMETER_NAME,
+						String.valueOf(RuntimeParameter.MULTIPLICITY_NODE_START_INDEX));
+				for (int i = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX; i <= Integer.valueOf(multiplicity); i++) {
+					String ipKey = nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR
+							+ RuntimeParameter.INSTANCE_ID_KEY;
 
-                    nodes.append(" ").append(run.getRuntimeParameterValue(ipKey));
-                }
+					nodes.append(" ").append(run.getRuntimeParameterValue(ipKey));
+				}
 			}
 		}
 
@@ -209,7 +229,13 @@ public class LocalConnector extends ConnectorBase {
 
 	@Override
 	public Properties describeInstances(User user) {
-		return new Properties();
+
+		Properties ps = new Properties();
+		for(Vm v : vms) {
+			ps.put(v.getInstanceId(), randomState());
+		}
+
+		return ps;
 	}
 
 	@Override

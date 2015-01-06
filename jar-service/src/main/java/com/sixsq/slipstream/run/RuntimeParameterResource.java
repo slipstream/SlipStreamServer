@@ -143,15 +143,20 @@ public class RuntimeParameterResource extends RunBaseResource {
 		if (isGlobalAbort || isNodeAbort) {
 			if (!runtimeParameter.isSet()) {
 				abortOrReset(value, em);
-				runtimeParameter.setValue(value);
+				setValue(value);
 			}
 		} else {
-			runtimeParameter.setValue(value);
+			setValue(value);
 		}
 
 		transaction.commit();
 		em.close();
 		getResponse().setEntity(null, MediaType.ALL);
+	}
+
+	private void setValue(String value) {
+		runtimeParameter.setValue(value);
+		RuntimeParameterMediator.processSpecialValue(runtimeParameter);
 	}
 
 	private String extractValueFromEntity(Representation entity) {

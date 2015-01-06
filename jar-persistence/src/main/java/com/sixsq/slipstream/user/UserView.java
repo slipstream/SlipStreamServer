@@ -45,16 +45,28 @@ public class UserView {
 	public final String lastName;
 
 	@Attribute(required = false)
+	public final String email;
+
+	@Attribute(required = false)
 	public final User.State state;
+
+	@Attribute(required = false)
+	public final Date activeSince;
 
 	@Attribute(required = false)
 	public final Date lastOnline;
 
 	@Attribute(required = false)
-	private String organization;
+	public final Date lastExecute;
 
-	public UserView(String name, String firstName, String lastName,
-			User.State state, Date lastOnline, String organization) {
+	@Attribute(required = false)
+	public String organization;
+
+	@Attribute(required = false, name = "issuper")
+	private boolean isSuperUser;
+
+	public UserView(String name, String firstName, String lastName, String email, User.State state, Date lastOnline,
+			Date lastExecute, Date activeSince, String organization, Boolean isSuperUser) {
 
 		this.name = name;
 		this.resourceUri = User.constructResourceUri(name);
@@ -62,15 +74,26 @@ public class UserView {
 		this.firstName = firstName;
 		this.lastName = lastName;
 
+		this.email = email;
+
 		this.state = state;
 
-        if (lastOnline != null) {
-            this.lastOnline = (Date) lastOnline.clone();
-        } else {
-            this.lastOnline = null;
-        }
+		if (lastOnline != null) {
+			this.lastOnline = (Date) lastOnline.clone();
+		} else {
+			this.lastOnline = null;
+		}
+
+		if (lastExecute != null) {
+			this.lastExecute = (Date) lastExecute.clone();
+		} else {
+			this.lastExecute = null;
+		}
+
+		this.activeSince = activeSince;
 
         this.organization = organization;
+        this.isSuperUser = isSuperUser;
 	}
 
 	@Root(name = "list")

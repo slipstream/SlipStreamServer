@@ -167,7 +167,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
 
 		Response resp = getRunList(null, null, null);
-		assertEquals(resp.getStatus(), Status.SUCCESS_OK);
+		assertEquals(Status.SUCCESS_OK, resp.getStatus());
 		Document runs = XmlUtil.stringToDom(resp.getEntityAsText());
 		assertEquals(5, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("5", runs.getDocumentElement().getAttribute("count"));
@@ -175,14 +175,14 @@ public class RunListResourceTest extends ResourceTestBase {
 		assertEquals("20", runs.getDocumentElement().getAttribute("limit"));
 
 		resp = getRunList(null, 10, "CloudB");
-		assertEquals(resp.getStatus(), Status.SUCCESS_OK);
+		assertEquals(Status.SUCCESS_OK, resp.getStatus());
 		runs = XmlUtil.stringToDom(resp.getEntityAsText());
 		assertEquals(4, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("4", runs.getDocumentElement().getAttribute("count"));
 		assertEquals("10", runs.getDocumentElement().getAttribute("limit"));
 
 		resp = getRunList(1, 4, null);
-		assertEquals(resp.getStatus(), Status.SUCCESS_OK);
+		assertEquals(Status.SUCCESS_OK, resp.getStatus());
 		runs = XmlUtil.stringToDom(resp.getEntityAsText());
 		assertEquals(4, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("5", runs.getDocumentElement().getAttribute("count"));
@@ -190,16 +190,16 @@ public class RunListResourceTest extends ResourceTestBase {
 		assertEquals("4", runs.getDocumentElement().getAttribute("limit"));
 
 		resp = getRunList(null, null, "CloudC");
-		assertEquals(resp.getStatus(), Status.SUCCESS_OK);
+		assertEquals(Status.SUCCESS_OK, resp.getStatus());
 		runs = XmlUtil.stringToDom(resp.getEntityAsText());
 		assertEquals(3, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("3", runs.getDocumentElement().getAttribute("count"));
 
 		resp = getRunList(-1, null, null);
-		assertEquals(resp.getStatus(), Status.CLIENT_ERROR_BAD_REQUEST);
+		assertEquals(Status.CLIENT_ERROR_BAD_REQUEST, resp.getStatus());
 
 		resp = getRunList(null, Run.MAX_NO_OF_ENTRIES + 1, null);
-		assertEquals(resp.getStatus(), Status.CLIENT_ERROR_BAD_REQUEST);
+		assertEquals(Status.CLIENT_ERROR_BAD_REQUEST, resp.getStatus());
 	}
 
 	@Test

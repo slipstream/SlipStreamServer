@@ -20,7 +20,6 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +33,6 @@ import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Parameter;
@@ -46,21 +44,16 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.FileUtil;
 
 public abstract class RunFactory {
-
-	private static final List<String> VALID_RUNNING_STATE = Arrays.asList("running", "on");
-	private static final String RUNNING_STATE = "running";
-
 
 	public final Run createRun(Module module, User user) throws SlipStreamClientException {
 		return createRun(module, user, null);
 	}
 
-	public final Run createRun(Module module, User user,
-			Map<String, List<Parameter<?>>> userChoices) throws SlipStreamClientException {
+	public final Run createRun(Module module, User user, Map<String, List<Parameter<?>>> userChoices)
+			throws SlipStreamClientException {
 
 		validateModuleForRun(module);
 
@@ -103,8 +96,7 @@ public abstract class RunFactory {
 				Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
 	}
 
-	private void initialize(Module module, Run run, User user)
-			throws ValidationException, NotFoundException {
+	private void initialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
 
 		initializeGlobalParameters(run);
 
@@ -117,8 +109,7 @@ public abstract class RunFactory {
 
 	protected abstract RunType getRunType();
 
-	protected abstract void init(Module module, Run run, User user)
-			throws ValidationException, NotFoundException;
+	protected abstract void init(Module module, Run run, User user) throws ValidationException, NotFoundException;
 
 	protected abstract Map<String, String> resolveCloudServiceNames(Module module, User user,
 			Map<String, List<Parameter<?>>> userChoices);
@@ -129,7 +120,7 @@ public abstract class RunFactory {
 	protected abstract Module castToRequiredModuleType(Module module);
 
 	private void initCloudServices(Run run, Map<String, String> cloudServicePerNode) throws ValidationException {
-		for (Map.Entry<String, String> entry: cloudServicePerNode.entrySet()) {
+		for (Map.Entry<String, String> entry : cloudServicePerNode.entrySet()) {
 			String key = constructParamName(entry.getKey(), RuntimeParameter.CLOUD_SERVICE_NAME);
 			RunParameter rp = new RunParameter(key, entry.getValue(), RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 			run.setParameter(rp);
@@ -138,16 +129,15 @@ public abstract class RunFactory {
 
 	protected abstract void initExtraRunParameters(Module module, Run run) throws ValidationException;
 
-	protected abstract void updateExtraRunParameters(Module module, Run run,
-			Map<String, List<Parameter<?>>> userChoices) throws ValidationException;
+	protected abstract void updateExtraRunParameters(Module module, Run run, Map<String, List<Parameter<?>>> userChoices)
+			throws ValidationException;
 
 	protected void validateModule(Module module, Map<String, String> cloudServicePerNode)
-	        throws SlipStreamClientException {
+			throws SlipStreamClientException {
 		return;
 	}
 
-	protected void validateRun(Run run, User user)
-			throws SlipStreamClientException {
+	protected void validateRun(Run run, User user) throws SlipStreamClientException {
 
 		validateCloudServicesSet(run);
 		validatePublicSshKey(run, user);
@@ -157,18 +147,16 @@ public abstract class RunFactory {
 		if (run.getCloudServiceNamesList().length == 0) {
 			throw new ValidationException("No cloud service names set on the run.");
 		}
-    }
+	}
 
-	private void validatePublicSshKey(Run run, User user)
-			throws ValidationException {
+	private void validatePublicSshKey(Run run, User user) throws ValidationException {
 		if (run.getType() != RunType.Run) {
 			String publicSshKeyFile = Configuration.getInstance().getProperty(
 					ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY, null);
 
 			if (publicSshKeyFile == null || "".equals(publicSshKeyFile)) {
-				throw new ValidationException(
-						"The path to the SSH public key to put in the orchestrator is empty. "
-								+ "Please contact your SlipStream administrator.");
+				throw new ValidationException("The path to the SSH public key to put in the orchestrator is empty. "
+						+ "Please contact your SlipStream administrator.");
 			}
 			if (!FileUtil.exist(publicSshKeyFile)) {
 				throw new ValidationException(
@@ -177,20 +165,14 @@ public abstract class RunFactory {
 			}
 		}
 
-		String publicSshKey = user
-				.getParameterValue(
-						ExecutionControlUserParametersFactory.CATEGORY
-								+ "."
-								+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME,
-						null);
+		String publicSshKey = user.getParameterValue(ExecutionControlUserParametersFactory.CATEGORY + "."
+				+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME, null);
 		if (publicSshKey == null || "".equals(publicSshKey)) {
-			throw new ValidationException(
-					"Missing public key in your user profile.");
+			throw new ValidationException("Missing public key in your user profile.");
 		}
 	}
 
-	public static Run getRun(Module module, RunType type, User user)
-			throws SlipStreamClientException {
+	public static Run getRun(Module module, RunType type, User user) throws SlipStreamClientException {
 		return getRun(module, type, user, null);
 	}
 
@@ -202,8 +184,7 @@ public abstract class RunFactory {
 		return selectFactory(type).createRun(module, user, userChoices);
 	}
 
-	public static RunFactory selectFactory(RunType type)
-			throws SlipStreamClientException {
+	public static RunFactory selectFactory(RunType type) throws SlipStreamClientException {
 
 		RunFactory factory = null;
 
@@ -261,8 +242,7 @@ public abstract class RunFactory {
 		return module;
 	}
 
-	protected void initializeOrchestratorRuntimeParameters(Run run)
-			throws ValidationException {
+	protected void initializeOrchestratorRuntimeParameters(Run run) throws ValidationException {
 
 		if (withOrchestrator(run)) {
 			for (String cloudServiceName : getCloudServiceNames(run)) {
@@ -275,34 +255,29 @@ public abstract class RunFactory {
 		return ConnectorBase.isInOrchestrationContext(run);
 	}
 
-	protected static void initializeGlobalParameters(Run run)
-			throws ValidationException {
+	protected static void initializeGlobalParameters(Run run) throws ValidationException {
 
-		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_CATEGORY_KEY, run
-				.getCategory().toString(), "Module category");
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_CATEGORY_KEY, run.getCategory().toString(),
+				"Module category");
 
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_COMPLETE_KEY, "",
 				RuntimeParameter.GLOBAL_COMPLETE_DESCRIPTION);
-		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY, "",
-				RuntimeParameter.GLOBAL_ABORT_DESCRIPTION);
-		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_KEY,
-				Run.INITIAL_NODE_STATE,
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_ABORT_KEY, "", RuntimeParameter.GLOBAL_ABORT_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_KEY, Run.INITIAL_NODE_STATE,
 				RuntimeParameter.GLOBAL_STATE_DESCRIPTION);
-        run.assignRuntimeParameter(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY, "",
-                RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY, "",
+				RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION);
 
-        run.assignRuntimeParameter(RuntimeParameter.GLOBAL_URL_SERVICE_KEY, "",
-                RuntimeParameter.GLOBAL_URL_SERVICE_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_URL_SERVICE_KEY, "",
+				RuntimeParameter.GLOBAL_URL_SERVICE_DESCRIPTION);
 
-        run.assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "",
-				RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_TAGS_KEY, "", RuntimeParameter.GLOBAL_TAGS_DESCRIPTION);
 
-        run.assignRuntimeParameter(RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY, "false",
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY, "false",
 				RuntimeParameter.GLOBAL_RECOVERY_MDDE_DESCRIPTION);
 	}
 
-	private static void initializeOrchestratorParameters(Run run,
-			String cloudService) throws ValidationException {
+	private static void initializeOrchestratorParameters(Run run, String cloudService) throws ValidationException {
 
 		if (cloudService.isEmpty()) {
 			throw new ValidationException("Failed to intialise orchestrator parameters: empty cloud service name.");
@@ -312,150 +287,77 @@ public abstract class RunFactory {
 
 		assignCommonRuntimeParameters(run, prefix);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.HOSTNAME_KEY),
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.HOSTNAME_KEY),
 				RuntimeParameter.HOSTNAME_DESCRIPTION);
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.INSTANCE_ID_KEY),
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.INSTANCE_ID_KEY),
 				RuntimeParameter.INSTANCE_ID_DESCRIPTION);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.IS_ORCHESTRATOR_KEY), "true", RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.IS_ORCHESTRATOR_KEY),
+				"true", RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
 
 		Configuration conf = Configuration.getInstance();
-		String maxJaasWorkers = conf.getProperty(ServiceConfigurationParameter
-				.constructKey(cloudService,
-						RuntimeParameter.MAX_JAAS_WORKERS_KEY),
+		String maxJaasWorkers = conf.getProperty(
+				ServiceConfigurationParameter.constructKey(cloudService, RuntimeParameter.MAX_JAAS_WORKERS_KEY),
 				RuntimeParameter.MAX_JAAS_WORKERS_DEFAULT);
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.MAX_JAAS_WORKERS_KEY), maxJaasWorkers,
-				RuntimeParameter.MAX_JAAS_WORKERS_DESCRIPTION);
-    }
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.MAX_JAAS_WORKERS_KEY),
+				maxJaasWorkers, RuntimeParameter.MAX_JAAS_WORKERS_DESCRIPTION);
+	}
 
 	/**
 	 * @param nodename
 	 *            Example (< nodename>.< index>)
 	 * @throws ValidationException
 	 */
-	public static void assignCommonRuntimeParameters(Run run, String nodename)
-			throws ValidationException {
+	public static void assignCommonRuntimeParameters(Run run, String nodename) throws ValidationException {
 		String prefix = nodename;
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.STATE_CUSTOM_KEY), "",
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.STATE_CUSTOM_KEY), "",
 				RuntimeParameter.STATE_CUSTOM_DESCRIPTION);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.STATE_VM_KEY), "",
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.STATE_VM_KEY), "",
 				RuntimeParameter.STATE_VM_DESCRIPTION);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.ABORT_KEY), "",
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.ABORT_KEY), "",
 				RuntimeParameter.ABORT_DESCRIPTION);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-				RuntimeParameter.COMPLETE_KEY), "false",
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.COMPLETE_KEY), "false",
 				RuntimeParameter.COMPLETE_DESCRIPTION);
 
-        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-        		RuntimeParameter.URL_SSH_KEY), "",
-                RuntimeParameter.URL_SSH_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.URL_SSH_KEY), "",
+				RuntimeParameter.URL_SSH_DESCRIPTION);
 
-        run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix,
-        		RuntimeParameter.URL_SERVICE_KEY), "",
-                RuntimeParameter.URL_SERVICE_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(prefix, RuntimeParameter.URL_SERVICE_KEY), "",
+				RuntimeParameter.URL_SERVICE_DESCRIPTION);
 
-    }
+	}
 
 	protected static void assignCommonNodeInstanceRuntimeParameters(Run run, String nodename)
 			throws ValidationException {
 
 		assignCommonRuntimeParameters(run, nodename);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename,
-				RuntimeParameter.IS_ORCHESTRATOR_KEY), "false",
-				RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename, RuntimeParameter.IS_ORCHESTRATOR_KEY),
+				"false", RuntimeParameter.IS_ORCHESTRATOR_DESCRIPTION);
 
-		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename,
-				RuntimeParameter.SCALE_STATE_KEY),
-				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE,
-				RuntimeParameter.SCALE_STATE_DESCRIPTION);
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename, RuntimeParameter.SCALE_STATE_KEY),
+				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE, RuntimeParameter.SCALE_STATE_DESCRIPTION);
 
 	}
 
-	protected void initOrchestratorsNodeNames(Run run)
-			throws ConfigurationException, ValidationException {
-		if (withOrchestrator(run)){
+	protected void initOrchestratorsNodeNames(Run run) throws ConfigurationException, ValidationException {
+		if (withOrchestrator(run)) {
 			for (String cloudServiceName : getCloudServiceNames(run)) {
 				String nodename = Run.constructOrchestratorName(cloudServiceName);
 				run.addNodeInstanceName(nodename, cloudServiceName);
-				run.assignRuntimeParameter(nodename
-						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+				run.assignRuntimeParameter(nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR
 						+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
 						RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 			}
 		}
 	}
 
-	public static String[] getCloudServiceNames(Run run)
-			throws ValidationException {
+	public static String[] getCloudServiceNames(Run run) throws ValidationException {
 		return run.getCloudServiceNamesList();
-	}
-
-	public static Run updateVmStatus(Run run, String username)
-			throws SlipStreamException {
-		List<Vm> vms = Vm.list(username);
-		run = populateVmStateProperties(run, vms);
-		return run;
-	}
-
-	public static Run updateVmStatus(Run run, List<Vm> vms)
-			throws SlipStreamException {
-		run = populateVmStateProperties(run, vms);
-		return run;
-	}
-
-	public static Run populateVmStateProperties(Run run,
-			List<Vm> vms) throws NotFoundException,
-			ValidationException {
-
-		List<String> nodes = run.getNodeNameList();
-		String vmIdKey;
-		String vmId;
-		String vmStateKey;
-
-		Map<String, Vm> map = Vm.toMap(vms);
-
-		for (String nodeName : nodes) {
-			String keyPrefix = nodeName
-					+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
-			vmIdKey = keyPrefix + RuntimeParameter.INSTANCE_ID_KEY;
-			vmId = run.getRuntimeParameterValueIgnoreAbort(vmIdKey);
-			vmId = vmId == null ? "" : vmId;
-			vmStateKey = keyPrefix + RuntimeParameter.STATE_VM_KEY;
-			Vm vm = map.get(vmId);
-			String vmState = vm == null ? "Unknown" : vm.getState();
-
-			vmState = cleanVmState(vmState);
-
-			try {
-				run.updateRuntimeParameter(vmStateKey, vmState);
-			} catch (NotFoundException e) {
-				run.assignRuntimeParameter(vmStateKey, vmState,
-						RuntimeParameter.STATE_VM_DESCRIPTION);
-			}
-		}
-
-		return run;
-	}
-
-	private static String cleanVmState(String vmState) {
-		if (vmState != null) {
-			if (VALID_RUNNING_STATE.contains(vmState.toLowerCase())) {
-				vmState = RUNNING_STATE;
-			}
-		}
-		return vmState;
 	}
 
 	public static String constructParamName(String nodename, String paramname) {
