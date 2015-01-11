@@ -1,5 +1,6 @@
 package com.sixsq.slipstream.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -9,15 +10,10 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 public class ServiceCatalogs {
 
-	@ElementList(inline = true, name = "service_catalog")
-	List<ServiceCatalog> list;
+	@ElementList(inline = true)
+	List<ServiceCatalog> list = new ArrayList<ServiceCatalog>();
 
 	public ServiceCatalogs() {
-		load();
-	}
-
-	private void load() {
-		list = ServiceCatalog.listall();
 	}
 
 	public List<ServiceCatalog> getList() {
@@ -75,6 +71,10 @@ public class ServiceCatalogs {
 		}
 
 		sc.populateDefinedParameters();
+	}
+
+	public void loadAll() throws ValidationException {
+		list = retrieveServiceCatalogs();
 	}
 
 }

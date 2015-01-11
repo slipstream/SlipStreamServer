@@ -33,10 +33,8 @@ import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.metrics.Metrics;
 import com.sixsq.slipstream.metrics.MetricsTimer;
-import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
-import com.sixsq.slipstream.run.RunView;
 
 public class Collector {
 
@@ -91,33 +89,12 @@ public class Collector {
 
 	private static int populateVmsForCloud(User user, String cloud, Properties idsAndStates) {
 		List<Vm> vms = new ArrayList<Vm>();
-		for (String key : idsAndStates.stringPropertyNames()) {
-			String instanceId = key;
-			String state = (String) idsAndStates.get(key);
+		for (String instanceId : idsAndStates.stringPropertyNames()) {
+			String state = (String) idsAndStates.get(instanceId);
 			Vm vm = new Vm(instanceId, cloud, state, user.getName());
-			try {
-				String runUuid = fetchRunUuid(user, cloud, instanceId);
-				vm.setRunUuid(runUuid);
-			} catch (ConfigurationException e) {
-				logger.warning("Error fetching run uuid for instance id "
-						+ instanceId + " for cloud " + cloud);
-			} catch (ValidationException e) {
-				logger.warning("Error fetching run uuid for instance id "
-						+ instanceId + " for cloud " + cloud);
-			}
 			vms.add(vm);
 		}
 		Vm.update(vms, user.getName(), cloud);
 		return idsAndStates.size();
-	}
-
-	private static String fetchRunUuid(User user, String cloud,
-			String instanceId) throws ConfigurationException,
-			ValidationException {
-		RunView run = Run.loadViewByInstanceId(user, instanceId, cloud);
-		if (run == null) {
-			return "Unknown";
-		}
-		return run.uuid;
 	}
 }

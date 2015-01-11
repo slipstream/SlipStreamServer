@@ -68,10 +68,8 @@ public class UserTest {
 
 	@After
 	public void tearDown() {
-		try {
-			user.remove();
-		} catch (Exception ex) {
-
+		for(User u : User.list()) {
+			u.remove();
 		}
 	}
 
@@ -176,23 +174,26 @@ public class UserTest {
 	@Test
 	public void verifyUserList() {
 
-		User user1 = UserTest.createUser("user1");
-		user1.setState(State.ACTIVE);
-		user1.store();
+		User userActive1 = UserTest.createUser("user1");
+		userActive1.setState(State.ACTIVE);
+		userActive1.store();
 
-		User user2 = UserTest.createUser("user2");
-		user2.setState(State.NEW);
-		user2.store();
+		User userNew = UserTest.createUser("user2");
+		userNew.setState(State.NEW);
+		userNew.store();
 
-		User user3 = UserTest.createUser("user3");
-		user3.setState(State.ACTIVE);
-		user3.store();
+		User userActive2 = UserTest.createUser("user3");
+		userActive2.setState(State.ACTIVE);
+		userActive2.store();
 
 		Set<String> activeUsernames = new TreeSet<String>();
 		activeUsernames.add("user1");
 		activeUsernames.add("user3");
 
-		List<User> userList = User.list();
+		List<User> allUsers = User.list();
+		assertEquals(4, allUsers.size()); // 3 + 1 from the setup
+
+		List<User> userList = User.listActive();
 		assertEquals(2, userList.size());
 
 		Set<String> retrievedUsernames = new TreeSet<String>();
@@ -201,10 +202,6 @@ public class UserTest {
 		}
 
 		assertEquals(activeUsernames, retrievedUsernames);
-
-		User.removeNamedUser("user1");
-		User.removeNamedUser("user2");
-		User.removeNamedUser("user3");
 	}
 
 	@Test
@@ -223,6 +220,8 @@ public class UserTest {
 
 		User user3 = UserTest.createUser("user3");
 		user3.setState(State.ACTIVE);
+		user3.setLastExecute();
+		user3.setLastModified();
 		user3.store();
 
 		Set<String> allUsernames = new TreeSet<String>();
@@ -232,10 +231,23 @@ public class UserTest {
 
 		userViewList = User.viewList();
 		assertThat(userViewList.size(), is(allUsernames.size() + before));
+	}
 
-		User.removeNamedUser("user1");
-		User.removeNamedUser("user2");
-		User.removeNamedUser("user3");
+	@Test
+	public void userViewListHasAttributes() {
+
+		User user = UserTest.createUser("user");
+		user.setState(State.ACTIVE);
+		user.setLastExecute();
+		user.setLastOnline();
+		user.setLastModified();
+		user.store();
+
+		List<UserView> userViewList = User.viewList();
+		UserView userView = userViewList.get(1);
+		assertNotNull(userView.activeSince);
+		assertNotNull(userView.lastExecute);
+		assertNotNull(userView.lastOnline);
 	}
 
 	@Test

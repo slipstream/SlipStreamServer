@@ -75,6 +75,9 @@ public class Dashboard {
 	private RunViewList runs;
 
 	@ElementList
+	private transient List<String> clouds = new ArrayList<String>();
+
+	@ElementList
 	private transient List<UsageElement> usage = new ArrayList<UsageElement>();
 
 	public void populate(User user, int offset, int limit, String cloudServiceName) throws SlipStreamException {
@@ -82,7 +85,9 @@ public class Dashboard {
 		user = User.loadByName(user.getName());  // ensure user is loaded from database
 
 		Map<String, Integer> cloudUsage = Vm.usage(user.getName());
-		for (String cloud : ConnectorFactory.getCloudServiceNamesList()) {
+		clouds = ConnectorFactory.getCloudServiceNamesList();
+
+		for (String cloud : clouds) {
 			Integer quota = Integer.parseInt(Quota.getValue(user, cloud));
 			Integer currentUsage = cloudUsage.get(cloud);
 			if (currentUsage == null) currentUsage = 0;

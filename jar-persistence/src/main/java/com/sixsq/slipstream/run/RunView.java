@@ -28,6 +28,7 @@ import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
@@ -47,11 +48,11 @@ public class RunView {
 	@Attribute(required = false)
 	public String status;
 
+	@Attribute(required = false)
+	public String abort;
+
 	@Attribute
 	public final Date startTime;
-
-	@Attribute(required = false)
-	private String vmstate;
 
 	@Attribute(required = false)
 	private String hostname;
@@ -69,7 +70,7 @@ public class RunView {
 	public String tags;
 
 	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
-			String status, Date startTime, String username, RunType type, String cloudServiceNames) {
+			String status, Date startTime, String username, RunType type, String cloudServiceNames, String abort) {
 		this.resourceUri = resourceUrl;
 		this.uuid = uuid;
 		this.moduleResourceUri = moduleResourceUri;
@@ -77,6 +78,7 @@ public class RunView {
 		this.username = username;
 		this.type = type;
 		this.cloudServiceNames = cloudServiceNames;
+		this.abort = abort;
 
         if (startTime != null) {
             this.startTime = (Date) startTime.clone();
@@ -107,10 +109,9 @@ public class RunView {
 
 	public RunView copy() {
 		RunView copy = new RunView(resourceUri, uuid, moduleResourceUri,
-				status, startTime, username, type, cloudServiceNames);
+				status, startTime, username, type, cloudServiceNames, abort);
 		copy.setHostname(hostname);
 		copy.setTags(tags);
-		copy.setVmstate(vmstate);
 		return copy;
 	}
 
@@ -130,14 +131,6 @@ public class RunView {
 		return type;
 	}
 
-	public String getVmstate() {
-		return vmstate;
-	}
-
-	public void setVmstate(String vmstate) {
-		this.vmstate = vmstate;
-	}
-
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
 	}
@@ -152,6 +145,14 @@ public class RunView {
 
 	public String getTags() {
 		return tags;
+	}
+
+	public boolean isAbort() {
+		return Parameter.hasValueSet(abort);
+	}
+
+	public void setAbort(String abort) {
+		this.abort = abort;
 	}
 
 }

@@ -10,7 +10,7 @@ public class Welcome {
 	ModuleViewList modules;
 
 	@Element(required = false)
-	ServiceCatalogs serviceCatalogues;
+	ServiceCatalogs serviceCatalogs;
 
 	public ModuleViewList getModules() {
 		return modules;
@@ -20,12 +20,12 @@ public class Welcome {
 		this.modules = modules;
 	}
 
-	public ServiceCatalogs getServiceCatalogues() {
-		return serviceCatalogues;
+	public ServiceCatalogs getServiceCatalogs() {
+		return serviceCatalogs;
 	}
 
-	public void setServiceCatalogues(ServiceCatalogs serviceCatalogues){
-		this.serviceCatalogues = serviceCatalogues;
+	public void setServiceCatalogues(ServiceCatalogs serviceCatalogs){
+		this.serviceCatalogs = serviceCatalogs;
 	}
 
 }

@@ -47,7 +47,6 @@ import javax.persistence.Id;
 import javax.persistence.MapKey;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
 import javax.persistence.Query;
 import javax.persistence.Temporal;
@@ -82,8 +81,7 @@ import com.sixsq.slipstream.statemachine.States;
 		@NamedQuery(name = "allRuns", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
 		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.lastStateChangeTime < :before AND r.state IN (:states)"),
-		// FIXME: check for the cloud
-		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.name_ = 'instanceid' AND p.value = :instanceid ORDER BY r.startTime DESC") })
+		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.name_ = :instanceidkey AND p.value = :instanceidvalue ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
 
 	private static final int DEFAULT_TIMEOUT = 60; // In minutes
@@ -297,28 +295,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return run;
 	}
 
-	public static RunView loadViewByInstanceId(Parameterized<User, UserParameter> user, String instanceId,
-			String cloud) throws ConfigurationException, ValidationException {
-		// TODO: there is a chance that if two clouds have overlaping
-		// instanceid,
-		// this logic will pickup both
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("runByInstanceId");
-		q.setParameter("instanceid", instanceId);
-		q.setParameter("user", user.getName());
-		Run run = null;
-		try {
-			run = (Run) q.getSingleResult();
-		} catch (NoResultException ex) {
-		}
-		em.close();
-		RunView view = null;
-		if (run != null) {
-			view = convertRunToRunView(run);
-		}
-		return view;
-	}
-
 	private static List<RunView> convertRunsToRunViews(List<Run> runs)
 			throws ConfigurationException, ValidationException {
 		List<RunView> views = new ArrayList<RunView>();
@@ -336,19 +312,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 			return null;
 		}
 
+		RuntimeParameter globalAbort = Run.getGlobalAbort(run);
+		String abortMessage = (globalAbort != null)? globalAbort.getValue() : "";
+
 		RunView runView;
-		runView = new RunView(run.getResourceUri(), run.getUuid(), run.getModuleResourceUrl(), run.getState()
-				.toString(), run.getStart(), run.getUser(), run.getType(), run.getCloudServiceNames());
-		try {
-			runView.setHostname(run.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-					+ RuntimeParameter.HOSTNAME_KEY));
-		} catch (NotFoundException e) {
-		}
-		try {
-			runView.setVmstate(run.getRuntimeParameterValueIgnoreAbort(MACHINE_NAME_PREFIX
-					+ RuntimeParameter.STATE_VM_KEY));
-		} catch (NotFoundException e) {
-		}
+		runView = new RunView(run.getResourceUri(), run.getUuid(), run.getModuleResourceUrl(),
+				run.getState().toString(), run.getStart(), run.getUser(), run.getType(), run.getCloudServiceNames(),
+				abortMessage);
+
 		try {
 			runView.setTags(run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
 		} catch (NotFoundException e) {
@@ -846,6 +817,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return nodeNames;
 	}
 
+	/**
+	 * Builds a list of node instance names (e.g. node.1, node.2, machine)
+	 * @return node instance name
+	 */
 	public List<String> getNodeNameList() {
 		String[] rawNodeNames = getNodeNames().split(NODE_NAMES_SEPARATOR);
 		List<String> nodeNames = new ArrayList<String>(rawNodeNames.length);
@@ -1050,4 +1025,17 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public void setImmutable() {
 		this.mutable = false;
 	}
+
+//	public void remove() {
+//		List<VmRuntimeParameterMapping> ms = VmRuntimeParameterMapping.getMappings(getUuid());
+//		for(VmRuntimeParameterMapping m : ms) {
+//			try {
+//				m.remove();
+//			} catch (IllegalArgumentException e) {
+//
+//			}
+//		}
+//		super.remove();
+//	}
+
 }

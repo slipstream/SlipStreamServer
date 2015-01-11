@@ -22,12 +22,16 @@ package com.sixsq.slipstream.run;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -52,8 +56,7 @@ import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 
-public class RuntimeParameterResourceTest extends
-		RuntimeParameterResourceTestBase {
+public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBase {
 
 	@BeforeClass
 	public static void classSetup() throws ValidationException {
@@ -71,8 +74,7 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void runtimeParameterResourceGetUnknownUuid()
-			throws ConfigurationException, ValidationException {
+	public void runtimeParameterResourceGetUnknownUuid() throws ConfigurationException, ValidationException {
 
 		Request request = createGetRequest("unknownUuid", "aKey");
 
@@ -82,8 +84,7 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void runtimeParameterResourceGetUnknownKey()
-			throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourceGetUnknownKey() throws FileNotFoundException, IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("RuntimeParameterResourceGetUnknownKey");
 
@@ -100,8 +101,8 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void runtimeParameterResourceGetNotYetSetValue()
-			throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourceGetNotYetSetValue() throws FileNotFoundException, IOException,
+			SlipStreamException {
 
 		Run run = createAndStoreRunImage("runtimeParameterResourceGetNotYetSetValue");
 
@@ -109,8 +110,7 @@ public class RuntimeParameterResourceTest extends
 
 		Response response = executeRequest(request);
 
-		assertEquals(Status.CLIENT_ERROR_PRECONDITION_FAILED,
-				response.getStatus());
+		assertEquals(Status.CLIENT_ERROR_PRECONDITION_FAILED, response.getStatus());
 
 		assertAbortNotSet(run);
 
@@ -118,8 +118,7 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void runtimeParameterResourceGet() throws FileNotFoundException,
-			IOException, SlipStreamException {
+	public void runtimeParameterResourceGet() throws FileNotFoundException, IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("RuntimeParameterResourceGet");
 
@@ -132,15 +131,13 @@ public class RuntimeParameterResourceTest extends
 		run.remove();
 	}
 
-	private void storeRuntimeParameter(String key, String value, Run run)
-			throws ValidationException, NotFoundException {
+	private void storeRuntimeParameter(String key, String value, Run run) throws ValidationException, NotFoundException {
 		run.assignRuntimeParameter(key, value, "");
 		run.store();
 	}
 
 	@Test
-	public void runtimeParameterResourcePutExisting()
-			throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourcePutExisting() throws FileNotFoundException, IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("runtimeParameterResourcePutExisting");
 
@@ -150,13 +147,11 @@ public class RuntimeParameterResourceTest extends
 		run.assignRuntimeParameter(key, value, "");
 		run.store();
 
-		Request request = createPutRequest(run.getUuid(), key,
-				new StringRepresentation(value));
+		Request request = createPutRequest(run.getUuid(), key, new StringRepresentation(value));
 
 		executeRequest(request);
 
-		RuntimeParameter runtimeParameter = RuntimeParameter
-				.loadFromUuidAndKey(run.getUuid(), key);
+		RuntimeParameter runtimeParameter = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
 
 		run.remove();
 
@@ -167,8 +162,7 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	private void assertAbortNotSet(Run run) {
-		assertThat(run.getRuntimeParameters().get("ss:abort").isSet(),
-				is(false));
+		assertThat(run.getRuntimeParameters().get("ss:abort").isSet(), is(false));
 	}
 
 	private void assertAbortSet(Run run) {
@@ -184,8 +178,7 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void runtimeParameterResourcePutNotExisting()
-			throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourcePutNotExisting() throws FileNotFoundException, IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("runtimeParameterResourcePutNotExisting");
 
@@ -205,8 +198,8 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void runtimeParameterRetrieveFromContainerRun()
-			throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterRetrieveFromContainerRun() throws FileNotFoundException, IOException,
+			SlipStreamException {
 
 		Run run = createAndStoreRunImage("RuntimeParameterRetrieveFromContainerRun");
 
@@ -227,13 +220,11 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void runtimeParameterReset() throws SlipStreamException,
-			FileNotFoundException, IOException {
+	public void runtimeParameterReset() throws SlipStreamException, FileNotFoundException, IOException {
 
 		String key = "node.1:key";
 		String value = "value of key";
-		Run run = createAndStoreRunWithRuntimeParameter(
-				"runtimeParameterReset", key, value);
+		Run run = createAndStoreRunWithRuntimeParameter("runtimeParameterReset", key, value);
 
 		assertNotNull(run);
 		assertEquals(value, run.getRuntimeParameterValue(key));
@@ -248,17 +239,14 @@ public class RuntimeParameterResourceTest extends
 		run.remove();
 	}
 
-	private void assertRuntimeParameterWasReset(Run run, String key)
-			throws AbortException {
-		RuntimeParameter rtp = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), key);
+	private void assertRuntimeParameterWasReset(Run run, String key) throws AbortException {
+		RuntimeParameter rtp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
 		assertNotNull(rtp);
 		assertThat(rtp.isSet(), is(false));
 	}
 
 	@Test
-	public void wrongNodeTriggersAbort() throws SlipStreamException,
-			FileNotFoundException, IOException {
+	public void wrongNodeTriggersAbort() throws SlipStreamException, FileNotFoundException, IOException {
 
 		String key = "wrong.1:key";
 		Run run = createAndStoreRunImage("wrongNodeTriggersAbort");
@@ -275,8 +263,7 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void wrongKeyTriggersAbort() throws SlipStreamException,
-			FileNotFoundException, IOException {
+	public void wrongKeyTriggersAbort() throws SlipStreamException, FileNotFoundException, IOException {
 
 		String key = "ss:wrong";
 		Run run = createAndStoreRunImage("wrongKeyTriggersAbort");
@@ -293,24 +280,20 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void cantSetAbortTwice() throws SlipStreamException,
-			FileNotFoundException, IOException {
+	public void cantSetAbortTwice() throws SlipStreamException, FileNotFoundException, IOException {
 
 		String key = "ss:abort";
 		Run run = createAndStoreRunImage("cantSetAbortTwice");
 
-		Request request = createPutRequest(run.getUuid(), key,
-				new StringRepresentation("first abort"));
+		Request request = createPutRequest(run.getUuid(), key, new StringRepresentation("first abort"));
 		Response response = executeRequest(request);
 
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
 
-		RuntimeParameter abort = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), "ss:abort");
+		RuntimeParameter abort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), "ss:abort");
 		assertThat(abort.getValue(), is("first abort"));
 
-		request = createPutRequest(run.getUuid(), key,
-				new StringRepresentation("second abort"));
+		request = createPutRequest(run.getUuid(), key, new StringRepresentation("second abort"));
 		response = executeRequest(request);
 
 		assertEquals(Status.CLIENT_ERROR_CONFLICT, response.getStatus());
@@ -322,34 +305,28 @@ public class RuntimeParameterResourceTest extends
 	}
 
 	@Test
-	public void errorSetsNodeAndGlobalAbort() throws FileNotFoundException,
-			IOException, SlipStreamException {
+	public void errorSetsNodeAndGlobalAbort() throws FileNotFoundException, IOException, SlipStreamException {
 
-		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase()
-				+ RuntimeParameter.ABORT_KEY;
+		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase() + RuntimeParameter.ABORT_KEY;
 		String globalAbortKey = RuntimeParameter.GLOBAL_ABORT_KEY;
 		String abortMessage = "machine abort";
 
 		Run run = createAndStoreRunImage("errorSetsNodeAndGlobalAbort");
 
-		Request request = createPutRequest(run.getUuid(), machineAbortKey,
-				new StringRepresentation(abortMessage));
+		Request request = createPutRequest(run.getUuid(), machineAbortKey, new StringRepresentation(abortMessage));
 		Response response = executeRequest(request);
 
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
 
-		RuntimeParameter nodeAbort = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), machineAbortKey);
+		RuntimeParameter nodeAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), machineAbortKey);
 		assertThat(nodeAbort.getValue(), is(abortMessage));
 
-		RuntimeParameter globalAbort = RuntimeParameter.loadFromUuidAndKey(
-				run.getUuid(), globalAbortKey);
+		RuntimeParameter globalAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), globalAbortKey);
 		assertThat(globalAbort.getValue(), is(abortMessage));
 	}
 
 	@Test
-	public void cancelAbort() throws FileNotFoundException, IOException,
-			SlipStreamException {
+	public void cancelAbort() throws FileNotFoundException, IOException, SlipStreamException {
 
 		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase() + RuntimeParameter.ABORT_KEY;
 		String globalAbortKey = RuntimeParameter.GLOBAL_ABORT_KEY;
@@ -390,6 +367,80 @@ public class RuntimeParameterResourceTest extends
 		globalAbort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), globalAbortKey);
 		assertThat(globalAbort.getValue(), is(""));
 		assertThat(globalAbort.isSet(), is(false));
+	}
+
+	@Test
+	public void runtimeParameterResourceGetStress() throws FileNotFoundException, IOException, SlipStreamException {
+
+		Run run = createAndStoreRunImage("runtimeParameterResourceGetStress");
+
+		String key = "node.1:key";
+		String value = "value of key";
+		storeRuntimeParameter(key, value, run);
+
+		Long before = System.currentTimeMillis();
+		for (int i = 0; i < 1000; i++) {
+			executeGetRequestAndAssertValue(run, key, value);
+		}
+		logTimeDiff("parseRequest", before);
+
+		run.remove();
+	}
+
+	@Test
+	public void isAbort() throws FileNotFoundException, IOException, SlipStreamException {
+
+		Run run = createAndStoreRunImage("isAbort");
+
+		boolean isAbort = RuntimeParameter.isAbort(run.getUuid());
+		assertThat(isAbort, is(false));
+
+		RuntimeParameter abort = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), "ss:abort");
+		abort.setValue("abort!");
+		abort.store();
+
+		isAbort = RuntimeParameter.isAbort(run.getUuid());
+		assertThat(isAbort, is(true));
+
+		run.remove();
+	}
+
+	@Test
+	public void getValueAndSet() throws FileNotFoundException, IOException, SlipStreamException {
+
+		Run run = createAndStoreRunImage("getValueAndSet");
+
+		String key = "node.1:key";
+		storeRuntimeParameter(key, "", run);
+
+		RuntimeParameter rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
+
+		Properties p = RuntimeParameter.getValueAndSet(run.getUuid(), key);
+		String value = (String) p.get("value");
+		boolean isSet = (Boolean) p.get("isSet");
+		assertThat(value, is(""));
+		assertFalse(isSet);
+
+		rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
+		value = "value of key";
+		rp.setValue(value);
+		rp.store();
+
+		p = RuntimeParameter.getValueAndSet(run.getUuid(), key);
+		value = (String) p.get("value");
+		isSet = (Boolean) p.get("isSet");
+		assertThat(value, is("value of key"));
+		assertTrue(isSet);
+		
+		run.remove();
+	}
+
+	private void logTimeDiff(String msg, long before, long after) {
+		Logger.getLogger("Timing").severe("took to execute " + msg + ": " + (after - before));
+	}
+
+	protected void logTimeDiff(String msg, long before) {
+		logTimeDiff(msg, before, System.currentTimeMillis());
 	}
 
 }

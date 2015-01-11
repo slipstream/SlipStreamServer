@@ -20,6 +20,7 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,12 +45,14 @@ import org.simpleframework.xml.Attribute;
  */
 @Entity
 @NamedQueries({
-			@NamedQuery(name = "byUser", query = "SELECT v FROM Vm v WHERE v.user_ = :user"),
-			@NamedQuery(name = "byUserCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user"),
-			@NamedQuery(name = "byUserByCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
-			@NamedQuery(name = "byUserByCloudCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
-			@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on', 'active', 'Active') AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
-			@NamedQuery(name = "removeByUser", query = "DELETE Vm WHERE user_ = :user AND cloud = :cloud") })
+		@NamedQuery(name = "byUser", query = "SELECT v FROM Vm v WHERE v.user_ = :user"),
+		@NamedQuery(name = "byUserCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user"),
+		@NamedQuery(name = "byUserAndCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
+		@NamedQuery(name = "byUserAndCloudCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
+		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on', 'active', 'Active') AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
+		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run")
+})
+
 public class Vm {
 
 	public final static String RESOURCE_URL_PREFIX = "vms/";
@@ -73,7 +76,7 @@ public class Vm {
 	@Attribute
 	private Date measurement;
 
-	@Attribute
+	@Attribute(required = false)
 	private String runUuid;
 
 	@SuppressWarnings("unused")
@@ -94,7 +97,7 @@ public class Vm {
 
 	public static List<Vm> list(String user, Integer offset, Integer limit, String cloudServiceName) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		String queryName = (cloudServiceName != null) ? "byUserByCloud" : "byUser";
+		String queryName = (cloudServiceName != null) ? "byUserAndCloud" : "byUser";
 		Query q = em.createNamedQuery(queryName);
 		if (offset != null) {
 			q.setFirstResult(offset);
@@ -114,7 +117,7 @@ public class Vm {
 
 	public static int listCount(String user, String cloudServiceName) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		String queryName = (cloudServiceName != null) ? "byUserByCloudCount" : "byUserCount";
+		String queryName = (cloudServiceName != null) ? "byUserAndCloudCount" : "byUserCount";
 		Query q = em.createNamedQuery(queryName);
 		q.setParameter("user", user);
 		if (cloudServiceName != null) {
@@ -129,33 +132,163 @@ public class Vm {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
-		Query q = em.createNamedQuery("removeByUser");
+		Query q = em.createNamedQuery("byUserAndCloud");
 		q.setParameter("user", user);
 		q.setParameter("cloud", cloud);
-		int removed = q.executeUpdate();
-		for(Vm v : newVms) {
-			em.persist(v);
+
+		@SuppressWarnings("unchecked")
+		List<Vm> oldVmList = q.getResultList();
+
+		Map<String, Vm> filteredOldVmMap = new HashMap<String, Vm>();
+		Map<String, Vm> newVmsMap = toMapByInstanceId(newVms);
+		int removed = 0;
+		for (Vm vm : oldVmList) {
+			String instanceId = vm.getInstanceId();
+			if (!newVmsMap.containsKey(instanceId)) {
+				setVmstate(em, getMapping(vm), "Unknown");
+				em.remove(vm);
+				removed++;
+			} else {
+				filteredOldVmMap.put(instanceId, vm);
+			}
+		}
+		for (Vm v : newVmsMap.values()) {
+			Vm old = filteredOldVmMap.get(v.getInstanceId());
+			VmRuntimeParameterMapping m = getMapping(v);
+			if (old == null) {
+				setVmstate(em, m, v);
+				setRunUuid(m, v);
+				em.persist(v);
+			} else {
+				boolean merge = false;
+				if (!v.getState().equals(old.getState())) {
+					old.setState(v.getState());
+					setVmstate(em, m, v);
+					merge = true;
+				}
+				if (old.getRunUuid() == null) {
+					setRunUuid(m, old);
+					merge = true;
+				}
+				if (merge) {
+					old = em.merge(old);
+				}
+			}
 		}
 		transaction.commit();
 		em.close();
 		return removed;
 	}
 
+	private static VmRuntimeParameterMapping getMapping(Vm v) {
+		return VmRuntimeParameterMapping.find(v.getCloud(), v.getInstanceId());
+	}
+
+	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
+		setVmstate(em, m, v.getState());
+	}
+
+	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, String vmstate) {
+		if (m != null) {
+			RuntimeParameter rp = m.getVmstateRuntimeParameter();
+			rp.setValue(vmstate);
+			em.merge(rp);
+		}
+	}
+
+	private static void setRunUuid(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			RuntimeParameter rp = m.getVmstateRuntimeParameter();
+			if (rp != null) {
+				v.setRunUuid(rp.getContainer().getUuid());
+			}
+		}
+	}
+
 	public static Map<String, Integer> usage(String user) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 
-		List<?> res = em.createNamedQuery("usageByUser")
-			.setParameter("user", user)
-			.getResultList();
+		List<?> res = em.createNamedQuery("usageByUser").setParameter("user", user).getResultList();
 		em.close();
 
 		Map<String, Integer> usageData = new HashMap<String, Integer>(res.size());
 		for (Object object : res) {
-			usageData.put((String)((Object[])object)[0],
-				      ((Long)((Object[])object)[1]).intValue());
+			usageData.put((String) ((Object[]) object)[0], ((Long) ((Object[]) object)[1]).intValue());
 		}
 
 		return usageData;
+	}
+
+	/**
+	 * This method assumes that the input VMs correspond to a single cloud.
+	 * Otherwise, duplicate instance ids would overwrite each other.
+	 *
+	 * @param vms
+	 *            for a single cloud
+	 * @return mapped VMs by instance id
+	 */
+	public static Map<String, Vm> toMapByInstanceId(List<Vm> vms) {
+		Map<String, Vm> map = new HashMap<String, Vm>();
+		for (Vm v : vms) {
+			map.put(v.getInstanceId(), v);
+		}
+		return map;
+	}
+
+	/**
+	 * Maps the VMs into list per cloud.
+	 *
+	 * @param vms
+	 *            for all or any cloud
+	 * @return map of VMs where the key is a cloud, and the value a list of
+	 *         corresponding VMs for that cloud.
+	 */
+	public static Map<String, List<Vm>> toMapByCloud(List<Vm> vms) {
+		Map<String, List<Vm>> map = new HashMap<String, List<Vm>>();
+		for (Vm v : vms) {
+			List<Vm> forCloud = map.get(v.getCloud());
+			if (forCloud == null) {
+				forCloud = new ArrayList<Vm>();
+				map.put(v.getCloud(), forCloud);
+			}
+			forCloud.add(v);
+		}
+		return map;
+	}
+
+	/**
+	 * Extract for a give run id, the VMs, grouped by cloud
+	 *
+	 * @param runUuid
+	 * @return map of vms grouped by cloud
+	 */
+	public static Map<String, List<Vm>> listByRun(String runUuid) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
+		Query q = em.createNamedQuery("byRun");
+		q.setParameter("run", runUuid);
+
+		List<?> vmList = q.getResultList();
+		Map<String, List<Vm>> vmMap = new HashMap<String, List<Vm>>();
+		for (Object o : vmList) {
+			String cloud = (String) ((Object[]) o)[0];
+			Vm vm = (Vm) ((Object[]) o)[1];
+			List<Vm> vms = vmMap.get(cloud);
+			if (vms == null) {
+				vms = new ArrayList<Vm>();
+				vmMap.put(cloud, vms);
+			}
+			vms.add(vm);
+		}
+
+		transaction.commit();
+		em.close();
+		return vmMap;
+	}
+
+	private void setState(String state) {
+		this.state = state;
 	}
 
 	public String getCloud() {
@@ -186,12 +319,15 @@ public class Vm {
 		this.runUuid = runUuid;
 	}
 
-	public static Map<String, Vm> toMap(List<Vm> vms) {
-		Map<String, Vm> map = new HashMap<String, Vm>();
-		for(Vm v : vms) {
-			map.put(v.getInstanceId(), v);
+	public void remove() {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
+		Vm fromDb = em.find(Vm.class, id);
+		if (fromDb != null) {
+			em.remove(fromDb);
 		}
-		return map;
+		transaction.commit();
+		em.close();
 	}
-
 }

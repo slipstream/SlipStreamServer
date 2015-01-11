@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,9 +38,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test:
- * 
+ *
  * @see ServiceCatalogTest
- * 
+ *
  */
 @SuppressWarnings("serial")
 @Entity
@@ -78,7 +78,7 @@ public class ServiceCatalog extends
 	protected void setParameters(Map<String, ServiceCatalogParameter> parameters) {
 		this.parameters = parameters;
 	}
-	
+
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = ServiceCatalogParameter.class)
 	public Map<String, ServiceCatalogParameter> getParameters() {
@@ -94,6 +94,7 @@ public class ServiceCatalog extends
 		validateParameters();
 	}
 
+	// Only used by tests
 	@SuppressWarnings("unchecked")
 	public static List<ServiceCatalog> list(String cloud) {
 		EntityManager em = PersistenceUtil.createEntityManager();
