@@ -423,6 +423,10 @@ public abstract class ConnectorBase implements Connector {
         return getParameterValue(ImageModule.RAM_KEY, image);
     }
 
+    protected String getExtraDiskVolatile(ImageModule image) throws ValidationException {
+        return image.getParameterValue(ImageModule.EXTRADISK_VOLATILE_PARAM, null);
+    }
+
     protected String getParameterValue(String parameterName, ImageModule image) throws ValidationException {
         ModuleParameter parameter = image.getParameter(constructKey(parameterName));
         return parameter == null ? null : parameter.getValue();

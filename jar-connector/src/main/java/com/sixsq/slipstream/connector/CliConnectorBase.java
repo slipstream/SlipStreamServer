@@ -226,7 +226,18 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		Map<String, String> launchParams = new HashMap<String, String>();
 		launchParams.put("image-id", getImageId(run, user));
 		launchParams.put("network-type", getNetwork(run));
+		putLaunchParamExtraDiskVolatile(launchParams, run);
 		return launchParams;
+	}
+
+	private void putLaunchParamExtraDiskVolatile(Map<String, String> launchParams, Run run)
+			throws ValidationException {
+		if (!isInOrchestrationContext(run)) {
+			String extraDiskGb = getExtraDiskVolatile((ImageModule) run.getModule());
+			if (extraDiskGb != null && !extraDiskGb.isEmpty()) {
+				launchParams.put("extra-disk-volatile", extraDiskGb);
+			}
+		}
 	}
 
 	private Map<String, String> getUserParams(User user)
