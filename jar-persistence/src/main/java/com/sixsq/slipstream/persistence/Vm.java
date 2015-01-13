@@ -52,6 +52,7 @@ import org.simpleframework.xml.Attribute;
 public class Vm {
 
 	public final static String RESOURCE_URL_PREFIX = "vms/";
+	public final static String DEFAULT_RUN_UUID = "Unknown";
 
 	@Id
 	@GeneratedValue
@@ -72,7 +73,6 @@ public class Vm {
 	@Attribute
 	private Date measurement;
 
-	@Attribute(required = false)
 	private String runUuid;
 
 	@SuppressWarnings("unused")
@@ -133,7 +133,7 @@ public class Vm {
 					setVmstate(em, m, v);
 					merge = true;
 				}
-				if (old.getRunUuid() == null) {
+				if (old.getRunUuid() == null || old.getRunUuid().equals(Vm.DEFAULT_RUN_UUID)) {
 					setRunUuid(m, old);
 					merge = true;
 				}
@@ -278,10 +278,15 @@ public class Vm {
 		return measurement;
 	}
 
+	@Attribute(required = false)
 	public String getRunUuid() {
+ 		if (runUuid == null || runUuid.isEmpty()) {
+ 			return DEFAULT_RUN_UUID;
+ 		}
 		return runUuid;
 	}
 
+	@Attribute(required = false)
 	public void setRunUuid(String runUuid) {
 		this.runUuid = runUuid;
 	}
