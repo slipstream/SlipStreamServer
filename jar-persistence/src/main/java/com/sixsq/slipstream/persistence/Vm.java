@@ -167,7 +167,10 @@ public class Vm {
 		if (m != null) {
 			RuntimeParameter rp = m.getVmstateRuntimeParameter();
 			if (rp != null) {
-				v.setRunUuid(rp.getContainer().getUuid());
+				Run run = rp.getContainer();
+				if (run.getUser().equals(v.getUser())) {
+					v.setRunUuid(run.getUuid());
+				}
 			}
 		}
 	}
