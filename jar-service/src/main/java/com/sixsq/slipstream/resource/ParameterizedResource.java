@@ -295,7 +295,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 
 		String redirectUrl = "/" + resourceUri;
-		String absolutePath = RequestUtil.constructAbsolutePath(redirectUrl);
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), redirectUrl);
 
 		getResponse().setLocationRef(absolutePath);
 	}
@@ -306,7 +306,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		getResponse().setStatus(status);
 
 		String redirectUrl = "/" + resourceUri;
-		String absolutePath = RequestUtil.constructAbsolutePath(redirectUrl);
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), redirectUrl);
 
 		getResponse().setLocationRef(absolutePath);
 	}

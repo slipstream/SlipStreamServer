@@ -157,8 +157,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientValidationError(e.getMessage());
 		}
 
-		String absolutePath = RequestUtil.constructAbsolutePath("/"
-				+ target.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + target.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 	}
@@ -187,25 +186,21 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	private void redirectToParent() throws ValidationException {
 		String resourceUri = getParameterized().getResourceUri();
-		String parentResourceUri = ModuleUriUtil
-				.extractParentUriFromResourceUri(resourceUri);
+		String parentResourceUri = ModuleUriUtil.extractParentUriFromResourceUri(resourceUri);
 
-		String absolutePath = RequestUtil.constructAbsolutePath("/"
-				+ parentResourceUri);
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + parentResourceUri);
 		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
 
 	private void redirectToLatest(Module latest) {
-		String absolutePath = RequestUtil.constructAbsolutePath("/"
-				+ latest.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + latest.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
 
 	@Put("form")
-	public void updateOrCreateFromForm(Representation entity)
-			throws ResourceException {
+	public void updateOrCreateFromForm(Representation entity) throws ResourceException {
 
 		if (entity == null) {
 			throwClientBadRequest("Empty form");
@@ -220,8 +215,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		updateOrCreate(module);
 
-		String absolutePath = RequestUtil.constructAbsolutePath("/"
-				+ module.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + module.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 
 		if (!isExisting()) {
@@ -232,15 +226,13 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@Put("multipart")
-	public void updateOrCreateFromXmlMultipart(Representation entity)
-			throws ResourceException {
+	public void updateOrCreateFromXmlMultipart(Representation entity) throws ResourceException {
 
 		Module module = xmlMultipartToModule();
 
 		updateOrCreate(module);
 
-		String absolutePath = RequestUtil.constructAbsolutePath("/"
-				+ module.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + module.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 
 		if (!isExisting()) {

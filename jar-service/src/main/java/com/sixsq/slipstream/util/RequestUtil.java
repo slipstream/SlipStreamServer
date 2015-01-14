@@ -22,27 +22,27 @@ public class RequestUtil {
 	public static void addServiceConfigurationToRequest(
 			AtomicReference<ServiceConfiguration> cfgReference, Request request) {
 		Map<String, Object> attributes = request.getAttributes();
-	
+
 		if (cfgReference == null) {
 			ServiceConfiguration cfg = ServiceConfiguration.load();
 			cfgReference = new AtomicReference<ServiceConfiguration>(cfg);
 		}
-	
+
 		attributes.put(ResourceUriUtil.SVC_CONFIGURATION_KEY, cfgReference.get());
 		request.setAttributes(attributes);
-	
+
 	}
 
 	public static void addConfigurationToRequest(Request request)
 			throws ConfigurationException, ValidationException {
 		Map<String, Object> attributes = request.getAttributes();
-	
+
 		Configuration configuration = Configuration.getInstance();
 		attributes.put(ResourceUriUtil.CONFIGURATION_KEY, configuration);
 		request.setAttributes(attributes);
 		request.getAttributes().put(ResourceUriUtil.SVC_CONFIGURATION_KEY,
 				configuration.getParameters());
-	
+
 	}
 
 	public static ServiceConfiguration getServiceConfigurationFromRequest(
@@ -73,18 +73,9 @@ public class RequestUtil {
 			throw new SlipStreamRuntimeException(e.getMessage());
 		}
 	}
-	
-	public static String constructAbsolutePath(String relativePath) {
-		return relativePath;
-		/*try {
-			Configuration configuration = Configuration.getInstance();
-			Reference baseRef = configuration.getBaseRef();
-			return new Reference(baseRef, relativePath).getTargetRef().toString();
-		} catch (ConfigurationException e) { 
-			return relativePath;
-		} catch (ValidationException e) { 
-			return relativePath;
-		}*/
+
+	public static String constructAbsolutePath(Request request, String relativePath) {
+		return ResourceUriUtil.getBaseUrl(request) + relativePath;
 	}
 
 }

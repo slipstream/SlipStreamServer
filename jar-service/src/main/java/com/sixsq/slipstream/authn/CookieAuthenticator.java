@@ -9,9 +9,9 @@ package com.sixsq.slipstream.authn;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -67,7 +67,7 @@ public class CookieAuthenticator extends AuthenticatorBase {
 	private boolean handleValid(Request request, Cookie cookie) {
 		String username = setClientInfo(request, cookie);
 		com.sixsq.slipstream.persistence.User user = null;
-		
+
 		try {
 			user = com.sixsq.slipstream.persistence.User.loadByName(username);
 		} catch (ConfigurationException e) {
@@ -75,7 +75,7 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		} catch (ValidationException e) {
 			return false;
 		}
-		
+
 		if(user == null) {
 			return false;
 		}
@@ -85,7 +85,7 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		if (!CookieUtils.isMachine(cookie)) {
 			setLastOnline(cookie);
 		}
-		
+
 		return true;
 	}
 
@@ -97,19 +97,15 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		List<MediaType> supported = new ArrayList<MediaType>();
 		supported.add(MediaType.APPLICATION_XML);
 		supported.add(MediaType.TEXT_HTML);
-		MediaType prefered = request.getClientInfo().getPreferredMediaType(
-				supported);
+		MediaType prefered = request.getClientInfo().getPreferredMediaType(supported);
 
 		if (prefered != null && prefered.isCompatible(MediaType.TEXT_HTML)) {
 			Reference baseRef = ResourceUriUtil.getBaseRef(request);
 
-			Reference redirectRef = new Reference(baseRef,
-					LoginResource.getResourceRoot());
-			redirectRef.setQuery("redirectURL="
-					+ request.getResourceRef().getPath());
+			Reference redirectRef = new Reference(baseRef, LoginResource.getResourceRoot());
+			redirectRef.setQuery("redirectURL=" + request.getResourceRef().getPath());
 
-			String absolutePath = RequestUtil.constructAbsolutePath(redirectRef
-					.toString());
+			String absolutePath = RequestUtil.constructAbsolutePath(request, redirectRef.toString());
 
 			response.redirectTemporary(absolutePath);
 		} else {

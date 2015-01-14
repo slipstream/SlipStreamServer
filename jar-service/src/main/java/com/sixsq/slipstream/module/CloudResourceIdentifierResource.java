@@ -167,7 +167,7 @@ public class CloudResourceIdentifierResource extends BaseResource {
 	protected void setResponseCreated(String resourceUri) {
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 
-		String absolutePath = RequestUtil.constructAbsolutePath("/" + resourceUri);
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + resourceUri);
 		getResponse().setLocationRef(absolutePath);
 	}
 
