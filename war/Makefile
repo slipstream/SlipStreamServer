@@ -6,17 +6,26 @@ SLIPSTREAM_DB_RUNNING=$(shell [ -f 'slipstreamdb.lck' ] && echo 'yes' || echo 'n
 SQLTOOL_FILENAME=hsqldb/hsqldb-2.3.2/hsqldb/lib/sqltool.jar
 SQLTOOL_FILE_PRESENT=$(shell [ -f $(SQLTOOL_FILENAME) ] && echo ok || echo missing )
 
-run-with-db: stop-db start-db re-run-with-db
+run: stop-db start-db re-run-with-db
+
+run-hnx: stop-db start-db re-run-with-db-hnx
 
 re-run-with-db:
-	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/src/slipstream/ui/views/ -Dpersistence.unit=hsqldb-schema
+	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema
 
-run:
+re-run-with-db-hnx:
+	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.theme.current-theme=helixnebula
+
+run-with-mem-db:
 	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/src/slipstream/ui/views/ -Dpersistence.unit=hsqldb-mem-schema
 
-new-ui: install-ui run-with-db
+new-ui: install-ui run
 
-new-ui-fast: install-ui-fast run-with-db
+new-ui-fast: install-ui-fast run
+
+new-ui-hnx: install-ui run-hnx
+
+new-ui-fast-hnx: install-ui-fast run-hnx
 
 install:
 	(cd ..; mvn clean install -Dmaven.test.skip=true)
