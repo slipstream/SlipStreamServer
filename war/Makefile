@@ -8,10 +8,15 @@ SQLTOOL_FILE_PRESENT=$(shell [ -f $(SQLTOOL_FILENAME) ] && echo ok || echo missi
 
 run: stop-db start-db re-run-with-db
 
+run-fr: stop-db start-db re-run-with-db-fr
+
 run-hnx: stop-db start-db re-run-with-db-hnx
 
 re-run-with-db:
 	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema
+
+re-run-with-db-fr:
+	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.localization.lang-default=fr
 
 re-run-with-db-hnx:
 	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.theme.current-theme=helixnebula
