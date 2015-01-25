@@ -105,7 +105,7 @@ public class RunListResource extends BaseResource {
 		RunViewList runViewList = getRunViewList();
 
 		return new StringRepresentation(HtmlUtil.toHtml(runViewList,
-				getPageRepresentation(), getTransformationType(), getUser()),
+				getPageRepresentation(), getUser(), getRequest()),
 				MediaType.TEXT_HTML);
 	}
 

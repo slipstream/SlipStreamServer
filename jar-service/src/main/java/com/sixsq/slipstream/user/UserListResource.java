@@ -63,7 +63,7 @@ public class UserListResource extends BaseResource {
 
 		UserViewList userViewList = new UserViewList(User.viewList());
 
-		String html = HtmlUtil.toHtml(userViewList, getPageRepresentation(), getUser());
+		String html = HtmlUtil.toHtml(userViewList, getPageRepresentation(), getUser(), getRequest());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}

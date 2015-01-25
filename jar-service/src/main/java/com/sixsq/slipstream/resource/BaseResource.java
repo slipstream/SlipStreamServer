@@ -45,6 +45,13 @@ import com.sixsq.slipstream.util.RequestUtil;
 
 public abstract class BaseResource extends ServerResource {
 
+	public static final String PAGING_OFFSET_KEY = "offset";
+	public static final String PAGING_LIMIT_KEY = "limit";
+	public static final String PAGING_CLOUD_KEY = "cloud";
+	public static final String CHOOSER_KEY = "chooser";
+	public static final String EDIT_KEY = "edit";
+	public static final String NEW_KEY = "new";
+
 	private User user = null;
 	private ServiceConfiguration configuration = null;
 	protected static final String NEW_NAME = "new";
@@ -105,19 +112,6 @@ public abstract class BaseResource extends ServerResource {
 
 	protected User getUser() {
 		return user;
-	}
-
-	protected String getTransformationType() {
-		String type = "view";
-		if (isChooser()) {
-			type = "chooser";
-		}
-		return type;
-	}
-
-	protected boolean isChooser() {
-		String c = (String) getRequest().getAttributes().get("chooser");
-		return (c == null) ? false : true;
 	}
 
 	public ServiceConfiguration getConfiguration() {
@@ -278,7 +272,11 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected int getOffset() {
-		Parameter offsetAttr = getRequest().getResourceRef().getQueryAsForm().getFirst("offset");
+		return getOffset(getRequest());
+	}
+
+	public int getOffset(Request request) {
+		Parameter offsetAttr = request.getResourceRef().getQueryAsForm().getFirst(PAGING_OFFSET_KEY);
 
 		int offset = 0;
 		if (offsetAttr != null) {
@@ -295,7 +293,7 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected int getLimit() {
-		Parameter limitAttr = getRequest().getResourceRef().getQueryAsForm().getFirst("limit");
+		Parameter limitAttr = getRequest().getResourceRef().getQueryAsForm().getFirst(PAGING_LIMIT_KEY);
 
 		int limit = 20;
 		if (limitAttr != null) {
@@ -312,7 +310,7 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected String getCloud() {
-		Parameter cloud = getRequest().getResourceRef().getQueryAsForm().getFirst("cloud");
+		Parameter cloud = getRequest().getResourceRef().getQueryAsForm().getFirst(PAGING_CLOUD_KEY);
 		return (cloud != null)? cloud.getValue(): null;
 	}
 }

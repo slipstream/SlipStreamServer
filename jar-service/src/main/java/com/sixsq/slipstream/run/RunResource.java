@@ -120,7 +120,7 @@ public class RunResource extends RunBaseResource {
 			Run run = constructRun(em);
 			logTimeDiff("constructRun", before);
 			before = System.currentTimeMillis();
-			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
+			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser(), getRequest());
 			logTimeDiff("html generation", before);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,

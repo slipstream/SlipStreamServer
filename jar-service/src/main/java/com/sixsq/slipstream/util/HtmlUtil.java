@@ -20,6 +20,9 @@
 
 package com.sixsq.slipstream.util;
 
+import java.util.Map;
+
+import org.restlet.Request;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
@@ -30,48 +33,43 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 
+/**
+ * For unit tests, @see HtmlUtilTest
+ * 
+ */
 public class HtmlUtil {
 
-	public static String toHtml(Object metadata, String page, User user) {
-		return toHtml(metadata, page, null, user);
+	public static String toHtml(Object metadata, String page, User user, Request request) {
+		return toHtml(metadata, page, user, RequestUtil.constructOptions(request));
 	}
 
-	public static String toHtml(Object metadata, String page, String type,
-			User user) {
-		
+	private static String toHtml(Object metadata, String page, User user, Map<String, Object> options) {
+
 		Document doc = SerializationUtil.toXmlDocument(metadata);
 
 		XmlUtil.addUser(doc, user);
 		try {
 			XmlUtil.addSystemConfiguration(doc);
 		} catch (ConfigurationException e) {
-			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL,
-					e.getMessage()));
+			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
 		} catch (ValidationException e) {
-			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-					e.getMessage()));
+			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e.getMessage()));
 		}
 
 		String xml = SerializationUtil.documentToString(doc);
 		try {
-			return Representation.toHtml(xml, page, type);
+			return Representation.toHtml(xml, page, options);
 		} catch (IllegalArgumentException ex) {
-			throw (new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-					"Unknown resource: " + page));
+			throw (new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Unknown resource: " + page));
 		}
 	}
 
-	public static String toHtml(String metadata, String page) {
-		return HtmlUtil.toHtml(metadata, page, "");
+	public static String toHtmlError(String metadata, String error, int code, Request request) {
+		return toHtmlError(metadata, error, code, RequestUtil.constructOptions(request));
 	}
 
-	public static String toHtml(String metadata, String page, String type) {
-		return Representation.toHtml(metadata, page, type);
-	}
-
-	public static String toHtmlError(String metadata, String error, int code) {
-		return Representation
-				.toHtmlError(metadata, error, String.valueOf(code));
+	private static String toHtmlError(String metadata, String error, int code, Map<String, Object> options) {
+		return Representation.toHtmlError(metadata, error, String.valueOf(code), options);
 	}
 
 }

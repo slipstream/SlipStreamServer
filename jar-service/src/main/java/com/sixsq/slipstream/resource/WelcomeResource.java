@@ -44,9 +44,8 @@ public class WelcomeResource extends SimpleResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		return new StringRepresentation(HtmlUtil.toHtml(retrieveWelcome(),
-				getPageRepresentation(), getTransformationType(), getUser()),
-				MediaType.TEXT_HTML);
+		return new StringRepresentation(HtmlUtil.toHtml(retrieveWelcome(), getPageRepresentation(), getUser(),
+				getRequest()), MediaType.TEXT_HTML);
 	}
 
 	private Welcome retrieveWelcome() {
@@ -68,8 +67,7 @@ public class WelcomeResource extends SimpleResource {
 		return welcome;
 	}
 
-	private ServiceCatalogs retrieveServiceCatalogs()
-			throws ValidationException {
+	private ServiceCatalogs retrieveServiceCatalogs() throws ValidationException {
 
 		ServiceCatalogs scs = new ServiceCatalogs();
 		scs.loadAll();

@@ -51,7 +51,7 @@ public class AuthnResource extends BaseResource {
 			metadata = SerializationUtil.documentToString(document);
 		}
 		return new StringRepresentation(HtmlUtil.toHtml(metadata, templateName,
-				null, getUser()), MediaType.TEXT_HTML);
+				getUser(), getRequest()), MediaType.TEXT_HTML);
 	}
 
 	protected Reference extractRedirectURL(Request request) {
