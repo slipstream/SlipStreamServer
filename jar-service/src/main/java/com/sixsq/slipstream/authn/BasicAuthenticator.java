@@ -64,16 +64,14 @@ public class BasicAuthenticator extends AuthenticatorBase {
 		} else {
 
 			username = request.getChallengeResponse().getIdentifier();
-			String password = String.copyValueOf(request.getChallengeResponse()
-					.getSecret());
+			String password = String.copyValueOf(request.getChallengeResponse().getSecret());
 
 			if (username == null || password == null) {
 				result = Verifier.RESULT_MISSING;
 			}
 
 			try {
-				user = com.sixsq.slipstream.persistence.User
-						.loadByName(username);
+				user = com.sixsq.slipstream.persistence.User.loadByName(username);
 			} catch (ConfigurationException e) {
 				Util.throwConfigurationException(e);
 			} catch (ValidationException e) {
@@ -84,7 +82,7 @@ public class BasicAuthenticator extends AuthenticatorBase {
 				String userPass = user.getHashedPassword();
 				if (userPass == null) {
 					response.setStatus(Status.SERVER_ERROR_INTERNAL,
-					        "Password is not set on the user '" + user.getName() + "'");
+							"Password is not set on the user '" + user.getName() + "'");
 					return false;
 				}
 				try {
@@ -116,19 +114,15 @@ public class BasicAuthenticator extends AuthenticatorBase {
 			List<MediaType> supported = new ArrayList<MediaType>();
 			supported.add(MediaType.APPLICATION_XML);
 			supported.add(MediaType.TEXT_HTML);
-			MediaType prefered = request.getClientInfo().getPreferredMediaType(
-					supported);
+			MediaType prefered = request.getClientInfo().getPreferredMediaType(supported);
 
 			if (prefered != null && prefered.isCompatible(MediaType.TEXT_HTML)) {
 				Reference baseRef = ResourceUriUtil.getBaseRef(request);
 
-				Reference redirectRef = new Reference(baseRef,
-						LoginResource.getResourceRoot());
-				redirectRef.setQuery("redirectURL="
-						+ request.getResourceRef().getPath().toString());
+				Reference redirectRef = new Reference(baseRef, LoginResource.getResourceRoot());
+				redirectRef.setQuery("redirectURL=" + request.getResourceRef().getPath().toString());
 
-				String absolutePath = RequestUtil
-						.constructAbsolutePath(redirectRef.toString());
+				String absolutePath = RequestUtil.constructAbsolutePath(request, redirectRef.toString());
 
 				response.redirectTemporary(absolutePath);
 			} else {

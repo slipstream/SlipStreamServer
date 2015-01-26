@@ -62,7 +62,7 @@ public class ServiceConfigurationResource extends
 
 		ConnectorFactory.resetConnectors();
 
-		String absolutePath = RequestUtil.constructAbsolutePath(CONFIGURATION_PATH);
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), CONFIGURATION_PATH);
 		getResponse().redirectSeeOther(absolutePath);
 	}
 
@@ -100,7 +100,7 @@ public class ServiceConfigurationResource extends
 		configuration.store();
 		ConnectorFactory.resetConnectors();
 
-		String absolutePath = RequestUtil.constructAbsolutePath(getRequest().getResourceRef().getPath());
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), getRequest().getResourceRef().getPath());
 		getResponse().setLocationRef(absolutePath);
 	}
 
