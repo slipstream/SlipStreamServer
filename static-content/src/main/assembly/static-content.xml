@@ -9,7 +9,7 @@
 
   <fileSets>
     <fileSet>
-      <directory>target/results/slipstream/ui/views</directory>
+      <directory>target/results/static_content</directory>
       <outputDirectory></outputDirectory>
       <includes>
         <include>css/**/*</include>
@@ -17,6 +17,7 @@
         <include>external/**/*</include>
         <include>images/**/*</include>
         <include>font/**/*</include>
+        <include>themes/**/*</include>
       </includes>
     </fileSet>
   </fileSets>
