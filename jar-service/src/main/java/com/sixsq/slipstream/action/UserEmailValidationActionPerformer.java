@@ -50,15 +50,14 @@ public class UserEmailValidationActionPerformer extends OneShotActionPerformer {
 		super(action);
 	}
 
-	private void emailValidated(String baseUrlSlash)
-			throws ConfigurationException, ValidationException {
+	private void emailValidated(String baseUrlSlash) throws ConfigurationException, ValidationException {
 
 		Form form = getForm();
 		String userResourceUrl = form.getFirst("userResourceUrl").getValue();
 
 		User user = User.load(userResourceUrl);
 
-		if(user.getState() != User.State.NEW) {
+		if (user.getState() != User.State.NEW) {
 			throw new ValidationException("User not new. Did you already validate this user?");
 		}
 
@@ -74,18 +73,16 @@ public class UserEmailValidationActionPerformer extends OneShotActionPerformer {
 
 		user.store();
 
-		informAdministratorOfUserCreation(baseUrlSlash, userResourceUrl);
+		informAdministratorOfUserCreation(user, baseUrlSlash, userResourceUrl);
 	}
 
-	private void informUserAccountActivated(User user, String baseUrlSlash,
-			String userResourceUrl) throws NoSuchAlgorithmException,
-			UnsupportedEncodingException {
+	private void informUserAccountActivated(User user, String baseUrlSlash, String userResourceUrl)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		String username = user.getName();
 		String password = user.getHashedPassword();
 		String url = baseUrlSlash + userResourceUrl;
 
-		String msg = MessageUtils.format(MSG_ACCOUNT_APPROVED, username,
-				password, url);
+		String msg = MessageUtils.format(MSG_ACCOUNT_APPROVED, username, password, url);
 
 		// now that the random password has been sent to the user
 		// hash it before it is stored
@@ -94,30 +91,23 @@ public class UserEmailValidationActionPerformer extends OneShotActionPerformer {
 		Notifier.sendNotification(user.getEmail(), msg);
 	}
 
-	private void informAdministratorOfUserCreation(String baseUrlSlash,
-			String userResourceUrl) throws ValidationException,
-			SlipStreamRuntimeException {
+	private void informAdministratorOfUserCreation(User user, String baseUrlSlash, String userResourceUrl)
+			throws ValidationException, SlipStreamRuntimeException {
 
-		String msg = MessageUtils.format(MSG_NEW_USER_NOTIFICATION,
-				baseUrlSlash + userResourceUrl);
+		String msg = MessageUtils.format(MSG_NEW_USER_NOTIFICATION, baseUrlSlash + userResourceUrl,
+				user.getName(), user.getEmail());
 
 		Notifier.sendNotification(getRegistrationEmail(), msg);
 	}
 
-	private String getRegistrationEmail() throws ConfigurationException,
-			ValidationException {
-		ServiceConfigurationParameter p = Configuration
-				.getInstance()
-				.getParameters()
-				.getParameter(
-						ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL
-								.getName());
+	private String getRegistrationEmail() throws ConfigurationException, ValidationException {
+		ServiceConfigurationParameter p = Configuration.getInstance().getParameters()
+				.getParameter(ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL.getName());
 		return p.getValue();
 	}
 
 	@Override
-	public Representation doAction(Request request)
-			throws SlipStreamRuntimeException, ConfigurationException {
+	public Representation doAction(Request request) throws SlipStreamRuntimeException, ConfigurationException {
 
 		String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(request);
 
