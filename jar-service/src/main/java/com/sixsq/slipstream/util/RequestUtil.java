@@ -145,6 +145,10 @@ public class RequestUtil {
 		if(parameter != null && "true".equals(parameter.getValue())) {
 			type = queryKey;
 		}
+		// new might be in the path, instead of the query part of the url
+		if(BaseResource.NEW_KEY.equals(queryKey) && request.getResourceRef().getPath().endsWith("/" + BaseResource.NEW_KEY)) {
+			type = queryKey;
+		}
 		return type;
 	}
 	

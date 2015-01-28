@@ -42,9 +42,18 @@ public class RequestUtilTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void constructNewOptions() {
+	public void constructNewOptionsFromQuery() {
 
 		Request r = createRequest("/something", "new=true");
+		Map<String, Object> options = RequestUtil.constructOptions(r);
+		assertThat((String) options.get(RequestUtil.TYPE_KEY), is("new"));
+
+	}
+
+	@Test
+	public void constructNewOptionsFromPath() {
+
+		Request r = createRequest("/something/new", null);
 		Map<String, Object> options = RequestUtil.constructOptions(r);
 		assertThat((String) options.get(RequestUtil.TYPE_KEY), is("new"));
 
