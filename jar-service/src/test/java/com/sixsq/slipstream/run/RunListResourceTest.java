@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,10 +24,16 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -40,6 +46,8 @@ import org.restlet.Response;
 import org.restlet.data.Form;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
+import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
@@ -53,11 +61,13 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
+import com.sixsq.slipstream.util.XmlUtil;
 
 public class RunListResourceTest extends ResourceTestBase {
 
@@ -83,10 +93,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 	}
 
-	@AfterClass
-	public static void teardownClass() throws ConfigurationException,
-			ValidationException {
-
+	private static void removeAllRuns() throws ConfigurationException, ValidationException {
 		for (Run r : Run.listAll()) {
 			try {
 				r.remove();
@@ -94,6 +101,13 @@ public class RunListResourceTest extends ResourceTestBase {
 
 			}
 		}
+	}
+
+	@AfterClass
+	public static void teardownClass() throws ConfigurationException,
+			ValidationException {
+
+		removeAllRuns();
 
 	}
 
@@ -109,6 +123,8 @@ public class RunListResourceTest extends ResourceTestBase {
 		baseImage = baseImage.store();
 
 		user = User.loadByName(user.getName());
+
+		createModules("overrideParmeters");
 
 	}
 
@@ -131,6 +147,62 @@ public class RunListResourceTest extends ResourceTestBase {
 	}
 
 	@Test
+	public void testPagination() throws ValidationException, SAXException, ParserConfigurationException, IOException {
+		removeAllRuns();
+
+		Set<String> cloudServiceNamesA = new HashSet<String>();
+		cloudServiceNamesA.add("CloudA");
+		Set<String> cloudServiceNamesB = new HashSet<String>();
+		cloudServiceNamesB.add("CloudA");
+		cloudServiceNamesB.add("CloudB");
+		Set<String> cloudServiceNamesC = new HashSet<String>();
+		cloudServiceNamesC.add("CloudA");
+		cloudServiceNamesC.add("CloudB");
+		cloudServiceNamesC.add("CloudC");
+
+		(new Run(deployment, RunType.Orchestration, cloudServiceNamesA, user)).store();
+		(new Run(deployment, RunType.Orchestration, cloudServiceNamesB, user)).store();
+		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
+		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
+		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
+
+		Response resp = getRunList(null, null, null);
+		assertEquals(Status.SUCCESS_OK, resp.getStatus());
+		Document runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		assertEquals(5, runs.getDocumentElement().getElementsByTagName("item").getLength());
+		assertEquals("5", runs.getDocumentElement().getAttribute("count"));
+		assertEquals("0", runs.getDocumentElement().getAttribute("offset"));
+		assertEquals("20", runs.getDocumentElement().getAttribute("limit"));
+
+		resp = getRunList(null, 10, "CloudB");
+		assertEquals(Status.SUCCESS_OK, resp.getStatus());
+		runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		assertEquals(4, runs.getDocumentElement().getElementsByTagName("item").getLength());
+		assertEquals("4", runs.getDocumentElement().getAttribute("count"));
+		assertEquals("10", runs.getDocumentElement().getAttribute("limit"));
+
+		resp = getRunList(1, 4, null);
+		assertEquals(Status.SUCCESS_OK, resp.getStatus());
+		runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		assertEquals(4, runs.getDocumentElement().getElementsByTagName("item").getLength());
+		assertEquals("5", runs.getDocumentElement().getAttribute("count"));
+		assertEquals("1", runs.getDocumentElement().getAttribute("offset"));
+		assertEquals("4", runs.getDocumentElement().getAttribute("limit"));
+
+		resp = getRunList(null, null, "CloudC");
+		assertEquals(Status.SUCCESS_OK, resp.getStatus());
+		runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		assertEquals(3, runs.getDocumentElement().getElementsByTagName("item").getLength());
+		assertEquals("3", runs.getDocumentElement().getAttribute("count"));
+
+		resp = getRunList(-1, null, null);
+		assertEquals(Status.CLIENT_ERROR_BAD_REQUEST, resp.getStatus());
+
+		resp = getRunList(null, Run.MAX_NO_OF_ENTRIES + 1, null);
+		assertEquals(Status.CLIENT_ERROR_BAD_REQUEST, resp.getStatus());
+	}
+
+	@Test
 	@Ignore
 	public void overrideParameters() throws ConfigurationException,
 			NotFoundException, AbortException, ValidationException {
@@ -147,8 +219,6 @@ public class RunListResourceTest extends ResourceTestBase {
 		user.setParameter(secretParameter);
 		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
 		user = user.store();
-
-		createModules("overrideParmeters");
 
 		List<NodeParameter> override = new ArrayList<NodeParameter>();
 		NodeParameter parameter = new NodeParameter(PARAMETER_NAME);
@@ -251,6 +321,21 @@ public class RunListResourceTest extends ResourceTestBase {
 	private Request createPostRequest(Representation entity)
 			throws ConfigurationException, ValidationException {
 		return createPostRequest(new HashMap<String, Object>(), entity);
+	}
+
+	private Response getRunList(Integer offset, Integer limit, String cloudServiceName)
+			throws ConfigurationException, ValidationException {
+
+		Map<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put(User.REQUEST_KEY, user);
+
+		Form queryString = new Form();
+		if (offset != null) queryString.set("offset", offset.toString());
+		if (limit != null) queryString.set("limit", limit.toString());
+		if (cloudServiceName != null) queryString.set("cloud", cloudServiceName);
+
+		Request req = createGetRequest("?" + queryString.getQueryString(), attributes);
+		return executeRequest(req);
 	}
 
 	private Response executeRequest(Request request) {

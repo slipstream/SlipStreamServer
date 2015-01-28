@@ -30,7 +30,6 @@ import com.sixsq.slipstream.util.HtmlUtil;
  * -=================================================================-
  */
 
-
 public class DocumentationResource extends BaseResource {
 
 	protected String getPageRepresentation() {
@@ -49,7 +48,7 @@ public class DocumentationResource extends BaseResource {
 			metadata = user;
 		}
 
-		String html = HtmlUtil.toHtml(metadata, getPageRepresentation(), getTransformationType(), getUser());
+		String html = HtmlUtil.toHtml(metadata, getPageRepresentation(), getUser(), getRequest());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}

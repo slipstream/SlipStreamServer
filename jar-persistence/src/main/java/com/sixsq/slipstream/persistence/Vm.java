@@ -46,9 +46,13 @@ import org.simpleframework.xml.Attribute;
 @Entity
 @NamedQueries({
 		@NamedQuery(name = "byUser", query = "SELECT v FROM Vm v WHERE v.user_ = :user"),
-		@NamedQuery(name = "byUserAndCloud", query = "SELECT v.instanceId, v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
-		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run"),
-		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on', 'active', 'Active') AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud") })
+		@NamedQuery(name = "byUserCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user"),
+		@NamedQuery(name = "byUserAndCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
+		@NamedQuery(name = "byUserAndCloudCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
+		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on', 'active', 'Active') AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
+		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run")
+})
+
 public class Vm {
 
 	public final static String RESOURCE_URL_PREFIX = "vms/";
@@ -87,14 +91,41 @@ public class Vm {
 		measurement = new Date();
 	}
 
-	@SuppressWarnings("unchecked")
 	public static List<Vm> list(String user) {
+		return list(user, null, null, null);
+	}
+
+	public static List<Vm> list(String user, Integer offset, Integer limit, String cloudServiceName) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("byUser");
+		String queryName = (cloudServiceName != null) ? "byUserAndCloud" : "byUser";
+		Query q = em.createNamedQuery(queryName);
+		if (offset != null) {
+			q.setFirstResult(offset);
+		}
+		if (limit != null) {
+			q.setMaxResults(limit);
+		}
+		if (cloudServiceName != null) {
+			q.setParameter("cloud", cloudServiceName);
+		}
 		q.setParameter("user", user);
+		@SuppressWarnings("unchecked")
 		List<Vm> vms = q.getResultList();
 		em.close();
 		return vms;
+	}
+
+	public static int listCount(String user, String cloudServiceName) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		String queryName = (cloudServiceName != null) ? "byUserAndCloudCount" : "byUserCount";
+		Query q = em.createNamedQuery(queryName);
+		q.setParameter("user", user);
+		if (cloudServiceName != null) {
+			q.setParameter("cloud", cloudServiceName);
+		}
+		long count = (long)(Long) q.getSingleResult();
+		em.close();
+		return (int)count;
 	}
 
 	public static int update(List<Vm> newVms, String user, String cloud) {
@@ -104,13 +135,15 @@ public class Vm {
 		Query q = em.createNamedQuery("byUserAndCloud");
 		q.setParameter("user", user);
 		q.setParameter("cloud", cloud);
-		List<?> oldVmList = q.getResultList();
+
+		@SuppressWarnings("unchecked")
+		List<Vm> oldVmList = q.getResultList();
+
 		Map<String, Vm> filteredOldVmMap = new HashMap<String, Vm>();
 		Map<String, Vm> newVmsMap = toMapByInstanceId(newVms);
 		int removed = 0;
-		for (Object o : oldVmList) {
-			String instanceId = (String) ((Object[]) o)[0];
-			Vm vm = (Vm) ((Object[]) o)[1];
+		for (Vm vm : oldVmList) {
+			String instanceId = vm.getInstanceId();
 			if (!newVmsMap.containsKey(instanceId)) {
 				setVmstate(em, getMapping(vm), "Unknown");
 				em.remove(vm);

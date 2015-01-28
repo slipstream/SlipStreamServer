@@ -35,7 +35,6 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.Module;
@@ -121,7 +120,7 @@ public class RunResource extends RunBaseResource {
 			Run run = constructRun(em);
 			logTimeDiff("constructRun", before);
 			before = System.currentTimeMillis();
-			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser());
+			html = HtmlUtil.toHtml(run, getPageRepresentation(), getUser(), getRequest());
 			logTimeDiff("html generation", before);
 		} catch (SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,

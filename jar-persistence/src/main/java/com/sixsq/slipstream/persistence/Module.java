@@ -47,7 +47,7 @@ import org.simpleframework.xml.ElementMap;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleVersionView;
 import com.sixsq.slipstream.module.ModuleView;
-import com.sixsq.slipstream.run.RunView.RunViewList;
+import com.sixsq.slipstream.run.RunViewList;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 
 /**

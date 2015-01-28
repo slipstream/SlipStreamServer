@@ -268,8 +268,7 @@ public class RootApplication extends Application {
 		guardAndAttach(router, new RunRouter(getContext()), "run");
 	}
 
-	private void attachDashboard(RootRouter router)
-			throws ConfigurationException {
+	private void attachDashboard(RootRouter router) throws ConfigurationException {
 		guardAndAttach(router, new DashboardRouter(getContext()), "dashboard");
 	}
 

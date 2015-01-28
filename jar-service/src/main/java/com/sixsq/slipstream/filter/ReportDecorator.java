@@ -31,6 +31,7 @@ import org.restlet.routing.Filter;
 
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.util.HtmlUtil;
+import com.sixsq.slipstream.util.RequestUtil;
 
 public class ReportDecorator extends Filter {
 
@@ -69,7 +70,7 @@ public class ReportDecorator extends Filter {
 				.getEntityAsText());
 
 		String html = HtmlUtil.toHtml(xhtmlRepresentation,
-				getPageRepresentation());
+				getPageRepresentation(), RequestUtil.getUserFromRequest(request), request);
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}

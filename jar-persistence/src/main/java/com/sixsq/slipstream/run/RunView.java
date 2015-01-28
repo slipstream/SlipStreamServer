@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -59,7 +58,7 @@ public class RunView {
 	private String hostname;
 
 	@Attribute(required = false)
-	private String cloudServiceName;
+	private String cloudServiceNames;
 
 	@Attribute(required = false)
 	private String username;
@@ -71,13 +70,14 @@ public class RunView {
 	public String tags;
 
 	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
-			String status, Date startTime, String username, RunType type, String abort) {
+			String status, Date startTime, String username, RunType type, String cloudServiceNames, String abort) {
 		this.resourceUri = resourceUrl;
 		this.uuid = uuid;
 		this.moduleResourceUri = moduleResourceUri;
 		this.status = status;
 		this.username = username;
 		this.type = type;
+		this.cloudServiceNames = cloudServiceNames;
 		this.abort = abort;
 
         if (startTime != null) {
@@ -87,41 +87,40 @@ public class RunView {
         }
 	}
 
-	public static RunViewList fetchListView(User user, boolean isSuper)
+	public static List<RunView> fetchListView(User user, int offset, int limit)
 			throws ConfigurationException, ValidationException {
-		return fetchListView(null, user, isSuper);
+		return fetchListView(user, null, offset, limit, null);
 	}
 
-	public static RunViewList fetchListView(String query, User user,
-			boolean isSuper) throws ConfigurationException, ValidationException {
-		List<RunView> list;
+	public static List<RunView> fetchListView(User user, String moduleResourceUri, int offset, int limit,
+			String cloudServiceName) throws ConfigurationException, ValidationException {
+		return Run.viewList(user, moduleResourceUri, offset, limit, cloudServiceName);
+	}
 
-		if (isSuper) {
-			list = (query != null) ? Run.viewList(query, user) : Run
-					.viewListAll();
-		} else {
-			list = (query != null) ? Run.viewList(query, user) : Run
-					.viewList(user);
-		}
-		return new RunViewList(list);
+	public static int fetchListViewCount(User user)
+			throws ConfigurationException, ValidationException {
+		return fetchListViewCount(user, null, null);
+	}
+
+	public static int fetchListViewCount(User user, String moduleResourceUri, String cloudServiceName)
+			throws ConfigurationException, ValidationException {
+		return Run.viewListCount(user, moduleResourceUri, cloudServiceName);
 	}
 
 	public RunView copy() {
 		RunView copy = new RunView(resourceUri, uuid, moduleResourceUri,
-				status, startTime, username, type, abort);
+				status, startTime, username, type, cloudServiceNames, abort);
 		copy.setHostname(hostname);
 		copy.setTags(tags);
-		copy.setAbort(abort);
-		copy.setCloudServiceName(cloudServiceName);
 		return copy;
 	}
 
-	public String getCloudServiceName() {
-		return cloudServiceName;
+	public String getCloudServiceNames() {
+		return cloudServiceNames;
 	}
 
-	public void setCloudServiceName(String cloudServiceName) {
-		this.cloudServiceName = cloudServiceName;
+	public void setCloudServiceNames(String cloudServiceNames) {
+		this.cloudServiceNames = cloudServiceNames;
 	}
 
 	public String getUsername() {
@@ -154,26 +153,6 @@ public class RunView {
 
 	public void setAbort(String abort) {
 		this.abort = abort;
-	}
-
-	@Root(name = "runs")
-	public static class RunViewList {
-
-		@ElementList(inline = true, required = false)
-		private List<RunView> list;
-
-		@SuppressWarnings("unused")
-		private RunViewList() {
-		}
-
-		public RunViewList(List<RunView> list) {
-			this.list = list;
-		}
-
-		public List<RunView> getList() {
-			return list;
-		}
-
 	}
 
 }

@@ -70,7 +70,7 @@ public class ModuleListResource extends BaseResource {
 		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
 
 		return new StringRepresentation(HtmlUtil.toHtml(moduleViewList,
-				getPageRepresentation(), getTransformationType(), getUser()),
+				getPageRepresentation(), getUser(), getRequest()),
 				MediaType.TEXT_HTML);
 	}
 

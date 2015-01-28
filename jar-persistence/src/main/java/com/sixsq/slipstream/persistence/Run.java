@@ -52,6 +52,11 @@ import javax.persistence.Query;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CollectionType;
@@ -71,19 +76,15 @@ import com.sixsq.slipstream.statemachine.States;
 @SuppressWarnings("serial")
 @Entity(name="Run")
 @NamedQueries({
-		@NamedQuery(name = "allActiveRuns", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) ORDER BY r.startTime DESC"),
-		@NamedQuery(name = "activeRunsByUser", query = "SELECT r FROM Run r WHERE r.state NOT IN (:completed) AND r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "allRuns", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
-		@NamedQuery(name = "runsByUser", query = "SELECT r FROM Run r WHERE r.user_ = :user ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
-		@NamedQuery(name = "runsByRefModule", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.moduleResourceUri = :referenceModule ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.lastStateChangeTime < :before AND r.state IN (:states)"),
 		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.name_ = :instanceidkey AND p.value = :instanceidvalue ORDER BY r.startTime DESC") })
 public class Run extends Parameterized<Run, RunParameter> {
 
 	private static final int DEFAULT_TIMEOUT = 60; // In minutes
 
-	private static final int MAX_NO_OF_ENTRIES = 20;
+	public static final int MAX_NO_OF_ENTRIES = 20;
 	public static final String ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR = "-";
 	public static final String NODE_NAME_PARAMETER_SEPARATOR = "--";
 	// Orchestrator
@@ -289,20 +290,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 		List<RunView> views = new ArrayList<RunView>();
 		RunView runView;
 		for (Run r : runs) {
-			// Deployment runs can span several clouds
-			// this info in held in getCloudServiceNameList()
-			// so if the list is not empty, use it and
-			// create a RunView instance for each
-			String[] cloudServiceNames = r.getCloudServiceNamesList();
-
 			runView = convertRunToRunView(r);
-
-			// For each cloud service, create a RunView entry
-			for (String csn : cloudServiceNames) {
-				RunView rv = runView.copy();
-				rv.setCloudServiceName(csn);
-				views.add(rv);
-			}
+			views.add(runView);
 		}
 		return views;
 	}
@@ -313,35 +302,100 @@ public class Run extends Parameterized<Run, RunParameter> {
 			return null;
 		}
 
+		RuntimeParameter globalAbort = Run.getGlobalAbort(run);
+		String abortMessage = (globalAbort != null)? globalAbort.getValue() : "";
+
 		RunView runView;
-		runView = new RunView(run.getResourceUri(), run.getUuid(),
-				run.getModuleResourceUrl(), run.getState().toString(),
-				run.getStart(), run.getUser(), run.getType(), Run.getGlobalAbort(run).getValue());
+		runView = new RunView(run.getResourceUri(), run.getUuid(), run.getModuleResourceUrl(),
+				run.getState().toString(), run.getStart(), run.getUser(), run.getType(), run.getCloudServiceNames(),
+				abortMessage);
+
 		try {
-			runView.setTags(run
-					.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
+			runView.setTags(run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
 		} catch (NotFoundException e) {
 		}
 		return runView;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static List<RunView> viewListAll() throws ConfigurationException,
-			ValidationException {
+	private static Predicate andPredicate(CriteriaBuilder builder, Predicate currentPredicate, Predicate newPredicate){
+		return (currentPredicate != null) ? builder.and(currentPredicate, newPredicate) : newPredicate;
+	}
+
+	public static List<RunView> viewList(User user, String moduleResourceUri)
+			throws ConfigurationException, ValidationException {
+		return viewList(user, moduleResourceUri, null, null, null);
+	}
+
+	public static List<RunView> viewList(User user, String moduleResourceUri, Integer offset,
+			Integer limit, String cloudServiceName) throws ConfigurationException, ValidationException {
+		List<RunView> views = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = createNamedQuery(em, "allRuns");
-		List<Run> runs = q.getResultList();
-		List<RunView> views = convertRunsToRunViews(runs);
-		em.close();
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Run> critQuery = builder.createQuery(Run.class);
+			Root<Run> rootQuery = critQuery.from(Run.class);
+			critQuery.select(rootQuery);
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, moduleResourceUri, cloudServiceName);
+			if (where != null){
+				critQuery.where(where);
+			}
+			critQuery.orderBy(builder.desc(rootQuery.get("startTime")));
+			TypedQuery<Run> query = em.createQuery(critQuery);
+			if (offset != null) {
+				query.setFirstResult(offset);
+			}
+			query.setMaxResults((limit != null)? limit : MAX_NO_OF_ENTRIES);
+			List<Run> runs = query.getResultList();
+			views = convertRunsToRunViews(runs);
+		} finally {
+			em.close();
+		}
 		return views;
 	}
 
- 	@SuppressWarnings("unchecked")
+	public static int viewListCount(User user, String moduleResourceUri, String cloudServiceName)
+			throws ConfigurationException, ValidationException {
+		int count = 0;
+		EntityManager em = PersistenceUtil.createEntityManager();
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Long> critQuery = builder.createQuery(Long.class);
+			Root<Run> rootQuery = critQuery.from(Run.class);
+			critQuery.select(builder.count(rootQuery));
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, moduleResourceUri, cloudServiceName);
+			if (where != null){
+				critQuery.where(where);
+			}
+			TypedQuery<Long> query = em.createQuery(critQuery);
+			count = (int)(long) query.getSingleResult();
+		} finally {
+			em.close();
+		}
+		return count;
+	}
+
+	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Run> rootQuery, User user,
+			String moduleResourceUri, String cloudServiceName) {
+		Predicate where = null;
+		if (!user.isSuper()) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), user.getName()));
+		}
+		if (moduleResourceUri != null && !"".equals(moduleResourceUri)) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("moduleResourceUri"), moduleResourceUri));
+		}
+		if (cloudServiceName != null && !"".equals(cloudServiceName)) {
+			// TODO: Replace the 'like' by an 'equals'
+			where = andPredicate(builder, where, builder.like(rootQuery.<String>get("cloudServiceNames"), "%" + cloudServiceName + "%"));
+		}
+		return where;
+	}
+
 	public static List<Run> listAll()
 			throws ConfigurationException, ValidationException {
  		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = createNamedQuery(em, "allRuns");
- 		List<Run> runs = q.getResultList();
+ 		@SuppressWarnings("unchecked")
+		List<Run> runs = q.getResultList();
  		em.close();
  		return runs;
  	}
@@ -371,18 +425,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return runs;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static List<RunView> viewList(User user)
-			throws ConfigurationException, ValidationException {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = createNamedQuery(em, "runsByUser");
-		q.setParameter("user", user.getName());
-		List<Run> runs = q.getResultList();
-		List<RunView> views = convertRunsToRunViews(runs);
-		em.close();
-		return views;
-	}
-
 	public static Run loadRunWithRuntimeParameters(String uuid)
 			throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -391,29 +433,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		Run run = (Run) q.getSingleResult();
 		em.close();
 		return run;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static List<RunView> viewList(String moduleResourceUri, User user)
-			throws ConfigurationException, ValidationException {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = createNamedQuery(em, "runsByRefModule");
-		q.setParameter("user", user.getName());
-		q.setParameter("referenceModule", moduleResourceUri);
-		List<Run> runs = q.getResultList();
-		List<RunView> views = convertRunsToRunViews(runs);
-		em.close();
-		return views;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static List<Run> listAllActive(EntityManager em, User user)
-			throws ConfigurationException, ValidationException {
-		Query q = em.createNamedQuery("activeRunsByUser");
-		q.setParameter("completed", States.completed());
-		q.setParameter("user", user.getName());
-		List<Run> runs = q.getResultList();
-		return runs;
 	}
 
 	private static Query createNamedQuery(EntityManager em, String query) {
@@ -982,14 +1001,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public void setImmutable() {
 		this.mutable = false;
 	}
-	
+
 //	public void remove() {
 //		List<VmRuntimeParameterMapping> ms = VmRuntimeParameterMapping.getMappings(getUuid());
 //		for(VmRuntimeParameterMapping m : ms) {
 //			try {
 //				m.remove();
 //			} catch (IllegalArgumentException e) {
-//				
+//
 //			}
 //		}
 //		super.remove();

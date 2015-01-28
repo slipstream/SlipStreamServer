@@ -9,9 +9,9 @@ package com.sixsq.slipstream.run;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ package com.sixsq.slipstream.run;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
@@ -33,6 +34,18 @@ import com.sixsq.slipstream.persistence.Vm;
 @Root
 public class Vms {
 
+	@Attribute(required=false)
+	private int offset;
+
+	@Attribute(required=false)
+	private int limit;
+
+	@Attribute(required=false)
+	private int count;
+
+	@Attribute(required=false)
+	private String cloud;
+
 	@ElementList(inline = true)
 	private List<Vm> vms = new ArrayList<Vm>();
 
@@ -40,7 +53,16 @@ public class Vms {
 		return vms;
 	}
 
-	public void populate(User user) throws SlipStreamException {
-		vms = Vm.list(user.getName());
+	public void populate(User user, int offset, int limit, String cloudServiceName) throws SlipStreamException {
+		populateVms(user, offset, limit, cloudServiceName);
+	}
+
+	private void populateVms(User user, int offset, int limit, String cloudServiceName) throws SlipStreamException {
+		this.offset = offset;
+		this.limit = limit;
+		this.cloud = cloudServiceName;
+
+		count = Vm.listCount(user.getName(), cloudServiceName);
+		vms = Vm.list(user.getName(), offset, limit, cloudServiceName);
 	}
 }

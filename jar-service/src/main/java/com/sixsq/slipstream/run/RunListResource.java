@@ -36,7 +36,6 @@ import javax.persistence.RollbackException;
 import org.hibernate.StaleObjectStateException;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
-import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -65,7 +64,7 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.run.RunView.RunViewList;
+import com.sixsq.slipstream.run.RunViewList;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
@@ -87,7 +86,7 @@ public class RunListResource extends BaseResource {
 
 	@Get("txt")
 	public Representation toTxt() {
-		RunViewList runViewList = fetchListView();
+		RunViewList runViewList = getRunViewList();
 		String result = SerializationUtil.toXmlString(runViewList);
 		return new StringRepresentation(result);
 	}
@@ -95,7 +94,7 @@ public class RunListResource extends BaseResource {
 	@Get("xml")
 	public Representation toXml() {
 
-		RunViewList runViewList = fetchListView();
+		RunViewList runViewList = getRunViewList();
 		String result = SerializationUtil.toXmlString(runViewList);
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
@@ -103,42 +102,25 @@ public class RunListResource extends BaseResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		RunViewList runViewList = fetchListView();
+		RunViewList runViewList = getRunViewList();
 
 		return new StringRepresentation(HtmlUtil.toHtml(runViewList,
-				getPageRepresentation(), getTransformationType(), getUser()),
+				getPageRepresentation(), getUser(), getRequest()),
 				MediaType.TEXT_HTML);
 	}
 
-	private RunViewList fetchListView() {
+	private RunViewList getRunViewList() {
+		String moduleResourceUri = getRequest().getResourceRef().getQueryAsForm().getFirstValue("moduleResourceUri");
 
-		Reference resourceRef = getRequest().getResourceRef();
-		Form form = resourceRef.getQueryAsForm();
-		String query = form.getFirstValue("query");
-
-		RunViewList list = null;
+		RunViewList list = new RunViewList();
 		try {
-			list = fetchListView(query, getUser());
+			list.populate(getUser(), moduleResourceUri, getOffset(), getLimit(), getCloud());
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
 		return list;
-	}
-
-	static RunViewList fetchListView(String query, User user)
-			throws ConfigurationException, ValidationException {
-		List<RunView> list;
-
-		if (user.isSuper()) {
-			list = (query != null) ? Run.viewList(query, user) : Run
-					.viewListAll();
-		} else {
-			list = (query != null) ? Run.viewList(query, user) : Run
-					.viewList(user);
-		}
-		return new RunViewList(list);
 	}
 
 	/**
