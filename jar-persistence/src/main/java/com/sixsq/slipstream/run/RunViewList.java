@@ -45,6 +45,9 @@ public class RunViewList {
 	private int count;
 
 	@Attribute(required=false)
+	private int totalCount;
+
+	@Attribute(required=false)
 	private String cloud;
 
 	@ElementList(inline = true, required = false)
@@ -77,8 +80,9 @@ public class RunViewList {
 		this.limit = limit;
 		this.cloud = cloudServiceName;
 
-		count = RunView.fetchListViewCount(user, moduleResourceUri, cloudServiceName);
+		totalCount = RunView.fetchListViewCount(user, moduleResourceUri, cloudServiceName);
 		runs = RunView.fetchListView(user, moduleResourceUri, offset, limit, cloudServiceName);
+		count = runs.size();
 	}
 
 }
