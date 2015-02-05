@@ -27,6 +27,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -58,6 +59,6 @@ public class CollectorTest extends RunTestBase {
 	@Test
 	public void collect() {
 		int res = Collector.collect(user, localConnector);
-		assertThat(res,  is(3));
+		assertThat(res,  is(LocalConnector.MAX_VMS));
 	}
 }

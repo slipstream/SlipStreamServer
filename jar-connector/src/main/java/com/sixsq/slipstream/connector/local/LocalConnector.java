@@ -55,11 +55,10 @@ public class LocalConnector extends ConnectorBase {
 	private static List<Vm> vms;
 	private static String[] states = { "running", "terminated", "initializing" };
 	private static Random random = new Random();
+	public static int MAX_VMS = 3;
 
 	static {
-		getLog().info("Generating dummy VMs...");
-//		int MAX_VMS = 5000;
-		int MAX_VMS = 3;
+		getLog().info("Generating " + MAX_VMS + " dummy VMs...");
 		String username = "super";
 		String cloud = "local";
 		vms = new ArrayList<Vm>();
