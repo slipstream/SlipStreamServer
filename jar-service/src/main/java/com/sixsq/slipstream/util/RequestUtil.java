@@ -88,7 +88,11 @@ public class RequestUtil {
 	}
 
 	public static String constructAbsolutePath(Request request, String relativePath) {
-		return ResourceUriUtil.getBaseUrl(request) + relativePath;
+		String absolutePath = ResourceUriUtil.getBaseUrl(request);
+		if (relativePath != null) {
+			absolutePath += relativePath;
+		}
+		return absolutePath;
 	}
 
 	/**
@@ -127,18 +131,18 @@ public class RequestUtil {
 
 		return options;
 	}
-	
+
 	private static String constructTransformationType(Request request) {
-		
+
 		String type = "view";
-		
+
 		type = setTypeIfTrue(request, BaseResource.CHOOSER_KEY, type);
 		type = setTypeIfTrue(request, BaseResource.EDIT_KEY, type);
 		type = setTypeIfTrue(request, BaseResource.NEW_KEY, type);
-		
+
 		return type;
 	}
-	
+
 	private static String setTypeIfTrue(Request request, String queryKey, String defaultType) {
 		String type = defaultType;
 		Parameter parameter = request.getResourceRef().getQueryAsForm().getFirst(queryKey);
@@ -151,5 +155,5 @@ public class RequestUtil {
 		}
 		return type;
 	}
-	
+
 }
