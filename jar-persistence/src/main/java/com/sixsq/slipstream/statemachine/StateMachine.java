@@ -124,7 +124,7 @@ public class StateMachine {
 		this.run = run;
 
 		nodeStates = new HashMap<String, State>();
-		for (String node : run.getNodeNameList()) {
+		for (String node : run.getNodeInstanceNamesList()) {
 			ExtrinsicState extrinsicState = createNodeExtrinsicState(run, node);
 			State nodeState = StateFactory.createInstance(extrinsicState);
 

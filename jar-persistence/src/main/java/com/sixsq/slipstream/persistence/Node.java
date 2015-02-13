@@ -60,6 +60,9 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	@Attribute
 	private int multiplicity = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX;
 
+	@Attribute(empty="0")
+	private int maxProvisioningFailures = 0;
+
 	@Attribute
 	private String cloudService = CloudImageIdentifier.DEFAULT_CLOUD_SERVICE;
 
@@ -116,7 +119,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	protected void setParameters(Map<String, NodeParameter> parameters) {
 		this.parameters = parameters;
 	}
-	
+
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = NodeParameter.class)
 	public Map<String, NodeParameter> getParameters() {
@@ -164,6 +167,14 @@ public class Node extends Parameterized<Node, NodeParameter> {
 					"Invalid multiplicity, it must be positive"));
 		}
 		this.multiplicity = multiplicity;
+	}
+
+	public void setMaxProvisioningFailures(int value) {
+		this.maxProvisioningFailures = value;
+	}
+
+	public int getMaxProvisioningFailures() {
+		return this.maxProvisioningFailures;
 	}
 
 	@Attribute(required = false)

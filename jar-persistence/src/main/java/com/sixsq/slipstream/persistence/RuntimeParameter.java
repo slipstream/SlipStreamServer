@@ -116,6 +116,9 @@ public class RuntimeParameter extends Metadata {
 	public final static String MULTIPLICITY_PARAMETER_NAME = "multiplicity";
 	public final static String MULTIPLICITY_PARAMETER_DESCRIPTION = "Multiplicity number";
 
+	public static final String MAX_PROVISIONING_FAILURES = "max-provisioning-failures";
+	public static final String MAX_PROVISIONING_FAILURES_DESCRIPTION = "Max provisioning failures";
+
 	public final static String IDS_PARAMETER_NAME = "ids";
 	public final static String IDS_PARAMETER_DESCRIPTION = "IDs of the machines in a mutable deployment.";
 

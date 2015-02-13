@@ -9,9 +9,9 @@ package com.sixsq.slipstream.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,9 +40,9 @@ import com.sixsq.slipstream.persistence.User;
 
 /**
  * Unit test see
- * 
+ *
  * @see DeploymentFormProcesorTest
- * 
+ *
  */
 public class DeploymentFormProcessor extends ModuleFormProcessor {
 
@@ -153,6 +153,8 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 
 			setCloudService(getForm(), nodeindex, node);
 
+			setMaxProvisioningFailures(getForm(), nodeindex, node);
+
 			module.setNode(node);
 		}
 	}
@@ -199,17 +201,32 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 		node.setMultiplicity(parseMultiplicity(multiplicityValue));
 	}
 
-	private int parseMultiplicity(String multiplicityValue)
+	private int parseMultiplicity(String value)
 			throws ValidationException {
-		int multiplicity = 0;
+		return parseIntegerValue(value, "multiplicity");
+	}
+
+	private void setMaxProvisioningFailures(Form form, String nodeindex, Node node)
+			throws ValidationException {
+
+		String value = form.getFirstValue("node--" + nodeindex
+				+ "--max--provisioning--failures--value", "0");
+		node.setMaxProvisioningFailures(parseMaxProvisioningFailures(value));
+	}
+
+	private int parseMaxProvisioningFailures(String value)
+			throws ValidationException {
+		return parseIntegerValue(value, "max provisioning failures");
+	}
+
+	private int parseIntegerValue(String value, String fieldName) throws ValidationException {
 		try {
-			multiplicity = Integer.parseInt(multiplicityValue);
+			return Integer.parseInt(value);
 		} catch (NumberFormatException e) {
 			throw new ValidationException(
-					"Field multiplicity must be a valid integer, got: "
-							+ multiplicityValue);
+					"Field '" + fieldName + "' must be a valid integer, got: "
+							+ value);
 		}
-		return multiplicity;
 	}
 
 	@Override

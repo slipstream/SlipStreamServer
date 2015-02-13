@@ -161,12 +161,12 @@ public class LocalConnector extends ConnectorBase {
 			// Empty deployment, nothing to
 			throw (new SlipStreamClientException("Empty deployment, nothing to"));
 		}
-		for (String n : run.getNodeNameList()) {
+		for (String n : run.getNodeNamesList()) {
 			int multiplicity = Integer.valueOf(run.getRuntimeParameterValue(RuntimeParameter.constructParamName(n,
 					RuntimeParameter.MULTIPLICITY_PARAMETER_NAME)));
 			for (int i = 1; i <= multiplicity; i++) {
 				run.updateRuntimeParameter(RuntimeParameter.constructParamName(n
-						+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + i, RuntimeParameter.INSTANCE_ID_KEY),
+						+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + i, RuntimeParameter.STATE_VM_KEY),
 						"running");
 			}
 		}
