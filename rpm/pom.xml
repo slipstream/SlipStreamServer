@@ -392,6 +392,7 @@
                             <filemode>664</filemode>
                             <username>slipstream</username>
                             <groupname>slipstream</groupname>
+                            <configuration>true</configuration>
                             <directoryIncluded>false</directoryIncluded>
                             <sources>
                                 <source>
