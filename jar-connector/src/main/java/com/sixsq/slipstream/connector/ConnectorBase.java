@@ -335,7 +335,7 @@ public abstract class ConnectorBase implements Connector {
     protected List<String> getCloudNodeInstanceIds(Run run) throws NotFoundException, ValidationException {
         List<String> ids = new ArrayList<String>();
 
-        for (String nodeName : run.getNodeNameList()) {
+        for (String nodeName : run.getNodeInstanceNamesList()) {
             nodeName = nodeName.trim();
 
             String idKey = nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.INSTANCE_ID_KEY;

@@ -64,6 +64,7 @@ public class RunNodeResource extends RunBaseResource {
 	private final static String NUMBER_INSTANCES_ADD_DEFAULT = "1";
 
 	private final static String INSTANCE_IDS_REMOVE_FORM_PARAM = "ids";
+	private final static String DELETE_INSTANCE_IDS_ONLY_FORM_PARAM = "delete-ids-only";
 
 	private final static List<Method> IGNORE_ABORT_HTTP_METHODS = new ArrayList<Method>(
 			Arrays.asList(Method.GET));
@@ -91,10 +92,9 @@ public class RunNodeResource extends RunBaseResource {
 	}
 
 	private void initNodeParameters() {
-		nodeMultiplicityRunParam = DeploymentFactory.constructParamName(nodename,
-				RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
-		nodeMultiplicityRuntimeParam = DeploymentFactory.constructParamName(nodename,
-				RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+		String multiplicityParamName = DeploymentFactory.constructParamName(nodename, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
+		nodeMultiplicityRunParam = multiplicityParamName;
+		nodeMultiplicityRuntimeParam = multiplicityParamName;
 		nodeIndicesRuntimeParam = DeploymentFactory.constructParamName(nodename, RuntimeParameter.IDS_PARAMETER_NAME);
 	}
 
@@ -183,10 +183,14 @@ public class RunNodeResource extends RunBaseResource {
 
 		Run run = Run.loadFromUuid(getUuid(), em);
 		try {
-			validateRun(run);
+			Form form = new Form(entity);
+			boolean deleteOnly = "true".equals(form.getFirstValue(DELETE_INSTANCE_IDS_ONLY_FORM_PARAM, "").trim()) ? true
+			        : false;
+			if (!deleteOnly) {
+				validateRun(run);
+			}
 			transaction.begin();
 
-			Form form = new Form(entity);
 			String ids = form.getFirstValue(INSTANCE_IDS_REMOVE_FORM_PARAM, "");
 			if (ids.isEmpty()) {
 				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
@@ -214,7 +218,9 @@ public class RunNodeResource extends RunBaseResource {
 				decrementNodeMultiplicityOnRun(instanceIds.size(), run);
 			}
 
-			StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
+			if (!deleteOnly) {
+				StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
+			}
 
 			transaction.commit();
 		} catch (Exception ex) {
