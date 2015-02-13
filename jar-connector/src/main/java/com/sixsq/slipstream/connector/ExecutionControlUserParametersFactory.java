@@ -51,25 +51,25 @@ public class ExecutionControlUserParametersFactory extends
 		putMandatoryBooleanParameter(
 				UserParameter.KEY_ON_ERROR_RUN_FOREVER,
 				false,
-				"If ANY error occurs, keep the execution running.",
+				"If ANY error occurs, keep the execution running",
 				"This value is useful to investigate the error.",
 				30);
 		putMandatoryBooleanParameter(
 				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER,
 				true,
-				"If NO errors occur, keep the execution running.",
+				"If NO errors occur, keep the execution running",
 				"This value is useful for deployment or long tests.",
 				20);
 		putMandatoryParameter(
 				UserParameter.KEY_TIMEOUT,
-				"Execution timeout (in minutes).",
+				"Execution timeout (in minutes)",
 				"30",
 				ParameterType.String,
 				"If the execution stays in a transitional state for more than the value of this timeout, the execution is forcefully terminated.",
 				90);
 		putMandatoryParameter(
 				SSHKEY_PARAMETER_NAME,
-				"SSH Public Key(s) (one per line).",
+				"SSH Public Key(s) (one per line)",
 				ParameterType.RestrictedText,
 				"Warning: Some clouds may take into account only the first key until SlipStream bootstraps the machine.",
 				40);
@@ -78,7 +78,7 @@ public class ExecutionControlUserParametersFactory extends
 		List<String> options = Arrays.asList(_options);
 		putMandatoryEnumParameter(
 				VERBOSITY_LEVEL,
-				"Level of verbosity.",
+				"Level of verbosity",
 				options, VERBOSITY_LEVEL_DEFAULT,
 				"0 - Actions,  1 - Steps,  2 - Details data,  3 - Debugging",
 				99);
@@ -86,7 +86,7 @@ public class ExecutionControlUserParametersFactory extends
 		List<String> clouds = extractCloudNames(ConnectorFactory.getConnectors());
 		putMandatoryEnumParameter(
 				UserParametersFactoryBase.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME,
-				"Select the default cloud.",
+				"Default Cloud",
 				clouds, "",
 				"Select the cloud that you want to use as the default.",
 				10);
