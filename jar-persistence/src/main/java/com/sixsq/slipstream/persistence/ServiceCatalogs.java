@@ -20,8 +20,7 @@ public class ServiceCatalogs {
 		return list;
 	}
 
-	public List<ServiceCatalog> retrieveServiceCatalogs()
-			throws ValidationException {
+	private List<ServiceCatalog> retrieveServiceCatalogs() {
 		return ServiceCatalog.listall();
 	}
 
@@ -73,7 +72,7 @@ public class ServiceCatalogs {
 		sc.populateDefinedParameters();
 	}
 
-	public void loadAll() throws ValidationException {
+	public void loadAll() {
 		list = retrieveServiceCatalogs();
 	}
 

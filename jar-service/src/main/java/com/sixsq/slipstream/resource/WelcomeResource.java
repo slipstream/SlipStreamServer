@@ -71,7 +71,6 @@ public class WelcomeResource extends SimpleResource {
 
 		ServiceCatalogs scs = new ServiceCatalogs();
 		scs.loadAll();
-		scs.retrieveServiceCatalogs();
 		scs.updateForEditing(getUser());
 
 		return scs;
