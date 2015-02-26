@@ -52,15 +52,6 @@
     <tag>HEAD</tag>
   </scm>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </reporting>
-
   <properties>
 
     <logger.level>INFO</logger.level>
