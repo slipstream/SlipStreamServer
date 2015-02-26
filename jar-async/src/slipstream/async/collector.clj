@@ -68,9 +68,13 @@
 ; This is the channel for queuing all user requests
 (def all-collector-chan (chan (sliding-buffer collector-chan-size)))
 
+(defn- user-connector
+  [user connector]
+  (apply str "[user " (get-name user) " on cloud " (.getConnectorInstanceName connector) "]"))
+
 (defn- build-msg
   [user connector elapsed & info]
-  (apply str "[user " (get-name user) " on cloud " (.getConnectorInstanceName connector) "] (" elapsed " ms) : " info))
+  (apply str (user-connector user connector) " (" elapsed " ms) : " info))
 
 (defn log-timeout
   [user connector elapsed]
@@ -146,7 +150,7 @@
             c connectors]
       (if-not (@busy [(get-name u) c])
         (go (>! chan [u c]))
-        (log/log-info "Avoiding working on " (build-user-connector-msg u c) " being in a process." )))))
+        (log/log-info "Avoiding working on " (user-connector u c) " being in a process." )))))
 
 ; Start collector writers
 (defn collect-writers
