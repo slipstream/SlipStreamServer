@@ -34,7 +34,7 @@
 (def number-of-readers 32)
 (def timeout-all-users-loop (seconds-in-msecs 240))
 (def timeout-online-loop (seconds-in-msecs 10))
-(def timeout-collect (* 2 timeout-collect-loop))
+(def timeout-collect (* 6 timeout-online-loop))
 (def timeout-collect-reader-release (+ timeout-collect (seconds-in-msecs 2)))
 (def timeout-processing-loop (seconds-in-msecs 60))
 
@@ -90,14 +90,14 @@
 
 (defn collect!
   [user connector]
-  (let [ch (chan 1)]
+  (let [ch (chan 1) ts (System/currentTimeMillis)]
     (go
       (let [[v _] (alts! [ch (timeout timeout-collect-reader-release)])]
         (swap! busy free [(get-name user) connector])
         (cond
-          (nil? v) (log-timeout user connector)
-          (< v 0) (log-failure user connector)
-          :else (log-collected user connector v))))
+          (nil? v) (log-timeout ts user connector)
+          (< v 0) (log-failure ts user connector)
+          :else (log-collected ts user connector v))))
     (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect))))))
 
 (defn update-metric!
@@ -146,7 +146,7 @@
   (let [connectors (connectors)]
     (check-channel-size users connectors)
     (doseq [u users
-      c connectors]
+            c connectors]
       (if-not (@busy [(get-name u) c])
         (go (>! chan [u c]))
         (log/log-info "Avoiding working on " (build-user-connector-msg u c) " being in a process." )))))
