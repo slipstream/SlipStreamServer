@@ -67,7 +67,7 @@ public abstract class ConnectorBase implements Connector {
 
     abstract public void terminate(Run run, User user) throws SlipStreamException;
 
-    abstract public Properties describeInstances(User user) throws SlipStreamException;
+    abstract public Properties describeInstances(User user, int timeout) throws SlipStreamException;
 
     private static Logger log = Logger.getLogger(ConnectorBase.class.toString());
 

@@ -99,7 +99,7 @@ public class Terminator {
 		em.close();
 	}
 
-	public static void terminateInstances(Run run, User user) throws ValidationException {
+	private static void terminateInstances(Run run, User user) throws ValidationException {
 		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
 
 		for (String cloudServiceName : run.getCloudServiceNamesList()) {

@@ -55,10 +55,10 @@ public class CollectorTest extends RunTestBase {
 		String secret = lpf.constructKey(LocalUserParametersFactory.SECRET_PARAMETER_NAME);
 		user.setParameter(new UserParameter(secret, "secret value", ""));
 	}
-	
+
 	@Test
 	public void collect() {
-		int res = Collector.collect(user, localConnector);
+		int res = Collector.collect(user, localConnector, 0);
 		assertThat(res,  is(LocalConnector.MAX_VMS));
 	}
 }
