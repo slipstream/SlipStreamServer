@@ -34,7 +34,7 @@
 (def number-of-readers 32)
 (def timeout-all-users-loop (seconds-in-msecs 240))
 (def timeout-online-loop (seconds-in-msecs 10))
-(def timeout-collect (* 2 timeout-collect-loop))
+(def timeout-collect (* 6 timeout-online-loop))
 (def timeout-collect-reader-release (+ timeout-collect (seconds-in-msecs 2)))
 (def timeout-processing-loop (seconds-in-msecs 60))
 
@@ -68,36 +68,33 @@
 ; This is the channel for queuing all user requests
 (def all-collector-chan (chan (sliding-buffer collector-chan-size)))
 
-(defn- build-user-connector-msg
-  [user connector]
-  (str "user " (get-name user) " on cloud " (.getConnectorInstanceName connector)))
-
 (defn- build-msg
-  [prefix user connector suffix]
-  (str prefix "for " (build-user-connector-msg user connector) suffix))
+  [user connector elapsed & info]
+  (apply str "[user " (get-name user) " on cloud " (.getConnectorInstanceName connector) "] (" elapsed " ms) : " info))
 
 (defn log-timeout
-  [user connector]
-  (log/log-error (build-msg "Timed out in waiting for collecting vms " user connector "")))
+  [user connector elapsed]
+  (log/log-error (build-msg user connector elapsed "Timed out in waiting for collecting vms")))
 
 (defn log-failure
-  [user connector]
-  (log/log-error (build-msg "Failed collecting vms " user connector "")))
+  [user connector elapsed]
+  (log/log-error (build-msg user connector elapsed "Failed collecting vms")))
 
 (defn log-collected
-  [user connector v]
-  (log/log-info (build-msg "Number of VMs collected " user connector (str ": " v))))
+  [user connector elapsed v]
+  (log/log-info (build-msg user connector elapsed "Number of VMs collected = " v)))
 
 (defn collect!
   [user connector]
-  (let [ch (chan 1)]
+  (let [ch (chan 1) start-ts (System/currentTimeMillis)]
     (go
-      (let [[v _] (alts! [ch (timeout timeout-collect-reader-release)])]
+      (let [ [v _] (alts! [ch (timeout timeout-collect-reader-release)])
+             elapsed (- (System/currentTimeMillis) start-ts) ]
         (swap! busy free [(get-name user) connector])
         (cond
-          (nil? v) (log-timeout user connector)
-          (< v 0) (log-failure user connector)
-          :else (log-collected user connector v))))
+          (nil? v) (log-timeout user connector elapsed)
+          (< v 0) (log-failure user connector elapsed)
+          :else (log-collected user connector elapsed))))
     (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect))))))
 
 (defn update-metric!
@@ -146,7 +143,7 @@
   (let [connectors (connectors)]
     (check-channel-size users connectors)
     (doseq [u users
-      c connectors]
+            c connectors]
       (if-not (@busy [(get-name u) c])
         (go (>! chan [u c]))
         (log/log-info "Avoiding working on " (build-user-connector-msg u c) " being in a process." )))))
