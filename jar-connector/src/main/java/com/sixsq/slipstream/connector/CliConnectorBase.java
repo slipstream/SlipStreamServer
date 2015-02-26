@@ -46,6 +46,10 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	public static final String CLI_LOCATION = "/usr/bin";
 
+	private static final int TIMEOUT_DEFAULT_LIST_SEC = 30;
+	private static final int TIMEOUT_DEFAULT_RUN_SEC = 600;
+	private static final int TIMEOUT_DEFAULT_TERMINATE_SEC = 600;
+
 	protected Logger log;
 
 	@Override
@@ -129,10 +133,11 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	@Override
-	public Properties describeInstances(User user) throws SlipStreamException {
+	public Properties describeInstances(User user, int timeout) throws SlipStreamException {
 		validateCredentials(user);
 
-		String command = getCommandDescribeInstances() + createCliParameters(getUserParams(user));
+		String command = getCommandDescribeInstances() + createTimeoutParameter(timeout)
+		        + createCliParameters(getUserParams(user));
 
 		String result;
 		String[] commands = { "sh", "-c", command };
@@ -148,6 +153,10 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 		return parseDescribeInstanceResult(result);
 	}
+
+	private String createTimeoutParameter(int timeout) {
+	    return " -t " + timeout + " ";
+    }
 
 	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {

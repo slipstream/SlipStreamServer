@@ -75,6 +75,7 @@ public interface Connector {
 
 	/**
 	 * @param user
+	 * @param timeout
 	 * @return properties representing each running machine instance. The
 	 *         minimum key/value pairs the method returns includes:
 	 *         <ul>
@@ -82,7 +83,7 @@ public interface Connector {
 	 *         </ul>
 	 * @throws SlipStreamException
 	 */
-	Properties describeInstances(User user) throws SlipStreamException;
+	Properties describeInstances(User user, int timeout) throws SlipStreamException;
 
 	/**
 	 * @return list of extra disk objects an image can support for this

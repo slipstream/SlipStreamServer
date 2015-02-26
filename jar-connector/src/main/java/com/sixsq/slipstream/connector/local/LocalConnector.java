@@ -227,7 +227,7 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	@Override
-	public Properties describeInstances(User user) {
+	public Properties describeInstances(User user, int timeout) {
 
 		Properties ps = new Properties();
 		for(Vm v : vms) {

@@ -38,11 +38,11 @@ public class Collector {
 
 	private static Logger logger = Logger.getLogger(Collector.class.getName());
 
-	public static int collect(User user, Connector connector) {
-		int res = 0;
+	public static int collect(User user, Connector connector, int timeout) {
+		int res = -1;
 		try {
 			if (connector.isCredentialsSet(user)) {
-				res = describeInstances(user, connector);
+				res = describeInstances(user, connector, timeout);
 			}
 		} catch (ConfigurationException e) {
 			logger.severe(e.getMessage());
@@ -54,13 +54,13 @@ public class Collector {
 		return res;
 	}
 
-	private static int describeInstances(User user, Connector connector)
+	private static int describeInstances(User user, Connector connector, int timeout)
 			throws ConfigurationException, ValidationException {
 		user.addSystemParametersIntoUser(Configuration.getInstance()
 				.getParameters());
 		Properties props = new Properties();
 		try {
-			props = connector.describeInstances(user);
+			props = connector.describeInstances(user, timeout);
 		} catch (SlipStreamException e) {
 			logger.warning("Failed contacting cloud: "
 					+ connector.getConnectorInstanceName() + " on behalf of "
@@ -88,7 +88,10 @@ public class Collector {
 			Vm vm = new Vm(instanceId, cloud, state, user.getName());
 			vms.add(vm);
 		}
-		Vm.update(vms, user.getName(), cloud);
+		long start = System.currentTimeMillis();
+		int removed = Vm.update(vms, user.getName(), cloud);
+		logger.info("Time: " + (System.currentTimeMillis() - start) + ". Number of VMs removed for user "
+		        + user.getName() + " on cloud " + cloud + ": " + removed);
 		return idsAndStates.size();
 	}
 }
