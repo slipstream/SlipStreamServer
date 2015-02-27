@@ -20,6 +20,9 @@
 
 package com.sixsq.slipstream.util;
 
+import java.util.Map;
+
+import org.restlet.Request;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
@@ -32,16 +35,19 @@ import com.sixsq.slipstream.metrics.Metrics;
 import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.User;
 
+/**
+ * For unit tests, @see HtmlUtilTest
+ *
+ */
 public class HtmlUtil {
 
-	public static String toHtml(Object metadata, String page, User user) {
-		return toHtml(metadata, page, null, user);
+	public static String toHtml(Object metadata, String page, User user, Request request) {
+		return toHtml(metadata, page, user, RequestUtil.constructOptions(request));
 	}
 
 	private static final MetricsTimer toHtmlTimer = Metrics.newTimer(HtmlUtil.class, "toHtml");
 
-	public static String toHtml(Object metadata, String page, String type,
-			User user) {
+	private static String toHtml(Object metadata, String page, User user, Map<String, Object> options) {
 
 		Document doc = SerializationUtil.toXmlDocument(metadata);
 
@@ -49,11 +55,9 @@ public class HtmlUtil {
 		try {
 			XmlUtil.addSystemConfiguration(doc);
 		} catch (ConfigurationException e) {
-			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL,
-					e.getMessage()));
+			throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
 		} catch (ValidationException e) {
-			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-					e.getMessage()));
+			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e.getMessage()));
 		}
 
 		String xml = SerializationUtil.documentToString(doc);
@@ -68,17 +72,20 @@ public class HtmlUtil {
 		}
 	}
 
-	public static String toHtml(String metadata, String page) {
-		return HtmlUtil.toHtml(metadata, page, "");
+	public static String toHtmlFromJson(String json, String page, Request request) {
+		return toHtmlFromJson(json, page, RequestUtil.constructOptions(request));
 	}
 
-	public static String toHtml(String metadata, String page, String type) {
-		return Representation.toHtml(metadata, page, type);
+	private static String toHtmlFromJson(String json, String page, Map<String, Object> options) {
+		return Representation.toHtml(json, page, options);
 	}
 
-	public static String toHtmlError(String metadata, String error, int code) {
-		return Representation
-				.toHtmlError(metadata, error, String.valueOf(code));
+	public static String toHtmlError(String metadata, String error, int code, Request request) {
+		return toHtmlError(metadata, error, code, RequestUtil.constructOptions(request));
+	}
+
+	private static String toHtmlError(String metadata, String error, int code, Map<String, Object> options) {
+		return Representation.toHtmlError(metadata, error, String.valueOf(code), options);
 	}
 
 }

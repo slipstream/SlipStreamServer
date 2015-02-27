@@ -171,6 +171,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		Document runs = XmlUtil.stringToDom(resp.getEntityAsText());
 		assertEquals(5, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("5", runs.getDocumentElement().getAttribute("count"));
+		assertEquals("5", runs.getDocumentElement().getAttribute("totalCount"));
 		assertEquals("0", runs.getDocumentElement().getAttribute("offset"));
 		assertEquals("20", runs.getDocumentElement().getAttribute("limit"));
 
@@ -179,13 +180,15 @@ public class RunListResourceTest extends ResourceTestBase {
 		runs = XmlUtil.stringToDom(resp.getEntityAsText());
 		assertEquals(4, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("4", runs.getDocumentElement().getAttribute("count"));
+		assertEquals("4", runs.getDocumentElement().getAttribute("totalCount"));
 		assertEquals("10", runs.getDocumentElement().getAttribute("limit"));
 
 		resp = getRunList(1, 4, null);
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
 		runs = XmlUtil.stringToDom(resp.getEntityAsText());
 		assertEquals(4, runs.getDocumentElement().getElementsByTagName("item").getLength());
-		assertEquals("5", runs.getDocumentElement().getAttribute("count"));
+		assertEquals("4", runs.getDocumentElement().getAttribute("count"));
+		assertEquals("5", runs.getDocumentElement().getAttribute("totalCount"));
 		assertEquals("1", runs.getDocumentElement().getAttribute("offset"));
 		assertEquals("4", runs.getDocumentElement().getAttribute("limit"));
 
@@ -194,6 +197,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		runs = XmlUtil.stringToDom(resp.getEntityAsText());
 		assertEquals(3, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("3", runs.getDocumentElement().getAttribute("count"));
+		assertEquals("3", runs.getDocumentElement().getAttribute("totalCount"));
 
 		resp = getRunList(-1, null, null);
 		assertEquals(Status.CLIENT_ERROR_BAD_REQUEST, resp.getStatus());

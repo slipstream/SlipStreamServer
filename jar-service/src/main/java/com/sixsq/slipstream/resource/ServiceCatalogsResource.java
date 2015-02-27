@@ -45,7 +45,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 	private ServiceCatalogs scs = new ServiceCatalogs();
 
 	@Override
-	public void initialize() throws ResourceException {
+	public void initialize() {
 
 		super.initialize();
 
@@ -59,11 +59,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 			throwClientValidationError(e.getMessage());
 		}
 
-		try {
-			scs.loadAll();
-		} catch (ValidationException e) {
-			throwClientValidationError(e.getMessage());
-		}
+		scs.loadAll();
 	}
 
 	@Get("xml")
@@ -85,7 +81,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 
 		try {
 			result = new StringRepresentation(HtmlUtil.toHtml(retrieveServiceCatalogs(), getPageRepresentation(),
-					getTransformationType(), getUser()), MediaType.TEXT_HTML);
+					getUser(), getRequest()), MediaType.TEXT_HTML);
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}

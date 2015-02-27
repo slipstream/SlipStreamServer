@@ -49,7 +49,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -58,8 +57,7 @@ import com.sixsq.slipstream.util.XmlUtil;
 public class CommonStatusService extends StatusService {
 
 	@Override
-	public Representation getRepresentation(Status status, Request request,
-			Response response) {
+	public Representation getRepresentation(Status status, Request request, Response response) {
 
 		try {
 			reloadParameters();
@@ -84,12 +82,8 @@ public class CommonStatusService extends StatusService {
 
 		String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(request);
 
-		Configuration configuration = ConfigurationUtil
-				.getConfigurationFromRequest(request);
-
 		ClientInfo clientInfo = request.getClientInfo();
-		List<Preference<MediaType>> mediaTypes = clientInfo
-				.getAcceptedMediaTypes();
+		List<Preference<MediaType>> mediaTypes = clientInfo.getAcceptedMediaTypes();
 
 		String error = statusToString(status);
 
@@ -99,13 +93,11 @@ public class CommonStatusService extends StatusService {
 
 			if (TEXT_HTML.isCompatible(desiredMediaType)) {
 
-				return toXhtml(status, response, user, baseUrlSlash,
-						configuration.version);
+				return toXhtml(status, request, response, user, baseUrlSlash);
 
 			} else if (APPLICATION_XHTML.isCompatible(desiredMediaType)) {
 
-				return toXhtml(status, response, user, baseUrlSlash,
-						configuration.version);
+				return toXhtml(status, request, response, user, baseUrlSlash);
 
 			} else if (APPLICATION_JSON.isCompatible(desiredMediaType)) {
 
@@ -125,8 +117,7 @@ public class CommonStatusService extends StatusService {
 		return representation;
 	}
 
-	private Representation toXhtml(Status status, Response response, User user,
-			String baseUrlSlash, String version) {
+	private Representation toXhtml(Status status, Request request, Response response, User user, String baseUrlSlash) {
 
 		String metadata = "";
 
@@ -136,8 +127,8 @@ public class CommonStatusService extends StatusService {
 			metadata = SerializationUtil.documentToString(doc);
 		}
 
-		return new StringRepresentation(HtmlUtil.toHtmlError(metadata,
-				status.getDescription(), status.getCode()), MediaType.TEXT_HTML);
+		return new StringRepresentation(HtmlUtil.toHtmlError(metadata, status.getDescription(), status.getCode(),
+				request), MediaType.TEXT_HTML);
 	}
 
 	private Representation toJson(Status status) {
@@ -150,8 +141,7 @@ public class CommonStatusService extends StatusService {
 		json.append("   \"detail\": \"" + status.getDescription() + "\"\n");
 		json.append("}\n");
 
-		Representation representation = new StringRepresentation(
-				json.toString());
+		Representation representation = new StringRepresentation(json.toString());
 		representation.setMediaType(APPLICATION_JSON);
 
 		return representation;
@@ -166,20 +156,16 @@ public class CommonStatusService extends StatusService {
 
 	private Representation toXml(Status status, String error) {
 		Representation representation;
-		representation = new StringRepresentation("<error code=\""
-				+ status.getCode() + "\">" + error + "</error>");
+		representation = new StringRepresentation("<error code=\"" + status.getCode() + "\">" + error + "</error>");
 		representation.setMediaType(APPLICATION_XML);
 		return representation;
 	}
 
-	private void reloadParameters() throws ConfigurationException,
-			ValidationException {
+	private void reloadParameters() throws ConfigurationException, ValidationException {
 		Configuration configuration = Configuration.getInstance();
 
-		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_EMAIL
-				.getName();
-		ServiceConfigurationParameter parameter = configuration.getParameters()
-				.getParameter(key);
+		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_EMAIL.getName();
+		ServiceConfigurationParameter parameter = configuration.getParameters().getParameter(key);
 		String email = parameter.getValue();
 
 		setContactEmail(email);
@@ -187,8 +173,7 @@ public class CommonStatusService extends StatusService {
 
 	private String statusToString(Status status) {
 
-		return "Error: " + status.getDescription() + " (" + status.getCode()
-				+ " - " + status.getReasonPhrase() + ")";
+		return "Error: " + status.getDescription() + " (" + status.getCode() + " - " + status.getReasonPhrase() + ")";
 
 	}
 }

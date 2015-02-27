@@ -39,18 +39,8 @@ public class ReportDecorator extends Filter {
 
 		super.doHandle(request, response);
 
-		if (response.getStatus().isSuccess()
-				&& request.getMethod().equals(Method.GET)) {
-			boolean isHtml = false;
-			for (Preference<MediaType> mt : request.getClientInfo()
-					.getAcceptedMediaTypes()) {
-				if (mt.getMetadata().includes(MediaType.APPLICATION_XHTML)
-						|| mt.getMetadata().includes(MediaType.TEXT_HTML)) {
-					isHtml = true;
-					break;
-				}
-			}
-			if (isHtml) {
+		if (response.getStatus().isSuccess() && request.getMethod().equals(Method.GET)) {
+			if (isHtml(request)) {
 				try {
 					response.setEntity(toHtml(request, response));
 				} catch (SlipStreamException e) {
@@ -62,14 +52,19 @@ public class ReportDecorator extends Filter {
 		return CONTINUE;
 	}
 
-	public Representation toHtml(Request request, Response response)
-			throws SlipStreamException {
+	protected boolean isHtml(Request request) {
+		for (Preference<MediaType> mt : request.getClientInfo().getAcceptedMediaTypes()) {
+			if (mt.getMetadata().includes(MediaType.APPLICATION_XHTML)
+					|| mt.getMetadata().includes(MediaType.TEXT_HTML)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-		String xhtmlRepresentation = convertHtmlToXhtml(response
-				.getEntityAsText());
+	public Representation toHtml(Request request, Response response) throws SlipStreamException {
 
-		String html = HtmlUtil.toHtml(xhtmlRepresentation,
-				getPageRepresentation());
+		String html = HtmlUtil.toHtmlFromJson(response.getEntityAsText(), getPageRepresentation(), request);
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
@@ -78,7 +73,4 @@ public class ReportDecorator extends Filter {
 		return "reports";
 	}
 
-	private String convertHtmlToXhtml(String htmlRepresentation) {
-		return htmlRepresentation.replace("<br>", "<br/>");
-	}
 }

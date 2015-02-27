@@ -55,11 +55,10 @@ public class LocalConnector extends ConnectorBase {
 	private static List<Vm> vms;
 	private static String[] states = { "running", "terminated", "initializing" };
 	private static Random random = new Random();
+	public static int MAX_VMS = 3;
 
 	static {
-		getLog().info("Generating dummy VMs...");
-//		int MAX_VMS = 5000;
-		int MAX_VMS = 3;
+		getLog().info("Generating " + MAX_VMS + " dummy VMs...");
 		String username = "super";
 		String cloud = "local";
 		vms = new ArrayList<Vm>();
@@ -162,12 +161,12 @@ public class LocalConnector extends ConnectorBase {
 			// Empty deployment, nothing to
 			throw (new SlipStreamClientException("Empty deployment, nothing to"));
 		}
-		for (String n : run.getNodeNameList()) {
+		for (String n : run.getNodeNamesList()) {
 			int multiplicity = Integer.valueOf(run.getRuntimeParameterValue(RuntimeParameter.constructParamName(n,
 					RuntimeParameter.MULTIPLICITY_PARAMETER_NAME)));
 			for (int i = 1; i <= multiplicity; i++) {
 				run.updateRuntimeParameter(RuntimeParameter.constructParamName(n
-						+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + i, RuntimeParameter.INSTANCE_ID_KEY),
+						+ RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + i, RuntimeParameter.STATE_VM_KEY),
 						"running");
 			}
 		}
@@ -228,7 +227,7 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	@Override
-	public Properties describeInstances(User user) {
+	public Properties describeInstances(User user, int timeout) {
 
 		Properties ps = new Properties();
 		for(Vm v : vms) {

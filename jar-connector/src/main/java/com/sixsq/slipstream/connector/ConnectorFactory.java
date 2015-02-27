@@ -201,6 +201,7 @@ public class ConnectorFactory {
     private static void updateServiceCatalog(Set<String> cloudServiceNames) {
 
         ServiceCatalogs scs = new ServiceCatalogs();
+        scs.loadAll();
         for (ServiceCatalog sc : scs.getList()) {
             if (!cloudServiceNames.contains(sc.getCloud())) {
                 sc.remove();
@@ -208,6 +209,7 @@ public class ConnectorFactory {
         }
         for (String cloud : cloudServiceNames) {
             boolean foundIt = false;
+            scs.loadAll();
             for (ServiceCatalog sc : scs.getList()) {
                 if (sc.getCloud().equals(cloud)) {
                     foundIt = true;

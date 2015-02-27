@@ -90,6 +90,18 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		addParameter(parameter, ParameterType.Enum, mandatory);
 	}
 
+	protected void putEnumParameter(String name, String description,
+			List<String> options, String value, String instructions, boolean mandatory, int order)
+			throws ValidationException {
+		S parameter = createParameter(name, description, mandatory);
+		parameter.setEnumValues(options);
+		parameter.setValue(value);
+		parameter.setCategory(getCategory());
+		parameter.setOrder(order);
+		parameter.setInstructions(instructions);
+		addParameter(parameter, ParameterType.Enum, mandatory);
+	}
+
 	protected void putMandatoryEnumParameter(String name, String description,
 			List<String> options, String value) throws ValidationException {
 		putEnumParameter(name, description, options, value, true);
@@ -99,6 +111,12 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 			List<String> options, String value, int order)
 			throws ValidationException {
 		putEnumParameter(name, description, options, value, true, order);
+	}
+
+	protected void putMandatoryEnumParameter(String name, String description,
+			List<String> options, String value, String instructions, int order)
+			throws ValidationException {
+		putEnumParameter(name, description, options, value, instructions, true, order);
 	}
 
 	protected void putParameter(String name, boolean value, String description,
@@ -117,6 +135,14 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 			String description, int order) throws ValidationException {
 		S parameter = createParameter(name, value, description);
 		parameter.setOrder(order);
+		addParameter(parameter, ParameterType.Boolean, true);
+	}
+
+	protected void putMandatoryBooleanParameter(String name, boolean value,
+			String description, String instructions, int order) throws ValidationException {
+		S parameter = createParameter(name, value, description);
+		parameter.setOrder(order);
+		parameter.setInstructions(instructions);
 		addParameter(parameter, ParameterType.Boolean, true);
 	}
 
@@ -155,6 +181,25 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		S parameter = createParameter(name, null, description, true);
 		parameter.setType(type);
 		parameter.setInstructions(instructions);
+		assignParameter(parameter);
+	}
+
+	protected void putMandatoryParameter(String name, String description,
+			ParameterType type, String instructions, int order) throws ValidationException {
+		S parameter = createParameter(name, null, description, true);
+		parameter.setType(type);
+		parameter.setInstructions(instructions);
+		parameter.setOrder(order);
+		assignParameter(parameter);
+	}
+
+	protected void putMandatoryParameter(String name, String description, String value,
+			ParameterType type, String instructions, int order) throws ValidationException {
+		S parameter = createParameter(name, null, description, true);
+		parameter.setType(type);
+		parameter.setInstructions(instructions);
+		parameter.setOrder(order);
+		parameter.setValue(value);
 		assignParameter(parameter);
 	}
 

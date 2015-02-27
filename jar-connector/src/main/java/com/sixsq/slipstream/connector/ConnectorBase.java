@@ -67,7 +67,7 @@ public abstract class ConnectorBase implements Connector {
 
     abstract public void terminate(Run run, User user) throws SlipStreamException;
 
-    abstract public Properties describeInstances(User user) throws SlipStreamException;
+    abstract public Properties describeInstances(User user, int timeout) throws SlipStreamException;
 
     private static Logger log = Logger.getLogger(ConnectorBase.class.toString());
 
@@ -335,7 +335,7 @@ public abstract class ConnectorBase implements Connector {
     protected List<String> getCloudNodeInstanceIds(Run run) throws NotFoundException, ValidationException {
         List<String> ids = new ArrayList<String>();
 
-        for (String nodeName : run.getNodeNameList()) {
+        for (String nodeName : run.getNodeInstanceNamesList()) {
             nodeName = nodeName.trim();
 
             String idKey = nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.INSTANCE_ID_KEY;
@@ -423,9 +423,13 @@ public abstract class ConnectorBase implements Connector {
         return getParameterValue(ImageModule.RAM_KEY, image);
     }
 
+    protected String getExtraDiskVolatile(ImageModule image) throws ValidationException {
+        return image.getParameterValue(ImageModule.EXTRADISK_VOLATILE_PARAM, null);
+    }
+
     protected String getParameterValue(String parameterName, ImageModule image) throws ValidationException {
-        ModuleParameter instanceTypeParameter = image.getParameter(constructKey(parameterName));
-        return instanceTypeParameter == null ? null : instanceTypeParameter.getValue();
+        ModuleParameter parameter = image.getParameter(constructKey(parameterName));
+        return parameter == null ? null : parameter.getValue();
     }
 
     protected String getKey(User user) {

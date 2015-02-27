@@ -39,8 +39,7 @@ import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
-		extends BaseResource {
+public abstract class ParameterizedResource<S extends Parameterized<S, ?>> extends BaseResource {
 
 	private S parameterized = null;
 
@@ -70,8 +69,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	abstract protected String extractTargetUriFromRequest();
 
-	abstract protected S getOrCreateParameterized(String name)
-			throws ValidationException;
+	abstract protected S getOrCreateParameterized(String name) throws ValidationException;
 
 	public String getTargetParameterizeUri() {
 		return targetParameterizeUri;
@@ -114,8 +112,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 	}
 
 	protected EntityManager getEntityManager() {
-		return (EntityManager) getRequest().getAttributes().get(
-				ResourceUriUtil.ENTITY_MANAGER_KEY);
+		return (EntityManager) getRequest().getAttributes().get(ResourceUriUtil.ENTITY_MANAGER_KEY);
 	}
 
 	public S getParameterized() {
@@ -126,8 +123,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 		targetParameterizeUri = extractTargetUriFromRequest();
 
-		if (NEW_NAME.equals(ModuleUriUtil
-				.extractShortNameFromResourceUri(targetParameterizeUri))) {
+		if (NEW_NAME.equals(ModuleUriUtil.extractShortNameFromResourceUri(targetParameterizeUri))) {
 			createVolatileParameterizedForEditing();
 		} else {
 			setParameterized(loadParameterized(targetParameterizeUri));
@@ -138,19 +134,15 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		}
 	}
 
-	abstract protected S loadParameterized(String targetParameterizedUri)
-			throws ValidationException;
+	abstract protected S loadParameterized(String targetParameterizedUri) throws ValidationException;
 
-	private void createVolatileParameterizedForEditing()
-			throws ValidationException {
-		setParameterized(getOrCreateParameterized(ModuleUriUtil
-				.extractModuleNameFromResourceUri(targetParameterizeUri)));
+	private void createVolatileParameterizedForEditing() throws ValidationException {
+		setParameterized(getOrCreateParameterized(ModuleUriUtil.extractModuleNameFromResourceUri(targetParameterizeUri)));
 		setIsEdit(true);
 	}
 
 	@Override
-	protected void setIsEdit() throws ConfigurationException,
-			ValidationException {
+	protected void setIsEdit() throws ConfigurationException, ValidationException {
 		setIsEdit(isEdit() || isEditFlagTrue() || newTemplateResource());
 	}
 
@@ -160,26 +152,21 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected boolean newTemplateResource() {
 		return isExisting()
-				&& NEW_NAME.equals(ModuleUriUtil
-						.extractShortNameFromResourceUri(getParameterized()
-								.getName()));
+				&& NEW_NAME.equals(ModuleUriUtil.extractShortNameFromResourceUri(getParameterized().getName()));
 	}
 
 	/**
-	 * User requested the creation of a new resource. This means that
-	 * if the resource already exists, for example, creation should
-	 * be forbidden.
+	 * User requested the creation of a new resource. This means that if the
+	 * resource already exists, for example, creation should be forbidden.
 	 */
 	protected boolean xxrequestingNew() {
-		boolean newInUri = isExisting() && NEW_NAME.equals(ModuleUriUtil
-						.extractShortNameFromResourceUri(getParameterized()
-								.getName()));
+		boolean newInUri = isExisting()
+				&& NEW_NAME.equals(ModuleUriUtil.extractShortNameFromResourceUri(getParameterized().getName()));
 		boolean newInQuery = extractNewFlagFromQuery();
 		return newInQuery || newInUri;
 	}
 
-	protected void addParametersForEditing() throws ValidationException,
-			ConfigurationException {
+	protected void addParametersForEditing() throws ValidationException, ConfigurationException {
 	}
 
 	@Delete
@@ -241,14 +228,12 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 			throwConfigurationException(e);
 		}
 
-		String html = HtmlUtil.toHtml(prepared, getPageRepresentation(),
-				getTransformationType(), getUser());
+		String html = HtmlUtil.toHtml(prepared, getPageRepresentation(), getUser(), getRequest());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
-	protected S prepareForSerialization() throws ConfigurationException,
-			ValidationException {
+	protected S prepareForSerialization() throws ConfigurationException, ValidationException {
 		return getParameterized();
 	}
 
@@ -272,8 +257,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 
 	protected void checkCanGet() {
 		if (!canGet()) {
-			throwClientForbiddenError("Not allowed to access: "
-					+ targetParameterizeUri);
+			throwClientForbiddenError("Not allowed to access: " + targetParameterizeUri);
 		}
 	}
 
@@ -295,18 +279,17 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>>
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 
 		String redirectUrl = "/" + resourceUri;
-		String absolutePath = RequestUtil.constructAbsolutePath(redirectUrl);
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), redirectUrl);
 
 		getResponse().setLocationRef(absolutePath);
 	}
 
 	protected void setResponseOkAndViewLocation(String resourceUri) {
-		Status status = isExisting() ? Status.SUCCESS_OK
-				: Status.SUCCESS_CREATED;
+		Status status = isExisting() ? Status.SUCCESS_OK : Status.SUCCESS_CREATED;
 		getResponse().setStatus(status);
 
 		String redirectUrl = "/" + resourceUri;
-		String absolutePath = RequestUtil.constructAbsolutePath(redirectUrl);
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), redirectUrl);
 
 		getResponse().setLocationRef(absolutePath);
 	}

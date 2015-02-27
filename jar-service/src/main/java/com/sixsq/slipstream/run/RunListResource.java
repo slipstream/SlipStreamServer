@@ -105,7 +105,7 @@ public class RunListResource extends BaseResource {
 		RunViewList runViewList = getRunViewList();
 
 		return new StringRepresentation(HtmlUtil.toHtml(runViewList,
-				getPageRepresentation(), getTransformationType(), getUser()),
+				getPageRepresentation(), getUser(), getRequest()),
 				MediaType.TEXT_HTML);
 	}
 
@@ -172,14 +172,14 @@ public class RunListResource extends BaseResource {
 			launch(run);
 
 			setLastExecute(user);
-			
+
 		} catch (SlipStreamClientException ex) {
 			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					ex.getMessage()));
 		}
 
 		String location = "/" + Run.RESOURCE_URI_PREFIX + run.getName();
-		String absolutePath = RequestUtil.constructAbsolutePath(location);
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), location);
 
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 		getResponse().setLocationRef(absolutePath);

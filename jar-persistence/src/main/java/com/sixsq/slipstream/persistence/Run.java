@@ -777,7 +777,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void addNodeInstanceName(String nodeInstanceName, String cloudServiceName) {
-		List<String> nodeNamesList = new ArrayList<String>(getNodeNameList());
+		List<String> nodeNamesList = new ArrayList<String>(getNodeInstanceNamesList());
 		nodeNamesList.remove("");
 		if (!nodeNamesList.contains(nodeInstanceName)) {
 			nodeNamesList.add(nodeInstanceName);
@@ -800,7 +800,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void removeNodeInstanceName(String nodeInstanceName) {
-		List<String> nodeNamesList = new ArrayList<String>(getNodeNameList());
+		List<String> nodeNamesList = new ArrayList<String>(getNodeInstanceNamesList());
 		while (nodeNamesList.contains(nodeInstanceName)) {
 			nodeNamesList.remove(nodeInstanceName);
 		}
@@ -821,7 +821,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 * Builds a list of node instance names (e.g. node.1, node.2, machine)
 	 * @return node instance name
 	 */
-	public List<String> getNodeNameList() {
+	public List<String> getNodeInstanceNamesList() {
 		String[] rawNodeNames = getNodeNames().split(NODE_NAMES_SEPARATOR);
 		List<String> nodeNames = new ArrayList<String>(rawNodeNames.length);
 
@@ -835,10 +835,33 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return nodeNames;
 	}
 
+	/**
+	 * Builds a list of node instance names (e.g. nodeA, nodeB, machine)
+	 * @return node names
+	 */
+	public List<String> getNodeNamesList() {
+		List<String> groupNames = getGroupNameList();
+		List<String> nodeNames = new ArrayList<String>();
+
+		for (String groupName : groupNames) {
+			String nodeName = "";
+			try {
+				nodeName = groupName.split(SERVICENAME_NODENAME_SEPARATOR)[1];
+			} catch (IndexOutOfBoundsException ex) {
+				//
+			}
+			if (!nodeName.isEmpty()) {
+				nodeNames.add(nodeName);
+			}
+		}
+
+		return nodeNames;
+	}
+
 	public List<String> getNodeInstanceNames(String nodeName) {
 		Pattern INSTANCENAME = Pattern.compile("^(" + nodeName + "\\.\\d+)$");
 		List<String> requested = new ArrayList<String>();
-		for (String instanceName : getNodeNameList()) {
+		for (String instanceName : getNodeInstanceNamesList()) {
 			if (INSTANCENAME.matcher(instanceName).matches())
 				requested.add(instanceName);
 		}
@@ -960,7 +983,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public List<String> getOrchestrators() {
 		List<String> orchestrators = new ArrayList<String>();
 
-		for (String nodename : getNodeNameList()) {
+		for (String nodename : getNodeInstanceNamesList()) {
 			if (nodename.startsWith(Run.ORCHESTRATOR_NAME)) {
 				orchestrators.add(nodename);
 			}

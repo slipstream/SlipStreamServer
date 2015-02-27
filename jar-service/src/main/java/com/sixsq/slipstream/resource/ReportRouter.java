@@ -9,9 +9,9 @@ package com.sixsq.slipstream.resource;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import org.restlet.routing.Router;
 import org.restlet.security.Authenticator;
 import org.restlet.security.Authorizer;
 
+import com.sixsq.slipstream.authn.BasicAuthenticator;
 import com.sixsq.slipstream.authn.CookieAuthenticator;
 import com.sixsq.slipstream.authz.ReportsAuthorizer;
 import com.sixsq.slipstream.authz.SuperEnroler;
@@ -45,9 +46,13 @@ public class ReportRouter extends Router {
 				"slipstream.reports.location");
 
 		Authorizer authorizer = new ReportsAuthorizer();
+		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
+		basicAuthenticator.setEnroler(new SuperEnroler(application));
 		Authenticator authenticator = new CookieAuthenticator(getContext());
-		authenticator.setNext(authorizer);
+		authenticator.setOptional(true);
+		authenticator.setNext(basicAuthenticator);
 		authenticator.setEnroler(new SuperEnroler(application));
+		basicAuthenticator.setNext(authorizer);
 
 		ResultsDirectory directory = new ResultsDirectory(getContext(),
 				"file://" + reportsLocation);

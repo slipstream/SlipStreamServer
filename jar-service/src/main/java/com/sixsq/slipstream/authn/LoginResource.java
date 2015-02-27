@@ -35,7 +35,6 @@ import org.restlet.data.ClientInfo;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Preference;
-import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
@@ -142,7 +141,8 @@ public class LoginResource extends AuthnResource {
 		CookieUtils.addAuthnCookie(response, username);
 
 		if (isHtmlRequested(request)) {
-			Reference redirectURL = extractRedirectURL(request);
+			String redirectPath = extractRedirectURL(request).getRelativePart();
+			String redirectURL = RequestUtil.constructAbsolutePath(request, redirectPath);
 			response.redirectSeeOther(redirectURL);
 		} else {
 			response.setEntity(null, MediaType.ALL);

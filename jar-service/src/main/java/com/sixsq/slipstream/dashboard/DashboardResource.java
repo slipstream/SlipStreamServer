@@ -56,7 +56,7 @@ public class DashboardResource extends BaseResource {
 
 		before = System.currentTimeMillis();
 		String html = HtmlUtil.toHtml(dashboard,
-				getPageRepresentation(), getUser());
+				getPageRepresentation(), getUser(), getRequest());
 		logTimeDiff("html generation", before);
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);

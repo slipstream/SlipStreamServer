@@ -57,7 +57,7 @@ public abstract class SimpleRepresentationBaseResource extends BaseResource {
 	protected String generateHtml() {
 		
 		return HtmlUtil.toHtml(getMessage(),
-				getPageRepresentation(), getUser());
+				getPageRepresentation(), getUser(), getRequest());
 
 	}
 

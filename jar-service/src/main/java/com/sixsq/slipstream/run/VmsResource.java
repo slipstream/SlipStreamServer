@@ -44,7 +44,7 @@ public class VmsResource extends BaseResource {
 	@Get("html")
 	public Representation toHtml() {
 
-		String html = HtmlUtil.toHtml(getVms(), getPageRepresentation(), getUser());
+		String html = HtmlUtil.toHtml(getVms(), getPageRepresentation(), getUser(), getRequest());
 
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}

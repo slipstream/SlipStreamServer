@@ -22,6 +22,7 @@ package com.sixsq.slipstream.resource;
 
 import static org.restlet.data.MediaType.APPLICATION_JSON;
 import static org.restlet.data.MediaType.APPLICATION_XML;
+import static org.restlet.data.MediaType.TEXT_HTML;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +57,7 @@ public class ResultsDirectory extends Directory {
         setNegotiatingContent(true);
     }
 
-    public Representation getIndexRepresentation(Variant variant,
-            ReferenceList indexContent) {
+    public Representation getIndexRepresentation(Variant variant, ReferenceList indexContent) {
 
         MediaType mediaType = variant.getMediaType();
 
@@ -65,6 +65,10 @@ public class ResultsDirectory extends Directory {
             return getJsonRepresentation(indexContent);
         } else if (APPLICATION_XML.isCompatible(mediaType)) {
             return getXmlRepresentation(indexContent);
+        } else if (TEXT_HTML.isCompatible(mediaType)) {
+            Representation jsonRepr = getJsonRepresentation(indexContent);
+            jsonRepr.setMediaType(TEXT_HTML);
+            return jsonRepr;
         } else {
             return super.getIndexRepresentation(variant, indexContent);
         }

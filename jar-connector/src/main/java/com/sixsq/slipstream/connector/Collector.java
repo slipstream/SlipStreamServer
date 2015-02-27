@@ -41,12 +41,12 @@ public class Collector {
 	private static Logger logger = Logger.getLogger(Collector.class.getName());
 	private static MetricsTimer collectTimer = Metrics.newTimer(Collector.class, "collect");
 
-	public static int collect(User user, Connector connector) {
-		int res = 0;
+	public static int collect(User user, Connector connector, int timeout) {
+		int res = -1;
 		collectTimer.start();
 		try {
 			if (connector.isCredentialsSet(user)) {
-				res = describeInstances(user, connector);
+				res = describeInstances(user, connector, timeout);
 			}
 		} catch (ConfigurationException e) {
 			logger.severe(e.getMessage());
@@ -60,20 +60,22 @@ public class Collector {
 		return res;
 	}
 
-	private static int describeInstances(User user, Connector connector)
+	private static int describeInstances(User user, Connector connector, int timeout)
 			throws ConfigurationException, ValidationException {
 		user.addSystemParametersIntoUser(Configuration.getInstance()
 				.getParameters());
 		Properties props = new Properties();
+		long startTime = System.currentTimeMillis();
+		long describeStopTime;
 		try {
-			props = connector.describeInstances(user);
+			props = connector.describeInstances(user, timeout);
 		} catch (SlipStreamException e) {
-			logger.warning("Failed contacting cloud: "
+			logger.warning("Failed contacting cloud [SlipStreamException]: "
 					+ connector.getConnectorInstanceName() + " on behalf of "
 					+ user.getName() + " with '" + e.getMessage() + "'");
 			return 0;
 		} catch (SlipStreamRuntimeException e) {
-			logger.warning("Failed contacting cloud: "
+			logger.warning("Failed contacting cloud [SlipStreamRuntimeException]: "
 					+ connector.getConnectorInstanceName() + " on behalf of "
 					+ user.getName() + " with '" + e.getMessage() + "'");
 		} catch (Exception e) {
@@ -82,9 +84,14 @@ public class Collector {
 					"Error in describeInstances "
 							+ "(cloud: " + connector.getConnectorInstanceName()
 							+ ", user: " + user.getName() + "): " + e.getMessage(), e);
+		} finally {
+			describeStopTime = System.currentTimeMillis();
+			log(user, connector, startTime, "describe VMs done.");
 		}
 
-		return populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
+		int vmsPopulated = populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
+		log(user, connector, describeStopTime, "populate DB VMs done.");
+		return vmsPopulated;
 	}
 
 	private static int populateVmsForCloud(User user, String cloud, Properties idsAndStates) {
@@ -96,5 +103,11 @@ public class Collector {
 		}
 		Vm.update(vms, user.getName(), cloud);
 		return idsAndStates.size();
+	}
+
+	private static void log(User user, Connector connector, long startTime, String info) {
+		String userCloud = "[" + user.getName() + "/" + connector.getCloudServiceName() + "]";
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info(userCloud + " (" + elapsed + " ms) : " + info);
 	}
 }

@@ -246,7 +246,13 @@ public class DeploymentFactory extends RunFactory {
 					constructParamName(nodeName,
 							RuntimeParameter.MULTIPLICITY_PARAMETER_NAME),
 					String.valueOf(multiplicity),
-					RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION	);
+					RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION);
+
+			run.assignRuntimeParameter(
+					constructParamName(nodeName,
+							RuntimeParameter.MAX_PROVISIONING_FAILURES),
+							getMaxProvisioningFailures(run, node),
+							RuntimeParameter.MAX_PROVISIONING_FAILURES_DESCRIPTION);
 		}
 	}
 
@@ -352,6 +358,7 @@ public class DeploymentFactory extends RunFactory {
 		List<String> paramsToFilter = new ArrayList<String>();
 		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		paramsToFilter.add(RuntimeParameter.CLOUD_SERVICE_NAME);
+		paramsToFilter.add(RuntimeParameter.MAX_PROVISIONING_FAILURES);
 
 		String paramName = parameter.getName();
 		if (!node.getParameters().containsKey(paramName) &&
@@ -419,6 +426,10 @@ public class DeploymentFactory extends RunFactory {
 					RuntimeParameter.MULTIPLICITY_PARAMETER_DESCRIPTION);
 
 			insertNewRunParameterForNode(run, node,
+					RuntimeParameter.MAX_PROVISIONING_FAILURES, String.valueOf(node.getMaxProvisioningFailures()),
+					RuntimeParameter.MAX_PROVISIONING_FAILURES_DESCRIPTION);
+
+			insertNewRunParameterForNode(run, node,
 					RunParameter.NODE_INCREMENT_KEY, String.valueOf(multiplicity + 1),
 					RunParameter.NODE_INCREMENT_DESCRIPTION);
 		}
@@ -441,8 +452,10 @@ public class DeploymentFactory extends RunFactory {
 						key = constructNodeParamName(node, RunParameter.NODE_INCREMENT_KEY);
 						String increment = String.valueOf(Integer.parseInt(multiplicity) + 1);
 						run.getParameter(key).setValue(increment);
-
-						break;
+					} else if (parameter.getName().equals(RuntimeParameter.MAX_PROVISIONING_FAILURES)) {
+						String key = constructNodeParamName(node, RuntimeParameter.MAX_PROVISIONING_FAILURES);
+						String value = extractNodeParameterValue((NodeParameter)parameter);
+						run.getParameter(key).setValue(value);
 					}
 				}
 			}
@@ -462,6 +475,11 @@ public class DeploymentFactory extends RunFactory {
 	private static int getNodeMultiplicity(Run run, Node node) throws NotFoundException {
 		String key = constructNodeParamName(node, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		return Integer.parseInt(run.getParameterValue(key, null));
+	}
+
+	private static String getMaxProvisioningFailures(Run run, Node node) throws NotFoundException {
+		String key = constructNodeParamName(node, RuntimeParameter.MAX_PROVISIONING_FAILURES);
+		return run.getParameterValue(key, null);
 	}
 
 	private static void insertNewRunParameterForNode(Run run, Node node, String name, String value, String description)

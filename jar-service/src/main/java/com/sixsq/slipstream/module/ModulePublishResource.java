@@ -9,9 +9,9 @@ package com.sixsq.slipstream.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,7 +41,7 @@ public class ModulePublishResource extends ModuleResource {
 		}
 		return new StringRepresentation(getParameterized().getPublished().getPublicationDate().toString());
 	}
-	
+
 	@Delete
 	public void unpublish() {
 		Module module = (Module) getParameterized();
@@ -58,7 +58,7 @@ public class ModulePublishResource extends ModuleResource {
 		if (!isExisting()) {
 			throwNotFoundResource();
 		}
-		
+
 		Module module = (Module)getParameterized();
 		Publish published = module.getPublished();
 		if(published != null) {
@@ -66,8 +66,8 @@ public class ModulePublishResource extends ModuleResource {
 		}
 		module.publish();
 		module.store(false);
-		
-		String absolutePath = RequestUtil.constructAbsolutePath("/");
+
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/");
 		getResponse().setLocationRef(absolutePath);
 	}
 }

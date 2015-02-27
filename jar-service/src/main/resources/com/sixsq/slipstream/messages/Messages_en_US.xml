@@ -23,7 +23,7 @@
 <properties>
 
 <entry key="MSG_ACCOUNT_APPROVED">
-Your SlipStream(TM) account has been approved.
+Your SlipStream account has been approved.
 
 Your username is ''{0}''.
 Your initial password is ''{1}''.
@@ -38,7 +38,7 @@ Thanks for your interest in SlipStream(TM).
 </entry>
 
 <entry key="MSG_PASSWORD_RESET">
-Your SlipStream(TM) password has been reset to ''{1}''.
+Your SlipStream password has been reset to ''{1}''.
 
 Please log in and change this temporary password:
 
@@ -55,10 +55,12 @@ Please contact the administrator for more information.
 </entry>
 
 <entry key="MSG_NEW_USER_NOTIFICATION">
-A new SlipStream(TM) user has registered.
+A new SlipStream user has registered.
 
 You can find the user''s information here:
-  {0}
+Url: {0}
+Username: {1}
+Email: {2}
 </entry>
 
 <entry key="MSG_INVALID_ACTION_URL">

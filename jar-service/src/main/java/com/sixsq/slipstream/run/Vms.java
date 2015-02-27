@@ -44,6 +44,9 @@ public class Vms {
 	private int count;
 
 	@Attribute(required=false)
+	private int totalCount;
+
+	@Attribute(required=false)
 	private String cloud;
 
 	@ElementList(inline = true)
@@ -62,7 +65,8 @@ public class Vms {
 		this.limit = limit;
 		this.cloud = cloudServiceName;
 
-		count = Vm.listCount(user.getName(), cloudServiceName);
+		totalCount = Vm.listCount(user.getName(), cloudServiceName);
 		vms = Vm.list(user.getName(), offset, limit, cloudServiceName);
+		count = vms.size();
 	}
 }

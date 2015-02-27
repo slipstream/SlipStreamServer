@@ -91,7 +91,7 @@ public class ModuleVersionListResource extends BaseResource {
 
 		return new StringRepresentation(
 				HtmlUtil.toHtml(list,
-						getPageRepresentation(), getTransformationType(), getUser()),
+						getPageRepresentation(), getUser(), getRequest()),
 				MediaType.TEXT_HTML);
 	}
 
