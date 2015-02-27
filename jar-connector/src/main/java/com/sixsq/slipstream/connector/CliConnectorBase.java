@@ -48,7 +48,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	private static final int TIMEOUT_DEFAULT_LIST_SEC = 30;
 	private static final int TIMEOUT_DEFAULT_RUN_SEC = 600;
-	private static final int TIMEOUT_DEFAULT_TERMINATE_SEC = 600;
+	private static final int TIMEOUT_DEFAULT_TERMINATE_SEC = 900;
 
 	protected Logger log;
 
