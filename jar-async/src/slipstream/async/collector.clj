@@ -69,8 +69,8 @@
 (def all-collector-chan (chan (sliding-buffer collector-chan-size)))
 
 (defn- user-connector
-  [user connector]
-  (apply str "[user " (get-name user) " on cloud " (.getConnectorInstanceName connector) "]"))
+ [user connector]
+ (apply str "[" (get-name user) "/" (.getConnectorInstanceName connector) "] " (System/currentTimeMillis) " "))
 
 (defn- build-msg
   [user connector elapsed & info]
@@ -98,7 +98,7 @@
         (cond
           (nil? v) (log-timeout user connector elapsed)
           (< v 0) (log-failure user connector elapsed)
-          :else (log-collected user connector elapsed))))
+          :else (log-collected user connector elapsed v))))
     (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect))))))
 
 (defn update-metric!
@@ -142,29 +142,38 @@
     (when (> (* users-count connectors-count) collector-chan-size)
       (log/log-error (str "The number of users x connectors: " users-count " x " connectors-count " exceeds the channel size: " collector-chan-size)))))
 
+(defn add-increasing-space
+ [ucs space]
+ (let [spaces (iterate #(+ space %) 0)]
+   (map (fn [[u c] t] [u c t]) ucs spaces)))
+
 (defn insert-collection-requests
-  [users chan]
-  (let [connectors (connectors)]
-    (check-channel-size users connectors)
-    (doseq [u users
-            c connectors]
-      (if-not (@busy [(get-name u) c])
-        (go (>! chan [u c]))
-        (log/log-info "Avoiding working on " (user-connector u c) " being in a process." )))))
+  [users chan time-to-spread context]
+  (if (> (count users) 0)
+    (let [connectors (connectors)
+          ucs (for [u users c connectors] [u c])
+          ucts (add-increasing-space ucs (int (/ time-to-spread (count ucs))))]
+      (check-channel-size users connectors)
+      (doseq [[u c t] ucts]
+        (if-not (@busy [(get-name u) c])
+          (go
+            (<! (timeout t))
+            (log/log-info "Inserting collect request for " (user-connector u c) " after timeout " t)
+            (>! chan [u c]))
+          (log/log-info "Avoiding working on " (user-connector u c) " being in a process." ))))
+    (log/log-info "No users to collect for " context)))
 
 ; Start collector writers
 (defn collect-writers
   []
   (go
     (while true
-      (<! (timeout timeout-online-loop))
-      (let [users (online-users)]
-        (insert-collection-requests users online-collector-chan))))
+      (insert-collection-requests (online-users) online-collector-chan timeout-online-loop "online users")
+      (<! (timeout timeout-online-loop))))
   (go
     (while true
-      (<! (timeout timeout-all-users-loop))
-      (let [users (users)]
-        (insert-collection-requests users all-collector-chan)))))
+      (insert-collection-requests (users) all-collector-chan timeout-all-users-loop "all users")
+      (<! (timeout timeout-all-users-loop)))))
 
 (defn -start
   []
