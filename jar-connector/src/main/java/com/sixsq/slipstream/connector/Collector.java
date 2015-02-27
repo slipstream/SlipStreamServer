@@ -84,7 +84,7 @@ public class Collector {
 		}
 
 		int vmsPopulated = populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
-		log(user, connector, describeStopTime, "describe VMs done.");
+		log(user, connector, describeStopTime, "populate DB VMs done.");
 		return vmsPopulated;
 	}
 
