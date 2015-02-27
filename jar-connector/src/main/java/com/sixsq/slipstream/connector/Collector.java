@@ -59,15 +59,17 @@ public class Collector {
 		user.addSystemParametersIntoUser(Configuration.getInstance()
 				.getParameters());
 		Properties props = new Properties();
+		long startTime = System.currentTimeMillis();
+		long describeStopTime;
 		try {
 			props = connector.describeInstances(user, timeout);
 		} catch (SlipStreamException e) {
-			logger.warning("Failed contacting cloud: "
+			logger.warning("Failed contacting cloud [SlipStreamException]: "
 					+ connector.getConnectorInstanceName() + " on behalf of "
 					+ user.getName() + " with '" + e.getMessage() + "'");
 			return 0;
 		} catch (SlipStreamRuntimeException e) {
-			logger.warning("Failed contacting cloud: "
+			logger.warning("Failed contacting cloud [SlipStreamRuntimeException]: "
 					+ connector.getConnectorInstanceName() + " on behalf of "
 					+ user.getName() + " with '" + e.getMessage() + "'");
 		} catch (Exception e) {
@@ -76,9 +78,14 @@ public class Collector {
 					"Error in describeInstances "
 							+ "(cloud: " + connector.getConnectorInstanceName()
 							+ ", user: " + user.getName() + "): " + e.getMessage(), e);
+		} finally {
+			describeStopTime = System.currentTimeMillis();
+			log(user, connector, startTime, "describe VMs done.");
 		}
 
-		return populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
+		int vmsPopulated = populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
+		log(user, connector, describeStopTime, "describe VMs done.");
+		return vmsPopulated;
 	}
 
 	private static int populateVmsForCloud(User user, String cloud, Properties idsAndStates) {
@@ -88,10 +95,13 @@ public class Collector {
 			Vm vm = new Vm(instanceId, cloud, state, user.getName());
 			vms.add(vm);
 		}
-		long start = System.currentTimeMillis();
-		int removed = Vm.update(vms, user.getName(), cloud);
-		logger.info("Time: " + (System.currentTimeMillis() - start) + ". Number of VMs removed for user "
-		        + user.getName() + " on cloud " + cloud + ": " + removed);
+		Vm.update(vms, user.getName(), cloud);
 		return idsAndStates.size();
+	}
+
+	private static void log(User user, Connector connector, long startTime, String info) {
+		String userCloud = "[" + user.getName() + "/" + connector.getCloudServiceName() + "]";
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info(userCloud + " (" + elapsed + " ms) : " + info);
 	}
 }
