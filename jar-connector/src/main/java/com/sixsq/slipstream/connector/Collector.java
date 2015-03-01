@@ -100,7 +100,7 @@ public class Collector {
 	}
 
 	private static void log(User user, Connector connector, long startTime, String info) {
-		String userCloud = "[" + user.getName() + "/" + connector.getCloudServiceName() + "]";
+		String userCloud = "[" + user.getName() + "/" + connector.getConnectorInstanceName() + "]";
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info(userCloud + " (" + elapsed + " ms) : " + info);
 	}
