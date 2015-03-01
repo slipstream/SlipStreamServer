@@ -65,26 +65,23 @@ public class Collector {
 			props = connector.describeInstances(user, timeout);
 		} catch (SlipStreamException e) {
 			logger.warning("Failed contacting cloud [SlipStreamException]: "
-					+ connector.getConnectorInstanceName() + " on behalf of "
-					+ user.getName() + " with '" + e.getMessage() + "'");
+					+ getUserCloudLogRepr(user, connector) + " with '" + e.getMessage() + "'");
 			return 0;
 		} catch (SlipStreamRuntimeException e) {
 			logger.warning("Failed contacting cloud [SlipStreamRuntimeException]: "
-					+ connector.getConnectorInstanceName() + " on behalf of "
-					+ user.getName() + " with '" + e.getMessage() + "'");
+					+ getUserCloudLogRepr(user, connector) + " with '" + e.getMessage() + "'");
 		} catch (Exception e) {
 			logger.log(
 					Level.SEVERE,
-					"Error in describeInstances "
-							+ "(cloud: " + connector.getConnectorInstanceName()
-							+ ", user: " + user.getName() + "): " + e.getMessage(), e);
+					"Error in describeInstances for "
+							+ getUserCloudLogRepr(user, connector) + ": " + e.getMessage(), e);
 		} finally {
 			describeStopTime = System.currentTimeMillis();
-			log(user, connector, startTime, "describe VMs done.");
+			logTiming(user, connector, startTime, "describe VMs done.");
 		}
 
 		int vmsPopulated = populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
-		log(user, connector, describeStopTime, "populate DB VMs done.");
+		logTiming(user, connector, describeStopTime, "populate DB VMs done.");
 		return vmsPopulated;
 	}
 
@@ -99,9 +96,12 @@ public class Collector {
 		return idsAndStates.size();
 	}
 
-	private static void log(User user, Connector connector, long startTime, String info) {
-		String userCloud = "[" + user.getName() + "/" + connector.getConnectorInstanceName() + "]";
+	private static void logTiming(User user, Connector connector, long startTime, String info) {
 		long elapsed = System.currentTimeMillis() - startTime;
-		logger.info(userCloud + " (" + elapsed + " ms) : " + info);
+		logger.info(getUserCloudLogRepr(user, connector) + " (" + elapsed + " ms) : " + info);
+	}
+
+	private static String getUserCloudLogRepr(User user, Connector connector) {
+		return "[" + user.getName() + "/" + connector.getConnectorInstanceName() + "]";
 	}
 }
