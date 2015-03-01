@@ -20,6 +20,9 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +39,7 @@ import com.sixsq.slipstream.exceptions.ProcessException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
+import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Run;
@@ -169,16 +173,25 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 
 		StringBuilder instances = new StringBuilder();
-        for (String id : instanceIds) {
-            instances.append(" --instance-id ")
-            	.append(wrapInSingleQuotes(id.trim()));
-        }
+		for (String id : instanceIds) {
+			instances.append(id.trim()).append("\n");
+		}
 
 		log.info(getConnectorInstanceName() + ". Terminating all instances on run " + run.getUuid());
 
+		File tempFile;
+		try {
+			tempFile = File.createTempFile("instance-ids", ".tmp");
+			BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
+			bw.write(instances.toString());
+			bw.close();
+		} catch (IOException ex) {
+			throw new SlipStreamRuntimeException(ex.getMessage(), ex);
+		}
+
 		String command = getCommandTerminateInstances() +
-				createCliParameters(getUserParams(user)) +
-				instances;
+						 createCliParameters(getUserParams(user)) +
+						 " --instance-ids-file " + tempFile.getPath();
 
 		String[] commands = { "sh", "-c", command};
 		try {
@@ -188,6 +201,9 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		} catch (IOException e) {
 			log.info(getConnectorInstanceName() + ". IO error while terminating instances on run " + run.getUuid());
 		} finally {
+			if (!tempFile.delete()) {
+				getLog().warning("Cannot delete temporary file: " + tempFile.getPath());
+			}
 			cleanupAfterTerminate();
 		}
 	}
