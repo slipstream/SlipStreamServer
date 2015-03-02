@@ -86,6 +86,7 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>docs-pkg</artifactId>
+      <version>2.4.2</version>
       <type>zip</type>
     </dependency>
 
