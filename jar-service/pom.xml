@@ -55,6 +55,7 @@
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamUI</artifactId>
+                        <version>2.4.2</version>
 		</dependency>
 
 		<dependency>
