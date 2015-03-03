@@ -38,12 +38,10 @@ import com.sixsq.slipstream.filter.ReportDecorator;
 
 public class ReportRouter extends Router {
 
-	public ReportRouter(Context context, Application application) throws ConfigurationException,
-			ValidationException {
+	public ReportRouter(Context context, Application application) throws ConfigurationException, ValidationException {
 		super(context);
 
-		String reportsLocation = Configuration.getInstance().getProperty(
-				"slipstream.reports.location");
+		String reportsLocation = Configuration.getInstance().getProperty("slipstream.reports.location");
 
 		Authorizer authorizer = new ReportsAuthorizer();
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
@@ -54,8 +52,7 @@ public class ReportRouter extends Router {
 		authenticator.setEnroler(new SuperEnroler(application));
 		basicAuthenticator.setNext(authorizer);
 
-		ResultsDirectory directory = new ResultsDirectory(getContext(),
-				"file://" + reportsLocation);
+		ResultsDirectory directory = new ResultsDirectory(getContext(), "file://" + reportsLocation);
 		Filter decorator = new ReportDecorator();
 		decorator.setNext(directory);
 		authorizer.setNext(decorator);
