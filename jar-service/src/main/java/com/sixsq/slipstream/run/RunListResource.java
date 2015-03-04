@@ -198,7 +198,7 @@ public class RunListResource extends BaseResource {
 
 	private void setRunMutability(Run run, Form form) {
 		String mutable = form.getFirstValue(MUTABLE_RUN_KEY, "");
-		if (mutable.trim().equals("true")) {
+		if (isTrue(mutable)) {
 			run.setMutable();
 		}
 	}

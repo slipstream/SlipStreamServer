@@ -218,8 +218,7 @@ public abstract class BaseResource extends ServerResource {
 			return false;
 		}
 		String trimmed = value.trim().toLowerCase();
-		return ("true".equals(trimmed) || "yes".equals(trimmed) || "on"
-				.equals(trimmed));
+		return ("true".equals(trimmed) || "yes".equals(trimmed) || "on".equals(trimmed));
 	}
 
 	private boolean isSetInQuery(String key) {
