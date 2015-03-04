@@ -140,6 +140,7 @@ public class RootApplication extends Application {
 
 	private void logServerStarted() {
 		String message = "Server started";
+		Logger.debug(message);
 		Logger.info(message);
 		Logger.warning(message);
 		Logger.severe(message);
@@ -255,7 +256,8 @@ public class RootApplication extends Application {
 	}
 
 	private void attachConfiguration(RootRouter router) {
-		guardAndAttach(router, ServiceConfigurationResource.class, ServiceConfigurationResource.CONFIGURATION_PATH);
+		String rootUri = ServiceConfigurationResource.CONFIGURATION_PATH.replaceAll("^/",	"");
+		guardAndAttach(router, ServiceConfigurationResource.class, rootUri);
 	}
 
 	private void attachLogout(RootRouter router) {
@@ -347,10 +349,10 @@ public class RootApplication extends Application {
 	}
 
 	private void attachDocumentation(RootRouter router) {
-		Authenticators authenticators = guardAndAttach(router, DocumentationResource.class, "/documentation")
+		Authenticators authenticators = guardAndAttach(router, DocumentationResource.class, "documentation")
 				.getAuthenticators();
 
-		for (ListIterator<Authenticator> iter = authenticators.listIterator(); iter.hasNext();) {
+		for (ListIterator<Authenticator> iter = authenticators.listIterator(); iter.hasNext(); ) {
 			iter.next().setOptional(true);
 		}
 	}
@@ -359,6 +361,8 @@ public class RootApplication extends Application {
 		AuthenticatorsTemplateRoute authenticatorsRoute = guardAndAttach(router, WelcomeResource.class, "/");
 		TemplateRoute route = authenticatorsRoute.getTemplateRoute();
 		Authenticator authenticator = authenticatorsRoute.getAuthenticators().getFirst();
+
+		route.getTemplate().setMatchingMode(Template.MODE_EQUALS);
 
 		route = router.attach("/?chooser={chooser}", authenticator);
 		route.setMatchingQuery(true);
