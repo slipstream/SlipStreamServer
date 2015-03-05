@@ -97,7 +97,7 @@
         (swap! busy free [(get-name user) connector])
         (cond
           (nil? v) (log-timeout user connector elapsed)
-          (< v 0) (log-failure user connector elapsed)
+          (< v -1) (log-failure user connector elapsed)
           :else (log-collected user connector elapsed v))))
     (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect))))))
 

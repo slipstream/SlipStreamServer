@@ -39,10 +39,12 @@ public class Collector {
 	private static Logger logger = Logger.getLogger(Collector.class.getName());
 
 	public static int collect(User user, Connector connector, int timeout) {
-		int res = -1;
+		int res = -2;
 		try {
 			if (connector.isCredentialsSet(user)) {
 				res = describeInstances(user, connector, timeout);
+			} else {
+				res = -1;
 			}
 		} catch (ConfigurationException e) {
 			logger.severe(e.getMessage());
