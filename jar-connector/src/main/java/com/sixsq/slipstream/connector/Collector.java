@@ -38,13 +38,16 @@ public class Collector {
 
 	private static Logger logger = Logger.getLogger(Collector.class.getName());
 
+	private static final int EXCEPTION_OCCURED = -2;
+	private static final int NO_CREDENTIALS = -1;
+	
 	public static int collect(User user, Connector connector, int timeout) {
-		int res = -2;
+		int res = EXCEPTION_OCCURED;
 		try {
 			if (connector.isCredentialsSet(user)) {
 				res = describeInstances(user, connector, timeout);
 			} else {
-				res = -1;
+				res = NO_CREDENTIALS;
 			}
 		} catch (ConfigurationException e) {
 			logger.severe(e.getMessage());
