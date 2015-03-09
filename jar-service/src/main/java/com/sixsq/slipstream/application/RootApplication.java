@@ -20,6 +20,10 @@ package com.sixsq.slipstream.application;
  * -=================================================================-
  */
 
+import static org.restlet.routing.Redirector.MODE_SERVER_OUTBOUND;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.ServiceLoader;
 
 import org.restlet.Application;
@@ -30,6 +34,7 @@ import org.restlet.Restlet;
 import org.restlet.data.CharacterSet;
 import org.restlet.data.MediaType;
 import org.restlet.resource.Directory;
+import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
@@ -165,6 +170,7 @@ public class RootApplication extends Application {
 		RootRouter router = new RootRouter(getContext());
 
 		try {
+			attachProxiesToClojureResources(router);
 			attachMetering(router);
 			attachAction(router);
 			attachModule(router);
@@ -207,6 +213,26 @@ public class RootApplication extends Application {
         DiscoverableConnectorServiceLoader.shutdownAll();
         super.stop();
     }
+
+	private void attachProxiesToClojureResources(RootRouter router) {
+		List<String> clojureResources = Arrays.asList("/Event");
+		for (String clojureResource : clojureResources) {
+			attachProxy(router, clojureResource);
+		}
+	}
+
+	private void attachProxy(RootRouter router, String clojureResource) {
+
+		Redirector redirector = new Redirector(getContext(),
+				"http://localhost:8201/ssclj" + clojureResource,
+				 MODE_SERVER_OUTBOUND);
+		router.attach(clojureResource, redirector);
+
+		Redirector redirectorSingle = new Redirector(getContext(),
+				"http://localhost:8201/ssclj" + clojureResource + "/{uuid}",
+				MODE_SERVER_OUTBOUND);
+		router.attach(clojureResource + "/{uuid}", redirectorSingle);
+	}
 
 	/**
 	 * During dev, set static content to local dir (e.g.
