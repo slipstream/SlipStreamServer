@@ -9,9 +9,9 @@ package com.sixsq.slipstream.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,7 +64,7 @@ public class XmlUtil {
 	/**
 	 * Remove nodes that were added after the serialization (e.g. navigation,
 	 * services)
-	 * 
+	 *
 	 * @param document
 	 */
 	// FIXME: This should never be needed. Use raw xml form where necessary.
@@ -77,7 +77,7 @@ public class XmlUtil {
 	/**
 	 * Add nodes to the standard serialization for display and XHTML
 	 * transformation
-	 * 
+	 *
 	 * @param metadata
 	 * @param configuration
 	 *            TODO
@@ -109,7 +109,7 @@ public class XmlUtil {
 
 	/**
 	 * Add the service references to the document.
-	 * 
+	 *
 	 * @param document
 	 */
 	// FIXME: This provides trivial information. Necessary?
@@ -141,11 +141,11 @@ public class XmlUtil {
 	/**
 	 * Add the breadcrumbs element to the document. This contains the
 	 * information for navigating back up through the application hierarchy.
-	 * 
+	 *
 	 * This creates a breadcrumbs element with child path elements in order
 	 * (each with a name and path attribute). The breadcrumbs element itself
 	 * also has a path attribute that specifies the root path.
-	 * 
+	 *
 	 * @param document
 	 * @param pathPrefix
 	 * @param relativePath
@@ -195,13 +195,13 @@ public class XmlUtil {
 	 * Method will strip any existing user elements and then add a new one based
 	 * on the given user. If the user is null, then no element will be added.
 	 * The document may be null, in which case this is a no-op.
-	 * 
+	 *
 	 * The added element is named "user" with "username", "resourceUri", and
 	 * "issuper" attributes.
-	 * 
+	 *
 	 * Note: The element will be added inside the root element. If there is no
 	 * root, then nothing will be added to the document.
-	 * 
+	 *
 	 * @param document
 	 * @param user
 	 */
@@ -213,14 +213,9 @@ public class XmlUtil {
 			Element root = document.getDocumentElement();
 
 			if (root != null && user != null) {
-				Element element = document.createElement("user");
-				element.setAttribute("name", user.getName());
-				element.setAttribute("resourceUri", user.getResourceUri());
-				if (user.isSuper()) {
-					element.setAttribute("issuper", "true");
-				}
-
-				root.appendChild(element);
+				Document userDocument = SerializationUtil.toXmlDocument(user);
+				Node node = document.importNode(userDocument.getFirstChild(), true);
+				root.appendChild(node);
 			}
 		}
 
@@ -247,7 +242,7 @@ public class XmlUtil {
 	/**
 	 * Normalize xml representation of a module, which is natively denormalized
 	 * to facilitate xslt (for example) processing
-	 * 
+	 *
 	 * @param module
 	 * @return
 	 */
@@ -263,7 +258,7 @@ public class XmlUtil {
 	/**
 	 * Denormalize xml representation of a module, which is natively
 	 * denormalized to facilitate xslt (for example) processing
-	 * 
+	 *
 	 * @param imported
 	 * @return
 	 */

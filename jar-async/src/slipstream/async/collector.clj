@@ -88,18 +88,9 @@
   [user connector elapsed v]
   (log/log-info (build-msg user connector elapsed "Number of VMs collected = " v)))
 
-(defn collect!
-  [user connector]
-  (let [ch (chan 1) start-ts (System/currentTimeMillis)]
-    (go
-      (let [ [v _] (alts! [ch (timeout timeout-collect-reader-release)])
-             elapsed (- (System/currentTimeMillis) start-ts) ]
-        (swap! busy free [(get-name user) connector])
-        (cond
-          (nil? v) (log-timeout user connector elapsed)
-          (< v -1) (log-failure user connector elapsed)
-          :else (log-collected user connector elapsed v))))
-    (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect))))))
+(defn log-no-credentials
+  [user connector elapsed]
+  (log/log-debug (build-msg user connector elapsed "The user has no credentials for this Cloud")))
 
 (defn update-metric!
   [user]
@@ -112,6 +103,22 @@
             (get-name user))
           (log/log-info (str "executed update-metric request for " (get-name user))))))
     (go (>! ch (updator/update user)))))
+
+(defn collect!
+  [user connector]
+  (let [ch (chan 1) start-ts (System/currentTimeMillis)]
+    (go
+      (let [ [v _] (alts! [ch (timeout timeout-collect-reader-release)])
+             elapsed (- (System/currentTimeMillis) start-ts) ]
+        (swap! busy free [(get-name user) connector])
+        (cond
+          (nil? v) (log-timeout user connector elapsed)
+          (= v Collector/NO_CREDENTIALS) (log-no-credentials user connector elapsed)
+          (= v Collector/EXCEPTION_OCCURED) (log-failure user connector elapsed)
+          :else (do
+                  (log-collected user connector elapsed v)
+                  (when (updator/metering-enabled?) (update-metric! user))))))
+    (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect))))))
 
 (def not-nil? (complement nil?))
 
@@ -128,8 +135,6 @@
             (try
               (log/log-info (str "executing collect request for " (get-name user) " and " (.getConnectorInstanceName connector)))
               (collect! user connector)
-              (if (updator/metering-enabled?)
-                 (update-metric! user))
               (catch Exception e (log/log-warn "caught exception executing collect request: " (.getMessage e))))))))))
 
 (defonce ^:dynamic *online-collect-processor* (collect-readers online-collector-chan))
