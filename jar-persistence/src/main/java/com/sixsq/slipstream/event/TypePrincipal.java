@@ -6,7 +6,10 @@ public class TypePrincipal {
 		USER, ROLE;
 	}
 	
+	@SuppressWarnings("unused")
 	private PrincipalType type;
+	
+	@SuppressWarnings("unused")
 	private String principal;
 	
 	public TypePrincipal(PrincipalType type, String principal) {

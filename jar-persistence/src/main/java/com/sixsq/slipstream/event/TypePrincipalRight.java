@@ -6,6 +6,7 @@ public class TypePrincipalRight extends TypePrincipal {
 		ALL, MODIFY, VIEW;
 	}
 	
+	@SuppressWarnings("unused")
 	private Right right;
 	
 	public TypePrincipalRight(PrincipalType type, String principal, Right right) {

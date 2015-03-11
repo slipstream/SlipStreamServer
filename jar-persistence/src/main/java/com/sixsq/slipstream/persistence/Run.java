@@ -20,6 +20,10 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
+import static com.sixsq.slipstream.event.TypePrincipalRight.Right.VIEW;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -60,12 +64,21 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CollectionType;
+import org.restlet.data.MediaType;
+import org.restlet.representation.StringRepresentation;
+import org.restlet.resource.ClientResource;
+import org.restlet.resource.ResourceException;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.credentials.Credentials;
+import com.sixsq.slipstream.event.ACL;
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.event.Event.EventType;
+import com.sixsq.slipstream.event.TypePrincipal;
+import com.sixsq.slipstream.event.TypePrincipalRight;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -552,10 +565,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.type = type;
 		this.cloudServiceNames = StringUtils.join(cloudServiceNames, ",");
 		this.user_ = user.getName();
-
+		
 		this.module = module;
 
 		setStart();
+		postEventCurrentState();
 	}
 
 	@Override
@@ -942,6 +956,21 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public void setState(States state) {
 		this.state = state;
+		
+		postEventCurrentState();		
+	}
+
+	private void postEventCurrentState() {
+		
+		TypePrincipal owner = new TypePrincipal(USER, getUser());
+		List<TypePrincipalRight> rules = Arrays.asList(new TypePrincipalRight(ROLE, "ANON", VIEW));
+		ACL acl = new ACL(owner, rules);
+
+		String resourceRef = RESOURCE_URI_PREFIX + uuid;
+
+		Event event = new Event(acl, now(), resourceRef, this.state.toString(), Event.Severity.medium, EventType.state);
+
+		Event.post(event);
 	}
 
 	public Date getLastStateChange() {
