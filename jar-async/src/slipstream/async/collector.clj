@@ -88,6 +88,10 @@
   [user connector elapsed v]
   (log/log-info (build-msg user connector elapsed "Number of VMs collected = " v)))
 
+(defn log-no-credentials
+  [user connector elapsed]
+  (log/log-debug (build-msg user connector elapsed "The user has no credentials for this Cloud")))
+
 (defn update-metric!
   [user]
   (let [ch (chan 1)]
@@ -109,11 +113,11 @@
         (swap! busy free [(get-name user) connector])
         (cond
           (nil? v) (log-timeout user connector elapsed)
-          (< v -1) (log-failure user connector elapsed)
-          :else (log-collected user connector elapsed v))
-        (if (and (updator/metering-enabled?) (>= v 0))
-          (update-metric! user))
-        ))
+          (= v Collector/NO_CREDENTIALS) (log-no-credentials user connector elapsed)
+          (= v Collector/EXCEPTION_OCCURED) (log-failure user connector elapsed)
+          :else (do
+                  (log-collected user connector elapsed v)
+                  (when (updator/metering-enabled?) (update-metric! user))))))
     (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect))))))
 
 (def not-nil? (complement nil?))
