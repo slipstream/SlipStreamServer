@@ -41,6 +41,8 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	public static final String[] TARGET_SCRIPT_NAMES = { "execute", "report", "onvmadd", "onvmremove" };
 	public static final String PRERECIPE_SCRIPT_NAME = "prerecipe--script";
+	public static final String MODULE_REFERENCE_NAME = "moduleReference";
+
 	boolean needsRebuild = false;
 
 	public ImageFormProcessor(User user) {
@@ -62,14 +64,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		ImageModule module = castToModule();
 		ParametersFactory.addParametersForEditing(module);
 
-		String moduleReferenceUri = getForm().getFirstValue("moduleReference");
-		if (Parameter.hasValueSet(moduleReferenceUri)) {
-			module.setModuleReference(Module
-					.constructResourceUri(moduleReferenceUri));
-		}
-
-		module.setIsBase(getBooleanValue(getForm(), "isbase"));
-
+		parseReferenceImageAndIsBase(getForm());
 		parsePackages(getForm());
 		parsePreRecipe(getForm());
 		parseRecipe(getForm());
@@ -156,6 +151,29 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		castToModule().setRecipe(recipe);
 
+	}
+
+	private void parseReferenceImageAndIsBase(Form form) throws ValidationException {
+		ImageModule module = castToModule();
+		String moduleReference = form.getFirstValue(MODULE_REFERENCE_NAME, "");
+		String newReferenceImage = Module.constructResourceUri(moduleReference);
+		String oldReferenceImage = module.getModuleReference();
+		Boolean newIsBase = getBooleanValue(form, "isbase");
+		Boolean oldIsBase = module.isBase();
+
+		if (!newIsBase && Parameter.hasValueSet(moduleReference)) {
+			module.setModuleReference(newReferenceImage);
+		}
+
+		module.setIsBase(newIsBase);
+
+		if (oldReferenceImage == null || oldReferenceImage.trim().isEmpty()) {
+			oldReferenceImage = Module.constructResourceUri("");
+		}
+
+		if (newIsBase != oldIsBase || !newReferenceImage.equals(oldReferenceImage)) {
+			needsRebuild = true;
+		}
 	}
 
 	private void parseTargets(Form form) throws ValidationException {
