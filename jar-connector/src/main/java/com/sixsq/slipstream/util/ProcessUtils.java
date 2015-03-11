@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.exceptions.ProcessException;
@@ -43,6 +44,11 @@ public class ProcessUtils {
 		return execGetOutputAsArray(command, true, environment)[0];
 	}
 
+	public static String execGetOutput(String[] command, Map<String, String> environment, boolean isFailureCritical)
+			throws IOException, SlipStreamClientException {
+		return execGetOutputAsArray(command, true, environment, isFailureCritical)[0];
+	}
+
 	public static String execGetOutput(String[] command, boolean stderrToStdout)
 			throws IOException, SlipStreamClientException {
 		return execGetOutputAsArray(command, stderrToStdout)[0];
@@ -60,6 +66,11 @@ public class ProcessUtils {
 
 	public static String[] execGetOutputAsArray(String[] command, boolean stderrToStdout,
 			Map<String, String> environment) throws IOException, SlipStreamClientException {
+		return execGetOutputAsArray(command, stderrToStdout, environment, true);
+	}
+
+	public static String[] execGetOutputAsArray(String[] command, boolean stderrToStdout,
+			Map<String, String> environment, boolean isFailureCritical) throws IOException, SlipStreamClientException {
 
 		StringBuilder commandMessage = new StringBuilder();
 		for (String part : command) {
@@ -91,13 +102,13 @@ public class ProcessUtils {
 		while ((line = stdOutErr.readLine()) != null) {
 			outputBuf.append(line);
 			outputBuf.append("\n");
-			getLogger().fine(line);
+			getLogger().finest(line);
 		}
 
 		while ((line = stdErrReader.readLine()) != null) {
 			errBuf.append(line);
 			errBuf.append("\n");
-			getLogger().fine(line);
+			getLogger().finest(line);
 		}
 
 		// Check for failure
@@ -107,7 +118,7 @@ public class ProcessUtils {
 						+ ". With exit code = " + p.exitValue()
 						+ " and stdout: " + outputBuf
 						+ " and stderr: " + errBuf;
-				getLogger().severe(error);
+				getLogger().log((isFailureCritical)? Level.SEVERE : Level.WARNING, error);
 				String message = (stderrToStdout)? outputBuf.toString() : errBuf.toString();
 				throw (new ProcessException(message, outputBuf.toString()));
 			}

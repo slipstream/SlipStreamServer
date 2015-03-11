@@ -54,6 +54,9 @@ public class Main {
 			log.severe("Starting SlipStream FAILED!");
 			System.exit(1);
 		}
+		log.finest("SlipStream started!");
+		log.finer("SlipStream started!");
+		log.fine("SlipStream started!");
 		log.info("SlipStream started!");
 	}
 
