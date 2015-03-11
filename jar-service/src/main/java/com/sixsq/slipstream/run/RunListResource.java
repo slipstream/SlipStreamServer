@@ -82,6 +82,10 @@ public class RunListResource extends BaseResource {
 	public static final String REFQNAME = "refqname";
 	public static final String MUTABLE_RUN_KEY = "mutable";
 	public static final String IGNORE_ABORT_QUERY = "ignoreabort";
+	public static final String SSH_ACCESS_KEY = "need-ssh-access";
+	public static final String KEEP_RUNNING_KEY = "keep-running";
+	public static final String TAGS_KEY = "tags";
+
 	String refqname = null;
 
 	@Get("txt")
@@ -153,9 +157,13 @@ public class RunListResource extends BaseResource {
 			User user = getUser();
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
+			RunType type = parseType(form);
+
+			validateUserPublicKey(user, type, form);
+
 			Map<String, List<Parameter<?>>> userChoices = getUserChoicesFromForm(module.getCategory(), form);
 
-			run = RunFactory.getRun(module, parseType(form), user, userChoices);
+			run = RunFactory.getRun(module, type, user, userChoices);
 
 			run = addCredentials(run);
 
@@ -200,6 +208,14 @@ public class RunListResource extends BaseResource {
 		String mutable = form.getFirstValue(MUTABLE_RUN_KEY, "");
 		if (isTrue(mutable)) {
 			run.setMutable();
+		}
+	}
+
+	private void validateUserPublicKey(User user, RunType type, Form form) throws ValidationException{
+		boolean requireSshAccess = isTrue(form.getFirstValue(SSH_ACCESS_KEY, "true"));
+
+		if (type != RunType.Machine && requireSshAccess) {
+			RunFactory.validateUserPublicSshKeys(user);
 		}
 	}
 
@@ -274,6 +290,9 @@ public class RunListResource extends BaseResource {
 		keysToFilter.add(RunListResource.REFQNAME);
 		keysToFilter.add(RunListResource.MUTABLE_RUN_KEY);
 		keysToFilter.add(RunListResource.TYPE);
+		keysToFilter.add(RunListResource.KEEP_RUNNING_KEY);
+		keysToFilter.add(RunListResource.SSH_ACCESS_KEY);
+		keysToFilter.add(RunListResource.TAGS_KEY);
 
 		if (keysToFilter.contains(entry.getKey())) {
 			return true;

@@ -35,7 +35,10 @@ import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
+import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -77,6 +80,7 @@ public class UserResource extends ParameterizedResource<User> {
 		try {
 			mergeCloudSystemParameters(user);
 			mergeCloudConnectorParameters(user);
+			replaceUserPublicSshKeyWithServerSshPublicKeyIfEmpty(user);
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -91,16 +95,30 @@ public class UserResource extends ParameterizedResource<User> {
 		return true;
 	}
 
-	private void mergeCloudSystemParameters(User user)
+	private void replaceUserPublicSshKeyWithServerSshPublicKeyIfEmpty(User user)
 			throws ConfigurationException, ValidationException {
+
+		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
+
+		if (CookieUtils.isMachine(cookie) == true) {
+			UserParameter userPublicSshKey = user.getParameter(ExecutionControlUserParametersFactory.CATEGORY + "."
+					+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME);
+
+			if (userPublicSshKey != null && userPublicSshKey.getValue().trim().isEmpty()) {
+				String serverPublicSshKey = FileUtil.fileToString(ConnectorBase.getServerPublicSshKeyFilename());
+				userPublicSshKey.setValue(serverPublicSshKey);
+				user.getParameters().put(userPublicSshKey.getName(), userPublicSshKey);
+			}
+		}
+	}
+
+	private void mergeCloudSystemParameters(User user) throws ConfigurationException, ValidationException {
 		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
 		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
 		if (cloudServiceName != null) {
-			for (Entry<String, Parameter<ServiceConfiguration>> p : Configuration
-					.getInstance().getParameters()
+			for (Entry<String, Parameter<ServiceConfiguration>> p : Configuration.getInstance().getParameters()
 					.getParameters(cloudServiceName).entrySet()) {
-				user.getParameters().put(p.getKey(),
-						UserParameter.convert(p.getValue()));
+				user.getParameters().put(p.getKey(), UserParameter.convert(p.getValue()));
 			}
 		}
 		mergePublicKeyParameter(user);
