@@ -27,7 +27,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 public class Event {
-
+	
 	private static final String EVENT_URI = "http://sixsq.com/slipstream/1/Event";
 	
 	private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -93,14 +93,13 @@ public class Event {
 	}
 	
 	public static void post(Event event) {
-		
-		try {
-		
-		StringRepresentation stringRep = new StringRepresentation(event.toJson());
-		stringRep.setMediaType(MediaType.APPLICATION_JSON);
 
-		ClientResource resource = new ClientResource("http://localhost:8080/Event");
-		resource.post(stringRep, MediaType.APPLICATION_JSON);
+		try {
+			StringRepresentation stringRep = new StringRepresentation(event.toJson());
+			stringRep.setMediaType(MediaType.APPLICATION_JSON);
+
+			ClientResource resource = new ClientResource("http://localhost:8080/Event");
+			resource.post(stringRep, MediaType.APPLICATION_JSON);
 		} catch (ResourceException re) {
 			Logger.getLogger("restlet").severe(re.getMessage());
 		} catch (Exception e) {

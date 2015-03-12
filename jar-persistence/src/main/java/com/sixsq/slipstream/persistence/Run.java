@@ -142,7 +142,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 		Run run = Run.loadFromUuid(uuid, em);
 		
-		run.postEventAbort(nodename);
+		run.postEventAbort(nodename, abortMessage);
 		
 		RuntimeParameter globalAbort = getGlobalAbort(run);
 		String nodeAbortKey = getNodeAbortKey(nodename);
@@ -209,12 +209,16 @@ public class Run extends Parameterized<Run, RunParameter> {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("true");
 		recoveryModeParam.store();
+		
+		run.postEventRecoveryMode(recoveryModeParam.getValue());
 	}
 
 	public static void resetRecoveryMode(Run run) {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("false");
 		recoveryModeParam.store();
+		
+		run.postEventRecoveryMode(recoveryModeParam.getValue());
 	}
 
 	public static boolean isInRecoveryMode(Run run) {
@@ -240,6 +244,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		} else {
 			garbageCollected.setValue("true");
 		}
+		run.postEventGarbageCollected();
 	}
 
 	public static boolean isGarbageCollected(Run run) {
@@ -569,7 +574,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.module = module;
 
 		setStart();
-		postEventStateTransition(this.state);
+		postEventStateTransition(this.state, true);
 	}
 
 	@Override
@@ -959,16 +964,44 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.state = state;		
 	}
 
-	private void postEventStateTransition(States newState) {		
-		boolean stateWillChange = this.state != newState;
-		if (stateWillChange) {
-			postEvent(Event.Severity.medium, newState.toString());					
-		}		
+	private void postEventStateTransition(States newState) {	
+		postEventStateTransition(newState, false);
 	}
 
-	private void postEventAbort(String origin) {
-		String message = "Abort from '" + origin + "'";
+	private void postEventGarbageCollected() {
+		postEvent(Event.Severity.medium, "Garbage collected");
+	}
+	
+	public void postEventTerminate() {
+		postEvent(Event.Severity.medium, "Terminated");
+	}
+	
+	public void postEventScaleUp(int nbInstancesToAdd) {
+		String message = "Scaling up with " + nbInstancesToAdd +" new instances";
+		postEvent(Event.Severity.medium, message);
+	}	
+	
+	public void postEventScaleDown(String idsToDelete) {
+		String message = "Scaling down by deleting :" + idsToDelete;
+		postEvent(Event.Severity.medium, message);
+	}	
+
+	private void postEventStateTransition(States newState, boolean forcePost) {
+		boolean stateWillChange = this.state != newState;
+		boolean shouldPost = forcePost || stateWillChange;
+		if (shouldPost) {
+			postEvent(Event.Severity.medium, newState.toString());					
+		}
+	}
+	
+	private void postEventAbort(String origin, String abortMessage) {
+		String message = "Abort from '" + origin + "', message:" + abortMessage;
 		postEvent(Event.Severity.high, message);		
+	}
+	
+	private void postEventRecoveryMode(String newValue) {
+		String message = "Recovery mode set to '" + newValue + "'";
+		postEvent(Event.Severity.high, message);
 	}
 	
 	private void postEvent(Event.Severity severity, String message) {
@@ -982,7 +1015,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 		Event.post(event);
 	}
-	
 	
 	public Date getLastStateChange() {
 		return this.lastStateChangeTime;

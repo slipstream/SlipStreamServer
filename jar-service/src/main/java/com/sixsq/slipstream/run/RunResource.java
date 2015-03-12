@@ -154,7 +154,8 @@ public class RunResource extends RunBaseResource {
 	public void terminate() {
 
 		try {
-
+			
+			this.run.postEventTerminate();
 			Terminator.terminate(this.run.getResourceUri());
 
 		} catch (CannotAdvanceFromTerminalStateException e) {

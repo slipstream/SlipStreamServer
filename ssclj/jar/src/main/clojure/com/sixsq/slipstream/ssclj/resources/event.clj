@@ -35,7 +35,9 @@
   (merge
     c/CreateAttrs
     c/AclAttr
-    { :timestamp    c/Timestamp
+    { 
+      :id           c/NonBlankString
+      :timestamp    c/Timestamp
       :content      EventContent
       :type         event-types
       :severity     severity-levels}))
