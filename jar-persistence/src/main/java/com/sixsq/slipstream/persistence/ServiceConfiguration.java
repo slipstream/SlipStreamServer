@@ -94,7 +94,7 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_REGISTRATION_EMAIL(
 				"Email address for account approvals, etc.",
 				ParameterCategory.SlipStream_Support,
-				"email address to use for registration") {
+				"Email address to use for registration.") {
 			@Override
 			public void validate(String value) {
 				super.validate(value);
@@ -118,7 +118,7 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_MAIL_USERNAME(
 				"Username for SMTP server.",
 				ParameterCategory.SlipStream_Support,
-				"Username of the mail server account you wan to use to send registration emails."),
+				"Username of the mail server account you want to use to send registration emails."),
 
 		SLIPSTREAM_MAIL_PASSWORD("Password for SMTP server.",
 				ParameterCategory.SlipStream_Support, ParameterType.Password),
