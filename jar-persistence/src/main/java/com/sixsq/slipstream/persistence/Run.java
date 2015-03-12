@@ -64,10 +64,6 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CollectionType;
-import org.restlet.data.MediaType;
-import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.ClientResource;
-import org.restlet.resource.ResourceException;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
@@ -143,7 +139,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public static Run abortOrReset(String abortMessage, String nodename,
 			EntityManager em, String uuid) {
+
 		Run run = Run.loadFromUuid(uuid, em);
+		
+		run.postEventAbort(nodename);
+		
 		RuntimeParameter globalAbort = getGlobalAbort(run);
 		String nodeAbortKey = getNodeAbortKey(nodename);
 		RuntimeParameter nodeAbort = run.getRuntimeParameters().get(
@@ -569,7 +569,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.module = module;
 
 		setStart();
-		postEventCurrentState();
+		postEventStateTransition(this.state);
 	}
 
 	@Override
@@ -955,24 +955,35 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setState(States state) {
-		this.state = state;
-		
-		postEventCurrentState();		
+		postEventStateTransition(state);		
+		this.state = state;		
 	}
 
-	private void postEventCurrentState() {
-		
+	private void postEventStateTransition(States newState) {		
+		boolean stateWillChange = this.state != newState;
+		if (stateWillChange) {
+			postEvent(Event.Severity.medium, newState.toString());					
+		}		
+	}
+
+	private void postEventAbort(String origin) {
+		String message = "Abort from '" + origin + "'";
+		postEvent(Event.Severity.high, message);		
+	}
+	
+	private void postEvent(Event.Severity severity, String message) {
 		TypePrincipal owner = new TypePrincipal(USER, getUser());
 		List<TypePrincipalRight> rules = Arrays.asList(new TypePrincipalRight(ROLE, "ANON", VIEW));
 		ACL acl = new ACL(owner, rules);
 
 		String resourceRef = RESOURCE_URI_PREFIX + uuid;
 
-		Event event = new Event(acl, now(), resourceRef, this.state.toString(), Event.Severity.medium, EventType.state);
+		Event event = new Event(acl, now(), resourceRef, message, severity, EventType.state);
 
 		Event.post(event);
 	}
-
+	
+	
 	public Date getLastStateChange() {
 		return this.lastStateChangeTime;
 	}
