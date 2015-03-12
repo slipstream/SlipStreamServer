@@ -20,12 +20,20 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
+
+import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -207,4 +215,31 @@ public class VmTest {
 		vmMap = Vm.listByRun("runUuid2");
 		assertThat(vmMap.size(), is(1)); // 1 cloud in this run
 	}
+	
+	@Test
+	public void cloudInstanceIdUserMustBeUnique() throws Exception {
+		boolean exceptionOccured = false;
+		boolean firstInsertAccepted = false;
+		try {
+			EntityManager em = PersistenceUtil.createEntityManager();
+			EntityTransaction transaction = em.getTransaction();
+			transaction.begin();
+			Query query1 = em
+					.createNativeQuery("insert into Vm values (10, 'lokal', 'instance100', null, null, 'up', 'joe')");
+			Query query2 = em
+					.createNativeQuery("insert into Vm values (20, 'lokal', 'instance100', null, null, 'down', 'joe')");
+
+			Assert.assertEquals(1, query1.executeUpdate());
+			firstInsertAccepted = true;
+			
+			query2.executeUpdate();
+			transaction.commit();
+		} catch (PersistenceException pe) {
+			exceptionOccured = true;
+		}
+		
+		assertTrue("First insert should have worked", firstInsertAccepted);
+		assertTrue("Second insert should have failed", exceptionOccured);
+	}
+	
 }
