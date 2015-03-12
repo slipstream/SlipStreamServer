@@ -94,7 +94,7 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_REGISTRATION_EMAIL(
 				"Email address for account approvals, etc.",
 				ParameterCategory.SlipStream_Support,
-				"<h1>email address</h1> to use for registration") {
+				"email address to use for registration") {
 			@Override
 			public void validate(String value) {
 				super.validate(value);
