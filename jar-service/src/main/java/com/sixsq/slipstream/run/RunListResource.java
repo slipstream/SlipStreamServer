@@ -82,7 +82,7 @@ public class RunListResource extends BaseResource {
 	public static final String REFQNAME = "refqname";
 	public static final String MUTABLE_RUN_KEY = "mutable";
 	public static final String IGNORE_ABORT_QUERY = "ignoreabort";
-	public static final String SSH_ACCESS_KEY = "need-ssh-access";
+	public static final String BYPASS_SSH_CHECK_KEY = "bypass-ssh-check";
 	public static final String KEEP_RUNNING_KEY = "keep-running";
 	public static final String TAGS_KEY = "tags";
 
@@ -212,9 +212,9 @@ public class RunListResource extends BaseResource {
 	}
 
 	private void validateUserPublicKey(User user, RunType type, Form form) throws ValidationException{
-		boolean requireSshAccess = isTrue(form.getFirstValue(SSH_ACCESS_KEY, "true"));
+		boolean bypassSshCheck = isTrue(form.getFirstValue(BYPASS_SSH_CHECK_KEY, "false"));
 
-		if (type != RunType.Machine && requireSshAccess) {
+		if (type != RunType.Machine && !bypassSshCheck) {
 			RunFactory.validateUserPublicSshKeys(user);
 		}
 	}
@@ -291,7 +291,7 @@ public class RunListResource extends BaseResource {
 		keysToFilter.add(RunListResource.MUTABLE_RUN_KEY);
 		keysToFilter.add(RunListResource.TYPE);
 		keysToFilter.add(RunListResource.KEEP_RUNNING_KEY);
-		keysToFilter.add(RunListResource.SSH_ACCESS_KEY);
+		keysToFilter.add(RunListResource.BYPASS_SSH_CHECK_KEY);
 		keysToFilter.add(RunListResource.TAGS_KEY);
 
 		if (keysToFilter.contains(entry.getKey())) {
