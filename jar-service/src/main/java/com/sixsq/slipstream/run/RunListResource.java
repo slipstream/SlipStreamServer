@@ -83,6 +83,8 @@ public class RunListResource extends BaseResource {
 	public static final String REFQNAME = "refqname";
 	public static final String MUTABLE_RUN_KEY = "mutable";
 	public static final String IGNORE_ABORT_QUERY = "ignoreabort";
+	public static final String BYPASS_SSH_CHECK_KEY = "bypass-ssh-check";
+	public static final String KEEP_RUNNING_KEY = "keep-running";
 	public static final String TAGS_KEY = "tags";
 
 	String refqname = null;
@@ -156,9 +158,13 @@ public class RunListResource extends BaseResource {
 			User user = getUser();
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
+			RunType type = parseType(form);
+
+			validateUserPublicKey(user, type, form);
+
 			Map<String, List<Parameter<?>>> userChoices = getUserChoicesFromForm(module.getCategory(), form);
 
-			run = RunFactory.getRun(module, parseType(form), user, userChoices);
+			run = RunFactory.getRun(module, type, user, userChoices);
 
 			run = addCredentials(run);
 
@@ -204,6 +210,14 @@ public class RunListResource extends BaseResource {
 		String mutable = form.getFirstValue(MUTABLE_RUN_KEY, "");
 		if (isTrue(mutable)) {
 			run.setMutable();
+		}
+	}
+
+	private void validateUserPublicKey(User user, RunType type, Form form) throws ValidationException{
+		boolean bypassSshCheck = isTrue(form.getFirstValue(BYPASS_SSH_CHECK_KEY, "false"));
+
+		if (type != RunType.Machine && !bypassSshCheck) {
+			RunFactory.validateUserPublicSshKeys(user);
 		}
 	}
 
@@ -285,6 +299,8 @@ public class RunListResource extends BaseResource {
 		keysToFilter.add(RunListResource.REFQNAME);
 		keysToFilter.add(RunListResource.MUTABLE_RUN_KEY);
 		keysToFilter.add(RunListResource.TYPE);
+		keysToFilter.add(RunListResource.KEEP_RUNNING_KEY);
+		keysToFilter.add(RunListResource.BYPASS_SSH_CHECK_KEY);
 		keysToFilter.add(RunListResource.TAGS_KEY);
 
 		if (keysToFilter.contains(entry.getKey())) {
