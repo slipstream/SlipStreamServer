@@ -397,7 +397,7 @@ public class CookieUtils {
 	}
 
 	private static Form extractCookieValueAsForm(Cookie cookie) {
-		String value = cookie.getValue();
+		String value = (cookie != null) ? cookie.getValue() : null;
 		return new Form((value != null) ? value : "");
 	}
 
@@ -444,12 +444,12 @@ public class CookieUtils {
 		return COOKIE_NAME;
 	}
 
-	public static boolean isMachine(Cookie cookie){
+	public static boolean isMachine(Cookie cookie) {
 		Form f = extractCookieValueAsForm(cookie);
 		return "true".equals(f.getFirstValue(COOKIE_IS_MACHINE, "false"));
 	}
 
-	public static String getRunId(Cookie cookie){
+	public static String getRunId(Cookie cookie) {
 		Form f = extractCookieValueAsForm(cookie);
 		return f.getFirstValue(COOKIE_RUN_ID, null);
 	}

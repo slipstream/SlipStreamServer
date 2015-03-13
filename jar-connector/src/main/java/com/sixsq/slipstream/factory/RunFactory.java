@@ -163,10 +163,13 @@ public abstract class RunFactory {
 								+ "Please contact your SlipStream administrator.");
 			}
 		}
+	}
 
+	public static void validateUserPublicSshKeys(User user) throws ValidationException {
 		String publicSshKey = user.getParameterValue(ExecutionControlUserParametersFactory.CATEGORY + "."
 				+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME, null);
-		if (publicSshKey == null || "".equals(publicSshKey)) {
+
+		if (publicSshKey == null || publicSshKey.trim().isEmpty()) {
 			throw new ValidationException("Missing public key in your user profile.");
 		}
 	}

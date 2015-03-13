@@ -22,11 +22,10 @@ package com.sixsq.slipstream.run;
 
 import org.restlet.Context;
 import org.restlet.routing.Router;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 
 public class VmsRouter extends Router {
 
-	public VmsRouter(Context context) throws ConfigurationException {
+	public VmsRouter(Context context) {
 		super(context);
 
 		attach("", VmsResource.class);

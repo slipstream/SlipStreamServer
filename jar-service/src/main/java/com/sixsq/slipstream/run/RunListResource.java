@@ -62,6 +62,7 @@ import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -160,14 +161,19 @@ public class RunListResource extends BaseResource {
 			User user = getUser();
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
+			RunType type = parseType(form);
+
+			validateUserPublicKey(user, type, form);
+
 			Map<String, List<Parameter<?>>> userChoices = getUserChoicesFromForm(module.getCategory(), form);
 
-			run = RunFactory.getRun(module, parseType(form), user, userChoices);
+			run = RunFactory.getRun(module, type, user, userChoices);
 
 			run = addCredentials(run);
 
 			setRunMutability(run, form);
 			setKeepRunning(run, form);
+			setTags(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
 				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
@@ -226,6 +232,21 @@ public class RunListResource extends BaseResource {
 		String mutable = form.getFirstValue(MUTABLE_RUN_KEY, "");
 		if (isTrue(mutable)) {
 			run.setMutable();
+		}
+	}
+
+	private void validateUserPublicKey(User user, RunType type, Form form) throws ValidationException{
+		boolean bypassSshCheck = isTrue(form.getFirstValue(BYPASS_SSH_CHECK_KEY, "false"));
+
+		if (type != RunType.Machine && !bypassSshCheck) {
+			RunFactory.validateUserPublicSshKeys(user);
+		}
+	}
+
+	private void setTags(Run run, Form form) {
+		RuntimeParameter rp = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_TAGS_KEY);
+		if (rp != null){
+			rp.setValue(form.getFirstValue(TAGS_KEY, ""));
 		}
 	}
 
