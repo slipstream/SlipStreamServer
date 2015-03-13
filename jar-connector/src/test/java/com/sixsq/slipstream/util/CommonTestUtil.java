@@ -107,8 +107,7 @@ public abstract class CommonTestUtil {
 			throw (new SlipStreamRuntimeException(e));
 		}
 
-		user.setOnSuccessRunForever(false);
-		user.setOnErrorRunForever(false);
+		user.setKeepRunning(UserParameter.KEEP_RUNNING_NEVER);
 
 		String key = Parameter.constructKey(ParameterCategory.General.toString(),
 				UserParameter.SSHKEY_PARAMETER_NAME);

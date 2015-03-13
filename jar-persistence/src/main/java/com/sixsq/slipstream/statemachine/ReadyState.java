@@ -49,24 +49,44 @@ public class ReadyState extends SynchronizedState {
 				(shouldKeepRunningForError(run) && run.getType() != RunType.Machine);
 	}
 
-	private boolean shouldKeepRunningForSuccess(Run run) {
-		String key = Parameter.constructKey(ParameterCategory.General.toString(),
-				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		RunParameter onSuccessKeepRunning = run.getParameter(key);
+	private String getKeepRunning(Run run) {
+		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_KEEP_RUNNING);
+		RunParameter rpKeepRunning = run.getParameter(key);
+		String keepRunning = null;
 
-		return onSuccessKeepRunning != null &&
-				onSuccessKeepRunning.isTrue() &&
-				!extrinsicState.isFailing();
+		if (rpKeepRunning != null) {
+			keepRunning = rpKeepRunning.getValue();
+		}
+
+		if (keepRunning == null) {
+			// Backward compatibility
+			key = Parameter.constructKey(ParameterCategory.getDefault(), UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+			RunParameter onSuccess = run.getParameter(key);
+			key = Parameter.constructKey(ParameterCategory.getDefault(), UserParameter.KEY_ON_ERROR_RUN_FOREVER);
+			RunParameter onError = run.getParameter(key);
+
+			if (onSuccess != null && onError != null) {
+				keepRunning = UserParameter.convertOldFormatToKeepRunning(onSuccess.isTrue(), onError.isTrue());
+			}
+		}
+
+		return (keepRunning != null) ? keepRunning : UserParameter.KEEP_RUNNING_DEFAULT;
+	}
+
+	private boolean shouldKeepRunningForSuccess(Run run) {
+		String keepRunning = getKeepRunning(run);
+
+		return !extrinsicState.isFailing() &&
+				(keepRunning == UserParameter.KEEP_RUNNING_ALWAYS ||
+				keepRunning == UserParameter.KEEP_RUNNING_ON_SUCCESS);
 	}
 
 	private boolean shouldKeepRunningForError(Run run) {
-		String key = Parameter.constructKey(ParameterCategory.General.toString(),
-				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		RunParameter onErrorKeepRunning = run.getParameter(key);
+		String keepRunning = getKeepRunning(run);
 
-		return onErrorKeepRunning != null &&
-				onErrorKeepRunning.isTrue() &&
-				extrinsicState.isFailing();
+		return extrinsicState.isFailing() &&
+				(keepRunning == UserParameter.KEEP_RUNNING_ALWAYS ||
+				keepRunning == UserParameter.KEEP_RUNNING_ON_ERROR);
 	}
 
     @Override

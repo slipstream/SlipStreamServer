@@ -56,6 +56,7 @@ import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class StateMachinetTest {
@@ -338,8 +339,7 @@ public class StateMachinetTest {
 			SlipStreamException {
 
 		User user = CommonTestUtil.createUser("user1");
-		user.setOnErrorRunForever(true);
-		user.setOnSuccessRunForever(true);
+		user.setKeepRunning(UserParameter.KEEP_RUNNING_ALWAYS);
 		user.store();
 
 		ImageModule parent = new ImageModule("test/parent");
@@ -389,8 +389,7 @@ public class StateMachinetTest {
 			SlipStreamException {
 
 		User user = CommonTestUtil.createUser("user1");
-		user.setOnErrorRunForever(true);
-		user.setOnSuccessRunForever(true);
+		user.setKeepRunning(UserParameter.KEEP_RUNNING_ALWAYS);
 		user.store();
 
 		ImageModule parent = new ImageModule("test/parent");
