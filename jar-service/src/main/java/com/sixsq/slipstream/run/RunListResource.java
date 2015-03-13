@@ -208,7 +208,7 @@ public class RunListResource extends BaseResource {
 			List<String> keepRunningOptions = UserParameter.getKeepRunningOptions();
 
 			if (! keepRunningOptions.contains(keepRunning)) {
-				throw new ValidationException("Value of " + KEEP_RUNNING_KEY + "should be one of the following: "
+				throw new ValidationException("Value of " + KEEP_RUNNING_KEY + " should be one of the following: "
 						+ keepRunningOptions.toString());
 			}
 

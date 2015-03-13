@@ -44,7 +44,7 @@ public class UserParameter extends Parameter<User> {
 	public static final String KEEP_RUNNING_NEVER = "never";
 	public static final String KEEP_RUNNING_ALWAYS = "always";
 	public static final String KEEP_RUNNING_ON_ERROR = "on-error";
-	public static final String KEEP_RUNNING_ON_SUCCESS = "on-succes";
+	public static final String KEEP_RUNNING_ON_SUCCESS = "on-success";
 
 	public static final String KEEP_RUNNING_DEFAULT = KEEP_RUNNING_ON_SUCCESS;
 
