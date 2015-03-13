@@ -34,6 +34,8 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.simpleframework.xml.Attribute;
 
@@ -44,6 +46,7 @@ import org.simpleframework.xml.Attribute;
  *
  */
 @Entity
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames={"cloud", "instanceId", "user_"})})
 @NamedQueries({
 		@NamedQuery(name = "byUser", query = "SELECT v FROM Vm v WHERE v.user_ = :user"),
 		@NamedQuery(name = "byUserCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user"),
