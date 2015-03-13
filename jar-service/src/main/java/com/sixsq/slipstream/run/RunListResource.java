@@ -60,6 +60,7 @@ import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
@@ -82,6 +83,8 @@ public class RunListResource extends BaseResource {
 	public static final String REFQNAME = "refqname";
 	public static final String MUTABLE_RUN_KEY = "mutable";
 	public static final String IGNORE_ABORT_QUERY = "ignoreabort";
+	public static final String TAGS_KEY = "tags";
+
 	String refqname = null;
 
 	@Get("txt")
@@ -160,6 +163,7 @@ public class RunListResource extends BaseResource {
 			run = addCredentials(run);
 
 			setRunMutability(run, form);
+			setTags(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
 				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
@@ -200,6 +204,13 @@ public class RunListResource extends BaseResource {
 		String mutable = form.getFirstValue(MUTABLE_RUN_KEY, "");
 		if (isTrue(mutable)) {
 			run.setMutable();
+		}
+	}
+
+	private void setTags(Run run, Form form) {
+		RuntimeParameter rp = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_TAGS_KEY);
+		if (rp != null){
+			rp.setValue(form.getFirstValue(TAGS_KEY, ""));
 		}
 	}
 
@@ -274,6 +285,7 @@ public class RunListResource extends BaseResource {
 		keysToFilter.add(RunListResource.REFQNAME);
 		keysToFilter.add(RunListResource.MUTABLE_RUN_KEY);
 		keysToFilter.add(RunListResource.TYPE);
+		keysToFilter.add(RunListResource.TAGS_KEY);
 
 		if (keysToFilter.contains(entry.getKey())) {
 			return true;
