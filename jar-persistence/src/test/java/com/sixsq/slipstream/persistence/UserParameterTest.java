@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -61,7 +61,7 @@ public class UserParameterTest {
 
 		UserParameter p = new UserParameter("toto");
 		user.setParameter(p);
-		
+
 		user.store();
 
 		user = User.loadByName(user.getName());
@@ -69,5 +69,13 @@ public class UserParameterTest {
 		assertThat(user.getParameters().size(), is(greaterThan(0)));
 
 		user.remove();
+	}
+
+	@Test
+	public void convertOldFormatToKeepRunning() {
+		assertThat(UserParameter.convertOldFormatToKeepRunning(false, false), is(UserParameter.KEEP_RUNNING_NEVER));
+		assertThat(UserParameter.convertOldFormatToKeepRunning(false, true), is(UserParameter.KEEP_RUNNING_ON_ERROR));
+		assertThat(UserParameter.convertOldFormatToKeepRunning(true, false), is(UserParameter.KEEP_RUNNING_ON_SUCCESS));
+		assertThat(UserParameter.convertOldFormatToKeepRunning(true, true), is(UserParameter.KEEP_RUNNING_ALWAYS));
 	}
 }

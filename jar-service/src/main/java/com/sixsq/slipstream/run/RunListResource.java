@@ -46,6 +46,7 @@ import org.restlet.resource.ResourceException;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
@@ -59,10 +60,12 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.run.RunViewList;
@@ -169,6 +172,7 @@ public class RunListResource extends BaseResource {
 			run = addCredentials(run);
 
 			setRunMutability(run, form);
+			setKeepRunning(run, form);
 			setTags(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
@@ -184,8 +188,7 @@ public class RunListResource extends BaseResource {
 			setLastExecute(user);
 
 		} catch (SlipStreamClientException ex) {
-			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					ex.getMessage()));
+			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex.getMessage()));
 		}
 
 		String location = "/" + Run.RESOURCE_URI_PREFIX + run.getName();
@@ -205,6 +208,25 @@ public class RunListResource extends BaseResource {
 		}
 	}
 
+	private void setKeepRunning(Run run, Form form) throws ValidationException {
+		String keepRunning = form.getFirstValue(KEEP_RUNNING_KEY, null);
+		if (keepRunning != null) {
+			List<String> keepRunningOptions = UserParameter.getKeepRunningOptions();
+
+			if (! keepRunningOptions.contains(keepRunning)) {
+				throw new ValidationException("Value of " + KEEP_RUNNING_KEY + " should be one of the following: "
+						+ keepRunningOptions.toString());
+			}
+
+			String key = RunParameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
+					UserParameter.KEY_KEEP_RUNNING);
+
+			RunParameter rp = run.getParameter(key);
+			if (rp != null) {
+				rp.setValue(keepRunning);
+			}
+		}
+	}
 
 	private void setRunMutability(Run run, Form form) {
 		String mutable = form.getFirstValue(MUTABLE_RUN_KEY, "");

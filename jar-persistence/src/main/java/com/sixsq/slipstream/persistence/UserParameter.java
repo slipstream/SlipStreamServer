@@ -20,6 +20,9 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -33,11 +36,33 @@ public class UserParameter extends Parameter<User> {
 	public static final String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
 
 	public static final String KEY_TIMEOUT = "Timeout";
-	
+
 	public static final String KEY_ON_ERROR_RUN_FOREVER = "On Error Run Forever";
 	public static final String KEY_ON_SUCCESS_RUN_FOREVER = "On Success Run Forever";
+	public static final String KEY_KEEP_RUNNING = "keep-running";
+
+	public static final String KEEP_RUNNING_NEVER = "never";
+	public static final String KEEP_RUNNING_ALWAYS = "always";
+	public static final String KEEP_RUNNING_ON_ERROR = "on-error";
+	public static final String KEEP_RUNNING_ON_SUCCESS = "on-success";
+
+	public static final String KEEP_RUNNING_DEFAULT = KEEP_RUNNING_ON_SUCCESS;
 
 	public static final String SSHKEY_PARAMETER_NAME = "ssh.public.key";
+
+	public static List<String> getKeepRunningOptions() {
+		String[] options = {KEEP_RUNNING_ALWAYS, KEEP_RUNNING_NEVER, KEEP_RUNNING_ON_SUCCESS, KEEP_RUNNING_ON_ERROR};
+		return Arrays.asList(options);
+	}
+
+	public static String convertOldFormatToKeepRunning(boolean onSuccess, boolean onError) {
+		String keepRunning = null;
+		if (!onError && !onSuccess) keepRunning = UserParameter.KEEP_RUNNING_NEVER;
+		else if (onError && onSuccess) keepRunning = UserParameter.KEEP_RUNNING_ALWAYS;
+		else if (onError && !onSuccess) keepRunning = UserParameter.KEEP_RUNNING_ON_ERROR;
+		else if (!onError && onSuccess) keepRunning = UserParameter.KEEP_RUNNING_ON_SUCCESS;
+		return keepRunning;
+	}
 
 	public static UserParameter convert(Parameter<ServiceConfiguration> source)
 			throws ValidationException {
