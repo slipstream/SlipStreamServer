@@ -60,6 +60,7 @@ import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
@@ -168,6 +169,7 @@ public class RunListResource extends BaseResource {
 			run = addCredentials(run);
 
 			setRunMutability(run, form);
+			setTags(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
 				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
@@ -216,6 +218,13 @@ public class RunListResource extends BaseResource {
 
 		if (type != RunType.Machine && !bypassSshCheck) {
 			RunFactory.validateUserPublicSshKeys(user);
+		}
+	}
+
+	private void setTags(Run run, Form form) {
+		RuntimeParameter rp = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_TAGS_KEY);
+		if (rp != null){
+			rp.setValue(form.getFirstValue(TAGS_KEY, ""));
 		}
 	}
 

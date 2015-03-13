@@ -153,10 +153,9 @@
    (map (fn [[u c] t] [u c t]) ucs spaces)))
 
 (defn insert-collection-requests
-  [users chan time-to-spread context]
-  (if (> (count users) 0)
-    (let [connectors (connectors)
-          ucs (for [u users c connectors] [u c])
+  [users connectors chan time-to-spread context]
+  (if (every? (comp pos? count) [connectors users])
+    (let [ucs (for [u users c connectors] [u c])
           ucts (add-increasing-space ucs (int (/ time-to-spread (count ucs))))]
       (check-channel-size users connectors)
       (doseq [[u c t] ucts]
@@ -173,11 +172,11 @@
   []
   (go
     (while true
-      (insert-collection-requests (online-users) online-collector-chan timeout-online-loop "online users")
+      (insert-collection-requests (online-users) (connectors) online-collector-chan timeout-online-loop "online users")
       (<! (timeout timeout-online-loop))))
   (go
     (while true
-      (insert-collection-requests (users) all-collector-chan timeout-all-users-loop "all users")
+      (insert-collection-requests (users) (connectors) all-collector-chan timeout-all-users-loop "all users")
       (<! (timeout timeout-all-users-loop)))))
 
 (defn -start
