@@ -12,17 +12,22 @@ run-fr: stop-db start-db re-run-with-db-fr
 
 run-hnx: stop-db start-db re-run-with-db-hnx
 
-re-run-with-db:
+run-prod: stop-db start-db re-run-with-db-prod
+
+re-run-with-db-prod:
 	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema
 
+re-run-with-db:
+	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev
+
 re-run-with-db-fr:
-	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.localization.lang-default=fr
+	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev -Dslipstream.ui.util.localization.lang-default=fr
 
 re-run-with-db-hnx:
-	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.theme.current-theme=helixnebula
+	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/resources/static_content -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev -Dslipstream.ui.util.theme.current-theme=helixnebula
 
 run-with-mem-db:
-	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/src/slipstream/ui/views/ -Dpersistence.unit=hsqldb-mem-schema
+	mvn jetty:run-war -Dstatic.content.location=file:///Users/sixsq_rob/Dropbox/dev/projects/2014/SlipStream/SlipStreamUI/clj/src/slipstream/ui/views/ -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=dev
 
 new-ui: install-ui run
 

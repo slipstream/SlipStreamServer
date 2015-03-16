@@ -89,8 +89,7 @@ public abstract class RunFactory {
 	}
 
 	private void initDefaultRunParameters(Run run, User user) throws ValidationException {
-		run = addOnSuccessRunForeverToParameters(run, user);
-		run = addOnErrorRunForeverToParameters(run, user);
+		run = addDefaultKeepRunningToParameters(run, user);
 
 		run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "false",
 				Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
@@ -164,10 +163,13 @@ public abstract class RunFactory {
 								+ "Please contact your SlipStream administrator.");
 			}
 		}
+	}
 
+	public static void validateUserPublicSshKeys(User user) throws ValidationException {
 		String publicSshKey = user.getParameterValue(ExecutionControlUserParametersFactory.CATEGORY + "."
 				+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME, null);
-		if (publicSshKey == null || "".equals(publicSshKey)) {
+
+		if (publicSshKey == null || publicSshKey.trim().isEmpty()) {
 			throw new ValidationException("Missing public key in your user profile.");
 		}
 	}
@@ -206,25 +208,43 @@ public abstract class RunFactory {
 		return factory;
 	}
 
-	private Run addOnSuccessRunForeverToParameters(Run run, User user) throws ValidationException {
-		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
-				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+	private Run addBackwardCompatibleDefaultKeepRunningToParameters(Run run, User user)
+			throws ValidationException {
 
-		UserParameter up = user.getParameter(key);
-		if (up != null) {
-			run.setParameter(new RunParameter(up.getName(), up.getValue("false"), up.getDescription()));
+		String keyOnSuccess = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
+				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+		String keyOnError = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
+				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
+
+		UserParameter upOnSuccess = user.getParameter(keyOnSuccess);
+		UserParameter upOnError = user.getParameter(keyOnError);
+
+		String value = UserParameter.KEEP_RUNNING_DEFAULT;
+
+		if (upOnSuccess != null && upOnError != null) {
+			boolean onSuccess = Boolean.parseBoolean(upOnSuccess.getValue());
+			boolean onError = Boolean.parseBoolean(upOnError.getValue());
+
+			value = UserParameter.convertOldFormatToKeepRunning(onSuccess, onError);
 		}
 
+		String name = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
+				UserParameter.KEY_KEEP_RUNNING);
+
+		run.setParameter(new RunParameter(name, value, ""));
 		return run;
 	}
 
-	private Run addOnErrorRunForeverToParameters(Run run, User user) throws ValidationException {
+	private Run addDefaultKeepRunningToParameters(Run run, User user) throws ValidationException {
 		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
-				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
+				UserParameter.KEY_KEEP_RUNNING);
 
 		UserParameter up = user.getParameter(key);
 		if (up != null) {
 			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
+		} else {
+			// For backward compatibility
+			run = addBackwardCompatibleDefaultKeepRunningToParameters(run, user);
 		}
 
 		return run;

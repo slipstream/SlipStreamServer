@@ -147,7 +147,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		String[] commands = { "sh", "-c", command };
 
 		try {
-			result = ProcessUtils.execGetOutput(commands, getCommonEnvironment(user));
+			result = ProcessUtils.execGetOutput(commands, getCommonEnvironment(user), false);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw (new SlipStreamInternalException(e));

@@ -498,36 +498,26 @@ public class User extends Parameterized<User, UserParameter> {
 		return Integer.parseInt(getParameterValue(key, "0"));
 	}
 
-	public boolean getOnSuccessRunForever() {
-		boolean _default = false;
-		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
+	public String getKeepRunning() {
+		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_KEEP_RUNNING);
+		return getParameterValue(key, UserParameter.KEEP_RUNNING_DEFAULT);
 	}
 
-	public boolean getOnErrorRunForever() {
-		boolean _default = false;
-		String key = Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		return Boolean.parseBoolean(getParameterValue(key, Boolean.toString(_default)));
-	}
+	public void setKeepRunning(String value) throws ValidationException {
+		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_KEEP_RUNNING);
+		List<String> keepRunningOptions = UserParameter.getKeepRunningOptions();
 
-	public void setOnSuccessRunForever(boolean on) throws ValidationException {
-		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
+		if (!keepRunningOptions.contains(value)) {
+			throw new ValidationException("Value of " + UserParameter.KEY_KEEP_RUNNING
+					+ "should be one of the following: " + keepRunningOptions.toString());
+		}
+
 		UserParameter parameter = getParameter(key);
 		if (parameter == null) {
 			parameter = new UserParameter(key);
 			setParameter(parameter);
 		}
-		parameter.setValue(Boolean.toString(on));
-	}
-
-	public void setOnErrorRunForever(boolean on) throws ValidationException {
-		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-		UserParameter parameter = getParameter(key);
-		if (parameter == null) {
-			parameter = new UserParameter(key);
-			setParameter(parameter);
-		}
-		parameter.setValue(Boolean.toString(on));
+		parameter.setValue(value);
 	}
 
 }

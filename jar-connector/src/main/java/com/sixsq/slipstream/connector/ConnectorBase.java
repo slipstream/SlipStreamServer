@@ -294,18 +294,31 @@ public abstract class ConnectorBase implements Connector {
         return privateSshKeyFile;
     }
 
+    public static String getServerPublicSshKeyFilename() throws ConfigurationException, ValidationException {
+		return Configuration.getInstance().getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY);
+    }
+
     private String getUserPublicSshKey(User user) throws ValidationException, IOException {
 		return user.getParameter(
 				ExecutionControlUserParametersFactory.CATEGORY + "." + UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
 				.getValue();
     }
 
+    private String getUserOrServerPublicSshKey(User user) throws ValidationException, IOException {
+		String userPublicSshKey = getUserPublicSshKey(user);
+		if (userPublicSshKey == null || userPublicSshKey.trim().isEmpty()) {
+			return FileUtil.fileToString(getServerPublicSshKeyFilename());
+		} else {
+			return userPublicSshKey;
+		}
+	}
+
     protected String getPublicSshKey(Run run, User user) throws ValidationException, IOException {
     	if (run.getType() == RunType.Run) {
-    		return getUserPublicSshKey(user);
+			return getUserOrServerPublicSshKey(user);
     	} else {
-    		String publicSshKeyFile = getPublicSshKeyFileName(run, user);
-    		return FileUtil.fileToString(publicSshKeyFile);
+			String publicSshKeyFile = getPublicSshKeyFileName(run, user);
+			return FileUtil.fileToString(publicSshKeyFile);
     	}
     }
 
@@ -314,12 +327,12 @@ public abstract class ConnectorBase implements Connector {
         if (run.getType() == RunType.Run) {
             tempSshKeyFile = File.createTempFile("sshkey", ".tmp");
             BufferedWriter out = new BufferedWriter(new FileWriter(tempSshKeyFile));
-            String sshPublicKey = getUserPublicSshKey(user);
+            String sshPublicKey = getUserOrServerPublicSshKey(user);
             out.write(sshPublicKey);
             out.close();
             publicSshKeyFilename = tempSshKeyFile.getPath();
         } else {
-            publicSshKeyFilename = Configuration.getInstance().getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY);
+            publicSshKeyFilename = getServerPublicSshKeyFilename();
         }
         return publicSshKeyFilename;
     }
