@@ -8,9 +8,9 @@
   <packaging>pom</packaging>
 
   <parent>
-    <groupId>eu.slipstream.ssclj</groupId>
-    <artifactId>ssclj</artifactId>
-    <version>14.06.1-SNAPSHOT</version>
+    <groupId>com.sixsq.slipstream</groupId>
+    <artifactId>SlipStreamCljResources</artifactId>
+    <version>2.5.0-SNAPSHOT</version>
   </parent>
 
   <!-- NOTE: This project MUST have same version as proxy module. -->
