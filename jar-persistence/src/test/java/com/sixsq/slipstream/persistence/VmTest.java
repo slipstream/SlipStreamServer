@@ -20,6 +20,7 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -32,8 +33,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
-
-import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -224,12 +223,14 @@ public class VmTest {
 			EntityManager em = PersistenceUtil.createEntityManager();
 			EntityTransaction transaction = em.getTransaction();
 			transaction.begin();
-			Query query1 = em
-					.createNativeQuery("insert into Vm values (10, 'lokal', 'instance100', null, null, 'up', 'joe')");
-			Query query2 = em
-					.createNativeQuery("insert into Vm values (20, 'lokal', 'instance100', null, null, 'down', 'joe')");
 
-			Assert.assertEquals(1, query1.executeUpdate());
+			String sqlInsert1 = String.format("insert into Vm values (10, 'lokal', 'instance100', null, null, 'up', '%s')", user);
+			String sqlInsert2 = String.format("insert into Vm values (20, 'lokal', 'instance100', null, null, 'down', '%s')", user); 
+
+			Query query1 = em.createNativeQuery(sqlInsert1);
+			Query query2 = em.createNativeQuery(sqlInsert2);
+
+			assertEquals(1, query1.executeUpdate());
 			firstInsertAccepted = true;
 			
 			query2.executeUpdate();
