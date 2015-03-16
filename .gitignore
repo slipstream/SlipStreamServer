@@ -18,4 +18,4 @@ pom.xml.tag
 release.properties
 
 # Generated on dev mode by the UI part
-raw-metadata-str.xml
+raw-metadata-str*.xml
