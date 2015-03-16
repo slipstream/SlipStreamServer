@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>ssclj-server-rpm</artifactId>
+  <name>SlipStream SSCLJ Server (RPM)</name>
+
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>eu.slipstream.ssclj</groupId>
+    <artifactId>ssclj</artifactId>
+    <version>14.06.1-SNAPSHOT</version>
+  </parent>
+
+  <!-- NOTE: This project MUST have same version as proxy module. -->
+  <properties>
+    <installation.dir>/opt/slipstream/ssclj</installation.dir>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamCljResources-jar</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+      <classifier>jar-with-dependencies</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+
+        <executions>
+
+          <execution>
+            <id>filter-service-configs</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${basedir}/target/service-config</outputDirectory>
+              <nonFilteredFileExtensions>
+                <nonFilteredFileExtension>jks</nonFilteredFileExtension>
+              </nonFilteredFileExtensions>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/service-config</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+
+        <executions>
+
+          <execution>
+            <id>copy-jar</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/dependency/fatjar</outputDirectory>
+              <stripVersion>true</stripVersion>
+              <stripClassifier>true</stripClassifier>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.sixsq.slipstream</groupId>
+                  <artifactId>SlipStreamCljResources-jar</artifactId>
+                  <type>jar</type>
+                  <classifier>jar-with-dependencies</classifier>
+                  <destFileName>ssclj.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+
+        </executions>
+
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rpm-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <classifier>${package.os}</classifier>
+          <release>${RELEASE}</release>
+          <summary>SlipStream SSCLJ Server</summary>
+          <name>slipstream-ssclj-server${slipstream.edition}</name>
+          <group>System</group>
+          <vendor>SlipStream</vendor>
+          <packager>SlipStream</packager>
+          <copyright>Apache</copyright>
+          <url>http://sixsq.com</url>
+          <needarch>noarch</needarch>
+          <description>
+            SlipStream SSCLJ server
+          </description>
+          <requires>
+            <require>java-1.7.0-openjdk</require>
+            <require>slipstream-useradd${slipstream.edition}</require>
+          </requires>
+
+          <postinstallScriptlet>
+            <script>
+              /sbin/chkconfig --add ssclj || true
+            </script>
+          </postinstallScriptlet>
+
+          <preremoveScriptlet>
+            <script>
+              /sbin/service ssclj stop || true
+              /sbin/chkconfig --del ssclj || true
+            </script>
+          </preremoveScriptlet>
+
+          <defaultDirmode>755</defaultDirmode>
+          <defaultFilemode>644</defaultFilemode>
+          <defaultGroupname>slipstream</defaultGroupname>
+          <defaultUsername>slipstream</defaultUsername>
+
+          <mappings>
+
+            <mapping>
+              <directory>/var/log/slipstream/ssclj</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/rc.d/init.d/</directory>
+              <filemode>755</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/scripts</location>
+                  <includes>
+                    <include>ssclj</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/default</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>src/main/resources</location>
+                  <includes>
+                    <include>ssclj</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/lib</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/fatjar</location>
+                </source>
+              </sources>
+            </mapping>
+
+          </mappings>
+        </configuration>
+
+        <executions>
+          <execution>
+            <id>attach-rpm</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attached-rpm</goal>
+            </goals>
+          </execution>
+        </executions>
+
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+</project>
