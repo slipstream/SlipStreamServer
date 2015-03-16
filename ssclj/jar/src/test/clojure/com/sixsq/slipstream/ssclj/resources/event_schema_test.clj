@@ -13,6 +13,8 @@
                 :acl {:owner {:type "USER" :principal "joe"}
                       :rules [{:type "ROLE" :principal "ANON" :right "ALL"}]}
                 
+                :id "Event/262626262626262"
+
                 :resourceURI resource-uri
 
                 :timestamp event-timestamp
