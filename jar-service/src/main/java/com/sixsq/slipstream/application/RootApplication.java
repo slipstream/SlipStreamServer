@@ -169,8 +169,7 @@ public class RootApplication extends Application {
 
 		RootRouter router = new RootRouter(getContext());
 
-		try {
-			attachProxiesToClojureResources(router);
+		try {			
 			attachMetering(router);
 			attachAction(router);
 			attachModule(router);
@@ -213,26 +212,6 @@ public class RootApplication extends Application {
         DiscoverableConnectorServiceLoader.shutdownAll();
         super.stop();
     }
-
-	private void attachProxiesToClojureResources(RootRouter router) {
-		List<String> clojureResources = Arrays.asList("/Event");
-		for (String clojureResource : clojureResources) {
-			attachProxy(router, clojureResource);
-		}
-	}
-
-	private void attachProxy(RootRouter router, String clojureResource) {
-
-		Redirector redirector = new Redirector(getContext(),
-				"http://localhost:8201/ssclj" + clojureResource,
-				 MODE_SERVER_OUTBOUND);
-		router.attach(clojureResource, redirector);
-
-		Redirector redirectorSingle = new Redirector(getContext(),
-				"http://localhost:8201/ssclj" + clojureResource + "/{uuid}",
-				MODE_SERVER_OUTBOUND);
-		router.attach(clojureResource + "/{uuid}", redirectorSingle);
-	}
 
 	/**
 	 * During dev, set static content to local dir (e.g.

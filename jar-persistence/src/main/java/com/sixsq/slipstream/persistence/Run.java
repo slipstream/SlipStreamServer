@@ -976,13 +976,19 @@ public class Run extends Parameterized<Run, RunParameter> {
 		postEvent(Event.Severity.medium, "Terminated");
 	}
 	
-	public void postEventScaleUp(int nbInstancesToAdd) {
-		String message = "Scaling up with " + nbInstancesToAdd +" new instances";
+	public void postEventScaleUp(String nodename, List<String> nodeInstanceNames, int nbInstancesToAdd) {
+		String message = "Scaling up '" + nodename + "' with " + nbInstancesToAdd + " new instances: " + nodeInstanceNames;
 		postEvent(Event.Severity.medium, message);
 	}	
 	
-	public void postEventScaleDown(String idsToDelete) {
-		String message = "Scaling down by deleting :" + idsToDelete;
+	public void postEventScaleDown(String nodename, List<String> nodeInstanceIds) {
+			
+		int nbInstancesToDelete = 0;		
+		if (nodeInstanceIds != null) {
+			nbInstancesToDelete = nodeInstanceIds.size();
+		}
+		
+		String message = "Scaling down '" + nodename + "' by deleting " + nbInstancesToDelete +" instances: " + nodeInstanceIds;
 		postEvent(Event.Severity.medium, message);
 	}	
 

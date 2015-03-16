@@ -136,13 +136,14 @@ public class RunNodeResource extends RunBaseResource {
 			transaction.begin();
 
 			int noOfInst = getNumberOfInstancesToAdd(entity);
-			
-			run.postEventScaleUp(noOfInst);
-			
+
 			Node node = getNode(run, nodename);
 			for (int i = 0; i < noOfInst; i++) {
 				instanceNames.add(createNodeInstanceOnRun(run, node));
 			}
+			
+			run.postEventScaleUp(nodename, instanceNames, noOfInst);
+			
 			incrementNodeMultiplicityOnRun(noOfInst, run);
 			StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
 
@@ -216,7 +217,7 @@ public class RunNodeResource extends RunBaseResource {
 					setRemovingNodeInstance(run, instanceName);
 					run.removeNodeInstanceName(instanceName, cloudServiceName);
 				}
-				run.postEventScaleDown(ids);
+				run.postEventScaleDown(nodename, instanceIds);
 				// update instance ids
 				removeNodeInstanceIndices(run, instanceIds);
 				decrementNodeMultiplicityOnRun(instanceIds.size(), run);

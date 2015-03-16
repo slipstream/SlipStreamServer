@@ -28,6 +28,10 @@ import com.google.gson.JsonSerializer;
 
 public class Event {
 	
+	private static final String EVENT_SERVER = "http://localhost:8201/ssclj";
+
+	private static final Logger logger = Logger.getLogger(Event.class.getName());
+	
 	private static final String EVENT_URI = "http://sixsq.com/slipstream/1/Event";
 	
 	private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -98,12 +102,12 @@ public class Event {
 			StringRepresentation stringRep = new StringRepresentation(event.toJson());
 			stringRep.setMediaType(MediaType.APPLICATION_JSON);
 
-			ClientResource resource = new ClientResource("http://localhost:8080/Event");
+			ClientResource resource = new ClientResource(EVENT_SERVER + "/Event");
 			resource.post(stringRep, MediaType.APPLICATION_JSON);
 		} catch (ResourceException re) {
-			Logger.getLogger("restlet").severe(re.getMessage());
+			logger.warning(re.getMessage());
 		} catch (Exception e) {
-			Logger.getLogger("restlet").severe(e.getMessage());
+			logger.warning(e.getMessage());
 		}
 	}
 	
