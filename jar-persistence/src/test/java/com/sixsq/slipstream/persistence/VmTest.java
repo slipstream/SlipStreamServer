@@ -225,9 +225,9 @@ public class VmTest {
 			EntityTransaction transaction = em.getTransaction();
 			transaction.begin();
 			Query query1 = em
-					.createNativeQuery("insert into Vm values (10, 'lokal', 'instance100', null, null, 'up', 'joe')");
+					.createNativeQuery("insert into Vm values (10, 'lokal', 'instance100', null, null, 'up', 'user')");
 			Query query2 = em
-					.createNativeQuery("insert into Vm values (20, 'lokal', 'instance100', null, null, 'down', 'joe')");
+					.createNativeQuery("insert into Vm values (20, 'lokal', 'instance100', null, null, 'down', 'user')");
 
 			Assert.assertEquals(1, query1.executeUpdate());
 			firstInsertAccepted = true;
