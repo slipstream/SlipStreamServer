@@ -48,31 +48,25 @@ public class ExecutionControlUserParametersFactory extends
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 
-		putMandatoryBooleanParameter(
-				UserParameter.KEY_ON_ERROR_RUN_FOREVER,
-				false,
-				"If ANY error occurs, keep the execution running",
-				"This value is useful to investigate the error.",
-				30);
-		putMandatoryBooleanParameter(
-				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER,
-				true,
-				"If NO errors occur, keep the execution running",
-				"This value is useful for deployment or long tests.",
-				20);
-		putMandatoryParameter(
-				UserParameter.KEY_TIMEOUT,
-				"Execution timeout (in minutes)",
-				"30",
-				ParameterType.String,
-				"If the execution stays in a transitional state for more than the value of this timeout, the execution is forcefully terminated.",
-				90);
-		putMandatoryParameter(
-				SSHKEY_PARAMETER_NAME,
-				"SSH Public Key(s) (one per line)",
-				ParameterType.RestrictedText,
-				"Warning: Some clouds may take into account only the first key until SlipStream bootstraps the machine.",
-				40);
+		List<String> clouds = extractCloudNames(ConnectorFactory.getConnectors());
+		putMandatoryEnumParameter(
+				UserParametersFactoryBase.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME,
+				"Default Cloud",
+				clouds, "",
+				"Select the cloud that you want to use as the default.",
+				10);
+
+		putMandatoryEnumParameter(
+				UserParameter.KEY_KEEP_RUNNING,
+				"Keep running after deployment",
+				UserParameter.getKeepRunningOptions(),
+				UserParameter.KEEP_RUNNING_DEFAULT,
+				"Here you can define if and when SlipStream should leave the application running after performing the deployment. <br/>"
+						+ "<code>On success</code> is useful for production deployments or long tests. </br>"
+						+ "<code>On Error</code> might be useful so that resources are consumed only when debugging is needed. <br/>"
+						+ "<code>Never</code> ensures that SlipStream automatically terminates the application after performing the deployment. <br/>"
+						+ "Note: This parameter doesn't apply to <code>mutable deployment</code> Runs and to <code>build image</code> Runs. <br/>",
+				15);
 
 		String[] _options = { VERBOSITY_LEVEL_DEFAULT, "1", "2", "3" };
 		List<String> options = Arrays.asList(_options);
@@ -81,15 +75,24 @@ public class ExecutionControlUserParametersFactory extends
 				"Level of verbosity",
 				options, VERBOSITY_LEVEL_DEFAULT,
 				"0 - Actions,  1 - Steps,  2 - Details data,  3 - Debugging",
-				99);
+				30);
 
-		List<String> clouds = extractCloudNames(ConnectorFactory.getConnectors());
-		putMandatoryEnumParameter(
-				UserParametersFactoryBase.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME,
-				"Default Cloud",
-				clouds, "",
-				"Select the cloud that you want to use as the default.",
-				10);
+		putMandatoryParameter(
+				UserParameter.KEY_TIMEOUT,
+				"Execution timeout (in minutes)",
+				"30",
+				ParameterType.String,
+				"If the execution stays in a transitional state for more than the value of this timeout, the execution is forcefully terminated.",
+				40);
+
+		putMandatoryParameter(
+				SSHKEY_PARAMETER_NAME,
+				"SSH Public Key(s) (one per line)",
+				ParameterType.RestrictedText,
+				"Warning: Some clouds may take into account only the first key until SlipStream bootstraps the machine.",
+				50);
+
+
 
 	}
 

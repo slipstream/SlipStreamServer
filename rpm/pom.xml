@@ -198,6 +198,9 @@
                     <url>http://sixsq.com</url>
                     <needarch>noarch</needarch>
                     <description>SlipStream REST Server, including open source connectors</description>
+                    <obsoletes>
+                      <obsolete>slipstream-server</obsolete>
+                    </obsoletes>
                     <requires>
                         <require>java-1.7.0-openjdk</require>
                         <require>slipstream-useradd${slipstream.edition}</require>
