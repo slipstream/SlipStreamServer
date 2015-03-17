@@ -65,7 +65,7 @@ public class ExecutionControlUserParametersFactory extends
 						+ "<code>On success</code> is useful for production deployments or long tests. </br>"
 						+ "<code>On Error</code> might be useful so that resources are consumed only when debugging is needed. <br/>"
 						+ "<code>Never</code> ensures that SlipStream automatically terminates the application after performing the deployment. <br/>"
-						+ "Note: This parameter doesn't apply to <code>mutable deployment</code> Runs and to <code>build image</code> Runs. <br/>",
+						+ "Note: This parameter doesn't apply to <code>mutable deployment</code> Runs and to <code>build image</code> Runs.",
 				15);
 
 		String[] _options = { VERBOSITY_LEVEL_DEFAULT, "1", "2", "3" };
