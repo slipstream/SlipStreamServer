@@ -144,7 +144,7 @@ fi
 # See if SSCLJ_PORT is defined
 #####################################################
 if [ -z "$SSCLJ_PORT" ]; then
-  SSCLJ_PORT=9200
+  SSCLJ_PORT=8202
 fi
 
 
@@ -157,7 +157,7 @@ if [ ! -f "$SSCLJ_JAR" ]; then
   exit 1
 fi
 
-RUN_ARGS=(${JAVA_OPTIONS[@]} -jar "$SSCLJ_JAR" $SSCLJ_PORT -DDB_CONFIG_PATH=$SSCLJ_CB_CFG)
+RUN_ARGS=(${JAVA_OPTIONS[@]} -Ddb.config.path=db.spec -Dlogfile.path=production -cp "$SSCLJ_HOME/etc:$SSCLJ_JAR" com.sixsq.slipstream.ssclj.app.main $SSCLJ_PORT)
 RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
 
 

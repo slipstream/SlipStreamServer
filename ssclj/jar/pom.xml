@@ -268,7 +268,6 @@
           <archive>
             <manifest>
               <mainClass>com.sixsq.slipstream.ssclj.app.main</mainClass>
-              <ClassPath>/opt/slipstream/ssclj/dbconfig/</ClassPath>
             </manifest>
           </archive>
           <descriptorRefs>

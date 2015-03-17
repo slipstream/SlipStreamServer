@@ -144,8 +144,8 @@
           <mappings>
 
             <mapping>
-              <directory>/var/log/slipstream/ssclj</directory>
-              <directoryIncluded>true</directoryIncluded>
+              <directory>/var/log/slipstream</directory>
+              <directoryIncluded>false</directoryIncluded>
             </mapping>
 
             <mapping>
@@ -184,6 +184,20 @@
               <sources>
                 <source>
                   <location>target/dependency/fatjar</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/etc</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/resources</location>
+                  <includes>
+                    <include>log4j.properties</include>
+                    <include>db.spec</include>
+                  </includes>
                 </source>
               </sources>
             </mapping>
