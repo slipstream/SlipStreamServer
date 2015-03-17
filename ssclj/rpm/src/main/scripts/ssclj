@@ -144,7 +144,7 @@ fi
 # See if SSCLJ_PORT is defined
 #####################################################
 if [ -z "$SSCLJ_PORT" ]; then
-  SSCLJ_PORT=8202
+  SSCLJ_PORT=8201
 fi
 
 
