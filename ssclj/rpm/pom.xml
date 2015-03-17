@@ -144,8 +144,8 @@
           <mappings>
 
             <mapping>
-              <directory>/var/log/slipstream</directory>
-              <directoryIncluded>false</directoryIncluded>
+              <directory>/var/log/slipstream/ssclj</directory>
+              <directoryIncluded>true</directoryIncluded>
             </mapping>
 
             <mapping>
