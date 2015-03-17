@@ -108,7 +108,7 @@
           <classifier>${package.os}</classifier>
           <release>${RELEASE}</release>
           <summary>SlipStream SSCLJ Server</summary>
-          <name>slipstream-ssclj-server${slipstream.edition}</name>
+          <name>slipstream-ssclj${slipstream.edition}</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
