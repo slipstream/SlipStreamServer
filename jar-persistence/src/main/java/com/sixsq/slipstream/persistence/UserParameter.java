@@ -51,7 +51,7 @@ public class UserParameter extends Parameter<User> {
 	public static final String SSHKEY_PARAMETER_NAME = "ssh.public.key";
 
 	public static List<String> getKeepRunningOptions() {
-		String[] options = {KEEP_RUNNING_ALWAYS, KEEP_RUNNING_NEVER, KEEP_RUNNING_ON_SUCCESS, KEEP_RUNNING_ON_ERROR};
+		String[] options = {KEEP_RUNNING_ALWAYS, KEEP_RUNNING_ON_SUCCESS, KEEP_RUNNING_ON_ERROR, KEEP_RUNNING_NEVER};
 		return Arrays.asList(options);
 	}
 

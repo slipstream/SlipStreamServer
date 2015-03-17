@@ -58,13 +58,14 @@ public class ExecutionControlUserParametersFactory extends
 
 		putMandatoryEnumParameter(
 				UserParameter.KEY_KEEP_RUNNING,
-				"Auto-terminate application after deployment",
+				"Keep running after deployment",
 				UserParameter.getKeepRunningOptions(),
 				UserParameter.KEEP_RUNNING_DEFAULT,
-				"Set the action to take in the Ready state. <br/>"
-						+ "This parameter doesn't apply to <code>mutable</code> Runs and to <code>build image</code> Runs. <br/>"
-						+ "<strong>On success</strong> is useful for deployment or long tests. </br>"
-						+ "<strong>On error</strong> is useful to investigate an error if any.",
+				"Here you can define if and when SlipStream should leave the application running after performing the deployment. <br/>"
+						+ "<code>On success</code> is useful for production deployments or long tests. </br>"
+						+ "<code>On Error</code> might be useful so that resources are consumed only when debugging is needed. <br/>"
+						+ "<code>Never</code> ensures that SlipStream automatically terminates the application after performing the deployment. <br/>"
+						+ "Note: This parameter doesn't apply to <code>mutable deployment</code> Runs and to <code>build image</code> Runs. <br/>",
 				15);
 
 		String[] _options = { VERBOSITY_LEVEL_DEFAULT, "1", "2", "3" };
