@@ -377,9 +377,8 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	public void setModuleReference(String moduleReferenceUri) throws ValidationException {
 		if (moduleReferenceUri != null){
-			String moduleReferenceUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(moduleReferenceUri);
 			String moduleUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(getResourceUri());
-			if (moduleUriVersionLess.equals(moduleReferenceUriVersionLess)) {
+			if (moduleUriVersionLess.equals(moduleReferenceUri)) {
 				throw new ValidationException("Module reference cannot be itself");
 			}
 		}
