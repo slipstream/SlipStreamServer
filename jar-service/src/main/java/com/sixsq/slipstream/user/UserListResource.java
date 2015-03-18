@@ -46,9 +46,9 @@ public class UserListResource extends BaseResource {
 		response.setMediaType(MediaType.TEXT_CSV);
 		return response;
 	}
-	
+
 	@Get("xml")
-	public Representation toXml() {				
+	public Representation toXml() {
 		String viewList = serializedUserViewList(User.viewList());
 		return new StringRepresentation(viewList, MediaType.APPLICATION_XML);
 	}

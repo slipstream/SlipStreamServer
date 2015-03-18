@@ -20,7 +20,6 @@ package com.sixsq.slipstream.application;
  * -=================================================================-
  */
 
-
 import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.ServiceLoader;
@@ -41,6 +40,10 @@ import org.restlet.routing.Variable;
 import org.restlet.security.Authenticator;
 import org.restlet.service.MetadataService;
 
+import slipstream.async.Collector;
+import slipstream.async.GarbageCollector;
+
+import com.sixsq.slipstream.action.ActionRouter;
 import com.sixsq.slipstream.authn.BasicAuthenticator;
 import com.sixsq.slipstream.authn.CookieAuthenticator;
 import com.sixsq.slipstream.authn.LoginResource;
@@ -71,11 +74,6 @@ import com.sixsq.slipstream.run.VmsRouter;
 import com.sixsq.slipstream.user.UserRouter;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.Logger;
-
-import slipstream.async.Collector;
-import slipstream.async.GarbageCollector;
-
-import com.sixsq.slipstream.action.ActionRouter;
 
 public class RootApplication extends Application {
 
@@ -187,7 +185,7 @@ public class RootApplication extends Application {
 
 		RootRouter router = new RootRouter(getContext());
 
-		try {			
+		try {
 			attachMetering(router);
 			attachAction(router);
 			attachModule(router);
