@@ -19,6 +19,7 @@
     <module>jar-connector</module>
     <module>jar-async</module>
     <module>jar-service</module>
+    <module>ssclj</module>
     <module>static-content</module>
     <module>war</module>
   </modules>

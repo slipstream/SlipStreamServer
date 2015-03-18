@@ -20,6 +20,10 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
+import static com.sixsq.slipstream.event.TypePrincipalRight.Right.VIEW;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -66,6 +70,11 @@ import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.credentials.Credentials;
+import com.sixsq.slipstream.event.ACL;
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.event.Event.EventType;
+import com.sixsq.slipstream.event.TypePrincipal;
+import com.sixsq.slipstream.event.TypePrincipalRight;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -130,7 +139,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public static Run abortOrReset(String abortMessage, String nodename,
 			EntityManager em, String uuid) {
+
 		Run run = Run.loadFromUuid(uuid, em);
+		
+		run.postEventAbort(nodename, abortMessage);
+		
 		RuntimeParameter globalAbort = getGlobalAbort(run);
 		String nodeAbortKey = getNodeAbortKey(nodename);
 		RuntimeParameter nodeAbort = run.getRuntimeParameters().get(
@@ -196,12 +209,16 @@ public class Run extends Parameterized<Run, RunParameter> {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("true");
 		recoveryModeParam.store();
+		
+		run.postEventRecoveryMode(recoveryModeParam.getValue());
 	}
 
 	public static void resetRecoveryMode(Run run) {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("false");
 		recoveryModeParam.store();
+		
+		run.postEventRecoveryMode(recoveryModeParam.getValue());
 	}
 
 	public static boolean isInRecoveryMode(Run run) {
@@ -227,6 +244,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		} else {
 			garbageCollected.setValue("true");
 		}
+		run.postEventGarbageCollected();
 	}
 
 	public static boolean isGarbageCollected(Run run) {
@@ -552,10 +570,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.type = type;
 		this.cloudServiceNames = StringUtils.join(cloudServiceNames, ",");
 		this.user_ = user.getName();
-
+		
 		this.module = module;
 
 		setStart();
+		postEventStateTransition(this.state, true);
 	}
 
 	@Override
@@ -941,9 +960,68 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setState(States state) {
-		this.state = state;
+		postEventStateTransition(state);		
+		this.state = state;		
 	}
 
+	private void postEventStateTransition(States newState) {	
+		postEventStateTransition(newState, false);
+	}
+
+	private void postEventGarbageCollected() {
+		postEvent(Event.Severity.medium, "Garbage collected");
+	}
+	
+	public void postEventTerminate() {
+		postEvent(Event.Severity.medium, "Terminated");
+	}
+	
+	public void postEventScaleUp(String nodename, List<String> nodeInstanceNames, int nbInstancesToAdd) {
+		String message = "Scaling up '" + nodename + "' with " + nbInstancesToAdd + " new instances: " + nodeInstanceNames;
+		postEvent(Event.Severity.medium, message);
+	}	
+	
+	public void postEventScaleDown(String nodename, List<String> nodeInstanceIds) {
+			
+		int nbInstancesToDelete = 0;		
+		if (nodeInstanceIds != null) {
+			nbInstancesToDelete = nodeInstanceIds.size();
+		}
+		
+		String message = "Scaling down '" + nodename + "' by deleting " + nbInstancesToDelete +" instances: " + nodeInstanceIds;
+		postEvent(Event.Severity.medium, message);
+	}	
+
+	private void postEventStateTransition(States newState, boolean forcePost) {
+		boolean stateWillChange = this.state != newState;
+		boolean shouldPost = forcePost || stateWillChange;
+		if (shouldPost) {
+			postEvent(Event.Severity.medium, newState.toString());					
+		}
+	}
+	
+	private void postEventAbort(String origin, String abortMessage) {
+		String message = "Abort from '" + origin + "', message:" + abortMessage;
+		postEvent(Event.Severity.high, message);		
+	}
+	
+	private void postEventRecoveryMode(String newValue) {
+		String message = "Recovery mode set to '" + newValue + "'";
+		postEvent(Event.Severity.high, message);
+	}
+	
+	private void postEvent(Event.Severity severity, String message) {
+		TypePrincipal owner = new TypePrincipal(USER, getUser());
+		List<TypePrincipalRight> rules = Arrays.asList(new TypePrincipalRight(ROLE, "ANON", VIEW));
+		ACL acl = new ACL(owner, rules);
+
+		String resourceRef = RESOURCE_URI_PREFIX + uuid;
+
+		Event event = new Event(acl, now(), resourceRef, message, severity, EventType.state);
+
+		Event.post(event);
+	}
+	
 	public Date getLastStateChange() {
 		return this.lastStateChangeTime;
 	}
