@@ -208,33 +208,6 @@ public abstract class RunFactory {
 		return factory;
 	}
 
-	private Run addBackwardCompatibleDefaultKeepRunningToParameters(Run run, User user)
-			throws ValidationException {
-
-		String keyOnSuccess = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
-				UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-		String keyOnError = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
-				UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-
-		UserParameter upOnSuccess = user.getParameter(keyOnSuccess);
-		UserParameter upOnError = user.getParameter(keyOnError);
-
-		String value = UserParameter.KEEP_RUNNING_DEFAULT;
-
-		if (upOnSuccess != null && upOnError != null) {
-			boolean onSuccess = Boolean.parseBoolean(upOnSuccess.getValue());
-			boolean onError = Boolean.parseBoolean(upOnError.getValue());
-
-			value = UserParameter.convertOldFormatToKeepRunning(onSuccess, onError);
-		}
-
-		String name = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
-				UserParameter.KEY_KEEP_RUNNING);
-
-		run.setParameter(new RunParameter(name, value, ""));
-		return run;
-	}
-
 	private Run addDefaultKeepRunningToParameters(Run run, User user) throws ValidationException {
 		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
 				UserParameter.KEY_KEEP_RUNNING);
@@ -243,8 +216,7 @@ public abstract class RunFactory {
 		if (up != null) {
 			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
 		} else {
-			// For backward compatibility
-			run = addBackwardCompatibleDefaultKeepRunningToParameters(run, user);
+			throw new ValidationException("Parameter 'Keep running after deployment' not found in the user profile.");
 		}
 
 		return run;

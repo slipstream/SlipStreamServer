@@ -72,11 +72,10 @@ public class VmRuntimeParameterMapping implements Serializable {
 		List<VmRuntimeParameterMapping> list = q.getResultList();
 
 		em.close();
-		boolean isEmpty = list.isEmpty();
-		if (!isEmpty) {
+		if (list.size() > 1) {
 			Logger.warning("found more than one cloud/instanceid tuple: " + cloud + " / " + instanceId);
 		}
-		return isEmpty ? null : list.get(0);
+		return list.isEmpty() ? null : list.get(0);
 	}
 
 	public static List<VmRuntimeParameterMapping> getMappings(String uuid) {
