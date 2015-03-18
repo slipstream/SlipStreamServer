@@ -652,7 +652,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		Module module = getParameterized();
 		// Add runs for this specific module version (will not apply to project)
 		RunViewList runs = new RunViewList();
-		runs.populate(getUser(), module.getResourceUri(), 0, Run.MAX_NO_OF_ENTRIES);
+		runs.populate(getUser(), module.getResourceUri(), 0, Run.DEFAULT_LIMIT);
 		module.setRuns(runs);
 		return module;
 	}

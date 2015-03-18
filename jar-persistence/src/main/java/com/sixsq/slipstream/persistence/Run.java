@@ -93,7 +93,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	private static final int DEFAULT_TIMEOUT = 60; // In minutes
 
-	public static final int MAX_NO_OF_ENTRIES = 20;
+	public static final int DEFAULT_LIMIT = 20;
 	public static final String ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR = "-";
 	public static final String NODE_NAME_PARAMETER_SEPARATOR = "--";
 	// Orchestrator
@@ -362,7 +362,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			if (offset != null) {
 				query.setFirstResult(offset);
 			}
-			query.setMaxResults((limit != null)? limit : MAX_NO_OF_ENTRIES);
+			query.setMaxResults((limit != null)? limit : DEFAULT_LIMIT);
 			List<Run> runs = query.getResultList();
 			views = convertRunsToRunViews(runs);
 		} finally {
@@ -455,7 +455,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	private static Query createNamedQuery(EntityManager em, String query) {
 		Query q = em.createNamedQuery(query);
-		q.setMaxResults(MAX_NO_OF_ENTRIES);
+		q.setMaxResults(DEFAULT_LIMIT);
 		return q;
 	}
 

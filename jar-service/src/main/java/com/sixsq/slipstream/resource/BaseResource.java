@@ -301,8 +301,8 @@ public abstract class BaseResource extends ServerResource {
 			} catch (NumberFormatException e) {
 				throwClientBadRequest("Invalid format for the limit attribute");
 			}
-			if (limit < 1 || limit > 20) {
-				throwClientBadRequest("The value for the limit attribute should be between 1 and 20");
+			if (limit < 1 || limit > 500) {
+				throwClientBadRequest("The value for the limit attribute should be between 1 and 500");
 			}
 		}
 		return limit;

@@ -202,7 +202,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		resp = getRunList(-1, null, null);
 		assertEquals(Status.CLIENT_ERROR_BAD_REQUEST, resp.getStatus());
 
-		resp = getRunList(null, Run.MAX_NO_OF_ENTRIES + 1, null);
+		resp = getRunList(null, 10000 + 1, null);
 		assertEquals(Status.CLIENT_ERROR_BAD_REQUEST, resp.getStatus());
 	}
 
