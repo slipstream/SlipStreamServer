@@ -20,15 +20,30 @@
   [msecs]
   (/ msecs 1000))
 
+(defn get-name
+  [user]
+  (.getName user))
+
 (def busy (atom #{}))
 
 (defn- mark-busy
  [current-busy v]
  (conj current-busy v))
 
-(defn- free
+(defn- mark-free
  [current-busy v]
  (disj current-busy v))
+
+(defn- busy? [u c]
+  (@busy [(get-name u) c]))
+
+(defn- busy!
+  [u c]
+  (swap! busy mark-busy [(get-name u) c]))
+
+(defn- free!
+  [u c]
+  (swap! busy mark-free [(get-name u) c]))
 
 (def collector-chan-size 512)
 (def number-of-readers 32)
@@ -57,10 +72,6 @@
 (defn online-users
   []
   (filter online? (users)))
-
-(defn get-name
-  [user]
-  (.getName user))
 
 ; This is the channel for queuing the online user requests
 (def online-collector-chan (chan (sliding-buffer collector-chan-size)))
@@ -110,7 +121,7 @@
     (go
       (let [ [v _] (alts! [ch (timeout timeout-collect-reader-release)])
              elapsed (- (System/currentTimeMillis) start-ts) ]
-        (swap! busy free [(get-name user) connector])
+        (free! user connector)        
         (cond
           (nil? v) (log-timeout user connector elapsed)
           (= v Collector/NO_CREDENTIALS) (log-no-credentials user connector elapsed)
@@ -130,8 +141,7 @@
     (go
       (while true
         (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
-          (when (not-nil? user)
-            (swap! busy mark-busy [(get-name user) connector])
+          (when (not-nil? user)            
             (try
               (log/log-info (str "executing collect request for " (get-name user) " and " (.getConnectorInstanceName connector)))
               (collect! user connector)
@@ -159,13 +169,17 @@
           ucts (add-increasing-space ucs (int (/ time-to-spread (count ucs))))]
       (check-channel-size users connectors)
       (doseq [[u c t] ucts]
-        (if-not (@busy [(get-name u) c])
+        (if (busy? u c)
+          (log/log-info context ": avoiding inserting on " (user-connector u c) " being in a process.")       
           (go
             (<! (timeout t))
-            (log/log-info "Inserting collect request for " (user-connector u c) " after timeout " t)
-            (>! chan [u c]))
-          (log/log-info "Avoiding working on " (user-connector u c) " being in a process." ))))
-    (log/log-info "No users to collect for " context)))
+            (if-not (busy? u c)
+              (do
+                (busy! u c)
+                (>! chan [u c])
+                (log/log-info context ": Inserted collect request for " (user-connector u c) " after timeout " t))
+              (log/log-info context ": Avoiding working on " (user-connector u c) " being in a process.")))))
+    (log/log-info context ": No users to collect"))))
 
 ; Start collector writers
 (defn collect-writers
