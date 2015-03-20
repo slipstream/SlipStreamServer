@@ -205,6 +205,14 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	@Attribute(required = true)
 	private int version;
 
+	/**
+	 * Intended to inform users about constraints or requirements on the
+	 * module requirements - e.g. required ports.
+	 */
+	@Element(required = false)
+	@Column(length = 65536)
+	private String note;
+	
 	@Transient
 	@Attribute(required = false)
 	private boolean isLatestVersion;
@@ -458,6 +466,14 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	public void setLogoLink(String logoLink) {
 		this.logoLink = logoLink;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
 	}
 
 	public void publish() {

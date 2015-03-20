@@ -20,6 +20,8 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +35,7 @@ import javax.persistence.Transient;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementList;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -450,6 +453,29 @@ public class ImageModule extends Module {
 		return Parameter.hasValueSet(value);
 	}
 
+	/**
+	 * Assembled notes. Includes notes from inherited images.
+	 */
+	@Transient
+	@ElementArray(required = false)
+	public String[] getNotes() {
+		List<String> notes = new ArrayList<String>();
+		String moduleReference = getModuleReference();
+		if(moduleReference != null) {
+			ImageModule parent = load(moduleReference);
+			notes.addAll(Arrays.asList(parent.getNotes()));
+		}
+		if(getNote() != null) {
+			notes.add(getNote());
+		}
+		return notes.toArray(new String[0]);
+	}
+
+	@Transient
+	@ElementArray(required = false)
+	private void setNotes(String[] notes) {
+	}
+	
 	public ImageModule copy() throws ValidationException {
 
 		ImageModule copy = (ImageModule) copyTo(new ImageModule(getName()));
