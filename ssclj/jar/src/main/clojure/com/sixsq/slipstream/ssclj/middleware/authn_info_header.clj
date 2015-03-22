@@ -7,6 +7,7 @@
 
 (defn extract-authn-info
   [request]
+  (println "request " request)
   (let [hcontent (get-in request [:headers authn-info-header])]
     (->> (str/split (or hcontent "") #"\s+")
          (remove str/blank?)
@@ -29,5 +30,5 @@
     (->> request
          (extract-authn-info)
          (create-identity-map)
-         (assoc request :identity)
+         (assoc request :identity)              
          (handler))))
