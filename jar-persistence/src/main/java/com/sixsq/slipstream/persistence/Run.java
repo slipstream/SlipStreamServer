@@ -23,6 +23,7 @@ package com.sixsq.slipstream.persistence;
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
 import static com.sixsq.slipstream.event.TypePrincipalRight.Right.VIEW;
+import static com.sixsq.slipstream.event.TypePrincipalRight.Right.MODIFY;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -1012,7 +1013,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	
 	private void postEvent(Event.Severity severity, String message) {
 		TypePrincipal owner = new TypePrincipal(USER, getUser());
-		List<TypePrincipalRight> rules = Arrays.asList(new TypePrincipalRight(ROLE, "ANON", VIEW));
+		List<TypePrincipalRight> rules = Arrays.asList(
+				new TypePrincipalRight(ROLE, "ANON", VIEW),
+				new TypePrincipalRight(USER, getUser(), MODIFY));
 		ACL acl = new ACL(owner, rules);
 
 		String resourceRef = RESOURCE_URI_PREFIX + uuid;
