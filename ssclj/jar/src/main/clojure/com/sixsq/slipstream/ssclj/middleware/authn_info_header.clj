@@ -6,8 +6,7 @@
   "slipstream-authn-info")
 
 (defn extract-authn-info
-  [request]
-  (println "request " request)
+  [request]  
   (let [hcontent (get-in request [:headers authn-info-header])]
     (->> (str/split (or hcontent "") #"\s+")
          (remove str/blank?)
