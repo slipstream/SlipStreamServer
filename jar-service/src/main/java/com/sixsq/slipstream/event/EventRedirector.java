@@ -23,15 +23,15 @@ public class EventRedirector extends Redirector {
 		String eventUUID = (String) request.getAttributes().get("event-uuid");
 		targetRef.addSegment(eventUUID);
 	}
-	
+		
+	@SuppressWarnings("unchecked")
 	protected void addSlipstreamAuthnInfo(Request request) {		
+		@SuppressWarnings("rawtypes")
 		Series<Header> requestHeaders = new Series(Header.class);
 		request.getAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS, requestHeaders);
 		
-		// TODO check not already existing
+		// roles should be added when available after username, space separated, e.g "username role1 role2 ..."				
 		String username = request.getClientInfo().getUser().getName();
-		// roles should be added when available after username, space separated, e.g "username role1 role2 ..."
-				
 		requestHeaders.add(new Header(SLIPSTREAM_AUTHN_INFO, username));				
 	}
 	
