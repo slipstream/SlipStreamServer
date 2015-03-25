@@ -1,71 +1,48 @@
 #!/bin/sh
 
-function space {
-	echo
-	echo
-	echo
-	echo
-	echo
-	echo
-}
-
 WAR_LOCATION=../../../war
 
-space
-echo "Starting DB"
+echo "Starting DB..."
 java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.server.Server \
         --database.0 file:slipstreamdb \
-        --dbname.0 slipstream &
+        --dbname.0 slipstream > /dev/null 2>&1 &
 
-space
+DB_PID=$!
+
 echo "Starting SlipStream Java Server..."
 cd $WAR_LOCATION
-mvn jetty:run-war -Dpersistence.unit=hsqldb-schema & > /dev/null 2>&1 &
+mvn jetty:run-war -Dpersistence.unit=hsqldb-schema > /dev/null 2>&1 &
+SS_JAVA_PID=$!
 
-space
 echo "Starting SlipStream Clojure Server..."
 java -cp ../ssclj/jar/target/SlipStreamCljResources-jar-2.5.0-SNAPSHOT-jar-with-dependencies.jar com.sixsq.slipstream.ssclj.app.main 8201 > /dev/null 2>&1 &
+SSCLJ_PID=$!
 
-space
-echo "Will test after servers are started"
+echo "Will test after servers have been started"
 sleep 40
 
-space
 echo "Inserting test users..."
 java  -Dpersistence.unit=hsqldb-schema \
 -cp \
-/Users/st/.m2/repository/org/hibernate/javax/persistence/hibernate-jpa-2.1-api/1.0.0.Final/hibernate-jpa-2.1-api-1.0.0.Final.jar:\
-/Users/st/.m2/repository/org/hibernate/common/hibernate-commons-annotations/4.0.4.Final/hibernate-commons-annotations-4.0.4.Final.jar:\
-/Users/st/.m2/repository/org/hibernate/hibernate-entitymanager/4.3.5.Final/hibernate-entitymanager-4.3.5.Final.jar:\
-/Users/st/.m2/repository/org/hibernate/hibernate-core/4.3.5.Final/hibernate-core-4.3.5.Final.jar:\
-/Users/st/.m2/repository/org/hibernate/hibernate-c3p0/4.3.5.Final/hibernate-c3p0-4.3.5.Final.jar:\
-/Users/st/.m2/repository/org/jboss/logging/jboss-logging/3.1.3.GA/jboss-logging-3.1.3.GA.jar:\
-/Users/st/.m2/repository/org/jboss/jandex/1.1.0.Final/jandex-1.1.0.Final.jar:\
-/Users/st/.m2/repository/org/jboss/spec/javax/transaction/jboss-transaction-api_1.2_spec/1.0.0.Final/jboss-transaction-api_1.2_spec-1.0.0.Final.jar:\
-/Users/st/.m2/repository/org/javassist/javassist/3.18.1-GA/javassist-3.18.1-GA.jar:\
-/Users/st/.m2/repository/javax/mail/mail/1.4.1/mail-1.4.1.jar:\
-/Users/st/.m2/repository/dom4j/dom4j/1.6.1/dom4j-1.6.1.jar:\
-/Users/st/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar:\
-/Users/st/.m2/repository/org/restlet/jee/org.restlet/2.2.1/org.restlet-2.2.1.jar:\
-/Users/st/.m2/repository/org/restlet/jee/org.restlet.ext.servlet/2.2.1/org.restlet.ext.servlet-2.2.1.jar:\
-/Users/st/.m2/repository/org/restlet/jee/org.restlet.ext.xml/2.2.1/org.restlet.ext.xml-2.2.1.jar:\
-/Users/st/.m2/repository/antlr/antlr/2.7.7/antlr-2.7.7.jar:\
 target/SlipStreamServer-war-2.5.0-SNAPSHOT/WEB-INF/lib:\
 ../jar-persistence/target/SlipStreamPersistence-2.5.0-SNAPSHOT.jar:\
 ../jar-persistence/target/SlipStreamPersistence-2.5.0-SNAPSHOT-tests.jar:\
 ../jar-service/target/SlipStreamService-2.5.0-SNAPSHOT-tests.jar\
- com/sixsq/slipstream/event/IntegrationTestHelper
+ com/sixsq/slipstream/event/IntegrationTestHelper 
+echo "... DONE"
 
 # $1 expected, $2 actual, $3 ok_msg
 function assert_code {
 	if [[ $1 == $2 ]]; then
-		echo $3
+		echo "OK: " $3
 	else
 		echo "test KO, failed to verify:" $3
 		echo "expected "$1" got "$2
 		exit 1
 	fi
 }
+
+echo "Testing..."
 
 code=$(curl --write-out "%{http_code}\n" --silent --output /dev/null http://localhost:8080/event/)
 assert_code 401 $code "event resource is guarded and authentication is needed"	
@@ -89,5 +66,5 @@ assert_code 405 $code "specific event resource can *not* be modified"
 code=$(curl -X DELETE --write-out "%{http_code}\n" --silent --output /dev/null $url -uuser1:123456)
 assert_code 204 $code "specific event resource can be deleted"
 
-
+kill -9 $DB_PID $SSCLJ_PID $SS_JAVA_PID
 
