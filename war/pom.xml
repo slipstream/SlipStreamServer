@@ -84,12 +84,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>docs-pkg</artifactId>
-      <type>zip</type>
-    </dependency>
-
-    <dependency>
       <groupId>org.restlet.jee</groupId>
       <artifactId>org.restlet</artifactId>
     </dependency>
@@ -174,13 +168,6 @@
             <phase>prepare-package</phase>
             <configuration>
               <artifactItems>
-
-                <artifactItem>
-                  <groupId>com.sixsq.slipstream</groupId>
-                  <artifactId>docs-pkg</artifactId>
-                  <type>zip</type>
-                  <outputDirectory>${project.build.directory}/static-content</outputDirectory>
-                </artifactItem>
 
                 <artifactItem>
                   <groupId>com.sixsq.slipstream</groupId>
