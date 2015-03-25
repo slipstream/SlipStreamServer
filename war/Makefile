@@ -70,10 +70,7 @@ else
 	$(info   - http://hsqldb.org/doc/guide/ch03.html)
 	$(info or directly executing following lines in the SlipStreamServer/war directory:)
 	$(info )
-	$(info mkdir hsqldb)
-	$(info cd hsqldb)
-	$(info curl -LO http://downloads.sourceforge.net/project/hsqldb/hsqldb/hsqldb_2_3/hsqldb-2.3.2.zip)
-	$(info unzip hsqldb-2.3.2.zip)
+	$(info (mkdir hsqldb && cd hsqldb && wget http://downloads.sourceforge.net/project/hsqldb/hsqldb/hsqldb_2_3/hsqldb-2.3.2.zip && unzip hsqldb-2.3.2.zip;))
 	$(info )
 	$(error File ${SQLTOOL_FILENAME} missing...)
 endif
