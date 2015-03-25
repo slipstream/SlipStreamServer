@@ -24,6 +24,12 @@
     (let [block-start-time (:start-timestamp block)]
       (assoc block :start-timestamp (u/max-time start block-start-time)))))
 
+(defn move-blocks-ends-before
+  [end]
+  (fn [block]
+    (let [block-end-time (:end-timestamp block)]
+      (assoc block :end-timestamp (u/min-time end block-end-time)))))
+
 (defn cut   
   [blocks start-time end-time]
   (u/check u/start-before-end? [start-time end-time] "Invalid timeframe")
@@ -32,4 +38,4 @@
     (remove (starts-after? end-time))
     (remove (ends-before? start-time))
     (map (move-blocks-starts-after start-time))
-    ))
+    (map (move-blocks-ends-before end-time))))

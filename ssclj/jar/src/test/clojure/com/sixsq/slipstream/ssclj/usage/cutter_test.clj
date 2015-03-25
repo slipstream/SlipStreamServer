@@ -19,6 +19,9 @@
 (def block-joe-day-2-cut-start
   (assoc block-joe-day-2 :start-timestamp (u/to-time "2015-01-17T15:00:00.0Z")))
 
+(def block-joe-day-2-cut-end
+  (assoc block-joe-day-2 :end-timestamp (u/to-time "2015-01-17T15:00:00.0Z")))
+
 (def block-joe-day-3
   { :id "joe"    
     :start-timestamp (u/to-time "2015-01-18T14:20:00.0Z")
@@ -53,9 +56,11 @@
 (deftest blocks-for-day-2
   (is (= [block-joe-day-2] (c/cut blocks start-day-2 end-day-2))))
 
-(deftest blocks-that-must-be-cut
+(deftest blocks-with-start-moved
   (is (= [block-joe-day-2-cut-start] (c/cut blocks middle-day-2 end-day-2))))
 
+(deftest blocks-with-end-moved
+  (is (= [block-joe-day-2-cut-end] (c/cut blocks start-day-2 middle-day-2))))
 
 
 
