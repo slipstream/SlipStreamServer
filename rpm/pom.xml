@@ -415,7 +415,7 @@
                             <source>
                               <location>${basedir}/src/main/migrations</location>
                               <includes>
-                                <include>**/*.sql</include>
+                                <include>**/*.*</include>
                               </includes>
                             </source>
                           </sources>
