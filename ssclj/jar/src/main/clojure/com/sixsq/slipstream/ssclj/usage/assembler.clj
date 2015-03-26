@@ -4,21 +4,13 @@
   [com.sixsq.slipstream.ssclj.usage.utils :as u]))
 
 ;;
+;; Assembles usage-events into blocks.
+;; A usage-event represents the start or end of the usage of some dimensions for a given vm instance id and (user/cloud)
+;; A block-usage is a pair of usage-event (start/end). Special cases when no end is allowed.
+;;
 ;; Computes for a given (user/cloud), timeframe (start/end) and dimension the actual usage on that dimension
 ;; dimension can be for example :nb-cpu, :memory-GB, ...
 ;;
-;; 
-;; Some cases 
-;; ..0-|-------|-1
-;; ..0-|---1...|..
-;; ....|..0--1.|..
-;; ....|..0----|1.
-;; ....|.01..01|..
-;;
-;; Wording
-;; 
-;; a usage-event represents the start or end of the usage of some dimensions for a given id (user/cloud)
-;; a block-usage is a pair of usage-event (start/end), special cases when no start or end 
 
 (defn alternated?     [coll] (= (count coll) (count (partition-by :event coll))))
 (defn first-is-start? [coll] (= :start (:event (first coll))))

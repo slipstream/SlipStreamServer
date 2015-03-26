@@ -21,7 +21,7 @@
 (defn move-blocks-starts-after
   [start]
   (fn [block]
-    (let [block-start-time (:start-timestamp block)]
+    (let [block-start-time (:start-timestamp block)]  
       (assoc block :start-timestamp (u/max-time start block-start-time)))))
 
 (defn move-blocks-ends-before

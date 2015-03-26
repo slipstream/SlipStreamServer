@@ -4,6 +4,12 @@
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [clojure.test :refer :all]))
 
+(def start-day-1  (u/to-time "2015-01-16T00:00:00.0Z"))
+(def start-day-2  (u/to-time "2015-01-17T00:00:00.0Z"))
+(def middle-day-2 (u/to-time "2015-01-17T15:00:00.0Z"))
+(def end-day-2    (u/to-time "2015-01-18T00:00:00.0Z"))
+(def middle-day-3 (u/to-time "2015-01-18T12:00:00.0Z"))
+
 (def block-joe-day-1
   { :id "joe"    
     :start-timestamp (u/to-time "2015-01-16T08:20:00.0Z")
@@ -16,16 +22,10 @@
     :end-timestamp (u/to-time "2015-01-17T15:44:12.0Z")
     :dimensions {:nb-cpu 2}})
 
-(def block-joe-day-2-cut-start
-  (assoc block-joe-day-2 :start-timestamp (u/to-time "2015-01-17T15:00:00.0Z")))
-
-(def block-joe-day-2-cut-end
-  (assoc block-joe-day-2 :end-timestamp (u/to-time "2015-01-17T15:00:00.0Z")))
-
 (def block-joe-day-3
   { :id "joe"    
-    :start-timestamp (u/to-time "2015-01-18T14:20:00.0Z")
-    :end-timestamp (u/to-time "2015-01-18T15:44:12.0Z")
+    :start-timestamp (u/to-time "2015-01-18T10:20:00.0Z")
+    :end-timestamp (u/to-time "2015-01-18T16:44:12.0Z")
     :dimensions {:nb-cpu 2}})
 
 (def block-joe-day-4
@@ -34,11 +34,17 @@
     :end-timestamp (u/to-time "2015-01-19T15:44:12.0Z")
     :dimensions {:nb-cpu 2}})
 
-(def blocks [block-joe-day-1 block-joe-day-2 block-joe-day-3 block-joe-day-4])
+(def block-joe-day-2-cut-start
+  (assoc block-joe-day-2 :start-timestamp (u/to-time "2015-01-17T15:00:00.0Z")))
 
-(def start-day-2  (u/to-time "2015-01-17T00:00:00.0Z"))
-(def middle-day-2 (u/to-time "2015-01-17T15:00:00.0Z"))
-(def end-day-2    (u/to-time "2015-01-18T00:00:00.0Z"))
+(def block-joe-day-2-cut-end
+  (assoc block-joe-day-2 :end-timestamp middle-day-2))
+
+(def block-joe-day-3-cut-end
+  (assoc block-joe-day-3 :end-timestamp middle-day-3))
+
+
+(def blocks [block-joe-day-1 block-joe-day-2 block-joe-day-3 block-joe-day-4])
 
 (deftest check-order-dates
   (is (thrown? IllegalArgumentException (c/cut blocks start-day-2 start-day-2)))
@@ -62,6 +68,9 @@
 (deftest blocks-with-end-moved
   (is (= [block-joe-day-2-cut-end] (c/cut blocks start-day-2 middle-day-2))))
 
+(deftest blocks-from-before-day-1-to-middle-day3
+  (is (= [block-joe-day-1 block-joe-day-2 block-joe-day-3-cut-end] (c/cut blocks start-day-1 middle-day-3))))
+  
 
 
 
