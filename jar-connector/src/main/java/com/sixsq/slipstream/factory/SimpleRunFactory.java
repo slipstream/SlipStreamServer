@@ -23,9 +23,14 @@ package com.sixsq.slipstream.factory;
 import java.util.Map;
 
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 
 public class SimpleRunFactory extends BuildImageFactory {
 
@@ -44,6 +49,21 @@ public class SimpleRunFactory extends BuildImageFactory {
 
 		String cloudServiceName = cloudServicePerNode.get(nodeInstanceName);
 		image.validateForRun(cloudServiceName);
+	}
+
+	@Override
+	protected void initExtraRunParameters(Module module, Run run) throws ValidationException {
+		ImageModule image = (ImageModule) module;
+
+		String cloudService = run.getParameterValue(
+				constructParamName(nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME),
+				CloudImageIdentifier.DEFAULT_CLOUD_SERVICE);
+
+		boolean runBuildRecipes = image.hasToRunBuildRecipes(cloudService);
+
+		String runParameterName = constructParamName(nodeInstanceName, RunParameter.NODE_RUN_BUILD_RECIPES_KEY);
+		run.setParameter(new RunParameter(runParameterName, String.valueOf(runBuildRecipes),
+				RunParameter.NODE_RUN_BUILD_RECIPES_DESCRIPTION));
 	}
 
 }
