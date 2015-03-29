@@ -118,11 +118,11 @@ public class RunListResource extends BaseResource {
 	}
 
 	private RunViewList getRunViewList() {
-		String moduleResourceUri = getRequest().getResourceRef().getQueryAsForm().getFirstValue("moduleResourceUri");
+		int limit = getLimit(Run.DEFAULT_LIMIT, LIMIT_MAX);
 
 		RunViewList list = new RunViewList();
 		try {
-			list.populate(getUser(), moduleResourceUri, getOffset(), getLimit(), getCloud());
+			list.populate(getUser(), getModuleResourceUri(), getOffset(), limit, getCloud());
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		} catch (ValidationException e) {
