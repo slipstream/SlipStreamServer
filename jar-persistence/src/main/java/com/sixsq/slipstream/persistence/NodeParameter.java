@@ -9,9 +9,9 @@ package com.sixsq.slipstream.persistence;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -92,7 +92,7 @@ public class NodeParameter extends Parameter<Node> {
 	 * If the parameter is added to a node named 'node1' with an input parameter
 	 * 'p1' and this parameter is to be mapped to an output parameter
 	 * 'node2.1:p1' then the following parameters should take the values:
-	 * 
+	 *
 	 * @param name
 	 *            for example 'p1'
 	 * @param value
@@ -156,8 +156,7 @@ public class NodeParameter extends Parameter<Node> {
 
 	@Override
 	public NodeParameter copy() throws ValidationException {
-		NodeParameter copy = (NodeParameter) copyTo(new NodeParameter(getName(), getValue(),
-				getDescription()));
+		NodeParameter copy = (NodeParameter) copyTo(new NodeParameter(getName(), getValue(), getDescription()));
 		copy.setMappedValue(isMappedValue());
 		return copy;
 	}
