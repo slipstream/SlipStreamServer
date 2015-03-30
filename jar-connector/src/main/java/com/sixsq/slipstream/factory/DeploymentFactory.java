@@ -117,7 +117,7 @@ public class DeploymentFactory extends RunFactory {
 			String referenceUri = image.getModuleReference();
 			ImageModule reference = (ImageModule) ImageModule.load(referenceUri);
 			if (reference == null) {
-				throw new ValidationException("Image " + image.getName() + " refers to an unknown image "
+				throw new ValidationException(image.getName() + " referring to an unknown image "
 						+ image.getModuleReference());
 			}
 			checkImageHasReferenceOrImageId(reference, cloudServiceName);
