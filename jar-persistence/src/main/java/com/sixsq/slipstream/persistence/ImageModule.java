@@ -457,7 +457,7 @@ public class ImageModule extends Module {
 	 * Assembled notes. Includes notes from inherited images.
 	 */
 	@Transient
-	@ElementArray(required = false)
+	@ElementArray(entry="note")
 	public String[] getNotes() {
 		List<String> notes = new ArrayList<String>();
 		String moduleReference = getModuleReference();
@@ -471,8 +471,12 @@ public class ImageModule extends Module {
 		return notes.toArray(new String[0]);
 	}
 
+	/**
+	 * Empty setter needed for serializer on a read only
+	 * property
+	 */
 	@Transient
-	@ElementArray(required = false)
+	@ElementArray(entry="note")
 	private void setNotes(String[] notes) {
 	}
 	
