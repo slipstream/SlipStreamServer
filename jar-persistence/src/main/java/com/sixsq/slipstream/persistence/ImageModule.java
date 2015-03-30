@@ -474,6 +474,7 @@ public class ImageModule extends Module {
 	/**
 	 * Empty setter needed for serializer on a read only
 	 * property
+	 * 
 	 */
 	@Transient
 	@ElementArray(entry="note")
