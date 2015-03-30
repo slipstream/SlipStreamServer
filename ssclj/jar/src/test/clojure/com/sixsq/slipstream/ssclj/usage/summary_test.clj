@@ -31,7 +31,7 @@
   (defentity usage-records)
   (defentity usage-summaries)
   (delete usage-records)
-  ; (delete usage-summaries)
+  (delete usage-summaries)
   (log/debug "All usage-records deleted")
   (log/debug "usage records " (select usage-records))
   (log/debug "usage summaries " (select usage-summaries))
