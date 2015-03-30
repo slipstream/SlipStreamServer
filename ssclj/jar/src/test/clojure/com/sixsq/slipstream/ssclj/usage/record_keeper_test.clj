@@ -19,8 +19,9 @@
 (def end-day-2    "2015-01-18T00:00:00.0Z")
 
 (defn delete-all [f]
+  (-init)
   (delete usage-records)
-  (log/info "All usage-records deleted")
+  (log/debug "All usage-records deleted")
   (log/debug "usage records " (select usage-records))
   (f))
 (use-fixtures :each delete-all)
@@ -42,7 +43,7 @@
     :end_timestamp       event-end-time})
 
 (deftest records-for-interval-for-open-records
-  (insert-start event-start)
+  (-insertStart event-start)
   (log/debug "after insert, usage records " (select usage-records))
   (is (= 3 (count (records-for-interval start-day-0 end-day-2))))
   (is (= 3 (count (records-for-interval start-day-1 end-day-1))))
@@ -51,10 +52,10 @@
   (is (= 3 (count (records-for-interval start-day-2 end-day-2)))))
 
 (deftest records-for-interval-for-closed-records  
-  (insert-start event-start)
+  (-insertStart event-start)
   (is (every? nil? (map :end_timestamp (records-for-interval start-day-0 end-day-2))))
   (is (= 3 (count (records-for-interval start-day-0 end-day-2))))
-  (insert-end   event-end)
+  (-insertEnd   event-end)
   (is (every? #(= event-end-time %) (map :end_timestamp (records-for-interval start-day-0 end-day-2))))
   (is (= 0 (count (records-for-interval start-day-2 end-day-2)))))
 
@@ -64,15 +65,15 @@
 (defn todo [] (is (= :done :not-yet)))
 
 (deftest event-already-open-can-not-be-reopened
-  (insert-start event-start)
-  (is (thrown? IllegalArgumentException (insert-start event-start))))
+  (-insertStart event-start)
+  (is (thrown? IllegalArgumentException (-insertStart event-start))))
 
 (deftest check-close-event-without-start
-  (is (thrown? IllegalArgumentException (insert-end event-end))))
+  (is (thrown? IllegalArgumentException (-insertEnd event-end))))
 
 (deftest check-with-middle-time
-  (insert-start event-start)
-  (insert-end   event-end)
+  (-insertStart event-start)
+  (-insertEnd   event-end)
   (is (= 3 (count (records-for-interval middle-event end-day-2))))
   (is (= 3 (count (records-for-interval start-day-0 middle-event)))))
   

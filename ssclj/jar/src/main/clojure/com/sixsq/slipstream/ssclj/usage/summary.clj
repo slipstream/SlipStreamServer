@@ -33,10 +33,6 @@
         (zipmap keys-to-compare [user cloud metric-name]) 
         (select-keys record keys-to-compare)))))
 
-(defn filter-user-cloud-terminal
-  [user cloud metric-name records]
-  (filter (same-user-cloud-metric-name? user cloud metric-name) records))
-
 (defn shift-start
   [start]
   (fn [record]
@@ -51,7 +47,7 @@
 
 (defn truncate   
   [start-time end-time records]
-  (u/check u/start-before-end? [start-time end-time] "Invalid timeframe")
+  (u/check u/start-before-end? [start-time end-time] (str "Invalid timeframe [ " start-time", "end-time" ]"))
   (->> records    
     (filter-inside-interval start-time end-time)
     (map (shift-start start-time))
@@ -60,7 +56,7 @@
 (defn contribution   
   [record]
   (let [value (:metric_value record)
-        nb-minutes (t/in-minutes (t/interval (u/to-time (:start_timestamp record)) (u/to-time (:end_timestamp record))))] 
+        nb-minutes (t/in-minutes (t/interval (u/to-time (:start_timestamp record)) (u/to-time (:end_timestamp record))))]
     (* value nb-minutes)))
 
 (defn comsumption   
@@ -68,7 +64,7 @@
   { :cloud_vm_instanceid    (:cloud_vm_instanceid record)
     :aggregated_duration_mn (contribution record)})
 
-(defn add-consumptions    
+(defn sum-consumptions    
   [cons1 cons2]
   (update-in cons1 [:aggregated_duration_mn] #(+ % (:aggregated_duration_mn cons2))))
 
@@ -77,7 +73,7 @@
   (let [record-metric (:metric_name record)
         record-comsumption (comsumption record)]
     (if-let [consumption-to-increase (get-in summary [:usage record-metric])]
-      (assoc-in summary [:usage record-metric] (add-consumptions consumption-to-increase record-comsumption))
+      (assoc-in summary [:usage record-metric] (sum-consumptions consumption-to-increase record-comsumption))
       (assoc-in summary [:usage record-metric] record-comsumption))))
 
 (defn empty-summary-for-record   
@@ -107,12 +103,17 @@
     (truncate start-time end-time)
     (group-by user-cloud)
     vals
-    (summarize-per-user-cloud start-time end-time)))
-    ; ))
+    (summarize-per-user-cloud start-time end-time)))    
 
-; (defn summarize
-;   [start-time end-time]
-;   (-> 
-;   (summarize-records rc/records-for-interval start-time end-time))        
-        
+(defn summarize
+  [start-time end-time]  
+  (summarize-records (rc/records-for-interval start-time end-time) start-time end-time))
+
+(defn summarize-and-store
+  [start-time end-time]   
+  (let [summaries (summarize start-time end-time)]
+    (log/info "Will persist " (count summaries) " summaries")
+    (doseq [summary summaries]
+      (rc/insert-summary summary))))
+
     

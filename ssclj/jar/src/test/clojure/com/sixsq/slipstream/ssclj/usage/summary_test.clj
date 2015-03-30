@@ -1,8 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.usage.summary-test
   (:require    
     [com.sixsq.slipstream.ssclj.usage.summary :refer :all]
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [clojure.test :refer :all]
+    [clojure.tools.logging :as log]
+    [korma.core :refer :all]
     [clj-time.format :as f]
     [clj-time.core :as t]))
 
@@ -22,6 +25,18 @@
 
 (def future-1 (timestamp 2015 04 20))
 (def future-2 (timestamp 2015 04 22))
+
+(defn delete-all [f]
+  (rc/-init)
+  (defentity usage-records)
+  (defentity usage-summaries)
+  (delete usage-records)
+  ; (delete usage-summaries)
+  (log/debug "All usage-records deleted")
+  (log/debug "usage records " (select usage-records))
+  (log/debug "usage summaries " (select usage-summaries))
+  (f))
+(use-fixtures :each delete-all)
 
 (deftest truncate-filters-outside-records
   (let [urs [{:start_timestamp in-day-1 :end_timestamp in-day-2}]]
@@ -47,20 +62,6 @@
 
 (deftest test-contribution
   (is (= 11692.8 (contribution {:start_timestamp start-day :end_timestamp end-day :metric_value 8.12}))))
-
-(deftest test-filter-user-cloud-terminal
-  (let [records
-    [
-    {:user "sixsq_dev" :cloud "exoscale-ch-gva" :metric_name "nb-cpu" :metric_value 12.5}    
-    {:user "sixsq_dev" :cloud "exoscale-ch-gva" :metric_name "RAM"}
-    {:user "sixsq_dev" :cloud "aws" :metric_name "nb-cpu"}
-    {:user "joe" :cloud "exoscale-ch-gva" :metric_name "nb-cpu"}]]
-
-  ( is (= [{:user "sixsq_dev" :cloud "exoscale-ch-gva" :metric_name "nb-cpu" :metric_value 12.5}] 
-    (filter-user-cloud-terminal "sixsq_dev" "exoscale-ch-gva" "nb-cpu" records)))  
-  ( is (= [] (filter-user-cloud-terminal "sixsq_dev" "exoscale-ch-gva" "size" records)))  
-  ( is (= [] (filter-user-cloud-terminal "sixsq_dev" "another-cloud" "nb-cpu" records)))
-  ( is (= [] (filter-user-cloud-terminal "mike" "exoscale-ch-gva" "nb-cpu" records)))))
 
 (def record-1  
   { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
@@ -89,6 +90,24 @@
     :metric_name         "RAM"
     :metric_value        16 })
 
+(def record-4 
+  { :cloud_vm_instanceid "aws:445623"
+    :user                "joe"
+    :cloud               "aws"
+    :start_timestamp     past-1  
+    :end_timestamp       future-2
+    :metric_name         "Disk"
+    :metric_value        100 })
+
+(def record-5 
+  { :cloud_vm_instanceid "aws:445623"
+    :user                "joe"
+    :cloud               "aws"
+    :start_timestamp     past-1  
+    :end_timestamp       nil
+    :metric_name         "Disk"
+    :metric_value        100 })
+
 (deftest test-summarize-records
   (is (=
     [{ 
@@ -111,4 +130,96 @@
         }
       }
      }]    
-    (summarize-records [record-1 record-2 record-3] start-day end-day))))
+    (summarize-records [record-1 record-2 record-3] start-day end-day)))
+
+  (is (=
+    [{ 
+    :user                "joe"
+    :cloud               "aws"
+    :start_timestamp     start-day   
+    :end_timestamp       end-day
+    :usage 
+      {
+        "Disk"
+          {
+            :cloud_vm_instanceid      "aws:445623"                      
+            :aggregated_duration_mn   144000
+          }
+      }
+     }]
+     (summarize-records [record-4] start-day end-day)))
+
+  (is (=
+    [{ 
+    :user                "joe"
+    :cloud               "aws"
+    :start_timestamp     start-day   
+    :end_timestamp       end-day
+    :usage 
+      {
+        "Disk"
+          {
+            :cloud_vm_instanceid      "aws:445623"                      
+            :aggregated_duration_mn   144000
+          }
+      }
+     }]
+     (summarize-records [record-5] start-day end-day)))
+  )
+
+(defn insert-record   
+  []
+  (rc/-insertStart
+    { :cloud_vm_instanceid   "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+      :user                "sixsq_dev"
+      :cloud               "exoscale-ch-gva"
+      :start_timestamp     in-day-1
+      :metrics [{   :name  "nb-cpu"
+                    :value 4 }
+                  { :name  "RAM-GB"
+                    :value 8 }
+                  { :name  "disk-GB"
+                    :value 100.5 }]})
+  (rc/-insertEnd
+    { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"    
+      :end_timestamp       in-day-2}))
+
+(deftest test-summarize
+  (insert-record)
+  (is (=
+    [{ 
+    :user                "sixsq_dev"
+    :cloud               "exoscale-ch-gva"
+    :start_timestamp     start-day   
+    :end_timestamp       end-day
+    :usage 
+      {
+        "nb-cpu"
+        {
+          :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"                      
+          :aggregated_duration_mn   (* 4.0 337)
+        }
+        "RAM-GB"
+        {
+          :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"                      
+          :aggregated_duration_mn   (* 8.0 337)
+        }
+        "disk-GB"
+        {
+          :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"                      
+          :aggregated_duration_mn   (* 100.5 337)
+        }
+      }
+     }]
+    (summarize start-day end-day)))
+  )
+
+(deftest test-summarize-and-store  
+  (insert-record)
+  (summarize-and-store start-day end-day)
+  (let [summaries-from-db (select usage-summaries)]
+    (is (= 1 (count summaries-from-db)))
+    (is (= "{\"disk-GB\":\n {\"cloud_vm_instanceid\":\n  \"exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592\",\n  \"aggregated_duration_mn\":33868.5},\n \"RAM-GB\":\n {\"cloud_vm_instanceid\":\n  \"exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592\",\n  \"aggregated_duration_mn\":2696.0},\n \"nb-cpu\":\n {\"cloud_vm_instanceid\":\n  \"exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592\",\n  \"aggregated_duration_mn\":1348.0}}\n"
+       (:usage (first summaries-from-db))))))
+
+

@@ -22,16 +22,8 @@
     e))
 
 (defn start-before-end?   
-  ;; TODO t1 and t2 are strings
   [[t1 t2]]  
   (time/before? (to-time t1) (to-time t2)))
-
-(defn start-before-end-or-open?   
-  ;; TODO t1 and t2 are times : HOMOGENEÏSE !!!
-  [[t1 t2]]
-  (or 
-    (nil? t2)
-    (time/before? t1 t2))) 
 
 (defn max-time   
   [t1 t2]
@@ -41,6 +33,8 @@
 
 (defn min-time   
   [t1 t2]
-  (if (time/before? (to-time t1) (to-time t2))
-    t1
-    t2))
+  (cond
+    (nil? t1) t2
+    (nil? t2) t1
+    (time/before? (to-time t1) (to-time t2)) t1
+    :else t2))
