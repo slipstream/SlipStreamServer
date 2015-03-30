@@ -56,11 +56,19 @@ public class VmRuntimeParameterMapping implements Serializable {
 	private String instanceId;
 	private String cloud;
 	private String runUuid;
+	private String nodeName;
+	private String nodeInstanceId;
 
 	@Transient
 	volatile private RuntimeParameter vmstateRuntimeParameter = null;
 
 	private String vmstateRuntimeParameterUri;
+
+	@Transient
+	volatile private RuntimeParameter hostnameRuntimeParameter = null;
+
+	private String hostnameRuntimeParameterUri;
+
 
 	public static VmRuntimeParameterMapping find(String cloud, String instanceId) {
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -101,35 +109,70 @@ public class VmRuntimeParameterMapping implements Serializable {
 		return list;
 	}
 
-	public static void insertVmInstanceMapping(RuntimeParameter instanceId) {
-		String nodeInstanceName = instanceId.getNodeName();
-		String cloudParameterName = RuntimeParameter.constructParamName(nodeInstanceName,
-				RuntimeParameter.CLOUD_SERVICE_NAME);
-		RuntimeParameter cloudParameter = RuntimeParameter.loadFromUuidAndKey(instanceId.getContainer().getUuid(),
-				cloudParameterName);
-		String vmstateParameterName = RuntimeParameter.constructParamName(nodeInstanceName,
-				RuntimeParameter.STATE_VM_KEY);
-		RuntimeParameter vmstateParameter = RuntimeParameter.loadFromUuidAndKey(instanceId.getContainer().getUuid(),
-				vmstateParameterName);
-		VmRuntimeParameterMapping m = new VmRuntimeParameterMapping(instanceId.getValue(), cloudParameter.getValue(),
-				vmstateParameter);
-		m.store();
+	private static RuntimeParameter getRuntimeParameter(String runUuid, String nodeInstanceName, String parameterName) {
+		String key = RuntimeParameter.constructParamName(nodeInstanceName, parameterName);
+		return RuntimeParameter.loadFromUuidAndKey(runUuid, key);
+	}
+
+	private static String getRuntimeParameterValue(RuntimeParameter parameter) {
+		return (parameter != null)? parameter.getValue() : null;
+	}
+
+	private static String getRuntimeParameterValue(String runUuid, String nodeInstanceName, String parameterName) {
+		return getRuntimeParameterValue(getRuntimeParameter(runUuid, nodeInstanceName, parameterName));
+	}
+
+	public static void insertVmInstanceMapping(RuntimeParameter instanceIdParameter) {
+		String nodeInstanceName = instanceIdParameter.getNodeName();
+		String runUuid = instanceIdParameter.getContainer().getUuid();
+		String instanceId = getRuntimeParameterValue(instanceIdParameter);
+
+		String cloud = getRuntimeParameterValue(runUuid, nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME);
+		String nodeName = getRuntimeParameterValue(runUuid, nodeInstanceName, RuntimeParameter.NODE_NAME_KEY);
+		String nodeInstanceid = getRuntimeParameterValue(runUuid, nodeInstanceName, RuntimeParameter.NODE_ID_KEY);
+
+		RuntimeParameter vmstate = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.STATE_VM_KEY);
+		RuntimeParameter hostname = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.HOSTNAME_KEY);
+
+		new VmRuntimeParameterMapping(instanceId, cloud, nodeName, nodeInstanceid, vmstate, hostname).store();
 	}
 
 	public VmRuntimeParameterMapping() {
 
 	}
 
-	public VmRuntimeParameterMapping(String instanceId, String cloud, RuntimeParameter vmstateRuntimeParameter) {
+	public VmRuntimeParameterMapping(String instanceId, String cloud, String nodeName, String nodeInstanceId,
+			RuntimeParameter vmstateRuntimeParameter,
+			RuntimeParameter hostnameRuntimeParameter) {
 		this.instanceId = instanceId;
 		this.cloud = cloud;
+		this.nodeName = nodeName;
+		this.nodeInstanceId = nodeInstanceId;
+		this.runUuid = vmstateRuntimeParameter.getContainer().getUuid();
 		this.vmstateRuntimeParameter = vmstateRuntimeParameter;
 		this.vmstateRuntimeParameterUri = vmstateRuntimeParameter.getResourceUri();
-		this.runUuid = vmstateRuntimeParameter.getContainer().getUuid();
+		this.hostnameRuntimeParameter = hostnameRuntimeParameter;
+		this.hostnameRuntimeParameterUri = hostnameRuntimeParameter.getResourceUri();
+	}
+
+	public String getInstanceId() {
+		return instanceId;
 	}
 
 	public String getCloud() {
 		return cloud;
+	}
+
+	public String getNodeName() {
+		return this.nodeName;
+	}
+
+	public String getNodeInstanceId() {
+		return this.nodeInstanceId;
+	}
+
+	public String getRunUuid() {
+		return runUuid;
 	}
 
 	public RuntimeParameter getVmstateRuntimeParameter() {
@@ -139,12 +182,11 @@ public class VmRuntimeParameterMapping implements Serializable {
 		return vmstateRuntimeParameter;
 	}
 
-	public String getRunUuid() {
-		return runUuid;
-	}
-
-	public String getInstanceId() {
-		return instanceId;
+	public RuntimeParameter getHostnameRuntimeParameter() {
+		if(hostnameRuntimeParameter == null) {
+			hostnameRuntimeParameter = RuntimeParameter.load(hostnameRuntimeParameterUri);
+		}
+		return hostnameRuntimeParameter;
 	}
 
 	public static VmRuntimeParameterMapping load(Long id) {

@@ -82,6 +82,15 @@ public class Vm {
 	@Attribute(required = false)
 	private String runUuid;
 
+	@Attribute(required = false)
+	private String ip;
+
+	@Attribute(required = false)
+	private String nodeName;
+
+	@Attribute(required = false)
+	private String nodeInstanceId;
+
 	@SuppressWarnings("unused")
 	private Vm() {
 	}
@@ -160,17 +169,35 @@ public class Vm {
 			VmRuntimeParameterMapping m = getMapping(v);
 			if (old == null) {
 				setVmstate(em, m, v);
+				setIp(m, v);
 				setRunUuid(m, v);
+				setNodeName(m, v);
+				setNodeInstanceId(m, v);
 				em.persist(v);
 			} else {
 				boolean merge = false;
+
 				if (!v.getState().equals(old.getState())) {
 					old.setState(v.getState());
 					setVmstate(em, m, v);
 					merge = true;
+				} else {
+					setVmstateIfNotYetSet(em, m, v);
+				}
+				if (old.getIp() == null) {
+					setIp(m, old);
+					merge = true;
 				}
 				if (old.getRunUuid() == null) {
 					setRunUuid(m, old);
+					merge = true;
+				}
+				if (old.getNodeName() == null) {
+					setNodeName(m, old);
+					merge = true;
+				}
+				if (old.getNodeInstanceId() == null) {
+					setNodeInstanceId(m, old);
 					merge = true;
 				}
 				if (merge) {
@@ -199,12 +226,40 @@ public class Vm {
 		}
 	}
 
-	private static void setRunUuid(VmRuntimeParameterMapping m, Vm v) {
+	private static void setVmstateIfNotYetSet(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
 		if (m != null) {
 			RuntimeParameter rp = m.getVmstateRuntimeParameter();
-			if (rp != null) {
-				v.setRunUuid(rp.getContainer().getUuid());
+			if (!rp.isSet()) {
+				setVmstate(em, m, v);
 			}
+		}
+	}
+
+	private static void setRunUuid(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setRunUuid(m.getRunUuid());
+		}
+	}
+
+	private static void setIp(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			RuntimeParameter rp = m.getHostnameRuntimeParameter();
+			if (rp.isSet()) {
+				v.setIp(rp.getValue());
+			}
+
+		}
+	}
+
+	private static void setNodeName(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setNodeName(m.getNodeName());
+		}
+	}
+
+	private static void setNodeInstanceId(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setNodeInstanceId(m.getNodeInstanceId());
 		}
 	}
 
@@ -320,6 +375,30 @@ public class Vm {
 
 	public void setRunUuid(String runUuid) {
 		this.runUuid = runUuid;
+	}
+
+	public String getIp() {
+		return this.ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public String getNodeName() {
+		return this.nodeName;
+	}
+
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
+
+	public String getNodeInstanceId() {
+		return this.nodeInstanceId;
+	}
+
+	public void setNodeInstanceId(String nodeInstanceId) {
+		this.nodeInstanceId = nodeInstanceId;
 	}
 
 	public void remove() {

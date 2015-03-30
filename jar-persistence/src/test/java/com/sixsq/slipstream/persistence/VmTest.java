@@ -43,7 +43,7 @@ public class VmTest {
 	private static String firstCloud = "firstCloud";
 	private static String secondCloud = "secondCloud";
 	private static String user = "user";
-	
+
 	@Before
 	public void setup() {
 		for(Vm vm : Vm.list(user)) {
@@ -51,13 +51,13 @@ public class VmTest {
 		}
 		assertThat(Vm.list(user).size(), is(0));
 	}
-	
+
 	@After
 	public void tearDown() {
 		Vm.update(new ArrayList<Vm>(), user, firstCloud);
 		Vm.update(new ArrayList<Vm>(), user, secondCloud);
 	}
-	
+
 	@Test
 	public void update() {
 
@@ -71,7 +71,7 @@ public class VmTest {
 		assertThat(firstCloudVms.size(), is(1));
 
 		// Insert one in another cloud
-		
+
 		vm = new Vm("secondCloudInstance1", secondCloud, "state", user);
 		List<Vm> secondCloudVms = new ArrayList<Vm>();
 		secondCloudVms.add(vm);
@@ -79,7 +79,7 @@ public class VmTest {
 		assertThat(Vm.list(user).size(), is(2));
 
 		// Insert a second in the first cloud
-		
+
 		vm = new Vm("fistCloudInstance2", firstCloud, "state", user);
 		firstCloudVms.add(vm);
 		Vm.update(firstCloudVms, user, firstCloud);
@@ -92,9 +92,9 @@ public class VmTest {
 		int removed = Vm.update(firstCloudVms, user, firstCloud);
 
 		assertThat(removed, is(2));
-		
+
 		List<Vm> allVms = Vm.list(user);
-		
+
 		// Here we cheat, mixing clouds
 		Map<String, Vm> allVmsMap = Vm.toMapByInstanceId(allVms);
 		assertThat(allVms.size(), is(2));
@@ -102,7 +102,7 @@ public class VmTest {
 		assertThat(allVmsMap.get("fistCloudInstance3").getCloud(), is(firstCloud));
 		assertThat(allVmsMap.get("secondCloudInstance1").getInstanceId(), is("secondCloudInstance1"));
 		assertThat(allVmsMap.get("secondCloudInstance1").getCloud(), is(secondCloud));
-		
+
 	}
 
 	@Test
@@ -141,7 +141,7 @@ public class VmTest {
 		assertThat(usage.get(firstCloud), is(2));
 		assertThat(usage.get(secondCloud), is(1));
 	}
-	
+
 	@Test
 	public void updateState() {
 
@@ -156,7 +156,7 @@ public class VmTest {
 		assertThat(vms.get(0).getState(), is("state"));
 
 		// Update state
-	
+
 		vm = new Vm("instance1", firstCloud, "newstate", user);
 		vms = new ArrayList<Vm>();
 		vms.add(vm);
@@ -166,14 +166,14 @@ public class VmTest {
 		assertThat(vms.size(), is(1));
 		assertThat(vms.get(0).getState(), is("newstate"));
 	}
-	
+
 	@Test
 	public void empty() {
 		List<Vm> vms = new ArrayList<Vm>();
 		vms = Vm.list(user);
-		assertThat(vms.size(), is(0));		
+		assertThat(vms.size(), is(0));
 	}
-	
+
 	@Test public void listByRun() {
 		List<Vm> vmList = new ArrayList<Vm>();
 
@@ -214,7 +214,7 @@ public class VmTest {
 		vmMap = Vm.listByRun("runUuid2");
 		assertThat(vmMap.size(), is(1)); // 1 cloud in this run
 	}
-	
+
 	@Test
 	public void cloudInstanceIdUserMustBeUnique() throws Exception {
 		boolean exceptionOccured = false;
@@ -224,23 +224,23 @@ public class VmTest {
 			EntityTransaction transaction = em.getTransaction();
 			transaction.begin();
 
-			String sqlInsert1 = String.format("insert into Vm values (10, 'lokal', 'instance100', null, null, 'up', '%s')", user);
-			String sqlInsert2 = String.format("insert into Vm values (20, 'lokal', 'instance100', null, null, 'down', '%s')", user); 
+			String sqlInsert1 = String.format("INSERT INTO Vm VALUES (10, 'lokal', 'instance100', null, null, 'up', '%s', null, null, null)", user);
+			String sqlInsert2 = String.format("INSERT INTO Vm VALUES (20, 'lokal', 'instance100', null, null, 'down', '%s', null, null, null)", user);
 
 			Query query1 = em.createNativeQuery(sqlInsert1);
 			Query query2 = em.createNativeQuery(sqlInsert2);
 
 			assertEquals(1, query1.executeUpdate());
 			firstInsertAccepted = true;
-			
+
 			query2.executeUpdate();
 			transaction.commit();
 		} catch (PersistenceException pe) {
 			exceptionOccured = true;
 		}
-		
+
 		assertTrue("First insert should have worked", firstInsertAccepted);
 		assertTrue("Second insert should have failed", exceptionOccured);
 	}
-	
+
 }
