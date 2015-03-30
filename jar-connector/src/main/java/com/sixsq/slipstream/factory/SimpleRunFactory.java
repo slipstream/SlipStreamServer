@@ -55,9 +55,9 @@ public class SimpleRunFactory extends BuildImageFactory {
 	protected void initExtraRunParameters(Module module, Run run) throws ValidationException {
 		ImageModule image = (ImageModule) module;
 
-		String cloudService = run.getParameterValue(
-				constructParamName(nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME),
-				CloudImageIdentifier.DEFAULT_CLOUD_SERVICE);
+		String cloudService = run.getParameterValue(constructParamName(
+				nodeInstanceName,
+				RuntimeParameter.CLOUD_SERVICE_NAME), CloudImageIdentifier.DEFAULT_CLOUD_SERVICE);
 
 		boolean runBuildRecipes = image.hasToRunBuildRecipes(cloudService);
 
