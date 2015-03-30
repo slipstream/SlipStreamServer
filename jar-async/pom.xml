@@ -40,7 +40,6 @@
         <dependency>
                 <groupId>org.clojure</groupId>
                 <artifactId>core.async</artifactId>
-                <version>0.1.267.0-0d7780-alpha</version>
         </dependency>
 
 	</dependencies>

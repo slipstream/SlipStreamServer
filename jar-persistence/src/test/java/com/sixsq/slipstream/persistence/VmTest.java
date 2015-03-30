@@ -38,14 +38,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+
 public class VmTest {
 
 	private static String firstCloud = "firstCloud";
 	private static String secondCloud = "secondCloud";
-	private static String user = "user";
+	private static String username = "user";
+	private static User user = null;
 
 	@Before
-	public void setup() {
+	public void setup() throws ValidationException {
+		user = new User(username);
+
 		for(Vm vm : Vm.list(user)) {
 			vm.remove();
 		}
@@ -54,42 +60,42 @@ public class VmTest {
 
 	@After
 	public void tearDown() {
-		Vm.update(new ArrayList<Vm>(), user, firstCloud);
-		Vm.update(new ArrayList<Vm>(), user, secondCloud);
+		Vm.update(new ArrayList<Vm>(), username, firstCloud);
+		Vm.update(new ArrayList<Vm>(), username, secondCloud);
 	}
 
 	@Test
-	public void update() {
+	public void update() throws ConfigurationException, ValidationException {
 
 		// Insert in one cloud
 
-		Vm vm = new Vm("fistCloudInstance1", firstCloud, "state", user);
+		Vm vm = new Vm("fistCloudInstance1", firstCloud, "state", username);
 		List<Vm> firstCloudVms = new ArrayList<Vm>();
 		firstCloudVms.add(vm);
-		Vm.update(firstCloudVms, user, firstCloud);
+		Vm.update(firstCloudVms, username, firstCloud);
 		firstCloudVms = Vm.list(user);
 		assertThat(firstCloudVms.size(), is(1));
 
 		// Insert one in another cloud
 
-		vm = new Vm("secondCloudInstance1", secondCloud, "state", user);
+		vm = new Vm("secondCloudInstance1", secondCloud, "state", username);
 		List<Vm> secondCloudVms = new ArrayList<Vm>();
 		secondCloudVms.add(vm);
-		Vm.update(secondCloudVms, user, secondCloud);
+		Vm.update(secondCloudVms, username, secondCloud);
 		assertThat(Vm.list(user).size(), is(2));
 
 		// Insert a second in the first cloud
 
-		vm = new Vm("fistCloudInstance2", firstCloud, "state", user);
+		vm = new Vm("fistCloudInstance2", firstCloud, "state", username);
 		firstCloudVms.add(vm);
-		Vm.update(firstCloudVms, user, firstCloud);
+		Vm.update(firstCloudVms, username, firstCloud);
 		assertThat(Vm.list(user).size(), is(3));
 
 		// Replace first cloud vms
-		vm = new Vm("fistCloudInstance3", firstCloud, "state", user);
+		vm = new Vm("fistCloudInstance3", firstCloud, "state", username);
 		firstCloudVms = new ArrayList<Vm>();
 		firstCloudVms.add(vm);
-		int removed = Vm.update(firstCloudVms, user, firstCloud);
+		int removed = Vm.update(firstCloudVms, username, firstCloud);
 
 		assertThat(removed, is(2));
 
@@ -143,24 +149,24 @@ public class VmTest {
 	}
 
 	@Test
-	public void updateState() {
+	public void updateState() throws ConfigurationException, ValidationException {
 
 		// Insert in one cloud
 
-		Vm vm = new Vm("instance1", firstCloud, "state", user);
+		Vm vm = new Vm("instance1", firstCloud, "state", username);
 		List<Vm> vms = new ArrayList<Vm>();
 		vms.add(vm);
-		Vm.update(vms, user, firstCloud);
+		Vm.update(vms, username, firstCloud);
 		vms = Vm.list(user);
 		assertThat(vms.size(), is(1));
 		assertThat(vms.get(0).getState(), is("state"));
 
 		// Update state
 
-		vm = new Vm("instance1", firstCloud, "newstate", user);
+		vm = new Vm("instance1", firstCloud, "newstate", username);
 		vms = new ArrayList<Vm>();
 		vms.add(vm);
-		int removed = Vm.update(vms, user, firstCloud);
+		int removed = Vm.update(vms, username, firstCloud);
 		assertThat(removed, is(0));
 		vms = Vm.list(user);
 		assertThat(vms.size(), is(1));
@@ -168,7 +174,7 @@ public class VmTest {
 	}
 
 	@Test
-	public void empty() {
+	public void empty() throws ConfigurationException, ValidationException {
 		List<Vm> vms = new ArrayList<Vm>();
 		vms = Vm.list(user);
 		assertThat(vms.size(), is(0));
@@ -178,19 +184,19 @@ public class VmTest {
 		List<Vm> vmList = new ArrayList<Vm>();
 
 		// First cloud
-		Vm vm = new Vm("instance1", firstCloud, "state", user);
+		Vm vm = new Vm("instance1", firstCloud, "state", username);
 		vm.setRunUuid("runUuid1");
 		vmList.add(vm);
 
-		vm = new Vm("instance2", firstCloud, "state", user);
+		vm = new Vm("instance2", firstCloud, "state", username);
 		vm.setRunUuid("runUuid1");
 		vmList.add(vm);
 
-		vm = new Vm("instance3", firstCloud, "state", user);
+		vm = new Vm("instance3", firstCloud, "state", username);
 		vm.setRunUuid("runUuid2");
 		vmList.add(vm);
 
-		Vm.update(vmList, user, firstCloud);
+		Vm.update(vmList, username, firstCloud);
 
 		Map<String, List<Vm>> vmMap = Vm.listByRun("runUuid1");
 		assertThat(vmMap.size(), is(1)); // 1 cloud in this run
@@ -202,11 +208,11 @@ public class VmTest {
 
 		// Second cloud
 		vmList = new ArrayList<Vm>();
-		vm = new Vm("instance1", secondCloud, "state", user);
+		vm = new Vm("instance1", secondCloud, "state", username);
 		vm.setRunUuid("runUuid1");
 		vmList.add(vm);
 
-		Vm.update(vmList, user, secondCloud);
+		Vm.update(vmList, username, secondCloud);
 
 		vmMap = Vm.listByRun("runUuid1");
 		assertThat(vmMap.size(), is(2)); // 2 clouds in this run

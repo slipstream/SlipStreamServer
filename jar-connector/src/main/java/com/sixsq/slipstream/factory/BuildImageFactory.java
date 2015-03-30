@@ -46,7 +46,6 @@ import com.sixsq.slipstream.persistence.User;
 public class BuildImageFactory extends RunFactory {
 
 	protected final static String nodeInstanceName = Run.MACHINE_NAME;
-	protected final static String nodeInstanceNamePrefix = Run.MACHINE_NAME_PREFIX;
 
 	@Override
 	protected RunType getRunType() {
@@ -154,22 +153,32 @@ public class BuildImageFactory extends RunFactory {
 		if (image.getParameters() != null) {
 			for (ModuleParameter param : image.getParameterList()) {
 				if (filter.contains(param.getCategory())) {
-					run.assignRuntimeParameter(
-							nodeInstanceNamePrefix + param.getName(),
-							param.getValue(), param.getDescription());
+					run.assignRuntimeParameter(constructParamName(nodeInstanceName, param.getName()),
+							extractInitialValue(param, run),
+							param.getDescription());
 				}
 			}
 		}
 
 		// Add cloud service name to orchestrator and machine
-		run.assignRuntimeParameter(nodeInstanceNamePrefix
-				+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
-				RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+		run.assignRuntimeParameter(constructParamName(nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME),
+				cloudServiceName, RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 
 		String imageId = image.extractBaseImageId(cloudServiceName);
-		run.assignRuntimeParameter(nodeInstanceNamePrefix + RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
-				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
+		run.assignRuntimeParameter(constructParamName(nodeInstanceName, RuntimeParameter.IMAGE_ID_PARAMETER_NAME),
+				imageId, RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
 
+	}
+
+	private static String extractInitialValue(ModuleParameter parameter, Run run) {
+		String parameterName = parameter.getName();
+
+		String value = run.getParameterValue(constructParamName(nodeInstanceName, parameterName), null);
+		if (value == null) {
+			value = parameter.getValue();
+		}
+
+		return value;
 	}
 
 	protected void initNodeNames(Run run, String cloudService)
