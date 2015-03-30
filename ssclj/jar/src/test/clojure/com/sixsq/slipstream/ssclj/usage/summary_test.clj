@@ -71,19 +71,44 @@
     :metric_name        "nb-cpu"
     :metric_value       4 })
 
+(def record-2  
+  { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+    :user                "sixsq_dev"
+    :cloud               "exoscale-ch-gva"
+    :start_timestamp     start-day  
+    :end_timestamp       in-day-2
+    :metric_name         "nb-cpu"
+    :metric_value        6 })
+
+(def record-3  
+  { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+    :user                "sixsq_dev"
+    :cloud               "exoscale-ch-gva"
+    :start_timestamp     in-day-1  
+    :end_timestamp       end-day
+    :metric_name         "RAM"
+    :metric_value        16 })
+
 (deftest test-summarize-records
   (is (=
     [{ 
     :user                "sixsq_dev"
     :cloud               "exoscale-ch-gva"
-    :start_timestamp     in-day-1  
-    :end_timestamp       in-day-2
-    :usages [
+    :start_timestamp     start-day   
+    :end_timestamp       end-day
+    :usage 
       {
-        :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
-        :metric_name              "nb-cpu"
-        ;; 337 minutes between in-day-1 and in-day-1
-        :aggregated_duration_mn   (* 4 337)
-      } ]
+        "nb-cpu"
+          {
+            :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"          
+            ;; 337 minutes between in-day-1 and in-day-1, 910 minutes from start day to in-
+            ; :aggregated_duration_mn   (+ (* 6 910) (* 4 337))
+            :aggregated_duration_mn   (+ (* 6 910) (* 4 337))
+          }
+       "RAM"
+        { :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"        
+          :aggregated_duration_mn   13872
+        }
+      }
      }]    
-    (summarize-records [record-1] start-day end-day))))
+    (summarize-records [record-1 record-2 record-3] start-day end-day))))

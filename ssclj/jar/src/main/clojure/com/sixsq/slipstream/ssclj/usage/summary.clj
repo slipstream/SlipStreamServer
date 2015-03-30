@@ -63,24 +63,34 @@
         nb-minutes (t/in-minutes (t/interval (u/to-time (:start_timestamp record)) (u/to-time (:end_timestamp record))))] 
     (* value nb-minutes)))
 
-(defn merge-usage   
-  [acc-usages record]
-  acc-usages)
-
-(defn usage-for-record   
+(defn comsumption   
   [record]
+  { :cloud_vm_instanceid    (:cloud_vm_instanceid record)
+    :aggregated_duration_mn (contribution record)})
+
+(defn add-consumptions    
+  [cons1 cons2]
+  (update-in cons1 [:aggregated_duration_mn] #(+ % (:aggregated_duration_mn cons2))))
+
+(defn merge-summary-record 
+  [summary record]
+  (let [record-metric (:metric_name record)
+        record-comsumption (comsumption record)]
+    (if-let [consumption-to-increase (get-in summary [:usage record-metric])]
+      (assoc-in summary [:usage record-metric] (add-consumptions consumption-to-increase record-comsumption))
+      (assoc-in summary [:usage record-metric] record-comsumption))))
+
+(defn empty-summary-for-record   
+  [record start end]
   (-> record    
     (dissoc :cloud_vm_instanceid :metric_name :metric_value)
-    (assoc :usages [{
-                    :cloud_vm_instanceid    (:cloud_vm_instanceid record)
-                    :metric_name            (:metric_name record)
-                    :aggregated_duration_mn (contribution record)
-                    }])))
+    (assoc :start_timestamp start)  
+    (assoc :end_timestamp end)))
 
 (defn merge-usage-user-cloud 
-  [records-user-cloud]
-  (let [usage-first-record (usage-for-record (first records-user-cloud))]
-    (reduce merge-usage usage-first-record records-user-cloud)))
+  [records-user-cloud start end]
+  (let [summary-first-record (empty-summary-for-record (first records-user-cloud) start end)]
+    (reduce merge-summary-record summary-first-record records-user-cloud)))
 
 (defn user-cloud   
   [record]
@@ -89,7 +99,7 @@
 (defn summarize-per-user-cloud 
   [start-time end-time per-user-cloud]
   (for [records-user-cloud per-user-cloud]
-    (merge-usage-user-cloud records-user-cloud)))    
+    (merge-usage-user-cloud records-user-cloud start-time end-time)))    
 
 (defn summarize-records
   [records start-time end-time]
