@@ -1,0 +1,108 @@
+(ns com.sixsq.slipstream.ssclj.usage.summary
+ (:require 
+  [clojure.set :as s]
+  [clojure.tools.logging :as log]
+  [clj-time.core :as t]
+  [com.sixsq.slipstream.ssclj.usage.utils :as u]
+  [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]))
+
+;;
+;; Cuts (truncate start or end timestamp) and aggregates usage records inside an interval.
+;; Then summaries them.
+;; Usage records must intersect with interval.
+;; 
+
+(defn intersect?
+  [start-time end-time]
+  (fn [usage-record]
+    (and 
+      (t/before? (u/to-time (:start_timestamp usage-record)) (u/to-time end-time))
+      (or 
+        (nil? (:end_timestamp usage-record)) 
+        (t/after? (u/to-time (:end_timestamp usage-record)) (u/to-time start-time))))))
+
+(defn filter-inside-interval
+  [start-time end-time usage-records]
+  (filter (intersect? start-time end-time) usage-records))
+
+(defn same-user-cloud-metric-name?
+  [user cloud metric-name]
+  (fn [record]
+    (let [keys-to-compare [:user :cloud :metric_name]]      
+      (= 
+        (zipmap keys-to-compare [user cloud metric-name]) 
+        (select-keys record keys-to-compare)))))
+
+(defn filter-user-cloud-terminal
+  [user cloud metric-name records]
+  (filter (same-user-cloud-metric-name? user cloud metric-name) records))
+
+(defn shift-start
+  [start]
+  (fn [record]
+    (let [record-start-time (:start_timestamp record)]  
+      (assoc record :start_timestamp (u/max-time start record-start-time)))))
+
+(defn shift-end
+  [end]
+  (fn [record]
+    (let [record-end-time (:end_timestamp record)]
+      (assoc record :end_timestamp (u/min-time end record-end-time)))))
+
+(defn truncate   
+  [start-time end-time records]
+  (u/check u/start-before-end? [start-time end-time] "Invalid timeframe")
+  (->> records    
+    (filter-inside-interval start-time end-time)
+    (map (shift-start start-time))
+    (map (shift-end end-time))))
+
+(defn contribution   
+  [record]
+  (let [value (:metric_value record)
+        nb-minutes (t/in-minutes (t/interval (u/to-time (:start_timestamp record)) (u/to-time (:end_timestamp record))))] 
+    (* value nb-minutes)))
+
+(defn merge-usage   
+  [acc-usages record]
+  acc-usages)
+
+(defn usage-for-record   
+  [record]
+  (-> record    
+    (dissoc :cloud_vm_instanceid :metric_name :metric_value)
+    (assoc :usages [{
+                    :cloud_vm_instanceid    (:cloud_vm_instanceid record)
+                    :metric_name            (:metric_name record)
+                    :aggregated_duration_mn (contribution record)
+                    }])))
+
+(defn merge-usage-user-cloud 
+  [records-user-cloud]
+  (let [usage-first-record (usage-for-record (first records-user-cloud))]
+    (reduce merge-usage usage-first-record records-user-cloud)))
+
+(defn user-cloud   
+  [record]
+  (select-keys record [:user :cloud]))
+
+(defn summarize-per-user-cloud 
+  [start-time end-time per-user-cloud]
+  (for [records-user-cloud per-user-cloud]
+    (merge-usage-user-cloud records-user-cloud)))    
+
+(defn summarize-records
+  [records start-time end-time]
+  (->> records
+    (truncate start-time end-time)
+    (group-by user-cloud)
+    vals
+    (summarize-per-user-cloud start-time end-time)))
+    ; ))
+
+; (defn summarize
+;   [start-time end-time]
+;   (-> 
+;   (summarize-records rc/records-for-interval start-time end-time))        
+        
+    

@@ -35,12 +35,12 @@
 
 (defn max-time   
   [t1 t2]
-  (if (time/after? t1 t2)
+  (if (time/after? (to-time t1) (to-time t2))
     t1
     t2))
 
 (defn min-time   
   [t1 t2]
-  (if (time/before? t1 t2)
+  (if (time/before? (to-time t1) (to-time t2))
     t1
     t2))
