@@ -86,6 +86,9 @@ public class Vm {
 	private String ip;
 
 	@Attribute(required = false)
+	private String name;
+
+	@Attribute(required = false)
 	private String nodeName;
 
 	@Attribute(required = false)
@@ -170,6 +173,7 @@ public class Vm {
 			if (old == null) {
 				setVmstate(em, m, v);
 				setIp(m, v);
+				setName(m, v);
 				setRunUuid(m, v);
 				setNodeName(m, v);
 				setNodeInstanceId(m, v);
@@ -184,12 +188,16 @@ public class Vm {
 				} else {
 					setVmstateIfNotYetSet(em, m, v);
 				}
+				if (old.getRunUuid() == null) {
+					setRunUuid(m, old);
+					merge = true;
+				}
 				if (old.getIp() == null) {
 					setIp(m, old);
 					merge = true;
 				}
-				if (old.getRunUuid() == null) {
-					setRunUuid(m, old);
+				if (old.getName() == null) {
+					setName(m, old);
 					merge = true;
 				}
 				if (old.getNodeName() == null) {
@@ -248,6 +256,12 @@ public class Vm {
 				v.setIp(rp.getValue());
 			}
 
+		}
+	}
+
+	private static void setName(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setName(m.getName());
 		}
 	}
 
@@ -383,6 +397,14 @@ public class Vm {
 
 	public void setIp(String ip) {
 		this.ip = ip;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getNodeName() {

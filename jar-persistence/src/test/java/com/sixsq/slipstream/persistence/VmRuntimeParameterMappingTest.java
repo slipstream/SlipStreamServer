@@ -78,28 +78,28 @@ public class VmRuntimeParameterMappingTest {
 		vmstate.store();
 		hostname = new RuntimeParameter(run, "machine:key111", "value111", "description");
 		hostname.store();
-		mapping = new VmRuntimeParameterMapping("instanceId1", "cloud1", "machine", null, vmstate, hostname);
+		mapping = new VmRuntimeParameterMapping("instanceId1", "cloud1", "machine", null, null, vmstate, hostname);
 		mapping.store();
 
 		vmstate = new RuntimeParameter(run, "machine:key21", "value21", "description");
 		vmstate.store();
 		hostname = new RuntimeParameter(run, "machine:key121", "value121", "description");
 		hostname.store();
-		mapping = new VmRuntimeParameterMapping("instanceId2", "cloud1", "machine", null, vmstate, hostname);
+		mapping = new VmRuntimeParameterMapping("instanceId2", "cloud1", "machine", null, null, vmstate, hostname);
 		mapping.store();
 
 		vmstate = new RuntimeParameter(run, "machine:key31", "value31", "description");
 		vmstate.store();
 		hostname = new RuntimeParameter(run, "machine:key131", "value131", "description");
 		hostname.store();
-		mapping = new VmRuntimeParameterMapping("instanceId3", "cloud1", "machine", null, vmstate, hostname);
+		mapping = new VmRuntimeParameterMapping("instanceId3", "cloud1", "machine", null, null, vmstate, hostname);
 		mapping.store();
 
 		vmstate = new RuntimeParameter(run, "machine:key12", "value12", "description");
 		vmstate.store();
 		hostname = new RuntimeParameter(run, "machine:key112", "value112", "description");
 		hostname.store();
-		mapping = new VmRuntimeParameterMapping("instanceId1", "cloud2", "machine", null, vmstate, hostname);
+		mapping = new VmRuntimeParameterMapping("instanceId1", "cloud2", "machine", null, null, vmstate, hostname);
 		mapping.store();
 
 		mapping = VmRuntimeParameterMapping.find("cloud1", "instanceId2");

@@ -56,6 +56,7 @@ public class VmRuntimeParameterMapping implements Serializable {
 	private String instanceId;
 	private String cloud;
 	private String runUuid;
+	private String name;
 	private String nodeName;
 	private String nodeInstanceId;
 
@@ -126,6 +127,7 @@ public class VmRuntimeParameterMapping implements Serializable {
 		String nodeInstanceName = instanceIdParameter.getNodeName();
 		String runUuid = instanceIdParameter.getContainer().getUuid();
 		String instanceId = getRuntimeParameterValue(instanceIdParameter);
+		String name = instanceIdParameter.getGroup();
 
 		String cloud = getRuntimeParameterValue(runUuid, nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME);
 		String nodeName = getRuntimeParameterValue(runUuid, nodeInstanceName, RuntimeParameter.NODE_NAME_KEY);
@@ -134,18 +136,20 @@ public class VmRuntimeParameterMapping implements Serializable {
 		RuntimeParameter vmstate = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.STATE_VM_KEY);
 		RuntimeParameter hostname = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.HOSTNAME_KEY);
 
-		new VmRuntimeParameterMapping(instanceId, cloud, nodeName, nodeInstanceid, vmstate, hostname).store();
+		new VmRuntimeParameterMapping(instanceId, cloud, name, nodeName, nodeInstanceid, vmstate, hostname).store();
 	}
 
 	public VmRuntimeParameterMapping() {
 
 	}
 
-	public VmRuntimeParameterMapping(String instanceId, String cloud, String nodeName, String nodeInstanceId,
+	public VmRuntimeParameterMapping(String instanceId, String cloud, String name, String nodeName,
+			String nodeInstanceId,
 			RuntimeParameter vmstateRuntimeParameter,
 			RuntimeParameter hostnameRuntimeParameter) {
 		this.instanceId = instanceId;
 		this.cloud = cloud;
+		this.name = name;
 		this.nodeName = nodeName;
 		this.nodeInstanceId = nodeInstanceId;
 		this.runUuid = vmstateRuntimeParameter.getContainer().getUuid();
@@ -161,6 +165,10 @@ public class VmRuntimeParameterMapping implements Serializable {
 
 	public String getCloud() {
 		return cloud;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	public String getNodeName() {
