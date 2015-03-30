@@ -10,6 +10,23 @@
 (def end-day-2    (u/to-time "2015-01-18T00:00:00.0Z"))
 (def middle-day-3 (u/to-time "2015-01-18T12:00:00.0Z"))
 
+(def event-start-time   "2015-01-16T09:44:12.0Z")
+(def middle-event       "2015-01-16T12:00:00.0Z")
+(def event-end-time     "2015-01-16T14:38:43.0Z")
+
+(def record
+  { :cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+    :user                "sixsq_dev"
+    :cloud               "exoscale-ch-gva"
+    :start-timestamp     event-start-time
+    :end-timestamp       event-end-time
+    :metrics [{   :name  "nb-cpu"
+                  :value 4 }
+                { :name  "RAM-GB"
+                  :value 8 }
+                { :name  "disk-GB"
+                  :value 100.5 }]})
+
 (def block-joe-day-1
   { :id "joe"    
     :start-timestamp (u/to-time "2015-01-16T08:20:00.0Z")
