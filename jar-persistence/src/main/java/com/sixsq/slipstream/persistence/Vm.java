@@ -99,10 +99,6 @@ public class Vm {
 		measurement = new Date();
 	}
 
-	private static Predicate andPredicate(CriteriaBuilder builder, Predicate currentPredicate, Predicate newPredicate){
-		return (currentPredicate != null) ? builder.and(currentPredicate, newPredicate) : newPredicate;
-	}
-
 	public static List<Vm> list(User user) throws ConfigurationException, ValidationException {
 		return list(user, null, null, null, null);
 	}
@@ -155,6 +151,10 @@ public class Vm {
 			em.close();
 		}
 		return count;
+	}
+
+	private static Predicate andPredicate(CriteriaBuilder builder, Predicate currentPredicate, Predicate newPredicate){
+		return (currentPredicate != null) ? builder.and(currentPredicate, newPredicate) : newPredicate;
 	}
 
 	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Vm> rootQuery, User user,
