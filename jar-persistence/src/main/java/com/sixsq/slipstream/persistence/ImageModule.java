@@ -141,11 +141,10 @@ public class ImageModule extends Module {
 			extractBaseImageId(cloudService);
 			return;
 		}
-		if (getImageId(cloudService) == null) {
-			throw new ValidationException(getName()
-					+ " missing an image id for cloud: " + cloudService
-					+ ". Did you build it?");
-		}
+	}
+
+	public boolean hasToRunBuildRecipes(String cloudService) {
+		return !isVirtual() && getImageId(cloudService) == null;
 	}
 
 	private void validateBaseImage(String cloudService, boolean throwOnError)

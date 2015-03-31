@@ -49,6 +49,9 @@ public class Vms {
 	@Attribute(required=false)
 	private String cloud;
 
+	@Attribute(required=false)
+	private String runUuid;
+
 	@ElementList(inline = true)
 	private List<Vm> vms = new ArrayList<Vm>();
 
@@ -56,17 +59,22 @@ public class Vms {
 		return vms;
 	}
 
-	public void populate(User user, int offset, int limit, String cloudServiceName) throws SlipStreamException {
-		populateVms(user, offset, limit, cloudServiceName);
+	public void populate(User user, int offset, int limit, String cloudServiceName, String runUuid)
+			throws SlipStreamException {
+
+		populateVms(user, offset, limit, cloudServiceName, runUuid);
 	}
 
-	private void populateVms(User user, int offset, int limit, String cloudServiceName) throws SlipStreamException {
+	private void populateVms(User user, int offset, int limit, String cloudServiceName, String runUuid)
+			throws SlipStreamException {
+
 		this.offset = offset;
 		this.limit = limit;
 		this.cloud = cloudServiceName;
+		this.runUuid = runUuid;
 
-		totalCount = Vm.listCount(user.getName(), cloudServiceName);
-		vms = Vm.list(user.getName(), offset, limit, cloudServiceName);
+		totalCount = Vm.listCount(user, cloudServiceName, runUuid);
+		vms = Vm.list(user, offset, limit, cloudServiceName, runUuid);
 		count = vms.size();
 	}
 }

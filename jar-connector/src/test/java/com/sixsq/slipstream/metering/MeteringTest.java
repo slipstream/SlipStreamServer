@@ -32,6 +32,7 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sixsq.slipstream.connector.Collector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.persistence.Vm;
@@ -63,13 +64,13 @@ public class MeteringTest extends RunTestBase {
 		vms.add(createVm("id_1", CLOUD_A, RUNNING_VM_STATE, username, runId));
 		vms.add(createVm("id_2", CLOUD_A, RUNNING_VM_STATE, username, runId));
 		vms.add(createVm("id_3", CLOUD_A, "Terminated", username, runId));
-		Vm.update(vms, username, CLOUD_A);
+		Collector.update(vms, username, CLOUD_A);
 
 		vms.clear();
 		vms.add(createVm("id_1", CLOUD_B, "Pending", username, runId));
 		vms.add(createVm("id_2", CLOUD_B, RUNNING_VM_STATE, username, runId));
 		vms.add(createVm("id_3", CLOUD_B, "Terminated", username, runId));
-		Vm.update(vms, username, CLOUD_B);
+		Collector.update(vms, username, CLOUD_B);
 
 	}
 

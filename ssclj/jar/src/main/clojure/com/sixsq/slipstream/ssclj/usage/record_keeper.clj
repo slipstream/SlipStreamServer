@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.usage.utils :as u])
 
   (:gen-class
-    :name com.sixsq.slipstream.ssclj.usage.Record
+    :name com.sixsq.slipstream.usage.Record
     :methods [
 
     #^{:static true} [init            [] void]

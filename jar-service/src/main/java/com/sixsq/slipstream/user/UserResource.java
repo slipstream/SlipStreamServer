@@ -104,7 +104,7 @@ public class UserResource extends ParameterizedResource<User> {
 			UserParameter userPublicSshKey = user.getParameter(ExecutionControlUserParametersFactory.CATEGORY + "."
 					+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME);
 
-			if (userPublicSshKey != null && userPublicSshKey.getValue().trim().isEmpty()) {
+			if (userPublicSshKey != null && userPublicSshKey.getValue("").trim().isEmpty()) {
 				String serverPublicSshKey = FileUtil.fileToString(ConnectorBase.getServerPublicSshKeyFilename());
 				userPublicSshKey.setValue(serverPublicSshKey);
 				user.getParameters().put(userPublicSshKey.getName(), userPublicSshKey);
