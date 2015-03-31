@@ -26,9 +26,9 @@
     :user                "joe"
     :cloud               "exoscale-ch-gva"    
     :metrics [{   :name  "nb-cpu"
-                  :value 2 }
+                  :value 2.0 }
               { :name  "RAM-GB"
-                  :value 8 }
+                  :value 8.0 }
               { :name  "disk-GB"
                   :value 100.5 }]})
 
@@ -43,11 +43,11 @@
           day-14h   (t/plus start-day (t/hours 14))
           vm-joe-id (str "exo" day)
           event-joe-start (assoc event-joe-start-template 
-                              :start_timestamp day-9h 
+                              :start_timestamp (u/to-ISO-8601 day-9h)
                               :cloud_vm_instanceid vm-joe-id)
-          event-joe-end {:end_timestamp day-14h
+          event-joe-end {:end_timestamp (u/to-ISO-8601 day-14h)
                          :cloud_vm_instanceid vm-joe-id}
-      ]
+      ]      
       (rc/-insertStart event-joe-start)
       (rc/-insertEnd event-joe-end))))
 
@@ -56,7 +56,7 @@
   (doseq [i (range nb-weeks)]
     (let [start-week (t/plus (t/date-time 2014) (t/weeks i))
           end-week (t/plus start-week (t/weeks 1))]
-      (summarize-and-store (u/to-ISO-8601 start-week) (u/to-ISO-8601 end-week)))))      
+      (summarizeAndStore (u/to-ISO-8601 start-week) (u/to-ISO-8601 end-week)))))      
 
 (defn check-summaries
   []  
@@ -69,7 +69,7 @@
     ))
 
 (deftest test-with-records-full-year
-  (let [nb-weeks 50]
+  (let [nb-weeks 5]
     (fill-joe (* nb-weeks 7))
     (summarize-joe-weekly nb-weeks)
     (check-summaries)))
