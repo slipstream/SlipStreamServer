@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.usage.utils
  (:require 
   [clojure.tools.logging :as log]
+  [clojure.data.json :as json]
   [clj-time.core :as time]
   [clj-time.format :as time-fmt]))
 
@@ -9,6 +10,19 @@
    instance on success and nil on failure."
   [s]
   (time-fmt/parse (:date-time time-fmt/formatters) s))
+
+(defn serialize
+  [m]
+  (with-out-str
+   (json/pprint m :key-fn name)))
+
+(defn deserialize
+  [s]
+  (json/read-str s :key-fn keyword))
+
+(defn to-ISO-8601
+  [ts]
+  (time-fmt/unparse (:date-time time-fmt/formatters) ts))
 
 (defn- log-and-throw 
   [msg-error]

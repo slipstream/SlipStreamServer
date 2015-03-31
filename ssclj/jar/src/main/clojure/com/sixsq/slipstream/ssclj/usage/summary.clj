@@ -61,12 +61,11 @@
 
 (defn comsumption   
   [record]
-  { :cloud_vm_instanceid    (:cloud_vm_instanceid record)
-    :aggregated_duration_mn (contribution record)})
+  { :unit_minutes (contribution record)})
 
 (defn sum-consumptions    
   [cons1 cons2]
-  (update-in cons1 [:aggregated_duration_mn] #(+ % (:aggregated_duration_mn cons2))))
+  (update-in cons1 [:unit_minutes] #(+ % (:unit_minutes cons2))))
 
 (defn merge-summary-record 
   [summary record]

@@ -25,10 +25,36 @@
 
 (defentity usage-summaries)
 
+(def UsageSummary
+  (merge
+    c/CreateAttrs
+    c/AclAttr
+    { 
+      :user             c/NonBlankString
+      :cloud            c/NonBlankString
+      :start_timestamp  c/Timestamp
+      :end_timestamp    c/Timestamp
+      :usage {
+         c/NonBlankString { ;; metric-name
+           :cloud_vm_instanceid      c/NonBlankString
+           :unit_minutes   c/NonBlankString } 
+       }
+    }))
+
+(def validate-fn (u/create-validation-fn UsageSummary))
+
 ;;
 ;; collection
 ;;
 
 (defmethod crud/query resource-name
-           [request]
-  (select usage-summaries))
+           [request]  
+    (-> (select usage-summaries)
+      (u/json-response)))
+
+  ;     (str resource-name "/" uuid)
+  ;       (db/retrieve)
+  ;       (a/can-view? request)
+  ;       (crud/set-operations request)
+  ;       (u/json-response))))
+  ; (select usage-summaries))

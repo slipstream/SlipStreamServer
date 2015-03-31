@@ -118,15 +118,14 @@
     :usage 
       {
         "nb-cpu"
-          {
-            :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"          
+          {            
             ;; 337 minutes between in-day-1 and in-day-1, 910 minutes from start day to in-
-            ; :aggregated_duration_mn   (+ (* 6 910) (* 4 337))
-            :aggregated_duration_mn   (+ (* 6 910) (* 4 337))
+            ; :unit_minutes   (+ (* 6 910) (* 4 337))
+            :unit_minutes   (+ (* 6 910) (* 4 337))
           }
        "RAM"
-        { :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"        
-          :aggregated_duration_mn   13872
+        { 
+          :unit_minutes   13872
         }
       }
      }]    
@@ -141,9 +140,8 @@
     :usage 
       {
         "Disk"
-          {
-            :cloud_vm_instanceid      "aws:445623"                      
-            :aggregated_duration_mn   144000
+          {            
+            :unit_minutes   144000
           }
       }
      }]
@@ -158,9 +156,8 @@
     :usage 
       {
         "Disk"
-          {
-            :cloud_vm_instanceid      "aws:445623"                      
-            :aggregated_duration_mn   144000
+          {            
+            :unit_minutes   144000
           }
       }
      }]
@@ -195,19 +192,16 @@
     :usage 
       {
         "nb-cpu"
-        {
-          :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"                      
-          :aggregated_duration_mn   (* 4.0 337)
+        {          
+          :unit_minutes   (* 4.0 337)
         }
         "RAM-GB"
-        {
-          :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"                      
-          :aggregated_duration_mn   (* 8.0 337)
+        {         
+          :unit_minutes   (* 8.0 337)
         }
         "disk-GB"
         {
-          :cloud_vm_instanceid      "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"                      
-          :aggregated_duration_mn   (* 100.5 337)
+          :unit_minutes   (* 100.5 337)
         }
       }
      }]
@@ -219,7 +213,7 @@
   (summarize-and-store start-day end-day)
   (let [summaries-from-db (select usage-summaries)]
     (is (= 1 (count summaries-from-db)))
-    (is (= "{\"disk-GB\":\n {\"cloud_vm_instanceid\":\n  \"exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592\",\n  \"aggregated_duration_mn\":33868.5},\n \"RAM-GB\":\n {\"cloud_vm_instanceid\":\n  \"exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592\",\n  \"aggregated_duration_mn\":2696.0},\n \"nb-cpu\":\n {\"cloud_vm_instanceid\":\n  \"exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592\",\n  \"aggregated_duration_mn\":1348.0}}\n"
+    (is (= "{\"disk-GB\":{\"unit_minutes\":33868.5},\n \"RAM-GB\":{\"unit_minutes\":2696.0},\n \"nb-cpu\":{\"unit_minutes\":1348.0}}\n"
        (:usage (first summaries-from-db))))))
 
 

@@ -2,8 +2,7 @@
   (:require 
     [clojure.string :only [join]]
     [clojure.tools.logging :as log]
-    [clojure.java.jdbc :refer :all :as jdbc] 
-    [clojure.data.json :as json]      
+    [clojure.java.jdbc :refer :all :as jdbc]     
     [korma.core :refer :all]
     [com.sixsq.slipstream.ssclj.api.korma-helper :as kh]
     [com.sixsq.slipstream.ssclj.usage.utils :as u])
@@ -30,11 +29,6 @@
 ;; The records-for-interval retrieves the usage-records for a given interval.
 ;; (i.e records whose [start-end timestamps] intersect with the interval)
 ;;
-
-(defn serialize
-  [m]
-  (with-out-str
-   (json/pprint m)))
   
 (defn anti-quote 
   [s] 
@@ -113,7 +107,8 @@
 
 (defn -insertStart
   [usage-event]
-  (log/info "Will persist usage event: " usage-event)
+  (log/info "Will persist usage event START")
+  (log/debug "Usage event " usage-event)
   (check-not-already-existing usage-event)
   (doseq [metric (:metrics usage-event)]    
     (let [usage-event-metric (project usage-event metric)]
@@ -123,6 +118,8 @@
 (defn -insertEnd
   [usage-event]
   (check-already-started usage-event)
+  (log/info "Will persist usage event END")
+  (log/debug "Usage event " usage-event)
   (update 
       usage-records 
       (set-fields {:end_timestamp (:end_timestamp usage-event)})
@@ -130,7 +127,7 @@
 
 (defn insert-summary   
   [summary]
-  (insert usage-summaries (values (update-in summary [:usage] serialize))))    
+  (insert usage-summaries (values (update-in summary [:usage] u/serialize))))    
 
 (defn records-for-interval
   [start end]
