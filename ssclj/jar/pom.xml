@@ -274,6 +274,8 @@
                 <namespace>com.sixsq.slipstream.ssclj.app.main</namespace>
                 <namespace>com.sixsq.slipstream.ssclj.api.acl</namespace>
                 <namespace>com.sixsq.slipstream.ssclj.api.korma-helper</namespace>
+                <namespace>com.sixsq.slipstream.ssclj.usage.record-keeper</namespace>
+                <namespace>com.sixsq.slipstream.ssclj.usage.summary</namespace>
               </namespaces>
               <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
             </configuration>
