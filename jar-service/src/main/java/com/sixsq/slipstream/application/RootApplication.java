@@ -65,7 +65,6 @@ import com.sixsq.slipstream.metrics.GraphiteRouter;
 import com.sixsq.slipstream.module.ModuleRouter;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.resource.DocumentationResource;
 import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.ServiceCatalogRouter;
 import com.sixsq.slipstream.resource.WelcomeResource;
@@ -200,7 +199,6 @@ public class RootApplication extends Application {
 			attachLogout(router);
 			attachConfiguration(router);
 			attachServiceCatalog(router); // needs to be after configuration
-			attachDocumentation(router);
 			attachReports(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
@@ -348,15 +346,6 @@ public class RootApplication extends Application {
 		TemplateRoute route;
 		route = router.attach("/action/", new ActionRouter());
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
-	}
-
-	private void attachDocumentation(RootRouter router) {
-		Authenticators authenticators = guardAndAttach(router, DocumentationResource.class, "documentation")
-				.getAuthenticators();
-
-		for (ListIterator<Authenticator> iter = authenticators.listIterator(); iter.hasNext(); ) {
-			iter.next().setOptional(true);
-		}
 	}
 
 	private void attachWelcome(RootRouter router) {

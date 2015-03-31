@@ -32,6 +32,8 @@ public class RunParameter extends Parameter<Run> {
 
 	public static final String NODE_INCREMENT_KEY = "node.increment";
 	public static final String NODE_INCREMENT_DESCRIPTION = "Current increment value for node instances ids";
+	public static final String NODE_RUN_BUILD_RECIPES_KEY = "run-build-recipes";
+	public static final String NODE_RUN_BUILD_RECIPES_DESCRIPTION = "Define if the SlipStream executor should run build recipes.";
 
 	@Id
 	@GeneratedValue

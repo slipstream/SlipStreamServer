@@ -35,9 +35,17 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
 import javax.persistence.Table;
+import javax.persistence.TypedQuery;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.simpleframework.xml.Attribute;
+
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test:
@@ -48,10 +56,7 @@ import org.simpleframework.xml.Attribute;
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames={"cloud", "instanceId", "user_"})})
 @NamedQueries({
-		@NamedQuery(name = "byUser", query = "SELECT v FROM Vm v WHERE v.user_ = :user"),
-		@NamedQuery(name = "byUserCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user"),
 		@NamedQuery(name = "byUserAndCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
-		@NamedQuery(name = "byUserAndCloudCount", query = "SELECT COUNT(v) FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
 		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on', 'active', 'Active') AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
 		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run")
 })
@@ -94,41 +99,77 @@ public class Vm {
 		measurement = new Date();
 	}
 
-	public static List<Vm> list(String user) {
-		return list(user, null, null, null);
+	public static List<Vm> list(User user) throws ConfigurationException, ValidationException {
+		return list(user, null, null, null, null);
 	}
 
-	public static List<Vm> list(String user, Integer offset, Integer limit, String cloudServiceName) {
+	public static List<Vm> list(User user, Integer offset, Integer limit, String cloudServiceName, String runUuid)
+			throws ConfigurationException, ValidationException {
+
+		List<Vm> vms = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
-		String queryName = (cloudServiceName != null) ? "byUserAndCloud" : "byUser";
-		Query q = em.createNamedQuery(queryName);
-		if (offset != null) {
-			q.setFirstResult(offset);
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Vm> critQuery = builder.createQuery(Vm.class);
+			Root<Vm> rootQuery = critQuery.from(Vm.class);
+			critQuery.select(rootQuery);
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, cloudServiceName, runUuid);
+			if (where != null){
+				critQuery.where(where);
+			}
+			critQuery.orderBy(builder.desc(rootQuery.get("measurement")));
+			TypedQuery<Vm> query = em.createQuery(critQuery);
+			if (offset != null) {
+				query.setFirstResult(offset);
+			}
+			if (limit != null) {
+				query.setMaxResults(limit);
+			}
+			vms = query.getResultList();
+		} finally {
+			em.close();
 		}
-		if (limit != null) {
-			q.setMaxResults(limit);
-		}
-		if (cloudServiceName != null) {
-			q.setParameter("cloud", cloudServiceName);
-		}
-		q.setParameter("user", user);
-		@SuppressWarnings("unchecked")
-		List<Vm> vms = q.getResultList();
-		em.close();
 		return vms;
 	}
 
-	public static int listCount(String user, String cloudServiceName) {
+	public static int listCount(User user, String cloudServiceName, String runUuid)
+			throws ConfigurationException, ValidationException {
+		int count = 0;
 		EntityManager em = PersistenceUtil.createEntityManager();
-		String queryName = (cloudServiceName != null) ? "byUserAndCloudCount" : "byUserCount";
-		Query q = em.createNamedQuery(queryName);
-		q.setParameter("user", user);
-		if (cloudServiceName != null) {
-			q.setParameter("cloud", cloudServiceName);
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Long> critQuery = builder.createQuery(Long.class);
+			Root<Vm> rootQuery = critQuery.from(Vm.class);
+			critQuery.select(builder.count(rootQuery));
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, cloudServiceName, runUuid);
+			if (where != null){
+				critQuery.where(where);
+			}
+			TypedQuery<Long> query = em.createQuery(critQuery);
+			count = (int)(long) query.getSingleResult();
+		} finally {
+			em.close();
 		}
-		long count = (long)(Long) q.getSingleResult();
-		em.close();
-		return (int)count;
+		return count;
+	}
+
+	private static Predicate andPredicate(CriteriaBuilder builder, Predicate currentPredicate, Predicate newPredicate){
+		return (currentPredicate != null) ? builder.and(currentPredicate, newPredicate) : newPredicate;
+	}
+
+	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Vm> rootQuery, User user,
+			String cloudServiceName, String runUuid) {
+		Predicate where = null;
+		if (!user.isSuper()) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), user.getName()));
+		}
+		if (runUuid != null && !"".equals(runUuid)) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("runUuid"), runUuid));
+		}
+		if (cloudServiceName != null && !"".equals(cloudServiceName)) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("cloud"), cloudServiceName));
+		}
+		return where;
 	}
 
 	public static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, Vm v) {

@@ -110,8 +110,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		Form form = new Form(entity);
 
 		if (!isExisting()) {
-			throwClientForbiddenError("Target project doesn't exist: "
-					+ getParameterized().getName());
+			throwClientForbiddenError("Target project doesn't exist: " + getParameterized().getName());
 		}
 
 		String sourceUri = form.getFirstValue(COPY_SOURCE_FORM_PARAMETER_NAME);
@@ -130,8 +129,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		}
 
 		if (!source.getAuthz().canGet(getUser())) {
-			throwClientForbiddenError("You do not have read rights on the source module: "
-					+ source.getName());
+			throwClientForbiddenError("You do not have read rights on the source module: " + source.getName());
 		}
 
 		String targetFullName = getParameterized().getName() + "/" + targetName;
@@ -139,8 +137,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		Module target = Module.load(targetUri);
 		if (target != null) {
-			throwClientForbiddenError("Target module already exists: "
-					+ targetUri);
+			throwClientForbiddenError("Target module already exists: " + targetUri);
 		}
 
 		if (!getParameterized().getAuthz().canCreateChildren(getUser())) {

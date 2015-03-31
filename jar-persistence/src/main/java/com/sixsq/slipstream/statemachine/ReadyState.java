@@ -77,16 +77,16 @@ public class ReadyState extends SynchronizedState {
 		String keepRunning = getKeepRunning(run);
 
 		return !extrinsicState.isFailing() &&
-				(keepRunning == UserParameter.KEEP_RUNNING_ALWAYS ||
-				keepRunning == UserParameter.KEEP_RUNNING_ON_SUCCESS);
+				(UserParameter.KEEP_RUNNING_ALWAYS.equals(keepRunning) ||
+				UserParameter.KEEP_RUNNING_ON_SUCCESS.equals(keepRunning));
 	}
 
 	private boolean shouldKeepRunningForError(Run run) {
 		String keepRunning = getKeepRunning(run);
 
 		return extrinsicState.isFailing() &&
-				(keepRunning == UserParameter.KEEP_RUNNING_ALWAYS ||
-				keepRunning == UserParameter.KEEP_RUNNING_ON_ERROR);
+				(UserParameter.KEEP_RUNNING_ALWAYS.equals(keepRunning) ||
+				UserParameter.KEEP_RUNNING_ON_ERROR.equals(keepRunning));
 	}
 
     @Override
