@@ -46,6 +46,7 @@ import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.vm.VmsQueryParameters;
 
 /**
  * Unit test:
@@ -115,10 +116,10 @@ public class Vm {
 	}
 
 	public static List<Vm> list(User user) throws ConfigurationException, ValidationException {
-		return list(user, null, null, null, null);
+		return list(new VmsQueryParameters(user, null, null, null, null, null, null));
 	}
 
-	public static List<Vm> list(User user, Integer offset, Integer limit, String cloudServiceName, String runUuid)
+	public static List<Vm> list(VmsQueryParameters parameters)
 			throws ConfigurationException, ValidationException {
 
 		List<Vm> vms = null;
@@ -128,17 +129,17 @@ public class Vm {
 			CriteriaQuery<Vm> critQuery = builder.createQuery(Vm.class);
 			Root<Vm> rootQuery = critQuery.from(Vm.class);
 			critQuery.select(rootQuery);
-			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, cloudServiceName, runUuid);
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, parameters);
 			if (where != null){
 				critQuery.where(where);
 			}
 			critQuery.orderBy(builder.desc(rootQuery.get("measurement")));
 			TypedQuery<Vm> query = em.createQuery(critQuery);
-			if (offset != null) {
-				query.setFirstResult(offset);
+			if (parameters.offset != null) {
+				query.setFirstResult(parameters.offset);
 			}
-			if (limit != null) {
-				query.setMaxResults(limit);
+			if (parameters.limit != null) {
+				query.setMaxResults(parameters.limit);
 			}
 			vms = query.getResultList();
 		} finally {
@@ -147,8 +148,7 @@ public class Vm {
 		return vms;
 	}
 
-	public static int listCount(User user, String cloudServiceName, String runUuid)
-			throws ConfigurationException, ValidationException {
+	public static int listCount(VmsQueryParameters parameters) throws ConfigurationException, ValidationException {
 		int count = 0;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
@@ -156,7 +156,7 @@ public class Vm {
 			CriteriaQuery<Long> critQuery = builder.createQuery(Long.class);
 			Root<Vm> rootQuery = critQuery.from(Vm.class);
 			critQuery.select(builder.count(rootQuery));
-			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, cloudServiceName, runUuid);
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, parameters);
 			if (where != null){
 				critQuery.where(where);
 			}
@@ -172,17 +172,24 @@ public class Vm {
 		return (currentPredicate != null) ? builder.and(currentPredicate, newPredicate) : newPredicate;
 	}
 
-	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Vm> rootQuery, User user,
-			String cloudServiceName, String runUuid) {
+	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Vm> rootQuery,
+			VmsQueryParameters parameters) {
+
 		Predicate where = null;
-		if (!user.isSuper()) {
-			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), user.getName()));
+		if (!parameters.user.isSuper()) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), parameters.user.getName()));
 		}
-		if (runUuid != null && !"".equals(runUuid)) {
-			where = andPredicate(builder, where, builder.equal(rootQuery.get("runUuid"), runUuid));
+		if (parameters.user.isSuper() && parameters.userFilter != null) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), parameters.userFilter));
 		}
-		if (cloudServiceName != null && !"".equals(cloudServiceName)) {
-			where = andPredicate(builder, where, builder.equal(rootQuery.get("cloud"), cloudServiceName));
+		if (parameters.runUuid != null && !"".equals(parameters.runUuid)) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("runUuid"), parameters.runUuid));
+		}
+		if (parameters.runOwner != null && !"".equals(parameters.runOwner)) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("runOwner"), parameters.runOwner));
+		}
+		if (parameters.cloud != null && !"".equals(parameters.cloud)) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("cloud"), parameters.cloud));
 		}
 		return where;
 	}

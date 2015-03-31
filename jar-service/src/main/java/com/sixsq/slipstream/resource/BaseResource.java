@@ -49,7 +49,9 @@ public abstract class BaseResource extends ServerResource {
 	public static final String PAGING_LIMIT_KEY = "limit";
 	public static final String PAGING_CLOUD_KEY = "cloud";
 	public static final String RUN_UUID_KEY = "runUuid";
+	public static final String RUN_OWNER_KEY = "runOwner";
 	public static final String CHOOSER_KEY = "chooser";
+	public static final String USER_KEY = "user";
 	public static final String EDIT_KEY = "edit";
 	public static final String NEW_KEY = "new";
 
@@ -328,4 +330,15 @@ public abstract class BaseResource extends ServerResource {
 		return getQueryValue(RUN_UUID_KEY);
 	}
 
+	protected String getRunOwner() {
+		return getQueryValue(RUN_OWNER_KEY);
+	}
+
+	protected String getUserFilter() {
+		String user = getQueryValue(USER_KEY);
+		if (user != null && !getUser().isSuper()) {
+			throwClientForbiddenError("You don't have the permission to use the query parameter 'user'");
+		}
+		return user;
+	}
 }
