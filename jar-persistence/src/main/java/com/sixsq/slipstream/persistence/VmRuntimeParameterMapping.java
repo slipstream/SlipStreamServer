@@ -56,6 +56,7 @@ public class VmRuntimeParameterMapping implements Serializable {
 	private String instanceId;
 	private String cloud;
 	private String runUuid;
+	private String runOwner;
 	private String name;
 	private String nodeName;
 	private String nodeInstanceId;
@@ -125,7 +126,9 @@ public class VmRuntimeParameterMapping implements Serializable {
 
 	public static void insertVmInstanceMapping(RuntimeParameter instanceIdParameter) {
 		String nodeInstanceName = instanceIdParameter.getNodeName();
-		String runUuid = instanceIdParameter.getContainer().getUuid();
+		Run run = instanceIdParameter.getContainer();
+		String runUuid = run.getUuid();
+		String runOwner = run.getUser();
 		String instanceId = getRuntimeParameterValue(instanceIdParameter);
 		String name = instanceIdParameter.getGroup();
 
@@ -136,14 +139,16 @@ public class VmRuntimeParameterMapping implements Serializable {
 		RuntimeParameter vmstate = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.STATE_VM_KEY);
 		RuntimeParameter hostname = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.HOSTNAME_KEY);
 
-		new VmRuntimeParameterMapping(instanceId, cloud, name, nodeName, nodeInstanceid, vmstate, hostname).store();
+		VmRuntimeParameterMapping m = new VmRuntimeParameterMapping(instanceId, cloud, runOwner, name, nodeName,
+				nodeInstanceid, vmstate, hostname);
+		m.store();
 	}
 
 	public VmRuntimeParameterMapping() {
 
 	}
 
-	public VmRuntimeParameterMapping(String instanceId, String cloud, String name, String nodeName,
+	public VmRuntimeParameterMapping(String instanceId, String cloud, String runOwner, String name, String nodeName,
 			String nodeInstanceId,
 			RuntimeParameter vmstateRuntimeParameter,
 			RuntimeParameter hostnameRuntimeParameter) {
@@ -153,6 +158,7 @@ public class VmRuntimeParameterMapping implements Serializable {
 		this.nodeName = nodeName;
 		this.nodeInstanceId = nodeInstanceId;
 		this.runUuid = vmstateRuntimeParameter.getContainer().getUuid();
+		this.runOwner = runOwner;
 		this.vmstateRuntimeParameter = vmstateRuntimeParameter;
 		this.vmstateRuntimeParameterUri = vmstateRuntimeParameter.getResourceUri();
 		this.hostnameRuntimeParameter = hostnameRuntimeParameter;
@@ -181,6 +187,10 @@ public class VmRuntimeParameterMapping implements Serializable {
 
 	public String getRunUuid() {
 		return runUuid;
+	}
+
+	public String getRunOwner() {
+		return runOwner;
 	}
 
 	public RuntimeParameter getVmstateRuntimeParameter() {

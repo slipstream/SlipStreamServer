@@ -88,6 +88,9 @@ public class Vm {
 	private String runUuid;
 
 	@Attribute(required = false)
+	private String runOwner;
+
+	@Attribute(required = false)
 	private String ip;
 
 	@Attribute(required = false)
@@ -216,6 +219,7 @@ public class Vm {
 				setIp(m, v);
 				setName(m, v);
 				setRunUuid(m, v);
+				setRunOwner(m, v);
 				setNodeName(m, v);
 				setNodeInstanceId(m, v);
 				em.persist(v);
@@ -231,6 +235,10 @@ public class Vm {
 				}
 				if (old.getRunUuid() == null) {
 					setRunUuid(m, old);
+					merge = true;
+				}
+				if (old.getRunOwner() == null) {
+					setRunOwner(m, old);
 					merge = true;
 				}
 				if (old.getIp() == null) {
@@ -290,13 +298,18 @@ public class Vm {
 		}
 	}
 
+	private static void setRunOwner(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setRunOwner(m.getRunOwner());
+		}
+	}
+
 	private static void setIp(VmRuntimeParameterMapping m, Vm v) {
 		if (m != null) {
 			RuntimeParameter rp = m.getHostnameRuntimeParameter();
 			if (rp.isSet()) {
 				v.setIp(rp.getValue());
 			}
-
 		}
 	}
 
@@ -430,6 +443,14 @@ public class Vm {
 
 	public void setRunUuid(String runUuid) {
 		this.runUuid = runUuid;
+	}
+
+	public String getRunOwner() {
+		return runOwner;
+	}
+
+	public void setRunOwner(String runOwner) {
+		this.runOwner = runOwner;
 	}
 
 	public String getIp() {
