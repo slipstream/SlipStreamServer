@@ -20,11 +20,16 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -167,8 +172,15 @@ public class Collector {
 		return removed;
 	}
 
-	private static void insertEnd(String instanceId, String user, String cloud) {
-		com.sixsq.slipstream.usage.Record r;
+	private static String keyCloudVMInstanceID(String cloud, String instanceId) {
+		return cloud + ":" + instanceId;
+	}
+	
+	private static void insertEnd(String instanceId, String user, String cloud) {		
+		Map<String, Object> record = new HashMap<String, Object>();		
+		record.put("cloud_vm_instanceid", keyCloudVMInstanceID(cloud, instanceId));
+		record.put("end_timestamp", nowISO8601());
+		Record.insertEnd(record);
 	}
 
 	private static Map<String, Double> createVmMetric() {
@@ -181,9 +193,25 @@ public class Collector {
 		return VmRuntimeParameterMapping.find(v.getCloud(), v.getInstanceId());
 	}
 
-
+	// TODO : factor out common functions with Event class
+	private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	private static final DateFormat ISO8601Formatter = new SimpleDateFormat(ISO_8601_PATTERN, Locale.US);
+	static {
+		ISO8601Formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+	}
+	private static String nowISO8601() {
+		return ISO8601Formatter.format(new Date());		
+	}
+	// TODO : factor out common functions with Event class
+	
 	private static void insertStart(String instanceId, String user, String cloud, Map<String, Double> metrics) {
-		
+		Map<String, Object> record = new HashMap<String, Object>();		
+		record.put("cloud_vm_instanceid", keyCloudVMInstanceID(cloud, instanceId));
+		record.put("user", user);
+		record.put("cloud", cloud);
+		record.put("start_timestamp", nowISO8601());
+		record.put("metrics", metrics);		
+		Record.insertStart(record);
 	}
 
 	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, String vmstate) {
