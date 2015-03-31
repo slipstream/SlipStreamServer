@@ -108,7 +108,7 @@
   [start-time end-time]  
   (summarize-records (rc/records-for-interval start-time end-time) start-time end-time))
 
-(defn summarize-and-store
+(defn summarizeAndStore
   [start-time end-time]   
   (let [summaries (summarize start-time end-time)]
     (log/info "Will persist" (count summaries) "summaries")

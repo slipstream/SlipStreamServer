@@ -46,7 +46,7 @@
     (map col-desc)
     (clojure.string/join ",")))      
 
-(defn columns-record  
+(defn columns-record 
   []
   (to-descs 
     "cloud_vm_instanceid"   "VARCHAR(100)"
@@ -55,7 +55,7 @@
     "start_timestamp"       "VARCHAR(30)"
     "end_timestamp"         "VARCHAR(30)"
     "metric_name"           "VARCHAR(100)"
-    "metric_value"          "DOUBLE"))
+    "metric_value"          "FLOAT"))
 
 (defn columns-summaries  
   []

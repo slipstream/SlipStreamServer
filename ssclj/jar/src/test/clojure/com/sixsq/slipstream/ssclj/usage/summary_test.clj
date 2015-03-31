@@ -208,9 +208,9 @@
     (summarize start-day end-day)))
   )
 
-(deftest test-summarize-and-store  
+(deftest test-summarizeAndStore  
   (insert-record)
-  (summarize-and-store start-day end-day)
+  (summarizeAndStore start-day end-day)
   (let [summaries-from-db (select usage-summaries)]
     (is (= 1 (count summaries-from-db)))
     (is (= "{\"disk-GB\":{\"unit_minutes\":33868.5},\n \"RAM-GB\":{\"unit_minutes\":2696.0},\n \"nb-cpu\":{\"unit_minutes\":1348.0}}\n"
