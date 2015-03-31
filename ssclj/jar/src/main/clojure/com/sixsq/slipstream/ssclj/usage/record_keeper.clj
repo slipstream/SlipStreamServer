@@ -66,12 +66,29 @@
     "end_timestamp"         "VARCHAR(30)"
     "usage"                 "VARCHAR(10000)"))
 
+(defn- quote [name] (str "\""name"\""))
+
+(defn- quote-list 
+  [names]
+  (->> names
+    (map quote)
+    (clojure.string/join ",")))
+
+(defn- create-index
+  [table index-name column-names]
+  (jdbc/execute! kh/db-spec [(str "DROP INDEX IF EXISTS " index-name)])
+  (jdbc/execute! kh/db-spec [(str "CREATE INDEX " index-name " ON \""table"\" (" (quote-list column-names) ")")]))
+
 (def init-db
   (delay  
     (kh/korma-init)
     (log/info "Korma init done for insert namespace")    
     (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS \"usage-records\" (" (columns-record) ")")])
     (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS \"usage-summaries\" (" (columns-summaries) ")")])
+
+    (create-index "usage-records"   "IDX_TIMESTAMPS" ["start_timestamp", "end_timestamp"])
+    (create-index "usage-summaries" "IDX_TIMESTAMPS" ["start_timestamp", "end_timestamp"])
+
     (log/info "Table created (if needed)")
     (defentity usage-records)
     (defentity usage-summaries)
@@ -107,8 +124,7 @@
 
 (defn -insertStart
   [usage-event]
-  (log/info "Will persist usage event START")
-  (log/debug "Usage event " usage-event)
+  (log/info "Will persist usage event START:" usage-event)
   (check-not-already-existing usage-event)
   (doseq [metric (:metrics usage-event)]    
     (let [usage-event-metric (project usage-event metric)]
@@ -118,8 +134,7 @@
 (defn -insertEnd
   [usage-event]
   (check-already-started usage-event)
-  (log/info "Will persist usage event END")
-  (log/debug "Usage event " usage-event)
+  (log/info "Will persist usage event END:" usage-event)    
   (update 
       usage-records 
       (set-fields {:end_timestamp (:end_timestamp usage-event)})

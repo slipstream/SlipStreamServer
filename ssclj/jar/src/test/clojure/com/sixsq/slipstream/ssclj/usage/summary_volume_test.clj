@@ -69,7 +69,7 @@
     ))
 
 (deftest test-with-records-full-year
-  (let [nb-weeks 5]
+  (let [nb-weeks 50]
     (fill-joe (* nb-weeks 7))
     (summarize-joe-weekly nb-weeks)
     (check-summaries)))

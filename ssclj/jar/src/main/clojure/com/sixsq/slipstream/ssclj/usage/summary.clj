@@ -111,7 +111,7 @@
 (defn summarize-and-store
   [start-time end-time]   
   (let [summaries (summarize start-time end-time)]
-    (log/info "Will persist " (count summaries) " summaries")
+    (log/info "Will persist" (count summaries) "summaries")
     (doseq [summary summaries]
       (rc/insert-summary summary))))
 
