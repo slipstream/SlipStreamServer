@@ -264,4 +264,35 @@ public class ImageModuleTest {
 		assertThat(image, is(not(copy)));
 	}
 
+	@Test
+	public void getEmptyNotes() throws ValidationException {
+		ImageModule image = new ImageModule("child");
+		String[] notes = image.getNotes();
+		assertThat(notes.length, is(0));
+	}
+
+	@Test
+	public void getNotes() throws ValidationException {
+		ImageModule image = new ImageModule("child");
+		image.setNote("my note");
+		String[] notes = image.getNotes();
+		assertThat(notes.length, is(1));
+		assertThat(notes[0], is("my note"));
+	}
+
+	@Test
+	public void getInheritedNotes() throws ValidationException {
+		ImageModule parent = new ImageModule("parent");
+		parent.setNote("parent note");
+		parent.store();
+		ImageModule child = new ImageModule("child");
+		child.setNote("child note");
+		child.setModuleReference(parent);
+		String[] notes = child.getNotes();
+		assertThat(notes.length, is(2));
+		assertThat(notes[0], is("parent note"));
+		assertThat(notes[1], is("child note"));
+		parent.remove();
+	}
+
 }

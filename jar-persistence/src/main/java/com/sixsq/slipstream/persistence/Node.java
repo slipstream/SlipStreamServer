@@ -20,6 +20,9 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -39,6 +42,7 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.CollectionType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -215,6 +219,25 @@ public class Node extends Parameterized<Node, NodeParameter> {
 		return parameterMappings;
 	}
 
+	/**
+	 * Assembled notes. Includes notes from inherited images.
+	 */
+	@Transient
+	@ElementArray(required = false)
+	public String[] getNotes() {
+		List<String> notes = new ArrayList<String>();
+		ImageModule image = getImage();
+		if(image != null) {
+			notes.addAll(Arrays.asList(image.getNotes()));
+		}
+		return notes.toArray(new String[0]);
+	}
+
+	@Transient
+	@ElementArray(required = false)
+	private void setNotes(String[] notes) {
+	}
+	
 	public void setParameterMappings(
 			Map<String, NodeParameter> parameterMappings) {
 		this.parameterMappings = parameterMappings;
