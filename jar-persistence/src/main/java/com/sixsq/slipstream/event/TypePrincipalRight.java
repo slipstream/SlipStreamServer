@@ -1,5 +1,9 @@
 package com.sixsq.slipstream.event;
 
+/**
+ * Structure representing a rule (a user or role has a certain right).
+ *  
+ */
 public class TypePrincipalRight extends TypePrincipal {
 
 	public static enum Right {
