@@ -32,6 +32,7 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
@@ -98,28 +99,25 @@ public class DeploymentFactory extends RunFactory {
 		}
 	}
 
-	private static void checkImageHasReferenceOrImageId(ImageModule image,
-			String cloudServiceName) throws ValidationException {
+	private static void checkImageHasReferenceOrImageId(ImageModule image, String cloudServiceName)
+			throws ValidationException {
 
 		if (!"".equals(image.getCloudImageId(cloudServiceName))) {
 			return;
 		}
-		boolean mustHaveImageId = image.isBase() || !image.isVirtual();
-		if (mustHaveImageId
-				&& "".equals(image.getCloudImageId(cloudServiceName))) {
-			throw new ValidationException(image.getName()
-					+ " missing an image id for cloud: " + cloudServiceName
-					+ ". Did you build it?");
+
+		boolean mustHaveImageId = image.isBase();
+		if (mustHaveImageId && "".equals(image.getCloudImageId(cloudServiceName))) {
+			throw new ValidationException(image.getName() + " missing an image id for cloud: " + cloudServiceName);
+
 		} else if (image.getModuleReference() == null || "".equals(image.getModuleReference())) {
-			throw new ValidationException(image.getName()
-					+ " missing a machine image reference");
+			throw new ValidationException(image.getName() + " missing a machine image reference");
+
 		} else {
 			String referenceUri = image.getModuleReference();
-			ImageModule reference = (ImageModule) ImageModule
-					.load(referenceUri);
+			ImageModule reference = (ImageModule) ImageModule.load(referenceUri);
 			if (reference == null) {
-				throw new ValidationException("Image " + image.getName()
-						+ " refers to an unknown image "
+				throw new ValidationException(image.getName() + " referring to an unknown image "
 						+ image.getModuleReference());
 			}
 			checkImageHasReferenceOrImageId(reference, cloudServiceName);
@@ -390,8 +388,7 @@ public class DeploymentFactory extends RunFactory {
 		return (DeploymentModule) module;
 	}
 
-	private String resolveCloudServiceNameForNode(User user, List<Parameter<?>> userChoicesForNode,
-			Node node) {
+	private String resolveCloudServiceNameForNode(User user, List<Parameter<?>> userChoicesForNode, Node node) {
 		String cloudService = null;
 
 		if (userChoicesForNode != null) {
@@ -432,6 +429,14 @@ public class DeploymentFactory extends RunFactory {
 			insertNewRunParameterForNode(run, node,
 					RunParameter.NODE_INCREMENT_KEY, String.valueOf(multiplicity + 1),
 					RunParameter.NODE_INCREMENT_DESCRIPTION);
+
+			String cloudService = run.getParameterValue(constructParamName(
+					node.getName(),
+					RuntimeParameter.CLOUD_SERVICE_NAME), CloudImageIdentifier.DEFAULT_CLOUD_SERVICE);
+			boolean runBuildRecipes = node.getImage().hasToRunBuildRecipes(cloudService);
+			insertNewRunParameterForNode(run, node,
+					RunParameter.NODE_RUN_BUILD_RECIPES_KEY, String.valueOf(runBuildRecipes),
+					RunParameter.NODE_RUN_BUILD_RECIPES_DESCRIPTION);
 		}
 	}
 

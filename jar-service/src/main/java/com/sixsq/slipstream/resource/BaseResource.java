@@ -27,7 +27,6 @@ import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
-import org.restlet.data.Parameter;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -45,12 +44,17 @@ import com.sixsq.slipstream.util.RequestUtil;
 
 public abstract class BaseResource extends ServerResource {
 
+	public static final String MODULE_RESOURCE_URI_KEY = "moduleResourceUri";
 	public static final String PAGING_OFFSET_KEY = "offset";
 	public static final String PAGING_LIMIT_KEY = "limit";
 	public static final String PAGING_CLOUD_KEY = "cloud";
+	public static final String RUN_UUID_KEY = "runUuid";
 	public static final String CHOOSER_KEY = "chooser";
 	public static final String EDIT_KEY = "edit";
 	public static final String NEW_KEY = "new";
+
+	public static final int LIMIT_DEFAULT = 20;
+	public static final int LIMIT_MAX = 500;
 
 	private User user = null;
 	private ServiceConfiguration configuration = null;
@@ -275,12 +279,12 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	public int getOffset(Request request) {
-		Parameter offsetAttr = request.getResourceRef().getQueryAsForm().getFirst(PAGING_OFFSET_KEY);
+		String offsetAttr = getQueryValue(PAGING_OFFSET_KEY);
 
 		int offset = 0;
 		if (offsetAttr != null) {
 			try {
-				offset = Integer.parseInt(offsetAttr.getValue());
+				offset = Integer.parseInt(offsetAttr);
 			} catch (NumberFormatException e) {
 				throwClientBadRequest("Invalid format for the offset attribute");
 			}
@@ -292,16 +296,20 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected int getLimit() {
-		Parameter limitAttr = getRequest().getResourceRef().getQueryAsForm().getFirst(PAGING_LIMIT_KEY);
+		return getLimit(LIMIT_DEFAULT, LIMIT_MAX);
+	}
 
-		int limit = 20;
+	protected int getLimit(int defaultLimit, int max) {
+		String limitAttr = getQueryValue(PAGING_LIMIT_KEY);
+
+		int limit = defaultLimit;
 		if (limitAttr != null) {
 			try {
-				limit = Integer.parseInt(limitAttr.getValue());
+				limit = Integer.parseInt(limitAttr);
 			} catch (NumberFormatException e) {
 				throwClientBadRequest("Invalid format for the limit attribute");
 			}
-			if (limit < 1 || limit > 500) {
+			if (limit < 1 || limit > max) {
 				throwClientBadRequest("The value for the limit attribute should be between 1 and 500");
 			}
 		}
@@ -309,7 +317,15 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected String getCloud() {
-		Parameter cloud = getRequest().getResourceRef().getQueryAsForm().getFirst(PAGING_CLOUD_KEY);
-		return (cloud != null)? cloud.getValue(): null;
+		return getQueryValue(PAGING_CLOUD_KEY);
 	}
+
+	protected String getModuleResourceUri() {
+		return getQueryValue(MODULE_RESOURCE_URI_KEY);
+	}
+
+	protected String getRunUuid() {
+		return getQueryValue(RUN_UUID_KEY);
+	}
+
 }

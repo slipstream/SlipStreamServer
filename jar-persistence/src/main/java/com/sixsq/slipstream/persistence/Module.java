@@ -500,6 +500,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		copy.setCloudNames((cloudNames == null ? null : cloudNames.clone()));
 		copy.setModuleReference(getModuleReference());
 		copy.setTag(getTag());
+		copy.setLogoLink(getLogoLink());
 
 		copy.setAuthz(getAuthz().copy(copy));
 

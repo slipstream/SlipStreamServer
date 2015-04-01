@@ -293,6 +293,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	public Node copy() throws ValidationException {
 		Node copy = new Node(getName(), getImageUri());
 		copy = (Node) copyTo(copy);
+		copy.setCloudService(getCloudService());
 		copy.setMultiplicity(getMultiplicity());
 		copy.setNetwork(getNetwork());
 		return copy;
