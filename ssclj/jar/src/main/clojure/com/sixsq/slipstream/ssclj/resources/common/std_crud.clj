@@ -82,6 +82,7 @@
       (a/can-view? {:acl collection-acl} request)
       (->> {}                                               ;; should allow options from body or params
            (db/query resource-name)
+           (filter #(a/authorized-view? % request))
            (map #(crud/set-operations % request))
            (wrapper-fn request)
            (u/json-response)))))

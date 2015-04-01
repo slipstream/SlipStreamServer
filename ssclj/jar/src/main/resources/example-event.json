@@ -11,5 +11,5 @@
     "content" :  { "resource":  {"href": "Run/45614147-aed1-4a24-889d-6365b0b1f2cd"},
     "state" : "Started" } ,
     "type": "state",
-    "severity": "critical"
+    "severity": "medium"
 }

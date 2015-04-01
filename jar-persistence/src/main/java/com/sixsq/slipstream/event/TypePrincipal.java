@@ -1,7 +1,13 @@
 package com.sixsq.slipstream.event;
 
+/**
+ * Structure representing a given user or a given role.
+ *  
+ */
 public class TypePrincipal {
 
+	public static final String ADMIN = "ADMIN";
+	
 	public static enum PrincipalType {
 		USER, ROLE;
 	}

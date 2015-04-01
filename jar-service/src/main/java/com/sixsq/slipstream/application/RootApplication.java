@@ -55,6 +55,7 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
 import com.sixsq.slipstream.dashboard.DashboardRouter;
+import com.sixsq.slipstream.event.EventRouter;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -185,6 +186,7 @@ public class RootApplication extends Application {
 		RootRouter router = new RootRouter(getContext());
 
 		try {
+			attachEvent(router);
 			attachMetering(router);
 			attachAction(router);
 			attachModule(router);
@@ -370,7 +372,11 @@ public class RootApplication extends Application {
 	private void attachMetering(RootRouter router) throws ConfigurationException, ValidationException {
 		guardAndAttach(router, new GraphiteRouter(getContext()), GraphiteRouter.ROOT_URI);
 	}
-
+	
+	private void attachEvent(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new EventRouter(getContext()), EventRouter.ROOT_URI);
+	}
+	
 	public class RootRouter extends Router {
 
 		public RootRouter(Context context) {

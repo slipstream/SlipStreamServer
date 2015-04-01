@@ -3,6 +3,7 @@
   (:require
     [clojure.tools.logging :as log]
     [schema.core :as s]
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -61,6 +62,7 @@
 
 (defmethod crud/add resource-name
            [request]  
+  (log/info resource-uri ": will add " (:body request))
   (add-impl request))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
@@ -77,6 +79,22 @@
 (defmethod crud/delete resource-name
            [request]
   (delete-impl request))
+
+;;
+;; available operations
+;; 
+(defmethod crud/set-operations resource-uri
+           [resource request]
+  (try
+    (a/can-modify? resource request)
+    (let [href (:id resource)
+          resourceURI (:resourceURI resource)
+          ops (if (.endsWith resourceURI "Collection")
+                [{:rel (:add c/action-uri) :href href}]
+                [{:rel (:delete c/action-uri) :href href}])]
+      (assoc resource :operations ops))
+    (catch Exception e
+      (dissoc resource :operations))))
 
 ;;
 ;; collection
