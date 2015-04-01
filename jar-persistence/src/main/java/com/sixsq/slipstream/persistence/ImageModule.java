@@ -43,9 +43,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test see:
- *
+ * 
  * @see ImageModuleTest
- *
+ * 
  */
 @Entity
 @SuppressWarnings("serial")
@@ -62,8 +62,7 @@ public class ImageModule extends Module {
 
 	public static final String EXTRADISK_PARAM_PREFIX = "extra.disk";
 	private static final String EXTRADISK_NAME_VOLATILE = "volatile";
-	public static final String EXTRADISK_VOLATILE_PARAM = EXTRADISK_PARAM_PREFIX
-			+ "." + EXTRADISK_NAME_VOLATILE;
+	public static final String EXTRADISK_VOLATILE_PARAM = EXTRADISK_PARAM_PREFIX + "." + EXTRADISK_NAME_VOLATILE;
 	private static final String VOLATILE_DISK_VALUE_REGEX = "^[0-9]*$";
 	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
 
@@ -101,8 +100,7 @@ public class ImageModule extends Module {
 		super();
 	}
 
-	public ImageModule(String name) throws ValidationException,
-			ConfigurationException {
+	public ImageModule(String name) throws ValidationException, ConfigurationException {
 
 		super(name, ModuleCategory.Image);
 
@@ -112,7 +110,7 @@ public class ImageModule extends Module {
 	/**
 	 * Validate for an image run (as opposed to a build or as part of a
 	 * deployment).
-	 *
+	 * 
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -133,8 +131,7 @@ public class ImageModule extends Module {
 			throw (new ValidationException(VOLATILE_DISK_VALUE_REGEXERROR));
 	}
 
-	private void validateHasImageId(String cloudService)
-			throws ValidationException {
+	private void validateHasImageId(String cloudService) throws ValidationException {
 
 		if (isBase) {
 			validateBaseImage(cloudService, true);
@@ -150,16 +147,11 @@ public class ImageModule extends Module {
 		return !isVirtual() && getImageId(cloudService) == null;
 	}
 
-	private void validateBaseImage(String cloudService, boolean throwOnError)
-			throws ValidationException {
+	private void validateBaseImage(String cloudService, boolean throwOnError) throws ValidationException {
 		CloudImageIdentifier cloudImageIdentifier = getCloudImageIdentifier(cloudService);
 
-		if (cloudImageIdentifier == null
-				|| !Parameter.hasValueSet(cloudImageIdentifier
-						.getCloudMachineIdentifer())) {
-			throw (new ValidationException(
-					"Base image must have an image id for cloud service: "
-							+ cloudService));
+		if (cloudImageIdentifier == null || !Parameter.hasValueSet(cloudImageIdentifier.getCloudMachineIdentifer())) {
+			throw (new ValidationException("Base image must have an image id for cloud service: " + cloudService));
 		}
 	}
 
@@ -180,13 +172,12 @@ public class ImageModule extends Module {
 
 	/**
 	 * Finds the base image id
-	 *
+	 * 
 	 * @param cloudService
 	 * @return image id
 	 * @throws ValidationException
 	 */
-	public String extractBaseImageId(String cloudService)
-			throws ValidationException {
+	public String extractBaseImageId(String cloudService) throws ValidationException {
 
 		String imageId = getCloudImageId(cloudService);
 		if (isSet(imageId)) {
@@ -194,8 +185,8 @@ public class ImageModule extends Module {
 		}
 
 		if (isBase()) {
-			throw (new ValidationException("Missing image id for base image: "
-					+ getName() + " on cloud service: " + cloudService));
+			throw (new ValidationException("Missing image id for base image: " + getName() + " on cloud service: "
+					+ cloudService));
 		}
 
 		ImageModule parentModule = getParentModule();
@@ -205,10 +196,8 @@ public class ImageModule extends Module {
 
 		imageId = parentModule.extractBaseImageId(cloudService);
 		if (!isSet(imageId)) {
-			throw (new ValidationException(
-					"Missing image id in reference module: "
-							+ parentModule.getName() + " for cloud service: "
-							+ cloudService));
+			throw (new ValidationException("Missing image id in reference module: " + parentModule.getName()
+					+ " for cloud service: " + cloudService));
 		}
 		return imageId;
 	}
@@ -228,13 +217,11 @@ public class ImageModule extends Module {
 		return parentModule;
 	}
 
-	private void setDefaultParameters() throws ValidationException,
-			ConfigurationException {
+	private void setDefaultParameters() throws ValidationException, ConfigurationException {
 
-		addMandatoryParameter(RuntimeParameter.HOSTNAME_KEY,
-				RuntimeParameter.HOSTNAME_DESCRIPTION, ParameterCategory.Output);
-		addMandatoryParameter(RuntimeParameter.INSTANCE_ID_KEY,
-				RuntimeParameter.INSTANCE_ID_DESCRIPTION,
+		addMandatoryParameter(RuntimeParameter.HOSTNAME_KEY, RuntimeParameter.HOSTNAME_DESCRIPTION,
+				ParameterCategory.Output);
+		addMandatoryParameter(RuntimeParameter.INSTANCE_ID_KEY, RuntimeParameter.INSTANCE_ID_DESCRIPTION,
 				ParameterCategory.Output);
 
 		updateNetwork();
@@ -242,45 +229,37 @@ public class ImageModule extends Module {
 	}
 
 	private void updateNetwork() throws ValidationException {
-		addMandatoryEnumParameter(NETWORK_KEY, "Network type",
-				ParameterCategory.Cloud, NetworkType.getValues());
+		addMandatoryEnumParameter(NETWORK_KEY, "Network type", ParameterCategory.Cloud, NetworkType.getValues());
 	}
 
-	private void updateExtraDisks() throws ValidationException,
-			ConfigurationException {
+	private void updateExtraDisks() throws ValidationException, ConfigurationException {
 		addVolatileDiskParameter();
 	}
 
 	private void addVolatileDiskParameter() throws ValidationException {
-		addMandatoryParameter(EXTRADISK_VOLATILE_PARAM,
-				"Volatile extra disk in GB", ParameterCategory.Cloud);
+		addMandatoryParameter(EXTRADISK_VOLATILE_PARAM, "Volatile extra disk in GB", ParameterCategory.Cloud);
 	}
 
-	private void addMandatoryParameter(String name, String description,
-			ParameterCategory category) throws ValidationException {
+	private void addMandatoryParameter(String name, String description, ParameterCategory category)
+			throws ValidationException {
 		addMandatoryParameter(name, description, category, ParameterType.String);
 	}
 
-	private void addMandatoryEnumParameter(String name, String description,
-			ParameterCategory category, List<String> enumValues)
-			throws ValidationException {
-		addMandatoryParameter(name, description, category, ParameterType.Enum,
-				enumValues);
+	private void addMandatoryEnumParameter(String name, String description, ParameterCategory category,
+			List<String> enumValues) throws ValidationException {
+		addMandatoryParameter(name, description, category, ParameterType.Enum, enumValues);
 	}
 
-	private void addMandatoryParameter(String name, String description,
-			ParameterCategory category, ParameterType type)
+	private void addMandatoryParameter(String name, String description, ParameterCategory category, ParameterType type)
 			throws ValidationException {
 
 		addMandatoryParameter(name, description, category, type, null);
 	}
 
-	private void addMandatoryParameter(String name, String description,
-			ParameterCategory category, ParameterType type,
+	private void addMandatoryParameter(String name, String description, ParameterCategory category, ParameterType type,
 			List<String> enumValues) throws ValidationException {
 
-		ModuleParameter parameter = new ModuleParameter(name, null,
-				description, category);
+		ModuleParameter parameter = new ModuleParameter(name, null, description, category);
 
 		parameter.setMandatory(true);
 		parameter.setType(type);
@@ -412,13 +391,13 @@ public class ImageModule extends Module {
 
 	public ImageModule store() {
 		setVersion();
-		if(targets != null) {
-			for(Target t : targets) {
+		if (targets != null) {
+			for (Target t : targets) {
 				t.setModule(this);
 			}
 		}
-		if(packages != null) {
-			for(Package p : packages) {
+		if (packages != null) {
+			for (Package p : packages) {
 				p.setModule(this);
 			}
 		}
@@ -441,8 +420,7 @@ public class ImageModule extends Module {
 		}
 		CloudImageIdentifier cloudImageIdentifier = getCloudImageIdentifier(cloudService);
 		if (cloudImageIdentifier == null) {
-			getCloudImageIdentifiers().add(
-					new CloudImageIdentifier(this, cloudService, imageId));
+			getCloudImageIdentifiers().add(new CloudImageIdentifier(this, cloudService, imageId));
 		} else {
 			cloudImageIdentifier.setCloudMachineIdentifer(imageId);
 		}
@@ -456,30 +434,29 @@ public class ImageModule extends Module {
 	 * Assembled notes. Includes notes from inherited images.
 	 */
 	@Transient
-	@ElementArray(entry="note")
+	@ElementArray(required = false, entry = "note")
 	public String[] getNotes() {
 		List<String> notes = new ArrayList<String>();
 		String moduleReference = getModuleReference();
-		if(moduleReference != null) {
+		if (moduleReference != null) {
 			ImageModule parent = load(moduleReference);
 			notes.addAll(Arrays.asList(parent.getNotes()));
 		}
-		if(getNote() != null) {
+		if (getNote() != null) {
 			notes.add(getNote());
 		}
 		return notes.toArray(new String[0]);
 	}
 
 	/**
-	 * Empty setter needed for serializer on a read only
-	 * property
+	 * Empty setter needed for serializer on a read only property
 	 * 
 	 */
 	@Transient
-	@ElementArray(entry="note")
+	@ElementArray(required = false, entry = "note")
 	private void setNotes(String[] notes) {
 	}
-	
+
 	public ImageModule copy() throws ValidationException {
 
 		ImageModule copy = (ImageModule) copyTo(new ImageModule(getName()));
@@ -507,8 +484,7 @@ public class ImageModule extends Module {
 		return copy;
 	}
 
-	public void setCloudImageIdentifiers(
-			Set<CloudImageIdentifier> cloudImageIdentifiers) {
+	public void setCloudImageIdentifiers(Set<CloudImageIdentifier> cloudImageIdentifiers) {
 		this.cloudImageIdentifiers = cloudImageIdentifiers;
 	}
 
@@ -530,8 +506,7 @@ public class ImageModule extends Module {
 
 	public String getCloudImageId(String cloudService) {
 		CloudImageIdentifier cloudImageIdentifer = getCloudImageIdentifier(cloudService);
-		return cloudImageIdentifer == null ? "" : cloudImageIdentifer
-				.getCloudMachineIdentifer();
+		return cloudImageIdentifer == null ? "" : cloudImageIdentifer.getCloudMachineIdentifer();
 	}
 
 	public void postDeserialization() {

@@ -64,7 +64,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	@Attribute
 	private int multiplicity = RuntimeParameter.MULTIPLICITY_NODE_START_INDEX;
 
-	@Attribute(empty="0")
+	@Attribute(empty = "0")
 	private int maxProvisioningFailures = 0;
 
 	@Attribute
@@ -167,8 +167,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 
 	public void setMultiplicity(int multiplicity) throws ValidationException {
 		if (multiplicity < 0) {
-			throw (new ValidationException(
-					"Invalid multiplicity, it must be positive"));
+			throw (new ValidationException("Invalid multiplicity, it must be positive"));
 		}
 		this.multiplicity = multiplicity;
 	}
@@ -194,8 +193,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	 * Look for a value in the local parameter list, otherwise return the value
 	 * from the image parameter list
 	 */
-	private String extractParameterWithOverride(String key)
-			throws ValidationException {
+	private String extractParameterWithOverride(String key) throws ValidationException {
 		ImageModule image = getImage();
 		if (image != null) {
 			return getParameterValue(key, image.getParameterValue(key, null));
@@ -223,66 +221,57 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	 * Assembled notes. Includes notes from inherited images.
 	 */
 	@Transient
-	@ElementArray(required = false)
+	@ElementArray(required = false, entry = "note")
 	public String[] getNotes() {
 		List<String> notes = new ArrayList<String>();
 		ImageModule image = getImage();
-		if(image != null) {
+		if (image != null) {
 			notes.addAll(Arrays.asList(image.getNotes()));
 		}
 		return notes.toArray(new String[0]);
 	}
 
 	@Transient
-	@ElementArray(required = false)
+	@ElementArray(required = false, entry = "note")
 	private void setNotes(String[] notes) {
 	}
-	
-	public void setParameterMappings(
-			Map<String, NodeParameter> parameterMappings) {
+
+	public void setParameterMappings(Map<String, NodeParameter> parameterMappings) {
 		this.parameterMappings = parameterMappings;
 	}
 
-	public void setParameterMapping(NodeParameter nodeParameter,
-			DeploymentModule deployment) throws ValidationException {
+	public void setParameterMapping(NodeParameter nodeParameter, DeploymentModule deployment)
+			throws ValidationException {
 
 		validateMapping(nodeParameter, deployment);
 
 		getParameterMappings().put(nodeParameter.getName(), nodeParameter);
 	}
 
-	private void validateMapping(NodeParameter nodeParameter,
-			DeploymentModule deployment) throws ValidationException {
-		ModuleParameter inputParameter = image.getParameter(nodeParameter
-				.getName());
-		if (!ParameterCategory.Input.name()
-				.equals(inputParameter.getCategory())) {
-			throw new ValidationException("Input parameter "
-					+ nodeParameter.getName() + " not Input category");
+	private void validateMapping(NodeParameter nodeParameter, DeploymentModule deployment) throws ValidationException {
+		ModuleParameter inputParameter = image.getParameter(nodeParameter.getName());
+		if (!ParameterCategory.Input.name().equals(inputParameter.getCategory())) {
+			throw new ValidationException("Input parameter " + nodeParameter.getName() + " not Input category");
 		}
 
 		if (nodeParameter.isStringValue()) {
 			return;
 		}
 
-		ModuleParameter outputParameter = extractModuleParameterFromNodeString(
-				nodeParameter.getValue(), deployment);
+		ModuleParameter outputParameter = extractModuleParameterFromNodeString(nodeParameter.getValue(), deployment);
 
-		if (!ParameterCategory.Output.name().equals(
-				outputParameter.getCategory())) {
-			throw new ValidationException("Output parameter "
-					+ outputParameter.getName() + " not Output category");
+		if (!ParameterCategory.Output.name().equals(outputParameter.getCategory())) {
+			throw new ValidationException("Output parameter " + outputParameter.getName() + " not Output category");
 		}
 	}
 
-	private ModuleParameter extractModuleParameterFromNodeString(
-			String fullyQualifiedParameterName, DeploymentModule deployment) {
+	private ModuleParameter extractModuleParameterFromNodeString(String fullyQualifiedParameterName,
+			DeploymentModule deployment) {
 		String[] parts = fullyQualifiedParameterName.split(":");
 		String nodeName = parts[0];
 		String paramName = parts[1];
 
-		return deployment.getNodes().get(nodeName).getImage()
-				.getParameter(paramName);
+		return deployment.getNodes().get(nodeName).getImage().getParameter(paramName);
 	}
 
 	@Element(required = false)
