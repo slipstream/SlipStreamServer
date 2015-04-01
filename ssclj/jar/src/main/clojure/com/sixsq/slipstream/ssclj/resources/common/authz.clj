@@ -81,7 +81,9 @@
   [resource request]
   (can-do? resource request ::view))
 
-(defn authorized-view? [resource request] (authorized-do? resource request ::view))
+(defn authorized-view? 
+  [resource request] 
+  (authorized-do? resource request ::view))
 
 (defn default-acl
   "Provides a default ACL based on the authentication information.
