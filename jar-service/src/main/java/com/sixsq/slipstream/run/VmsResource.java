@@ -30,6 +30,8 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.vm.VmsQueryParameters;
+
 
 public class VmsResource extends BaseResource {
 
@@ -51,9 +53,11 @@ public class VmsResource extends BaseResource {
 
 	private Vms getVms() {
 		Vms vms = new Vms();
+		VmsQueryParameters parameters = new VmsQueryParameters(getUser(), getOffset(), getLimit(), getCloud(),
+				getRunUuid(), getRunOwner(), getUserFilter());
 
 		try {
-			vms.populate(getUser(), getOffset(), getLimit(), getCloud(), getRunUuid());
+			vms.populate(parameters);
 		} catch (SlipStreamClientException e) {
 		} catch (SlipStreamException e) {
 		}

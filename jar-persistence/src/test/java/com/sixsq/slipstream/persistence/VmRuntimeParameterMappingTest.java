@@ -45,6 +45,8 @@ public class VmRuntimeParameterMappingTest {
 			RuntimeParameter.INSTANCE_ID_KEY);
 	private String vmstateParameterName = RuntimeParameter.constructParamName(Run.MACHINE_NAME,
 			RuntimeParameter.STATE_VM_KEY);
+	private String hostnameParameterName = RuntimeParameter.constructParamName(Run.MACHINE_NAME,
+			RuntimeParameter.HOSTNAME_KEY);
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
@@ -68,30 +70,45 @@ public class VmRuntimeParameterMappingTest {
 		Module module = new ImageModule("module");
 		Run run = new Run(module, RunType.Machine, clouds, user);
 		run.store();
-		RuntimeParameter rp;
+		RuntimeParameter vmstate;
+		RuntimeParameter hostname;
 		VmRuntimeParameterMapping mapping;
 
-		rp = new RuntimeParameter(run, "machine:key11", "value11", "description");
-		rp.store();
-		mapping = new VmRuntimeParameterMapping("instanceId1", "cloud1", rp);
+		vmstate = new RuntimeParameter(run, "machine:key11", "value11", "description");
+		vmstate.store();
+		hostname = new RuntimeParameter(run, "machine:key111", "value111", "description");
+		hostname.store();
+		mapping = new VmRuntimeParameterMapping("instanceId1", "cloud1", user.getName(), "machine", null, null, vmstate, hostname);
 		mapping.store();
-		rp = new RuntimeParameter(run, "machine:key21", "value21", "description");
-		rp.store();
-		mapping = new VmRuntimeParameterMapping("instanceId2", "cloud1", rp);
+
+		vmstate = new RuntimeParameter(run, "machine:key21", "value21", "description");
+		vmstate.store();
+		hostname = new RuntimeParameter(run, "machine:key121", "value121", "description");
+		hostname.store();
+		mapping = new VmRuntimeParameterMapping("instanceId2", "cloud1", user.getName(), "machine", null, null, vmstate, hostname);
 		mapping.store();
-		rp = new RuntimeParameter(run, "machine:key31", "value31", "description");
-		rp.store();
-		mapping = new VmRuntimeParameterMapping("instanceId3", "cloud1", rp);
+
+		vmstate = new RuntimeParameter(run, "machine:key31", "value31", "description");
+		vmstate.store();
+		hostname = new RuntimeParameter(run, "machine:key131", "value131", "description");
+		hostname.store();
+		mapping = new VmRuntimeParameterMapping("instanceId3", "cloud1", user.getName(), "machine", null, null, vmstate, hostname);
 		mapping.store();
-		rp = new RuntimeParameter(run, "machine:key12", "value12", "description");
-		rp.store();
-		mapping = new VmRuntimeParameterMapping("instanceId1", "cloud2", rp);
+
+		vmstate = new RuntimeParameter(run, "machine:key12", "value12", "description");
+		vmstate.store();
+		hostname = new RuntimeParameter(run, "machine:key112", "value112", "description");
+		hostname.store();
+		mapping = new VmRuntimeParameterMapping("instanceId1", "cloud2", user.getName(), "machine", null, null, vmstate, hostname);
 		mapping.store();
 
 		mapping = VmRuntimeParameterMapping.find("cloud1", "instanceId2");
 		assertThat(mapping.getVmstateRuntimeParameter().getName(), is("key21"));
+		assertThat(mapping.getHostnameRuntimeParameter().getName(), is("key121"));
+
 		mapping = VmRuntimeParameterMapping.find("cloud2", "instanceId1");
 		assertThat(mapping.getVmstateRuntimeParameter().getName(), is("key12"));
+		assertThat(mapping.getHostnameRuntimeParameter().getName(), is("key112"));
 
 		for (VmRuntimeParameterMapping m : VmRuntimeParameterMapping.getMappings()) {
 			m.remove();
@@ -154,6 +171,9 @@ public class VmRuntimeParameterMappingTest {
 
 		RuntimeParameter vmstateRuntimeParameter = new RuntimeParameter(run, vmstateParameterName, "", "");
 		run.getRuntimeParameters().put(vmstateParameterName, vmstateRuntimeParameter);
+
+		RuntimeParameter hostnameRuntimeParameter = new RuntimeParameter(run, hostnameParameterName, "", "");
+		run.getRuntimeParameters().put(hostnameParameterName, hostnameRuntimeParameter);
 
 		run.store();
 		return run;
