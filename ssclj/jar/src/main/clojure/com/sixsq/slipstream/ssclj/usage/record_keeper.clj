@@ -3,7 +3,7 @@
     [clojure.string :only [join]]
     [clojure.tools.logging :as log]
     [clojure.java.jdbc :refer :all :as jdbc]     
-    [korma.core :refer :all]
+    [korma.core :as kc]
     [com.sixsq.slipstream.ssclj.api.korma-helper :as kh]
     [com.sixsq.slipstream.ssclj.usage.utils :as u])
 
@@ -66,7 +66,9 @@
     "end_timestamp"         "VARCHAR(30)"
     "usage"                 "VARCHAR(10000)"))
 
-(defn- quote [name] (str "\""name"\""))
+(defn- quote 
+  [name] 
+  (str "\""name"\""))
 
 (defn- quote-list 
   [names]
@@ -90,9 +92,9 @@
     (create-index "usage-summaries" "IDX_TIMESTAMPS" ["start_timestamp", "end_timestamp"])
 
     (log/info "Table created (if needed)")
-    (defentity usage-records)
-    (defentity usage-summaries)
-    (select usage-records (limit 1))
+    (kc/defentity usage-records)
+    (kc/defentity usage-summaries)
+    (kc/select usage-records (kc/limit 1))
     (log/info "Korma Entity 'usage-records' defined")))
 
 (defn -init
@@ -108,7 +110,7 @@
 
 (defn not-existing?
   [usage-event]
-  (empty? (select usage-records (where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)}))))
+  (empty? (kc/select usage-records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)}))))
 
 (defn check-not-already-existing
   [usage-event]
@@ -129,25 +131,25 @@
   (doseq [metric (:metrics usage-event)]    
     (let [usage-event-metric (project usage-event metric)]
       (log/debug "Will persist metric: " usage-event-metric)
-      (insert usage-records (values usage-event-metric)))))
+      (kc/insert usage-records (kc/values usage-event-metric)))))
 
 (defn -insertEnd
   [usage-event]
   (check-already-started usage-event)
   (log/info "Will persist usage event END:" usage-event)    
-  (update 
+  (kc/update 
       usage-records 
-      (set-fields {:end_timestamp (:end_timestamp usage-event)})
-      (where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})))
+      (kc/set-fields {:end_timestamp (:end_timestamp usage-event)})
+      (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})))
 
 (defn insert-summary   
   [summary]
-  (insert usage-summaries (values (update-in summary [:usage] u/serialize))))    
+  (kc/insert usage-summaries (kc/values (update-in summary [:usage] u/serialize))))    
 
 (defn records-for-interval
   [start end]
   (check-order start end)
-  (select usage-records (where 
+  (kc/select usage-records (kc/where 
     (and 
       (or (= nil :end_timestamp) (>= :end_timestamp start))            
       (<= :start_timestamp end)))))
