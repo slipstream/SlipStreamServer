@@ -56,7 +56,8 @@
 (defn contribution   
   [record]
   (let [value (:metric_value record)
-        nb-minutes (t/in-minutes (t/interval (u/to-time (:start_timestamp record)) (u/to-time (:end_timestamp record))))]
+    ;; TODO cries for refactoring
+        nb-minutes (/ (t/in-seconds (t/interval (u/to-time (:start_timestamp record)) (u/to-time (:end_timestamp record)))) 60.0)]
     (* value nb-minutes)))
 
 (defn comsumption   

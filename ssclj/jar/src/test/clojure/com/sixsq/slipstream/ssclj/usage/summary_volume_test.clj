@@ -101,6 +101,28 @@
                 :nb-cpu {:unit_minutes 3360.0}} (u/deserialize (:usage summary)))))
     )))
 
+(deftest check-precision-small-interval
+  (let [start-day         (t/date-time 2014)
+        end-day           (t/plus (t/date-time 2014) (t/days 1))
+
+        ten-seconds-after (t/plus start-day (t/seconds 50))
+
+        joe-exo-start (assoc joe-exoscale 
+                              :start_timestamp (u/to-ISO-8601 start-day)
+                              :cloud_vm_instanceid "vm-joe-exo-id")
+        joe-exo-end { :end_timestamp (u/to-ISO-8601 ten-seconds-after)
+                      :cloud_vm_instanceid "vm-joe-exo-id"}]      
+
+      (println ten-seconds-after)
+
+      (rc/-insertStart joe-exo-start)
+      (rc/-insertEnd joe-exo-end)
+      (summarizeAndStore (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day))
+
+      ;; TODO actual test
+      (println (select usage-summaries))))
+
+
 (deftest test-with-records-full-year
   (let [nb-weeks 5]
     (fill-joe (* nb-weeks 7))
