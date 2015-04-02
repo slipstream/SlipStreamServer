@@ -21,7 +21,6 @@ package com.sixsq.slipstream.application;
  */
 
 import java.util.ArrayList;
-import java.util.ListIterator;
 import java.util.ServiceLoader;
 
 import org.restlet.Application;
@@ -372,11 +371,11 @@ public class RootApplication extends Application {
 	private void attachMetering(RootRouter router) throws ConfigurationException, ValidationException {
 		guardAndAttach(router, new GraphiteRouter(getContext()), GraphiteRouter.ROOT_URI);
 	}
-	
+
 	private void attachEvent(RootRouter router) throws ValidationException {
 		guardAndAttach(router, new EventRouter(getContext()), EventRouter.ROOT_URI);
 	}
-	
+
 	public class RootRouter extends Router {
 
 		public RootRouter(Context context) {
