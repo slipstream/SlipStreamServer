@@ -12,6 +12,9 @@ bin
 *.p12
 hsql*
 
+logs/
+*.log
+
 pom.xml.next
 pom.xml.releaseBackup
 pom.xml.tag
