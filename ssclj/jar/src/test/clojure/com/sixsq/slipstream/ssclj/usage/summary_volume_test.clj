@@ -113,14 +113,17 @@
         joe-exo-end { :end_timestamp (u/to-ISO-8601 ten-seconds-after)
                       :cloud_vm_instanceid "vm-joe-exo-id"}]      
 
-      (println ten-seconds-after)
-
       (rc/-insertStart joe-exo-start)
       (rc/-insertEnd joe-exo-end)
       (summarizeAndStore (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day))
 
-      ;; TODO actual test
-      (println (select usage-summaries))))
+      (let [summary (-> (select usage-summaries)
+                        first
+                        :usage  
+                        u/deserialize)]
+        (is (= 83.75 (get-in summary [:disk-GB :unit_minutes])))
+        (is (< 6.666 (get-in summary [:RAM-GB :unit_minutes]) 6.667))
+        (is (< 1.666 (get-in summary [:nb-cpu :unit_minutes]) 1.667)))))
 
 
 (deftest test-with-records-full-year
@@ -128,3 +131,10 @@
     (fill-joe (* nb-weeks 7))
     (summarize-joe-weekly nb-weeks)
     (check-summaries)))
+
+;; TODO 
+;; Add test many records inside period
+;; a mix with different users
+;; records duration longer than billing period
+;; open records
+

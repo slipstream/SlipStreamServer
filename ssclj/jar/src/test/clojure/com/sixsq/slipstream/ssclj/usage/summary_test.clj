@@ -121,11 +121,11 @@
           {            
             ;; 337 minutes between in-day-1 and in-day-1, 910 minutes from start day to in-
             ; :unit_minutes   (+ (* 6 910) (* 4 337))
-            :unit_minutes   (+ (* 6 910) (* 4 337))
+            :unit_minutes   (float (+ (* 6 910) (* 4 337)))
           }
        "RAM"
         { 
-          :unit_minutes   13872
+          :unit_minutes   13872.0
         }
       }
      }]    
@@ -141,7 +141,7 @@
       {
         "Disk"
           {            
-            :unit_minutes   144000
+            :unit_minutes   144000.0
           }
       }
      }]
@@ -157,7 +157,7 @@
       {
         "Disk"
           {            
-            :unit_minutes   144000
+            :unit_minutes   144000.0
           }
       }
      }]
