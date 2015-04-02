@@ -4,7 +4,7 @@
     [clojure.java.jdbc :refer :all :as jdbc]    
     [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
-    [com.sixsq.slipstream.ssclj.api.korma-helper :as kh]    
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [korma.core :refer :all]
     [ring.util.response :as r]))

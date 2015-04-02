@@ -2,9 +2,11 @@
   (:require 
     [clojure.string :only [join]]
     [clojure.tools.logging :as log]
-    [clojure.java.jdbc :refer :all :as jdbc]     
+    [clojure.java.jdbc :refer :all :as jdbc]
+
     [korma.core :as kc]
-    [com.sixsq.slipstream.ssclj.api.korma-helper :as kh]
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
+    [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
     [com.sixsq.slipstream.ssclj.usage.utils :as u])
 
   (:gen-class
@@ -30,25 +32,8 @@
 ;; (i.e records whose [start-end timestamps] intersect with the interval)
 ;;
   
-(defn anti-quote 
-  [s] 
-  (str \" s \"))
-
-(defn col-desc 
-  [[name type]]
-  (str (anti-quote name) " " type))
-
-(defn to-descs 
-  [& name-types] 
-  (->> 
-    name-types
-    (partition 2)
-    (map col-desc)
-    (clojure.string/join ",")))      
-
-(defn columns-record 
-  []
-  (to-descs 
+(defonce ^:private columns-record 
+  (ddl/columns 
     "cloud_vm_instanceid"   "VARCHAR(100)"
     "user"                  "VARCHAR(100)"
     "cloud"                 "VARCHAR(100)"
@@ -57,39 +42,24 @@
     "metric_name"           "VARCHAR(100)"
     "metric_value"          "FLOAT"))
 
-(defn columns-summaries  
-  []
-  (to-descs     
+(defonce ^:private columns-summaries    
+  (ddl/columns     
     "user"                  "VARCHAR(100)"
     "cloud"                 "VARCHAR(100)"
     "start_timestamp"       "VARCHAR(30)"
     "end_timestamp"         "VARCHAR(30)"
     "usage"                 "VARCHAR(10000)"))
 
-(defn- quote 
-  [name] 
-  (str "\""name"\""))
-
-(defn- quote-list 
-  [names]
-  (->> names
-    (map quote)
-    (clojure.string/join ",")))
-
-(defn- create-index
-  [table index-name column-names]
-  (jdbc/execute! kh/db-spec [(str "DROP INDEX IF EXISTS " index-name)])
-  (jdbc/execute! kh/db-spec [(str "CREATE INDEX " index-name " ON \""table"\" (" (quote-list column-names) ")")]))
-
 (def init-db
   (delay  
     (kh/korma-init)
     (log/info "Korma init done for insert namespace")    
-    (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS \"usage-records\" (" (columns-record) ")")])
-    (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS \"usage-summaries\" (" (columns-summaries) ")")])
 
-    (create-index "usage-records"   "IDX_TIMESTAMPS" ["start_timestamp", "end_timestamp"])
-    (create-index "usage-summaries" "IDX_TIMESTAMPS" ["start_timestamp", "end_timestamp"])
+    (ddl/create-table "usage-records" columns-record)
+    (ddl/create-table "usage-summaries" columns-summaries)
+
+    (ddl/create-index "usage-records"   "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
+    (ddl/create-index "usage-summaries" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
 
     (log/info "Table created (if needed)")
     (kc/defentity usage-records)
@@ -101,26 +71,26 @@
   []
   @init-db)
 
-(defn project   
+(defn- project   
   [usage-event metric]
   (-> usage-event
     (dissoc :metrics)
     (assoc :metric_name   (:name metric))
     (assoc :metric_value  (:value metric))))
 
-(defn not-existing?
+(defn- not-existing?
   [usage-event]
   (empty? (kc/select usage-records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)}))))
 
-(defn check-not-already-existing
+(defn- check-not-already-existing
   [usage-event]
   (u/check not-existing? usage-event (str "Usage record already inserted: " usage-event)))
 
-(defn check-already-started
+(defn- check-already-started
   [usage-event]
   (u/check (complement not-existing?) usage-event (str "Usage record not started: " usage-event)))  
 
-(defn check-order
+(defn- check-order
   [start end]
   (u/check u/start-before-end? [start end] "Invalid period"))
 
@@ -144,7 +114,7 @@
 
 (defn insert-summary   
   [summary]
-  (kc/insert usage-summaries (kc/values (update-in summary [:usage] u/serialize))))    
+  (kc/insert usage-summaries (kc/values (update-in summary [:usage] u/serialize))))
 
 (defn records-for-interval
   [start end]

@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.api.acl
   (:require
-    [com.sixsq.slipstream.ssclj.api.korma-helper  :as kh]
+    [com.sixsq.slipstream.ssclj.database.korma-helper  :as kh]
     [clojure.java.jdbc :refer :all                :as jdbc]
     [clojure.tools.logging                        :as log]
     [clojure.set                                  :as s]
