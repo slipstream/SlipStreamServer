@@ -1014,7 +1014,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		TypePrincipal owner = new TypePrincipal(USER, getUser());
 		List<TypePrincipalRight> rules = Arrays.asList(
 				new TypePrincipalRight(USER, getUser(), ALL),
-				new TypePrincipalRight(ROLE, "ADMIN", ALL));
+				new TypePrincipalRight(ROLE, TypePrincipalRight.ADMIN, ALL));
 		ACL acl = new ACL(owner, rules);
 		
 		String resourceRef = RESOURCE_URI_PREFIX + uuid;
