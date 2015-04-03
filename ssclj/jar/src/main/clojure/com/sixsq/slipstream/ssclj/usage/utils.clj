@@ -15,6 +15,10 @@
   [ts]
   (time-fmt/unparse (:date-time time-fmt/formatters) ts))
 
+(defn to-interval   
+  [start end]    
+  (time/interval (to-time start) (to-time end)))
+
 (defn serialize
   [m]
   (with-out-str
