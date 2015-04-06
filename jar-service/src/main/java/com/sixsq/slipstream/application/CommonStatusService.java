@@ -159,18 +159,18 @@ public class CommonStatusService extends StatusService {
 
 		json.append("{\n");
 		json.append("    \"error\": {\n");
-		json.append("        \"code\": \"" + status.getCode() + "\",\n");
+		json.append("        \"code\": \"" + status.getCode() + "\"");
 
 		if (status.getReasonPhrase() != null)
-			json.append("        \"reason\": \"" + status.getReasonPhrase() + "\",\n");
+			json.append(",\n        \"reason\": \"" + status.getReasonPhrase() + "\"");
 
 		if (status.getDescription() != null)
-			json.append("        \"detail\": \"" + status.getDescription() + "\"\n");
+			json.append(",\n        \"detail\": \"" + status.getDescription() + "\"");
 
 		if (status.getUri() != null)
-			json.append("        \"specificationUri\": \"" + status.getUri() + "\"\n");
+			json.append(",\n        \"specificationUri\": \"" + status.getUri() + "\"");
 
-		json.append("    }\n");
+		json.append("\n    }\n");
 		json.append("}");
 
 		Representation representation = new StringRepresentation(json.toString());
