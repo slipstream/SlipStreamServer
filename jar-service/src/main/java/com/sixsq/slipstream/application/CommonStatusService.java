@@ -39,6 +39,9 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.security.Verifier;
 import org.restlet.service.StatusService;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Root;
+import org.simpleframework.xml.Text;
 import org.w3c.dom.Document;
 
 import com.sixsq.slipstream.configuration.Configuration;
@@ -55,6 +58,33 @@ import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
 
 public class CommonStatusService extends StatusService {
+
+	@Root(name="error")
+	private static class ErrorElement {
+		@Attribute
+		private int code;
+		@Attribute
+		private String reason;
+		@Attribute
+		private String detail;
+		@Attribute
+		private String specificationUri;
+		@Text
+		private String text;
+
+		public ErrorElement(Status status) {
+			this(status.getCode(), status.getReasonPhrase(), status.getDescription(), status.getUri(),
+					status.getDescription());
+		}
+
+		public ErrorElement(int code, String reason, String detail, String specificationUri, String text) {
+			this.code = code;
+			this.reason = reason;
+			this.detail = detail;
+			this.specificationUri = specificationUri;
+			this.text = "\n" + text + "\n";
+		}
+    }
 
 	@Override
 	public Representation getRepresentation(Status status, Request request, Response response) {
@@ -85,32 +115,24 @@ public class CommonStatusService extends StatusService {
 		ClientInfo clientInfo = request.getClientInfo();
 		List<Preference<MediaType>> mediaTypes = clientInfo.getAcceptedMediaTypes();
 
-		String error = statusToString(status);
-
 		for (Preference<MediaType> preference : mediaTypes) {
 
 			MediaType desiredMediaType = preference.getMetadata();
 
 			if (TEXT_HTML.isCompatible(desiredMediaType)) {
-
 				return toXhtml(status, request, response, user, baseUrlSlash);
 
 			} else if (APPLICATION_XHTML.isCompatible(desiredMediaType)) {
-
 				return toXhtml(status, request, response, user, baseUrlSlash);
 
 			} else if (APPLICATION_JSON.isCompatible(desiredMediaType)) {
-
 				return toJson(status);
 
 			} else if (TEXT_PLAIN.isCompatible(desiredMediaType)) {
-
-				return toTxt(error);
+				return toTxt(status);
 
 			} else if (APPLICATION_XML.isCompatible(desiredMediaType)) {
-
-				return toXml(status, error);
-
+				return toXml(status);
 			}
 		}
 
@@ -136,10 +158,20 @@ public class CommonStatusService extends StatusService {
 		StringBuilder json = new StringBuilder();
 
 		json.append("{\n");
-		json.append("   \"error\": \"" + status.getCode() + "\",\n");
-		json.append("   \"reason\": \"" + status.getReasonPhrase() + "\",\n");
-		json.append("   \"detail\": \"" + status.getDescription() + "\"\n");
-		json.append("}\n");
+		json.append("    \"error\": {\n");
+		json.append("        \"code\": \"" + status.getCode() + "\",\n");
+
+		if (status.getReasonPhrase() != null)
+			json.append("        \"reason\": \"" + status.getReasonPhrase() + "\",\n");
+
+		if (status.getDescription() != null)
+			json.append("        \"detail\": \"" + status.getDescription() + "\"\n");
+
+		if (status.getUri() != null)
+			json.append("        \"specificationUri\": \"" + status.getUri() + "\"\n");
+
+		json.append("    }\n");
+		json.append("}");
 
 		Representation representation = new StringRepresentation(json.toString());
 		representation.setMediaType(APPLICATION_JSON);
@@ -147,16 +179,25 @@ public class CommonStatusService extends StatusService {
 		return representation;
 	}
 
-	private Representation toTxt(String error) {
+	private Representation toTxt(Status status) {
+		StringBuilder txt = new StringBuilder();
+		txt.append(status.getCode());
+
+		if (status.getReasonPhrase() != null)
+			txt.append(" - " + status.getReasonPhrase());
+
+		if (status.getDescription() != null)
+			txt.append("\n" + status.getDescription());
+
 		Representation representation;
-		representation = new StringRepresentation(error);
+		representation = new StringRepresentation(txt.toString());
 		representation.setMediaType(TEXT_PLAIN);
 		return representation;
 	}
 
-	private Representation toXml(Status status, String error) {
-		Representation representation;
-		representation = new StringRepresentation("<error code=\"" + status.getCode() + "\">" + error + "</error>");
+	private Representation toXml(Status status) {
+		String xml = SerializationUtil.toXmlString(new ErrorElement(status));
+		Representation representation = new StringRepresentation(xml);
 		representation.setMediaType(APPLICATION_XML);
 		return representation;
 	}
@@ -171,9 +212,4 @@ public class CommonStatusService extends StatusService {
 		setContactEmail(email);
 	}
 
-	private String statusToString(Status status) {
-
-		return "Error: " + status.getDescription() + " (" + status.getCode() + " - " + status.getReasonPhrase() + ")";
-
-	}
 }
