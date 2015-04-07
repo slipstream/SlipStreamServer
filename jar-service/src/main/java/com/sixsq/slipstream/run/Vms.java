@@ -73,7 +73,12 @@ public class Vms {
 		this.cloud = parameters.cloud;
 		this.runUuid = parameters.runUuid;
 		this.runOwner = parameters.runOwner;
-		this.user = (parameters.userFilter != null) ? parameters.userFilter : parameters.user.getName();
+
+		if (parameters.userFilter != null) {
+			this.user = parameters.userFilter;
+		} else if (!parameters.user.isSuper()) {
+			this.user = parameters.user.getName();
+		}
 
 		totalCount = Vm.listCount(parameters);
 		vms = Vm.list(parameters);

@@ -1,5 +1,9 @@
 package com.sixsq.slipstream.event;
 
+import static org.restlet.engine.header.HeaderConstants.ATTRIBUTE_HEADERS;
+
+import java.util.logging.Logger;
+
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -11,8 +15,13 @@ import org.restlet.routing.Redirector;
 import org.restlet.routing.Template;
 import org.restlet.util.Series;
 
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.User;
+
 public class EventRedirector extends Redirector {
 
+	private static final Logger logger = Logger.getLogger(Redirector.class.getName());
+	
 	private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
 
 	public EventRedirector(Context context, String targetPattern, int mode) {
@@ -25,14 +34,20 @@ public class EventRedirector extends Redirector {
 	}
 		
 	@SuppressWarnings("unchecked")
-	protected void addSlipstreamAuthnInfo(Request request) {		
-		@SuppressWarnings("rawtypes")
-		Series<Header> requestHeaders = new Series(Header.class);
-		request.getAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS, requestHeaders);
-		
-		// roles should be added when available after username, space separated, e.g "username role1 role2 ..."				
-		String username = request.getClientInfo().getUser().getName();
-		requestHeaders.add(new Header(SLIPSTREAM_AUTHN_INFO, username));				
+	protected void addSlipstreamAuthnInfo(Request request) {
+		try {
+			@SuppressWarnings("rawtypes")
+			Series<Header> requestHeaders = new Series(Header.class);
+			request.getAttributes().put(ATTRIBUTE_HEADERS, requestHeaders);
+
+			String username = request.getClientInfo().getUser().getName();
+			boolean isSuper = User.loadByName(username).isSuper();
+			String role = isSuper ? " " + TypePrincipalRight.ADMIN : "";
+
+			requestHeaders.add(new Header(SLIPSTREAM_AUTHN_INFO, username + role));
+		} catch (ValidationException ve) {
+			logger.severe("Unable to add SlipstreamAuthnInfo in header:" + ve.getMessage());
+		}
 	}
 	
 	// hack inspired by this discussion http://restlet.tigris.org/ds/viewMessage.do?dsForumId=4447&dsMessageId=3076621

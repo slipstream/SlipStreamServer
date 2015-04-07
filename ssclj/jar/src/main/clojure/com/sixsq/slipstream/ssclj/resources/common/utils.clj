@@ -44,7 +44,7 @@
     (ex-response msg 409 id)))
 
 (defn ex-unauthorized [id]
-  (let [msg (str "not authorized for " id)]
+  (let [msg (str "not authorized for '" id "'")]
     (ex-response msg 403 id)))
 
 (defn ex-bad-method

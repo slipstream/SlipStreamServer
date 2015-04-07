@@ -47,19 +47,25 @@
        (remove nil?)
        (set)))
 
+(defn authorized-do?
+  "Returns true if the ACL associated with the given resource permits the
+   current user (in the request) the given action."
+  [resource request action]  
+  (let [rights (extract-rights
+                 (current-authentication request)
+                 (:acl resource))
+        action (get rights-keywords action)]
+    (some #(isa? % action) rights)))
+
 (defn can-do?
   "Determines if the ACL associated with the given resource permits the
    current user (in the request) the given action.  If the action is
    allowed, then the resource itself is returned.  If the action is not
    allowed then an 'unauthorized' response map is thrown."
   [resource request action]
-  (let [rights (extract-rights
-                 (current-authentication request)
-                 (:acl resource))
-        action (get rights-keywords action)]
-    (if (some #(isa? % action) rights)
-      resource
-      (throw (u/ex-unauthorized (:resource-id resource))))))
+  (if (authorized-do? resource request action)
+    resource
+    (throw (u/ex-unauthorized (:resource-id resource)))))
 
 (defn can-modify?
   "Determines if the resource can be modified by the user in the request.
@@ -74,6 +80,10 @@
    failure."
   [resource request]
   (can-do? resource request ::view))
+
+(defn authorized-view? 
+  [resource request] 
+  (authorized-do? resource request ::view))
 
 (defn default-acl
   "Provides a default ACL based on the authentication information.

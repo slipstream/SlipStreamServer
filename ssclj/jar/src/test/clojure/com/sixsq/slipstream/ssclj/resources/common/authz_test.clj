@@ -38,6 +38,7 @@
                     :type      "USER"
                     :right     "MODIFY"}]}]
 
+  (expect #{} (extract-rights {:identity nil} acl))
   (expect #{::authz/all} (extract-rights {:identity "USER1"} acl))
   (expect #{::authz/all ::authz/view} (extract-rights {:identity "USER1" :roles ["ROLE1"]} acl))
   (expect #{} (extract-rights {:identity "USER_UNKNOWN" :roles ["ROLE_UNKNOWN"]} acl))

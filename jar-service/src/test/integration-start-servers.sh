@@ -15,7 +15,7 @@ mvn jetty:run-war -Dpersistence.unit=hsqldb-schema > /dev/null 2>&1 &
 SS_JAVA_PID=$!
 
 echo "Starting SlipStream Clojure Server..."
-java -cp ../ssclj/jar/target/SlipStreamCljResources-jar-2.5.0-SNAPSHOT-jar-with-dependencies.jar com.sixsq.slipstream.ssclj.app.main 8201 > /dev/null 2>&1 &
+java -cp ../ssclj/jar/target/SlipStreamCljResources-jar-2.6-SNAPSHOT-jar-with-dependencies.jar com.sixsq.slipstream.ssclj.app.main 8201 > /dev/null 2>&1 &
 SSCLJ_PID=$!
 
 echo "Wait for servers to be started"
@@ -24,10 +24,10 @@ sleep 40
 echo "Inserting test users..."
 java  -Dpersistence.unit=hsqldb-schema \
 -cp \
-target/SlipStreamServer-war-2.5.0-SNAPSHOT/WEB-INF/lib:\
-../jar-persistence/target/SlipStreamPersistence-2.5.0-SNAPSHOT.jar:\
-../jar-persistence/target/SlipStreamPersistence-2.5.0-SNAPSHOT-tests.jar:\
-../jar-service/target/SlipStreamService-2.5.0-SNAPSHOT-tests.jar\
+target/SlipStreamServer-war-2.6-SNAPSHOT/WEB-INF/lib:\
+../jar-persistence/target/SlipStreamPersistence-2.6-SNAPSHOT.jar:\
+../jar-persistence/target/SlipStreamPersistence-2.6-SNAPSHOT-tests.jar:\
+../jar-service/target/SlipStreamService-2.6-SNAPSHOT-tests.jar\
  com/sixsq/slipstream/event/IntegrationTestHelper 
 echo "... DONE"
 
