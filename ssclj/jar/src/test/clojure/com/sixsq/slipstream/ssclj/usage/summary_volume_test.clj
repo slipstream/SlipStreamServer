@@ -21,6 +21,15 @@
   (f))
 (use-fixtures :each delete-all)
 
+(def jack-exoscale
+  { 
+    :user                "jack"
+    :cloud               "exoscale-ch-gva"    
+    :metrics [{   :name  "small"
+                  :value 2.0 }
+              { :name  "big"
+                  :value 4.0 }]})
+
 (def joe-exoscale
   { 
     :user                "joe"
@@ -74,8 +83,7 @@
       (rc/-insertStart joe-aws-start)
 
       (rc/-insertEnd joe-exo-end)
-      (rc/-insertEnd joe-aws-end)
-      )))
+      (rc/-insertEnd joe-aws-end))))
 
 (defn summarize-joe-weekly 
   [nb-weeks]
@@ -105,12 +113,12 @@
   (let [start-day         (t/date-time 2014)
         end-day           (t/plus (t/date-time 2014) (t/days 1))
 
-        ten-seconds-after (t/plus start-day (t/seconds 50))
+        fifty-seconds-after (t/plus start-day (t/seconds 50))
 
         joe-exo-start (assoc joe-exoscale 
                               :start_timestamp (u/to-ISO-8601 start-day)
                               :cloud_vm_instanceid "vm-joe-exo-id")
-        joe-exo-end { :end_timestamp (u/to-ISO-8601 ten-seconds-after)
+        joe-exo-end { :end_timestamp (u/to-ISO-8601 fifty-seconds-after)
                       :cloud_vm_instanceid "vm-joe-exo-id"}]      
 
       (rc/-insertStart joe-exo-start)
@@ -132,9 +140,51 @@
     (summarize-joe-weekly nb-weeks)
     (check-summaries)))
 
-;; TODO 
-;; Add test many records inside period
-;; a mix with different users
-;; records duration longer than billing period
-;; open records
+(deftest multiple-users-same-cloud
+  (let [start-day         (t/date-time 2014)
+        end-day           (t/plus (t/date-time 2014) (t/days 1))
+
+        joe-exo-start (assoc joe-exoscale   
+                              :start_timestamp (u/to-ISO-8601 start-day)
+                              :cloud_vm_instanceid "vm-joe-exo-id")
+        joe-exo-end { :end_timestamp (u/to-ISO-8601 (t/plus start-day (t/days 1)))
+                      :cloud_vm_instanceid "vm-joe-exo-id"}      
+
+        jack-exo-start (assoc jack-exoscale 
+                              :start_timestamp (u/to-ISO-8601 start-day)
+                              :cloud_vm_instanceid "vm-jack-exo-id")
+        jack-exo-end {:end_timestamp (u/to-ISO-8601 (t/plus start-day (t/days 1)))
+                      :cloud_vm_instanceid "vm-jack-exo-id"}]      
+
+      (rc/-insertStart joe-exo-start)
+      (rc/-insertStart jack-exo-start)
+      (rc/-insertEnd joe-exo-end)
+      (rc/-insertEnd jack-exo-end)
+
+      (summarizeAndStore (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day))
+      
+      (let [summaries (select usage-summaries)]
+        (is (= [
+          {:disk-GB {:unit_minutes 144720.0}, :RAM-GB {:unit_minutes 11520.0}, :nb-cpu {:unit_minutes 2880.0}}] 
+          (map (comp u/deserialize :usage) (filter #(= "joe" (:user %)) summaries))))
+        (is (= [
+          {:big {:unit_minutes 5760.0}, :small {:unit_minutes 2880.0}}]
+          (map (comp u/deserialize :usage) (filter #(= "jack" (:user %)) summaries)))))))
+
+(deftest summarize-open-record
+  (let [start-day         (t/date-time 2014)
+        end-day           (t/plus (t/date-time 2014) (t/days 1))
+        joe-exo-start (assoc joe-exoscale   
+                              :start_timestamp (u/to-ISO-8601 start-day)
+                              :cloud_vm_instanceid "vm-joe-exo-id")]
+
+      (rc/-insertStart joe-exo-start)
+
+      (summarizeAndStore (u/to-ISO-8601 (t/minus start-day (t/days 1))) (u/to-ISO-8601 end-day))
+      
+      (let [summaries (select usage-summaries)]
+        (is (= [{:disk-GB {:unit_minutes 144720.0}, :RAM-GB {:unit_minutes 11520.0}, :nb-cpu {:unit_minutes 2880.0}}] 
+          (map (comp u/deserialize :usage) (select usage-summaries)))))))
+
+
 

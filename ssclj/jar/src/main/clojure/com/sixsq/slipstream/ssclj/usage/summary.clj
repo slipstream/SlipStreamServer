@@ -25,14 +25,6 @@
   [start-time end-time usage-records]
   (filter (intersect? start-time end-time) usage-records))
 
-(defn same-user-cloud-metric-name?
-  [user cloud metric-name]
-  (fn [record]
-    (let [keys-to-compare [:user :cloud :metric_name]]      
-      (= 
-        (zipmap keys-to-compare [user cloud metric-name]) 
-        (select-keys record keys-to-compare)))))
-
 (defn shift-start
   [start]
   (fn [record]
