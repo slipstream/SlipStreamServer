@@ -282,13 +282,13 @@ public class RunListResource extends BaseResource {
 
 			if (category == ModuleCategory.Deployment) {
 				if (parts.length != 4) {
-					throw new ValidationException("Invalid key format: " + entry.getKey());
+					throw new ValidationException("Invalid key format for " + category + " module: " + entry.getKey());
 				}
 				nodeName = parts[2];
 				parameterName = parts[3];
 			} else {
 				if (parts.length != 2) {
-					throw new ValidationException("Invalid key format: " + entry.getKey());
+					throw new ValidationException("Invalid key format for " + category + " module: " + entry.getKey());
 				}
 				nodeName = Run.MACHINE_NAME;
 				parameterName = parts[1];

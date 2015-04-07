@@ -42,6 +42,21 @@
   { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"    
     :end_timestamp       event-end-time})
 
+(deftest inserts-should-keywordize-maps
+  (let [start-with-string-keys
+        { "cloud_vm_instanceid" "exo:123"
+          "user"                "sixsq_dev"
+          "cloud"               "exo"
+          "start_timestamp"     event-start-time
+          "metrics" [{"name"  "A" "value" 4 } {"name" "B" "value" 8}]}
+        end-with-string-keys
+        { "cloud_vm_instanceid" "exo:123"          
+          "end_timestamp"     event-end-time }]
+    (-insertStart start-with-string-keys)
+    (-insertEnd end-with-string-keys)
+    (is (= 2 (count (records-for-interval start-day-1 end-day-1))))  
+    (is (= 0 (count (records-for-interval start-day-2 end-day-2))))))
+
 (deftest records-for-interval-for-open-records
   (-insertStart event-start)
   (log/debug "after insert, usage records " (select usage-records))

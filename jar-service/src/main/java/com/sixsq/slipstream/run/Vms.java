@@ -28,8 +28,8 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
+import com.sixsq.slipstream.vm.VmsQueryParameters;
 
 @Root
 public class Vms {
@@ -52,6 +52,12 @@ public class Vms {
 	@Attribute(required=false)
 	private String runUuid;
 
+	@Attribute(required=false)
+	private String runOwner;
+
+	@Attribute(required=false)
+	private String user;
+
 	@ElementList(inline = true)
 	private List<Vm> vms = new ArrayList<Vm>();
 
@@ -59,22 +65,18 @@ public class Vms {
 		return vms;
 	}
 
-	public void populate(User user, int offset, int limit, String cloudServiceName, String runUuid)
+	public void populate(VmsQueryParameters parameters)
 			throws SlipStreamException {
 
-		populateVms(user, offset, limit, cloudServiceName, runUuid);
-	}
+		this.offset = parameters.offset;
+		this.limit = parameters.limit;
+		this.cloud = parameters.cloud;
+		this.runUuid = parameters.runUuid;
+		this.runOwner = parameters.runOwner;
+		this.user = (parameters.userFilter != null) ? parameters.userFilter : parameters.user.getName();
 
-	private void populateVms(User user, int offset, int limit, String cloudServiceName, String runUuid)
-			throws SlipStreamException {
-
-		this.offset = offset;
-		this.limit = limit;
-		this.cloud = cloudServiceName;
-		this.runUuid = runUuid;
-
-		totalCount = Vm.listCount(user, cloudServiceName, runUuid);
-		vms = Vm.list(user, offset, limit, cloudServiceName, runUuid);
+		totalCount = Vm.listCount(parameters);
+		vms = Vm.list(parameters);
 		count = vms.size();
 	}
 }

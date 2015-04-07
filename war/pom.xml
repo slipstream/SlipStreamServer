@@ -38,13 +38,13 @@
   interface) and the SlipStreamConnector module.
 -->
 
-<!--
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamConnector-CloudStack-jar</artifactId>
       <version>${project.version}</version>
     </dependency>
 
+<!--
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamConnector-Okeanos-jar</artifactId>

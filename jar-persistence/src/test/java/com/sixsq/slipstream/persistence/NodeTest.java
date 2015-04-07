@@ -20,6 +20,8 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
@@ -59,4 +61,19 @@ public class NodeTest {
 		}
 	}
 
+	@Test
+	public void nodeNotes() throws SlipStreamClientException {
+		ImageModule image = new ImageModule("nodeNotes");
+		image.setNote("image note");
+		Node node = new Node("my_node", image);
+		assertThat(node.getNotes().length, is(1));
+		assertThat(node.getNotes()[0], is("image note"));
+	}
+
+	@Test
+	public void nodeEmptyNotes() throws SlipStreamClientException {
+		ImageModule image = new ImageModule("nodeNotes");
+		Node node = new Node("my_node", image);
+		assertThat(node.getNotes().length, is(0));
+	}
 }

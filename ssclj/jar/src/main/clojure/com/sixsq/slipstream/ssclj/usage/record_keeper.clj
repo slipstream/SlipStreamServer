@@ -97,20 +97,22 @@
 (defn -insertStart
   [usage-event]
   (log/info "Will persist usage event START:" usage-event)
-  (check-not-already-existing usage-event)
-  (doseq [metric (:metrics usage-event)]    
-    (let [usage-event-metric (project usage-event metric)]
-      (log/debug "Will persist metric: " usage-event-metric)
-      (kc/insert usage-records (kc/values usage-event-metric)))))
+  (let [usage-event-keyworded (clojure.walk/keywordize-keys usage-event)]
+    (check-not-already-existing usage-event-keyworded)
+    (doseq [metric (:metrics usage-event-keyworded)]    
+      (let [usage-event-metric (project usage-event-keyworded metric)]
+        (log/info "Will persist metric: " usage-event-metric)
+        (kc/insert usage-records (kc/values usage-event-metric))))))
 
 (defn -insertEnd
   [usage-event]
-  (check-already-started usage-event)
   (log/info "Will persist usage event END:" usage-event)    
-  (kc/update 
+  (let [usage-event-keyworded (clojure.walk/keywordize-keys usage-event)]
+    (check-already-started usage-event-keyworded)
+    (kc/update 
       usage-records 
-      (kc/set-fields {:end_timestamp (:end_timestamp usage-event)})
-      (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})))
+      (kc/set-fields {:end_timestamp (:end_timestamp usage-event-keyworded)})
+      (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event-keyworded)}))))
 
 (defn insert-summary   
   [summary]

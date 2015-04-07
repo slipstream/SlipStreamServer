@@ -3,7 +3,7 @@
     [clojure.java.jdbc :refer :all                :as jdbc]
     [clojure.tools.logging                        :as log]
     [com.sixsq.slipstream.ssclj.database.ddl      :as ddlh]
-    [com.sixsq.slipstream.ssclj.api.korma-helper  :as kh]
+    [com.sixsq.slipstream.ssclj.database.korma-helper  :as kh]
     ))
 
 (def columns-acl   
