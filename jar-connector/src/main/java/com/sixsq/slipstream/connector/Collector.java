@@ -20,16 +20,11 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,7 +42,6 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.persistence.VmRuntimeParameterMapping;
-import com.sixsq.slipstream.usage.Record;
 
 public class Collector {
 
@@ -116,7 +110,7 @@ public class Collector {
 		update(vms, user.getName(), cloud);
 		return idsAndStates.size();
 	}
-
+	
 	public static int update(List<Vm> newVms, String user, String cloud) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
@@ -129,37 +123,66 @@ public class Collector {
 		List<Vm> oldVmList = q.getResultList();
 
 		Map<String, Vm> filteredOldVmMap = new HashMap<String, Vm>();
-		Map<String, Vm> newVmsMap = Vm.toMapByInstanceId(newVms);
+		Map<String, Vm> newVmsMap = toMapByInstanceId(newVms);
 		int removed = 0;
-		for (Vm v : oldVmList) {
-			String instanceId = v.getInstanceId();
+		for (Vm vm : oldVmList) {
+			String instanceId = vm.getInstanceId();
 			if (!newVmsMap.containsKey(instanceId)) {
-				setVmstate(em, getMapping(v), "Unknown");
-				em.remove(v);
-				insertEnd(v.getInstanceId(), user, cloud);
+				setVmstate(em, getMapping(vm), "Unknown");
+				em.remove(vm);
 				removed++;
+				UsageRecorder.insertEnd(instanceId, user, cloud);
 			} else {
-				filteredOldVmMap.put(instanceId, v);
+				filteredOldVmMap.put(instanceId, vm);
 			}
 		}
 		for (Vm v : newVmsMap.values()) {
 			Vm old = filteredOldVmMap.get(v.getInstanceId());
 			VmRuntimeParameterMapping m = getMapping(v);
 			if (old == null) {
-				Vm.setVmstate(em, m, v);
+				
+				UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
+				
+				setVmstate(em, m, v);
+				setIp(m, v);
+				setName(m, v);
 				setRunUuid(m, v);
+				setRunOwner(m, v);
+				setNodeName(m, v);
+				setNodeInstanceId(m, v);
 				em.persist(v);
-				Map<String, Double> metrics = createVmMetric();
-				insertStart(v.getInstanceId(), user, cloud, metrics);
 			} else {
 				boolean merge = false;
+
 				if (!v.getState().equals(old.getState())) {
 					old.setState(v.getState());
-					Vm.setVmstate(em, m, v);
+					setVmstate(em, m, v);
 					merge = true;
+				} else {
+					setVmstateIfNotYetSet(em, m, v);
 				}
 				if (old.getRunUuid() == null) {
 					setRunUuid(m, old);
+					merge = true;
+				}
+				if (old.getRunOwner() == null) {
+					setRunOwner(m, old);
+					merge = true;
+				}
+				if (old.getIp() == null) {
+					setIp(m, old);
+					merge = true;
+				}
+				if (old.getName() == null) {
+					setName(m, old);
+					merge = true;
+				}
+				if (old.getNodeName() == null) {
+					setNodeName(m, old);
+					merge = true;
+				}
+				if (old.getNodeInstanceId() == null) {
+					setNodeInstanceId(m, old);
 					merge = true;
 				}
 				if (merge) {
@@ -171,47 +194,13 @@ public class Collector {
 		em.close();
 		return removed;
 	}
-
-	private static String keyCloudVMInstanceID(String cloud, String instanceId) {
-		return cloud + ":" + instanceId;
-	}
 	
-	private static void insertEnd(String instanceId, String user, String cloud) {		
-		Map<String, Object> record = new HashMap<String, Object>();		
-		record.put("cloud_vm_instanceid", keyCloudVMInstanceID(cloud, instanceId));
-		record.put("end_timestamp", nowISO8601());
-		Record.insertEnd(record);
-	}
-
-	private static Map<String, Double> createVmMetric() {
-		Map<String, Double> metrics = new HashMap<String, Double>();
-		metrics.put("vm", 1.0);
-		return metrics;
-	}
-
 	private static VmRuntimeParameterMapping getMapping(Vm v) {
 		return VmRuntimeParameterMapping.find(v.getCloud(), v.getInstanceId());
 	}
 
-	// TODO : factor out common functions with Event class
-	private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-	private static final DateFormat ISO8601Formatter = new SimpleDateFormat(ISO_8601_PATTERN, Locale.US);
-	static {
-		ISO8601Formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-	}
-	private static String nowISO8601() {
-		return ISO8601Formatter.format(new Date());		
-	}
-	// TODO : factor out common functions with Event class
-	
-	private static void insertStart(String instanceId, String user, String cloud, Map<String, Double> metrics) {
-		Map<String, Object> record = new HashMap<String, Object>();		
-		record.put("cloud_vm_instanceid", keyCloudVMInstanceID(cloud, instanceId));
-		record.put("user", user);
-		record.put("cloud", cloud);
-		record.put("start_timestamp", nowISO8601());
-		record.put("metrics", metrics);		
-		Record.insertStart(record);
+	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
+		setVmstate(em, m, v.getState());
 	}
 
 	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, String vmstate) {
@@ -222,15 +211,70 @@ public class Collector {
 		}
 	}
 
-	private static void setRunUuid(VmRuntimeParameterMapping m, Vm v) {
+	private static void setVmstateIfNotYetSet(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
 		if (m != null) {
 			RuntimeParameter rp = m.getVmstateRuntimeParameter();
-			if (rp != null) {
-				v.setRunUuid(rp.getContainer().getUuid());
+			if (!rp.isSet()) {
+				setVmstate(em, m, v);
 			}
 		}
 	}
 
+	private static void setRunUuid(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setRunUuid(m.getRunUuid());
+		}
+	}
+
+	private static void setRunOwner(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setRunOwner(m.getRunOwner());
+		}
+	}
+
+	private static void setIp(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			RuntimeParameter rp = m.getHostnameRuntimeParameter();
+			if (rp.isSet()) {
+				v.setIp(rp.getValue());
+			}
+		}
+	}
+
+	private static void setName(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setName(m.getName());
+		}
+	}
+
+	private static void setNodeName(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setNodeName(m.getNodeName());
+		}
+	}
+
+	private static void setNodeInstanceId(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setNodeInstanceId(m.getNodeInstanceId());
+		}
+	}
+	
+	/**
+	 * This method assumes that the input VMs correspond to a single cloud.
+	 * Otherwise, duplicate instance ids would overwrite each other.
+	 *
+	 * @param vms
+	 *            for a single cloud
+	 * @return mapped VMs by instance id
+	 */
+	public static Map<String, Vm> toMapByInstanceId(List<Vm> vms) {
+		Map<String, Vm> map = new HashMap<String, Vm>();
+		for (Vm v : vms) {
+			map.put(v.getInstanceId(), v);
+		}
+		return map;
+	}
+	
 	private static void logTiming(User user, Connector connector, long startTime, String info) {
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info(getUserCloudLogRepr(user, connector) + " (" + elapsed + " ms) : " + info);

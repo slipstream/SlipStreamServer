@@ -46,6 +46,7 @@ import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.vm.VmsQueryParameters;
 
 /**
  * Unit test:
@@ -87,6 +88,21 @@ public class Vm {
 	@Attribute(required = false)
 	private String runUuid;
 
+	@Attribute(required = false)
+	private String runOwner;
+
+	@Attribute(required = false)
+	private String ip;
+
+	@Attribute(required = false)
+	private String name;
+
+	@Attribute(required = false)
+	private String nodeName;
+
+	@Attribute(required = false)
+	private String nodeInstanceId;
+
 	@SuppressWarnings("unused")
 	private Vm() {
 	}
@@ -100,10 +116,10 @@ public class Vm {
 	}
 
 	public static List<Vm> list(User user) throws ConfigurationException, ValidationException {
-		return list(user, null, null, null, null);
+		return list(new VmsQueryParameters(user, null, null, null, null, null, null));
 	}
 
-	public static List<Vm> list(User user, Integer offset, Integer limit, String cloudServiceName, String runUuid)
+	public static List<Vm> list(VmsQueryParameters parameters)
 			throws ConfigurationException, ValidationException {
 
 		List<Vm> vms = null;
@@ -113,17 +129,17 @@ public class Vm {
 			CriteriaQuery<Vm> critQuery = builder.createQuery(Vm.class);
 			Root<Vm> rootQuery = critQuery.from(Vm.class);
 			critQuery.select(rootQuery);
-			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, cloudServiceName, runUuid);
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, parameters);
 			if (where != null){
 				critQuery.where(where);
 			}
 			critQuery.orderBy(builder.desc(rootQuery.get("measurement")));
 			TypedQuery<Vm> query = em.createQuery(critQuery);
-			if (offset != null) {
-				query.setFirstResult(offset);
+			if (parameters.offset != null) {
+				query.setFirstResult(parameters.offset);
 			}
-			if (limit != null) {
-				query.setMaxResults(limit);
+			if (parameters.limit != null) {
+				query.setMaxResults(parameters.limit);
 			}
 			vms = query.getResultList();
 		} finally {
@@ -132,8 +148,7 @@ public class Vm {
 		return vms;
 	}
 
-	public static int listCount(User user, String cloudServiceName, String runUuid)
-			throws ConfigurationException, ValidationException {
+	public static int listCount(VmsQueryParameters parameters) throws ConfigurationException, ValidationException {
 		int count = 0;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
@@ -141,7 +156,7 @@ public class Vm {
 			CriteriaQuery<Long> critQuery = builder.createQuery(Long.class);
 			Root<Vm> rootQuery = critQuery.from(Vm.class);
 			critQuery.select(builder.count(rootQuery));
-			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, cloudServiceName, runUuid);
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, parameters);
 			if (where != null){
 				critQuery.where(where);
 			}
@@ -157,31 +172,26 @@ public class Vm {
 		return (currentPredicate != null) ? builder.and(currentPredicate, newPredicate) : newPredicate;
 	}
 
-	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Vm> rootQuery, User user,
-			String cloudServiceName, String runUuid) {
+	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Vm> rootQuery,
+			VmsQueryParameters parameters) {
+
 		Predicate where = null;
-		if (!user.isSuper()) {
-			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), user.getName()));
+		if (!parameters.user.isSuper()) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), parameters.user.getName()));
 		}
-		if (runUuid != null && !"".equals(runUuid)) {
-			where = andPredicate(builder, where, builder.equal(rootQuery.get("runUuid"), runUuid));
+		if (parameters.user.isSuper() && parameters.userFilter != null) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), parameters.userFilter));
 		}
-		if (cloudServiceName != null && !"".equals(cloudServiceName)) {
-			where = andPredicate(builder, where, builder.equal(rootQuery.get("cloud"), cloudServiceName));
+		if (parameters.runUuid != null && !"".equals(parameters.runUuid)) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("runUuid"), parameters.runUuid));
+		}
+		if (parameters.runOwner != null && !"".equals(parameters.runOwner)) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("runOwner"), parameters.runOwner));
+		}
+		if (parameters.cloud != null && !"".equals(parameters.cloud)) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("cloud"), parameters.cloud));
 		}
 		return where;
-	}
-
-	public static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
-		setVmstate(em, m, v.getState());
-	}
-
-	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, String vmstate) {
-		if (m != null) {
-			RuntimeParameter rp = m.getVmstateRuntimeParameter();
-			rp.setValue(vmstate);
-			em.merge(rp);
-		}
 	}
 
 	public static Map<String, Integer> usage(String user) {
@@ -266,10 +276,6 @@ public class Vm {
 		return vmMap;
 	}
 
-	public String getState() {
-		return state;
-	}
-
 	public void setState(String state) {
 		this.state = state;
 	}
@@ -286,6 +292,10 @@ public class Vm {
 		return instanceId;
 	}
 
+	public String getState() {
+		return state;
+	}
+
 	public Date getMeasurement() {
 		return measurement;
 	}
@@ -296,6 +306,46 @@ public class Vm {
 
 	public void setRunUuid(String runUuid) {
 		this.runUuid = runUuid;
+	}
+
+	public String getRunOwner() {
+		return runOwner;
+	}
+
+	public void setRunOwner(String runOwner) {
+		this.runOwner = runOwner;
+	}
+
+	public String getIp() {
+		return this.ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getNodeName() {
+		return this.nodeName;
+	}
+
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
+
+	public String getNodeInstanceId() {
+		return this.nodeInstanceId;
+	}
+
+	public void setNodeInstanceId(String nodeInstanceId) {
+		this.nodeInstanceId = nodeInstanceId;
 	}
 
 	public void remove() {

@@ -35,6 +35,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sixsq.slipstream.connector.Collector;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.run.RuntimeParameterMediator;
 
@@ -141,7 +142,7 @@ public class VmRuntimeParameterMappingTest {
 
 		// Updating the vm state sets the corresponding runtime parameter
 		Vm vm = new Vm(instanceId, cloudName, vmstate, user.getName());
-		Vm.update(Arrays.asList(vm), user.getName(), cloudName);
+		Collector.update(Arrays.asList(vm), user.getName(), cloudName);
 		mapping = VmRuntimeParameterMapping.find("local", instanceId);
 		assertThat(mapping.getRunUuid(), is(run.getUuid()));
 		assertThat(vm.getRunUuid(), is(run.getUuid()));
@@ -191,7 +192,7 @@ public class VmRuntimeParameterMappingTest {
 			Vm vm = new Vm("instance_" + i, "local", states[random.nextInt(states.length)], user.getName());
 			vms.add(vm);
 		}
-		Vm.update(vms, user.getName(), "local");
+		Collector.update(vms, user.getName(), "local");
 
 	}
 

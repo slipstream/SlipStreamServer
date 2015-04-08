@@ -78,6 +78,17 @@
     (assoc :metric_name   (:name metric))
     (assoc :metric_value  (:value metric))))
 
+(defn clojurify   
+  [exp] 
+  (cond
+    (instance? java.util.Map exp) (into {} (for [[k v] exp] [(keyword k) v]))
+    (instance? java.util.List exp) (into [] exp)
+    :else exp))
+
+(defn walk-to-clojure-map
+  [java-map]
+  (clojure.walk/prewalk clojurify java-map))
+
 (defn- not-existing?
   [usage-event]
   (empty? (kc/select usage-records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)}))))
@@ -94,25 +105,42 @@
   [start end]
   (u/check u/start-before-end? [start end] "Invalid period"))
 
+(defn- extract-metrics
+  [usage-event]
+  (let [metrics (:metrics usage-event)]
+    (if (zero? (count metrics))
+      (log/warn "No metrics in " usage-event)      
+      metrics)))
+
+(defn- insert-metrics   
+  [usage-event]  
+  (doseq [metric (extract-metrics usage-event)]    
+    (let [usage-event-metric (project usage-event metric)]
+      (log/info "Will persist metric: " usage-event-metric)
+      (kc/insert usage-records (kc/values usage-event-metric)))))
+
+(defn- close-usage-record   
+  [usage-event]
+  (kc/update 
+    usage-records 
+    (kc/set-fields {:end_timestamp (:end_timestamp usage-event)})
+    (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})))
+
 (defn -insertStart
   [usage-event]
   (log/info "Will persist usage event START:" usage-event)
-  (let [usage-event-keyworded (clojure.walk/keywordize-keys usage-event)]
-    (check-not-already-existing usage-event-keyworded)
-    (doseq [metric (:metrics usage-event-keyworded)]    
-      (let [usage-event-metric (project usage-event-keyworded metric)]
-        (log/info "Will persist metric: " usage-event-metric)
-        (kc/insert usage-records (kc/values usage-event-metric))))))
+  (-> usage-event
+    walk-to-clojure-map       
+    check-not-already-existing
+    insert-metrics))
 
 (defn -insertEnd
   [usage-event]
-  (log/info "Will persist usage event END:" usage-event)    
-  (let [usage-event-keyworded (clojure.walk/keywordize-keys usage-event)]
-    (check-already-started usage-event-keyworded)
-    (kc/update 
-      usage-records 
-      (kc/set-fields {:end_timestamp (:end_timestamp usage-event-keyworded)})
-      (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event-keyworded)}))))
+  (log/info "Will persist usage event END:" usage-event) 
+  (-> usage-event
+    walk-to-clojure-map
+    check-already-started
+    close-usage-record))
 
 (defn insert-summary   
   [summary]
