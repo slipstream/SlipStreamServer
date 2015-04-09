@@ -36,7 +36,6 @@
   These cannot be added to WAR because it creates a circular dependency
   between the SlipStreamServer module (which contains the connector 
   interface) and the SlipStreamConnector module.
--->
 
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
@@ -44,7 +43,6 @@
       <version>${project.version}</version>
     </dependency>
 
-<!--
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamConnector-Okeanos-jar</artifactId>
