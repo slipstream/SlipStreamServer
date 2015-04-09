@@ -194,14 +194,14 @@ public class VmRuntimeParameterMapping implements Serializable {
 	}
 
 	public RuntimeParameter getVmstateRuntimeParameter() {
-		if(vmstateRuntimeParameter == null) {
+		if (vmstateRuntimeParameter == null) {
 			vmstateRuntimeParameter = RuntimeParameter.load(vmstateRuntimeParameterUri);
 		}
 		return vmstateRuntimeParameter;
 	}
 
 	public RuntimeParameter getHostnameRuntimeParameter() {
-		if(hostnameRuntimeParameter == null) {
+		if (hostnameRuntimeParameter == null && hostnameRuntimeParameterUri != null) {
 			hostnameRuntimeParameter = RuntimeParameter.load(hostnameRuntimeParameterUri);
 		}
 		return hostnameRuntimeParameter;

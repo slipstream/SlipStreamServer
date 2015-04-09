@@ -314,7 +314,7 @@ public class Vm {
 	private static void setIp(VmRuntimeParameterMapping m, Vm v) {
 		if (m != null) {
 			RuntimeParameter rp = m.getHostnameRuntimeParameter();
-			if (rp.isSet()) {
+			if (rp != null && rp.isSet()) {
 				v.setIp(rp.getValue());
 			}
 		}
