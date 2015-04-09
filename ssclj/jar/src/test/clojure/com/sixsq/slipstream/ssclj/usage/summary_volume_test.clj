@@ -90,7 +90,7 @@
   (doseq [i (range nb-weeks)]
     (let [start-week (t/plus (t/date-time 2014) (t/weeks i))
           end-week (t/plus start-week (t/weeks 1))]
-      (summarizeAndStore (u/to-ISO-8601 start-week) (u/to-ISO-8601 end-week)))))      
+      (summarize-and-store (u/to-ISO-8601 start-week) (u/to-ISO-8601 end-week)))))      
 
 (defn check-summaries
   []  
@@ -123,7 +123,7 @@
 
       (rc/-insertStart joe-exo-start)
       (rc/-insertEnd joe-exo-end)
-      (summarizeAndStore (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day))
+      (summarize-and-store (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day))
 
       (let [summary (-> (select usage-summaries)
                         first
@@ -161,7 +161,7 @@
       (rc/-insertEnd joe-exo-end)
       (rc/-insertEnd jack-exo-end)
 
-      (summarizeAndStore (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day))
+      (summarize-and-store (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day))
       
       (let [summaries (select usage-summaries)]
         (is (= [
@@ -180,7 +180,7 @@
 
       (rc/-insertStart joe-exo-start)
 
-      (summarizeAndStore (u/to-ISO-8601 (t/minus start-day (t/days 1))) (u/to-ISO-8601 end-day))
+      (summarize-and-store (u/to-ISO-8601 (t/minus start-day (t/days 1))) (u/to-ISO-8601 end-day))
       
       (let [summaries (select usage-summaries)]
         (is (= [{:disk-GB {:unit_minutes 144720.0}, :RAM-GB {:unit_minutes 11520.0}, :nb-cpu {:unit_minutes 2880.0}}] 

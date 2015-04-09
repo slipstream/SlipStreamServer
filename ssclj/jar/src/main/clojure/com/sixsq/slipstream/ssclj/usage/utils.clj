@@ -60,11 +60,14 @@
 (defn clojurify   
   [exp] 
   (cond
-    (instance? java.util.Map exp) (into {} (for [[k v] exp] [(keyword k) v]))
+    (instance? java.util.Map  exp) (into {} exp)
     (instance? java.util.List exp) (into [] exp)
     :else exp))
 
 (defn walk-clojurify
   [java-map]
-  (clojure.walk/prewalk clojurify java-map))
+  (->> java-map
+       (clojure.walk/prewalk clojurify)
+       clojure.walk/keywordize-keys))
+  
 

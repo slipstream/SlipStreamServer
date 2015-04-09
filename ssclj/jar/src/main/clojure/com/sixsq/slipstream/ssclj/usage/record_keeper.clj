@@ -79,13 +79,15 @@
 (defn- project   
   [usage-event metric]
   (-> usage-event
-    (dissoc :metrics)
-    (assoc :metric_name   (:name metric))
-    (assoc :metric_value  (:value metric))))
+      (dissoc :metrics)
+      (assoc  :metric_name   (:name  metric))
+      (assoc  :metric_value  (:value metric))))
 
 (defn- not-existing?
   [usage-event]
-  (empty? (kc/select usage-records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)}))))
+  (empty? 
+    (kc/select usage-records 
+      (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)}))))
 
 (defn- check-not-already-existing
   [usage-event]
