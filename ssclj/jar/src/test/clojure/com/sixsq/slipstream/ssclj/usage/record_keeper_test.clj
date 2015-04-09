@@ -91,9 +91,3 @@
   (-insertEnd   event-end)
   (is (= 3 (count (records-for-interval middle-event end-day-2))))
   (is (= 3 (count (records-for-interval start-day-0 middle-event)))))
-  
-  (deftest walk-to-clojure-map-should-recursively-keywordize-a-java-map
-    (is (=
-      {:A 42 :c {:B [{:Z 111} {:e 1515}]}}
-      (walk-to-clojure-map 
-        (java.util.HashMap. {"A" 42 "c" {"B" (java.util.ArrayList. [(java.util.HashMap. {"Z" 111}) {"e" 1515}])}})))))

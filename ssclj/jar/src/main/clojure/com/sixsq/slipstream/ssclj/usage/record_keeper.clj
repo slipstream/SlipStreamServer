@@ -50,6 +50,11 @@
     "end_timestamp"         "VARCHAR(30)"
     "usage"                 "VARCHAR(10000)"))
 
+
+;; TODO : add private keys (uuid like)
+;; TODO ? add checkers on init was called ??
+
+
 (def init-db
   (delay  
     (kh/korma-init)
@@ -77,17 +82,6 @@
     (dissoc :metrics)
     (assoc :metric_name   (:name metric))
     (assoc :metric_value  (:value metric))))
-
-(defn clojurify   
-  [exp] 
-  (cond
-    (instance? java.util.Map exp) (into {} (for [[k v] exp] [(keyword k) v]))
-    (instance? java.util.List exp) (into [] exp)
-    :else exp))
-
-(defn walk-to-clojure-map
-  [java-map]
-  (clojure.walk/prewalk clojurify java-map))
 
 (defn- not-existing?
   [usage-event]
@@ -130,7 +124,7 @@
   [usage-event]
   (log/info "Will persist usage event START:" usage-event)
   (-> usage-event
-    walk-to-clojure-map       
+    u/walk-clojurify       
     check-not-already-existing
     insert-metrics))
 
@@ -138,7 +132,7 @@
   [usage-event]
   (log/info "Will persist usage event END:" usage-event) 
   (-> usage-event
-    walk-to-clojure-map
+    u/walk-clojurify
     check-already-started
     close-usage-record))
 
