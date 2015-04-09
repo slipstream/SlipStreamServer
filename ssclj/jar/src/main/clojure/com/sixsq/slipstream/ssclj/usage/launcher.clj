@@ -8,11 +8,25 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu])
   (:gen-class))
 
+(defn fill-up-to-timestamp
+  [ts]
+  (let [timestamp-filler "XXXX-01-01T00:00:00.0Z"]
+    (cond 
+      (< (count ts) 4) 
+        (throw (IllegalArgumentException. (str "Given timestamp '" ts "' is too short. (Minimum yyyy)")))
+      (< (count timestamp-filler) (count ts)) 
+        (throw (IllegalArgumentException. (str "Given timestamp '" ts "' is too long. (Maximum 2015-01-15T00:00:00.0Z)")))
+      :else
+        (str ts (subs timestamp-filler (count ts))))))
+
 (def cli-options  
   [["-s" "--start START_TIMESTAMP" "Start timestamp"  
-     :validate [cu/valid-timestamp? "Must be a valid timestamp (e.g 2015-01-15T00:00:00.0Z)"]]
+    :validate [cu/valid-timestamp? "Must be a valid timestamp (e.g 2015, 2015-01, ... 2015-01-15T00:00:00.0Z)"]
+    :parse-fn fill-up-to-timestamp]
+    
    ["-e" "--end START_TIMESTAMP" "End timestamp"  
-     :validate [cu/valid-timestamp? "Must be a valid timestamp (e.g 2015-01-16T00:00:00.0Z)"]]   
+    :validate [cu/valid-timestamp? "Must be a valid timestamp (e.g 2015, 2015-01, ... 2015-01-16T00:00:00.0Z)"] 
+    :parse-fn fill-up-to-timestamp]
    ["-h" "--help"]])
 
 (defn usage [options-summary]
