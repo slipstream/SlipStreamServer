@@ -19,14 +19,9 @@
   [start end]    
   (time/interval (to-time start) (to-time end)))
 
-(defn serialize
-  [m]
-  (with-out-str
-   (json/pprint m :key-fn name)))
-
-(defn deserialize
-  [s]
-  (json/read-str s :key-fn keyword))
+(defn disp-interval   
+  [start end]      
+  (str "[" start " / " end "]"))
 
 (defn- log-and-throw 
   [msg-error]
@@ -42,6 +37,19 @@
 (defn start-before-end?   
   [[t1 t2]]  
   (time/before? (to-time t1) (to-time t2)))
+
+(defn check-order
+  [[start end]]
+  (check start-before-end? [start end] (str (disp-interval start end) ": invalid period (respect order!)")))
+
+(defn serialize
+  [m]
+  (with-out-str
+   (json/pprint m :key-fn name)))
+
+(defn deserialize
+  [s]
+  (json/read-str s :key-fn keyword))
 
 (defn max-time   
   [t1 t2]

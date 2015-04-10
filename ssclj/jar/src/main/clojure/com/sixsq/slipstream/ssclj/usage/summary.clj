@@ -39,7 +39,7 @@
 
 (defn truncate   
   [start-time end-time records]
-  (u/check u/start-before-end? [start-time end-time] (str "Invalid timeframe [ " start-time", "end-time" ]"))
+  (u/check u/start-before-end? [start-time end-time] (str "Invalid timeframe: " (u/disp-interval start-time end-time)))
   (->> records    
     (filter-inside-interval start-time end-time)
     (map (shift-start start-time))
@@ -105,7 +105,7 @@
 (defn summarize-and-store
   [start-time end-time]   
   (let [summaries (summarize start-time end-time)]
-    (log/info "Will persist" (count summaries) "summaries for [" start-time "/"end-time "]")
+    (log/info "Will persist" (count summaries) "summaries for " (u/disp-interval start-time end-time))
     (doseq [summary summaries]
       (rc/insert-summary summary))))
 

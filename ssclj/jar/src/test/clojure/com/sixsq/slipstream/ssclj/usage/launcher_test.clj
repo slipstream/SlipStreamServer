@@ -22,6 +22,8 @@
   (is (success-matches? ["2015-01-15T00:00:00.0Z" "2015-04-30T00:00:00.0Z"] 
     (analyze-args ["-s" "2015-01-15" "-e" "2015-04-30"])))
 
+  (is (error-matches? [:error  "Invalid period"] (analyze-args ["-s" "2015-04-30" "-e" "2015-01-15"])))
+
   (is (success-matches? ["2015-01-01T00:00:00.0Z" "2016-01-01T00:00:00.0Z"] 
     (analyze-args ["-s" "2015" "-e" "2016"])))
 

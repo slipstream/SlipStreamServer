@@ -3,7 +3,6 @@
     [clojure.string :only [join]]
     [clojure.tools.logging :as log]
     [clojure.java.jdbc :refer :all :as jdbc]
-
     [korma.core :as kc]
     [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
     [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
@@ -97,10 +96,6 @@
   [usage-event]
   (u/check (complement not-existing?) usage-event (str "Usage record not started: " usage-event)))  
 
-(defn- check-order
-  [start end]
-  (u/check u/start-before-end? [start end] "Invalid period"))
-
 (defn- extract-metrics
   [usage-event]
   (let [metrics (:metrics usage-event)]
@@ -144,7 +139,7 @@
 
 (defn records-for-interval
   [start end]
-  (check-order start end)
+  (u/check-order [start end])
   (kc/select usage-records (kc/where 
     (and 
       (or (= nil :end_timestamp) (>= :end_timestamp start))            
