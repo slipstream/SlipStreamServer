@@ -32,9 +32,12 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
 
 import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+
+import flexjson.JSON;
 
 @MappedSuperclass
 @SuppressWarnings("serial")
@@ -60,6 +63,11 @@ public abstract class Metadata implements Serializable {
 	@Attribute(required = false)
 	protected boolean deleted;
 
+	@Element(required=false)
+	@JSON(include=false)
+	@Column(length=65536)
+	private String blob;
+	
 	protected Metadata() {
 	}
 
