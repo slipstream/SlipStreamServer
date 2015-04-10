@@ -32,10 +32,16 @@
 
 (defn usage 
   [options-summary]
-  (->> ["Triggers a usage summary computation for the given period."
+  (->> [""
+        "Triggers a usage summary computation for the given period."
         ""
         "Usage: launcher -s START_TIMESTAMP -e END_TIMESTAMP"
         ""
+        "The format for the timestamp is flexible (from year to second precision)"
+        "Examples:"
+        ""
+        "To compute a full year: launcher -s 2015 -e 2016"
+        "To compute a period of 2 days: launcher -s 2015-01-15 -e 2015-01-17"
         "Options:"
         options-summary]
        (string/join \newline)))
