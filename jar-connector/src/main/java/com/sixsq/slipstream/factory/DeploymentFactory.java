@@ -42,7 +42,6 @@ import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
@@ -180,11 +179,6 @@ public class DeploymentFactory extends RunFactory {
 		run.createRuntimeParameter(node, nodeInstanceId,
 				RuntimeParameter.IMAGE_ID_PARAMETER_NAME, imageId,
 				RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION);
-
-		String imagePlatform = image.getPlatform();
-		run.createRuntimeParameter(node, nodeInstanceId,
-				RuntimeParameter.IMAGE_PLATFORM_PARAMETER_NAME, imagePlatform,
-				RuntimeParameter.IMAGE_PLATFORM_PARAMETER_DESCRIPTION);
 
 		run = initNodeInstanceRuntimeParametersFromImageParameters(run, node, nodeInstanceId);
 

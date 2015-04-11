@@ -113,9 +113,6 @@ public class RuntimeParameter extends Metadata {
 	public final static String IMAGE_ID_PARAMETER_NAME = "image.id";
 	public final static String IMAGE_ID_PARAMETER_DESCRIPTION = "Cloud image id";
 
-	public final static String IMAGE_PLATFORM_PARAMETER_NAME = "image.platform";
-	public final static String IMAGE_PLATFORM_PARAMETER_DESCRIPTION = "Platform (eg: ubuntu, windows)";
-
 	public final static String MULTIPLICITY_PARAMETER_NAME = "multiplicity";
 	public final static String MULTIPLICITY_PARAMETER_DESCRIPTION = "Multiplicity number";
 

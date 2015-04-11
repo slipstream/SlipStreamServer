@@ -168,10 +168,6 @@ public class BuildImageFactory extends RunFactory {
 		run.assignRuntimeParameter(constructParamName(nodeInstanceName, RuntimeParameter.IMAGE_ID_PARAMETER_NAME),
 				imageId, RuntimeParameter.IMAGE_ID_PARAMETER_DESCRIPTION, ParameterType.String);
 
-		String imagePlatform = image.getPlatform();
-		run.assignRuntimeParameter(constructParamName(nodeInstanceName, RuntimeParameter.IMAGE_PLATFORM_PARAMETER_NAME),
-				imagePlatform, RuntimeParameter.IMAGE_PLATFORM_PARAMETER_DESCRIPTION, ParameterType.String);
-
 	}
 
 	private static String extractInitialValue(ModuleParameter parameter, Run run) {
