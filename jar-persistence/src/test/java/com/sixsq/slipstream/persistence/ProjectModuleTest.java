@@ -21,11 +21,11 @@ package com.sixsq.slipstream.persistence;
  */
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,6 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleView;
 import com.sixsq.slipstream.util.ModuleTestUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ProjectModuleTest {
 
@@ -63,8 +62,8 @@ public class ProjectModuleTest {
 		String resourceUrl = Module.constructResourceUri(name);
 
 		Module module = new ProjectModule(name);
-		module.store();
-
+		module = module.store();
+		
 		Module moduleRestored = Module.load(resourceUrl);
 		assertNotNull(moduleRestored);
 
@@ -102,7 +101,7 @@ public class ProjectModuleTest {
 		Map<String, ModuleParameter> parameters = moduleRestored
 				.getParameters();
 		assertNotNull(parameters);
-		assertTrue(parameters.size() > 0);
+		assertThat(parameters.size(), not(0));
 
 		parameter = parameters.get(parameterName);
 		assertNotNull(parameter);
@@ -187,17 +186,6 @@ public class ProjectModuleTest {
 		module2.remove();
 		module3.remove();
 		parent.remove();
-	}
-
-	@Test
-	public void checkModuleSerialization() throws ValidationException {
-
-		Module module = new ProjectModule("module1");
-		module.store();
-
-		SerializationUtil.toXmlString(module);
-
-		module.remove();
 	}
 
 	@Test

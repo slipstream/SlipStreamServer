@@ -21,24 +21,21 @@ package com.sixsq.slipstream.persistence;
  */
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.MapKey;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
-import org.hibernate.annotations.CollectionType;
 //import org.hibernate.annotations.Type;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-// The mapping between a parameterized class and its associated
+import flexjson.JSON;
+
+// The mapping between a parameterized class and its associated 
 // parameter type must be given here.
 //
 // Type S = the subclass of Parameterized and
@@ -54,8 +51,9 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	@MapKey(name = "name")
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
+	@Transient
+	@JSON
 	protected Map<String, T> parameters = new ConcurrentHashMap<String, T>();
-
 	
 	/**
 	 * parameters accessors have to be overriden to set the valueType value of
@@ -104,7 +102,7 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	}
 
 	public Map<String, Parameter<S>> getParameters(String category) {
-		Map<String, Parameter<S>> filteredParameters = new HashMap<String, Parameter<S>>();
+		Map<String, Parameter<S>> filteredParameters = new ConcurrentHashMap<String, Parameter<S>>();
 		for (Parameter<S> parameter : getParameters().values()) {
 			String pCategory = parameter.getCategory();
 			if (pCategory.equals(category)) {
@@ -115,6 +113,7 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 		return filteredParameters;
 	}
 
+	@JSON(include = false)
 	public Collection<T> getParameterList() {
 		return getParameters().values();
 	}

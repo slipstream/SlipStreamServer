@@ -230,13 +230,27 @@ public class ImageModuleTest {
 	}
 
 	@Test
-	public void checkModuleSerialization() throws ValidationException {
+	public void checkXmlModuleSerialization() throws ValidationException {
 
-		Module module = new ImageModule("module1");
+		Module module = new ImageModule("checkXmlModuleSerialization");
 		module.store();
 
 		SerializationUtil.toXmlString(module);
 
+		module.remove();
+	}
+
+	@Test
+	public void checkJsonModuleSerialization() throws ValidationException {
+
+		Module module;
+		module = new ProjectModule("checkJsonModuleSerializationProject");
+		SerializationUtil.toJsonString(module);
+		module = new DeploymentModule("checkJsonModuleSerializationDeployment");
+		SerializationUtil.toJsonString(module);
+		module = new ImageModule("checkJsonModuleSerializationImage");
+		SerializationUtil.toJsonString(module);
+		
 		module.remove();
 	}
 

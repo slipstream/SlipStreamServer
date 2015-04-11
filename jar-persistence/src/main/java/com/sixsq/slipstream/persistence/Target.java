@@ -31,6 +31,8 @@ import javax.persistence.ManyToOne;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
+import flexjson.JSON;
+
 @SuppressWarnings("serial")
 @Entity
 public class Target implements Serializable {
@@ -52,6 +54,7 @@ public class Target implements Serializable {
 	private String name;
 
 	@ManyToOne
+	@JSON(include=false)
 	private ImageModule module;
 
 	@SuppressWarnings("unused")

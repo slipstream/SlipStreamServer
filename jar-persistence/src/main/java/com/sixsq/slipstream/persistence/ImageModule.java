@@ -41,6 +41,8 @@ import org.simpleframework.xml.ElementList;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 
+import flexjson.JSON;
+
 /**
  * Unit test see:
  * 
@@ -94,6 +96,7 @@ public class ImageModule extends Module {
 	private Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
 
 	@Transient
+	@JSON(include=false)
 	private volatile ImageModule parentModule;
 
 	protected ImageModule() {
@@ -274,6 +277,11 @@ public class ImageModule extends Module {
 
 	public Boolean isBase() {
 		return isBase == null ? false : isBase;
+	}
+
+	// Flexjson is not smart enough to use the isBase accessor
+	public Boolean getIsBase() {
+		return isBase();
 	}
 
 	public void setIsBase(Boolean isBase) throws ValidationException {

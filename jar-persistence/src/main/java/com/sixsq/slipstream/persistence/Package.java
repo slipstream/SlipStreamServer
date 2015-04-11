@@ -31,6 +31,8 @@ import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
+import flexjson.JSON;
+
 @SuppressWarnings("serial")
 @Entity
 public class Package implements Serializable {
@@ -49,6 +51,7 @@ public class Package implements Serializable {
 	private String key_;
 
 	@ManyToOne
+	@JSON(include=false)
 	private ImageModule module;
 
 	@SuppressWarnings("unused")

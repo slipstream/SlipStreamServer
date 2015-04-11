@@ -48,16 +48,19 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
+import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.user.UserView;
+
+import flexjson.JSON;
 
 /**
  * Unit test:
- *
+ * 
  * @see UserTest
- *
+ * 
  */
 @SuppressWarnings("serial")
-@Entity(name="User")
+@Entity(name = "User")
 @NamedQueries({
 		@NamedQuery(name = "allUsers", query = "SELECT u FROM User u"),
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
@@ -72,7 +75,7 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public static final String NEW_NAME = "new";
 
-    private static final Random rnd = new Random();
+	private static final Random rnd = new Random();
 
 	public enum State {
 		NEW, ACTIVE, DELETED, SUSPENDED
@@ -97,6 +100,7 @@ public class User extends Parameterized<User, UserParameter> {
 	@Attribute(required = false)
 	private String organization;
 
+	@JSON(include = false)
 	private String password;
 
 	@Attribute(required = false, name = "issuper")
@@ -245,6 +249,7 @@ public class User extends Parameterized<User, UserParameter> {
 		this.firstName = firstName;
 	}
 
+	@JSON(include = false)
 	public String getHashedPassword() {
 		return password;
 	}
@@ -259,7 +264,7 @@ public class User extends Parameterized<User, UserParameter> {
 
 	@Attribute(name = "password", required = false)
 	public String getPassword() {
-		// We don't want to serialize the password into the XML.
+		// We don't want to serialize the password.
 		return null;
 	}
 
@@ -338,10 +343,10 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	private static String randomPassword() {
-        long v = rnd.nextLong();
-        while (v == Long.MIN_VALUE) {
-            v = rnd.nextLong();
-        }
+		long v = rnd.nextLong();
+		while (v == Long.MIN_VALUE) {
+			v = rnd.nextLong();
+		}
 		return Long.toString(Math.abs(v), 36);
 	}
 
@@ -417,10 +422,7 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public static User load(String resourceUrl) throws ConfigurationException,
 			ValidationException {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		User user = em.find(User.class, resourceUrl);
-		em.close();
-		return user;
+		return (User) Metadata.load(resourceUrl, User.class);
 	}
 
 	public void addSystemParametersIntoUser(ServiceConfiguration sc)

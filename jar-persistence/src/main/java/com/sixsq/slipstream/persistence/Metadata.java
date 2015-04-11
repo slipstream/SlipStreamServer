@@ -34,10 +34,13 @@ import javax.persistence.TemporalType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
+import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-
-import flexjson.JSON;
+import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.json.JsonExcludeField;
 
 @MappedSuperclass
 @SuppressWarnings("serial")
@@ -49,25 +52,21 @@ public abstract class Metadata implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date lastModified;
 
-	@SuppressWarnings("unused")
-	@Deprecated
-	private int jpaVersion;
-
 	@Attribute(required = false)
 	protected ModuleCategory category;
 
 	@Attribute(required = false)
-	@Column(length=1024)
+	@Column(length = 1024)
 	protected String description;
 
 	@Attribute(required = false)
 	protected boolean deleted;
 
 	@Element(required=false)
-	@JSON(include=false)
-	@Column(length=65536)
-	private String blob;
-	
+	@Column(length = 1048576)
+	@JsonExcludeField
+	private String json;
+
 	protected Metadata() {
 	}
 
@@ -129,6 +128,10 @@ public abstract class Metadata implements Serializable {
 		this.description = description;
 	}
 
+	String getJson() {
+		return json;
+	}
+
 	public static String URLEncode(String url) {
 		if (url == null) {
 			return url;
@@ -146,6 +149,7 @@ public abstract class Metadata implements Serializable {
 
 	public Metadata store() throws SlipStreamDatabaseException {
 		Metadata obj = null;
+		json = SerializationUtil.toJsonString(this);
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = null;
 		try {
@@ -157,10 +161,30 @@ public abstract class Metadata implements Serializable {
 			transaction.rollback();
 			throw new SlipStreamDatabaseException(e.getMessage());
 		} finally {
-			
+
 			em.close();
 		}
-		return obj;
+		return substituteFromJson(obj);
+	}
+
+	public static Metadata load(String resourceUrl, Class<? extends Metadata> type) throws ConfigurationException,
+			ValidationException {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Metadata meta = (Metadata) em.find(type, resourceUrl);
+		em.close();
+		meta = substituteFromJson(meta);
+		return meta;
+	}
+
+	protected static Metadata substituteFromJson(Metadata meta) {
+		if (meta != null) {
+			try {
+				meta = (Metadata) SerializationUtil.fromJson(meta.getJson(), meta.getClass());
+			} catch (SlipStreamClientException e) {
+				throw new SlipStreamRuntimeException(e.getMessage(), e);
+			}
+		}
+		return meta;
 	}
 
 	public void remove() {
@@ -179,8 +203,7 @@ public abstract class Metadata implements Serializable {
 		em.close();
 	}
 
-	protected void throwValidationException(String error)
-			throws ValidationException {
+	protected void throwValidationException(String error) throws ValidationException {
 		throw new ValidationException(error);
 	}
 

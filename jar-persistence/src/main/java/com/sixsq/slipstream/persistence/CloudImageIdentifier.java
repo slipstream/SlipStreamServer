@@ -30,6 +30,8 @@ import javax.persistence.ManyToOne;
 
 import org.simpleframework.xml.Attribute;
 
+import flexjson.JSON;
+
 @SuppressWarnings("serial")
 @Entity
 public class CloudImageIdentifier implements Serializable {
@@ -51,6 +53,7 @@ public class CloudImageIdentifier implements Serializable {
 	private String cloudImageIdentifier;
 
 	@ManyToOne
+	@JSON(include=false)
 	private ImageModule container;
 
 	public CloudImageIdentifier() {

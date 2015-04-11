@@ -43,6 +43,14 @@ public class VmsResource extends BaseResource {
 
 	}
 
+	@Get("json")
+	public Representation toJson() {
+
+		String metadata = SerializationUtil.toJsonString(getVms());
+		return new StringRepresentation(metadata, MediaType.APPLICATION_JSON);
+
+	}
+
 	@Get("html")
 	public Representation toHtml() {
 

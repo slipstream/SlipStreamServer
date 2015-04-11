@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
@@ -236,10 +237,14 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void passwordBlankedForNormalUser() throws SlipStreamClientException {
 		Request request = createGetRequest(user, user.getName());
+		request.getClientInfo().accept(MediaType.APPLICATION_XML);
 		Response response = executeRequest(request);
+
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
 		User user = (User) SerializationUtil.fromXml(
 				response.getEntityAsText(), User.class);
+		assertNull(user.getPassword());
 		assertNull(user.getHashedPassword());
 	}
 
@@ -262,10 +267,14 @@ public class UserResourceTest extends ResourceTestBase {
 			throws SlipStreamClientException {
 
 		Request request = createGetRequest(superUser, superUser.getName());
+		request.getClientInfo().accept(MediaType.APPLICATION_JSON);
 		Response response = executeRequest(request);
 
-		User user = (User) SerializationUtil.fromXml(
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
+
+		User user = (User) SerializationUtil.fromJson(
 				response.getEntityAsText(), User.class);
+		assertNull(user.getPassword());
 		assertNull(user.getHashedPassword());
 	}
 
@@ -476,6 +485,7 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void systemParameterMerge() throws SlipStreamClientException {
 		Request request = createGetRequest(superUser, otherUser.getName());
+		request.getClientInfo().accept(MediaType.APPLICATION_XML);
 
 		// Pick a category that we know always exists
 		String category = "SlipStream_Support";

@@ -27,25 +27,21 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.CollectionType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.util.json.JsonExcludeField;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -97,12 +93,11 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	 * <node-name>.<index>:<parameter-name>.
 	 */
 	@ElementMap(required = false)
-	@MapKey(name = "name")
-	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
+	@Transient
 	private Map<String, NodeParameter> parameterMappings = new ConcurrentHashMap<String, NodeParameter>();
 
 	@ManyToOne
+	@JsonExcludeField
 	private DeploymentModule module;
 
 	protected Node() {

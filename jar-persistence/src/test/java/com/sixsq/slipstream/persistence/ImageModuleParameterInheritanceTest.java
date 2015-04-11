@@ -77,7 +77,7 @@ public class ImageModuleParameterInheritanceTest {
 		ModuleParameter baseParameter = parameter.copy();
 		baseParameter.setValue("some default");
 		baseImage.setParameter(baseParameter);
-		baseImage.store();
+		baseImage = baseImage.store();
 		
 		image.setModuleReference(baseImage);
 		

@@ -86,6 +86,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		if (latestVersion != null && m != null) {
 			m.setIsLatestVersion(latestVersion.version);
 		}
+		m = (Module) substituteFromJson(m);
 		bindModuleToAuthz(m);
 		return m;
 	}
@@ -98,6 +99,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		Module module;
 		try {
 			module = (Module) q.getSingleResult();
+			module = (Module) Metadata.substituteFromJson(module);
 			module.setIsLatestVersion(module.version);
 		} catch (NoResultException ex) {
 			module = null;
@@ -257,6 +259,19 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		super();
 	}
 
+	public Module(String name, ModuleCategory category)
+			throws ValidationException {
+		this();
+		this.category = category;
+		setName(name);
+		
+		validateName(name);
+	
+		resourceUri = constructResourceUri(name);
+	
+		extractUriComponents();
+	}
+
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = ModuleParameter.class)
 	protected void setParameters(Map<String, ModuleParameter> parameters) {
@@ -267,14 +282,6 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	@ElementMap(name = "parameters", required = false, valueType = ModuleParameter.class)
 	public Map<String, ModuleParameter> getParameters() {
 		return parameters;
-	}
-
-	public Module(String name, ModuleCategory category)
-			throws ValidationException {
-
-		this.category = category;
-
-		setName(name);
 	}
 
 	public Guarded getGuardedParent() {
@@ -312,7 +319,9 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	@Attribute
 	public String getShortName() {
-		return ModuleUriUtil.extractShortNameFromResourceUri(resourceUri);
+		String name;
+		name = resourceUri == null ? null : ModuleUriUtil.extractShortNameFromResourceUri(resourceUri);
+		return name;
 	}
 
 	@Attribute
@@ -328,6 +337,14 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		return resourceUri;
 	}
 
+	/**
+	 * Needed for json deserialization
+	 */
+	@SuppressWarnings("unused")
+	private void setResourceUri(String resourceUri) {
+		this.resourceUri = resourceUri;
+	}
+
 	public Authz getAuthz() {
 		return authz;
 	}
@@ -340,6 +357,14 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		return version;
 	}
 
+	/**
+	 * Needed for json deserialization
+	 */
+	@SuppressWarnings("unused")
+	private void setVersion(int version) {
+		this.version = version;
+	}
+
 	@Override
 	public String getParent() {
 		return parentUri;
@@ -350,13 +375,13 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		return name;
 	}
 
+	/* 
+	 * Should not be called directly
+	 * @see com.sixsq.slipstream.persistence.Metadata#setName(java.lang.String)
+	 */
 	@Override
 	public void setName(String name) throws ValidationException {
-		validateName(name);
-
-		resourceUri = constructResourceUri(name);
-
-		extractUriComponents();
+		this.name = name;
 	}
 
 	public String getTag() {
@@ -486,6 +511,11 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	public Publish getPublished() {
 		return published;
+	}
+
+	@SuppressWarnings("unused")
+	private void setPublished(Publish published) {
+		this.published = published ;
 	}
 
 	protected String computeParameterValue(String key) throws ValidationException {

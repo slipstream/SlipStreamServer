@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -534,7 +533,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private boolean mutable;
 
 	@Transient
-	private Map<String, Integer> cloudServiceUsage = new HashMap<String, Integer>();
+	private Map<String, Integer> cloudServiceUsage = new ConcurrentHashMap<String, Integer>();
 
 	/**
 	 * List of cloud service names used in the current run
@@ -751,7 +750,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setEnd(Date end) {
-		this.endTime = (Date) end.clone();
+		if(end != null) {
+			this.endTime = (Date) end.clone();
+		}
 	}
 
 	public void setEnd() {
@@ -814,7 +815,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	/**
 	 * Builds a list of node instance names (e.g. node.1, node.2, machine)
-	 * @return node instance name
+	 * @return node instance name list
 	 */
 	public List<String> getNodeInstanceNamesList() {
 		String[] rawNodeNames = getNodeNames().split(NODE_NAMES_SEPARATOR);
@@ -1057,7 +1058,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Attribute
 	@Column(length=1024)
 	public String getGroups() {
-		getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY).setValue(groups);
+		RuntimeParameter groupsParameter = getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY);
+		if(groupsParameter != null) {
+			groupsParameter.setValue(groups);
+		}
 		return groups;
 	}
 

@@ -54,6 +54,16 @@ public class ModuleListResource extends BaseResource {
 		}
 	}
 
+	@Get("json")
+	public Representation toJson() {
+
+		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
+
+		String result = SerializationUtil.toJsonString(moduleViewList);
+
+		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
+	}
+
 	@Get("xml")
 	public Representation toXml() {
 

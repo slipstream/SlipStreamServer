@@ -73,6 +73,21 @@ public class UserResource extends ParameterizedResource<User> {
 		return super.toTxt();
 	}
 
+	@Get("json")
+	public Representation toJson() {
+		User user = (User) getParameterized();
+
+		try {
+			mergeCloudSystemParameters(user);
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
+
+		return super.toJson();
+	}
+
 	@Get("xml")
 	public Representation toXml() {
 		User user = (User) getParameterized();
@@ -289,8 +304,29 @@ public class UserResource extends ParameterizedResource<User> {
 		setEmptyEntity(MediaType.APPLICATION_XML);
 	}
 
+	@Put("json")
+	public void updateOrCreateFromJson(Representation entity)
+			throws ResourceException {
+
+		User user = jsonToUser();
+
+		try {
+			updateOrCreate(user);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		}
+
+		if (isExisting()) {
+			getResponse().setStatus(Status.SUCCESS_ACCEPTED);
+		} else {
+			getResponse().setStatus(Status.SUCCESS_CREATED);
+		}
+
+		setEmptyEntity(MediaType.APPLICATION_JSON);
+	}
+
 	private User xmlToUser() {
-		return xmlToUser(extractXml());
+		return xmlToUser(extractEntityAsText());
 	}
 
 	private User xmlToUser(String xml) {
@@ -309,8 +345,22 @@ public class UserResource extends ParameterizedResource<User> {
 		return user;
 	}
 
-	private String extractXml() {
-		return getRequest().getEntityAsText();
+	private User jsonToUser() {
+		return jsonToUser(extractEntityAsText());
+	}
+
+	private User jsonToUser(String json) {
+
+		User user = null;
+		try {
+			user = (User) SerializationUtil.fromJson(json, User.class);
+		} catch (SlipStreamClientException e) {
+			throwClientBadRequest(e.getMessage());
+		}
+
+		user.postDeserialization();
+
+		return user;
 	}
 
 	private void updateOrCreate(User user) throws ValidationException {
