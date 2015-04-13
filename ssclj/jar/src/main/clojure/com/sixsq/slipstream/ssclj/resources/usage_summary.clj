@@ -2,17 +2,18 @@
   com.sixsq.slipstream.ssclj.resources.usage-summary
   (:require
     [clojure.tools.logging :as log]
-    [schema.core :as s]
+    [schema.core :as s]    
     [korma.core :refer :all]
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
-(def ^:const resource-tag :events)
-(def ^:const resource-name "UsageSummary")
-(def ^:const collection-name "UsageSummaryCollection")
+(def ^:const resource-tag :summaries)
+(def ^:const resource-name "Usage")
+(def ^:const collection-name "UsageCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
@@ -23,9 +24,11 @@
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
+(defonce init-record-keeper (rc/-init))
+
 (defentity usage-summaries)
 
-(def UsageSummary
+(def Usage
   (merge
     c/CreateAttrs
     c/AclAttr
@@ -34,14 +37,14 @@
       :cloud            c/NonBlankString
       :start_timestamp  c/Timestamp
       :end_timestamp    c/Timestamp
-      :usage {
-         c/NonBlankString { ;; metric-name
-           :cloud_vm_instanceid      c/NonBlankString
-           :unit_minutes   c/NonBlankString } 
-       }
+      :usage            c/NonBlankString
+       ;   c/NonBlankString { ;; metric-name
+       ;     :cloud_vm_instanceid      c/NonBlankString
+       ;     :unit_minutes   c/NonBlankString } 
+       ; }
     }))
 
-(def validate-fn (u/create-validation-fn UsageSummary))
+(def validate-fn (u/create-validation-fn Usage))
 
 ;;
 ;; collection
@@ -51,10 +54,3 @@
            [request]  
     (-> (select usage-summaries)
       (u/json-response)))
-
-  ;     (str resource-name "/" uuid)
-  ;       (db/retrieve)
-  ;       (a/can-view? request)
-  ;       (crud/set-operations request)
-  ;       (u/json-response))))
-  ; (select usage-summaries))

@@ -19,5 +19,5 @@
 (defn create-ddl
   []
   (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS \"acl\" (" columns-acl unique-acl ")")])
-  (ddlh/create-index "acl" "IDX_TYPE_PRINCIPAL" "resource-type", "principal-type", "principal-name")
+  (ddlh/create-index! "acl" "IDX_TYPE_PRINCIPAL" "resource-type", "principal-type", "principal-name")
   (log/info "DDL created"))

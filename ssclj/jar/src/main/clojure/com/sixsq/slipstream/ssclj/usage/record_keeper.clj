@@ -59,11 +59,11 @@
     (kh/korma-init)
     (log/info "Korma init done for insert namespace")    
 
-    (ddl/create-table "usage-records" columns-record)
-    (ddl/create-table "usage-summaries" columns-summaries)
+    (ddl/create-table! "usage-records" columns-record)
+    (ddl/create-table! "usage-summaries" columns-summaries)
 
-    (ddl/create-index "usage-records"   "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
-    (ddl/create-index "usage-summaries" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
+    (ddl/create-index! "usage-records"   "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
+    (ddl/create-index! "usage-summaries" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
 
     (log/info "Table created (if needed)")
     (kc/defentity usage-records)
