@@ -4,10 +4,10 @@
     [clojure.tools.logging :as log]
     [clojure.java.jdbc :refer :all :as jdbc]
     [korma.core :as kc]
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
     [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
     [com.sixsq.slipstream.ssclj.usage.utils :as u])
-
   (:gen-class
     :name com.sixsq.slipstream.usage.Record
     :methods [
@@ -43,16 +43,13 @@
 
 (defonce ^:private columns-summaries    
   (ddl/columns     
+    "id"                    "VARCHAR(100)"
+    "acl"                   "VARCHAR(100)"
     "user"                  "VARCHAR(100)"
     "cloud"                 "VARCHAR(100)"
     "start_timestamp"       "VARCHAR(30)"
     "end_timestamp"         "VARCHAR(30)"
     "usage"                 "VARCHAR(10000)"))
-
-
-;; TODO : add private keys (uuid like)
-;; TODO ? add checkers on init was called ??
-
 
 (def init-db
   (delay  
@@ -133,9 +130,14 @@
     check-already-started
     close-usage-record))
 
-(defn insert-summary   
+(defn insert-summary!   
   [summary]
-  (kc/insert usage-summaries (kc/values (update-in summary [:usage] u/serialize))))
+  (let [summary-resource
+         (-> summary
+         (update-in   [:usage] u/serialize)
+         (assoc :id   (cu/random-uuid))
+         (assoc :acl  (u/serialize {:owner {:principal "ADMIN" :type "ROLE"}})))]
+    (kc/insert usage-summaries (kc/values summary-resource))))
 
 (defn records-for-interval
   [start end]
