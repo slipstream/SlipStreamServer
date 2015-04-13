@@ -79,9 +79,12 @@
 
 (defn todo [] (is (= :done :not-yet)))
 
-(deftest event-already-open-can-not-be-reopened
+(deftest event-already-open-can-be-reopened-but-does-nothing
+  (is (empty? (select usage-records)))
   (-insertStart event-start)
-  (is (thrown? IllegalArgumentException (-insertStart event-start))))
+  (let [records (select usage-records)]
+    (-insertStart event-start)
+    (is (= records (select usage-records)))))
 
 (deftest check-close-event-without-start
   (is (thrown? IllegalArgumentException (-insertEnd event-end))))

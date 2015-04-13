@@ -79,19 +79,17 @@
       (assoc  :metric_name   (:name  metric))
       (assoc  :metric_value  (:value metric))))
 
-(defn- not-existing?
+(defn- existing?
   [usage-event]
-  (empty? 
-    (kc/select usage-records 
-      (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)}))))
-
-(defn- check-not-already-existing
-  [usage-event]
-  (u/check not-existing? usage-event (str "Usage record already inserted: " usage-event)))
+  (not
+    (empty? 
+      (kc/select usage-records 
+        (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})
+        (kc/limit 1)))))
 
 (defn- check-already-started
   [usage-event]
-  (u/check (complement not-existing?) usage-event (str "Usage record not started: " usage-event)))  
+  (u/check existing? usage-event (str "Usage record not started: " usage-event)))  
 
 (defn- extract-metrics
   [usage-event]
@@ -101,11 +99,13 @@
       metrics)))
 
 (defn- insert-metrics   
-  [usage-event]  
-  (doseq [metric (extract-metrics usage-event)]    
-    (let [usage-event-metric (project usage-event metric)]
-      (log/info "Will persist metric: " usage-event-metric)
-      (kc/insert usage-records (kc/values usage-event-metric)))))
+  [usage-event]
+  (if (existing? usage-event)
+    (log/warn (str "Usage record already inserted: " usage-event))    
+    (doseq [metric (extract-metrics usage-event)]    
+      (let [usage-event-metric (project usage-event metric)]
+        (log/info "Will persist metric: " usage-event-metric)
+        (kc/insert usage-records (kc/values usage-event-metric))))))
 
 (defn- close-usage-record   
   [usage-event]
@@ -118,8 +118,7 @@
   [usage-event]
   (log/info "Will persist usage event START:" usage-event)
   (-> usage-event
-    u/walk-clojurify       
-    check-not-already-existing
+    u/walk-clojurify        
     insert-metrics))
 
 (defn -insertEnd
