@@ -13,7 +13,7 @@
 (defn error-matches?   
   [[expected-code expected-msg] [actual-code actual-msg]]
   (is (= expected-code actual-code))
-  (is (.startsWith actual-msg expected-msg))) ;; TODO with a regexp would be better
+  (is (.contains actual-msg expected-msg)))
 
 (deftest test-launcher-checks-args
   (is (success-matches? ["2015-01-15T00:00:00.0Z" "2015-01-16T00:00:00.0Z"] 
