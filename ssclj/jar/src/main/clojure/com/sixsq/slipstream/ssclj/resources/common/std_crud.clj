@@ -5,8 +5,10 @@
     [clojure.walk :as w]
     [clojure.data.json :as json]
     [clojure.pprint :refer [pprint]]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.usage.utils :as uu]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [ring.util.response :as r]))
@@ -82,7 +84,8 @@
       (a/can-view? {:acl collection-acl} request)
       (->> {}                                               ;; should allow options from body or params
            (db/query resource-name)
-           (filter #(a/authorized-view? % request))
+           uu/walk-clojurify           
+           (filter #(a/authorized-view? % request))           
            (map #(crud/set-operations % request))
            (wrapper-fn request)
            (u/json-response)))))

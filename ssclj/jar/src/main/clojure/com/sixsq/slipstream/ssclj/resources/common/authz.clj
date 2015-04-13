@@ -1,5 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.authz
-  (:require [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+  (:require 
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.usage.utils :as uu]))
 
 (def rights-hierarchy (make-hierarchy))
 
@@ -53,8 +55,8 @@
   [resource request action]  
   (let [rights (extract-rights
                  (current-authentication request)
-                 (:acl resource))
-        action (get rights-keywords action)]
+                 (uu/walk-clojurify (:acl resource)))
+        action (get rights-keywords action)]    
     (some #(isa? % action) rights)))
 
 (defn can-do?

@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
     [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
+    [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [korma.core :refer :all]
     [ring.util.response :as r]))
@@ -12,9 +13,7 @@
 (defn init-db
   []  
   (kh/korma-init)
-  (jdbc/execute! kh/db-spec [    
-    "CREATE TABLE IF NOT EXISTS \"resources\" (\"id\" VARCHAR(100), \"data\" VARCHAR(10000))"
-    ])
+  (ddl/create-table! "resources" (ddl/columns "id" "VARCHAR(100)" "data" "VARCHAR(10000)"))
   (defentity resources))
 
 ;;
@@ -52,8 +51,10 @@
       :data
       deserialize))
 
-(defn- find-resources 
-  [collection-id]
+(defmulti find-resources identity)
+
+(defmethod find-resources :default
+  [collection-id]  
   (->>  (select resources (where {:id [like (str collection-id"%")]}))
         (map :data)
         (map deserialize)))

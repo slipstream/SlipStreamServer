@@ -107,6 +107,6 @@
   (let [summaries (summarize start-time end-time)]
     (log/info "Will persist" (count summaries) "summaries for " (u/disp-interval start-time end-time))
     (doseq [summary summaries]
-      (rc/insert-summary summary))))
+      (rc/insert-summary! summary))))
 
     

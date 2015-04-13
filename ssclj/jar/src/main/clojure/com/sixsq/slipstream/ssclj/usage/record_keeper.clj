@@ -44,7 +44,7 @@
 (defonce ^:private columns-summaries    
   (ddl/columns     
     "id"                    "VARCHAR(100)"
-    "acl"                   "VARCHAR(100)"
+    "acl"                   "VARCHAR(1000)"
     "user"                  "VARCHAR(100)"
     "cloud"                 "VARCHAR(100)"
     "start_timestamp"       "VARCHAR(30)"
@@ -133,9 +133,11 @@
   [summary]
   (let [summary-resource
          (-> summary
-         (update-in   [:usage] u/serialize)
-         (assoc :id   (cu/random-uuid))
-         (assoc :acl  (u/serialize {:owner {:principal "ADMIN" :type "ROLE"}})))]
+             (update-in   [:usage] u/serialize)
+             (assoc :id   (cu/random-uuid))
+             (assoc :acl  (u/serialize                               
+                                {:owner  {:type "USER" :principal (:user summary)}
+                                 :rules [{:type "USER" :principal (:user summary) :right "ALL"}]})))]    
     (kc/insert usage-summaries (kc/values summary-resource))))
 
 (defn records-for-interval
