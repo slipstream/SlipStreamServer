@@ -312,6 +312,13 @@ public class UserTest {
 		user.setEmail("test@example.com");
 
 		try {
+			user.setKeepRunning(UserParameter.KEEP_RUNNING_ON_ERROR);
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			fail();
+		}
+
+		try {
 			user.hashAndSetPassword(password);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
