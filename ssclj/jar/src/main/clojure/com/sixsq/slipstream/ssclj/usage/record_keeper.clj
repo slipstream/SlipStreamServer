@@ -134,7 +134,7 @@
   (let [summary-resource
          (-> summary
              (update-in   [:usage] u/serialize)
-             (assoc :id   (cu/random-uuid))
+             (assoc :id   (str "Usage/" (cu/random-uuid)))
              (assoc :acl  (u/serialize                               
                                 {:owner  {:type "USER" :principal (:user summary)}
                                  :rules [{:type "USER" :principal (:user summary) :right "ALL"}]})))]    

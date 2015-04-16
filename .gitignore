@@ -11,8 +11,9 @@ bin
 *.pem
 *.p12
 hsql*
-
+war/*
 logs/
+*.logs
 *.log
 
 pom.xml.next
@@ -25,3 +26,5 @@ raw-metadata-str*.xml
 
 # Eclipse scrap page
 scrap.jpage
+
+downloads/*
