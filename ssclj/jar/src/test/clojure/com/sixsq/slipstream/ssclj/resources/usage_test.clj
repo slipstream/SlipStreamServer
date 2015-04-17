@@ -69,30 +69,38 @@
     :end_timestamp       (u/timestamp year month (inc day))    
     :usage               usage})
 
-;;
-;; Populate some fake summaries in DB
-;;
+;; macro 'is' can not be used in -> or ->>
+(defn is-true? [x] (is (= true x)))
+
+(defn is-desc-dates?   
+  [m]
+  (->> (get-in m [:response :body :usages])
+       (map :end_timestamp)       
+       (u/all-timestamps? time/after?)
+       is-true?))
 
 (deftest get-should-return-most-recent-first
   (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 16] {:ram { :unit_minutes 100.0}}))
   (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 17] {:ram { :unit_minutes 200.0}}))
+  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 18] {:ram { :unit_minutes 500.0}}))
   (rc/insert-summary! (daily-summary "mike" "exo"   [2015 04 16] {:ram { :unit_minutes 300.0}}))
   (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 17] {:ram { :unit_minutes 400.0}})) 
-  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 18] {:ram { :unit_minutes 500.0}}))
 
   (-> (session (ring-app))
       (content-type "application/json")
       (header authn-info-header "joe")
       (request base-uri)      
-      t/body->json      
-      (t/is-key-value :count 2))
+      t/body->json        
+      (t/is-key-value :count 2)
+      is-desc-dates?)          
 
   (-> (session (ring-app))
-    (content-type "application/json")
-    (header authn-info-header "mike")
-    (request base-uri)      
-    t/body->json
-    (t/is-key-value :count 3)))
+      (content-type "application/json")
+      (header authn-info-header "mike") 
+      (request base-uri)      
+      t/body->json
+      (t/is-key-value :count 3)
+      is-desc-dates?))
 
 (defn todo [] (is (= :done :not)))
 
@@ -100,4 +108,4 @@
 
 (deftest acl-filter-cloud-as-role (todo))
 
-(deftest check-order-desc (todo))
+(deftest prefilter-acl-with-index (todo))

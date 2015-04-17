@@ -32,8 +32,8 @@
 
 (defmethod dbb/find-resources resource-name
   [collection-id]
-  (->> (select usage-summaries)
-    (map #(update-in % [:acl] fu/deserialize))))
+  (->> (select usage-summaries (order :start_timestamp :DESC))
+       (map #(update-in % [:acl] fu/deserialize))))
 
 ;;
 ;; schemas

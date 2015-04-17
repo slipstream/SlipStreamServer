@@ -38,6 +38,10 @@
     (log-and-throw msg-error)
     e))
 
+(defn all-timestamps?   
+  [pred? ts]  
+  (every? (fn [[a b]] (pred? (to-time a) (to-time b))) (partition 2 1 ts)))
+
 (defn start-before-end?   
   [[t1 t2]]  
   (time/before? (to-time t1) (to-time t2)))
