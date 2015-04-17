@@ -31,7 +31,7 @@
   "Given the identity map, this extracts the associated right from the
    given rule if it applies.  If the rule does not apply, then nil is
    returned."
-  [{:keys [identity roles]} {:keys [principal type right]}]
+  [{:keys [identity roles] :as id-map} {:keys [type principal right] :as rules}]
   (let [right (get rights-keywords right)]
     (cond
       (and (= type "USER") (= principal identity)) right
@@ -56,7 +56,7 @@
   (let [rights (extract-rights
                  (current-authentication request)
                  (uu/walk-clojurify (:acl resource)))
-        action (get rights-keywords action)]    
+        action (get rights-keywords action)]        
     (some #(isa? % action) rights)))
 
 (defn can-do?

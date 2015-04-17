@@ -1,0 +1,103 @@
+(ns com.sixsq.slipstream.ssclj.resources.usage-test
+  (:require
+    [clojure.test :refer :all]
+    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+    [clj-time.core :as time]
+    [korma.core :as kc]
+
+    [peridot.core :refer :all]
+
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
+    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.usage :refer :all]
+    [com.sixsq.slipstream.ssclj.app.routes :as routes]   
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t] 
+    ))
+
+(defn reset-summaries
+  [f]
+  (kc/delete rc/usage-summaries)
+  (f))
+
+(use-fixtures :each reset-summaries)
+
+(def base-uri (str c/service-context resource-name))
+
+(defn make-ring-app [resource-routes]
+  (db/set-impl! (dbdb/get-instance))
+  (-> resource-routes
+      wrap-exceptions
+      wrap-base-uri
+      wrap-authn-info-header
+      (wrap-json-body {:keywords? true})
+      (wrap-json-response {:pretty true :escape-non-ascii true})))
+
+(defn ring-app []
+  (make-ring-app (t/concat-routes routes/final-routes)))  
+
+(defn show [e] (clojure.pprint/pprint e) e)
+
+(deftest get-without-authn-succeeds 
+  (-> (session (ring-app))
+      (content-type "application/json")      
+      (request base-uri)      
+      t/body->json      
+      (t/is-status 200)))
+
+(deftest get-with-authn-succeeds    
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (header authn-info-header "jane")
+      (request base-uri)      
+      t/body->json
+      (t/is-status 200)))
+
+(defn daily-summary 
+  "convenience function"
+  [user cloud [year month day] usage]
+  { :user                user
+    :cloud               cloud
+    :start_timestamp     (u/timestamp year month day)
+    :end_timestamp       (u/timestamp year month (inc day))    
+    :usage               usage})
+
+;;
+;; Populate some fake summaries in DB
+;;
+
+(deftest get-should-return-most-recent-first
+  (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 16] {:ram { :unit_minutes 100.0}}))
+  (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 17] {:ram { :unit_minutes 200.0}}))
+  (rc/insert-summary! (daily-summary "mike" "exo"   [2015 04 16] {:ram { :unit_minutes 300.0}}))
+  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 17] {:ram { :unit_minutes 400.0}})) 
+  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 18] {:ram { :unit_minutes 500.0}}))
+
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (header authn-info-header "joe")
+      (request base-uri)      
+      t/body->json      
+      (t/is-key-value :count 2))
+
+  (-> (session (ring-app))
+    (content-type "application/json")
+    (header authn-info-header "mike")
+    (request base-uri)      
+    t/body->json
+    (t/is-key-value :count 3)))
+
+(defn todo [] (is (= :done :not)))
+
+(deftest pagination (todo))
+
+(deftest acl-filter-cloud-as-role (todo))
+
+(deftest check-order-desc (todo))

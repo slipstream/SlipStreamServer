@@ -5,6 +5,10 @@
   [clj-time.core :as time]
   [clj-time.format :as time-fmt]))
 
+(defn timestamp
+  [& args]
+  (time-fmt/unparse (:date-time time-fmt/formatters) (apply time/date-time args)))  
+
 (defn to-time
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
    instance on success and nil on failure."

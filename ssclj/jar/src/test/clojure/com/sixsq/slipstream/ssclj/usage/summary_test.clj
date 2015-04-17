@@ -9,22 +9,18 @@
     [clj-time.format :as f]
     [clj-time.core :as t]))
 
-(defn timestamp
-  [& args]
-  (f/unparse (:date-time f/formatters) (apply t/date-time args)))  
+(def past-1 (u/timestamp 2015 04 12))
+(def past-2 (u/timestamp 2015 04 13))
+(def after-day (u/timestamp 2015 04 17 3))
 
-(def past-1 (timestamp 2015 04 12))
-(def past-2 (timestamp 2015 04 13))
-(def after-day (timestamp 2015 04 17 3))
+(def start-day  (u/timestamp 2015 04 16))
+(def in-day-1  (u/timestamp 2015 04 16 9 33))
+(def in-day-2  (u/timestamp 2015 04 16 15 10))
 
-(def start-day  (timestamp 2015 04 16))
-(def in-day-1  (timestamp 2015 04 16 9 33))
-(def in-day-2  (timestamp 2015 04 16 15 10))
+(def end-day    (u/timestamp 2015 04 17))
 
-(def end-day    (timestamp 2015 04 17))
-
-(def future-1 (timestamp 2015 04 20))
-(def future-2 (timestamp 2015 04 22))
+(def future-1 (u/timestamp 2015 04 20))
+(def future-2 (u/timestamp 2015 04 22))
 
 (defn delete-all [f]
   (rc/-init)
