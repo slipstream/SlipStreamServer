@@ -85,7 +85,7 @@
        is-true?)
   m)
 
-(defn are-all-fields?   
+(defn are-all-usages?   
   [m field expected]
   (->> (get-in m [:response :body :usages])
        (map field)       
@@ -113,7 +113,7 @@
       t/body->json       
       (t/is-key-value :count 2)
       are-desc-dates?
-      (are-all-fields? :user "joe"))          
+      (are-all-usages? :user "joe"))          
 
   (-> (session (ring-app))
       (content-type "application/json")
@@ -122,23 +122,41 @@
       t/body->json
       (t/is-key-value :count 3)
       are-desc-dates?
-      (are-all-fields? :user "mike")))
+      (are-all-usages? :user "mike")))
 
-(deftest acl-filter-cloud-as-role
+(deftest acl-filter-cloud-with-role
   (insert-summaries)
 
   (-> (session (ring-app))
       (content-type "application/json")
       (header authn-info-header "john exo")
       (request base-uri)      
-      t/body->json
-      show 
+      t/body->json      
       (t/is-key-value :count 3)
       are-desc-dates?
-      (are-all-fields? :cloud "exo")))
+      (are-all-usages? :cloud "exo")))
 
-(defn todo [] (is (= :done :not)))
+(defn fail   
+  [& args]
+  (doseq [arg args]
+    (prn arg))
+  (is (= 0 1)))
 
+(deftest get-uuid 
+
+  (insert-summaries)
+
+  (let [uuid (-> (kc/select rc/usage-summaries (kc/limit 1))
+                 first
+                 :id)]    
+    (-> (session (ring-app))
+        (content-type "application/json")
+        (header authn-info-header "john exo")        
+        (request (str c/service-context uuid))              
+        t/body->json        
+        (t/is-status 200))))
+
+; (defn todo [] (is (= :done :not)))
 ; (deftest pagination (todo))
-
 ; (deftest prefilter-acl-with-index (todo))
+; (deftest acl-on-get-uuid (todo))

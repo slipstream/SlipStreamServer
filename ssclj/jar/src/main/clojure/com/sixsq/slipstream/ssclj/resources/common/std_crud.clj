@@ -13,11 +13,6 @@
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [ring.util.response :as r]))
 
-(defn dump
-  [m]
-  (pprint m)
-  m)
-
 (defn add-fn
   [resource-name collection-acl resource-uri]
   (fn [{:keys [body] :as request}]
@@ -35,7 +30,7 @@
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
     (-> (str resource-name "/" uuid)
-        (db/retrieve)
+        db/retrieve
         (a/can-view? request)
         (crud/set-operations request)
         (u/json-response))))

@@ -61,7 +61,7 @@
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
-           [request]  
+  [request]  
   (log/info resource-uri ": will add " (:body request))
   (add-impl request))
 
@@ -71,20 +71,20 @@
 ;; single 
 ;;
 (defmethod crud/retrieve resource-name
-           [request]
+  [request]
   (retrieve-impl request))
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
 (defmethod crud/delete resource-name
-           [request]
+  [request]
   (delete-impl request))
 
 ;;
 ;; available operations
 ;; 
 (defmethod crud/set-operations resource-uri
-           [resource request]
+  [resource request]
   (try
     (a/can-modify? resource request)
     (let [href (:id resource)
@@ -101,5 +101,5 @@
 ;;
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 (defmethod crud/query resource-name
-           [request]
+  [request]
   (query-impl request))

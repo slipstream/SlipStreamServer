@@ -19,10 +19,10 @@
 ;;
 ;; Korma SQL primitives
 ;;
- 
-(defn- exist-in-db? 
+
+(defn exist-in-db? 
   [id]
-  (not (empty? (select resources (where {:id id})))))
+  (not (empty? (select resources (where {:id id}) (limit 1)))))
 
 (defn- check-conflict 
   [id]
@@ -31,7 +31,7 @@
 
 (defn- check-exist 
   [id]
-  (when-not (exist-in-db? id)    
+  (when-not (exist-in-db? id)        
     (throw (u/ex-not-found id))))
 
 (defn- insert-resource 
@@ -44,15 +44,14 @@
     (set-fields {:data data})
     (where {:id id})))
 
-(defn- find-resource  
+(defn find-resource
   [id]
   (-> (select resources (where {:id id}) (limit 1))
       first
       :data
       deserialize))
 
-(defmulti find-resources identity)
-
+(defmulti  find-resources identity)
 (defmethod find-resources :default
   [collection-id]  
   (->>  (select resources (where {:id [like (str collection-id"%")]}))
@@ -77,13 +76,13 @@
 (deftype DatabaseBinding []
   Binding
 
-  (add [this {:keys [id] :as data}]    
+  (add [this {:keys [id] :as data}]     
     (check-conflict id)      
     (insert-resource id data)
-    (response-created id))
+    (response-created id)) 
 
-  (retrieve [this id]
-    (check-exist id)
+  (retrieve [this id]    
+    (check-exist  id)
     (find-resource id))
 
   (delete [this {:keys [id]}]    
@@ -94,9 +93,8 @@
   (edit [this {:keys [id] :as data}]    
     (check-exist id)      
     (update-resource id data))
-
-  (query
-    [this collection-id options]
+  
+  (query [this collection-id options]
     (find-resources collection-id)))
 
 (defn get-instance []  

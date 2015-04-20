@@ -2,7 +2,8 @@
 
 (defn show 
   [x] 
-  (print ":-> ") (prn (class x) x) 
+  (println ":-> " (class x))
+  (clojure.pprint/pprint x) 
   x)
 
 (defmacro e-> 
