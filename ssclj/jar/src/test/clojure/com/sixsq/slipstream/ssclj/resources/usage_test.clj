@@ -67,45 +67,78 @@
     :cloud               cloud
     :start_timestamp     (u/timestamp year month day)
     :end_timestamp       (u/timestamp year month (inc day))    
-    :usage               usage})
+    :usage               usage })
 
-;; macro 'is' can not be used in -> or ->>
-(defn is-true? [x] (is (= true x)))
+; macro 'is' can not be used in -> or ->>
+(defn is-true? 
+  [x] (is (= true x))) 
 
-(defn is-desc-dates?   
+(defn every-timestamps?   
+  [pred? ts]  
+  (every? (fn [[a b]] (pred? (u/to-time a) (u/to-time b))) (partition 2 1 ts)))
+
+(defn are-desc-dates?   
   [m]
   (->> (get-in m [:response :body :usages])
        (map :end_timestamp)       
-       (u/all-timestamps? time/after?)
-       is-true?))
+       (every-timestamps? (complement time/before?))
+       is-true?)
+  m)
 
-(deftest get-should-return-most-recent-first
+(defn are-all-fields?   
+  [m field expected]
+  (->> (get-in m [:response :body :usages])
+       (map field)       
+       distinct
+       (= [expected])
+       is-true?)
+  m)
+
+(defn insert-summaries   
+  []
   (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 16] {:ram { :unit_minutes 100.0}}))
   (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 17] {:ram { :unit_minutes 200.0}}))
   (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 18] {:ram { :unit_minutes 500.0}}))
   (rc/insert-summary! (daily-summary "mike" "exo"   [2015 04 16] {:ram { :unit_minutes 300.0}}))
-  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 17] {:ram { :unit_minutes 400.0}})) 
+  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 17] {:ram { :unit_minutes 400.0}})))
+
+(deftest get-should-return-most-recent-first-by-user
+
+  (insert-summaries)
 
   (-> (session (ring-app))
       (content-type "application/json")
       (header authn-info-header "joe")
       (request base-uri)      
-      t/body->json        
+      t/body->json       
       (t/is-key-value :count 2)
-      is-desc-dates?)          
+      are-desc-dates?
+      (are-all-fields? :user "joe"))          
 
   (-> (session (ring-app))
       (content-type "application/json")
       (header authn-info-header "mike") 
-      (request base-uri)      
+      (request base-uri)   
       t/body->json
       (t/is-key-value :count 3)
-      is-desc-dates?))
+      are-desc-dates?
+      (are-all-fields? :user "mike")))
+
+(deftest acl-filter-cloud-as-role
+  (insert-summaries)
+
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (header authn-info-header "john exo")
+      (request base-uri)      
+      t/body->json
+      show 
+      (t/is-key-value :count 3)
+      are-desc-dates?
+      (are-all-fields? :cloud "exo")))
 
 (defn todo [] (is (= :done :not)))
 
-(deftest pagination (todo))
+; (deftest pagination (todo))
 
-(deftest acl-filter-cloud-as-role (todo))
-
-(deftest prefilter-acl-with-index (todo))
+; (deftest prefilter-acl-with-index (todo))

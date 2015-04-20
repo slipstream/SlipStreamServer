@@ -129,15 +129,23 @@
     check-already-started
     close-usage-record))
 
+
+(defn- acl-for-user-cloud   
+  [summary]
+  (let [user  (:user summary)
+        cloud (:cloud summary)]
+
+    { :owner  {:type "USER" :principal user}
+      :rules [{:type "USER" :principal user :right "ALL"}
+              {:type "ROLE" :principal cloud :right "ALL"}]}))
+
 (defn insert-summary!   
   [summary]
   (let [summary-resource
          (-> summary
              (update-in   [:usage] u/serialize)
              (assoc :id   (str "Usage/" (cu/random-uuid)))
-             (assoc :acl  (u/serialize                               
-                                {:owner  {:type "USER" :principal (:user summary)}
-                                 :rules [{:type "USER" :principal (:user summary) :right "ALL"}]})))]    
+             (assoc :acl  (u/serialize (acl-for-user-cloud summary))))]    
     (kc/insert usage-summaries (kc/values summary-resource))))
 
 (defn records-for-interval
