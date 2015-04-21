@@ -21,18 +21,27 @@ package com.sixsq.slipstream.connector;
  */
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.PersistenceUtil;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
+import com.sixsq.slipstream.persistence.VmRuntimeParameterMapping;
 
 public class Collector {
 
@@ -67,7 +76,6 @@ public class Collector {
 				.getParameters());
 		Properties props = new Properties();
 		long startTime = System.currentTimeMillis();
-		long describeStopTime;
 		try {
 			props = connector.describeInstances(user, timeout);
 		} catch (SlipStreamException e) {
@@ -83,10 +91,10 @@ public class Collector {
 					"Error in describeInstances for "
 							+ getUserCloudLogRepr(user, connector) + ": " + e.getMessage(), e);
 		} finally {
-			describeStopTime = System.currentTimeMillis();
 			logTiming(user, connector, startTime, "describe VMs done.");
 		}
 
+		long describeStopTime = System.currentTimeMillis();
 		int vmsPopulated = populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
 		logTiming(user, connector, describeStopTime, "populate DB VMs done.");
 		return vmsPopulated;
@@ -99,10 +107,174 @@ public class Collector {
 			Vm vm = new Vm(instanceId, cloud, state, user.getName());
 			vms.add(vm);
 		}
-		Vm.update(vms, user.getName(), cloud);
+		update(vms, user.getName(), cloud);
 		return idsAndStates.size();
 	}
+	
+	public static int update(List<Vm> newVms, String user, String cloud) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
+		Query q = em.createNamedQuery("byUserAndCloud");
+		q.setParameter("user", user);
+		q.setParameter("cloud", cloud);
 
+		@SuppressWarnings("unchecked")
+		List<Vm> oldVmList = q.getResultList();
+
+		Map<String, Vm> filteredOldVmMap = new HashMap<String, Vm>();
+		Map<String, Vm> newVmsMap = toMapByInstanceId(newVms);
+		int removed = 0;
+		for (Vm vm : oldVmList) {
+			String instanceId = vm.getInstanceId();
+			if (!newVmsMap.containsKey(instanceId)) {
+				setVmstate(em, getMapping(vm), "Unknown");
+				em.remove(vm);
+				removed++;
+				UsageRecorder.insertEnd(instanceId, user, cloud);
+			} else {
+				filteredOldVmMap.put(instanceId, vm);
+			}
+		}
+		for (Vm v : newVmsMap.values()) {
+			Vm old = filteredOldVmMap.get(v.getInstanceId());
+			VmRuntimeParameterMapping m = getMapping(v);
+			if (old == null) {
+				
+				UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
+				
+				setVmstate(em, m, v);
+				setIp(m, v);
+				setName(m, v);
+				setRunUuid(m, v);
+				setRunOwner(m, v);
+				setNodeName(m, v);
+				setNodeInstanceId(m, v);
+				em.persist(v);
+			} else {
+				boolean merge = false;
+
+				if (!v.getState().equals(old.getState())) {
+					old.setState(v.getState());
+					setVmstate(em, m, v);
+					merge = true;
+				} else {
+					setVmstateIfNotYetSet(em, m, v);
+				}
+				if (old.getRunUuid() == null) {
+					setRunUuid(m, old);
+					merge = true;
+				}
+				if (old.getRunOwner() == null) {
+					setRunOwner(m, old);
+					merge = true;
+				}
+				if (old.getIp() == null) {
+					setIp(m, old);
+					merge = true;
+				}
+				if (old.getName() == null) {
+					setName(m, old);
+					merge = true;
+				}
+				if (old.getNodeName() == null) {
+					setNodeName(m, old);
+					merge = true;
+				}
+				if (old.getNodeInstanceId() == null) {
+					setNodeInstanceId(m, old);
+					merge = true;
+				}
+				if (merge) {
+					old = em.merge(old);
+				}
+			}
+		}
+		transaction.commit();
+		em.close();
+		return removed;
+	}
+	
+	private static VmRuntimeParameterMapping getMapping(Vm v) {
+		return VmRuntimeParameterMapping.find(v.getCloud(), v.getInstanceId());
+	}
+
+	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
+		setVmstate(em, m, v.getState());
+	}
+
+	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, String vmstate) {
+		if (m != null) {
+			RuntimeParameter rp = m.getVmstateRuntimeParameter();
+			rp.setValue(vmstate);
+			em.merge(rp);
+		}
+	}
+
+	private static void setVmstateIfNotYetSet(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			RuntimeParameter rp = m.getVmstateRuntimeParameter();
+			if (!rp.isSet()) {
+				setVmstate(em, m, v);
+			}
+		}
+	}
+
+	private static void setRunUuid(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setRunUuid(m.getRunUuid());
+		}
+	}
+
+	private static void setRunOwner(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setRunOwner(m.getRunOwner());
+		}
+	}
+
+	private static void setIp(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			RuntimeParameter rp = m.getHostnameRuntimeParameter();
+			if (rp.isSet()) {
+				v.setIp(rp.getValue());
+			}
+		}
+	}
+
+	private static void setName(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setName(m.getName());
+		}
+	}
+
+	private static void setNodeName(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setNodeName(m.getNodeName());
+		}
+	}
+
+	private static void setNodeInstanceId(VmRuntimeParameterMapping m, Vm v) {
+		if (m != null) {
+			v.setNodeInstanceId(m.getNodeInstanceId());
+		}
+	}
+	
+	/**
+	 * This method assumes that the input VMs correspond to a single cloud.
+	 * Otherwise, duplicate instance ids would overwrite each other.
+	 *
+	 * @param vms
+	 *            for a single cloud
+	 * @return mapped VMs by instance id
+	 */
+	public static Map<String, Vm> toMapByInstanceId(List<Vm> vms) {
+		Map<String, Vm> map = new HashMap<String, Vm>();
+		for (Vm v : vms) {
+			map.put(v.getInstanceId(), v);
+		}
+		return map;
+	}
+	
 	private static void logTiming(User user, Connector connector, long startTime, String info) {
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info(getUserCloudLogRepr(user, connector) + " (" + elapsed + " ms) : " + info);

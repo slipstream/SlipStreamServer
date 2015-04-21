@@ -30,6 +30,11 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamCljResources-jar</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamUI</artifactId>
 		</dependency>
 
