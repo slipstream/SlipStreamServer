@@ -30,8 +30,10 @@ import org.restlet.Response;
 import org.restlet.Restlet;
 import org.restlet.data.CharacterSet;
 import org.restlet.data.MediaType;
+import org.restlet.data.Status;
 import org.restlet.resource.Directory;
 import org.restlet.resource.ServerResource;
+import org.restlet.routing.Filter;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
@@ -193,6 +195,7 @@ public class RootApplication extends Application {
 			attachDashboard(router);
 			attachVms(router);
 			attachRun(router);
+			attachTeapot(router);
 			attachWelcome(router);
 			attachLogin(router);
 			attachLogout(router);
@@ -252,6 +255,16 @@ public class RootApplication extends Application {
 
 	private void attachReports(RootRouter router) throws ConfigurationException, ValidationException {
 		router.attach("/reports", new ReportRouter(getContext(), router.getApplication()));
+	}
+
+	private void attachTeapot(RootRouter router) throws ConfigurationException, ValidationException {
+		router.attach("/teapot", new Filter() {
+			protected int beforeHandle(Request request, Response response) {
+				response.setStatus(new Status(418, "I'm a teapot!", "I'm a teapot!",
+						"http://tools.ietf.org/html/rfc2324"));
+				return Filter.STOP;
+			}
+		});
 	}
 
 	private void attachConfiguration(RootRouter router) {

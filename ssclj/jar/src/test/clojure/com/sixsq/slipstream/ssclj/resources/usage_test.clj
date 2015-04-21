@@ -7,20 +7,20 @@
 
     [peridot.core :refer :all]
 
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
-    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.usage :refer :all]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]   
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t] 
-    ))
+    [com.sixsq.slipstream.ssclj.database.korma-helper           :as kh]  
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]  
+    [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.middleware.base-uri             :refer [wrap-base-uri]]
+    [com.sixsq.slipstream.ssclj.middleware.exception-handler    :refer [wrap-exceptions]]
+    [com.sixsq.slipstream.ssclj.db.impl                         :as db]
+    [com.sixsq.slipstream.ssclj.db.database-binding             :as dbdb]
+    [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
+    [com.sixsq.slipstream.ssclj.usage.utils                     :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
+    [com.sixsq.slipstream.ssclj.resources.usage                 :refer :all]
+    [com.sixsq.slipstream.ssclj.app.routes                      :as routes]   
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]))
 
 (defn reset-summaries
   [f]
@@ -153,7 +153,8 @@
         (content-type "application/json")
         (header authn-info-header "john exo")        
         (request (str c/service-context uuid))              
-        t/body->json        
+        t/body->json
+        du/show
         (t/is-status 200))))
 
 ; (defn todo [] (is (= :done :not)))

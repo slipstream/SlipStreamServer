@@ -11,7 +11,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud       :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils          :as u]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils     :as fu]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]
     [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]))
 
 (def ^:const resource-tag     :usages)

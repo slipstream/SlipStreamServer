@@ -262,27 +262,6 @@ public abstract class ConnectorBase implements Connector {
         }
     }
 
-    protected String constructScriptObfuscateCommand(Run run, User user) throws IOException, SlipStreamClientException {
-        String sshUsername = getLoginUsername(run);
-        String command = "";
-        // command +=
-        // "sed -r -i 's/# *(account +required +pam_access\\.so).*/\\1/' /etc/pam.d/login\n";
-        // command += "echo '-:ALL:LOCAL' >> /etc/security/access.conf\n";
-        command += "sed -i '/RSAAuthentication/d' /etc/ssh/sshd_config\n";
-        command += "sed -i '/PubkeyAuthentication/d' /etc/ssh/sshd_config\n";
-        command += "sed -i '/PasswordAuthentication/d' /etc/ssh/sshd_config\n";
-        command += "echo -e 'RSAAuthentication yes\nPubkeyAuthentication yes\nPasswordAuthentication no\n' >> " +
-                "/etc/ssh/sshd_config\n";
-        command += "umask 077\n";
-        command += "mkdir -p ~/.ssh\n";
-        command += "echo '" + getPublicSshKey(run, user) + "' >> ~/.ssh/authorized_keys\n";
-        command += "chown -R " + sshUsername + ":$(id -g " + sshUsername + ")" + " ~/.ssh\n";
-        // If SELinux is installed and enabled.
-        command += "restorecon -Rv ~/.ssh || true\n";
-        command += "[ -x /etc/init.d/sshd ] && { service sshd reload; } || { service ssh reload; }\n";
-        return command;
-    }
-
     protected String getPrivateSshKey() throws ConfigurationException, ValidationException {
         String privateSshKeyFile = getPrivateSshKeyFileName();
         return FileUtil.fileToString(privateSshKeyFile);
@@ -486,7 +465,6 @@ public abstract class ConnectorBase implements Connector {
     }
 
     private String getMachineImageLoginUsername(Run run) throws ValidationException {
-
         ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
         String username = machine.getLoginUser();
         if (username == null) {

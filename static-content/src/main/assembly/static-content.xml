@@ -18,6 +18,7 @@
         <include>images/**/*</include>
         <include>font/**/*</include>
         <include>themes/**/*</include>
+        <include>errors/**/*</include>
       </includes>
     </fileSet>
   </fileSets>
