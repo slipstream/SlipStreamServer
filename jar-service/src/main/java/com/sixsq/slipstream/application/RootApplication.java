@@ -56,7 +56,6 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
 import com.sixsq.slipstream.dashboard.DashboardRouter;
-import com.sixsq.slipstream.event.EventRouter;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -72,6 +71,7 @@ import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
+import com.sixsq.slipstream.ssclj.SSCLJRouter;
 import com.sixsq.slipstream.user.UserRouter;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.Logger;
@@ -187,7 +187,7 @@ public class RootApplication extends Application {
 		RootRouter router = new RootRouter(getContext());
 
 		try {
-			attachEvent(router);
+			attachSSCLJ(router);
 			attachMetering(router);
 			attachAction(router);
 			attachModule(router);
@@ -385,8 +385,10 @@ public class RootApplication extends Application {
 		guardAndAttach(router, new GraphiteRouter(getContext()), GraphiteRouter.ROOT_URI);
 	}
 
-	private void attachEvent(RootRouter router) throws ValidationException {
-		guardAndAttach(router, new EventRouter(getContext()), EventRouter.ROOT_URI);
+	private void attachSSCLJ(RootRouter router) throws ValidationException {
+		for (String sscljResourceName : SSCLJRouter.SSCLJ_RESOURCE_NAMES) {			
+			guardAndAttach(router, new SSCLJRouter(getContext(), sscljResourceName), sscljResourceName);			
+		}
 	}
 
 	public class RootRouter extends Router {

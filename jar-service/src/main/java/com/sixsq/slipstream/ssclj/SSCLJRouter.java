@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.event;
+package com.sixsq.slipstream.ssclj;
 
 /*
  * +=================================================================+
@@ -20,28 +20,42 @@ package com.sixsq.slipstream.event;
  * -=================================================================-
  */
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.restlet.Context;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-public class EventRouter extends Router {
+public class SSCLJRouter extends Router {
 
 	private static final int PORT_NUMBER = 8201;
 	private static final String SSCLJ_SERVER = String.format("http://localhost:%d/ssclj", PORT_NUMBER);
 
-	public static final String ROOT_URI = "event";
+	public static final List<String> SSCLJ_RESOURCE_NAMES = Arrays.asList("event", "usage");
 
-	public EventRouter(Context context) throws ValidationException {
+	private String capitalize(final String s) {
+		if (s==null || s.length()<1) {
+			throw new IllegalArgumentException("Unable to capitalize empty strings");
+		}
+		return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+	}
+	
+	/**
+	 * Please note the convention: corresponding Clojure resource name is Java resource name capitalised.
+	 * 
+	 */
+	public SSCLJRouter(Context context, String sscljResourceName) throws ValidationException {
 		super(context);
 			
-		String target = SSCLJ_SERVER + "/Event";		
-		Redirector listRedirector = new ListEventRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);		
-		Redirector singleRedirector = new SingleEventRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
+		String target = SSCLJ_SERVER + "/" + capitalize(sscljResourceName);		
+		Redirector listRedirector = new ListSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);		
+		Redirector singleRedirector = new SingleSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
 		
 		attach("/", listRedirector);		
-		attach("/{event-uuid}", singleRedirector);
+		attach("/{ssclj-uuid}", singleRedirector);
 	}
 
 }

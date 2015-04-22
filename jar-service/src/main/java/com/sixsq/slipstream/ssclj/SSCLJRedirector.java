@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.event;
+package com.sixsq.slipstream.ssclj;
 
 import static org.restlet.engine.header.HeaderConstants.ATTRIBUTE_HEADERS;
 
@@ -15,22 +15,23 @@ import org.restlet.routing.Redirector;
 import org.restlet.routing.Template;
 import org.restlet.util.Series;
 
+import com.sixsq.slipstream.event.TypePrincipalRight;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 
-public class EventRedirector extends Redirector {
+public class SSCLJRedirector extends Redirector {
 
 	private static final Logger logger = Logger.getLogger(Redirector.class.getName());
 	
 	private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
 
-	public EventRedirector(Context context, String targetPattern, int mode) {
+	public SSCLJRedirector(Context context, String targetPattern, int mode) {
 		super(context, targetPattern, mode);		
 	}
 
-	protected void addSegmentForEventUUID(Reference targetRef, Request request) {
-		String eventUUID = (String) request.getAttributes().get("event-uuid");
-		targetRef.addSegment(eventUUID);
+	protected void addSegmentForSSCLJUUID(Reference targetRef, Request request) {
+		String sscljUUID = (String) request.getAttributes().get("ssclj-uuid");
+		targetRef.addSegment(sscljUUID);
 	}
 		
 	@SuppressWarnings("unchecked")

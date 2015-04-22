@@ -1,13 +1,13 @@
-package com.sixsq.slipstream.event;
+package com.sixsq.slipstream.ssclj;
 
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Reference;
 
-public class ListEventRedirector extends EventRedirector {
+public class ListSSCLJRedirector extends SSCLJRedirector {
 
-	public ListEventRedirector(Context context, String targetPattern, int mode) {
+	public ListSSCLJRedirector(Context context, String targetPattern, int mode) {
 		super(context, targetPattern, mode);
 	}
 
