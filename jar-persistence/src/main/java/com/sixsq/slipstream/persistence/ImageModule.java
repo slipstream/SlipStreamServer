@@ -43,9 +43,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test see:
- * 
+ *
  * @see ImageModuleTest
- * 
+ *
  */
 @Entity
 @SuppressWarnings("serial")
@@ -110,7 +110,7 @@ public class ImageModule extends Module {
 	/**
 	 * Validate for an image run (as opposed to a build or as part of a
 	 * deployment).
-	 * 
+	 *
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -172,7 +172,7 @@ public class ImageModule extends Module {
 
 	/**
 	 * Finds the base image id
-	 * 
+	 *
 	 * @param cloudService
 	 * @return image id
 	 * @throws ValidationException
@@ -440,7 +440,9 @@ public class ImageModule extends Module {
 		String moduleReference = getModuleReference();
 		if (moduleReference != null) {
 			ImageModule parent = load(moduleReference);
-			notes.addAll(Arrays.asList(parent.getNotes()));
+			if (parent != null) {
+			    notes.addAll(Arrays.asList(parent.getNotes()));
+			}
 		}
 		if (getNote() != null) {
 			notes.add(getNote());
@@ -450,7 +452,7 @@ public class ImageModule extends Module {
 
 	/**
 	 * Empty setter needed for serializer on a read only property
-	 * 
+	 *
 	 */
 	@Transient
 	@ElementArray(required = false, entry = "note")
