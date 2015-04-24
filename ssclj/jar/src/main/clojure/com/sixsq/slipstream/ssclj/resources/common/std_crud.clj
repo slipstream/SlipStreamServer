@@ -77,7 +77,7 @@
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
     (fn [request]
       (a/can-view? {:acl collection-acl} request)
-      (->> {}                                               ;; should allow options from body or params
+      (->> (:identity request) ;; should allow options from body or params, using only :identity inside request
            (db/query resource-name)
            uu/walk-clojurify           
            (filter #(a/authorized-view? % request))           

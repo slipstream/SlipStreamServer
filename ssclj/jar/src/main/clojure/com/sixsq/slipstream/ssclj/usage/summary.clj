@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.usage.summary
  (:require 
-  [clojure.set :as s]
-  [clojure.tools.logging :as log]
-  [clj-time.core :as t]
-  [com.sixsq.slipstream.ssclj.usage.utils :as u]
-  [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]))
+  [clojure.set                                      :as s]
+  [clojure.tools.logging                            :as log]
+  [clj-time.core                                    :as t]
+  [com.sixsq.slipstream.ssclj.usage.utils           :as u]
+  [com.sixsq.slipstream.ssclj.usage.record-keeper   :as rc]))
 
 ;;
 ;; Cuts (truncate start or end timestamp) and aggregates usage records inside an interval.

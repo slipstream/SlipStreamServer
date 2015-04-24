@@ -51,9 +51,13 @@
       :data
       deserialize))
 
-(defmulti  find-resources identity)
+(defn dispatch-fn   
+  [collection-id options]
+  collection-id)
+
+(defmulti  find-resources dispatch-fn)
 (defmethod find-resources :default
-  [collection-id]  
+  [collection-id options]  
   (->>  (select resources (where {:id [like (str collection-id"%")]}))
         (map :data)
         (map deserialize)))
@@ -95,7 +99,9 @@
     (update-resource id data))
   
   (query [this collection-id options]
-    (find-resources collection-id)))
+
+
+    (find-resources collection-id options)))
 
 (defn get-instance []  
   (init-db)

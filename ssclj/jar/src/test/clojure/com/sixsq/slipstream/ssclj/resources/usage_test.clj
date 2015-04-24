@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-test
   (:require
-    [clojure.test :refer :all]
-    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
-    [clj-time.core :as time]
-    [korma.core :as kc]
-
-    [peridot.core :refer :all]
+    [clojure.test                                               :refer :all]
+    [ring.middleware.json                                       :refer [wrap-json-body wrap-json-response]]
+    [clj-time.core                                              :as time]
+    [korma.core                                                 :as kc]
+                              
+    [peridot.core                                               :refer :all]
 
     [com.sixsq.slipstream.ssclj.database.korma-helper           :as kh]  
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]  
@@ -13,6 +13,7 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri             :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler    :refer [wrap-exceptions]]
+    [com.sixsq.slipstream.ssclj.api.acl                         :as acl]
     [com.sixsq.slipstream.ssclj.db.impl                         :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding             :as dbdb]
     [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
@@ -24,7 +25,9 @@
 
 (defn reset-summaries
   [f]
+  (acl/-init)
   (kc/delete rc/usage-summaries)
+  (kc/delete acl/acl)
   (f))
 
 (use-fixtures :each reset-summaries)
@@ -126,7 +129,6 @@
 
 (deftest acl-filter-cloud-with-role
   (insert-summaries)
-
   (-> (session (ring-app))
       (content-type "application/json")
       (header authn-info-header "john exo")
@@ -136,16 +138,8 @@
       are-desc-dates?
       (are-all-usages? :cloud "exo")))
 
-(defn fail   
-  [& args]
-  (doseq [arg args]
-    (prn arg))
-  (is (= 0 1)))
-
-(deftest get-uuid 
-
+(deftest get-uuid-with-correct-authn 
   (insert-summaries)
-
   (let [uuid (-> (kc/select rc/usage-summaries (kc/limit 1))
                  first
                  :id)]    
@@ -153,9 +147,21 @@
         (content-type "application/json")
         (header authn-info-header "john exo")        
         (request (str c/service-context uuid))              
-        t/body->json
-        du/show
+        t/body->json              
+        (t/is-key-value :id uuid)
         (t/is-status 200))))
+
+(deftest get-uuid-without-correct-authn 
+  (insert-summaries)
+  (let [uuid (-> (kc/select rc/usage-summaries (kc/limit 1))
+                 first
+                 :id)]    
+    (-> (session (ring-app))
+        (content-type "application/json")
+        (header authn-info-header "jack")        
+        (request (str c/service-context uuid))              
+        t/body->json              
+        (t/is-status 403))))
 
 ; (defn todo [] (is (= :done :not)))
 ; (deftest pagination (todo))

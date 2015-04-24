@@ -1,13 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.usage.summary-test
   (:require    
-    [com.sixsq.slipstream.ssclj.usage.summary :refer :all]
+    [com.sixsq.slipstream.ssclj.usage.summary       :refer :all]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [clojure.test :refer :all]
-    [clojure.tools.logging :as log]
-    [korma.core :refer :all]
-    [clj-time.format :as f]
-    [clj-time.core :as t]))
+    [com.sixsq.slipstream.ssclj.usage.utils         :as u]
+    [clojure.test                                   :refer :all]
+    [clojure.tools.logging                          :as log]
+    [korma.core                                     :refer :all]
+    [clj-time.format                                :as f]
+    [clj-time.core                                  :as t]))
 
 (def past-1 (u/timestamp 2015 04 12))
 (def past-2 (u/timestamp 2015 04 13))

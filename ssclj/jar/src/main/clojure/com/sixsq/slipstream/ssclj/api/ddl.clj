@@ -1,10 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.api.ddl
   (:require    
-    [clojure.java.jdbc :refer :all                :as jdbc]
-    [clojure.tools.logging                        :as log]
-    [com.sixsq.slipstream.ssclj.database.ddl      :as ddlh]
-    [com.sixsq.slipstream.ssclj.database.korma-helper  :as kh]
-    ))
+    [clojure.java.jdbc :refer :all                    :as jdbc]
+    [clojure.tools.logging                            :as log]
+    [com.sixsq.slipstream.ssclj.database.ddl          :as ddlh]
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]))
 
 (def columns-acl   
   (ddlh/columns 
@@ -14,7 +13,7 @@
     "principal-name"  "VARCHAR(100)"))
 
 (def unique-acl
-  (str ", UNIQUE (" (ddlh/quote-list ["resource-id" "resource-type" "principal-type" "principal-name"])")"))
+  (str ", UNIQUE (" (ddlh/double-quote-list ["resource-id" "resource-type" "principal-type" "principal-name"])")"))
 
 (defn create-ddl
   []

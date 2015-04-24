@@ -4,19 +4,28 @@
     [clojure.java.jdbc :refer :all :as jdbc]
     [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]))
 
-(defn- double-quote 
-  [s] 
-  (str \" s \"))
+(defn surrounder [c] (fn[s] (str c s c)))
+
+(def simple-quote (surrounder \'))
+(def double-quote (surrounder \"))
 
 (defn- column-description 
   [[name type]]
   (str (double-quote name) " " type))
 
-(defn quote-list 
-  [names]
-  (->> names
-    (map double-quote)
+(defn surround-join 
+  [xs surround]
+  (->> xs
+    (map surround)
     (clojure.string/join ",")))
+
+(defn double-quote-list 
+  [names]
+  (surround-join names double-quote))
+  
+(defn simple-quote-list 
+  [names]
+  (surround-join names simple-quote))
 
 (defn columns 
   [& name-types] 
@@ -34,4 +43,4 @@
 (defn create-index!
   [table index-name & column-names]
   (jdbc/execute! kh/db-spec [(str "DROP INDEX IF EXISTS " index-name)])
-  (jdbc/execute! kh/db-spec [(str "CREATE INDEX " index-name " ON \""table"\" (" (quote-list column-names) ")")]))
+  (jdbc/execute! kh/db-spec [(str "CREATE INDEX " index-name " ON \""table"\" (" (double-quote-list column-names) ")")]))

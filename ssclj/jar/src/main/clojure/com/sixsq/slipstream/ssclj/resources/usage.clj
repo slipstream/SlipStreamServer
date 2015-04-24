@@ -1,11 +1,12 @@
 (ns 
   com.sixsq.slipstream.ssclj.resources.usage
   (:require
-    [clojure.tools.logging :as log]
-    [schema.core :as s]    
-    [korma.core :refer :all]
+    [clojure.tools.logging                                      :as log]
+    [schema.core                                                :as s]    
+    [korma.core                                                 :refer :all]
     [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
     [com.sixsq.slipstream.ssclj.db.database-binding             :as dbb]
+    [com.sixsq.slipstream.ssclj.database.ddl                    :as ddl]
     [com.sixsq.slipstream.ssclj.resources.common.authz          :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud       :as std-crud]
@@ -31,15 +32,49 @@
 (defonce init-record-keeper (rc/-init))
 
 (defentity usage-summaries)
+(defentity acl)
 
 (defn- deserialize-usage   
   [usage]
   (update-in usage [:acl] fu/deserialize))
 
-(defmethod dbb/find-resources resource-name
-  [collection-id]
+(defn id-roles   
+  [options]
+  (-> options
+      :authentications 
+      (get (:current options))
+      ((juxt :identity :roles))))
+
+; (defn roles-in   
+;   [roles]
+;   (str     
+;     "(" 
+;       (ddl/double-quote "acl") "." 
+;       (ddl/double-quote "principal-name")
+;     " IN "
+;     (ddl/simple-quote-list roles)) ")")
+
+
+ (defmethod dbb/find-resources resource-name
+  [collection-id options]
   (->> (select usage-summaries (order :start_timestamp :DESC))
        (map deserialize-usage)))
+
+; (defmethod dbb/find-resources resource-name
+;   [collection-id options]
+;   (let [[id roles] (id-roles options)] 
+;     (->>  
+;         (select usage-summaries
+;             (modifier "DISTINCT")
+;             (join :inner acl
+;               (or 
+;                 (and  (= :acl.principal-type "USER")
+;                       (= :acl.principal-name id))))
+;                 ; (and  (= :acl.principal-type "ROLE")
+;                 ;       (raw (roles-in roles)))))
+;             (order :start_timestamp :DESC))
+
+;         (map deserialize-usage))))           
 
 ;;
 ;; schemas
@@ -71,7 +106,7 @@
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
 (defmethod crud/query resource-name
-  [request]
+  [request]  
   (query-impl request))
 
 ;;

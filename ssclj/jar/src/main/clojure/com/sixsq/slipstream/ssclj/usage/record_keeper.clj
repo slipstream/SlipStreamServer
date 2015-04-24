@@ -1,13 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.usage.record-keeper
   (:require 
-    [clojure.string :only [join]]
-    [clojure.tools.logging :as log]
-    [clojure.java.jdbc :refer :all :as jdbc]
-    [korma.core :as kc]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
-    [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u])
+    [clojure.string                                     :only [join]]
+    [clojure.tools.logging                              :as log]
+    [clojure.java.jdbc                                  :refer :all :as jdbc]
+    [korma.core                                         :as kc]
+    [com.sixsq.slipstream.ssclj.api.acl                 :as acl]
+    [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]
+    [com.sixsq.slipstream.ssclj.database.korma-helper   :as kh]    
+    [com.sixsq.slipstream.ssclj.database.ddl            :as ddl]
+    [com.sixsq.slipstream.ssclj.usage.utils             :as u])
   (:gen-class
     :name com.sixsq.slipstream.usage.Record
     :methods [
@@ -129,24 +130,35 @@
     check-already-started
     close-usage-record))
 
-
 (defn- acl-for-user-cloud   
   [summary]
   (let [user  (:user summary)
         cloud (:cloud summary)]
 
     { :owner  {:type "USER" :principal user}
-      :rules [{:type "USER" :principal user :right "ALL"}
+      :rules [{:type "USER" :principal user  :right "ALL"}
               {:type "ROLE" :principal cloud :right "ALL"}]}))
+
+(defn- type-principal-from-rule   
+  [{:keys [type principal]}]
+  [type principal])
+
+(defn- types-principals-from-acl
+  [acl]
+  (->> acl
+       :rules
+       (map type-principal-from-rule)))
 
 (defn insert-summary!   
   [summary]
-  (let [summary-resource
-         (-> summary
-             (update-in   [:usage] u/serialize)
-             (assoc :id   (str "Usage/" (cu/random-uuid)))
-             (assoc :acl  (u/serialize (acl-for-user-cloud summary))))]    
-    (kc/insert usage-summaries (kc/values summary-resource))))
+  (let [resource-id         (str "Usage/" (cu/random-uuid))
+        acl                 (acl-for-user-cloud summary)
+        summary-resource    (-> summary
+                                (update-in   [:usage] u/serialize)
+                                (assoc :id   resource-id)
+                                (assoc :acl  (u/serialize acl)))]    
+    (kc/insert usage-summaries (kc/values summary-resource))
+    (acl/insert-resource resource-id "Usage" (types-principals-from-acl acl))))
 
 (defn records-for-interval
   [start end]

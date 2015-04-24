@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.usage.launcher-test
   (:require 
-    [com.sixsq.slipstream.ssclj.usage.launcher :refer :all]
-    [clojure.tools.cli :refer [parse-opts]]    
-    [clojure.test :refer :all]))
+    [com.sixsq.slipstream.ssclj.usage.launcher  :refer :all]
+    [clojure.tools.cli                          :refer [parse-opts]]    
+    [clojure.test                               :refer :all]))
 
 (defn success-matches?   
   [[expected-start expected-end] [actual-code [actual-start actual-end]]]

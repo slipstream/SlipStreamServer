@@ -1,13 +1,21 @@
 (ns com.sixsq.slipstream.ssclj.usage.utils
  (:require 
-  [clojure.tools.logging :as log]
-  [clojure.data.json :as json]
-  [clj-time.core :as time]
-  [clj-time.format :as time-fmt]))
+  [clojure.tools.logging  :as log]
+  [clojure.data.json      :as json]
+  [clj-time.core          :as time]
+  [clj-time.format        :as time-fmt]))
 
 (defn timestamp
   [& args]
   (time-fmt/unparse (:date-time time-fmt/formatters) (apply time/date-time args)))  
+
+(defn inc-day   
+  [ts]
+  (time/plus ts (time/days 1)))
+
+(defn days-after   
+  [& start-date]
+  (iterate inc-day (apply time/date-time start-date)))
 
 (defn to-time
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
