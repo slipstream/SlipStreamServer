@@ -25,10 +25,10 @@
 ;; * we store the start of a usage record (no end-timestamp yet)
 ;; * we "close" this usage record by assigning its end-timestamp.
 ;;
-;; The usage-records is projected onto its metric dimensions, that means that
+;; The usage_records is projected onto its metric dimensions, that means that
 ;; an original event on 3 dimensions will end up being stored as 3 rows.
 ;;
-;; The records-for-interval retrieves the usage-records for a given interval.
+;; The records-for-interval retrieves the usage_records for a given interval.
 ;; (i.e records whose [start-end timestamps] intersect with the interval)
 ;;
   
@@ -57,17 +57,17 @@
     (kh/korma-init)
     (log/info "Korma init done for insert namespace")    
 
-    (ddl/create-table! "usage-records" columns-record)
-    (ddl/create-table! "usage-summaries" columns-summaries)
+    (ddl/create-table! "usage_records"    columns-record)
+    (ddl/create-table! "usage_summaries"  columns-summaries)
 
-    (ddl/create-index! "usage-records"   "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
-    (ddl/create-index! "usage-summaries" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
+    (ddl/create-index! "usage_records"   "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
+    (ddl/create-index! "usage_summaries" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
 
     (log/info "Table created (if needed)")
-    (kc/defentity usage-records)
-    (kc/defentity usage-summaries)
-    (kc/select usage-records (kc/limit 1))
-    (log/info "Korma Entity 'usage-records' defined")))
+    (kc/defentity usage_records)
+    (kc/defentity usage_summaries)
+    (kc/select usage_records (kc/limit 1))
+    (log/info "Korma Entities defined")))
 
 (defn -init
   []
@@ -84,7 +84,7 @@
   [usage-event]
   (not
     (empty? 
-      (kc/select usage-records 
+      (kc/select usage_records 
         (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})
         (kc/limit 1)))))
 
@@ -106,12 +106,12 @@
     (doseq [metric (extract-metrics usage-event)]    
       (let [usage-event-metric (project usage-event metric)]
         (log/info "Will persist metric: " usage-event-metric)
-        (kc/insert usage-records (kc/values usage-event-metric))))))
+        (kc/insert usage_records (kc/values usage-event-metric))))))
 
 (defn- close-usage-record   
   [usage-event]
   (kc/update 
-    usage-records 
+    usage_records 
     (kc/set-fields {:end_timestamp (:end_timestamp usage-event)})
     (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})))
 
@@ -157,13 +157,13 @@
                                 (update-in   [:usage] u/serialize)
                                 (assoc :id   resource-id)
                                 (assoc :acl  (u/serialize acl)))]    
-    (kc/insert usage-summaries (kc/values summary-resource))
+    (kc/insert usage_summaries (kc/values summary-resource))
     (acl/insert-resource resource-id "Usage" (types-principals-from-acl acl))))
 
 (defn records-for-interval
   [start end]
   (u/check-order [start end])
-  (kc/select usage-records (kc/where 
+  (kc/select usage_records (kc/where 
     (and 
       (or (= nil :end_timestamp) (>= :end_timestamp start))            
       (<= :start_timestamp end)))))

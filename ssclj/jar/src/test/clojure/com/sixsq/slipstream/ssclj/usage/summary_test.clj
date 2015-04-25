@@ -24,13 +24,13 @@
 
 (defn delete-all [f]
   (rc/-init)
-  (defentity usage-records)
-  (defentity usage-summaries)
-  (delete usage-records)
-  (delete usage-summaries)
-  (log/debug "All usage-records deleted")
-  (log/debug "usage records " (select usage-records))
-  (log/debug "usage summaries " (select usage-summaries))
+  (defentity usage_records)
+  (defentity usage_summaries)
+  (delete usage_records)
+  (delete usage_summaries)
+  (log/debug "All usage_records deleted")
+  (log/debug "usage records " (select usage_records))
+  (log/debug "usage summaries " (select usage_summaries))
   (f))
 (use-fixtures :each delete-all)
 
@@ -205,7 +205,7 @@
 (deftest test-summarize-and-store  
   (insert-record)
   (summarize-and-store start-day end-day)
-  (let [summaries-from-db (select usage-summaries)]
+  (let [summaries-from-db (select usage_summaries)]
     (is (= 1 (count summaries-from-db)))
     (is (= "{\"disk-GB\":{\"unit_minutes\":33868.5},\n \"RAM-GB\":{\"unit_minutes\":2696.0},\n \"nb-cpu\":{\"unit_minutes\":1348.0}}\n"
        (:usage (first summaries-from-db))))))

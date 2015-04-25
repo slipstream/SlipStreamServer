@@ -20,9 +20,9 @@
 
 (defn delete-all [f]
   (-init)
-  (delete usage-records)
-  (log/debug "All usage-records deleted")
-  (log/debug "usage records " (select usage-records))
+  (delete usage_records)
+  (log/debug "All usage_records deleted")
+  (log/debug "usage records " (select usage_records))
   (f))
 (use-fixtures :each delete-all)
 
@@ -59,7 +59,7 @@
 
 (deftest records-for-interval-for-open-records
   (-insertStart event-start)
-  (log/debug "after insert, usage records " (select usage-records))
+  (log/debug "after insert, usage records " (select usage_records))
   (is (= 3 (count (records-for-interval start-day-0 end-day-2))))
   (is (= 3 (count (records-for-interval start-day-1 end-day-1))))
   (is (= 0 (count (records-for-interval start-day-0 end-day-0))))
@@ -80,11 +80,11 @@
 (defn todo [] (is (= :done :not-yet)))
 
 (deftest event-already-open-can-be-reopened-but-does-nothing
-  (is (empty? (select usage-records)))
+  (is (empty? (select usage_records)))
   (-insertStart event-start)
-  (let [records (select usage-records)]
+  (let [records (select usage_records)]
     (-insertStart event-start)
-    (is (= records (select usage-records)))))
+    (is (= records (select usage_records)))))
 
 (deftest check-close-event-without-start
   (is (thrown? IllegalArgumentException (-insertEnd event-end))))

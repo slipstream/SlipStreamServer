@@ -22,8 +22,8 @@
         (t/after? (u/to-time (:end_timestamp usage-record)) (u/to-time start-time))))))
 
 (defn filter-inside-interval
-  [start-time end-time usage-records]
-  (filter (intersect? start-time end-time) usage-records))
+  [start-time end-time usage_records]
+  (filter (intersect? start-time end-time) usage_records))
 
 (defn shift-start
   [start]

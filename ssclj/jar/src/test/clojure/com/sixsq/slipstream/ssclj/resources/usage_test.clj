@@ -26,7 +26,7 @@
 (defn reset-summaries
   [f]
   (acl/-init)
-  (kc/delete rc/usage-summaries)
+  (kc/delete rc/usage_summaries)
   (kc/delete acl/acl)
   (f))
 
@@ -45,8 +45,6 @@
 
 (defn ring-app []
   (make-ring-app (t/concat-routes routes/final-routes)))  
-
-(defn show [e] (clojure.pprint/pprint e) e)
 
 (deftest get-without-authn-succeeds 
   (-> (session (ring-app))
@@ -72,10 +70,6 @@
     :end_timestamp       (u/timestamp year month (inc day))    
     :usage               usage })
 
-; macro 'is' can not be used in -> or ->>
-(defn is-true? 
-  [x] (is (= true x))) 
-
 (defn every-timestamps?   
   [pred? ts]  
   (every? (fn [[a b]] (pred? (u/to-time a) (u/to-time b))) (partition 2 1 ts)))
@@ -84,8 +78,8 @@
   [m]
   (->> (get-in m [:response :body :usages])
        (map :end_timestamp)       
-       (every-timestamps? (complement time/before?))
-       is-true?)
+       (every-timestamps? (complement time/before?))       
+       is)
   m)
 
 (defn are-all-usages?   
@@ -93,8 +87,8 @@
   (->> (get-in m [:response :body :usages])
        (map field)       
        distinct
-       (= [expected])
-       is-true?)
+       (= [expected])              
+       is)
   m)
 
 (defn insert-summaries   
@@ -131,7 +125,7 @@
   (insert-summaries)
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "john exo")
+      (header authn-info-header "john exo1 exo")
       (request base-uri)      
       t/body->json      
       (t/is-key-value :count 3)
@@ -140,7 +134,7 @@
 
 (deftest get-uuid-with-correct-authn 
   (insert-summaries)
-  (let [uuid (-> (kc/select rc/usage-summaries (kc/limit 1))
+  (let [uuid (-> (kc/select rc/usage_summaries (kc/limit 1))
                  first
                  :id)]    
     (-> (session (ring-app))
@@ -153,7 +147,7 @@
 
 (deftest get-uuid-without-correct-authn 
   (insert-summaries)
-  (let [uuid (-> (kc/select rc/usage-summaries (kc/limit 1))
+  (let [uuid (-> (kc/select rc/usage_summaries (kc/limit 1))
                  first
                  :id)]    
     (-> (session (ring-app))

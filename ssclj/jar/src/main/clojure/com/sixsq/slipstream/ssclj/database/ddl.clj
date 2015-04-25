@@ -1,10 +1,21 @@
 (ns com.sixsq.slipstream.ssclj.database.ddl
   (:require
-    [clojure.tools.logging :as log]
-    [clojure.java.jdbc :refer :all :as jdbc]
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]))
+    [clojure.tools.logging                                        :as log]
+    [clojure.java.jdbc                                :refer :all :as jdbc]
+    [clojure.string                                   :refer [join split]]
+    [com.sixsq.slipstream.ssclj.database.korma-helper             :as kh]))
 
-(defn surrounder [c] (fn[s] (str c s c)))
+(defn simple-surrounder 
+  [c]
+  (fn sur [s]
+    (str c s c)))
+
+(defn surrounder 
+  [c] 
+  (fn [s]
+    (->>  (split s #"\.")
+          (map (simple-surrounder c))
+          (join "."))))
 
 (def simple-quote (surrounder \'))
 (def double-quote (surrounder \"))
@@ -17,23 +28,19 @@
   [xs surround]
   (->> xs
     (map surround)
-    (clojure.string/join ",")))
+    (join ",")))
 
 (defn double-quote-list 
   [names]
   (surround-join names double-quote))
   
-(defn simple-quote-list 
-  [names]
-  (surround-join names simple-quote))
-
 (defn columns 
   [& name-types] 
   (->> 
     name-types
     (partition 2)
     (map column-description)
-    (clojure.string/join ",")))      
+    (join ",")))      
 
 (defn create-table!   
   [table columns]  

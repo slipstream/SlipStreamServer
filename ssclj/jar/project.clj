@@ -31,6 +31,7 @@
                  ;; Environment settings
                  [environ "1.0.0"]
                  ;; database
+                 [honeysql "0.5.2"]
                  [org.clojure/java.jdbc "0.3.6"]
                  [korma "0.4.0"]
                  [org.hsqldb/hsqldb "2.3.2"]

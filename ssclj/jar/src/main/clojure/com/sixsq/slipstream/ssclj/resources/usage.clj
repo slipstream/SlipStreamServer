@@ -1,12 +1,20 @@
 (ns 
   com.sixsq.slipstream.ssclj.resources.usage
   (:require
+
     [clojure.tools.logging                                      :as log]
+    [clojure.java.jdbc                                          :as j]
+
     [schema.core                                                :as s]    
+
     [korma.core                                                 :refer :all]
+
+    [honeysql.core                                              :as sql]
+    [honeysql.helpers                                           :as hh]
+
     [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
-    [com.sixsq.slipstream.ssclj.db.database-binding             :as dbb]
-    [com.sixsq.slipstream.ssclj.database.ddl                    :as ddl]
+    [com.sixsq.slipstream.ssclj.database.korma-helper           :as kh]
+    [com.sixsq.slipstream.ssclj.db.database-binding             :as dbb]    
     [com.sixsq.slipstream.ssclj.resources.common.authz          :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud       :as std-crud]
@@ -31,7 +39,7 @@
 
 (defonce init-record-keeper (rc/-init))
 
-(defentity usage-summaries)
+(defentity usage_summaries)
 (defentity acl)
 
 (defn- deserialize-usage   
@@ -45,36 +53,48 @@
       (get (:current options))
       ((juxt :identity :roles))))
 
-; (defn roles-in   
-;   [roles]
-;   (str     
-;     "(" 
-;       (ddl/double-quote "acl") "." 
-;       (ddl/double-quote "principal-name")
-;     " IN "
-;     (ddl/simple-quote-list roles)) ")")
+(defn id-matches?   
+  [id]
+  (if id
+    [:and [:= :a.principal-type "USER"] [:= :a.principal-name id]]
+    [:= 0 1]))
 
+(defn roles-in?   
+  [roles]
+  (if (seq roles)
+    [:and [:= :a.principal-type "ROLE"] [:in :a.principal-name roles]]
+    [:= 0 1]))
+
+(defn- neither-id-roles?
+  [id roles]
+  (not (or id (seq roles))))
+
+(defn- both-id-roles?
+  [id roles]
+  (and id (seq roles)))
+
+(defn sql   
+  [id roles]
+  (->   (hh/select :u.*) 
+        (hh/from [:acl :a] [:usage_summaries :u])
+        (hh/where [:and [:= :u.id :a.resource-id]
+                        [:or 
+                          (id-matches? id)
+                          (roles-in? roles)]])
+
+        (hh/order-by [:u.start_timestamp :desc])
+
+        (sql/format :quoting :ansi)))
 
  (defmethod dbb/find-resources resource-name
   [collection-id options]
-  (->> (select usage-summaries (order :start_timestamp :DESC))
-       (map deserialize-usage)))
 
-; (defmethod dbb/find-resources resource-name
-;   [collection-id options]
-;   (let [[id roles] (id-roles options)] 
-;     (->>  
-;         (select usage-summaries
-;             (modifier "DISTINCT")
-;             (join :inner acl
-;               (or 
-;                 (and  (= :acl.principal-type "USER")
-;                       (= :acl.principal-name id))))
-;                 ; (and  (= :acl.principal-type "ROLE")
-;                 ;       (raw (roles-in roles)))))
-;             (order :start_timestamp :DESC))
-
-;         (map deserialize-usage))))           
+  (let [[id roles] (id-roles options)]     
+    (if (neither-id-roles? id roles)
+      []
+      (->> (sql id roles)
+           (j/query kh/db-spec)           
+           (map deserialize-usage)))))
 
 ;;
 ;; schemas
@@ -121,7 +141,7 @@
 
 (defn find-resource
   [id]
-  (-> (select usage-summaries (where {:id id}) (limit 1))
+  (-> (select usage_summaries (where {:id id}) (limit 1))
       (check-exist id)
       first            
       deserialize-usage))
