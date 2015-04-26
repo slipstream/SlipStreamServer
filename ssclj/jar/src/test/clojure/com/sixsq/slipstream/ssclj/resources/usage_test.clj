@@ -2,6 +2,7 @@
   (:require
     [clojure.test                                               :refer :all]
     [ring.middleware.json                                       :refer [wrap-json-body wrap-json-response]]
+    [ring.middleware.params                                     :refer [wrap-params]]
     [clj-time.core                                              :as time]
     [korma.core                                                 :as kc]
                               
@@ -13,6 +14,7 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri             :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler    :refer [wrap-exceptions]]
+
     [com.sixsq.slipstream.ssclj.api.acl                         :as acl]
     [com.sixsq.slipstream.ssclj.db.impl                         :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding             :as dbdb]
@@ -39,6 +41,7 @@
   (-> resource-routes
       wrap-exceptions
       wrap-base-uri
+      wrap-params
       wrap-authn-info-header
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})))
@@ -166,18 +169,32 @@
         t/body->json              
         (t/is-status 403))))
 
-; (deftest pagination 
-;   (insert-summaries)    
-;   (-> (session (ring-app))
-;       (content-type "application/json")
-;       (header authn-info-header "joe")        
-;       (request base-uri)              
-;       t/body->json              
-;       (t/is-status 403))))
+(deftest pagination-full 
+  (insert-summaries)    
+  (-> (session (ring-app))
+      (content-type "application/json")      
+      (header authn-info-header "mike")          
+      (request (str base-uri "?offset=0&limit=10"))                
+      t/body->json       
+      (t/is-status 200)
+      (t/is-key-value :count 3)))
 
+(deftest pagination-only-one 
+  (insert-summaries)    
+  (-> (session (ring-app))
+      (content-type "application/json")      
+      (header authn-info-header "mike")          
+      (request (str base-uri "?offset=1&limit=1"))                
+      t/body->json                   
+      (t/is-status 200)
+      (t/is-key-value :count 1)))
 
-; (defn todo [] (is (= :done :not)))
+(deftest pagination-wrong-offset
+  (insert-summaries)    
+  (-> (session (ring-app))
+      (content-type "application/json")      
+      (header authn-info-header "mike")          
+      (request (str base-uri "?offset=1&limit=1000"))                
+      t/body->json                   
+      (t/is-status 403)))
 
-; (deftest pagination (todo))
-
-; (deftest acl-on-get-uuid (todo))

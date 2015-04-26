@@ -75,9 +75,9 @@
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
-    (fn [request]      
+    (fn [request]         
       (a/can-view? {:acl collection-acl} request)
-      (->> (select-keys request [:identity :params])
+      (->> (select-keys request [:identity :query-params])
            (db/query resource-name)
            uu/walk-clojurify           
            (filter #(a/authorized-view? % request))           

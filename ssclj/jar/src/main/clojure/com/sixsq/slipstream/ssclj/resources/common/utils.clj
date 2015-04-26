@@ -25,27 +25,36 @@
       (r/response)
       (r/content-type "application/json")))
 
-(defn map-response [msg status id]
+(defn map-response 
+  [msg status id]
   (-> {:status      status
        :message     msg
        :resource-id id}
       (json-response)
       (r/status status)))
 
-(defn ex-response [msg status id]
+(defn ex-response 
+  [msg status id]
   (ex-info msg (map-response msg status id)))
 
-(defn ex-not-found [id]
+(defn ex-not-found 
+  [id]
   (let [msg (str id " not found")]
     (ex-response msg 404 id)))
 
-(defn ex-conflict [id]
+(defn ex-conflict 
+  [id]
   (let [msg (str "conflict with " id)]
     (ex-response msg 409 id)))
 
-(defn ex-unauthorized [id]
+(defn ex-unauthorized 
+  [id]
   (let [msg (str "not authorized for '" id "'")]
     (ex-response msg 403 id)))
+
+(defn ex-forbidden 
+  [id]  
+  (ex-response "forbidden" 403 id))
 
 (defn ex-bad-method
   [{:keys [uri request-method] :as request}]
