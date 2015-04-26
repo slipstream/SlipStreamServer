@@ -48,9 +48,10 @@
 
 (defn id-roles   
   [options]
-  (-> options
-      :authentications 
-      (get (:current options))
+  (-> options            
+      :identity      
+      :authentications   
+      (get (get-in options [:identity :current]))
       ((juxt :identity :roles))))
 
 (defn id-matches?   
@@ -69,10 +70,6 @@
   [id roles]
   (not (or id (seq roles))))
 
-(defn- both-id-roles?
-  [id roles]
-  (and id (seq roles)))
-
 (defn sql   
   [id roles]
   (->   (hh/select :u.*) 
@@ -86,9 +83,8 @@
 
         (sql/format :quoting :ansi)))
 
- (defmethod dbb/find-resources resource-name
+(defmethod dbb/find-resources resource-name
   [collection-id options]
-
   (let [[id roles] (id-roles options)]     
     (if (neither-id-roles? id roles)
       []

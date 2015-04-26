@@ -99,8 +99,6 @@
     (update-resource id data))
   
   (query [this collection-id options]
-
-
     (find-resources collection-id options)))
 
 (defn get-instance []  

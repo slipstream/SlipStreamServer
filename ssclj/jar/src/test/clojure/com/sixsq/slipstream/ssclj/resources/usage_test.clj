@@ -46,6 +46,15 @@
 (defn ring-app []
   (make-ring-app (t/concat-routes routes/final-routes)))  
 
+(deftest extract-id-roles
+  (is 
+    (= ["john" ["exo1" "exo"]]
+    (id-roles {:identity
+                {:current "john", 
+                 :authentications {
+                  "john" 
+                    {:identity "john", :roles ["exo1" "exo"]}}}}))))
+
 (deftest get-without-authn-succeeds 
   (-> (session (ring-app))
       (content-type "application/json")      
@@ -125,7 +134,7 @@
   (insert-summaries)
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "john exo1 exo")
+      (header authn-info-header "john exo1 exo")      
       (request base-uri)      
       t/body->json      
       (t/is-key-value :count 3)
@@ -157,7 +166,18 @@
         t/body->json              
         (t/is-status 403))))
 
+; (deftest pagination 
+;   (insert-summaries)    
+;   (-> (session (ring-app))
+;       (content-type "application/json")
+;       (header authn-info-header "joe")        
+;       (request base-uri)              
+;       t/body->json              
+;       (t/is-status 403))))
+
+
 ; (defn todo [] (is (= :done :not)))
+
 ; (deftest pagination (todo))
-; (deftest prefilter-acl-with-index (todo))
+
 ; (deftest acl-on-get-uuid (todo))

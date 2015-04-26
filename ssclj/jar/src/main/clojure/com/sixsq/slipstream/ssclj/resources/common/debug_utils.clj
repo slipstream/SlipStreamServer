@@ -2,8 +2,10 @@
 
 (defn show 
   [x] 
+  (println "SHOW----")
   (println ":-> " (class x))
   (clojure.pprint/pprint x) 
+  (println "--------")
   x)
 
 (defmacro e-> 
