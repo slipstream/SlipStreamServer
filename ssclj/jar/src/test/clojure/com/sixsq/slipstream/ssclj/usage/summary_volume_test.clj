@@ -11,13 +11,13 @@
 
 (defn delete-all [f]
   (rc/-init)
-  (defentity usage-records)
-  (defentity usage-summaries)
-  (delete usage-records)
-  (delete usage-summaries)
-  (log/debug "All usage-records deleted")
-  (log/debug "usage records " (select usage-records))
-  (log/debug "usage summaries " (select usage-summaries))
+  (defentity usage_records)
+  (defentity usage_summaries)
+  (delete usage_records)
+  (delete usage_summaries)
+  (log/debug "All usage_records deleted")
+  (log/debug "usage records " (select usage_records))
+  (log/debug "usage summaries " (select usage_summaries))
   (f))
 (use-fixtures :each delete-all)
 
@@ -94,7 +94,7 @@
 
 (defn check-summaries
   []  
-  (doseq [summary (select usage-summaries)]    
+  (doseq [summary (select usage_summaries)]    
     (if (= "exoscale-ch-gva"  (:cloud summary))
       (do
         (is (= "joe"              (:user summary)))
@@ -125,7 +125,7 @@
       (rc/-insertEnd joe-exo-end)
       (summarize-and-store (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day))
 
-      (let [summary (-> (select usage-summaries)
+      (let [summary (-> (select usage_summaries)
                         first
                         :usage  
                         u/deserialize)]
@@ -163,7 +163,7 @@
 
       (summarize-and-store (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day))
       
-      (let [summaries (select usage-summaries)]
+      (let [summaries (select usage_summaries)]
         (is (= [
           {:disk-GB {:unit_minutes 144720.0}, :RAM-GB {:unit_minutes 11520.0}, :nb-cpu {:unit_minutes 2880.0}}] 
           (map (comp u/deserialize :usage) (filter #(= "joe" (:user %)) summaries))))
@@ -182,9 +182,9 @@
 
       (summarize-and-store (u/to-ISO-8601 (t/minus start-day (t/days 1))) (u/to-ISO-8601 end-day))
       
-      (let [summaries (select usage-summaries)]
+      (let [summaries (select usage_summaries)]
         (is (= [{:disk-GB {:unit_minutes 144720.0}, :RAM-GB {:unit_minutes 11520.0}, :nb-cpu {:unit_minutes 2880.0}}] 
-          (map (comp u/deserialize :usage) (select usage-summaries)))))))
+          (map (comp u/deserialize :usage) (select usage_summaries)))))))
 
 
 
