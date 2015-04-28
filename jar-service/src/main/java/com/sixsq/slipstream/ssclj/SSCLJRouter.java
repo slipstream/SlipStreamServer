@@ -23,11 +23,14 @@ package com.sixsq.slipstream.ssclj;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sixsq.slipstream.run.RunListResource;
 import org.restlet.Context;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+import org.restlet.routing.TemplateRoute;
+import org.restlet.routing.Variable;
 
 public class SSCLJRouter extends Router {
 
@@ -53,8 +56,14 @@ public class SSCLJRouter extends Router {
 		String target = SSCLJ_SERVER + "/" + capitalize(sscljResourceName);		
 		Redirector listRedirector = new ListSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);		
 		Redirector singleRedirector = new SingleSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
-		
-		attach("/", listRedirector);		
+
+		attach("/", listRedirector).setMatchingQuery(true);
+
+		TemplateRoute route = attach("/?offset={offset}&limit={limit}", listRedirector);
+		route.getTemplate().getVariables().put("offset", new Variable(Variable.TYPE_URI_QUERY));
+		route.getTemplate().getVariables().put("limit", new Variable(Variable.TYPE_URI_QUERY));
+		route.setMatchingQuery(true);
+
 		attach("/{ssclj-uuid}", singleRedirector);
 	}
 

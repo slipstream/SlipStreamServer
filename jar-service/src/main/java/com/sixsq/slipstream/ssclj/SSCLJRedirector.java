@@ -33,11 +33,20 @@ public class SSCLJRedirector extends Redirector {
 		String sscljUUID = (String) request.getAttributes().get("ssclj-uuid");
 		targetRef.addSegment(sscljUUID);
 	}
-		
+
+    protected void addOffsetAndLimit(Request request){
+        String offset = (String) request.getAttributes().get("offset");
+        String limit = (String) request.getAttributes().get("limit");
+
+        request.getResourceRef().addQueryParameter("offset", offset);
+        request.getResourceRef().addQueryParameter("limit", limit);
+    }
+
 	@SuppressWarnings("unchecked")
 	protected void addSlipstreamAuthnInfo(Request request) {
 		try {
-			@SuppressWarnings("rawtypes")
+
+            @SuppressWarnings("rawtypes")
 			Series<Header> requestHeaders = new Series(Header.class);
 			request.getAttributes().put(ATTRIBUTE_HEADERS, requestHeaders);
 
@@ -75,7 +84,9 @@ public class SSCLJRedirector extends Redirector {
             
             // hack
             addSlipstreamAuthnInfo(request);
-            
+            addOffsetAndLimit(request);
+            // hack end
+
             next.handle(request, response);
 
             // Allow for response rewriting and clean the headers
