@@ -66,8 +66,8 @@
       { :env {
           :clj-env :test
           ; :db-config-path "config-sqlite.edn"}
-          :db-config-path "config-hsqldb-mem.edn"}
-          ;:db-config-path "config-hsqldb.edn"}
+          ; :db-config-path "config-hsqldb.edn"}
+          :db-config-path "config-hsqldb.edn"}
         
         :jvm-opts ["-Dlogfile.path=test"]
 

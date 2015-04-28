@@ -1,21 +1,22 @@
 (ns com.sixsq.slipstream.ssclj.app.server
   (:require
-    [clojure.tools.logging :as log]
-    [compojure.handler :as handler]
-    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
-    [metrics.core :refer [default-registry]]
-    [metrics.ring.instrument :refer [instrument]]
-    [metrics.ring.expose :refer [expose-metrics-as-json]]
-    [metrics.jvm.core :refer [instrument-jvm]]
-    [org.httpkit.server :refer [run-server]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
-    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
-    [com.sixsq.slipstream.ssclj.resources.root :as root]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding :as fsdb]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]))
+    [clojure.tools.logging                                          :as log]
+    [compojure.handler                                              :as handler]
+    [ring.middleware.json                                           :refer [wrap-json-body wrap-json-response]]
+    [ring.middleware.params                                         :refer [wrap-params]]
+    [metrics.core                                                   :refer [default-registry]]
+    [metrics.ring.instrument                                        :refer [instrument]]
+    [metrics.ring.expose                                            :refer [expose-metrics-as-json]]
+    [metrics.jvm.core                                               :refer [instrument-jvm]]
+    [org.httpkit.server                                             :refer [run-server]]
+    [com.sixsq.slipstream.ssclj.middleware.base-uri                 :refer [wrap-base-uri]]
+    [com.sixsq.slipstream.ssclj.middleware.exception-handler        :refer [wrap-exceptions]]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header        :refer [wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.app.routes                          :as routes]
+    [com.sixsq.slipstream.ssclj.resources.root                      :as root]
+    [com.sixsq.slipstream.ssclj.db.impl                             :as db]
+    [com.sixsq.slipstream.ssclj.db.filesystem-binding               :as fsdb]
+    [com.sixsq.slipstream.ssclj.db.database-binding                 :as dbdb]))
 
 ;; FIXME: make this dynamic depending on the service configuration
 (defn set-db-impl
@@ -45,6 +46,7 @@
       (handler/site)
       (wrap-exceptions)
       (wrap-base-uri)
+      wrap-params
       (wrap-authn-info-header)
       (expose-metrics-as-json "/ssclj/metrics" default-registry {:pretty-print? true})
       (wrap-json-body {:keywords? true})

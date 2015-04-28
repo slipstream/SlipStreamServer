@@ -79,7 +79,7 @@
   { :user                user
     :cloud               cloud
     :start_timestamp     (u/timestamp year month day)
-    :end_timestamp       (u/timestamp year month (inc day))    
+    :end_timestamp       (u/timestamp-next-day year month day)    
     :usage               usage })
 
 (defn every-timestamps?   

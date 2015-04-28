@@ -163,6 +163,11 @@
       <artifactId>expectations</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>honeysql</groupId>
+      <artifactId>honeysql</artifactId>
+      <version>0.5.2</version>
+    </dependency>
   </dependencies>
 
   <profiles>

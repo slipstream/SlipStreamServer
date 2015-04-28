@@ -7,11 +7,18 @@
 
 (defn timestamp
   [& args]
-  (time-fmt/unparse (:date-time time-fmt/formatters) (apply time/date-time args)))  
+  (->> (apply time/date-time args)      
+       (time-fmt/unparse (:date-time time-fmt/formatters))))  
 
 (defn inc-day   
   [ts]
   (time/plus ts (time/days 1)))
+
+(defn timestamp-next-day
+  [& args]
+   (->> (apply time/date-time args)      
+        inc-day
+        (time-fmt/unparse (:date-time time-fmt/formatters))))    
 
 (defn days-after   
   [& start-date]
