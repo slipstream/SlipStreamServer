@@ -33,7 +33,7 @@ public class VmTest {
 		}
 		assertThat(Vm.list(user).size(), is(0));
 	}
-	
+
 	@Test
 	public void empty() throws ConfigurationException, ValidationException {
 		List<Vm> vms = new ArrayList<Vm>();
@@ -50,8 +50,8 @@ public class VmTest {
 			EntityTransaction transaction = em.getTransaction();
 			transaction.begin();
 
-			String sqlInsert1 = String.format("INSERT INTO Vm VALUES (10, 'lokal', 'instance100', null, null, null, 'up', '%s', null, null, null, null)", user);
-			String sqlInsert2 = String.format("INSERT INTO Vm VALUES (20, 'lokal', 'instance100', null, null, null, 'down', '%s', null, null, null, null)", user);
+			String sqlInsert1 = String.format("INSERT INTO Vm VALUES (10, 'lokal', 'instance100', null, null, null, 'up', '%s', null, null, null, null, null)", user);
+			String sqlInsert2 = String.format("INSERT INTO Vm VALUES (20, 'lokal', 'instance100', null, null, null, 'down', '%s', null, null, null, null, null)", user);
 
 			Query query1 = em.createNativeQuery(sqlInsert1);
 			Query query2 = em.createNativeQuery(sqlInsert2);
@@ -69,5 +69,5 @@ public class VmTest {
 		assertTrue("Second insert should have failed", exceptionOccured);
 	}
 
-	
+
 }

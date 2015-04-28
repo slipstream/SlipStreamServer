@@ -36,6 +36,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipstream.connector.Collector;
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.run.RuntimeParameterMediator;
 
@@ -141,7 +143,7 @@ public class VmRuntimeParameterMappingTest {
 		assertThat(mapping.getInstanceId(), is(instanceId));
 
 		// Updating the vm state sets the corresponding runtime parameter
-		Vm vm = new Vm(instanceId, cloudName, vmstate, user.getName());
+		Vm vm = new Vm(instanceId, cloudName, vmstate, user.getName(), new LocalConnector().isVmUsable(vmstate));
 		Collector.update(Arrays.asList(vm), user.getName(), cloudName);
 		mapping = VmRuntimeParameterMapping.find("local", instanceId);
 		assertThat(mapping.getRunUuid(), is(run.getUuid()));
@@ -184,12 +186,14 @@ public class VmRuntimeParameterMappingTest {
 
 		int MAX_VMS = 1000;
 
+		Connector connector = new LocalConnector();
 		Random random = new Random();
 		String[] states = { "init", "run", "done", "error" };
 		random.nextInt(states.length);
 		List<Vm> vms = new ArrayList<Vm>();
 		for (int i = 0; i < MAX_VMS; i++) {
-			Vm vm = new Vm("instance_" + i, "local", states[random.nextInt(states.length)], user.getName());
+			String state = states[random.nextInt(states.length)];
+			Vm vm = new Vm("instance_" + i, "local", state, user.getName(), connector.isVmUsable(state));
 			vms.add(vm);
 		}
 		Collector.update(vms, user.getName(), "local");

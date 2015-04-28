@@ -32,11 +32,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sixsq.slipstream.connector.Collector;
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 public class CollectorTest {
 
+	private static Connector connector = null;
 	private static String firstCloud = "firstCloud";
 	private static String secondCloud = "secondCloud";
 	private static String username = "user";
@@ -44,6 +47,8 @@ public class CollectorTest {
 
 	@Before
 	public void setup() throws ValidationException {
+		connector = new LocalConnector("localCloud");
+
 		user = new User(username);
 
 		for(Vm vm : Vm.list(user)) {
@@ -63,7 +68,7 @@ public class CollectorTest {
 
 		// Insert in one cloud
 
-		Vm vm = new Vm("fistCloudInstance1", firstCloud, "state", username);
+		Vm vm = new Vm("fistCloudInstance1", firstCloud, "state", username, false);
 		List<Vm> firstCloudVms = new ArrayList<Vm>();
 		firstCloudVms.add(vm);
 		Collector.update(firstCloudVms, username, firstCloud);
@@ -72,7 +77,7 @@ public class CollectorTest {
 
 		// Insert one in another cloud
 
-		vm = new Vm("secondCloudInstance1", secondCloud, "state", username);
+		vm = new Vm("secondCloudInstance1", secondCloud, "state", username, false);
 		List<Vm> secondCloudVms = new ArrayList<Vm>();
 		secondCloudVms.add(vm);
 		Collector.update(secondCloudVms, username, secondCloud);
@@ -80,13 +85,13 @@ public class CollectorTest {
 
 		// Insert a second in the first cloud
 
-		vm = new Vm("fistCloudInstance2", firstCloud, "state", username);
+		vm = new Vm("fistCloudInstance2", firstCloud, "state", username, true);
 		firstCloudVms.add(vm);
 		Collector.update(firstCloudVms, username, firstCloud);
 		assertThat(Vm.list(user).size(), is(3));
 
 		// Replace first cloud vms
-		vm = new Vm("fistCloudInstance3", firstCloud, "state", username);
+		vm = new Vm("fistCloudInstance3", firstCloud, "state", username, true);
 		firstCloudVms = new ArrayList<Vm>();
 		firstCloudVms.add(vm);
 		int removed = Collector.update(firstCloudVms, username, firstCloud);
@@ -108,20 +113,27 @@ public class CollectorTest {
 	@Test
 	public void usage() {
 		Vm vm;
+		String vmState;
 		List<Vm> vms = new ArrayList<Vm>();
 
 		// cloud1
-		vm = new Vm("instance1", firstCloud, "running", "user1");
+		vmState = "running";
+		vm = new Vm("instance1", firstCloud, vmState, "user1", connector.isVmUsable(vmState));
 		vm.setRunUuid("e06cf0dd-5266-472d-90b4-2a1a27af9dfa");
 		vms.add(vm);
-		vm = new Vm("instance2", firstCloud, "Running", "user1");
+
+		vmState = "Running";
+		vm = new Vm("instance2", firstCloud, vmState, "user1", connector.isVmUsable(vmState));
 		vm.setRunUuid("10ac7940-6151-4d0f-b90c-0213b094bcd0");
 		vms.add(vm);
-		vm = new Vm("instance3", firstCloud, "terminated", "user1");
 
+		vmState = "terminated";
+		vm = new Vm("instance3", firstCloud, vmState, "user1", connector.isVmUsable(vmState));
 		vm.setRunUuid("abf3a90f-c024-411b-8536-164b4617c636");
 		vms.add(vm);
-		vm = new Vm("instance5", firstCloud, "running", "user1");
+
+		vmState = "running";
+		vm = new Vm("instance5", firstCloud, vmState, "user1", connector.isVmUsable(vmState));
 		vm.setRunUuid("Unknown");
 		vms.add(vm);
 
@@ -129,7 +141,8 @@ public class CollectorTest {
 
 		// cloud2
 		vms.clear();
-		vm = new Vm("instance4", secondCloud, "on", "user1");
+		vmState = "on";
+		vm = new Vm("instance4", secondCloud, vmState, "user1", connector.isVmUsable(vmState));
 		vm.setRunUuid("8e519c11-e46b-43d0-a370-c738655e1c06");
 		vms.add(vm);
 
@@ -144,10 +157,12 @@ public class CollectorTest {
 
 	@Test
 	public void updateState() throws ConfigurationException, ValidationException {
+		String vmState;
 
 		// Insert in one cloud
 
-		Vm vm = new Vm("instance1", firstCloud, "state", username);
+		vmState = "state";
+		Vm vm = new Vm("instance1", firstCloud, vmState, username, connector.isVmUsable(vmState));
 		List<Vm> vms = new ArrayList<Vm>();
 		vms.add(vm);
 		Collector.update(vms, username, firstCloud);
@@ -157,7 +172,8 @@ public class CollectorTest {
 
 		// Update state
 
-		vm = new Vm("instance1", firstCloud, "newstate", username);
+		vmState = "newstate";
+		vm = new Vm("instance1", firstCloud, vmState, username, connector.isVmUsable(vmState));
 		vms = new ArrayList<Vm>();
 		vms.add(vm);
 		int removed = Collector.update(vms, username, firstCloud);
@@ -169,17 +185,18 @@ public class CollectorTest {
 
 	@Test public void listByRun() {
 		List<Vm> vmList = new ArrayList<Vm>();
+		String vmState = "newstate";
 
 		// First cloud
-		Vm vm = new Vm("instance1", firstCloud, "state", username);
+		Vm vm = new Vm("instance1", firstCloud, "state", username, connector.isVmUsable(vmState));
 		vm.setRunUuid("runUuid1");
 		vmList.add(vm);
 
-		vm = new Vm("instance2", firstCloud, "state", username);
+		vm = new Vm("instance2", firstCloud, "state", username, connector.isVmUsable(vmState));
 		vm.setRunUuid("runUuid1");
 		vmList.add(vm);
 
-		vm = new Vm("instance3", firstCloud, "state", username);
+		vm = new Vm("instance3", firstCloud, "state", username, connector.isVmUsable(vmState));
 		vm.setRunUuid("runUuid2");
 		vmList.add(vm);
 
@@ -195,7 +212,7 @@ public class CollectorTest {
 
 		// Second cloud
 		vmList = new ArrayList<Vm>();
-		vm = new Vm("instance1", secondCloud, "state", username);
+		vm = new Vm("instance1", secondCloud, "state", username, connector.isVmUsable(vmState));
 		vm.setRunUuid("runUuid1");
 		vmList.add(vm);
 
