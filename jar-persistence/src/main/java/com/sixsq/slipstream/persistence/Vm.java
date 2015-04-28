@@ -355,7 +355,7 @@ public class Vm {
 	}
 
 	public boolean getIsUsable() {
-		return this.isUsable;
+		return (this.isUsable == null) ? false : this.isUsable;
 	}
 
 	public void setIsUsable(boolean isUsable) {
