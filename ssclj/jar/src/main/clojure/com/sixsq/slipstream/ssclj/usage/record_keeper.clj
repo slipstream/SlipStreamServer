@@ -68,6 +68,9 @@
     (kc/defentity usage_records)
     (kc/defentity usage_summaries)
     (kc/select usage_records (kc/limit 1))
+
+    (acl/-init)
+
     (log/info "Korma Entities defined")))
 
 (defn -init

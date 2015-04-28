@@ -282,6 +282,7 @@
                 <namespace>com.sixsq.slipstream.ssclj.usage.record-keeper</namespace>
                 <namespace>com.sixsq.slipstream.ssclj.usage.summary</namespace>
                 <namespace>com.sixsq.slipstream.ssclj.usage.launcher</namespace>
+                <namespace>com.sixsq.slipstream.ssclj.usage.daily-summary-launcher</namespace>
               </namespaces>
               <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
             </configuration>

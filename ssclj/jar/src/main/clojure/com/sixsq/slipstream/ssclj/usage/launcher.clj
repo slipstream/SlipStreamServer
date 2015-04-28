@@ -1,12 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.usage.launcher
   (:require 
-    [clojure.string :as string]
-    [clojure.tools.cli :refer [parse-opts]]    
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.ssclj.usage.summary :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    )
+    [clojure.string                                     :as string]
+    [clojure.tools.cli                                  :refer [parse-opts]]    
+    [com.sixsq.slipstream.ssclj.usage.record-keeper     :as rc]
+    [com.sixsq.slipstream.ssclj.usage.summary           :as s]
+    [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]
+    [com.sixsq.slipstream.ssclj.usage.utils             :as u])
   (:gen-class))
 
 (defn fill-up-to-timestamp
@@ -56,6 +55,10 @@
   (str "Wrong number of arguments provided:\n\n"
        (string/join \newline errors)))
 
+(defn mandatory-absent? 
+  [options]  
+  (some nil? [(:start options) (:end options)]))
+
 (defn exit 
   [status msg]
   (println msg)
@@ -73,12 +76,12 @@
   (let [{:keys [options arguments errors summary] :as all} (parse-opts args cli-options)]      
     ; (clojure.pprint/pprint all)  ;; TODO
     (cond
-      (:help options) [:help    (usage summary)]      
-      errors          [:error   (error-msg errors)]
+      (:help options)             [:help    (usage summary)]      
+      errors                      [:error   (error-msg errors)]
+      (mandatory-absent? options) [:help    (usage summary)]      
+      :else                       (check-order options))))
 
-      :else           (check-order options))))
-
-(defn- do-summarize   
+(defn do-summarize   
   [[start end]]
   (rc/-init)
   (s/summarize-and-store start end)
