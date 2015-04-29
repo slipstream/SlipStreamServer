@@ -189,12 +189,25 @@
       (t/is-status 200)
       (t/is-key-value :count 1)))
 
-(deftest pagination-wrong-offset
-  (insert-summaries)    
-  (-> (session (ring-app))
+(defn expect-pagination   
+  [code query-strings]
+  (doseq [query-string query-strings]
+    (-> (session (ring-app))
       (content-type "application/json")      
       (header authn-info-header "mike")          
-      (request (str base-uri "?offset=1&limit=1000"))                
+      (request (str base-uri query-string))                
       t/body->json                   
-      (t/is-status 403)))
+      (t/is-status code))))
 
+(deftest pagination-wrong-query
+  (insert-summaries) 
+  (expect-pagination 400 
+    [ "?offset=-1&limit=10"
+      "?offset=1&limit=-10"
+      "?offset=-1&limit=-10"
+      "?offset=a&limit=10"]))
+
+(deftest pagination-does-not-check-max-limit
+  (insert-summaries) 
+  (expect-pagination 200 
+    [ "?offset=1&limit=1000000"]))

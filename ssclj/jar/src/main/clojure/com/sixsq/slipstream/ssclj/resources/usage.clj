@@ -30,7 +30,6 @@
 (def ^:const resource-uri     (str c/slipstream-schema-uri resource-name))
 (def ^:const collection-uri   (str c/slipstream-schema-uri collection-name))
 
-(def ^:const pagination-limit-max     "500")
 (def ^:const pagination-limit-default "20")
 
 (def collection-acl {:owner {:principal   "ADMIN"
@@ -80,11 +79,23 @@
   [id roles]
   (not (or id (seq roles))))
 
+(defn bad-query   
+  [offset limit]
+  (throw 
+    (u/ex-response 
+      (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset, 
+            ", limit:"limit")")
+      400 0)))
+
 (defn check-offset-limit
   [offset limit]
-  (when (> (Integer. limit) (Integer. pagination-limit-max))
-    (throw (u/ex-forbidden resource-name))))
-
+  (try  
+    (let [offset-value (Integer. offset) limit-value (Integer. limit)]
+      (when (some neg? [offset-value limit-value])
+        (bad-query offset limit)))
+    (catch NumberFormatException nfe
+      (bad-query offset limit))))  
+    
 (defn sql   
   [id roles offset limit]
   (check-offset-limit offset limit)
