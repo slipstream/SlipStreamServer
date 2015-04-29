@@ -33,6 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipstream.connector.Collector;
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.persistence.Vm;
@@ -75,7 +76,7 @@ public class MeteringTest extends RunTestBase {
 	}
 
 	private static Vm createVm(String instanceid, String cloud, String state, String user, String runId) {
-		Vm vm = new Vm(instanceid, cloud, state, user);
+		Vm vm = new Vm(instanceid, cloud, state, user, new LocalConnector().isVmUsable(state));
 		vm.setRunUuid(runId);
 		return vm;
 	}
