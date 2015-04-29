@@ -13,21 +13,27 @@
                                                               :authentications {"user" {:identity "user"}}}})))
 
 
-(let [id-map {:identity "USER1"
-              :roles    ["R1" "R3"]}]
+(let [id-map {:identity "USER1" :roles ["R1" "R3"]}]
 
-  (expect ::authz/all (extract-right id-map {:principal "USER1" :type "USER" :right "ALL"}))
-  (expect nil? (extract-right id-map {:principal "USER1" :type "USER"}))
-  (expect nil? (extract-right id-map {:principal "USER1" :type "ROLE" :right "ALL"}))
-  (expect ::authz/view (extract-right id-map {:principal "R1" :type "ROLE" :right "VIEW"}))
-  (expect nil? (extract-right id-map {:principal "R1" :type "USER" :right "VIEW"}))
-  (expect nil? (extract-right id-map {:principal "R2" :type "ROLE" :right "MODIFY"}))
-  (expect ::authz/modify (extract-right id-map {:principal "R3" :type "ROLE" :right "MODIFY"}))
-  (expect nil? (extract-right id-map {:principal "R3" :type "ROLE"}))
+  (expect ::authz/all     (extract-right id-map {:type "USER" :principal "USER1" :right "ALL"   }))
+  (expect nil?            (extract-right id-map {:type "USER" :principal "USER1"                }))
+  (expect nil?            (extract-right id-map {:type "ROLE" :principal "USER1" :right "ALL"   }))
+  (expect ::authz/view    (extract-right id-map {:type "ROLE" :principal "R1"    :right "VIEW"  }))
+  (expect nil?            (extract-right id-map {:type "USER" :principal "R1"    :right "VIEW"  }))
+  (expect nil?            (extract-right id-map {:type "ROLE" :principal "R2"    :right "MODIFY"}))
+  (expect ::authz/modify  (extract-right id-map {:type "ROLE" :principal "R3"    :right "MODIFY"}))
+  (expect nil?            (extract-right id-map {:type "ROLE" :principal "R3"                   }))
 
-  (expect nil? (extract-right id-map {:principal "ANON" :type "ROLE"}))
-  (expect ::authz/view (extract-right id-map {:principal "ANON" :type "ROLE" :right "VIEW"})))
+  (expect nil?            (extract-right id-map {:type "ROLE" :principal "ANON"                 }))
+  (expect ::authz/view    (extract-right id-map {:type "ROLE" :principal "ANON"  :right "VIEW"  }))
+  (expect nil?            (extract-right id-map nil))
+  (expect nil?            (extract-right id-map {})))
 
+;;
+;; anonymous access does *not* requires authentication
+;;
+(expect ::authz/view      (extract-right  nil   {:type "ROLE" :principal "ANON"  :right "VIEW"  }))
+(expect ::authz/view      (extract-right  {}    {:type "ROLE" :principal "ANON"  :right "VIEW"  }))
 
 (let [acl {:owner {:principal "USER1"
                    :type      "USER"}
@@ -38,12 +44,14 @@
                     :type      "USER"
                     :right     "MODIFY"}]}]
 
-  (expect #{} (extract-rights {:identity nil} acl))
-  (expect #{::authz/all} (extract-rights {:identity "USER1"} acl))
-  (expect #{::authz/all ::authz/view} (extract-rights {:identity "USER1" :roles ["ROLE1"]} acl))
-  (expect #{} (extract-rights {:identity "USER_UNKNOWN" :roles ["ROLE_UNKNOWN"]} acl))
-  (expect #{::authz/view} (extract-rights {:identity "USER_UNKNOWN" :roles ["ROLE1"]} acl))
-  (expect #{::authz/view ::authz/modify} (extract-rights {:identity "USER2" :roles ["ROLE1"]} acl)))
+  (expect #{}                             (extract-rights nil                                                 acl))
+
+  (expect #{}                             (extract-rights {:identity nil}                                     acl))
+  (expect #{::authz/all}                  (extract-rights {:identity "USER1"}                                 acl))
+  (expect #{::authz/all ::authz/view}     (extract-rights {:identity "USER1"        :roles ["ROLE1"]}         acl))
+  (expect #{}                             (extract-rights {:identity "USER_UNKNOWN" :roles ["ROLE_UNKNOWN"]}  acl))
+  (expect #{::authz/view}                 (extract-rights {:identity "USER_UNKNOWN" :roles ["ROLE1"]}         acl))
+  (expect #{::authz/view ::authz/modify}  (extract-rights {:identity "USER2"        :roles ["ROLE1"]}         acl)))
 
 (expect (isa? ::authz/all ::authz/view))
 (expect (isa? ::authz/modify ::authz/view))

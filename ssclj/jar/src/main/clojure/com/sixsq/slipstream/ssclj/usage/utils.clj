@@ -1,9 +1,28 @@
 (ns com.sixsq.slipstream.ssclj.usage.utils
  (:require 
-  [clojure.tools.logging :as log]
-  [clojure.data.json :as json]
-  [clj-time.core :as time]
-  [clj-time.format :as time-fmt]))
+  [clojure.tools.logging  :as log]
+  [clojure.data.json      :as json]
+  [clj-time.core          :as time]
+  [clj-time.format        :as time-fmt]))
+
+(defn timestamp
+  [& args]
+  (->> (apply time/date-time args)      
+       (time-fmt/unparse (:date-time time-fmt/formatters))))  
+
+(defn inc-day   
+  [ts]
+  (time/plus ts (time/days 1)))
+
+(defn timestamp-next-day
+  [& args]
+   (->> (apply time/date-time args)      
+        inc-day
+        (time-fmt/unparse (:date-time time-fmt/formatters))))    
+
+(defn days-after   
+  [& start-date]
+  (iterate inc-day (apply time/date-time start-date)))
 
 (defn to-time
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
@@ -19,14 +38,9 @@
   [start end]    
   (time/interval (to-time start) (to-time end)))
 
-(defn serialize
-  [m]
-  (with-out-str
-   (json/pprint m :key-fn name)))
-
-(defn deserialize
-  [s]
-  (json/read-str s :key-fn keyword))
+(defn disp-interval   
+  [start end]      
+  (str "[" start " / " end "]"))
 
 (defn- log-and-throw 
   [msg-error]
@@ -42,6 +56,19 @@
 (defn start-before-end?   
   [[t1 t2]]  
   (time/before? (to-time t1) (to-time t2)))
+
+(defn check-order
+  [[start end]]
+  (check start-before-end? [start end] (str (disp-interval start end) ": invalid period (respect order!)")))
+
+(defn serialize
+  [m]
+  (with-out-str
+   (json/pprint m :key-fn name)))
+
+(defn deserialize
+  [s]
+  (json/read-str s :key-fn keyword))
 
 (defn max-time   
   [t1 t2]

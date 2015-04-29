@@ -1,5 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.middleware.authn-info-header
-  (:require [clojure.string :as str]))
+  (:require 
+    [clojure.string                                             :as str]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]))
 
 ;; NOTE: ring uses lowercased values of header names!
 (def ^:const authn-info-header
@@ -29,5 +31,5 @@
     (->> request
          (extract-authn-info)
          (create-identity-map)
-         (assoc request :identity)              
+         (assoc request :identity)                  
          (handler))))

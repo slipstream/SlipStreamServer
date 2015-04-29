@@ -1,12 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.api.acl
   (:require
-    [com.sixsq.slipstream.ssclj.database.korma-helper  :as kh]
-    [clojure.java.jdbc :refer :all                :as jdbc]
-    [clojure.tools.logging                        :as log]
-    [clojure.set                                  :as s]
-    [clojure.walk                                 :as w]
-    [korma.core                                   :refer :all]
-    [com.sixsq.slipstream.ssclj.api.ddl           :as ddl])
+    [com.sixsq.slipstream.ssclj.database.korma-helper             :as kh]
+    [clojure.java.jdbc                                :refer :all :as jdbc]
+    [clojure.tools.logging                                        :as log]
+    [clojure.set                                                  :as s]
+    [clojure.walk                                                 :as w]
+    [korma.core                                       :refer :all]
+    [com.sixsq.slipstream.ssclj.api.ddl                           :as ddl]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils      :as du])
   (:gen-class
     :name com.sixsq.slipstream.ssclj.api.Acl
     :methods [
@@ -57,10 +58,10 @@
 (defn- rows
   ([id type type-names]    
     (check-not-empty type-names)
-    (set (for [[ptype pname] type-names] {:resource-id id :resource-type type :principal-type ptype :principal-name pname})))
+    (set (for [[ptype pname] type-names] {:resource_id id :resource_type type :principal_type ptype :principal_name pname})))
   ([type type-names]
     (check-not-empty type-names)
-    (set (for [[ptype pname] type-names] {:resource-type type :principal-type ptype :principal-name pname}))))    
+    (set (for [[ptype pname] type-names] {:resource_type type :principal_type ptype :principal_name pname}))))    
 
 ;;
 ;; An entire row is also the clause to query it in db
@@ -113,31 +114,35 @@
   [user roles]
   {:identity user :roles roles})
 
-(defn -insertResource
-  [^String id ^String type ^java.util.Map authn]
-  (check-init-called)
-  (let [
-    principals (parse-authn authn)
-    candidates (rows id type principals)
-    existings (filter-existing candidates)
-    actual-inserts (s/difference candidates existings)]    
 
-    (when (seq actual-inserts)
+(defn insert-resource
+  [^String id ^String type types-principals]
+  (check-init-called)
+  (let [    
+    candidates      (rows id type types-principals)
+    existings       (filter-existing candidates)
+    actual-inserts  (s/difference candidates existings)]    
+    (when (seq actual-inserts)            
       ;; loop of single inserts instead of bulk one because korma translates this
       ;; into SQL not supported by sqlite : http://stackoverflow.com/questions/1609637/is-it-possible-to-insert-multiple-rows-at-a-time-in-an-sqlite-database
-      (doseq [actual-insert actual-inserts]        
+      (doseq [actual-insert actual-inserts]                
         (insert acl (values actual-insert))))
 
     (log-warn-existing existings)
     (count candidates)))
 
+(defn -insertResource
+  [^String id ^String type ^java.util.Map authn]
+  (check-init-called)
+  (insert-resource id type (parse-authn authn)))
+  
 (defn -getResourceIds
   [^String type ^java.util.Map authn]
   (check-init-called)  
   (->> (select acl
           (where (apply or (rows type (parse-authn authn))))
-          (fields [:resource-id]))
-    (map :resource-id)
+          (fields [:resource_id]))
+    (map :resource_id)
     (into #{})))
 
 (defn -hasResourceId
@@ -163,7 +168,7 @@
 
 (defn- row
   [type user i]
-  {:resource-id (str type"/"i) :principal-type "USER" :principal-name (str user i)})
+  {:resource_id (str type"/"i) :principal_type "USER" :principal_name (str user i)})
 
 (defn- bulk
   [type user start size]

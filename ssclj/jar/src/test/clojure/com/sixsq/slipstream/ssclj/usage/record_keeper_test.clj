@@ -20,9 +20,9 @@
 
 (defn delete-all [f]
   (-init)
-  (delete usage-records)
-  (log/debug "All usage-records deleted")
-  (log/debug "usage records " (select usage-records))
+  (delete usage_records)
+  (log/debug "All usage_records deleted")
+  (log/debug "usage records " (select usage_records))
   (f))
 (use-fixtures :each delete-all)
 
@@ -42,6 +42,27 @@
   { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"    
     :end_timestamp       event-end-time})
 
+(def event-second-start
+  (assoc event-start :start_timestamp start-day-2))  
+
+(def event-second-end
+  (assoc event-end :end_timestamp end-day-2))  
+
+(deftest basic-insert-open
+  (-insertStart event-start)  
+  (let [records (select usage_records)]
+    (is (= 3 (count records)))
+    (is (= event-start-time (:start_timestamp (first records))))
+    (is (nil? (:end_timestamp (first records))))))
+
+(deftest basic-insert
+  (-insertStart event-start)
+  (-insertEnd   event-end)
+  (let [records (select usage_records)]
+    (is (= 3 (count records)))
+    (is (= event-start-time (:start_timestamp (first records))))
+    (is (= event-end-time   (:end_timestamp (first records))))))
+
 (deftest inserts-should-keywordize-maps
   (let [start-with-string-keys
         { "cloud_vm_instanceid" "exo:123"
@@ -59,7 +80,7 @@
 
 (deftest records-for-interval-for-open-records
   (-insertStart event-start)
-  (log/debug "after insert, usage records " (select usage-records))
+  (log/debug "after insert, usage records " (select usage_records))
   (is (= 3 (count (records-for-interval start-day-0 end-day-2))))
   (is (= 3 (count (records-for-interval start-day-1 end-day-1))))
   (is (= 0 (count (records-for-interval start-day-0 end-day-0))))
@@ -77,17 +98,27 @@
 (deftest invalid-date
   (is (thrown? IllegalArgumentException (records-for-interval end-day-2 start-day-0))))
 
-(defn todo [] (is (= :done :not-yet)))
-
 (deftest event-already-open-can-be-reopened-but-does-nothing
-  (is (empty? (select usage-records)))
+  (is (empty? (select usage_records)))
   (-insertStart event-start)
-  (let [records (select usage-records)]
+  (let [records (select usage_records)]
     (-insertStart event-start)
-    (is (= records (select usage-records)))))
+    (is (= records (select usage_records)))))
+
+(deftest reappearance-should-forget-last-close
+  (is (empty? (select usage_records)))
+  (-insertStart event-start)
+  (-insertEnd   event-end)
+  (-insertStart event-second-start)
+
+  (is (nil? (-> (select usage_records)
+                first
+                :end_timestamp))))
+  
 
 (deftest check-close-event-without-start
-  (is (thrown? IllegalArgumentException (-insertEnd event-end))))
+  (-insertEnd event-end)
+  (is (= 0 (count (select usage_records)))))
 
 (deftest check-with-middle-time
   (-insertStart event-start)
