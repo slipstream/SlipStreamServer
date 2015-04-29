@@ -65,7 +65,7 @@ public class LocalConnector extends ConnectorBase {
 		vms = new ArrayList<Vm>();
 		for (int i = 0; i < MAX_VMS; i++) {
 			String randomState = randomState();
-			Vm vm = new Vm("instance_" + i, cloud, randomState, username);
+			Vm vm = new Vm("instance_" + i, cloud, randomState, username, new LocalConnector().isVmUsable(randomState));
 			vms.add(vm);
 		}
 		Collector.update(vms, username, cloud);

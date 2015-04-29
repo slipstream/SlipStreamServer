@@ -141,4 +141,6 @@ public interface Connector {
 
 	boolean isCredentialsSet(User user);
 
+	boolean isVmUsable(String vmState);
+
 }

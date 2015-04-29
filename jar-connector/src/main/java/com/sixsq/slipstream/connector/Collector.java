@@ -66,14 +66,15 @@ public class Collector {
 			logger.warning(e.getMessage());
 		} catch (Exception e) {
 			logger.severe(e.getMessage());
-		} 
+		}
 		return res;
 	}
 
 	private static int describeInstances(User user, Connector connector, int timeout)
 			throws ConfigurationException, ValidationException {
-		user.addSystemParametersIntoUser(Configuration.getInstance()
-				.getParameters());
+
+		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
+
 		Properties props = new Properties();
 		long startTime = System.currentTimeMillis();
 		try {
@@ -95,22 +96,23 @@ public class Collector {
 		}
 
 		long describeStopTime = System.currentTimeMillis();
-		int vmsPopulated = populateVmsForCloud(user, connector.getConnectorInstanceName(), props);
+		int vmsPopulated = populateVmsForCloud(user, connector, props);
 		logTiming(user, connector, describeStopTime, "populate DB VMs done.");
 		return vmsPopulated;
 	}
 
-	private static int populateVmsForCloud(User user, String cloud, Properties idsAndStates) {
+	private static int populateVmsForCloud(User user, Connector connector, Properties idsAndStates) {
+		String cloud = connector.getConnectorInstanceName();
 		List<Vm> vms = new ArrayList<Vm>();
 		for (String instanceId : idsAndStates.stringPropertyNames()) {
 			String state = (String) idsAndStates.get(instanceId);
-			Vm vm = new Vm(instanceId, cloud, state, user.getName());
+			Vm vm = new Vm(instanceId, cloud, state, user.getName(), connector.isVmUsable(state));
 			vms.add(vm);
 		}
 		update(vms, user.getName(), cloud);
 		return idsAndStates.size();
 	}
-	
+
 	public static int update(List<Vm> newVms, String user, String cloud) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
@@ -131,6 +133,7 @@ public class Collector {
 				setVmstate(em, getMapping(vm), "Unknown");
 				em.remove(vm);
 				removed++;
+
 				UsageRecorder.insertEnd(instanceId, user, cloud);
 			} else {
 				filteredOldVmMap.put(instanceId, vm);
@@ -140,9 +143,11 @@ public class Collector {
 			Vm old = filteredOldVmMap.get(v.getInstanceId());
 			VmRuntimeParameterMapping m = getMapping(v);
 			if (old == null) {
-				
-				UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
-				
+
+				if (v.getIsUsable()) {
+					UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
+				}
+
 				setVmstate(em, m, v);
 				setIp(m, v);
 				setName(m, v);
@@ -155,7 +160,16 @@ public class Collector {
 				boolean merge = false;
 
 				if (!v.getState().equals(old.getState())) {
+					if (v.getIsUsable() != old.getIsUsable()) {
+						if (v.getIsUsable()) {
+							UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
+						} else {
+						UsageRecorder.insertEnd(v.getInstanceId(), user, cloud);
+						}
+					}
+
 					old.setState(v.getState());
+					old.setIsUsable(v.getIsUsable());
 					setVmstate(em, m, v);
 					merge = true;
 				} else {
@@ -194,7 +208,7 @@ public class Collector {
 		em.close();
 		return removed;
 	}
-	
+
 	private static VmRuntimeParameterMapping getMapping(Vm v) {
 		return VmRuntimeParameterMapping.find(v.getCloud(), v.getInstanceId());
 	}
@@ -258,7 +272,7 @@ public class Collector {
 			v.setNodeInstanceId(m.getNodeInstanceId());
 		}
 	}
-	
+
 	/**
 	 * This method assumes that the input VMs correspond to a single cloud.
 	 * Otherwise, duplicate instance ids would overwrite each other.
@@ -274,7 +288,7 @@ public class Collector {
 		}
 		return map;
 	}
-	
+
 	private static void logTiming(User user, Connector connector, long startTime, String info) {
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info(getUserCloudLogRepr(user, connector) + " (" + elapsed + " ms) : " + info);

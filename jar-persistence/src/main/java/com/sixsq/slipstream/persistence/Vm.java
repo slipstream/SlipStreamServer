@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -58,7 +59,7 @@ import com.sixsq.slipstream.vm.VmsQueryParameters;
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames={"cloud", "instanceId", "user_"})})
 @NamedQueries({
 		@NamedQuery(name = "byUserAndCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
-		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on', 'active', 'Active') AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
+		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.isUsable = 1 AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
 		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run")
 })
 
@@ -103,15 +104,20 @@ public class Vm {
 	@Attribute(required = false)
 	private String nodeInstanceId;
 
+	@Column(nullable = true)
+	@Attribute(required = false)
+	private Boolean isUsable;
+
 	@SuppressWarnings("unused")
 	private Vm() {
 	}
 
-	public Vm(String instanceid, String cloud, String state, String user) {
+	public Vm(String instanceid, String cloud, String state, String user, boolean isUsable) {
 		this.instanceId = instanceid;
 		this.cloud = cloud;
 		this.state = state;
 		this.user_ = user;
+		this.isUsable = isUsable;
 		measurement = new Date();
 	}
 
@@ -346,6 +352,14 @@ public class Vm {
 
 	public void setNodeInstanceId(String nodeInstanceId) {
 		this.nodeInstanceId = nodeInstanceId;
+	}
+
+	public boolean getIsUsable() {
+		return (this.isUsable == null) ? false : this.isUsable;
+	}
+
+	public void setIsUsable(boolean isUsable) {
+		this.isUsable = isUsable;
 	}
 
 	public void remove() {
