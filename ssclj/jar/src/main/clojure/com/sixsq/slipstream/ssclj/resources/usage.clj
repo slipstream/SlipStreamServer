@@ -94,6 +94,7 @@
                         [:or 
                           (id-matches? id)
                           (roles-in? roles)]])
+        (hh/modifiers :distinct)
         (hh/limit limit)
         (hh/offset offset)
         (hh/order-by [:u.start_timestamp :desc])
