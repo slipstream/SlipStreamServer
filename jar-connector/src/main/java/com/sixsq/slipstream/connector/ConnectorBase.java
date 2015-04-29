@@ -504,12 +504,11 @@ public abstract class ConnectorBase implements Connector {
     	throw new ValidationException("Failed to get endpoint. Parameter not found: " + paramName);
     }
 
-    @Override
-    public boolean isVmUsable(String vmState) {
-    	return vmState != null &&
-    			("running".equals(vmState.toLowerCase())
-    			|| "active".equals(vmState.toLowerCase())
-    			|| "on".equals(vmState.toLowerCase()));
-    }
+	@Override
+	public boolean isVmUsable(String vmState) {
+		return "running".equalsIgnoreCase(vmState)
+				|| "active".equalsIgnoreCase(vmState)
+				|| "on".equalsIgnoreCase(vmState);
+	}
 
 }
