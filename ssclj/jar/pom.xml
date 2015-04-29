@@ -165,8 +165,7 @@
     </dependency>
     <dependency>
       <groupId>honeysql</groupId>
-      <artifactId>honeysql</artifactId>
-      <version>0.5.2</version>
+      <artifactId>honeysql</artifactId>      
     </dependency>
   </dependencies>
 
