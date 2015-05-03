@@ -1,4 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.api.acl
+  (:refer-clojure :exclude [update])
   (:require
     [com.sixsq.slipstream.ssclj.database.korma-helper             :as kh]
     [clojure.java.jdbc                                :refer :all :as jdbc]

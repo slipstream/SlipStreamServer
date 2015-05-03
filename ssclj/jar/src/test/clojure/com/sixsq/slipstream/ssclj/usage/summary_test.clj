@@ -1,4 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.usage.summary-test
+  (:refer-clojure :exclude [update])
   (:require    
     [com.sixsq.slipstream.ssclj.usage.summary       :refer :all]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]

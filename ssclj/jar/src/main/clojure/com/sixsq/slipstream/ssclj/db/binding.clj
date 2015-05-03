@@ -1,4 +1,5 @@
-(ns com.sixsq.slipstream.ssclj.db.binding)
+(ns com.sixsq.slipstream.ssclj.db.binding
+  (:refer-clojure :exclude [update]))
 
 (defprotocol Binding
   "This protocol defines the core interface to the underlying database.

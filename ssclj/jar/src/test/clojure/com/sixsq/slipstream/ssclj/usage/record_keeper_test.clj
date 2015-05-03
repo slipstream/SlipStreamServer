@@ -1,4 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.usage.record-keeper-test
+  (:refer-clojure :exclude [update])
   (:require 
     [com.sixsq.slipstream.ssclj.usage.record-keeper :refer :all]
     [korma.core :refer :all]

@@ -1,5 +1,6 @@
 ;; database implementation of Binding protocol
 (ns com.sixsq.slipstream.ssclj.db.database-binding
+  (:refer-clojure :exclude [update])
   (:require 
     [clojure.java.jdbc :refer :all :as jdbc]    
     [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]]
