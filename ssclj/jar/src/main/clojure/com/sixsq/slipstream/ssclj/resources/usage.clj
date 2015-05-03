@@ -1,5 +1,6 @@
 (ns 
   com.sixsq.slipstream.ssclj.resources.usage
+  (:refer-clojure :exclude [update])
   (:require
 
     [clojure.tools.logging                                      :as log]
@@ -88,9 +89,9 @@
       400 0)))
 
 (defn check-offset-limit
-  [offset limit]
+  [^String offset ^String limit]
   (try  
-    (let [offset-value (Integer. offset) limit-value (Integer. limit)]
+    (let [offset-value (Integer/valueOf offset) limit-value (Integer/valueOf limit)]
       (when (some neg? [offset-value limit-value])
         (bad-query offset limit)))
     (catch NumberFormatException nfe

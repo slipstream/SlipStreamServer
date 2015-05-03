@@ -88,7 +88,7 @@
   (try
     (a/can-modify? resource request)
     (let [href (:id resource)
-          resourceURI (:resourceURI resource)
+          ^String resourceURI (:resourceURI resource)
           ops (if (.endsWith resourceURI "Collection")
                 [{:rel (:add c/action-uri) :href href}]
                 [{:rel (:delete c/action-uri) :href href}])]
