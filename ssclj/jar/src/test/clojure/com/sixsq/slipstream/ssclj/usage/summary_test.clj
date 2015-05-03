@@ -4,6 +4,7 @@
     [com.sixsq.slipstream.ssclj.usage.summary       :refer :all]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.usage.utils         :as u]
+    [clojure.data.json                              :as json]
     [clojure.test                                   :refer :all]
     [clojure.tools.logging                          :as log]
     [korma.core                                     :refer :all]
@@ -203,12 +204,17 @@
     (summarize start-day end-day)))
   )
 
-(deftest test-summarize-and-store  
+(deftest test-summarize-and-store
   (insert-record)
   (summarize-and-store start-day end-day)
-  (let [summaries-from-db (select usage_summaries)]
+  (let [summaries-from-db (select usage_summaries)
+        result "{\"disk-GB\":{\"unit_minutes\":33868.5},
+                 \"RAM-GB\":{\"unit_minutes\":2696.0},
+                 \"nb-cpu\":{\"unit_minutes\":1348.0}}"]
+
     (is (= 1 (count summaries-from-db)))
-    (is (= "{\"disk-GB\":{\"unit_minutes\":33868.5},\n \"RAM-GB\":{\"unit_minutes\":2696.0},\n \"nb-cpu\":{\"unit_minutes\":1348.0}}\n"
-       (:usage (first summaries-from-db))))))
-
-
+    (is (= (json/read-str result)
+           (-> summaries-from-db
+               (first)
+               (:usage)
+               (json/read-str))))))
