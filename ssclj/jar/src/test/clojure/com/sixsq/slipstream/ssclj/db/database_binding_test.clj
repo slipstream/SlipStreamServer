@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.db.database-binding-test
   (:refer-clojure :exclude [update])
   (:require    
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbb] 
+    [com.sixsq.slipstream.ssclj.db.database-binding         :as dbb] 
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize]]
-    [korma.core :refer :all]
-    [expectations :refer :all]
-    [clojure.tools.logging :as log]))
+    [korma.core                                             :refer :all]
+    [expectations                                           :refer :all]
+    [clojure.tools.logging                                  :as log]))
 
 (def db (dbb/get-instance))
 
