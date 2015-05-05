@@ -57,7 +57,7 @@
       { :env {
           :clj-env :development
           ; :db-config-path "config-sqlite.edn"
-          :db-config-path "config-hsqldb.edn"
+          :db-config-path "config-hsqldb-mem.edn"
         }
         :jvm-opts ["-Dlogfile.path=development"]
         :dependencies [ [peridot/peridot "0.3.0"]
@@ -67,7 +67,7 @@
           :clj-env :test
           ; :db-config-path "config-sqlite.edn"}
           ; :db-config-path "config-hsqldb.edn"}
-          :db-config-path "config-hsqldb.edn"}
+          :db-config-path "config-hsqldb-mem.edn"}
         
         :jvm-opts ["-Dlogfile.path=test"]
 
