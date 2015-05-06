@@ -25,41 +25,40 @@
 (defmulti add resource-name-dispatch)
 
 (defmethod add :default
-           [request]
+  [request]
   (throw (u/ex-bad-method request)))
 
 
 (defmulti query resource-name-dispatch)
 
 (defmethod query :default
-           [request]
+  [request]
   (throw (u/ex-bad-method request)))
 
 
 (defmulti retrieve resource-name-dispatch)
 
 (defmethod retrieve :default
-           [request]
+  [request]
   (throw (u/ex-bad-method request)))
-
 
 (defmulti edit resource-name-dispatch)
 
 (defmethod edit :default
-           [request]
+  [request]
   (throw (u/ex-bad-method request)))
 
 
 (defmulti delete resource-name-dispatch)
 
 (defmethod delete :default
-           [request]
+  [request]
   (throw (u/ex-bad-method request)))
 
 (defmulti do-action resource-name-and-action-dispatch)
 
 (defmethod do-action :default
-           [request]
+  [request]
   (throw (u/ex-bad-method request)))
 
 ;;
@@ -89,7 +88,7 @@
           :resourceURI)
 
 (defmethod set-operations :default
-           [resource request]
+  [resource request]
   (try
     (a/can-modify? resource request)
     (let [href (:id resource)
@@ -110,11 +109,11 @@
 ;;
 
 (defmulti new-identifier
-          (fn [json resource-name]
-            resource-name))
+  (fn [json resource-name]
+    resource-name))
 
 (defmethod new-identifier :default
-           [json resource-name]
+  [json resource-name]
   (assoc json :id (u/new-resource-id resource-name)))
 
 ;;
@@ -123,9 +122,9 @@
 ;;
 
 (defmulti add-acl
-          (fn [{:keys [resourceURI]} request]
-            resourceURI))
+  (fn [{:keys [resourceURI]} request]
+    resourceURI))
 
 (defmethod add-acl :default
-           [json request]
+  [json request]
   json)

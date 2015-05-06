@@ -1,10 +1,12 @@
 ;; database implementation of Binding protocol
 (ns com.sixsq.slipstream.ssclj.db.database-binding
+  (:refer-clojure :exclude [update])
   (:require 
     [clojure.java.jdbc :refer :all :as jdbc]    
     [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
-    [com.sixsq.slipstream.ssclj.api.korma-helper :as kh]    
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
+    [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [korma.core :refer :all]
     [ring.util.response :as r]))
@@ -12,18 +14,16 @@
 (defn init-db
   []  
   (kh/korma-init)
-  (jdbc/execute! kh/db-spec [    
-    "CREATE TABLE IF NOT EXISTS \"resources\" (\"id\" VARCHAR(100), \"data\" VARCHAR(10000))"
-    ])
+  (ddl/create-table! "resources" (ddl/columns "id" "VARCHAR(100)" "data" "VARCHAR(10000)"))
   (defentity resources))
 
 ;;
 ;; Korma SQL primitives
 ;;
- 
-(defn- exist-in-db? 
+
+(defn exist-in-db? 
   [id]
-  (not (empty? (select resources (where {:id id})))))
+  (not (empty? (select resources (where {:id id}) (limit 1)))))
 
 (defn- check-conflict 
   [id]
@@ -32,7 +32,7 @@
 
 (defn- check-exist 
   [id]
-  (when-not (exist-in-db? id)    
+  (when-not (exist-in-db? id)        
     (throw (u/ex-not-found id))))
 
 (defn- insert-resource 
@@ -45,15 +45,20 @@
     (set-fields {:data data})
     (where {:id id})))
 
-(defn- find-resource  
+(defn find-resource
   [id]
   (-> (select resources (where {:id id}) (limit 1))
       first
       :data
       deserialize))
 
-(defn- find-resources 
-  [collection-id]
+(defn dispatch-fn   
+  [collection-id options]
+  collection-id)
+
+(defmulti  find-resources dispatch-fn)
+(defmethod find-resources :default
+  [collection-id options]  
   (->>  (select resources (where {:id [like (str collection-id"%")]}))
         (map :data)
         (map deserialize)))
@@ -76,13 +81,13 @@
 (deftype DatabaseBinding []
   Binding
 
-  (add [this {:keys [id] :as data}]    
+  (add [this {:keys [id] :as data}]     
     (check-conflict id)      
     (insert-resource id data)
-    (response-created id))
+    (response-created id)) 
 
-  (retrieve [this id]
-    (check-exist id)
+  (retrieve [this id]    
+    (check-exist  id)
     (find-resource id))
 
   (delete [this {:keys [id]}]    
@@ -93,10 +98,9 @@
   (edit [this {:keys [id] :as data}]    
     (check-exist id)      
     (update-resource id data))
-
-  (query
-    [this collection-id options]
-    (find-resources collection-id)))
+  
+  (query [this collection-id options]
+    (find-resources collection-id options)))
 
 (defn get-instance []  
   (init-db)

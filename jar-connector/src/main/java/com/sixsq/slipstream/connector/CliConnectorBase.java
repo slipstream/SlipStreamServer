@@ -50,10 +50,6 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	public static final String CLI_LOCATION = "/usr/bin";
 
-	private static final int TIMEOUT_DEFAULT_LIST_SEC = 30;
-	private static final int TIMEOUT_DEFAULT_RUN_SEC = 600;
-	private static final int TIMEOUT_DEFAULT_TERMINATE_SEC = 900;
-
 	protected Logger log;
 
 	@Override
@@ -251,12 +247,26 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		Map<String, String> launchParams = new HashMap<String, String>();
 		launchParams.put("image-id", getImageId(run, user));
 		launchParams.put("network-type", getNetwork(run));
+		putLaunchParamPlatform(launchParams, run);
+		putLaunchParamLoginUser(launchParams, run);
 		putLaunchParamExtraDiskVolatile(launchParams, run);
 		return launchParams;
 	}
 
-	private void putLaunchParamExtraDiskVolatile(Map<String, String> launchParams, Run run)
-			throws ValidationException {
+	private void putLaunchParamPlatform(Map<String, String> launchParams, Run run) throws ValidationException {
+		if (!isInOrchestrationContext(run)) {
+			launchParams.put("platform", ((ImageModule) run.getModule()).getPlatform());
+		}
+	}
+
+	private void putLaunchParamLoginUser(Map<String, String> launchParams, Run run) throws ValidationException {
+		try {
+			launchParams.put("login-username", getLoginUsername(run));
+		} catch (ConfigurationException e) {
+		}
+	}
+
+	private void putLaunchParamExtraDiskVolatile(Map<String, String> launchParams, Run run) throws ValidationException {
 		if (!isInOrchestrationContext(run)) {
 			String extraDiskGb = getExtraDiskVolatile((ImageModule) run.getModule());
 			if (extraDiskGb != null && !extraDiskGb.isEmpty()) {

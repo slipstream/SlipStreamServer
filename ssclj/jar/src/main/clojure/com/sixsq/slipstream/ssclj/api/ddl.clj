@@ -1,29 +1,22 @@
 (ns com.sixsq.slipstream.ssclj.api.ddl
   (:require    
-    [clojure.java.jdbc :refer :all                :as jdbc]
-    [clojure.tools.logging                        :as log]
-    [com.sixsq.slipstream.ssclj.api.korma-helper  :as kh]))
+    [clojure.java.jdbc :refer :all                    :as jdbc]
+    [clojure.tools.logging                            :as log]
+    [com.sixsq.slipstream.ssclj.database.ddl          :as ddlh]
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]))
 
-(def create-table-acl
-  "CREATE TABLE IF NOT EXISTS \"acl\"
-  (\"resource-id\" VARCHAR(100), \"resource-type\" VARCHAR(50), \"principal-type\" VARCHAR(20), \"principal-name\" VARCHAR(100),
-  UNIQUE (\"resource-id\", \"resource-type\", \"principal-type\", \"principal-name\"))")
+(def columns-acl   
+  (ddlh/columns 
+    "resource_id"     "VARCHAR(100)" 
+    "resource_type"   "VARCHAR(50)" 
+    "principal_type"  "VARCHAR(20)" 
+    "principal_name"  "VARCHAR(100)"))
 
-(defn- quote [name] (str "\""name"\""))
-
-(defn- quote-list 
-  [names]
-  (->> names
-    (map quote)
-    (clojure.string/join ",")))
-
-(defn- create-index
-  [index-name column-names]
-  (jdbc/execute! kh/db-spec [(str "DROP INDEX IF EXISTS " index-name)])
-  (jdbc/execute! kh/db-spec [(str "CREATE INDEX " index-name " ON \"acl\" (" (quote-list column-names) ")")]))
+(def unique-acl
+  (str ", UNIQUE (" (ddlh/double-quote-list ["resource_id" "resource_type" "principal_type" "principal_name"])")"))
 
 (defn create-ddl
   []
-  (jdbc/execute! kh/db-spec [create-table-acl])
-  (create-index "IDX_TYPE_PRINCIPAL" ["resource-type", "principal-type", "principal-name"])
+  (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS \"acl\" (" columns-acl unique-acl ")")])
+  (ddlh/create-index! "acl" "IDX_TYPE_PRINCIPAL" "resource_type", "principal_type", "principal_name")
   (log/info "DDL created"))

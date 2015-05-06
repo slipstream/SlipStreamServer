@@ -89,6 +89,27 @@ ifneq ("$(SQLTOOL_RC_FILE_PRESENT)","ok")
 	$(error File $(DB_SQLITE_FILENAME) missing...)
 endif
 
+BACKUP_DIR="db_backup_$(shell date +"%Y%m%d%H%M")"
+backup-db:
+	mkdir -p $(BACKUP_DIR)
+	if [ -f slipstreamdb.script ];     then cp -v slipstreamdb.script      $(BACKUP_DIR); fi;
+	if [ -f slipstreamdb.properties ]; then cp -v slipstreamdb.properties  $(BACKUP_DIR); fi;
+
+remove-db: backup-db
+	if [ -f slipstreamdb.script ];     then rm -v slipstreamdb.script;     fi;
+	if [ -f slipstreamdb.properties ]; then rm -v slipstreamdb.properties; fi;
+
+fresh-test-db: remove-db
+	curl -sSLO https://gist.github.com/rbf/fcfecf39587f2688dcd6/raw/slipstreamdb.script
+	curl -sSLO https://gist.github.com/rbf/fcfecf39587f2688dcd6/raw/slipstreamdb.properties
+
+patch-test-pom: fresh-test-db
+	curl -sSLO https://gist.github.com/rbf/fcfecf39587f2688dcd6/raw/set_up_connectors_in_server_pom.patch
+	git apply set_up_connectors_in_server_pom.patch
+	$(info This patch modified the war/pom.xml to use all public connectors (but Okeanos) and the private EC2 connector.)
+	$(info To download the code for this last connector and build it perform following commands:)
+	$(info cd ../../ && git clone git@github.com:SixSq/SlipStreamConnector-EC2.git && cd SlipStreamConnector-EC2 && mvn clean install)
+
 list: goals
 
 goals:

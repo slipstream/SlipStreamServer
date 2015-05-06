@@ -49,7 +49,7 @@ public class CookieUtils {
 
 	// For testing, the age defaults to 30 minutes. The value is given in
 	// seconds!
-	private static final int COOKIE_DEFAULT_AGE = 60 * 60 * 12; // 12 hours
+	private static final int COOKIE_DEFAULT_AGE = 60 * 60 * 24 * 7; // 7 days
 
 	// Name used to identify the authentication cookie.
 	public static String COOKIE_NAME = "com.sixsq.slipstream.cookie";

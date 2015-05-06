@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.event;
+package com.sixsq.slipstream.ssclj;
 
 import static org.restlet.engine.header.HeaderConstants.ATTRIBUTE_HEADERS;
 
@@ -15,28 +15,38 @@ import org.restlet.routing.Redirector;
 import org.restlet.routing.Template;
 import org.restlet.util.Series;
 
+import com.sixsq.slipstream.event.TypePrincipalRight;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 
-public class EventRedirector extends Redirector {
+public class SSCLJRedirector extends Redirector {
 
 	private static final Logger logger = Logger.getLogger(Redirector.class.getName());
 	
 	private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
 
-	public EventRedirector(Context context, String targetPattern, int mode) {
+	public SSCLJRedirector(Context context, String targetPattern, int mode) {
 		super(context, targetPattern, mode);		
 	}
 
-	protected void addSegmentForEventUUID(Reference targetRef, Request request) {
-		String eventUUID = (String) request.getAttributes().get("event-uuid");
-		targetRef.addSegment(eventUUID);
+	protected void addSegmentForSSCLJUUID(Reference targetRef, Request request) {
+		String sscljUUID = (String) request.getAttributes().get("ssclj-uuid");
+		targetRef.addSegment(sscljUUID);
 	}
-		
+
+    protected void addOffsetAndLimit(Request request){
+        String offset = (String) request.getAttributes().get("offset");
+        String limit = (String) request.getAttributes().get("limit");
+
+        request.getResourceRef().addQueryParameter("offset", offset);
+        request.getResourceRef().addQueryParameter("limit", limit);
+    }
+
 	@SuppressWarnings("unchecked")
 	protected void addSlipstreamAuthnInfo(Request request) {
 		try {
-			@SuppressWarnings("rawtypes")
+
+            @SuppressWarnings("rawtypes")
 			Series<Header> requestHeaders = new Series(Header.class);
 			request.getAttributes().put(ATTRIBUTE_HEADERS, requestHeaders);
 
@@ -74,7 +84,9 @@ public class EventRedirector extends Redirector {
             
             // hack
             addSlipstreamAuthnInfo(request);
-            
+            addOffsetAndLimit(request);
+            // hack end
+
             next.handle(request, response);
 
             // Allow for response rewriting and clean the headers

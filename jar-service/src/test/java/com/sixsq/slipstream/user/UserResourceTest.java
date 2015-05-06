@@ -383,15 +383,15 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void putWithParameter() throws ConfigurationException,
-			ValidationException {
+	public void putWithParameter() throws ConfigurationException, ValidationException {
+		user = user.store();
 
-		String paramName = ExecutionControlUserParametersFactory.CATEGORY
-				+ "."
+		String paramName = ExecutionControlUserParametersFactory.CATEGORY + "."
 				+ ExecutionControlUserParametersFactory.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME;
-		UserParameter p = new UserParameter(paramName,
-				LocalConnector.CLOUD_SERVICE_NAME, "description");
+		
+		UserParameter p = new UserParameter(paramName, LocalConnector.CLOUD_SERVICE_NAME, "description");
 		user.setParameter(p);
+		
 		Request request = createPutRequest(user, user.getName());
 		Response response = executeRequest(request);
 
@@ -399,8 +399,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User updated = User.load(user.getResourceUri());
 
-		assertThat(updated.getParameter(paramName).getValue(),
-				is(LocalConnector.CLOUD_SERVICE_NAME));
+		assertThat(updated.getParameter(paramName).getValue(), is(LocalConnector.CLOUD_SERVICE_NAME));
 	}
 
 	@Test

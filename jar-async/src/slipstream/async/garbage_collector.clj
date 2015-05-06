@@ -1,5 +1,5 @@
 (ns slipstream.async.garbage-collector
-  (:require [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!!]])
+  (:require [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!! alts!]])
   (:require [slipstream.async.log :as log])
   (:require [slipstream.async.metric-updator :as updator])
   (:import [com.sixsq.slipstream.util Terminator])

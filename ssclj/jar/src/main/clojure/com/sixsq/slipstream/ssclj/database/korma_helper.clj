@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.api.korma-helper
+(ns com.sixsq.slipstream.ssclj.database.korma-helper
   (:require
     [korma.db :refer [defdb]]
     [clojure.tools.logging :as log]

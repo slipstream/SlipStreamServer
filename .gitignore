@@ -11,6 +11,10 @@ bin
 *.pem
 *.p12
 hsql*
+war/*
+logs/
+*.logs
+*.log
 
 pom.xml.next
 pom.xml.releaseBackup
@@ -19,3 +23,8 @@ release.properties
 
 # Generated on dev mode by the UI part
 raw-metadata-str*.xml
+
+# Eclipse scrap page
+scrap.jpage
+
+downloads/*
