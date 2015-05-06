@@ -13,17 +13,7 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Node;
-import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
 
@@ -38,7 +28,7 @@ public class RunTestBase {
 	protected static ImageModule imagebuildme = null;
 	protected static Connector localConnector = new LocalConnector();
 	protected static final String cloudServiceName = localConnector.getCloudServiceName();
-	protected static final Set<String> cloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceName));
+	protected static final Set<ConnectorInstance> cloudServices = new HashSet<ConnectorInstance>(Arrays.asList(new ConnectorInstance(cloudServiceName, null)));
 
 	public static DeploymentModule deployment = null;
 	protected static ImageModule imageForDeployment1 = null;
@@ -57,21 +47,21 @@ public class RunTestBase {
 
 		image = new ImageModule("test/image");
 		image.setModuleReference(imageref.getResourceUri());
-		image.setRecipe("a recipe");
+		image.setTarget(new Target(Target.TARGET_RECIPE_NAME, "a recipe"));
 		image.setImageId("image_id", cloudServiceName);
 		image = image.store();
 
 		imagebuildme = new ImageModule("test/imagebuildme");
 		imagebuildme.setModuleReference(imageref.getResourceUri());
-		imagebuildme.setRecipe("a recipe");
+		imagebuildme.getTargets().put(Target.TARGET_RECIPE_NAME, new Target(Target.TARGET_RECIPE_NAME, "a recipe"));
 		imagebuildme = imagebuildme.store();
 
 		imagenoref = new ImageModule("test/imagenoref");
-		imagenoref.setRecipe("a recipe");
+		imagenoref.getTargets().put(Target.TARGET_RECIPE_NAME, new Target(Target.TARGET_RECIPE_NAME, "a recipe"));
 		imagenoref = imagenoref.store();
 
 		imagenoref = new ImageModule("test/imagenoref");
-		imagenoref.setRecipe("a recipe");
+		imagenoref.getTargets().put(Target.TARGET_RECIPE_NAME, new Target(Target.TARGET_RECIPE_NAME, "a recipe"));
 		imagenoref = imagenoref.store();
 
 		createUser();

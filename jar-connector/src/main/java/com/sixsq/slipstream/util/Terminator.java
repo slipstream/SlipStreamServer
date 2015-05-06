@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 
+import com.sixsq.slipstream.persistence.*;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 
@@ -17,12 +18,6 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.PersistenceUtil;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 
@@ -31,10 +26,10 @@ public class Terminator {
 	/* I WILL BE BACK */
 
 	public static int purge() throws ConfigurationException, ValidationException {
-		int runPurged =0;
+		int runPurged = 0;
 
 		List<User> users = User.list();
-		for (User u: users) {
+		for (User u : users) {
 			u = User.loadByName(u.getName());
 			int timeout = u.getTimeout();
 
@@ -63,13 +58,19 @@ public class Terminator {
 		Run.setGarbageCollected(run);
 		run = run.store();
 
-		String onErrorKeepRunning = run.getParameterValue(Parameter
-				.constructKey(ParameterCategory.General.toString(),
-						UserParameter.KEY_ON_ERROR_RUN_FOREVER), "false");
+		String onErrorKeepRunning = run.getParameterValue(
+				Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_ERROR_RUN_FOREVER),
+				"false");
 
-		if (! Boolean.parseBoolean(onErrorKeepRunning) &&
-				! run.isMutable() &&
-				(run.getState() == States.Initializing || isGarbageCollected)) {
+		// user wants to run forever?
+		boolean terminateOnError = !Boolean.parseBoolean(onErrorKeepRunning);
+		// for mutable run we never transition to cancel on error
+		boolean notMutable = !run.isMutable();
+		// state from which we should cancel
+		boolean toCancelState = (run.getState() == States.Initializing) || (run.getState() == States.Provisioning)
+				|| (run.getState() == States.Executing) || isGarbageCollected;
+
+		if (terminateOnError && notMutable && toCancelState) {
 			terminate(run.getResourceUri());
 		}
 
@@ -80,35 +81,37 @@ public class Terminator {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 
-		Run run = Run.load(runResourceUri, em);
-		User user = User.loadByName(run.getUser());
+		try {
+			Run run = Run.load(runResourceUri, em);
+			User user = User.loadByName(run.getUser());
 
-		StateMachine sc = StateMachine.createStateMachine(run);
+			StateMachine sc = StateMachine.createStateMachine(run);
 
-		if (sc.canCancel()) {
-			sc.tryAdvanceToCancelled();
-			terminateInstances(run, user);
-		} else {
-			if (sc.getState() == States.Ready) {
-				sc.tryAdvanceToFinalizing();
+			if (sc.canCancel()) {
+				sc.tryAdvanceToCancelled();
+				terminateInstances(run, user);
+			} else {
+				if (sc.getState() == States.Ready) {
+					sc.tryAdvanceToFinalizing();
+				}
+				terminateInstances(run, user);
+				sc.tryAdvanceState(true);
 			}
-			terminateInstances(run, user);
-			sc.tryAdvanceState(true);
-		}
 
-		em.close();
+		} finally {
+			em.close();
+		}
 	}
 
 	private static void terminateInstances(Run run, User user) throws ValidationException {
 		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
 
-		for (String cloudServiceName : run.getCloudServiceNamesList()) {
-			Connector connector = ConnectorFactory.getConnector(cloudServiceName);
+		for (ConnectorInstance cloudServiceName : run.getCloudServices()) {
+			Connector connector = ConnectorFactory.getConnector(cloudServiceName.getName());
 			try {
 				connector.terminate(run, user);
 			} catch (SlipStreamException e) {
-				throw new ResourceException(
-						Status.CLIENT_ERROR_CONFLICT, "Failed terminating VMs", e);
+				throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Failed terminating VMs", e);
 			}
 		}
 	}

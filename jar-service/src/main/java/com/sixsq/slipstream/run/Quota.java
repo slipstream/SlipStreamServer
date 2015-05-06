@@ -66,7 +66,7 @@ public class Quota {
 		String key = cloud + RuntimeParameter.PARAM_WORD_SEPARATOR
 				+ QuotaParameter.QUOTA_VM_PARAMETER_NAME;
 
-		Parameter<?> parameter = user.getParameter(key, cloud);
+		Parameter parameter = user.getParameter(key, cloud);
 		if (parameter != null && Parameter.hasValueSet(parameter.getValue())) {
 			return parameter.getValue();
 		}

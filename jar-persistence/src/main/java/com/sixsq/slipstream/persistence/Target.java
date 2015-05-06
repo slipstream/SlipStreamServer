@@ -21,40 +21,38 @@ package com.sixsq.slipstream.persistence;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Text;
+import org.simpleframework.xml.*;
 
 import flexjson.JSON;
 
 @SuppressWarnings("serial")
-@Entity
 public class Target implements Serializable {
 
-	public static final String EXECUTE_TARGET = "execute";
-	public static final String REPORT_TARGET = "report";
-	public static final String ONVMADD_TARGET = "onvmadd";
-	public static final String ONVMREMOVE_TARGET = "onvmremove";
+//	private static final String PRERECIPE_TARGET = "prerecipe";
+//	private static final String RECIPE_TARGET = "recipe";
+//	private static final String EXECUTE_TARGET = "execute";
+//	private static final String REPORT_TARGET = "report";
+//	private static final String ONVMADD_TARGET = "onvmadd";
+//	private static final String ONVMREMOVE_TARGET = "onvmremove";
+//
+	public static final String TARGET_PRERECIPE_NAME = "prerecipe";
+	public static final String TARGET_RECIPE_NAME = "recipe";
+	public static final String[] TARGET_BUILD_SCRIPT_NAMES = { TARGET_PRERECIPE_NAME, TARGET_RECIPE_NAME };
+	public static final String[] TARGET_SCRIPT_NAMES = { TARGET_PRERECIPE_NAME, TARGET_RECIPE_NAME, "execute", "report", "onvmadd", "onvmremove" };
 
-	@Id
-	@GeneratedValue
-	Long id;
+	@ElementList(data = true, entry = "script")
+	private List<String> inheritedScripts = new ArrayList<String>();
 
-	@Text(required = false, data = true)
-	@Column(length = 65536)
-	private String script = "";
+	@Element(data = true)
+	private String script;
 
-	@Attribute
+	@Attribute(required = false)
 	private String name;
 
-	@ManyToOne
-	@JSON(include=false)
+	@JSON(include = false)
 	private ImageModule module;
 
 	@SuppressWarnings("unused")
@@ -70,20 +68,9 @@ public class Target implements Serializable {
 		this.script = script;
 	}
 
-	public ImageModule getModule() {
-		return module;
-	}
-
-	public void setModule(ImageModule module) {
-		this.module = module;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
+	public Target(String name, String script, List<String> inheritedScripts) {
+		this(name, script);
+		this.inheritedScripts = inheritedScripts;
 	}
 
 	public String getScript() {
@@ -94,9 +81,75 @@ public class Target implements Serializable {
 		this.script = script;
 	}
 
-
-	public Target copy() {
-		return new Target(getName(), getScript());
+	public ImageModule getModule() {
+		return module;
 	}
 
+	public void setModule(ImageModule module) {
+		this.module = module;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	private void setName(String name) {
+		this.name = name;
+	}
+
+	public List<String> getInheritedScripts() {
+		return inheritedScripts;
+	}
+
+	public void setInheritedScripts(List<String> inheritedScripts) {
+		this.inheritedScripts = inheritedScripts;
+	}
+
+	public boolean equals(Target obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (obj.getName() == null) {
+			return name == null;
+		}
+		if (!obj.getName().equals(name)) {
+			return false;
+		}
+		if (!(script == null ? obj.getScript() == null : script.equals(obj.getScript()))) {
+			return false;
+		}
+		return equalStringList(obj.getInheritedScripts());
+	}
+
+	private boolean equalStringList(List<String> list) {
+		if (list == null) {
+			return getInheritedScripts() == null;
+		}
+		if (getInheritedScripts() == null) {
+			return list == null;
+		}
+		if (list.size() != getInheritedScripts().size()) {
+			return false;
+		}
+		for (int i = 0; i < list.size(); i++) {
+			if (!list.get(i).equals(getInheritedScripts().get(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public Target copy() {
+		return new Target(getName(), getScript(), getInheritedScripts());
+	}
+
+	@JSON(include = false)
+	public boolean isTargetSet() {
+		return Parameter.hasValueSet(script);
+	}
+
+	@JSON(include = false)
+	public boolean isInheritedTargetSet() {
+		return !inheritedScripts.isEmpty();
+	}
 }

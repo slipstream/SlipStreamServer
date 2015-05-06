@@ -20,6 +20,8 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -44,17 +46,23 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementMap;
 
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleVersionView;
 import com.sixsq.slipstream.module.ModuleView;
 import com.sixsq.slipstream.run.RunViewList;
 import com.sixsq.slipstream.util.ModuleUriUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
+
+import flexjson.JSON;
+import flexjson.JSONDeserializer;
 
 /**
  * Unit test see:
- *
+ * 
  * @see ModuleTest
- *
+ * 
  */
 @SuppressWarnings("serial")
 @Entity
@@ -64,12 +72,14 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 		@NamedQuery(name = "moduleViewLatestChildren", query = "SELECT NEW com.sixsq.slipstream.module.ModuleView(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.parentUri = :parent AND m.version = (SELECT MAX(c.version) FROM Module c WHERE c.name = m.name AND c.deleted != TRUE)"),
 		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name AND m.deleted != TRUE"),
 		@NamedQuery(name = "moduleAll", query = "SELECT m FROM Module m WHERE m.deleted != TRUE"),
-		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz, m.logoLink) FROM Module m WHERE m.published != null AND m.deleted != TRUE") })
-public abstract class Module extends Parameterized<Module, ModuleParameter> implements Guarded {
+		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz, m.logoLink) FROM Module m WHERE m.isPublished = TRUE AND m.deleted != TRUE") })
+public abstract class Module extends Parameterized implements Guarded {
 
 	public final static String RESOURCE_URI_PREFIX = "module/";
 
 	public final static int DEFAULT_VERSION = -1;
+	@Attribute(required = false)
+	protected ModuleCategory category;
 
 	private static void bindModuleToAuthz(Module module) {
 		if (module != null) {
@@ -80,14 +90,21 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	private static Module loadByUri(String uri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Module m = em.find(Module.class, uri);
+		Module m = (Module) Metadata.load(uri, Module.class);
 		Module latestVersion = loadLatest(uri);
 		em.close();
-		if (latestVersion != null && m != null) {
+		if (m != null) {
+			m = postLoad(m, latestVersion);
+		}
+		bindModuleToAuthz(m);
+		return m;
+	}
+
+	private static Module postLoad(Module m, Module latestVersion) {
+		m = (Module) m.substituteFromJson();
+		if (latestVersion != null) {
 			m.setIsLatestVersion(latestVersion.version);
 		}
-		m = (Module) substituteFromJson(m);
-		bindModuleToAuthz(m);
 		return m;
 	}
 
@@ -99,7 +116,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		Module module;
 		try {
 			module = (Module) q.getSingleResult();
-			module = (Module) Metadata.substituteFromJson(module);
+			module = (Module) module.substituteFromJson();
 			module.setIsLatestVersion(module.version);
 		} catch (NoResultException ex) {
 			module = null;
@@ -178,6 +195,30 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		return constructResourceUri(name + "/" + String.valueOf(version));
 	}
 
+	@SuppressWarnings("unchecked")
+	public static Module fromJson(String json, Class<? extends Module> type) throws SlipStreamClientException {
+		Method m;
+		try {
+			m = type.getMethod("createDeserializer");
+		} catch (NoSuchMethodException e) {
+			throw new SlipStreamRuntimeException(e);
+		} catch (SecurityException e) {
+			throw new SlipStreamRuntimeException(e);
+		}
+		String[] params = null;
+		JSONDeserializer<Object> deserializer;
+		try {
+			deserializer = (JSONDeserializer<Object>) m.invoke(null, (Object) params);
+		} catch (IllegalAccessException e) {
+			throw new SlipStreamRuntimeException(e);
+		} catch (IllegalArgumentException e) {
+			throw new SlipStreamRuntimeException(e);
+		} catch (InvocationTargetException e) {
+			throw new SlipStreamRuntimeException(e);
+		}
+		return (Module) SerializationUtil.fromJson(json, type, deserializer);
+	}
+
 	@Attribute
 	@Id
 	private String resourceUri;
@@ -187,7 +228,8 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	private Authz authz = new Authz("", this);
 
 	@Transient
-	private Module parent = null;
+	@JSON(include = false)
+	private Module parentModule = null;
 
 	@Attribute(required = false)
 	private String customVersion;
@@ -195,7 +237,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	/**
 	 * Module hierarchy (e.g. <parent>/<module>)
 	 */
-	@Attribute(required = true)
+	@JSON(include = false)
 	private String parentUri;
 
 	/**
@@ -208,31 +250,35 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	private int version;
 
 	/**
-	 * Intended to inform users about constraints or requirements on the
-	 * module requirements - e.g. required ports.
+	 * Intended to inform users about constraints or requirements on the module
+	 * requirements - e.g. required ports.
 	 */
+	@Transient
 	@Element(required = false)
-	@Column(length = 65536)
 	private String note;
-	
+
 	@Transient
 	@Attribute(required = false)
 	private boolean isLatestVersion;
 
+	@Transient
 	@Attribute(required = false)
-	@Column(length = 1024)
 	private String tag;
 
 	@Element(required = false)
 	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Commit commit;
 
+	@Attribute
+	@Column(nullable = true)
+	private Boolean isPublished = false; // to the app store
+
+	@Transient
 	@Element(required = false)
-	@OneToOne(optional = true, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Publish published; // to the app store
 
 	/**
-	 * Module reference is a URL.
+	 * Module reference is a URI.
 	 * <p/>
 	 * In the case "Image", the module to use as a base image from which to
 	 * extract the cloud image id (e.g. AMI). It can be empty if the ImageId
@@ -257,44 +303,49 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	protected Module() {
 		super();
+		isPublished = false;
 	}
 
-	public Module(String name, ModuleCategory category)
-			throws ValidationException {
+	public Module(String name, ModuleCategory category) throws ValidationException {
 		this();
 		this.category = category;
 		setName(name);
-		
+
 		validateName(name);
-	
+
 		resourceUri = constructResourceUri(name);
-	
+
 		extractUriComponents();
+	}
+
+	protected JSONDeserializer<Object> createDeserializer() {
+		return new JSONDeserializer<Object>().use("parameters.values", ModuleParameter.class).use(
+				"nodes.values.image.parameters.values", ModuleParameter.class);
 	}
 
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = ModuleParameter.class)
-	protected void setParameters(Map<String, ModuleParameter> parameters) {
+	protected void setParameters(Map<String, Parameter> parameters) {
 		this.parameters = parameters;
 	}
 
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = ModuleParameter.class)
-	public Map<String, ModuleParameter> getParameters() {
+	public Map<String, Parameter> getParameters() {
 		return parameters;
 	}
 
 	public Guarded getGuardedParent() {
-		if (parent == null) {
+		if (parentModule == null) {
 			if (parentUri != null) {
-				parent = Module.load(parentUri);
+				parentModule = Module.load(parentUri);
 			}
 		}
-		return parent;
+		return parentModule;
 	}
 
 	public void clearGuardedParent() {
-		parent = null;
+		parentModule = null;
 	}
 
 	public RunViewList getRuns() {
@@ -303,6 +354,10 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 
 	public void setRuns(RunViewList runs) {
 		this.runs = runs;
+	}
+
+	public Module getParentModule() {
+		return parentModule;
 	}
 
 	private void validateName(String name) throws ValidationException {
@@ -366,8 +421,16 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	}
 
 	@Override
+	@Attribute(required = true, name = "parentUri")
+	@JSON
 	public String getParent() {
 		return parentUri;
+	}
+
+	@Attribute(required = true, name = "parentUri")
+	@JSON
+	private void setParent(String parentUri) {
+		this.parentUri = parentUri;
 	}
 
 	@Override
@@ -375,8 +438,9 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		return name;
 	}
 
-	/* 
+	/*
 	 * Should not be called directly
+	 * 
 	 * @see com.sixsq.slipstream.persistence.Metadata#setName(java.lang.String)
 	 */
 	@Override
@@ -400,16 +464,22 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		this.customVersion = customVersion;
 	}
 
-	public String getModuleReference() {
+	public String getModuleReferenceUri() {
 		return moduleReferenceUri;
 	}
 
+	public void setModuleReferenceUri(String moduleReferenceUri) {
+		this.moduleReferenceUri = moduleReferenceUri;
+	}
+
 	public void setModuleReference(Module reference) throws ValidationException {
-		setModuleReference(reference.getResourceUri());
+		if(reference != null) {
+			setModuleReference(reference.getResourceUri());
+		}
 	}
 
 	public void setModuleReference(String moduleReferenceUri) throws ValidationException {
-		if (moduleReferenceUri != null){
+		if (moduleReferenceUri != null) {
 			String moduleReferenceUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(moduleReferenceUri);
 			String moduleUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(getResourceUri());
 			if (moduleUriVersionLess.equals(moduleReferenceUriVersionLess)) {
@@ -422,7 +492,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	/**
 	 * A virtual module is a module that doesn't require to be explicitly built,
 	 * since it only defines runtime behavior
-	 *
+	 * 
 	 * @return true if the module is virtual, false if not
 	 */
 	public boolean isVirtual() {
@@ -439,7 +509,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	}
 
 	@Override
-	public void setContainer(ModuleParameter parameter) {
+	public void setContainer(Parameter parameter) {
 		parameter.setContainer(this);
 	}
 
@@ -501,30 +571,50 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		this.note = note;
 	}
 
+	/**
+	 * Retreive the default parameter from the inheritance hierarchy
+	 * 
+	 * @param parameterName
+	 * @return
+	 * @throws ValidationException
+	 */
+	public String getInheritedDefaultParameterValue(String parameterName) throws ValidationException {
+		return "";
+	}
+
 	public void publish() {
 		published = new Publish(this);
+		isPublished = true;
 	}
 
 	public void unpublish() {
 		published = null;
+		isPublished = false;
 	}
 
+	@Transient
+	@JSON
 	public Publish getPublished() {
 		return published;
 	}
 
-	@SuppressWarnings("unused")
+	@Transient
+	@JSON
 	private void setPublished(Publish published) {
-		this.published = published ;
+		if (published != null) {
+			published.setModule(this);
+		}
+		this.published = published;
+		isPublished = (published != null);
 	}
 
 	protected String computeParameterValue(String key) throws ValidationException {
-		ModuleParameter parameter = getParameter(key);
+		Parameter parameter = getParameter(key);
 		String value = (parameter == null ? null : parameter.getValue());
 		if (value == null) {
-			String reference = getModuleReference();
+			String reference = getModuleReferenceUri();
 			if (reference != null) {
-				Module parent = Module.load(getModuleReference());
+				Module parent = Module.load(getModuleReferenceUri());
 				if (parent != null) {
 					value = parent.computeParameterValue(key);
 				}
@@ -538,18 +628,32 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	protected Module copyTo(Module copy) throws ValidationException {
 		copy = (Module) super.copyTo(copy);
 
+		copy.setCategory(getCategory());
+
 		if (getCommit() != null) {
 			copy.setCommit(getCommit().copy());
 		}
 		copy.setCustomVersion(getCustomVersion());
 
 		copy.setCloudNames((cloudNames == null ? null : cloudNames.clone()));
-		copy.setModuleReference(getModuleReference());
+		copy.setModuleReference(getModuleReferenceUri());
 		copy.setTag(getTag());
 		copy.setLogoLink(getLogoLink());
 
 		copy.setAuthz(getAuthz().copy(copy));
 
 		return copy;
+	}
+
+	public ModuleCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(ModuleCategory category) {
+		this.category = category;
+	}
+
+	public void setCategory(String category) {
+		this.category = ModuleCategory.valueOf(category);
 	}
 }

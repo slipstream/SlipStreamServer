@@ -22,6 +22,7 @@ package com.sixsq.slipstream.persistence;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,9 +46,9 @@ import flexjson.JSON;
 
 /**
  * Unit tests:
- *
+ * 
  * @see RuntimeParameterTest
- *
+ * 
  */
 @Entity
 @SuppressWarnings("serial")
@@ -99,9 +100,9 @@ public class RuntimeParameter extends Metadata {
 	public static final String GLOBAL_TAGS_KEY = GLOBAL_NAMESPACE_PREFIX + TAGS_KEY;
 	public static final String GLOBAL_TAGS_DESCRIPTION = "Comma separated tag values";
 
-	public static final String NODE_GROUPS_KEY = "groups";
-	public static final String GLOBAL_NODE_GROUPS_KEY = GLOBAL_NAMESPACE_PREFIX + NODE_GROUPS_KEY;
-	public static final String GLOBAL_NODE_GROUPS_DESCRIPTION = "Comma separated node groups";
+	public static final String NODE_NODES_KEY = "nodes";
+	public static final String GLOBAL_NODE_GROUPS_KEY = GLOBAL_NAMESPACE_PREFIX + NODE_NODES_KEY;
+	public static final String GLOBAL_NODE_GROUPS_DESCRIPTION = "Comma separated nodes";
 
 	public static final String COMPLETE_KEY = "complete";
 	public static final String COMPLETE_DESCRIPTION = "'true' when current state is completed";
@@ -246,7 +247,7 @@ public class RuntimeParameter extends Metadata {
 	private String mappedRuntimeParameterNames = "";
 
 	@ManyToOne
-	@JSON(include=false)
+	@JSON(include = false)
 	private Run container;
 
 	/**
@@ -347,6 +348,10 @@ public class RuntimeParameter extends Metadata {
 		return container;
 	}
 
+	void setContainer(Run container) {
+		this.container = container;
+	}
+
 	public static RuntimeParameter loadFromUuidAndKey(String uuid, String key) {
 		String resourceUri = getResourceUrl(uuid, key);
 		return load(resourceUri);
@@ -361,6 +366,10 @@ public class RuntimeParameter extends Metadata {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		RuntimeParameter rp = em.find(RuntimeParameter.class, resourceUri);
 		em.close();
+		if(rp != null) {
+			// The run pulled from the db is raw. We need to deserialize it.
+			rp.setContainer((Run) rp.getContainer().substituteFromJson());
+		}
 		return rp;
 	}
 
@@ -420,8 +429,12 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	private void updateMappedRuntimeParameters() {
+		if (getContainer() == null) {
+			return;
+		}
+		Map<String, RuntimeParameter> runtimeParameters = getContainer().getRuntimeParameters();
 		for (String mappedRuntimaParameterName : getMappedRuntimeParameterNames().split(",")) {
-			RuntimeParameter mappedRuntimeParameter = getContainer().getRuntimeParameters().get(
+			RuntimeParameter mappedRuntimeParameter = runtimeParameters.get(
 					mappedRuntimaParameterName.trim());
 			mappedRuntimeParameter.setValue(getValue());
 		}

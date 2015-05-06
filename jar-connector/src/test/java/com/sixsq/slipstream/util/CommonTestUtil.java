@@ -49,6 +49,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import static org.junit.Assert.fail;
 
@@ -227,7 +228,11 @@ public abstract class CommonTestUtil {
 	public static void updateServiceConfigurationParameters(
 			SystemConfigurationParametersFactoryBase connectorSystemConfigFactory) throws ValidationException {
 		ServiceConfiguration sc = Configuration.getInstance().getParameters();
-		sc.setParameters(connectorSystemConfigFactory.getParameters());
+		
+		for(Entry<String, ServiceConfigurationParameter> p : connectorSystemConfigFactory.getParameters().entrySet()) {
+			sc.setParameter(p.getValue());
+		}
+
 		sc.store();
 	}
 

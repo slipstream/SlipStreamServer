@@ -30,6 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -55,6 +56,8 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.ConnectorInstance;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
@@ -66,7 +69,6 @@ import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.run.RunResource;
 import com.sixsq.slipstream.run.RuntimeParameterResource;
 import com.sixsq.slipstream.user.UserResource;
-import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -90,13 +92,11 @@ public class CookieTest extends ResourceTestBase {
 		createAndStoreRuns();
 		cookieRunA = createCookie(user, runA);
 		cookieRunB = createCookie(user, runB);
-		cookieStd = new Cookie(CookieUtils.COOKIE_NAME,
-				CookieUtils.createCookie(user.getName(), cloudServiceName));
+		cookieStd = new Cookie(CookieUtils.COOKIE_NAME, CookieUtils.createCookie(user.getName(), cloudServiceName));
 	}
 
-	private void createAndStoreUser() throws NoSuchAlgorithmException,
-			UnsupportedEncodingException, ConfigurationException,
-			ValidationException {
+	private void createAndStoreUser() throws NoSuchAlgorithmException, UnsupportedEncodingException,
+			ConfigurationException, ValidationException {
 
 		user = CommonTestUtil.createUser("test");
 		user.hashAndSetPassword("password");
@@ -106,29 +106,25 @@ public class CookieTest extends ResourceTestBase {
 		userParam.setCategory(cloudServiceName);
 		user.setParameter(userParam);
 
-		userParam = new UserParameter(cloudServiceNameB + "."
-				+ UserParametersFactoryBase.SECRET_PARAMETER_NAME, "pass", "");
+		userParam = new UserParameter(cloudServiceNameB + "." + UserParametersFactoryBase.SECRET_PARAMETER_NAME,
+				"pass", "");
 		userParam.setCategory(cloudServiceNameB);
 		user.setParameter(userParam);
 
 		user.store();
 	}
 
-	private void createPublicKeyFileAndSetConnector() throws IOException,
-			ValidationException {
-		Map<String, ServiceConfigurationParameter> params = new HashMap<String, ServiceConfigurationParameter>(
-				1);
+	private void createPublicKeyFileAndSetConnector() throws IOException, ValidationException {
+		Map<String, Parameter> params = new HashMap<String, Parameter>(1);
 
 		publicKeyFile = File.createTempFile("tempfile", ".tmp");
 		String paramName = ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY;
-		ServiceConfigurationParameter param = new ServiceConfigurationParameter(
-				paramName, publicKeyFile.getPath());
+		ServiceConfigurationParameter param = new ServiceConfigurationParameter(paramName, publicKeyFile.getPath());
 		params.put(paramName, param);
 
 		paramName = RequiredParameters.CLOUD_CONNECTOR_CLASS.getName();
 		param = new ServiceConfigurationParameter(paramName, cloudServiceName
-				+ ":com.sixsq.slipstream.connector.local.LocalConnector,"
-				+ cloudServiceNameB
+				+ ":com.sixsq.slipstream.connector.local.LocalConnector," + cloudServiceNameB
 				+ ":com.sixsq.slipstream.connector.local.LocalConnector");
 		params.put(paramName, param);
 
@@ -173,21 +169,17 @@ public class CookieTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void checkMachineCookieCloudCredentialsFiltering()
-			throws ConfigurationException, ValidationException {
+	public void checkMachineCookieCloudCredentialsFiltering() throws ConfigurationException, ValidationException {
 
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("user", user.getName());
 
-		Request request = createRequest(attributes, Method.GET, null, null,
-				cookieRunA);
+		Request request = createRequest(attributes, Method.GET, null, null, cookieRunA);
 		request.setClientInfo(getClientInfo());
 		Response response = executeRequest(request, new UserResource());
 
-		String keyA = cloudServiceName + "."
-				+ UserParametersFactoryBase.SECRET_PARAMETER_NAME;
-		String keyB = cloudServiceNameB + "."
-				+ UserParametersFactoryBase.SECRET_PARAMETER_NAME;
+		String keyA = cloudServiceName + "." + UserParametersFactoryBase.SECRET_PARAMETER_NAME;
+		String keyB = cloudServiceNameB + "." + UserParametersFactoryBase.SECRET_PARAMETER_NAME;
 
 		assertThat(response.getEntityAsText().contains(keyA), is(true));
 		assertThat(response.getEntityAsText().contains(keyB), is(false));
@@ -201,8 +193,7 @@ public class CookieTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void checkMachineCookieWithRuntimeParams()
-			throws ConfigurationException, ValidationException {
+	public void checkMachineCookieWithRuntimeParams() throws ConfigurationException, ValidationException {
 
 		String value = "http://sixsq.com/";
 
@@ -211,11 +202,9 @@ public class CookieTest extends ResourceTestBase {
 		attributes.put("uuid", runA.getUuid());
 
 		Representation entity = new StringRepresentation(value);
-		Request request = createRequest(attributes, Method.PUT, entity, null,
-				cookieRunA);
+		Request request = createRequest(attributes, Method.PUT, entity, null, cookieRunA);
 		request.setClientInfo(getClientInfo());
-		Response response = executeRequest(request,
-				new RuntimeParameterResource());
+		Response response = executeRequest(request, new RuntimeParameterResource());
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
@@ -235,22 +224,22 @@ public class CookieTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void checkStdCookieCanGetSetUserParam() throws ConfigurationException, ValidationException, SAXException,
+	public void checkStdCookieCanGetAndPutUserParam() throws ConfigurationException, ValidationException, SAXException,
 			ParserConfigurationException, IOException {
 
-		Response response = getAndPostUser(cookieStd);
+		Response response = getAndPutUser(cookieStd);
 		assertThat(response.getStatus(), is(Status.SUCCESS_ACCEPTED));
 	}
 
 	@Test
-	public void ensureMachineCookieCanotSetUserParam() throws ConfigurationException, ValidationException,
+	public void ensureMachineCookieCanGetButCannotPutUserParam() throws ConfigurationException, ValidationException,
 			SAXException, ParserConfigurationException, IOException {
 
-		Response response = getAndPostUser(cookieRunA);
+		Response response = getAndPutUser(cookieRunA);
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 	}
 
-	private Response getAndPostUser(Cookie cookie) throws ConfigurationException, ValidationException, SAXException,
+	private Response getAndPutUser(Cookie cookie) throws ConfigurationException, ValidationException, SAXException,
 			ParserConfigurationException, IOException {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("user", user.getName());
@@ -263,7 +252,6 @@ public class CookieTest extends ResourceTestBase {
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
 		Document XmlDocument = XmlUtil.stringToDom(response.getEntityAsText());
-		XmlDocument.getDocumentElement().setAttribute("password", UserTest.PASSWORD);
 		String value = SerializationUtil.documentToString(XmlDocument);
 
 		Representation entity = new StringRepresentation(value);
@@ -279,11 +267,10 @@ public class CookieTest extends ResourceTestBase {
 		extraProperties.put(CookieUtils.COOKIE_RUN_ID, run.getUuid());
 		extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
 
-        String[] cloudServiceNames = run.getCloudServiceNamesList();
-		String cloudName = (cloudServiceNames == null || cloudServiceNames.length == 0) ? cloudServiceName
-		        : cloudServiceNames[0];
+		Set<ConnectorInstance> cloudServices = run.getCloudServices();
+		String cloudName = cloudServices.isEmpty() ? cloudServiceName : cloudServices.iterator().next().getName();
 
-        String value = CookieUtils.createCookie(user.getName(), cloudName, extraProperties);
+		String value = CookieUtils.createCookie(user.getName(), cloudName, extraProperties);
 
 		return new Cookie(CookieUtils.COOKIE_NAME, value);
 	}

@@ -25,7 +25,6 @@ import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
 
 public abstract class CredentialsBase implements Credentials {
 
@@ -57,7 +56,7 @@ public abstract class CredentialsBase implements Credentials {
 	}
 	
 	protected String getParameterValue(String key) throws InvalidElementException {
-		UserParameter parameter = user.getParameter(qualifyKey(key));
+		Parameter parameter = user.getParameter(qualifyKey(key));
 		if (parameter == null) {
 			throwInvalidElementException(key);
 		}

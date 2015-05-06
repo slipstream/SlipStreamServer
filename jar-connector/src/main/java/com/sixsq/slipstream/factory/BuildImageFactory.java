@@ -31,17 +31,7 @@ import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.ParameterType;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.*;
 
 public class BuildImageFactory extends RunFactory {
 
@@ -53,7 +43,7 @@ public class BuildImageFactory extends RunFactory {
 	}
 
 	@Override
-	protected void validateModule(Module module, Map<String, String> cloudServicePerNode)
+	protected void validateModule(Module module, Map<String, ConnectorInstance> cloudServicePerNode)
 			throws SlipStreamClientException {
 
 		ImageModule image = castToRequiredModuleType(module);
@@ -65,11 +55,11 @@ public class BuildImageFactory extends RunFactory {
 
 		checkHasSomethingToBuild(image);
 
-		String cloudServiceName = cloudServicePerNode.get(nodeInstanceName);
-		checkNotAlreadyBuilt(image, cloudServiceName);
+		ConnectorInstance cloudService = cloudServicePerNode.get(nodeInstanceName);
+		checkNotAlreadyBuilt(image, cloudService.getName());
 
 		// Finding an image id will validate that one exists
-		image.extractBaseImageId(cloudServiceName);
+		image.extractBaseImageId(cloudService.getName());
 	}
 
 	protected static void checkNoCircularDependencies(ImageModule image)
@@ -89,9 +79,9 @@ public class BuildImageFactory extends RunFactory {
 			}
 		}
 		visitedReferenceModules.add(image.getResourceUri());
-		if (image.getModuleReference() != null) {
+		if (image.getModuleReferenceUri() != null) {
 			recurseDependencies(
-					(ImageModule) ImageModule.load(image.getModuleReference()),
+					(ImageModule) ImageModule.load(image.getModuleReferenceUri()),
 					visitedReferenceModules);
 		}
 		return;
@@ -151,7 +141,7 @@ public class BuildImageFactory extends RunFactory {
 		filter.add(cloudServiceName);
 
 		if (image.getParameters() != null) {
-			for (ModuleParameter param : image.getParameterList()) {
+			for (Parameter param : image.getParameterList()) {
 				if (filter.contains(param.getCategory())) {
 					run.assignRuntimeParameter(constructParamName(nodeInstanceName, param.getName()),
 							extractInitialValue(param, run),
@@ -174,7 +164,7 @@ public class BuildImageFactory extends RunFactory {
 
 	}
 
-	private static String extractInitialValue(ModuleParameter parameter, Run run) {
+	private static String extractInitialValue(Parameter parameter, Run run) {
 		String parameterName = parameter.getName();
 
 		String value = run.getParameterValue(constructParamName(nodeInstanceName, parameterName), null);
@@ -187,44 +177,44 @@ public class BuildImageFactory extends RunFactory {
 
 	protected void initNodeNames(Run run, String cloudService)
 			throws ConfigurationException, ValidationException {
-		run.addNodeInstanceName(nodeInstanceName, cloudService);
-		run.addGroup(nodeInstanceName, cloudService);
+		run.addNodeInstance(nodeInstanceName, cloudService);
+		run.addNode(nodeInstanceName, cloudService);
 	}
 
 	@Override
 	protected void addUserFormParametersAsRunParameters(Module module, Run run,
-			Map<String, List<Parameter<?>>> userChoices) throws ValidationException {
+			Map<String, List<Parameter>> userChoices) throws ValidationException {
 
 		if (!isProvidedUserChoicesForNodeInstance(userChoices, nodeInstanceName)) {
 				return;
 		}
 
 		ImageModule image = (ImageModule) module;
-		List<Parameter<?>> userChoicesForMachine = userChoices.get(nodeInstanceName);
+		List<Parameter> userChoicesForMachine = userChoices.get(nodeInstanceName);
 
-		for (Parameter<?> parameter : userChoicesForMachine) {
+		for (Parameter parameter : userChoicesForMachine) {
 			checkParameterIsValid(image, parameter);
 
 			String key = constructParamName(nodeInstanceName, parameter.getName());
-			RunParameter rp = new RunParameter(key, parameter.getValue(), "");
+			Parameter rp = new Parameter(key, parameter.getValue(), "");
 			run.setParameter(rp);
 		}
 	}
 
 	// TODO: pull this method up to be used in other factories.
-	public static boolean isProvidedUserChoicesForNodeInstance(Map<String, List<Parameter<?>>> userChoices,
+	public static boolean isProvidedUserChoicesForNodeInstance(Map<String, List<Parameter>> userChoices,
 	        String nodeInstanceName) {
 		if (userChoices == null || userChoices.isEmpty())
 			return false;
 
-		List<Parameter<?>> paramsForNodeInstance = userChoices.get(nodeInstanceName);
+		List<Parameter> paramsForNodeInstance = userChoices.get(nodeInstanceName);
 		if (paramsForNodeInstance == null || paramsForNodeInstance.isEmpty())
 			return false;
 
 		return true;
 	}
 
-	private void checkParameterIsValid(ImageModule image, Parameter<?> parameter) throws ValidationException {
+	private void checkParameterIsValid(ImageModule image, Parameter parameter) throws ValidationException {
 		List<String> paramsToFilter = new ArrayList<String>();
 		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		paramsToFilter.add(RuntimeParameter.CLOUD_SERVICE_NAME);
@@ -237,27 +227,27 @@ public class BuildImageFactory extends RunFactory {
 	}
 
 	@Override
-	protected Map<String, String> resolveCloudServiceNames(Module module, User user,
-			Map<String, List<Parameter<?>>> userChoices) {
-		Map<String, String> cloudServiceNamesPerNode = new HashMap<String, String>();
-		String cloudService = null;
+	protected Map<String, ConnectorInstance> resolveCloudServices(Module module, User user,
+																  Map<String, List<Parameter>> userChoices) {
+		Map<String, ConnectorInstance> cloudServicesPerNode = new HashMap<String, ConnectorInstance>();
+		ConnectorInstance cloudService = null;
 
 		if (isProvidedUserChoicesForNodeInstance(userChoices, nodeInstanceName)) {
-    		for (Parameter<?> parameter : userChoices.get(nodeInstanceName)) {
+    		for (Parameter parameter : userChoices.get(nodeInstanceName)) {
     			if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
-    				cloudService = parameter.getValue();
+    				cloudService = new ConnectorInstance(parameter.getValue(), null);
     				break;
     			}
     		}
 		}
 
-		if (CloudService.isDefaultCloudService(cloudService)) {
-			cloudService = user.getDefaultCloudService();
+		if (cloudService == null || CloudService.isDefaultCloudService(cloudService.getName())) {
+			cloudService = new ConnectorInstance(user.getDefaultCloudService(), null);
 		}
 
-		cloudServiceNamesPerNode.put(nodeInstanceName, cloudService);
+		cloudServicesPerNode.put(nodeInstanceName, cloudService);
 
-		return cloudServiceNamesPerNode;
+		return cloudServicesPerNode;
 	}
 
 	@Override
@@ -265,7 +255,7 @@ public class BuildImageFactory extends RunFactory {
 	}
 
 	@Override
-	protected void updateExtraRunParameters(Module module, Run run, Map<String, List<Parameter<?>>> userChoices)
+	protected void updateExtraRunParameters(Module module, Run run, Map<String, List<Parameter>> userChoices)
 			throws ValidationException {
 	}
 
@@ -274,5 +264,24 @@ public class BuildImageFactory extends RunFactory {
 	    return (ImageModule) module;
     }
 
+	@Override
+	protected void initOrchestratorsNodeNames(Run run) throws ConfigurationException, ValidationException {
+		for (ConnectorInstance cloudService : getCloudServiceNames(run)) {
+			String nodename = Run.constructOrchestratorName(cloudService.getName());
+			run.addNodeInstance(nodename, cloudService.getName());
+			run.assignRuntimeParameter(nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR
+					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudService.getName(),
+					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+		}
+	}
+
+	@Override
+	protected void initialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
+		super.initialize(module, run, user);
+
+		initializeOrchestratorRuntimeParameters(run);
+		initOrchestratorsNodeNames(run);
+
+	}
 }
 

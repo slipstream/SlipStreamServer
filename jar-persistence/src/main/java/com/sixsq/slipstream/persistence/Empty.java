@@ -1,6 +1,7 @@
 package com.sixsq.slipstream.persistence;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+import org.simpleframework.xml.Attribute;
 
 @SuppressWarnings("serial")
 public class Empty extends Metadata {
@@ -18,5 +19,4 @@ public class Empty extends Metadata {
 	@Override
 	public void setName(String name) throws ValidationException {
 	}
-
 }

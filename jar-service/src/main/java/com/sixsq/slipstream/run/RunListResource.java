@@ -60,7 +60,6 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
@@ -68,18 +67,11 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.run.RunViewList;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-/**
- * Unit test:
- *
- * @see RunListResourceTest.class
- *
- */
 public class RunListResource extends BaseResource {
 
 	public static final String TYPE = "type";
@@ -101,15 +93,13 @@ public class RunListResource extends BaseResource {
 
 	@Get("json")
 	public Representation toJson() {
-
-		RunViewList runViewList = fetchListView();
+		RunViewList runViewList = getRunViewList();
 		String result = SerializationUtil.toJsonString(runViewList);
 		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
 	}
 
 	@Get("xml")
 	public Representation toXml() {
-
 		RunViewList runViewList = getRunViewList();
 		String result = SerializationUtil.toXmlString(runViewList);
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
@@ -173,7 +163,7 @@ public class RunListResource extends BaseResource {
 
 			validateUserPublicKey(user, type, form);
 
-			Map<String, List<Parameter<?>>> userChoices = getUserChoicesFromForm(module.getCategory(), form);
+			Map<String, List<Parameter>> userChoices = getUserChoicesFromForm(module.getCategory(), form);
 
 			run = RunFactory.getRun(module, type, user, userChoices);
 
@@ -226,10 +216,10 @@ public class RunListResource extends BaseResource {
 						+ keepRunningOptions.toString());
 			}
 
-			String key = RunParameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
+			String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
 					UserParameter.KEY_KEEP_RUNNING);
 
-			RunParameter rp = run.getParameter(key);
+			Parameter rp = run.getParameter(key);
 			if (rp != null) {
 				rp.setValue(keepRunning);
 			}
@@ -274,9 +264,9 @@ public class RunListResource extends BaseResource {
 		refqname = refqname.trim();
 	}
 
-	public static Map<String, List<Parameter<?>>> getUserChoicesFromForm(ModuleCategory category, Form form) throws ValidationException {
+	public static Map<String, List<Parameter>> getUserChoicesFromForm(ModuleCategory category, Form form) throws ValidationException {
 
-		Map<String, List<Parameter<?>>> parametersPerNode = new HashMap<String, List<Parameter<?>>>();
+		Map<String, List<Parameter>> parametersPerNode = new HashMap<String, List<Parameter>>();
 
 		for (Entry<String, String> entry : form.getValuesMap().entrySet()) {
 			if (notUserChoiceForNode(entry)) {
@@ -305,17 +295,17 @@ public class RunListResource extends BaseResource {
 			String value = entry.getValue();
 			if (category == ModuleCategory.Deployment) {
 				if (!parametersPerNode.containsKey(nodeName)) {
-					parametersPerNode.put(nodeName, new ArrayList<Parameter<?>>());
+					parametersPerNode.put(nodeName, new ArrayList<Parameter>());
 				}
-				Parameter<?> parameter = new NodeParameter(parameterName);
+				Parameter parameter = new NodeParameter(parameterName);
 				value = NodeParameter.isStringValue(value) ? value : "'" + value + "'";
 				parameter.setValue(value);
 				parametersPerNode.get(nodeName).add(parameter);
 			} else {
 				if (!parametersPerNode.containsKey(nodeName)) {
-					parametersPerNode.put(nodeName, new ArrayList<Parameter<?>>());
+					parametersPerNode.put(nodeName, new ArrayList<Parameter>());
 				}
-				Parameter<?> parameter = new ModuleParameter(parameterName);
+				Parameter parameter = new ModuleParameter(parameterName);
 				parameter.setValue(value);
 				parametersPerNode.get(nodeName).add(parameter);
 			}

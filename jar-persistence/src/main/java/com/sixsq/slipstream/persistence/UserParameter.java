@@ -23,15 +23,12 @@ package com.sixsq.slipstream.persistence;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-@Entity
-@SuppressWarnings("serial")
-public class UserParameter extends Parameter<User> {
+public class UserParameter extends Parameter {
 
 	public static final String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";
 
@@ -64,7 +61,7 @@ public class UserParameter extends Parameter<User> {
 		return keepRunning;
 	}
 
-	public static UserParameter convert(Parameter<ServiceConfiguration> source)
+	public static UserParameter convert(Parameter source)
 			throws ValidationException {
 		UserParameter target = new UserParameter(source.getName(),
 				source.getValue(), source.getDescription());
@@ -87,16 +84,6 @@ public class UserParameter extends Parameter<User> {
 
 	public UserParameter(String name) throws ValidationException {
 		super(name);
-	}
-
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	protected void setId(Long id) {
-		this.id = id;
 	}
 
 	@Override

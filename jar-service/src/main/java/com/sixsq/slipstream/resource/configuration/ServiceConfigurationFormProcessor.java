@@ -30,11 +30,15 @@ import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.FormProcessor;
 
-public class ServiceConfigurationFormProcessor extends
-		FormProcessor<ServiceConfiguration, ServiceConfigurationParameter> {
+public class ServiceConfigurationFormProcessor extends FormProcessor {
 
 	public ServiceConfigurationFormProcessor(User user) {
 		super(user);
+	}
+
+	@Override
+	public ServiceConfiguration getParametrized() {
+		return (ServiceConfiguration) super.getParametrized();
 	}
 
 	@Override
@@ -44,14 +48,13 @@ public class ServiceConfigurationFormProcessor extends
 	}
 
 	@Override
-	protected ServiceConfiguration getOrCreateParameterized(String name)
-			throws ValidationException, NotFoundException {
+	protected ServiceConfiguration getOrCreateParameterized(String name) throws ValidationException, NotFoundException {
 		return ServiceConfiguration.load();
 	}
 
 	@Override
-	protected ServiceConfigurationParameter createParameter(String name,
-			String value, String description) throws SlipStreamClientException {
+	protected ServiceConfigurationParameter createParameter(String name, String value, String description)
+			throws SlipStreamClientException {
 		return new ServiceConfigurationParameter(name, value, description);
 	}
 

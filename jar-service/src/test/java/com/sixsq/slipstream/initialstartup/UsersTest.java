@@ -34,7 +34,6 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 
 public class UsersTest {
 
-	// Fixes #143
 	@Test
 	public void passwordIsPersisted() throws ValidationException,
 			NotFoundException, ConfigurationException,

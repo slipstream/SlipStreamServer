@@ -32,7 +32,7 @@ public class Resolver {
 			String cloudService) throws InvalidMetadataException,
 			ValidationException {
 
-		String moduleReference = module.getModuleReference();
+		String moduleReference = module.getModuleReferenceUri();
 
 		if (moduleReference == null) {
 			throw new ValidationException("Module " + module.getName()
@@ -58,7 +58,7 @@ public class Resolver {
 							+ " on cloud service: " + cloudService);
 		}
 
-		if (reference.getModuleReference() != null) {
+		if (reference.getModuleReferenceUri() != null) {
 			return Resolver.findReferencedModule(reference, cloudService);
 		}
 
@@ -91,7 +91,7 @@ public class Resolver {
 
 		} else {
 
-			if (referencedModule.getModuleReference() != null) {
+			if (referencedModule.getModuleReferenceUri() != null) {
 
 				return Resolver.resolveReference(referencedModule,
 						cloudServiceName);

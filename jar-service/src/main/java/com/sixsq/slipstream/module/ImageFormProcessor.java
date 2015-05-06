@@ -20,7 +20,10 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.restlet.data.Form;
@@ -39,8 +42,14 @@ import com.sixsq.slipstream.persistence.User;
 
 public class ImageFormProcessor extends ModuleFormProcessor {
 
-	public static final String[] TARGET_SCRIPT_NAMES = { "execute", "report", "onvmadd", "onvmremove" };
 	public static final String PRERECIPE_SCRIPT_NAME = "prerecipe--script";
+	// private static final String TARGET_PRERECIPE_NAME = "prerecipe";
+	// private static final String TARGET_RECIPE_NAME = "recipe";
+	// private static final String[] TARGET_BUILD_SCRIPT_NAMES = {
+	// TARGET_PRERECIPE_NAME, TARGET_RECIPE_NAME };
+	// private static final String[] TARGET_SCRIPT_NAMES = {
+	// TARGET_PRERECIPE_NAME, TARGET_RECIPE_NAME, "execute", "report",
+	// "onvmadd", "onvmremove" };
 	public static final String MODULE_REFERENCE_NAME = "moduleReference";
 
 	boolean needsRebuild = false;
@@ -50,8 +59,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 	}
 
 	@Override
-	protected Module getOrCreateParameterized(String name)
-			throws ValidationException, NotFoundException {
+	protected Module getOrCreateParameterized(String name) throws ValidationException, NotFoundException {
 		Module loaded = load(name);
 		return loaded == null ? new ImageModule(name) : loaded;
 	}
@@ -66,8 +74,6 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		parseReferenceImageAndIsBase(getForm());
 		parsePackages(getForm());
-		parsePreRecipe(getForm());
-		parseRecipe(getForm());
 		parseNewImage(getForm());
 		parseTargets(getForm());
 
@@ -83,19 +89,16 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		image.getPackages().clear();
 
 		for (String inputName : formitems.toArray(new String[0])) {
-			if (inputName.startsWith("package--")
-					&& inputName.endsWith("--name")) {
+			if (inputName.startsWith("package--") && inputName.endsWith("--name")) {
 				String[] parts = inputName.split("--");
 				String genericPart = parts[0] + "--" + parts[1] + "--";
 				String name = form.getFirstValue(inputName);
-				String repository = form.getFirstValue(genericPart
-						+ "repository");
+				String repository = form.getFirstValue(genericPart + "repository");
 				String key = form.getFirstValue(genericPart + "key");
 				Package package_ = new Package(name, repository, key);
 				if (image.getPackages().contains(package_)) {
-					throw (new ValidationException(
-							"Cannot specify the same package multiply times: "
-									+ package_.getName()));
+					throw (new ValidationException("Cannot specify the same package multiply times: "
+							+ package_.getName()));
 				}
 				image.setPackage(package_);
 			}
@@ -123,41 +126,11 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		return haveChanged;
 	}
 
-	private void parsePreRecipe(Form form) {
-
-		String prerecipe = form.getFirstValue(PRERECIPE_SCRIPT_NAME);
-		if (prerecipe == null) {
-			prerecipe = "";
-		}
-
-		if (!prerecipe.equals(castToModule().getPreRecipe())) {
-			needsRebuild = true;
-		}
-
-		castToModule().setPreRecipe(prerecipe);
-
-	}
-
-	private void parseRecipe(Form form) {
-
-		String recipe = form.getFirstValue("recipe--script");
-		if (recipe == null) {
-			recipe = "";
-		}
-
-		if (!recipe.equals(castToModule().getRecipe())) {
-			needsRebuild = true;
-		}
-
-		castToModule().setRecipe(recipe);
-
-	}
-
 	private void parseReferenceImageAndIsBase(Form form) throws ValidationException {
 		ImageModule module = castToModule();
 		String moduleReference = form.getFirstValue(MODULE_REFERENCE_NAME, "");
 		String newReferenceImage = Module.constructResourceUri(moduleReference);
-		String oldReferenceImage = module.getModuleReference();
+		String oldReferenceImage = module.getModuleReferenceUri();
 		Boolean newIsBase = getBooleanValue(form, "isbase");
 		Boolean oldIsBase = module.isBase();
 
@@ -178,9 +151,9 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	private void parseTargets(Form form) throws ValidationException {
 
-		Set<Target> targets = new HashSet<Target>();
+		Map<String, Target> targets = new HashMap<String, Target>();
 
-		for (String targetName : TARGET_SCRIPT_NAMES) {
+		for (String targetName : Target.TARGET_SCRIPT_NAMES) {
 			addTarget(form, targets, targetName);
 		}
 
@@ -188,11 +161,30 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 	}
 
-	private void addTarget(Form form, Set<Target> targets, String targetName) {
-		String target = form.getFirstValue(targetName + "--script");
-		if (target != null) {
-			targets.add(new Target(targetName, target));
+	private void addTarget(Form form, Map<String, Target> targets, String targetName) {
+		String script = form.getFirstValue(targetName + "--script");
+		Target target = new Target(targetName, script);
+		if (script != null) {
+			targets.put(targetName, target);
 		}
+		if (Arrays.asList(Target.TARGET_BUILD_SCRIPT_NAMES).contains(targetName)) {
+			if (hasBuildTargetChanged(target)) {
+				needsRebuild = true;
+			}
+		}
+	}
+
+	private boolean hasBuildTargetChanged(Target newTarget) {
+
+		boolean newTargetScriptSet  = Parameter.hasValueSet(newTarget.getScript());
+		Map<String, Target> oldTargets = castToModule().getTargets();
+
+		Target oldTarget = oldTargets.get(newTarget.getName());
+		if(oldTarget == null) {
+			return newTargetScriptSet;
+		}
+
+		return !oldTarget.equals(newTarget);
 	}
 
 	private void parseImageId(Form form) throws ValidationException {
@@ -205,10 +197,8 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		}
 		// take updates for base (native) image
 		if (module.isBase()) {
-			for (String cloudServiceName : ConnectorFactory
-					.getCloudServiceNames()) {
-				String imageId = form
-						.getFirstValue(constructFormImageIdName(cloudServiceName));
+			for (String cloudServiceName : ConnectorFactory.getCloudServiceNames()) {
+				String imageId = form.getFirstValue(constructFormImageIdName(cloudServiceName));
 				module.setImageId(imageId, cloudServiceName);
 			}
 		}

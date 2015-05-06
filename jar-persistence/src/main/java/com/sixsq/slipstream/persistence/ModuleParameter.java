@@ -20,25 +20,14 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-@Entity
-@SuppressWarnings("serial")
-public class ModuleParameter extends Parameter<Module> {
+public class ModuleParameter extends Parameter {
 
 	private static final String INSTANCE_TYPE_INHERITED = ImageModule.INSTANCE_TYPE_INHERITED;
-
-	@Id
-	@GeneratedValue
-	Long id;
 
 	@SuppressWarnings("unused")
 	private ModuleParameter() {
@@ -48,32 +37,24 @@ public class ModuleParameter extends Parameter<Module> {
 		super(name);
 	}
 
-	public ModuleParameter(String name, String value, String description)
-			throws ValidationException {
+	public ModuleParameter(String name, String value, String description) throws ValidationException {
 		super(name, value, description);
 		setValue(value);
 	}
 
-	public ModuleParameter(String name, String value, String description,
-			ParameterCategory category) throws ValidationException {
+	public ModuleParameter(String name, String value, String description, ParameterCategory category)
+			throws ValidationException {
 		super(name, value, description);
 		setCategory(category);
 	}
 
-	@Override
-	public Long getId() {
-		return id;
+	public ModuleParameter(ModuleParameter moduleParameter) throws ValidationException {
+		super(moduleParameter);
 	}
 
 	@Override
-	protected void setId(Long id) {
-		this.id = id;
-	}
-
-	@Override
-	public ModuleParameter copy() throws ValidationException {
-		ModuleParameter copy = new ModuleParameter(getName(), getValue(),
-				getDescription());
+	public Parameter copy() throws ValidationException {
+		ModuleParameter copy = new ModuleParameter(this);
 		copy.setDefaultValue(getDefaultValue());
 		return (ModuleParameter) copyTo(copy);
 	}
@@ -97,7 +78,7 @@ public class ModuleParameter extends Parameter<Module> {
 		if (isSet()) {
 			if (isInheritedEnumValue()) {
 				try {
-					value = getDefaultValueFromParent();
+					value = getInheritedDefaultValue();
 				} catch (ValidationException e) {
 					value = null;
 				}
@@ -115,11 +96,10 @@ public class ModuleParameter extends Parameter<Module> {
 	}
 
 	private boolean isInheritedEnumValue() {
-		return getType() == ParameterType.Enum
-				&& INSTANCE_TYPE_INHERITED.equals(super.getValue());
+		return getType() == ParameterType.Enum && INSTANCE_TYPE_INHERITED.equals(super.getValue());
 	}
 
-	@Attribute(required=false)
+	@Attribute(required = false)
 	private boolean isSet = false;
 
 	public boolean isSet() {
@@ -136,39 +116,32 @@ public class ModuleParameter extends Parameter<Module> {
 		return isSet() ? super.getValue() : defaultValue;
 	}
 
+	/**
+	 * Dummy setter to please serializer
+	 */
 	@Element(required = false, data = true)
-	@Column(length=1024)
 	public void setDefaultValue(String defaultValue) {
 	}
 
 	/**
-	 * Inherited from parent or current value
+	 * Inherited or current value
 	 */
 	@Element(required = false, data = true)
-	@Column(length=1024)
 	public String getDefaultValue() throws ValidationException {
 		String defaultValue = null;
 		String value = super.getValue();
 		if (hasValueSet(value)) {
 			defaultValue = value;
 		} else {
-			defaultValue = getDefaultValueFromParent();
+			defaultValue = getInheritedDefaultValue();
 		}
 		return defaultValue;
 	}
 
-	private String getDefaultValueFromParent() throws ValidationException {
+	private String getInheritedDefaultValue() throws ValidationException {
 		String defaultValue = null;
-		if (getContainer() instanceof ImageModule) {
-			ImageModule parentModule = ((ImageModule) getContainer())
-					.getParentModule();
-			if (parentModule != null) {
-				ModuleParameter parentParameter = parentModule
-						.getParameter(getName());
-				if (parentParameter != null) {
-					defaultValue = parentParameter.getValue();
-				}
-			}
+		if (getContainer() != null) {
+			defaultValue = ((Module) getContainer()).getInheritedDefaultParameterValue(getName());
 		}
 		return defaultValue;
 	}

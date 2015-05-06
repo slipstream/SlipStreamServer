@@ -89,7 +89,7 @@ public class ProjectModuleTest {
 		String description = "description";
 		String value = "value";
 
-		ModuleParameter parameter = new ModuleParameter(parameterName, value,
+		Parameter parameter = new ModuleParameter(parameterName, value,
 				description);
 		module.setParameter(parameter);
 
@@ -98,7 +98,7 @@ public class ProjectModuleTest {
 		Module moduleRestored = Module.load(resourceUrl);
 		assertNotNull(moduleRestored);
 
-		Map<String, ModuleParameter> parameters = moduleRestored
+		Map<String, Parameter> parameters = moduleRestored
 				.getParameters();
 		assertNotNull(parameters);
 		assertThat(parameters.size(), not(0));
@@ -155,7 +155,7 @@ public class ProjectModuleTest {
 			throws ValidationException {
 
 		ProjectModule parent = new ProjectModule("p");
-		parent.store();
+		parent = parent.store();
 
 		Module module1 = new ProjectModule("p/module1");
 		module1.store();

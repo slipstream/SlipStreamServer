@@ -22,6 +22,7 @@ package com.sixsq.slipstream.util;
 
 import static org.junit.Assert.assertEquals;
 
+import com.sixsq.slipstream.persistence.ModuleCategory;
 import org.junit.Test;
 import org.simpleframework.xml.Attribute;
 import org.w3c.dom.Document;

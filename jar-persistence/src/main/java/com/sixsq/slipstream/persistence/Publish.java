@@ -23,32 +23,18 @@ package com.sixsq.slipstream.persistence;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
 import flexjson.JSON;
 
 @SuppressWarnings("serial")
-@Entity
 public class Publish implements Serializable {
 
-	@Id
-	@GeneratedValue
-	Long id;
-
-	@OneToOne
 	@JSON(include = false)
 	private Module module;
 
 	@Attribute(required = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date publicationDate;
 
 	@Attribute(required = false)

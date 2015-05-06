@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.sixsq.slipstream.persistence.ParameterCategory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,7 @@ import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -77,7 +79,7 @@ public class UserTest {
 	public void setParameter() throws ValidationException {
 		User user = User.loadByName(UserTest.user.getName());
 
-		user.setParameter(new UserParameter("p", "v", "d"));
+//		user.setParameter(new UserParameter("p", "v", "d"));
 		user = user.store();
 		user.setParameter(new UserParameter("p", "v", "d"));
 		user = user.store();
@@ -147,7 +149,7 @@ public class UserTest {
 		String description = "description";
 		String value = "value";
 
-		UserParameter parameter = new UserParameter(parameterName, value,
+		Parameter parameter = new UserParameter(parameterName, value,
 				description);
 		user.setParameter(parameter);
 
@@ -156,7 +158,7 @@ public class UserTest {
 		User restored = User.load(resourceUrl);
 		assertNotNull(restored);
 
-		Map<String, UserParameter> parameters = restored.getParameters();
+		Map<String, Parameter> parameters = restored.getParameters();
 		assertNotNull(parameters);
 		assertTrue(parameters.size() > 0);
 
@@ -310,6 +312,14 @@ public class UserTest {
 		user.setFirstName("Te");
 		user.setLastName("st");
 		user.setEmail("test@example.com");
+
+		try {
+			user.setParameter(new UserParameter(UserParameter.constructKey(ParameterCategory.General.toString(),
+					UserParameter.KEY_KEEP_RUNNING), UserParameter.KEEP_RUNNING_NEVER, null));
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			fail();
+		}
 
 		try {
 			user.hashAndSetPassword(password);

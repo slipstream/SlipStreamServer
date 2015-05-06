@@ -55,6 +55,7 @@ import com.sixsq.slipstream.persistence.Package;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.CommonTestUtil;
@@ -106,7 +107,6 @@ public class StateMachinetTest {
 
 		DeploymentModule module = new DeploymentModule("setUp");
 
-
 		ImageModule image = new ImageModule("foo_image");
 		image.setIsBase(true);
 		image.setImageId("123", cloudName);
@@ -116,14 +116,12 @@ public class StateMachinetTest {
 			for (String nodename : nodeNames) {
 				Node node = new Node(nodename, image);
 				node.setCloudService(cloudName);
-				node = (Node) node.store();
 				module.setNode(node);
 			}
 		} else {
 			// Add fake node if none were provided.  Run needs nodes on the deployment module.
     		Node node = new Node("fake", image);
     		node.setCloudService(cloudName);
-    		node = (Node) node.store();
     		module.setNode(node);
 		}
 
@@ -227,11 +225,8 @@ public class StateMachinetTest {
 		sc.updateState("n1.1");
 		sc.updateState(orchName);
 
-		em = PersistenceUtil.createEntityManager();
-		run = em.find(Run.class, run.getResourceUri());
-		assertThat(run.getRuntimeParameterValue("ss:state"),
+		assertThat(RuntimeParameter.loadFromUuidAndKey(run.getUuid(), "ss:state").getValue(),
 				is(States.Done.toString()));
-		em.close();
 
 		assertState(sc, States.Done);
 

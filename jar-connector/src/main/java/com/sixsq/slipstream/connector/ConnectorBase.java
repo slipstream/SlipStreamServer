@@ -348,7 +348,7 @@ public abstract class ConnectorBase implements Connector {
     protected List<String> getCloudNodeInstanceIds(Run run) throws NotFoundException, ValidationException {
         List<String> ids = new ArrayList<String>();
 
-        for (String nodeName : run.getNodeInstanceNamesList()) {
+        for (String nodeName : run.getNodeInstances()) {
             nodeName = nodeName.trim();
 
             String idKey = nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.INSTANCE_ID_KEY;
@@ -441,7 +441,7 @@ public abstract class ConnectorBase implements Connector {
     }
 
     protected String getParameterValue(String parameterName, ImageModule image) throws ValidationException {
-        ModuleParameter parameter = image.getParameter(constructKey(parameterName));
+        Parameter parameter = image.getParameter(constructKey(parameterName));
         return parameter == null ? null : parameter.getValue();
     }
 
@@ -519,7 +519,7 @@ public abstract class ConnectorBase implements Connector {
 
     protected String getEndpoint(User user) throws ValidationException {
     	String paramName = getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME;
-    	UserParameter endpointParam = user.getParameter(paramName);
+    	Parameter endpointParam = user.getParameter(paramName);
     	if (endpointParam != null) {
     		return endpointParam.getValue();
     	}

@@ -62,7 +62,7 @@ public class NodeParameterTest {
 		form.add("parameter--node--n1--p2", "'value2'");
 		form.add("parameter--node--n2--pa", "'valuea'");
 		form.add("parameter--node--n2--pb", "'valueb'");
-		Map<String, List<Parameter<?>>> choices = RunListResource.getUserChoicesFromForm(ModuleCategory.Deployment,
+		Map<String, List<Parameter>> choices = RunListResource.getUserChoicesFromForm(ModuleCategory.Deployment,
 				form);
 		assertThat(choices.size(), is(2));
 		assertThat(choices.get("n1").size(), is(2));
@@ -76,7 +76,7 @@ public class NodeParameterTest {
 		form.add("parameter--p1", "'value1'");
 		form.add("parameter--p2", "'value2'");
 		form.add("parameter--pa", "'valuea'");
-		Map<String, List<Parameter<?>>> choices = RunListResource.getUserChoicesFromForm(ModuleCategory.Image, form);
+		Map<String, List<Parameter>> choices = RunListResource.getUserChoicesFromForm(ModuleCategory.Image, form);
 		assertThat(choices.size(), is(1));
 		assertThat(choices.get(Run.MACHINE_NAME).size(), is(3));
 		assertThat(choices.get(Run.MACHINE_NAME).get(0).getName(), is("p1"));

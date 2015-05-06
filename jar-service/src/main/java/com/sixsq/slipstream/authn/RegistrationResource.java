@@ -33,15 +33,15 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.action.OneShotAction;
 import com.sixsq.slipstream.action.UserEmailValidationAction;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.SimpleRepresentationBaseResource;
 import com.sixsq.slipstream.util.Notifier;
@@ -50,8 +50,7 @@ import com.sixsq.slipstream.util.ResourceUriUtil;
 public class RegistrationResource extends SimpleRepresentationBaseResource {
 
 	@Post("form")
-	public void createNewAccount(Representation entity)
-			throws ResourceException {
+	public void createNewAccount(Representation entity) throws ResourceException {
 
 		checkIsAllowed();
 
@@ -71,16 +70,13 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 
 		newUser.store();
 
-		setPostResponse(MessageUtils.format(MSG_REGISTRATION_SENT),
-				MediaType.TEXT_PLAIN);
+		setPostResponse(MessageUtils.format(MSG_REGISTRATION_SENT), MediaType.TEXT_PLAIN);
 	}
 
 	private void checkIsAllowed() {
 		boolean allow = true; // allowed by default
-		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_ENABLE
-				.getName();
-		ServiceConfigurationParameter parameter = getConfiguration()
-				.getParameters().get(key);
+		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_ENABLE.getName();
+		Parameter parameter = getConfiguration().getParameters().get(key);
 		if (parameter != null) {
 			allow = parameter.isTrue();
 		}
@@ -94,57 +90,47 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 		try {
 			newUser = processEntityAsForm(entity);
 		} catch (SlipStreamException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					e.getMessage());
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, e.getMessage());
 		}
 		return newUser;
 	}
 
 	private void notifyUser(User newUser, OneShotAction action) {
 		String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(getRequest());
-		String confirmUrl = baseUrlSlash + "action/" + action.getUuid()
-				+ "/confirm";
+		String confirmUrl = baseUrlSlash + "action/" + action.getUuid() + "/confirm";
 
 		String msg = MessageUtils.format(MSG_CONFIRM_EMAIL, confirmUrl);
 
-		boolean sendOk = Notifier.sendNotification(getConfiguration(),
-				newUser.getEmail(), msg);
+		boolean sendOk = Notifier.sendNotification(getConfiguration(), newUser.getEmail(), msg);
 
 		if (!sendOk) {
 
-			String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL
-					.getName();
-			ServiceConfigurationParameter parameter = getConfiguration()
-					.getParameter(key);
+			String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL.getName();
+			Parameter parameter = getConfiguration().getParameter(key);
 			String adminEmail = parameter.getValue();
 
-			String errorMsg = MessageUtils.format(MSG_ERROR_SENDING_EMAIL,
-					adminEmail);
+			String errorMsg = MessageUtils.format(MSG_ERROR_SENDING_EMAIL, adminEmail);
 
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, errorMsg);
 		}
 	}
 
 	private OneShotAction createConfirmationEntry(User newUser) {
-		OneShotAction action = new UserEmailValidationAction("user/"
-				+ newUser.getName());
+		OneShotAction action = new UserEmailValidationAction("user/" + newUser.getName());
 		action.store();
 		return action;
 	}
 
-	public void checkUserDoesntExist(User user) throws ConfigurationException,
-			ValidationException {
+	public void checkUserDoesntExist(User user) throws ConfigurationException, ValidationException {
 
 		if (User.loadByName(user.getName()) != null) {
-			throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,
-					"Sorry but user " + user.getName()
-							+ " already exists. Please choose another.");
+			throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN, "Sorry but user " + user.getName()
+					+ " already exists. Please choose another.");
 		}
 
 	}
 
-	public User processEntityAsForm(Representation entity)
-			throws SlipStreamException {
+	public User processEntityAsForm(Representation entity) throws SlipStreamException {
 
 		User user = null;
 
@@ -170,8 +156,7 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 
 			String agreement = form.getFirstValue("agreement");
 			if (agreement == null) {
-				throw new InvalidElementException(
-						"You must agree to the Terms of Service to register.");
+				throw new InvalidElementException("You must agree to the Terms of Service to register.");
 			}
 
 		} catch (IOException e) {

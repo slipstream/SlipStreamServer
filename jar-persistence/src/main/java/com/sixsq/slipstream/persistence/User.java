@@ -41,17 +41,20 @@ import javax.persistence.Query;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.sixsq.slipstream.util.Logger;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
-import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.user.UserView;
+import com.sixsq.slipstream.util.SerializationUtil;
 
 import flexjson.JSON;
+import flexjson.JSONDeserializer;
 
 /**
  * Unit test:
@@ -65,7 +68,7 @@ import flexjson.JSON;
 		@NamedQuery(name = "allUsers", query = "SELECT u FROM User u"),
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
 		@NamedQuery(name = "userViewList", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization, u.isSuperUser) FROM User u") })
-public class User extends Parameterized<User, UserParameter> {
+public class User extends Parameterized {
 
 	public static final String REQUEST_KEY = "authenticated_user";
 
@@ -104,6 +107,7 @@ public class User extends Parameterized<User, UserParameter> {
 	private String password;
 
 	@Attribute(required = false, name = "issuper")
+	@JSON(name = "issuper")
 	private boolean isSuperUser = false;
 
 	@Attribute
@@ -122,13 +126,11 @@ public class User extends Parameterized<User, UserParameter> {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date activeSince = null;
 
-	@SuppressWarnings("unused")
 	private User() {
-
 	}
 
-	public User(String name, String password) throws ValidationException,
-			NoSuchAlgorithmException, UnsupportedEncodingException {
+	public User(String name, String password) throws ValidationException, NoSuchAlgorithmException,
+			UnsupportedEncodingException {
 		this(name);
 		hashAndSetPassword(password);
 	}
@@ -140,14 +142,14 @@ public class User extends Parameterized<User, UserParameter> {
 
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
-	protected void setParameters(Map<String, UserParameter> parameters) {
-		this.parameters = parameters;
+	protected void setParameters(Map<String, Parameter> parameters) {
+		super.setParameters(parameters);
 	}
 
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
-	public Map<String, UserParameter> getParameters() {
-		return parameters;
+	public Map<String, Parameter> getParameters() {
+		return super.getParameters();
 	}
 
 	@Override
@@ -249,28 +251,21 @@ public class User extends Parameterized<User, UserParameter> {
 		this.firstName = firstName;
 	}
 
-	@JSON(include = false)
+//	@Attribute(name = "password", required = false)
+	@JSON(name = "password")
 	public String getHashedPassword() {
 		return password;
 	}
 
+//	@Attribute(name = "password", required = false)
+	@JSON(name = "password")
 	public void setHashedPassword(String password) {
 		this.password = password;
 	}
 
 	public void hashAndSetPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		setHashedPassword(Passwords.hash(password));
-	}
-
-	@Attribute(name = "password", required = false)
-	public String getPassword() {
-		// We don't want to serialize the password.
-		return null;
-	}
-
-	@Attribute(name = "password", required = false)
-	public void setPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		hashAndSetPassword(password);
+		String hashed = (password == null) ? null : Passwords.hash(password);
+		setHashedPassword(hashed);
 	}
 
 	public String randomizePassword() {
@@ -286,44 +281,25 @@ public class User extends Parameterized<User, UserParameter> {
 		this.organization = organization;
 	}
 
-	public String getSummaryString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("username:     ");
-		sb.append(getName());
-		sb.append("\n");
-
-		sb.append("name:         ");
-		sb.append(getFullName());
-		sb.append("\n");
-
-		sb.append("organization: ");
-		sb.append(getOrganization());
-		sb.append("\n");
-
-		sb.append("email:        ");
-		sb.append(getEmail());
-		sb.append("\n");
-
-		return sb.toString();
-	}
-
 	public State getState() {
 		return state;
 	}
 
 	public void setState(State state) {
 		this.state = state;
-		if(state == State.ACTIVE) {
+		if (state == State.ACTIVE) {
 			activeSince = new Date();
 		}
 	}
 
+	@JSON(include = false)
 	public String getDefaultCloudService() {
-		UserParameter parameter = getDefaultCloudServiceParameter();
+		Parameter parameter = getDefaultCloudServiceParameter();
 		return parameter == null ? "" : parameter.getValue();
 	}
 
-	private UserParameter getDefaultCloudServiceParameter() {
+	@JSON(include = false)
+	private Parameter getDefaultCloudServiceParameter() {
 		return getParameter(constructCloudServiceKey());
 	}
 
@@ -332,9 +308,8 @@ public class User extends Parameterized<User, UserParameter> {
 				UserParameter.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME);
 	}
 
-	public void setDefaultCloudServiceName(String defaultCloudServiceName)
-			throws ValidationException {
-		UserParameter parameter = getDefaultCloudServiceParameter();
+	public void setDefaultCloudServiceName(String defaultCloudServiceName) throws ValidationException {
+		Parameter parameter = getDefaultCloudServiceParameter();
 		if (parameter == null) {
 			parameter = new UserParameter(constructCloudServiceKey());
 			setParameter(parameter);
@@ -350,8 +325,7 @@ public class User extends Parameterized<User, UserParameter> {
 		return Long.toString(Math.abs(v), 36);
 	}
 
-	public static void validateMinimumInfo(User user)
-			throws InvalidElementException {
+	public static void validateMinimumInfo(User user) throws InvalidElementException {
 
 		if (user.getName() == null) {
 			throw new InvalidElementException("Missing username");
@@ -359,8 +333,7 @@ public class User extends Parameterized<User, UserParameter> {
 
 		String username = user.getName();
 		if (!Pattern.matches("\\w[\\w\\d.]+", username)) {
-			throw new InvalidElementException(
-					"Username must start with a letter and contain only letters and digits.");
+			throw new InvalidElementException("Username must start with a letter and contain only letters and digits.");
 		}
 
 		// The first name cannot be empty.
@@ -377,10 +350,10 @@ public class User extends Parameterized<User, UserParameter> {
 
 		// For security reasons, the password must not be null or the empty
 		// string.
-		String password = user.getHashedPassword();
-		if (password == null || "".equals(password)) {
-			throw new InvalidElementException("Password cannot be empty.");
-		}
+//		String password = user.getHashedPassword();
+//		if (password == null || "".equals(password)) {
+//			throw new InvalidElementException("Password cannot be empty.");
+//		}
 
 		// Ensure that the email address is valid.
 		try {
@@ -399,18 +372,17 @@ public class User extends Parameterized<User, UserParameter> {
 
 	}
 
-	public static User loadByName(String name) throws ConfigurationException,
-			ValidationException {
+	public static User loadByName(String name) throws ConfigurationException, ValidationException {
 		return loadByName(name, null);
 	}
 
-	public static User loadByName(String name, ServiceConfiguration sc)
-			throws ConfigurationException, ValidationException {
+	public static User loadByName(String name, ServiceConfiguration sc) throws ConfigurationException,
+			ValidationException {
 		return load(User.constructResourceUri(name), sc);
 	}
 
-	public static User load(String resourceUrl, ServiceConfiguration sc)
-			throws ConfigurationException, ValidationException {
+	public static User load(String resourceUrl, ServiceConfiguration sc) throws ConfigurationException,
+			ValidationException {
 		User user = load(resourceUrl);
 
 		if (sc != null && user != null) {
@@ -420,17 +392,14 @@ public class User extends Parameterized<User, UserParameter> {
 		return user;
 	}
 
-	public static User load(String resourceUrl) throws ConfigurationException,
-			ValidationException {
+	public static User load(String resourceUrl) throws ConfigurationException, ValidationException {
 		return (User) Metadata.load(resourceUrl, User.class);
 	}
 
-	public void addSystemParametersIntoUser(ServiceConfiguration sc)
-			throws ConfigurationException, ValidationException {
-		for (ServiceConfigurationParameter p : sc.getParameters().values()) {
+	public void addSystemParametersIntoUser(ServiceConfiguration sc) throws ConfigurationException, ValidationException {
+		for (Parameter p : sc.getParameters().values()) {
 			try {
-				UserParameter userParam = new UserParameter(p.getName(),
-						p.getValue(""), "");
+				Parameter userParam = new UserParameter(p.getName(), p.getValue(""), "");
 				userParam.setCategory("System");
 				setParameter(userParam);
 			} catch (ValidationException e) {
@@ -469,9 +438,15 @@ public class User extends Parameterized<User, UserParameter> {
 		return list;
 	}
 
-	@Override
-	public void setContainer(UserParameter parameter) {
-		parameter.setContainer(this);
+	public static User fromJson(String json) throws SlipStreamClientException {
+		Logger.info("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		Logger.info(json);
+		Logger.info("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		return (User) SerializationUtil.fromJson(json, User.class, new User().createDeserializer());
+	}
+
+	protected JSONDeserializer<Object> createDeserializer() {
+		return new JSONDeserializer<Object>().use("parameters.values", UserParameter.class);
 	}
 
 	@Override
@@ -501,12 +476,12 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	public String getKeepRunning() {
-		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_KEEP_RUNNING);
+		String key = Parameter.constructKey(ParameterCategory.getDefault(), UserParameter.KEY_KEEP_RUNNING);
 		return getParameterValue(key, UserParameter.KEEP_RUNNING_DEFAULT);
 	}
 
 	public void setKeepRunning(String value) throws ValidationException {
-		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_KEEP_RUNNING);
+		String key = Parameter.constructKey(ParameterCategory.getDefault(), UserParameter.KEY_KEEP_RUNNING);
 		List<String> keepRunningOptions = UserParameter.getKeepRunningOptions();
 
 		if (!keepRunningOptions.contains(value)) {
@@ -514,7 +489,7 @@ public class User extends Parameterized<User, UserParameter> {
 					+ "should be one of the following: " + keepRunningOptions.toString());
 		}
 
-		UserParameter parameter = getParameter(key);
+		Parameter parameter = getParameter(key);
 		if (parameter == null) {
 			parameter = new UserParameter(key);
 			setParameter(parameter);

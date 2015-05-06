@@ -20,13 +20,19 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
+import static org.restlet.data.MediaType.APPLICATION_XHTML;
+import static org.restlet.data.MediaType.TEXT_HTML;
+
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.restlet.Request;
+import org.restlet.data.ClientInfo;
 import org.restlet.data.Form;
 import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
+import org.restlet.data.Preference;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -62,6 +68,28 @@ public abstract class BaseResource extends ServerResource {
 	private ServiceConfiguration configuration = null;
 	protected static final String NEW_NAME = "new";
 	private boolean isEdit = false;
+
+	protected static boolean isHtmlRequested(Request request) {
+
+		ClientInfo clientInfo = request.getClientInfo();
+		List<Preference<MediaType>> preferences = clientInfo
+				.getAcceptedMediaTypes();
+
+		for (Preference<MediaType> preference : preferences) {
+			if (isHtmlLike(preference.getMetadata())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	static boolean isHtmlLike(MediaType mediaType) {
+		if (TEXT_HTML.isCompatible(mediaType)
+				|| APPLICATION_XHTML.isCompatible(mediaType)) {
+			return true;
+		}
+		return false;
+	}
 
 	@Override
 	protected void doInit() throws ResourceException {
@@ -341,4 +369,5 @@ public abstract class BaseResource extends ServerResource {
 		}
 		return user;
 	}
+
 }

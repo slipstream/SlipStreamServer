@@ -102,7 +102,7 @@ public class ImageModuleTest {
 		String description = "description";
 		String value = "value";
 
-		ModuleParameter parameter = new ModuleParameter(parameterName, value,
+		Parameter parameter = new ModuleParameter(parameterName, value,
 				description);
 		module.setParameter(parameter);
 
@@ -111,7 +111,7 @@ public class ImageModuleTest {
 		Module moduleRestored = Module.load(resourceUrl);
 		assertNotNull(moduleRestored);
 
-		Map<String, ModuleParameter> parameters = moduleRestored
+		Map<String, Parameter> parameters = moduleRestored
 				.getParameters();
 		assertNotNull(parameters);
 		assertTrue(parameters.size() > 0);

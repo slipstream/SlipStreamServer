@@ -68,18 +68,18 @@ public class StateMachine {
 		String key;
 		String nodePrefix = node + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 		key = nodePrefix + RuntimeParameter.COMPLETE_KEY;
-		RuntimeParameter completed = run.getRuntimeParameters().get(key);
+		RuntimeParameter completed = run.getRuntimeParameter(key);
 
 		key = nodePrefix + RuntimeParameter.ABORT_KEY;
-		RuntimeParameter failing = run.getRuntimeParameters().get(key);
+		RuntimeParameter failing = run.getRuntimeParameter(key);
 
 		key = nodePrefix + RuntimeParameter.IS_ORCHESTRATOR_KEY;
-		RuntimeParameter isOrchestrator = run.getRuntimeParameters().get(key);
+		RuntimeParameter isOrchestrator = run.getRuntimeParameter(key);
 
 		key = nodePrefix + RuntimeParameter.SCALE_STATE_KEY;
-		RuntimeParameter scaleState = run.getRuntimeParameters().get(key);
+		RuntimeParameter scaleState = run.getRuntimeParameter(key);
 
-		RuntimeParameter state = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY);
+		RuntimeParameter state = run.getRuntimeParameter(RuntimeParameter.GLOBAL_STATE_KEY);
 
 		ExtrinsicState extrinsicState = new ExtrinsicState(completed, failing, isOrchestrator, state, scaleState);
 		return extrinsicState;
@@ -124,7 +124,7 @@ public class StateMachine {
 		this.run = run;
 
 		nodeStates = new HashMap<String, State>();
-		for (String node : run.getNodeInstanceNamesList()) {
+		for (String node : run.getNodeInstances()) {
 			ExtrinsicState extrinsicState = createNodeExtrinsicState(run, node);
 			State nodeState = StateFactory.createInstance(extrinsicState);
 
@@ -342,12 +342,15 @@ public class StateMachine {
 	protected EntityManager beginTransation() throws InvalidStateException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		em.getTransaction().begin();
-		Run run = em.find(Run.class, getRun().getResourceUri());
+		Run run = Run.load(getRun().getResourceUri(), em);
 		recreateStateFromRun(run);
 		return em;
 	}
 
 	protected void commitTransaction(EntityManager em) {
+		// Since we auto-magically change the run inside, we need to 
+		// explicitly set the json. Not cool!
+		this.run.toJsonForPersistence();
 		em.getTransaction().commit();
 		em.close();
 	}

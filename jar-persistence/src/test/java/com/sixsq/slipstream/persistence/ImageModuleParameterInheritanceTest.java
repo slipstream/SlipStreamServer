@@ -56,7 +56,7 @@ public class ImageModuleParameterInheritanceTest {
 		baseImage.store();
 		
 		ImageModule image = new ImageModule("image");
-		ModuleParameter parameter = baseParameter.copy();
+		Parameter parameter = baseParameter.copy();
 		image.setParameter(parameter);
 		image.setModuleReference(baseImage);
 		
@@ -69,12 +69,12 @@ public class ImageModuleParameterInheritanceTest {
 	public void inheritedParameterWithDefaultInParentValue() throws ValidationException {
 		ImageModule image = new ImageModule("image");
 		
-		ModuleParameter parameter = new ModuleParameter(PARAMETER_NAME);
+		Parameter parameter = new ModuleParameter(PARAMETER_NAME);
 				
 		image.setParameter(parameter);
 
 		ImageModule baseImage = new ImageModule("base");
-		ModuleParameter baseParameter = parameter.copy();
+		Parameter baseParameter = parameter.copy();
 		baseParameter.setValue("some default");
 		baseImage.setParameter(baseParameter);
 		baseImage = baseImage.store();
@@ -90,14 +90,14 @@ public class ImageModuleParameterInheritanceTest {
 	public void inheritedEnumParameterValue() throws ValidationException {
 		ImageModule image = new ImageModule("image");
 		
-		ModuleParameter parameter = new ModuleParameter(PARAMETER_NAME);
+		Parameter parameter = new ModuleParameter(PARAMETER_NAME);
 		parameter.setType(ParameterType.Enum);
 		parameter.setEnumValues(Arrays.asList(ImageModule.INSTANCE_TYPE_INHERITED, "A", "B"));
 		parameter.setValue(ImageModule.INSTANCE_TYPE_INHERITED);
 		image.setParameter(parameter);
 
 		ImageModule baseImage = new ImageModule("base");
-		ModuleParameter baseParameter = parameter.copy();
+		Parameter baseParameter = parameter.copy();
 		baseParameter.setValue("A");
 		baseImage.setParameter(baseParameter);
 		baseImage.store();

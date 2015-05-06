@@ -20,75 +20,47 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
-import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
-import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
-
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.MapKey;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Query;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.CollectionType;
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementArray;
-import org.simpleframework.xml.ElementMap;
-
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.event.ACL;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.event.Event.EventType;
 import com.sixsq.slipstream.event.TypePrincipal;
 import com.sixsq.slipstream.event.TypePrincipalRight;
-import com.sixsq.slipstream.exceptions.AbortException;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.statemachine.States;
+import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.json.ModuleObjectFactory;
+import flexjson.JSON;
+import flexjson.JSONDeserializer;
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.CollectionType;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.ElementMap;
+
+import javax.persistence.*;
+import javax.persistence.criteria.*;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
+import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
 
 @SuppressWarnings("serial")
-@Entity(name="Run")
+@Entity(name = "Run")
 @NamedQueries({
 		@NamedQuery(name = "allRuns", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
 		@NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
 		@NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.lastStateChangeTime < :before AND r.state IN (:states)"),
 		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.name_ = :instanceidkey AND p.value = :instanceidvalue ORDER BY r.startTime DESC") })
-public class Run extends Parameterized<Run, RunParameter> {
+public class Run extends Parameterized {
 
 	private static final int DEFAULT_TIMEOUT = 60; // In minutes
 
@@ -101,12 +73,10 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	// Default machine name for image and disk creation
 	public final static String MACHINE_NAME = "machine";
-	public final static String MACHINE_NAME_PREFIX = MACHINE_NAME
-			+ RuntimeParameter.NODE_PROPERTY_SEPARATOR;
+	public final static String MACHINE_NAME_PREFIX = MACHINE_NAME + RuntimeParameter.NODE_PROPERTY_SEPARATOR;
 
 	// The initial state of each node
-	public final static String INITIAL_NODE_STATE_MESSAGE = States.Initializing
-			.toString();
+	public final static String INITIAL_NODE_STATE_MESSAGE = States.Initializing.toString();
 	public final static String INITIAL_NODE_STATE = States.Initializing.toString();
 
 	public final static String RESOURCE_URI_PREFIX = "run/";
@@ -122,8 +92,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public final static String GARBAGE_COLLECTED_PARAMETER_NAME = "garbage_collected";
 	public final static String GARBAGE_COLLECTED_PARAMETER_DESCRIPTION = "true if the Run was already garbage collected";
 
-	public static Run abortOrReset(String abortMessage, String nodename,
-			String uuid) {
+	public static final String NODE_INCREMENT_KEY = "node.increment";
+	public static final String NODE_INCREMENT_DESCRIPTION = "Current increment value for node instances ids";
+	public static final String NODE_RUN_BUILD_RECIPES_KEY = "run-build-recipes";
+	public static final String NODE_RUN_BUILD_RECIPES_DESCRIPTION = "Define if the SlipStream executor should run build recipes.";
+	@Attribute(required = false)
+	protected ModuleCategory category;
+
+	public static Run abortOrReset(String abortMessage, String nodename, String uuid) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
@@ -136,17 +112,15 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return run;
 	}
 
-	public static Run abortOrReset(String abortMessage, String nodename,
-			EntityManager em, String uuid) {
+	public static Run abortOrReset(String abortMessage, String nodename, EntityManager em, String uuid) {
 
 		Run run = Run.loadFromUuid(uuid, em);
-		
+
 		run.postEventAbort(nodename, abortMessage);
-		
+
 		RuntimeParameter globalAbort = getGlobalAbort(run);
 		String nodeAbortKey = getNodeAbortKey(nodename);
-		RuntimeParameter nodeAbort = run.getRuntimeParameters().get(
-				nodeAbortKey);
+		RuntimeParameter nodeAbort = run.getRuntimeParameters().get(nodeAbortKey);
 		if ("".equals(abortMessage)) {
 			globalAbort.reset();
 			if (nodeAbort != null) {
@@ -166,8 +140,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return run;
 	}
 
-	private static void setGlobalAbortState(String abortMessage,
-			RuntimeParameter globalAbort) {
+	private static void setGlobalAbortState(String abortMessage, RuntimeParameter globalAbort) {
 		globalAbort.setValue(abortMessage);
 		globalAbort.store();
 		Run run = globalAbort.getContainer();
@@ -189,26 +162,23 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	private static RuntimeParameter getGlobalAbort(Run run) {
-		RuntimeParameter abort = run.getRuntimeParameters().get(
-				RuntimeParameter.GLOBAL_ABORT_KEY);
+		RuntimeParameter abort = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_ABORT_KEY);
 		return abort;
 	}
 
 	private static String getNodeAbortKey(String nodeName) {
-		return nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR
-				+ RuntimeParameter.ABORT_KEY;
+		return nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.ABORT_KEY;
 	}
 
 	private static RuntimeParameter getRecoveryModeParameter(Run run) {
-		return run.getRuntimeParameters().get(
-				RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY);
+		return run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY);
 	}
 
 	public static void setRecoveryMode(Run run) {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("true");
 		recoveryModeParam.store();
-		
+
 		run.postEventRecoveryMode(recoveryModeParam.getValue());
 	}
 
@@ -216,7 +186,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("false");
 		recoveryModeParam.store();
-		
+
 		run.postEventRecoveryMode(recoveryModeParam.getValue());
 	}
 
@@ -225,20 +195,20 @@ public class Run extends Parameterized<Run, RunParameter> {
 		boolean result = false;
 		if (recoveryModeParam != null) {
 			String recoveryMode = recoveryModeParam.getValue();
-			result = ! ("".equals(recoveryMode) || "false".equalsIgnoreCase(recoveryMode));
+			result = !("".equals(recoveryMode) || "false".equalsIgnoreCase(recoveryMode));
 		}
 		return result;
 	}
 
-	private static RunParameter getGarbageCollectedParameter(Run run) {
+	private static Parameter getGarbageCollectedParameter(Run run) {
 		return run.getParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME);
 	}
 
 	public static void setGarbageCollected(Run run) throws ValidationException {
-		RunParameter garbageCollected = getGarbageCollectedParameter(run);
+		Parameter garbageCollected = getGarbageCollectedParameter(run);
 
 		if (garbageCollected == null) {
-			run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "true",
+			run.setParameter(new Parameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "true",
 					Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
 		} else {
 			garbageCollected.setValue("true");
@@ -247,7 +217,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public static boolean isGarbageCollected(Run run) {
-		RunParameter garbageCollected = getGarbageCollectedParameter(run);
+		Parameter garbageCollected = getGarbageCollectedParameter(run);
 		boolean result = false;
 		if (garbageCollected != null) {
 			String recoveryMode = garbageCollected.getValue();
@@ -281,29 +251,29 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public static Run loadFromUuid(String uuid) {
-		String resourceUri = RESOURCE_URI_PREFIX + uuid;
+		String resourceUri = assembleResourceUri(uuid);
 		return load(resourceUri);
 	}
 
+	private static String assembleResourceUri(String uuid) {
+		return RESOURCE_URI_PREFIX + uuid;
+	}
+
 	public static Run loadFromUuid(String uuid, EntityManager em) {
-		String resourceUri = RESOURCE_URI_PREFIX + uuid;
+		String resourceUri = assembleResourceUri(uuid);
 		return load(resourceUri, em);
 	}
 
 	public static Run load(String resourceUri) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run = em.find(Run.class, resourceUri);
-		em.close();
-		return run;
+		return (Run) Run.load(resourceUri, Run.class);
 	}
 
 	public static Run load(String resourceUri, EntityManager em) {
-		Run run = em.find(Run.class, resourceUri);
-		return run;
+		return (Run) load(resourceUri, Run.class, em);
 	}
 
-	private static List<RunView> convertRunsToRunViews(List<Run> runs)
-			throws ConfigurationException, ValidationException {
+	private static List<RunView> convertRunsToRunViews(List<Run> runs) throws ConfigurationException,
+			ValidationException {
 		List<RunView> views = new ArrayList<RunView>();
 		RunView runView;
 		for (Run r : runs) {
@@ -320,12 +290,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 
 		RuntimeParameter globalAbort = Run.getGlobalAbort(run);
-		String abortMessage = (globalAbort != null)? globalAbort.getValue() : "";
+		String abortMessage = (globalAbort != null) ? globalAbort.getValue() : "";
 
 		RunView runView;
-		runView = new RunView(run.getResourceUri(), run.getUuid(), run.getModuleResourceUrl(),
-				run.getState().toString(), run.getStart(), run.getUser(), run.getType(), run.getCloudServiceNames(),
-				abortMessage);
+		runView = new RunView(run.getResourceUri(), run.getUuid(), run.getModuleResourceUrl(), run.getState()
+				.toString(), run.getStart(), run.getUser(), run.getType(), run.getCloudServices(), abortMessage);
 
 		try {
 			runView.setTags(run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
@@ -334,17 +303,17 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return runView;
 	}
 
-	private static Predicate andPredicate(CriteriaBuilder builder, Predicate currentPredicate, Predicate newPredicate){
+	private static Predicate andPredicate(CriteriaBuilder builder, Predicate currentPredicate, Predicate newPredicate) {
 		return (currentPredicate != null) ? builder.and(currentPredicate, newPredicate) : newPredicate;
 	}
 
-	public static List<RunView> viewList(User user, String moduleResourceUri)
-			throws ConfigurationException, ValidationException {
+	public static List<RunView> viewList(User user, String moduleResourceUri) throws ConfigurationException,
+			ValidationException {
 		return viewList(user, moduleResourceUri, null, null, null);
 	}
 
-	public static List<RunView> viewList(User user, String moduleResourceUri, Integer offset,
-			Integer limit, String cloudServiceName) throws ConfigurationException, ValidationException {
+	public static List<RunView> viewList(User user, String moduleResourceUri, Integer offset, Integer limit,
+			String cloudServiceName) throws ConfigurationException, ValidationException {
 		List<RunView> views = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
@@ -353,7 +322,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			Root<Run> rootQuery = critQuery.from(Run.class);
 			critQuery.select(rootQuery);
 			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, moduleResourceUri, cloudServiceName);
-			if (where != null){
+			if (where != null) {
 				critQuery.where(where);
 			}
 			critQuery.orderBy(builder.desc(rootQuery.get("startTime")));
@@ -361,7 +330,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			if (offset != null) {
 				query.setFirstResult(offset);
 			}
-			query.setMaxResults((limit != null)? limit : DEFAULT_LIMIT);
+			query.setMaxResults((limit != null) ? limit : DEFAULT_LIMIT);
 			List<Run> runs = query.getResultList();
 			views = convertRunsToRunViews(runs);
 		} finally {
@@ -380,11 +349,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 			Root<Run> rootQuery = critQuery.from(Run.class);
 			critQuery.select(builder.count(rootQuery));
 			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, moduleResourceUri, cloudServiceName);
-			if (where != null){
+			if (where != null) {
 				critQuery.where(where);
 			}
 			TypedQuery<Long> query = em.createQuery(critQuery);
-			count = (int)(long) query.getSingleResult();
+			count = (int) (long) query.getSingleResult();
 		} finally {
 			em.close();
 		}
@@ -401,30 +370,27 @@ public class Run extends Parameterized<Run, RunParameter> {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("moduleResourceUri"), moduleResourceUri));
 		}
 		if (cloudServiceName != null && !"".equals(cloudServiceName)) {
-			// TODO: Replace the 'like' by an 'equals'
-			where = andPredicate(builder, where, builder.like(rootQuery.<String>get("cloudServiceNames"), "%" + cloudServiceName + "%"));
+			Join<Run, ConnectorInstance> cloudServices = rootQuery.join("cloudServices");
+			where = builder.equal(cloudServices.get("name"), cloudServiceName);
 		}
 		return where;
 	}
 
-	public static List<Run> listAll()
-			throws ConfigurationException, ValidationException {
- 		EntityManager em = PersistenceUtil.createEntityManager();
+	public static List<Run> listAll() throws ConfigurationException, ValidationException {
+		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = createNamedQuery(em, "allRuns");
- 		@SuppressWarnings("unchecked")
+		@SuppressWarnings("unchecked")
 		List<Run> runs = q.getResultList();
- 		em.close();
- 		return runs;
- 	}
+		em.close();
+		return runs;
+	}
 
- 	public static List<Run> listOldTransient(User user) throws ConfigurationException,
- 			ValidationException {
- 		return listOldTransient(user, 0);
- 	}
+	public static List<Run> listOldTransient(User user) throws ConfigurationException, ValidationException {
+		return listOldTransient(user, 0);
+	}
 
 	@SuppressWarnings("unchecked")
-	public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException,
-			ValidationException {
+	public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException, ValidationException {
 		if (timeout <= 0) {
 			timeout = DEFAULT_TIMEOUT;
 		}
@@ -442,8 +408,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return runs;
 	}
 
-	public static Run loadRunWithRuntimeParameters(String uuid)
-			throws ConfigurationException, ValidationException {
+	public static Run loadRunWithRuntimeParameters(String uuid) throws ConfigurationException, ValidationException {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = createNamedQuery(em, "runWithRuntimeParameters");
 		q.setParameter("uuid", uuid);
@@ -468,12 +433,29 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Attribute(empty = "Orchestration")
 	private RunType type = RunType.Orchestration;
 
+	@OneToMany(mappedBy = "run", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@ElementList(entry = "name")
+	@JSON
+	private Set<ConnectorInstance> cloudServices = new HashSet<ConnectorInstance>();
+
 	/**
-	 * Cloud service names comma separated
+	 * Set of node instance names - e.g. apache1.1, apache1.2, ... including the
+	 * orchestrators: orchestrator-local, ...
 	 */
-	@Attribute(required = true)
-	@Column(length=65536)
-	private String cloudServiceNames;
+	@Transient
+	@ElementList(entry = "name")
+	@JSON
+	private Set<String> nodeInstances = new HashSet<String>();
+
+	/**
+	 * Comma separated list of nodes, including the associated orchestrator name
+	 * - e.g. orchestrator:apache1, orchestrator:testclient1, ... or
+	 * orchestrator-stratuslab:apache1, orchestrator-openstack:testclient1, ...
+	 */
+	@Transient
+	@ElementList(entry = "name")
+	@JSON
+	private Set<String> nodes = new HashSet<String>();
 
 	@Attribute(required = false)
 	@Enumerated
@@ -482,7 +464,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Attribute
 	private String moduleResourceUri;
 
-	private transient Credentials credentials;
+	@Transient
+	@JSON(include = false)
+	private Credentials credentials;
 
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@MapKey(name = "key_")
@@ -502,25 +486,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date lastStateChangeTime = new Date();
 
-	/**
-	 * Comma separated list of node names - e.g. apache1.1, apache1.2, ...
-	 * Including the orchestrator: orchestrator-local, ...
-	 *
-	 * FIXME: Should be changed to instanceNames (or nodeInstanceNames).
-	 *        NB: orchestrator is part of this list as well.
-	 */
-	@Column(length=65536)
-	@Attribute
-	private String nodeNames = "";
-	private static final String NODE_NAMES_SEPARATOR = ",";
-
-	/**
-	 * Comma separated list of nodes, including the associated orchestror name -
-	 * e.g. orchestrator:apache1, orchestrator:testclient1, ... or
-	 * orchestrator-stratuslab:apache1, orchestrator-openstack:testclient1, ...
-	 */
-	private String groups = "";
-
 	@Attribute(name = "user", required = false)
 	private String user_;
 
@@ -529,7 +494,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	private Module module;
 
 	@Attribute(required = false)
-	@Column(nullable=false, columnDefinition="boolean default false")
+	@Column(nullable = false, columnDefinition = "boolean default false")
 	private boolean mutable;
 
 	@Transient
@@ -538,54 +503,36 @@ public class Run extends Parameterized<Run, RunParameter> {
 	/**
 	 * List of cloud service names used in the current run
 	 */
-	@ElementArray(required = false)
-	public String[] getCloudServiceNamesList() {
-		if (cloudServiceNames == null) {
-			return new String[] {};
-		}
-		Set<String> uniqueCloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceNames.split(",")));
-		return uniqueCloudServiceNames.toArray(new String[uniqueCloudServiceNames.size()]);
-	}
-
-	@ElementArray(required = false)
-	private void setCloudServiceNamesList(String[] cloudServiceNames) {
-		Set<String> uniqueCloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceNames));
-		this.cloudServiceNames = StringUtils.join(
-		        uniqueCloudServiceNames.toArray(new String[uniqueCloudServiceNames.size()]), ",");
+	public Set<ConnectorInstance> getCloudServices() {
+		return cloudServices;
 	}
 
 	@SuppressWarnings("unused")
+	private void setCloudServices(Set<ConnectorInstance> cloudServices) {
+		for(ConnectorInstance ci : cloudServices) {
+			ci.setRun(this);
+		}
+		this.cloudServices = cloudServices;
+	}
+
 	private Run() throws NotFoundException {
 	}
 
-	public Run(Module module, RunType type, Set<String> cloudServiceNames, User user)
-			throws ValidationException {
+	public Run(Module module, RunType type, Set<ConnectorInstance> cloudServices, User user) throws ValidationException {
 
 		uuid = UUID.randomUUID().toString();
-		resourceUri = RESOURCE_URI_PREFIX + uuid;
+		resourceUri = assembleResourceUri(uuid);
 
 		this.category = module.getCategory();
 		this.moduleResourceUri = module.getResourceUri();
 		this.type = type;
-		this.cloudServiceNames = StringUtils.join(cloudServiceNames, ",");
+		setCloudServices(cloudServices);
 		this.user_ = user.getName();
-		
+
 		this.module = module;
 
 		setStart();
 		postEventStateTransition(this.state, true);
-	}
-
-	@Override
-	@ElementMap(name = "parameters", required = false, valueType = RunParameter.class)
-	protected void setParameters(Map<String, RunParameter> parameters) {
-		this.parameters = parameters;
-	}
-
-	@Override
-	@ElementMap(name = "parameters", required = false, valueType = RunParameter.class)
-	public Map<String, RunParameter> getParameters() {
-		return parameters;
 	}
 
 	public Module getModule(boolean load) {
@@ -598,7 +545,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public Module getModule() {
 		return getModule(true);
 	}
-
 
 	public void setModule(Module module) throws ValidationException {
 		this.module = module;
@@ -620,6 +566,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
+		resourceUri = assembleResourceUri(uuid);
 	}
 
 	public String getModuleResourceUrl() {
@@ -634,8 +581,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return runtimeParameters;
 	}
 
-	public void setRuntimeParameters(
-			Map<String, RuntimeParameter> runtimeParameters) {
+	public void setRuntimeParameters(Map<String, RuntimeParameter> runtimeParameters) {
 		this.runtimeParameters = runtimeParameters;
 	}
 
@@ -662,22 +608,23 @@ public class Run extends Parameterized<Run, RunParameter> {
 	/**
 	 * Set value to key, ignoring the abort flag, such that no exception is
 	 * thrown.
-	 *
+	 * 
 	 * @param key
 	 * @return new value
 	 * @throws AbortException
 	 * @throws NotFoundException
 	 */
-	public String getRuntimeParameterValueIgnoreAbort(String key)
-			throws NotFoundException {
+	public String getRuntimeParameterValueIgnoreAbort(String key) throws NotFoundException {
 
 		RuntimeParameter parameter = extractRuntimeParameter(key);
 		return parameter.getValue();
 	}
 
-	private RuntimeParameter extractRuntimeParameter(String key)
-			throws NotFoundException {
+	private RuntimeParameter extractRuntimeParameter(String key) throws NotFoundException {
 
+		if (runtimeParameters == null) {
+			throwNotFoundException(key);
+		}
 		if (!runtimeParameters.containsKey(key)) {
 			throwNotFoundException(key);
 		}
@@ -718,8 +665,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 		createRuntimeParameter(node, nodeInstanceId, key, value, description, ParameterType.String);
 	}
 
-	public void createRuntimeParameter(Node node, int nodeInstanceId, String key, String value,
-			String description, ParameterType type) throws ValidationException {
+	public void createRuntimeParameter(Node node, int nodeInstanceId, String key, String value, String description,
+			ParameterType type) throws ValidationException {
 
 		String parameterName = composeNodeInstanceParameterName(node, nodeInstanceId, key);
 		assignRuntimeParameter(parameterName, value, description, type);
@@ -750,7 +697,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setEnd(Date end) {
-		if(end != null) {
+		if (end != null) {
 			this.endTime = (Date) end.clone();
 		}
 	}
@@ -765,99 +712,51 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return new Date();
 	}
 
-	public void addNodeInstanceName(Node node, int nodeInstanceId) {
-		String nodeInstanceName = composeNodeInstanceName(node, nodeInstanceId);
-		String cloudServiceName = getCloudServiceNameForNode(node.getName());
+	public void addNodeInstance(Node node, int nodeInstanceId) {
+		String nodeInstance = composeNodeInstanceName(node, nodeInstanceId);
+		String cloudService = getCloudServiceNameForNode(node.getName());
 
-		addNodeInstanceName(nodeInstanceName, cloudServiceName);
+		addNodeInstance(nodeInstance, cloudService);
 	}
 
-	public void addNodeInstanceName(String nodeInstanceName, String cloudServiceName) {
-		List<String> nodeNamesList = new ArrayList<String>(getNodeInstanceNamesList());
-		nodeNamesList.remove("");
-		if (!nodeNamesList.contains(nodeInstanceName)) {
-			nodeNamesList.add(nodeInstanceName);
-			nodeNames = StringUtils.join(nodeNamesList, NODE_NAMES_SEPARATOR);
-
-			Integer nb = cloudServiceUsage.get(cloudServiceName);
-			if (nb == null){
+	public void addNodeInstance(String nodeInstance, String cloudService) {
+		Set<String> nodeInstances = getNodeInstances();
+		if (!nodeInstances.contains(nodeInstance)) {
+			Integer nb = cloudServiceUsage.get(cloudService);
+			if (nb == null) {
 				nb = 0;
 			}
-			cloudServiceUsage.put(cloudServiceName, nb + 1);
+			cloudServiceUsage.put(cloudService, nb + 1);
 		}
+
+		nodeInstances.add(nodeInstance);
 	}
 
 	public void removeNodeInstanceName(String nodeInstanceName, String cloudServiceName) {
 		// removeNodeInstanceName(nodeInstanceName);
 		Integer nb = cloudServiceUsage.get(cloudServiceName);
-		if (nb != null && nb > 0){
+		if (nb != null && nb > 0) {
 			cloudServiceUsage.put(cloudServiceName, nb - 1);
 		}
 	}
 
-	public void removeNodeInstanceName(String nodeInstanceName) {
-		List<String> nodeNamesList = new ArrayList<String>(getNodeInstanceNamesList());
-		while (nodeNamesList.contains(nodeInstanceName)) {
-			nodeNamesList.remove(nodeInstanceName);
-		}
-		nodeNames = StringUtils.join(nodeNamesList, NODE_NAMES_SEPARATOR);
+	public void removeNodeInstanceName(String nodeInstance) {
+		nodeInstances.remove(nodeInstance);
 	}
 
-	/**
-	 * Return nodenames, including a value for each index from 1 to multiplicity
-	 * (e.g. apache1.1, apache1.2...)
-	 *
-	 * @return comma separated nodenames
-	 */
-	public String getNodeNames() {
-		return nodeNames;
+	public Set<String> getNodeInstances() {
+		return nodeInstances;
 	}
 
-	/**
-	 * Builds a list of node instance names (e.g. node.1, node.2, machine)
-	 * @return node instance name list
-	 */
-	public List<String> getNodeInstanceNamesList() {
-		String[] rawNodeNames = getNodeNames().split(NODE_NAMES_SEPARATOR);
-		List<String> nodeNames = new ArrayList<String>(rawNodeNames.length);
-
-		for (int i=0; i < rawNodeNames.length; i++) {
-			String nodeName = rawNodeNames[i].trim();
-			if (!nodeName.isEmpty()) {
-				nodeNames.add(nodeName);
-			}
-		}
-
-		return nodeNames;
+	@SuppressWarnings("unused")
+	private void setNodeInstances(Set<String> nodeInstances) {
+		this.nodeInstances = nodeInstances;
 	}
 
-	/**
-	 * Builds a list of node instance names (e.g. nodeA, nodeB, machine)
-	 * @return node names
-	 */
-	public List<String> getNodeNamesList() {
-		List<String> groupNames = getGroupNameList();
-		List<String> nodeNames = new ArrayList<String>();
-
-		for (String groupName : groupNames) {
-			String nodeName = "";
-			try {
-				nodeName = groupName.split(SERVICENAME_NODENAME_SEPARATOR)[1];
-			} catch (IndexOutOfBoundsException ex) {
-				//
-			}
-			if (!nodeName.isEmpty()) {
-				nodeNames.add(nodeName);
-			}
-		}
-
-		return nodeNames;
-	}
-
-	public List<String> getNodeInstanceNames(String nodeName) {
+	public Set<String> getNodeInstances(String nodeName) {
 		Pattern INSTANCENAME = Pattern.compile("^(" + nodeName + "\\.\\d+)$");
-		List<String> requested = new ArrayList<String>();
-		for (String instanceName : getNodeInstanceNamesList()) {
+		Set<String> requested = new HashSet<String>();
+		for (String instanceName : getNodeInstances()) {
 			if (INSTANCENAME.matcher(instanceName).matches())
 				requested.add(instanceName);
 		}
@@ -873,11 +772,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return resourceUri;
 	}
 
-	@Override
-	public void setContainer(RunParameter parameter) {
-		parameter.setContainer(this);
-	}
-
 	public String getUser() {
 		return user_;
 	}
@@ -886,14 +780,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.user_ = user;
 	}
 
-	public RuntimeParameter assignRuntimeParameter(String key, String value,
-			String description) throws ValidationException {
-		return assignRuntimeParameter(key, value, description,
-				ParameterType.String);
+	public RuntimeParameter assignRuntimeParameter(String key, String value, String description)
+			throws ValidationException {
+		return assignRuntimeParameter(key, value, description, ParameterType.String);
 	}
 
-	public RuntimeParameter assignRuntimeParameter(String key, String value,
-			String description, ParameterType type) throws ValidationException {
+	public RuntimeParameter assignRuntimeParameter(String key, String value, String description, ParameterType type)
+			throws ValidationException {
 		if (key == null) {
 			throw new ValidationException("Key cannot be null");
 		}
@@ -910,13 +803,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return parameter;
 	}
 
-	public RuntimeParameter assignRuntimeParameter(String key,
-			String description) throws ValidationException {
+	public RuntimeParameter assignRuntimeParameter(String key, String description) throws ValidationException {
 		return assignRuntimeParameter(key, "", description);
 	}
 
-	public RuntimeParameter updateRuntimeParameter(String key, String value)
-			throws NotFoundException, ValidationException {
+	public RuntimeParameter updateRuntimeParameter(String key, String value) throws NotFoundException,
+			ValidationException {
 		if (!runtimeParameters.containsKey(key)) {
 			throwNotFoundException(key);
 		}
@@ -939,12 +831,49 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	private void throwNotFoundException(String key) throws NotFoundException {
-		throw new NotFoundException("Couldn't find key '" + key
-				+ "' in execution instance: '" + getName() + "'");
+		throw new NotFoundException("Couldn't find key '" + key + "' in execution instance: '" + getName() + "'");
 	}
 
 	public Run store() {
 		return (Run) super.store();
+	}
+
+	/*
+	 * Runtime parameters are persisted in a separate table. We therefore don't
+	 * need to serialize them as a json blob with the run object. However, they
+	 * are relevent when serializing the object in json or xml. (non-Javadoc)
+	 * 
+	 * @see com.sixsq.slipstream.persistence.Metadata#toJson()
+	 */
+	public String toJsonForPersistence() {
+		Map<String, RuntimeParameter> runtimeParameters = this.runtimeParameters;
+		this.runtimeParameters = null;
+		setJson(super.toJsonForPersistence());
+		this.runtimeParameters = runtimeParameters;
+		return getJson();
+	}
+
+	@Override
+	protected Metadata substituteFromJson() {
+		Map<String, RuntimeParameter> runtimeParameters = getRuntimeParameters();
+		Run run = (Run) super.substituteFromJson();
+		run.setRuntimeParameters(runtimeParameters);
+		return run;
+	}
+
+	public static Run fromJson(String json) throws SlipStreamClientException {
+		return (Run) SerializationUtil.fromJson(json, Run.class, new Run().createDeserializer());
+	}
+
+	protected JSONDeserializer<Object> createDeserializer() {
+		return new JSONDeserializer<Object>()
+				.use("parameters.values", Parameter.class)
+				.use("runtimeParameters", ConcurrentHashMap.class)
+				.use("runtimeParameters.values", RuntimeParameter.class)
+				.use("nodes.values", String.class)
+				.use("nodeInstance.values", String.class)
+				.use("module", new ModuleObjectFactory())
+				.use("module.parameters.values", Parameter.class);
 	}
 
 	public void setType(RunType type) {
@@ -961,69 +890,70 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public void setState(States state) {
-		postEventStateTransition(state);		
-		this.state = state;		
+		postEventStateTransition(state);
+		this.state = state;
 	}
 
-	private void postEventStateTransition(States newState) {	
+	private void postEventStateTransition(States newState) {
 		postEventStateTransition(newState, false);
 	}
 
 	private void postEventGarbageCollected() {
 		postEvent(Event.Severity.medium, "Garbage collected");
 	}
-	
+
 	public void postEventTerminate() {
 		postEvent(Event.Severity.medium, "Terminated");
 	}
-	
+
 	public void postEventScaleUp(String nodename, List<String> nodeInstanceNames, int nbInstancesToAdd) {
-		String message = "Scaling up '" + nodename + "' with " + nbInstancesToAdd + " new instances: " + nodeInstanceNames;
+		String message = "Scaling up '" + nodename + "' with " + nbInstancesToAdd + " new instances: "
+				+ nodeInstanceNames;
 		postEvent(Event.Severity.medium, message);
-	}	
-	
+	}
+
 	public void postEventScaleDown(String nodename, List<String> nodeInstanceIds) {
-			
-		int nbInstancesToDelete = 0;		
+
+		int nbInstancesToDelete = 0;
 		if (nodeInstanceIds != null) {
 			nbInstancesToDelete = nodeInstanceIds.size();
 		}
-		
-		String message = "Scaling down '" + nodename + "' by deleting " + nbInstancesToDelete +" instances: " + nodeInstanceIds;
+
+		String message = "Scaling down '" + nodename + "' by deleting " + nbInstancesToDelete + " instances: "
+				+ nodeInstanceIds;
 		postEvent(Event.Severity.medium, message);
-	}	
+	}
 
 	private void postEventStateTransition(States newState, boolean forcePost) {
 		boolean stateWillChange = this.state != newState;
 		boolean shouldPost = forcePost || stateWillChange;
 		if (shouldPost) {
-			postEvent(Event.Severity.medium, newState.toString());					
+			postEvent(Event.Severity.medium, newState.toString());
 		}
 	}
-	
+
 	private void postEventAbort(String origin, String abortMessage) {
 		String message = "Abort from '" + origin + "', message:" + abortMessage;
-		postEvent(Event.Severity.high, message);		
+		postEvent(Event.Severity.high, message);
 	}
-	
+
 	private void postEventRecoveryMode(String newValue) {
 		String message = "Recovery mode set to '" + newValue + "'";
 		postEvent(Event.Severity.high, message);
 	}
-	
+
 	private void postEvent(Event.Severity severity, String message) {
 		TypePrincipal owner = new TypePrincipal(USER, getUser());
-		List<TypePrincipalRight> rules = Arrays.asList(
-				new TypePrincipalRight(USER, getUser(), ALL),
+		List<TypePrincipalRight> rules = Arrays.asList(new TypePrincipalRight(USER, getUser(), ALL),
 				new TypePrincipalRight(ROLE, "ADMIN", ALL));
 		ACL acl = new ACL(owner, rules);
-		
-		String resourceRef = RESOURCE_URI_PREFIX + uuid;
-		Event event = new Event(acl, now(), resourceRef, message, severity, EventType.state);
+
+		String resourceUri = assembleResourceUri(uuid);
+		Event event = new Event(acl, now(), resourceUri, message, severity, EventType.state);
 
 		Event.post(event);
 	}
-	
+
 	public Date getLastStateChange() {
 		return this.lastStateChangeTime;
 	}
@@ -1032,14 +962,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 		setLastStateChange(now());
 	}
 
-	public void setLastStateChange(Date date){
+	public void setLastStateChange(Date date) {
 		this.lastStateChangeTime = date;
 	}
 
-	public List<String> getOrchestrators() {
-		List<String> orchestrators = new ArrayList<String>();
+	public Set<String> getOrchestrators() {
+		Set<String> orchestrators = new HashSet<String>();
 
-		for (String nodename : getNodeInstanceNamesList()) {
+		for (String nodename : getNodeInstances()) {
 			if (nodename.startsWith(Run.ORCHESTRATOR_NAME)) {
 				orchestrators.add(nodename);
 			}
@@ -1048,31 +978,27 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return orchestrators;
 	}
 
-	public void addGroup(String group, String serviceName) {
-		if (!this.groups.isEmpty()) {
-			this.groups += Run.NODE_NAMES_SEPARATOR;
-		}
-		this.groups += serviceName + SERVICENAME_NODENAME_SEPARATOR + group;
+	@SuppressWarnings("unused")
+	private void setOrchestrators(Set<String> dummy) {
+	}
+	
+	public void addNode(String node, String service) {
+		nodes.add(service + SERVICENAME_NODENAME_SEPARATOR + node);
 	}
 
-	@Attribute
-	@Column(length=1024)
-	public String getGroups() {
-		RuntimeParameter groupsParameter = getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY);
-		if(groupsParameter != null) {
-			groupsParameter.setValue(groups);
-		}
-		return groups;
+	public Set<String> getNodes() {
+//		if (getRuntimeParameters() == null) {
+//			return nodes;
+//		}
+//		RuntimeParameter groupsParameter = getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY);
+//		if (groupsParameter != null) {
+//			groupsParameter.setValue(StringUtils.join(nodes, ","));
+//		}
+		return nodes;
 	}
 
-	@Attribute
-	@Column(length=1024)
-	public void setGroups(String groups) {
-		this.groups = groups;
-	}
-
-	public List<String> getGroupNameList() {
-		return Arrays.asList(getGroups().split(","));
+	public void setNodes(Set<String> nodes) {
+		this.nodes = nodes;
 	}
 
 	public String nodeRuntimeParameterKeyName(Node node, String nodeParameterName) {
@@ -1081,14 +1007,6 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	public static String constructOrchestratorName(String cloudService) {
 		return ORCHESTRATOR_NAME + ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR + cloudService;
-	}
-
-	public String getCloudServiceNames() {
-		return cloudServiceNames;
-	}
-
-	public void setCloudServiceNames(String cloudServiceNames) {
-		this.cloudServiceNames = cloudServiceNames;
 	}
 
 	public String getCloudServiceNameForNode(String nodeName) {
@@ -1108,16 +1026,29 @@ public class Run extends Parameterized<Run, RunParameter> {
 		this.mutable = false;
 	}
 
-//	public void remove() {
-//		List<VmRuntimeParameterMapping> ms = VmRuntimeParameterMapping.getMappings(getUuid());
-//		for(VmRuntimeParameterMapping m : ms) {
-//			try {
-//				m.remove();
-//			} catch (IllegalArgumentException e) {
-//
-//			}
-//		}
-//		super.remove();
-//	}
+	public void remove() {
+		remove(getResourceUri(), this.getClass());
+	}
 
+	public ModuleCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(ModuleCategory category) {
+		this.category = category;
+	}
+
+	public void setCategory(String category) {
+		this.category = ModuleCategory.valueOf(category);
+	}
+
+	public RuntimeParameter getRuntimeParameter(String key) {
+		RuntimeParameter rp = getRuntimeParameters().get(key);
+		if(rp != null) {
+			// Replace the container (run) with this since it has
+			// been deserialized from json (unlike the version from the db)
+			rp.setContainer(this);
+		}
+		return rp;
+	}
 }

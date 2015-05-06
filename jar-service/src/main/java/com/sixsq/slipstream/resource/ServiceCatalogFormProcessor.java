@@ -28,8 +28,7 @@ import com.sixsq.slipstream.persistence.ServiceCatalogParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.FormProcessor;
 
-public class ServiceCatalogFormProcessor extends
-		FormProcessor<ServiceCatalog, ServiceCatalogParameter> {
+public class ServiceCatalogFormProcessor extends FormProcessor {
 
 	private String cloud;
 
@@ -45,20 +44,18 @@ public class ServiceCatalogFormProcessor extends
 	}
 
 	@Override
-	protected ServiceCatalog getOrCreateParameterized(String cloud)
-			throws ValidationException, NotFoundException {
+	protected ServiceCatalog getOrCreateParameterized(String cloud) throws ValidationException, NotFoundException {
 		return new ServiceCatalog(cloud);
 	}
 
 	@Override
-	protected ServiceCatalogParameter createParameter(String name,
-			String value, String description) throws SlipStreamClientException {
+	protected ServiceCatalogParameter createParameter(String name, String value, String description)
+			throws SlipStreamClientException {
 		return new ServiceCatalogParameter(name, value, description);
 	}
 
 	@Override
-	protected boolean shouldProcess(String paramName)
-			throws ValidationException {
+	protected boolean shouldProcess(String paramName) throws ValidationException {
 		if (paramName == null) {
 			throw new ValidationException("Missing parameter name");
 		}

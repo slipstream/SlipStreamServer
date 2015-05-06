@@ -22,28 +22,16 @@ package com.sixsq.slipstream.persistence;
 
 import java.util.regex.Pattern;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-@Entity
-@SuppressWarnings("serial")
-public class ServiceCatalogParameter extends Parameter<ServiceCatalog> {
+public class ServiceCatalogParameter extends Parameter {
 
-	@Id
-	@GeneratedValue
-	Long id;
-
-	@SuppressWarnings("unused")
-	private ServiceCatalogParameter() {
-		super();
+	public ServiceCatalogParameter(String name, String value, String description) throws ValidationException {
+		super(name, value, description);
 	}
 
-	public ServiceCatalogParameter(String key, String value, String description)
-			throws ValidationException {
-		super(key, value, description);
+	public ServiceCatalogParameter(ServiceCatalogParameter serviceCatalogParameter) throws ValidationException {
+		super(serviceCatalogParameter);
 	}
 
 	@Override
@@ -51,8 +39,7 @@ public class ServiceCatalogParameter extends Parameter<ServiceCatalog> {
 		super.validateName();
 
 		if ("".equals(getName())) {
-			throw (new ValidationException(
-					"Error creating new Parameter, argument name cannot be empty"));
+			throw (new ValidationException("Error creating new Parameter, argument name cannot be empty"));
 		}
 
 		String key = getName();
@@ -64,19 +51,8 @@ public class ServiceCatalogParameter extends Parameter<ServiceCatalog> {
 	}
 
 	@Override
-	public Long getId() {
-		return id;
+	public Parameter copy() throws ValidationException {
+		Parameter copy = new ServiceCatalogParameter(this);
+		return copyTo(copy);
 	}
-
-	@Override
-	protected void setId(Long id) {
-		this.id = id;
-	}
-
-	@Override
-	public ServiceCatalogParameter copy() throws ValidationException {
-		return (ServiceCatalogParameter) copyTo(new ServiceCatalogParameter(
-				getName(), getValue(), getDescription()));
-	}
-
 }

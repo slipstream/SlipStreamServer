@@ -238,7 +238,7 @@ public class Configuration {
 					+ versionRequiredParameter.getName()));
 		}
 
-		ServiceConfigurationParameter versionParameter = getParameters().getParameter(
+		Parameter versionParameter = getParameters().getParameter(
 				versionRequiredParameter.getName());
 		if (versionParameter == null) {
 			versionParameter = createParameter(version, versionRequiredParameter.getName(),
@@ -257,7 +257,7 @@ public class Configuration {
 	}
 
 	private void setMandatoryToAllParameters() {
-		for (ServiceConfigurationParameter parameter : serviceConfiguration.getParameterList()) {
+		for (Parameter parameter : serviceConfiguration.getParameterList()) {
 			parameter.setMandatory(true);
 		}
 	}
@@ -303,8 +303,6 @@ public class Configuration {
 	 * of the config file. Since connector class names can be added at anytime
 	 * during the lifetime of a SlipStream server instance.
 	 *
-	 * @param properties
-	 *            (e.g. loaded from the configuration file)
 	 */
 	private void mergeWithParametersFromConnectors() {
 
@@ -314,7 +312,7 @@ public class Configuration {
 
 		String[] connectorClassNames = getConnectorClassNames();
 
-		Map<String, ServiceConfigurationParameter> connectorsParameters;
+		Map<String, Parameter> connectorsParameters;
 		try {
 			connectorsParameters = ParametersFactory.getServiceConfigurationParametersTemplate(connectorClassNames);
 		} catch (ValidationException e) {
@@ -324,9 +322,9 @@ public class Configuration {
 		// Loop around the connector parameters and add them to the list if
 		// they are not there, otherwise reset their fields, with the exception
 		// of the value
-		for (ServiceConfigurationParameter p : connectorsParameters.values()) {
+		for (Parameter p : connectorsParameters.values()) {
 
-			ServiceConfigurationParameter parameter = p;
+			Parameter parameter = p;
 			if (serviceConfiguration.parametersContainKey(p.getName())) {
 				parameter = serviceConfiguration.getParameters().get(p.getName());
 				parameter.setDescription(p.getDescription());
@@ -350,9 +348,9 @@ public class Configuration {
 		return parameter;
 	}
 
-	private Map<String, ServiceConfigurationParameter> convertPropertiesToParameters(Properties properties)
+	private Map<String, Parameter> convertPropertiesToParameters(Properties properties)
 			throws ValidationException {
-		Map<String, ServiceConfigurationParameter> parameters = new HashMap<String, ServiceConfigurationParameter>();
+		Map<String, Parameter> parameters = new HashMap<String, Parameter>();
 		for (Entry<Object, Object> entry : properties.entrySet()) {
 			String key = (String) entry.getKey();
 			String value = (String) entry.getValue();
@@ -567,7 +565,7 @@ public class Configuration {
 	 * @return value associated with key or null if the key does not exist
 	 */
 	public String getProperty(String key) {
-		ServiceConfigurationParameter parameter = serviceConfiguration.getParameter(key);
+		Parameter parameter = serviceConfiguration.getParameter(key);
 		return (parameter == null ? null : parameter.getValue());
 	}
 
@@ -777,10 +775,10 @@ public class Configuration {
 	 * @throws ValidationException
 	 * @throws ConfigurationException
 	 */
-	public void update(Map<String, ServiceConfigurationParameter> parameters) throws ConfigurationException,
+	public void update(Map<String, Parameter> parameters) throws ConfigurationException,
 			ValidationException {
 		loadFromFile();
-		for (ServiceConfigurationParameter p : parameters.values()) {
+		for (Parameter p : parameters.values()) {
 			this.serviceConfiguration.setParameter(p);
 		}
 		mergeWithParametersFromConnectors();
@@ -795,7 +793,7 @@ public class Configuration {
 
 	private void resetRequiredParameterDefinition() {
 		for (RequiredParameters required : ServiceConfiguration.RequiredParameters.values()) {
-			ServiceConfigurationParameter target = serviceConfiguration.getParameter(required.getName());
+			Parameter target = serviceConfiguration.getParameter(required.getName());
 			target.setCategory(required.getCategory().name());
 			target.setType(required.getType());
 			target.setDescription(required.getDescription());

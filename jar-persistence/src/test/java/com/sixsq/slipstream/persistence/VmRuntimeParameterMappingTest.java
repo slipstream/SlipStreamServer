@@ -65,8 +65,8 @@ public class VmRuntimeParameterMappingTest {
 	@Test
 	public void getRuntimeParameter() throws ValidationException {
 
-		Set<String> clouds = new HashSet<String>();
-		clouds.add("cloud1");
+		Set<ConnectorInstance> clouds = new HashSet<ConnectorInstance>();
+		clouds.add(new ConnectorInstance("cloud1", null));
 		Module module = new ImageModule("module");
 		Run run = new Run(module, RunType.Machine, clouds, user);
 		run.store();
@@ -158,8 +158,9 @@ public class VmRuntimeParameterMappingTest {
 	}
 
 	private Run createAndStoreRun(Module image, String instanceId, String cloudName) throws ValidationException {
-		Set<String> cloudServiceNames = new HashSet<String>(Arrays.asList(cloudName));
-		Run run = new Run(image, RunType.Run, cloudServiceNames, user);
+		Set<ConnectorInstance> clouds = new HashSet<ConnectorInstance>();
+		clouds.add(new ConnectorInstance("cloud1", null));
+		Run run = new Run(image, RunType.Run, clouds, user);
 
 		String cloudRuntimeParameterName = RuntimeParameter.constructParamName(Run.MACHINE_NAME,
 				RuntimeParameter.CLOUD_SERVICE_NAME);

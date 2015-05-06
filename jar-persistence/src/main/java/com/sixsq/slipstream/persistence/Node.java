@@ -27,32 +27,21 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
-
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementArray;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.util.json.JsonExcludeField;
 
-@Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+import flexjson.JSON;
+
 @SuppressWarnings("serial")
-public class Node extends Parameterized<Node, NodeParameter> {
+public class Node extends Parameterized {
 
 	private static final String NETWORK_KEY = ImageModule.NETWORK_KEY;
-
-	@Id
-	@GeneratedValue
-	private Long id;
+	@Attribute(required = false)
+	protected ModuleCategory category;
 
 	@Attribute
 	private String name;
@@ -85,7 +74,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 		this.imageUri = imageUri;
 	}
 
-	@Transient
+	@JSON(include = false)
 	private ImageModule image;
 
 	/**
@@ -93,11 +82,10 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	 * <node-name>.<index>:<parameter-name>.
 	 */
 	@ElementMap(required = false)
-	@Transient
 	private Map<String, NodeParameter> parameterMappings = new ConcurrentHashMap<String, NodeParameter>();
 
-	@ManyToOne
-	@JsonExcludeField
+//	@JsonExcludeField
+	@JSON(include = false)
 	private DeploymentModule module;
 
 	protected Node() {
@@ -111,18 +99,6 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	public Node(String name, ImageModule image) throws ValidationException {
 		this(name, image.getResourceUri());
 		this.image = image;
-	}
-
-	@Override
-	@ElementMap(name = "parameters", required = false, valueType = NodeParameter.class)
-	protected void setParameters(Map<String, NodeParameter> parameters) {
-		this.parameters = parameters;
-	}
-
-	@Override
-	@ElementMap(name = "parameters", required = false, valueType = NodeParameter.class)
-	public Map<String, NodeParameter> getParameters() {
-		return parameters;
 	}
 
 	public DeploymentModule getModule() {
@@ -140,10 +116,6 @@ public class Node extends Parameterized<Node, NodeParameter> {
 			throwValidationException("invalid node name: " + name);
 		}
 		image.validate();
-	}
-
-	public Long getId() {
-		return id;
 	}
 
 	public int getMultiplicity() {
@@ -215,8 +187,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	/**
 	 * Assembled notes. Includes notes from inherited images.
 	 */
-	@Transient
-	@ElementArray(required = false, entry = "note")
+	@ElementList(required = false, entry = "note")
 	public String[] getNotes() {
 		List<String> notes = new ArrayList<String>();
 		ImageModule image = getImage();
@@ -226,8 +197,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 		return notes.toArray(new String[0]);
 	}
 
-	@Transient
-	@ElementArray(required = false, entry = "note")
+	@ElementList(required = false, entry = "note")
 	private void setNotes(String[] notes) {
 	}
 
@@ -244,7 +214,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 	}
 
 	private void validateMapping(NodeParameter nodeParameter, DeploymentModule deployment) throws ValidationException {
-		ModuleParameter inputParameter = image.getParameter(nodeParameter.getName());
+		ModuleParameter inputParameter = (ModuleParameter) image.getParameter(nodeParameter.getName());
 		if (!ParameterCategory.Input.name().equals(inputParameter.getCategory())) {
 			throw new ValidationException("Input parameter " + nodeParameter.getName() + " not Input category");
 		}
@@ -266,7 +236,7 @@ public class Node extends Parameterized<Node, NodeParameter> {
 		String nodeName = parts[0];
 		String paramName = parts[1];
 
-		return deployment.getNodes().get(nodeName).getImage().getParameter(paramName);
+		return (ModuleParameter) deployment.getNodes().get(nodeName).getImage().getParameter(paramName);
 	}
 
 	@Element(required = false)
@@ -292,11 +262,6 @@ public class Node extends Parameterized<Node, NodeParameter> {
 		this.getParameterMappings().put(parameter.getName(), parameter);
 	}
 
-	@Override
-	public void setContainer(NodeParameter parameter) {
-		parameter.setContainer(this);
-	}
-
 	public Node copy() throws ValidationException {
 		Node copy = new Node(getName(), getImageUri());
 		copy = (Node) copyTo(copy);
@@ -306,8 +271,15 @@ public class Node extends Parameterized<Node, NodeParameter> {
 		return copy;
 	}
 
-	@Override
-	public Node store() {
-		return (Node) super.store();
+	public ModuleCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(ModuleCategory category) {
+		this.category = category;
+	}
+
+	public void setCategory(String category) {
+		this.category = ModuleCategory.valueOf(category);
 	}
 }

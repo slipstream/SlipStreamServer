@@ -26,27 +26,18 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.sixsq.slipstream.persistence.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.AbortException;
-import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Node;
-import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.util.CommonTestUtil;
 
 public class RunFactoryTest extends RunTest {
@@ -94,6 +85,9 @@ public class RunFactoryTest extends RunTest {
 		imageCircular1of2 = new ImageModule("test/imagecircular1of2");
 		imageCircular2of2 = new ImageModule("test/imagecircular2of2");
 
+		imageCircular1of2.store();
+		imageCircular2of2.store();
+
 		imageCircular1of2.setModuleReference(imageCircular2of2);
 		imageCircular2of2.setModuleReference(imageCircular1of2);
 
@@ -106,6 +100,10 @@ public class RunFactoryTest extends RunTest {
 		imageCircular1of3 = new ImageModule("test/imagecircular1of3");
 		imageCircular2of3 = new ImageModule("test/imagecircular2of3");
 		imageCircular3of3 = new ImageModule("test/imagecircular3of3");
+
+		imageCircular1of3.store();
+		imageCircular2of3.store();
+		imageCircular3of3.store();
 
 		imageCircular1of3.setModuleReference(imageCircular2of3);
 		imageCircular2of3.setModuleReference(imageCircular3of3);
@@ -123,7 +121,7 @@ public class RunFactoryTest extends RunTest {
 		baseImage.store();
 
 		customImage = new ImageModule("test/customImage");
-		customImage.setRecipe("echo hello;");
+		customImage.getTargets().put(Target.TARGET_RECIPE_NAME, new Target(Target.TARGET_RECIPE_NAME, "echo hello;"));
 		customImage.setModuleReference(baseImage);
 		customImage.store();
 	}
@@ -167,7 +165,7 @@ public class RunFactoryTest extends RunTest {
 
 	}
 
-	@Test(expected = InvalidMetadataException.class)
+	@Test(expected = ValidationException.class)
 	public void cannotBuildImageWith2ElementCircularDependency()
 			throws SlipStreamClientException {
 
@@ -175,7 +173,7 @@ public class RunFactoryTest extends RunTest {
 
 	}
 
-	@Test(expected = InvalidMetadataException.class)
+	@Test(expected = ValidationException.class)
 	public void cannotBuildImageWith3ElementCircularDependency()
 			throws SlipStreamException {
 
@@ -257,7 +255,7 @@ public class RunFactoryTest extends RunTest {
 
 		ImageModule imageWithOutputParameter = new ImageModule(
 				"test/imageWithOutputParameter");
-		imageWithOutputParameter.setRecipe("echo hello;");
+		imageWithOutputParameter.getTargets().put(Target.TARGET_RECIPE_NAME, new Target(Target.TARGET_RECIPE_NAME, "echo hello;"));
 		imageWithOutputParameter.setImageId("123", cloudServiceName);
 		ModuleParameter po1 = new ModuleParameter("po1", "po1 init value",
 				"po1 desc", ParameterCategory.Output);
@@ -266,7 +264,7 @@ public class RunFactoryTest extends RunTest {
 
 		ImageModule imageWithInputParameter = new ImageModule(
 				"test/imageWithInputParameter");
-		imageWithInputParameter.setRecipe("echo hello;");
+		imageWithInputParameter.getTargets().put(Target.TARGET_RECIPE_NAME, new Target(Target.TARGET_RECIPE_NAME, "echo hello;"));
 		imageWithInputParameter.setImageId("123", cloudServiceName);
 		ModuleParameter pi1 = new ModuleParameter("pi1", "", "pi1 desc",
 				ParameterCategory.Input);
@@ -372,12 +370,22 @@ public class RunFactoryTest extends RunTest {
 	}
 
 	@Test
+	public void nodeInstanceNames() throws SlipStreamException {
+
+		Run run = getDeploymentRun(deployment);
+
+		int HAS_2_NODES = 2;
+		assertThat(run.getNodes().size(),
+				is(HAS_2_NODES));
+	}
+
+	@Test
 	public void nodeNames() throws SlipStreamException {
 
 		Run run = getDeploymentRun(deployment);
 
 		int ORCHESTRATOR_AND_2_NODES = 3;
-		assertThat(run.getNodeNames().split(",").length,
+		assertThat(run.getNodeInstances().size(),
 				is(ORCHESTRATOR_AND_2_NODES));
 	}
 

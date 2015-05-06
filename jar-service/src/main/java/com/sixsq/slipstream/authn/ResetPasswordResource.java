@@ -31,13 +31,13 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.action.OneShotAction;
 import com.sixsq.slipstream.action.ResetPasswordAction;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.SimpleRepresentationBaseResource;
 import com.sixsq.slipstream.util.Notifier;
@@ -61,34 +61,27 @@ public class ResetPasswordResource extends SimpleRepresentationBaseResource {
 
 		notifyUser(user, action);
 
-		setPostResponse(MessageUtils.format(MSG_RESET_SENT),
-				MediaType.TEXT_PLAIN);
+		setPostResponse(MessageUtils.format(MSG_RESET_SENT), MediaType.TEXT_PLAIN);
 	}
 
 	private void notifyUser(User user, OneShotAction action) {
 		if (user != null && action != null) {
 			String baseUrlSlash = ResourceUriUtil.getBaseUrlSlash(getRequest());
-			String confirmUrl = baseUrlSlash + "action/" + action.getUuid()
-					+ "/confirm";
+			String confirmUrl = baseUrlSlash + "action/" + action.getUuid() + "/confirm";
 
 			String msg = MessageUtils.format(MSG_CONFIRM_RESET, confirmUrl);
 
-			boolean sendOk = Notifier.sendNotification(getConfiguration(),
-					user.getEmail(), msg);
+			boolean sendOk = Notifier.sendNotification(getConfiguration(), user.getEmail(), msg);
 
 			if (!sendOk) {
 
-				String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL
-						.getName();
-				ServiceConfigurationParameter parameter = getConfiguration()
-						.getParameter(key);
+				String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL.getName();
+				Parameter parameter = getConfiguration().getParameter(key);
 				String adminEmail = parameter.getValue();
 
-				String errorMsg = MessageUtils.format(MSG_ERROR_SENDING_EMAIL,
-						adminEmail);
+				String errorMsg = MessageUtils.format(MSG_ERROR_SENDING_EMAIL, adminEmail);
 
-				throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
-						errorMsg);
+				throw new ResourceException(Status.SERVER_ERROR_INTERNAL, errorMsg);
 			}
 		}
 	}
@@ -102,8 +95,7 @@ public class ResetPasswordResource extends SimpleRepresentationBaseResource {
 		return action;
 	}
 
-	public User retrieveNamedUser(Representation entity)
-			throws ResourceException, ConfigurationException,
+	public User retrieveNamedUser(Representation entity) throws ResourceException, ConfigurationException,
 			ValidationException {
 
 		Form form = new Form(entity);

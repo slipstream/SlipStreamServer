@@ -25,28 +25,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
-import org.hibernate.annotations.CollectionType;
-import org.simpleframework.xml.ElementMap;
-
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.util.SerializationUtil;
+
+import flexjson.JSON;
 
 @Entity
 @SuppressWarnings("serial")
 public class DeploymentModule extends Module {
 
-	@ElementMap(required = false)
-	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
-	private Map<String, Node> nodes = new ConcurrentHashMap<String, Node>();
+	@Transient
+	@JSON
+	private Map<String, Node> nodes = new HashMap<String, Node>();
 
 	@SuppressWarnings("unused")
 	private DeploymentModule() {
@@ -61,7 +58,7 @@ public class DeploymentModule extends Module {
 		return nodes;
 	}
 
-	public void setNodes(HashMap<String, Node> nodes) {
+	public void setNodes(Map<String, Node> nodes) {
 		this.nodes = nodes;
 	}
 
@@ -83,7 +80,7 @@ public class DeploymentModule extends Module {
 	 * Validates the integrity of the object. For example, checks that the
 	 * mapping for deployment instances is complete and no input parameter is
 	 * left unresolved.
-	 *
+	 * 
 	 * @throws ValidationException
 	 */
 	public void validate() throws ValidationException {
@@ -101,15 +98,17 @@ public class DeploymentModule extends Module {
 		}
 	}
 
-	private HashMap<String, ImageModule> buildImageNameImageMap()
-			throws ValidationException {
+	public Module fromJson(String json) throws SlipStreamClientException {
+		return (Module) SerializationUtil.fromJson(json, DeploymentModule.class, createDeserializer());
+	}
+
+	private HashMap<String, ImageModule> buildImageNameImageMap() throws ValidationException {
 
 		List<ImageModule> images = new LinkedList<ImageModule>();
 		for (Node node : nodes.values()) {
 			ImageModule image = node.getImage();
 			if (image == null) {
-				throw new ValidationException("Cannot find image: "
-						+ node.getImageUri());
+				throw new ValidationException("Cannot find image: " + node.getImageUri());
 			}
 			images.add(image);
 		}
@@ -123,8 +122,7 @@ public class DeploymentModule extends Module {
 		return imagemap;
 	}
 
-	private void validateThatAllParametersExist(
-			HashMap<String, ImageModule> imagemap) throws ValidationException {
+	private void validateThatAllParametersExist(HashMap<String, ImageModule> imagemap) throws ValidationException {
 
 		// Iterate over each node
 		for (Entry<String, Node> nodeEntry : getNodes().entrySet()) {
@@ -139,8 +137,7 @@ public class DeploymentModule extends Module {
 
 	}
 
-	private void validateOutputParametersExistsInOtherNodes(
-			HashMap<String, ImageModule> imagemap, Node node)
+	private void validateOutputParametersExistsInOtherNodes(HashMap<String, ImageModule> imagemap, Node node)
 			throws ValidationException {
 
 		// Check output params
@@ -150,50 +147,39 @@ public class DeploymentModule extends Module {
 				continue;
 			}
 
-			String nodeName = RuntimeParameter
-					.extractNodeNamePart(nodeParameter.getValue());
-			String paramName = RuntimeParameter
-					.extractParamNamePart(nodeParameter.getValue());
+			String nodeName = RuntimeParameter.extractNodeNamePart(nodeParameter.getValue());
+			String paramName = RuntimeParameter.extractParamNamePart(nodeParameter.getValue());
 
 			// Check that the node referring to by the oparam exists
 			if (!this.getNodes().containsKey(nodeName)) {
-				throw (new ValidationException(
-						"Node: "
-								+ node.getName()
-								+ " defines an output parameter: "
-								+ nodeParameter.getValue()
-								+ " which referes to a node not defined in the deployment"));
+				throw (new ValidationException("Node: " + node.getName() + " defines an output parameter: "
+						+ nodeParameter.getValue() + " which referes to a node not defined in the deployment"));
 			}
-			if (!this.getNodes().get(nodeName).getImage()
-					.parametersContainKey(paramName)) {
-				throw (new ValidationException(
-						"Failed to find output parameter: "
-								+ nodeParameter.getValue()
-								+ " as declared in: " + node.getName()));
+			if (!this.getNodes().get(nodeName).getImage().parametersContainKey(paramName)) {
+				throw (new ValidationException("Failed to find output parameter: " + nodeParameter.getValue()
+						+ " as declared in: " + node.getName()));
 			}
 		}
 	}
 
-	private void validateInputParametersExistsInNodeImage(Node node)
-			throws ValidationException {
+	private void validateInputParametersExistsInNodeImage(Node node) throws ValidationException {
 		boolean foundit = false;
 		for (String iparam : node.getParameterMappings().keySet()) {
 			foundit = false;
-			for (ModuleParameter param : node.getImage().getParameterList()) {
+			for (Parameter param : node.getImage().getParameterList()) {
 				if (param.getName().equals(iparam)) {
 					foundit = true;
 					break;
 				}
 			}
 			if (!foundit) {
-				throw (new ValidationException("Input parameter: " + iparam
-						+ " doesn't exist in image: " + node.getName()));
+				throw (new ValidationException("Input parameter: " + iparam + " doesn't exist in image: "
+						+ node.getName()));
 			}
 		}
 	}
 
-	private void validateAllInputsHaveMappingOutputs(
-			HashMap<String, ImageModule> imagemap) throws ValidationException {
+	private void validateAllInputsHaveMappingOutputs(HashMap<String, ImageModule> imagemap) throws ValidationException {
 		// Iterate over each node and build a map of mappings across all images
 		HashMap<String, NodeParameter> mapping = new HashMap<String, NodeParameter>();
 		for (Node node : getNodes().values()) {
@@ -202,13 +188,10 @@ public class DeploymentModule extends Module {
 			}
 		}
 		for (Module image : imagemap.values()) {
-			for (Parameter<Module> param : image.getParameters(
-					ParameterCategory.Input.name()).values()) {
+			for (Parameter param : image.getParameters(ParameterCategory.Input.name()).values()) {
 				if (!param.hasValueSet()) {
 					if (!mapping.containsKey(param.getName())) {
-						throw (new ValidationException(
-								"Missing mapping for input parameter: "
-										+ param.getName()));
+						throw (new ValidationException("Missing mapping for input parameter: " + param.getName()));
 					}
 				}
 			}
@@ -216,14 +199,12 @@ public class DeploymentModule extends Module {
 
 	}
 
-	private void imageInputParameterPresentIfNoDefault(Node node)
-			throws ValidationException {
-		for (Parameter<Module> moduleParameter : node.getImage()
-				.getParameters(ParameterCategory.Input.toString()).values()) {
+	private void imageInputParameterPresentIfNoDefault(Node node) throws ValidationException {
+		for (Parameter moduleParameter : node.getImage().getParameters(ParameterCategory.Input.toString())
+				.values()) {
 			if (!moduleParameter.hasValueSet()) {
 				if (!node.getParameterMappings().containsKey(moduleParameter.getName())) {
-					throw (new ValidationException("Missing input parameter "
-							+ moduleParameter.getName() + " in node "
+					throw (new ValidationException("Missing input parameter " + moduleParameter.getName() + " in node "
 							+ node.getName()));
 				}
 			}
@@ -236,8 +217,7 @@ public class DeploymentModule extends Module {
 
 	public DeploymentModule copy() throws ValidationException {
 
-		DeploymentModule copy = (DeploymentModule) copyTo(new DeploymentModule(
-				getName()));
+		DeploymentModule copy = (DeploymentModule) copyTo(new DeploymentModule(getName()));
 
 		for (Node node : getNodes().values()) {
 			copy.setNode(node.copy());
@@ -250,16 +230,15 @@ public class DeploymentModule extends Module {
 		super.postDeserialization();
 		// Assign containers inside parameters
 		for (Entry<String, Node> n : getNodes().entrySet()) {
-			for (Entry<String, NodeParameter> p : n.getValue().getParameters()
-					.entrySet()) {
+			for (Entry<String, Parameter> p : n.getValue().getParameters().entrySet()) {
 				p.getValue().setContainer(n.getValue());
 			}
 		}
 	}
 
 	public DeploymentModule store() {
-		if(nodes != null) {
-			for(Node n : nodes.values()) {
+		if (nodes != null) {
+			for (Node n : nodes.values()) {
 				n.setModule(this);
 			}
 		}
@@ -272,7 +251,7 @@ public class DeploymentModule extends Module {
 		transaction.begin();
 		DeploymentModule fromDb = em.find(this.getClass(), getResourceUri());
 		if (fromDb != null) {
-			for(Node n : fromDb.getNodes().values()) {
+			for (Node n : fromDb.getNodes().values()) {
 				n.getParameters().clear();
 				n.getParameterMappings().clear();
 				em.remove(n);

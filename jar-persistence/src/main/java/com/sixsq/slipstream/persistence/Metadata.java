@@ -32,19 +32,23 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.json.JsonExcludeField;
+
+import flexjson.JSON;
+import flexjson.JSONDeserializer;
 
 @MappedSuperclass
 @SuppressWarnings("serial")
 public abstract class Metadata implements Serializable {
+
+	@SuppressWarnings("unused")
+	@Deprecated
+	private int jpaVersion;
 
 	protected Date creation = new Date();
 
@@ -53,18 +57,14 @@ public abstract class Metadata implements Serializable {
 	protected Date lastModified;
 
 	@Attribute(required = false)
-	protected ModuleCategory category;
-
-	@Attribute(required = false)
 	@Column(length = 1024)
 	protected String description;
 
 	@Attribute(required = false)
 	protected boolean deleted;
 
-	@Element(required=false)
 	@Column(length = 1048576)
-	@JsonExcludeField
+	@JSON(include = false)
 	private String json;
 
 	protected Metadata() {
@@ -108,18 +108,6 @@ public abstract class Metadata implements Serializable {
 		this.lastModified = new Date();
 	}
 
-	public ModuleCategory getCategory() {
-		return category;
-	}
-
-	public void setCategory(ModuleCategory category) {
-		this.category = category;
-	}
-
-	public void setCategory(String category) {
-		this.category = ModuleCategory.valueOf(category);
-	}
-
 	public String getDescription() {
 		return description;
 	}
@@ -130,6 +118,10 @@ public abstract class Metadata implements Serializable {
 
 	String getJson() {
 		return json;
+	}
+
+	void setJson(String json) {
+		this.json = json;
 	}
 
 	public static String URLEncode(String url) {
@@ -149,7 +141,7 @@ public abstract class Metadata implements Serializable {
 
 	public Metadata store() throws SlipStreamDatabaseException {
 		Metadata obj = null;
-		json = SerializationUtil.toJsonString(this);
+		json = toJsonForPersistence();
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = null;
 		try {
@@ -158,31 +150,58 @@ public abstract class Metadata implements Serializable {
 			obj = em.merge(this);
 			transaction.commit();
 		} catch (PersistenceException e) {
-			transaction.rollback();
+			if(transaction.isActive()) {
+				transaction.rollback();
+			}
 			throw new SlipStreamDatabaseException(e.getMessage());
 		} finally {
-
 			em.close();
 		}
-		return substituteFromJson(obj);
+		return obj.substituteFromJson();
 	}
 
-	public static Metadata load(String resourceUrl, Class<? extends Metadata> type) throws ConfigurationException,
-			ValidationException {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Metadata meta = (Metadata) em.find(type, resourceUrl);
-		em.close();
-		meta = substituteFromJson(meta);
+	protected String toJsonForPersistence() {
+		return SerializationUtil.toJsonString(this);
+	}
+
+	public static Metadata load(String resourceUri, Class<? extends Metadata> type, EntityManager em) {
+		Metadata meta = (Metadata) em.find(type, resourceUri);
+		if(meta != null) {
+			meta = meta.substituteFromJson();
+		}
 		return meta;
 	}
 
-	protected static Metadata substituteFromJson(Metadata meta) {
-		if (meta != null) {
-			try {
-				meta = (Metadata) SerializationUtil.fromJson(meta.getJson(), meta.getClass());
-			} catch (SlipStreamClientException e) {
-				throw new SlipStreamRuntimeException(e.getMessage(), e);
-			}
+	public static Metadata load(String resourceUri, Class<? extends Metadata> type) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Metadata meta = (Metadata) load(resourceUri, type, em);
+		em.close();
+		return meta;
+	}
+
+	protected Metadata substituteFromJson() {
+		return substituteFromJson(createDeserializer());
+	}
+
+	protected JSONDeserializer<Object> createDeserializer() {
+		return new JSONDeserializer<Object>();
+	}
+	
+	protected Metadata substituteFromJson(JSONDeserializer<Object> deserializer) {
+		// cache the json since it will be set to null by the deserializer,
+		// since it's volatile
+		String json = getJson();
+		if(json == null) {
+			return this;
+		}
+		Metadata meta = null;
+		try {
+			meta = (Metadata) SerializationUtil.fromJson(getJson(), getClass(), deserializer);
+		} catch (SlipStreamClientException e) {
+			throw new SlipStreamRuntimeException(e.getMessage(), e);
+		}
+		if(meta != null) {
+			meta.setJson(json);
 		}
 		return meta;
 	}
@@ -210,7 +229,6 @@ public abstract class Metadata implements Serializable {
 	protected Metadata copyTo(Metadata copy) throws ValidationException {
 		copy.setCreation(getCreation());
 		copy.setLastModified();
-		copy.setCategory(getCategory());
 		copy.setDeleted(deleted);
 		copy.setDescription(getDescription());
 		copy.setName(getName());

@@ -70,7 +70,7 @@ public class ModuleVersionListResource extends BaseResource {
 	@Get("txt")
 	public Representation toTxt() {
 
-		String viewList = serialized(Module.viewListAllVersions(resourceUri));
+		String viewList = toXml(Module.viewListAllVersions(resourceUri));
 		return new StringRepresentation(viewList);
 	}
 
@@ -86,8 +86,7 @@ public class ModuleVersionListResource extends BaseResource {
 	@Get("json")
 	public Representation toJson() {
 
-		ModuleVersionViewList list = new ModuleVersionViewList(
-				Module.viewListAllVersions(resourceUri));
+		List<ModuleVersionView> list = Module.viewListAllVersions(resourceUri);
 		String result = SerializationUtil.toJsonString(list);
 		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
 	}
@@ -104,7 +103,7 @@ public class ModuleVersionListResource extends BaseResource {
 				MediaType.TEXT_HTML);
 	}
 
-	private String serialized(List<ModuleVersionView> viewList) {
+	private String toXml(List<ModuleVersionView> viewList) {
 		ModuleVersionViewList moduleViewList = new ModuleVersionViewList(
 				viewList);
 		return SerializationUtil.toXmlString(moduleViewList);

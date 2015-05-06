@@ -39,8 +39,8 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Package;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
@@ -130,7 +130,7 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 		image = image.store();
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
-		run.setParameter(new RunParameter("foo", "bar", "baz"));
+		run.setParameter(new Parameter("foo", "bar", "baz"));
 		return (Run) run.store();
 	}
 

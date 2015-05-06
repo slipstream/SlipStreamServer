@@ -34,10 +34,10 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ConnectorInstance;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
@@ -52,13 +52,13 @@ public abstract class RunFactory {
 		return createRun(module, user, null);
 	}
 
-	public final Run createRun(Module module, User user, Map<String, List<Parameter<?>>> userChoices)
+	public final Run createRun(Module module, User user, Map<String, List<Parameter>> userChoices)
 			throws SlipStreamClientException {
 
 		validateModuleForRun(module);
 
-		Map<String, String> cloudServicePerNode = resolveCloudServiceNames(module, user, userChoices);
-		Set<String> cloudServiceNames = new HashSet<String>(cloudServicePerNode.values());
+		Map<String, ConnectorInstance> cloudServicePerNode = resolveCloudServices(module, user, userChoices);
+		Set<ConnectorInstance> cloudServiceNames = new HashSet<ConnectorInstance>(cloudServicePerNode.values());
 
 		validateModule(module, cloudServicePerNode);
 
@@ -91,47 +91,42 @@ public abstract class RunFactory {
 	private void initDefaultRunParameters(Run run, User user) throws ValidationException {
 		run = addDefaultKeepRunningToParameters(run, user);
 
-		run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "false",
+		run.setParameter(new Parameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "false",
 				Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
 	}
 
-	private void initialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
+	protected void initialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
 
 		initializeGlobalParameters(run);
-
 		init(module, run, user);
-
-		initializeOrchestratorRuntimeParameters(run);
-		initOrchestratorsNodeNames(run);
-
 	}
 
 	protected abstract RunType getRunType();
 
 	protected abstract void init(Module module, Run run, User user) throws ValidationException, NotFoundException;
 
-	protected abstract Map<String, String> resolveCloudServiceNames(Module module, User user,
-			Map<String, List<Parameter<?>>> userChoices);
+	protected abstract Map<String, ConnectorInstance> resolveCloudServices(Module module, User user,
+																		   Map<String, List<Parameter>> userChoices);
 
 	protected abstract void addUserFormParametersAsRunParameters(Module module, Run run,
-			Map<String, List<Parameter<?>>> userChoices) throws ValidationException;
+			Map<String, List<Parameter>> userChoices) throws ValidationException;
 
 	protected abstract Module castToRequiredModuleType(Module module);
 
-	private void initCloudServices(Run run, Map<String, String> cloudServicePerNode) throws ValidationException {
-		for (Map.Entry<String, String> entry : cloudServicePerNode.entrySet()) {
+	private void initCloudServices(Run run, Map<String, ConnectorInstance> cloudServicePerNode) throws ValidationException {
+		for (Map.Entry<String, ConnectorInstance> entry : cloudServicePerNode.entrySet()) {
 			String key = constructParamName(entry.getKey(), RuntimeParameter.CLOUD_SERVICE_NAME);
-			RunParameter rp = new RunParameter(key, entry.getValue(), RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+			Parameter rp = new Parameter(key, entry.getValue().getName(), RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 			run.setParameter(rp);
 		}
 	}
 
 	protected abstract void initExtraRunParameters(Module module, Run run) throws ValidationException;
 
-	protected abstract void updateExtraRunParameters(Module module, Run run, Map<String, List<Parameter<?>>> userChoices)
+	protected abstract void updateExtraRunParameters(Module module, Run run, Map<String, List<Parameter>> userChoices)
 			throws ValidationException;
 
-	protected void validateModule(Module module, Map<String, String> cloudServicePerNode)
+	protected void validateModule(Module module, Map<String, ConnectorInstance> cloudServicePerNode)
 			throws SlipStreamClientException {
 		return;
 	}
@@ -143,7 +138,7 @@ public abstract class RunFactory {
 	}
 
 	private void validateCloudServicesSet(Run run) throws ValidationException {
-		if (run.getCloudServiceNamesList().length == 0) {
+		if (run.getCloudServices().size() == 0) {
 			throw new ValidationException("No cloud service names set on the run.");
 		}
 	}
@@ -178,10 +173,10 @@ public abstract class RunFactory {
 		return getRun(module, type, user, null);
 	}
 
-	public static Run getRun(Module module, RunType type, User user, Map<String, List<Parameter<?>>> userChoices)
+	public static Run getRun(Module module, RunType type, User user, Map<String, List<Parameter>> userChoices)
 			throws SlipStreamClientException {
 		if (userChoices == null) {
-			userChoices = new HashMap<String, List<Parameter<?>>>();
+			userChoices = new HashMap<String, List<Parameter>>();
 		}
 		return selectFactory(type).createRun(module, user, userChoices);
 	}
@@ -212,9 +207,9 @@ public abstract class RunFactory {
 		String key = Parameter.constructKey(ExecutionControlUserParametersFactory.CATEGORY,
 				UserParameter.KEY_KEEP_RUNNING);
 
-		UserParameter up = user.getParameter(key);
+		Parameter up = user.getParameter(key);
 		if (up != null) {
-			run.setParameter(new RunParameter(up.getName(), up.getValue(), up.getDescription()));
+			run.setParameter(new Parameter(up.getName(), up.getValue(), up.getDescription()));
 		} else {
 			throw new ValidationException("Parameter 'Keep running after deployment' not found in the user profile.");
 		}
@@ -237,8 +232,8 @@ public abstract class RunFactory {
 	protected void initializeOrchestratorRuntimeParameters(Run run) throws ValidationException {
 
 		if (withOrchestrator(run)) {
-			for (String cloudServiceName : getCloudServiceNames(run)) {
-				initializeOrchestratorParameters(run, cloudServiceName);
+			for (ConnectorInstance cloudServiceName : getCloudServiceNames(run)) {
+				initializeOrchestratorParameters(run, cloudServiceName.getName());
 			}
 		}
 	}
@@ -272,7 +267,7 @@ public abstract class RunFactory {
 	private static void initializeOrchestratorParameters(Run run, String cloudService) throws ValidationException {
 
 		if (cloudService.isEmpty()) {
-			throw new ValidationException("Failed to intialise orchestrator parameters: empty cloud service name.");
+			throw new ValidationException("Failed to initialise orchestrator parameters: empty cloud service name.");
 		}
 
 		String prefix = Run.constructOrchestratorName(cloudService);
@@ -336,20 +331,10 @@ public abstract class RunFactory {
 
 	}
 
-	protected void initOrchestratorsNodeNames(Run run) throws ConfigurationException, ValidationException {
-		if (withOrchestrator(run)) {
-			for (String cloudServiceName : getCloudServiceNames(run)) {
-				String nodename = Run.constructOrchestratorName(cloudServiceName);
-				run.addNodeInstanceName(nodename, cloudServiceName);
-				run.assignRuntimeParameter(nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR
-						+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName,
-						RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-			}
-		}
-	}
+	abstract protected void initOrchestratorsNodeNames(Run run) throws ConfigurationException, ValidationException;
 
-	public static String[] getCloudServiceNames(Run run) throws ValidationException {
-		return run.getCloudServiceNamesList();
+	public static Set<ConnectorInstance> getCloudServiceNames(Run run) throws ValidationException {
+		return run.getCloudServices();
 	}
 
 	public static String constructParamName(String nodename, String paramname) {

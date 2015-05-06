@@ -22,67 +22,43 @@ package com.sixsq.slipstream.persistence;
 
 import java.util.regex.Pattern;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
-import org.simpleframework.xml.Attribute;
-
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 
-@Entity
-@SuppressWarnings("serial")
-public class ServiceConfigurationParameter extends
-		Parameter<ServiceConfiguration> {
+public class ServiceConfigurationParameter extends Parameter {
 
-	@Id
-	@GeneratedValue
-	Long id;
-
-	@Attribute(required = false)
+	@SuppressWarnings("unused")
 	private ServiceConfigurationParameter() {
 	}
 
-	public ServiceConfigurationParameter(String name)
-			throws ValidationException {
+	public ServiceConfigurationParameter(String name) throws ValidationException {
 		super(name);
 	}
 
-	public ServiceConfigurationParameter(String name, String value)
-			throws ValidationException {
+	public ServiceConfigurationParameter(String name, String value) throws ValidationException {
 		super(name, value, "");
 	}
 
-	public ServiceConfigurationParameter(String name, String value,
-			String description) throws ValidationException {
+	public ServiceConfigurationParameter(String name, String value, String description) throws ValidationException {
 		super(name, value, description);
 	}
 
-	public ServiceConfigurationParameter(RequiredParameters parameter,
-			String value) throws ValidationException {
-		super(parameter.name(), value, parameter.getDescription());
-		setType(parameter.getType());
-		setInstructions(parameter.getInstruction());
-		setCategory(parameter.getCategory().name());
-		setMandatory(true);
-		setReadonly(parameter.isReadonly());
-	}
+//	public ServiceConfigurationParameter(RequiredParameters parameter, String value) throws ValidationException {
+//		super();
+//		setType(parameter.getType());
+//		setInstructions(parameter.getInstruction());
+//		setCategory(parameter.getCategory().name());
+//		setMandatory(true);
+//		setReadonly(parameter.isReadonly());
+//	}
 
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	protected void setId(Long id) {
-		this.id = id;
+	public ServiceConfigurationParameter(ServiceConfigurationParameter serviceConfigurationParameter)
+			throws ValidationException {
+		super(serviceConfigurationParameter);
 	}
 
 	@Override
 	public ServiceConfigurationParameter copy() throws ValidationException {
-		return (ServiceConfigurationParameter) copyTo(new ServiceConfigurationParameter(
-				getName(), getValue(), getDescription()));
+		return (ServiceConfigurationParameter) copyTo(new ServiceConfigurationParameter(this));
 	}
 
 	@Override

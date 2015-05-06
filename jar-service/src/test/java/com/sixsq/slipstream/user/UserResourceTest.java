@@ -31,6 +31,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
+import com.sixsq.slipstream.util.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -47,6 +48,7 @@ import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -59,14 +61,12 @@ public class UserResourceTest extends ResourceTestBase {
 	private static final String NEW_PASSWORD = "newPassword";
 	private static final String SUPER_PASSWORD = "passwordSuper";
 	private static User otherUser = UserTest.createUser("test2", "password2");
-	private static User superUser = UserTest
-			.createUser("super", SUPER_PASSWORD);
+	private static User superUser = UserTest.createUser("super", SUPER_PASSWORD);
 	private static User user = null;
 
 	@BeforeClass
-	public static void setupBeforeClass() throws InstantiationException,
-			IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException, ClassNotFoundException {
+	public static void setupBeforeClass() throws InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 		resetAndLoadConnector(LocalConnector.class);
 	}
 
@@ -97,8 +97,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void normalUserCantAccessOthers() throws ConfigurationException,
-			ValidationException {
+	public void normalUserCantAccessOthers() throws ConfigurationException, ValidationException {
 
 		Request request = createGetRequest(user, otherUser.getName());
 		Response response = executeRequest(request);
@@ -107,8 +106,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void getUserAsSuperUser() throws ConfigurationException,
-			ValidationException {
+	public void getUserAsSuperUser() throws ConfigurationException, ValidationException {
 
 		Request request = createGetRequest(superUser, otherUser.getName());
 		Response response = executeRequest(request);
@@ -117,8 +115,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void getInexistantUser() throws ConfigurationException,
-			ValidationException {
+	public void getInexistantUser() throws ConfigurationException, ValidationException {
 
 		Request request = createGetRequest(user, "inexistant");
 		Response response = executeRequest(request);
@@ -127,15 +124,13 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void changePasswordValidAsSuper() throws ConfigurationException,
-			NoSuchAlgorithmException, UnsupportedEncodingException,
-			ValidationException {
+	public void changePasswordValidAsSuper() throws ConfigurationException, NoSuchAlgorithmException,
+			UnsupportedEncodingException, ValidationException {
 
 		user = user.store();
 		user.hashAndSetPassword("something old");
 		user = user.store();
-		assertThat(getPersistedPassword(user),
-				is(not(Passwords.hash(NEW_PASSWORD))));
+		assertThat(getPersistedPassword(user), is(not(Passwords.hash(NEW_PASSWORD))));
 
 		Passwords passwords = createValidPasswords(UserTest.PASSWORD);
 		Request request = createPutRequest(user, superUser.getName(), passwords);
@@ -145,14 +140,12 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User modifiedUser = User.load(user.getResourceUri());
 
-		assertThat(getPersistedPassword(modifiedUser),
-				is(Passwords.hash(NEW_PASSWORD)));
+		assertThat(getPersistedPassword(modifiedUser), is(Passwords.hash(NEW_PASSWORD)));
 	}
 
 	@Test
-	public void changePasswordValidAsItself() throws ConfigurationException,
-			NoSuchAlgorithmException, UnsupportedEncodingException,
-			ValidationException {
+	public void changePasswordValidAsItself() throws ConfigurationException, NoSuchAlgorithmException,
+			UnsupportedEncodingException, ValidationException {
 
 		user = user.store();
 		String oldPassword = "something old";
@@ -168,13 +161,11 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User modifiedUser = User.load(user.getResourceUri());
 
-		assertThat(getPersistedPassword(modifiedUser),
-				is(Passwords.hash(NEW_PASSWORD)));
+		assertThat(getPersistedPassword(modifiedUser), is(Passwords.hash(NEW_PASSWORD)));
 	}
 
 	@Test
-	public void cannotChangePasswordOfOtherUser()
-			throws ConfigurationException, NoSuchAlgorithmException,
+	public void cannotChangePasswordOfOtherUser() throws ConfigurationException, NoSuchAlgorithmException,
 			UnsupportedEncodingException, ValidationException {
 
 		String oldPassword = "old password";
@@ -190,8 +181,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void changePasswordMissingOldPassword()
-			throws ConfigurationException, NoSuchAlgorithmException,
+	public void changePasswordMissingOldPassword() throws ConfigurationException, NoSuchAlgorithmException,
 			UnsupportedEncodingException, ValidationException {
 
 		Passwords passwords = createValidPasswords(UserTest.PASSWORD);
@@ -203,8 +193,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void superCanChangeOthersPasswordWithoutOldPassword()
-			throws ConfigurationException, ValidationException,
+	public void superCanChangeOthersPasswordWithoutOldPassword() throws ConfigurationException, ValidationException,
 			NoSuchAlgorithmException, UnsupportedEncodingException {
 
 		user.hashAndSetPassword(UserTest.PASSWORD);
@@ -221,14 +210,12 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void superMustProvideItsOwnOldPassowrdToChangeItsPassword()
-			throws ConfigurationException, ValidationException,
-			NoSuchAlgorithmException, UnsupportedEncodingException {
+	public void superMustProvideItsOwnOldPassowrdToChangeItsPassword() throws ConfigurationException,
+			ValidationException, NoSuchAlgorithmException, UnsupportedEncodingException {
 
 		Passwords passwords = createValidPasswords(SUPER_PASSWORD);
 		passwords.oldPassword = null;
-		Request request = createPutRequest(superUser, superUser.getName(),
-				passwords);
+		Request request = createPutRequest(superUser, superUser.getName(), passwords);
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_CONFLICT));
@@ -242,15 +229,12 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		User user = (User) SerializationUtil.fromXml(
-				response.getEntityAsText(), User.class);
-		assertNull(user.getPassword());
+		User user = (User) SerializationUtil.fromXml(response.getEntityAsText(), User.class);
 		assertNull(user.getHashedPassword());
 	}
 
 	@Test
-	public void passwordSerializedForNormalUserAsSuper()
-			throws SlipStreamClientException {
+	public void passwordSerializedForNormalUserAsSuper() throws SlipStreamClientException {
 
 		Request request = createGetRequest(superUser, superUser.getName());
 		Response response = executeRequest(request);
@@ -263,8 +247,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void passwordBlankedForSuperAsSuper()
-			throws SlipStreamClientException {
+	public void passwordBlankedForSuperAsSuper() throws SlipStreamClientException {
 
 		Request request = createGetRequest(superUser, superUser.getName());
 		request.getClientInfo().accept(MediaType.APPLICATION_JSON);
@@ -272,9 +255,8 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		User user = (User) SerializationUtil.fromJson(
-				response.getEntityAsText(), User.class);
-		assertNull(user.getPassword());
+		String xml = response.getEntityAsText();
+		User user = (User) SerializationUtil.fromXml(xml, User.class);
 		assertNull(user.getHashedPassword());
 	}
 
@@ -291,8 +273,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void cantDeleteAnotherUser() throws ConfigurationException,
-			ValidationException {
+	public void cantDeleteAnotherUser() throws ConfigurationException, ValidationException {
 
 		User cantBeDeleted = new User("cantBeDeletedByAnotherUser");
 		UserTest.storeUser(cantBeDeleted);
@@ -306,16 +287,14 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void cantSelfAssignSuperUnlessAlreadySuper()
-			throws ConfigurationException, ValidationException {
+	public void cantSelfAssignSuperUnlessAlreadySuper() throws ConfigurationException, ValidationException {
 
 		User cantSelfAssignSuper = UserTest.createUser("cantSelfAssignSuper");
 		UserTest.storeUser(cantSelfAssignSuper);
 
 		cantSelfAssignSuper.setSuper(true);
 
-		Request request = createPutRequest(cantSelfAssignSuper,
-				"cantSelfAssignSuper");
+		Request request = createPutRequest(cantSelfAssignSuper, "cantSelfAssignSuper");
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
@@ -328,11 +307,9 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void superCanAssignSuperToOthers() throws ConfigurationException,
-			ValidationException {
+	public void superCanAssignSuperToOthers() throws ConfigurationException, ValidationException {
 
-		User superCanAssignSuperToOthers = UserTest.createUser(
-				"superCanAssignSuperToOthers");
+		User superCanAssignSuperToOthers = UserTest.createUser("superCanAssignSuperToOthers");
 
 		superCanAssignSuperToOthers.setSuper(true);
 
@@ -340,36 +317,31 @@ public class UserResourceTest extends ResourceTestBase {
 
 		superCanAssignSuperToOthers.setSuper(false);
 
-		Request request = createPutRequest(superCanAssignSuperToOthers,
-				superUser.getName());
+		Request request = createPutRequest(superCanAssignSuperToOthers, superUser.getName());
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		superCanAssignSuperToOthers = User
-				.loadByName("superCanAssignSuperToOthers");
+		superCanAssignSuperToOthers = User.loadByName("superCanAssignSuperToOthers");
 		superCanAssignSuperToOthers.remove();
 
 		assertThat(superCanAssignSuperToOthers.isSuper(), is(false));
 
 	}
 
-	private String getPersistedPassword(User user)
-			throws ConfigurationException, ValidationException {
+	private String getPersistedPassword(User user) throws ConfigurationException, ValidationException {
 		User restoredUser = User.load(user.getResourceUri());
 		return restoredUser.getHashedPassword();
 	}
 
-	private Passwords createValidPasswords(String oldPassword)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		Passwords passwords = new Passwords(oldPassword, NEW_PASSWORD,
-				NEW_PASSWORD);
+	private Passwords createValidPasswords(String oldPassword) throws NoSuchAlgorithmException,
+			UnsupportedEncodingException {
+		Passwords passwords = new Passwords(oldPassword, NEW_PASSWORD, NEW_PASSWORD);
 		return passwords;
 	}
 
 	@Test
-	public void getNewToRetrieveTemplate() throws ConfigurationException,
-			ValidationException {
+	public void getNewToRetrieveTemplate() throws ConfigurationException, ValidationException {
 
 		Request request = createGetRequest(user, "new");
 		Response response = executeRequest(request);
@@ -378,8 +350,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void editRedirectsToView() throws ConfigurationException,
-			ValidationException {
+	public void editRedirectsToView() throws ConfigurationException, ValidationException {
 
 		Passwords passwords = new Passwords();
 
@@ -387,19 +358,15 @@ public class UserResourceTest extends ResourceTestBase {
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
-		assertThat(response.getLocationRef().getPath(),
-				is("/user/" + user.getName()));
+		assertThat(response.getLocationRef().getPath(), is("/user/" + user.getName()));
 	}
 
 	@Test
-	public void putWithParameter() throws ConfigurationException,
-			ValidationException {
+	public void putWithParameter() throws ConfigurationException, ValidationException {
 
-		String paramName = ExecutionControlUserParametersFactory.CATEGORY
-				+ "."
+		String paramName = ExecutionControlUserParametersFactory.CATEGORY + "."
 				+ ExecutionControlUserParametersFactory.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME;
-		UserParameter p = new UserParameter(paramName,
-				LocalConnector.CLOUD_SERVICE_NAME, "description");
+		UserParameter p = new UserParameter(paramName, LocalConnector.CLOUD_SERVICE_NAME, "description");
 		user.setParameter(p);
 		Request request = createPutRequest(user, user.getName());
 		Response response = executeRequest(request);
@@ -408,13 +375,11 @@ public class UserResourceTest extends ResourceTestBase {
 
 		User updated = User.load(user.getResourceUri());
 
-		assertThat(updated.getParameter(paramName).getValue(),
-				is(LocalConnector.CLOUD_SERVICE_NAME));
+		assertThat(updated.getParameter(paramName).getValue(), is(LocalConnector.CLOUD_SERVICE_NAME));
 	}
 
 	@Test
-	public void superCreatesInActiveState() throws ValidationException,
-			ConfigurationException {
+	public void superCreatesInActiveState() throws ValidationException, ConfigurationException {
 		User willBeActive = UserTest.createUser("superCreatesInActiveState");
 		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
 
@@ -430,8 +395,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void normalUserCreatedInNewState() throws ValidationException,
-			ConfigurationException {
+	public void normalUserCreatedInNewState() throws ValidationException, ConfigurationException {
 		User willBeNew = UserTest.createUser("normalUserCreatedInNewState");
 		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
 
@@ -447,8 +411,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void createWithUserState() throws ValidationException,
-			ConfigurationException {
+	public void createWithUserState() throws ValidationException, ConfigurationException {
 		User withState = UserTest.createUser("createWithUserState");
 		withState.setState(State.SUSPENDED);
 		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
@@ -465,8 +428,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void putWithUserState() throws ValidationException,
-			ConfigurationException {
+	public void putWithUserState() throws ValidationException, ConfigurationException {
 		User withState = UserTest.createUser("putWithUserState");
 		withState = withState.store();
 		withState.setState(State.SUSPENDED);
@@ -496,33 +458,30 @@ public class UserResourceTest extends ResourceTestBase {
 		String denormalized = XmlUtil.denormalize(response.getEntityAsText());
 		User user = (User) SerializationUtil.fromXml(denormalized, User.class);
 
-		UserParameter systemParameter = user
-				.getParameter("slipstream.support.email");
+		Parameter systemParameter = user.getParameter("slipstream.support.email");
 		assertNotNull(systemParameter);
 	}
 
-	private Request createDeleteRequest(User targetUser, User user)
-			throws ConfigurationException, ValidationException {
+	private Request createDeleteRequest(User targetUser, User user) throws ConfigurationException, ValidationException {
 		return createDeleteRequest(targetUser, user.getName());
 	}
 
-	private Request createDeleteRequest(User user, String targetUsername)
-			throws ConfigurationException, ValidationException {
+	private Request createDeleteRequest(User user, String targetUsername) throws ConfigurationException,
+			ValidationException {
 		Map<String, Object> attributes = createUserAttributes(targetUsername);
 		Request request = createDeleteRequest(attributes);
 		addUserToRequest(user, request);
 		return request;
 	}
 
-	private Request createPutRequest(User targetUser, String username)
-			throws ConfigurationException, ValidationException {
+	private Request createPutRequest(User targetUser, String username) throws ConfigurationException,
+			ValidationException {
 		Passwords passwords = new Passwords();
 		return createPutRequest(targetUser, username, passwords);
 	}
 
-	private Request createPutRequest(User targetUser, String username,
-			Passwords passwords) throws ConfigurationException,
-			ValidationException {
+	private Request createPutRequest(User targetUser, String username, Passwords passwords)
+			throws ConfigurationException, ValidationException {
 		Form form = new Form();
 		form.add("name", targetUser.getName());
 		form.add("firstname", targetUser.getFirstName());
@@ -545,27 +504,24 @@ public class UserResourceTest extends ResourceTestBase {
 
 		form.add("state", targetUser.getState().toString());
 
-		for (UserParameter parameter : targetUser.getParameters().values()) {
-			UserFormProcessorTest.fillForm(parameter, form);
+		for (Parameter parameter : targetUser.getParameters().values()) {
+			UserFormProcessorTest.fillForm((UserParameter) parameter, form);
 		}
 
-		Map<String, Object> attributes = createUserAttributes(targetUser
-				.getName());
+		Map<String, Object> attributes = createUserAttributes(targetUser.getName());
 
-		Request request = createPutRequest(attributes,
-				form.getWebRepresentation(), targetUser.getResourceUri());
+		Request request = createPutRequest(attributes, form.getWebRepresentation(), targetUser.getResourceUri());
 
 		addUserToRequest(username, request);
 		return request;
 	}
 
-	private Request createGetRequest(User user) throws ConfigurationException,
-			ValidationException {
+	private Request createGetRequest(User user) throws ConfigurationException, ValidationException {
 		return createGetRequest(user, user.getName());
 	}
 
-	private Request createGetRequest(User user, String targetUsername)
-			throws ConfigurationException, ValidationException {
+	private Request createGetRequest(User user, String targetUsername) throws ConfigurationException,
+			ValidationException {
 		Map<String, Object> attributes = createUserAttributes(targetUsername);
 		Request request = createGetRequest(attributes);
 		addUserToRequest(user, request);

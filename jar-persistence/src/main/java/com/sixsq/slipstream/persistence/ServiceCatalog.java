@@ -21,7 +21,6 @@ package com.sixsq.slipstream.persistence;
  */
 
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -31,24 +30,21 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Query;
 
 import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 /**
  * Unit test:
- *
+ * 
  * @see ServiceCatalogTest
- *
+ * 
  */
 @SuppressWarnings("serial")
 @Entity
-@NamedQueries({
-		@NamedQuery(name = "byCloud", query = "SELECT sc FROM ServiceCatalog sc WHERE sc.cloud = :cloud"),
+@NamedQueries({ @NamedQuery(name = "byCloud", query = "SELECT sc FROM ServiceCatalog sc WHERE sc.cloud = :cloud"),
 		@NamedQuery(name = "all", query = "SELECT sc FROM ServiceCatalog sc") })
-public class ServiceCatalog extends
-		Parameterized<ServiceCatalog, ServiceCatalogParameter> {
+public class ServiceCatalog extends Parameterized {
 
 	private final static String CATEGORY_OVERALL_CAPACITY = "Overall capacity";
 	private final static String CATEGORY_SINGLE_VM_CAPACITY = "Single VM capacity";
@@ -57,6 +53,8 @@ public class ServiceCatalog extends
 	private final static String CATEGORY_SUPPLIERS_CATALOG = "Suppliers catalogue";
 
 	public final static String RESOURCE_URL_PREFIX = "service_catalog/";
+	@Attribute(required = false)
+	protected ModuleCategory category;
 
 	@Attribute
 	@Id
@@ -67,22 +65,11 @@ public class ServiceCatalog extends
 
 	@SuppressWarnings("unused")
 	private ServiceCatalog() {
+		super();
 	}
 
 	public ServiceCatalog(String cloud) {
 		setName(cloud);
-	}
-
-	@Override
-	@ElementMap(name = "parameters", required = false, valueType = ServiceCatalogParameter.class)
-	protected void setParameters(Map<String, ServiceCatalogParameter> parameters) {
-		this.parameters = parameters;
-	}
-
-	@Override
-	@ElementMap(name = "parameters", required = false, valueType = ServiceCatalogParameter.class)
-	public Map<String, ServiceCatalogParameter> getParameters() {
-		return parameters;
 	}
 
 	public String getCloud() {
@@ -115,11 +102,6 @@ public class ServiceCatalog extends
 	}
 
 	@Override
-	public void setContainer(ServiceCatalogParameter parameter) {
-		parameter.setContainer(this);
-	}
-
-	@Override
 	public String getResourceUri() {
 		return constructResourceUri(getCloud());
 	}
@@ -144,10 +126,7 @@ public class ServiceCatalog extends
 	}
 
 	public static ServiceCatalog load(String resourceUrl) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		ServiceCatalog sc = em.find(ServiceCatalog.class, resourceUrl);
-		em.close();
-		return sc;
+		return (ServiceCatalog) Metadata.load(resourceUrl, ServiceCatalog.class);
 	}
 
 	public static ServiceCatalog load() {
@@ -162,7 +141,7 @@ public class ServiceCatalog extends
 	public void populateDefinedParameters() throws ValidationException {
 		for (DefinedParameters dp : DefinedParameters.values()) {
 			String name = cloud + "." + dp.getName();
-			ServiceCatalogParameter scp = getParameter(name);
+			Parameter scp = getParameter(name);
 			if (scp == null) {
 				scp = new ServiceCatalogParameter(name, "", dp.getDescription());
 			}
@@ -177,9 +156,21 @@ public class ServiceCatalog extends
 	}
 
 	public void clearParameters() {
-		for (ServiceCatalogParameter p : getParameters().values()) {
+		for (Parameter p : getParameters().values()) {
 			p.setContainer(null);
 		}
+	}
+
+	public ModuleCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(ModuleCategory category) {
+		this.category = category;
+	}
+
+	public void setCategory(String category) {
+		this.category = ModuleCategory.valueOf(category);
 	}
 
 	/**
@@ -191,7 +182,8 @@ public class ServiceCatalog extends
 
 		OVERALL_CAPACITY_CPU(
 				"The number of CPU cores (currently) available within (the relevant part of) the supplier’s IaaS environment",
-				CATEGORY_OVERALL_CAPACITY, "Value: an integer, and possibly approximate, number, e.g. 1,000; Explanation: to give an indication of the scale of the environment available for use"),
+				CATEGORY_OVERALL_CAPACITY,
+				"Value: an integer, and possibly approximate, number, e.g. 1,000; Explanation: to give an indication of the scale of the environment available for use"),
 
 		OVERALL_CAPACITY_RAM(
 				"Nature: the amount of random-access memory in total; Value: expressed in relevant terms, e.g. 10 TB; Explanation: the amount of memory available across the installation as a whole. See below for what is available on any one system",
@@ -261,8 +253,7 @@ public class ServiceCatalog extends
 
 		// Suppliers catalog
 
-		SUPPLIERS_CATALOG(
-				"Nature: URL of web site with further details; Value: e.g. http://example.com",
+		SUPPLIERS_CATALOG("Nature: URL of web site with further details; Value: e.g. http://example.com",
 				CATEGORY_SUPPLIERS_CATALOG);
 
 		private final String description;
@@ -283,8 +274,7 @@ public class ServiceCatalog extends
 			this.readonly = true;
 		}
 
-		private DefinedParameters(String description, String category,
-				String instructions) {
+		private DefinedParameters(String description, String category, String instructions) {
 			this.description = description;
 			this.category = category;
 			this.instructions = instructions;
@@ -313,8 +303,7 @@ public class ServiceCatalog extends
 				return;
 			}
 			if (value == null || "".equals(value)) {
-				throw new IllegalArgumentException(
-						"value cannot be empty or null");
+				throw new IllegalArgumentException("value cannot be empty or null");
 			}
 		}
 

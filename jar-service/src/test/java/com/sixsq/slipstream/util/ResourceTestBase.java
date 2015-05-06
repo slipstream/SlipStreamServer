@@ -25,10 +25,12 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Cookie;
+import org.restlet.data.MediaType;
 import org.restlet.data.Method;
 import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
@@ -46,6 +48,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Authz;
 import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ProjectModule;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
@@ -60,16 +63,12 @@ public class ResourceTestBase extends RunTestBase {
 
 	// Need to set cloudServiceName before the status user is
 	// created, since the createUser method uses it
-	public static String cloudServiceName = new LocalConnector()
-			.getCloudServiceName();
+	public static String cloudServiceName = new LocalConnector().getCloudServiceName();
 
 	protected static User user = UserTest.createUser("test", UserTest.PASSWORD);
 
-	public static void resetAndLoadConnector(
-			Class<? extends Connector> connectorClass)
-			throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException,
-			ClassNotFoundException {
+	public static void resetAndLoadConnector(Class<? extends Connector> connectorClass) throws InstantiationException,
+			IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 
 		// Instantiate the configuration force loading from disk
 		// This is required otherwise the first loading from
@@ -83,50 +82,51 @@ public class ResourceTestBase extends RunTestBase {
 		}
 
 		Map<String, Connector> connectors = new HashMap<String, Connector>();
-		Connector connector = ConnectorFactory
-				.instantiateConnectorFromName(connectorClass.getName());
+		Connector connector = ConnectorFactory.instantiateConnectorFromName(connectorClass.getName());
 		connectors.put(connector.getCloudServiceName(), connector);
 		ConnectorFactory.setConnectors(connectors);
 	}
 
-	public Request createRequest(Map<String, Object> attributes, Method method)
-			throws ConfigurationException, ValidationException {
+	public Request createRequest(Map<String, Object> attributes, Method method) throws ConfigurationException,
+			ValidationException {
 		return createRequest(attributes, method, null);
 	}
 
-	public Request createRequest(Map<String, Object> attributes, Method method,
-			Representation entity) throws ConfigurationException,
-			ValidationException {
+	public Request createRequest(Map<String, Object> attributes, Method method, Representation entity)
+			throws ConfigurationException, ValidationException {
 		return createRequest(attributes, method, entity, null);
 	}
 
-	public Request createRequest(Map<String, Object> attributes, Method method,
-			Representation entity, String targetUrl)
+	public Request createRequest(Map<String, Object> attributes, Method method, Representation entity, String targetUrl)
 			throws ConfigurationException, ValidationException {
 		return createRequest(attributes, method, entity, targetUrl, null);
 	}
 
-	public Request createRequest(Method method, Cookie cookie)
-			throws ConfigurationException, ValidationException {
+	public Request createRequest(Method method, Cookie cookie) throws ConfigurationException, ValidationException {
 		return createRequest(null, method, null, null, cookie);
 	}
 
-	public Request createRequest(Method method, String targetUrl, Cookie cookie)
-			throws ConfigurationException, ValidationException {
+	public Request createRequest(Method method, String targetUrl, Cookie cookie) throws ConfigurationException,
+			ValidationException {
 		return createRequest(null, method, null, targetUrl, cookie);
 	}
 
-	public Request createRequest(Map<String, Object> attributes, Method method,
-			Representation entity, String targetUrl, Cookie cookie)
-			throws ConfigurationException, ValidationException {
+	public Request createRequest(Map<String, Object> attributes, Method method, Representation entity,
+			String targetUrl, Cookie cookie) throws ConfigurationException, ValidationException {
+		return createRequest(attributes, method, entity, targetUrl, cookie, MediaType.APPLICATION_XML);
+	}
+
+	public Request createRequest(Map<String, Object> attributes, Method method, Representation entity,
+			String targetUrl, Cookie cookie, MediaType mediaType) throws ConfigurationException, ValidationException {
 		if (targetUrl == null) {
 			targetUrl = TEST_REQUEST_NAME;
 		}
 
-		Request request = new Request(method, "http://something.org"
-				+ targetUrl);
+		Request request = new Request(method, "http://something.org" + targetUrl);
 		request.setRootRef(new Reference("http://something.org"));
 
+		request.getClientInfo().accept(mediaType);
+		
 		if (attributes != null) {
 			request.setAttributes(attributes);
 		}
@@ -154,47 +154,44 @@ public class ResourceTestBase extends RunTestBase {
 		return request;
 	}
 
-	protected Request createGetRequest(Map<String, Object> attributes)
-			throws ConfigurationException, ValidationException {
+	protected Request createGetRequest(Map<String, Object> attributes) throws ConfigurationException,
+			ValidationException {
 		Method method = Method.GET;
 		return createRequest(attributes, method);
 	}
 
-	protected Request createGetRequest(String targetUrl, Map<String, Object> attributes)
-			throws ConfigurationException, ValidationException {
+	protected Request createGetRequest(String targetUrl, Map<String, Object> attributes) throws ConfigurationException,
+			ValidationException {
 		Method method = Method.GET;
 		return createRequest(attributes, method, null, targetUrl);
 	}
 
-	protected Request createPutRequest(Map<String, Object> attributes,
-			Representation entity) throws ConfigurationException,
-			ValidationException {
+	protected Request createPutRequest(Map<String, Object> attributes, Representation entity)
+			throws ConfigurationException, ValidationException {
 		return createRequest(attributes, Method.PUT, entity);
 	}
 
-	protected Request createPutRequest(Map<String, Object> attributes,
-			Representation entity, String targetUrl)
+	protected Request createPutRequest(Map<String, Object> attributes, Representation entity, String targetUrl)
 			throws ConfigurationException, ValidationException {
 		return createRequest(attributes, Method.PUT, entity, targetUrl);
 	}
 
-	protected Request createDeleteRequest(Map<String, Object> attributes)
-			throws ConfigurationException, ValidationException {
+	protected Request createDeleteRequest(Map<String, Object> attributes) throws ConfigurationException,
+			ValidationException {
 		Method method = Method.DELETE;
 		return createRequest(attributes, method);
 	}
 
-	protected Request createDeleteRequest(Map<String, Object> attributes,
-			User user) throws ConfigurationException, ValidationException {
+	protected Request createDeleteRequest(Map<String, Object> attributes, User user) throws ConfigurationException,
+			ValidationException {
 		Method method = Method.DELETE;
 		Request request = createRequest(attributes, method);
 		addUserToRequest(user, request);
 		return request;
 	}
 
-	protected Request createPostRequest(Map<String, Object> attributes,
-			Representation entity) throws ConfigurationException,
-			ValidationException {
+	protected Request createPostRequest(Map<String, Object> attributes, Representation entity)
+			throws ConfigurationException, ValidationException {
 		Method method = Method.POST;
 		return createRequest(attributes, method, entity);
 	}
@@ -217,32 +214,28 @@ public class ResourceTestBase extends RunTestBase {
 		return attributes;
 	}
 
-	protected Request createGetRequest(String module, User user)
-			throws ConfigurationException, ValidationException {
+	protected Request createGetRequest(String module, User user) throws ConfigurationException, ValidationException {
 		Request request = createGetRequest(createModuleAttributes(module));
 		addUserToRequest(user, request);
 		return request;
 	}
 
-	protected Module createAndStoreProject(String projectName)
-			throws ValidationException {
+	protected Module createAndStoreProject(String projectName) throws ValidationException {
 		Module project = new ProjectModule(projectName);
 		project.setAuthz(new Authz(user.getName(), project));
-		project.store();
+		project = project.store();
 		return project;
 	}
 
-	protected Request createPutRequest(String name, Representation entity,
-			User user, String targetUrl) throws ConfigurationException,
-			ValidationException {
-		Request request = createPutRequest(createModuleAttributes(name),
-				entity, targetUrl);
+	protected Request createPutRequest(String name, Representation entity, User user, String targetUrl)
+			throws ConfigurationException, ValidationException {
+		Request request = createPutRequest(createModuleAttributes(name), entity, targetUrl);
 		addUserToRequest(user, request);
 		return request;
 	}
 
-	protected Request createPutRequest(String name, Representation entity,
-			User user) throws ConfigurationException, ValidationException {
+	protected Request createPutRequest(String name, Representation entity, User user) throws ConfigurationException,
+			ValidationException {
 		Request request = createPutRequest(createModuleAttributes(name), entity);
 		addUserToRequest(user, request);
 		return request;
@@ -252,19 +245,17 @@ public class ResourceTestBase extends RunTestBase {
 		return createAttributes("module", module);
 	}
 
-	protected void addUserToRequest(String username, Request request)
-			throws ConfigurationException, ValidationException {
+	protected void addUserToRequest(String username, Request request) throws ConfigurationException,
+			ValidationException {
 		addUserToRequest(User.loadByName(username), request);
 	}
 
 	protected void addUserToRequest(User user, Request request) {
-		request.getClientInfo().setUser(
-				new org.restlet.security.User(user.getName()));
+		request.getClientInfo().setUser(new org.restlet.security.User(user.getName()));
 		AuthenticatorBase.setUserInRequest(user, request);
 	}
 
-	public static void setCloudConnector(String connectorClassName)
-			throws ConfigurationException {
+	public static void setCloudConnector(String connectorClassName) throws ConfigurationException {
 		Configuration configuration = null;
 		try {
 			configuration = Configuration.getInstance();
@@ -274,8 +265,7 @@ public class ResourceTestBase extends RunTestBase {
 
 		ServiceConfiguration sc = configuration.getParameters();
 		try {
-			sc.setParameter(new ServiceConfigurationParameter(
-					RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
+			sc.setParameter(new ServiceConfigurationParameter(RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
 					connectorClassName));
 		} catch (ValidationException e) {
 			fail();
@@ -285,10 +275,13 @@ public class ResourceTestBase extends RunTestBase {
 	}
 
 	protected static void updateServiceConfigurationParameters(
-			SystemConfigurationParametersFactoryBase connectorSystemConfigFactory)
-			throws ValidationException {
+			SystemConfigurationParametersFactoryBase connectorSystemConfigFactory) throws ValidationException {
 		ServiceConfiguration sc = Configuration.getInstance().getParameters();
-		sc.setParameters(connectorSystemConfigFactory.getParameters());
+		Map<String, Parameter> params = new HashMap<String, Parameter>();
+		for (Entry<String, ServiceConfigurationParameter> s : connectorSystemConfigFactory.getParameters().entrySet()) {
+			params.put(s.getKey(), s.getValue());
+		}
+		sc.setParameters(params);
 		sc.store();
 	}
 }

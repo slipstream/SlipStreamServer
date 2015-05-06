@@ -20,7 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +33,9 @@ import com.sixsq.slipstream.module.ModuleView;
 
 /**
  * For unittests
+ * 
  * @see ProjectModuleTest
- *
+ * 
  */
 @Entity
 @SuppressWarnings("serial")
@@ -63,7 +63,7 @@ public class ProjectModule extends Module {
 
 	public static ProjectModule load(String resourceUri) {
 		ProjectModule project = (ProjectModule) Module.load(resourceUri);
-		if(project == null) {
+		if (project == null) {
 			return null;
 		}
 		project.setChildren(Module.viewList(resourceUri));
@@ -71,7 +71,7 @@ public class ProjectModule extends Module {
 	}
 
 	public ProjectModule store() {
-		return (ProjectModule)super.store();
+		return (ProjectModule) super.store();
 	}
 
 	public ProjectModule copy() throws ValidationException {

@@ -34,6 +34,7 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.Target;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
@@ -112,7 +113,7 @@ public class ImageFormProcesorTest {
 		ImageModule image = new ImageModule(imageName);
 		image.setImageId("image_id", cloudServiceName);
 		image.setIsBase(false);
-		image.setPreRecipe("some pre-recipe");
+		image.setTarget(new Target(Target.TARGET_PRERECIPE_NAME, "some pre-recipe"));
 		image = image.store();
 
 		ImageFormProcessor processor = new ImageFormProcessor(user);
@@ -121,7 +122,7 @@ public class ImageFormProcesorTest {
 
 		form.add("name", imageName);
 		form.add(ImageFormProcessor.constructFormImageIdName(cloudServiceName), "new_image_id");
-		form.add(ImageFormProcessor.PRERECIPE_SCRIPT_NAME, "modified pre-recipe");
+		form.add(Target.TARGET_PRERECIPE_NAME, "modified pre-recipe");
 
 		processor.processForm(form);			
 
@@ -142,7 +143,7 @@ public class ImageFormProcesorTest {
 		ImageModule image = new ImageModule(imageName);
 		image.setImageId("image_id", cloudServiceName);
 		image.setIsBase(false);
-		image.setPreRecipe("some pre-recipe");
+		image.setTarget(new Target(Target.TARGET_PRERECIPE_NAME, "some pre-recipe"));
 		image = image.store();
 
 		ImageFormProcessor processor = new ImageFormProcessor(user);
@@ -151,7 +152,7 @@ public class ImageFormProcesorTest {
 
 		form.add("name", imageName);
 		form.add(ImageFormProcessor.constructFormImageIdName(cloudServiceName), "new_image_id");
-		form.add(ImageFormProcessor.PRERECIPE_SCRIPT_NAME, image.getPreRecipe());
+		form.add(ImageFormProcessor.PRERECIPE_SCRIPT_NAME, image.getTargets().get(Target.TARGET_PRERECIPE_NAME).getScript());
 
 		processor.processForm(form);			
 

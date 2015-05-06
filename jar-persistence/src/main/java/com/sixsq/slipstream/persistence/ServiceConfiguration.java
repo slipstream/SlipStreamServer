@@ -20,7 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +32,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.NotImplementedException;
@@ -40,12 +40,25 @@ import com.sixsq.slipstream.exceptions.NotImplementedException;
 @SuppressWarnings("serial")
 @Entity
 @NamedQueries({ @NamedQuery(name = "latestConfiguration", query = "SELECT c FROM ServiceConfiguration c WHERE c.id = (SELECT MAX(c.id) FROM ServiceConfiguration c)") })
-public class ServiceConfiguration extends
-		Parameterized<ServiceConfiguration, ServiceConfigurationParameter> {
+public class ServiceConfiguration extends Parameterized {
 
 	public final static String RESOURCE_URI_PREFIX = "configuration/";
-    public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY = "cloud.connector.orchestrator.publicsshkey";
-    public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY = "cloud.connector.orchestrator.privatesshkey";
+	public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY = "cloud.connector.orchestrator.publicsshkey";
+	public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY = "cloud.connector.orchestrator.privatesshkey";
+	@Attribute(required = false)
+	protected ModuleCategory category;
+
+	public ModuleCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(ModuleCategory category) {
+		this.category = category;
+	}
+
+	public void setCategory(String category) {
+		this.category = ModuleCategory.valueOf(category);
+	}
 
 	public enum ParameterCategory {
 		SlipStream_Support, SlipStream_Basics, SlipStream_Advanced
@@ -56,45 +69,33 @@ public class ServiceConfiguration extends
 	 */
 	public enum RequiredParameters {
 
-		SLIPSTREAM_BASE_URL("Default URL and port for the SlipStream RESTlet",
-				ParameterCategory.SlipStream_Basics),
+		SLIPSTREAM_BASE_URL("Default URL and port for the SlipStream RESTlet", ParameterCategory.SlipStream_Basics),
 
-		SLIPSTREAM_UPDATE_CLIENTURL(
-				"Endpoint of the SlipStream client tarball",
+		SLIPSTREAM_UPDATE_CLIENTURL("Endpoint of the SlipStream client tarball", ParameterCategory.SlipStream_Advanced),
+
+		SLIPSTREAM_UPDATE_CLIENTBOOTSTRAPURL("Endpoint of the SlipStream client bootstrap script",
 				ParameterCategory.SlipStream_Advanced),
 
-		SLIPSTREAM_UPDATE_CLIENTBOOTSTRAPURL(
-				"Endpoint of the SlipStream client bootstrap script",
-				ParameterCategory.SlipStream_Advanced),
-
-		CLOUD_CONNECTOR_CLASS(
-				"Cloud connector java class name(s) (comma separated for multi-cloud configuration)",
+		CLOUD_CONNECTOR_CLASS("Cloud connector java class name(s) (comma separated for multi-cloud configuration)",
 				ParameterCategory.SlipStream_Basics, ParameterType.Text),
 
-		CLOUD_CONNECTOR_LIBRARY_LIBCLOUD_URL(
-				"URL to fetch libcloud library from",
-				ParameterCategory.SlipStream_Advanced,
-				"URL should point to a valid gzipped tarball."),
+		CLOUD_CONNECTOR_LIBRARY_LIBCLOUD_URL("URL to fetch libcloud library from",
+				ParameterCategory.SlipStream_Advanced, "URL should point to a valid gzipped tarball."),
 
-		CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY(
-				"Path to the SSH public key to put in the orchestrator",
+		CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY("Path to the SSH public key to put in the orchestrator",
 				ParameterCategory.SlipStream_Advanced),
 
 		CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY(
 				"Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)",
 				ParameterCategory.SlipStream_Advanced),
 
-		SLIPSTREAM_VERSION("Installed SlipStream version",
-				ParameterCategory.SlipStream_Advanced, true),
+		SLIPSTREAM_VERSION("Installed SlipStream version", ParameterCategory.SlipStream_Advanced, true),
 
-		SLIPSTREAM_REPORTS_LOCATION(
-				"Location where the deployments and build reports are saved",
+		SLIPSTREAM_REPORTS_LOCATION("Location where the deployments and build reports are saved",
 				ParameterCategory.SlipStream_Advanced),
 
-		SLIPSTREAM_REGISTRATION_EMAIL(
-				"Email address for account approvals, etc.",
-				ParameterCategory.SlipStream_Support,
-				"Email address to use for registration.") {
+		SLIPSTREAM_REGISTRATION_EMAIL("Email address for account approvals, etc.",
+				ParameterCategory.SlipStream_Support, "Email address to use for registration.") {
 			@Override
 			public void validate(String value) {
 				super.validate(value);
@@ -102,12 +103,9 @@ public class ServiceConfiguration extends
 			}
 		},
 
-		SLIPSTREAM_MAIL_HOST("Host for SMTP server for email notifications.",
-				ParameterCategory.SlipStream_Support),
+		SLIPSTREAM_MAIL_HOST("Host for SMTP server for email notifications.", ParameterCategory.SlipStream_Support),
 
-		SLIPSTREAM_MAIL_PORT(
-				"Port on SMTP server (defaults to standard ports).",
-				ParameterCategory.SlipStream_Support) {
+		SLIPSTREAM_MAIL_PORT("Port on SMTP server (defaults to standard ports).", ParameterCategory.SlipStream_Support) {
 			@Override
 			public void validate(String value) {
 				super.validate(value);
@@ -115,23 +113,17 @@ public class ServiceConfiguration extends
 			}
 		},
 
-		SLIPSTREAM_MAIL_USERNAME(
-				"Username for SMTP server.",
-				ParameterCategory.SlipStream_Support,
+		SLIPSTREAM_MAIL_USERNAME("Username for SMTP server.", ParameterCategory.SlipStream_Support,
 				"Username of the mail server account you want to use to send registration emails."),
 
-		SLIPSTREAM_MAIL_PASSWORD("Password for SMTP server.",
-				ParameterCategory.SlipStream_Support, ParameterType.Password),
+		SLIPSTREAM_MAIL_PASSWORD("Password for SMTP server.", ParameterCategory.SlipStream_Support,
+				ParameterType.Password),
 
-		SLIPSTREAM_MAIL_SSL("Use SSL for SMTP server.",
-				ParameterCategory.SlipStream_Support, ParameterType.Boolean),
+		SLIPSTREAM_MAIL_SSL("Use SSL for SMTP server.", ParameterCategory.SlipStream_Support, ParameterType.Boolean),
 
-		SLIPSTREAM_MAIL_DEBUG("Debug mail sending.",
-				ParameterCategory.SlipStream_Support, ParameterType.Boolean),
+		SLIPSTREAM_MAIL_DEBUG("Debug mail sending.", ParameterCategory.SlipStream_Support, ParameterType.Boolean),
 
-		SLIPSTREAM_SUPPORT_EMAIL(
-				"Email address for SlipStream support requests",
-				ParameterCategory.SlipStream_Support) {
+		SLIPSTREAM_SUPPORT_EMAIL("Email address for SlipStream support requests", ParameterCategory.SlipStream_Support) {
 			@Override
 			public void validate(String value) {
 				super.validate(value);
@@ -143,19 +135,17 @@ public class ServiceConfiguration extends
 				"Allow user self registration. If checked, user will be able to create accounts themselves.",
 				ParameterCategory.SlipStream_Basics, ParameterType.Boolean),
 
-		SLIPSTREAM_SERVICE_CATALOG_ENABLE(
-				"Enable service catalog feature.",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+		SLIPSTREAM_SERVICE_CATALOG_ENABLE("Enable service catalog feature.", ParameterCategory.SlipStream_Advanced,
+				ParameterType.Boolean),
 
 		SLIPSTREAM_METERING_HOSTNAME(
 				"Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:2005).",
 				ParameterCategory.SlipStream_Advanced),
 
-		SLIPSTREAM_METERING_ENABLE("Metering enabled",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+		SLIPSTREAM_METERING_ENABLE("Metering enabled", ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
 
-		SLIPSTREAM_QUOTA_ENABLE("Quota enforcement enabled",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean);
+		SLIPSTREAM_QUOTA_ENABLE("Quota enforcement enabled", ParameterCategory.SlipStream_Advanced,
+				ParameterType.Boolean);
 
 		private final String description;
 		private final ParameterCategory category;
@@ -167,8 +157,7 @@ public class ServiceConfiguration extends
 			return instructions;
 		}
 
-		private RequiredParameters(String description,
-				ParameterCategory category) {
+		private RequiredParameters(String description, ParameterCategory category) {
 			this.description = description;
 			this.category = category;
 			this.instructions = "";
@@ -176,8 +165,7 @@ public class ServiceConfiguration extends
 			this.readonly = false;
 		}
 
-		private RequiredParameters(String description,
-				ParameterCategory category, boolean readonly) {
+		private RequiredParameters(String description, ParameterCategory category, boolean readonly) {
 			this.description = description;
 			this.category = category;
 			this.instructions = "";
@@ -185,8 +173,7 @@ public class ServiceConfiguration extends
 			this.readonly = readonly;
 		}
 
-		private RequiredParameters(String description,
-				ParameterCategory category, String instructions) {
+		private RequiredParameters(String description, ParameterCategory category, String instructions) {
 			this.description = description;
 			this.category = category;
 			this.instructions = instructions;
@@ -194,8 +181,7 @@ public class ServiceConfiguration extends
 			this.readonly = false;
 		}
 
-		private RequiredParameters(String description,
-				ParameterCategory category, ParameterType type) {
+		private RequiredParameters(String description, ParameterCategory category, ParameterType type) {
 			this.description = description;
 			this.category = category;
 			this.instructions = "";
@@ -203,8 +189,7 @@ public class ServiceConfiguration extends
 			this.readonly = false;
 		}
 
-		private RequiredParameters(String description,
-				ParameterCategory category, String instructions,
+		private RequiredParameters(String description, ParameterCategory category, String instructions,
 				ParameterType type) {
 			this.description = description;
 			this.category = category;
@@ -234,8 +219,7 @@ public class ServiceConfiguration extends
 				return;
 			}
 			if (value == null || "".equals(value)) {
-				throw new IllegalArgumentException(
-						"value cannot be empty or null");
+				throw new IllegalArgumentException("value cannot be empty or null");
 			}
 		}
 
@@ -243,8 +227,7 @@ public class ServiceConfiguration extends
 			try {
 				int port = Integer.parseInt(s);
 				if (port < 1 || port > 65535) {
-					throw new IllegalArgumentException("invalid port number("
-							+ port + ")");
+					throw new IllegalArgumentException("invalid port number(" + port + ")");
 				}
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException(e.getMessage());
@@ -255,8 +238,7 @@ public class ServiceConfiguration extends
 			try {
 				new InternetAddress(s);
 			} catch (AddressException e) {
-				throw new IllegalArgumentException("invalid email address: "
-						+ e.getMessage());
+				throw new IllegalArgumentException("invalid email address: " + e.getMessage());
 			}
 		}
 
@@ -277,8 +259,8 @@ public class ServiceConfiguration extends
 		}
 
 		/**
-		 * Convert string to enum name where word separators are
-		 * converted from . to _ and upper cased.
+		 * Convert string to enum name where word separators are converted from
+		 * . to _ and upper cased.
 		 */
 		public static String getEnum(String name) {
 			return name.replace(".", "_").toUpperCase();
@@ -294,62 +276,35 @@ public class ServiceConfiguration extends
 
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = ServiceConfigurationParameter.class)
-	public Map<String, ServiceConfigurationParameter> getParameters() {
+	public Map<String, Parameter> getParameters() {
 		return parameters;
 	}
 
 	@Override
 	@ElementMap(name = "parameters", required = false, valueType = ServiceConfigurationParameter.class)
-	public void setParameters(
-			Map<String, ServiceConfigurationParameter> parameters) {
+	public void setParameters(Map<String, Parameter> parameters) {
 		if (parameters == null) {
-			parameters = new HashMap<String, ServiceConfigurationParameter>();
+			parameters = new HashMap<String, Parameter>();
 		}
-		for (ServiceConfigurationParameter p : parameters.values()) {
+		for (Parameter p : parameters.values()) {
 			setParameter(p);
 		}
 	}
 
-	public ServiceConfigurationParameter getParameter(String name) {
-		return getParameters().get(name);
-	}
+//	public Parameter getParameter(String name) {
+//		return getParameters().get(name);
+//	}
 
-	public void setParameter(ServiceConfigurationParameter parameter) {
+//	public void setParameter(Parameter parameter) {
+//
+//		validateParameter(parameter);
+//
+//		Map<String, Parameter> parameters = getParameters();
+//
+//		parameter.setContainer(this);
+//		parameters.put(parameter.getName(), parameter);
+//	}
 
-		validateParameter(parameter);
-
-		Map<String, ServiceConfigurationParameter> parameters = getParameters();
-
-		parameter.setContainer(this);
-		parameters.put(parameter.getName(), parameter);
-	}
-
-	public Parameter<ServiceConfiguration> getParameter(String name,
-			ParameterCategory category) {
-		Parameter<ServiceConfiguration> parameter = getParameter(name);
-		if (parameter != null && parameter.getCategory().equals(category.name())) {
-			return parameter;
-		} else {
-			return null;
-		}
-	}
-
-	public Map<String, Parameter<ServiceConfiguration>> getParameters(
-			ParameterCategory category) {
-		Map<String, Parameter<ServiceConfiguration>> filteredParameters = new HashMap<String, Parameter<ServiceConfiguration>>();
-		for (Parameter<ServiceConfiguration> parameter : getParameters()
-				.values()) {
-			if (parameter.getCategory().equals(category.name())) {
-				filteredParameters.put(parameter.getName(), parameter);
-			}
-		}
-
-		return filteredParameters;
-	}
-
-	public Collection<ServiceConfigurationParameter> getParameterList() {
-		return getParameters().values();
-	}
 
 	public String getId() {
 		return id;
@@ -363,17 +318,12 @@ public class ServiceConfiguration extends
 		parameter.setContainer(this);
 	}
 
-	private void validateParameter(ServiceConfigurationParameter parameter) {
-	}
-
 	public void validate() {
 
 		// Check that all of the required parameters are present.
 		for (RequiredParameters p : RequiredParameters.values()) {
 			if (getParameter(p.getName()) == null) {
-				throw new IllegalArgumentException(
-						"missing required system configuration parameter: "
-								+ p.name());
+				throw new IllegalArgumentException("missing required system configuration parameter: " + p.name());
 			}
 		}
 

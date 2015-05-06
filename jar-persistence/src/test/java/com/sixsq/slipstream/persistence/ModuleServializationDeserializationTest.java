@@ -32,8 +32,7 @@ public class ModuleServializationDeserializationTest {
 
 		ProjectModule module = new ProjectModule("checkJsonProjectModuleSerialization");
 		String json = SerializationUtil.toJsonString(module);
-		module = (ProjectModule) SerializationUtil.fromJson(json, ProjectModule.class);
-
+		module = (ProjectModule) SerializationUtil.fromJson(json, ProjectModule.class, module.createDeserializer());
 	}
 
 	@Test
@@ -50,7 +49,8 @@ public class ModuleServializationDeserializationTest {
 
 		DeploymentModule module = new DeploymentModule("checkJsonDeploymentModuleSerialization");
 		String json = SerializationUtil.toJsonString(module);
-		module = (DeploymentModule) SerializationUtil.fromJson(json, DeploymentModule.class);
+		module = (DeploymentModule) SerializationUtil.fromJson(json, DeploymentModule.class,
+				module.createDeserializer());
 
 	}
 
@@ -68,7 +68,7 @@ public class ModuleServializationDeserializationTest {
 
 		ImageModule module = new ImageModule("checkJsonImageModuleSerialization");
 		String json = SerializationUtil.toJsonString(module);
-		module = (ImageModule) SerializationUtil.fromJson(json, ImageModule.class);
+		module = (ImageModule) SerializationUtil.fromJson(json, ImageModule.class, module.createDeserializer());
 
 	}
 

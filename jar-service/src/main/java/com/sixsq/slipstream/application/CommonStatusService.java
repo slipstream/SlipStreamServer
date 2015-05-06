@@ -49,8 +49,8 @@ import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
@@ -206,7 +206,7 @@ public class CommonStatusService extends StatusService {
 		Configuration configuration = Configuration.getInstance();
 
 		String key = ServiceConfiguration.RequiredParameters.SLIPSTREAM_SUPPORT_EMAIL.getName();
-		ServiceConfigurationParameter parameter = configuration.getParameters().getParameter(key);
+		Parameter parameter = configuration.getParameters().getParameter(key);
 		String email = parameter.getValue();
 
 		setContactEmail(email);

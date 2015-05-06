@@ -176,8 +176,10 @@ public class StateMachineMultiThreadingTest extends
 		Run run = createRunDeployment("testMultipleStateTransitions");
 		run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY)
 				.setValue(initialState.name());
+		run.toJsonForPersistence();
 		run = em.merge(run);
 		transaction.commit();
+		run = Run.loadFromUuid(run.getUuid());
 		return run;
 	}
 
@@ -265,6 +267,7 @@ public class StateMachineMultiThreadingTest extends
 
 		assertThat(States.valueOf(actualState), is(expectedState));
 
+		run.toJsonForPersistence();
 		transaction.commit();
 		em.close();
 

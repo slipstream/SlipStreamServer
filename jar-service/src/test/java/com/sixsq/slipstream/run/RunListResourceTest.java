@@ -35,6 +35,7 @@ import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.sixsq.slipstream.persistence.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -55,16 +56,6 @@ import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Node;
-import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.XmlUtil;
@@ -147,24 +138,24 @@ public class RunListResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void testPagination() throws ValidationException, SAXException, ParserConfigurationException, IOException {
+	public void testPaging() throws ValidationException, SAXException, ParserConfigurationException, IOException {
 		removeAllRuns();
 
-		Set<String> cloudServiceNamesA = new HashSet<String>();
-		cloudServiceNamesA.add("CloudA");
-		Set<String> cloudServiceNamesB = new HashSet<String>();
-		cloudServiceNamesB.add("CloudA");
-		cloudServiceNamesB.add("CloudB");
-		Set<String> cloudServiceNamesC = new HashSet<String>();
-		cloudServiceNamesC.add("CloudA");
-		cloudServiceNamesC.add("CloudB");
-		cloudServiceNamesC.add("CloudC");
+		Set<ConnectorInstance> cloudServicesA = new HashSet<ConnectorInstance>();
+		cloudServicesA.add(new ConnectorInstance("CloudA", null));
+		Set<ConnectorInstance> cloudServicesAB = new HashSet<ConnectorInstance>();
+		cloudServicesAB.add(new ConnectorInstance("CloudA", null));
+		cloudServicesAB.add(new ConnectorInstance("CloudB", null));
+		Set<ConnectorInstance> cloudServicesABC = new HashSet<ConnectorInstance>();
+		cloudServicesABC.add(new ConnectorInstance("CloudA", null));
+		cloudServicesABC.add(new ConnectorInstance("CloudB", null));
+		cloudServicesABC.add(new ConnectorInstance("CloudC", null));
 
-		(new Run(deployment, RunType.Orchestration, cloudServiceNamesA, user)).store();
-		(new Run(deployment, RunType.Orchestration, cloudServiceNamesB, user)).store();
-		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
-		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
-		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
+		Run run = new Run(deployment, RunType.Orchestration, cloudServicesA, user).store();
+		run = new Run(deployment, RunType.Orchestration, cloudServicesAB, user).store();
+		run = new Run(deployment, RunType.Orchestration, cloudServicesABC, user).store();
+		run = new Run(deployment, RunType.Orchestration, cloudServicesABC, user).store();
+		run = new Run(deployment, RunType.Orchestration, cloudServicesABC, user).store();
 
 		Response resp = getRunList(null, null, null);
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
@@ -177,7 +168,8 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		resp = getRunList(null, 10, "CloudB");
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
-		runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		String xml = resp.getEntityAsText();
+		runs = XmlUtil.stringToDom(xml);
 		assertEquals(4, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("4", runs.getDocumentElement().getAttribute("count"));
 		assertEquals("4", runs.getDocumentElement().getAttribute("totalCount"));

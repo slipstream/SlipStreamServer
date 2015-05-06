@@ -23,6 +23,7 @@ package com.sixsq.slipstream.module;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.sixsq.slipstream.persistence.Target;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,7 +65,7 @@ public class ModuleCloudImageIdInheritanceTest {
 
 		notBuiltImage = new ImageModule("notBuiltImage");
 		notBuiltImage.setModuleReference(baseImage);
-		notBuiltImage.setRecipe("some recipe");
+		notBuiltImage.getTargets().put(Target.TARGET_RECIPE_NAME, new Target(Target.TARGET_RECIPE_NAME, "some recipe"));
 		notBuiltImage = notBuiltImage.store();
 
 		baseImageWithoutImageId = new ImageModule("baseImageWithoutImageId");

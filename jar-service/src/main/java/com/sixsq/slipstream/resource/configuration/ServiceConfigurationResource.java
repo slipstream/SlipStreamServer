@@ -41,8 +41,7 @@ import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 
-public class ServiceConfigurationResource extends
-		ParameterizedResource<ServiceConfiguration> {
+public class ServiceConfigurationResource extends ParameterizedResource {
 
 	public static final String CONFIGURATION_PATH = "/configuration";
 
@@ -56,8 +55,7 @@ public class ServiceConfigurationResource extends
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
-			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-					e.getMessage()));
+			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e.getMessage()));
 		}
 
 		ConnectorFactory.resetConnectors();
@@ -66,13 +64,11 @@ public class ServiceConfigurationResource extends
 		getResponse().redirectSeeOther(absolutePath);
 	}
 
-	public void processEntityAsForm(Representation entity)
-			throws ResourceException, ConfigurationException,
+	public void processEntityAsForm(Representation entity) throws ResourceException, ConfigurationException,
 			ValidationException {
 
 		Form form = extractFormFromEntity(entity);
-		ServiceConfigurationFormProcessor processor = new ServiceConfigurationFormProcessor(
-				getUser());
+		ServiceConfigurationFormProcessor processor = new ServiceConfigurationFormProcessor(getUser());
 
 		try {
 			processor.processForm(form);
@@ -82,15 +78,13 @@ public class ServiceConfigurationResource extends
 			throwClientError(e);
 		}
 
-		ServiceConfiguration proposedServiceConfiguration = processor
-				.getParametrized();
+		ServiceConfiguration proposedServiceConfiguration = processor.getParametrized();
 		configuration.update(proposedServiceConfiguration.getParameters());
 		configuration.store();
 	}
 
 	@Post
-	public void reloadConfigFile(Representation entity)
-			throws ValidationException {
+	public void reloadConfigFile(Representation entity) throws ValidationException {
 
 		try {
 			configuration.reset();
@@ -125,8 +119,7 @@ public class ServiceConfigurationResource extends
 	}
 
 	@Override
-	protected ServiceConfiguration getOrCreateParameterized(String name)
-			throws ValidationException {
+	protected ServiceConfiguration getOrCreateParameterized(String name) throws ValidationException {
 		throw (new NotImplementedException());
 	}
 
@@ -134,8 +127,7 @@ public class ServiceConfigurationResource extends
 	protected void authorize() {
 
 		if (!getClientInfo().getRoles().contains(SuperEnroler.Super)) {
-			throw (new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,
-					"Only administrators can access this resource"));
+			throw (new ResourceException(Status.CLIENT_ERROR_FORBIDDEN, "Only administrators can access this resource"));
 		}
 
 		setCanPut(true);
@@ -143,8 +135,7 @@ public class ServiceConfigurationResource extends
 	}
 
 	@Override
-	protected ServiceConfiguration loadParameterized(
-			String targetParameterizedUri) throws ValidationException {
+	protected ServiceConfiguration loadParameterized(String targetParameterizedUri) throws ValidationException {
 		throw (new NotImplementedException());
 	}
 

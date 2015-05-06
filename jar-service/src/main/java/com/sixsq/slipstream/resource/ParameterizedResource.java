@@ -39,9 +39,9 @@ import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
-public abstract class ParameterizedResource<S extends Parameterized<S, ?>> extends BaseResource {
+public abstract class ParameterizedResource extends BaseResource {
 
-	private S parameterized = null;
+	private Parameterized parameterized = null;
 
 	private String targetParameterizeUri = null;
 
@@ -69,7 +69,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>> exten
 
 	abstract protected String extractTargetUriFromRequest();
 
-	abstract protected S getOrCreateParameterized(String name) throws ValidationException;
+	abstract protected Parameterized getOrCreateParameterized(String name) throws ValidationException;
 
 	public String getTargetParameterizeUri() {
 		return targetParameterizeUri;
@@ -107,7 +107,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>> exten
 		this.canPost = canPost;
 	}
 
-	public void setParameterized(S parameterized) {
+	public void setParameterized(Parameterized parameterized) {
 		this.parameterized = parameterized;
 	}
 
@@ -115,7 +115,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>> exten
 		return (EntityManager) getRequest().getAttributes().get(ResourceUriUtil.ENTITY_MANAGER_KEY);
 	}
 
-	public S getParameterized() {
+	public Parameterized getParameterized() {
 		return parameterized;
 	}
 
@@ -134,7 +134,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>> exten
 		}
 	}
 
-	abstract protected S loadParameterized(String targetParameterizedUri) throws ValidationException;
+	abstract protected Parameterized loadParameterized(String targetParameterizedUri) throws ValidationException;
 
 	private void createVolatileParameterizedForEditing() throws ValidationException {
 		setParameterized(getOrCreateParameterized(ModuleUriUtil.extractModuleNameFromResourceUri(targetParameterizeUri)));
@@ -192,14 +192,14 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>> exten
 	public Representation toJson() {
 		checkCanGet();
 
-		S prepared = prepareForSerialisation();
+		Parameterized prepared = prepareForSerialisation();
 
 		String result = SerializationUtil.toJsonString(prepared);
 		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
 	}
 
-	private S prepareForSerialisation() {
-		S prepared = null;
+	private Parameterized prepareForSerialisation() {
+		Parameterized prepared = null;
 		try {
 			prepared = prepareForSerialization();
 		} catch (ValidationException e) {
@@ -214,7 +214,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>> exten
 	public Representation toXml() {
 		checkCanGet();
 
-		S prepared = prepareForSerialisation();
+		Parameterized prepared = prepareForSerialisation();
 
 		String result = SerializationUtil.toXmlString(prepared);
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
@@ -234,7 +234,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>> exten
 			}
 		}
 
-		S prepared = null;
+		Parameterized prepared = null;
 		try {
 			prepared = prepareForSerialization();
 		} catch (ValidationException e) {
@@ -248,7 +248,7 @@ public abstract class ParameterizedResource<S extends Parameterized<S, ?>> exten
 		return new StringRepresentation(html, MediaType.TEXT_HTML);
 	}
 
-	protected S prepareForSerialization() throws ConfigurationException, ValidationException {
+	protected Parameterized prepareForSerialization() throws ConfigurationException, ValidationException {
 		return getParameterized();
 	}
 

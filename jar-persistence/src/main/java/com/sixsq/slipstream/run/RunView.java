@@ -22,12 +22,15 @@ package com.sixsq.slipstream.run;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ConnectorInstance;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -57,8 +60,8 @@ public class RunView {
 	@Attribute(required = false)
 	private String hostname;
 
-	@Attribute(required = false)
-	private String cloudServiceNames;
+	@ElementList(required = false, entry = "cloud")
+	private Set<ConnectorInstance> cloudServices;
 
 	@Attribute(required = false)
 	private String username;
@@ -69,26 +72,26 @@ public class RunView {
 	@Attribute(required = false)
 	public String tags;
 
-	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
-			String status, Date startTime, String username, RunType type, String cloudServiceNames, String abort) {
+	public RunView(String resourceUrl, String uuid, String moduleResourceUri, String status, Date startTime,
+			String username, RunType type, Set<ConnectorInstance> cloudServices, String abort) {
 		this.resourceUri = resourceUrl;
 		this.uuid = uuid;
 		this.moduleResourceUri = moduleResourceUri;
 		this.status = status;
 		this.username = username;
 		this.type = type;
-		this.cloudServiceNames = cloudServiceNames;
+		this.cloudServices = cloudServices;
 		this.abort = abort;
 
-        if (startTime != null) {
-            this.startTime = (Date) startTime.clone();
-        } else {
-            this.startTime = null;
-        }
+		if (startTime != null) {
+			this.startTime = (Date) startTime.clone();
+		} else {
+			this.startTime = null;
+		}
 	}
 
-	public static List<RunView> fetchListView(User user, int offset, int limit)
-			throws ConfigurationException, ValidationException {
+	public static List<RunView> fetchListView(User user, int offset, int limit) throws ConfigurationException,
+			ValidationException {
 		return fetchListView(user, null, offset, limit, null);
 	}
 
@@ -97,8 +100,7 @@ public class RunView {
 		return Run.viewList(user, moduleResourceUri, offset, limit, cloudServiceName);
 	}
 
-	public static int fetchListViewCount(User user)
-			throws ConfigurationException, ValidationException {
+	public static int fetchListViewCount(User user) throws ConfigurationException, ValidationException {
 		return fetchListViewCount(user, null, null);
 	}
 
@@ -108,19 +110,19 @@ public class RunView {
 	}
 
 	public RunView copy() {
-		RunView copy = new RunView(resourceUri, uuid, moduleResourceUri,
-				status, startTime, username, type, cloudServiceNames, abort);
+		RunView copy = new RunView(resourceUri, uuid, moduleResourceUri, status, startTime, username, type,
+				cloudServices, abort);
 		copy.setHostname(hostname);
 		copy.setTags(tags);
 		return copy;
 	}
 
-	public String getCloudServiceNames() {
-		return cloudServiceNames;
+	public Set<ConnectorInstance> getCloudServiceNames() {
+		return cloudServices;
 	}
 
-	public void setCloudServiceNames(String cloudServiceNames) {
-		this.cloudServiceNames = cloudServiceNames;
+	public void setCloudServiceNames(Set<ConnectorInstance> cloudServiceNames) {
+		this.cloudServices = cloudServiceNames;
 	}
 
 	public String getUsername() {

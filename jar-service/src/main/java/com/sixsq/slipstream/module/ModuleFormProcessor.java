@@ -37,18 +37,15 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.FormProcessor;
 
-public abstract class ModuleFormProcessor extends
-		FormProcessor<Module, ModuleParameter> {
+public abstract class ModuleFormProcessor extends FormProcessor {
 
-	private List<String> illegalNames = new ArrayList<String>(
-			(Arrays.asList(("new"))));
+	private List<String> illegalNames = new ArrayList<String>((Arrays.asList(("new"))));
 
 	public ModuleFormProcessor(User user) {
 		super(user);
 	}
 
-	static public ModuleFormProcessor createFormProcessorInstance(
-			ModuleCategory category, User user) {
+	static public ModuleFormProcessor createFormProcessorInstance(ModuleCategory category, User user) {
 
 		ModuleFormProcessor processor = null;
 
@@ -74,14 +71,19 @@ public abstract class ModuleFormProcessor extends
 	}
 
 	@Override
+	public Module getParametrized() {
+		return (Module) super.getParametrized();
+	}
+
+	@Override
 	protected void parseForm() throws ValidationException, NotFoundException {
 		super.parseForm();
 
 		String name = parseName();
 		setParametrized(getOrCreateParameterized(name));
 		getParametrized().setDescription(parseDescription());
-		getParametrized().setCommit(parseCommit());
-		getParametrized().setLogoLink(parseLogoLink());
+		((Module) getParametrized()).setCommit(parseCommit());
+		((Module) getParametrized()).setLogoLink(parseLogoLink());
 	}
 
 	private String parseName() throws ValidationException {
@@ -98,8 +100,7 @@ public abstract class ModuleFormProcessor extends
 	}
 
 	private Commit parseCommit() throws ValidationException {
-		return new Commit(getUser().getName(), getForm().getFirstValue(
-				"comment"), getParametrized());
+		return new Commit(getUser().getName(), getForm().getFirstValue("comment"), (Module) getParametrized());
 	}
 
 	private String parseLogoLink() throws ValidationException {
@@ -118,7 +119,7 @@ public abstract class ModuleFormProcessor extends
 	protected void parseAuthz() {
 
 		// Save authz section
-		Module module = getParametrized();
+		Module module = (Module) getParametrized();
 		String owner = module.getAuthz().getUser();
 		if (owner == null || owner.isEmpty()) {
 			owner = getUser().getName();
@@ -151,7 +152,7 @@ public abstract class ModuleFormProcessor extends
 			authz.setPublicCreateChildren(getBooleanValue(form, "publicCreateChildren"));
 		}
 
-		getParametrized().setAuthz(authz);
+		module.setAuthz(authz);
 
 	}
 
@@ -166,15 +167,15 @@ public abstract class ModuleFormProcessor extends
 	}
 
 	@Override
-	protected ModuleParameter createParameter(String name, String value,
-			String description) throws SlipStreamClientException {
+	protected ModuleParameter createParameter(String name, String value, String description)
+			throws SlipStreamClientException {
 		return new ModuleParameter(name, value, description);
 	}
 
 	public void adjustModule(Module older) throws ValidationException {
 		if (older != null) {
 			getParametrized().setCreation(older.getCreation());
-			getParametrized().getAuthz().setUser(older.getOwner());
+			((Module) getParametrized()).getAuthz().setUser(older.getOwner());
 		}
 	}
 

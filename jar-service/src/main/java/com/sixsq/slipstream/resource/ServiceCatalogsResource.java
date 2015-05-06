@@ -134,7 +134,7 @@ public class ServiceCatalogsResource extends SimpleResource {
 				throwClientError(e);
 			}
 
-			ServiceCatalog proposedServiceCatalog = processor.getParametrized();
+			ServiceCatalog proposedServiceCatalog = (ServiceCatalog) processor.getParametrized();
 
 			scs.update(proposedServiceCatalog);
 		}

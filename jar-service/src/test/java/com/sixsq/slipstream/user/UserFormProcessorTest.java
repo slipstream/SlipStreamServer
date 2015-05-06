@@ -73,7 +73,7 @@ public class UserFormProcessorTest {
 		UserFormProcessor processor = new UserFormProcessor(user);
 		processor.processForm(form);
 
-		UserParameter processed = processor.getParametrized().getParameter("p");
+		UserParameter processed = (UserParameter) processor.getParametrized().getParameter("p");
 		assertThat(processed.getName(), is(parameter.getName()));
 		assertThat(processed.getValue(), is(parameter.getValue()));
 		assertThat(processed.getDescription(), is(parameter.getDescription()));

@@ -22,11 +22,6 @@ package com.sixsq.slipstream.persistence;
 
 import java.io.Serializable;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-
 import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -34,12 +29,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import flexjson.JSON;
 
 @SuppressWarnings("serial")
-@Entity
 public class Package implements Serializable {
-
-	@Id
-	@GeneratedValue
-	Long id;
 
 	@Attribute
 	private String name;
@@ -50,7 +40,6 @@ public class Package implements Serializable {
 	@Attribute(required = false, name = "key")
 	private String key_;
 
-	@ManyToOne
 	@JSON(include=false)
 	private ImageModule module;
 

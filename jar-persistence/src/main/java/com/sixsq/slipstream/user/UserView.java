@@ -23,6 +23,7 @@ package com.sixsq.slipstream.user;
 import java.util.Date;
 import java.util.List;
 
+import flexjson.JSON;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -63,7 +64,8 @@ public class UserView {
 	public String organization;
 
 	@Attribute(required = false, name = "issuper")
-	private boolean isSuperUser;
+	@JSON(name = "issuper")
+	public boolean isSuperUser;
 
 	public UserView(String name, String firstName, String lastName, String email, User.State state, Date lastOnline,
 			Date lastExecute, Date activeSince, String organization, Boolean isSuperUser) {

@@ -36,8 +36,8 @@ import javax.mail.internet.MimeMessage;
 
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 
 public class Notifier {
@@ -129,7 +129,7 @@ public class Notifier {
 		try {
 
 			String key = RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL.getName();
-			ServiceConfigurationParameter parameter = cfg.getParameter(key);
+			Parameter parameter = cfg.getParameter(key);
 			String adminEmail = parameter.getValue();
 			return new InternetAddress(adminEmail);
 
@@ -146,7 +146,7 @@ public class Notifier {
 	private static String getMailPassword(ServiceConfiguration cfg) {
 
 		String key = RequiredParameters.SLIPSTREAM_MAIL_PASSWORD.getName();
-		ServiceConfigurationParameter parameter = cfg.getParameter(key);
+		Parameter parameter = cfg.getParameter(key);
 		if (parameter != null) {
 			return parameter.getValue();
 		} else {
@@ -172,7 +172,7 @@ public class Notifier {
 			// Determine whether or not to use SSL. By default, SSL is not used
 			// when contacting the SMTP server.
 			String key = RequiredParameters.SLIPSTREAM_MAIL_SSL.getName();
-			ServiceConfigurationParameter parameter = cfg.getParameter(key);
+			Parameter parameter = cfg.getParameter(key);
 			boolean useSSL = false;
 			if ("true".equals(parameter.getValue())) {
 				useSSL = true;

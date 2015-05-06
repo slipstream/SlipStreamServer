@@ -22,12 +22,13 @@ package com.sixsq.slipstream.persistence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -37,9 +38,12 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementArray;
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.util.SerializationUtil;
 
 import flexjson.JSON;
 
@@ -68,27 +72,22 @@ public class ImageModule extends Module {
 	private static final String VOLATILE_DISK_VALUE_REGEX = "^[0-9]*$";
 	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
 
-	@ElementList(required = false)
-	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	private Set<Target> targets = new HashSet<Target>();
+	@Transient
+	@ElementMap(required = false)
+	private Map<String, Target> targets = new HashMap<String, Target>();
 
+	@Transient
 	@ElementList(required = false)
-	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Package> packages = new HashSet<Package>();
 
-	@Element(required = false, data = true)
-	@Column(length = 65536)
-	private String prerecipe = "";
-
-	@Element(required = false, data = true)
-	@Column(length = 65536)
-	private String recipe = "";
-
+	@Transient
 	@Attribute
 	private Boolean isBase = false;
 
+	@Transient
 	private String loginUser = "root";
 
+	@Transient
 	private String platform = "other";
 
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -96,8 +95,7 @@ public class ImageModule extends Module {
 	private Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
 
 	@Transient
-	@JSON(include=false)
-	private volatile ImageModule parentModule;
+	private ImageModule moduleReference;
 
 	protected ImageModule() {
 		super();
@@ -108,6 +106,10 @@ public class ImageModule extends Module {
 		super(name, ModuleCategory.Image);
 
 		setDefaultParameters();
+	}
+
+	public Module fromJson(String json) throws SlipStreamClientException {
+		return (Module) SerializationUtil.fromJson(json, ImageModule.class, createDeserializer());
 	}
 
 	/**
@@ -192,31 +194,40 @@ public class ImageModule extends Module {
 					+ cloudService));
 		}
 
-		ImageModule parentModule = getParentModule();
-		if (parentModule == null) {
+		ImageModule referenceModule = getModuleReference();
+		if (referenceModule == null) {
 			throw (new ValidationException("Missing reference module"));
 		}
 
-		imageId = parentModule.extractBaseImageId(cloudService);
+		imageId = referenceModule.extractBaseImageId(cloudService);
 		if (!isSet(imageId)) {
-			throw (new ValidationException("Missing image id in reference module: " + parentModule.getName()
+			throw (new ValidationException("Missing image id in reference module: " + referenceModule.getName()
 					+ " for cloud service: " + cloudService));
 		}
 		return imageId;
+	}
+
+	@JSON(include = false)
+	private ImageModule getModuleReference() {
+		if (moduleReference == null && getModuleReferenceUri() != null) {
+			moduleReference = (ImageModule) Module.load(getModuleReferenceUri());
+		}
+		return moduleReference;
 	}
 
 	/**
 	 * @return parent module. If the module doesn't have a parent, returns null
 	 * @throws ValidationException
 	 */
-	public ImageModule getParentModule() throws ValidationException {
+	public Module getParentModule() {
+		Module parentModule = super.getParentModule();
 		if (parentModule != null) {
 			return parentModule;
 		}
-		if (getModuleReference() == null) {
+		if (getParent() == null) {
 			return null;
 		}
-		parentModule = (ImageModule) Module.load(getModuleReference());
+		parentModule = Module.load(getParent());
 		return parentModule;
 	}
 
@@ -288,28 +299,20 @@ public class ImageModule extends Module {
 		this.isBase = isBase;
 	}
 
-	public String getPreRecipe() {
-		return prerecipe;
-	}
-
-	public void setPreRecipe(String prerecipe) {
-		this.prerecipe = prerecipe;
-	}
-
-	public Set<Target> getTargets() {
+	public Map<String, Target> getTargets() {
 		return targets;
 	}
 
-	public void setTargets(Set<Target> targets) {
+	public void setTargets(Map<String, Target> targets) {
 		this.targets.clear();
-		for (Target t : targets) {
+		for (Target t : targets.values()) {
 			setTarget(t);
 		}
 	}
 
-	private void setTarget(Target target) {
+	public void setTarget(Target target) {
 		target.setModule(this);
-		targets.add(target);
+		targets.put(target.getName(), target);
 	}
 
 	public Set<Package> getPackages() {
@@ -328,24 +331,13 @@ public class ImageModule extends Module {
 		packages.add(package_);
 	}
 
-	public String getRecipe() {
-		return recipe;
-	}
-
-	public void setRecipe(String recipe) {
-		this.recipe = recipe;
-	}
-
 	@Attribute
 	public String getLoginUser() throws ValidationException {
 		if (isBase()) {
 			return loginUser;
 		}
-		if (getModuleReference() == null) {
-			return "";
-		}
-		if (getParentModule() != null) {
-			return getParentModule().getLoginUser();
+		if (getModuleReference() != null) {
+			return getModuleReference().getLoginUser();
 		} else {
 			return "";
 		}
@@ -366,14 +358,11 @@ public class ImageModule extends Module {
 		if (isBase()) {
 			return platform;
 		}
-		if (getModuleReference() == null) {
-			return "";
+		String platform = "";
+		if (getModuleReference() != null) {
+			platform = getModuleReference().getPlatform();
 		}
-		if (getParentModule() != null) {
-			return getParentModule().getPlatform();
-		} else {
-			return "";
-		}
+		return platform;
 	}
 
 	@Override
@@ -385,14 +374,23 @@ public class ImageModule extends Module {
 		}
 	}
 
+	@JSON(include = false)
 	private boolean isRecipeEmpty() {
-		return !Parameter.hasValueSet(getRecipe());
+		return !isTargetSet("recipe");
 	}
 
+	@JSON(include = false)
 	private boolean isPreRecipeEmpty() {
-		return !Parameter.hasValueSet(getPreRecipe());
+		return !isTargetSet("prerecipe");
 	}
 
+	@JSON(include = false)
+	private boolean isTargetSet(String name) {
+		Target target = targets.get(name);
+		return target != null && target.isTargetSet();
+	}
+
+	@JSON(include = false)
 	private boolean isPackagesEmpty() {
 		return getPackages().isEmpty() ? true : false;
 	}
@@ -400,7 +398,7 @@ public class ImageModule extends Module {
 	public ImageModule store() {
 		setVersion();
 		if (targets != null) {
-			for (Target t : targets) {
+			for (Target t : targets.values()) {
 				t.setModule(this);
 			}
 		}
@@ -445,7 +443,7 @@ public class ImageModule extends Module {
 	@ElementArray(required = false, entry = "note")
 	public String[] getNotes() {
 		List<String> notes = new ArrayList<String>();
-		String moduleReference = getModuleReference();
+		String moduleReference = getModuleReferenceUri();
 		if (moduleReference != null) {
 			ImageModule parent = load(moduleReference);
 			notes.addAll(Arrays.asList(parent.getNotes()));
@@ -465,6 +463,18 @@ public class ImageModule extends Module {
 	private void setNotes(String[] notes) {
 	}
 
+	public String getInheritedDefaultParameterValue(String parameterName) throws ValidationException {
+		String defaultValue = "";
+		ModuleParameter p = null;
+		if (getModuleReference() != null) {
+			p = (ModuleParameter) getModuleReference().getParameter(parameterName);
+		}
+		if (p != null) {
+			defaultValue = p.getDefaultValue();
+		}
+		return defaultValue;
+	}
+
 	public ImageModule copy() throws ValidationException {
 
 		ImageModule copy = (ImageModule) copyTo(new ImageModule(getName()));
@@ -482,11 +492,8 @@ public class ImageModule extends Module {
 
 		copy.setPlatform(getPlatform());
 
-		copy.setPreRecipe(getPreRecipe());
-		copy.setRecipe(getRecipe());
-
-		for (Target target : getTargets()) {
-			copy.getTargets().add(target.copy());
+		for (Target target : getTargets().values()) {
+			copy.getTargets().put(target.getName(), target.copy());
 		}
 
 		return copy;

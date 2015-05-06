@@ -20,59 +20,58 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+
 import java.io.Serializable;
+import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
+import javax.persistence.*;
 
 import flexjson.JSON;
+import org.simpleframework.xml.Attribute;
 
 @Entity
-@Embeddable
 @SuppressWarnings("serial")
-public class Commit implements Serializable {
+public class ConnectorInstance implements Serializable {
 
 	@Id
 	@GeneratedValue
 	Long id;
 
-	@OneToOne
-	@JSON(include = false)
-	private Module guardedModule;
+	@ManyToOne
+	@JSON(include=false)
+	private Run run;
 
-	@Attribute(required = false)
-	private String author;
+	@Attribute
+	private String name;
 
-	@Element(required = false)
-	@Column(length = 1024)
-	private String comment;
+	@Attribute(required=false)
+	private String owner;
 
-	private Commit() {
-		author = "";
-		comment = "";
+	public ConnectorInstance(String name, String owner) {
+		this.name = name;
+		this.owner= owner;
 	}
 
-	public Commit(String author, String comment, Module module) {
-		this();
-		this.author = author;
-		this.comment = comment;
-		guardedModule = module;
+	public ConnectorInstance() {
 	}
 
-	public Module getGuardedModule() {
-		return guardedModule;
+	public String getName() {
+		return name;
 	}
 
-	public Commit store() {
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Run getRun() {
+		return run;
+	}
+
+	public void setRun(Run run) {
+		this.run = run;
+	}
+
+	public ConnectorInstance store() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		try {
@@ -80,7 +79,7 @@ public class Commit implements Serializable {
 			em.merge(this);
 			transaction.commit();
 		} finally {
-			if (transaction.isActive()) {
+			if(transaction.isActive()) {
 				transaction.rollback();
 			}
 			em.close();
@@ -88,16 +87,18 @@ public class Commit implements Serializable {
 		return this;
 	}
 
-	public Commit copy() {
-		return new Commit(getAuthor(), getComment(), getGuardedModule());
+	public boolean equals(Object obj) {
+		if(!(obj instanceof ConnectorInstance)) {
+			return false;
+		}
+		ConnectorInstance other = (ConnectorInstance) obj;
+		boolean sameName = (this.getName() == null && other.getName() == null) || this.name.equals(other.getName());
+		boolean sameOwner = ((this.owner == null) && (other.owner == null)) || this.owner.equals(other.owner);
+		return (sameName && sameOwner);
 	}
 
-	private String getAuthor() {
-		return author;
-	}
-
-	private String getComment() {
-		return comment;
+	public int hashCode(){
+		return Objects.hashCode(name) ^ Objects.hashCode(owner);
 	}
 
 }

@@ -38,12 +38,12 @@ public class ParameterTest {
 	@Test(expected = ValidationException.class)
 	public void nullParameterName() throws SlipStreamClientException {
 
-		new RunParameter(null, "ok", "ok");
+		new Parameter(null, "ok", "ok");
 	}
 
 	@Test
 	public void serializationWorks() throws ValidationException {
-		RunParameter parameter = new RunParameter("dummy", "ok", "ok");
+		Parameter parameter = new Parameter("dummy", "ok", "ok");
 
 		String serialization = SerializationUtil.toXmlString(parameter);
 

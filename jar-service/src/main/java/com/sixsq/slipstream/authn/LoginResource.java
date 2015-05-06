@@ -20,21 +20,16 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
-import static org.restlet.data.MediaType.APPLICATION_XHTML;
-import static org.restlet.data.MediaType.TEXT_HTML;
 import static org.restlet.data.Status.CLIENT_ERROR_UNAUTHORIZED;
 import static org.restlet.data.Status.SUCCESS_OK;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 import org.restlet.Request;
 import org.restlet.Response;
-import org.restlet.data.ClientInfo;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
-import org.restlet.data.Preference;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
@@ -148,28 +143,6 @@ public class LoginResource extends AuthnResource {
 			response.setEntity(null, MediaType.ALL);
 			response.setStatus(SUCCESS_OK);
 		}
-	}
-
-	private boolean isHtmlRequested(Request request) {
-
-		ClientInfo clientInfo = request.getClientInfo();
-		List<Preference<MediaType>> preferences = clientInfo
-				.getAcceptedMediaTypes();
-
-		for (Preference<MediaType> preference : preferences) {
-			if (isHtmlLike(preference.getMetadata())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean isHtmlLike(MediaType mediaType) {
-		if (TEXT_HTML.isCompatible(mediaType)
-				|| APPLICATION_XHTML.isCompatible(mediaType)) {
-			return true;
-		}
-		return false;
 	}
 
 	public static String getResourceRoot() {

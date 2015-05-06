@@ -50,8 +50,7 @@ import flexjson.JSONSerializer;
 
 public class SerializationUtil {
 
-	public static Metadata fromXml(String contents,
-			Class<? extends Metadata> resultClass)
+	public static Metadata fromXml(String contents, Class<? extends Metadata> resultClass)
 			throws SlipStreamClientException {
 
 		try {
@@ -73,9 +72,8 @@ public class SerializationUtil {
 			return writer.toString();
 
 		} catch (Exception e) {
-			throw new SlipStreamInternalException(
-					"cannot serialize object to string, with detail: "
-							+ e.getMessage(), e);
+			throw new SlipStreamInternalException("cannot serialize object to string, with detail: " + e.getMessage(),
+					e);
 		} finally {
 			writer.close();
 		}
@@ -95,14 +93,11 @@ public class SerializationUtil {
 			return db.parse(new InputSource(reader));
 
 		} catch (ParserConfigurationException e) {
-			throw new SlipStreamInternalException(
-					"error converting to XML document", e);
+			throw new SlipStreamInternalException("error converting to XML document", e);
 		} catch (SAXException e) {
-			throw new SlipStreamInternalException(
-					"error converting to XML document", e);
+			throw new SlipStreamInternalException("error converting to XML document", e);
 		} catch (IOException e) {
-			throw new SlipStreamInternalException(
-					"error converting to XML document", e);
+			throw new SlipStreamInternalException("error converting to XML document", e);
 
 		} finally {
 			reader.close();
@@ -128,16 +123,14 @@ public class SerializationUtil {
 			return writer.toString();
 
 		} catch (TransformerException e) {
-			throw new SlipStreamInternalException(
-					"cannot convert document to string", e);
+			throw new SlipStreamInternalException("cannot convert document to string", e);
 		} finally {
 			writer.close();
 		}
 
 	}
 
-	public static String extractCategoryFromXmlEntity(String xml)
-			throws SlipStreamClientException {
+	public static String extractCategoryFromXmlEntity(String xml) throws SlipStreamClientException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
 		Document document = null;
@@ -153,12 +146,10 @@ public class SerializationUtil {
 			throw new SlipStreamClientException(e.getMessage());
 		}
 
-		return document.getDocumentElement().getAttributes()
-				.getNamedItem("category").getNodeValue();
+		return document.getDocumentElement().getAttributes().getNamedItem("category").getNodeValue();
 	}
 
-	public static String extractCategoryFromJsonEntity(String json)
-			throws SlipStreamClientException {
+	public static String extractCategoryFromJsonEntity(String json) throws SlipStreamClientException {
 
 		JSONObject obj = new JSONObject(json);
 		String category = null;
@@ -171,13 +162,12 @@ public class SerializationUtil {
 
 	}
 
-	public static Object fromJson(String contents,
-			Class<? extends Metadata> resultClass)
+	public static Object fromJson(String contents, Class<? extends Metadata> resultClass, JSONDeserializer<Object> deserializer)
 			throws SlipStreamClientException {
 
 		Object obj = null;
 		try {
-			obj = new JSONDeserializer<Object>().deserialize(contents, resultClass);
+			obj = deserializer.deserialize(contents, resultClass);
 		} catch (Exception e) {
 			throw new SlipStreamClientException("cannot deserialize object", e);
 		}

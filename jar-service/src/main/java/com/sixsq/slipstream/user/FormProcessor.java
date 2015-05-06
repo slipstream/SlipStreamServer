@@ -34,10 +34,10 @@ import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.Parameterized;
 import com.sixsq.slipstream.persistence.User;
 
-public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Parameter<S>> {
+public abstract class FormProcessor {
 
-	private S parametrized;
-	private Map<String, T> existingParameters;
+	private Parameterized parametrized;
+	private Map<String, Parameter> existingParameters;
 	private User user;
 	private Form form;
 
@@ -57,15 +57,15 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		return user;
 	}
 
-	public S getParametrized() {
+	public Parameterized getParametrized() {
 		return parametrized;
 	}
 
-	protected void setParametrized(S parametrized) {
+	protected void setParametrized(Parameterized parametrized) {
 		this.parametrized = parametrized;
 	}
 
-	abstract protected S getOrCreateParameterized(String name)
+	abstract protected Parameterized getOrCreateParameterized(String name)
 			throws ValidationException, NotFoundException;
 
 	public void processForm(Form form) throws BadlyFormedElementException,
@@ -94,7 +94,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		// - parameter--[id]--description
 		// - parameter--[id]--value
 		// ...
-		existingParameters = new ConcurrentHashMap<String, T>(getParametrized().getParameters());
+		existingParameters = new ConcurrentHashMap<String, Parameter>(getParametrized().getParameters());
 		getParametrized().getParameters().clear();
 		for (String paramName : form.getNames().toArray(new String[0])) {
 			if (isParameterName(paramName)) {
@@ -137,7 +137,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 
 	protected void setExistingParameter(String name, String value)
 			throws ValidationException {
-		T parameter;
+		Parameter parameter;
 		parameter = existingParameters.get(name);
 		boolean overwrite = shouldSetValue(parameter, value);
 
@@ -147,7 +147,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		getParametrized().setParameter(parameter);
 	}
 
-	private String parseValue(String value, T parameter) {
+	private String parseValue(String value, Parameter parameter) {
 		String parsed = value;
 		if(parameter.getType() == ParameterType.Boolean) {
 			parsed = Boolean.toString("on".equals(value));
@@ -157,7 +157,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 
 	protected void setNewParameter(Form form, String genericPart, String name,
 			String value) throws SlipStreamClientException, ValidationException {
-		T parameter;
+		Parameter parameter;
 		String description = extractDescription(form, genericPart);
 
 		parameter = createParameter(name, value, description);
@@ -172,11 +172,11 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		}
 	}
 
-	private boolean shouldSetValue(T parameter, String value) {
+	private boolean shouldSetValue(Parameter parameter, String value) {
 		return !parameter.isReadonly() || user.isSuper();
 	}
 
-	protected abstract T createParameter(String name, String value,
+	protected abstract Parameter createParameter(String name, String value,
 			String description) throws SlipStreamClientException;
 
 	protected String getGenericPart(String paramName) {

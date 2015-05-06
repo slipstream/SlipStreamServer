@@ -23,6 +23,7 @@ package com.sixsq.slipstream.run;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -49,9 +50,9 @@ import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
@@ -101,7 +102,7 @@ public class RunNodeResource extends RunBaseResource {
 	@Get
 	public Representation represent(Representation entity) {
 		Run run = Run.loadFromUuid(getUuid());
-		List<String> instanceNames = run.getNodeInstanceNames(nodename);
+		Set<String> instanceNames = run.getNodeInstances(nodename);
 		return new StringRepresentation(StringUtils.join(instanceNames, ","), MediaType.TEXT_PLAIN);
 	}
 
@@ -289,7 +290,7 @@ public class RunNodeResource extends RunBaseResource {
 		// add mapping parameters
 		for (NodeParameter param : node.getParameterMappings().values()) {
 			if (!param.isStringValue()) {
-				DeploymentFactory.addParameterMapping(run, param, newId);
+				DeploymentFactory.addParameterMapping(run, node, param, newId);
 			}
 		}
 	}
@@ -335,8 +336,8 @@ public class RunNodeResource extends RunBaseResource {
 
 		String ids = getNodeInstanceIndices(run);
 
-		String key = DeploymentFactory.constructNodeParamName(node, RunParameter.NODE_INCREMENT_KEY);
-		RunParameter nodeInscrement = run.getParameter(key);
+		String key = DeploymentFactory.constructNodeParamName(node, Run.NODE_INCREMENT_KEY);
+		Parameter nodeInscrement = run.getParameter(key);
 
 		int newId = Integer.parseInt(nodeInscrement.getValue("0"));
 		nodeInscrement.setValue(String.valueOf(newId + 1));

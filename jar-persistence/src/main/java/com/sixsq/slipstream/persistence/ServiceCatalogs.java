@@ -52,13 +52,13 @@ public class ServiceCatalogs {
 	public void update(ServiceCatalog updated) throws ValidationException {
 		ServiceCatalog sc = getServiceCatalog(updated.getCloud());
 
-		Map<String, ServiceCatalogParameter> existingParameters = sc
+		Map<String, Parameter> existingParameters = sc
 				.getParameters();
 		sc.clearParameters();
 
-		for (ServiceCatalogParameter p : updated.getParameters().values()) {
+		for (Parameter p : updated.getParameters().values()) {
 
-			ServiceCatalogParameter existing = existingParameters.get(p
+			Parameter existing = existingParameters.get(p
 					.getName());
 
 			if (existing == null) {

@@ -28,6 +28,7 @@ import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ConnectorInstance;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -91,8 +92,8 @@ public class Launcher {
 		}
 
 		private void launchRun() throws ValidationException {
-			for (String cloudServiceName : run.getCloudServiceNamesList()) {
-				Connector connector = ConnectorFactory.getConnector(cloudServiceName);
+			for (ConnectorInstance cloudService : run.getCloudServices()) {
+				Connector connector = ConnectorFactory.getConnector(cloudService.getName());
 				try {
 					connector.launch(run, user);
 				} catch (SlipStreamException e) {

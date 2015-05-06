@@ -38,8 +38,8 @@ import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.Notifier;
 import com.sixsq.slipstream.util.ResourceUriUtil;
@@ -101,7 +101,7 @@ public class UserEmailValidationActionPerformer extends OneShotActionPerformer {
 	}
 
 	private String getRegistrationEmail() throws ConfigurationException, ValidationException {
-		ServiceConfigurationParameter p = Configuration.getInstance().getParameters()
+		Parameter p = Configuration.getInstance().getParameters()
 				.getParameter(ServiceConfiguration.RequiredParameters.SLIPSTREAM_REGISTRATION_EMAIL.getName());
 		return p.getValue();
 	}

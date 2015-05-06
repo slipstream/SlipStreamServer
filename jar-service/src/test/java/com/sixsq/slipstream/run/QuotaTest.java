@@ -28,29 +28,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import com.sixsq.slipstream.persistence.*;
 import org.junit.Test;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.QuotaException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.QuotaParameter;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
 
 public class QuotaTest {
 
 	private Run testQuotaCreateRun(User user, String cloud)
 			throws ValidationException {
 		Module deployment = new DeploymentModule("deployment1");
-		return new Run(deployment, RunType.Orchestration, new HashSet<String>(Arrays.asList(cloud)), user);
+		return new Run(deployment, RunType.Orchestration, new HashSet<ConnectorInstance>(Arrays.asList(new ConnectorInstance(cloud, null))), user);
 	}
 
 	private User testQuotaCreateUser() throws ValidationException {
@@ -81,7 +72,7 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeInstanceName("node1", cloud);
+		run1.addNodeInstance("node1", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -98,8 +89,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeInstanceName("node1", cloud);
-		run1.addNodeInstanceName("node2", cloud);
+		run1.addNodeInstance("node1", cloud);
+		run1.addNodeInstance("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -115,8 +106,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeInstanceName("node1", cloud);
-		run1.addNodeInstanceName("node2", cloud);
+		run1.addNodeInstance("node1", cloud);
+		run1.addNodeInstance("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -132,8 +123,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeInstanceName("node1", cloud);
-		run1.addNodeInstanceName("node2", cloud);
+		run1.addNodeInstance("node1", cloud);
+		run1.addNodeInstance("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}
@@ -149,8 +140,8 @@ public class QuotaTest {
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
-		run1.addNodeInstanceName("node1", cloud);
-		run1.addNodeInstanceName("node2", cloud);
+		run1.addNodeInstance("node1", cloud);
+		run1.addNodeInstance("node2", cloud);
 
 		Quota.validate(user, run1.getCloudServiceUsage(), usage);
 	}

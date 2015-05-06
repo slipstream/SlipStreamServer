@@ -23,7 +23,6 @@ package com.sixsq.slipstream.persistence;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
@@ -31,9 +30,7 @@ import org.simpleframework.xml.Attribute;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-@Entity
-@SuppressWarnings("serial")
-public class NodeParameter extends Parameter<Node> {
+public class NodeParameter extends Parameter {
 
 	private static final Pattern NAME_VALIDATION_PATTERN = Pattern
 			.compile("(.+\\" + RuntimeParameter.NODE_PROPERTY_SEPARATOR
@@ -118,16 +115,6 @@ public class NodeParameter extends Parameter<Node> {
 
 	public NodeParameter(String name) throws ValidationException {
 		super(name);
-	}
-
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	protected void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setValue(String value) throws ValidationException {

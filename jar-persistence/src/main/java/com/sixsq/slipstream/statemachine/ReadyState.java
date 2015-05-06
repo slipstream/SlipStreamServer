@@ -3,7 +3,6 @@ package com.sixsq.slipstream.statemachine;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.UserParameter;
 
@@ -27,31 +26,34 @@ import com.sixsq.slipstream.persistence.UserParameter;
  * -=================================================================-
  */
 
-
 public class ReadyState extends SynchronizedState {
 
-    public ReadyState(ExtrinsicState extrinsicState) {
-        super(extrinsicState);
+	public ReadyState(ExtrinsicState extrinsicState) {
 
-        Run run = extrinsicState.getRun();
+		super(extrinsicState);
 
-        if (shouldStayInReady(run)) {
-        	nextState = States.Ready;
-        } else {
-        	nextState = States.Finalizing;
-        }
-    }
+		Run run = extrinsicState.getRun();
+
+		if (shouldStayInReady(run)) {
+			nextState = States.Ready;
+		} else {
+			nextState = States.Finalizing;
+		}
+	}
 
 	private boolean shouldStayInReady(Run run) {
-		return run.getType() == RunType.Run ||
-				run.isMutable() ||
-				(shouldKeepRunningForSuccess(run) && run.getType() != RunType.Machine) ||
-				(shouldKeepRunningForError(run) && run.getType() != RunType.Machine);
+
+		boolean isRunType = run.getType() == RunType.Run;
+		boolean isMutable = run.isMutable();
+		boolean shouldKeepRunningForSuccess = (shouldKeepRunningForSuccess(run) && run.getType() != RunType.Machine);
+		boolean shouldKeepRunningForError = (shouldKeepRunningForError(run) && run.getType() != RunType.Machine);
+
+		return isRunType || isMutable || shouldKeepRunningForSuccess || shouldKeepRunningForError;
 	}
 
 	private String getKeepRunning(Run run) {
-		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_KEEP_RUNNING);
-		RunParameter rpKeepRunning = run.getParameter(key);
+		String key = Parameter.constructKey(ParameterCategory.getDefault(), UserParameter.KEY_KEEP_RUNNING);
+		Parameter rpKeepRunning = run.getParameter(key);
 		String keepRunning = null;
 
 		if (rpKeepRunning != null) {
@@ -61,9 +63,9 @@ public class ReadyState extends SynchronizedState {
 		if (keepRunning == null) {
 			// Backward compatibility
 			key = Parameter.constructKey(ParameterCategory.getDefault(), UserParameter.KEY_ON_SUCCESS_RUN_FOREVER);
-			RunParameter onSuccess = run.getParameter(key);
+			Parameter onSuccess = run.getParameter(key);
 			key = Parameter.constructKey(ParameterCategory.getDefault(), UserParameter.KEY_ON_ERROR_RUN_FOREVER);
-			RunParameter onError = run.getParameter(key);
+			Parameter onError = run.getParameter(key);
 
 			if (onSuccess != null && onError != null) {
 				keepRunning = UserParameter.convertOldFormatToKeepRunning(onSuccess.isTrue(), onError.isTrue());
@@ -76,22 +78,22 @@ public class ReadyState extends SynchronizedState {
 	private boolean shouldKeepRunningForSuccess(Run run) {
 		String keepRunning = getKeepRunning(run);
 
-		return !extrinsicState.isFailing() &&
-				(UserParameter.KEEP_RUNNING_ALWAYS.equals(keepRunning) ||
-				UserParameter.KEEP_RUNNING_ON_SUCCESS.equals(keepRunning));
+		return !extrinsicState.isFailing()
+				&& (UserParameter.KEEP_RUNNING_ALWAYS.equals(keepRunning) || UserParameter.KEEP_RUNNING_ON_SUCCESS
+						.equals(keepRunning));
 	}
 
 	private boolean shouldKeepRunningForError(Run run) {
 		String keepRunning = getKeepRunning(run);
 
-		return extrinsicState.isFailing() &&
-				(UserParameter.KEEP_RUNNING_ALWAYS.equals(keepRunning) ||
-				UserParameter.KEEP_RUNNING_ON_ERROR.equals(keepRunning));
+		return extrinsicState.isFailing()
+				&& (UserParameter.KEEP_RUNNING_ALWAYS.equals(keepRunning) || UserParameter.KEEP_RUNNING_ON_ERROR
+						.equals(keepRunning));
 	}
 
-    @Override
-    public States getState() {
-        return States.Ready;
-    }
+	@Override
+	public States getState() {
+		return States.Ready;
+	}
 
 }

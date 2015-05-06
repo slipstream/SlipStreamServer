@@ -24,13 +24,7 @@ import java.util.Map;
 
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.*;
 
 public class SimpleRunFactory extends BuildImageFactory {
 
@@ -40,15 +34,15 @@ public class SimpleRunFactory extends BuildImageFactory {
 	}
 
 	@Override
-	protected void validateModule(Module module, Map<String, String> cloudServicePerNode)
+	protected void validateModule(Module module, Map<String, ConnectorInstance> cloudServicePerNode)
 	        throws SlipStreamClientException {
 
 		ImageModule image = (ImageModule) module;
 
 		checkNoCircularDependencies(image);
 
-		String cloudServiceName = cloudServicePerNode.get(nodeInstanceName);
-		image.validateForRun(cloudServiceName);
+		ConnectorInstance cloudService = cloudServicePerNode.get(nodeInstanceName);
+		image.validateForRun(cloudService.getName());
 	}
 
 	@Override
@@ -61,9 +55,9 @@ public class SimpleRunFactory extends BuildImageFactory {
 
 		boolean runBuildRecipes = image.hasToRunBuildRecipes(cloudService);
 
-		String runParameterName = constructParamName(nodeInstanceName, RunParameter.NODE_RUN_BUILD_RECIPES_KEY);
-		run.setParameter(new RunParameter(runParameterName, String.valueOf(runBuildRecipes),
-				RunParameter.NODE_RUN_BUILD_RECIPES_DESCRIPTION));
+		String runParameterName = constructParamName(nodeInstanceName, Run.NODE_RUN_BUILD_RECIPES_KEY);
+		run.setParameter(new Parameter(runParameterName, String.valueOf(runBuildRecipes),
+				Run.NODE_RUN_BUILD_RECIPES_DESCRIPTION));
 	}
 
 }

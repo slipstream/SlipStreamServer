@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.module;
+package com.sixsq.slipstream.exceptions;
 
 /*
  * +=================================================================+
@@ -20,30 +20,29 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Root;
+/**
+ * Marker class to group all of the SlipStream runtime exceptions.
+ * 
+ * @author loomis
+ * 
+ */
+@SuppressWarnings("serial")
+public class SlipStreamClientRuntimeException extends SlipStreamRuntimeException {
 
-import com.sixsq.slipstream.persistence.Authz;
-import com.sixsq.slipstream.persistence.ModuleCategory;
-
-@Root(name = "item")
-public class ModuleViewPublished extends ModuleView {
-
-	@Attribute(required = false)
-	private final boolean published = true;
-
-	@Attribute(required = false)
-	private final String logoLink;
-
-	public ModuleViewPublished(String resourceUri, String description, ModuleCategory category, String customVersion,
-			Authz authz, String logoLink) {
-
-		super(resourceUri, description, category, customVersion, authz);
-		this.logoLink = logoLink;
+	public SlipStreamClientRuntimeException(String message, Throwable exception) {
+		super(message, exception);
 	}
 
-	public boolean isPublished() {
-		return published;
+	public SlipStreamClientRuntimeException(Throwable exception) {
+		super(exception);
+	}
+
+	public SlipStreamClientRuntimeException(String message) {
+		super(message);
+	}
+
+	public SlipStreamClientRuntimeException() {
+		super();
 	}
 
 }

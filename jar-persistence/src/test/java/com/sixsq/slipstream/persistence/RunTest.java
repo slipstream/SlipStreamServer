@@ -42,13 +42,13 @@ import com.sixsq.slipstream.statemachine.States;
 
 public class RunTest {
 
-	private static final Set<String> cloudServiceNames = new HashSet<String>(Arrays.asList("test"));
+	private static final Set<ConnectorInstance> cloudServices = new HashSet<ConnectorInstance>(Arrays.asList(new ConnectorInstance("test", null)));
 
 	@Test
 	public void loadWithRuntimeParameters() throws ValidationException, NotFoundException, AbortException {
 		Module image = new ImageModule();
 
-		Run run = new Run(image, RunType.Run, cloudServiceNames, new User("user"));
+		Run run = new Run(image, RunType.Run, cloudServices, new User("user"));
 
 		run.assignRuntimeParameter("ss:key", "value", "description");
 
@@ -82,12 +82,12 @@ public class RunTest {
 
 		List<Run> before = Run.listOldTransient(user);
 
-		Run done = new Run(image, RunType.Run, cloudServiceNames, new User("user"));
+		Run done = new Run(image, RunType.Run, cloudServices, new User("user"));
 		done.setStart(twoHourBack);
 		done.setState(States.Done);
 		done.store();
 
-		Run aborting = new Run(image, RunType.Run, cloudServiceNames, new User("user"));
+		Run aborting = new Run(image, RunType.Run, cloudServices, new User("user"));
 		aborting.setLastStateChange(twoHourBack);
 		aborting.store();
 

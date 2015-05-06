@@ -188,7 +188,7 @@ public class AuthzTest {
 		Authz parentAuthz = new Authz(owner.getName(), parent);
 		parentAuthz.addGroupMember("other");
 		parentAuthz.setInheritedGroupMembers(false);
-		parent.store();
+		parent = parent.store();
 
 		Module module = new ImageModule("parent/project/module");
 		Authz moduleAuthz = new Authz(owner.getName(), module);
@@ -200,7 +200,7 @@ public class AuthzTest {
 
 		// add to parent group
 		parent.getAuthz().addGroupMember("user");
-		parent.store();
+		parent = parent.store();
 		
 		module = Module.load(module.getResourceUri());
 

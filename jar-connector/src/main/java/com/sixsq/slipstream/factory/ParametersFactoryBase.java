@@ -27,7 +27,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterType;
 
-public abstract class ParametersFactoryBase<S extends Parameter<?>> {
+public abstract class ParametersFactoryBase<S extends Parameter> {
 
 	private String category;
 

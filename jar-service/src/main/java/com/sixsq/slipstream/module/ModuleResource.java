@@ -52,7 +52,7 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Metadata;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.persistence.ModuleParameter;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ProjectModule;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.resource.ParameterizedResource;
@@ -64,11 +64,11 @@ import com.sixsq.slipstream.util.XmlUtil;
 
 /**
  * Unit test see
- *
+ * 
  * @see ModuleResourceTest
- *
+ * 
  */
-public class ModuleResource extends ParameterizedResource<Module> {
+public class ModuleResource extends ParameterizedResource {
 
 	private ModuleCategory category = null;
 	public static final String COPY_SOURCE_FORM_PARAMETER_NAME = "source_uri";
@@ -95,6 +95,23 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		String result = XmlUtil.normalize(prepared);
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
+
+//	@Get("json")
+//	public Representation toJson() {
+//		checkCanGet();
+//
+//		Module prepared = null;
+//		try {
+//			prepared = prepareForSerialization();
+//		} catch (ValidationException e) {
+//			throwClientValidationError(e.getMessage());
+//		} catch (ConfigurationException e) {
+//			Util.throwConfigurationException(e);
+//		}
+//
+//		String result = XmlUtil.normalize(prepared);
+//		return new StringRepresentation(result, MediaType.APPLICATION_XML);
+//	}
 
 	@Post("form")
 	public void copyTo(Representation entity) throws ValidationException {
@@ -131,7 +148,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientForbiddenError("Target module already exists: " + targetUri);
 		}
 
-		if (!getParameterized().getAuthz().canCreateChildren(getUser())) {
+		if (!((Module) getParameterized()).getAuthz().canCreateChildren(getUser())) {
 			throwClientForbiddenError("You do not have rights to create modules in this project");
 		}
 
@@ -172,6 +189,11 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		}
 	}
 
+	@Override
+	public Module getParameterized() {
+		return (Module) super.getParameterized();
+	}
+	
 	private void redirectToParent() throws ValidationException {
 		String resourceUri = getParameterized().getResourceUri();
 		String parentResourceUri = ModuleUriUtil.extractParentUriFromResourceUri(resourceUri);
@@ -189,6 +211,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	@Put("form")
 	public void updateOrCreateFromForm(Representation entity) throws ResourceException {
+
+		checkCanPut();
 
 		if (entity == null) {
 			throwClientBadRequest("Empty form");
@@ -216,6 +240,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	@Put("multipart")
 	public void updateOrCreateFromXmlMultipart(Representation entity) throws ResourceException {
 
+		checkCanPut();
+
 		Module module = xmlMultipartToModule();
 
 		updateOrCreate(module);
@@ -235,8 +261,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	private String extractXmlMultipart() {
 
-		RestletFileUpload upload = new RestletFileUpload(
-				new DiskFileItemFactory());
+		RestletFileUpload upload = new RestletFileUpload(new DiskFileItemFactory());
 
 		List<FileItem> items;
 
@@ -244,8 +269,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		try {
 			items = upload.parseRequest(request);
 		} catch (FileUploadException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-					e.getMessage());
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e.getMessage());
 		}
 
 		String module = null;
@@ -255,16 +279,16 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			}
 		}
 		if (module == null) {
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-					"the file is empty");
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "the file is empty");
 		}
 
 		return module;
 	}
 
 	@Put("xml")
-	public void updateOrCreateFromXml(Representation entity)
-			throws ResourceException {
+	public void updateOrCreateFromXml(Representation entity) throws ResourceException {
+
+		checkCanPut();
 
 		Module module = xmlToModule();
 
@@ -278,8 +302,9 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@Put("json")
-	public void updateOrCreateFromJson(Representation entity)
-			throws ResourceException {
+	public void updateOrCreateFromJson(Representation entity) throws ResourceException {
+
+		checkCanPut();
 
 		Module module = jsonToModule();
 
@@ -309,8 +334,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		String denormalized = XmlUtil.denormalize(xml);
 		Module module = null;
 		try {
-			module = (Module) SerializationUtil.fromXml(denormalized,
-					moduleClass);
+			module = (Module) SerializationUtil.fromXml(denormalized, moduleClass);
 		} catch (SlipStreamClientException e) {
 			throwClientBadRequest("Invalid xml module: " + e.getMessage());
 		}
@@ -339,7 +363,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		Module module = null;
 		try {
-			module = (Module) SerializationUtil.fromJson(json, moduleClass);
+			module = Module.fromJson(json, moduleClass);
 		} catch (SlipStreamClientException e) {
 			throwClientBadRequest("Invalid json module: " + e.getMessage());
 		}
@@ -354,8 +378,6 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	private void updateOrCreate(Module module) {
 
-		checkCanPut();
-
 		try {
 			module.validate();
 		} catch (ValidationException ex) {
@@ -365,10 +387,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		String moduleUri = null;
 		String targetUri = null;
 		try {
-			moduleUri = ModuleUriUtil.extractVersionLessResourceUri(module
-					.getResourceUri());
-			targetUri = ModuleUriUtil
-					.extractVersionLessResourceUri(getTargetParameterizeUri());
+			moduleUri = ModuleUriUtil.extractVersionLessResourceUri(module.getResourceUri());
+			targetUri = ModuleUriUtil.extractVersionLessResourceUri(getTargetParameterizeUri());
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
 		}
@@ -385,8 +405,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	}
 
-	private void checkConsistentModule(String moduleUri, String targetUri)
-			throws ValidationException {
+	private void checkConsistentModule(String moduleUri, String targetUri) throws ValidationException {
 		if (!targetUri.equals(moduleUri)) {
 			throwClientBadRequest("The uploaded module does not correspond to the target module uri");
 		}
@@ -395,8 +414,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	@SuppressWarnings("unchecked")
 	private Class<? extends Module> getModuleClass(String category) {
 
-		String className = "com.sixsq.slipstream.persistence." + category
-				+ "Module";
+		String className = "com.sixsq.slipstream.persistence." + category + "Module";
 		Class<? extends Module> moduleClass = null;
 		try {
 			moduleClass = (Class<? extends Module>) Class.forName(className);
@@ -411,19 +429,16 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@Override
-	protected Module loadParameterized(String targetParameterizedUri)
-			throws ValidationException {
+	protected Module loadParameterized(String targetParameterizedUri) throws ValidationException {
 
 		return loadModule(targetParameterizedUri);
 	}
 
-	public Module loadModule(String targetParameterizedUri)
-			throws ValidationException {
+	public Module loadModule(String targetParameterizedUri) throws ValidationException {
 		Module module = Module.load(targetParameterizedUri);
 		if (module != null) {
 			if (module.getCategory() == ModuleCategory.Project) {
-				List<ModuleView> children = Module.viewList(module
-						.getResourceUri());
+				List<ModuleView> children = Module.viewList(module.getResourceUri());
 				((ProjectModule) module).setChildren(children);
 			}
 		}
@@ -431,22 +446,18 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@Override
-	protected void setIsEdit() throws ConfigurationException,
-			ValidationException {
+	protected void setIsEdit() throws ConfigurationException, ValidationException {
 		super.setIsEdit();
 
 		if (isExisting()) {
 			// Add connector information for the transformation
-			List<String> serviceCloudNames = ConnectorFactory
-					.getCloudServiceNamesList();
+			List<String> serviceCloudNames = ConnectorFactory.getCloudServiceNamesList();
 			serviceCloudNames.add(CloudImageIdentifier.DEFAULT_CLOUD_SERVICE);
-			getParameterized().setCloudNames(
-					serviceCloudNames.toArray(new String[0]));
+			getParameterized().setCloudNames(serviceCloudNames.toArray(new String[0]));
 		}
 	}
 
-	private Metadata processEntityAsForm(Representation entity)
-			throws ValidationException {
+	private Metadata processEntityAsForm(Representation entity) throws ValidationException {
 
 		// Add the default module parameters if the module is not new,
 		// to ensure that all mandatory parameters are present.
@@ -464,8 +475,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		}
 
 		Form form = extractFormFromEntity(entity);
-		ModuleFormProcessor processor = ModuleFormProcessor
-				.createFormProcessorInstance(getCategory(form), getUser());
+		ModuleFormProcessor processor = ModuleFormProcessor.createFormProcessorInstance(getCategory(form), getUser());
 
 		try {
 			processor.processForm(form);
@@ -490,21 +500,17 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		return module;
 	}
 
-	private Module copyAllParameters(Module module) throws ValidationException
-	{
-		for (ModuleParameter p : module.getParameterList()) {
+	private Module copyAllParameters(Module module) throws ValidationException {
+		for (Parameter p : module.getParameterList()) {
 			module.setParameter(p.copy());
 		}
 
 		return module;
 	}
 
-	private Module resetMandatoryParameters(Module module)
-			throws ValidationException {
-		for (ModuleParameter referenceParameter : getOrCreateParameterized(
-				"reference").getParameterList()) {
-			ModuleParameter p = module.getParameter(referenceParameter
-					.getName());
+	private Module resetMandatoryParameters(Module module) throws ValidationException {
+		for (Parameter referenceParameter : getOrCreateParameterized("reference").getParameterList()) {
+			Parameter p = module.getParameter(referenceParameter.getName());
 
 			if (p != null) {
 				referenceParameter.setValue(p.getValue());
@@ -520,8 +526,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		String module = (String) getRequest().getAttributes().get("module");
 
 		int version = extractVersion();
-		String moduleName = (version == Module.DEFAULT_VERSION ? module
-				: module + "/" + version);
+		String moduleName = (version == Module.DEFAULT_VERSION ? module : module + "/" + version);
 		return Module.constructResourceUri(moduleName);
 	}
 
@@ -543,8 +548,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			setCanGet(authorizeGet());
 		}
 
-		if (getParameterized() != null && getParameterized().isDeleted()
-				&& !getUser().isSuper()) {
+		if (getParameterized() != null && getParameterized().isDeleted() && !getUser().isSuper()) {
 			throwClientForbiddenError("Module deleted");
 		}
 	}
@@ -577,8 +581,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			// check parent
 			String parentResourceUri = null;
 			try {
-				parentResourceUri = ModuleUriUtil
-						.extractParentUriFromResourceUri(getTargetParameterizeUri());
+				parentResourceUri = ModuleUriUtil.extractParentUriFromResourceUri(getTargetParameterizeUri());
 			} catch (ValidationException e) {
 				return false;
 			}
@@ -591,14 +594,12 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			}
 		}
 
-		return isExisting() ? Module
-				.loadLatest(getParameterized().getResourceUri()).getAuthz()
-				.canPut(getUser()) : true;
+		return isExisting() ? Module.loadLatest(getParameterized().getResourceUri()).getAuthz().canPut(getUser())
+				: true;
 	}
 
 	@Override
-	protected Module getOrCreateParameterized(String name)
-			throws ValidationException {
+	protected Module getOrCreateParameterized(String name) throws ValidationException {
 		Module module = null;
 		switch (getCategory()) {
 		case Project:

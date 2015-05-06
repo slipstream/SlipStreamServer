@@ -30,8 +30,8 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceCatalog;
-import com.sixsq.slipstream.persistence.ServiceCatalogParameter;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ServiceCatalogResource extends SimpleResource {
@@ -105,15 +105,11 @@ public class ServiceCatalogResource extends SimpleResource {
 
 		serviceCatalog.clearParameters();
 
-		for (ServiceCatalogParameter p : s.getParameters().values()) {
-			try {
-				// Don't trust the provided info
-				p.setMandatory(false);
-				p.setReadonly(true);
-				serviceCatalog.setParameter(p);
-			} catch (ValidationException e) {
-				throwClientBadRequest(e.getMessage());
-			}
+		for (Parameter p : s.getParameters().values()) {
+			// Don't trust the provided info
+			p.setMandatory(false);
+			p.setReadonly(true);
+			serviceCatalog.setParameter(p);
 		}
 
 		try {

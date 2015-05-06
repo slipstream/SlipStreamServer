@@ -161,7 +161,7 @@ public class LocalConnector extends ConnectorBase {
 			// Empty deployment, nothing to
 			throw (new SlipStreamClientException("Empty deployment, nothing to"));
 		}
-		for (String n : run.getNodeNamesList()) {
+		for (String n : run.getNodeInstances()) {
 			int multiplicity = Integer.valueOf(run.getRuntimeParameterValue(RuntimeParameter.constructParamName(n,
 					RuntimeParameter.MULTIPLICITY_PARAMETER_NAME)));
 			for (int i = 1; i <= multiplicity; i++) {
@@ -195,7 +195,7 @@ public class LocalConnector extends ConnectorBase {
 	public void terminate(Run run, User user) throws SlipStreamException {
 
 		if (run.getType() != RunType.Orchestration) {
-			Logger.getLogger(this.getClass().getName()).info("Terminating: " + run.getNodeNames());
+			Logger.getLogger(this.getClass().getName()).info("Terminating: " + run.getNodeInstances());
 			return;
 		}
 
@@ -207,7 +207,7 @@ public class LocalConnector extends ConnectorBase {
 
 		StringBuilder nodes = new StringBuilder(ids);
 
-		for (String nodeName : run.getNodeNames().split(",")) {
+		for (String nodeName : run.getNodeInstances()) {
 			nodeName = nodeName.trim();
 			if (!"".equals(nodeName)) {
 				String multiplicity = run.getParameterValue(nodeName + RuntimeParameter.NODE_PROPERTY_SEPARATOR

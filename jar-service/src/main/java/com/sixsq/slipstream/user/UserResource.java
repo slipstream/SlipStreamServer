@@ -49,7 +49,6 @@ import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -62,7 +61,7 @@ import com.sixsq.slipstream.util.XmlUtil;
 /**
  * @see UserResourceTest
  */
-public class UserResource extends ParameterizedResource<User> {
+public class UserResource extends ParameterizedResource {
 
 	public static final String USERNAME_URI_ATTRIBUTE = "user";
 	private static final String resourceRoot = User.RESOURCE_URL_PREFIX;
@@ -85,6 +84,9 @@ public class UserResource extends ParameterizedResource<User> {
 			throwClientValidationError(e.getMessage());
 		}
 
+		// reset password
+		user.setHashedPassword(null);
+		
 		return super.toJson();
 	}
 
@@ -106,17 +108,17 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Override
-	protected boolean isMachineAllowedToAccessThisResource(){
+	protected boolean isMachineAllowedToAccessThisResource() {
 		return true;
 	}
 
-	private void replaceUserPublicSshKeyWithServerSshPublicKeyIfEmpty(User user)
-			throws ConfigurationException, ValidationException {
+	private void replaceUserPublicSshKeyWithServerSshPublicKeyIfEmpty(User user) throws ConfigurationException,
+			ValidationException {
 
 		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
 
 		if (CookieUtils.isMachine(cookie) == true) {
-			UserParameter userPublicSshKey = user.getParameter(ExecutionControlUserParametersFactory.CATEGORY + "."
+			Parameter userPublicSshKey = user.getParameter(ExecutionControlUserParametersFactory.CATEGORY + "."
 					+ UserParametersFactoryBase.SSHKEY_PARAMETER_NAME);
 
 			if (userPublicSshKey != null && userPublicSshKey.getValue("").trim().isEmpty()) {
@@ -131,7 +133,7 @@ public class UserResource extends ParameterizedResource<User> {
 		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
 		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
 		if (cloudServiceName != null) {
-			for (Entry<String, Parameter<ServiceConfiguration>> p : Configuration.getInstance().getParameters()
+			for (Entry<String, Parameter> p : Configuration.getInstance().getParameters()
 					.getParameters(cloudServiceName).entrySet()) {
 				user.getParameters().put(p.getKey(), UserParameter.convert(p.getValue()));
 			}
@@ -150,37 +152,33 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected User prepareForSerialization() throws ConfigurationException, ValidationException {
-		User user = getParameterized();
+		User user = (User) getParameterized();
 
 		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
 		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
 		if (cloudServiceName != null && CookieUtils.isMachine(cookie) == true) {
-			Map<String, Parameter<User>> params = user.getParameters(ParameterCategory.General.name());
+			Map<String, Parameter> params = user.getParameters(ParameterCategory.General.name());
 			params.putAll(user.getParameters(cloudServiceName));
 
-			Map<String, UserParameter> userParameters = user.getParameters();
+			Map<String, Parameter> userParameters = user.getParameters();
 			userParameters.clear();
-			for (Map.Entry<String,Parameter<User>> entry : params.entrySet()) {
-				userParameters.put(entry.getKey(), (UserParameter)entry.getValue());
+			for (Map.Entry<String, Parameter> entry : params.entrySet()) {
+				userParameters.put(entry.getKey(), entry.getValue());
 			}
 		}
 
 		return user;
 	}
 
-	private void mergePublicKeyParameter(User user)
-			throws ConfigurationException, ValidationException {
+	private void mergePublicKeyParameter(User user) throws ConfigurationException, ValidationException {
 		String pubKeyParameterName = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY
 				.getName();
-		ServiceConfigurationParameter pubKeySystemParameter = Configuration
-				.getInstance().getParameters()
-				.getParameter(pubKeyParameterName);
+		Parameter pubKeySystemParameter = Configuration.getInstance().getParameters().getParameter(pubKeyParameterName);
 		String pubKeyFilePath = pubKeySystemParameter.getValue();
 		if (FileUtil.exist(pubKeyFilePath)) {
 			String pubKey = FileUtil.fileToString(pubKeyFilePath);
 			pubKeyParameterName = "General.orchestrator.publicsshkey";
-			UserParameter pubKeyUserParameter = new UserParameter(
-					pubKeyParameterName, pubKey, "");
+			UserParameter pubKeyUserParameter = new UserParameter(pubKeyParameterName, pubKey, "");
 			pubKeyUserParameter.setCategory("General");
 			user.getParameters().put(pubKeyParameterName, pubKeyUserParameter);
 		}
@@ -202,13 +200,12 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected User getOrCreateParameterized(String name) {
-		User user = getParameterized();
+		User user = (User) getParameterized();
 		if (user == null) {
 			try {
 				user = new User(name);
 			} catch (ValidationException e) {
-				throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-						e.getMessage()));
+				throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e.getMessage()));
 			}
 		}
 		return user;
@@ -230,15 +227,11 @@ public class UserResource extends ParameterizedResource<User> {
 
 	protected boolean newTemplateResource() {
 		return isExisting()
-				&& NEW_NAME.equals(ModuleUriUtil
-						.extractShortNameFromResourceUri(getParameterized()
-								.getName()));
+				&& NEW_NAME.equals(ModuleUriUtil.extractShortNameFromResourceUri(getParameterized().getName()));
 	}
 
 	private boolean isItSelf() {
-		return isExisting()
-				&& getUser().getResourceUri().equals(
-						getTargetUser().getResourceUri());
+		return isExisting() && getUser().getResourceUri().equals(getTargetUser().getResourceUri());
 	}
 
 	private User getTargetUser() {
@@ -246,15 +239,13 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Override
-	protected void addParametersForEditing() throws ValidationException,
-			ConfigurationException {
+	protected void addParametersForEditing() throws ValidationException, ConfigurationException {
 
-		ParametersFactory.addParametersForEditing(getParameterized());
+		ParametersFactory.addParametersForEditing((User) getParameterized());
 	}
 
 	@Put("form")
-	public void modifyOrCreateFromForm(Representation entity)
-			throws ResourceException {
+	public void modifyOrCreateFromForm(Representation entity) throws ResourceException {
 
 		if (!canPut()) {
 			throwClientForbiddenError();
@@ -275,7 +266,7 @@ public class UserResource extends ParameterizedResource<User> {
 		processEntityAsForm(entity);
 
 		try {
-			updateOrCreate(getParameterized());
+			updateOrCreate((User) getParameterized());
 		} catch (ValidationException e) {
 			throwClientBadRequest(e.getMessage());
 		}
@@ -284,8 +275,7 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Put("xml")
-	public void updateOrCreateFromXml(Representation entity)
-			throws ResourceException {
+	public void updateOrCreateFromXml(Representation entity) throws ResourceException {
 
 		User user = xmlToUser();
 
@@ -305,8 +295,7 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Put("json")
-	public void updateOrCreateFromJson(Representation entity)
-			throws ResourceException {
+	public void updateOrCreateFromJson(Representation entity) throws ResourceException {
 
 		User user = jsonToUser();
 
@@ -353,7 +342,7 @@ public class UserResource extends ParameterizedResource<User> {
 
 		User user = null;
 		try {
-			user = (User) SerializationUtil.fromJson(json, User.class);
+			user = User.fromJson(json);
 		} catch (SlipStreamClientException e) {
 			throwClientBadRequest(e.getMessage());
 		}
@@ -379,8 +368,7 @@ public class UserResource extends ParameterizedResource<User> {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex.getMessage());
 		}
 
-		if (!getTargetParameterizeUri().equals(user.getName())
-				&& !getUser().isSuper()) {
+		if (!getTargetParameterizeUri().equals(user.getName()) && !getUser().isSuper()) {
 			throwClientBadRequest("The uploaded user does not correspond to the target user uri");
 		}
 
@@ -420,16 +408,14 @@ public class UserResource extends ParameterizedResource<User> {
 			String text = entity.getText();
 			form = new Form(text);
 		} catch (IOException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-					"cannot extract text from entity");
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "cannot extract text from entity");
 		}
 		return form;
 	}
 
 	private void processForm(Form form) {
 
-		UserFormProcessor processor = new UserFormProcessor(getParameterized(),
-				getUser());
+		UserFormProcessor processor = new UserFormProcessor((User) getParameterized(), getUser());
 		try {
 			processor.processForm(form);
 		} catch (BadlyFormedElementException e) {
@@ -447,8 +433,7 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Override
-	protected User loadParameterized(String targetParameterizedName)
-			throws ConfigurationException, ValidationException {
+	protected User loadParameterized(String targetParameterizedName) throws ConfigurationException, ValidationException {
 		return User.loadByName(targetParameterizedName);
 	}
 

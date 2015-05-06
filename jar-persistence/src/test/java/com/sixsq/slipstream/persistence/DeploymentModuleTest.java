@@ -115,7 +115,7 @@ public class DeploymentModuleTest {
 		String description = "description";
 		String value = "value";
 
-		ModuleParameter parameter = new ModuleParameter(parameterName, value,
+		Parameter parameter = new ModuleParameter(parameterName, value,
 				description);
 		module.setParameter(parameter);
 
@@ -124,7 +124,7 @@ public class DeploymentModuleTest {
 		Module moduleRestored = Module.load(resourceUrl);
 		assertNotNull(moduleRestored);
 
-		Map<String, ModuleParameter> parameters = moduleRestored
+		Map<String, Parameter> parameters = moduleRestored
 				.getParameters();
 		assertNotNull(parameters);
 		assertTrue(parameters.size() > 0);
@@ -149,11 +149,10 @@ public class DeploymentModuleTest {
 
 		String resourceUrl = module.getResourceUri();
 
-		ImageModule image = new ImageModule("image1");
-		image.store();
+		ImageModule image = new ImageModule("image1ModuleWithParameterMappings");
 
 		Node node = new Node("node1", image);
-		node = (Node) node.store();
+		image = image.store();
 
 		String parameterName = "name";
 		String description = "description";
@@ -161,7 +160,7 @@ public class DeploymentModuleTest {
 
 		NodeParameter np = new NodeParameter(parameterName, value, description);
 		node.setParameterMapping(np);
-		node = (Node) node.store();
+		image = image.store();
 
 		module.setNode(node);
 
@@ -203,7 +202,7 @@ public class DeploymentModuleTest {
 
 		DeploymentModule deployment = new DeploymentModule(name);
 
-		ImageModule image = new ImageModule("image1");
+		ImageModule image = new ImageModule("image1ModuleWithNonExistantNodeNameMapping");
 		image.getParameters().put("pi1", new ModuleParameter("pi1", "pi1 init value", ""));
 		image.store();
 
@@ -240,7 +239,7 @@ public class DeploymentModuleTest {
 
 		ModuleParameter parameter;
 
-		ImageModule image = new ImageModule("image1");
+		ImageModule image = new ImageModule("image1ModuleWithNonExistantOutputParamaterNameMapping");
 		parameter = new ModuleParameter("pi1", "pi1 init value", "");
 		parameter.setCategory(ParameterCategory.Input);
 		image.getParameters().put(parameter.getName(), parameter);
@@ -298,6 +297,7 @@ public class DeploymentModuleTest {
 
 		List<ModuleView> moduleViewList = Module
 				.viewList(Module.RESOURCE_URI_PREFIX);
+		
 		assertEquals(3, moduleViewList.size());
 
 		Set<String> retrievedUsernames = new TreeSet<String>();

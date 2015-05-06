@@ -40,7 +40,7 @@ import com.sixsq.slipstream.persistence.UserParameter;
  * @see UserFormProcessorTest
  *
  */
-public class UserFormProcessor extends FormProcessor<User, UserParameter> {
+public class UserFormProcessor extends FormProcessor {
 
 	public UserFormProcessor(User user) {
 		super(user);
@@ -85,7 +85,7 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 	@Override
 	protected User getOrCreateParameterized(String name)
 			throws ValidationException {
-		User user = getParametrized();
+		User user = (User) getParametrized();
 		if (user == null) {
 			user = new User(name);
 		}
@@ -131,7 +131,7 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 		} else {
 			password = (isNewUser(dbUser) ? null : dbUser.getHashedPassword());
 		}
-		getParametrized().setHashedPassword(password);
+		((User) getParametrized()).setHashedPassword(password);
 	}
 
 	private Passwords extractPasswords(Form form)
@@ -210,7 +210,7 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 	private void processIsSuper(Form form) {
 		if (getUser().isSuper()) {
 			String isSuper = form.getFirstValue("issuper");
-			getParametrized().setSuper("on".equals(isSuper));
+			((User) getParametrized()).setSuper("on".equals(isSuper));
 		}
 	}
 

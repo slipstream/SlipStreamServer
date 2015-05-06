@@ -20,13 +20,11 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.simpleframework.xml.Attribute;
@@ -40,20 +38,18 @@ import flexjson.JSON;
 
 /**
  * Unit test see
- *
+ * 
  * @see ParameterTest
- *
+ * 
  */
-@MappedSuperclass
-@SuppressWarnings("serial")
 @Root(name = "parameter")
-public abstract class Parameter<T> implements Serializable {
+public class Parameter {
 
 	private static final CharSequence INVALID_RESTRICTED_CHAR = "'";
 
 	@ManyToOne
-	@JSON(include=false)
-	private T container;
+	@JSON(include = false)
+	private Metadata container;
 
 	@Attribute
 	private String name;
@@ -88,10 +84,14 @@ public abstract class Parameter<T> implements Serializable {
 	@ElementArray(required = false)
 	private String[] enumValues;
 
-	@Attribute(required = false)
+	@JSON(include = false)
 	private Integer order_ = 0;
 
 	protected Parameter() {
+	}
+
+	public Parameter(Parameter p) throws ValidationException {
+		this(p.getName(), p.getValue(), p.getDescription());
 	}
 
 	public Parameter(String name) throws ValidationException {
@@ -101,8 +101,7 @@ public abstract class Parameter<T> implements Serializable {
 		this.category = ParameterCategory.General.name();
 	}
 
-	public Parameter(String name, String value, String description)
-			throws ValidationException {
+	public Parameter(String name, String value, String description) throws ValidationException {
 		this(name);
 		this.description = description;
 		this.value = value;
@@ -110,14 +109,9 @@ public abstract class Parameter<T> implements Serializable {
 
 	protected void validateName() throws ValidationException {
 		if (name == null) {
-			throw (new ValidationException(
-					"Error creating new Parameter, argument name cannot be null"));
+			throw (new ValidationException("Error creating new Parameter, argument name cannot be null"));
 		}
 	}
-
-	abstract public Long getId();
-
-	abstract protected void setId(Long id);
 
 	public String getName() {
 		return name;
@@ -155,8 +149,8 @@ public abstract class Parameter<T> implements Serializable {
 		}
 		if (isRestrictedValue()) {
 			if (value != null && value.contains(INVALID_RESTRICTED_CHAR)) {
-				throw (new ValidationException("Invalid character ("
-						+ INVALID_RESTRICTED_CHAR + ") in parameter: " + name));
+				throw (new ValidationException("Invalid character (" + INVALID_RESTRICTED_CHAR + ") in parameter: "
+						+ name));
 			}
 		}
 	}
@@ -202,11 +196,11 @@ public abstract class Parameter<T> implements Serializable {
 		this.inheritedFromUri = inheritedFrom;
 	}
 
-	final public T getContainer() {
+	final public Metadata getContainer() {
 		return container;
 	}
 
-	final public void setContainer(T container) {
+	final public void setContainer(Metadata container) {
 		this.container = container;
 	}
 
@@ -281,14 +275,15 @@ public abstract class Parameter<T> implements Serializable {
 	}
 
 	protected boolean isRestrictedValue() {
-		return getType() == ParameterType.RestrictedText
-				|| getType() == ParameterType.RestrictedString
+		return getType() == ParameterType.RestrictedText || getType() == ParameterType.RestrictedString
 				|| getType() == ParameterType.Password;
 	}
 
-	abstract public Parameter<T> copy() throws ValidationException;
+	public Parameter copy() throws ValidationException {
+		return copyTo(new Parameter(this));
+	}
 
-	public Parameter<T> copyTo(Parameter<T> copy) throws ValidationException {
+	public Parameter copyTo(Parameter copy) throws ValidationException {
 
 		copy.setCategory(getCategory());
 		copy.setEnumValues(getEnumValues());
@@ -305,6 +300,7 @@ public abstract class Parameter<T> implements Serializable {
 		return isTrue(getValue());
 	}
 
+	@JSON(include = false)
 	public static boolean isTrue(String value) {
 		return Boolean.parseBoolean(value);
 	}

@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
@@ -135,7 +136,7 @@ public class ServiceConfigurationTest {
 		assertNotNull(recoveredCfg);
 		assertEquals(second, recoveredCfg.getId());
 
-		ServiceConfigurationParameter recoveredParameter = cfg
+		Parameter recoveredParameter = cfg
 				.getParameter(ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME
 						.getName());
 		assertNotNull(recoveredParameter);
