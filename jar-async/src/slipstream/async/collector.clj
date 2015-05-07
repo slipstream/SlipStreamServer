@@ -119,7 +119,7 @@
     (go
       (let [res (alts! [ch (timeout timeout-collect)])]
         (if (nil? res)
-          (log/log-error  "Timeout updating metrics for user " (get-name user))
+          (log/log-error  "Timeout updating metrics for user "  (get-name user))
           (log/log-info   "Executed update-metric request for " (get-name user)))))
     (go (>! ch (updator/update-metric user)))))
 
@@ -151,7 +151,7 @@
         (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
           (when (not-nil? user)            
             (try
-              (log/log-info (str "executing collect request for " (get-name user) " and " (.getConnectorInstanceName connector)))
+              (log/log-info "Will execute collect request for " (user-connector user connector))
               (collect! user connector)
               (catch Exception e (log/log-warn "caught exception executing collect request: " (.getMessage e))))))))))
 
