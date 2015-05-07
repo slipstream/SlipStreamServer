@@ -49,6 +49,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
@@ -333,6 +334,9 @@ public class Configuration {
 				parameter.setMandatory(p.isMandatory());
 				parameter.setCategory(p.getCategory());
 				parameter.setType(p.getType());
+				if (parameter.getType() == ParameterType.Enum) {
+					parameter.setEnumValues(p.getEnumValues());
+				}
 			}
 
 			serviceConfiguration.setParameter(parameter);
