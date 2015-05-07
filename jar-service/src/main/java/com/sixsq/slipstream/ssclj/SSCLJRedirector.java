@@ -1,5 +1,8 @@
 package com.sixsq.slipstream.ssclj;
 
+import static com.sixsq.slipstream.resource.BaseResource.LIMIT_DEFAULT;
+import static com.sixsq.slipstream.resource.BaseResource.PAGING_LIMIT_KEY;
+import static com.sixsq.slipstream.resource.BaseResource.PAGING_OFFSET_KEY;
 import static org.restlet.engine.header.HeaderConstants.ATTRIBUTE_HEADERS;
 
 import java.util.logging.Logger;
@@ -22,11 +25,11 @@ import com.sixsq.slipstream.persistence.User;
 public class SSCLJRedirector extends Redirector {
 
 	private static final Logger logger = Logger.getLogger(Redirector.class.getName());
-	
+
 	private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
 
 	public SSCLJRedirector(Context context, String targetPattern, int mode) {
-		super(context, targetPattern, mode);		
+		super(context, targetPattern, mode);
 	}
 
 	protected void addSegmentForSSCLJUUID(Reference targetRef, Request request) {
@@ -35,11 +38,11 @@ public class SSCLJRedirector extends Redirector {
 	}
 
     protected void addOffsetAndLimit(Request request){
-        String offset = (String) request.getAttributes().get("offset");
-        String limit = (String) request.getAttributes().get("limit");
+        int offset = Integer.parseInt(request.getOriginalRef().getQueryAsForm().getFirstValue(PAGING_OFFSET_KEY, "0"));
+        int limit = Integer.parseInt(request.getOriginalRef().getQueryAsForm().getFirstValue(PAGING_LIMIT_KEY, "" + LIMIT_DEFAULT));
 
-        request.getResourceRef().addQueryParameter("offset", offset);
-        request.getResourceRef().addQueryParameter("limit", limit);
+        request.getResourceRef().addQueryParameter("$first", "" + (offset + 1));
+        request.getResourceRef().addQueryParameter("$last", "" + (limit + offset));
     }
 
 	@SuppressWarnings("unchecked")
@@ -59,7 +62,7 @@ public class SSCLJRedirector extends Redirector {
 			logger.severe("Unable to add SlipstreamAuthnInfo in header:" + ve.getMessage());
 		}
 	}
-	
+
 	// hack inspired by this discussion http://restlet.tigris.org/ds/viewMessage.do?dsForumId=4447&dsMessageId=3076621
 	// main trick is to call addSlipstreamAuthnInfo to add slipstream header after it has been removed from request
 	//
@@ -81,7 +84,7 @@ public class SSCLJRedirector extends Redirector {
             // Update the request to cleanly go to the target URI
             request.setResourceRef(targetRef);
             request.getAttributes().remove(HeaderConstants.ATTRIBUTE_HEADERS);
-            
+
             // hack
             addSlipstreamAuthnInfo(request);
             addOffsetAndLimit(request);
