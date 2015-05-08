@@ -52,11 +52,11 @@
 (deftest extract-id-roles
   (is 
     (= ["john" ["exo1" "exo"]]
-    (id-roles {:identity
-                {:current "john", 
-                 :authentications {
-                  "john" 
-                    {:identity "john", :roles ["exo1" "exo"]}}}}))))
+    (dbdb/id-roles {:identity
+                     {:current "john", 
+                      :authentications {
+                        "john" 
+                        {:identity "john", :roles ["exo1" "exo"]}}}}))))
 
 (deftest get-without-authn-succeeds 
   (-> (session (ring-app))

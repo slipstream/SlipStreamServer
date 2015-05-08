@@ -2,18 +2,28 @@
 (ns com.sixsq.slipstream.ssclj.db.database-binding
   (:refer-clojure :exclude [update])
   (:require 
-    [clojure.java.jdbc :refer :all :as jdbc]    
-    [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]]
+    [com.sixsq.slipstream.ssclj.api.acl                     :as acl]
+    [com.sixsq.slipstream.ssclj.db.binding                  :refer [Binding]]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
-    [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [korma.core :refer :all]
-    [ring.util.response :as r]))
+    [com.sixsq.slipstream.ssclj.database.korma-helper       :as kh]    
+    [com.sixsq.slipstream.ssclj.database.ddl                :as ddl]
+    [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+
+    [clojure.java.jdbc                                      :refer :all :as jdbc]    
+    [honeysql.helpers                                       :as hh]
+    [honeysql.core                                          :as hq]
+    [korma.core                                             :refer :all]
+
+    [ring.util.response                                     :as r]))
+
+(def ^:const pagination-limit-default "20")
 
 (defn init-db
   []  
+  (acl/-init)
   (kh/korma-init)
+
   (ddl/create-table! "resources" (ddl/columns "id" "VARCHAR(100)" "data" "VARCHAR(10000)"))
   (defentity resources))
 
@@ -37,7 +47,9 @@
 
 (defn- insert-resource 
   [id data]
-  (insert resources (values {:id id :data (serialize data)})))
+  (insert resources (values {:id id :data (serialize data)}))
+  (when (:acl data)
+    (acl/insert-resource id "Event" (acl/types-principals-from-acl (:acl data)))))
 
 (defn- update-resource 
   [id data]
@@ -56,12 +68,64 @@
   [collection-id options]
   collection-id)
 
+(defn id-matches?   
+  [id]
+  (if id
+    [:and [:= :a.principal-type "USER"] [:= :a.principal-name id]]
+    [:= 0 1]))
+
+(defn roles-in?   
+  [roles]
+  (if (seq roles)
+    [:and [:= :a.principal-type "ROLE"] [:in :a.principal-name roles]]
+    [:= 0 1]))
+
+(defn neither-id-roles?
+  [id roles]
+  (not (or id (seq roles))))
+
+(defn offset-limit 
+  [options]
+  (->> options 
+       :query-params      
+       (merge {"offset" "0" "limit" pagination-limit-default})
+       ((juxt #(get % "offset") #(get % "limit")))))
+
+(defn id-roles   
+  [options]
+  (-> options      
+      :identity      
+      :authentications   
+      (get (get-in options [:identity :current]))
+      ((juxt :identity :roles))))
+
+(defn sql   
+  [collection-id id roles offset limit]  
+  (->   (hh/select :r.*) 
+        (hh/from [:acl :a] [:resources :r])        
+        (hh/where [:and 
+                        [:like :r.id (str collection-id"%")] 
+                        [:= :r.id :a.resource-id] ;; join acl with resources 
+                        [:or 
+                          (id-matches? id)        ;; an acl line with given id
+                          (roles-in? roles)]])    ;; an acl line with one of the given roles 
+        (hh/modifiers :distinct)
+        (hh/limit limit)
+        (hh/offset offset)
+        (hq/format :quoting :ansi)))
+
 (defmulti  find-resources dispatch-fn)
 (defmethod find-resources :default
-  [collection-id options]  
-  (->>  (select resources (where {:id [like (str collection-id"%")]}))
+  [collection-id options]    
+  (let [[id roles]      (id-roles options)
+        [offset limit]  (offset-limit options)]  
+    (if (neither-id-roles? id roles)
+      []
+      (->>          
+        (sql collection-id id roles offset limit)                
+        (jdbc/query kh/db-spec)                 
         (map :data)
-        (map deserialize)))
+        (map deserialize)))))
 
 (defn- delete-resource 
   [id]
@@ -81,23 +145,23 @@
 (deftype DatabaseBinding []
   Binding
 
-  (add [this {:keys [id] :as data}]     
-    (check-conflict id)      
-    (insert-resource id data)
+  (add [this {:keys [id] :as data}]
+    (check-conflict   id)      
+    (insert-resource  id data)
     (response-created id)) 
 
   (retrieve [this id]    
-    (check-exist  id)
-    (find-resource id))
+    (check-exist    id)
+    (find-resource  id))
 
   (delete [this {:keys [id]}]    
-    (check-exist id)
-    (delete-resource id)
+    (check-exist      id)
+    (delete-resource  id)
     (response-deleted id))
 
   (edit [this {:keys [id] :as data}]    
-    (check-exist id)      
-    (update-resource id data))
+    (check-exist      id)      
+    (update-resource  id data))
   
   (query [this collection-id options]
     (find-resources collection-id options)))

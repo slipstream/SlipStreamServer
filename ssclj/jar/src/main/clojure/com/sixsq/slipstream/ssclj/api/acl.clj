@@ -2,11 +2,11 @@
   (:refer-clojure :exclude [update])
   (:require
     [com.sixsq.slipstream.ssclj.database.korma-helper             :as kh]
-    [clojure.java.jdbc                                :refer :all :as jdbc]
+    [clojure.java.jdbc                                            :refer :all :as jdbc]
     [clojure.tools.logging                                        :as log]
     [clojure.set                                                  :as s]
     [clojure.walk                                                 :as w]
-    [korma.core                                       :refer :all]
+    [korma.core                                                   :refer :all]
     [com.sixsq.slipstream.ssclj.api.ddl                           :as ddl]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils      :as du])
   (:gen-class
@@ -102,11 +102,11 @@
 
 (defn parse-authn   
   [authn-map]
-  (->> authn-map
-    (into {})
-    w/keywordize-keys
-    extract-current
-    parse-id-map))
+  (->>  authn-map
+        (into {})
+        w/keywordize-keys
+        extract-current
+        parse-id-map))
 
 ;; API
 ;;
@@ -115,14 +115,23 @@
   [user roles]
   {:identity user :roles roles})
 
+(defn- type-principal-from-rule   
+  [{:keys [type principal]}]
+  [type principal])
+
+(defn types-principals-from-acl
+  [acl]
+  (->> acl
+       :rules
+       (map type-principal-from-rule)))
 
 (defn insert-resource
   [^String id ^String type types-principals]
   (check-init-called)
-  (let [    
-    candidates      (rows id type types-principals)
-    existings       (filter-existing candidates)
-    actual-inserts  (s/difference candidates existings)]    
+  (let [
+    candidates        (rows id type types-principals)
+    existings         (filter-existing candidates)
+    actual-inserts    (s/difference candidates existings)]
     (when (seq actual-inserts)            
       ;; loop of single inserts instead of bulk one because korma translates this
       ;; into SQL not supported by sqlite : http://stackoverflow.com/questions/1609637/is-it-possible-to-insert-multiple-rows-at-a-time-in-an-sqlite-database

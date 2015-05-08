@@ -31,8 +31,6 @@
 (def ^:const resource-uri     (str c/slipstream-schema-uri resource-name))
 (def ^:const collection-uri   (str c/slipstream-schema-uri collection-name))
 
-(def ^:const pagination-limit-default "20")
-
 (def collection-acl {:owner {:principal   "ADMIN"
                              :type        "ROLE"}
 
@@ -48,37 +46,6 @@
 (defn- deserialize-usage   
   [usage]
   (update-in usage [:acl] fu/deserialize))
-
-(defn offset-limit 
-  [options]
-  (->> options 
-       :query-params      
-       (merge {"offset" "0" "limit" pagination-limit-default})
-       ((juxt #(get % "offset") #(get % "limit")))))
-
-(defn id-roles   
-  [options]
-  (-> options            
-      :identity      
-      :authentications   
-      (get (get-in options [:identity :current]))
-      ((juxt :identity :roles))))
-
-(defn id-matches?   
-  [id]
-  (if id
-    [:and [:= :a.principal-type "USER"] [:= :a.principal-name id]]
-    [:= 0 1]))
-
-(defn roles-in?   
-  [roles]
-  (if (seq roles)
-    [:and [:= :a.principal-type "ROLE"] [:in :a.principal-name roles]]
-    [:= 0 1]))
-
-(defn- neither-id-roles?
-  [id roles]
-  (not (or id (seq roles))))
 
 (defn bad-query   
   [offset limit]
@@ -104,8 +71,8 @@
         (hh/from [:acl :a] [:usage_summaries :u])
         (hh/where [:and [:= :u.id :a.resource-id]
                         [:or 
-                          (id-matches? id)
-                          (roles-in? roles)]])
+                          (dbb/id-matches? id)
+                          (dbb/roles-in? roles)]])
         (hh/modifiers :distinct)
         (hh/limit limit)
         (hh/offset offset)
@@ -115,9 +82,9 @@
 
 (defmethod dbb/find-resources resource-name
   [collection-id options]
-  (let [[id roles] (id-roles options)
-        [offset limit] (offset-limit options)]     
-    (if (neither-id-roles? id roles)
+  (let [[id roles]      (dbb/id-roles options)
+        [offset limit]  (dbb/offset-limit options)]     
+    (if (dbb/neither-id-roles? id roles)
       []
       (->> (sql id roles offset limit)
            (j/query kh/db-spec)           

@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.db.database-binding-test
   (:refer-clojure :exclude [update])
   (:require    
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbb] 
+    [com.sixsq.slipstream.ssclj.db.database-binding         :as dbb] 
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize]]
-    [korma.core :refer :all]
-    [expectations :refer :all]
-    [clojure.tools.logging :as log]))
+    [korma.core                                             :refer :all]
+    [expectations                                           :refer :all]
+    [clojure.tools.logging                                  :as log]))
 
 (def db (dbb/get-instance))
 
@@ -15,7 +15,9 @@
 
 ;; Given a clean database
 
-(def data {:id "Type/123" :name "alfred" :age 23})
+(def data {:id "Type/123" :name "alfred" :age 23
+           :acl {:owner {:type "USER" :principal "alfred"}
+                 :rules [{:type "USER" :principal "alfred" :right "ALL"}]}})
 (def response-add (.add db data))
 ;; When we add data
 
@@ -52,9 +54,10 @@
 (expect data retrieved)
 ;; Then it equals what was added
 
-(def collection (.query db "Type" {}))
+(def collection (.query db "Type" {:identity
+                                    {:current "alfred"
+                                     :authentications {"alfred" {:identity "alfred" :roles []}}}}))
+
 (expect (list data) collection)
 (expect empty? (.query db "Unknown" {}))
 ;; Then collections can be queried
-
-
