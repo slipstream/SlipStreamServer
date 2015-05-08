@@ -23,14 +23,11 @@ package com.sixsq.slipstream.ssclj;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sixsq.slipstream.run.RunListResource;
 import org.restlet.Context;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
-import org.restlet.routing.TemplateRoute;
-import org.restlet.routing.Variable;
 
 public class SSCLJRouter extends Router {
 

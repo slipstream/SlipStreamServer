@@ -10,6 +10,7 @@ import org.restlet.data.Parameter;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
+import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
@@ -18,10 +19,6 @@ import com.sixsq.slipstream.resource.BaseResource;
 public class RequestUtil {
 
 	public static final String TYPE_KEY = "type";
-	public static final String TYPE_VIEW_VALUE = "view";
-	public static final String TYPE_EDIT_VALUE = "edit";
-	public static final String TYPE_NEW_VALUE = "new";
-	public static final String TYPE_CHOOSER_VALUE = "chooser";
 
 	public static final String REQUEST_KEY = "request";
 	public static final String QUERY_PARAMETERS_KEY = "query-parameters";
@@ -154,6 +151,52 @@ public class RequestUtil {
 			type = queryKey;
 		}
 		return type;
+	}
+
+	public static String getQueryValue(Request request, String name) {
+		return getQueryValue(request, name, null);
+	}
+
+	public static String getQueryValue(Request request, String name, String defaultValue) {
+		return request.getOriginalRef().getQueryAsForm().getFirstValue(name, defaultValue);
+	}
+
+	public static int getOffset(Request request) {
+		String offsetAttr = getQueryValue(request, BaseResource.PAGING_OFFSET_KEY);
+
+		int offset = 0;
+		if (offsetAttr != null) {
+			try {
+				offset = Integer.parseInt(offsetAttr);
+			} catch (NumberFormatException e) {
+				Util.throwClientBadRequest("Invalid format for the offset attribute");
+			}
+			if (offset < 0) {
+				Util.throwClientBadRequest("The value for the offset attribute should be positive");
+			}
+		}
+		return offset;
+	}
+
+	public static int getLimit(Request request) {
+		return getLimit(request, BaseResource.LIMIT_DEFAULT, BaseResource.LIMIT_MAX);
+	}
+
+	public static int getLimit(Request request, int defaultLimit, int max) {
+		String limitAttr = getQueryValue(request, BaseResource.PAGING_LIMIT_KEY);
+
+		int limit = defaultLimit;
+		if (limitAttr != null) {
+			try {
+				limit = Integer.parseInt(limitAttr);
+			} catch (NumberFormatException e) {
+				Util.throwClientBadRequest("Invalid format for the limit attribute");
+			}
+			if (limit < 1 || limit > max) {
+				Util.throwClientBadRequest("The value for the limit attribute should be between 1 and 500");
+			}
+		}
+		return limit;
 	}
 
 }

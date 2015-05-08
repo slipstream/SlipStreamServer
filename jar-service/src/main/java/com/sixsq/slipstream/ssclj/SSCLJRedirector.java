@@ -1,8 +1,5 @@
 package com.sixsq.slipstream.ssclj;
 
-import static com.sixsq.slipstream.resource.BaseResource.LIMIT_DEFAULT;
-import static com.sixsq.slipstream.resource.BaseResource.PAGING_LIMIT_KEY;
-import static com.sixsq.slipstream.resource.BaseResource.PAGING_OFFSET_KEY;
 import static org.restlet.engine.header.HeaderConstants.ATTRIBUTE_HEADERS;
 
 import java.util.logging.Logger;
@@ -21,6 +18,7 @@ import org.restlet.util.Series;
 import com.sixsq.slipstream.event.TypePrincipalRight;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.RequestUtil;
 
 public class SSCLJRedirector extends Redirector {
 
@@ -37,9 +35,9 @@ public class SSCLJRedirector extends Redirector {
 		targetRef.addSegment(sscljUUID);
 	}
 
-    protected void addOffsetAndLimit(Request request){
-        int offset = Integer.parseInt(request.getOriginalRef().getQueryAsForm().getFirstValue(PAGING_OFFSET_KEY, "0"));
-        int limit = Integer.parseInt(request.getOriginalRef().getQueryAsForm().getFirstValue(PAGING_LIMIT_KEY, "" + LIMIT_DEFAULT));
+    protected void addOffsetAndLimit(Request request) {
+        int offset = RequestUtil.getOffset(request);
+        int limit = RequestUtil.getLimit(request);
 
         request.getResourceRef().addQueryParameter("$first", "" + (offset + 1));
         request.getResourceRef().addQueryParameter("$last", "" + (limit + offset));
