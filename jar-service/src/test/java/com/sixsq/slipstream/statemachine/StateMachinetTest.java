@@ -40,6 +40,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
@@ -74,6 +75,9 @@ public class StateMachinetTest {
 	@BeforeClass
 	public static void beforeClass() throws ConfigurationException,
 			ValidationException {
+
+		Event.muteForTests();
+
 		user = CommonTestUtil.createTestUser();
 
 		CommonTestUtil.addSshKeys(user);
