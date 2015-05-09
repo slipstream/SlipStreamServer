@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.restlet.Request;
 import org.restlet.data.Parameter;
+import org.restlet.data.Reference;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -158,7 +159,14 @@ public class RequestUtil {
 	}
 
 	public static String getQueryValue(Request request, String name, String defaultValue) {
-		return request.getOriginalRef().getQueryAsForm().getFirstValue(name, defaultValue);
+		String value = null;
+		Reference ref = request.getResourceRef();
+
+		if (ref != null) {
+			value = ref.getQueryAsForm().getFirstValue(name, defaultValue);
+		}
+
+		return value;
 	}
 
 	public static int getOffset(Request request) {
