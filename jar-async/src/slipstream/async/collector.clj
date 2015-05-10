@@ -1,16 +1,16 @@
 (ns slipstream.async.collector
-  (:require [slipstream.async.log :as log])
-  (:require [slipstream.async.metric-updator :as updator])
-  (:import [com.sixsq.slipstream.connector Collector])
-  (:import [com.sixsq.slipstream.connector Connector])
-  (:import [com.sixsq.slipstream.connector ConnectorFactory])
-  (:import [com.sixsq.slipstream.persistence User])
-  (:require [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!! alts!]])
+  (:require 
+    [slipstream.async.log             :as log]
+    [slipstream.async.metric-updator  :as updator]
+    [clojure.core.async               :as async :refer [go timeout thread chan sliding-buffer <! >! <!! alts!]])
+  (:import 
+    [com.sixsq.slipstream.connector    Collector]
+    [com.sixsq.slipstream.connector    Connector]
+    [com.sixsq.slipstream.connector    ConnectorFactory]
+    [com.sixsq.slipstream.persistence  User])
   (:gen-class
     :name slipstream.async.Collector
-    :methods [#^{:static true
-                 :doc "Takes: run user"}
-[start [] void]]))
+    :methods [#^{:static true :doc "Takes: run user"} [start [] void]]))
 
 (defn seconds-in-msecs
   [seconds]
@@ -19,6 +19,14 @@
 (defn msecs-in-seconds
   [msecs]
   (/ msecs 1000))
+
+(def collector-chan-size            512)
+(def number-of-readers              32)
+(def timeout-all-users-loop         (seconds-in-msecs 240))
+(def timeout-online-loop            (seconds-in-msecs 10))
+(def timeout-collect                (* 6 timeout-online-loop))
+(def timeout-collect-reader-release (+ timeout-collect (seconds-in-msecs 2)))
+(def timeout-processing-loop        (seconds-in-msecs 60))
 
 (defn get-name
   [user]
@@ -45,13 +53,15 @@
   [u c]
   (swap! busy mark-free [(get-name u) c]))
 
-(def collector-chan-size 512)
-(def number-of-readers 32)
-(def timeout-all-users-loop (seconds-in-msecs 240))
-(def timeout-online-loop (seconds-in-msecs 10))
-(def timeout-collect (* 6 timeout-online-loop))
-(def timeout-collect-reader-release (+ timeout-collect (seconds-in-msecs 2)))
-(def timeout-processing-loop (seconds-in-msecs 60))
+(defn full?   
+  []
+  (>= (count @busy) collector-chan-size))
+
+(defn current-working-usage   
+  []
+  (let [current-working (count @busy)
+        ratio           (* 100.0 (/ current-working (float collector-chan-size)))]
+    [current-working collector-chan-size ratio]))
 
 (defn get-value
   [entry]
@@ -109,23 +119,21 @@
     (go
       (let [res (alts! [ch (timeout timeout-collect)])]
         (if (nil? res)
-          (log/log-error
-            "Timeout updating metrics for user "
-            (get-name user))
-          (log/log-info (str "executed update-metric request for " (get-name user))))))
-    (go (>! ch (updator/update user)))))
+          (log/log-error  "Timeout updating metrics for user "  (get-name user))
+          (log/log-info   "Executed update-metric request for " (get-name user)))))
+    (go (>! ch (updator/update-metric user)))))
 
 (defn collect!
   [user connector]
   (let [ch (chan 1) start-ts (System/currentTimeMillis)]
     (go
-      (let [ [v _] (alts! [ch (timeout timeout-collect-reader-release)])
-             elapsed (- (System/currentTimeMillis) start-ts) ]
+      (let [ [v _]    (alts! [ch (timeout timeout-collect-reader-release)])
+             elapsed  (- (System/currentTimeMillis) start-ts) ]
         (free! user connector)        
         (cond
-          (nil? v) (log-timeout user connector elapsed)
-          (= v Collector/NO_CREDENTIALS) (log-no-credentials user connector elapsed)
-          (= v Collector/EXCEPTION_OCCURED) (log-failure user connector elapsed)
+          (nil? v)                            (log-timeout user connector elapsed)
+          (= v Collector/NO_CREDENTIALS)      (log-no-credentials user connector elapsed)
+          (= v Collector/EXCEPTION_OCCURED)   (log-failure user connector elapsed)
           :else (do
                   (log-collected user connector elapsed v)
                   (when (updator/metering-enabled?) (update-metric! user))))))
@@ -143,43 +151,61 @@
         (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
           (when (not-nil? user)            
             (try
-              (log/log-info (str "executing collect request for " (get-name user) " and " (.getConnectorInstanceName connector)))
+              (log/log-info "Will execute collect request for " (user-connector user connector))
               (collect! user connector)
               (catch Exception e (log/log-warn "caught exception executing collect request: " (.getMessage e))))))))))
 
 (defonce ^:dynamic *online-collect-processor* (collect-readers online-collector-chan))
 (defonce ^:dynamic *all-collect-processor* (collect-readers all-collector-chan))
 
-(defn check-channel-size
-  [users connectors]
-  (let [users-count (count users)
-        connectors-count (count connectors)]
-    (when (> (* users-count connectors-count) collector-chan-size)
-      (log/log-error (str "The number of users x connectors: " users-count " x " connectors-count " exceeds the channel size: " collector-chan-size)))))
-
 (defn add-increasing-space
  [ucs space]
  (let [spaces (iterate #(+ space %) 0)]
-   (map (fn [[u c] t] [u c t]) ucs spaces)))
+   (map conj ucs spaces)))
+
+(defn warn-channel-full   
+  [context u c]
+  (log/log-error context 
+    ": the processing channel capacity(" collector-chan-size") is currently full, will *not* insert request for "
+      (user-connector u c)))
+
+(defn inform-avoiding   
+  [context u c]
+  (log/log-info context ": avoiding inserting on " (user-connector u c) " being already processed."))
+
+(defn inform-inserted 
+  [context u c t]
+  (log/log-info context ": inserted collect request for " (user-connector u c) " after timeout " t))    
+
+(defn inform-nothing-to-do 
+  [context]
+  (log/log-info context ": no users to collect."))
+
+(defn show-current-channel-usage   
+  [context]
+  (let [[current total ratio] (current-working-usage)]
+    (log/log-info context ": " current " / " total " => " ratio " %")))
 
 (defn insert-collection-requests
   [users connectors chan time-to-spread context]
+  (show-current-channel-usage context)
   (if (every? (comp pos? count) [connectors users])
-    (let [ucs (for [u users c connectors] [u c])
-          ucts (add-increasing-space ucs (int (/ time-to-spread (count ucs))))]
-      (check-channel-size users connectors)
+    (let [ucs   (for [u users c connectors] [u c])
+          ucts  (add-increasing-space ucs (int (/ time-to-spread (count ucs))))]
       (doseq [[u c t] ucts]
-        (if (busy? u c)
-          (log/log-info context ": avoiding inserting on " (user-connector u c) " being in a process.")       
-          (go
-            (<! (timeout t))
-            (if-not (busy? u c)
-              (do
-                (busy! u c)
-                (>! chan [u c])
-                (log/log-info context ": Inserted collect request for " (user-connector u c) " after timeout " t))
-              (log/log-info context ": Avoiding working on " (user-connector u c) " being in a process.")))))
-    (log/log-info context ": No users to collect"))))
+        (cond 
+          (full?)     (warn-channel-full context u c)
+          (busy? u c) (inform-avoiding context u c))
+          :else       (go
+                        (<! (timeout t))
+                        (if-not (busy? u c)
+                          (do
+                            (busy! u c)
+                            (>! chan [u c])
+                            (inform-inserted context u c t))
+
+                          (inform-avoiding context u c)))))
+    (inform-nothing-to-do context)))
 
 ; Start collector writers
 (defn collect-writers
