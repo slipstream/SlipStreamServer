@@ -1,14 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils
   "General utilities for dealing with resources."
   (:require
-    [clojure.data.json :as json]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [clojure.edn :as edn]
-    [clj-time.core :as time]
-    [clj-time.format :as time-fmt]
-    [schema.core :as s]
-    [ring.util.response :as r])
+    [clojure.edn          :as edn]
+    [clj-time.core        :as time]
+    [clj-time.format      :as time-fmt]
+    [schema.core          :as s]
+    [ring.util.response   :as r])
   (:import
     [java.util UUID]
     [javax.xml.bind DatatypeConverter]))
@@ -51,10 +48,6 @@
   [id]
   (let [msg (str "not authorized for '" id "'")]
     (ex-response msg 403 id)))
-
-(defn ex-forbidden 
-  [id]  
-  (ex-response "forbidden" 403 id))
 
 (defn ex-bad-method
   [{:keys [uri request-method] :as request}]
@@ -104,6 +97,10 @@
    instance on success and nil on failure."
   [data]
   (time-fmt/parse (:date-time time-fmt/formatters) data))
+
+(defn valid-number?
+  [s]
+  (number? (read-string s)))
 
 (defn create-validation-fn
   "Creates a validation function that compares a resource against the

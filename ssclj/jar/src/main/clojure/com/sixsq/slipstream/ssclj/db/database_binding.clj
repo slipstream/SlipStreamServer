@@ -1,15 +1,14 @@
 ;; database implementation of Binding protocol
 (ns com.sixsq.slipstream.ssclj.db.database-binding
-  (:refer-clojure :exclude [update])
-  (:require 
-    [clojure.java.jdbc :refer :all :as jdbc]    
-    [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]]
+  (:refer-clojure                                           :exclude [update])
+  (:require
+    [com.sixsq.slipstream.ssclj.db.binding                  :refer [Binding]]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
-    [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [korma.core :refer :all]
-    [ring.util.response :as r]))
+    [com.sixsq.slipstream.ssclj.database.korma-helper       :as kh]
+    [com.sixsq.slipstream.ssclj.database.ddl                :as ddl]
+    [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
+    [korma.core                                             :refer :all]
+    [ring.util.response                                     :as r]))
 
 (defn init-db
   []  
@@ -70,8 +69,8 @@
 (defn- response-created 
   [id]
   (-> (str "created " id)
-    (u/map-response 201 id)
-    (r/header "Location" id)))
+      (u/map-response 201 id)
+      (r/header "Location" id)))
 
 (defn- response-deleted 
   [id]
@@ -81,7 +80,7 @@
 (deftype DatabaseBinding []
   Binding
 
-  (add [this {:keys [id] :as data}]     
+  (add [this collection-id {:keys [id] :as data}]
     (check-conflict id)      
     (insert-resource id data)
     (response-created id)) 

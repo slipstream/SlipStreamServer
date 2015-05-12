@@ -9,8 +9,8 @@
   [impl]
   (alter-var-root #'*impl* (constantly impl)))
 
-(defn add [data]
-  (p/add *impl* data))
+(defn add [collection-id data]
+  (p/add *impl* collection-id data))
 
 (defn retrieve [id]
   (p/retrieve *impl* id))

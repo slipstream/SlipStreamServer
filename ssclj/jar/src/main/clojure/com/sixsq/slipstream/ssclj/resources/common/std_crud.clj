@@ -1,30 +1,28 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.std-crud
   "Standard CRUD functions for resources."
   (:require
-    [fs.core :as fs]
-    [clojure.walk :as w]
-    [clojure.data.json :as json]
-    [clojure.pprint :refer [pprint]]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.usage.utils :as uu]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [ring.util.response :as r]))
+    [clojure.walk                                             :as w]
+    [clojure.pprint                                           :refer [pprint]]
+    [com.sixsq.slipstream.ssclj.resources.common.authz        :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.utils        :as u]
+    [com.sixsq.slipstream.ssclj.usage.utils                   :as uu]
+    [com.sixsq.slipstream.ssclj.resources.common.crud         :as crud]
+    [com.sixsq.slipstream.ssclj.db.impl                       :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
+    ))
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
   (fn [{:keys [body] :as request}]
     (a/can-modify? {:acl collection-acl} request)
-    (-> body
-        (u/strip-service-attrs)
-        (crud/new-identifier resource-name)
-        (assoc :resourceURI resource-uri)
-        (u/update-timestamps)
-        (crud/add-acl request)
-        (crud/validate)
-        (db/add))))
+    (->> (->  body
+              (u/strip-service-attrs)
+              (crud/new-identifier resource-name)
+              (assoc :resourceURI resource-uri)
+              (u/update-timestamps)
+              (crud/add-acl request)
+              (crud/validate))
+         (db/add resource-name))))
 
 (defn retrieve-fn
   [resource-name]
