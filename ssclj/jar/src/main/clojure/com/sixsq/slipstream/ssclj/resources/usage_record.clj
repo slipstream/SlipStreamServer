@@ -3,10 +3,12 @@
   (:require
     [clojure.tools.logging                                  :as log]
     [schema.core                                            :as s]
+    [com.sixsq.slipstream.ssclj.db.database-binding         :as dbb]
     [com.sixsq.slipstream.ssclj.resources.common.crud       :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud   :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema     :as c]))
+    [com.sixsq.slipstream.ssclj.resources.common.schema     :as c]
+    [com.sixsq.slipstream.ssclj.usage.record-keeper         :as rc]))
 
 (def ^:const resource-tag     :usage-records)
 (def ^:const resource-name    "UsageRecord")
@@ -26,14 +28,21 @@
     c/CreateAttrs
     c/AclAttr
     {
-     :id                              c/NonBlankString
-     :cloud_vm_instanceid             c/NonBlankString
-     :user                            c/NonBlankString
-     :cloud                           c/NonBlankString
-     :start_timestamp                 c/Timestamp
-     (s/optional-key :end_timestamp)  c/OptionalTimestamp
-     :metric_name                     c/NonBlankString
-     :metric_value                    c/Numeric}))
+     :id                                c/NonBlankString
+     :cloud_vm_instanceid               c/NonBlankString
+     :user                              c/NonBlankString
+     :cloud                             c/NonBlankString
+     (s/optional-key :start_timestamp)  c/Timestamp
+     (s/optional-key :end_timestamp)    c/OptionalTimestamp
+     (s/optional-key :metrics)          [{:name   c/NonBlankString
+                                          :value  c/NonBlankString}]}))
+
+(defmethod dbb/store-in-db resource-name
+  [collection-id id data]  
+  (let [data-stripped (select-keys data [:cloud_vm_instanceid :user :cloud :start_timestamp :end_timestamp :metrics])]
+    (if (nil? (:end_timestamp data))
+      (rc/-insertStart  data-stripped)
+      (rc/-insertEnd    data-stripped))))
 
 ;;
 ;; "Implementations" of multimethod declared in crud namespace
@@ -53,8 +62,9 @@
 
 (defmethod crud/add resource-name
   [request]
-  (log/info resource-uri ": will add usage record" (:body request))
-  (add-impl request))
+  (log/info resource-uri ": Will add usage record" (:body request))
+  (add-impl request)
+  (log/info resource-uri ": Done adding usage record" (:body request)))
 
 ;;
 ;; collection

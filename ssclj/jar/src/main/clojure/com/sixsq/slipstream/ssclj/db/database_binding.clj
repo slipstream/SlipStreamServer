@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.database.ddl                :as ddl]
     [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
     [korma.core                                             :refer :all]
-    [ring.util.response                                     :as r]))
+    [ring.util.response                                     :as r]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]))
 
 (defn init-db
   []  
@@ -55,22 +56,36 @@
   [collection-id options]
   collection-id)
 
+(defn store-dispatch-fn
+  [collection-id id data]
+  collection-id)
+
+(defn response-created
+  [id]
+  (println "RESPONSE CREATED " id)
+  (-> (str "created " id)
+      du/show
+      (u/map-response 201 id)
+      du/show
+      (r/header "Location" id)
+      du/show))
+
+(defmulti store-in-db store-dispatch-fn)
+(defmethod store-in-db :default
+  [collection-id id data]
+  (check-conflict id)
+  (insert-resource id data))
+
 (defmulti  find-resources dispatch-fn)
 (defmethod find-resources :default
-  [collection-id options]  
+  [collection-id options]
   (->>  (select resources (where {:id [like (str collection-id"%")]}))
         (map :data)
         (map deserialize)))
 
-(defn- delete-resource 
+(defn- delete-resource
   [id]
   (delete resources (where {:id id})))
-
-(defn- response-created 
-  [id]
-  (-> (str "created " id)
-      (u/map-response 201 id)
-      (r/header "Location" id)))
 
 (defn- response-deleted 
   [id]
@@ -81,9 +96,8 @@
   Binding
 
   (add [this collection-id {:keys [id] :as data}]
-    (check-conflict id)      
-    (insert-resource id data)
-    (response-created id)) 
+    (store-in-db collection-id id data)    
+    (response-created id))
 
   (retrieve [this id]    
     (check-exist  id)

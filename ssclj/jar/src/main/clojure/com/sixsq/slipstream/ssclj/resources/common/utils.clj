@@ -1,11 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils
   "General utilities for dealing with resources."
   (:require
-    [clojure.edn          :as edn]
-    [clj-time.core        :as time]
-    [clj-time.format      :as time-fmt]
-    [schema.core          :as s]
-    [ring.util.response   :as r])
+    [clojure.tools.logging    :as log]
+    [clojure.edn              :as edn]
+    [clj-time.core            :as time]
+    [clj-time.format          :as time-fmt]
+    [schema.core              :as s]
+    [ring.util.response       :as r])
   (:import
     [java.util UUID]
     [javax.xml.bind DatatypeConverter]))
@@ -51,7 +52,8 @@
 
 (defn ex-bad-method
   [{:keys [uri request-method] :as request}]
-  (-> (str "invalid method (" (name request-method) ") for " uri)
+  (println "BAD METHOD")
+  (-> (str "invalid method (" (name request-method) ") for " uri)    
       (ex-response 405 uri)))
 
 ;;
@@ -107,15 +109,15 @@
    given schema.  The generated function raises an exception with the
    violations of the schema and a 400 ring response. If everything's
    OK, then the resource itself is returned."
-  [schema]
-  (let [checker (s/checker schema)]
+   [schema]
+   (let [checker (s/checker schema)]
     (fn [resource]
-      (if-let [msg (checker resource)]
+      (if-let [msg (checker resource)]        
         (let [msg (str "resource does not satisfy defined schema: " msg)
-              response (-> {:status  400
-                            :message msg}
-                           (json-response)
-                           (r/status 400))]
+          response (->  {:status  400 :message msg}
+                        json-response
+                        (r/status 400))]
+          (log/warn msg)
           (throw (ex-info msg response)))
         resource))))
 

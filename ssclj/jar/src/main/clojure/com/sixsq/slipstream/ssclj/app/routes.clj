@@ -10,6 +10,7 @@
 (def collection-routes
   (let-routes [uri "/ssclj/:resource-name"]
               (POST uri request
+                    (println "OK POSTING")
                     (crud/add request))
               (GET uri request
                    (crud/query request))

@@ -8,7 +8,6 @@
                               
     [peridot.core                                               :refer :all]
 
-    [com.sixsq.slipstream.ssclj.database.korma-helper           :as kh]  
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]  
     [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
@@ -20,7 +19,6 @@
     [com.sixsq.slipstream.ssclj.db.database-binding             :as dbdb]
     [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
     [com.sixsq.slipstream.ssclj.usage.utils                     :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
     [com.sixsq.slipstream.ssclj.resources.usage                 :refer :all]
     [com.sixsq.slipstream.ssclj.app.routes                      :as routes]   
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]))

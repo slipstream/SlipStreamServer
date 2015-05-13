@@ -14,14 +14,16 @@
 (defn add-fn
   [resource-name collection-acl resource-uri]
   (fn [{:keys [body] :as request}]
+    (println "ADD FN")
     (a/can-modify? {:acl collection-acl} request)
-    (->> (->  body
-              (u/strip-service-attrs)
-              (crud/new-identifier resource-name)
-              (assoc :resourceURI resource-uri)
-              (u/update-timestamps)
-              (crud/add-acl request)
-              (crud/validate))
+    (println "CAN MODIFY")
+    (->> (->  body              
+              u/strip-service-attrs              
+              (crud/new-identifier resource-name)              
+              (assoc :resourceURI resource-uri)              
+              u/update-timestamps              
+              (crud/add-acl request)                            
+              crud/validate)
          (db/add resource-name))))
 
 (defn retrieve-fn
