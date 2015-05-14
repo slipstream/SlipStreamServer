@@ -182,10 +182,19 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	private States attemptCompleteCurrentNodeState(String nodeName) {
 		EntityManager em = PersistenceUtil.createEntityManager();
+		em.getTransaction().begin();
 		Run run = Run.loadFromUuid(getUuid(), em);
 		StateMachine sc = StateMachine.createStateMachine(run);
+		States state = completeCurrentNodeState(nodeName, sc);
+		boolean isManaged = false;
+		if(em.contains(run)) {
+			isManaged = true;
+		}
+		em.getTransaction().commit();
 		em.close();
-		return completeCurrentNodeState(nodeName, sc);
+//		run.setState(state);
+//		run.store();
+		return state;
 	}
 
 	public States completeCurrentNodeState(String nodeName, StateMachine sc) {

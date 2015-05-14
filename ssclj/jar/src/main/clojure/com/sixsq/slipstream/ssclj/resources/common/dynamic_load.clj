@@ -1,21 +1,22 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.dynamic-load
   "Utilities for loading information from CIMI resources dynamically."
   (:require
-    [compojure.core :refer :all]
-    [compojure.route :as route]
-    [ring.util.response :as r]
-    [clojure.tools.logging :as log]
-    [clojure.java.classpath :as cp]
-    [clojure.tools.namespace.find :as nsf]))
+    [compojure.core                                           :refer :all]
+    [compojure.route                                          :as route]
+    [ring.util.response                                       :as r]
+    [clojure.tools.logging                                    :as log]
+    [clojure.java.classpath                                   :as cp]
+    [clojure.tools.namespace.find                             :as nsf]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]))
 
 (defn resource?
   "If the given symbol represents a resource namespace, the symbol
    is returned; nil otherwise.  Resource namespaces have the prefix
    'com.sixsq.slipstream.ssclj.resources.'. "
   [sym]
-  (->> (name sym)
-       (re-matches #"^com\.sixsq\.slipstream\.ssclj\.resources\.[\w-]+$")
-       (first)))
+  (->>  (name sym)
+        (re-matches #"^com\.sixsq\.slipstream\.ssclj\.resources\.[\w-]+$")
+        first)) 
 
 (defn resources
   "Returns the namespaces of all resources available on the classpath."
@@ -40,16 +41,17 @@
    nil if the var could not be found.  Function logs the success or
    failure of the request."
   [varname resource-ns]  
-  (if-let [value (-> resource-ns
-                     (name)
-                     (str "/" varname)
-                     (symbol)
-                     (find-var))]
+  (if (.contains (name resource-ns) "test")
+    (log/info "avoiding retrieving" varname "for" (name resource-ns))    
+    (if-let [value (-> resource-ns                     
+                      name                     
+                      (str "/" varname)
+                      symbol                      
+                      find-var)]
     (do
       (log/info "retrieved" varname "for" (name resource-ns))
       value)
-    (do
-      (log/warn "did NOT retrieve" varname "for" (name resource-ns)))))
+    (log/warn "did NOT retrieve" varname "for" (name resource-ns)))))
 
 (defn get-resource-link
   "Returns a vector with the resource tag keyword and map with the

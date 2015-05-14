@@ -36,6 +36,7 @@ import javax.persistence.EntityTransaction;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -138,6 +139,7 @@ public class StateMachineMultiThreadingTest extends
 	private States initialState = States.Executing;
 	private States finalState = States.SendingReports;
 
+	@Ignore("WIP")
 	@Test
 	public void testMultipleStateTransitions() throws FileNotFoundException,
 			IOException, SlipStreamException, InterruptedException,
@@ -160,8 +162,9 @@ public class StateMachineMultiThreadingTest extends
 
 		waitAllThreadsComplete(threads);
 
+		run = Run.load(run.getResourceUri());
 		try {
-			assertTransitionReached(Run.load(run.getResourceUri()), finalState);
+			assertTransitionReached(run, finalState);
 			assertThat(errors, is(0));
 		} finally {
 			run.remove();
@@ -250,22 +253,22 @@ public class StateMachineMultiThreadingTest extends
 
 		run = em.find(Run.class, run.getResourceUri());
 
-		String actualState = run
-				.getRuntimeParameterValue(RuntimeParameter.GLOBAL_STATE_KEY);
-
 		for (int i = 1; i <= MULTIPLICITY; i++) {
 			String key = createParameterName(RuntimeParameter.COMPLETE_KEY,
 					createQualifiedNodeName(NODE_NAME, i));
 			String complete = run.getRuntimeParameterValue(key);
-			assertThat(complete, is("false"));
+			assertThat("RuntimeParameter " + key + " is not complete", complete, is("false"));
 		}
+
+		String actualState = run
+				.getRuntimeParameterValue(RuntimeParameter.GLOBAL_STATE_KEY);
+
+		assertThat(States.valueOf(actualState), is(expectedState));
 
 		String key = createParameterName(RuntimeParameter.COMPLETE_KEY,
 				ORCHESTRATOR_NAME);
 		String complete = run.getRuntimeParameterValue(key);
 		System.out.println("Node: " + ORCHESTRATOR_NAME + " is " + complete);
-
-		assertThat(States.valueOf(actualState), is(expectedState));
 
 		run.toJsonForPersistence();
 		transaction.commit();

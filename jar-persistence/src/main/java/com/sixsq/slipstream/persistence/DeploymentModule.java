@@ -108,7 +108,7 @@ public class DeploymentModule extends Module {
 		for (Node node : nodes.values()) {
 			ImageModule image = node.getImage();
 			if (image == null) {
-				throw new ValidationException("Cannot find image: " + node.getImageUri());
+				throw new ValidationException("Cannot find image in node: " + node.getName());
 			}
 			images.add(image);
 		}

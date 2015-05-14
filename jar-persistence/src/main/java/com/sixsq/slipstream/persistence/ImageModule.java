@@ -49,9 +49,9 @@ import flexjson.JSON;
 
 /**
  * Unit test see:
- * 
+ *
  * @see ImageModuleTest
- * 
+ *
  */
 @Entity
 @SuppressWarnings("serial")
@@ -115,7 +115,7 @@ public class ImageModule extends Module {
 	/**
 	 * Validate for an image run (as opposed to a build or as part of a
 	 * deployment).
-	 * 
+	 *
 	 * @param cloudService
 	 * @throws ValidationException
 	 */
@@ -177,7 +177,7 @@ public class ImageModule extends Module {
 
 	/**
 	 * Finds the base image id
-	 * 
+	 *
 	 * @param cloudService
 	 * @return image id
 	 * @throws ValidationException
@@ -213,22 +213,6 @@ public class ImageModule extends Module {
 			moduleReference = (ImageModule) Module.load(getModuleReferenceUri());
 		}
 		return moduleReference;
-	}
-
-	/**
-	 * @return parent module. If the module doesn't have a parent, returns null
-	 * @throws ValidationException
-	 */
-	public Module getParentModule() {
-		Module parentModule = super.getParentModule();
-		if (parentModule != null) {
-			return parentModule;
-		}
-		if (getParent() == null) {
-			return null;
-		}
-		parentModule = Module.load(getParent());
-		return parentModule;
 	}
 
 	private void setDefaultParameters() throws ValidationException, ConfigurationException {
@@ -446,7 +430,9 @@ public class ImageModule extends Module {
 		String moduleReference = getModuleReferenceUri();
 		if (moduleReference != null) {
 			ImageModule parent = load(moduleReference);
-			notes.addAll(Arrays.asList(parent.getNotes()));
+			if (parent != null) {
+			    notes.addAll(Arrays.asList(parent.getNotes()));
+			}
 		}
 		if (getNote() != null) {
 			notes.add(getNote());
@@ -456,7 +442,7 @@ public class ImageModule extends Module {
 
 	/**
 	 * Empty setter needed for serializer on a read only property
-	 * 
+	 *
 	 */
 	@Transient
 	@ElementArray(required = false, entry = "note")

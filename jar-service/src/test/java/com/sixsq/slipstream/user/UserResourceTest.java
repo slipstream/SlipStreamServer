@@ -31,7 +31,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
-import com.sixsq.slipstream.util.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -250,7 +249,7 @@ public class UserResourceTest extends ResourceTestBase {
 	public void passwordBlankedForSuperAsSuper() throws SlipStreamClientException {
 
 		Request request = createGetRequest(superUser, superUser.getName());
-		request.getClientInfo().accept(MediaType.APPLICATION_JSON);
+		request.getClientInfo().accept(MediaType.APPLICATION_XML);
 		Response response = executeRequest(request);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
@@ -366,8 +365,10 @@ public class UserResourceTest extends ResourceTestBase {
 
 		String paramName = ExecutionControlUserParametersFactory.CATEGORY + "."
 				+ ExecutionControlUserParametersFactory.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME;
+
 		UserParameter p = new UserParameter(paramName, LocalConnector.CLOUD_SERVICE_NAME, "description");
 		user.setParameter(p);
+		
 		Request request = createPutRequest(user, user.getName());
 		Response response = executeRequest(request);
 

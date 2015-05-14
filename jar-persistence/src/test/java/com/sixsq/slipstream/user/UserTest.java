@@ -153,7 +153,7 @@ public class UserTest {
 				description);
 		user.setParameter(parameter);
 
-		user.store();
+		user = user.store();
 
 		User restored = User.load(resourceUrl);
 		assertNotNull(restored);
@@ -314,8 +314,7 @@ public class UserTest {
 		user.setEmail("test@example.com");
 
 		try {
-			user.setParameter(new UserParameter(UserParameter.constructKey(ParameterCategory.General.toString(),
-					UserParameter.KEY_KEEP_RUNNING), UserParameter.KEEP_RUNNING_NEVER, null));
+			user.setKeepRunning(UserParameter.KEEP_RUNNING_ON_ERROR);
 		} catch (ValidationException e) {
 			e.printStackTrace();
 			fail();

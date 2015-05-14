@@ -71,7 +71,7 @@ public class ExtrinsicState {
 	}
 
 	public void setFailing(boolean failing) {
-		setValue(this.failing, failing);
+		setAndStoreValue(this.failing, failing);
 	}
 
 	public boolean isCompleted() {
@@ -79,7 +79,7 @@ public class ExtrinsicState {
 	}
 
 	public void setCompleted(boolean completed) {
-		setValue(this.completed, completed);
+		setAndStoreValue(this.completed, completed);
 	}
 
 	public States getState() {
@@ -87,12 +87,18 @@ public class ExtrinsicState {
 	}
 
 	public void setState(States state) {
-		this.state.setValue(state.toString());
+		setAndStoreValue(this.state, state.toString());
 	}
 
-	private void setValue(RuntimeParameter targetParameter,
-			boolean newValue) {
-		targetParameter.setValue(Boolean.toString(newValue));
+	private RuntimeParameter setAndStoreValue(RuntimeParameter targetParameter,
+											  boolean newValue) {
+		return setAndStoreValue(targetParameter, Boolean.toString(newValue));
+	}
+
+	private RuntimeParameter setAndStoreValue(RuntimeParameter targetParameter,
+											  String newValue) {
+		targetParameter.setValue(newValue);
+		return (RuntimeParameter) targetParameter.store();
 	}
 
 	private boolean getParameterValueAsBoolean(RuntimeParameter parameter) {

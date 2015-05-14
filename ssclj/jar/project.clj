@@ -11,6 +11,7 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.logging "0.3.0"]
                  [org.clojure/tools.namespace "0.2.5"]
+                 [org.clojure/tools.cli "0.3.1"]
                  [org.clojure/data.json "0.2.5"]
                  [prismatic/schema "0.2.6"]
                  [org.clojure/java.classpath "0.2.2"]
@@ -26,10 +27,11 @@
                  [metrics-clojure-ring/metrics-clojure-ring "2.1.0"]
                  [metrics-clojure-jvm/metrics-clojure-jvm "2.1.0"]
                  [fs/fs "1.3.3"]
-                 [org.slf4j/slf4j-log4j12 "1.7.7"]
+                 [org.slf4j/slf4j-log4j12 "1.7.7"]                 
                  ;; Environment settings
                  [environ "1.0.0"]
                  ;; database
+                 [honeysql "0.5.2"]
                  [org.clojure/java.jdbc "0.3.6"]
                  [korma "0.4.0"]
                  [org.hsqldb/hsqldb "2.3.2"]
@@ -64,6 +66,7 @@
       { :env {
           :clj-env :test
           ; :db-config-path "config-sqlite.edn"}
+          ; :db-config-path "config-hsqldb.edn"}
           :db-config-path "config-hsqldb-mem.edn"}
         
         :jvm-opts ["-Dlogfile.path=test"]

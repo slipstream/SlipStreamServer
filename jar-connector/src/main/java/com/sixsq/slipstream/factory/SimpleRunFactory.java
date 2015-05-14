@@ -22,6 +22,7 @@ package com.sixsq.slipstream.factory;
 
 import java.util.Map;
 
+import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
@@ -43,6 +44,18 @@ public class SimpleRunFactory extends BuildImageFactory {
 
 		ConnectorInstance cloudService = cloudServicePerNode.get(nodeInstanceName);
 		image.validateForRun(cloudService.getName());
+	}
+
+	@Override
+	protected void postInitialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
+		super.postInitialize(module, run, user);
+
+//		initRuntimeParameters((ImageModule) module, run);
+//		initMachineState(run);
+//
+//		String cloudService = run.getCloudServiceNameForNode(nodeInstanceName);
+//		initNodes(run, cloudService);
+
 	}
 
 	@Override

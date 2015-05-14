@@ -30,6 +30,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import com.sixsq.slipstream.connector.Collector;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.credentials.Credentials;
@@ -64,10 +65,10 @@ public class LocalConnector extends ConnectorBase {
 		vms = new ArrayList<Vm>();
 		for (int i = 0; i < MAX_VMS; i++) {
 			String randomState = randomState();
-			Vm vm = new Vm("instance_" + i, cloud, randomState, username);
+			Vm vm = new Vm("instance_" + i, cloud, randomState, username, new LocalConnector().isVmUsable(randomState));
 			vms.add(vm);
 		}
-		Vm.update(vms, username, cloud);
+		Collector.update(vms, username, cloud);
 		getLog().info("Done generating dummy VMs");
 	}
 

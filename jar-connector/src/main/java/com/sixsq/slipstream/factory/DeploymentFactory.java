@@ -29,7 +29,6 @@ import com.sixsq.slipstream.persistence.*;
 import org.apache.commons.lang.StringUtils;
 
 import com.sixsq.slipstream.connector.CloudService;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
@@ -42,11 +41,11 @@ public class DeploymentFactory extends RunFactory {
 		return RunType.Orchestration;
 	}
 
-	@Override
-	protected void init(Module module, Run run, User user) throws ValidationException, NotFoundException {
-		initNodesInstancesRuntimeParameters(run);
-		initNodesRuntimeParameters(run);
-	}
+//	@Override
+//	protected void init(Module module, Run run, User user) throws ValidationException, NotFoundException {
+//		initNodesInstancesRuntimeParameters(run);
+//		initNodesRuntimeParameters(run);
+//	}
 
 	@Override
 	protected void validateRun(Run run, User user) throws SlipStreamClientException {
@@ -72,7 +71,7 @@ public class DeploymentFactory extends RunFactory {
 			String cloudServiceName = run.getCloudServiceNameForNode(node.getName());
 			ImageModule image = node.getImage();
 			if (image == null) {
-				throw new ValidationException("Unknown image: " + node.getImageUri());
+				throw new ValidationException("Unknown image in node: " + node.getName());
 			}
 
 			try {
@@ -466,22 +465,14 @@ public class DeploymentFactory extends RunFactory {
 	}
 
 	@Override
-	protected void initOrchestratorsNodeNames(Run run) throws ConfigurationException, ValidationException {
-		for (ConnectorInstance cloudService : getCloudServiceNames(run)) {
-			String nodename = Run.constructOrchestratorName(cloudService.getName());
-			run.addNodeInstance(nodename, cloudService.getName());
-			run.assignRuntimeParameter(nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR
-					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudService.getName(),
-					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-		}
-	}
+	protected void postInitialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
+		super.postInitialize(module, run, user);
 
-	@Override
-	protected void initialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
-		super.initialize(module, run, user);
+		initNodesInstancesRuntimeParameters(run);
+		initNodesRuntimeParameters(run);
 
-		initializeOrchestratorRuntimeParameters(run);
-		initOrchestratorsNodeNames(run);
+		initOrchestratorRuntimeParameters(run);
+		initOrchestrators(run);
 
 	}
 }

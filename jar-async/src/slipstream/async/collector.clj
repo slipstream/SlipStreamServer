@@ -5,7 +5,7 @@
   (:import [com.sixsq.slipstream.connector Connector])
   (:import [com.sixsq.slipstream.connector ConnectorFactory])
   (:import [com.sixsq.slipstream.persistence User])
-  (:require [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!!]])
+  (:require [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!! alts!]])
   (:gen-class
     :name slipstream.async.Collector
     :methods [#^{:static true

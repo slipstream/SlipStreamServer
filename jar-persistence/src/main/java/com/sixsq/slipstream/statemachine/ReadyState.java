@@ -1,5 +1,7 @@
 package com.sixsq.slipstream.statemachine;
 
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientRuntimeException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.Run;
@@ -33,8 +35,14 @@ public class ReadyState extends SynchronizedState {
 		super(extrinsicState);
 
 		Run run = extrinsicState.getRun();
+		Run deserializedRun = null;
+		try {
+			deserializedRun = Run.fromJson(run.getJson());
+		} catch (SlipStreamClientException e) {
+			throw new SlipStreamClientRuntimeException(e);
+		}
 
-		if (shouldStayInReady(run)) {
+		if (shouldStayInReady(deserializedRun)) {
 			nextState = States.Ready;
 		} else {
 			nextState = States.Finalizing;

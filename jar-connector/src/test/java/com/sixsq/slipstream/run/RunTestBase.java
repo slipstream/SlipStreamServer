@@ -119,11 +119,11 @@ public class RunTestBase {
 
 		Node node;
 
-		node = new Node("node1", ImageModule.constructResourceUri(imageForDeployment1.getName()));
+		node = new Node("node1", imageForDeployment1);
 		node.setCloudService(cloudServiceName);
 		deployment.setNode(node);
 
-		node = new Node("node2", ImageModule.constructResourceUri(imageForDeployment2.getName()));
+		node = new Node("node2", imageForDeployment2);
 		node.setCloudService(cloudServiceName);
 		deployment.setNode(node);
 

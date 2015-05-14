@@ -370,7 +370,7 @@ public class RunFactoryTest extends RunTest {
 	}
 
 	@Test
-	public void nodeInstanceNames() throws SlipStreamException {
+	public void nodeInstances() throws SlipStreamException {
 
 		Run run = getDeploymentRun(deployment);
 
@@ -380,13 +380,23 @@ public class RunFactoryTest extends RunTest {
 	}
 
 	@Test
-	public void nodeNames() throws SlipStreamException {
+	public void nodes() throws SlipStreamException {
 
 		Run run = getDeploymentRun(deployment);
 
-		int ORCHESTRATOR_AND_2_NODES = 3;
+		int NODES = 2;
 		assertThat(run.getNodeInstances().size(),
-				is(ORCHESTRATOR_AND_2_NODES));
+				is(NODES));
+	}
+
+	@Test
+	public void orchestrators() throws SlipStreamException {
+
+		Run run = getDeploymentRun(deployment);
+
+		int ORCHESTRATOR = 1;
+		assertThat(run.getOrchestrators().size(),
+				is(ORCHESTRATOR));
 	}
 
 	@Test

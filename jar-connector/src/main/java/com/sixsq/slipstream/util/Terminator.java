@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 
 import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.statemachine.State;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 
@@ -52,7 +53,6 @@ public class Terminator {
 	}
 
 	public static void purgeRun(Run run) throws SlipStreamException {
-		Run.abort("The run has timed out", run.getUuid());
 
 		boolean isGarbageCollected = Run.isGarbageCollected(run);
 		Run.setGarbageCollected(run);
@@ -66,20 +66,24 @@ public class Terminator {
 		boolean terminateOnError = !Boolean.parseBoolean(onErrorKeepRunning);
 		// for mutable run we never transition to cancel on error
 		boolean notMutable = !run.isMutable();
-		// state from which we should cancel
-		boolean toCancelState = (run.getState() == States.Initializing) || (run.getState() == States.Provisioning)
-				|| (run.getState() == States.Executing) || isGarbageCollected;
+		// state from which we should terminate
+		boolean shouldTerminate = (run.getState() == States.Initializing) || (run.getState() == States.Provisioning)
+				|| (run.getState() == States.Executing)|| (run.getState() == States.Ready) || isGarbageCollected;
 
-		if (terminateOnError && notMutable && toCancelState) {
+		if (terminateOnError && notMutable && shouldTerminate) {
 			terminate(run.getResourceUri());
 		}
 
+		if(run.getState() != States.Done) {
+			Run.abort("The run has timed out", run.getUuid());
+		}
 	}
 
 	public static void terminate(String runResourceUri) throws ValidationException,
 			CannotAdvanceFromTerminalStateException, InvalidStateException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
+		em.getTransaction().begin();
 
 		try {
 			Run run = Run.load(runResourceUri, em);
@@ -97,8 +101,12 @@ public class Terminator {
 				terminateInstances(run, user);
 				sc.tryAdvanceState(true);
 			}
+			run = run.store();
 
 		} finally {
+			if(em.getTransaction().isActive()) {
+				em.getTransaction().commit();
+			}
 			em.close();
 		}
 	}

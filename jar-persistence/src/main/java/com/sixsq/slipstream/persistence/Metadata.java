@@ -116,7 +116,7 @@ public abstract class Metadata implements Serializable {
 		this.description = description;
 	}
 
-	String getJson() {
+	public String getJson() {
 		return json;
 	}
 
@@ -150,7 +150,7 @@ public abstract class Metadata implements Serializable {
 			obj = em.merge(this);
 			transaction.commit();
 		} catch (PersistenceException e) {
-			if(transaction.isActive()) {
+			if(transaction != null && transaction.isActive()) {
 				transaction.rollback();
 			}
 			throw new SlipStreamDatabaseException(e.getMessage());
@@ -165,17 +165,17 @@ public abstract class Metadata implements Serializable {
 	}
 
 	public static Metadata load(String resourceUri, Class<? extends Metadata> type, EntityManager em) {
-		Metadata meta = (Metadata) em.find(type, resourceUri);
-		if(meta != null) {
-			meta = meta.substituteFromJson();
-		}
+		Metadata meta = em.find(type, resourceUri);
 		return meta;
 	}
 
 	public static Metadata load(String resourceUri, Class<? extends Metadata> type) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Metadata meta = (Metadata) load(resourceUri, type, em);
+		Metadata meta = load(resourceUri, type, em);
 		em.close();
+		if(meta != null) {
+			meta = meta.substituteFromJson();
+		}
 		return meta;
 	}
 

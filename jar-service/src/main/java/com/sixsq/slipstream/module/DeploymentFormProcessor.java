@@ -26,17 +26,11 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.sixsq.slipstream.persistence.*;
 import org.restlet.data.Form;
 
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Node;
-import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
 
 /**
  * Unit test see
@@ -164,7 +158,12 @@ public class DeploymentFormProcessor extends ModuleFormProcessor {
 		String imagelink = getForm().getFirstValue(
 				"node--" + nodeindex + "--imagelink");
 
-		return new Node(shortname, imagelink);
+		ImageModule image = ImageModule.load(imagelink);
+		if(image == null) {
+			throw new ValidationException("Unknown image: " + imagelink);
+		}
+
+		return new Node(shortname, image);
 	}
 
 	private void setPostProcessingScript() throws ValidationException {

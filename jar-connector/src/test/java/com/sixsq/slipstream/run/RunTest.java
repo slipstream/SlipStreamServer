@@ -450,24 +450,18 @@ public class RunTest extends RunTestBase {
 	}
 
 	private Run setRunState(Run run, States state){
-		EntityManager em = PersistenceUtil.createEntityManager();
-		em.getTransaction().begin();
-		run = Run.load(run.getResourceUri(), em);
 
-		RuntimeParameter globalState = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY);
+		RuntimeParameter globalState = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), RuntimeParameter.GLOBAL_STATE_KEY);
 		globalState.setValue(state.toString());
 		globalState.store();
 
 		run.setState(state);
-		run.store();
-
-		em.getTransaction().commit();
-		em.close();
+		run = run.store();
 
 		return run;
 	}
 
-	@Ignore("Don't understand :-(")
+//	@Ignore("Don't understand :-(")
 	@Test
 	public void purge() throws ConfigurationException, SlipStreamException {
 
@@ -488,18 +482,15 @@ public class RunTest extends RunTestBase {
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Cancelled));
 
+		// Just reset the global abort runtime parameter
+		Run.abortOrReset("", "", run.getUuid());
 		run = setRunState(run, States.Ready);
 		Terminator.purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Done));
 
 		run = setRunState(run, States.Ready);
-		run.getRuntimeParameters().put(
-				RuntimeParameter.GLOBAL_ABORT_KEY,
-				new RuntimeParameter(run, RuntimeParameter.GLOBAL_ABORT_KEY,
-						"Kaboom", ""));
-		run.store();
-//		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY, States.Aborting);
+		Run.abortOrReset("kaboom", "", run.getUuid());
 		Terminator.purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Aborted));

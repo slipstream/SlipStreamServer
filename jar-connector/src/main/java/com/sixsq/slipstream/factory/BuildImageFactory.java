@@ -108,16 +108,16 @@ public class BuildImageFactory extends RunFactory {
 		}
 	}
 
-	@Override
-	protected void init(Module module, Run run, User user)
-			throws ValidationException, NotFoundException {
-
-		initRuntimeParameters((ImageModule) module, run);
-		initMachineState(run);
-
-		String cloudService = run.getCloudServiceNameForNode(nodeInstanceName);
-		initNodeNames(run, cloudService);
-	}
+//	@Override
+//	protected void init(Module module, Run run, User user)
+//			throws ValidationException, NotFoundException {
+//
+//		initRuntimeParameters((ImageModule) module, run);
+//		initMachineState(run);
+//
+//		String cloudService = run.getCloudServiceNameForNode(nodeInstanceName);
+//		initNodeNames(run, cloudService);
+//	}
 
 	protected static void initMachineState(Run run) throws ValidationException,
 			NotFoundException {
@@ -175,9 +175,10 @@ public class BuildImageFactory extends RunFactory {
 		return value;
 	}
 
-	protected void initNodeNames(Run run, String cloudService)
+	protected void initNodes(Run run, String cloudService)
 			throws ConfigurationException, ValidationException {
 		run.addNodeInstance(nodeInstanceName, cloudService);
+		// For build image, nodeInstanceName is the same as node (i.e. machine)
 		run.addNode(nodeInstanceName, cloudService);
 	}
 
@@ -265,22 +266,17 @@ public class BuildImageFactory extends RunFactory {
     }
 
 	@Override
-	protected void initOrchestratorsNodeNames(Run run) throws ConfigurationException, ValidationException {
-		for (ConnectorInstance cloudService : getCloudServiceNames(run)) {
-			String nodename = Run.constructOrchestratorName(cloudService.getName());
-			run.addNodeInstance(nodename, cloudService.getName());
-			run.assignRuntimeParameter(nodename + RuntimeParameter.NODE_PROPERTY_SEPARATOR
-					+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudService.getName(),
-					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-		}
-	}
+	protected void postInitialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
+		super.postInitialize(module, run, user);
 
-	@Override
-	protected void initialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
-		super.initialize(module, run, user);
+		initRuntimeParameters((ImageModule) module, run);
+		initMachineState(run);
 
-		initializeOrchestratorRuntimeParameters(run);
-		initOrchestratorsNodeNames(run);
+		String cloudService = run.getCloudServiceNameForNode(nodeInstanceName);
+		initNodes(run, cloudService);
+
+		initOrchestratorRuntimeParameters(run);
+		initOrchestrators(run);
 
 	}
 }

@@ -5,16 +5,13 @@
     [clojure.walk :as w]
     [clojure.data.json :as json]
     [clojure.pprint :refer [pprint]]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.usage.utils :as uu]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [ring.util.response :as r]))
-
-(defn dump
-  [m]
-  (pprint m)
-  m)
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
@@ -33,7 +30,7 @@
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
     (-> (str resource-name "/" uuid)
-        (db/retrieve)
+        db/retrieve
         (a/can-view? request)
         (crud/set-operations request)
         (u/json-response))))
@@ -78,11 +75,12 @@
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
-    (fn [request]
+    (fn [request]         
       (a/can-view? {:acl collection-acl} request)
-      (->> {}                                               ;; should allow options from body or params
+      (->> (select-keys request [:identity :query-params])
            (db/query resource-name)
-           (filter #(a/authorized-view? % request))
+           uu/walk-clojurify           
+           (filter #(a/authorized-view? % request))           
            (map #(crud/set-operations % request))
            (wrapper-fn request)
            (u/json-response)))))

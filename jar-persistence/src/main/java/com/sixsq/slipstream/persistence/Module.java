@@ -335,6 +335,7 @@ public abstract class Module extends Parameterized implements Guarded {
 		return parameters;
 	}
 
+	@JSON(include = false)
 	public Guarded getGuardedParent() {
 		if (parentModule == null) {
 			if (parentUri != null) {
@@ -354,10 +355,6 @@ public abstract class Module extends Parameterized implements Guarded {
 
 	public void setRuns(RunViewList runs) {
 		this.runs = runs;
-	}
-
-	public Module getParentModule() {
-		return parentModule;
 	}
 
 	private void validateName(String name) throws ValidationException {

@@ -26,15 +26,10 @@ import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 
+import com.sixsq.slipstream.exceptions.*;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
-import com.sixsq.slipstream.exceptions.InvalidStateException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
@@ -53,12 +48,6 @@ public class StateMachine {
 	private Run run;
 	private State globalState;
 	private Map<String, State> nodeStates = new HashMap<String, State>();
-
-	public StateMachine(Map<String, State> nodeStates, State globalState, Run run) {
-		this.globalState = globalState;
-		this.nodeStates = nodeStates;
-		this.run = run;
-	}
 
 	public StateMachine(Run run) throws InvalidStateException {
 		recreateStateFromRun(run);
@@ -123,23 +112,37 @@ public class StateMachine {
 	private void recreateStateFromRun(Run run) throws InvalidStateException {
 		this.run = run;
 
+		// nodeInstances and orchestrators are not persisted and only
+		// available in the json part of the run
+		// Since the StateMachine requires a managed run (i.e. attached to
+		// an EntityManager), it cannot be deserialized from json since it
+		// would detach the run object from the entity manager.  We therefore
+		// need to extract the node instances and orchestrators from a locally
+		// deserialized run, but attach the managed run to the extrinsic
+		// state of the state machine.
+		Run deserializedRun = null;
+		try {
+			deserializedRun = Run.fromJson(run.getJson());
+		} catch (SlipStreamClientException e) {
+			throw new SlipStreamClientRuntimeException(e);
+		}
+
 		nodeStates = new HashMap<String, State>();
-		for (String node : run.getNodeInstances()) {
+		for (String node : deserializedRun.getNodeInstances()) {
 			ExtrinsicState extrinsicState = createNodeExtrinsicState(run, node);
 			State nodeState = StateFactory.createInstance(extrinsicState);
 
 			nodeStates.put(node, nodeState);
 		}
+		for (String orchestrator : deserializedRun.getOrchestrators()) {
+			ExtrinsicState extrinsicState = createNodeExtrinsicState(run, orchestrator);
+			State nodeState = StateFactory.createInstance(extrinsicState);
+
+			nodeStates.put(orchestrator, nodeState);
+		}
 
 		ExtrinsicState globalExtrinsicState = createGlobalExtrinsicState(run);
 		globalState = StateFactory.createInstance(globalExtrinsicState);
-	}
-
-	// Note: Used only for unit tests
-	public void start() throws SlipStreamException {
-		EntityManager em = beginTransation();
-		completeAllNodesState();
-		commitTransaction(em);
 	}
 
 	// Note: Used only for unit tests
@@ -162,9 +165,7 @@ public class StateMachine {
 
 	private void completeCurrentState(String nodeName)
 			throws InvalidStateException, SlipStreamClientException {
-		EntityManager em = beginTransation();
 		setNodeStateCompleted(nodeName);
-		commitTransaction(em);
 	}
 
 	private void tryAdvanceState()
@@ -203,7 +204,7 @@ public class StateMachine {
 	}
 
 	public void tryAdvanceToCancelled() throws InvalidStateException, CannotAdvanceFromTerminalStateException {
-		if (! canCancel()){
+		if (!canCancel()){
 			throw new InvalidStateException("Transition from " + globalState + " to Cancelled not allowed.");
 		}
 		tryAdvanceToState(States.Cancelled, true);
@@ -221,28 +222,15 @@ public class StateMachine {
 
 	private void tryAdvanceToState(States state, boolean force, int recursions)
 			throws InvalidStateException, CannotAdvanceFromTerminalStateException {
-		EntityManager em = null;
 		try {
-			em = beginTransation();
 			attemptToAdvanceToState(state, force);
-			commitTransaction(em);
 		} catch (RuntimeException ex) {
-            if (em != null) {
-                if (em.getTransaction() != null && em.getTransaction().isActive()) {
-                    em.getTransaction().rollback();
-                }
-                em.close();
-            }
-
 			if (recursions > 0) {
 				logger.warning("Error in tryAdvanceToState " + state + ". Retrying...");
 				tryAdvanceToState(state, force, recursions - 1);
 			} else {
 				throw ex;
 			}
-		}
-		if (em.isOpen()) {
-			em.close();
 		}
 	}
 
@@ -333,26 +321,8 @@ public class StateMachine {
 	}
 
 	public void failCurrentState(String nodeName) throws InvalidStateException {
-		EntityManager em = beginTransation();
 		nodeStates.get(nodeName).setFailing(true);
 		globalState.setFailing(true);
-		commitTransaction(em);
-	}
-
-	protected EntityManager beginTransation() throws InvalidStateException {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		em.getTransaction().begin();
-		Run run = Run.load(getRun().getResourceUri(), em);
-		recreateStateFromRun(run);
-		return em;
-	}
-
-	protected void commitTransaction(EntityManager em) {
-		// Since we auto-magically change the run inside, we need to 
-		// explicitly set the json. Not cool!
-		this.run.toJsonForPersistence();
-		em.getTransaction().commit();
-		em.close();
 	}
 
 	private void alineAllNodesStateToGlobalState() throws InvalidStateException {
@@ -372,16 +342,6 @@ public class StateMachine {
 
 	public States getState() {
 		return globalState.getState();
-	}
-
-	public void fail(String nodeName) throws InvalidStateException {
-		EntityManager em = beginTransation();
-		State state = nodeStates.get(nodeName);
-		state.setFailing(true);
-		globalState.setFailing(true);
-		setState(States.SendingReports);
-		alineAllNodesStateToGlobalState();
-		commitTransaction(em);
 	}
 
 	public boolean isFailing() {

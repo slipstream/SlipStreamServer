@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -58,7 +59,7 @@ import com.sixsq.slipstream.vm.VmsQueryParameters;
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames={"cloud", "instanceId", "user_"})})
 @NamedQueries({
 		@NamedQuery(name = "byUserAndCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
-		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.state IN ('Running', 'running', 'On', 'on', 'active', 'Active') AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
+		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.isUsable = 1 AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
 		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run")
 })
 
@@ -103,15 +104,20 @@ public class Vm {
 	@Attribute(required = false)
 	private String nodeInstanceId;
 
+	@Column(nullable = true)
+	@Attribute(required = false)
+	private Boolean isUsable;
+
 	@SuppressWarnings("unused")
 	private Vm() {
 	}
 
-	public Vm(String instanceid, String cloud, String state, String user) {
+	public Vm(String instanceid, String cloud, String state, String user, boolean isUsable) {
 		this.instanceId = instanceid;
 		this.cloud = cloud;
 		this.state = state;
 		this.user_ = user;
+		this.isUsable = isUsable;
 		measurement = new Date();
 	}
 
@@ -192,150 +198,6 @@ public class Vm {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("cloud"), parameters.cloud));
 		}
 		return where;
-	}
-
-	public static int update(List<Vm> newVms, String user, String cloud) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		EntityTransaction transaction = em.getTransaction();
-		transaction.begin();
-		Query q = em.createNamedQuery("byUserAndCloud");
-		q.setParameter("user", user);
-		q.setParameter("cloud", cloud);
-
-		@SuppressWarnings("unchecked")
-		List<Vm> oldVmList = q.getResultList();
-
-		Map<String, Vm> filteredOldVmMap = new HashMap<String, Vm>();
-		Map<String, Vm> newVmsMap = toMapByInstanceId(newVms);
-		int removed = 0;
-		for (Vm vm : oldVmList) {
-			String instanceId = vm.getInstanceId();
-			if (!newVmsMap.containsKey(instanceId)) {
-				setVmstate(em, getMapping(vm), "Unknown");
-				em.remove(vm);
-				removed++;
-			} else {
-				filteredOldVmMap.put(instanceId, vm);
-			}
-		}
-		for (Vm v : newVmsMap.values()) {
-			Vm old = filteredOldVmMap.get(v.getInstanceId());
-			VmRuntimeParameterMapping m = getMapping(v);
-			if (old == null) {
-				setVmstate(em, m, v);
-				setIp(m, v);
-				setName(m, v);
-				setRunUuid(m, v);
-				setRunOwner(m, v);
-				setNodeName(m, v);
-				setNodeInstanceId(m, v);
-				em.persist(v);
-			} else {
-				boolean merge = false;
-
-				if (!v.getState().equals(old.getState())) {
-					old.setState(v.getState());
-					setVmstate(em, m, v);
-					merge = true;
-				} else {
-					setVmstateIfNotYetSet(em, m, v);
-				}
-				if (old.getRunUuid() == null) {
-					setRunUuid(m, old);
-					merge = true;
-				}
-				if (old.getRunOwner() == null) {
-					setRunOwner(m, old);
-					merge = true;
-				}
-				if (old.getIp() == null) {
-					setIp(m, old);
-					merge = true;
-				}
-				if (old.getName() == null) {
-					setName(m, old);
-					merge = true;
-				}
-				if (old.getNodeName() == null) {
-					setNodeName(m, old);
-					merge = true;
-				}
-				if (old.getNodeInstanceId() == null) {
-					setNodeInstanceId(m, old);
-					merge = true;
-				}
-				if (merge) {
-					old = em.merge(old);
-				}
-			}
-		}
-		transaction.commit();
-		em.close();
-		return removed;
-	}
-
-	private static VmRuntimeParameterMapping getMapping(Vm v) {
-		return VmRuntimeParameterMapping.find(v.getCloud(), v.getInstanceId());
-	}
-
-	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
-		setVmstate(em, m, v.getState());
-	}
-
-	private static void setVmstate(EntityManager em, VmRuntimeParameterMapping m, String vmstate) {
-		if (m != null) {
-			RuntimeParameter rp = m.getVmstateRuntimeParameter();
-			rp.setValue(vmstate);
-			em.merge(rp);
-		}
-	}
-
-	private static void setVmstateIfNotYetSet(EntityManager em, VmRuntimeParameterMapping m, Vm v) {
-		if (m != null) {
-			RuntimeParameter rp = m.getVmstateRuntimeParameter();
-			if (!rp.isSet()) {
-				setVmstate(em, m, v);
-			}
-		}
-	}
-
-	private static void setRunUuid(VmRuntimeParameterMapping m, Vm v) {
-		if (m != null) {
-			v.setRunUuid(m.getRunUuid());
-		}
-	}
-
-	private static void setRunOwner(VmRuntimeParameterMapping m, Vm v) {
-		if (m != null) {
-			v.setRunOwner(m.getRunOwner());
-		}
-	}
-
-	private static void setIp(VmRuntimeParameterMapping m, Vm v) {
-		if (m != null) {
-			RuntimeParameter rp = m.getHostnameRuntimeParameter();
-			if (rp != null && rp.isSet()) {
-				v.setIp(rp.getValue());
-			}
-		}
-	}
-
-	private static void setName(VmRuntimeParameterMapping m, Vm v) {
-		if (m != null) {
-			v.setName(m.getName());
-		}
-	}
-
-	private static void setNodeName(VmRuntimeParameterMapping m, Vm v) {
-		if (m != null) {
-			v.setNodeName(m.getNodeName());
-		}
-	}
-
-	private static void setNodeInstanceId(VmRuntimeParameterMapping m, Vm v) {
-		if (m != null) {
-			v.setNodeInstanceId(m.getNodeInstanceId());
-		}
 	}
 
 	public static Map<String, Integer> usage(String user) {
@@ -420,7 +282,7 @@ public class Vm {
 		return vmMap;
 	}
 
-	private void setState(String state) {
+	public void setState(String state) {
 		this.state = state;
 	}
 
@@ -490,6 +352,14 @@ public class Vm {
 
 	public void setNodeInstanceId(String nodeInstanceId) {
 		this.nodeInstanceId = nodeInstanceId;
+	}
+
+	public boolean getIsUsable() {
+		return (this.isUsable == null) ? false : this.isUsable;
+	}
+
+	public void setIsUsable(boolean isUsable) {
+		this.isUsable = isUsable;
 	}
 
 	public void remove() {

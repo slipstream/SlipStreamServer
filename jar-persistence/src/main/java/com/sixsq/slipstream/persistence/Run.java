@@ -96,6 +96,7 @@ public class Run extends Parameterized {
 	public static final String NODE_INCREMENT_DESCRIPTION = "Current increment value for node instances ids";
 	public static final String NODE_RUN_BUILD_RECIPES_KEY = "run-build-recipes";
 	public static final String NODE_RUN_BUILD_RECIPES_DESCRIPTION = "Define if the SlipStream executor should run build recipes.";
+
 	@Attribute(required = false)
 	protected ModuleCategory category;
 
@@ -210,10 +211,11 @@ public class Run extends Parameterized {
 		if (garbageCollected == null) {
 			run.setParameter(new Parameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "true",
 					Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
-		} else {
+			run.postEventGarbageCollected();
+		} else if (!garbageCollected.isTrue()) {
 			garbageCollected.setValue("true");
+			run.postEventGarbageCollected();
 		}
-		run.postEventGarbageCollected();
 	}
 
 	public static boolean isGarbageCollected(Run run) {
@@ -439,8 +441,7 @@ public class Run extends Parameterized {
 	private Set<ConnectorInstance> cloudServices = new HashSet<ConnectorInstance>();
 
 	/**
-	 * Set of node instance names - e.g. apache1.1, apache1.2, ... including the
-	 * orchestrators: orchestrator-local, ...
+	 * Set of node instance names - e.g. apache1.1, apache1.2
 	 */
 	@Transient
 	@ElementList(entry = "name")
@@ -456,6 +457,11 @@ public class Run extends Parameterized {
 	@ElementList(entry = "name")
 	@JSON
 	private Set<String> nodes = new HashSet<String>();
+
+	@Transient
+	@ElementList(entry = "name", required = false)
+	@JSON
+	private Set<String> orchestrators = new HashSet<String>();
 
 	@Attribute(required = false)
 	@Enumerated
@@ -921,6 +927,7 @@ public class Run extends Parameterized {
 
 		String message = "Scaling down '" + nodename + "' by deleting " + nbInstancesToDelete + " instances: "
 				+ nodeInstanceIds;
+
 		postEvent(Event.Severity.medium, message);
 	}
 
@@ -967,33 +974,22 @@ public class Run extends Parameterized {
 	}
 
 	public Set<String> getOrchestrators() {
-		Set<String> orchestrators = new HashSet<String>();
-
-		for (String nodename : getNodeInstances()) {
-			if (nodename.startsWith(Run.ORCHESTRATOR_NAME)) {
-				orchestrators.add(nodename);
-			}
-		}
-
 		return orchestrators;
 	}
 
-	@SuppressWarnings("unused")
-	private void setOrchestrators(Set<String> dummy) {
+	public void setOrchestrators(Set<String> orchestrators) {
+		this.orchestrators = orchestrators;
 	}
-	
+
+	public void addOrchestrator(String orchestrator) {
+		orchestrators.add(orchestrator);
+	}
+
 	public void addNode(String node, String service) {
 		nodes.add(service + SERVICENAME_NODENAME_SEPARATOR + node);
 	}
 
 	public Set<String> getNodes() {
-//		if (getRuntimeParameters() == null) {
-//			return nodes;
-//		}
-//		RuntimeParameter groupsParameter = getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY);
-//		if (groupsParameter != null) {
-//			groupsParameter.setValue(StringUtils.join(nodes, ","));
-//		}
 		return nodes;
 	}
 

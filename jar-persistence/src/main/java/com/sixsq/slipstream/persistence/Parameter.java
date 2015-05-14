@@ -82,6 +82,7 @@ public class Parameter {
 	private String instructions = null;
 
 	@ElementArray(required = false)
+	@Column(length = 65536)
 	private String[] enumValues;
 
 	@JSON(include = false)

@@ -75,7 +75,7 @@ public abstract class RunFactory {
 
 		validateRun(run, user);
 
-		initialize(module, run, user);
+		postInitialize(module, run, user);
 
 		return run;
 	}
@@ -95,15 +95,11 @@ public abstract class RunFactory {
 				Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
 	}
 
-	protected void initialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
-
+	protected void postInitialize(Module module, Run run, User user) throws ValidationException, NotFoundException {
 		initializeGlobalParameters(run);
-		init(module, run, user);
 	}
 
 	protected abstract RunType getRunType();
-
-	protected abstract void init(Module module, Run run, User user) throws ValidationException, NotFoundException;
 
 	protected abstract Map<String, ConnectorInstance> resolveCloudServices(Module module, User user,
 																		   Map<String, List<Parameter>> userChoices);
@@ -229,18 +225,16 @@ public abstract class RunFactory {
 		return module;
 	}
 
-	protected void initializeOrchestratorRuntimeParameters(Run run) throws ValidationException {
+	protected void initOrchestratorRuntimeParameters(Run run) throws ValidationException {
 
-		if (withOrchestrator(run)) {
-			for (ConnectorInstance cloudServiceName : getCloudServiceNames(run)) {
-				initializeOrchestratorParameters(run, cloudServiceName.getName());
-			}
+		for (ConnectorInstance cloudServiceName : getCloudServiceNames(run)) {
+			initializeOrchestratorParameters(run, cloudServiceName.getName());
 		}
 	}
 
-	private static boolean withOrchestrator(Run run) {
-		return ConnectorBase.isInOrchestrationContext(run);
-	}
+//	private static boolean withOrchestrator(Run run) {
+//		return ConnectorBase.isInOrchestrationContext(run);
+//	}
 
 	protected static void initializeGlobalParameters(Run run) throws ValidationException {
 
@@ -331,7 +325,15 @@ public abstract class RunFactory {
 
 	}
 
-	abstract protected void initOrchestratorsNodeNames(Run run) throws ConfigurationException, ValidationException;
+	protected void initOrchestrators(Run run) throws ConfigurationException, ValidationException {
+		for (ConnectorInstance cloudService : getCloudServiceNames(run)) {
+			String orchestratorName = Run.constructOrchestratorName(cloudService.getName());
+			run.addOrchestrator(orchestratorName);
+			run.assignRuntimeParameter(orchestratorName + RuntimeParameter.NODE_PROPERTY_SEPARATOR
+							+ RuntimeParameter.CLOUD_SERVICE_NAME, cloudService.getName(),
+					RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+		}
+	}
 
 	public static Set<ConnectorInstance> getCloudServiceNames(Run run) throws ValidationException {
 		return run.getCloudServices();

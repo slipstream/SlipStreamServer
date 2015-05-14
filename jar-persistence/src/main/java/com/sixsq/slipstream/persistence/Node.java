@@ -36,6 +36,8 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 import flexjson.JSON;
 
+import javax.persistence.Transient;
+
 @SuppressWarnings("serial")
 public class Node extends Parameterized {
 
@@ -55,26 +57,6 @@ public class Node extends Parameterized {
 	@Attribute
 	private String cloudService = CloudImageIdentifier.DEFAULT_CLOUD_SERVICE;
 
-	public String getCloudService() {
-		return cloudService;
-	}
-
-	public void setCloudService(String cloudService) {
-		this.cloudService = cloudService;
-	}
-
-	@Attribute(required = false)
-	private String imageUri;
-
-	public String getImageUri() {
-		return imageUri;
-	}
-
-	public void setImageUri(String imageUri) {
-		this.imageUri = imageUri;
-	}
-
-	@JSON(include = false)
 	private ImageModule image;
 
 	/**
@@ -84,21 +66,23 @@ public class Node extends Parameterized {
 	@ElementMap(required = false)
 	private Map<String, NodeParameter> parameterMappings = new ConcurrentHashMap<String, NodeParameter>();
 
-//	@JsonExcludeField
 	@JSON(include = false)
 	private DeploymentModule module;
 
 	protected Node() {
 	}
 
-	public Node(String name, String imageUri) throws ValidationException {
+	public Node(String name, ImageModule image) throws ValidationException {
 		this.name = name;
-		this.imageUri = imageUri;
+		this.image = image;
 	}
 
-	public Node(String name, ImageModule image) throws ValidationException {
-		this(name, image.getResourceUri());
-		this.image = image;
+	public String getCloudService() {
+		return cloudService;
+	}
+
+	public void setCloudService(String cloudService) {
+		this.cloudService = cloudService;
 	}
 
 	public DeploymentModule getModule() {
@@ -111,6 +95,7 @@ public class Node extends Parameterized {
 
 	public void validate() throws ValidationException {
 		super.validate();
+		// TODO: node cannot start with : "orchestrator-"
 		Matcher matcher = RuntimeParameter.NODE_NAME_ONLY_PATTERN.matcher(name);
 		if (!matcher.matches()) {
 			throwValidationException("invalid node name: " + name);
@@ -241,9 +226,6 @@ public class Node extends Parameterized {
 
 	@Element(required = false)
 	public ImageModule getImage() {
-		if (image == null) {
-			image = (ImageModule) ImageModule.load(imageUri);
-		}
 		return image;
 	}
 
@@ -263,7 +245,7 @@ public class Node extends Parameterized {
 	}
 
 	public Node copy() throws ValidationException {
-		Node copy = new Node(getName(), getImageUri());
+		Node copy = new Node(getName(), getImage());
 		copy = (Node) copyTo(copy);
 		copy.setCloudService(getCloudService());
 		copy.setMultiplicity(getMultiplicity());
