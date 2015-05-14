@@ -62,13 +62,9 @@
 
 (defn response-created
   [id]
-  (println "RESPONSE CREATED " id)
   (-> (str "created " id)
-      du/show
       (u/map-response 201 id)
-      du/show
-      (r/header "Location" id)
-      du/show))
+      (r/header "Location" id)))
 
 (defmulti store-in-db store-dispatch-fn)
 (defmethod store-in-db :default
@@ -96,7 +92,7 @@
   Binding
 
   (add [this collection-id {:keys [id] :as data}]
-    (store-in-db collection-id id data)    
+    (store-in-db collection-id id data)
     (response-created id))
 
   (retrieve [this id]    

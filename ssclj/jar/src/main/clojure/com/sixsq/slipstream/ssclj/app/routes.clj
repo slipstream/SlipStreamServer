@@ -1,21 +1,20 @@
 (ns com.sixsq.slipstream.ssclj.app.routes
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [ring.middleware.head :refer [wrap-head]]
-    [compojure.core :refer [defroutes let-routes routes POST GET PUT DELETE ANY]]
-    [compojure.route :as route]))
+    [com.sixsq.slipstream.ssclj.resources.common.crud         :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils        :as u]
+    [ring.middleware.head                                     :refer [wrap-head]]
+    [compojure.core                                           :refer [defroutes let-routes routes POST GET PUT DELETE ANY]]
+    [compojure.route                                          :as route]))
 
 (def collection-routes
   (let-routes [uri "/ssclj/:resource-name"]
-              (POST uri request
-                    (println "OK POSTING")
+              (POST uri request                    
                     (crud/add request))
-              (GET uri request
-                   (crud/query request))
-              (ANY uri request
-                   (throw (u/ex-bad-method request)))))
+              (GET uri request                    
+                    (crud/query request))
+              (ANY uri request                    
+                    (throw (u/ex-bad-method request)))))
 
 (def resource-routes
   (let-routes [uri "/ssclj/:resource-name/:uuid"]
@@ -24,15 +23,15 @@
               (PUT uri request
                    (crud/edit request))
               (DELETE uri request
-                      (crud/delete request))
-              (ANY uri request
+                   (crud/delete request))
+              (ANY uri request                  
                    (throw (u/ex-bad-method request)))))
 
 (def action-routes
   (let-routes [uri "/ssclj/:resource-name/:uuid/:action"]
               (POST uri request
                     (crud/do-action request))
-              (ANY uri request
+              (ANY uri request                
                    (throw (u/ex-bad-method request)))))
 
 (defn not-found
@@ -43,7 +42,8 @@
       (u/map-response "unknown resource" 404 uri))))
 
 (def final-routes
-  [collection-routes
+  [
+   collection-routes
    resource-routes
    action-routes
    (not-found)])

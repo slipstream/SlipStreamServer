@@ -13,10 +13,8 @@
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
-  (fn [{:keys [body] :as request}]
-    (println "ADD FN")
+  (fn [{:keys [body] :as request}]    
     (a/can-modify? {:acl collection-acl} request)
-    (println "CAN MODIFY")
     (->> (->  body              
               u/strip-service-attrs              
               (crud/new-identifier resource-name)              

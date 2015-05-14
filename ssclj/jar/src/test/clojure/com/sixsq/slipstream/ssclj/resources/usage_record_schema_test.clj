@@ -22,8 +22,8 @@
     :user                   "joe"
     :cloud                  "aws"
     :start_timestamp        "2015-05-04T15:32:22.853Z"
-    :metrics {:name   "vm"
-              :value  "1.0"}})
+    :metrics [{:name   "vm"
+              :value  "1.0"}]})
 
 (def valid-usage-records
   [valid-usage-record

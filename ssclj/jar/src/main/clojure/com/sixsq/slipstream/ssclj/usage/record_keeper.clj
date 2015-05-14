@@ -156,16 +156,16 @@
 
 (defn -insertStart
   [usage-event]  
-  (-> usage-event      
+  (-> usage-event
+      u/walk-clojurify
       nil-timestamps-if-absent
-      u/walk-clojurify        
       (process-event :start)))
 
 (defn -insertEnd
   [usage-event]  
   (-> usage-event
+      u/walk-clojurify
       nil-timestamps-if-absent
-      u/walk-clojurify      
       (process-event :stop)))
 
 (defn- acl-for-user-cloud   

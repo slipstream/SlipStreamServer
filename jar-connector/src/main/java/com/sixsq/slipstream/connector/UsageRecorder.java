@@ -30,9 +30,21 @@ public class UsageRecorder {
 	public static final String METRIC_NAME_KEY = "name";
 	public static final String METRIC_VALUE_KEY = "value";
 	private static Logger logger = Logger.getLogger(UsageRecorder.class.getName());
-	
+
+	public static boolean isMuted = false;
+
+	public static void muteForTests() {
+		isMuted = true;
+		logger.severe("You should NOT see this message in production: usage will *not* be recorded");
+	}
+
 	public static void insertStart(String instanceId, String user, String cloud, List<Map<String, String>> metrics) {
 		try {
+
+			if(isMuted) {
+				return;
+			}
+
 			logger.info("Inserting usage record START for " + describe(instanceId, user, cloud));
 
 			TypePrincipal owner = new TypePrincipal(TypePrincipal.PrincipalType.USER, user);
@@ -52,6 +64,11 @@ public class UsageRecorder {
 
 	public static void insertEnd(String instanceId, String user, String cloud) {
 		try {
+
+			if(isMuted) {
+				return;
+			}
+
 			logger.info("Inserting usage record END for " + describe(instanceId, user, cloud));
 
 			TypePrincipal owner = new TypePrincipal(TypePrincipal.PrincipalType.USER, user);

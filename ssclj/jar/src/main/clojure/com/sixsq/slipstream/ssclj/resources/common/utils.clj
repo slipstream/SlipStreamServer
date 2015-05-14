@@ -52,7 +52,6 @@
 
 (defn ex-bad-method
   [{:keys [uri request-method] :as request}]
-  (println "BAD METHOD")
   (-> (str "invalid method (" (name request-method) ") for " uri)    
       (ex-response 405 uri)))
 
