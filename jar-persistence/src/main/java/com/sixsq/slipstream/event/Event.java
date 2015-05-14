@@ -33,6 +33,8 @@ import com.google.gson.JsonSerializer;
 
 public class Event {
 
+	public static boolean isMuted = false;
+
 	private static final String EVENT_SERVER = "http://localhost:8201/ssclj";
 
 	private static final Logger logger = Logger.getLogger(Event.class.getName());
@@ -82,6 +84,11 @@ public class Event {
 		this.type = type;
 	}
 
+	public static void muteForTests() {
+		isMuted = true;
+		logger.severe("You should NOT see this message in production: events won't be posted");
+	}
+
 	private Map<String, Object> buildContent(String resourceRef, String state) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		Map<String, String> resource = new HashMap<String, String>();
@@ -102,6 +109,11 @@ public class Event {
 	}
 
 	public static void post(Event event) {
+
+			if(isMuted) {
+				return;
+			}
+
 		ClientResource resource = null;
 		Representation response = null;
 
