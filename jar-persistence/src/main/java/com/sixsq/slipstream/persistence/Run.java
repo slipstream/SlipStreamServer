@@ -97,6 +97,9 @@ public class Run extends Parameterized {
 	public static final String NODE_RUN_BUILD_RECIPES_KEY = "run-build-recipes";
 	public static final String NODE_RUN_BUILD_RECIPES_DESCRIPTION = "Define if the SlipStream executor should run build recipes.";
 
+//	@Version
+//	long jpaVersion;
+
 	@Attribute(required = false)
 	protected ModuleCategory category;
 

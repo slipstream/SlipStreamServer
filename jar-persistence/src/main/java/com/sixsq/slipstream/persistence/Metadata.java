@@ -23,13 +23,7 @@ package com.sixsq.slipstream.persistence;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PersistenceException;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 import org.simpleframework.xml.Attribute;
 
@@ -46,9 +40,12 @@ import flexjson.JSONDeserializer;
 @SuppressWarnings("serial")
 public abstract class Metadata implements Serializable {
 
-	@SuppressWarnings("unused")
-	@Deprecated
+	@Version
 	private int jpaVersion;
+
+	public int getJpaVersion() {
+		return jpaVersion;
+	}
 
 	protected Date creation = new Date();
 

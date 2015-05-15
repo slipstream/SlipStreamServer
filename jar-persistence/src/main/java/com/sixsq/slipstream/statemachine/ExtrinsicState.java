@@ -98,7 +98,8 @@ public class ExtrinsicState {
 	private RuntimeParameter setAndStoreValue(RuntimeParameter targetParameter,
 											  String newValue) {
 		targetParameter.setValue(newValue);
-		return (RuntimeParameter) targetParameter.store();
+//		return (RuntimeParameter) targetParameter.store();
+		return targetParameter;
 	}
 
 	private boolean getParameterValueAsBoolean(RuntimeParameter parameter) {

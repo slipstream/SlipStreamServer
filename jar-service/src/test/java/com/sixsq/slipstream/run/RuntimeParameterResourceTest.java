@@ -405,35 +405,35 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 		run.remove();
 	}
 
-	@Test
-	public void getValueAndSet() throws FileNotFoundException, IOException, SlipStreamException {
-
-		Run run = createAndStoreRunImage("getValueAndSet");
-
-		String key = "node.1:key";
-		storeRuntimeParameter(key, "", run);
-
-		RuntimeParameter rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
-
-		Properties p = RuntimeParameter.getValueAndSet(run.getUuid(), key);
-		String value = (String) p.get("value");
-		boolean isSet = (Boolean) p.get("isSet");
-		assertThat(value, is(""));
-		assertFalse(isSet);
-
-		rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
-		value = "value of key";
-		rp.setValue(value);
-		rp.store();
-
-		p = RuntimeParameter.getValueAndSet(run.getUuid(), key);
-		value = (String) p.get("value");
-		isSet = (Boolean) p.get("isSet");
-		assertThat(value, is("value of key"));
-		assertTrue(isSet);
-		
-		run.remove();
-	}
+//	@Test
+//	public void getValueAndSet() throws FileNotFoundException, IOException, SlipStreamException {
+//
+//		Run run = createAndStoreRunImage("getValueAndSet");
+//
+//		String key = "node.1:key";
+//		storeRuntimeParameter(key, "", run);
+//
+//		RuntimeParameter rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
+//
+//		Properties p = RuntimeParameter.getValueAndSet(run.getUuid(), key);
+//		String value = (String) p.get("value");
+//		boolean isSet = (Boolean) p.get("isSet");
+//		assertThat(value, is(""));
+//		assertFalse(isSet);
+//
+//		rp = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
+//		value = "value of key";
+//		rp.setValue(value);
+//		rp.store();
+//
+//		p = RuntimeParameter.getValueAndSet(run.getUuid(), key);
+//		value = (String) p.get("value");
+//		isSet = (Boolean) p.get("isSet");
+//		assertThat(value, is("value of key"));
+//		assertTrue(isSet);
+//
+//		run.remove();
+//	}
 
 	private void logTimeDiff(String msg, long before, long after) {
 		Logger.getLogger("Timing").severe("took to execute " + msg + ": " + (after - before));

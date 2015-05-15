@@ -139,7 +139,7 @@ public class StateMachineMultiThreadingTest extends
 	private States initialState = States.Executing;
 	private States finalState = States.SendingReports;
 
-	@Ignore("WIP")
+//	@Ignore("WIP")
 	@Test
 	public void testMultipleStateTransitions() throws FileNotFoundException,
 			IOException, SlipStreamException, InterruptedException,
@@ -164,8 +164,8 @@ public class StateMachineMultiThreadingTest extends
 
 		run = Run.load(run.getResourceUri());
 		try {
-			assertTransitionReached(run, finalState);
 			assertThat(errors, is(0));
+			assertTransitionReached(run, finalState);
 		} finally {
 			run.remove();
 		}
@@ -177,6 +177,7 @@ public class StateMachineMultiThreadingTest extends
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
 		Run run = createRunDeployment("testMultipleStateTransitions");
+		run.setState(initialState);
 		run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_STATE_KEY)
 				.setValue(initialState.name());
 		run.toJsonForPersistence();
@@ -248,8 +249,6 @@ public class StateMachineMultiThreadingTest extends
 			throws NotFoundException, AbortException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
-		EntityTransaction transaction = em.getTransaction();
-		transaction.begin();
 
 		run = em.find(Run.class, run.getResourceUri());
 
@@ -270,8 +269,6 @@ public class StateMachineMultiThreadingTest extends
 		String complete = run.getRuntimeParameterValue(key);
 		System.out.println("Node: " + ORCHESTRATOR_NAME + " is " + complete);
 
-		run.toJsonForPersistence();
-		transaction.commit();
 		em.close();
 
 	}

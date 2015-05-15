@@ -25,7 +25,10 @@ import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceException;
+import javax.persistence.RollbackException;
 
+import com.sixsq.slipstream.exceptions.*;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -35,11 +38,6 @@ import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
-import com.sixsq.slipstream.exceptions.InvalidStateException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
@@ -172,28 +170,72 @@ public class RuntimeParameterResource extends RunBaseResource {
 	@Post
 	public void completeCurrentNodeState(Representation entity) {
 
-		String nodeName = runtimeParameter.getNodeName();
-		States newState = null;
+        com.sixsq.slipstream.util.Logger.info("OLD STATE: " + runtimeParameter.getContainer().getState());
 
-		newState = attemptCompleteCurrentNodeState(nodeName);
+        if(!runtimeParameter.getName().equals(RuntimeParameter.COMPLETE_KEY)) {
+            throwClientConflicError("Only " + RuntimeParameter.COMPLETE_KEY + " key can be posted");
+        }
+        runtimeParameter.setValue("true");
+        runtimeParameter.store();
+//		com.sixsq.slipstream.util.Logger.info(">>>>>>>>>>> Before: " + nodeName);
+		States newState = null;
+		EntityManager em = PersistenceUtil.createEntityManager();
+		runtimeParameter = (RuntimeParameter) RuntimeParameter.load(runtimeParameter.getResourceUri(), RuntimeParameter.class, em);//em.merge(runtimeParameter);
+
+        String nodeName = runtimeParameter.getNodeName();
+		try {
+			newState = attemptCompleteCurrentNodeStateWithRetry(nodeName, em, null, true);
+            em.close();;
+            com.sixsq.slipstream.util.Logger.info("NEW STATE: " + newState);
+            com.sixsq.slipstream.util.Logger.info("Closed!!");
+		} catch (SlipStreamDatabaseException e) {
+			e.printStackTrace();
+			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Error in state machine");
+		}
+
+		RuntimeParameter v = RuntimeParameter.load(runtimeParameter.getResourceUri());
+		com.sixsq.slipstream.util.Logger.info("################ RP: " + v.getNodeName() + " with value: " + v.getValue() + " and state: " + v.getContainer().getState());
 
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
+//		com.sixsq.slipstream.util.Logger.info("<<<<<<<<<<< After: " + nodeName);
 	}
 
-	private States attemptCompleteCurrentNodeState(String nodeName) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		em.getTransaction().begin();
-		Run run = Run.loadFromUuid(getUuid(), em);
-		StateMachine sc = StateMachine.createStateMachine(run);
-		States state = completeCurrentNodeState(nodeName, sc);
-		boolean isManaged = false;
-		if(em.contains(run)) {
-			isManaged = true;
+	private States attemptCompleteCurrentNodeStateWithRetry(String nodeName, EntityManager em, StateMachine sc, boolean retry) {
+        com.sixsq.slipstream.util.Logger.info("################ RP: " + nodeName);
+        Run run = runtimeParameter.getContainer();
+        run = em.find(Run.class, run.getResourceUri());
+//		runtimeParameter = em.merge(runtimeParameter);
+//		if(sc == null) {
+			sc = StateMachine.createStateMachine(run);
+//		}
+		try {
+			return attemptCompleteCurrentNodeState(nodeName, em, sc);
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+			if(retry) {
+				com.sixsq.slipstream.util.Logger.info("Failed completing node... retrying!");
+//				runtimeParameter = em.merge(runtimeParameter);
+//				return attemptCompleteCurrentNodeStateWithRetry(nodeName, em, null, true);
+			} else {
+				throw e;
+			}
 		}
-		em.getTransaction().commit();
-		em.close();
-//		run.setState(state);
-//		run.store();
+        return run.getState();
+	}
+
+	private States attemptCompleteCurrentNodeState(String nodeName, EntityManager em, StateMachine sc) {
+		em.getTransaction().begin();
+		States state = completeCurrentNodeState(nodeName, sc);
+		try {
+			em.getTransaction().commit();
+            com.sixsq.slipstream.util.Logger.info("Committed!!");
+		} catch (PersistenceException e) {
+			if(em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			throw e;
+		}
+
 		return state;
 	}
 

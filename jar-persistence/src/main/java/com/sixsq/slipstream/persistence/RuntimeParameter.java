@@ -27,15 +27,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
+import javax.persistence.*;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
@@ -480,23 +472,26 @@ public class RuntimeParameter extends Metadata {
 		return res;
 	}
 
-	public static Properties getValueAndSet(String runId, String key) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("getValueAndSet");
-		q.setParameter("resourceuri", "run/" + runId + "/" + key);
-		Properties valueAndSet = null;
-		try {
-			Object res = q.getSingleResult();
-			valueAndSet = new Properties();
-			Object[] objs = (Object[]) res;
-			String value = (String) objs[0];
-			boolean isSet = (Boolean) objs[1];
-			valueAndSet.put("value", value);
-			valueAndSet.put("isSet", isSet);
-		} catch (NoResultException ex) {
-		}
-		em.close();
-		return valueAndSet;
-	}
+//	public static Properties getValueAndSet(String runId, String key) {
+//		EntityManager em = PersistenceUtil.createEntityManager();
+//		Query q = em.createNamedQuery("getValueAndSet");
+//		q.setParameter("resourceuri", "run/" + runId + "/" + key);
+//		Properties valueAndSet = null;
+//		try {
+//			Object res = q.getSingleResult();
+//			valueAndSet = new Properties();
+//			Object[] objs = (Object[]) res;
+//			String value = (String) objs[0];
+//			boolean isSet = (Boolean) objs[1];
+//			valueAndSet.put("value", value);
+//			valueAndSet.put("isSet", isSet);
+//		} catch (NoResultException ex) {
+//		}
+//		em.close();
+//		return valueAndSet;
+//	}
 
+	public RuntimeParameter store() {
+		return (RuntimeParameter) super.store();
+	}
 }

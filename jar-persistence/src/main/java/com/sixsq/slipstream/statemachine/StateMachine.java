@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.persistence.EntityManager;
-
 import com.sixsq.slipstream.exceptions.*;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
@@ -156,7 +154,7 @@ public class StateMachine {
 	public States updateState(String nodeName)
 			throws SlipStreamClientException, InvalidStateException {
 
-		completeCurrentState(nodeName);
+//		completeCurrentState(nodeName);
 
 		tryAdvanceState();
 
@@ -269,11 +267,7 @@ public class StateMachine {
 		}
 	}
 
-	private void setState(States newState) throws InvalidStateException {
-		setState(newState, false);
-	}
-
-	protected void setState(States newState, boolean force) throws InvalidStateException {
+	void setState(States newState, boolean force) throws InvalidStateException {
 
 		globalState = assignNodeState(globalState, newState);
 
@@ -335,6 +329,9 @@ public class StateMachine {
 	}
 
 	private void resetNodesStateCompleted() {
+
+		com.sixsq.slipstream.util.Logger.info("Reseting!!!");
+
 		for (State nodeState : nodeStates.values()) {
 			nodeState.setStateCompleted(false);
 		}
