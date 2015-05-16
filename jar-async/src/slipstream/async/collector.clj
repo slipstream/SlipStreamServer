@@ -114,14 +114,14 @@
   (log/log-debug (build-msg user connector elapsed "The user has no credentials for this Cloud")))
 
 (defn update-metric!
-  [user]
+  [user connector]
   (let [ch (chan 1)]
     (go
       (let [res (alts! [ch (timeout timeout-collect)])]
         (if (nil? res)
           (log/log-error  "Timeout updating metrics for user "  (get-name user))
           (log/log-info   "Executed update-metric request for " (get-name user)))))
-    (go (>! ch (updator/update-metric user)))))
+    (go (>! ch (updator/update-metric user connector)))))
 
 (defn collect!
   [user connector]
@@ -136,7 +136,7 @@
           (= v Collector/EXCEPTION_OCCURED)   (log-failure user connector elapsed)
           :else (do
                   (log-collected user connector elapsed v)
-                  (when (updator/metering-enabled?) (update-metric! user))))))
+                  (when (updator/metering-enabled?) (update-metric! user connector))))))
     (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect))))))
 
 (def not-nil? (complement nil?))
