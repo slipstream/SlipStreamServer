@@ -64,8 +64,8 @@
       []
       (->> (select resources
                    (where {:id [like (str collection-id"%")]})
-                   (kc/limit offset)
-                   (kc/offset limit))
+                   (kc/limit limit)
+                   (kc/offset offset))
            (map :data)
            (map deserialize)))))
 
