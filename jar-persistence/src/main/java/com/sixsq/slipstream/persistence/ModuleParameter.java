@@ -27,10 +27,12 @@ import javax.persistence.Id;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 @Entity
+@Root(name = "parameter")
 @SuppressWarnings("serial")
 public class ModuleParameter extends Parameter<Module> {
 
