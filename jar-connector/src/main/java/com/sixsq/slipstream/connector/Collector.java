@@ -113,6 +113,11 @@ public class Collector {
 		return idsAndStates.size();
 	}
 
+	private static boolean vmHasRunUuid(Vm vm) {
+		String runUuid = vm.getRunUuid();
+		return runUuid != null && !runUuid.isEmpty();
+	}
+
 	public static int update(List<Vm> newVms, String user, String cloud) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
@@ -134,7 +139,9 @@ public class Collector {
 				em.remove(vm);
 				removed++;
 
-				UsageRecorder.insertEnd(instanceId, user, cloud);
+				if (vmHasRunUuid(vm)) {
+					UsageRecorder.insertEnd(instanceId, user, cloud);
+				}
 			} else {
 				filteredOldVmMap.put(instanceId, vm);
 			}
@@ -143,11 +150,6 @@ public class Collector {
 			Vm old = filteredOldVmMap.get(v.getInstanceId());
 			VmRuntimeParameterMapping m = getMapping(v);
 			if (old == null) {
-
-				if (v.getIsUsable()) {
-					UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
-				}
-
 				setVmstate(em, m, v);
 				setIp(m, v);
 				setName(m, v);
@@ -156,18 +158,23 @@ public class Collector {
 				setNodeName(m, v);
 				setNodeInstanceId(m, v);
 				em.persist(v);
+
+				if (v.getIsUsable() && vmHasRunUuid(v)) {
+					UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
+				}
 			} else {
 				boolean merge = false;
 
-				if (!v.getState().equals(old.getState())) {
-					if (v.getIsUsable() != old.getIsUsable()) {
-						if (v.getIsUsable()) {
-							UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
-						} else {
+				if ((v.getIsUsable() != old.getIsUsable() && vmHasRunUuid(v))
+						|| (!vmHasRunUuid(old) && vmHasRunUuid(v) && v.getIsUsable())) {
+					if (v.getIsUsable()) {
+						UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
+					} else {
 						UsageRecorder.insertEnd(v.getInstanceId(), user, cloud);
-						}
 					}
+				}
 
+				if (!v.getState().equals(old.getState())) {
 					old.setState(v.getState());
 					old.setIsUsable(v.getIsUsable());
 					setVmstate(em, m, v);
@@ -200,7 +207,7 @@ public class Collector {
 					merge = true;
 				}
 				if (merge) {
-					old = em.merge(old);
+					em.merge(old);
 				}
 			}
 		}
