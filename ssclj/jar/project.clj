@@ -40,7 +40,9 @@
   :plugins [[lein-expectations                              "0.0.7"] 
             [lein-autoexpect                                "1.4.2"]       
             [lein-environ                                   "1.0.0"]
-            [com.jakemccrary/lein-test-refresh              "0.5.5"]]
+            [com.jakemccrary/lein-test-refresh              "0.5.5"]
+            [jonase/eastwood                                "0.2.1"]
+            [lein-cloverage                                 "1.0.3"]]
 
   :profiles {
     :provided 
