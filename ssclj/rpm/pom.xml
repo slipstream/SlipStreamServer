@@ -119,7 +119,7 @@
             SlipStream SSCLJ server
           </description>
           <requires>
-            <require>java-1.7.0-openjdk</require>
+            <require>java-1.8.0-openjdk</require>
             <require>slipstream-useradd${slipstream.edition}</require>
           </requires>
 
@@ -202,7 +202,44 @@
               </sources>
             </mapping>
 
+            <mapping>
+              <directory>/usr/sbin</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <filemode>755</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <sources>
+                <source>
+                  <location>src/main/scripts</location>
+                  <includes>
+                    <include>create-daily-usage.sh</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/cron.d</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/config</location>
+                  <includes>
+                    <include>create-daily-usage</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
           </mappings>
+
+<prepareScriptlet>
+<script>
+# Turn off the brp-python-bytecompile script                                                        
+%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
+</script>
+ </prepareScriptlet>
+
         </configuration>
 
         <executions>

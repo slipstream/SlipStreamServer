@@ -202,7 +202,7 @@
                       <obsolete>slipstream-server</obsolete>
                     </obsoletes>
                     <requires>
-                        <require>java-1.7.0-openjdk</require>
+                        <require>java-1.8.0-openjdk</require>
                         <require>slipstream-useradd${slipstream.edition}</require>
                         <require>slipstream-client${slipstream.edition} &gt;= 1.3</require>
                         <require>slipstream-ssclj${slipstream.edition}</require>
@@ -474,6 +474,13 @@
 						                </sources>
 						            </mapping>
                     </mappings>
+
+<prepareScriptlet>
+<script>
+# Turn off the brp-python-bytecompile script                                                        
+%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
+</script>
+ </prepareScriptlet>
 
                     <postinstallScriptlet>
                         <script>
