@@ -56,7 +56,9 @@
 (def init-db
   (delay  
     (kh/korma-init)
-    (log/info "Korma init done for insert namespace")    
+    (log/info "Korma init done")    
+    
+    (acl/-init)
 
     (ddl/create-table! "usage_records"    columns-record)
     (ddl/create-table! "usage_summaries"  columns-summaries)
@@ -64,12 +66,9 @@
     (ddl/create-index! "usage_records"   "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
     (ddl/create-index! "usage_summaries" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
 
-    (log/info "Table created (if needed)")
     (kc/defentity usage_records)
     (kc/defentity usage_summaries)
     (kc/select usage_records (kc/limit 1))
-
-    (acl/-init)
 
     (log/info "Korma Entities defined")))
 
@@ -177,22 +176,12 @@
       (assoc :id   (str "Usage/" (cu/random-uuid)))
       (assoc :acl  (u/serialize acl))))  
 
-(defn- type-principal-from-rule   
-  [{:keys [type principal]}]
-  [type principal])
-
-(defn- types-principals-from-acl
-  [acl]
-  (->> acl
-       :rules
-       (map type-principal-from-rule)))
-
 (defn insert-summary!   
   [summary]
   (let [acl                 (acl-for-user-cloud summary)
         summary-resource    (resource-for summary acl)]    
-    (kc/insert usage_summaries (kc/values summary-resource))
-    (acl/insert-resource (:id summary-resource) "Usage" (types-principals-from-acl acl))))
+    (kc/insert usage_summaries (kc/values summary-resource))    
+    (acl/insert-resource (:id summary-resource) "Usage" (acl/types-principals-from-acl acl))))
 
 (defn records-for-interval
   [start end]

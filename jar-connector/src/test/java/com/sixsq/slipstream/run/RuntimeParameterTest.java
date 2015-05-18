@@ -29,6 +29,7 @@ import static org.junit.Assert.fail;
 
 import java.lang.reflect.InvocationTargetException;
 
+import com.sixsq.slipstream.event.Event;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,6 +56,8 @@ public class RuntimeParameterTest {
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException,
 			ClassNotFoundException {
+
+		Event.muteForTests();
 		user = CommonTestUtil.createTestUser();
 
 		CommonTestUtil.addSshKeys(user);

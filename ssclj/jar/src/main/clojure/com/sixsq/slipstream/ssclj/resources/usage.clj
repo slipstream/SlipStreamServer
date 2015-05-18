@@ -3,13 +3,8 @@
   (:refer-clojure :exclude [update])
   (:require
 
-    [clojure.tools.logging                                      :as log]
     [clojure.java.jdbc                                          :as j]
-
-    [schema.core                                                :as s]
-
     [korma.core                                                 :refer :all]
-
     [honeysql.core                                              :as sql]
     [honeysql.helpers                                           :as hh]
 
@@ -47,49 +42,35 @@
   [usage]
   (update-in usage [:acl] fu/deserialize))
 
-(defn id-roles
-  [options]
-  (-> options
-      :identity
-      :authentications
-      (get (get-in options [:identity :current]))
-      ((juxt :identity :roles))))
-
-(defn id-matches?
-  [id]
-  (if id
-    [:and [:= :a.principal-type "USER"] [:= :a.principal-name id]]
-    [:= 0 1]))
-
-(defn roles-in?
-  [roles]
-  (if (seq roles)
-    [:and [:= :a.principal-type "ROLE"] [:in :a.principal-name roles]]
-    [:= 0 1]))
-
-(defn- neither-id-roles?
-  [id roles]
-  (not (or id (seq roles))))
-
-(defn sql
+(defn bad-query   
+  [offset limit]
+  (throw 
+    (u/ex-response 
+      (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset, 
+            ", limit:"limit")")
+      400 0)))
+ 
+(defn sql   
   [id roles offset limit]
-  (-> (hh/select :u.*)
-      (hh/from [:acl :a] [:usage_summaries :u])
-      (hh/where [:and [:= :u.id :a.resource-id]
-                [:or  (id-matches? id) (roles-in? roles)]])
-      (hh/modifiers :distinct)
-      (hh/limit limit)
-      (hh/offset offset)
-      (hh/order-by [:u.start_timestamp :desc])
+  (->   (hh/select :u.*) 
+        (hh/from [:acl :a] [:usage_summaries :u])
+        (hh/where [:and [:= :u.id :a.resource-id]
+                        [:or 
+                          (dbb/id-matches? id)
+                          (dbb/roles-in? roles)]])
+        (hh/modifiers :distinct)
+        (hh/limit limit)
+        (hh/offset offset)
+        (hh/order-by [:u.start_timestamp :desc])
 
-      (sql/format :quoting :ansi)))
+        (sql/format :quoting :ansi)))
 
 (defmethod dbb/find-resources resource-name
   [collection-id options]
-  (let [[id roles] (id-roles options)
-        {:keys [offset limit]} (u/offset-limit options)]
-    (if (or (neg? limit) (neither-id-roles? id roles))
-      []
+  (let [[id roles]              (dbb/id-roles options)
+        {:keys [offset limit]}  (u/offset-limit options)]
+    (if (or (neg? limit) (dbb/neither-id-roles? id roles))
+      []      
       (->> (sql id roles offset limit)
            (j/query kh/db-spec)
            (map deserialize-usage)))))

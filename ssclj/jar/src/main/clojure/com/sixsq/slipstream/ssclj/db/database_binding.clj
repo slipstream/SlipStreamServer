@@ -2,17 +2,24 @@
 (ns com.sixsq.slipstream.ssclj.db.database-binding
   (:refer-clojure :exclude [update])
   (:require
+    [ring.util.response                                     :as r]
+
     [clojure.java.jdbc                                      :refer :all :as jdbc]
+    [korma.core                                             :refer :all]
+    [honeysql.helpers                                       :as hh]
+    [honeysql.core                                          :as hq]
+    [com.sixsq.slipstream.ssclj.database.korma-helper       :as kh]
+
+    [com.sixsq.slipstream.ssclj.api.acl                     :as acl]
     [com.sixsq.slipstream.ssclj.db.binding                  :refer [Binding]]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
-    [com.sixsq.slipstream.ssclj.database.korma-helper       :as kh]
     [com.sixsq.slipstream.ssclj.database.ddl                :as ddl]
     [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
-    [korma.core                                             :refer :all :as kc]
-    [ring.util.response                                     :as r]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (defn init-db
   []
+  (acl/-init)
   (kh/korma-init)
   (ddl/create-table! "resources" (ddl/columns "id" "VARCHAR(100)" "data" "VARCHAR(10000)"))
   (defentity resources))
@@ -37,13 +44,54 @@
 
 (defn- insert-resource
   [id data]
-  (insert resources (values {:id id :data (serialize data)})))
+  (insert resources (values {:id id :data (serialize data)}))
+  (when (:acl data)
+    (acl/insert-resource id "Event" (acl/types-principals-from-acl (:acl data)))))
 
 (defn- update-resource
   [id data]
   (update resources
     (set-fields {:data data})
     (where {:id id})))
+
+(defn id-matches?
+  [id]
+  (if id
+    [:and [:= :a.principal-type "USER"] [:= :a.principal-name id]]
+    [:= 0 1]))
+
+(defn roles-in?
+  [roles]
+  (if (seq roles)
+    [:and [:= :a.principal-type "ROLE"] [:in :a.principal-name roles]]
+    [:= 0 1]))
+
+(defn neither-id-roles?
+  [id roles]
+  (not (or id (seq roles))))
+
+(defn id-roles
+  [options]
+  (-> options      
+      :identity
+      :authentications
+      (get (get-in options [:identity :current]))
+      ((juxt :identity :roles))))
+
+(defn sql
+  [collection-id id roles offset limit]
+  (->   (hh/select :r.*)
+        (hh/from [:acl :a] [:resources :r])
+        (hh/where [:and
+                    [:like :r.id (str collection-id"%")]
+                    [:= :r.id :a.resource-id] ;; join acl with resources
+                    [:or
+                      (id-matches? id)        ;; an acl line with given id
+                      (roles-in? roles)]])    ;; an acl line with one of the given roles
+        (hh/modifiers :distinct)
+        (hh/limit   limit)
+        (hh/offset  offset)
+        (hq/format :quoting :ansi)))
 
 (defn find-resource
   [id]
@@ -58,16 +106,16 @@
 
 (defmulti  find-resources dispatch-fn)
 (defmethod find-resources :default
-  [collection-id options]
-  (let [{:keys [offset limit]} (u/offset-limit options)]
-    (if (neg? limit)
-      []
-      (->> (select resources
-                   (where {:id [like (str collection-id"%")]})
-                   (kc/limit limit)
-                   (kc/offset offset))
-           (map :data)
-           (map deserialize)))))
+ [collection-id options]  
+ (let [ [id roles]      (id-roles options)        
+        {:keys [offset limit]}  (u/offset-limit options)]
+   (if (or (neg? limit) (neither-id-roles? id roles))
+     []
+     (->> (sql collection-id id roles offset limit)                
+          (jdbc/query kh/db-spec)                 
+          (map :data)
+          (map deserialize)))))
+
 
 (defn- delete-resource
   [id]
