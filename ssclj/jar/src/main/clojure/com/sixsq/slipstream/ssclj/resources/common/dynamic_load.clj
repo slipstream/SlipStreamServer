@@ -31,7 +31,7 @@
   [resource-ns]
   (try
     (require resource-ns)
-    (log/info "loaded resource namespace:" (name resource-ns))
+    (log/info "loaded resource namespace :" (name resource-ns))
     resource-ns
     (catch Exception e
       (log/warn "could not load resource namespace:" (name resource-ns)))))
@@ -40,18 +40,18 @@
   "Retrieves the named var in the given namespace, returning
    nil if the var could not be found.  Function logs the success or
    failure of the request."
-  [varname resource-ns]  
+  [varname resource-ns]
   (if (.contains (name resource-ns) "test")
     (log/info "avoiding retrieving" varname "for" (name resource-ns))    
-    (if-let [value (-> resource-ns                     
-                      name                     
-                      (str "/" varname)
-                      symbol                      
-                      find-var)]
+    (if-let [value (->  resource-ns
+                        name
+                        (str "/" varname)
+                        symbol
+                        find-var)]
     (do
-      (log/info "retrieved" varname "for" (name resource-ns))
+      (log/info "retrieved" varname "for" (name resource-ns) "\n")
       value)
-    (log/warn "did NOT retrieve" varname "for" (name resource-ns)))))
+    (log/warn "did NOT retrieve" varname "for" (name resource-ns) "\n"))))
 
 (defn get-resource-link
   "Returns a vector with the resource tag keyword and map with the

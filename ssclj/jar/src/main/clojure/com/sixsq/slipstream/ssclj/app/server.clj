@@ -16,7 +16,8 @@
     [com.sixsq.slipstream.ssclj.resources.root                      :as root]
     [com.sixsq.slipstream.ssclj.db.impl                             :as db]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding               :as fsdb]
-    [com.sixsq.slipstream.ssclj.db.database-binding                 :as dbdb]))
+    [com.sixsq.slipstream.ssclj.db.database-binding                 :as dbdb]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils        :as du]))
 
 ;; FIXME: make this dynamic depending on the service configuration
 (defn set-db-impl
@@ -43,11 +44,11 @@
   (instrument-jvm default-registry)
 
   (-> (routes/get-main-routes)
-      (handler/site)
-      (wrap-exceptions)
-      (wrap-base-uri)
+      handler/site
+      wrap-exceptions
+      wrap-base-uri
       wrap-params
-      (wrap-authn-info-header)
+      wrap-authn-info-header
       (expose-metrics-as-json "/ssclj/metrics" default-registry {:pretty-print? true})
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})

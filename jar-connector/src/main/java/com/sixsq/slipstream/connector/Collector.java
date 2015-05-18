@@ -20,28 +20,19 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
-
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.PersistenceUtil;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.Vm;
-import com.sixsq.slipstream.persistence.VmRuntimeParameterMapping;
+import com.sixsq.slipstream.persistence.*;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Collector {
 
@@ -145,7 +136,7 @@ public class Collector {
 			if (old == null) {
 
 				if (v.getIsUsable()) {
-					UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
+					UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics());
 				}
 
 				setVmstate(em, m, v);
@@ -162,7 +153,7 @@ public class Collector {
 				if (!v.getState().equals(old.getState())) {
 					if (v.getIsUsable() != old.getIsUsable()) {
 						if (v.getIsUsable()) {
-							UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetric());
+							UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics());
 						} else {
 						UsageRecorder.insertEnd(v.getInstanceId(), user, cloud);
 						}

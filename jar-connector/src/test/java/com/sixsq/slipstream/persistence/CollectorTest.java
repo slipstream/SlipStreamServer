@@ -20,22 +20,23 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import com.sixsq.slipstream.connector.Collector;
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.UsageRecorder;
+import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.sixsq.slipstream.connector.Collector;
-import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.local.LocalConnector;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 public class CollectorTest {
 
@@ -47,6 +48,8 @@ public class CollectorTest {
 
 	@Before
 	public void setup() throws ValidationException {
+		UsageRecorder.muteForTests();
+		Event.muteForTests();
 		connector = new LocalConnector("localCloud");
 
 		user = new User(username);
