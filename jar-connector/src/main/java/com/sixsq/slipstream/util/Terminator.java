@@ -24,7 +24,7 @@ import com.sixsq.slipstream.statemachine.States;
 
 public class Terminator {
 
-	/* I WILL BE BACK */
+	/* I'LL BE BACK */
 
 	public static int purge() throws ConfigurationException, ValidationException {
 		int runPurged = 0;
@@ -35,17 +35,21 @@ public class Terminator {
 			int timeout = u.getTimeout();
 
 			List<Run> old = Run.listOldTransient(u, timeout);
+			EntityManager em = PersistenceUtil.createEntityManager();
 			for (Run r : old) {
-				EntityManager em = PersistenceUtil.createEntityManager();
 				try {
+					em.getTransaction().begin();
 					r = Run.load(r.getResourceUri(), em);
 					purgeRun(r);
-				} catch (SlipStreamException e) {
+					em.getTransaction().commit();
+				} catch (Exception e) {
 					Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
-				} finally {
-					em.close();
+				}
+				if(em.getTransaction().isActive()) {
+					em.getTransaction().rollback();
 				}
 			}
+			em.close();
 			runPurged += old.size();
 		}
 
@@ -56,7 +60,6 @@ public class Terminator {
 
 		boolean isGarbageCollected = Run.isGarbageCollected(run);
 		Run.setGarbageCollected(run);
-		run = run.store();
 
 		String onErrorKeepRunning = run.getParameterValue(
 				Parameter.constructKey(ParameterCategory.General.toString(), UserParameter.KEY_ON_ERROR_RUN_FOREVER),
@@ -71,11 +74,11 @@ public class Terminator {
 				|| (run.getState() == States.Executing)|| (run.getState() == States.Ready) || isGarbageCollected;
 
 		if (terminateOnError && notMutable && shouldTerminate) {
-			terminate(run.getResourceUri());
+			terminate(run);
 		}
 
 		if(run.getState() != States.Done) {
-			Run.abort("The run has timed out", run.getUuid());
+			run.abort("The run has timed out");
 		}
 	}
 
@@ -87,27 +90,31 @@ public class Terminator {
 
 		try {
 			Run run = Run.load(runResourceUri, em);
-			User user = User.loadByName(run.getUser());
-
-			StateMachine sc = StateMachine.createStateMachine(run);
-
-			if (sc.canCancel()) {
-				sc.tryAdvanceToCancelled();
-				terminateInstances(run, user);
-			} else {
-				if (sc.getState() == States.Ready) {
-					sc.tryAdvanceToFinalizing();
-				}
-				terminateInstances(run, user);
-				sc.tryAdvanceState(true);
-			}
-			run = run.store();
-
+			terminate(run);
 		} finally {
-			if(em.getTransaction().isActive()) {
+			if (em.getTransaction().isActive()) {
 				em.getTransaction().commit();
 			}
 			em.close();
+		}
+	}
+
+	private static void terminate(Run run) throws ValidationException,
+			CannotAdvanceFromTerminalStateException, InvalidStateException {
+
+		User user = User.loadByName(run.getUser());
+
+		StateMachine sc = StateMachine.createStateMachine(run);
+
+		if (sc.canCancel()) {
+			sc.tryAdvanceToCancelled();
+			terminateInstances(run, user);
+		} else {
+			if (sc.getState() == States.Ready) {
+				sc.tryAdvanceToFinalizing();
+			}
+			terminateInstances(run, user);
+			sc.tryAdvanceState(true);
 		}
 	}
 

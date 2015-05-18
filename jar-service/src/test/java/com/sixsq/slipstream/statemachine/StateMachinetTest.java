@@ -175,64 +175,69 @@ public class StateMachinetTest {
 
 		assertState(sc, States.Initializing);
 
-		sc.updateState(orchName);
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 
 		assertState(sc, States.Provisioning);
 
-		sc.updateState("n1.1");
+		sc.completeCurrentState("n1.1");
+		sc.updateState();
 
 		assertState(sc, States.Provisioning);
 
-		sc.updateState("n2.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n2.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 
 		assertState(sc, States.Executing);
 
-		sc.updateState("n1.1");
+		sc.completeCurrentState("n1.1");
+		sc.updateState();
 
 		assertState(sc, States.Executing);
 
-		sc.updateState("n2.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n2.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 
 		assertState(sc, States.SendingReports);
 
-		sc.updateState("n1.1");
+		sc.completeCurrentState("n1.1");
+		sc.updateState();
 
 		assertState(sc, States.SendingReports);
 
-		sc.updateState("n2.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n2.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 
 		assertState(sc, States.Ready);
 
-		sc.updateState("n1.1");
+		sc.completeCurrentState("n1.1");
+		sc.updateState();
 
 		assertState(sc, States.Ready);
 
-		sc.updateState("n2.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n2.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 
 		assertState(sc, States.Finalizing);
 
-		sc.updateState("n1.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n1.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
+
+		assertState(sc, States.Done);
+
+		run.store();
 
 		assertThat(RuntimeParameter.loadFromUuidAndKey(run.getUuid(), "ss:state").getValue(),
 				is(States.Done.toString()));
-
-		assertState(sc, States.Done);
 	}
 
 	private void assertState(StateMachine sc, States state) {
 		assertEquals(state, sc.getState());
-	}
-
-	@Test(expected = SlipStreamClientException.class)
-	public void inexistantNodeName() throws SlipStreamException {
-		StateMachine sc = createStateMachine(new String[] { "n1.1", "n2.1" });
-
-		sc.updateState("doesn-t-exist");
 	}
 
 	@Test
@@ -260,13 +265,16 @@ public class StateMachinetTest {
 
 		assertEquals(States.Initializing, sc.getState());
 
-		sc.updateState(orchName);
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 		assertEquals(States.Provisioning, sc.getState());
 
-		sc.updateState(failingNodeName);
+		sc.completeCurrentState(failingNodeName);
+		sc.updateState();
 		assertEquals(States.Provisioning, sc.getState());
-		sc.updateState("n2.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n2.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 		assertEquals(States.Executing, sc.getState());
 
 		sc.failCurrentState(failingNodeName);
@@ -275,31 +283,38 @@ public class StateMachinetTest {
 		assertEquals(States.Executing, sc.getState());
 		assertTrue(sc.isFailing());
 
-		sc.updateState("n2.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n2.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 
 		assertEquals(States.Executing, sc.getState());
 		assertTrue(sc.isFailing());
 
-		sc.updateState(failingNodeName);
+		sc.completeCurrentState(failingNodeName);
+		sc.updateState();
 
 		assertEquals(States.SendingReports, sc.getState());
-		sc.updateState(failingNodeName);
+		sc.completeCurrentState(failingNodeName);
+		sc.updateState();
 
 		assertEquals(States.SendingReports, sc.getState());
-		sc.updateState("n2.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n2.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 
 		assertEquals(States.Ready, sc.getState());
-		sc.updateState(failingNodeName);
+		sc.completeCurrentState(failingNodeName);
+		sc.updateState();
 
 		assertEquals(States.Ready, sc.getState());
-		sc.updateState("n2.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n2.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 
 		assertEquals(States.Finalizing, sc.getState());
-		sc.updateState("n2.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState("n2.1");
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 
 		assertEquals(States.Aborted, sc.getState());
 	}
@@ -336,8 +351,9 @@ public class StateMachinetTest {
 
 		assertThat(run.getState(), is(States.Executing));
 
-		run = Run.abort("Error in build image", run.getUuid());
+		run.abort("Error in build image");
 		sc = StateMachine.getStateMachine(run);
+		assertEquals(States.Executing, sc.getState());
 		assertTrue(sc.isFailing());
 		sc.tryAdvanceState(true);
 
@@ -412,7 +428,7 @@ public class StateMachinetTest {
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, SlipStreamException {
 
-		StateMachine sc = createStateMachine(new String[] { "n1.1" });
+		StateMachine sc = createStateMachine(new String[]{"n1.1"});
 
 		sc.setState(States.Done, true);
 
@@ -422,8 +438,10 @@ public class StateMachinetTest {
 		run = em.merge(run);
 		assertThat(run.getRuntimeParameterValue("ss:state"),
 				is(States.Done.toString()));
+		em.close();
 
-		sc.updateState("n1.1");
+		sc.completeCurrentState("n1.1");
+		sc.updateState();
 	}
 
 	private State createState(String nodeName) throws SlipStreamException,
@@ -455,12 +473,14 @@ public class StateMachinetTest {
 		assertEquals(States.Initializing, sc.getState());
 		assertEquals(run, beforeRun);
 
-		sc.updateState(orchName);
+		sc.completeCurrentState(orchName);
+		sc.updateState();
 		assertEquals(States.Provisioning, sc.getState());
 		assertEquals(run, beforeRun);
 
-		sc.updateState("n1.1");
-		sc.updateState(orchName);
+		sc.completeCurrentState(orchName);
+		sc.completeCurrentState("n1.1");
+		sc.updateState();
 
 		assertEquals(States.Executing, sc.getState());
 		assertEquals(run, beforeRun);

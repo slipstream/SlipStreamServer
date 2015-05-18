@@ -146,9 +146,29 @@ public class Run extends Parameterized {
 
 	private static void setGlobalAbortState(String abortMessage, RuntimeParameter globalAbort) {
 		globalAbort.setValue(abortMessage);
-		globalAbort.store();
 		Run run = globalAbort.getContainer();
 		run.setState(run.getState());
+	}
+
+	/*
+	* The run must be managed by an EntityManager, since the RuntimeParameters
+	* are lazy loaded.
+	 */
+	public void abort(String abortMessage) {
+		RuntimeParameter globalAbort = getGlobalAbort(this);
+		if (!globalAbort.isSet()) {
+			setGlobalAbortState(abortMessage, globalAbort);
+		}
+		if (state == States.Provisioning) {
+			setRecoveryMode();
+		}
+	}
+
+	private void setRecoveryMode() {
+		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(this);
+		recoveryModeParam.setValue("true");
+
+		postEventRecoveryMode(recoveryModeParam.getValue());
 	}
 
 	public static Run abort(String abortMessage, String uuid) {
@@ -178,18 +198,16 @@ public class Run extends Parameterized {
 		return run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY);
 	}
 
-	public static void setRecoveryMode(Run run) {
+	private static void setRecoveryMode(Run run) {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("true");
-		recoveryModeParam.store();
 
 		run.postEventRecoveryMode(recoveryModeParam.getValue());
 	}
 
-	public static void resetRecoveryMode(Run run) {
+	private static void resetRecoveryMode(Run run) {
 		RuntimeParameter recoveryModeParam = getRecoveryModeParameter(run);
 		recoveryModeParam.setValue("false");
-		recoveryModeParam.store();
 
 		run.postEventRecoveryMode(recoveryModeParam.getValue());
 	}
@@ -428,7 +446,11 @@ public class Run extends Parameterized {
 		return q;
 	}
 
-	@Attribute
+    @Version
+    @JSON(include = false)
+    private int jpaVersion;
+
+    @Attribute
 	@Id
 	private String resourceUri;
 

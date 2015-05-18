@@ -40,13 +40,6 @@ import flexjson.JSONDeserializer;
 @SuppressWarnings("serial")
 public abstract class Metadata implements Serializable {
 
-	@Version
-	private int jpaVersion;
-
-	public int getJpaVersion() {
-		return jpaVersion;
-	}
-
 	protected Date creation = new Date();
 
 	@Attribute(required = false)
@@ -167,12 +160,17 @@ public abstract class Metadata implements Serializable {
 	}
 
 	public static Metadata load(String resourceUri, Class<? extends Metadata> type) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Metadata meta = load(resourceUri, type, em);
-		em.close();
+		Metadata meta = loadRaw(resourceUri, type);
 		if(meta != null) {
 			meta = meta.substituteFromJson();
 		}
+		return meta;
+	}
+
+	public static Metadata loadRaw(String resourceUri, Class<? extends Metadata> type) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Metadata meta = load(resourceUri, type, em);
+		em.close();
 		return meta;
 	}
 

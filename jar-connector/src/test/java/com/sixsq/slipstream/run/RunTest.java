@@ -21,11 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,6 +29,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -449,15 +447,17 @@ public class RunTest extends RunTestBase {
 		assertThat(run.isAbort(), is(false));
 	}
 
-	private Run setRunState(Run run, States state){
+	private Run setRunState(String runResourceUri, States state){
 
-		RuntimeParameter globalState = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), RuntimeParameter.GLOBAL_STATE_KEY);
-		globalState.setValue(state.toString());
-		globalState.store();
+        EntityManager em = PersistenceUtil.createEntityManager();
+        em.getTransaction().begin();
+        Run run = Run.load(runResourceUri, em);
+		RuntimeParameter globalState = run.getRuntimeParameter(RuntimeParameter.GLOBAL_STATE_KEY);
+        globalState.setValue(state.toString());
 
 		run.setState(state);
-		run = run.store();
-
+        em.getTransaction().commit();
+        em.close();
 		return run;
 	}
 
@@ -469,33 +469,48 @@ public class RunTest extends RunTestBase {
 		image.setImageId("123", cloudServiceName);
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
-		run.store();
+		run = run.store();
 		String resourceUri = run.getResourceUri();
 
-		run = setRunState(run, States.Initializing);
-		Terminator.purgeRun(run);
+		setRunState(run.getResourceUri(), States.Initializing);
+		purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Cancelled));
 
-		run = setRunState(run, States.Executing);
-		Terminator.purgeRun(run);
+		run = setRunState(run.getResourceUri(), States.Executing);
+		purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Cancelled));
 
 		// Just reset the global abort runtime parameter
 		Run.abortOrReset("", "", run.getUuid());
-		run = setRunState(run, States.Ready);
-		Terminator.purgeRun(run);
+		run = setRunState(run.getResourceUri(), States.Ready);
+		purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Done));
 
-		run = setRunState(run, States.Ready);
+		run = setRunState(run.getResourceUri(), States.Ready);
 		Run.abortOrReset("kaboom", "", run.getUuid());
-		Terminator.purgeRun(run);
+		purgeRun(run);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Aborted));
 
 		run.remove();
 	}
 
+	private Run purgeRun(Run run) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		em.getTransaction().begin();
+		try {
+			run = Run.load(run.getResourceUri(), em);
+			Terminator.purgeRun(run);
+			run.toJsonForPersistence();
+			em.getTransaction().commit();
+		} catch (SlipStreamException e) {
+			fail();
+		} finally {
+			em.close();
+		}
+		return run;
+	}
 }

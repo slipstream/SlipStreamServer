@@ -22,9 +22,9 @@ package com.sixsq.slipstream.statemachine;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.sixsq.slipstream.exceptions.*;
+import com.sixsq.slipstream.util.Logger;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 
@@ -40,7 +40,6 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
  */
 public class StateMachine {
 
-	private static Logger logger = Logger.getLogger("com.sixsq.slipstream.statemachine");
 	private static final int MAX_RECURSION = 100;
 
 	private Run run;
@@ -143,25 +142,15 @@ public class StateMachine {
 		globalState = StateFactory.createInstance(globalExtrinsicState);
 	}
 
-	// Note: Used only for unit tests
-	private void completeAllNodesState() throws SlipStreamClientException {
-		for (String nodeName : nodeStates.keySet()) {
-			setNodeStateCompleted(nodeName);
-		}
-		attemptToAdvanceState();
-	}
-
-	public States updateState(String nodeName)
+	public States updateState()
 			throws SlipStreamClientException, InvalidStateException {
-
-//		completeCurrentState(nodeName);
 
 		tryAdvanceState();
 
 		return globalState.getState();
 	}
 
-	private void completeCurrentState(String nodeName)
+	void completeCurrentState(String nodeName)
 			throws InvalidStateException, SlipStreamClientException {
 		setNodeStateCompleted(nodeName);
 	}
@@ -224,7 +213,7 @@ public class StateMachine {
 			attemptToAdvanceToState(state, force);
 		} catch (RuntimeException ex) {
 			if (recursions > 0) {
-				logger.warning("Error in tryAdvanceToState " + state + ". Retrying...");
+				Logger.warning("Error in tryAdvanceToState " + state + ". Retrying...");
 				tryAdvanceToState(state, force, recursions - 1);
 			} else {
 				throw ex;
@@ -329,8 +318,6 @@ public class StateMachine {
 	}
 
 	private void resetNodesStateCompleted() {
-
-		com.sixsq.slipstream.util.Logger.info("Reseting!!!");
 
 		for (State nodeState : nodeStates.values()) {
 			nodeState.setStateCompleted(false);

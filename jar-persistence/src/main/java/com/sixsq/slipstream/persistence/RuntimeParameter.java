@@ -209,6 +209,10 @@ public class RuntimeParameter extends Metadata {
 		return nodeName + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + nodeInstanceId;
 	}
 
+	@Version
+	@JSON(include = false)
+	private int jpaVersion;
+
 	@Id
 	private String resourceUri;
 
@@ -471,25 +475,6 @@ public class RuntimeParameter extends Metadata {
 		em.close();
 		return res;
 	}
-
-//	public static Properties getValueAndSet(String runId, String key) {
-//		EntityManager em = PersistenceUtil.createEntityManager();
-//		Query q = em.createNamedQuery("getValueAndSet");
-//		q.setParameter("resourceuri", "run/" + runId + "/" + key);
-//		Properties valueAndSet = null;
-//		try {
-//			Object res = q.getSingleResult();
-//			valueAndSet = new Properties();
-//			Object[] objs = (Object[]) res;
-//			String value = (String) objs[0];
-//			boolean isSet = (Boolean) objs[1];
-//			valueAndSet.put("value", value);
-//			valueAndSet.put("isSet", isSet);
-//		} catch (NoResultException ex) {
-//		}
-//		em.close();
-//		return valueAndSet;
-//	}
 
 	public RuntimeParameter store() {
 		return (RuntimeParameter) super.store();

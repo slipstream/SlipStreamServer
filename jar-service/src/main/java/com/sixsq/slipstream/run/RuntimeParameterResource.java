@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
 
 import com.sixsq.slipstream.exceptions.*;
 import org.restlet.data.MediaType;
@@ -168,67 +167,47 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	@Post
-	public void completeCurrentNodeState(Representation entity) {
-
-        com.sixsq.slipstream.util.Logger.info("OLD STATE: " + runtimeParameter.getContainer().getState());
+	public void tryAdvanceState(Representation entity) {
 
         if(!runtimeParameter.getName().equals(RuntimeParameter.COMPLETE_KEY)) {
             throwClientConflicError("Only " + RuntimeParameter.COMPLETE_KEY + " key can be posted");
         }
         runtimeParameter.setValue("true");
-        runtimeParameter.store();
-//		com.sixsq.slipstream.util.Logger.info(">>>>>>>>>>> Before: " + nodeName);
+		runtimeParameter.store();
+
 		States newState = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		runtimeParameter = (RuntimeParameter) RuntimeParameter.load(runtimeParameter.getResourceUri(), RuntimeParameter.class, em);//em.merge(runtimeParameter);
 
         String nodeName = runtimeParameter.getNodeName();
 		try {
-			newState = attemptCompleteCurrentNodeStateWithRetry(nodeName, em, null, true);
-            em.close();;
-            com.sixsq.slipstream.util.Logger.info("NEW STATE: " + newState);
-            com.sixsq.slipstream.util.Logger.info("Closed!!");
+			newState = attemptStateUpdate(em);
+            em.close();
 		} catch (SlipStreamDatabaseException e) {
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Error in state machine");
 		}
 
-		RuntimeParameter v = RuntimeParameter.load(runtimeParameter.getResourceUri());
-		com.sixsq.slipstream.util.Logger.info("################ RP: " + v.getNodeName() + " with value: " + v.getValue() + " and state: " + v.getContainer().getState());
-
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
-//		com.sixsq.slipstream.util.Logger.info("<<<<<<<<<<< After: " + nodeName);
 	}
 
-	private States attemptCompleteCurrentNodeStateWithRetry(String nodeName, EntityManager em, StateMachine sc, boolean retry) {
-        com.sixsq.slipstream.util.Logger.info("################ RP: " + nodeName);
+	private States attemptStateUpdate(EntityManager em) {
         Run run = runtimeParameter.getContainer();
         run = em.find(Run.class, run.getResourceUri());
-//		runtimeParameter = em.merge(runtimeParameter);
-//		if(sc == null) {
-			sc = StateMachine.createStateMachine(run);
-//		}
+        StateMachine sc = StateMachine.createStateMachine(run);
 		try {
-			return attemptCompleteCurrentNodeState(nodeName, em, sc);
-		} catch (PersistenceException e) {
-			e.printStackTrace();
-			if(retry) {
-				com.sixsq.slipstream.util.Logger.info("Failed completing node... retrying!");
-//				runtimeParameter = em.merge(runtimeParameter);
-//				return attemptCompleteCurrentNodeStateWithRetry(nodeName, em, null, true);
-			} else {
-				throw e;
-			}
+			return attemptStateUpdateInTransaction(em, sc);
+        } catch (PersistenceException e) {
+            // Someone else beat us to it... it's ok, the job is done!
 		}
         return run.getState();
 	}
 
-	private States attemptCompleteCurrentNodeState(String nodeName, EntityManager em, StateMachine sc) {
+	private States attemptStateUpdateInTransaction(EntityManager em, StateMachine sc) {
 		em.getTransaction().begin();
-		States state = completeCurrentNodeState(nodeName, sc);
+		States state = tryAdvanceState(sc);
 		try {
 			em.getTransaction().commit();
-            com.sixsq.slipstream.util.Logger.info("Committed!!");
 		} catch (PersistenceException e) {
 			if(em.getTransaction().isActive()) {
 				em.getTransaction().rollback();
@@ -239,10 +218,10 @@ public class RuntimeParameterResource extends RunBaseResource {
 		return state;
 	}
 
-	public States completeCurrentNodeState(String nodeName, StateMachine sc) {
+	public States tryAdvanceState(StateMachine sc) {
 		States state;
 		try {
-			state = sc.updateState(nodeName);
+			state = sc.updateState();
 		} catch (CannotAdvanceFromTerminalStateException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
 					e.getMessage());

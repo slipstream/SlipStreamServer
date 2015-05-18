@@ -29,6 +29,8 @@ import java.util.HashSet;
 import java.util.Map;
 
 import com.sixsq.slipstream.persistence.*;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sixsq.slipstream.configuration.Configuration;
@@ -38,6 +40,19 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 
 public class QuotaTest {
 
+	private User user;
+	private String cloud = "cloud1";
+
+	@Before
+	public void setup() throws ValidationException {
+		user = testQuotaCreateUser();
+	}
+
+	@After
+	public void teardown() {
+		user.remove();
+	}
+
 	private Run testQuotaCreateRun(User user, String cloud)
 			throws ValidationException {
 		Module deployment = new DeploymentModule("deployment1");
@@ -46,8 +61,7 @@ public class QuotaTest {
 
 	private User testQuotaCreateUser() throws ValidationException {
 		User user = new User("user");
-		user.store();
-		return user;
+		return user.store();
 	}
 
 	private void setQuota(User user, String cloud, String value)
@@ -63,8 +77,6 @@ public class QuotaTest {
 	@Test
 	public void validateOk() throws ValidationException,
 			ConfigurationException, QuotaException {
-		String cloud = "cloud1";
-		User user = testQuotaCreateUser();
 		setQuota(user, cloud, "10");
 
 		Map<String, Integer> usage = new HashMap<String, Integer>();
@@ -80,8 +92,6 @@ public class QuotaTest {
 	@Test(expected = QuotaException.class)
 	public void validateFail() throws ValidationException,
 			ConfigurationException, QuotaException {
-		String cloud = "cloud1";
-		User user = testQuotaCreateUser();
 		setQuota(user, cloud, "10");
 
 		Map<String, Integer> usage = new HashMap<String, Integer>();
@@ -98,8 +108,6 @@ public class QuotaTest {
 	@Test
 	public void validateNoUsage() throws ValidationException,
 			ConfigurationException, QuotaException {
-		String cloud = "cloud1";
-		User user = testQuotaCreateUser();
 		setQuota(user, cloud, "10");
 
 		Map<String, Integer> usage = new HashMap<String, Integer>();
@@ -115,8 +123,6 @@ public class QuotaTest {
 	@Test
 	public void validateNoQuotaOk() throws ValidationException,
 			ConfigurationException, QuotaException {
-		String cloud = "cloud1";
-		User user = testQuotaCreateUser();
 
 		Map<String, Integer> usage = new HashMap<String, Integer>();
 		usage.put(cloud, 9);
@@ -132,8 +138,6 @@ public class QuotaTest {
 	@Test(expected = QuotaException.class)
 	public void validateNoQuotaFail() throws ValidationException,
 			ConfigurationException, QuotaException {
-		String cloud = "cloud1";
-		User user = testQuotaCreateUser();
 
 		Map<String, Integer> usage = new HashMap<String, Integer>();
 		usage.put(cloud, 19);
@@ -148,8 +152,6 @@ public class QuotaTest {
 
 	@Test
 	public void getValue() throws ValidationException {
-		String cloud = "cloud1";
-		User user = new User("user");
 
 		// Default value
 		assertThat(Quota.getValue(user, cloud),
