@@ -1,15 +1,15 @@
 ;; database implementation of Binding protocol
 (ns com.sixsq.slipstream.ssclj.db.database-binding
-  (:refer-clojure :exclude [update])
-  (:require 
-    [clojure.java.jdbc :refer :all :as jdbc]    
-    [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]]
+  (:refer-clojure                                           :exclude [update])
+  (:require
+    [com.sixsq.slipstream.ssclj.db.binding                  :refer [Binding]]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]    
-    [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [korma.core :refer :all]
-    [ring.util.response :as r]))
+    [com.sixsq.slipstream.ssclj.database.korma-helper       :as kh]
+    [com.sixsq.slipstream.ssclj.database.ddl                :as ddl]
+    [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
+    [korma.core                                             :refer :all]
+    [ring.util.response                                     :as r]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]))
 
 (defn init-db
   []  
@@ -56,22 +56,32 @@
   [collection-id options]
   collection-id)
 
+(defn store-dispatch-fn
+  [collection-id id data]
+  collection-id)
+
+(defn response-created
+  [id]
+  (-> (str "created " id)
+      (u/map-response 201 id)
+      (r/header "Location" id)))
+
+(defmulti store-in-db store-dispatch-fn)
+(defmethod store-in-db :default
+  [collection-id id data]
+  (check-conflict id)
+  (insert-resource id data))
+
 (defmulti  find-resources dispatch-fn)
 (defmethod find-resources :default
-  [collection-id options]  
+  [collection-id options]
   (->>  (select resources (where {:id [like (str collection-id"%")]}))
         (map :data)
         (map deserialize)))
 
-(defn- delete-resource 
+(defn- delete-resource
   [id]
   (delete resources (where {:id id})))
-
-(defn- response-created 
-  [id]
-  (-> (str "created " id)
-    (u/map-response 201 id)
-    (r/header "Location" id)))
 
 (defn- response-deleted 
   [id]
@@ -81,10 +91,9 @@
 (deftype DatabaseBinding []
   Binding
 
-  (add [this {:keys [id] :as data}]     
-    (check-conflict id)      
-    (insert-resource id data)
-    (response-created id)) 
+  (add [this collection-id {:keys [id] :as data}]
+    (store-in-db collection-id id data)
+    (response-created id))
 
   (retrieve [this id]    
     (check-exist  id)

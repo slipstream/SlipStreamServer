@@ -32,33 +32,33 @@
 (defmulti query resource-name-dispatch)
 
 (defmethod query :default
-  [request]
+  [request]  
   (throw (u/ex-bad-method request)))
 
 
 (defmulti retrieve resource-name-dispatch)
 
 (defmethod retrieve :default
-  [request]
+  [request]  
   (throw (u/ex-bad-method request)))
 
 (defmulti edit resource-name-dispatch)
 
 (defmethod edit :default
-  [request]
+  [request]  
   (throw (u/ex-bad-method request)))
 
 
 (defmulti delete resource-name-dispatch)
 
 (defmethod delete :default
-  [request]
+  [request]  
   (throw (u/ex-bad-method request)))
 
 (defmulti do-action resource-name-and-action-dispatch)
 
 (defmethod do-action :default
-  [request]
+  [request]  
   (throw (u/ex-bad-method request)))
 
 ;;

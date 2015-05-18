@@ -20,13 +20,24 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import com.sixsq.slipstream.connector.UsageRecorder;
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.statemachine.States;
+import com.sixsq.slipstream.util.CommonTestUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.Terminator;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -34,37 +45,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.Authz;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Metadata;
-import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Node;
-import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.PersistenceUtil;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.statemachine.States;
-import com.sixsq.slipstream.util.CommonTestUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.Terminator;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 
 public class RunTest extends RunTestBase {
 
@@ -73,6 +55,8 @@ public class RunTest extends RunTestBase {
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException,
 			ClassNotFoundException {
+		UsageRecorder.muteForTests();
+		Event.muteForTests();
 		setupImages();
 		CommonTestUtil
 				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);

@@ -11,7 +11,7 @@
    protocol."
 
   (add
-    [this data]
+    [this collection-id data]
     "This function adds the given resource to the database.  The resource
      must not already exist in the database.
 

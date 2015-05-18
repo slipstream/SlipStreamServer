@@ -15,7 +15,7 @@
   Binding
 
   (add
-    [this {:keys [id] :as data}]
+    [this collection-id {:keys [id] :as data}]
     (let [fname (str db-prefix id)]
       (if-not (fs/exists? fname)
         (do

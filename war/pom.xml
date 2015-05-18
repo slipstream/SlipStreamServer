@@ -32,7 +32,7 @@
       <version>${project.version}</version>
     </dependency>
 
-<!--
+<!-- 
   These cannot be added to WAR because it creates a circular dependency
   between the SlipStreamServer module (which contains the connector 
   interface) and the SlipStreamConnector module.
@@ -217,15 +217,14 @@
   This problem is apparently due to a difference in the class
   loading scheme between the plugin and a deployment in a 
   standalone jetty container.
--->
 
-<!--
         <dependencies>
           <dependency>
               <groupId>com.sixsq.slipstream</groupId>
               <artifactId>SlipStreamConnector-CloudStack-jar</artifactId>
               <version>${project.version}</version>
           </dependency>
+        </dependencies>
 
           <dependency>
               <groupId>com.sixsq.slipstream</groupId>
