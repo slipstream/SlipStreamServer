@@ -21,12 +21,6 @@ package com.sixsq.slipstream.connector;
  */
 
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -35,12 +29,18 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.run.RunTestBase;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 
 public class CollectorTest extends RunTestBase {
 
 	@BeforeClass
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
+		UsageRecorder.muteForTests();
 		createUser();
 		for(Run r : Run.listAll()) {
 			r.remove();

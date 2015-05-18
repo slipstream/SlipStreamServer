@@ -1,11 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.event-schema-test
   (require
-    [schema.core :as s]
-    [expectations :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.event :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    ))
+    [schema.core                                          :as s]
+    [expectations                                         :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.event           :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.common.crud     :as crud]))
 
 (def event-timestamp "2015-01-16T08:05:00.0Z")
 

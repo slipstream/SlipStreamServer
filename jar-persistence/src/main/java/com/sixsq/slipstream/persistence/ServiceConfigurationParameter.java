@@ -27,11 +27,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 
+
 @Entity
+@Root(name = "parameter")
 @SuppressWarnings("serial")
 public class ServiceConfigurationParameter extends
 		Parameter<ServiceConfiguration> {

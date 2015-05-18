@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.db.database-binding-test
-  (:refer-clojure :exclude [update])
+  (:refer-clojure                                           :exclude [update])
   (:require    
     [com.sixsq.slipstream.ssclj.db.database-binding         :as dbb] 
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize]]
@@ -16,7 +16,7 @@
 ;; Given a clean database
 
 (def data {:id "Type/123" :name "alfred" :age 23})
-(def response-add (.add db data))
+(def response-add (.add db "Type" data))
 ;; When we add data
 
 (expect 201 (:status response-add))
@@ -38,7 +38,7 @@
 ;; (expect clojure.lang.ExceptionInfo (.add db data))
 ;; TODO : something to be done with transaction?
 (try
-  (.add db data)
+  (.add db "Type" data)
   (expect false "should have been caught")
   (catch Exception e 
     (log/info "caught exception: class=" (class e))))

@@ -20,34 +20,18 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.exceptions.*;
+import com.sixsq.slipstream.factory.DeploymentFactory;
+import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.util.CommonTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sixsq.slipstream.exceptions.AbortException;
-import com.sixsq.slipstream.exceptions.InvalidMetadataException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.factory.DeploymentFactory;
-import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Node;
-import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.util.CommonTestUtil;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 
 public class RunFactoryTest extends RunTest {
 
@@ -63,6 +47,7 @@ public class RunFactoryTest extends RunTest {
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
+		Event.muteForTests();
 		try {
 			RunTest.setupClass();
 		} catch (Exception e) {

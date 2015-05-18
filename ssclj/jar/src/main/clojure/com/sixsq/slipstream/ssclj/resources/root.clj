@@ -74,7 +74,7 @@
                     :id          resource-name
                     :resourceURI resource-uri}
                    (u/update-timestamps))]
-    (db/add record)))
+    (db/add resource-name record)))
 
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]
