@@ -8,6 +8,7 @@
 
     [peridot.core                                               :refer :all]
 
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]  
     [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri             :refer [wrap-base-uri]]

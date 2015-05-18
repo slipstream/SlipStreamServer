@@ -21,24 +21,24 @@ package com.sixsq.slipstream.metering;
  */
 
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.sixsq.slipstream.connector.Collector;
+import com.sixsq.slipstream.connector.UsageRecorder;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.run.RunTestBase;
 import com.sixsq.slipstream.util.CommonTestUtil;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 
 public class MeteringTest extends RunTestBase {
@@ -51,6 +51,7 @@ public class MeteringTest extends RunTestBase {
 
 	@BeforeClass
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
+		UsageRecorder.muteForTests();
 		createUser();
 		String username = user.getName();
 

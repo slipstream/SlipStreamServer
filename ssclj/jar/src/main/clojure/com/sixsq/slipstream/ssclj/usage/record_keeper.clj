@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]
     [com.sixsq.slipstream.ssclj.database.korma-helper   :as kh]    
     [com.sixsq.slipstream.ssclj.database.ddl            :as ddl]
-    [com.sixsq.slipstream.ssclj.usage.utils             :as u])
+    [com.sixsq.slipstream.ssclj.usage.utils             :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du])
   (:gen-class
     :name com.sixsq.slipstream.usage.Record
     :methods [
@@ -118,7 +119,8 @@
   (doseq [metric (extract-metrics usage-event)]    
     (let [usage-event-metric (project-to-metric usage-event metric)]
       (log/info "Will persist metric: " usage-event-metric)
-      (kc/insert usage_records (kc/values usage-event-metric)))))
+      (kc/insert usage_records (kc/values usage-event-metric))
+      (log/info "Done persisting metric: " usage-event-metric))))
 
 (defn- close-usage-record   
   ([usage-event close-timestamp]
@@ -128,7 +130,6 @@
       (kc/set-fields {:end_timestamp close-timestamp})
       (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})))
   ([usage-event]
-    (log/info "Will close usage event") 
     (close-usage-record usage-event (:end_timestamp usage-event))))
 
 (defn reset-end   
@@ -148,16 +149,22 @@
       :reset-end                (reset-end usage-event)      
       :close-record             (close-usage-record usage-event))))
 
+(defn- nil-timestamps-if-absent
+  [usage-event]
+  (merge {:end_timestamp nil :start_timestamp nil} usage-event))
+
 (defn -insertStart
   [usage-event]  
-  (-> usage-event      
-      u/walk-clojurify        
+  (-> usage-event
+      u/walk-clojurify
+      nil-timestamps-if-absent
       (process-event :start)))
 
 (defn -insertEnd
   [usage-event]  
   (-> usage-event
-      u/walk-clojurify      
+      u/walk-clojurify
+      nil-timestamps-if-absent
       (process-event :stop)))
 
 (defn- acl-for-user-cloud   

@@ -10,13 +10,13 @@
 
 (def db (dbb/get-instance))
 
-(defentity resources)
-(delete resources)
+(defentity  resources)
+(delete     resources)
 (log/info "All resources deleted")
 
 (def data {:id "Thing/456" :name "alfred" :age 23})
 
-(.add db data)
+(.add db "Thing" data)
 (let [response-delete (.delete db data)]
 	;; When we delete an existing data
 	(expect 204 (:status response-delete)))

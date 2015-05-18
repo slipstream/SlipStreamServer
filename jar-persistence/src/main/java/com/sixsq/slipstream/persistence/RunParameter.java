@@ -26,7 +26,10 @@ import javax.persistence.Id;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
+import org.simpleframework.xml.Root;
+
 @Entity
+@Root(name = "parameter")
 @SuppressWarnings("serial")
 public class RunParameter extends Parameter<Run> {
 

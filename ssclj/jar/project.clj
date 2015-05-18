@@ -48,26 +48,19 @@
 
     :uberjar 
       { :aot [#"com.sixsq.slipstream.ssclj.api.acl*"]
-        :env {
-          :clj-env :production
-          :db-config-path "config-hsqldb-mem.edn"}
+        :env {  :clj-env :production
+                :db-config-path "config-hsqldb-mem.edn"}
         :jvm-opts ["-Dlogfile.path=production"]}
 
     :dev 
-      { :env {
-          :clj-env :development
-          ; :db-config-path "config-sqlite.edn"
-          :db-config-path "config-hsqldb-mem.edn"
-        }
+      { :env {  :clj-env :development          
+                :db-config-path "config-hsqldb-mem.edn"}
         :jvm-opts ["-Dlogfile.path=development"]
         :dependencies [ [peridot/peridot "0.3.0"]
                         [expectations/expectations "2.0.9"]]}
     :test
-      { :env {
-          :clj-env :test
-          ; :db-config-path "config-sqlite.edn"}
-          ; :db-config-path "config-hsqldb.edn"}
-          :db-config-path "config-hsqldb-mem.edn"}
+      { :env {  :clj-env :test          
+                :db-config-path "config-hsqldb-mem.edn"}
         
         :jvm-opts ["-Dlogfile.path=test"]
 

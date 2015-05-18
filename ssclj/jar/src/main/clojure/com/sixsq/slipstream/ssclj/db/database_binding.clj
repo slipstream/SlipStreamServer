@@ -104,6 +104,22 @@
   [collection-id options]
   collection-id)
 
+(defn store-dispatch-fn
+  [collection-id id data]
+  collection-id)
+
+(defn response-created
+  [id]
+  (-> (str "created " id)
+      (u/map-response 201 id)
+      (r/header "Location" id)))
+
+(defmulti store-in-db store-dispatch-fn)
+(defmethod store-in-db :default
+  [collection-id id data]
+  (check-conflict id)
+  (insert-resource id data))
+
 (defmulti  find-resources dispatch-fn)
 (defmethod find-resources :default
  [collection-id options]  
@@ -134,10 +150,8 @@
 
 (deftype DatabaseBinding []
   Binding
-
-  (add [this {:keys [id] :as data}]
-    (check-conflict id)
-    (insert-resource id data)
+  (add [this collection-id {:keys [id] :as data}]
+    (store-in-db collection-id id data)
     (response-created id))
 
   (retrieve [this id]

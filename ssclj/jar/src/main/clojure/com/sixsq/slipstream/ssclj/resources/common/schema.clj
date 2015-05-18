@@ -1,13 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.schema
   (:require
-    [clojure.tools.logging :as log]
-    [clojure.string :as str]
-    [schema.core :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
-  (:import
-    [java.net URI]
-    [javax.xml.bind DatatypeConverter]
-    (com.lambdaworks.codec Base64)))
+    [clojure.string                                     :as str]
+    [schema.core                                        :as s]
+    [com.sixsq.slipstream.ssclj.resources.common.utils  :as u]))
 
 (def ^:const slipstream-schema-uri "http://sixsq.com/slipstream/1/")
 
@@ -45,12 +40,20 @@
 (def NonBlankString
   (s/both s/Str (s/pred (complement str/blank?) "not-blank?")))
 
+(def BlankString
+  (s/both s/Str (s/pred str/blank? "blank?")))
+
 (def NonEmptyStrList
   (s/both [NonBlankString] NotEmpty))
 
 (def Timestamp
   (s/both NonBlankString (s/pred u/valid-timestamp? "valid-timestamp?")))
 
+(def OptionalTimestamp
+  (s/either BlankString Timestamp))
+
+(def Numeric
+  (s/both NonBlankString (s/pred u/valid-number? "valid-number?")))
 ;;
 ;; schema definitions for common attributes
 ;;
