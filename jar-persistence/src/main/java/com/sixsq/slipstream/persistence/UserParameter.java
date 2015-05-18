@@ -27,9 +27,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.simpleframework.xml.Root;
+
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 @Entity
+@Root(name = "parameter")
 @SuppressWarnings("serial")
 public class UserParameter extends Parameter<User> {
 
