@@ -1,0 +1,1 @@
+00 2 * * * root (/usr/sbin/create-daily-usage.sh) >> /var/log/create-daily-usage-cron.log 2>&1
