@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/ssclj "2.9.0-SNAPSHOT"
+(defproject com.sixsq.slipstream/ssclj "2.10.0-SNAPSHOT"
   :description    "Clojure REST resources"
   :url            "http://sixsq.com"
   :license {:name "Apache License, Version 2.0"
@@ -27,7 +27,8 @@
                  [metrics-clojure-ring/metrics-clojure-ring "2.1.0"]
                  [metrics-clojure-jvm/metrics-clojure-jvm   "2.1.0"]
                  [fs/fs                                     "1.3.3"]
-                 [org.slf4j/slf4j-log4j12                   "1.7.7"]                 
+                 [org.slf4j/slf4j-log4j12                   "1.7.7"]
+                 [instaparse                                "1.4.0"]
                  ;; Environment settings
                  [environ                                   "1.0.0"]
                  ;; database
@@ -37,12 +38,13 @@
                  [org.hsqldb/hsqldb                         "2.3.2"]
                  [org.xerial/sqlite-jdbc                    "3.7.2"]]
 
-  :plugins [[lein-expectations                              "0.0.7"] 
-            [lein-autoexpect                                "1.4.2"]       
-            [lein-environ                                   "1.0.0"]
-            [com.jakemccrary/lein-test-refresh              "0.5.5"]
-            [jonase/eastwood                                "0.2.1"]
-            [lein-cloverage                                 "1.0.3"]]
+  :plugins      [[lein-expectations                         "0.0.7"]
+                 [lein-autoexpect                           "1.4.2"]
+                 [lein-environ                              "1.0.0"]
+                 [com.jakemccrary/lein-test-refresh         "0.5.5"]
+                 [lein-kibit                                "0.1.2"]
+                 [jonase/eastwood                           "0.2.1"]
+                 [lein-cloverage                            "1.0.3"]]
 
   :profiles {
     :provided 
@@ -50,18 +52,18 @@
 
     :uberjar 
       { :aot [#"com.sixsq.slipstream.ssclj.api.acl*"]
-        :env {  :clj-env :production
+        :env {  :clj-env        :production
                 :db-config-path "config-hsqldb-mem.edn"}
         :jvm-opts ["-Dlogfile.path=production"]}
 
     :dev 
-      { :env {  :clj-env :development          
-                :db-config-path "config-hsqldb-mem.edn"}
+      { :env {  :clj-env        :development
+                :db-config-path "config-hsqldb.edn"}
         :jvm-opts ["-Dlogfile.path=development"]
         :dependencies [ [peridot/peridot "0.3.0"]
                         [expectations/expectations "2.0.9"]]}
     :test
-      { :env {  :clj-env :test          
+      { :env {  :clj-env        :test
                 :db-config-path "config-hsqldb-mem.edn"}
         
         :jvm-opts ["-Dlogfile.path=test"]

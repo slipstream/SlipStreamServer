@@ -5,7 +5,6 @@
     [clojure.pprint                                           :refer [pprint]]
     [com.sixsq.slipstream.ssclj.resources.common.authz        :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils        :as u]
-    [com.sixsq.slipstream.ssclj.usage.utils                   :as uu]
     [com.sixsq.slipstream.ssclj.resources.common.crud         :as crud]
     [com.sixsq.slipstream.ssclj.db.impl                       :as db]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
@@ -77,7 +76,7 @@
       (a/can-view? {:acl collection-acl} request)
       (->> (select-keys request [:identity :query-params])
            (db/query resource-name)
-           uu/walk-clojurify           
+           u/walk-clojurify
            (filter #(a/authorized-view? % request))           
            (map #(crud/set-operations % request))
            (wrapper-fn request)
