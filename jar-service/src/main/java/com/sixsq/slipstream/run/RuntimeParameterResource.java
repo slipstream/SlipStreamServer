@@ -170,14 +170,44 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	@Post
-	public void completeCurrentNodeState(Representation entity) {
+	public void completeCurrentNodeStateOrChangeGlobalState(Representation entity) {
 
 		String nodeName = runtimeParameter.getNodeName();
-		States newState = null;
+		States newState;
 
-		newState = attemptCompleteCurrentNodeState(nodeName);
+		if (RuntimeParameter.GLOBAL_NAMESPACE.equals(nodeName)) {
+			newState = attemptChangeGlobalStateReadyToProvisioning();
+		} else {
+			newState = attemptCompleteCurrentNodeState(nodeName);
+		}
 
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
+	}
+
+	private States attemptChangeGlobalStateReadyToProvisioning() {
+		States newState;
+		Run run = Run.loadFromUuid(getUuid());
+		String stateFromTo = String.format("from %s to %s", States.Ready, States.Provisioning);
+		if (run.isMutable() && States.Ready == run.getState()) {
+            StateMachine sc = StateMachine.createStateMachine(run);
+            try {
+                sc.tryAdvanceToProvisionning();
+            } catch (InvalidStateException |CannotAdvanceFromTerminalStateException e) {
+                e.printStackTrace();
+                throw (new ResourceException(Status.SERVER_ERROR_INTERNAL,
+                        String.format("Failed to advance state %s: %s", stateFromTo, e.getMessage())));
+            }
+            newState = sc.getState();
+            if (States.Provisioning != newState) {
+                throw (new ResourceException(Status.SERVER_ERROR_INTERNAL,
+                        String.format("Failed to advance state %s: requested doesn't match reached %s.",
+								stateFromTo, newState)));
+            }
+        } else {
+            throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+                    "Bad request: via API a state can be advanced only on a mutable run and only " + stateFromTo ));
+        }
+		return newState;
 	}
 
 	private States attemptCompleteCurrentNodeState(String nodeName) {
