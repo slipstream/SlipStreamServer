@@ -17,7 +17,7 @@
   {:content
             {:state    "init"
              :resource {:href "run/7890"}}
-   :updated "2015-05-15T14:59:16.059Z"
+   :updated "2016-06-15T14:59:16.059Z"
    :type    "critical"
    :created "2016-05-15T14:59:16.059Z"
    :id      "Event/12312312312312312323123"
@@ -48,3 +48,25 @@
 
 (deftest filter-cimi-checks-attribute-presence
   (is (thrown? IllegalArgumentException (doall (cimi-filter events "abc=123")))))
+
+(deftest filter-cimi-various-operators
+  (is (= [event2] (cimi-filter events "type!='state'")))
+  (is (= [event1] (cimi-filter events "type!='critical'")))
+  (is (= events   (cimi-filter events "type!='unknown'"))))
+
+(deftest filter-cimi-date-comparisons
+  (is (= []       (cimi-filter events "created<'2015-05-15'")))
+  (is (= events   (cimi-filter events "created<'2017-05-15'")))
+  (is (= [event1] (cimi-filter events "created<'2016-01-01'")))
+
+  (is (= events   (cimi-filter events "created>'2014-01-01'")))
+  (is (= [event2] (cimi-filter events "created>'2016-01-01'"))))
+
+(deftest filter-cimi-multiple-ands
+  (is (= events   (cimi-filter events "content/state='init'")))
+  (is (= [event1] (cimi-filter events "content/state='init' and type='state'")))
+  (is (= [event2] (cimi-filter events "content/state='init' and type!='state'")))
+  (is (= [event2] (cimi-filter events "content/state='init' and type='critical' and updated>'2016-01-01'")))
+  (is (= [event2] (cimi-filter events "content/state='init' and type='critical' and updated>'2016-01-01' and created>'2015-01-01'")))
+  (is (= []
+         (cimi-filter events "content/state='init' and type='critical' and updated>'2016-01-01' and created<'2015-01-01'"))))

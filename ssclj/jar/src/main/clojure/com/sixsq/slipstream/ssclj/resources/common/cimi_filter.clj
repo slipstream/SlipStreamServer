@@ -31,7 +31,12 @@
 (defn- mk-pred-attribute-value
   [attribute-full-name operator value]
   (fn [resource]
-    (= value (attribute-value resource attribute-full-name))))
+    (let [actual-value (attribute-value resource attribute-full-name)]
+      (case operator
+        "="   (=    value actual-value)
+        "!="  (not= value actual-value)
+        "<"   (<  0 (compare value actual-value))
+        ">"   (>  0 (compare value actual-value))))))
 
 (defn- remove-quotes
   [s]
@@ -40,20 +45,19 @@
 (def ^:private transformations
   {:SingleQuoteString   remove-quotes
    :DoubleQuoteString   remove-quotes
-   :Comp                (fn[[_ a] o v] (mk-pred-attribute-value a o v))
+   :DateValue           identity
+   :Comp                (fn[[_ a] [_ o] v] (mk-pred-attribute-value a o v))
    :Filter              identity
-   :AndExpr             identity})
+   :AndExpr             (fn [& comps] (apply every-pred comps))})
 
 (defn to-predicates
   [tree]
   (it/transform transformations tree))
 
-(def assemble-predicates    identity)
-
 (defn handle-failure
   [tree]
   (if (insta/failure? tree)
-    (throw (IllegalArgumentException. (str "Wrong format: " tree)))
+    (throw (IllegalArgumentException. (str "wrong format: " (insta/get-failure tree))))
     tree))
 
 (defn cimi-filter
@@ -63,6 +67,5 @@
       parser/parse-cimi-filter
       handle-failure
       to-predicates
-      ;assemble-predicates
       (filter resources)))
 
