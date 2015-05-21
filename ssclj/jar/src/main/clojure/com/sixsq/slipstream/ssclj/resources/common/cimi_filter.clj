@@ -3,11 +3,13 @@
     [clojure.string                                           :refer [split]]
     [instaparse.core                                          :as insta]
     [instaparse.transform                                     :as it]
-    [com.sixsq.slipstream.ssclj.filter.parser                 :as parser]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]))
+    [com.sixsq.slipstream.ssclj.filter.parser                 :as parser]))
 
 ;;
-;; Implementation of CIMI resource filtering.
+;; Partial Implementation of CIMI resource filtering.
+;;
+;; TODO: or operator, more control on date comparison
+;;
 ;; See dmtf.org/sites/default/files/standards/documents/DSP0263_1.0.1.pdf Section 4.1.6.1
 ;;
 
@@ -62,7 +64,6 @@
 
 (defn cimi-filter
   [resources cimi-filter-expression]
-
   (-> cimi-filter-expression
       parser/parse-cimi-filter
       handle-failure
