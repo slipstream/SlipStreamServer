@@ -2,6 +2,11 @@
   (:require
     [clojure.string :refer [split]]))
 
+;;
+;; Minimal implementation of CIMI resource filtering.
+;; See dmtf.org/sites/default/files/standards/documents/DSP0263_1.0.1.pdf Section 4.1.6.1
+;;
+
 (defn- attribute-path
   [attribute-full-name]
   (map keyword (split attribute-full-name #"\.")))
@@ -46,6 +51,6 @@
     [attribute-full-name (unwrap-quotes value)]))
 
 (defn cimi-filter
-  [resources cimi-expression]
-  (let [[attribute-full-name value] (split-attribute-value cimi-expression)]
+  [resources cimi-comp]
+  (let [[attribute-full-name value] (split-attribute-value cimi-comp)]
     (filter (mk-pred-attribute-value attribute-full-name value) resources)))
