@@ -5,7 +5,7 @@
     [ring.middleware.params                                     :refer [wrap-params]]
     [clj-time.core                                              :as time]
     [korma.core                                                 :as kc]
-                              
+
     [peridot.core                                               :refer :all]
 
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]  
@@ -20,7 +20,7 @@
     [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
     [com.sixsq.slipstream.ssclj.usage.utils                     :as u]
     [com.sixsq.slipstream.ssclj.resources.usage                 :refer :all]
-    [com.sixsq.slipstream.ssclj.app.routes                      :as routes]   
+    [com.sixsq.slipstream.ssclj.app.routes                      :as routes]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]))
 
 (defn reset-summaries
@@ -45,63 +45,54 @@
       (wrap-json-response {:pretty true :escape-non-ascii true})))
 
 (defn ring-app []
-  (make-ring-app (t/concat-routes routes/final-routes)))  
+  (make-ring-app (t/concat-routes routes/final-routes)))
 
-(deftest extract-id-roles
-  (is 
-    (= ["john" ["exo1" "exo"]]
-    (id-roles {:identity
-                {:current "john", 
-                 :authentications {
-                  "john" 
-                    {:identity "john", :roles ["exo1" "exo"]}}}}))))
-
-(deftest get-without-authn-succeeds 
-  (-> (session (ring-app))
-      (content-type "application/json")      
-      (request base-uri)      
-      t/body->json      
-      (t/is-status 200)))
-
-(deftest get-with-authn-succeeds    
+(deftest get-without-authn-succeeds
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "jane")
-      (request base-uri)      
+      (request base-uri)
       t/body->json
       (t/is-status 200)))
 
-(defn daily-summary 
+(deftest get-with-authn-succeeds
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (header authn-info-header "jane")
+      (request base-uri)
+      t/body->json
+      (t/is-status 200)))
+
+(defn daily-summary
   "convenience function"
   [user cloud [year month day] usage]
   { :user                user
     :cloud               cloud
     :start_timestamp     (u/timestamp year month day)
-    :end_timestamp       (u/timestamp-next-day year month day)    
+    :end_timestamp       (u/timestamp-next-day year month day)
     :usage               usage })
 
-(defn every-timestamps?   
-  [pred? ts]  
+(defn every-timestamps?
+  [pred? ts]
   (every? (fn [[a b]] (pred? (u/to-time a) (u/to-time b))) (partition 2 1 ts)))
 
-(defn are-desc-dates?   
+(defn are-desc-dates?
   [m]
   (->> (get-in m [:response :body :usages])
-       (map :end_timestamp)       
-       (every-timestamps? (complement time/before?))       
+       (map :end_timestamp)
+       (every-timestamps? (complement time/before?))
        is)
   m)
 
-(defn are-all-usages?   
+(defn are-all-usages?
   [m field expected]
   (->> (get-in m [:response :body :usages])
-       (map field)       
+       (map field)
        distinct
-       (= [expected])              
+       (= [expected])
        is)
   m)
 
-(defn insert-summaries   
+(defn insert-summaries
   []
   (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 16] {:ram { :unit_minutes 100.0}}))
   (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 17] {:ram { :unit_minutes 200.0}}))
@@ -116,16 +107,16 @@
   (-> (session (ring-app))
       (content-type "application/json")
       (header authn-info-header "joe")
-      (request base-uri)      
-      t/body->json       
+      (request base-uri)
+      t/body->json
       (t/is-key-value :count 2)
       are-desc-dates?
-      (are-all-usages? :user "joe"))          
+      (are-all-usages? :user "joe"))
 
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "mike") 
-      (request base-uri)   
+      (header authn-info-header "mike")
+      (request base-uri)
       t/body->json
       (t/is-key-value :count 3)
       are-desc-dates?
@@ -135,77 +126,98 @@
   (insert-summaries)
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "john exo1 exo")      
-      (request base-uri)      
-      t/body->json      
+      (header authn-info-header "john exo1 exo")
+      (request base-uri)
+      t/body->json
       (t/is-key-value :count 3)
       are-desc-dates?
       (are-all-usages? :cloud "exo")))
 
-(deftest get-uuid-with-correct-authn 
+(deftest get-uuid-with-correct-authn
   (insert-summaries)
   (let [uuid (-> (kc/select rc/usage_summaries (kc/limit 1))
                  first
-                 :id)]    
+                 :id)]
     (-> (session (ring-app))
         (content-type "application/json")
-        (header authn-info-header "john exo")        
-        (request (str c/service-context uuid))              
-        t/body->json              
+        (header authn-info-header "john exo")
+        (request (str c/service-context uuid))
+        t/body->json
         (t/is-key-value :id uuid)
         (t/is-status 200))))
 
-(deftest get-uuid-without-correct-authn 
+(deftest get-uuid-without-correct-authn
   (insert-summaries)
   (let [uuid (-> (kc/select rc/usage_summaries (kc/limit 1))
                  first
-                 :id)]    
+                 :id)]
     (-> (session (ring-app))
         (content-type "application/json")
-        (header authn-info-header "jack")        
-        (request (str c/service-context uuid))              
-        t/body->json              
+        (header authn-info-header "jack")
+        (request (str c/service-context uuid))
+        t/body->json
         (t/is-status 403))))
 
-(deftest pagination-full 
-  (insert-summaries)    
+(deftest pagination-full
+  (insert-summaries)
   (-> (session (ring-app))
-      (content-type "application/json")      
-      (header authn-info-header "mike")          
-      (request (str base-uri "?offset=0&limit=10"))                
-      t/body->json       
+      (content-type "application/json")
+      (header authn-info-header "mike")
+      (request (str base-uri "?$first=0&$last=10"))
+      t/body->json
       (t/is-status 200)
       (t/is-key-value :count 3)))
 
-(deftest pagination-only-one 
-  (insert-summaries)    
+(deftest pagination-only-one
+  (insert-summaries)
   (-> (session (ring-app))
-      (content-type "application/json")      
-      (header authn-info-header "mike")          
-      (request (str base-uri "?offset=1&limit=1"))                
-      t/body->json                   
+      (content-type "application/json")
+      (header authn-info-header "mike")
+      (request (str base-uri "?$first=1&$last=1"))
+      t/body->json
       (t/is-status 200)
       (t/is-key-value :count 1)))
 
-(defn expect-pagination   
+(deftest pagination-outside-bounds
+  (insert-summaries)
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (header authn-info-header "mike")
+      (request (str base-uri "?$first=10&$last=15"))
+      t/body->json
+      (t/is-status 200)
+      (t/is-key-value :count 0)))
+
+(deftest pagination-first-larger-than-last
+  (insert-summaries)
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (header authn-info-header "mike")
+      (request (str base-uri "?$first=10&$last=5"))
+      t/body->json
+      (t/is-status 200)
+      (t/is-key-value :count 0)))
+
+(defn expect-pagination
   [code query-strings]
   (doseq [query-string query-strings]
     (-> (session (ring-app))
-      (content-type "application/json")      
-      (header authn-info-header "mike")          
-      (request (str base-uri query-string))                
-      t/body->json                   
+      (content-type "application/json")
+      (header authn-info-header "mike")
+      (request (str base-uri query-string))
+      t/body->json
       (t/is-status code))))
 
 (deftest pagination-wrong-query
-  (insert-summaries) 
-  (expect-pagination 400 
-    [ "?offset=-1&limit=10"
-      "?offset=1&limit=-10"
-      "?offset=-1&limit=-10"
-      "?offset=a&limit=10"]))
+  (insert-summaries)
+  (expect-pagination 400
+      ["?$first=a&$last=10"])
+  (expect-pagination 200
+      ["?$first=-1&$last=10"
+      "?$first=1&$last=-10"
+      "?$first=-1&$last=-10"]))
 
 (deftest pagination-does-not-check-max-limit
-  (insert-summaries) 
-  (expect-pagination 200 
-    [ "?offset=1&limit=1000000"]))
+  (insert-summaries)
+  (expect-pagination 200
+    [ "?$first=1&$last=1000000"]))

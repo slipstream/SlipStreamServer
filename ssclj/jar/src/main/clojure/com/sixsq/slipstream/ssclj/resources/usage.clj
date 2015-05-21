@@ -1,21 +1,16 @@
-(ns 
+(ns
   com.sixsq.slipstream.ssclj.resources.usage
   (:refer-clojure :exclude [update])
   (:require
 
-    [clojure.tools.logging                                      :as log]
     [clojure.java.jdbc                                          :as j]
-
-    [schema.core                                                :as s]    
-
     [korma.core                                                 :refer :all]
-
     [honeysql.core                                              :as sql]
     [honeysql.helpers                                           :as hh]
 
     [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
     [com.sixsq.slipstream.ssclj.database.korma-helper           :as kh]
-    [com.sixsq.slipstream.ssclj.db.database-binding             :as dbb]    
+    [com.sixsq.slipstream.ssclj.db.database-binding             :as dbb]
     [com.sixsq.slipstream.ssclj.resources.common.authz          :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud       :as std-crud]
@@ -31,8 +26,6 @@
 (def ^:const resource-uri     (str c/slipstream-schema-uri resource-name))
 (def ^:const collection-uri   (str c/slipstream-schema-uri collection-name))
 
-(def ^:const pagination-limit-default "20")
-
 (def collection-acl {:owner {:principal   "ADMIN"
                              :type        "ROLE"}
 
@@ -45,40 +38,9 @@
 (defentity usage_summaries)
 (defentity acl)
 
-(defn- deserialize-usage   
+(defn- deserialize-usage
   [usage]
   (update-in usage [:acl] fu/deserialize))
-
-(defn offset-limit 
-  [options]
-  (->> options 
-       :query-params      
-       (merge {"offset" "0" "limit" pagination-limit-default})
-       ((juxt #(get % "offset") #(get % "limit")))))
-
-(defn id-roles   
-  [options]
-  (-> options            
-      :identity      
-      :authentications   
-      (get (get-in options [:identity :current]))
-      ((juxt :identity :roles))))
-
-(defn id-matches?   
-  [id]
-  (if id
-    [:and [:= :a.principal-type "USER"] [:= :a.principal-name id]]
-    [:= 0 1]))
-
-(defn roles-in?   
-  [roles]
-  (if (seq roles)
-    [:and [:= :a.principal-type "ROLE"] [:in :a.principal-name roles]]
-    [:= 0 1]))
-
-(defn- neither-id-roles?
-  [id roles]
-  (not (or id (seq roles))))
 
 (defn bad-query   
   [offset limit]
@@ -87,25 +49,15 @@
       (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset, 
             ", limit:"limit")")
       400 0)))
-
-(defn check-offset-limit
-  [^String offset ^String limit]
-  (try  
-    (let [offset-value (Integer/valueOf offset) limit-value (Integer/valueOf limit)]
-      (when (some neg? [offset-value limit-value])
-        (bad-query offset limit)))
-    (catch NumberFormatException nfe
-      (bad-query offset limit))))  
-    
+ 
 (defn sql   
   [id roles offset limit]
-  (check-offset-limit offset limit)
   (->   (hh/select :u.*) 
         (hh/from [:acl :a] [:usage_summaries :u])
         (hh/where [:and [:= :u.id :a.resource-id]
                         [:or 
-                          (id-matches? id)
-                          (roles-in? roles)]])
+                          (dbb/id-matches? id)
+                          (dbb/roles-in? roles)]])
         (hh/modifiers :distinct)
         (hh/limit limit)
         (hh/offset offset)
@@ -115,12 +67,12 @@
 
 (defmethod dbb/find-resources resource-name
   [collection-id options]
-  (let [[id roles] (id-roles options)
-        [offset limit] (offset-limit options)]     
-    (if (neither-id-roles? id roles)
-      []
+  (let [[id roles]              (dbb/id-roles options)
+        {:keys [offset limit]}  (u/offset-limit options)]
+    (if (or (neg? limit) (dbb/neither-id-roles? id roles))
+      []      
       (->> (sql id roles offset limit)
-           (j/query kh/db-spec)           
+           (j/query kh/db-spec)
            (map deserialize-usage)))))
 
 ;;
@@ -131,7 +83,7 @@
   (merge
     c/CreateAttrs
     c/AclAttr
-    { 
+    {
       :id               c/NonBlankString
       :user             c/NonBlankString
       :cloud            c/NonBlankString
@@ -140,7 +92,7 @@
       :usage            c/NonBlankString
        ;   c/NonBlankString { ;; metric-name
        ;     :cloud_vm_instanceid      c/NonBlankString
-       ;     :unit_minutes   c/NonBlankString } 
+       ;     :unit_minutes   c/NonBlankString }
        ; }
     }))
 
@@ -153,14 +105,14 @@
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
 (defmethod crud/query resource-name
-  [request]      
+  [request]
   (query-impl request))
 
 ;;
 ;; single
 ;;
 
-(defn- check-exist 
+(defn- check-exist
   [resource id]
   (if (empty? resource)
     (throw (u/ex-not-found id))
@@ -170,14 +122,14 @@
   [id]
   (-> (select usage_summaries (where {:id id}) (limit 1))
       (check-exist id)
-      first            
+      first
       deserialize-usage))
 
 (defn retrieve-fn
   [request]
   (fn [{{uuid :uuid} :params :as request}]
-    (-> (str resource-name "/" uuid)        
-        find-resource        
+    (-> (str resource-name "/" uuid)
+        find-resource
         (a/can-view? request)
         (crud/set-operations request)
         (u/json-response))))

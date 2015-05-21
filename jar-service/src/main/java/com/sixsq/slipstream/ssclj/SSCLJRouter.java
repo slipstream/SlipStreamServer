@@ -23,14 +23,11 @@ package com.sixsq.slipstream.ssclj;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sixsq.slipstream.run.RunListResource;
 import org.restlet.Context;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
-import org.restlet.routing.TemplateRoute;
-import org.restlet.routing.Variable;
 
 public class SSCLJRouter extends Router {
 
@@ -45,24 +42,20 @@ public class SSCLJRouter extends Router {
 		}
 		return Character.toUpperCase(s.charAt(0)) + s.substring(1);
 	}
-	
+
 	/**
 	 * Please note the convention: corresponding Clojure resource name is Java resource name capitalised.
-	 * 
+	 *
 	 */
 	public SSCLJRouter(Context context, String sscljResourceName) throws ValidationException {
 		super(context);
-			
-		String target = SSCLJ_SERVER + "/" + capitalize(sscljResourceName);		
-		Redirector listRedirector = new ListSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);		
+
+		String target = SSCLJ_SERVER + "/" + capitalize(sscljResourceName);
+		Redirector listRedirector = new ListSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
 		Redirector singleRedirector = new SingleSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
 
-		attach("/", listRedirector).setMatchingQuery(true);
+		attach("", listRedirector).setMatchingQuery(false);
 
-		TemplateRoute route = attach("/?offset={offset}&limit={limit}", listRedirector);
-		route.getTemplate().getVariables().put("offset", new Variable(Variable.TYPE_URI_QUERY));
-		route.getTemplate().getVariables().put("limit", new Variable(Variable.TYPE_URI_QUERY));
-		route.setMatchingQuery(true);
 
 		attach("/{ssclj-uuid}", singleRedirector);
 	}
