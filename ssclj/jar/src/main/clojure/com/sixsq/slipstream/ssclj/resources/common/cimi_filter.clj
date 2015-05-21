@@ -1,15 +1,19 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.cimi-filter
   (:require
-    [clojure.string :refer [split]]))
+    [clojure.string                                           :refer [split]]
+    [instaparse.core                                          :as insta]
+    [instaparse.transform                                     :as it]
+    [com.sixsq.slipstream.ssclj.filter.parser                 :as parser]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]))
 
 ;;
-;; Minimal implementation of CIMI resource filtering.
+;; Implementation of CIMI resource filtering.
 ;; See dmtf.org/sites/default/files/standards/documents/DSP0263_1.0.1.pdf Section 4.1.6.1
 ;;
 
 (defn- attribute-path
   [attribute-full-name]
-  (map keyword (split attribute-full-name #"\.")))
+  (map keyword (split attribute-full-name #"/")))
 
 (defn- check-present
   [attribute-full-name value]
@@ -25,32 +29,40 @@
         (check-present attribute-full-name)))
 
 (defn- mk-pred-attribute-value
-  [attribute-full-name value]
+  [attribute-full-name operator value]
   (fn [resource]
     (= value (attribute-value resource attribute-full-name))))
 
-(defn- supress-wrap
+(defn- remove-quotes
   [s]
   (subs s 1 (dec (count s))))
 
-(defn- wrapped?
-  [s c]
-  (and
-    (>= (count s) 2)
-    (.startsWith s c) (.endsWith s c)))
+(def ^:private transformations
+  {:SingleQuoteString   remove-quotes
+   :DoubleQuoteString   remove-quotes
+   :Comp                (fn[[_ a] o v] (mk-pred-attribute-value a o v))
+   :Filter              identity
+   :AndExpr             identity})
 
-(defn- unwrap-quotes
-  [s]
-  (if (or (wrapped? s "\"") (wrapped? s "'"))
-    (supress-wrap s)
-    (throw (IllegalArgumentException. (str "Wrong format (must be simple or double quotted): "s)))))
+(defn to-predicates
+  [tree]
+  (it/transform transformations tree))
 
-(defn- split-attribute-value
-  [s]
-  (let [[attribute-full-name value] (split s #"=")]
-    [attribute-full-name (unwrap-quotes value)]))
+(def assemble-predicates    identity)
+
+(defn handle-failure
+  [tree]
+  (if (insta/failure? tree)
+    (throw (IllegalArgumentException. (str "Wrong format: " tree)))
+    tree))
 
 (defn cimi-filter
-  [resources cimi-comp]
-  (let [[attribute-full-name value] (split-attribute-value cimi-comp)]
-    (filter (mk-pred-attribute-value attribute-full-name value) resources)))
+  [resources cimi-filter-expression]
+
+  (-> cimi-filter-expression
+      parser/parse-cimi-filter
+      handle-failure
+      to-predicates
+      ;assemble-predicates
+      (filter resources)))
+
