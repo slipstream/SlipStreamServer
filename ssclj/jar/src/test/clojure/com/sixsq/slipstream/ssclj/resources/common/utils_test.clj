@@ -1,18 +1,28 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils-test
+  (import clojure.lang.ExceptionInfo)
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.utils :refer :all]
-    [expectations :refer :all]))
+    [clojure.test                                      :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :refer :all]))
 
-;;
-;; Base64 encoding
-;;
+(deftest offset-limit-should-extract-from-options
+  (is (= {:offset 1 :limit 4}
+         (offset-limit {:query-params {"$first" "2" "$last" "5"}}))))
 
-(let [round-trip (comp decode-base64 encode-base64)
-      values ["alpha"
-              2
-              true
-              3.14
-              {:alpha "alpha"}]]
+(deftest offset-limit-option-empty
+  (is (= {:offset 0 :limit 0}
+         (offset-limit {}))))
 
-  (expect (from-each [v values]
-                     (= v (round-trip v)))))
+(deftest offset-limit-option-invalid
+  (is (= {:offset 0 :limit 2}
+         (offset-limit {:query-params {"$first" "-2" "$last" "2"}}))))
+
+(deftest offset-limit-first-not-number
+  (is (thrown? ExceptionInfo
+         (offset-limit {:query-params {"$first" "a" "$last" "2"}}))))
+
+(deftest offset-limit-first-higher-than-last
+  (is (neg? (:limit (offset-limit {:query-params {"$first" "4" "$last" "2"}})))))
+
+(deftest offset-limit-first-equals-last
+  (is (= {:offset 2 :limit 1}
+         (offset-limit {:query-params {"$first" "3" "$last" "3"}}))))

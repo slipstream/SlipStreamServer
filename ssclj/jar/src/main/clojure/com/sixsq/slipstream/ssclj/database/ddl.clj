@@ -26,9 +26,9 @@
 
 (defn surround-join 
   [xs surround]
-  (->> xs
-    (map surround)
-    (join ",")))
+  (->>  xs
+        (map surround)
+        (join ",")))
 
 (defn double-quote-list 
   [names]
@@ -36,18 +36,18 @@
   
 (defn columns 
   [& name-types] 
-  (->> 
-    name-types
-    (partition 2)
-    (map column-description)
-    (join ",")))      
+  (->>  name-types
+        (partition 2)
+        (map column-description)
+        (join ",")))      
 
 (defn create-table!   
-  [table columns]  
-  (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS " (double-quote table)" (" columns ")")])
-  (log/info "Created (if needed!) table:"table", columns:"columns))
+  [table columns & [options]]  
+  (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS " (double-quote table) " ( " columns options " ) ")])
+  (log/info "Created (if needed!) table:" table ", columns:" columns ", options: "options))
 
 (defn create-index!
   [table index-name & column-names]
   (jdbc/execute! kh/db-spec [(str "DROP INDEX IF EXISTS " index-name)])
-  (jdbc/execute! kh/db-spec [(str "CREATE INDEX " index-name " ON \""table"\" (" (double-quote-list column-names) ")")]))
+  (jdbc/execute! kh/db-spec [(str "CREATE INDEX " index-name " ON \""table"\" (" (double-quote-list column-names) ")")])
+  (log/info "Created index on" table ": " index-name ", " column-names))
