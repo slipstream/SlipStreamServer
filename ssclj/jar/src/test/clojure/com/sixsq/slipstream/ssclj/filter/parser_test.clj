@@ -82,8 +82,8 @@
                   "a1"
                   "_a"
                   "_1"
-                  "a1.b2"
-                  "a1.b2.c3")))
+                  "a1/b2"
+                  "a1/b2/c3")))
 
 (deftest check-invalid-attributes
   (let [parse (insta/parser grammar-url :start :Attribute)]
@@ -91,8 +91,8 @@
                   ""
                   "1"
                   "1a"
-                  "a1."
-                  ".a1"
-                  "a.1")))
+                  "a1/"
+                  "/a1"
+                  "a/1")))
 
 
