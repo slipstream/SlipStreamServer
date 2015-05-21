@@ -51,6 +51,10 @@
       <artifactId>schema</artifactId>
     </dependency>
     <dependency>
+      <groupId>instaparse</groupId>
+      <artifactId>instaparse</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>java.classpath</artifactId>
     </dependency>
