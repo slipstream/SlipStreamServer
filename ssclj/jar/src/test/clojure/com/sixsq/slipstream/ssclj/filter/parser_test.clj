@@ -4,8 +4,6 @@
     [instaparse.core :as insta]
     [clojure.test :refer [deftest is are]]))
 
-(is (= 1 2))
-
 (deftest check-valid-double-quote-strings
   (let [parse (insta/parser grammar-url :start :DoubleQuoteString)]
     (are [s] (not (insta/failure? (parse s)))
