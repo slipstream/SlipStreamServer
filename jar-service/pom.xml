@@ -49,20 +49,13 @@
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamConnector</artifactId>
 			<type>test-jar</type>
-            <scope>test</scope>
+                        <scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamUI</artifactId>
 		</dependency>
-
-<!--
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
--->
 
 		<dependency>
 			<groupId>org.clojure</groupId>
@@ -133,15 +126,11 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-entitymanager</artifactId> 
-			</dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.hsqldb</groupId> <artifactId>hsqldb</artifactId> 
-			</dependency> -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -152,14 +141,6 @@
 			<artifactId>jsch</artifactId>
 			<type>jar</type>
 		</dependency>
-
-<!--
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>13.0</version> 
-		</dependency>
--->
 
 	</dependencies>
 
