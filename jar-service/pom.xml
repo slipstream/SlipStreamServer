@@ -57,10 +57,12 @@
 			<artifactId>SlipStreamUI</artifactId>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
+-->
 
 		<dependency>
 			<groupId>org.clojure</groupId>
@@ -151,11 +153,13 @@
 			<type>jar</type>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>13.0</version> <!-- needed here to avoid inheriting 15.0 from raven -->
+			<version>13.0</version> 
 		</dependency>
+-->
 
 	</dependencies>
 
