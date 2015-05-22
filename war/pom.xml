@@ -140,11 +140,6 @@
       <type>jar</type>
     </dependency>
 
-<!--     <dependency>
-      <groupId>net.kencochrane.raven</groupId>
-      <artifactId>raven</artifactId>
-    </dependency>
- -->
   </dependencies>
 
   <build>
