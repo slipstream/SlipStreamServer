@@ -145,6 +145,9 @@ public class RuntimeParameterResource extends RunBaseResource {
 				abortOrReset(value, em);
 				setValue(value);
 			}
+		} else if (isGlobalStateParameter()) {
+			States newState = attemptChangeGlobalState(value);
+			setValue(newState.toString());
 		} else {
 			setValue(value);
 		}
@@ -169,53 +172,64 @@ public class RuntimeParameterResource extends RunBaseResource {
 		}
 	}
 
+	private States attemptChangeGlobalState(String toState) {
+		States toNewState = null;
+		try {
+			toNewState = States.valueOf(toState);
+		} catch (IllegalArgumentException e) {
+			throwClientBadRequest("Requested transition to unknown state: " + toState);
+		}
+		States newState = null;
+		// Jumping between states with an abort flag set on the run is not a good practice.
+		if (isAbortSet()) {
+			throwClientBadRequest("For any state transition via API abort should be cleared first.");
+		} else {
+			Run run = Run.loadFromUuid(getUuid());
+			States currentState = run.getState();
+			if (run.isMutable() && States.Ready == currentState && States.Provisioning == toNewState) {
+				newState = attemptChangeGlobalStateToProvisioning();
+			} else {
+				throwClientBadRequest(String.format(
+				        "Via API state can be advanced only on a mutable run and only from %s to %s", States.Ready,
+				        States.Provisioning));
+			}
+		}
+		return newState;
+	}
+
+	private States attemptChangeGlobalStateToProvisioning() {
+		StateMachine sm = createStateMachine();
+		String fromToState = String.format("from %s to %s", States.Ready, States.Provisioning);
+		try {
+			sm.tryAdvanceToProvisionning();
+		} catch (InvalidStateException e) {
+			e.printStackTrace();
+			throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
+		} catch (CannotAdvanceFromTerminalStateException e) {
+			e.printStackTrace();
+			throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
+		}
+		States newState = sm.getState();
+		if (States.Provisioning != newState) {
+			throwServerError(String.format("Failed to advance state %s: requested doesn't match reached %s.",
+					fromToState, newState));
+		}
+		return newState;
+	}
+
 	@Post
 	public void completeCurrentNodeStateOrChangeGlobalState(Representation entity) {
 
 		String nodeName = runtimeParameter.getNodeName();
 		States newState;
-
-		if (RuntimeParameter.GLOBAL_NAMESPACE.equals(nodeName)) {
-			newState = attemptChangeGlobalStateReadyToProvisioning();
-		} else {
-			newState = attemptCompleteCurrentNodeState(nodeName);
-		}
-
+		newState = attemptCompleteCurrentNodeState(nodeName);
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
 	}
 
-	private States attemptChangeGlobalStateReadyToProvisioning() {
-		States newState;
-		Run run = Run.loadFromUuid(getUuid());
-		String stateFromTo = String.format("from %s to %s", States.Ready, States.Provisioning);
-		if (run.isMutable() && States.Ready == run.getState()) {
-            StateMachine sc = StateMachine.createStateMachine(run);
-            try {
-                sc.tryAdvanceToProvisionning();
-            } catch (InvalidStateException |CannotAdvanceFromTerminalStateException e) {
-                e.printStackTrace();
-                throw (new ResourceException(Status.SERVER_ERROR_INTERNAL,
-                        String.format("Failed to advance state %s: %s", stateFromTo, e.getMessage())));
-            }
-            newState = sc.getState();
-            if (States.Provisioning != newState) {
-                throw (new ResourceException(Status.SERVER_ERROR_INTERNAL,
-                        String.format("Failed to advance state %s: requested doesn't match reached %s.",
-								stateFromTo, newState)));
-            }
-        } else {
-            throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-                    "Bad request: via API a state can be advanced only on a mutable run and only " + stateFromTo ));
-        }
-		return newState;
-	}
 
 	private States attemptCompleteCurrentNodeState(String nodeName) {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run = Run.loadFromUuid(getUuid(), em);
-		StateMachine sc = StateMachine.createStateMachine(run);
-		em.close();
-		return completeCurrentNodeState(nodeName, sc);
+		StateMachine sm = createStateMachine();
+		return completeCurrentNodeState(nodeName, sm);
 	}
 
 	public States completeCurrentNodeState(String nodeName, StateMachine sc) {
@@ -247,5 +261,15 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	protected void logTimeDiff(String msg, long before) {
 		logTimeDiff(msg, before, System.currentTimeMillis());
+	}
+
+	private boolean isGlobalStateParameter() { return RuntimeParameter.GLOBAL_STATE_KEY.equals(key); }
+
+	private StateMachine createStateMachine() {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Run run = Run.loadFromUuid(getUuid(), em);
+		StateMachine sm = StateMachine.createStateMachine(run);
+		em.close();
+		return sm;
 	}
 }
