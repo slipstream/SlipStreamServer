@@ -101,13 +101,6 @@
       <artifactId>mail</artifactId>
     </dependency>
 
-    <!-- Needs to be before junit -->
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-all</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
