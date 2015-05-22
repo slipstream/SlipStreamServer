@@ -263,7 +263,9 @@ public class RuntimeParameterResource extends RunBaseResource {
 		logTimeDiff(msg, before, System.currentTimeMillis());
 	}
 
-	private boolean isGlobalStateParameter() { return RuntimeParameter.GLOBAL_STATE_KEY.equals(key); }
+	private boolean isGlobalStateParameter() { 
+		return RuntimeParameter.GLOBAL_STATE_KEY.equals(key); 
+	}
 
 	private StateMachine createStateMachine() {
 		EntityManager em = PersistenceUtil.createEntityManager();
