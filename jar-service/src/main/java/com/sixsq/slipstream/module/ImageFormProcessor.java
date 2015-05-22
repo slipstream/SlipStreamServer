@@ -180,7 +180,7 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		Set<Target> targets = new HashSet<Target>();
 
-		for (String targetName : TARGET_SCRIPT_NAMES) {
+		for (String targetName : Target.getTargetScriptNames()) {
 			addTarget(form, targets, targetName);
 		}
 
