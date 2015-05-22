@@ -113,7 +113,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 	protected void putMandatoryQuotaVm() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(QuotaParameter.QUOTA_VM_PARAMETER_NAME),
-				"VM quota for " + getCategory() + " (i.e. maximum number number of VM allowed)");
+				"VM quota for " + getCategory() + " (i.e. maximum number of VMs allowed)");
 	}
 
 	protected void putMandatoryMaxIaasWorkers() throws ValidationException {
