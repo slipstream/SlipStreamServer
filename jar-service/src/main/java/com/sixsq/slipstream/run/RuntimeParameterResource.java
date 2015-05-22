@@ -189,7 +189,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 			if (run.isMutable() && States.Ready == currentState && States.Provisioning == toNewState) {
 				newState = attemptChangeGlobalStateToProvisioning();
 			} else if (getUser().isSuper()) {
-    				newState = toNewState;
+    			newState = toNewState;
 			} else {
 				throwClientBadRequest(String.format(
 				        "Via API state can be advanced only on a mutable run and only from %s to %s", States.Ready,
@@ -221,10 +221,8 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	@Post
 	public void completeCurrentNodeStateOrChangeGlobalState(Representation entity) {
-
 		String nodeName = runtimeParameter.getNodeName();
-		States newState;
-		newState = attemptCompleteCurrentNodeState(nodeName);
+		States newState = attemptCompleteCurrentNodeState(nodeName);
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
 	}
 
