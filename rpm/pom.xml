@@ -118,8 +118,16 @@
                                     <artifactId>guava</artifactId>
                                 </artifactItem>
                                 <artifactItem>
-                        			<groupId>com.fasterxml.jackson.core</groupId>
-                        			<artifactId>jackson-databind</artifactId>
+                                  <groupId>com.fasterxml.jackson.core</groupId>
+                                  <artifactId>jackson-databind</artifactId>
+                                </artifactItem>
+                                <artifactItem>
+                                  <groupId>com.fasterxml.jackson.core</groupId>
+                                  <artifactId>jackson-core</artifactId>
+                                </artifactItem>
+                                <artifactItem>
+                                  <groupId>com.fasterxml.jackson.core</groupId>
+                                  <artifactId>jackson-annotations</artifactId>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
