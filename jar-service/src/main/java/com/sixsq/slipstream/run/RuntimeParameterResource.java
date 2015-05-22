@@ -188,6 +188,8 @@ public class RuntimeParameterResource extends RunBaseResource {
 			States currentState = run.getState();
 			if (run.isMutable() && States.Ready == currentState && States.Provisioning == toNewState) {
 				newState = attemptChangeGlobalStateToProvisioning();
+			} else if (getUser().isSuper()) {
+    				newState = toNewState;
 			} else {
 				throwClientBadRequest(String.format(
 				        "Via API state can be advanced only on a mutable run and only from %s to %s", States.Ready,
