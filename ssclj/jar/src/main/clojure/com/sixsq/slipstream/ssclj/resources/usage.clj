@@ -33,7 +33,7 @@
                               :type       "ROLE"
                               :right      "VIEW"}]})
 
-#_(defonce init-record-keeper (rc/-init))
+(defonce init-record-keeper (rc/-init))
 
 (defentity usage_summaries)
 (defentity acl)
