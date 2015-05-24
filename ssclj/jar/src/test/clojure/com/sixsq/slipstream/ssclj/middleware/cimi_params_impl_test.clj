@@ -1,6 +1,6 @@
-(ns com.sixsq.slipstream.ssclj.middleware.cimi-params-test
+(ns com.sixsq.slipstream.ssclj.middleware.cimi-params-impl-test
   (:require
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer :all]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params-impl :refer :all]
     [expectations :refer :all]))
 
 (defn set-and-extract
