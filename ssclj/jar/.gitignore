@@ -17,3 +17,6 @@
 .project
 .lein-repl-history
 .nrepl-port
+
+*.iml
+lib/
