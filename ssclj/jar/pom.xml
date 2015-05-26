@@ -47,6 +47,11 @@
       <artifactId>data.json</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>data.xml</artifactId>
+      <version>0.0.8</version>
+    </dependency>
+    <dependency>
       <groupId>prismatic</groupId>
       <artifactId>schema</artifactId>
     </dependency>
@@ -169,7 +174,7 @@
     </dependency>
     <dependency>
       <groupId>honeysql</groupId>
-      <artifactId>honeysql</artifactId>      
+      <artifactId>honeysql</artifactId>
     </dependency>
   </dependencies>
 
@@ -187,7 +192,7 @@
           <plugin>
             <groupId>com.theoryinpractise</groupId>
             <artifactId>clojure-maven-plugin</artifactId>
-            
+
             <executions>
               <execution>
                 <id>syntax-check-source</id>
@@ -217,9 +222,9 @@
               </execution>
 
             </executions>
-            
+
           </plugin>
-          
+
         </plugins>
       </build>
     </profile>
@@ -268,9 +273,9 @@
       <plugin>
         <groupId>com.theoryinpractise</groupId>
         <artifactId>clojure-maven-plugin</artifactId>
-        
+
         <executions>
-          
+
           <execution>
             <id>minimal-compile</id>
             <goals>
@@ -290,9 +295,9 @@
               <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
             </configuration>
           </execution>
-          
+
         </executions>
-        
+
       </plugin>
 
     </plugins>
