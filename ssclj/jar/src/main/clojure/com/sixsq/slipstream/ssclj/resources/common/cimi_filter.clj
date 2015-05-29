@@ -3,12 +3,13 @@
     [clojure.string                                           :refer [split]]
     [instaparse.core                                          :as insta]
     [instaparse.transform                                     :as it]
-    [com.sixsq.slipstream.ssclj.filter.parser                 :as parser]))
+    [com.sixsq.slipstream.ssclj.filter.parser                 :as parser]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 ;;
 ;; Partial Implementation of CIMI resource filtering.
 ;;
-;; TODO: or operator, more control on date comparison
+;; TODO: more control on date comparison
 ;;
 ;; See dmtf.org/sites/default/files/standards/documents/DSP0263_1.0.1.pdf Section 4.1.6.1
 ;;
@@ -44,13 +45,18 @@
   [s]
   (subs s 1 (dec (count s))))
 
+(defn some-pred
+  [preds]
+  (fn [x]
+    (some #(% x) preds)))
+
 (def ^:private transformations
   {:SingleQuoteString   remove-quotes
    :DoubleQuoteString   remove-quotes
    :DateValue           identity
-   :Comp                (fn[[_ a] [_ o] v] (mk-pred-attribute-value a o v))
-   :Filter              identity
-   :AndExpr             (fn [& comps] (apply every-pred comps))})
+   :Comp                (fn[[_ a] [_ o] v]  (mk-pred-attribute-value a o v))
+   :AndExpr             (fn [& comps]       (apply every-pred comps))
+   :Filter              (fn [& preds]       (some-pred preds))})
 
 (defn to-predicates
   [tree]
