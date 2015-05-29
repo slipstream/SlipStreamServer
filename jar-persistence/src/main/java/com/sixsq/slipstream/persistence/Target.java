@@ -39,6 +39,8 @@ public class Target implements Serializable {
 	public static final String REPORT_TARGET = "report";
 	public static final String ONVMADD_TARGET = "onvmadd";
 	public static final String ONVMREMOVE_TARGET = "onvmremove";
+	public static final String PRESCALE_TARGET = "prescale";
+	public static final String POSTSCALE_TARGET = "postscale";
 
 	@Id
 	@GeneratedValue
@@ -91,9 +93,13 @@ public class Target implements Serializable {
 		this.script = script;
 	}
 
-
 	public Target copy() {
 		return new Target(getName(), getScript());
 	}
+
+	public static String[] getTargetScriptNames() {
+        return new String[]{EXECUTE_TARGET, REPORT_TARGET, ONVMADD_TARGET,
+				ONVMREMOVE_TARGET, PRESCALE_TARGET, POSTSCALE_TARGET};
+    }
 
 }
