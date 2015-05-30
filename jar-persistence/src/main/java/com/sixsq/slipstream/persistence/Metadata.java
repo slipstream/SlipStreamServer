@@ -143,7 +143,7 @@ public abstract class Metadata implements Serializable {
 			if(transaction != null && transaction.isActive()) {
 				transaction.rollback();
 			}
-			throw new SlipStreamDatabaseException(e.getMessage());
+			throw new SlipStreamDatabaseException(e);
 		} finally {
 			em.close();
 		}

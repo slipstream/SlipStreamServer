@@ -133,9 +133,8 @@ public class RuntimeParameterResource extends RunBaseResource {
 		String value = (entity == null ? "" : extractValueFromEntity(entity));
 
 		boolean isGlobalAbort = RuntimeParameter.GLOBAL_ABORT_KEY.equals(key);
-		boolean isNodeAbort = (runtimeParameter.getNodeName()
-				+ RuntimeParameter.NODE_PROPERTY_SEPARATOR + RuntimeParameter.ABORT_KEY)
-				.equals(key);
+		boolean isNodeAbort = runtimeParameter.constructParamName(runtimeParameter.getNodeName(),
+                RuntimeParameter.ABORT_KEY).equals(key);
 
 		if (isGlobalAbort || isNodeAbort) {
 			if (!runtimeParameter.isSet()) {
