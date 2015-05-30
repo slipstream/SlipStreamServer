@@ -20,8 +20,7 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactoryBase;
@@ -33,6 +32,20 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 		ParametersFactoryBase<ServiceConfigurationParameter> {
 
 	protected Map<String, ServiceConfigurationParameter> referenceParameters = new HashMap<String, ServiceConfigurationParameter>();
+
+	public static final String NATIVE_CONTEXTUALIZATION_KEY = "native-contextualization";
+
+	public static final String NATIVE_CONTEXTUALIZATION_NEVER = "never";
+	public static final String NATIVE_CONTEXTUALIZATION_ALWAYS = "always";
+	public static final String NATIVE_CONTEXTUALIZATION_LINUX_ONLY = "linux only";
+	public static final String NATIVE_CONTEXTUALIZATION_WINDOWS_ONLY = "windows only";
+
+	public static final String NATIVE_CONTEXTUALIZATION_DEFAULT = NATIVE_CONTEXTUALIZATION_LINUX_ONLY;
+
+	public static List<String> getNativeContextualizationOptions() {
+		String[] options = {NATIVE_CONTEXTUALIZATION_NEVER, NATIVE_CONTEXTUALIZATION_LINUX_ONLY, NATIVE_CONTEXTUALIZATION_WINDOWS_ONLY, NATIVE_CONTEXTUALIZATION_ALWAYS};
+		return Arrays.asList(options);
+	}
 
 	public SystemConfigurationParametersFactoryBase(String category)
 			throws ValidationException {
@@ -121,6 +134,16 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 				super.constructKey(RuntimeParameter.MAX_JAAS_WORKERS_KEY),
 				RuntimeParameter.MAX_JAAS_WORKERS_DESCRIPTION,
 				RuntimeParameter.MAX_JAAS_WORKERS_DEFAULT);
+	}
+
+	protected void putMandatoryContextualizationType() throws ValidationException {
+		putMandatoryEnumParameter(
+				super.constructKey(NATIVE_CONTEXTUALIZATION_KEY),
+				"Use native cloud contextualisation",
+				getNativeContextualizationOptions(),
+				NATIVE_CONTEXTUALIZATION_DEFAULT,
+				"Here you can define when SlipStream should use the native Cloud contextualization mechanisme or when it should try other methods like SSH and WinRM. <br/>",
+				10);
 	}
 
 }
