@@ -28,32 +28,40 @@ import org.simpleframework.xml.*;
 
 import flexjson.JSON;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+
 @SuppressWarnings("serial")
 public class Target implements Serializable {
 
-//	private static final String PRERECIPE_TARGET = "prerecipe";
-//	private static final String RECIPE_TARGET = "recipe";
-//	private static final String EXECUTE_TARGET = "execute";
-//	private static final String REPORT_TARGET = "report";
-//	private static final String ONVMADD_TARGET = "onvmadd";
-//	private static final String ONVMREMOVE_TARGET = "onvmremove";
-//
+	public static final String EXECUTE_TARGET = "execute";
+	public static final String REPORT_TARGET = "report";
+	public static final String ONVMADD_TARGET = "onvmadd";
+	public static final String ONVMREMOVE_TARGET = "onvmremove";
+	public static final String PRESCALE_TARGET = "prescale";
+	public static final String POSTSCALE_TARGET = "postscale";
 	public static final String TARGET_PRERECIPE_NAME = "prerecipe";
 	public static final String TARGET_RECIPE_NAME = "recipe";
 	public static final String[] TARGET_BUILD_SCRIPT_NAMES = { TARGET_PRERECIPE_NAME, TARGET_RECIPE_NAME };
-	public static final String[] TARGET_SCRIPT_NAMES = { TARGET_PRERECIPE_NAME, TARGET_RECIPE_NAME, "execute", "report", "onvmadd", "onvmremove" };
+	public static final String[] TARGET_SCRIPT_NAMES = { TARGET_PRERECIPE_NAME, TARGET_RECIPE_NAME, EXECUTE_TARGET, REPORT_TARGET, ONVMADD_TARGET,
+			ONVMREMOVE_TARGET, PRESCALE_TARGET, POSTSCALE_TARGET };
+
+	@Id
+	@GeneratedValue
+	Long id;
+
+	@Attribute
+	private String name;
+
+	@JSON(include = false)
+	private ImageModule module;
 
 	@ElementList(data = true, entry = "script")
 	private List<String> inheritedScripts = new ArrayList<String>();
 
 	@Element(data = true)
 	private String script;
-
-	@Attribute(required = false)
-	private String name;
-
-	@JSON(include = false)
-	private ImageModule module;
 
 	@SuppressWarnings("unused")
 	private Target() {

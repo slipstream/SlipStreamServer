@@ -41,15 +41,33 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sixsq.slipstream.connector.UsageRecorder;
+import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.Terminator;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 
 @Ignore("RunFactoryTest extends this class. So ignore to avoid running twice. Good idea?")
 public class RunTest extends RunTestBase {
@@ -59,6 +77,8 @@ public class RunTest extends RunTestBase {
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException,
 			ClassNotFoundException {
+		UsageRecorder.muteForTests();
+		Event.muteForTests();
 		setupImages();
 		CommonTestUtil
 				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);

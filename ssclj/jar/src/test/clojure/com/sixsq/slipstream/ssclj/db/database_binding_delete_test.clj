@@ -1,22 +1,22 @@
 (ns com.sixsq.slipstream.ssclj.db.database-binding-delete-test
   (:refer-clojure :exclude [update])
   (:require    
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbb] 
+    [com.sixsq.slipstream.ssclj.db.database-binding         :as dbb] 
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize]]
-    [korma.core :refer :all]    
-    [korma.db :refer [transaction]]    
-    [expectations :refer :all]
-    [clojure.tools.logging :as log]))
+    [korma.core                                             :refer :all]    
+    [korma.db                                               :refer [transaction]]    
+    [expectations                                           :refer :all]
+    [clojure.tools.logging                                  :as log]))
 
 (def db (dbb/get-instance))
 
-(defentity resources)
-(delete resources)
+(defentity  resources)
+(delete     resources)
 (log/info "All resources deleted")
 
 (def data {:id "Thing/456" :name "alfred" :age 23})
 
-(.add db data)
+(.add db "Thing" data)
 (let [response-delete (.delete db data)]
 	;; When we delete an existing data
 	(expect 204 (:status response-delete)))

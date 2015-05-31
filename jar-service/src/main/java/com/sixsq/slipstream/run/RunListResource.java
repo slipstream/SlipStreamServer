@@ -71,6 +71,7 @@ import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.run.RunViewList;
 
 public class RunListResource extends BaseResource {
 

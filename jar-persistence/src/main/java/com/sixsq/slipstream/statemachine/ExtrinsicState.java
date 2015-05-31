@@ -104,5 +104,4 @@ public class ExtrinsicState {
 	private boolean getParameterValueAsBoolean(RuntimeParameter parameter) {
 		return Boolean.parseBoolean(parameter.getValue());
 	}
-
 }

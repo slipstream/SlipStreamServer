@@ -51,6 +51,7 @@ import com.sixsq.slipstream.util.RequestUtil;
 public abstract class BaseResource extends ServerResource {
 
 	public static final String MODULE_RESOURCE_URI_KEY = "moduleResourceUri";
+
 	public static final String PAGING_OFFSET_KEY = "offset";
 	public static final String PAGING_LIMIT_KEY = "limit";
 	public static final String PAGING_CLOUD_KEY = "cloud";
@@ -305,45 +306,15 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected int getOffset() {
-		return getOffset(getRequest());
-	}
-
-	public int getOffset(Request request) {
-		String offsetAttr = getQueryValue(PAGING_OFFSET_KEY);
-
-		int offset = 0;
-		if (offsetAttr != null) {
-			try {
-				offset = Integer.parseInt(offsetAttr);
-			} catch (NumberFormatException e) {
-				throwClientBadRequest("Invalid format for the offset attribute");
-			}
-			if (offset < 0) {
-				throwClientBadRequest("The value for the offset attribute should be positive");
-			}
-		}
-		return offset;
+		return RequestUtil.getOffset(getRequest());
 	}
 
 	protected int getLimit() {
-		return getLimit(LIMIT_DEFAULT, LIMIT_MAX);
+		return RequestUtil.getLimit(getRequest());
 	}
 
 	protected int getLimit(int defaultLimit, int max) {
-		String limitAttr = getQueryValue(PAGING_LIMIT_KEY);
-
-		int limit = defaultLimit;
-		if (limitAttr != null) {
-			try {
-				limit = Integer.parseInt(limitAttr);
-			} catch (NumberFormatException e) {
-				throwClientBadRequest("Invalid format for the limit attribute");
-			}
-			if (limit < 1 || limit > max) {
-				throwClientBadRequest("The value for the limit attribute should be between 1 and 500");
-			}
-		}
-		return limit;
+		return RequestUtil.getLimit(getRequest(), defaultLimit, max);
 	}
 
 	protected String getCloud() {

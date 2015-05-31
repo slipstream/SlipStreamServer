@@ -26,8 +26,12 @@ import java.util.List;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.simpleframework.xml.Root;
+
 import com.sixsq.slipstream.exceptions.ValidationException;
 
+@Root(name = "parameter")
+@SuppressWarnings("serial")
 public class UserParameter extends Parameter {
 
 	public static final String DEFAULT_CLOUD_SERVICE_PARAMETER_NAME = "default.cloud.service";

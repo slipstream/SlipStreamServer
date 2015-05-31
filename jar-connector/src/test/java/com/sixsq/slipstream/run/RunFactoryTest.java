@@ -25,12 +25,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import com.sixsq.slipstream.persistence.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.exceptions.*;
+import com.sixsq.slipstream.factory.DeploymentFactory;
+import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -54,6 +59,7 @@ public class RunFactoryTest extends RunTest {
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
+		Event.muteForTests();
 		try {
 			RunTest.setupClass();
 		} catch (Exception e) {

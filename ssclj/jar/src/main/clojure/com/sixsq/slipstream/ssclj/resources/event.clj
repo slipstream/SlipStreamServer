@@ -1,17 +1,17 @@
 (ns 
   com.sixsq.slipstream.ssclj.resources.event
   (:require
-    [clojure.tools.logging :as log]
-    [schema.core :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
+    [clojure.tools.logging                                  :as log]
+    [schema.core                                            :as s]
+    [com.sixsq.slipstream.ssclj.resources.common.authz      :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.crud       :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud   :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.schema     :as c]))
 
-(def ^:const resource-tag :events)
-(def ^:const resource-name "Event")
-(def ^:const collection-name "EventCollection")
+(def ^:const resource-tag     :events)
+(def ^:const resource-name    "Event")
+(def ^:const collection-name  "EventCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
@@ -62,7 +62,7 @@
 
 (defmethod crud/add resource-name
   [request]  
-  (log/info resource-uri ": will add " (:body request))
+  (log/info resource-uri ": will add event " (:body request))
   (add-impl request))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))

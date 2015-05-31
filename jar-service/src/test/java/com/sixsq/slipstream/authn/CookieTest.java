@@ -34,6 +34,7 @@ import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.sixsq.slipstream.event.Event;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +87,7 @@ public class CookieTest extends ResourceTestBase {
 
 	@Before
 	public void setUpBeforeClass() throws Exception {
+		Event.muteForTests();
 		createAndStoreUser();
 		setupDeployments();
 		createPublicKeyFileAndSetConnector();

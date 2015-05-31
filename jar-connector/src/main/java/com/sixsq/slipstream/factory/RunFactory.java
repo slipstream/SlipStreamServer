@@ -323,6 +323,12 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename, RuntimeParameter.SCALE_STATE_KEY),
 				RuntimeParameter.SCALE_STATE_DEFAULT_VALUE, RuntimeParameter.SCALE_STATE_DESCRIPTION);
 
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename, RuntimeParameter.PRE_SCALE_DONE),
+				RuntimeParameter.PRE_SCALE_DONE_DEFAULT_VALUE, RuntimeParameter.PRE_SCALE_DONE_DESCRIPTION);
+
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename, RuntimeParameter.SCALE_IAAS_DONE),
+				RuntimeParameter.SCALE_IAAS_DONE_DEFAULT_VALUE, RuntimeParameter.SCALE_IAAS_DONE_DESCRIPTION);
+
 	}
 
 	protected void initOrchestrators(Run run) throws ConfigurationException, ValidationException {

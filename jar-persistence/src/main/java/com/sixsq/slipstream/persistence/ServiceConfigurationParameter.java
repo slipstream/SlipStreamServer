@@ -23,7 +23,19 @@ package com.sixsq.slipstream.persistence;
 import java.util.regex.Pattern;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Root;
+
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
+
+
+@Root(name = "parameter")
+@SuppressWarnings("serial")
 public class ServiceConfigurationParameter extends Parameter {
 
 	@SuppressWarnings("unused")

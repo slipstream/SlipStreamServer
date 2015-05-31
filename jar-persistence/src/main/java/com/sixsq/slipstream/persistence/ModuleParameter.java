@@ -22,9 +22,12 @@ package com.sixsq.slipstream.persistence;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
+@Root(name = "parameter")
+@SuppressWarnings("serial")
 public class ModuleParameter extends Parameter {
 
 	private static final String INSTANCE_TYPE_INHERITED = ImageModule.INSTANCE_TYPE_INHERITED;

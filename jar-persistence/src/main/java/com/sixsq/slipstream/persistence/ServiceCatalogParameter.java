@@ -24,7 +24,18 @@ import java.util.regex.Pattern;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
+import org.simpleframework.xml.Root;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+@Root(name = "parameter")
+@SuppressWarnings("serial")
 public class ServiceCatalogParameter extends Parameter {
+
+	@Id
+	@GeneratedValue
+	Long id;
 
 	public ServiceCatalogParameter(String name, String value, String description) throws ValidationException {
 		super(name, value, description);

@@ -28,6 +28,12 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
 
 import com.sixsq.slipstream.exceptions.*;
+import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
+import com.sixsq.slipstream.exceptions.InvalidStateException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -40,6 +46,7 @@ import org.restlet.resource.ResourceException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.run.RuntimeParameterMediator;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 
@@ -141,6 +148,9 @@ public class RuntimeParameterResource extends RunBaseResource {
 				abortOrReset(value, em);
 				setValue(value);
 			}
+		} else if (isGlobalStateParameter()) {
+			States newState = attemptChangeGlobalState(value);
+			setValue(newState.toString());
 		} else {
 			setValue(value);
 		}
@@ -168,26 +178,74 @@ public class RuntimeParameterResource extends RunBaseResource {
 	@Post
 	public void tryAdvanceState(Representation entity) {
 
-        if(!runtimeParameter.getName().equals(RuntimeParameter.COMPLETE_KEY)) {
-            throwClientConflicError("Only " + RuntimeParameter.COMPLETE_KEY + " key can be posted");
-        }
-        runtimeParameter.setValue("true");
+		if (!runtimeParameter.getName().equals(RuntimeParameter.COMPLETE_KEY)) {
+			throwClientConflicError("Only " + RuntimeParameter.COMPLETE_KEY + " key can be posted");
+		}
+		runtimeParameter.setValue("true");
 		runtimeParameter.store();
 
 		States newState = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
-		runtimeParameter = (RuntimeParameter) RuntimeParameter.load(runtimeParameter.getResourceUri(), RuntimeParameter.class, em);//em.merge(runtimeParameter);
+		runtimeParameter = (RuntimeParameter) RuntimeParameter.load(runtimeParameter.getResourceUri(), RuntimeParameter.class, em);
 
-        String nodeName = runtimeParameter.getNodeName();
+		String nodeName = runtimeParameter.getNodeName();
 		try {
 			newState = attemptStateUpdate(em);
-            em.close();
+			em.close();
 		} catch (SlipStreamDatabaseException e) {
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Error in state machine");
 		}
 
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
+	}
+
+	private States attemptChangeGlobalState(String toState) {
+		States toNewState = null;
+		try {
+			toNewState = States.valueOf(toState);
+		} catch (IllegalArgumentException e) {
+			throwClientBadRequest("Requested transition to unknown state: " + toState);
+		}
+		States newState = null;
+		// Jumping between states with an abort flag set on the run is not a good practice.
+		if (isAbortSet()) {
+			throwClientBadRequest("Please clear the abort state before attempting a state transition.");
+		}
+
+		Run run = Run.loadFromUuid(getUuid());
+		States currentState = run.getState();
+		if (run.isMutable() && States.Ready == currentState && States.Provisioning == toNewState) {
+			newState = attemptChangeGlobalStateToProvisioning();
+		} else if (getUser().isSuper()) {
+			newState = toNewState;
+		} else {
+			throwClientBadRequest(String.format(
+					"Via API state can be advanced only on a mutable run and only from %s to %s", States.Ready,
+					States.Provisioning));
+		}
+
+		return newState;
+	}
+
+	private States attemptChangeGlobalStateToProvisioning() {
+		StateMachine sm = createStateMachine();
+		String fromToState = String.format("from %s to %s", States.Ready, States.Provisioning);
+		try {
+			sm.tryAdvanceToProvisionning();
+		} catch (InvalidStateException e) {
+			e.printStackTrace();
+			throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
+		} catch (CannotAdvanceFromTerminalStateException e) {
+			e.printStackTrace();
+			throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
+		}
+		States newState = sm.getState();
+		if (States.Provisioning != newState) {
+			throwServerError(String.format("Failed to advance state %s: requested doesn't match reached %s.",
+					fromToState, newState));
+		}
+		return newState;
 	}
 
 	private States attemptStateUpdate(EntityManager em) {
@@ -208,7 +266,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 		try {
 			em.getTransaction().commit();
 		} catch (PersistenceException e) {
-			if(em.getTransaction().isActive()) {
+			if (em.getTransaction().isActive()) {
 				em.getTransaction().rollback();
 			}
 			throw e;
@@ -246,5 +304,17 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	protected void logTimeDiff(String msg, long before) {
 		logTimeDiff(msg, before, System.currentTimeMillis());
+	}
+
+	private boolean isGlobalStateParameter() { 
+		return RuntimeParameter.GLOBAL_STATE_KEY.equals(key); 
+	}
+
+	private StateMachine createStateMachine() {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Run run = Run.loadFromUuid(getUuid(), em);
+		StateMachine sm = StateMachine.createStateMachine(run);
+		em.close();
+		return sm;
 	}
 }

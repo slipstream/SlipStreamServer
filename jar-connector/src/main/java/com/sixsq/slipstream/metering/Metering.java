@@ -24,9 +24,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
+import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -38,19 +41,36 @@ import com.sixsq.slipstream.util.Logger;
 
 public class Metering {
 
-	public static String populate(User user) throws ConfigurationException, ValidationException, NotFoundException,
-	        AbortException {
+	public static String populate(User user)
+			throws ConfigurationException, ValidationException, NotFoundException, AbortException {
 		Map<String, Integer> usageData = produceCloudUsageData(user);
 		String usages = sendToGraphite(user, usageData);
 		return usages;
 	}
 
-	public static Map<String, Integer> produceCloudUsageData(User user) throws ConfigurationException,
-	        ValidationException {
+	public static String populate(User user, Connector connector)
+			throws ConfigurationException, ValidationException, NotFoundException, AbortException {
+
+		List<String> cloudServiceNamesList = new ArrayList<String>();
+		cloudServiceNamesList.add(connector.getConnectorInstanceName());
+
+		Map<String, Integer> usageData = produceCloudUsageData(user, cloudServiceNamesList);
+		String usages = sendToGraphite(user, usageData);
+
+		return usages;
+	}
+
+	public static Map<String, Integer> produceCloudUsageData(User user)
+			throws ConfigurationException, ValidationException {
+		return produceCloudUsageData(user, ConnectorFactory.getCloudServiceNamesList());
+	}
+
+	public static Map<String, Integer> produceCloudUsageData(User user, List<String> cloudServiceNamesList)
+			throws ConfigurationException, ValidationException {
 		Map<String, Integer> cloudUsage = new HashMap<String, Integer>();
 		Map<String, Integer> vmUsage = Vm.usage(user.getName());
 
-		for (String cloud : ConnectorFactory.getCloudServiceNamesList()) {
+		for (String cloud : cloudServiceNamesList) {
 			Integer currentUsage = vmUsage.get(cloud);
 			if (currentUsage == null) {
 				currentUsage = 0;

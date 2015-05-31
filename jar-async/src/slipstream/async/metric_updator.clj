@@ -8,6 +8,6 @@
   (Configuration/getMeteringEnabled))
 
 (defn update-metric
-  [user]
-  (Metering/populate user))
+  [user connector]
+  (Metering/populate user connector))
 

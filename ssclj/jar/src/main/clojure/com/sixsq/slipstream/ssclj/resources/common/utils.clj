@@ -1,14 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils
   "General utilities for dealing with resources."
   (:require
-    [clojure.data.json :as json]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [clojure.edn :as edn]
-    [clj-time.core :as time]
-    [clj-time.format :as time-fmt]
-    [schema.core :as s]
-    [ring.util.response :as r])
+    [clojure.tools.logging    :as log]
+    [clojure.edn              :as edn]
+    [clj-time.core            :as time]
+    [clj-time.format          :as time-fmt]
+    [schema.core              :as s]
+    [ring.util.response       :as r])
   (:import
     [java.util UUID]
     [javax.xml.bind DatatypeConverter]))
@@ -25,7 +23,7 @@
       (r/response)
       (r/content-type "application/json")))
 
-(defn map-response 
+(defn map-response
   [msg status id]
   (-> {:status      status
        :message     msg
@@ -33,32 +31,28 @@
       (json-response)
       (r/status status)))
 
-(defn ex-response 
+(defn ex-response
   [msg status id]
   (ex-info msg (map-response msg status id)))
 
-(defn ex-not-found 
+(defn ex-not-found
   [id]
   (let [msg (str id " not found")]
     (ex-response msg 404 id)))
 
-(defn ex-conflict 
+(defn ex-conflict
   [id]
   (let [msg (str "conflict with " id)]
     (ex-response msg 409 id)))
 
-(defn ex-unauthorized 
+(defn ex-unauthorized
   [id]
   (let [msg (str "not authorized for '" id "'")]
     (ex-response msg 403 id)))
 
-(defn ex-forbidden 
-  [id]  
-  (ex-response "forbidden" 403 id))
-
 (defn ex-bad-method
   [{:keys [uri request-method] :as request}]
-  (-> (str "invalid method (" (name request-method) ") for " uri)
+  (-> (str "invalid method (" (name request-method) ") for " uri)    
       (ex-response 405 uri)))
 
 ;;
@@ -105,20 +99,24 @@
   [data]
   (time-fmt/parse (:date-time time-fmt/formatters) data))
 
+(defn valid-number?
+  [s]
+  (number? (read-string s)))
+
 (defn create-validation-fn
   "Creates a validation function that compares a resource against the
    given schema.  The generated function raises an exception with the
    violations of the schema and a 400 ring response. If everything's
    OK, then the resource itself is returned."
-  [schema]
-  (let [checker (s/checker schema)]
+   [schema]
+   (let [checker (s/checker schema)]
     (fn [resource]
-      (if-let [msg (checker resource)]
+      (if-let [msg (checker resource)]        
         (let [msg (str "resource does not satisfy defined schema: " msg)
-              response (-> {:status  400
-                            :message msg}
-                           (json-response)
-                           (r/status 400))]
+          response (->  {:status  400 :message msg}
+                        json-response
+                        (r/status 400))]
+          (log/warn msg)
           (throw (ex-info msg response)))
         resource))))
 
@@ -146,4 +144,44 @@
       (DatatypeConverter/parseBase64Binary)
       (String.)
       (edn/read-string)))
+
+(defn bad-query
+  [offset limit]
+  (throw
+    (ex-response
+      (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset,
+            ", limit:"limit")")
+      400 0)))
+
+(defn get-offset
+  [^String first]
+  (max 0 (dec (Integer. first))))
+
+(defn- first-last-to-offset-limit
+  "Converts $first and $last to (SQL equivalent) offset and limit"
+  [[^String first ^String last]]
+  (try
+    (cond
+      (every? nil? [first last]) {:offset 0                  :limit 0}
+      (nil? first)               {:offset 0                  :limit (Integer. last)}
+      (nil? last)                {:offset (get-offset first) :limit 0}
+      :else                      {:offset (get-offset first) :limit (- (Integer. last) (get-offset first))})
+    (catch NumberFormatException nfe
+      (bad-query first last))))
+
+(defn- first-last
+  "Extracts $first and $last from query-params of options"
+  [options]
+  (->> options
+       :query-params
+       ((juxt #(get % "$first") #(get % "$last")))))
+
+(defn offset-limit
+  "Extracts $first and $last from query-params of options and
+  converts it to (SQL equivalent) offset and limit"
+  [options]
+  (-> options
+      first-last
+      first-last-to-offset-limit))
+
 

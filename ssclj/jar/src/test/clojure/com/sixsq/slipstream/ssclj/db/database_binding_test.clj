@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.db.database-binding-test
-  (:refer-clojure :exclude [update])
+  (:refer-clojure                                           :exclude [update])
   (:require    
     [com.sixsq.slipstream.ssclj.db.database-binding         :as dbb] 
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize]]
@@ -14,9 +14,10 @@
 (log/info "All resources deleted")
 
 ;; Given a clean database
-
-(def data {:id "Type/123" :name "alfred" :age 23})
-(def response-add (.add db data))
+(def data {:id "Type/123" :name "alfred" :age 23
+           :acl {:owner {:type "USER" :principal "alfred"}
+                 :rules [{:type "USER" :principal "alfred" :right "ALL"}]}})
+(def response-add (.add db "Type" data))
 ;; When we add data
 
 (expect 201 (:status response-add))
@@ -38,7 +39,7 @@
 ;; (expect clojure.lang.ExceptionInfo (.add db data))
 ;; TODO : something to be done with transaction?
 (try
-  (.add db data)
+  (.add db "Type" data)
   (expect false "should have been caught")
   (catch Exception e 
     (log/info "caught exception: class=" (class e))))
@@ -52,9 +53,10 @@
 (expect data retrieved)
 ;; Then it equals what was added
 
-(def collection (.query db "Type" {}))
+(def collection (.query db "Type" {:identity
+                                   {:current "alfred"
+                                    :authentications {"alfred" {:identity "alfred" :roles []}}}}))
+
 (expect (list data) collection)
 (expect empty? (.query db "Unknown" {}))
 ;; Then collections can be queried
-
-

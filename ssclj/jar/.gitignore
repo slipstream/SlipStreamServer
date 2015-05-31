@@ -17,3 +17,9 @@
 .project
 .lein-repl-history
 .nrepl-port
+
+# Intellij #
+############
+lib
+.idea/
+*.iml
