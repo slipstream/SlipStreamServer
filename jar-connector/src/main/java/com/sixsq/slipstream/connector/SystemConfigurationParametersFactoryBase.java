@@ -142,7 +142,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 				"Use native cloud contextualisation",
 				getNativeContextualizationOptions(),
 				NATIVE_CONTEXTUALIZATION_DEFAULT,
-				"Here you can define when SlipStream should use the native Cloud contextualization mechanisme or when it should try other methods like SSH and WinRM. <br/>",
+				"Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>",
 				10);
 	}
 
