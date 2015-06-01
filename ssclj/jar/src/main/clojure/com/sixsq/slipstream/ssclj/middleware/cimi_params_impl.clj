@@ -79,12 +79,13 @@
 
 (defn filter-conjunction
   "A reduction function that will combine the given filter(s) with a
-  logical AND expression."
+  logical AND expression.  Essentially just conj except if no argument
+  is given, then an empty list is returned."
 
   ([]
     [])
   ([a m]
-   [:AndExpr a m]))
+   (conj a m)))
 
 (defn process-filter
   "Adds the :filter key to the :cimi-params map in the request.  If

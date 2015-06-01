@@ -132,6 +132,21 @@
         (set-and-extract process-filter "filter" "a=1"))
 
 (expect [:AndExpr
-          [:AndExpr [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]
+          [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]
+        (set-and-extract process-filter "filter" ["a=1"]))
+
+(expect [:AndExpr
+          [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]
           [:AndExpr [:Comp [:Attribute "b"] [:Op "="] [:IntValue "2"]]]]
         (set-and-extract process-filter "filter" ["a=1" "b=2"]))
+
+(expect (set-and-extract process-filter "filter" "a=1")
+        (set-and-extract process-filter "filter" ["a=1"]))
+
+(expect (set-and-extract process-filter "filter" "a=1 and b=2")
+        (set-and-extract process-filter "filter" ["a=1" "b=2"]))
+
+(expect (set-and-extract process-filter "filter" "a=1 and b=2 and c=3")
+        (set-and-extract process-filter "filter" ["a=1" "b=2" "c=3"]))
+
+
