@@ -250,6 +250,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		putLaunchParamPlatform(launchParams, run);
 		putLaunchParamLoginUser(launchParams, run);
 		putLaunchParamExtraDiskVolatile(launchParams, run);
+		putLaunchParamNativeContextualization(launchParams, run);
 		return launchParams;
 	}
 
@@ -272,6 +273,14 @@ public abstract class CliConnectorBase extends ConnectorBase {
 			if (extraDiskGb != null && !extraDiskGb.isEmpty()) {
 				launchParams.put("extra-disk-volatile", extraDiskGb);
 			}
+		}
+	}
+
+	private void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run) throws ValidationException {
+		String key = SystemConfigurationParametersFactoryBase.NATIVE_CONTEXTUALIZATION_KEY;
+		String nativeContextualization = Configuration.getInstance().getProperty(constructKey(key));
+		if (nativeContextualization != null) {
+			launchParams.put(key, nativeContextualization);
 		}
 	}
 
