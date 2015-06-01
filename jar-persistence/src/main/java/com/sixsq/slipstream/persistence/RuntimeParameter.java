@@ -190,6 +190,14 @@ public class RuntimeParameter extends Metadata {
 
 	public static final List<String> SPECIAL_PARAMETERS = Arrays.asList(RuntimeParameter.INSTANCE_ID_KEY);
 
+	public static final String PRE_SCALE_DONE = "pre.scale.done";
+	public static final String PRE_SCALE_DONE_DEFAULT_VALUE = "";
+	public static final String PRE_SCALE_DONE_DESCRIPTION = "Pre-scale script ran or not.";
+
+	public static final String SCALE_IAAS_DONE = "scale.iaas.done";
+	public static final String SCALE_IAAS_DONE_DEFAULT_VALUE = "";
+	public static final String SCALE_IAAS_DONE_DESCRIPTION = "Orchestrator completed scaling IaaS action on the node instance.";
+
 	public static String extractNodeNamePart(String name) {
 		if (!name.contains(NODE_PROPERTY_SEPARATOR)) {
 			return null;
