@@ -1,10 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.cimi-filter
+  (:refer-clojure :exclude [update])
   (:require
     [clojure.string                                           :refer [split]]
     [instaparse.core                                          :as insta]
     [instaparse.transform                                     :as it]
     [com.sixsq.slipstream.ssclj.filter.parser                 :as parser]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]))
 
 ;;
 ;; Partial Implementation of CIMI resource filtering.
@@ -62,17 +63,22 @@
   [tree]
   (it/transform transformations tree))
 
-(defn handle-failure
+(defn- handle-failure
   [tree]
   (if (insta/failure? tree)
     (throw (IllegalArgumentException. (str "wrong format: " (insta/get-failure tree))))
     tree))
+
+(defn cimi-filter-tree
+  [cimi-filter-tree resources]
+  (if (empty? (second cimi-filter-tree))
+    resources
+    (filter (to-predicates cimi-filter-tree) resources)))
 
 (defn cimi-filter
   [resources cimi-filter-expression]
   (-> cimi-filter-expression
       parser/parse-cimi-filter
       handle-failure
-      to-predicates
-      (filter resources)))
+      (cimi-filter-tree resources)))
 

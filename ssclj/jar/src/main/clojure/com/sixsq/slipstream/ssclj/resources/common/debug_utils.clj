@@ -2,7 +2,7 @@
   (:require [clojure.pprint :refer [pp pprint]]))
 
 (defn show 
-  [x] 
+  [x]
   (println "SHOW----")
   (println ":-> " (class x))
   (pprint x) 

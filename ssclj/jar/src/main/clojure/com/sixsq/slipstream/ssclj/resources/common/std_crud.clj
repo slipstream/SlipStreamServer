@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud         :as crud]
     [com.sixsq.slipstream.ssclj.db.impl                       :as db]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
-    ))
+    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter  :as cf]))
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
@@ -72,11 +72,13 @@
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
-    (fn [request]         
+    (fn [request]
       (a/can-view? {:acl collection-acl} request)
-      (->> (select-keys request [:identity :query-params])
+
+      (->> (select-keys request [:identity :query-params :cimi-params])
            (db/query resource-name)
            u/walk-clojurify
+           (cf/cimi-filter-tree (get-in request [:cimi-params :filter]))
            (filter #(a/authorized-view? % request))           
            (map #(crud/set-operations % request))
            (wrapper-fn request)
