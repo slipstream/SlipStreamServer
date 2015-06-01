@@ -36,6 +36,7 @@
   (is (= [event2]   (cimi-filter events "type='critical' or type='BB'")))
   (is (= []         (cimi-filter events "type='AA' or type='BB'")))
   (is (= events     (cimi-filter events "type='state' or type='critical'")))
+  (is (= events     (cimi-filter events "(type='state') or (type='critical')")))
   (is (= events     (cimi-filter events "content/resource/href='run/1234' or type='critical'")))
   (is (= events     (cimi-filter events "content/resource/href='run/1234' or type='critical' or type='state'"))))
 

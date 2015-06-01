@@ -42,6 +42,12 @@
         "<"   (<  0 (compare value actual-value))
         ">"   (>  0 (compare value actual-value))))))
 
+(defn handle-comp
+  ([_]
+    identity)
+  ([[_ a] [_ o] v]
+    (mk-pred-attribute-value a o v)))
+
 (defn- remove-quotes
   [s]
   (subs s 1 (dec (count s))))
@@ -55,7 +61,7 @@
   {:SingleQuoteString   remove-quotes
    :DoubleQuoteString   remove-quotes
    :DateValue           identity
-   :Comp                (fn[[_ a] [_ o] v]  (mk-pred-attribute-value a o v))
+   :Comp                handle-comp
    :AndExpr             (fn [& comps]       (apply every-pred comps))
    :Filter              (fn [& preds]       (some-pred preds))})
 

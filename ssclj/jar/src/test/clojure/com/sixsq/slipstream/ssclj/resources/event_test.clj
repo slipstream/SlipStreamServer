@@ -84,7 +84,8 @@
   (-> (session (ring-app))
       (content-type "application/json")
       (header authn-info-header "jane")
-      (request (str base-uri query-string))
+      (request (str base-uri query-string)
+               :content-type "application/x-www-form-urlencoded")
       (t/body->json)
       (t/is-key-value :count expected-count)))
 
@@ -99,4 +100,14 @@
   (doseq [i (range 20)]
     (is-count 1 (str "?$filter=content/resource/href='Run/" i "'")))
   (is-count 0 "?$filter=content/resource/href='Run/100'")
+
+  ; content/resource/href='Run/3' and type='state'
+  (is-count 1 "?%24filter=content%2Fresource%2Fhref%3D%27Run%2F3%27%20and%20type%3D%27state%27")
+
+  ; content/resource/href='Run/3' and type='WRONG'
+  (is-count 0 "?%24filter=content%2Fresource%2Fhref%3D%27Run%2F3%27%20and%20type%3D%27WRONG%27")
   (is-count 20 "?$filter=type='state'"))
+
+(deftest filter-or
+  (is-count 20 "?%24filter=%28type%3D%27state%27%29%20or%20%28type%3D%27XXX%27%29")
+  (is-count 20 "?%24filter=%28type%3D%27XXXX%27%29%20or%20%28type%3D%27state%27%29"))

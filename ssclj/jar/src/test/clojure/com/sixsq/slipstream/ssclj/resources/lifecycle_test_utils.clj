@@ -27,7 +27,7 @@
 
 (defn is-key-value [m k v]
   (let [actual (get-in m [:response :body k])]
-    (is (= v actual) (str "Got '" actual "', wanted '" v))
+    (is (= v actual) (str "Got '" actual "', wanted '" v "'"))
     m))
 
 (defn is-resource-uri [m type-uri]

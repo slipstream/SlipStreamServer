@@ -127,13 +127,11 @@
 (expect [["a" :desc]] (set-and-extract process-orderby "orderby" ["a:desc" ":b"]))
 (expect [["a" :desc] ["b" :desc]] (set-and-extract process-orderby "orderby" [" a : desc " "b : desc"]))
 
-(expect [:Filter
-         [:AndExpr
-          [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]]
+(expect [:AndExpr
+          [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]
         (set-and-extract process-filter "filter" "a=1"))
 
-(expect [:Filter
-         [:AndExpr
+(expect [:AndExpr
           [:AndExpr [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]
-          [:AndExpr [:Comp [:Attribute "b"] [:Op "="] [:IntValue "2"]]]]]
+          [:AndExpr [:Comp [:Attribute "b"] [:Op "="] [:IntValue "2"]]]]
         (set-and-extract process-filter "filter" ["a=1" "b=2"]))

@@ -98,7 +98,6 @@
        (remove insta/failure?)
        (map second)
        (reduce filter-conjunction)
-       (conj [:Filter])
        (add-cimi-param req :filter)))
 
 (defn comma-split
