@@ -37,8 +37,8 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 
 	public static final String NATIVE_CONTEXTUALIZATION_NEVER = "never";
 	public static final String NATIVE_CONTEXTUALIZATION_ALWAYS = "always";
-	public static final String NATIVE_CONTEXTUALIZATION_LINUX_ONLY = "linux only";
-	public static final String NATIVE_CONTEXTUALIZATION_WINDOWS_ONLY = "windows only";
+	public static final String NATIVE_CONTEXTUALIZATION_LINUX_ONLY = "linux-only";
+	public static final String NATIVE_CONTEXTUALIZATION_WINDOWS_ONLY = "windows-only";
 
 	public static final String NATIVE_CONTEXTUALIZATION_DEFAULT = NATIVE_CONTEXTUALIZATION_LINUX_ONLY;
 
