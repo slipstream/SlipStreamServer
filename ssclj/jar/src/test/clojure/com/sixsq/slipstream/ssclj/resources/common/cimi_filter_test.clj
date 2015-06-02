@@ -36,7 +36,9 @@
   (is (= [event2]   (cimi-filter events "type='critical' or type='BB'")))
   (is (= []         (cimi-filter events "type='AA' or type='BB'")))
   (is (= events     (cimi-filter events "type='state' or type='critical'")))
+  (is (= events     (cimi-filter events "type='critical' or type='state'")))
   (is (= events     (cimi-filter events "(type='state') or (type='critical')")))
+  (is (= events     (cimi-filter events "(type='critical') or (type='state')")))
   (is (= events     (cimi-filter events "content/resource/href='run/1234' or type='critical'")))
   (is (= events     (cimi-filter events "content/resource/href='run/1234' or type='critical' or type='state'"))))
 
@@ -74,6 +76,7 @@
 (deftest filter-cimi-multiple-ands
   (is (= events   (cimi-filter events "content/state='init'")))
   (is (= [event1] (cimi-filter events "content/state='init' and type='state'")))
+  (is (= events (cimi-filter events "(content/state='init' and type='state')")))
   (is (= [event2] (cimi-filter events "content/state='init' and type!='state'")))
   (is (= [event2] (cimi-filter events "content/state='init' and type='critical' and updated>'2016-01-01'")))
   (is (= [event2] (cimi-filter events "content/state='init' and type='critical' and updated>'2016-01-01' and created>'2015-01-01'")))

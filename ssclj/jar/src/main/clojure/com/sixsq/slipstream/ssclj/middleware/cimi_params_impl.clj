@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.middleware.accepted-mime-types :as mime]
     [clojure.string :as s]
-    [instaparse.core :as insta]))
+    [instaparse.core :as insta]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (defn add-cimi-param
   "Adds the given key and value to the :cimi-params map in the
@@ -87,6 +88,11 @@
   ([a m]
    (conj a m)))
 
+(defn join-wrap-and
+  [filters]
+  (->>  (map #(str "(" % ")") filters)
+        (clojure.string/join " and ")))
+
 (defn process-filter
   "Adds the :filter key to the :cimi-params map in the request.  If
   the $filter parameter appears more than once, then the filters are
@@ -94,11 +100,26 @@
 
   [{:keys [params] :or {:params {}} :as req}]
   (->> (get params "$filter")
+       du/show
        (as-vector)
-       (map parser/parse-cimi-filter)
-       (remove insta/failure?)
-       (map second)
-       (reduce filter-conjunction)
+       join-wrap-and
+       du/show
+       parser/parse-cimi-filter
+       du/show
+       ;
+       ;
+       ;
+       ;
+       ;du/show
+       ;(remove insta/failure?)
+       ;(map second)
+       ;
+       ;du/show
+       ;(reduce filter-conjunction)
+       ;du/show
+       ;(conj [:Filter])
+       ;du/show
+
        (add-cimi-param req :filter)))
 
 (defn comma-split
