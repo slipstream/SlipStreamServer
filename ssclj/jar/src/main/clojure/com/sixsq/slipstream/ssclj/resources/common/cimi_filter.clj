@@ -43,8 +43,8 @@
         ">"   (>  0 (compare value actual-value))))))
 
 (defn handle-comp
-  ([_]
-    identity)
+  ([x]
+    x)
   ([[_ a] [_ o] v]
     (mk-pred-attribute-value a o v)))
 
@@ -52,18 +52,22 @@
   [s]
   (subs s 1 (dec (count s))))
 
-(defn some-pred
-  [preds]
+(defn or-preds
+  [& preds]
   (fn [x]
     (some #(% x) preds)))
+
+(defn and-preds
+  [& preds]
+  (apply every-pred preds))
 
 (def ^:private transformations
   {:SingleQuoteString   remove-quotes
    :DoubleQuoteString   remove-quotes
    :DateValue           identity
    :Comp                handle-comp
-   :AndExpr             (fn [& comps]       (apply every-pred comps))
-   :Filter              (fn [& preds]       (some-pred preds))})
+   :AndExpr             and-preds
+   :Filter              or-preds })
 
 (defn to-predicates
   [tree]

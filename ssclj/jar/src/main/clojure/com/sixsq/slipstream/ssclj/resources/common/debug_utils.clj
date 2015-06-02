@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.debug-utils  
   (:require [clojure.pprint :refer [pp pprint]]))
+(defn show
 
-(defn show 
   [x]
   (println "SHOW----")
   (println ":-> " (class x))

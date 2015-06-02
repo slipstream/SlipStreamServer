@@ -39,6 +39,8 @@
 
 (def base-uri (str c/service-context resource-name))
 
+(def ^:private nb-events 4)
+
 (defn make-ring-app [resource-routes]
   (db/set-impl! (dbdb/get-instance))
   (-> resource-routes
@@ -69,7 +71,7 @@
 (defn insert-some-events
   []
   (reset-events)
-  (dotimes [i 1]
+  (dotimes [i nb-events]
     (-> (session (ring-app))
         (content-type "application/json")
         (header authn-info-header "jane")
@@ -89,11 +91,11 @@
       (t/is-key-value :count expected-count)))
 
 (deftest resources-pagination
-  (is-count 20  "")
+  (is-count nb-events  "")
   (is-count 0   "?$first=10&$last=5")
-  (is-count 6   "?$first=15")
-  (is-count 12  "?$last=12")
-  (is-count 2   "?$first=18&$last=19"))
+  (is-count 2   "?$first=3")
+  (is-count 2  "?$last=2")
+  (is-count 2   "?$first=3&$last=4"))
 
 (defn- urlencode-param
   [p]
@@ -112,7 +114,7 @@
           (str "?"))))
 
 (deftest resources-filtering
-  (doseq [i (range 20)]
+  (doseq [i (range nb-events)]
     (is-count 1 (str "?$filter=content/resource/href='Run/" i "'")))
   (is-count 0 "?$filter=content/resource/href='Run/100'")
 
@@ -123,18 +125,25 @@
   (is-count 1 (urlencode-params "?$filter=content/resource/href='Run/3'"))
   (is-count 0 (urlencode-params "?$filter=type='WRONG' and content/resource/href='Run/3'"))
   (is-count 0 (urlencode-params "?$filter=content/resource/href='Run/3' and type='WRONG'"))
-  (is-count 20 "?$filter=type='state'"))
+  (is-count nb-events "?$filter=type='state'"))
 
 (deftest filter-and
   (is-count 0 (urlencode-params "?$filter=type='state' and type='XXX'")))
 
 ;  (is-count 0 (urlencode-params "?$filter=type='YYY' and type='state'")))
 
+(deftest filter-or-1
+  (is-count 0 (urlencode-params "?$filter=type='XXX'"))
+  (is-count nb-events (urlencode-params "?$filter=type='state'"))
+  (is-count nb-events (urlencode-params "?$filter=type='state' or type='XXXX'"))
+  (is-count nb-events (urlencode-params "?$filter=type='XXXX' or type='state'"))
+  )
+
 (deftest filter-or
-  (is-count 20 (urlencode-params "?$filter=(type='state') or (type='XXX')"))
-  (is-count 20 (urlencode-params "?$filter=(type='XXXXX') or (type='state')"))
-  (is-count 20 (urlencode-params "?$filter=type='state' or type='XXX'"))
-  (is-count 20 (urlencode-params "?$filter=type='XXXXX' or type='state'")))
+  (is-count nb-events (urlencode-params "?$filter=(type='state') or (type='XXX')"))
+  (is-count nb-events (urlencode-params "?$filter=(type='XXXXX') or (type='state')"))
+  (is-count nb-events (urlencode-params "?$filter=type='state' or type='XXX'"))
+  (is-count nb-events (urlencode-params "?$filter=type='XXXXX' or type='state'")))
 
 (deftest filter-multiple
   (is-count 0 (urlencode-params "?$filter=type='state'&$filter=type='XXX'")))

@@ -28,6 +28,7 @@
 (deftest filter-cimi-simple-expression
   "Dotted notation is used to locate nested attribute"
   (is (= [event1] (cimi-filter events "type='state'")))
+  (is (= [event1] (cimi-filter events "(type='state')")))
   (is (= [event2] (cimi-filter events "type='critical'")))
   (is (= []       (cimi-filter events "type='unknown'"))))
 
@@ -76,7 +77,7 @@
 (deftest filter-cimi-multiple-ands
   (is (= events   (cimi-filter events "content/state='init'")))
   (is (= [event1] (cimi-filter events "content/state='init' and type='state'")))
-  (is (= events (cimi-filter events "(content/state='init' and type='state')")))
+  (is (= [event1] (cimi-filter events "(content/state='init' and type='state')")))
   (is (= [event2] (cimi-filter events "content/state='init' and type!='state'")))
   (is (= [event2] (cimi-filter events "content/state='init' and type='critical' and updated>'2016-01-01'")))
   (is (= [event2] (cimi-filter events "content/state='init' and type='critical' and updated>'2016-01-01' and created>'2015-01-01'")))

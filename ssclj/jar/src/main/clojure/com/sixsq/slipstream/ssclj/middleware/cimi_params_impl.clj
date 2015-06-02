@@ -88,7 +88,7 @@
   ([a m]
    (conj a m)))
 
-(defn join-wrap-and
+(defn wrap-join-with-and
   [filters]
   (->>  (map #(str "(" % ")") filters)
         (clojure.string/join " and ")))
@@ -99,13 +99,19 @@
   combined with a logical AND.  Invalid filters are silently ignored."
 
   [{:keys [params] :or {:params {}} :as req}]
-  (->> (get params "$filter")
-       du/show
-       (as-vector)
-       join-wrap-and
-       du/show
-       parser/parse-cimi-filter
-       du/show
+
+  (let [filter-param (get params "$filter")]
+    (if (nil? filter-param)
+      (add-cimi-param req :filter [:Filter])
+
+      (->> (get params "$filter")
+           (as-vector)
+           wrap-join-with-and
+           parser/parse-cimi-filter
+           (add-cimi-param req :filter)))))
+
+       ; (remove insta/failure?)
+
        ;
        ;
        ;
@@ -117,10 +123,8 @@
        ;du/show
        ;(reduce filter-conjunction)
        ;du/show
-       ;(conj [:Filter])
-       ;du/show
-
-       (add-cimi-param req :filter)))
+       ; (conj [:Filter])
+       ; (add-cimi-param req :filter)))
 
 (defn comma-split
   "Split string on commas, optionally surrounded by whitespace.  All values
