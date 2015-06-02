@@ -42,6 +42,9 @@
         "<"   (<  0 (compare value actual-value))
         ">"   (>  0 (compare value actual-value))))))
 
+;;
+;; FIXME: This will not correctly handle clauses like "'a'=attribute".
+;;
 (defn handle-comp
   ([x]
     x)
@@ -61,6 +64,9 @@
   [& preds]
   (apply every-pred preds))
 
+;;
+;; FIXME: This does not handle integers or booleans.
+;;
 (def ^:private transformations
   {:SingleQuoteString   remove-quotes
    :DoubleQuoteString   remove-quotes
