@@ -55,7 +55,7 @@
 (defn ring-app []
   (make-ring-app (t/concat-routes routes/final-routes)))
 
-(def valid-event { 
+(def valid-event {
   :acl {
     :owner {
       :type "USER" :principal "jane"}
@@ -63,7 +63,7 @@
   :timestamp "2015-01-16T08:05:00.0Z"
   :content  {
     :resource {:href "Run/45614147-aed1-4a24-889d-6365b0b1f2cd"}
-    :state "Started"} 
+    :state "Started"}
   :type "state"
   :severity "critical"
 })
@@ -128,9 +128,8 @@
   (is-count nb-events "?$filter=type='state'"))
 
 (deftest filter-and
-  (is-count 0 (urlencode-params "?$filter=type='state' and type='XXX'")))
-
-;  (is-count 0 (urlencode-params "?$filter=type='YYY' and type='state'")))
+  (is-count 0 (urlencode-params "?$filter=type='state' and type='XXX'"))
+  (is-count 0 (urlencode-params "?$filter=type='YYY' and type='state'")))
 
 (deftest filter-or-1
   (is-count 0 (urlencode-params "?$filter=type='XXX'"))
@@ -146,5 +145,5 @@
   (is-count nb-events (urlencode-params "?$filter=type='XXXXX' or type='state'")))
 
 (deftest filter-multiple
-  (is-count 0 (urlencode-params "?$filter=type='state'&$filter=type='XXX'")))
-  ;(is-count 1 (urlencode-params "?$filter=type='state'&$filter=content/resource/href='Run/3'")))
+  (is-count 0 (urlencode-params "?$filter=type='state'&$filter=type='XXX'"))
+  (is-count 1 (urlencode-params "?$filter=type='state'&$filter=content/resource/href='Run/3'")))

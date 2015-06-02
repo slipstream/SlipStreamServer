@@ -78,53 +78,31 @@
        (merge cimi-params)
        (assoc req :cimi-params)))
 
-(defn filter-conjunction
-  "A reduction function that will combine the given filter(s) with a
-  logical AND expression.  Essentially just conj except if no argument
-  is given, then an empty list is returned."
-
-  ([]
-    [])
-  ([a m]
-   (conj a m)))
-
 (defn wrap-join-with-and
+  "Wraps individual filters in parentheses and then combines them with
+   a logical AND."
   [filters]
   (->>  (map #(str "(" % ")") filters)
         (clojure.string/join " and ")))
 
+(defn remove-invalid-filter
+  [parse-result]
+  (when-not (insta/failure? parse-result)
+    parse-result))
+
 (defn process-filter
   "Adds the :filter key to the :cimi-params map in the request.  If
   the $filter parameter appears more than once, then the filters are
-  combined with a logical AND.  Invalid filters are silently ignored."
+  combined with a logical AND.  If the resulting filter is invalid,
+  then it is ignored."
 
   [{:keys [params] :or {:params {}} :as req}]
-
-  (let [filter-param (get params "$filter")]
-    (if (nil? filter-param)
-      (add-cimi-param req :filter [:Filter])
-
-      (->> (get params "$filter")
-           (as-vector)
-           wrap-join-with-and
-           parser/parse-cimi-filter
-           (add-cimi-param req :filter)))))
-
-       ; (remove insta/failure?)
-
-       ;
-       ;
-       ;
-       ;
-       ;du/show
-       ;(remove insta/failure?)
-       ;(map second)
-       ;
-       ;du/show
-       ;(reduce filter-conjunction)
-       ;du/show
-       ; (conj [:Filter])
-       ; (add-cimi-param req :filter)))
+  (->> (get params "$filter")
+       (as-vector)
+       (wrap-join-with-and)
+       (parser/parse-cimi-filter)
+       (remove-invalid-filter)
+       (add-cimi-param req :filter)))
 
 (defn comma-split
   "Split string on commas, optionally surrounded by whitespace.  All values

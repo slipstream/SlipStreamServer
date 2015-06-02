@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.middleware.cimi-params-impl-test
   (:require
+    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params-impl :refer :all]
     [expectations :refer :all]))
 
@@ -127,26 +128,45 @@
 (expect [["a" :desc]] (set-and-extract process-orderby "orderby" ["a:desc" ":b"]))
 (expect [["a" :desc] ["b" :desc]] (set-and-extract process-orderby "orderby" [" a : desc " "b : desc"]))
 
-(expect [:AndExpr
-          [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]
+(expect [:Filter
+         [:AndExpr
+          [:Comp
+           [:Filter
+            [:AndExpr
+             [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]]]]]
         (set-and-extract process-filter "filter" "a=1"))
 
-(expect [:AndExpr
-          [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]
+(expect [:Filter
+         [:AndExpr
+          [:Comp
+           [:Filter
+            [:AndExpr
+             [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]]]]]
         (set-and-extract process-filter "filter" ["a=1"]))
 
-(expect [:AndExpr
-          [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]
-          [:AndExpr [:Comp [:Attribute "b"] [:Op "="] [:IntValue "2"]]]]
+(expect [:Filter
+         [:AndExpr
+          [:Comp
+           [:Filter
+            [:AndExpr
+             [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]]]
+          [:AndExpr
+           [:Comp
+            [:Filter
+             [:AndExpr
+              [:Comp [:Attribute "b"] [:Op "="] [:IntValue "2"]]]]]]]]
         (set-and-extract process-filter "filter" ["a=1" "b=2"]))
 
 (expect (set-and-extract process-filter "filter" "a=1")
         (set-and-extract process-filter "filter" ["a=1"]))
 
-(expect (set-and-extract process-filter "filter" "a=1 and b=2")
+(expect (parser/parse-cimi-filter "(a=1) and (b=2)")
         (set-and-extract process-filter "filter" ["a=1" "b=2"]))
 
-(expect (set-and-extract process-filter "filter" "a=1 and b=2 and c=3")
+(expect (parser/parse-cimi-filter "(a=1) and (b=2) and (c=3)")
         (set-and-extract process-filter "filter" ["a=1" "b=2" "c=3"]))
+
+(expect (parser/parse-cimi-filter "(a=1 or c=3) and (b=2)")
+        (set-and-extract process-filter "filter" ["a=1 or c=3" "b=2"]))
 
 
