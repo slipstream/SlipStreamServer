@@ -181,11 +181,11 @@ public class RuntimeParameter extends Metadata {
 	public static final String SCALE_STATE_DESCRIPTION = "Defined scalability state";
 
 	public static final String PRE_SCALE_DONE_KEY = "pre.scale.done";
-	public static final String PRE_SCALE_DONE_DEFAULT_VALUE = "";
+	public static final String PRE_SCALE_DONE_DEFAULT_VALUE = "false";
 	public static final String PRE_SCALE_DONE_DESCRIPTION = "Node instance sets to 'true' after running pre-scale script";
 
 	public static final String SCALE_IAAS_DONE_KEY = "scale.iaas.done";
-	public static final String SCALE_IAAS_DONE_DEFAULT_VALUE = "";
+	public static final String SCALE_IAAS_DONE_DEFAULT_VALUE = "false";
 	public static final String SCALE_IAAS_DONE_DESCRIPTION = "Orchestrator sets to 'true' after scaling the node instance";
 
 	public static final List<String> SPECIAL_PARAMETERS = Arrays.asList(RuntimeParameter.INSTANCE_ID_KEY);
