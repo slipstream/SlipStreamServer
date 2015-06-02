@@ -129,20 +129,19 @@
 
 (deftest filter-and
   (is-count 0 (urlencode-params "?$filter=type='state' and type='XXX'"))
-  (is-count 0 (urlencode-params "?$filter=type='YYY' and type='state'")))
+  (is-count 0 (urlencode-params "?$filter=type='YYY' and type='state'"))
+  (is-count 0 (urlencode-params "?$filter=(type='state') and (type='XXX')"))
+  (is-count 0 (urlencode-params "?$filter=(type='YYY') and (type='state')")))
 
-(deftest filter-or-1
+(deftest filter-or
   (is-count 0 (urlencode-params "?$filter=type='XXX'"))
   (is-count nb-events (urlencode-params "?$filter=type='state'"))
   (is-count nb-events (urlencode-params "?$filter=type='state' or type='XXXX'"))
   (is-count nb-events (urlencode-params "?$filter=type='XXXX' or type='state'"))
-  )
-
-(deftest filter-or
   (is-count nb-events (urlencode-params "?$filter=(type='state') or (type='XXX')"))
   (is-count nb-events (urlencode-params "?$filter=(type='XXXXX') or (type='state')"))
-  (is-count nb-events (urlencode-params "?$filter=type='state' or type='XXX'"))
-  (is-count nb-events (urlencode-params "?$filter=type='XXXXX' or type='state'")))
+  (is-count 0 (urlencode-params "?$filter=type='XXXXX' or type='YYYY'"))
+  (is-count 0 (urlencode-params "?$filter=(type='XXXXX') or (type='YYYY')")))
 
 (deftest filter-multiple
   (is-count 0 (urlencode-params "?$filter=type='state'&$filter=type='XXX'"))
