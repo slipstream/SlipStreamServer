@@ -340,6 +340,12 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename, RuntimeParameter.SCALE_IAAS_DONE_KEY),
 				RuntimeParameter.SCALE_IAAS_DONE_DEFAULT_VALUE, RuntimeParameter.SCALE_IAAS_DONE_DESCRIPTION);
 
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename, RuntimeParameter.SCALE_DISK_ATTACH_SIZE_KEY),
+				RuntimeParameter.SCALE_DISK_ATTACH_SIZE_DEFAULT_VALUE, RuntimeParameter.SCALE_DISK_ATTACH_SIZE_DESCRIPTION);
+
+		run.assignRuntimeParameter(RuntimeParameter.constructParamName(nodename, RuntimeParameter.SCALE_DISK_DETACH_DEVICE_KEY),
+				RuntimeParameter.SCALE_DISK_DETACH_DEVICE_DEFAULT_VALUE, RuntimeParameter.SCALE_DISK_DETACH_DEVICE_DESCRIPTION);
+
 	}
 
 	protected void initOrchestratorsNodeNames(Run run) throws ConfigurationException, ValidationException {
