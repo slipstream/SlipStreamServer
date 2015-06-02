@@ -30,6 +30,7 @@ import org.simpleframework.xml.ElementList;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleView;
+import org.simpleframework.xml.Root;
 
 /**
  * For unittests
@@ -38,6 +39,7 @@ import com.sixsq.slipstream.module.ModuleView;
  * 
  */
 @Entity
+@Root(name = "Project")
 @SuppressWarnings("serial")
 public class ProjectModule extends Module {
 
@@ -45,8 +47,8 @@ public class ProjectModule extends Module {
 	@ElementList(required = false)
 	private List<ModuleView> children = new ArrayList<ModuleView>();
 
-	protected ProjectModule() {
-		super();
+	private ProjectModule() {
+		super(ModuleCategory.Project);
 	}
 
 	public ProjectModule(String name) throws ValidationException {
@@ -61,12 +63,12 @@ public class ProjectModule extends Module {
 		this.children = children;
 	}
 
-	public static ProjectModule load(String resourceUri) {
-		ProjectModule project = (ProjectModule) Module.load(resourceUri);
+	public static ProjectModule load(String id) {
+		ProjectModule project = (ProjectModule) Module.load(id);
 		if (project == null) {
 			return null;
 		}
-		project.setChildren(Module.viewList(resourceUri));
+		project.setChildren(Module.viewList(id));
 		return project;
 	}
 

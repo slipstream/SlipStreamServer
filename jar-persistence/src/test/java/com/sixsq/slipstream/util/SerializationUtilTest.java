@@ -22,7 +22,6 @@ package com.sixsq.slipstream.util;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sixsq.slipstream.persistence.ModuleCategory;
 import org.junit.Test;
 import org.simpleframework.xml.Attribute;
 import org.w3c.dom.Document;
@@ -35,21 +34,21 @@ public class SerializationUtilTest {
 	@Test
 	public void verifySerializationCycle() throws SlipStreamClientException {
 
-		TestClass test = new TestClass("name", "resourceUrl");
+		TestClass test = new TestClass("name", "id");
 
 		String asString = SerializationUtil.toXmlString(test);
 		TestClass recovered = (TestClass) SerializationUtil.fromXml(asString,
 				TestClass.class);
 
 		assertEquals(test.getName(), recovered.getName());
-		assertEquals(test.getResourceUri(), recovered.getResourceUri());
+		assertEquals(test.getId(), recovered.getId());
 	}
 
 	@Test
 	public void verifySerializationCycleWithDocument()
 			throws SlipStreamClientException {
 
-		TestClass test = new TestClass("name", "resourceUrl");
+		TestClass test = new TestClass("name", "id");
 
 		Document asDocument = SerializationUtil.toXmlDocument(test);
 		String asString = SerializationUtil.documentToString(asDocument);
@@ -57,7 +56,7 @@ public class SerializationUtilTest {
 				TestClass.class);
 
 		assertEquals(test.getName(), recovered.getName());
-		assertEquals(test.getResourceUri(), recovered.getResourceUri());
+		assertEquals(test.getId(), recovered.getId());
 	}
 
 	@SuppressWarnings("serial")
@@ -66,16 +65,14 @@ public class SerializationUtilTest {
 		@Attribute
 		private String name;
 
-		@Attribute
-		private String resourceUrl;
-
 		public TestClass() {
-
+			super("TestClass");
 		}
 
-		public TestClass(String name, String resourceUrl) {
+		public TestClass(String name, String id) {
+			super(id);
 			this.name = name;
-			this.resourceUrl = resourceUrl;
+			setId(id);
 		}
 
 		@Override
@@ -83,17 +80,9 @@ public class SerializationUtilTest {
 			return name;
 		}
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
-		}
-
-		@Override
-		public String getResourceUri() {
-			return resourceUrl;
-		}
-
-		public void setResourceUrl(String resourceUrl) {
-			this.resourceUrl = resourceUrl;
 		}
 
 		@Override

@@ -61,7 +61,7 @@ public abstract class OneShotAction {
 	@Enumerated(EnumType.STRING)
 	private State state;
 
-	private Timestamp lastModified;
+	private Timestamp updated;
 
 	@Column(length=1024)
 	private String encodedForm;
@@ -72,7 +72,7 @@ public abstract class OneShotAction {
 
 		encodedForm = null;
 
-		setLastModified();
+		setUpdated();
 	}
 
 	public OneShotAction(String userResourceUrl) {
@@ -95,21 +95,21 @@ public abstract class OneShotAction {
 		if (State.ACTIVE.equals(state)) {
 			if (!State.ACTIVE.equals(newState)) {
 				state = newState;
-				setLastModified();
+				setUpdated();
 			}
 		}
 	}
 
-	public Timestamp getLastModified() {
-        if (lastModified != null) {
-            return (Timestamp) lastModified.clone();
+	public Timestamp getUpdated() {
+        if (updated != null) {
+            return (Timestamp) updated.clone();
         } else {
             return null;
         }
 	}
 
-	protected void setLastModified() {
-		lastModified = new Timestamp(System.currentTimeMillis());
+	protected void setUpdated() {
+		updated = new Timestamp(System.currentTimeMillis());
 	}
 
 	public Form getForm() {

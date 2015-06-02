@@ -44,15 +44,15 @@ public class ModuleVersionView {
 	private Authz authz;
 
 	@Attribute
-	public final String resourceUri;
+	public final String id;
 
 	@Attribute
 	public String getName() {
-		return ModuleUriUtil.extractShortNameFromResourceUri(resourceUri);
+		return ModuleUriUtil.extractShortNameFromResourceUri(id);
 	}
 
 	@Attribute(required = false)
-	public final Date lastModified;
+	public final Date updated;
 
 	@Attribute
 	public final int version;
@@ -63,20 +63,20 @@ public class ModuleVersionView {
 	@Element(required = false)
 	public final Commit commit;
 
-	public ModuleVersionView(String resourceUri, int version,
-			Date lastModified, Commit commit, Authz authz,
+	public ModuleVersionView(String id, int version,
+			Date updated, Commit commit, Authz authz,
 			ModuleCategory category) {
 
-		this.resourceUri = resourceUri;
+		this.id = id;
 		this.version = version;
 		this.commit = commit;
 		this.authz = authz;
 		this.category = category;
 
-		if (lastModified != null) {
-			this.lastModified = (Date) lastModified.clone();
+		if (updated != null) {
+			this.updated = (Date) updated.clone();
 		} else {
-			this.lastModified = null;
+			this.updated = null;
 		}
 	}
 

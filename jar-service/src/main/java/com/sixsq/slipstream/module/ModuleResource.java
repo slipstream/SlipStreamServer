@@ -162,7 +162,7 @@ public class ModuleResource extends ParameterizedResource {
 			throwClientValidationError(e.getMessage());
 		}
 
-		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + target.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + target.getId());
 		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 	}
@@ -177,7 +177,7 @@ public class ModuleResource extends ParameterizedResource {
 		getParameterized().setDeleted(true);
 		getParameterized().store(false);
 
-		Module latest = Module.loadLatest(getParameterized().getResourceUri());
+		Module latest = Module.loadLatest(getParameterized().getId());
 		try {
 			if (latest == null) {
 				redirectToParent();
@@ -195,8 +195,8 @@ public class ModuleResource extends ParameterizedResource {
 	}
 	
 	private void redirectToParent() throws ValidationException {
-		String resourceUri = getParameterized().getResourceUri();
-		String parentResourceUri = ModuleUriUtil.extractParentUriFromResourceUri(resourceUri);
+		String id = getParameterized().getId();
+		String parentResourceUri = ModuleUriUtil.extractParentUriFromResourceUri(id);
 
 		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + parentResourceUri);
 		getResponse().setLocationRef(absolutePath);
@@ -204,7 +204,7 @@ public class ModuleResource extends ParameterizedResource {
 	}
 
 	private void redirectToLatest(Module latest) {
-		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + latest.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + latest.getId());
 		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}
@@ -227,7 +227,7 @@ public class ModuleResource extends ParameterizedResource {
 
 		updateOrCreate(module);
 
-		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + module.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + module.getId());
 		getResponse().setLocationRef(absolutePath);
 
 		if (!isExisting()) {
@@ -246,7 +246,7 @@ public class ModuleResource extends ParameterizedResource {
 
 		updateOrCreate(module);
 
-		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + module.getResourceUri());
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + module.getId());
 		getResponse().setLocationRef(absolutePath);
 
 		if (!isExisting()) {
@@ -297,7 +297,7 @@ public class ModuleResource extends ParameterizedResource {
 		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
-		getResponse().setLocationRef("/" + module.getResourceUri());
+		getResponse().setLocationRef("/" + module.getId());
 		setEmptyEntity(MediaType.APPLICATION_XML);
 	}
 
@@ -313,7 +313,7 @@ public class ModuleResource extends ParameterizedResource {
 		if (!isExisting()) {
 			getResponse().setStatus(Status.SUCCESS_CREATED);
 		}
-		getResponse().setLocationRef("/" + module.getResourceUri());
+		getResponse().setLocationRef("/" + module.getId());
 		setEmptyEntity(MediaType.APPLICATION_JSON);
 	}
 
@@ -387,7 +387,7 @@ public class ModuleResource extends ParameterizedResource {
 		String moduleUri = null;
 		String targetUri = null;
 		try {
-			moduleUri = ModuleUriUtil.extractVersionLessResourceUri(module.getResourceUri());
+			moduleUri = ModuleUriUtil.extractVersionLessResourceUri(module.getId());
 			targetUri = ModuleUriUtil.extractVersionLessResourceUri(getTargetParameterizeUri());
 		} catch (ValidationException e) {
 			throwClientValidationError(e.getMessage());
@@ -438,7 +438,7 @@ public class ModuleResource extends ParameterizedResource {
 		Module module = Module.load(targetParameterizedUri);
 		if (module != null) {
 			if (module.getCategory() == ModuleCategory.Project) {
-				List<ModuleView> children = Module.viewList(module.getResourceUri());
+				List<ModuleView> children = Module.viewList(module.getId());
 				((ProjectModule) module).setChildren(children);
 			}
 		}
@@ -594,7 +594,7 @@ public class ModuleResource extends ParameterizedResource {
 			}
 		}
 
-		return isExisting() ? Module.loadLatest(getParameterized().getResourceUri()).getAuthz().canPut(getUser())
+		return isExisting() ? Module.loadLatest(getParameterized().getId()).getAuthz().canPut(getUser())
 				: true;
 	}
 
@@ -659,7 +659,7 @@ public class ModuleResource extends ParameterizedResource {
 		Module module = getParameterized();
 		// Add runs for this specific module version (will not apply to project)
 		RunViewList runs = new RunViewList();
-		runs.populate(getUser(), module.getResourceUri(), 0, Run.DEFAULT_LIMIT);
+		runs.populate(getUser(), module.getId(), 0, Run.DEFAULT_LIMIT);
 		module.setRuns(runs);
 		return module;
 	}

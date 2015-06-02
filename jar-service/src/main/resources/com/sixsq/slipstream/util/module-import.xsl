@@ -36,7 +36,7 @@
 					</xsl:choose>
 				</xsl:attribute>
 				
-				<xsl:attribute name="resourceUri">
+				<xsl:attribute name="id">
 					<xsl:choose>
 						<xsl:when test="@parentUri = 'module/'">
 							<xsl:value-of select="concat(@parentUri, @shortName, '/', @version)" />
@@ -65,7 +65,7 @@
    	<xsl:template match="node()">
   		<xsl:copy>
 			<xsl:if test="name(.) = 'cloudImageIdentifier'">
-	  			<xsl:attribute name="resourceUri">
+	  			<xsl:attribute name="id">
 	  				<xsl:value-of select="concat(/*/@parentUri, /*/@shortName, '/', @version, '/', @cloudServiceName)" />
 	  			</xsl:attribute>
 			</xsl:if>

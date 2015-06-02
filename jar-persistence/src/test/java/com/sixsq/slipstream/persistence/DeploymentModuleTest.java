@@ -76,7 +76,7 @@ public class DeploymentModuleTest {
 		DeploymentModule module = new DeploymentModule(name);
 
 		assertEquals(name, module.getName());
-		assertEquals(resourceUrl, module.getResourceUri());
+		assertEquals(resourceUrl, module.getId());
 		assertEquals(ModuleCategory.Deployment, module.getCategory());
 
 	}
@@ -94,7 +94,7 @@ public class DeploymentModuleTest {
 		assertNotNull(moduleRestored);
 
 		assertEquals(module.getName(), moduleRestored.getName());
-		assertEquals(module.getResourceUri(), moduleRestored.getResourceUri());
+		assertEquals(module.getId(), moduleRestored.getId());
 		assertEquals(module.getCategory(), moduleRestored.getCategory());
 
 		module.remove();
@@ -109,7 +109,7 @@ public class DeploymentModuleTest {
 
 		Module module = new DeploymentModule(name);
 
-		String resourceUrl = module.getResourceUri();
+		String resourceUrl = module.getId();
 
 		String parameterName = "name";
 		String description = "description";
@@ -147,7 +147,7 @@ public class DeploymentModuleTest {
 
 		DeploymentModule module = new DeploymentModule(name);
 
-		String resourceUrl = module.getResourceUri();
+		String resourceUrl = module.getId();
 
 		ImageModule image = new ImageModule("image1ModuleWithParameterMappings");
 
@@ -189,9 +189,9 @@ public class DeploymentModuleTest {
 
 		module.remove();
 		assertNull(Module.load(resourceUrl));
-		assertNotNull(ImageModule.load(image.getResourceUri()));
+		assertNotNull(ImageModule.load(image.getId()));
 		image.remove();
-		assertNull(ImageModule.load(image.getResourceUri()));
+		assertNull(ImageModule.load(image.getId()));
 	}
 
 	@Test(expected = ValidationException.class)

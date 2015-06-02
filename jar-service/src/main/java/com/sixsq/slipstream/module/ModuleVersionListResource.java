@@ -38,14 +38,14 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ModuleVersionListResource extends BaseResource {
 
-	private String resourceUri = null;
+	private String id = null;
 
 	@Override
 	public void initialize() throws ResourceException {
 
-		resourceUri = ResourceUriUtil.extractResourceUri(getRequest());
+		id = ResourceUriUtil.extractResourceUri(getRequest());
 
-		if (resourceUri == null) {
+		if (id == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 		}
 	}
@@ -53,7 +53,7 @@ public class ModuleVersionListResource extends BaseResource {
 	@Override
 	protected void authorize() {
 
-		Module m = Module.loadLatest(resourceUri);
+		Module m = Module.loadLatest(id);
 
 		if (getUser().isSuper()) {
 			return;
@@ -64,13 +64,13 @@ public class ModuleVersionListResource extends BaseResource {
 
 		}
 
-		throwClientForbiddenError("Not allowed to access: " + resourceUri);
+		throwClientForbiddenError("Not allowed to access: " + id);
 	}
 
 	@Get("txt")
 	public Representation toTxt() {
 
-		String viewList = toXml(Module.viewListAllVersions(resourceUri));
+		String viewList = toXml(Module.viewListAllVersions(id));
 		return new StringRepresentation(viewList);
 	}
 
@@ -78,7 +78,7 @@ public class ModuleVersionListResource extends BaseResource {
 	public Representation toXml() {
 
 		ModuleVersionViewList list = new ModuleVersionViewList(
-				Module.viewListAllVersions(resourceUri));
+				Module.viewListAllVersions(id));
 		String result = SerializationUtil.toXmlString(list);
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
 	}
@@ -86,7 +86,7 @@ public class ModuleVersionListResource extends BaseResource {
 	@Get("json")
 	public Representation toJson() {
 
-		List<ModuleVersionView> list = Module.viewListAllVersions(resourceUri);
+		List<ModuleVersionView> list = Module.viewListAllVersions(id);
 		String result = SerializationUtil.toJsonString(list);
 		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
 	}
@@ -95,7 +95,7 @@ public class ModuleVersionListResource extends BaseResource {
 	public Representation toHtml() {
 
 		ModuleVersionViewList list = new ModuleVersionViewList(
-				Module.viewListAllVersions(resourceUri));
+				Module.viewListAllVersions(id));
 
 		return new StringRepresentation(
 				HtmlUtil.toHtml(list,

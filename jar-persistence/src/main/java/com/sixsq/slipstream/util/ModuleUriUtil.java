@@ -28,7 +28,7 @@ import com.sixsq.slipstream.persistence.Module;
  * have a slash at the end of the returned URLs.
  * 
  * Terminology - uri: /module/<parent>/<module>/<version> - shortName: if
- * <module> = project1/image1: shortName = image1 - resourceUri: uri - version:
+ * <module> = project1/image1: shortName = image1 - id: uri - version:
  * <version> - parent:
  * 
  * Unit test see
@@ -40,9 +40,9 @@ public class ModuleUriUtil {
 
 	private static int DEFAULT_VERSION = Module.DEFAULT_VERSION;
 
-	public static String extractShortNameFromResourceUri(String resourceUri) {
-		String[] slices = resourceUri.split("/");
-		int version = extractVersion(resourceUri);
+	public static String extractShortNameFromResourceUri(String id) {
+		String[] slices = id.split("/");
+		int version = extractVersion(id);
 		int index;
 		String last = slices[slices.length - 1];
 		if (version != DEFAULT_VERSION
@@ -54,16 +54,16 @@ public class ModuleUriUtil {
 		return slices[index];
 	}
 
-	public static String extractVersionLessResourceUri(String resourceUri)
+	public static String extractVersionLessResourceUri(String id)
 			throws ValidationException {
-		String parentUri = extractParentUriFromResourceUri(resourceUri);
-		String shortName = extractShortNameFromResourceUri(resourceUri);
+		String parentUri = extractParentUriFromResourceUri(id);
+		String shortName = extractShortNameFromResourceUri(id);
 		String sep = parentUri.endsWith("/") ? "" : "/";
 		return parentUri + sep + shortName;
 	}
 
-	private static int extractVersion(String resourceUri) {
-		String[] slices = resourceUri.split("/");
+	private static int extractVersion(String id) {
+		String[] slices = id.split("/");
 		String last = slices[slices.length - 1];
 		int version = DEFAULT_VERSION;
 		try {
@@ -73,66 +73,66 @@ public class ModuleUriUtil {
 		return version;
 	}
 
-	public static int extractVersionFromResourceUri(String resourceUri) {
-		return extractVersion(resourceUri);
+	public static int extractVersionFromResourceUri(String id) {
+		return extractVersion(id);
 	}
 
-	public static String extractModuleUriFromResourceUri(String resourceUri) {
-		return resourceUri;
+	public static String extractModuleUriFromResourceUri(String id) {
+		return id;
 	}
 
-	public static String extractModuleNameFromResourceUri(String resourceUri) {
+	public static String extractModuleNameFromResourceUri(String id) {
 
-		if (Module.RESOURCE_URI_PREFIX.replace("/", "").equals(resourceUri)
-				|| Module.RESOURCE_URI_PREFIX.equals(resourceUri)) {
+		if (Module.RESOURCE_URI_PREFIX.replace("/", "").equals(id)
+				|| Module.RESOURCE_URI_PREFIX.equals(id)) {
 			return "";
 		}
 
-		Integer version = extractVersion(resourceUri);
-		int startIndex = (resourceUri.startsWith(Module.RESOURCE_URI_PREFIX) ? Module.RESOURCE_URI_PREFIX
+		Integer version = extractVersion(id);
+		int startIndex = (id.startsWith(Module.RESOURCE_URI_PREFIX) ? Module.RESOURCE_URI_PREFIX
 				.length() : 0);
 
 		int endIndex;
 		String defaultVersionPostFix = "/" + Module.DEFAULT_VERSION;
-		if (resourceUri.endsWith(defaultVersionPostFix)) {
-			endIndex = resourceUri.length() - defaultVersionPostFix.length();
+		if (id.endsWith(defaultVersionPostFix)) {
+			endIndex = id.length() - defaultVersionPostFix.length();
 		} else {
-			endIndex = (version != DEFAULT_VERSION) ? resourceUri.length()
-					- version.toString().length() - 1 : resourceUri.length();
+			endIndex = (version != DEFAULT_VERSION) ? id.length()
+					- version.toString().length() - 1 : id.length();
 		}
-		if (resourceUri.endsWith("/")) {
-			endIndex = resourceUri.length() - 1;
+		if (id.endsWith("/")) {
+			endIndex = id.length() - 1;
 		}
 
-		return (endIndex <= startIndex ? "" : resourceUri.substring(startIndex,
+		return (endIndex <= startIndex ? "" : id.substring(startIndex,
 				endIndex));
 	}
 
-	public static String extractParentUriFromResourceUri(String resourceUri)
+	public static String extractParentUriFromResourceUri(String id)
 			throws ValidationException {
-		if (!resourceUri.startsWith(Module.RESOURCE_URI_PREFIX)) {
+		if (!id.startsWith(Module.RESOURCE_URI_PREFIX)) {
 			throw (new ValidationException("Resource URI not starting with "
 					+ Module.RESOURCE_URI_PREFIX));
 		}
 
-		String strippedResourceUri = stripDefaultVersionIfPresent(resourceUri);
+		String strippedResourceUri = stripDefaultVersionIfPresent(id);
 
-		boolean hasParent = (resourceUri.split("/").length > 2);
+		boolean hasParent = (id.split("/").length > 2);
 		String moduleUrl = extractModuleUriFromResourceUri(strippedResourceUri);
 		if (!hasParent) {
 			return Module.RESOURCE_URI_PREFIX;
 		}
-		boolean hasVersion = (extractVersion(resourceUri) != -1);
+		boolean hasVersion = (extractVersion(id) != -1);
 		String moduleName = (hasVersion ? moduleUrl.substring(0,
 				moduleUrl.lastIndexOf('/')) : strippedResourceUri);
 		return moduleName.substring(0, moduleName.lastIndexOf('/'));
 	}
 
-	private static String stripDefaultVersionIfPresent(String resourceUri) {
+	private static String stripDefaultVersionIfPresent(String id) {
 		String defaultEnd = "/" + String.valueOf(DEFAULT_VERSION);
-		String strippedResourceUri = resourceUri.endsWith(defaultEnd) ? resourceUri
-				.substring(0, resourceUri.length() - defaultEnd.length())
-				: resourceUri;
+		String strippedResourceUri = id.endsWith(defaultEnd) ? id
+				.substring(0, id.length() - defaultEnd.length())
+				: id;
 		return strippedResourceUri;
 	}
 

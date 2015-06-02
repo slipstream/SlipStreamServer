@@ -40,11 +40,37 @@ import flexjson.JSONDeserializer;
 @SuppressWarnings("serial")
 public abstract class Metadata implements Serializable {
 
+	static final String RESOURCE_URI_ROOT = "http://slipstream.sixsq.com/cimi/1/";
+
+	/*
+	** CIMI type, not to confuse with currently used id as the unique
+	* identifier of the resource, name "id" in teh xml and json serialization.
+	 */
+	@JSON(name = "resoureceURI")
+	static protected String cimiResoureceURI;
+
+	@Id
+	@Attribute
+	@JSON(name = "id")
+	private String id;
+
+	/*
+	** Only needed for xml rendering
+	 */
+	@Attribute(required = false, empty = "http://slipstream.sixsq.com/cimi/1")
+	@JSON(include = false)
+	@Transient
+	private String xmlns;
+
+	@Attribute(name = "created", required = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	@JSON(name = "created")
 	protected Date creation = new Date();
 
-	@Attribute(required = false)
+	@Attribute(name = "updated", required = false)
 	@Temporal(TemporalType.TIMESTAMP)
-	protected Date lastModified;
+	@JSON(name = "updated")
+	protected Date updated;
 
 	@Attribute(required = false)
 	@Column(length = 1024)
@@ -57,10 +83,21 @@ public abstract class Metadata implements Serializable {
 	@JSON(include = false)
 	private String json;
 
-	protected Metadata() {
+	private Metadata() {
 	}
 
-	public abstract String getResourceUri();
+	protected Metadata(String resourceUriType) {
+		this();
+		cimiResoureceURI = RESOURCE_URI_ROOT + resourceUriType;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	protected void setId(String id) {
+		this.id = id;
+	}
 
 	public boolean isDeleted() {
 		return deleted;
@@ -78,24 +115,20 @@ public abstract class Metadata implements Serializable {
 
 	public abstract void setName(String name) throws ValidationException;
 
-	@Attribute(required = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	public Date getCreation() {
 		return creation;
 	}
 
-	@Attribute(required = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	public void setCreation(Date creation) {
 		this.creation = creation;
 	}
 
-	public Date getLastModified() {
-		return lastModified;
+	public Date getUpdated() {
+		return updated;
 	}
 
-	public void setLastModified() {
-		this.lastModified = new Date();
+	public void setUpdated() {
+		this.updated = new Date();
 	}
 
 	public String getDescription() {
@@ -154,22 +187,22 @@ public abstract class Metadata implements Serializable {
 		return SerializationUtil.toJsonString(this);
 	}
 
-	public static Metadata load(String resourceUri, Class<? extends Metadata> type, EntityManager em) {
-		Metadata meta = em.find(type, resourceUri);
+	public static Metadata load(String id, Class<? extends Metadata> type, EntityManager em) {
+		Metadata meta = em.find(type, id);
 		return meta;
 	}
 
-	public static Metadata load(String resourceUri, Class<? extends Metadata> type) {
-		Metadata meta = loadRaw(resourceUri, type);
+	public static Metadata load(String id, Class<? extends Metadata> type) {
+		Metadata meta = loadRaw(id, type);
 		if(meta != null) {
 			meta = meta.substituteFromJson();
 		}
 		return meta;
 	}
 
-	public static Metadata loadRaw(String resourceUri, Class<? extends Metadata> type) {
+	public static Metadata loadRaw(String id, Class<? extends Metadata> type) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Metadata meta = load(resourceUri, type, em);
+		Metadata meta = load(id, type, em);
 		em.close();
 		return meta;
 	}
@@ -202,14 +235,14 @@ public abstract class Metadata implements Serializable {
 	}
 
 	public void remove() {
-		remove(getResourceUri(), this.getClass());
+		remove(getId(), this.getClass());
 	}
 
-	public static void remove(String resourceUri, Class<? extends Metadata> c) {
+	public static void remove(String id, Class<? extends Metadata> c) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
-		Metadata fromDb = em.find(c, resourceUri);
+		Metadata fromDb = em.find(c, id);
 		if (fromDb != null) {
 			em.remove(fromDb);
 		}
@@ -223,7 +256,7 @@ public abstract class Metadata implements Serializable {
 
 	protected Metadata copyTo(Metadata copy) throws ValidationException {
 		copy.setCreation(getCreation());
-		copy.setLastModified();
+		copy.setUpdated();
 		copy.setDeleted(deleted);
 		copy.setDescription(getDescription());
 		copy.setName(getName());

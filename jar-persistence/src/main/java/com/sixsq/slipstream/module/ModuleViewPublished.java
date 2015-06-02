@@ -35,10 +35,10 @@ public class ModuleViewPublished extends ModuleView {
 	@Attribute(required = false)
 	private final String logoLink;
 
-	public ModuleViewPublished(String resourceUri, String description, ModuleCategory category, String customVersion,
+	public ModuleViewPublished(String id, String description, ModuleCategory category, String customVersion,
 			Authz authz, String logoLink) {
 
-		super(resourceUri, description, category, customVersion, authz);
+		super(id, description, category, customVersion, authz);
 		this.logoLink = logoLink;
 	}
 

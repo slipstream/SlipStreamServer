@@ -27,8 +27,6 @@
 			<xsl:copy>
 				<xsl:for-each select="@*">
 					<xsl:choose>
-						<xsl:when test="name(.) = 'resourceUri'">
-						</xsl:when>
 						<xsl:when test="name(.) = 'name'">
 						</xsl:when>
 						<xsl:when test="name(.) = 'class'">
@@ -54,8 +52,6 @@
   
 	<xsl:template match="@*">
 		<xsl:choose>
-			<xsl:when test="name(.) = 'resourceUri'">
-			</xsl:when>
 			<xsl:when test="name(.) = 'class'">
 			</xsl:when>
 			<xsl:otherwise>

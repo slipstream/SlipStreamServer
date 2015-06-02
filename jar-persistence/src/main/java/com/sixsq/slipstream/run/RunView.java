@@ -40,7 +40,7 @@ import com.sixsq.slipstream.persistence.User;
 public class RunView {
 
 	@Attribute
-	public final String resourceUri;
+	public final String id;
 
 	@Attribute
 	public final String uuid;
@@ -74,7 +74,7 @@ public class RunView {
 
 	public RunView(String resourceUrl, String uuid, String moduleResourceUri, String status, Date startTime,
 			String username, RunType type, Set<ConnectorInstance> cloudServices, String abort) {
-		this.resourceUri = resourceUrl;
+		this.id = resourceUrl;
 		this.uuid = uuid;
 		this.moduleResourceUri = moduleResourceUri;
 		this.status = status;
@@ -110,7 +110,7 @@ public class RunView {
 	}
 
 	public RunView copy() {
-		RunView copy = new RunView(resourceUri, uuid, moduleResourceUri, status, startTime, username, type,
+		RunView copy = new RunView(id, uuid, moduleResourceUri, status, startTime, username, type,
 				cloudServices, abort);
 		copy.setHostname(hostname);
 		copy.setTags(tags);

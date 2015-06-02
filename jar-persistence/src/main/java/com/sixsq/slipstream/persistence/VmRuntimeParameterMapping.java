@@ -160,9 +160,9 @@ public class VmRuntimeParameterMapping implements Serializable {
 		this.runUuid = vmstateRuntimeParameter.getContainer().getUuid();
 		this.runOwner = runOwner;
 		this.vmstateRuntimeParameter = vmstateRuntimeParameter;
-		this.vmstateRuntimeParameterUri = vmstateRuntimeParameter.getResourceUri();
+		this.vmstateRuntimeParameterUri = vmstateRuntimeParameter.getId();
 		this.hostnameRuntimeParameter = hostnameRuntimeParameter;
-		this.hostnameRuntimeParameterUri = hostnameRuntimeParameter.getResourceUri();
+		this.hostnameRuntimeParameterUri = hostnameRuntimeParameter.getId();
 	}
 
 	public String getInstanceId() {

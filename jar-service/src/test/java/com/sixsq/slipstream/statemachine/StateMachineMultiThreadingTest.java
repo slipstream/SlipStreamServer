@@ -36,7 +36,6 @@ import javax.persistence.EntityTransaction;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -162,7 +161,7 @@ public class StateMachineMultiThreadingTest extends
 
 		waitAllThreadsComplete(threads);
 
-		run = Run.load(run.getResourceUri());
+		run = Run.load(run.getId());
 		try {
 			assertThat(errors, is(0));
 			assertTransitionReached(run, finalState);
@@ -250,7 +249,7 @@ public class StateMachineMultiThreadingTest extends
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 
-		run = em.find(Run.class, run.getResourceUri());
+		run = em.find(Run.class, run.getId());
 
 		for (int i = 1; i <= MULTIPLICITY; i++) {
 			String key = createParameterName(RuntimeParameter.COMPLETE_KEY,

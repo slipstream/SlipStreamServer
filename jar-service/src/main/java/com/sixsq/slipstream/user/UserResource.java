@@ -231,7 +231,7 @@ public class UserResource extends ParameterizedResource {
 	}
 
 	private boolean isItSelf() {
-		return isExisting() && getUser().getResourceUri().equals(getTargetUser().getResourceUri());
+		return isExisting() && getUser().getId().equals(getTargetUser().getId());
 	}
 
 	private User getTargetUser() {
@@ -390,9 +390,9 @@ public class UserResource extends ParameterizedResource {
 
 	private void setResponseForPut() {
 		if (isExisting()) {
-			setResponseOkAndViewLocation(getParameterized().getResourceUri());
+			setResponseOkAndViewLocation(getParameterized().getId());
 		} else {
-			setResponseCreatedAndViewLocation(getParameterized().getResourceUri());
+			setResponseCreatedAndViewLocation(getParameterized().getId());
 		}
 	}
 

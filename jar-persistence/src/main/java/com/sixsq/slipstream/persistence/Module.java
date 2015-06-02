@@ -31,7 +31,6 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.NamedQueries;
@@ -69,15 +68,16 @@ import flexjson.JSONDeserializer;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @NamedQueries({
 		@NamedQuery(name = "moduleLastVersion", query = "SELECT m FROM Module m WHERE m.version = (SELECT MAX(n.version) FROM Module n WHERE n.name = :name AND n.deleted != TRUE)"),
-		@NamedQuery(name = "moduleViewLatestChildren", query = "SELECT NEW com.sixsq.slipstream.module.ModuleView(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.parentUri = :parent AND m.version = (SELECT MAX(c.version) FROM Module c WHERE c.name = m.name AND c.deleted != TRUE)"),
-		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name AND m.deleted != TRUE"),
+		@NamedQuery(name = "moduleViewLatestChildren", query = "SELECT NEW com.sixsq.slipstream.module.ModuleView(m.id, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.parentUri = :parent AND m.version = (SELECT MAX(c.version) FROM Module c WHERE c.name = m.name AND c.deleted != TRUE)"),
+		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.id, m.version, m.updated, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name AND m.deleted != TRUE"),
 		@NamedQuery(name = "moduleAll", query = "SELECT m FROM Module m WHERE m.deleted != TRUE"),
-		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz, m.logoLink) FROM Module m WHERE m.isPublished = TRUE AND m.deleted != TRUE") })
+		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.id, m.description, m.category, m.customVersion, m.authz, m.logoLink) FROM Module m WHERE m.isPublished = TRUE AND m.deleted != TRUE") })
 public abstract class Module extends Parameterized implements Guarded {
 
 	public final static String RESOURCE_URI_PREFIX = "module/";
 
 	public final static int DEFAULT_VERSION = -1;
+
 	@Attribute(required = false)
 	protected ModuleCategory category;
 
@@ -108,10 +108,10 @@ public abstract class Module extends Parameterized implements Guarded {
 		return m;
 	}
 
-	public static Module loadLatest(String resourceUri) {
+	public static Module loadLatest(String id) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleLastVersion");
-		String name = ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri);
+		String name = ModuleUriUtil.extractModuleNameFromResourceUri(id);
 		q.setParameter("name", name);
 		Module module;
 		try {
@@ -126,9 +126,9 @@ public abstract class Module extends Parameterized implements Guarded {
 		return module;
 	}
 
-	public static boolean exists(String resourceUri) {
+	public static boolean exists(String id) {
 		boolean exists;
-		if (load(resourceUri) != null) {
+		if (load(id) != null) {
 			exists = true;
 		} else {
 			exists = false;
@@ -141,9 +141,9 @@ public abstract class Module extends Parameterized implements Guarded {
 	}
 
 	public static Module load(String uri) {
-		String resourceUri = uri;
-		int version = ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
-		Module module = (version == DEFAULT_VERSION ? loadLatest(resourceUri) : loadByUri(resourceUri));
+		String id = uri;
+		int version = ModuleUriUtil.extractVersionFromResourceUri(id);
+		Module module = (version == DEFAULT_VERSION ? loadLatest(id) : loadByUri(id));
 		return module;
 	}
 
@@ -157,21 +157,21 @@ public abstract class Module extends Parameterized implements Guarded {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<ModuleView> viewList(String resourceUri) {
+	public static List<ModuleView> viewList(String id) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleViewLatestChildren");
 		q.setParameter("parent",
-				Module.constructResourceUri(ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri)));
+				Module.constructResourceUri(ModuleUriUtil.extractModuleNameFromResourceUri(id)));
 		List<ModuleView> list = q.getResultList();
 		em.close();
 		return list;
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<ModuleVersionView> viewListAllVersions(String resourceUri) {
+	public static List<ModuleVersionView> viewListAllVersions(String id) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleViewAllVersions");
-		String name = ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri);
+		String name = ModuleUriUtil.extractModuleNameFromResourceUri(id);
 		q.setParameter("name", name);
 		List<ModuleVersionView> list = q.getResultList();
 		em.close();
@@ -218,10 +218,6 @@ public abstract class Module extends Parameterized implements Guarded {
 		}
 		return (Module) SerializationUtil.fromJson(json, type, deserializer);
 	}
-
-	@Attribute
-	@Id
-	private String resourceUri;
 
 	@Element(required = false)
 	@Embedded
@@ -301,19 +297,19 @@ public abstract class Module extends Parameterized implements Guarded {
 	@Attribute(required = false)
 	private String logoLink;
 
-	protected Module() {
-		super();
+	protected Module(ModuleCategory category) {
+		super(category.toString());
+		this.category = category;
 		isPublished = false;
 	}
 
 	public Module(String name, ModuleCategory category) throws ValidationException {
-		this();
-		this.category = category;
+		this(category);
 		setName(name);
 
 		validateName(name);
 
-		resourceUri = constructResourceUri(name);
+		setId(constructResourceUri(name));
 
 		extractUriComponents();
 	}
@@ -372,7 +368,7 @@ public abstract class Module extends Parameterized implements Guarded {
 	@Attribute
 	public String getShortName() {
 		String name;
-		name = resourceUri == null ? null : ModuleUriUtil.extractShortNameFromResourceUri(resourceUri);
+		name = getId() == null ? null : ModuleUriUtil.extractShortNameFromResourceUri(getId());
 		return name;
 	}
 
@@ -382,19 +378,6 @@ public abstract class Module extends Parameterized implements Guarded {
 
 	public String getOwner() {
 		return authz.getUser();
-	}
-
-	@Override
-	public String getResourceUri() {
-		return resourceUri;
-	}
-
-	/**
-	 * Needed for json deserialization
-	 */
-	@SuppressWarnings("unused")
-	private void setResourceUri(String resourceUri) {
-		this.resourceUri = resourceUri;
 	}
 
 	public Authz getAuthz() {
@@ -471,14 +454,14 @@ public abstract class Module extends Parameterized implements Guarded {
 
 	public void setModuleReference(Module reference) throws ValidationException {
 		if(reference != null) {
-			setModuleReference(reference.getResourceUri());
+			setModuleReference(reference.getId());
 		}
 	}
 
 	public void setModuleReference(String moduleReferenceUri) throws ValidationException {
 		if (moduleReferenceUri != null) {
 			String moduleReferenceUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(moduleReferenceUri);
-			String moduleUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(getResourceUri());
+			String moduleUriVersionLess = ModuleUriUtil.extractVersionLessResourceUri(getId());
 			if (moduleUriVersionLess.equals(moduleReferenceUriVersionLess)) {
 				throw new ValidationException("Module reference cannot be itself");
 			}
@@ -498,11 +481,11 @@ public abstract class Module extends Parameterized implements Guarded {
 
 	private void extractUriComponents() throws ValidationException {
 
-		version = ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
+		version = ModuleUriUtil.extractVersionFromResourceUri(getId());
 
-		parentUri = ModuleUriUtil.extractParentUriFromResourceUri(resourceUri);
+		parentUri = ModuleUriUtil.extractParentUriFromResourceUri(getId());
 
-		name = ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri);
+		name = ModuleUriUtil.extractModuleNameFromResourceUri(getId());
 	}
 
 	@Override
@@ -515,7 +498,7 @@ public abstract class Module extends Parameterized implements Guarded {
 	}
 
 	public Module store(boolean incrementVersion) {
-		setLastModified();
+		setUpdated();
 		if (incrementVersion) {
 			setVersion();
 		}
@@ -524,8 +507,8 @@ public abstract class Module extends Parameterized implements Guarded {
 
 	protected void setVersion() {
 		version = VersionCounter.getNextVersion();
-		resourceUri = Module.constructResourceUri(ModuleUriUtil.extractModuleNameFromResourceUri(resourceUri) + "/"
-				+ version);
+		setId(Module.constructResourceUri(ModuleUriUtil.extractModuleNameFromResourceUri(getId()) + "/"
+				+ version));
 	}
 
 	protected void setIsLatestVersion(int lastVersion) {

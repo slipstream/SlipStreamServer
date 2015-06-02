@@ -49,7 +49,7 @@ public class XmlUtilTest extends ResourceTestBase {
 
 		Element root = document.getDocumentElement();
 
-		Element user = document.createElement("user");
+		Element user = document.createElement("User");
 		root.appendChild(user);
 
 		Element services = document.createElement("services");
@@ -58,13 +58,13 @@ public class XmlUtilTest extends ResourceTestBase {
 		Element breadcrumbs = document.createElement("breadcrumbs");
 		root.appendChild(breadcrumbs);
 
-		assertEquals("1", runXpath("count(/*/user)", document));
+		assertEquals("1", runXpath("count(/*/User)", document));
 		assertEquals("1", runXpath("count(/*/services)", document));
 		assertEquals("1", runXpath("count(/*/breadcrumbs)", document));
 
 		XmlUtil.cleanDocumentForDeserialization(document);
 
-		assertEquals("0", runXpath("count(/*/user)", document));
+		assertEquals("0", runXpath("count(/*/User)", document));
 		assertEquals("0", runXpath("count(/*/services)", document));
 		assertEquals("0", runXpath("count(/*/breadcrumbs)", document));
 
@@ -98,17 +98,21 @@ public class XmlUtilTest extends ResourceTestBase {
 
 		XmlUtil.addUser(document, user1);
 
-		assertEquals(user1.getName(), runXpath("/*/user/@name", document));
-		assertEquals(user1.getResourceUri(),
-				runXpath("/*/user/@resourceUri", document));
-		assertEquals("true", runXpath("/*/user/@issuper", document));
+		String xml = SerializationUtil.documentToString(document);
+
+		assertEquals(user1.getName(), runXpath("/*/User/@name", document));
+		assertEquals(user1.getId(),
+				runXpath("/*/User/@id", document));
+		assertEquals("true", runXpath("/*/User/@issuper", document));
 
 		XmlUtil.addUser(document, user2);
 
-		assertEquals(user2.getName(), runXpath("/*/user/@name", document));
-		assertEquals(user2.getResourceUri(),
-				runXpath("/*/user/@resourceUri", document));
-		assertEquals("", runXpath("/*/user/@isSuper", document));
+		xml = SerializationUtil.documentToString(document);
+
+		assertEquals(user2.getName(), runXpath("/*/User/@name", document));
+		assertEquals(user2.getId(),
+				runXpath("/*/User/@id", document));
+		assertEquals("", runXpath("/*/User/@isSuper", document));
 
 	}
 

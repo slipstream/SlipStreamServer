@@ -40,8 +40,9 @@ public class CloudImageIdentifier implements Serializable {
 	public static final String DEFAULT_CLOUD_SERVICE = "default";
 
 	@Id
-	@Attribute
-	private String resourceUri;
+	@Attribute(name = "id")
+	@JSON(name = "id")
+	private String id;
 
 	@Attribute
 	private String cloudServiceName;
@@ -61,7 +62,7 @@ public class CloudImageIdentifier implements Serializable {
 
 	public CloudImageIdentifier(ImageModule module, String cloudServiceName) {
 		this.setCloudServiceName(cloudServiceName);
-		this.resourceUri = module.getResourceUri() + "/" + cloudServiceName;
+		this.id = module.getId() + "/" + cloudServiceName;
 		setContainer(module);
 	}
 
@@ -76,7 +77,7 @@ public class CloudImageIdentifier implements Serializable {
 		this(module, cloudServiceName, cloudImageIdentifer);
 		this.region = region;
 		if (Parameter.hasValueSet(region)) {
-			resourceUri += CloudImageIdentifier.CLOUD_SERVICE_ID_SEPARATOR
+			id += CloudImageIdentifier.CLOUD_SERVICE_ID_SEPARATOR
 					+ region;
 		}
 	}
@@ -97,12 +98,12 @@ public class CloudImageIdentifier implements Serializable {
 		em.close();
 	}
 
-	public void setResourceUri(String resourceUri) {
-		this.resourceUri = resourceUri;
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	public String getResourceUri() {
-		return resourceUri;
+	public String getId() {
+		return id;
 	}
 
 	public void setCloudServiceName(String cloudServiceName) {

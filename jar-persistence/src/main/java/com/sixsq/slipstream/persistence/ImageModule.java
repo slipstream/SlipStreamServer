@@ -34,11 +34,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementArray;
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.ElementMap;
+import org.simpleframework.xml.*;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -54,6 +50,7 @@ import flexjson.JSON;
  *
  */
 @Entity
+@Root(name = "Image")
 @SuppressWarnings("serial")
 public class ImageModule extends Module {
 
@@ -98,13 +95,11 @@ public class ImageModule extends Module {
 	private ImageModule moduleReference;
 
 	protected ImageModule() {
-		super();
+		super(ModuleCategory.Image);
 	}
 
 	public ImageModule(String name) throws ValidationException, ConfigurationException {
-
 		super(name, ModuleCategory.Image);
-
 		setDefaultParameters();
 	}
 
@@ -296,7 +291,7 @@ public class ImageModule extends Module {
 
 	public void setTarget(Target target) {
 		target.setModule(this);
-		targets.put(target.getName(), target);
+        targets.put(target.getName(), target);
 	}
 
 	public Set<Package> getPackages() {
@@ -392,7 +387,7 @@ public class ImageModule extends Module {
 			}
 		}
 		for (CloudImageIdentifier id : getCloudImageIdentifiers()) {
-			id.setResourceUri(getResourceUri() + "/" + id.getCloudServiceName());
+			id.setId(getId() + "/" + id.getCloudServiceName());
 		}
 		return (ImageModule) store(false);
 	}

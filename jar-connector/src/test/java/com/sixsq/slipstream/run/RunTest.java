@@ -29,8 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -48,26 +46,12 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.Terminator;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
 
 @Ignore("RunFactoryTest extends this class. So ignore to avoid running twice. Good idea?")
 public class RunTest extends RunTestBase {
@@ -95,9 +79,9 @@ public class RunTest extends RunTestBase {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 
-		assertEquals(image.getResourceUri(), run.getModuleResourceUrl());
+		assertEquals(image.getId(), run.getModuleResourceUrl());
 		assertEquals(ModuleCategory.Image, run.getCategory());
-		assertNotNull(run.getResourceUri());
+		assertNotNull(run.getId());
 		assertNotNull(run.getUuid());
 	}
 
@@ -108,12 +92,12 @@ public class RunTest extends RunTestBase {
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 		run.store();
 
-		String resourceUrl = run.getResourceUri();
+		String resourceUrl = run.getId();
 
 		Run runRestored = Run.load(resourceUrl);
 		assertNotNull(runRestored);
 
-		assertEquals(run.getResourceUri(), runRestored.getResourceUri());
+		assertEquals(run.getId(), runRestored.getId());
 		assertEquals(run.getModuleResourceUrl(),
 				runRestored.getModuleResourceUrl());
 		assertEquals(run.getCategory(), runRestored.getCategory());
@@ -131,7 +115,7 @@ public class RunTest extends RunTestBase {
 
 		int initialNumberOfParameters = run.getParameters().size();
 
-		String resourceUrl = run.getResourceUri();
+		String resourceUrl = run.getId();
 
 		String parameterName = "name";
 		String description = "description";
@@ -170,7 +154,7 @@ public class RunTest extends RunTestBase {
 
 		int initialNumberOfParameters = run.getParameters().size();
 
-		String resourceUrl = run.getResourceUri();
+		String resourceUrl = run.getId();
 
 		String parameterName1 = "p1";
 		String description1 = "d1";
@@ -221,7 +205,7 @@ public class RunTest extends RunTestBase {
 
 		int initialParameterNo = run.getRuntimeParameters().size();
 
-		String resourceUrl = run.getResourceUri();
+		String resourceUrl = run.getId();
 
 		String k1 = "node.1:k1";
 		String v1 = "v1";
@@ -299,14 +283,14 @@ public class RunTest extends RunTestBase {
 		Metadata run2 = createAndStoreRun(findit, RunType.Machine);
 
 		ImageModule dontfindit = new ImageModule("dontfindit");
-		dontfindit.setModuleReference(image.getResourceUri());
+		dontfindit.setModuleReference(image.getId());
 		dontfindit.getTargets().put(Target.TARGET_RECIPE_NAME, new Target(Target.TARGET_RECIPE_NAME, "a recipe"));
 		authz = new Authz("test", dontfindit);
 		dontfindit.setAuthz(authz);
 		dontfindit.store();
 		Metadata run3 = createAndStoreRun(dontfindit, RunType.Machine);
 
-		List<RunView> runList = Run.viewList(new User("user"), findit.getResourceUri());
+		List<RunView> runList = Run.viewList(new User("user"), findit.getId());
 
 		assertEquals(2, runList.size());
 
@@ -333,7 +317,7 @@ public class RunTest extends RunTestBase {
 		Run myOtherRun = createAndStoreRun(image, RunType.Machine);
 		Run notMyRun = createAndStoreRun(image, "other", RunType.Machine);
 
-		List<RunView> runList = Run.viewList(new User("user"), image.getResourceUri());
+		List<RunView> runList = Run.viewList(new User("user"), image.getId());
 
 		assertEquals(2, runList.size());
 
@@ -490,29 +474,29 @@ public class RunTest extends RunTestBase {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 		run = run.store();
-		String resourceUri = run.getResourceUri();
+		String id = run.getId();
 
-		setRunState(run.getResourceUri(), States.Initializing);
+		setRunState(run.getId(), States.Initializing);
 		purgeRun(run);
-		run = Run.load(resourceUri);
+		run = Run.load(id);
 		assertThat(run.getState(), is(States.Cancelled));
 
-		run = setRunState(run.getResourceUri(), States.Executing);
+		run = setRunState(run.getId(), States.Executing);
 		purgeRun(run);
-		run = Run.load(resourceUri);
+		run = Run.load(id);
 		assertThat(run.getState(), is(States.Cancelled));
 
 		// Just reset the global abort runtime parameter
 		Run.abortOrReset("", "", run.getUuid());
-		run = setRunState(run.getResourceUri(), States.Ready);
+		run = setRunState(run.getId(), States.Ready);
 		purgeRun(run);
-		run = Run.load(resourceUri);
+		run = Run.load(id);
 		assertThat(run.getState(), is(States.Done));
 
-		run = setRunState(run.getResourceUri(), States.Ready);
+		run = setRunState(run.getId(), States.Ready);
 		Run.abortOrReset("kaboom", "", run.getUuid());
 		purgeRun(run);
-		run = Run.load(resourceUri);
+		run = Run.load(id);
 		assertThat(run.getState(), is(States.Aborted));
 
 		run.remove();
@@ -522,7 +506,7 @@ public class RunTest extends RunTestBase {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		em.getTransaction().begin();
 		try {
-			run = Run.load(run.getResourceUri(), em);
+			run = Run.load(run.getId(), em);
 			Terminator.purgeRun(run);
 			run.toJsonForPersistence();
 			em.getTransaction().commit();

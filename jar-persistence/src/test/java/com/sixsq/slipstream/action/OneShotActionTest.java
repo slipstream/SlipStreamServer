@@ -50,7 +50,7 @@ public class OneShotActionTest {
 
 		assertNotNull(action.getForm());
 
-		assertNotNull(action.getLastModified());
+		assertNotNull(action.getUpdated());
 	}
 
 	@Test
@@ -81,10 +81,10 @@ public class OneShotActionTest {
 
 		OneShotAction action = getConcreteTestInstance();
 
-		Timestamp initialTime = action.getLastModified();
+		Timestamp initialTime = action.getUpdated();
 		Thread.sleep(2000);
-		action.setLastModified();
-		Timestamp laterTime = action.getLastModified();
+		action.setUpdated();
+		Timestamp laterTime = action.getUpdated();
 
 		assertTrue(initialTime.before(laterTime));
 	}

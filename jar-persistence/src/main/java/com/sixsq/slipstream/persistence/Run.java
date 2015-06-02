@@ -33,7 +33,6 @@ import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.json.ModuleObjectFactory;
 import flexjson.JSON;
 import flexjson.JSONDeserializer;
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CollectionType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
@@ -62,7 +61,10 @@ import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
 		@NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.name_ = :instanceidkey AND p.value = :instanceidvalue ORDER BY r.startTime DESC") })
 public class Run extends Parameterized {
 
-	private static final int DEFAULT_TIMEOUT = 60; // In minutes
+    @Attribute
+    private static String resourceURI = Metadata.RESOURCE_URI_ROOT + "Run";
+
+    private static final int DEFAULT_TIMEOUT = 60; // In minutes
 
 	public static final int DEFAULT_LIMIT = 20;
 	public static final String ORCHESTRATOR_CLOUD_SERVICE_SEPARATOR = "-";
@@ -81,7 +83,7 @@ public class Run extends Parameterized {
 
 	public final static String RESOURCE_URI_PREFIX = "run/";
 
-	public final static String TAGS_PARAMETER_DESCRIPTION = "Tags (comma separated) or annotations for this run";
+	public final static String TAGS_PARAMETER_DESCRIPTION = "Tags or annotations for this run";
 
 	public final static String CPU_PARAMETER_NAME = ImageModule.CPU_KEY;
 	public final static String CPU_PARAMETER_DESCRIPTION = "Number of CPUs (i.e. virtual cores)";
@@ -96,12 +98,6 @@ public class Run extends Parameterized {
 	public static final String NODE_INCREMENT_DESCRIPTION = "Current increment value for node instances ids";
 	public static final String NODE_RUN_BUILD_RECIPES_KEY = "run-build-recipes";
 	public static final String NODE_RUN_BUILD_RECIPES_DESCRIPTION = "Define if the SlipStream executor should run build recipes.";
-
-//	@Version
-//	long jpaVersion;
-
-	@Attribute(required = false)
-	protected ModuleCategory category;
 
 	public static Run abortOrReset(String abortMessage, String nodename, String uuid) {
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -274,8 +270,8 @@ public class Run extends Parameterized {
 	}
 
 	public static Run loadFromUuid(String uuid) {
-		String resourceUri = assembleResourceUri(uuid);
-		return load(resourceUri);
+		String id = assembleResourceUri(uuid);
+		return load(id);
 	}
 
 	private static String assembleResourceUri(String uuid) {
@@ -283,16 +279,16 @@ public class Run extends Parameterized {
 	}
 
 	public static Run loadFromUuid(String uuid, EntityManager em) {
-		String resourceUri = assembleResourceUri(uuid);
-		return load(resourceUri, em);
+		String id = assembleResourceUri(uuid);
+		return load(id, em);
 	}
 
-	public static Run load(String resourceUri) {
-		return (Run) Run.load(resourceUri, Run.class);
+	public static Run load(String id) {
+		return (Run) Run.load(id, Run.class);
 	}
 
-	public static Run load(String resourceUri, EntityManager em) {
-		return (Run) load(resourceUri, Run.class, em);
+	public static Run load(String id, EntityManager em) {
+		return (Run) load(id, Run.class, em);
 	}
 
 	private static List<RunView> convertRunsToRunViews(List<Run> runs) throws ConfigurationException,
@@ -316,7 +312,7 @@ public class Run extends Parameterized {
 		String abortMessage = (globalAbort != null) ? globalAbort.getValue() : "";
 
 		RunView runView;
-		runView = new RunView(run.getResourceUri(), run.getUuid(), run.getModuleResourceUrl(), run.getState()
+		runView = new RunView(run.getId(), run.getUuid(), run.getModuleResourceUrl(), run.getState()
 				.toString(), run.getStart(), run.getUser(), run.getType(), run.getCloudServices(), abortMessage);
 
 		try {
@@ -450,11 +446,10 @@ public class Run extends Parameterized {
     @JSON(include = false)
     private int jpaVersion;
 
-    @Attribute
-	@Id
-	private String resourceUri;
+    @Attribute(required = false)
+    private ModuleCategory category;
 
-	@Attribute
+    @Attribute
 	private String uuid;
 
 	@Attribute(empty = "Orchestration")
@@ -546,16 +541,18 @@ public class Run extends Parameterized {
 		this.cloudServices = cloudServices;
 	}
 
-	private Run() throws NotFoundException {
+	private Run() {
+        super("Run");
 	}
 
 	public Run(Module module, RunType type, Set<ConnectorInstance> cloudServices, User user) throws ValidationException {
 
+        this();
 		uuid = UUID.randomUUID().toString();
-		resourceUri = assembleResourceUri(uuid);
+		setId(assembleResourceUri(uuid));
 
-		this.category = module.getCategory();
-		this.moduleResourceUri = module.getResourceUri();
+        this.category = module.getCategory();
+		this.moduleResourceUri = module.getId();
 		this.type = type;
 		setCloudServices(cloudServices);
 		this.user_ = user.getName();
@@ -597,7 +594,7 @@ public class Run extends Parameterized {
 
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
-		resourceUri = assembleResourceUri(uuid);
+		setId(assembleResourceUri(uuid));
 	}
 
 	public String getModuleResourceUrl() {
@@ -798,11 +795,6 @@ public class Run extends Parameterized {
 		return cloudServiceUsage;
 	}
 
-	@Override
-	public String getResourceUri() {
-		return resourceUri;
-	}
-
 	public String getUser() {
 		return user_;
 	}
@@ -980,8 +972,8 @@ public class Run extends Parameterized {
 				new TypePrincipalRight(ROLE, "ADMIN", ALL));
 		ACL acl = new ACL(owner, rules);
 
-		String resourceUri = assembleResourceUri(uuid);
-		Event event = new Event(acl, now(), resourceUri, message, severity, EventType.state);
+		String id = assembleResourceUri(uuid);
+		Event event = new Event(acl, now(), id, message, severity, EventType.state);
 
 		Event.post(event);
 	}
@@ -1048,7 +1040,7 @@ public class Run extends Parameterized {
 	}
 
 	public void remove() {
-		remove(getResourceUri(), this.getClass());
+		remove(getId(), this.getClass());
 	}
 
 	public ModuleCategory getCategory() {

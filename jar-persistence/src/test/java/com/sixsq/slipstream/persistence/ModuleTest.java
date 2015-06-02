@@ -76,13 +76,13 @@ public class ModuleTest {
 		module = module.store(false);
 		// need to load with specific uri, otherwise deleted flag is considered
 		// in the query
-		module = Module.load(module.getResourceUri());
+		module = Module.load(module.getId());
 		assertThat(module.isDeleted(), is(true));
 		modules = Module.listAll();
 		assertThat(modules.size(), is(originalCount));
 	
 		// but it still exists
-		module = Module.load(module.getResourceUri());
+		module = Module.load(module.getId());
 		assertNotNull(module);
 	}
 }

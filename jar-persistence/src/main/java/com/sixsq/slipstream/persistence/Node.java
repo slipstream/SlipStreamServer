@@ -69,10 +69,12 @@ public class Node extends Parameterized {
 	@JSON(include = false)
 	private DeploymentModule module;
 
-	protected Node() {
+	public Node() {
+		super("Node");
 	}
 
 	public Node(String name, ImageModule image) throws ValidationException {
+		this();
 		this.name = name;
 		this.image = image;
 	}
@@ -235,7 +237,7 @@ public class Node extends Parameterized {
 	}
 
 	@Override
-	public String getResourceUri() {
+	public String getId() {
 		return null;
 	}
 

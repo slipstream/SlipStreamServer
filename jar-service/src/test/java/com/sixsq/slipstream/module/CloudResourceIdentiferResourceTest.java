@@ -121,7 +121,7 @@ public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 		assertEquals(Status.SUCCESS_CREATED, response.getStatus());
 
 		CloudImageIdentifier id = CloudImageIdentifier.load(module
-				.getResourceUri() + "/" + cloudServiceName);
+				.getId() + "/" + cloudServiceName);
 		assertEquals(cloudImageIdentifer, id.getCloudMachineIdentifer());
 
 		module.remove();
@@ -146,7 +146,7 @@ public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 		assertEquals(Status.SUCCESS_CREATED, response.getStatus());
 
 		CloudImageIdentifier id = CloudImageIdentifier.load(module
-				.getResourceUri()
+				.getId()
 				+ "/"
 				+ cloudServiceName
 				+ CloudImageIdentifier.CLOUD_SERVICE_ID_SEPARATOR + region);
@@ -178,7 +178,7 @@ public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 		assertEquals(Status.CLIENT_ERROR_FORBIDDEN, response.getStatus());
 
 		CloudImageIdentifier id = CloudImageIdentifier.load(module
-				.getResourceUri() + "/" + cloudServiceName);
+				.getId() + "/" + cloudServiceName);
 		assertEquals(cloudImageIdentifer, id.getCloudMachineIdentifer());
 
 		module.remove();

@@ -55,7 +55,7 @@ public class ServiceCatalogResource extends SimpleResource {
 
 		// Service catalogs are loaded from the system configuration
 		// Therefore they already exist in the system
-		serviceCatalog = ServiceCatalog.load(getResourceUri());
+		serviceCatalog = ServiceCatalog.load(getId());
 		if (serviceCatalog == null) {
 			throwNotFoundResource();
 		}

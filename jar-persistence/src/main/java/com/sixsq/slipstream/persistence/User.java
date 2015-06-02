@@ -30,16 +30,7 @@ import java.util.regex.Pattern;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Query;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 import com.sixsq.slipstream.util.Logger;
 import org.simpleframework.xml.Attribute;
@@ -55,6 +46,7 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 import flexjson.JSON;
 import flexjson.JSONDeserializer;
+import org.simpleframework.xml.Root;
 
 /**
  * Unit test:
@@ -64,6 +56,7 @@ import flexjson.JSONDeserializer;
  */
 @SuppressWarnings("serial")
 @Entity(name = "User")
+@Root(name = "User")
 @NamedQueries({
 		@NamedQuery(name = "allUsers", query = "SELECT u FROM User u"),
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
@@ -83,10 +76,6 @@ public class User extends Parameterized {
 	public enum State {
 		NEW, ACTIVE, DELETED, SUSPENDED
 	}
-
-	@Attribute
-	@Id
-	private String resourceUri;
 
 	@Attribute
 	private String name;
@@ -127,6 +116,7 @@ public class User extends Parameterized {
 	private Date activeSince = null;
 
 	private User() {
+		super("User");
 	}
 
 	public User(String name, String password) throws ValidationException, NoSuchAlgorithmException,
@@ -136,8 +126,10 @@ public class User extends Parameterized {
 	}
 
 	public User(String name) throws ValidationException {
+		this();
 		setName(name);
 		this.state = State.NEW;
+		setId(User.constructResourceUri(name));
 	}
 
 	@Override
@@ -198,11 +190,6 @@ public class User extends Parameterized {
 	}
 
 	@Override
-	public String getResourceUri() {
-		return resourceUri;
-	}
-
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -210,7 +197,6 @@ public class User extends Parameterized {
 	@Override
 	public void setName(String name) {
 		this.name = name;
-		this.resourceUri = User.constructResourceUri(name);
 	}
 
 	public String getEmail() {

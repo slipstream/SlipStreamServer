@@ -36,8 +36,10 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 import flexjson.JSON;
+import org.simpleframework.xml.Root;
 
 @Entity
+@Root(name = "Deployment")
 @SuppressWarnings("serial")
 public class DeploymentModule extends Module {
 
@@ -47,7 +49,7 @@ public class DeploymentModule extends Module {
 
 	@SuppressWarnings("unused")
 	private DeploymentModule() {
-		super();
+		super(ModuleCategory.Deployment);
 	}
 
 	public DeploymentModule(String name) throws ValidationException {
@@ -249,7 +251,7 @@ public class DeploymentModule extends Module {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
-		DeploymentModule fromDb = em.find(this.getClass(), getResourceUri());
+		DeploymentModule fromDb = em.find(this.getClass(), getId());
 		if (fromDb != null) {
 			for (Node n : fromDb.getNodes().values()) {
 				n.getParameters().clear();

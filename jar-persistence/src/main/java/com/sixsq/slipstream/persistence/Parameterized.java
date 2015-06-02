@@ -42,6 +42,10 @@ import flexjson.JSON;
 @SuppressWarnings("serial")
 public abstract class Parameterized extends Metadata {
 
+	protected Parameterized(String resourceUriType) {
+		super(resourceUriType);
+	}
+
 	/**
 	 * @Transient such that it's not persisted, but we must add @JSON to ensure
 	 *            it gets serialized.
@@ -177,8 +181,8 @@ public abstract class Parameterized extends Metadata {
 		return filteredParameters;
 	}
 
-	public static Metadata load(String resourceUri, Class<? extends Metadata> type) {
-		Parameterized meta = (Parameterized) Metadata.load(resourceUri, type);
+	public static Metadata load(String id, Class<? extends Metadata> type) {
+		Parameterized meta = (Parameterized) Metadata.load(id, type);
 		if(meta != null) {
 			for (Parameter p : meta.getParameterList()) {
 				Metadata m = meta;

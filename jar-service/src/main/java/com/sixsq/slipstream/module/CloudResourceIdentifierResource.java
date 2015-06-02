@@ -119,7 +119,7 @@ public class CloudResourceIdentifierResource extends BaseResource {
 
 		setCloudImageId(entity);
 
-		setResponseCreated(cloudImage.getResourceUri());
+		setResponseCreated(cloudImage.getId());
 	}
 
 	private void checkExisting() {
@@ -134,7 +134,7 @@ public class CloudResourceIdentifierResource extends BaseResource {
 		// Entity is null if content-length in PUT request either doesn't exist or of size 0 bytes.
 		if (entity == null) {
 			String msg = "Image ID was not provided.";
-			Logger.debug("'" + msg + "' when setting new image ID on " + cloudImage.getResourceUri());
+			Logger.debug("'" + msg + "' when setting new image ID on " + cloudImage.getId());
 			throwClientError(msg);
 		}
 
@@ -143,7 +143,7 @@ public class CloudResourceIdentifierResource extends BaseResource {
 			newImageId = entity.getText();
 		} catch (IOException e) {
 			String msg = "Failed to get image ID from the request.";
-			Logger.debug("'" + msg + "' when setting new image ID on " + cloudImage.getResourceUri()
+			Logger.debug("'" + msg + "' when setting new image ID on " + cloudImage.getId()
 			        + ". Exception: " + e.getMessage());
 			throwClientError(msg);
 		}
@@ -164,10 +164,10 @@ public class CloudResourceIdentifierResource extends BaseResource {
 		throw new ResourceException(status, message);
 	}
 
-	protected void setResponseCreated(String resourceUri) {
+	protected void setResponseCreated(String id) {
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 
-		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + resourceUri);
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + id);
 		getResponse().setLocationRef(absolutePath);
 	}
 

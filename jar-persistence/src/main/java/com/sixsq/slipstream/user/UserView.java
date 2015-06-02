@@ -37,7 +37,7 @@ public class UserView {
 	public final String name;
 
 	@Attribute
-	public final String resourceUri;
+	public final String id;
 
 	@Attribute(required = false)
 	public final String firstName;
@@ -71,7 +71,7 @@ public class UserView {
 			Date lastExecute, Date activeSince, String organization, Boolean isSuperUser) {
 
 		this.name = name;
-		this.resourceUri = User.constructResourceUri(name);
+		this.id = User.constructResourceUri(name);
 
 		this.firstName = firstName;
 		this.lastName = lastName;

@@ -42,16 +42,16 @@ public class ModuleView {
 	private Authz authz;
 
 	@Attribute
-	public final String resourceUri;
+	public final String id;
 
 	@Attribute
 	public String getName() {
-		return ModuleUriUtil.extractShortNameFromResourceUri(resourceUri);
+		return ModuleUriUtil.extractShortNameFromResourceUri(id);
 	}
 
 	@Attribute
 	public int getVersion() {
-		return ModuleUriUtil.extractVersionFromResourceUri(resourceUri);
+		return ModuleUriUtil.extractVersionFromResourceUri(id);
 	}
 
 	@Attribute
@@ -63,10 +63,10 @@ public class ModuleView {
 	@Attribute(required = false)
 	public final String description;
 
-	public ModuleView(String resourceUri, String description, ModuleCategory category,
+	public ModuleView(String id, String description, ModuleCategory category,
 			String customVersion, Authz authz) {
 
-		this.resourceUri = resourceUri;
+		this.id = id;
 		this.description = description;
 		this.category = category;
 		this.customVersion = customVersion;

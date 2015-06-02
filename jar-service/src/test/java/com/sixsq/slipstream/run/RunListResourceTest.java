@@ -222,7 +222,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		override.add(parameter);
 
 		Request request = createPostRequest(override, multiplicityOverride,
-				deployment.getResourceUri());
+				deployment.getId());
 		Response response = executeRequest(request);
 
 		assertEquals(Status.SUCCESS_CREATED, response.getStatus());

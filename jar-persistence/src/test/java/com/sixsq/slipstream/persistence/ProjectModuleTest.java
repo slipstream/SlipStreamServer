@@ -50,7 +50,7 @@ public class ProjectModuleTest {
 		Module module = new ProjectModule(name);
 
 		assertEquals(name, module.getName());
-		assertEquals(resourceUrl, module.getResourceUri());
+		assertEquals(resourceUrl, module.getId());
 		assertEquals(ModuleCategory.Project, module.getCategory());
 
 	}
@@ -68,7 +68,7 @@ public class ProjectModuleTest {
 		assertNotNull(moduleRestored);
 
 		assertEquals(module.getName(), moduleRestored.getName());
-		assertEquals(module.getResourceUri(), moduleRestored.getResourceUri());
+		assertEquals(module.getId(), moduleRestored.getId());
 		assertEquals(module.getCategory(), moduleRestored.getCategory());
 
 		module.remove();
@@ -83,7 +83,7 @@ public class ProjectModuleTest {
 
 		Module module = new ProjectModule(name);
 
-		String resourceUrl = module.getResourceUri();
+		String resourceUrl = module.getId();
 
 		String parameterName = "name";
 		String description = "description";
@@ -171,7 +171,7 @@ public class ProjectModuleTest {
 		modules.add("module2");
 		modules.add("module3");
 
-		parent = ProjectModule.load(parent.getResourceUri());
+		parent = ProjectModule.load(parent.getId());
 
 		assertThat(parent.getChildren().size(), is(3));
 

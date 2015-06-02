@@ -72,13 +72,13 @@ public class BuildImageFactory extends RunFactory {
 			List<String> visitedReferenceModules)
 			throws InvalidMetadataException, ValidationException {
 		for (String ref : visitedReferenceModules) {
-			if (ref.equals(image.getResourceUri())) {
+			if (ref.equals(image.getId())) {
 				throw new InvalidMetadataException(
 						"Circular dependency detected in module "
-								+ image.getResourceUri());
+								+ image.getId());
 			}
 		}
-		visitedReferenceModules.add(image.getResourceUri());
+		visitedReferenceModules.add(image.getId());
 		if (image.getModuleReferenceUri() != null) {
 			recurseDependencies(
 					(ImageModule) ImageModule.load(image.getModuleReferenceUri()),

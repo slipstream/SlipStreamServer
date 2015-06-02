@@ -137,7 +137,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		User modifiedUser = User.load(user.getResourceUri());
+		User modifiedUser = User.load(user.getId());
 
 		assertThat(getPersistedPassword(modifiedUser), is(Passwords.hash(NEW_PASSWORD)));
 	}
@@ -158,7 +158,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		User modifiedUser = User.load(user.getResourceUri());
+		User modifiedUser = User.load(user.getId());
 
 		assertThat(getPersistedPassword(modifiedUser), is(Passwords.hash(NEW_PASSWORD)));
 	}
@@ -204,7 +204,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		user = User.load(user.getResourceUri());
+		user = User.load(user.getId());
 		assertThat(user.getHashedPassword(), is(Passwords.hash(NEW_PASSWORD)));
 	}
 
@@ -329,7 +329,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	private String getPersistedPassword(User user) throws ConfigurationException, ValidationException {
-		User restoredUser = User.load(user.getResourceUri());
+		User restoredUser = User.load(user.getId());
 		return restoredUser.getHashedPassword();
 	}
 
@@ -374,7 +374,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		User updated = User.load(user.getResourceUri());
+		User updated = User.load(user.getId());
 
 		assertThat(updated.getParameter(paramName).getValue(), is(LocalConnector.CLOUD_SERVICE_NAME));
 	}
@@ -511,7 +511,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		Map<String, Object> attributes = createUserAttributes(targetUser.getName());
 
-		Request request = createPutRequest(attributes, form.getWebRepresentation(), targetUser.getResourceUri());
+		Request request = createPutRequest(attributes, form.getWebRepresentation(), targetUser.getId());
 
 		addUserToRequest(username, request);
 		return request;

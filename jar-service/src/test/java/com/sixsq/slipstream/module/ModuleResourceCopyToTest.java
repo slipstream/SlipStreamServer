@@ -181,7 +181,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 
 		Form form = new Form();
 		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME,
-				image.getResourceUri());
+				image.getId());
 
 		Request request = createPostRequest(image.getName(),
 				form.getWebRepresentation(), user);
@@ -200,7 +200,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 
 		Form form = new Form();
 		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME,
-				image.getResourceUri());
+				image.getId());
 		form.add(ModuleResource.COPY_TARGET_FORM_PARAMETER_NAME, targetName);
 
 		Request request = createPostRequest(publicProject.getName(),
@@ -224,7 +224,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 
 		Form form = new Form();
 		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME,
-				privateImage.getResourceUri());
+				privateImage.getId());
 		form.add(ModuleResource.COPY_TARGET_FORM_PARAMETER_NAME, targetName);
 
 		Request request = createPostRequest(privateProjectAnother.getName(),
@@ -244,7 +244,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 
 		Form form = new Form();
 		form.add(ModuleResource.COPY_SOURCE_FORM_PARAMETER_NAME,
-				image.getResourceUri());
+				image.getId());
 		form.add(ModuleResource.COPY_TARGET_FORM_PARAMETER_NAME, targetName);
 
 		Request request = createPostRequest(privateProjectAnother.getName(),

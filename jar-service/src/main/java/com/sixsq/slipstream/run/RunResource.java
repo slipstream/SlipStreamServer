@@ -162,7 +162,7 @@ public class RunResource extends RunBaseResource {
 	private Run constructRun(EntityManager em)
 			throws SlipStreamClientException {
 
-		Run run = Run.load(this.run.getResourceUri(), em);
+		Run run = Run.load(this.run.getId(), em);
 
 		Module module = RunFactory.loadModule(run);
 		run.setModule(module);
@@ -176,7 +176,7 @@ public class RunResource extends RunBaseResource {
 		try {
 			
 			this.run.postEventTerminate();
-			Terminator.terminate(this.run.getResourceUri());
+			Terminator.terminate(this.run.getId());
 
 		} catch (CannotAdvanceFromTerminalStateException e) {
 		} catch (InvalidStateException e) {

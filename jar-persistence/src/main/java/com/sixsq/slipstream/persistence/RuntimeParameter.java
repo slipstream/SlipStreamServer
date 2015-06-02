@@ -23,7 +23,6 @@ package com.sixsq.slipstream.persistence;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,9 +45,9 @@ import flexjson.JSON;
 @SuppressWarnings("serial")
 @NamedQueries({
 		@NamedQuery(name = "getParameterByInstanceId", query = "SELECT p FROM RuntimeParameter p WHERE p.key_ = 'instanceid' AND p.value = :instanceid"),
-		@NamedQuery(name = "isSet", query = "SELECT p.isSet FROM RuntimeParameter p WHERE p.resourceUri = :resourceuri"),
-		@NamedQuery(name = "getValueAndSet", query = "SELECT p.value, p.isSet FROM RuntimeParameter p WHERE p.resourceUri = :resourceuri"),
-		@NamedQuery(name = "getValueByResourceUri", query = "SELECT p.value FROM RuntimeParameter p WHERE p.resourceUri = :resourceuri") })
+		@NamedQuery(name = "isSet", query = "SELECT p.isSet FROM RuntimeParameter p WHERE p.id = :resourceuri"),
+		@NamedQuery(name = "getValueAndSet", query = "SELECT p.value, p.isSet FROM RuntimeParameter p WHERE p.id = :resourceuri"),
+		@NamedQuery(name = "getValueByResourceUri", query = "SELECT p.value FROM RuntimeParameter p WHERE p.id = :resourceuri") })
 public class RuntimeParameter extends Metadata {
 
 	// Define the constants for properties:
@@ -221,9 +220,6 @@ public class RuntimeParameter extends Metadata {
 	@JSON(include = false)
 	private int jpaVersion;
 
-	@Id
-	private String resourceUri;
-
 	@Attribute(name = "key")
 	private String key_;
 
@@ -261,11 +257,12 @@ public class RuntimeParameter extends Metadata {
 	@Attribute
 	boolean isMappedValue = false;
 
-	@SuppressWarnings("unused")
 	private RuntimeParameter() {
+		super("Run");
 	}
 
 	public RuntimeParameter(Run run, String key, String value, String description) throws ValidationException {
+		this();
 		this.container = run;
 		this.key_ = key;
 		this.value = value;
@@ -331,7 +328,7 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	private void init() {
-		resourceUri = container.getResourceUri() + "/" + key_;
+		setId(container.getId() + "/" + key_);
 		setIsSet(!isNullOrEmpty(value));
 		group_ = RuntimeParameter.extractNodeNamePart(key_);
 		if (GLOBAL_NAMESPACE.equals(group_)) {
@@ -357,18 +354,18 @@ public class RuntimeParameter extends Metadata {
 	}
 
 	public static RuntimeParameter loadFromUuidAndKey(String uuid, String key) {
-		String resourceUri = getResourceUrl(uuid, key);
-		return load(resourceUri);
+		String id = getResourceUrl(uuid, key);
+		return load(id);
 	}
 
 	private static String getResourceUrl(String uuid, String key) {
-		String resourceUri = Run.RESOURCE_URI_PREFIX + uuid + "/" + key;
-		return resourceUri;
+		String id = Run.RESOURCE_URI_PREFIX + uuid + "/" + key;
+		return id;
 	}
 
-	public static RuntimeParameter load(String resourceUri) {
+	public static RuntimeParameter load(String id) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		RuntimeParameter rp = em.find(RuntimeParameter.class, resourceUri);
+		RuntimeParameter rp = em.find(RuntimeParameter.class, id);
 		em.close();
 		if(rp != null) {
 			// The run pulled from the db is raw. We need to deserialize it.
@@ -379,11 +376,6 @@ public class RuntimeParameter extends Metadata {
 
 	public String getNodeName() {
 		return key_.split(NODE_PROPERTY_SEPARATOR)[0];
-	}
-
-	@Override
-	public String getResourceUri() {
-		return resourceUri;
 	}
 
 	public String getValue() {

@@ -6,8 +6,12 @@ import org.simpleframework.xml.Attribute;
 @SuppressWarnings("serial")
 public class Empty extends Metadata {
 
+	public Empty() {
+		super("Empty");
+	}
+
 	@Override
-	public String getResourceUri() {
+	public String getId() {
 		return "";
 	}
 

@@ -232,7 +232,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 
 		assertEquals(Status.SUCCESS_CREATED, response.getStatus());
 
-		project = ProjectModule.load(project.getResourceUri());
+		project = ProjectModule.load(project.getId());
 
 		project.remove();
 		parentProject.remove();
@@ -360,7 +360,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 					+ Module.constructResourceUri(image.getName())));
 		} finally {
 			try {
-				ImageModule.loadLatest(image.getResourceUri()).remove();
+				ImageModule.loadLatest(image.getId()).remove();
 				project.remove();
 			} catch (NullPointerException ex) {
 

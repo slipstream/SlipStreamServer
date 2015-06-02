@@ -51,7 +51,7 @@ import com.sixsq.slipstream.persistence.User;
 public class XmlUtil {
 
 	private final static String[] addedElementNames = { "breadcrumbs",
-			"services", "user" };
+			"services", "User" };
 
 	public static void addSystemConfiguration(Document root)
 			throws ConfigurationException, ValidationException {
@@ -98,9 +98,9 @@ public class XmlUtil {
 
 		XmlUtil.addUser(doc, user);
 
-		String resourceUri = metadata.getResourceUri();
+		String id = metadata.getId();
 
-		XmlUtil.addBreadcrumbs(doc, "", resourceUri);
+		XmlUtil.addBreadcrumbs(doc, "", id);
 
 		XmlUtil.addServices(doc);
 
@@ -196,7 +196,7 @@ public class XmlUtil {
 	 * on the given user. If the user is null, then no element will be added.
 	 * The document may be null, in which case this is a no-op.
 	 *
-	 * The added element is named "user" with "username", "resourceUri", and
+	 * The added element is named "user" with "username", "id", and
 	 * "issuper" attributes.
 	 *
 	 * Note: The element will be added inside the root element. If there is no
@@ -208,7 +208,7 @@ public class XmlUtil {
 	public static void addUser(Document document, User user) {
 
 		if (document != null) {
-			stripNamedElements(document, "user");
+			stripNamedElements(document, "User");
 
 			Element root = document.getDocumentElement();
 

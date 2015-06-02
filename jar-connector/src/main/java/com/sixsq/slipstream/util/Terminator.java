@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 
 import com.sixsq.slipstream.persistence.*;
-import com.sixsq.slipstream.statemachine.State;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 
@@ -39,7 +38,7 @@ public class Terminator {
 			for (Run r : old) {
 				try {
 					em.getTransaction().begin();
-					r = Run.load(r.getResourceUri(), em);
+					r = Run.load(r.getId(), em);
 					purgeRun(r);
 					em.getTransaction().commit();
 				} catch (Exception e) {

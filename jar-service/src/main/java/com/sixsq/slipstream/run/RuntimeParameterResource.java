@@ -27,7 +27,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
 
-import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -46,7 +45,6 @@ import org.restlet.resource.ResourceException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.run.RuntimeParameterMediator;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 
@@ -186,7 +184,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 		States newState = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
-		runtimeParameter = (RuntimeParameter) RuntimeParameter.load(runtimeParameter.getResourceUri(), RuntimeParameter.class, em);
+		runtimeParameter = (RuntimeParameter) RuntimeParameter.load(runtimeParameter.getId(), RuntimeParameter.class, em);
 
 		String nodeName = runtimeParameter.getNodeName();
 		try {
@@ -250,7 +248,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	private States attemptStateUpdate(EntityManager em) {
         Run run = runtimeParameter.getContainer();
-        run = em.find(Run.class, run.getResourceUri());
+        run = em.find(Run.class, run.getId());
         StateMachine sc = StateMachine.createStateMachine(run);
 		try {
 			return attemptStateUpdateInTransaction(em, sc);

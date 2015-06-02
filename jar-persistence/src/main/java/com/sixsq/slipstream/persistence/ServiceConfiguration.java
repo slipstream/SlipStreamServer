@@ -27,7 +27,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
@@ -267,10 +266,8 @@ public class ServiceConfiguration extends Parameterized {
 		}
 	}
 
-	@Id
-	String id;
-
 	public ServiceConfiguration() {
+		super("ServiceConfiguration");
 		setId();
 	}
 
@@ -291,27 +288,8 @@ public class ServiceConfiguration extends Parameterized {
 		}
 	}
 
-//	public Parameter getParameter(String name) {
-//		return getParameters().get(name);
-//	}
-
-//	public void setParameter(Parameter parameter) {
-//
-//		validateParameter(parameter);
-//
-//		Map<String, Parameter> parameters = getParameters();
-//
-//		parameter.setContainer(this);
-//		parameters.put(parameter.getName(), parameter);
-//	}
-
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId() {
-		id = RESOURCE_URI_PREFIX + String.valueOf(System.currentTimeMillis());
+	private void setId() {
+		setId(RESOURCE_URI_PREFIX + String.valueOf(System.currentTimeMillis()));
 	}
 
 	public void setContainer(ServiceConfigurationParameter parameter) {
@@ -341,11 +319,6 @@ public class ServiceConfiguration extends Parameterized {
 		validate();
 		setId();
 		return (ServiceConfiguration) super.store();
-	}
-
-	@Override
-	public String getResourceUri() {
-		return id;
 	}
 
 	@Override

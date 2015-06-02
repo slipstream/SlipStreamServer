@@ -290,27 +290,27 @@ public abstract class ParameterizedResource extends BaseResource {
 		return false;
 	}
 
-	protected void setResponseCreatedAndViewLocation(String resourceUri) {
+	protected void setResponseCreatedAndViewLocation(String id) {
 		getResponse().setStatus(Status.SUCCESS_CREATED);
 
-		String redirectUrl = "/" + resourceUri;
+		String redirectUrl = "/" + id;
 		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), redirectUrl);
 
 		getResponse().setLocationRef(absolutePath);
 	}
 
-	protected void setResponseOkAndViewLocation(String resourceUri) {
+	protected void setResponseOkAndViewLocation(String id) {
 		Status status = isExisting() ? Status.SUCCESS_OK : Status.SUCCESS_CREATED;
 		getResponse().setStatus(status);
 
-		String redirectUrl = "/" + resourceUri;
+		String redirectUrl = "/" + id;
 		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), redirectUrl);
 
 		getResponse().setLocationRef(absolutePath);
 	}
 
-	protected void setResponseRedirect(String resourceUri) {
-		getResponse().redirectSeeOther(resourceUri);
+	protected void setResponseRedirect(String id) {
+		getResponse().redirectSeeOther(id);
 	}
 
 	protected String extractEntityAsText() {

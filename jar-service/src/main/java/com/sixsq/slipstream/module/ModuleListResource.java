@@ -39,18 +39,18 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ModuleListResource extends BaseResource {
 
-	private String resourceUri = null;
+	private String id = null;
 
-	protected String getResourceUri() {
-		return resourceUri;
+	protected String getId() {
+		return id;
 	}
 
 	@Override
 	public void initialize() throws ResourceException {
 
-		resourceUri = ResourceUriUtil.extractResourceUri(getRequest());
+		id = ResourceUriUtil.extractResourceUri(getRequest());
 
-		if (resourceUri == null) {
+		if (id == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 		}
 	}
@@ -92,7 +92,7 @@ public class ModuleListResource extends BaseResource {
 	protected ModuleViewList retrieveFilteredModuleViewList() {
 
 		ModuleViewList modules = new ModuleViewList(
-				Module.viewList(resourceUri));
+				Module.viewList(id));
 
 		if ("/".equals(getRequest().getResourceRef().getPath())) {
 			ModuleViewList published = new ModuleViewList(

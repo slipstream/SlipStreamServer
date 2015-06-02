@@ -202,7 +202,7 @@ public class AuthzTest {
 		parent.getAuthz().addGroupMember("user");
 		parent = parent.store();
 		
-		module = Module.load(module.getResourceUri());
+		module = Module.load(module.getId());
 
 		// now user can view
 		assertThat(module.getAuthz().canGet(user), is(true));

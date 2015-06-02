@@ -46,13 +46,13 @@ public class RunTestBase {
 		imageref = imageref.store();
 
 		image = new ImageModule("test/image");
-		image.setModuleReference(imageref.getResourceUri());
+		image.setModuleReference(imageref.getId());
 		image.setTarget(new Target(Target.TARGET_RECIPE_NAME, "a recipe"));
 		image.setImageId("image_id", cloudServiceName);
 		image = image.store();
 
 		imagebuildme = new ImageModule("test/imagebuildme");
-		imagebuildme.setModuleReference(imageref.getResourceUri());
+		imagebuildme.setModuleReference(imageref.getId());
 		imagebuildme.getTargets().put(Target.TARGET_RECIPE_NAME, new Target(Target.TARGET_RECIPE_NAME, "a recipe"));
 		imagebuildme = imagebuildme.store();
 

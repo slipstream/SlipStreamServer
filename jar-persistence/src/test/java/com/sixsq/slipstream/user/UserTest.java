@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.sixsq.slipstream.persistence.ParameterCategory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,7 +93,7 @@ public class UserTest {
 		User user = UserTest.createUser(name);
 
 		assertEquals(name, user.getName());
-		assertEquals(resourceUrl, user.getResourceUri());
+		assertEquals(resourceUrl, user.getId());
 
 	}
 
@@ -124,12 +123,12 @@ public class UserTest {
 		assertNotNull(userRestored);
 
 		assertEquals(user.getName(), userRestored.getName());
-		assertEquals(user.getResourceUri(), userRestored.getResourceUri());
+		assertEquals(user.getId(), userRestored.getId());
 
 		userRestored = User.load(resourceUrl);
 
 		assertEquals(user.getName(), userRestored.getName());
-		assertEquals(user.getResourceUri(), userRestored.getResourceUri());
+		assertEquals(user.getId(), userRestored.getId());
 
 		userRestored.remove();
 		userRestored = User.load(resourceUrl);
@@ -143,7 +142,7 @@ public class UserTest {
 
 		User user = UserTest.createUser(username);
 
-		String resourceUrl = user.getResourceUri();
+		String resourceUrl = user.getId();
 
 		String parameterName = "name";
 		String description = "description";
@@ -223,7 +222,7 @@ public class UserTest {
 		User user3 = UserTest.createUser("user3");
 		user3.setState(State.ACTIVE);
 		user3.setLastExecute();
-		user3.setLastModified();
+		user3.setUpdated();
 		user3.store();
 
 		Set<String> allUsernames = new TreeSet<String>();
@@ -242,7 +241,7 @@ public class UserTest {
 		user.setState(State.ACTIVE);
 		user.setLastExecute();
 		user.setLastOnline();
-		user.setLastModified();
+		user.setUpdated();
 		user.store();
 
 		List<UserView> userViewList = User.viewList();

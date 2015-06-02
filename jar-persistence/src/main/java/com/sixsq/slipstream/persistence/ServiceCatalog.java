@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Query;
@@ -57,19 +56,16 @@ public class ServiceCatalog extends Parameterized {
 	protected ModuleCategory category;
 
 	@Attribute
-	@Id
-	private String resourceUri;
-
-	@Attribute
 	private String cloud;
 
-	@SuppressWarnings("unused")
 	private ServiceCatalog() {
-		super();
+		super("ServiceCatalog");
 	}
 
 	public ServiceCatalog(String cloud) {
+		this();
 		setName(cloud);
+		setId(constructResourceUri(cloud));
 	}
 
 	public String getCloud() {
@@ -102,11 +98,6 @@ public class ServiceCatalog extends Parameterized {
 	}
 
 	@Override
-	public String getResourceUri() {
-		return constructResourceUri(getCloud());
-	}
-
-	@Override
 	public String getName() {
 		return getCloud();
 	}
@@ -114,7 +105,6 @@ public class ServiceCatalog extends Parameterized {
 	@Override
 	public void setName(String cloud) {
 		this.cloud = cloud;
-		this.resourceUri = constructResourceUri(cloud);
 	}
 
 	public static String constructResourceUri(String name) {

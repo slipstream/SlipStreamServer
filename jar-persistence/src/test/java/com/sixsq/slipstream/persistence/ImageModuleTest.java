@@ -63,7 +63,7 @@ public class ImageModuleTest {
 		Module module = new ImageModule(name);
 
 		assertEquals(name, module.getName());
-		assertEquals(resourceUrl, module.getResourceUri());
+		assertEquals(resourceUrl, module.getId());
 		assertEquals(ModuleCategory.Image, module.getCategory());
 
 	}
@@ -81,7 +81,7 @@ public class ImageModuleTest {
 		assertNotNull(moduleRestored);
 
 		assertEquals(module.getName(), moduleRestored.getName());
-		assertEquals(module.getResourceUri(), moduleRestored.getResourceUri());
+		assertEquals(module.getId(), moduleRestored.getId());
 		assertEquals(module.getCategory(), moduleRestored.getCategory());
 
 		module.remove();
@@ -96,7 +96,7 @@ public class ImageModuleTest {
 
 		Module module = new ImageModule(name);
 
-		String resourceUrl = module.getResourceUri();
+		String resourceUrl = module.getId();
 
 		String parameterName = "name";
 		String description = "description";
@@ -186,12 +186,12 @@ public class ImageModuleTest {
 		Module module = new ImageModule("moduleUnpublished");
 		module.publish();
 		module.store(false);
-		module = Module.loadLatest(module.getResourceUri());
+		module = Module.loadLatest(module.getId());
 		assertNotNull(module.getPublished());
 
 		module.unpublish();
 		module.store(false);
-		module = Module.loadLatest(module.getResourceUri());
+		module = Module.loadLatest(module.getId());
 		assertNull(module.getPublished());
 
 		module.remove();
@@ -204,7 +204,7 @@ public class ImageModuleTest {
 		module.publish();
 		module.store(false);
 
-		module = Module.loadLatest(module.getResourceUri());
+		module = Module.loadLatest(module.getId());
 
 		assertNotNull(module.getPublished());
 
@@ -217,12 +217,12 @@ public class ImageModuleTest {
 		Module module = new ImageModule("storeNoVersionIncrement");
 		module.store();
 
-		module = Module.loadLatest(module.getResourceUri());
+		module = Module.loadLatest(module.getId());
 		int version = module.getVersion();
 
 		module.store(false);
 
-		module = Module.loadLatest(module.getResourceUri());
+		module = Module.loadLatest(module.getId());
 
 		assertThat(module.getVersion(), is(version));
 
