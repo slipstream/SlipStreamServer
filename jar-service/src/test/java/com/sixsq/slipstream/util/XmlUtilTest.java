@@ -20,7 +20,15 @@ package com.sixsq.slipstream.util;
  * -=================================================================-
  */
 
-import static org.junit.Assert.assertEquals;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.user.UserTest;
+import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,15 +37,9 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.IOException;
 
-import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.user.UserTest;
+import static org.junit.Assert.assertEquals;
 
 public class XmlUtilTest extends ResourceTestBase {
 
@@ -143,6 +145,15 @@ public class XmlUtilTest extends ResourceTestBase {
 		assertEquals("alpha/beta/gamma/delta/epsilon",
 				runXpath("/*/breadcrumbs/crumb[3]/@path", document));
 
+	}
+
+	@Test
+	public void runsAreRemovedDuringDenormalization () throws IOException {
+		String originalXML = IOUtils.toString(getClass().getResourceAsStream("/image.xml"));
+		Assert.assertTrue(originalXML.contains("</runs>"));
+
+		String denormalizedXML = XmlUtil.denormalize(originalXML);
+		Assert.assertFalse(denormalizedXML.contains("</runs>"));
 	}
 
 	private String runXpath(String xpath, Document document)
