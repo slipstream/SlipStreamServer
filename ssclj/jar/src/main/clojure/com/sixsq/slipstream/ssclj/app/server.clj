@@ -12,6 +12,7 @@
     [com.sixsq.slipstream.ssclj.middleware.base-uri                 :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler        :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header        :refer [wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params              :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.app.routes                          :as routes]
     [com.sixsq.slipstream.ssclj.resources.root                      :as root]
     [com.sixsq.slipstream.ssclj.db.impl                             :as db]
@@ -21,7 +22,7 @@
 
 ;; FIXME: make this dynamic depending on the service configuration
 (defn set-db-impl
-  []  
+  []
   ; (-> (fsdb/get-instance fsdb/default-db-prefix)
   ;     (db/set-impl!)))
   (db/set-impl! (dbdb/get-instance)))
@@ -46,6 +47,7 @@
   (-> (routes/get-main-routes)
       handler/site
       wrap-exceptions
+      wrap-cimi-params
       wrap-base-uri
       wrap-params
       wrap-authn-info-header

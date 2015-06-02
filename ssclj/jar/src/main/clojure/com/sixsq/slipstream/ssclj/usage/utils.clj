@@ -18,11 +18,7 @@
   [& args]
    (->> (apply time/date-time args)      
         inc-day
-        (time-fmt/unparse (:date-time time-fmt/formatters))))    
-
-(defn days-after   
-  [& start-date]
-  (iterate inc-day (apply time/date-time start-date)))
+        (time-fmt/unparse (:date-time time-fmt/formatters))))
 
 (defn to-time
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
@@ -84,17 +80,4 @@
     (time/before? (to-time t1) (to-time t2)) t1
     :else t2))
 
-(defn clojurify   
-  [exp] 
-  (cond
-    (instance? java.util.Map  exp) (into {} exp)
-    (instance? java.util.List exp) (into [] exp)
-    :else exp))
-
-(defn walk-clojurify
-  [java-map]
-  (->> java-map
-       (clojure.walk/prewalk clojurify)
-       clojure.walk/keywordize-keys))
-  
 

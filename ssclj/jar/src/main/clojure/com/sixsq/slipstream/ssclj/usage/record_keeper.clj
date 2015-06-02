@@ -156,14 +156,14 @@
 (defn -insertStart
   [usage-event]  
   (-> usage-event
-      u/walk-clojurify
+      cu/walk-clojurify
       nil-timestamps-if-absent
       (process-event :start)))
 
 (defn -insertEnd
   [usage-event]  
   (-> usage-event
-      u/walk-clojurify
+      cu/walk-clojurify
       nil-timestamps-if-absent
       (process-event :stop)))
 
