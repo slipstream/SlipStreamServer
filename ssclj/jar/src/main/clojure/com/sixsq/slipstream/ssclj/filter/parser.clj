@@ -6,9 +6,12 @@
     [instaparse.core :as insta]))
 
 ;; NOTE: The URL for instaparse must be a string.
-(def grammar-url
+(def filter-grammar-url
   (str (io/resource "filter-grammar.txt")))
 
-(def parser
-  (insta/parser grammar-url))
+(def ^:private cimi-filter-parser
+  (insta/parser filter-grammar-url))
 
+(defn parse-cimi-filter
+  [s]
+  (insta/parse cimi-filter-parser s))

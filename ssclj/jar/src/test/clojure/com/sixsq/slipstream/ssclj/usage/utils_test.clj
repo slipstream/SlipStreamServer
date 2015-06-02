@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.usage.utils-test
   (:require 
-    [com.sixsq.slipstream.ssclj.usage.utils :refer :all]    
+    [com.sixsq.slipstream.ssclj.resources.common.utils :refer :all]
     [clojure.test :refer :all]))
 
   (deftest walk-clojurify-should-recursively-keywordize-a-java-map
