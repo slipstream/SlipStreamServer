@@ -85,24 +85,26 @@
   (->>  (map #(str "(" % ")") filters)
         (clojure.string/join " and ")))
 
-(defn remove-invalid-filter
+(defn throw-illegal-for-invalid-filter
   [parse-result]
-  (when-not (insta/failure? parse-result)
+  (if (insta/failure? parse-result)
+    (throw (Exception. (str "Invalid filter: " (insta/get-failure parse-result))))
     parse-result))
 
 (defn process-filter
   "Adds the :filter key to the :cimi-params map in the request.  If
   the $filter parameter appears more than once, then the filters are
   combined with a logical AND.  If the resulting filter is invalid,
-  then it is ignored."
-
+  then an exception is thrown."
   [{:keys [params] :or {:params {}} :as req}]
-  (->> (get params "$filter")
-       (as-vector)
-       (wrap-join-with-and)
-       (parser/parse-cimi-filter)
-       (remove-invalid-filter)
-       (add-cimi-param req :filter)))
+  (if-let [filter-param (get params "$filter")]
+    (->>  filter-param
+          (as-vector)
+          (wrap-join-with-and)
+          (parser/parse-cimi-filter)
+          (throw-illegal-for-invalid-filter)
+          (add-cimi-param req :filter))
+    req))
 
 (defn comma-split
   "Split string on commas, optionally surrounded by whitespace.  All values

@@ -10,6 +10,7 @@
 
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]  
     [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params          :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri             :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler    :refer [wrap-exceptions]]
@@ -39,6 +40,7 @@
   (-> resource-routes
       wrap-exceptions
       wrap-base-uri
+      wrap-cimi-params
       wrap-params
       wrap-authn-info-header
       (wrap-json-body {:keywords? true})
@@ -173,7 +175,8 @@
   (-> (session (ring-app))
       (content-type "application/json")
       (header authn-info-header "mike")
-      (request (str base-uri "?$first=1&$last=1"))
+      (request (str base-uri "?$first=1&$last=1")
+               :content-type "application/x-www-form-urlencoded")
       t/body->json
       (t/is-status 200)
       (t/is-key-value :count 1)))
@@ -208,9 +211,9 @@
       t/body->json
       (t/is-status code))))
 
-(deftest pagination-wrong-query
+(deftest pagination-wrong-query-ignores-invalid
   (insert-summaries)
-  (expect-pagination 400
+  (expect-pagination 200
       ["?$first=a&$last=10"])
   (expect-pagination 200
       ["?$first=-1&$last=10"

@@ -145,45 +145,6 @@
       (String.)
       (edn/read-string)))
 
-(defn bad-query
-  [offset limit]
-  (throw
-    (ex-response
-      (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset,
-            ", limit:"limit")")
-      400 0)))
-
-(defn get-offset
-  [^String first]
-  (max 0 (dec (Integer. first))))
-
-(defn- first-last-to-offset-limit
-  "Converts $first and $last to (SQL equivalent) offset and limit"
-  [[^String first ^String last]]
-  (try
-    (cond
-      (every? nil? [first last]) {:offset 0                  :limit 0}
-      (nil? first)               {:offset 0                  :limit (Integer. last)}
-      (nil? last)                {:offset (get-offset first) :limit 0}
-      :else                      {:offset (get-offset first) :limit (- (Integer. last) (get-offset first))})
-    (catch NumberFormatException nfe
-      (bad-query first last))))
-
-(defn- first-last
-  "Extracts $first and $last from query-params of options"
-  [options]
-  (->> options
-       :query-params
-       ((juxt #(get % "$first") #(get % "$last")))))
-
-(defn offset-limit
-  "Extracts $first and $last from query-params of options and
-  converts it to (SQL equivalent) offset and limit"
-  [options]
-  (-> options
-      first-last
-      first-last-to-offset-limit))
-
 (defn- clojurify
   [exp]
   (cond
