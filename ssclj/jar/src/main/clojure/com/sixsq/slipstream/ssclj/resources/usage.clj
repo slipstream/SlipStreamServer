@@ -42,20 +42,20 @@
   [usage]
   (update-in usage [:acl] fu/deserialize))
 
-(defn bad-query   
+(defn bad-query
   [offset limit]
-  (throw 
-    (u/ex-response 
-      (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset, 
+  (throw
+    (u/ex-response
+      (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset,
             ", limit:"limit")")
       400 0)))
- 
-(defn sql   
+
+(defn sql
   [id roles offset limit]
-  (->   (hh/select :u.*) 
+  (->   (hh/select :u.*)
         (hh/from [:acl :a] [:usage_summaries :u])
         (hh/where [:and [:= :u.id :a.resource-id]
-                        [:or 
+                        [:or
                           (dbb/id-matches? id)
                           (dbb/roles-in? roles)]])
         (hh/modifiers :distinct)
@@ -70,7 +70,7 @@
   (let [[id roles]              (dbb/id-roles options)
         {:keys [offset limit]}  (u/offset-limit options)]
     (if (or (neg? limit) (dbb/neither-id-roles? id roles))
-      []      
+      []
       (->> (sql id roles offset limit)
            (j/query kh/db-spec)
            (map deserialize-usage)))))
