@@ -1,42 +1,23 @@
 (ns com.sixsq.slipstream.ssclj.resources.event-test
   (:require
-    [clojure.string                                             :as s]
     [clojure.test                                               :refer :all]
     [ring.middleware.json                                       :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params                                     :refer [wrap-params]]
-    [ring.util.codec                                            :as rc]
     [korma.core                                                 :as kc]
 
     [peridot.core                                               :refer :all]
 
     [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri             :refer [wrap-base-uri]]
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params          :refer [wrap-cimi-params]]
-    [com.sixsq.slipstream.ssclj.middleware.exception-handler    :refer [wrap-exceptions]]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header]]
 
     [clojure.data.json                                          :as json]
     [com.sixsq.slipstream.ssclj.api.acl                         :as acl]
-    [com.sixsq.slipstream.ssclj.db.impl                         :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding             :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.event                 :refer :all]
-    [com.sixsq.slipstream.ssclj.app.routes                      :as routes]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]
+
+
+    [com.sixsq.slipstream.ssclj.resources.test-utils            :refer [urlencode-params is-count *base-uri* *auth-name* ring-app]]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]))
-
-(defn make-ring-app [resource-routes]
-  (db/set-impl! (dbdb/get-instance))
-  (-> resource-routes
-      wrap-base-uri
-      wrap-cimi-params
-      wrap-params
-      wrap-authn-info-header
-      wrap-exceptions
-      (wrap-json-body {:keywords? true})
-      (wrap-json-response {:pretty true :escape-non-ascii true})))
-
-(defn ring-app []
-  (make-ring-app (t/concat-routes routes/final-routes)))
 
 (defn reset-events
   []
@@ -60,6 +41,8 @@
                   })
 
 (def base-uri (str c/service-context resource-name))
+(alter-var-root #'*base-uri*  (constantly base-uri))
+(alter-var-root #'*auth-name* (constantly "jane"))
 
 (defn insert-some-events
   []
@@ -67,7 +50,7 @@
   (dotimes [i nb-events]
     (-> (session (ring-app))
         (content-type "application/json")
-        (header authn-info-header "jane")
+        (header authn-info-header *auth-name*)
         (request base-uri
                  :request-method :post
                  :body (json/write-str (assoc-in valid-event [:content :resource :href] (str "Run/" i)))))))
@@ -78,25 +61,6 @@
   (f))
 
 (use-fixtures :once fixture-insert-some-events)
-
-(defn exec-request
-  [query-string]
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "jane")
-      (request (str base-uri query-string)
-               :content-type "application/x-www-form-urlencoded")
-      (t/body->json)))
-
-(defn- is-count
-  [expected-count query-string]
-  (-> (exec-request query-string)
-      (t/is-key-value :count expected-count)))
-
-(defn- is-invalid-request
-  [query-string]
-  (-> (exec-request query-string)
-      (t/is-status 500)))
 
 ;;
 ;; Note that these tests need nb-events > 5
@@ -114,22 +78,6 @@
   (is-count 1 "?$filter=content/resource/href='Run/5'")
   (is-count 1 "?$filter=content/resource/href='Run/5'&$last=1")
   (is-count 1 "?$last=1&$filter=content/resource/href='Run/5'"))
-
-(defn- urlencode-param
-  [p]
-  (->>  (re-seq #"([^=]*)=(.*)" p)
-        first
-        next
-        (map rc/url-encode)
-        (s/join "=")))
-
-(defn urlencode-params
-  [query-string]
-  (let [params (subs query-string 1)]
-    (->>  (s/split params #"&")
-          (map urlencode-param)
-          (s/join "&")
-          (str "?"))))
 
 (deftest resources-filtering
   (doseq [i (range nb-events)]

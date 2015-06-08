@@ -1,0 +1,38 @@
+## 90 usage_summaries
+curl "http://localhost:8201/ssclj/Usage" -H "slipstream-authn-info: user-38"
+real	0m0.125s
+
+## 986 summaries
+curl "http://localhost:8201/ssclj/Usage" -H "slipstream-authn-info: user-38"
+;; result count = 6
+real	0m0.127s
+
+;; command for a given user and cloud
+curl "http://localhost:8201/ssclj/Usage" -H "slipstream-authn-info: user-97 cloud-2" 
+;; result count = 91
+;; real	0m0.219s
+
+;; count = 116
+;; real	0m0.255s
+
+;; count = 91
+;; real	0m0.228s
+
+;; command for a cloud only
+curl "http://localhost:8201/ssclj/Usage" -H "slipstream-authn-info: zorro cloud-3"
+;; count = 93
+;; real	0m0.238s
+
+;; count = 85
+;; real	0m0.212s
+
+;; multiple clouds at the same time
+curl "http://localhost:8201/ssclj/Usage" -H "slipstream-authn-info: zorro cloud-0 cloud-1 cloud-2 cloud-3 cloud-4 cloud-5" 
+;; count = 597
+;; real	0m0.768s
+
+;; filtering for a specific user
+curl "http://localhost:8201/ssclj/Usage?%24filter=user%3D%27user-39%27" -H "slipstream-authn-info: zorro cloud-0 cloud-1 cloud-2 cloud-3" 
+;; count = 7
+;; real	0m0.232s
+

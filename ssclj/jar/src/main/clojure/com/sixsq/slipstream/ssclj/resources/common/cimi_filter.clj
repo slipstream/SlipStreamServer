@@ -27,6 +27,7 @@
 
 (defn- attribute-value
   [resource attribute-full-name]
+
   (->>  attribute-full-name
         attribute-path
         (get-in resource)

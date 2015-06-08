@@ -42,35 +42,47 @@
   [usage]
   (update-in usage [:acl] fu/deserialize))
 
-(defn bad-query
-  [offset limit]
-  (throw
-    (u/ex-response
-      (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset,
-            ", limit:"limit")")
-      400 0)))
-
 (defn sql
-  [id roles]
+  [id roles start end]
   (->   (hh/select :u.*)
         (hh/from [:acl :a] [:usage_summaries :u])
-        (hh/where [:and [:= :u.id :a.resource-id]
+        (hh/where [:and
+                        [:= :u.id :a.resource-id]
                         [:or
                           (dbb/id-matches? id)
-                          (dbb/roles-in? roles)]])
+                          (dbb/roles-in? roles)]
+
+                        ;; FIXME string comparison hack
+                        ; [:=  :u.start_timestamp  (str start "T00:00:00.000Z")]
+                        ; [:=  :u.end_timestamp    (str end   "T00:00:00.000Z")]
+                  ])
         (hh/modifiers :distinct)
         (hh/order-by [:u.start_timestamp :desc])
 
-        (sql/format :quoting :ansi)))
+        (sql/format :quoting :ansi)
+        ; du/show
+        ))
+
+(defn start-end
+  [options]
+  ((juxt :start_timestamp :end_timestamp) (:cimi-params options)))
 
 (defmethod dbb/find-resources resource-name
   [collection-id options]
-  (let [[id roles] (dbb/id-roles options)]
+  (let [[id roles]  (dbb/id-roles options)
+        [start end] (start-end options)]
     (if (dbb/neither-id-roles? id roles)
       []
-      (->> (sql id roles)
-           (j/query kh/db-spec)
-           (map deserialize-usage)))))
+      (do
+        ; (du/start-ts "find resources" nil)
+        (->>  (sql id roles start end)
+              ;(du/record-ts "sql built")
+              ; du/show
+              (j/query kh/db-spec)
+              ; (du/record-ts "sql exec")
+              (map deserialize-usage)
+              ; (du/record-ts "deserialize")
+              )))))
 
 ;;
 ;; schemas
