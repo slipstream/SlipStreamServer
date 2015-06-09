@@ -7,6 +7,7 @@
     [ring.util.response :as r]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
@@ -114,9 +115,9 @@
 ;; pattern, so the routes must be defined explicitly.
 ;;
 (defroutes routes
-           (GET c/service-context request
+           (GET p/service-context request
                 (crud/retrieve (assoc-in request [:params :resource-name] resource-name)))
-           (PUT c/service-context request
+           (PUT p/service-context request
                 (crud/edit (assoc-in request [:params :resource-name] resource-name)))
-           (ANY c/service-context request
+           (ANY p/service-context request
                 (throw (u/ex-bad-method request))))
