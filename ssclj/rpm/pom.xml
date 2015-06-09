@@ -106,7 +106,7 @@
         <extensions>true</extensions>
         <configuration>
           <classifier>${package.os}</classifier>
-          <release>${RELEASE}</release>
+          <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream SSCLJ Server</summary>
           <name>slipstream-ssclj${slipstream.edition}</name>
           <group>System</group>
