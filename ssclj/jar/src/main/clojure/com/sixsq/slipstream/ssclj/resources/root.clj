@@ -111,7 +111,7 @@
   (edit-impl request))
 
 ;;
-;; Root doesn't follow the usual /ssclj/ResourceName/UUID
+;; Root doesn't follow the usual service-context + '/ResourceName/UUID'
 ;; pattern, so the routes must be defined explicitly.
 ;;
 (defroutes routes
