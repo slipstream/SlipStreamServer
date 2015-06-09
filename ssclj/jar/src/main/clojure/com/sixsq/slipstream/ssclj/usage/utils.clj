@@ -28,27 +28,6 @@
   [ts]
   (time-fmt/unparse (:date-time time-fmt/formatters) ts))
 
-(defn to-datetime
-  [yyyy-mm-dd]
-  (->> (clojure.string/split yyyy-mm-dd #"-")
-       (map #(Integer/parseInt %))
-       (apply time/date-time)))
-
-(defn to-yyyy-mm-dd
-  [datetime]
-  (-> datetime
-      to-ISO-8601
-      (subs 0 10)))
-
-(defn add-duration
-  [start duration]
-  (println "START " start)
-  (println "DURATION " duration)
-  (let [durations {"day" time/days "week" time/weeks}]
-    (-> start
-        to-datetime
-        (time/plus ((get durations duration) 1)))))
-
 (defn to-time
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
    instance on success and nil on failure."

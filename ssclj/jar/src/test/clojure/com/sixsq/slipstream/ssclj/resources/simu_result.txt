@@ -1,8 +1,10 @@
-## 90 usage_summaries
+## 90 summaries
+---------------------
 curl "http://localhost:8201/ssclj/Usage" -H "slipstream-authn-info: user-38"
 real	0m0.125s
 
 ## 986 summaries
+---------------------
 curl "http://localhost:8201/ssclj/Usage" -H "slipstream-authn-info: user-38"
 ;; result count = 6
 real	0m0.127s
@@ -35,4 +37,11 @@ curl "http://localhost:8201/ssclj/Usage" -H "slipstream-authn-info: zorro cloud-
 curl "http://localhost:8201/ssclj/Usage?%24filter=user%3D%27user-39%27" -H "slipstream-authn-info: zorro cloud-0 cloud-1 cloud-2 cloud-3" 
 ;; count = 7
 ;; real	0m0.232s
+
+### 10'000 summaries (100 days * 100 records per day)
+
+;; one day for 3 clouds
+curl "http://localhost:8201/ssclj/Usage?%24filter=start_timestamp%3D%272010-01-02T00%3A00%3A00.000Z%27%20and%20end_timestamp%3D%272010-01-03T00%3A00%3A00.000Z%27" -H "slipstream-authn-info: zorro cloud-0 cloud-1 cloud-2 cloud-3"
+;; count = 38
+;; real	0m11.894s
 

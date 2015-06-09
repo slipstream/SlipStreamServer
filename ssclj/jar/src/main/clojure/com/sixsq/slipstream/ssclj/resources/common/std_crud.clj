@@ -75,6 +75,7 @@
   [resource-name collection-acl collection-uri collection-key]
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
     (fn [request]
+
       (a/can-view? {:acl collection-acl} request)
 
       (->> (select-keys request [:identity :query-params :cimi-params])
@@ -90,7 +91,7 @@
 
            ;; filtering
            (cf/cimi-filter-tree (get-in request [:cimi-params :filter]))
-           ; (du/record-ts "filtering")
+           ;(du/record-ts "filtering")
 
            ;; paginating
            (pg/paginate         (get-in request [:cimi-params :first]) (get-in request [:cimi-params :last]))

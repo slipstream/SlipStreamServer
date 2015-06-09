@@ -62,9 +62,11 @@
 
 (defn roles-in?
   [roles]
-  (if (seq roles)
-    [:and [:= :a.principal-type "ROLE"] [:in :a.principal-name roles]]
-    [:= 0 1]))
+  (cond
+    (some #{"ADMIN"} roles) [:= 1 1]
+    (seq roles)             [:and [:= :a.principal-type "ROLE"]
+                                  [:in :a.principal-name roles]]
+    :else                   [:= 0 1]))
 
 (defn neither-id-roles?
   [id roles]

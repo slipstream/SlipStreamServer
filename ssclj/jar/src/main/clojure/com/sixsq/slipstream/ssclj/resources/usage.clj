@@ -77,7 +77,7 @@
         ; (du/start-ts "find resources" nil)
         (->>  (sql id roles start end)
               ;(du/record-ts "sql built")
-              ; du/show
+
               (j/query kh/db-spec)
               ; (du/record-ts "sql exec")
               (map deserialize-usage)

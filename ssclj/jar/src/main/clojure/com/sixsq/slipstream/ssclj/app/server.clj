@@ -48,7 +48,6 @@
   (-> (routes/get-main-routes)
       handler/site
       wrap-exceptions
-      wrap-usage-params
       wrap-cimi-params
       wrap-base-uri
       wrap-params
