@@ -43,7 +43,6 @@
   "Returns a set containing all of the applicable rights from an ACL
    for the given identity map."
   [id-map {:keys [owner rules]}]
-  du/show rules
   (->> (concat [admin-rule (assoc owner :right "ALL")] rules)
        (map #(extract-right id-map %))
        (remove nil?)

@@ -159,4 +159,13 @@
        (clojure.walk/prewalk clojurify)
        clojure.walk/keywordize-keys))
 
+(defn into-vec-without-nil
+  [op xs]
+  (when (->>  xs
+              (remove nil?)
+              seq)
+    (->>  (into [op] xs)
+          (remove nil?)
+          vec)))
+
 

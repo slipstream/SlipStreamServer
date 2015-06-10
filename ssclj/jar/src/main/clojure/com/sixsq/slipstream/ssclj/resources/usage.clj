@@ -11,6 +11,7 @@
     [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
     [com.sixsq.slipstream.ssclj.database.korma-helper           :as kh]
     [com.sixsq.slipstream.ssclj.db.database-binding             :as dbb]
+    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter    :as cf]
     [com.sixsq.slipstream.ssclj.resources.common.authz          :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud       :as std-crud]
@@ -40,42 +41,38 @@
 
 (defn- deserialize-usage
   [usage]
-  (update-in usage [:acl] fu/deserialize))
+  (-> usage
+      (update-in [:acl]   fu/deserialize)
+      (update-in [:usage] fu/deserialize)))
 
 (defn sql
-  [id roles start end]
+  [id roles cimi-filter]
   (->   (hh/select :u.*)
-        (hh/from [:acl :a] [:usage_summaries :u])
-        (hh/where [:and
-                        [:= :u.id :a.resource-id]
-                        [:or
-                          (dbb/id-matches? id)
-                          (dbb/roles-in? roles)]
+        (hh/from    [:acl :a] [:usage_summaries :u])
+        (hh/where   (u/into-vec-without-nil :and
+                                        [
+                                          [:= :u.id :a.resource-id]
 
-                        ;; FIXME string comparison hack
-                        ; [:=  :u.start_timestamp  (str start "T00:00:00.000Z")]
-                        ; [:=  :u.end_timestamp    (str end   "T00:00:00.000Z")]
-                  ])
+                                          [:or
+                                           (dbb/id-matches? id)
+                                           (dbb/roles-in? roles)]
+
+                                          (cf/sql-clauses cimi-filter)
+                                         ]))
+
         (hh/modifiers :distinct)
         (hh/order-by [:u.start_timestamp :desc])
 
-        (sql/format :quoting :ansi)
-        ; du/show
-        ))
-
-(defn start-end
-  [options]
-  ((juxt :start_timestamp :end_timestamp) (:cimi-params options)))
+        (sql/format :quoting :ansi)))
 
 (defmethod dbb/find-resources resource-name
   [collection-id options]
-  (let [[id roles]  (dbb/id-roles options)
-        [start end] (start-end options)]
+  (let [[id roles]  (dbb/id-roles options)]
     (if (dbb/neither-id-roles? id roles)
       []
       (do
         ; (du/start-ts "find resources" nil)
-        (->>  (sql id roles start end)
+        (->>  (sql id roles (get-in options [:cimi-params :filter]))
               ;(du/record-ts "sql built")
 
               (j/query kh/db-spec)

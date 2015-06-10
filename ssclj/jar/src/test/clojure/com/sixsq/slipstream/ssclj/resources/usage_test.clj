@@ -161,8 +161,17 @@
 (deftest admin-sees-everything
   (is-count 5 "" "super ADMIN"))
 
-(deftest filter-with-admin
+(deftest simple-filter-with-admin
+  (is-count 2 "?$filter=user='joe'"   "super ADMIN")
+  (is-count 3 "?$filter=user='mike'"  "super ADMIN")
+  )
 
+(deftest filter-with-cimi-filter-unknown-to-db
+  (is-count 2 "?$filter=user='joe'" "super ADMIN")
+  ;; usage/ram/unit will *not* be filtered at sql level
+  (is-count 1 "?$filter=usage/ram/unit_minutes='100.0'" "super ADMIN"))
+
+(deftest filter-with-admin
   (is-count 2 (one-line
                 "?$filter=
                  start_timestamp='2015-04-16T00:00:00.000Z'
@@ -176,6 +185,14 @@
                  start_timestamp='2015-04-16T00:00:00.000Z'
                  and
                  end_timestamp='2015-04-17T00:00:00.000Z'") "super ADMIN")
+
+  (is-count 2 (one-line
+                "?$filter=
+                 user='joe'") "super ADMIN")
+
+  (is-count 3 (one-line
+                "?$filter=
+                 user='mike'") "super ADMIN")
 
   (is-count 1 (one-line
                 "?$filter=
