@@ -6,8 +6,6 @@
 
 (def ^:const slipstream-schema-uri "http://sixsq.com/slipstream/1/")
 
-(def ^:const service-context "/ssclj/")
-
 ;;
 ;; actions
 ;;

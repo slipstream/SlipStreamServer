@@ -35,7 +35,7 @@ public class Event {
 
 	public static boolean isMuted = false;
 
-	private static final String EVENT_SERVER = "http://localhost:8201/ssclj";
+	private static final String EVENT_SERVER = "http://localhost:8201/api";
 
 	private static final Logger logger = Logger.getLogger(Event.class.getName());
 

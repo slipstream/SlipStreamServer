@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 public class UsageRecord {
 
-    private static final String SSCLJ_SERVER = "http://localhost:8201/ssclj";
+    private static final String SSCLJ_SERVER = "http://localhost:8201/api";
 
     private static final Logger logger = Logger.getLogger(UsageRecord.class.getName());
 

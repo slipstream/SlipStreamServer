@@ -9,7 +9,6 @@
 
     [peridot.core                                               :refer :all]
 
-    [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri             :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params          :refer [wrap-cimi-params]]
@@ -21,6 +20,7 @@
     [com.sixsq.slipstream.ssclj.db.database-binding             :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.event                 :refer :all]
     [com.sixsq.slipstream.ssclj.app.routes                      :as routes]
+    [com.sixsq.slipstream.ssclj.app.params                      :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]))
 
@@ -37,7 +37,7 @@
 
 (use-fixtures :each reset-events-fixtures)
 
-(def base-uri (str c/service-context resource-name))
+(def base-uri (str p/service-context resource-name))
 
 (def ^:private nb-events 4)
 

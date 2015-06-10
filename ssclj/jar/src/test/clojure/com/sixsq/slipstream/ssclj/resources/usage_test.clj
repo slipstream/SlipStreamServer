@@ -8,8 +8,7 @@
 
     [peridot.core                                               :refer :all]
 
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]  
-    [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri             :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler    :refer [wrap-exceptions]]
@@ -21,6 +20,7 @@
     [com.sixsq.slipstream.ssclj.usage.utils                     :as u]
     [com.sixsq.slipstream.ssclj.resources.usage                 :refer :all]
     [com.sixsq.slipstream.ssclj.app.routes                      :as routes]
+    [com.sixsq.slipstream.ssclj.app.params                      :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]))
 
 (defn reset-summaries
@@ -32,7 +32,7 @@
 
 (use-fixtures :each reset-summaries)
 
-(def base-uri (str c/service-context resource-name))
+(def base-uri (str p/service-context resource-name))
 
 (defn make-ring-app [resource-routes]
   (db/set-impl! (dbdb/get-instance))
@@ -141,7 +141,7 @@
     (-> (session (ring-app))
         (content-type "application/json")
         (header authn-info-header "john exo")
-        (request (str c/service-context uuid))
+        (request (str p/service-context uuid))
         t/body->json
         (t/is-key-value :id uuid)
         (t/is-status 200))))
@@ -154,7 +154,7 @@
     (-> (session (ring-app))
         (content-type "application/json")
         (header authn-info-header "jack")
-        (request (str c/service-context uuid))
+        (request (str p/service-context uuid))
         t/body->json
         (t/is-status 403))))
 
