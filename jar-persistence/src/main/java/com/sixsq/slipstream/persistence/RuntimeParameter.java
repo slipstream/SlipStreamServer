@@ -180,15 +180,23 @@ public class RuntimeParameter extends Metadata {
 	public static final String SCALE_STATE_DEFAULT_VALUE = ScaleStates.creating.name();
 	public static final String SCALE_STATE_DESCRIPTION = "Defined scalability state";
 
+	public static final String PRE_SCALE_DONE_KEY = "pre.scale.done";
+	public static final String PRE_SCALE_DONE_DEFAULT_VALUE = "false";
+	public static final String PRE_SCALE_DONE_DESCRIPTION = "Node instance sets to 'true' after running pre-scale script";
+
+	public static final String SCALE_IAAS_DONE_KEY = "scale.iaas.done";
+	public static final String SCALE_IAAS_DONE_DEFAULT_VALUE = "false";
+	public static final String SCALE_IAAS_DONE_DESCRIPTION = "Orchestrator sets to 'true' after scaling the node instance";
+
+	public static final String SCALE_DISK_ATTACH_SIZE_KEY = "disk.attach.size";
+	public static final String SCALE_DISK_ATTACH_SIZE_DEFAULT_VALUE = "";
+	public static final String SCALE_DISK_ATTACH_SIZE_DESCRIPTION = "Size of the extra disk to attach to the VM during vertical scaling";
+
+	public static final String SCALE_DISK_DETACH_DEVICE_KEY = "disk.detach.device";
+	public static final String SCALE_DISK_DETACH_DEVICE_DEFAULT_VALUE = "";
+	public static final String SCALE_DISK_DETACH_DEVICE_DESCRIPTION = "Name of the block device to detach from the VM during vertical scaling";
+
 	public static final List<String> SPECIAL_PARAMETERS = Arrays.asList(RuntimeParameter.INSTANCE_ID_KEY);
-
-	public static final String PRE_SCALE_DONE = "pre.scale.done";
-	public static final String PRE_SCALE_DONE_DEFAULT_VALUE = "";
-	public static final String PRE_SCALE_DONE_DESCRIPTION = "Pre-scale script ran or not.";
-
-	public static final String SCALE_IAAS_DONE = "scale.iaas.done";
-	public static final String SCALE_IAAS_DONE_DEFAULT_VALUE = "";
-	public static final String SCALE_IAAS_DONE_DESCRIPTION = "Orchestrator completed scaling IaaS action on the node instance.";
 
 	public static String extractNodeNamePart(String name) {
 		if (!name.contains(NODE_PROPERTY_SEPARATOR)) {

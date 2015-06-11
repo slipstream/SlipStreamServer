@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.sixsq.slipstream</groupId>
         <artifactId>SlipStreamServer</artifactId>
-        <version>2.10-SNAPSHOT</version>
+        <version>2.11-SNAPSHOT</version>
     </parent>
     <dependencies>
         <dependency>
@@ -201,7 +201,7 @@
                     <group>Applications/Engineering</group>
                     <vendor>SixSq</vendor>
                     <packager>SixSq</packager>
-                    <copyright>Apache License, Version 2.0</copyright>
+                    <license>Apache 2.0</license>
                     <url>http://sixsq.com</url>
                     <needarch>noarch</needarch>
                     <description>SlipStream REST Server, including open source connectors</description>
@@ -274,6 +274,7 @@
                                 </source>
                             </sources>
                         </mapping>
+
                         <mapping>
                             <directory>/etc/rc.d/init.d</directory>
                             <sources>
@@ -283,6 +284,19 @@
                                 </softlinkSource>
                             </sources>
                         </mapping>
+
+            <mapping>
+              <directory>/etc/systemd/system</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/systemd</location>
+                </source>
+              </sources>
+            </mapping>
 
                         <mapping>
                             <directory>${installation.dir}/etc</directory>

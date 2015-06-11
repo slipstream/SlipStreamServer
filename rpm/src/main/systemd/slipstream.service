@@ -1,0 +1,13 @@
+[Unit]
+Description=SlipStream Service
+After=syslog.target network.target
+
+[Service]
+RemainAfterExit=yes
+Type=oneshot
+ExecStart=/etc/init.d/slipstream start
+ExecStop=/etc/init.d/slipstream stop
+ExecReload=/etc/init.d/slipstream restart
+
+[Install]
+WantedBy=multi-user.target

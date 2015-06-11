@@ -7,6 +7,7 @@
 
     [peridot.core                                               :refer :all]
 
+
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]  
     [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header]]
@@ -15,7 +16,7 @@
     [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
     [com.sixsq.slipstream.ssclj.usage.utils                     :as u]
     [com.sixsq.slipstream.ssclj.resources.usage                 :refer :all]
-
+    [com.sixsq.slipstream.ssclj.app.params                      :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]
     [com.sixsq.slipstream.ssclj.resources.test-utils            :refer [ring-app *base-uri* *auth-name*
                                                                         exec-request is-count]]
@@ -46,7 +47,7 @@
 
 (use-fixtures :once insert-summaries)
 
-(def base-uri (str c/service-context resource-name))
+(def base-uri (str p/service-context resource-name))
 (alter-var-root #'*base-uri*  (constantly base-uri))
 (alter-var-root #'*auth-name* (constantly "joe"))
 
@@ -147,9 +148,6 @@
   (expect-pagination 200
     [ "?$first=1&$last=1000000"]))
 
-(defn- one-line
-  [s]
-  (clojure.string/replace s #"\n" ""))
 
 (deftest admin-sees-everything
   (is-count 5 "" "super ADMIN"))
@@ -176,6 +174,10 @@
   (is-count 2 "?$filter=user='joe'" "super ADMIN")
   ;; usage/ram/unit will *not* be filtered at sql level
   (is-count 1 "?$filter=usage/ram/unit_minutes='100.0'" "super ADMIN"))
+
+(defn- one-line
+  [s]
+  (clojure.string/replace s #"\n" ""))
 
 (deftest filter-with-admin
   (is-count 2 (one-line
@@ -222,5 +224,4 @@
                and
                start_timestamp='2015-04-18T00:00:00.000Z'
                and
-               end_timestamp='2015-04-19T00:00:00.000Z'") "super ADMIN")
-  )
+               end_timestamp='2015-04-19T00:00:00.000Z'") "super ADMIN"))

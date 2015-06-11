@@ -32,7 +32,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 public class SSCLJRouter extends Router {
 
 	private static final int PORT_NUMBER = 8201;
-	private static final String SSCLJ_SERVER = String.format("http://localhost:%d/ssclj", PORT_NUMBER);
+	private static final String SSCLJ_SERVER = String.format("http://localhost:%d/api", PORT_NUMBER);
 
 	public static final List<String> SSCLJ_RESOURCE_NAMES = Arrays.asList("event", "usage");
 

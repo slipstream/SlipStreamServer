@@ -14,6 +14,7 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header        :refer [wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params              :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.app.routes                          :as routes]
+    [com.sixsq.slipstream.ssclj.app.params                          :as p]
     [com.sixsq.slipstream.ssclj.resources.root                      :as root]
     [com.sixsq.slipstream.ssclj.db.impl                             :as db]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding               :as fsdb]
@@ -51,7 +52,7 @@
       wrap-base-uri
       wrap-params
       wrap-authn-info-header
-      (expose-metrics-as-json "/ssclj/metrics" default-registry {:pretty-print? true})
+      (expose-metrics-as-json (str p/service-context "metrics") default-registry {:pretty-print? true})
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (instrument default-registry)))

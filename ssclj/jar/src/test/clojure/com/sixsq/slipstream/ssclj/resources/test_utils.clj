@@ -71,6 +71,7 @@
 (defn is-count
   ([expected-count query-string auth-name]
    (-> (exec-request query-string auth-name)
+       (t/is-status 200)
         (t/is-key-value :count expected-count)))
   ([expected-count query-string]
    (is-count expected-count query-string *auth-name*)))

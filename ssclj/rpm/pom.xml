@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>2.10-SNAPSHOT</version>
+    <version>2.11-SNAPSHOT</version>
   </parent>
 
   <!-- NOTE: This project MUST have same version as proxy module. -->
@@ -106,13 +106,13 @@
         <extensions>true</extensions>
         <configuration>
           <classifier>${package.os}</classifier>
-          <release>${RELEASE}</release>
+          <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream SSCLJ Server</summary>
           <name>slipstream-ssclj${slipstream.edition}</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
-          <copyright>Apache</copyright>
+          <license>Apache 2.0</license>
           <url>http://sixsq.com</url>
           <needarch>noarch</needarch>
           <description>
@@ -160,6 +160,19 @@
                   <includes>
                     <include>ssclj</include>
                   </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/systemd/system</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/systemd</location>
                 </source>
               </sources>
             </mapping>
