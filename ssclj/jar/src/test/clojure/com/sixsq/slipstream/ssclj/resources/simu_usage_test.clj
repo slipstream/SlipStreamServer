@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.simu-usage-test
   (:require
     [clojure.test                                       :refer :all]
+    [clojure.java.shell                                 :only [sh] :as sh]
     [com.sixsq.slipstream.ssclj.resources.usage-record  :refer :all]
     [com.sixsq.slipstream.ssclj.usage.record-keeper     :as rc]
     [korma.core                                         :as kc]
@@ -82,7 +83,7 @@
 ;; public
 ;;
 
-(defn delete-all
+(defn delete-everything
   []
   (acl/-init)
   (rc/-init)
@@ -94,8 +95,9 @@
 (defn populate-usage-records
   []
   (rc/-init)
-  (doseq [day (some-days) i (range nb-records-per-day)]
-    (do
+  (doseq [day (some-days)]
+    (println "Populating " day)
+    (doseq [i (range nb-records-per-day)]
       (kc/insert rc/usage_records (kc/values (rand-usage-record day))))))
 
 
@@ -106,15 +108,17 @@
   []
   (compute-summaries (some-days)))
 
-(defn compute-weekly-summaries
-  []
-  (->> (some-days)
-       (drop 3) ;; so that first day is monday
-       (take-nth 7)
-       compute-summaries))
+;;
+;; user-1 for the day january 21st 2015:
+;;
+;; ?$filter=user='user-3' and start_timestamp='2010-02-10T00:00:00.000Z' and end_timestamp='2010-02-11T00:00:00.000Z'
+;;
+;; cloud-2
+;;
+;; ?$filter=cloud='cloud-2' and start_timestamp='2010-02-10T00:00:00.000Z' and end_timestamp='2010-02-11T00:00:00.000Z'
 
 (defn curl
   [qs]
-  (println
-    (str "curl -H \"slipstream-authn-info: super ADMIN\" -X GET \"http://localhost:8201/ssclj/Usage"
+  (print
+    (str "time curl -H \"slipstream-authn-info: super ADMIN\" -X GET \"http://localhost:8201/api/Usage"
        (tu/urlencode-params qs) "\"")))
