@@ -72,7 +72,11 @@
   (is (= [event1] (cimi-filter events "created<'2016-01-01'")))
 
   (is (= events   (cimi-filter events "created>'2014-01-01'")))
-  (is (= [event2] (cimi-filter events "created>'2016-01-01'"))))
+  (is (= [event2] (cimi-filter events "created>'2016-01-01'")))
+
+  (is (= [event1] (cimi-filter events "created=2015-05-15")))
+  (is (= [event2] (cimi-filter events "created=2016-05-15")))
+  )
 
 (deftest filter-cimi-multiple-ands
   (is (= events   (cimi-filter events "content/state='init'")))

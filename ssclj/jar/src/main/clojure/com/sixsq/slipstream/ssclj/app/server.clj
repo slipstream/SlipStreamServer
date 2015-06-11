@@ -13,7 +13,6 @@
     [com.sixsq.slipstream.ssclj.middleware.exception-handler        :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header        :refer [wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params              :refer [wrap-cimi-params]]
-    [com.sixsq.slipstream.ssclj.middleware.usage-params             :refer [wrap-usage-params]]
     [com.sixsq.slipstream.ssclj.app.routes                          :as routes]
     [com.sixsq.slipstream.ssclj.resources.root                      :as root]
     [com.sixsq.slipstream.ssclj.db.impl                             :as db]

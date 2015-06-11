@@ -30,28 +30,21 @@
    :end_timestamp       (u/timestamp-next-day year month day)
    :usage               usage })
 
+
 (defn insert-summaries
-  []
+  [f]
+  (acl/-init)
+  (rc/-init)
+  (kc/delete rc/usage_summaries)
+  (kc/delete acl/acl)
   (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 16] {:ram { :unit_minutes 100.0}}))
   (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 17] {:ram { :unit_minutes 200.0}}))
   (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 18] {:ram { :unit_minutes 500.0}}))
   (rc/insert-summary! (daily-summary "mike" "exo"   [2015 04 16] {:ram { :unit_minutes 300.0}}))
-  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 17] {:ram { :unit_minutes 400.0}})))
-
-(defn acl-init
-  [f]
-  (acl/-init)
+  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 17] {:ram { :unit_minutes 40.0}}))
   (f))
 
-(defn reset-summaries
-  [f]
-  (kc/delete rc/usage_summaries)
-  (kc/delete acl/acl)
-  (insert-summaries)
-  (f))
-
-(use-fixtures :each reset-summaries)
-(use-fixtures :once acl-init)
+(use-fixtures :once insert-summaries)
 
 (def base-uri (str c/service-context resource-name))
 (alter-var-root #'*base-uri*  (constantly base-uri))
@@ -165,6 +158,19 @@
   (is-count 2 "?$filter=user='joe'"   "super ADMIN")
   (is-count 3 "?$filter=user='mike'"  "super ADMIN")
   )
+
+(deftest filter-int-value
+  (is-count 1 "?$filter=usage/ram/unit_minutes < 100" "super ADMIN")
+  (is-count 1 "?$filter=usage/ram/unit_minutes > 400" "super ADMIN")
+  (is-count 1 "?$filter=usage/ram/unit_minutes < 50" "super ADMIN")
+  (is-count 1 "?$filter=usage/ram/unit_minutes < 50 and usage/ram/unit_minutes > 30" "super ADMIN")
+  (is-count 2 "?$filter=usage/ram/unit_minutes > 100 and usage/ram/unit_minutes < 500" "super ADMIN")
+
+  (is-count 1 "?$filter=usage/ram/unit_minutes = 40" "super ADMIN")
+  (is-count 1 "?$filter=usage/ram/unit_minutes = 100" "super ADMIN")
+  (is-count 1 "?$filter=usage/ram/unit_minutes = 200" "super ADMIN")
+  (is-count 1 "?$filter=usage/ram/unit_minutes = 300" "super ADMIN")
+  (is-count 1 "?$filter=usage/ram/unit_minutes = 500" "super ADMIN"))
 
 (deftest filter-with-cimi-filter-unknown-to-db
   (is-count 2 "?$filter=user='joe'" "super ADMIN")

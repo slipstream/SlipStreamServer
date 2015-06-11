@@ -17,6 +17,28 @@
 ;; see dmtf.org/sites/default/files/standards/documents/dsp0263_1.0.1.pdf section 4.1.6.1
 ;;
 
+(defn- remove-quotes    [s] (subs s 1 (dec (count s))))
+(defn wrap-anti-quotes  [s] (str "\"" s "\""))
+(defn- anti-quotes      [s] (-> s remove-quotes wrap-anti-quotes))
+
+(defn to-int
+  [x]
+  (cond
+    (number? x) (int x)
+    (string? x) (. Integer parseInt x)))
+
+(defn as-int
+  [^String s]
+  [:IntValue (. Integer parseInt s)])
+
+(defn as-string
+  [^String s]
+  [:StringValue (remove-quotes s)])
+
+(defn as-date
+  [^String s]
+  [:DateValue s])
+
 (defn- attribute-path
   [attribute-full-name]
   (map keyword (split attribute-full-name #"/")))
@@ -41,52 +63,66 @@
     (let [actual-value (attribute-value resource attribute-full-name)]
       (compare-fn value actual-value))))
 
-(defmulti mk-pred-equals? (fn [attribute-full-name [type value]] type))
-(defmethod mk-pred-equals? :default
-  [attribute-full-name [type value]]
+(defmulti mk-pred-attribute-value
+  (fn [attribute-full-name op [type value]]
+    [op type]))
+
+(defmethod mk-pred-attribute-value ["=" :StringValue]
+  [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (= value (str actual)))))
+           (fn [value actual] (= (str actual) value))))
 
-(defmulti mk-pred-lower? (fn [actual_value [type value]] type))
-(defmethod mk-pred-lower? :default
-  [attribute-full-name [type value]]
+(defmethod mk-pred-attribute-value ["=" :DateValue]
+  [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (< 0 (compare value actual)))))
+           (fn [value actual] (= (subs (str actual) 0 10)
+                                 (subs value 0 10)))))
 
-(defmulti mk-pred-greater? (fn [actual_value [type value]] type))
-(defmethod mk-pred-greater? :default
-  [attribute-full-name [type value]]
+(defmethod mk-pred-attribute-value ["=" :IntValue]
+  [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (> 0 (compare value actual)))))
+           (fn [value actual] (= (to-int actual) value))))
 
-;; (defn- mk-pred-attribute-value
-;;   [attribute-full-name operator value]
-;;   (fn [resource]
-;;     (let [actual-value (attribute-value resource attribute-full-name)]
-;;       (case operator
-;;         "="
-;;         (do
-;;           (du/show value)
-;;           (du/show actual-value)
-;;           (= value actual-value))
-;;
-;;         "!="  (not= value actual-value)
-;;         "<"   (<  0 (compare value actual-value))
-;;         ">"   (>  0 (compare value actual-value))))))
-;;
+(defmethod mk-pred-attribute-value ["!=" :StringValue]
+  [attribute-full-name op [type value]]
+  (mk-pred attribute-full-name
+           value
+           (fn [value actual] (not= (str actual) value))))
 
-(defn- mk-pred-attribute-value
-  [attribute-full-name operator value]
-    (case operator
-      "="     (mk-pred-equals? attribute-full-name value)
-      "!="    (complement (mk-pred-equals? attribute-full-name value))
+(defmethod mk-pred-attribute-value ["!=" :IntValue]
+  [attribute-full-name op [type value]]
+  (mk-pred attribute-full-name
+           value
+           (fn [value actual] (not= (int actual) value))))
 
-      "<"     (mk-pred-lower? attribute-full-name value)
-      ">"     (mk-pred-greater? attribute-full-name value)
-      ))
+(defmethod mk-pred-attribute-value ["<" :StringValue]
+  [attribute-full-name op [type value]]
+  (mk-pred attribute-full-name
+           value
+           (fn [value actual]
+             (< (compare actual value) 0))))
+
+(defmethod mk-pred-attribute-value ["<" :IntValue]
+  [attribute-full-name op [type value]]
+  (mk-pred attribute-full-name
+           value
+           (fn [value actual]
+             (< (to-int actual) value))))
+
+(defmethod mk-pred-attribute-value [">" :StringValue]
+  [attribute-full-name op [type value]]
+  (mk-pred attribute-full-name
+           value
+           (fn [value actual] (> (compare actual value) 0))))
+
+(defmethod mk-pred-attribute-value [">" :IntValue]
+  [attribute-full-name op [type value]]
+  (mk-pred attribute-full-name
+           value
+           (fn [value actual] (> (to-int actual) value))))
 
 ;;
 ;; fixme: this will not correctly handle clauses like "'a'=attribute".
@@ -96,25 +132,6 @@
     x)
   ([[_ a] [_ o] v]
     (mk-pred-attribute-value a o v)))
-
-
-(defn- remove-quotes
-  [s]
-  (subs s 1 (dec (count s))))
-
-(defn wrap-anti-quotes
-  [s]
-  (str "\"" s "\""))
-
-(defn- anti-quotes
-  [s]
-  (-> s
-      remove-quotes
-      wrap-anti-quotes))
-
-(defn to-int    [s] [:IntValue (. Integer parseInt s)])
-(defn to-string [s] [:StringValue (remove-quotes s)])
-(defn to-date   [s] [:DateValue s])
 
 (defn or-preds
   [& preds]
@@ -129,10 +146,10 @@
 ;; fixme: this does not handle booleans.
 ;;
 (def ^:private transformations
-  {:SingleQuoteString   to-string
-   :DoubleQuoteString   to-string
-   :DateValue           to-date
-   :IntValue            to-int
+  {:SingleQuoteString   as-string
+   :DoubleQuoteString   as-string
+   :DateValue           as-date
+   :IntValue            as-int
 
    :Comp                handle-comp
    :AndExpr             and-preds
@@ -162,7 +179,7 @@
   {:SingleQuoteString   remove-quotes
    :DoubleQuoteString   anti-quotes
    :DateValue           identity
-   :IntValue            to-int
+   :IntValue            as-int
 
    :Comp                sql-comp
    :AndExpr             sql-and

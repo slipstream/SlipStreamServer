@@ -58,7 +58,7 @@
   (insert-some-events)
   (f))
 
-(use-fixtures :each fixture-insert-some-events)
+(use-fixtures :once fixture-insert-some-events)
 
 ;;
 ;; Note that these tests need nb-events > 5

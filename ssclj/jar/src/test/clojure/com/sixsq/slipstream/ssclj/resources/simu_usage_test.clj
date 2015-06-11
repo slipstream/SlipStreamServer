@@ -11,14 +11,15 @@
 
     [clj-time.core                                      :as time]
     [com.sixsq.slipstream.ssclj.usage.utils             :as uu]
+    [com.sixsq.slipstream.ssclj.resources.test-utils    :as tu]
     [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]))
 
-(def nb-users           100)
+(def nb-users           10)
 (def nb-clouds          10)
 (def start-day          [2010])
 
 ;; parameters to tweak
-(def nb-days            1000)
+(def nb-days            100)
 (def nb-records-per-day 100)
 
 (defn some-strings
@@ -67,13 +68,6 @@
 
     (usage-record (rand-user) (rand-cloud) (rand-metric) start end)))
 
-(defn populate-usage-records
-  []
-  (rc/-init)
-  (doseq [day (some-days) i (range nb-records-per-day)]
-    (do
-      (kc/insert rc/usage_records (kc/values (rand-usage-record day))))))
-
 (defn compute-summaries
   [days]
   (acl/-init)
@@ -83,6 +77,27 @@
        (partition 2 1)
        (map (fn[[s e]] (us/summarize-and-store s e)))
        dorun))
+
+;;
+;; public
+;;
+
+(defn delete-all
+  []
+  (acl/-init)
+  (rc/-init)
+
+  (kc/delete rc/usage_records)
+  (kc/delete rc/usage_summaries)
+  (acl/delete-all))
+
+(defn populate-usage-records
+  []
+  (rc/-init)
+  (doseq [day (some-days) i (range nb-records-per-day)]
+    (do
+      (kc/insert rc/usage_records (kc/values (rand-usage-record day))))))
+
 
 (defn compute-daily-summaries
   ;;
@@ -97,3 +112,9 @@
        (drop 3) ;; so that first day is monday
        (take-nth 7)
        compute-summaries))
+
+(defn curl
+  [qs]
+  (println
+    (str "curl -H \"slipstream-authn-info: super ADMIN\" -X GET \"http://localhost:8201/ssclj/Usage"
+       (tu/urlencode-params qs) "\"")))
