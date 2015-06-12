@@ -40,7 +40,6 @@
             (str "?")))))
 
 (defn make-ring-app [resource-routes]
-  (db/set-impl! (dbdb/get-instance))
   (-> resource-routes
       wrap-base-uri
       wrap-cimi-params

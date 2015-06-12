@@ -119,6 +119,6 @@
 
 (defn curl
   [qs]
-  (print
+  (println
     (str "time curl -H \"slipstream-authn-info: super ADMIN\" -X GET \"http://localhost:8201/api/Usage"
        (tu/urlencode-params qs) "\"")))

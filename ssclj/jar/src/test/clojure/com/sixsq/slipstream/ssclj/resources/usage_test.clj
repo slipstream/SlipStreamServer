@@ -194,13 +194,8 @@
                  and
                  end_timestamp='2015-04-17T00:00:00.000Z'") "super ADMIN")
 
-  (is-count 2 (one-line
-                "?$filter=
-                 user='joe'") "super ADMIN")
-
-  (is-count 3 (one-line
-                "?$filter=
-                 user='mike'") "super ADMIN")
+  (is-count 2 "?$filter=user='joe'" "super ADMIN")
+  (is-count 3 "?$filter=user='mike'" "super ADMIN")
 
   (is-count 1 (one-line
                 "?$filter=
@@ -225,3 +220,9 @@
                start_timestamp='2015-04-18T00:00:00.000Z'
                and
                end_timestamp='2015-04-19T00:00:00.000Z'") "super ADMIN"))
+
+(deftest date-comparisons
+  (is-count 1 "?$filter=user='joe' and start_timestamp=2015-04-17 and end_timestamp=2015-04-18" "super ADMIN")
+  (is-count 1 "?$filter=user='joe' and start_timestamp=2015-04-16 and end_timestamp=2015-04-17" "super ADMIN")
+  (is-count 2 "?$filter=user='joe' and start_timestamp>2015-04-15" "super ADMIN")
+  )

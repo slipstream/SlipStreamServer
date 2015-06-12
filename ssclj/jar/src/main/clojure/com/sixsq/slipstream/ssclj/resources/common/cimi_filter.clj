@@ -77,8 +77,19 @@
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (= (subs (str actual) 0 10)
-                                 (subs value 0 10)))))
+           (fn [value actual] (.startsWith actual value))))
+
+(defmethod mk-pred-attribute-value [">" :DateValue]
+  [attribute-full-name op [type value]]
+  (mk-pred attribute-full-name
+           value
+           (fn [value actual] (> (compare actual value) 0))))
+
+(defmethod mk-pred-attribute-value ["<" :DateValue]
+  [attribute-full-name op [type value]]
+  (mk-pred attribute-full-name
+           value
+           (fn [value actual] (< (compare actual value) 0))))
 
 (defmethod mk-pred-attribute-value ["=" :IntValue]
   [attribute-full-name op [type value]]
@@ -161,8 +172,14 @@
   ;; FIXME use operator to build corresponding keyword operator
   ;; FIXME decouple from usage specific known columns
   ([[_ a] [_ o] v]
-   (when (some #{a} ["user" "cloud" "start_timestamp" "end_timestamp"])
-    [:= (keyword (str "u." a)) v])))
+   (case o
+     "="  (cond (some #{a} ["user" "cloud"])                     [:=     (keyword (str "u." a)) v]
+                (some #{a} ["start_timestamp" "end_timestamp"])  [:like  (keyword (str "u." a)) (str v "%")])
+
+     "<" (when  (some #{a} ["user" "cloud" "start_timestamp" "end_timestamp"])
+                [:<     (keyword (str "u." a)) v])
+     ">" (when  (some #{a} ["user" "cloud" "start_timestamp" "end_timestamp"])
+                [:>     (keyword (str "u." a)) v]))))
 
 (defn sql-or
   [& clauses]
@@ -179,7 +196,7 @@
   {:SingleQuoteString   remove-quotes
    :DoubleQuoteString   anti-quotes
    :DateValue           identity
-   :IntValue            as-int
+   :IntValue            to-int
 
    :Comp                sql-comp
    :AndExpr             sql-and
