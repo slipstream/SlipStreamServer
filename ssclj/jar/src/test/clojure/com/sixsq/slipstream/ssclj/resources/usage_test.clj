@@ -1,26 +1,26 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-test
   (:require
-    [clojure.test                                               :refer :all]
+    [clojure.test :refer :all]
 
-    [clj-time.core                                              :as time]
-    [korma.core                                                 :as kc]
+    [clj-time.core :as time]
+    [korma.core :as kc]
 
-    [peridot.core                                               :refer :all]
+    [peridot.core :refer :all]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
 
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
 
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]  
-    [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header]]
-
-    [com.sixsq.slipstream.ssclj.api.acl                         :as acl]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
-    [com.sixsq.slipstream.ssclj.usage.utils                     :as u]
-    [com.sixsq.slipstream.ssclj.resources.usage                 :refer :all]
-    [com.sixsq.slipstream.ssclj.app.params                      :as p]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]
-    [com.sixsq.slipstream.ssclj.resources.test-utils            :refer [ring-app *base-uri* *auth-name*
-                                                                        exec-request is-count]]
-    ))
+    [com.sixsq.slipstream.ssclj.api.acl :as acl]
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.usage :refer :all]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
+    [com.sixsq.slipstream.ssclj.resources.test-utils :refer [ring-app *base-uri* *auth-name*
+                                                             exec-request is-count]]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]))
 
 (defn daily-summary
   "convenience function"
@@ -34,6 +34,7 @@
 
 (defn insert-summaries
   [f]
+  (db/set-impl! (dbdb/get-instance))
   (acl/-init)
   (rc/-init)
   (kc/delete rc/usage_summaries)
@@ -148,17 +149,18 @@
   (expect-pagination 200
     [ "?$first=1&$last=1000000"]))
 
-
 (deftest admin-sees-everything
   (is-count 5 "" "super ADMIN"))
 
 (deftest simple-filter-with-admin
   (is-count 2 "?$filter=user='joe'"   "super ADMIN")
-  (is-count 3 "?$filter=user='mike'"  "super ADMIN")
-  )
+  (is-count 3 "?$filter=user='mike'"  "super ADMIN"))
+
+(deftest filter-int-value-when-no-value
+  (is-count 0 "?$filter=xxx<100" "super ADMIN"))
 
 (deftest filter-int-value
-  (is-count 1 "?$filter=usage/ram/unit_minutes < 100" "super ADMIN")
+  (is-count 1 "?$filter=usage/ram/unit_minutes<100" "super ADMIN")
   (is-count 1 "?$filter=usage/ram/unit_minutes > 400" "super ADMIN")
   (is-count 1 "?$filter=usage/ram/unit_minutes < 50" "super ADMIN")
   (is-count 1 "?$filter=usage/ram/unit_minutes < 50 and usage/ram/unit_minutes > 30" "super ADMIN")

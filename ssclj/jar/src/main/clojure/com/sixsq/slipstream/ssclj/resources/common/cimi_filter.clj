@@ -25,7 +25,9 @@
   [x]
   (cond
     (number? x) (int x)
-    (string? x) (. Integer parseInt x)))
+    (empty? x)  nil
+    (string? x) (. Integer parseInt x)
+    :else       nil))
 
 (defn as-int
   [^String s]
@@ -43,19 +45,11 @@
   [attribute-full-name]
   (map keyword (split attribute-full-name #"/")))
 
-(defn- check-present
-  [resource attribute-full-name value]
-  (if (nil? value)
-    (throw (IllegalArgumentException.
-             (str "unknown attribute: "attribute-full-name " in " resource)))
-    value))
-
 (defn- attribute-value
   [resource attribute-full-name]
   (->>  attribute-full-name
         attribute-path
-        (get-in resource)
-        (check-present resource attribute-full-name)))
+        (get-in resource)))
 
 (defn mk-pred
   [attribute-full-name value compare-fn]
@@ -71,69 +65,67 @@
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (= (str actual) value))))
+           (fn [value actual] (when actual (= (str actual) value)))))
 
 (defmethod mk-pred-attribute-value ["=" :DateValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (.startsWith actual value))))
+           (fn [value actual] (when actual (.startsWith actual value)))))
 
 (defmethod mk-pred-attribute-value [">" :DateValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (> (compare actual value) 0))))
+           (fn [value actual] (when actual (> (compare actual value) 0)))))
 
 (defmethod mk-pred-attribute-value ["<" :DateValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (< (compare actual value) 0))))
+           (fn [value actual] (when actual (< (compare actual value) 0)))))
 
 (defmethod mk-pred-attribute-value ["=" :IntValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (= (to-int actual) value))))
+           (fn [value actual] (when actual (= (to-int actual) value)))))
 
 (defmethod mk-pred-attribute-value ["!=" :StringValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (not= (str actual) value))))
+           (fn [value actual] (when actual (not= (str actual) value)))))
 
 (defmethod mk-pred-attribute-value ["!=" :IntValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (not= (int actual) value))))
+           (fn [value actual] (when actual (not= (int actual) value)))))
 
 (defmethod mk-pred-attribute-value ["<" :StringValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual]
-             (< (compare actual value) 0))))
+           (fn [value actual] (when actual (< (compare actual value) 0)))))
 
 (defmethod mk-pred-attribute-value ["<" :IntValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual]
-             (< (to-int actual) value))))
+           (fn [value actual] (when actual (< (to-int actual) value)))))
 
 (defmethod mk-pred-attribute-value [">" :StringValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (> (compare actual value) 0))))
+           (fn [value actual] (when actual (> (compare actual value) 0)))))
 
 (defmethod mk-pred-attribute-value [">" :IntValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (> (to-int actual) value))))
+           (fn [value actual] (when actual (> (to-int actual) value)))))
 
 ;;
 ;; fixme: this will not correctly handle clauses like "'a'=attribute".

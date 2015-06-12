@@ -25,8 +25,19 @@
 
 (def events [event1 event2])
 
+(deftest test-to-int
+  (is (= 123 (to-int "123")))
+  (is (nil? (to-int nil)))
+  (is (nil? (to-int ""))))
+
 (deftest filter-cimi-simple-expression
-  "Dotted notation is used to locate nested attribute"
+  (is (= [] (cimi-filter events "xxx='state'")))
+  (is (= [] (cimi-filter events "xxx!='state'")))
+  (is (= [] (cimi-filter events "xxx>123")))
+  (is (= [] (cimi-filter events "xxx=123")))
+  (is (= [] (cimi-filter events "xxx!=123")))
+  (is (= [] (cimi-filter events "xxx<123")))
+
   (is (= [event1] (cimi-filter events "type='state'")))
   (is (= [event1] (cimi-filter events "(type='state')")))
   (is (= [event2] (cimi-filter events "type='critical'")))
@@ -57,9 +68,6 @@
   (is (thrown? IllegalArgumentException (doall (cimi-filter events "content/resource/href=run/7890"))))
   (is (thrown? IllegalArgumentException (doall (cimi-filter events "content/resource/href=\"run/7890'"))))
   (is (thrown? IllegalArgumentException (doall (cimi-filter events "content/resource/href='run/7890\"")))))
-
-(deftest filter-cimi-checks-attribute-presence
-  (is (thrown? IllegalArgumentException (doall (cimi-filter events "abc=123")))))
 
 (deftest filter-cimi-various-operators
   (is (= [event2] (cimi-filter events "type!='state'")))
