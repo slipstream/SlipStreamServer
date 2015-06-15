@@ -461,7 +461,8 @@ public abstract class ConnectorBase implements Connector {
     }
 
     private String getOrchestratorImageLoginUsername() throws ConfigurationException, ValidationException {
-        return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.ssh.username"));
+        String key = constructKey(SystemConfigurationParametersFactoryBase.ORCHESTRATOR_USERNAME_KEY);
+        return Configuration.getInstance().getRequiredProperty(key);
     }
 
     private String getMachineImageLoginUsername(Run run) throws ValidationException {
@@ -482,7 +483,8 @@ public abstract class ConnectorBase implements Connector {
     }
 
     private String getOrchestratorImageLoginPassword() throws ConfigurationException, ValidationException {
-        return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.ssh.password"));
+        String key = constructKey(SystemConfigurationParametersFactoryBase.ORCHESTRATOR_PASSWORD_KEY);
+        return Configuration.getInstance().getRequiredProperty(key);
     }
 
     private String getMachineImageLoginPassword(Run run) throws ValidationException {
