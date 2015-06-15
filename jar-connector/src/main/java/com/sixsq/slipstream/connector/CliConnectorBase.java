@@ -248,7 +248,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		launchParams.put("image-id", getImageId(run, user));
 		launchParams.put("network-type", getNetwork(run));
 		putLaunchParamPlatform(launchParams, run);
-		putLaunchParamLoginUser(launchParams, run);
+		putLaunchParamLoginUserAndPassword(launchParams, run);
 		putLaunchParamExtraDiskVolatile(launchParams, run);
 		putLaunchParamNativeContextualization(launchParams, run);
 		return launchParams;
@@ -260,9 +260,13 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 	}
 
-	private void putLaunchParamLoginUser(Map<String, String> launchParams, Run run) throws ValidationException {
+	private void putLaunchParamLoginUserAndPassword(Map<String, String> launchParams, Run run) throws ValidationException {
 		try {
 			launchParams.put("login-username", getLoginUsername(run));
+			try {
+				launchParams.put("login-password", getLoginPassword(run));
+			} catch (ValidationException e) {
+			}
 		} catch (ConfigurationException e) {
 		}
 	}
