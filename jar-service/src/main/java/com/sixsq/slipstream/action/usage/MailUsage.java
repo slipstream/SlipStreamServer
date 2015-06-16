@@ -25,7 +25,12 @@ public class MailUsage {
     }
 
     public String body(){
-        return intro() + usageCloud() + footer();
+        return "\n" + intro() + lineSep() + usageCloud() + lineSep() + footer() + lineSep();
+    }
+
+    // TODO temp
+    private String lineSep() {
+        return "--------------------------\n";
     }
 
     private String intro() {
@@ -58,6 +63,7 @@ public class MailUsage {
 
     private String footer(){
         // TODO real text
+        // TODO real link
         String unsubcribeLink = "http://localhost:8080/user/"+ userName + "#general";
         return
                 "You receive this email because you have enabled" +
