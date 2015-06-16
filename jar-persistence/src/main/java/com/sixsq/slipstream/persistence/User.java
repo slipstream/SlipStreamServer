@@ -520,4 +520,9 @@ public class User extends Parameterized<User, UserParameter> {
 		parameter.setValue(value);
 	}
 
+	public String getMailUsage() {
+		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_MAIL_USAGE);
+		return getParameterValue(key, UserParameter.MAIL_USAGE_DEFAULT);
+	}
+
 }

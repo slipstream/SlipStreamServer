@@ -20,13 +20,13 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.UserParameter;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class ExecutionControlUserParametersFactory extends
 		UserParametersFactoryBase {
@@ -92,6 +92,13 @@ public class ExecutionControlUserParametersFactory extends
 				"Warning: Some clouds may take into account only the first key until SlipStream bootstraps the machine.",
 				50);
 
+		putMandatoryEnumParameter(
+				UserParameter.KEY_MAIL_USAGE,
+				"Receive a mail with cloud usages",
+				UserParameter.getMailUsageOptions(),
+				UserParameter.MAIL_USAGE_DEFAULT,
+				"Mail detailing your usage on your clouds",
+				60);
 
 
 	}
