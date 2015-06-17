@@ -1,9 +1,9 @@
 package com.sixsq.slipstream.ssclj;
 
-import static org.restlet.engine.header.HeaderConstants.ATTRIBUTE_HEADERS;
-
-import java.util.logging.Logger;
-
+import com.sixsq.slipstream.event.TypePrincipalRight;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.RequestUtil;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -15,10 +15,9 @@ import org.restlet.routing.Redirector;
 import org.restlet.routing.Template;
 import org.restlet.util.Series;
 
-import com.sixsq.slipstream.event.TypePrincipalRight;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.RequestUtil;
+import java.util.logging.Logger;
+
+import static org.restlet.engine.header.HeaderConstants.ATTRIBUTE_HEADERS;
 
 public class SSCLJRedirector extends Redirector {
 
@@ -66,6 +65,7 @@ public class SSCLJRedirector extends Redirector {
 	//
 	protected void serverRedirect(Restlet next, Reference targetRef,
             Request request, Response response) {
+
         if (next == null) {
             getLogger().warning(
                     "No next Restlet provided for server redirection to "

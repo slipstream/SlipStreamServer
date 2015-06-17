@@ -5,6 +5,7 @@ import com.sixsq.slipstream.action.usage.MailsBuilder;
 import com.sixsq.slipstream.action.usage.UsageSummaries;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.util.Notifier;
 import org.restlet.Context;
 import org.restlet.data.Parameter;
 import org.restlet.engine.header.Header;
@@ -43,12 +44,16 @@ public class DailyUsageSender {
 
     private static final Logger logger = Logger.getLogger(DailyUsageSender.class.getName());
 
+    public static void main(String[] args) {
+        sendDailyUsageEmails();
+        System.exit(0);
+    }
+
     public static void sendDailyUsageEmails() {
 
         logger.info("DailyUsageEmails will send emails");
         List<User> usersToEmail = usersFilteredByMailUsage(UserParameter.MAIL_USAGE_DAILY);
-
-        if(usersToEmail.isEmpty()){
+        if(usersToEmail == null || usersToEmail.isEmpty()){
             logger.info("No users to send daily email to. Returning.");
             return;
         }
@@ -58,14 +63,19 @@ public class DailyUsageSender {
         logger.info("DailyUsageEmails usersToEmail = " + userNames);
 
         String response = getJsonYesterdayUsage(userNames);
+        if(response == null) {
+            logger.warning("No response from Usage service. Returning.");
+            return;
+        }
+
         UsageSummaries usageSummaries = UsageSummaries.fromJson(response);
 
         MailsBuilder mailsBuilder = new MailsBuilder(humanFormat(today()));
         List<MailUsage> mailUsages = mailsBuilder.buildMails(usageSummaries, nameEmails);
 
-        // TODO
         for(MailUsage mailUsage : mailUsages){
-            System.out.println("Will send : "+ mailUsage.body());
+            Notifier.sendHTMLNotification(mailUsage.to(), mailUsage.body());
+            logger.info("Daily usage mail sent to " + mailUsage.to());
         }
     }
 
@@ -85,6 +95,7 @@ public class DailyUsageSender {
             logger.info("DailyUsageEmails Will query Usage resource with uri = '" + uri + "'");
 
             ClientResource resource = new ClientResource(context, uri);
+
             resource.setRetryOnError(false);
             Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get("org.restlet.http.headers");
             if (headers == null) {
@@ -97,7 +108,6 @@ public class DailyUsageSender {
 
         } catch (Exception e) {
             logger.warning("Unable to getJsonYesterdayUsage :" + e.getMessage());
-            e.printStackTrace();
             return null;
         }
     }
@@ -152,9 +162,6 @@ public class DailyUsageSender {
 
             if(mailUsage.equals(u.getMailUsage())) {
                 result.add(u);
-                logger.info(u.getName() + " added to list");
-            } else {
-                logger.info(u.getName() + " rejected");
             }
         }
         return result;
