@@ -1,13 +1,12 @@
 package com.sixsq.slipstream.action.usage;
 
+import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
 
-import javax.servlet.ServletContext;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static org.restlet.Application.getCurrent;
 
 /**
  * Represents the content of a daily mail sent to one user for a specific day.
@@ -35,7 +34,7 @@ public class MailUsage {
     }
 
     public String body(){
-        String unsubcribeLink = getBaseUrl() + "/user/" + userName + "#general";
+        String unsubcribeLink = unsubcribeLink();
         return MessageUtils.format(MSG_DAILY_USAGE, userName, date, usageCloud(), unsubcribeLink);
     }
 
@@ -63,12 +62,12 @@ public class MailUsage {
         return sb.toString();
     }
 
-    private String getBaseUrl(){
+    private String unsubcribeLink() {
         try {
-            return ((ServletContext) getCurrent().getContext().getAttributes().get("org.restlet.ext.servlet.ServletContext")).getResource("").toString();
-        } catch (Exception e) {
+            return Configuration.getInstance().baseUrl + "/user/" + userName + "#general";
+        }catch(ValidationException ve){
             logger.warning("Unable to get base URL");
-            return "TODO://";
+            return null;
         }
     }
 }
