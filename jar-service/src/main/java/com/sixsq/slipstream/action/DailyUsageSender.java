@@ -1,6 +1,7 @@
 package com.sixsq.slipstream.action;
 
 import com.sixsq.slipstream.action.usage.MailUsage;
+import com.sixsq.slipstream.action.usage.MailUtils;
 import com.sixsq.slipstream.action.usage.MailsBuilder;
 import com.sixsq.slipstream.action.usage.UsageSummaries;
 import com.sixsq.slipstream.persistence.User;
@@ -12,10 +13,6 @@ import org.restlet.engine.header.Header;
 import org.restlet.resource.ClientResource;
 import org.restlet.util.Series;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -70,7 +67,7 @@ public class DailyUsageSender {
 
         UsageSummaries usageSummaries = UsageSummaries.fromJson(response);
 
-        MailsBuilder mailsBuilder = new MailsBuilder(humanFormat(today()));
+        MailsBuilder mailsBuilder = new MailsBuilder(yesterday(), today());
         List<MailUsage> mailUsages = mailsBuilder.buildMails(usageSummaries, nameEmails);
 
         for(MailUsage mailUsage : mailUsages){
@@ -80,7 +77,7 @@ public class DailyUsageSender {
 
     private static void trySendEmail(MailUsage mailUsage) {
         boolean mailSentOK = Notifier.sendHTMLNotification(mailUsage.to(), mailUsage.body());
-//        boolean mailSentOK = Notifier.sendHTMLNotification("stephane.tavera@gmail.com", mailUsage.body());
+
         if(mailSentOK) {
             logger.info("Daily usage mail successfully sent to " + mailUsage.to());
         } else {
@@ -122,26 +119,9 @@ public class DailyUsageSender {
     }
 
     protected static String cimiQueryStringUsageYesterday(Set<String> userNames) {
-        String yesterday = formatDate(yesterday());
-        String today = formatDate(today());
-        return cimiQueryStringUsage(userNames, yesterday, today);
-    }
-
-    protected static String cimiQueryStringUsage(Set<String> userNames, String start, String end) {
-
-        if(userNames == null || userNames.isEmpty()){
-            throw new IllegalArgumentException("No user names provided");
-        }
-
-        List<String> clauseUsers = new ArrayList<String>();
-        for(String userName : userNames) {
-            clauseUsers.add(String.format("user='%s'", userName));
-        }
-        String conditionUsers = String.join(" or ", clauseUsers);
-
-        String queryString = String.format("$filter=start_timestamp=%s and end_timestamp=%s and (%s)",
-                start, end, conditionUsers);
-        return encodeQueryParameters(queryString);
+        String yesterday = MailUtils.formatDate(yesterday());
+        String today = MailUtils.formatDate(today());
+        return MailUtils.cimiQueryStringUsage(userNames, yesterday, today);
     }
 
     protected static Date yesterday() {
@@ -154,15 +134,6 @@ public class DailyUsageSender {
         return new Date();
     }
 
-    private static String humanFormat(Date date) {
-        return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
-    }
-
-    protected static String formatDate(Date date) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return simpleDateFormat.format(date);
-    }
-
     private static List<User> usersFilteredByMailUsage(String mailUsage) {
         List<User> result = new ArrayList<User>();
         for (User u: User.list()){
@@ -173,32 +144,6 @@ public class DailyUsageSender {
         return result;
     }
 
-    private static String encodeQueryParameter(String parameter) {
-
-        int indexEquals = parameter.indexOf('=');
-        if(indexEquals<0) {
-            return parameter;
-        }
-
-        String key = parameter.substring(0, indexEquals);
-        String value = parameter.substring(indexEquals+1);
-
-        try {
-            return URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8");
-        } catch (UnsupportedEncodingException ignore) {
-            ignore.printStackTrace();
-            return null;
-        }
-    }
-
-    protected static String encodeQueryParameters(String queryString) {
-        String[] parameters = queryString.split("&");
-        List<String> encodedParameters = new ArrayList<String>();
-        for (String parameter : parameters) {
-            encodedParameters.add(encodeQueryParameter(parameter));
-        }
-        return String.join("&", encodedParameters);
-    }
 
     private static Map<String, String> nameEmails(List<User> users) {
         Map<String, String> result = new HashMap<String, String>();

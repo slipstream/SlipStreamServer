@@ -4,6 +4,7 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.messages.MessageUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -17,13 +18,15 @@ public class MailUsage {
 
     private static final String MSG_DAILY_USAGE = "MSG_DAILY_USAGE";
 
-    private String date;
+    private Date startDate;
+    private Date endDate;
     private String email;
     private String userName;
     private List<UsageSummary> usageSummaries;
 
-    public MailUsage(String date, String userName, String email, List<UsageSummary> usageSummaries){
-        this.date = date;
+    public MailUsage(Date startDate, Date endDate, String userName, String email, List<UsageSummary> usageSummaries){
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.email = email;
         this.userName = userName;
         this.usageSummaries = usageSummaries;
@@ -35,7 +38,9 @@ public class MailUsage {
 
     public String body(){
         String unsubcribeLink = unsubcribeLink();
-        return MessageUtils.format(MSG_DAILY_USAGE, userName, date, usageCloud(), unsubcribeLink);
+        String directLink = linkToDailyUsageJson();
+        String humanDate = MailUtils.humanFormat(startDate);
+        return MessageUtils.format(MSG_DAILY_USAGE, userName, humanDate, usageCloud(), unsubcribeLink, directLink);
     }
 
     private String usageCloud(){
@@ -65,6 +70,18 @@ public class MailUsage {
     private String unsubcribeLink() {
         try {
             return Configuration.getInstance().baseUrl + "/user/" + userName + "#general";
+        }catch(ValidationException ve){
+            logger.warning("Unable to get base URL");
+            return null;
+        }
+    }
+
+    private String linkToDailyUsageJson() {
+        try {
+            String cimiQueryStringUsage = MailUtils.cimiQueryStringUsage(userName, startDate, endDate);
+            String resourceURL = String.format("/usage?%s", cimiQueryStringUsage);
+
+            return Configuration.getInstance().baseUrl + resourceURL;
         }catch(ValidationException ve){
             logger.warning("Unable to get base URL");
             return null;

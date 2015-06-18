@@ -1,5 +1,6 @@
 package com.sixsq.slipstream.action;
 
+import com.sixsq.slipstream.action.usage.MailUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,19 +32,19 @@ public class DailyUsageSenderTest {
 
     @Test
     public void encodeParameters() {
-        Assert.assertEquals("", DailyUsageSender.encodeQueryParameters(""));
-        Assert.assertEquals("a=1", DailyUsageSender.encodeQueryParameters("a=1"));
-        Assert.assertEquals("a=1&b=2", DailyUsageSender.encodeQueryParameters("a=1&b=2"));
+        Assert.assertEquals("", MailUtils.encodeQueryParameters(""));
+        Assert.assertEquals("a=1", MailUtils.encodeQueryParameters("a=1"));
+        Assert.assertEquals("a=1&b=2", MailUtils.encodeQueryParameters("a=1&b=2"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void cimiQueryStringUsageRequiresUserNamesNotNull() {
-        DailyUsageSender.cimiQueryStringUsage(null, "2015-12-31", "2016-01-01");
+        MailUtils.cimiQueryStringUsage(null, "2015-12-31", "2016-01-01");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void cimiQueryStringUsageRequiresUserNamesNotEmpty() {
-        DailyUsageSender.cimiQueryStringUsage(new HashSet<String>(), "2015-12-31", "2016-01-01");
+        MailUtils.cimiQueryStringUsage(new HashSet<String>(), "2015-12-31", "2016-01-01");
     }
 
     @Test
@@ -51,12 +52,12 @@ public class DailyUsageSenderTest {
         Set<String> userNames = new HashSet<String>(Arrays.asList("joe"));
         Assert.assertEquals(
                 "%24filter=start_timestamp%3D2015-12-31+and+end_timestamp%3D2016-01-01+and+%28user%3D%27joe%27%29",
-                DailyUsageSender.cimiQueryStringUsage(userNames, "2015-12-31", "2016-01-01"));
+                MailUtils.cimiQueryStringUsage(userNames, "2015-12-31", "2016-01-01"));
 
         userNames = new HashSet<String>(Arrays.asList("joe", "jack"));
         Assert.assertEquals(
                 "%24filter=start_timestamp%3D2015-12-31+and+end_timestamp%3D2016-01-01+and+%28user%3D%27joe%27+or+user%3D%27jack%27%29",
-                DailyUsageSender.cimiQueryStringUsage(userNames, "2015-12-31", "2016-01-01"));
+                MailUtils.cimiQueryStringUsage(userNames, "2015-12-31", "2016-01-01"));
     }
 
     @Test
@@ -64,7 +65,7 @@ public class DailyUsageSenderTest {
     public void dateY() {
         Set<String> userNames = new HashSet<String>(Arrays.asList("joe"));
         System.out.println(DailyUsageSender.yesterday());
-        System.out.println(DailyUsageSender.formatDate(DailyUsageSender.yesterday()));
+        System.out.println(MailUtils.formatDate(DailyUsageSender.yesterday()));
         System.out.println(DailyUsageSender.cimiQueryStringUsageYesterday(userNames));
     }
 }

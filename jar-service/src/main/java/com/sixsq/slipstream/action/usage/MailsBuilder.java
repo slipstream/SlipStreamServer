@@ -1,18 +1,17 @@
 package com.sixsq.slipstream.action.usage;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class MailsBuilder {
 
-    private String date;
+    private Date startDate;
+    private Date endDate;
 
-    public MailsBuilder(String date){
-        this.date = date;
+    public MailsBuilder(Date startDate, Date endDate){
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     /**
@@ -49,6 +48,6 @@ public class MailsBuilder {
     }
 
     private MailUsage buildMail(String userName, String email, List<UsageSummary> usages) {
-        return new MailUsage(date, userName, email, usages);
+        return new MailUsage(startDate, endDate, userName, email, usages);
     }
 }
