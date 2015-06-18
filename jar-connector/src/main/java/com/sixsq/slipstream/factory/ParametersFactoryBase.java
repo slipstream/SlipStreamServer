@@ -180,6 +180,7 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 			ParameterType type, String instructions) throws ValidationException {
 		S parameter = createParameter(name, null, description, true);
 		parameter.setType(type);
+		parameter.setCategory(getCategory());
 		parameter.setInstructions(instructions);
 		assignParameter(parameter);
 	}
