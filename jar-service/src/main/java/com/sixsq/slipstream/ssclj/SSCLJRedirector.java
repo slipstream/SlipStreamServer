@@ -1,6 +1,7 @@
 package com.sixsq.slipstream.ssclj;
 
 import com.sixsq.slipstream.event.TypePrincipalRight;
+import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.RequestUtil;
@@ -8,6 +9,7 @@ import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.Restlet;
+import org.restlet.data.Parameter;
 import org.restlet.data.Reference;
 import org.restlet.engine.header.Header;
 import org.restlet.engine.header.HeaderConstants;
@@ -15,6 +17,8 @@ import org.restlet.routing.Redirector;
 import org.restlet.routing.Template;
 import org.restlet.util.Series;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static org.restlet.engine.header.HeaderConstants.ATTRIBUTE_HEADERS;
@@ -25,6 +29,12 @@ public class SSCLJRedirector extends Redirector {
 
 	private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
 
+    private static final String CIMI_KEY_FIRST_PARAM = "$first";
+    private static final String CIMI_KEY_LAST_PARAM = "$last";
+    private static final String CIMI_KEY_FILTER_PARAM = "$filter";
+
+    private List<Parameter> cimiParameters;
+
 	public SSCLJRedirector(Context context, String targetPattern, int mode) {
 		super(context, targetPattern, mode);
 	}
@@ -34,12 +44,27 @@ public class SSCLJRedirector extends Redirector {
 		targetRef.addSegment(sscljUUID);
 	}
 
-    protected void addOffsetAndLimit(Request request) {
-        int offset = RequestUtil.getOffset(request);
-        int limit = RequestUtil.getLimit(request);
+    protected void saveCIMIQueryParams(Request request) {
 
-        request.getResourceRef().addQueryParameter("$first", "" + (offset + 1));
-        request.getResourceRef().addQueryParameter("$last", "" + (limit + offset));
+        this.cimiParameters = new ArrayList<Parameter>();
+
+        String first    = RequestUtil.getQueryValue(request,    CIMI_KEY_FIRST_PARAM);
+        String last     = RequestUtil.getQueryValue(request,    CIMI_KEY_LAST_PARAM);
+        String filter   = RequestUtil.getQueryValue(request,    CIMI_KEY_FILTER_PARAM);
+
+        checkIntegerPositive(CIMI_KEY_FIRST_PARAM, first);
+        checkIntegerPositive(CIMI_KEY_LAST_PARAM, last);
+
+        cimiParameters.add(new Parameter(CIMI_KEY_FIRST_PARAM, first));
+        cimiParameters.add(new Parameter(CIMI_KEY_LAST_PARAM, last));
+        cimiParameters.add(new Parameter(CIMI_KEY_FILTER_PARAM, filter));
+    }
+
+
+    protected void addCIMIQueryParams(Request request) {
+        for(Parameter parameter : cimiParameters) {
+            request.getResourceRef().addQueryParameter(parameter);
+        }
     }
 
 	@SuppressWarnings("unchecked")
@@ -71,6 +96,10 @@ public class SSCLJRedirector extends Redirector {
                     "No next Restlet provided for server redirection to "
                             + targetRef);
         } else {
+
+            // hack
+            saveCIMIQueryParams(request);
+
             // Save the base URI if it exists as we might need it for
             // redirections
             Reference resourceRef = request.getResourceRef();
@@ -85,7 +114,7 @@ public class SSCLJRedirector extends Redirector {
 
             // hack
             addSlipstreamAuthnInfo(request);
-            addOffsetAndLimit(request);
+            addCIMIQueryParams(request);
             // hack end
 
             next.handle(request, response);
@@ -111,6 +140,19 @@ public class SSCLJRedirector extends Redirector {
                                 + remainingPart);
                     }
                 }
+            }
+        }
+    }
+
+    private void checkIntegerPositive(String paramName, String value) {
+        if (value != null) {
+            try {
+                Integer result = new Integer(value);
+                if (result < 0) {
+                    Util.throwClientBadRequest("The value for '"+ paramName +"' should be positive");
+                }
+            } catch (NumberFormatException e) {
+                Util.throwClientBadRequest("Invalid format for '"+ paramName + "'");
             }
         }
     }

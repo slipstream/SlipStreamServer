@@ -51,7 +51,7 @@ public class DailyUsageSender {
 
     public static void sendDailyUsageEmails() {
 
-        logger.info("DailyUsageEmails will send emails");
+        logger.info("Will send emails");
         List<User> usersToEmail = usersFilteredByMailUsage(UserParameter.MAIL_USAGE_DAILY);
         if(usersToEmail == null || usersToEmail.isEmpty()){
             logger.info("No users to send daily email to. Returning.");
@@ -60,7 +60,7 @@ public class DailyUsageSender {
 
         Map<String, String> nameEmails  = nameEmails(usersToEmail);
         Set<String> userNames           = nameEmails.keySet();
-        logger.info("DailyUsageEmails usersToEmail = " + userNames);
+        logger.info("List of user names to send email to : " + userNames);
 
         String response = getJsonYesterdayUsage(userNames);
         if(response == null) {
@@ -74,8 +74,17 @@ public class DailyUsageSender {
         List<MailUsage> mailUsages = mailsBuilder.buildMails(usageSummaries, nameEmails);
 
         for(MailUsage mailUsage : mailUsages){
-            Notifier.sendHTMLNotification(mailUsage.to(), mailUsage.body());
-            logger.info("Daily usage mail sent to " + mailUsage.to());
+            trySendEmail(mailUsage);
+        }
+    }
+
+    private static void trySendEmail(MailUsage mailUsage) {
+        boolean mailSentOK = Notifier.sendHTMLNotification(mailUsage.to(), mailUsage.body());
+//        boolean mailSentOK = Notifier.sendHTMLNotification("stephane.tavera@gmail.com", mailUsage.body());
+        if(mailSentOK) {
+            logger.info("Daily usage mail successfully sent to " + mailUsage.to());
+        } else {
+            logger.warning("Unable to send daily usage mail to " + mailUsage.to());
         }
     }
 
@@ -92,7 +101,7 @@ public class DailyUsageSender {
 
             String uri = SSCLJ_SERVER + "/Usage?" + cimiQueryStringUsageYesterday(userNames);
 
-            logger.info("DailyUsageEmails Will query Usage resource with uri = '" + uri + "'");
+            logger.info("Will query Usage resource with uri = '" + uri + "'");
 
             ClientResource resource = new ClientResource(context, uri);
 
@@ -155,11 +164,8 @@ public class DailyUsageSender {
     }
 
     private static List<User> usersFilteredByMailUsage(String mailUsage) {
-
         List<User> result = new ArrayList<User>();
-
         for (User u: User.list()){
-
             if(mailUsage.equals(u.getMailUsage())) {
                 result.add(u);
             }
