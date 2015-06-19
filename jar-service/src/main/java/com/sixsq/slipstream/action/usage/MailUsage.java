@@ -46,19 +46,17 @@ public class MailUsage {
     private String usageCloud(){
 
         if(usageSummaries == null || usageSummaries.isEmpty()) {
-            return "Your Cloud usage is empty.";
-            // TODO real text
+            return "You have no cloud usage recorded for this period.";
         }
 
         StringBuilder sb = new StringBuilder();
         for(UsageSummary usageSummary : usageSummaries) {
-            sb.append("On Cloud <b>" + usageSummary.cloud + "</b> <p/>");
+            sb.append("Cloud <b>" + usageSummary.cloud + "</b> <p/>");
 
             sb.append("<table border=\"1\">");
             sb.append("<tr><th>Metric</th><th>Quantity (Unit * minutes)</th></tr>");
 
             // TODO sort by cloud name
-            // TODO real text
             for(Map.Entry<String, Double> metric : usageSummary.getMetrics().entrySet()){
                 sb.append(String.format("<tr><td>%s</td><td>%s</th></tr>", metric.getKey(), metric.getValue()));
             }
