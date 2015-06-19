@@ -94,10 +94,10 @@ public class ExecutionControlUserParametersFactory extends
 
 		putMandatoryEnumParameter(
 				UserParameter.KEY_MAIL_USAGE,
-				"Receive a mail with cloud usages",
+				"Cloud usage email",
 				UserParameter.getMailUsageOptions(),
 				UserParameter.MAIL_USAGE_DEFAULT,
-				"Mail detailing your usage on your clouds",
+				"Frequency for receiving emails concerning your cloud usage.",
 				60);
 
 
