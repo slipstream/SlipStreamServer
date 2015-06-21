@@ -3,9 +3,6 @@
     [clojure.string :as s]
     [ring.util.codec :as rc]
 
-    [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params :refer [wrap-params]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header wrap-authn-info-header]]
@@ -17,9 +14,6 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
-
-(def ^:dynamic *base-uri*)
-(def ^:dynamic *auth-name*)
 
 (defn- urlencode-param
   [p]
@@ -59,19 +53,11 @@
        (header authn-info-header auth-name)
        (request (str uri (urlencode-params query-string))
                 :content-type "application/x-www-form-urlencoded")
-       (t/body->json)))
-
-  ([query-string auth-name]
-   (exec-request *base-uri* query-string auth-name))
-
-  ([query-string]
-     (exec-request query-string *auth-name*)))
+       (t/body->json))))
 
 (defn is-count
-  ([expected-count query-string auth-name]
-   (-> (exec-request query-string auth-name)
+  ([uri expected-count query-string auth-name]
+   (-> (exec-request uri query-string auth-name)
        (t/is-status 200)
-        (t/is-key-value :count expected-count)))
-  ([expected-count query-string]
-   (is-count expected-count query-string *auth-name*)))
+        (t/is-key-value :count expected-count))))
 

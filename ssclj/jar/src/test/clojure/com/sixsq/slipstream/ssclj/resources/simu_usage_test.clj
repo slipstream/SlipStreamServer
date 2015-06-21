@@ -17,10 +17,11 @@
 
 
 (def nb-clouds          10)
-(def start-day          [2015 6 12])
+(def nb-users           10)
+(def start-day          [2015 1])
 
 ;; parameters to tweak
-(def nb-days            10)
+(def nb-days            1000)
 (def nb-records-per-day 100)
 
 (defn some-strings
@@ -29,8 +30,8 @@
        (map #(str s "-" %))
        (take n)))
 
-;; (def some-users   (some-strings "user" nb-users))
-(def some-users   ["joe"])
+(def some-users   (some-strings "user" nb-users))
+;(def some-users   ["joe"])
 
 (def some-clouds  (some-strings "cloud" nb-clouds))
 (def some-metrics [{:name "vm" :value "1.0"}

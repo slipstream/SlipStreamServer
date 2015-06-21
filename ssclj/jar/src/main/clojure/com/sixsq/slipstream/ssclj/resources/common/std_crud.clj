@@ -80,36 +80,24 @@
 
       (->> (select-keys request [:identity :query-params :cimi-params])
 
-           ;(du/record-ts "start")
-
            (db/query resource-name)
-           ; (du/record-ts "query")
 
-           ; du/show
            u/walk-clojurify
-           ; (du/record-ts "clojurify")
 
            ;; filtering
            (cf/cimi-filter-tree (get-in request [:cimi-params :filter]))
-           ;(du/record-ts "filtering")
 
            ;; paginating
            (pg/paginate         (get-in request [:cimi-params :first]) (get-in request [:cimi-params :last]))
-           ; (du/record-ts "paginating")
 
            ;; access controlling
            (filter #(a/authorized-view? % request))
-           ; (du/record-ts "fine grained ACL")
 
            (map #(crud/set-operations % request))
-           ; (du/record-ts "set operations")
 
            (wrapper-fn request)
-           ; (du/record-ts "wrapper fn")
 
-           (u/json-response)
-           ; (du/record-ts "end")
-           ))))
+           (u/json-response)))))
 
 (defn resolve-href
   "Pulls in the resource identified by the value of the :href key

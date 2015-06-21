@@ -76,12 +76,12 @@ public class DailyUsageSender {
     }
 
     private static void trySendEmail(MailUsage mailUsage) {
-        boolean mailSentOK = Notifier.sendHTMLNotification(mailUsage.to(), mailUsage.body());
-
+        String recipient = mailUsage.to();
+        boolean mailSentOK = Notifier.sendHTMLNotification(recipient, mailUsage.body());
         if(mailSentOK) {
-            logger.info("Daily usage mail successfully sent to " + mailUsage.to());
+            logger.info("Daily usage mail successfully sent to " + recipient);
         } else {
-            logger.warning("Unable to send daily usage mail to " + mailUsage.to());
+            logger.warning("Unable to send daily usage mail to " + recipient);
         }
     }
 

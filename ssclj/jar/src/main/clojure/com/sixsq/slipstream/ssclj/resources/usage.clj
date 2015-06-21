@@ -96,10 +96,6 @@
       :start_timestamp  c/Timestamp
       :end_timestamp    c/Timestamp
       :usage            c/NonBlankString
-       ;   c/NonBlankString { ;; metric-name
-       ;     :cloud_vm_instanceid      c/NonBlankString
-       ;     :unit_minutes   c/NonBlankString }
-       ; }
     }))
 
 (def validate-fn (u/create-validation-fn Usage))

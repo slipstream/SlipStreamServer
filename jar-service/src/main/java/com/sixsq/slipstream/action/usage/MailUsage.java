@@ -67,7 +67,7 @@ public class MailUsage {
 
     private String unsubcribeLink() {
         try {
-            return Configuration.getInstance().baseUrl + "/user/" + userName + "#general";
+            return Configuration.getInstance().baseUrl + "/user/" + userName + "?edit=true#general";
         }catch(ValidationException ve){
             logger.warning("Unable to get base URL");
             return null;

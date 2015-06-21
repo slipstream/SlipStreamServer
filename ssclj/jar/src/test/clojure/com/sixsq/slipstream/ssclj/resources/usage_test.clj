@@ -18,8 +18,7 @@
     [com.sixsq.slipstream.ssclj.resources.usage :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
-    [com.sixsq.slipstream.ssclj.resources.test-utils :refer [ring-app *base-uri* *auth-name*
-                                                             exec-request is-count]]
+    [com.sixsq.slipstream.ssclj.resources.test-utils :refer [exec-request is-count]]
     [com.sixsq.slipstream.ssclj.db.impl :as db]))
 
 (defn daily-summary
@@ -49,9 +48,6 @@
 (use-fixtures :once insert-summaries)
 
 (def base-uri (str p/service-context resource-name))
-(alter-var-root #'*base-uri*  (constantly base-uri))
-(alter-var-root #'*auth-name* (constantly "joe"))
-
 
 (defn every-timestamps?
   [pred? ts]
@@ -75,18 +71,18 @@
   m)
 
 (deftest get-should-return-most-recent-first-by-user
-  (-> (exec-request "" "joe")
+  (-> (exec-request base-uri "" "joe")
       (t/is-key-value :count 2)
       are-desc-dates?
       (are-all-usages? :user "joe"))
 
-  (-> (exec-request "" "mike")
+  (-> (exec-request base-uri "" "mike")
       (t/is-key-value :count 3)
       are-desc-dates?
       (are-all-usages? :user "mike")))
 
 (deftest acl-filter-cloud-with-role
-  (-> (exec-request "" "john exo1 exo")
+  (-> (exec-request base-uri "" "john exo1 exo")
       (t/is-key-value :count 3)
       are-desc-dates?
       (are-all-usages? :cloud "exo")))
@@ -113,28 +109,28 @@
         (t/is-status 403))))
 
 (deftest pagination-full
-  (-> (exec-request "?$first=0&$last=10" "mike")
+  (-> (exec-request base-uri "?$first=0&$last=10" "mike")
       (t/is-status 200)
       (t/is-key-value :count 3)))
 
 (deftest pagination-only-one
-  (-> (exec-request "?$first=1&$last=1" "mike")
+  (-> (exec-request base-uri "?$first=1&$last=1" "mike")
       (t/is-status 200)
       (t/is-key-value :count 1)))
 
 (deftest pagination-outside-bounds
-  (-> (exec-request "?$first=10&$last=15" "mike")
+  (-> (exec-request base-uri "?$first=10&$last=15" "mike")
       (t/is-status 200)
       (t/is-key-value :count 0)))
 
 (deftest pagination-first-larger-than-last
-  (-> (exec-request "?$first=10&$last=5" "mike")
+  (-> (exec-request base-uri "?$first=10&$last=5" "mike")
       (t/is-key-value :count 0)))
 
 (defn expect-pagination
   [code query-strings]
   (doseq [query-string query-strings]
-    (-> (exec-request query-string "mike")
+    (-> (exec-request base-uri query-string "mike")
         (t/is-status code))))
 
 (deftest pagination-wrong-query-ignores-invalid
@@ -150,45 +146,45 @@
     [ "?$first=1&$last=1000000"]))
 
 (deftest admin-sees-everything
-  (is-count 5 "" "super ADMIN"))
+  (is-count base-uri 5 "" "super ADMIN"))
 
 (deftest simple-filter-with-admin
-  (is-count 2 "?$filter=user='joe'"   "super ADMIN")
-  (is-count 3 "?$filter=user='mike'"  "super ADMIN"))
+  (is-count base-uri 2 "?$filter=user='joe'"   "super ADMIN")
+  (is-count base-uri 3 "?$filter=user='mike'"  "super ADMIN"))
 
 (deftest filter-int-value-when-no-value
-  (is-count 0 "?$filter=xxx<100" "super ADMIN"))
+  (is-count base-uri 0 "?$filter=xxx<100" "super ADMIN"))
 
 (deftest filter-int-value
-  (is-count 1 "?$filter=usage/ram/unit_minutes<100" "super ADMIN")
-  (is-count 1 "?$filter=usage/ram/unit_minutes > 400" "super ADMIN")
-  (is-count 1 "?$filter=usage/ram/unit_minutes < 50" "super ADMIN")
-  (is-count 1 "?$filter=usage/ram/unit_minutes < 50 and usage/ram/unit_minutes > 30" "super ADMIN")
-  (is-count 2 "?$filter=usage/ram/unit_minutes > 100 and usage/ram/unit_minutes < 500" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes<100" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes > 400" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes < 50" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes < 50 and usage/ram/unit_minutes > 30" "super ADMIN")
+  (is-count base-uri 2 "?$filter=usage/ram/unit_minutes > 100 and usage/ram/unit_minutes < 500" "super ADMIN")
 
-  (is-count 1 "?$filter=usage/ram/unit_minutes = 40" "super ADMIN")
-  (is-count 1 "?$filter=usage/ram/unit_minutes = 100" "super ADMIN")
-  (is-count 1 "?$filter=usage/ram/unit_minutes = 200" "super ADMIN")
-  (is-count 1 "?$filter=usage/ram/unit_minutes = 300" "super ADMIN")
-  (is-count 1 "?$filter=usage/ram/unit_minutes = 500" "super ADMIN"))
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 40" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 100" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 200" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 300" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 500" "super ADMIN"))
 
 (deftest filter-with-cimi-filter-unknown-to-db
-  (is-count 2 "?$filter=user='joe'" "super ADMIN")
+  (is-count base-uri 2 "?$filter=user='joe'" "super ADMIN")
   ;; usage/ram/unit will *not* be filtered at sql level
-  (is-count 1 "?$filter=usage/ram/unit_minutes='100.0'" "super ADMIN"))
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes='100.0'" "super ADMIN"))
 
 (defn- one-line
   [s]
   (clojure.string/replace s #"\n" ""))
 
 (deftest filter-with-admin
-  (is-count 2 (one-line
+  (is-count base-uri 2 (one-line
                 "?$filter=
                  start_timestamp='2015-04-16T00:00:00.000Z'
                  and
                  end_timestamp='2015-04-17T00:00:00.000Z'") "super ADMIN")
 
-  (is-count 1 (one-line
+  (is-count base-uri 1 (one-line
                 "?$filter=
                  user='joe'
                  and
@@ -196,10 +192,10 @@
                  and
                  end_timestamp='2015-04-17T00:00:00.000Z'") "super ADMIN")
 
-  (is-count 2 "?$filter=user='joe'" "super ADMIN")
-  (is-count 3 "?$filter=user='mike'" "super ADMIN")
+  (is-count base-uri 2 "?$filter=user='joe'" "super ADMIN")
+  (is-count base-uri 3 "?$filter=user='mike'" "super ADMIN")
 
-  (is-count 1 (one-line
+  (is-count base-uri 1 (one-line
                 "?$filter=
                  user='joe'
                  and
@@ -207,7 +203,7 @@
                  and
                  end_timestamp='2015-04-18T00:00:00.000Z'") "super ADMIN")
 
-  (is-count 0 (one-line
+  (is-count base-uri 0 (one-line
               "?$filter=
                user='joe'
                and
@@ -215,7 +211,7 @@
                and
                end_timestamp='2015-04-19T00:00:00.000Z'") "super ADMIN")
 
-  (is-count 1 (one-line
+  (is-count base-uri 1 (one-line
               "?$filter=
                user='mike'
                and
@@ -224,7 +220,7 @@
                end_timestamp='2015-04-19T00:00:00.000Z'") "super ADMIN"))
 
 (deftest date-comparisons
-  (is-count 1 "?$filter=user='joe' and start_timestamp=2015-04-17 and end_timestamp=2015-04-18" "super ADMIN")
-  (is-count 1 "?$filter=user='joe' and start_timestamp=2015-04-16 and end_timestamp=2015-04-17" "super ADMIN")
-  (is-count 2 "?$filter=user='joe' and start_timestamp>2015-04-15" "super ADMIN")
+  (is-count base-uri 1 "?$filter=user='joe' and start_timestamp=2015-04-17 and end_timestamp=2015-04-18" "super ADMIN")
+  (is-count base-uri 1 "?$filter=user='joe' and start_timestamp=2015-04-16 and end_timestamp=2015-04-17" "super ADMIN")
+  (is-count base-uri 2 "?$filter=user='joe' and start_timestamp>2015-04-15" "super ADMIN")
   )
