@@ -20,16 +20,14 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.Arrays;
-import java.util.List;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import org.simpleframework.xml.Root;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
-import org.simpleframework.xml.Root;
-
-import com.sixsq.slipstream.exceptions.ValidationException;
+import java.util.Arrays;
+import java.util.List;
 
 @Entity
 @Root(name = "parameter")
@@ -51,11 +49,23 @@ public class UserParameter extends Parameter<User> {
 
 	public static final String KEEP_RUNNING_DEFAULT = KEEP_RUNNING_ON_SUCCESS;
 
+	public static final String KEY_MAIL_USAGE = "mail-usage";
+	public static final String MAIL_USAGE_NEVER = "never";
+	public static final String MAIL_USAGE_DAILY = "daily";
+	public static final String MAIL_USAGE_WEEKLY = "weekly";
+	public static final String MAIL_USAGE_MONTHLY = "monthly";
+	public static final String MAIL_USAGE_DEFAULT = MAIL_USAGE_NEVER;
+
+
 	public static final String SSHKEY_PARAMETER_NAME = "ssh.public.key";
 
 	public static List<String> getKeepRunningOptions() {
 		String[] options = {KEEP_RUNNING_ALWAYS, KEEP_RUNNING_ON_SUCCESS, KEEP_RUNNING_ON_ERROR, KEEP_RUNNING_NEVER};
 		return Arrays.asList(options);
+	}
+
+	public static List<String> getMailUsageOptions(){
+		return Arrays.asList(MAIL_USAGE_NEVER, MAIL_USAGE_DAILY);
 	}
 
 	public static String convertOldFormatToKeepRunning(boolean onSuccess, boolean onError) {

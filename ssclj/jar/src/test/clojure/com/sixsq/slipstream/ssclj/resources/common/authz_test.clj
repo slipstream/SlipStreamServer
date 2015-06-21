@@ -13,9 +13,14 @@
                                                               :authentications {"user" {:identity "user"}}}})))
 
 
+;; Role ADMIN can do anything
+(expect ::authz/all     (extract-right {:identity "anyone" :roles ["R1", "ADMIN"]}
+                                       {:type "USER" :principal "USER1" :right "ALL"}))
+
 (let [id-map {:identity "USER1" :roles ["R1" "R3"]}]
 
   (expect ::authz/all     (extract-right id-map {:type "USER" :principal "USER1" :right "ALL"   }))
+
   (expect nil?            (extract-right id-map {:type "USER" :principal "USER1"                }))
   (expect nil?            (extract-right id-map {:type "ROLE" :principal "USER1" :right "ALL"   }))
   (expect ::authz/view    (extract-right id-map {:type "ROLE" :principal "R1"    :right "VIEW"  }))

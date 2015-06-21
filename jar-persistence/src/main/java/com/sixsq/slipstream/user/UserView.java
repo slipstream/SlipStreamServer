@@ -20,14 +20,13 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
-import java.util.Date;
-import java.util.List;
-
+import com.sixsq.slipstream.persistence.User;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
-import com.sixsq.slipstream.persistence.User;
+import java.util.Date;
+import java.util.List;
 
 @Root(name = "item")
 public class UserView {

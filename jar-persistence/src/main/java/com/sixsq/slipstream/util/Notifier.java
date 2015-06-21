@@ -20,25 +20,19 @@ package com.sixsq.slipstream.util;
  * -=================================================================-
  */
 
-import java.util.Date;
-import java.util.Properties;
-import java.util.logging.Logger;
-
-import javax.mail.Address;
-import javax.mail.AuthenticationFailedException;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
+
+import javax.mail.*;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.util.Date;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 public class Notifier {
 
@@ -46,6 +40,18 @@ public class Notifier {
 
 	private Notifier() {
 
+	}
+
+	public static boolean sendHTMLNotification(String email, String message)
+			throws SlipStreamRuntimeException {
+
+		ServiceConfiguration cfg = ServiceConfiguration.load();
+		try {
+			InternetAddress address = new InternetAddress(email);
+			return sendNotification(cfg, address, message, true);
+		} catch (AddressException e) {
+			throw new SlipStreamRuntimeException(e.getMessage());
+		}
 	}
 
 	public static boolean sendNotification(String email, String message)
@@ -66,8 +72,14 @@ public class Notifier {
 		}
 	}
 
+
 	public static boolean sendNotification(ServiceConfiguration cfg,
-			InternetAddress email, String message) {
+										   InternetAddress email, String message) {
+		return sendNotification(cfg, email, message, false);
+	}
+
+	private static boolean sendNotification(ServiceConfiguration cfg,
+			InternetAddress email, String message, boolean isHTML) {
 
 		boolean sendOk = true;
 
@@ -89,12 +101,18 @@ public class Notifier {
 
 			msg.setSubject("SlipStream(TM) Message");
 
-			msg.setText(message);
+			if(isHTML) {
+				msg.setContent(message, "text/html; charset=utf-8");
+			} else {
+				msg.setText(message);
+			}
 
 			msg.setHeader("X-Mailer", "javamail");
 			msg.setSentDate(new Date());
 
 			msg.saveChanges();
+
+
 
 			// send the thing off
 			try {

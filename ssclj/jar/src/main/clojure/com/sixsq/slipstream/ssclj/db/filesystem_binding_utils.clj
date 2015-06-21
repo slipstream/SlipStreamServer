@@ -1,12 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.db.filesystem-binding-utils
   (:require
-    [fs.core :as fs]
-    [clojure.data.json :as json]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]]
-    [ring.util.response :as r]))
+    [fs.core                                :as fs]
+    [clojure.data.json                      :as json]
+    [com.sixsq.slipstream.ssclj.db.binding  :refer [Binding]]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (defn serialize
   [resource]

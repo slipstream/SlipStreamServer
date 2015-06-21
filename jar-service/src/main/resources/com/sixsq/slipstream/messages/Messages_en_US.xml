@@ -112,5 +112,22 @@ Your password has been reset.  You will receive another email
 with the new password.  						
 </entry>
 
+<entry key="MSG_DAILY_USAGE">
+Hello {0},&lt;p&gt;
+Below is a summary of your cloud usage for &lt;b&gt;{1}&lt;/b&gt;.
+&lt;p/&gt;
+{2}
+&lt;p/&gt;
+The raw usage data (JSON) can be retrieved from this URL: {4}
+&lt;p/&gt;
+You received this email because you have enabled the 
+'Cloud usage email' parameter in your profile.
+To unsubscribe, modify your user preferences via this link:
+&lt;p/&gt;
+{3}
+&lt;p/&gt;
+
+Thanks for your interest in SlipStream.
+</entry>
 
 </properties>

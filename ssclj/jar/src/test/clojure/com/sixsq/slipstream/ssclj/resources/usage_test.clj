@@ -1,75 +1,53 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-test
   (:require
-    [clojure.test                                               :refer :all]
-    [ring.middleware.json                                       :refer [wrap-json-body wrap-json-response]]
-    [ring.middleware.params                                     :refer [wrap-params]]
-    [clj-time.core                                              :as time]
-    [korma.core                                                 :as kc]
+    [clojure.test :refer :all]
 
-    [peridot.core                                               :refer :all]
+    [clj-time.core :as time]
+    [korma.core :as kc]
 
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri             :refer [wrap-base-uri]]
-    [com.sixsq.slipstream.ssclj.middleware.exception-handler    :refer [wrap-exceptions]]
+    [peridot.core :refer :all]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
 
-    [com.sixsq.slipstream.ssclj.api.acl                         :as acl]
-    [com.sixsq.slipstream.ssclj.db.impl                         :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding             :as dbdb]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
-    [com.sixsq.slipstream.ssclj.usage.utils                     :as u]
-    [com.sixsq.slipstream.ssclj.resources.usage                 :refer :all]
-    [com.sixsq.slipstream.ssclj.app.routes                      :as routes]
-    [com.sixsq.slipstream.ssclj.app.params                      :as p]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
 
-(defn reset-summaries
-  [f]
-  (acl/-init)
-  (kc/delete rc/usage_summaries)
-  (kc/delete acl/acl)
-  (f))
-
-(use-fixtures :each reset-summaries)
-
-(def base-uri (str p/service-context resource-name))
-
-(defn make-ring-app [resource-routes]
-  (db/set-impl! (dbdb/get-instance))
-  (-> resource-routes
-      wrap-exceptions
-      wrap-base-uri
-      wrap-params
-      wrap-authn-info-header
-      (wrap-json-body {:keywords? true})
-      (wrap-json-response {:pretty true :escape-non-ascii true})))
-
-(defn ring-app []
-  (make-ring-app (t/concat-routes routes/final-routes)))
-
-(deftest get-without-authn-succeeds
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (request base-uri)
-      t/body->json
-      (t/is-status 200)))
-
-(deftest get-with-authn-succeeds
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "jane")
-      (request base-uri)
-      t/body->json
-      (t/is-status 200)))
+    [com.sixsq.slipstream.ssclj.api.acl :as acl]
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.usage :refer :all]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
+    [com.sixsq.slipstream.ssclj.resources.test-utils :refer [exec-request is-count]]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]))
 
 (defn daily-summary
   "convenience function"
   [user cloud [year month day] usage]
   { :user                user
-    :cloud               cloud
-    :start_timestamp     (u/timestamp year month day)
-    :end_timestamp       (u/timestamp-next-day year month day)
-    :usage               usage })
+   :cloud               cloud
+   :start_timestamp     (u/timestamp year month day)
+   :end_timestamp       (u/timestamp-next-day year month day)
+   :usage               usage })
+
+
+(defn insert-summaries
+  [f]
+  (db/set-impl! (dbdb/get-instance))
+  (acl/-init)
+  (rc/-init)
+  (kc/delete rc/usage_summaries)
+  (kc/delete acl/acl)
+  (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 16] {:ram { :unit_minutes 100.0}}))
+  (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 17] {:ram { :unit_minutes 200.0}}))
+  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 18] {:ram { :unit_minutes 500.0}}))
+  (rc/insert-summary! (daily-summary "mike" "exo"   [2015 04 16] {:ram { :unit_minutes 300.0}}))
+  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 17] {:ram { :unit_minutes 40.0}}))
+  (f))
+
+(use-fixtures :once insert-summaries)
+
+(def base-uri (str p/service-context resource-name))
 
 (defn every-timestamps?
   [pred? ts]
@@ -92,125 +70,71 @@
        is)
   m)
 
-(defn insert-summaries
-  []
-  (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 16] {:ram { :unit_minutes 100.0}}))
-  (rc/insert-summary! (daily-summary "joe" "exo"    [2015 04 17] {:ram { :unit_minutes 200.0}}))
-  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 18] {:ram { :unit_minutes 500.0}}))
-  (rc/insert-summary! (daily-summary "mike" "exo"   [2015 04 16] {:ram { :unit_minutes 300.0}}))
-  (rc/insert-summary! (daily-summary "mike" "aws"   [2015 04 17] {:ram { :unit_minutes 400.0}})))
-
 (deftest get-should-return-most-recent-first-by-user
-
-  (insert-summaries)
-
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "joe")
-      (request base-uri)
-      t/body->json
+  (-> (exec-request base-uri "" "joe")
       (t/is-key-value :count 2)
       are-desc-dates?
       (are-all-usages? :user "joe"))
 
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "mike")
-      (request base-uri)
-      t/body->json
+  (-> (exec-request base-uri "" "mike")
       (t/is-key-value :count 3)
       are-desc-dates?
       (are-all-usages? :user "mike")))
 
 (deftest acl-filter-cloud-with-role
-  (insert-summaries)
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "john exo1 exo")
-      (request base-uri)
-      t/body->json
+  (-> (exec-request base-uri "" "john exo1 exo")
       (t/is-key-value :count 3)
       are-desc-dates?
       (are-all-usages? :cloud "exo")))
 
+(defn last-uuid
+  []
+  (let [full-uuid (-> (kc/select rc/usage_summaries (kc/limit 1))
+                      first
+                      :id)
+        uuid (-> full-uuid
+                 (clojure.string/split #"/")
+                 second)]
+    [uuid full-uuid]))
+
 (deftest get-uuid-with-correct-authn
-  (insert-summaries)
-  (let [uuid (-> (kc/select rc/usage_summaries (kc/limit 1))
-                 first
-                 :id)]
-    (-> (session (ring-app))
-        (content-type "application/json")
-        (header authn-info-header "john exo")
-        (request (str p/service-context uuid))
-        t/body->json
-        (t/is-key-value :id uuid)
+  (let [[uuid full-uuid] (last-uuid)]
+    (-> (exec-request (str base-uri "/" uuid) ""  "john exo")
+        (t/is-key-value :id full-uuid)
         (t/is-status 200))))
 
 (deftest get-uuid-without-correct-authn
-  (insert-summaries)
-  (let [uuid (-> (kc/select rc/usage_summaries (kc/limit 1))
-                 first
-                 :id)]
-    (-> (session (ring-app))
-        (content-type "application/json")
-        (header authn-info-header "jack")
-        (request (str p/service-context uuid))
-        t/body->json
+  (let [[uuid _] (last-uuid)]
+    (-> (exec-request (str base-uri "/" uuid) ""  "intruder")
         (t/is-status 403))))
 
 (deftest pagination-full
-  (insert-summaries)
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "mike")
-      (request (str base-uri "?$first=0&$last=10"))
-      t/body->json
+  (-> (exec-request base-uri "?$first=0&$last=10" "mike")
       (t/is-status 200)
       (t/is-key-value :count 3)))
 
 (deftest pagination-only-one
-  (insert-summaries)
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "mike")
-      (request (str base-uri "?$first=1&$last=1"))
-      t/body->json
+  (-> (exec-request base-uri "?$first=1&$last=1" "mike")
       (t/is-status 200)
       (t/is-key-value :count 1)))
 
 (deftest pagination-outside-bounds
-  (insert-summaries)
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "mike")
-      (request (str base-uri "?$first=10&$last=15"))
-      t/body->json
+  (-> (exec-request base-uri "?$first=10&$last=15" "mike")
       (t/is-status 200)
       (t/is-key-value :count 0)))
 
 (deftest pagination-first-larger-than-last
-  (insert-summaries)
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "mike")
-      (request (str base-uri "?$first=10&$last=5"))
-      t/body->json
-      (t/is-status 200)
+  (-> (exec-request base-uri "?$first=10&$last=5" "mike")
       (t/is-key-value :count 0)))
 
 (defn expect-pagination
   [code query-strings]
   (doseq [query-string query-strings]
-    (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "mike")
-      (request (str base-uri query-string))
-      t/body->json
-      (t/is-status code))))
+    (-> (exec-request base-uri query-string "mike")
+        (t/is-status code))))
 
-(deftest pagination-wrong-query
-  (insert-summaries)
-  (expect-pagination 400
+(deftest pagination-wrong-query-ignores-invalid
+  (expect-pagination 200
       ["?$first=a&$last=10"])
   (expect-pagination 200
       ["?$first=-1&$last=10"
@@ -218,6 +142,85 @@
       "?$first=-1&$last=-10"]))
 
 (deftest pagination-does-not-check-max-limit
-  (insert-summaries)
   (expect-pagination 200
     [ "?$first=1&$last=1000000"]))
+
+(deftest admin-sees-everything
+  (is-count base-uri 5 "" "super ADMIN"))
+
+(deftest simple-filter-with-admin
+  (is-count base-uri 2 "?$filter=user='joe'"   "super ADMIN")
+  (is-count base-uri 3 "?$filter=user='mike'"  "super ADMIN"))
+
+(deftest filter-int-value-when-no-value
+  (is-count base-uri 0 "?$filter=xxx<100" "super ADMIN"))
+
+(deftest filter-int-value
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes<100" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes > 400" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes < 50" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes < 50 and usage/ram/unit_minutes > 30" "super ADMIN")
+  (is-count base-uri 2 "?$filter=usage/ram/unit_minutes > 100 and usage/ram/unit_minutes < 500" "super ADMIN")
+
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 40" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 100" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 200" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 300" "super ADMIN")
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 500" "super ADMIN"))
+
+(deftest filter-with-cimi-filter-unknown-to-db
+  (is-count base-uri 2 "?$filter=user='joe'" "super ADMIN")
+  ;; usage/ram/unit will *not* be filtered at sql level
+  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes='100.0'" "super ADMIN"))
+
+(defn- one-line
+  [s]
+  (clojure.string/replace s #"\n" ""))
+
+(deftest filter-with-admin
+  (is-count base-uri 2 (one-line
+                "?$filter=
+                 start_timestamp='2015-04-16T00:00:00.000Z'
+                 and
+                 end_timestamp='2015-04-17T00:00:00.000Z'") "super ADMIN")
+
+  (is-count base-uri 1 (one-line
+                "?$filter=
+                 user='joe'
+                 and
+                 start_timestamp='2015-04-16T00:00:00.000Z'
+                 and
+                 end_timestamp='2015-04-17T00:00:00.000Z'") "super ADMIN")
+
+  (is-count base-uri 2 "?$filter=user='joe'" "super ADMIN")
+  (is-count base-uri 3 "?$filter=user='mike'" "super ADMIN")
+
+  (is-count base-uri 1 (one-line
+                "?$filter=
+                 user='joe'
+                 and
+                 start_timestamp='2015-04-17T00:00:00.000Z'
+                 and
+                 end_timestamp='2015-04-18T00:00:00.000Z'") "super ADMIN")
+
+  (is-count base-uri 0 (one-line
+              "?$filter=
+               user='joe'
+               and
+               start_timestamp='2015-04-18T00:00:00.000Z'
+               and
+               end_timestamp='2015-04-19T00:00:00.000Z'") "super ADMIN")
+
+  (is-count base-uri 1 (one-line
+              "?$filter=
+               user='mike'
+               and
+               start_timestamp='2015-04-18T00:00:00.000Z'
+               and
+               end_timestamp='2015-04-19T00:00:00.000Z'") "super ADMIN"))
+
+(deftest date-comparisons
+  (is-count base-uri 1 "?$filter=user='joe' and start_timestamp=2015-04-17 and end_timestamp=2015-04-18" "super ADMIN")
+  (is-count base-uri 1 "?$filter=user='joe' and start_timestamp=2015-04-16 and end_timestamp=2015-04-17" "super ADMIN")
+  (is-count base-uri 2 "?$filter=user='joe' and start_timestamp>2015-04-15" "super ADMIN")
+  )

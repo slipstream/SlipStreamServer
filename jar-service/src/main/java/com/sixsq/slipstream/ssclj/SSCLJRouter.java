@@ -20,14 +20,13 @@ package com.sixsq.slipstream.ssclj;
  * -=================================================================-
  */
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.sixsq.slipstream.exceptions.ValidationException;
 import org.restlet.Context;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 
-import com.sixsq.slipstream.exceptions.ValidationException;
+import java.util.Arrays;
+import java.util.List;
 
 public class SSCLJRouter extends Router {
 
@@ -52,11 +51,9 @@ public class SSCLJRouter extends Router {
 
 		String target = SSCLJ_SERVER + "/" + capitalize(sscljResourceName);
 		Redirector listRedirector = new ListSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
-		Redirector singleRedirector = new SingleSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
-
 		attach("", listRedirector).setMatchingQuery(false);
 
-
+		Redirector singleRedirector = new SingleSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
 		attach("/{ssclj-uuid}", singleRedirector);
 	}
 

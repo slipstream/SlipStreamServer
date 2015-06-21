@@ -62,9 +62,11 @@
 
 (defn roles-in?
   [roles]
-  (if (seq roles)
-    [:and [:= :a.principal-type "ROLE"] [:in :a.principal-name roles]]
-    [:= 0 1]))
+  (cond
+    (some #{"ADMIN"} roles) [:= 1 1]
+    (seq roles)             [:and [:= :a.principal-type "ROLE"]
+                                  [:in :a.principal-name roles]]
+    :else                   [:= 0 1]))
 
 (defn neither-id-roles?
   [id roles]
@@ -79,7 +81,7 @@
       ((juxt :identity :roles))))
 
 (defn sql
-  [collection-id id roles offset limit]
+  [collection-id id roles]
   (->   (hh/select :r.*)
         (hh/from [:acl :a] [:resources :r])
         (hh/where [:and
@@ -89,8 +91,6 @@
                       (id-matches? id)        ;; an acl line with given id
                       (roles-in? roles)]])    ;; an acl line with one of the given roles
         (hh/modifiers :distinct)
-        (hh/limit   limit)
-        (hh/offset  offset)
         (hq/format :quoting :ansi)))
 
 (defn find-resource
@@ -123,11 +123,10 @@
 (defmulti  find-resources dispatch-fn)
 (defmethod find-resources :default
  [collection-id options]  
- (let [ [id roles]      (id-roles options)        
-        {:keys [offset limit]}  (u/offset-limit options)]
-   (if (or (neg? limit) (neither-id-roles? id roles))
+ (let [ [id roles]      (id-roles options)]
+   (if (neither-id-roles? id roles)
      []
-     (->> (sql collection-id id roles offset limit)                
+     (->> (sql collection-id id roles)
           (jdbc/query kh/db-spec)                 
           (map :data)
           (map deserialize)))))

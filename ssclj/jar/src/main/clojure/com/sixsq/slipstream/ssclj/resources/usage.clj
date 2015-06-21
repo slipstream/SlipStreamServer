@@ -11,6 +11,7 @@
     [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
     [com.sixsq.slipstream.ssclj.database.korma-helper           :as kh]
     [com.sixsq.slipstream.ssclj.db.database-binding             :as dbb]
+    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter    :as cf]
     [com.sixsq.slipstream.ssclj.resources.common.authz          :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud       :as std-crud]
@@ -40,40 +41,45 @@
 
 (defn- deserialize-usage
   [usage]
-  (update-in usage [:acl] fu/deserialize))
-
-(defn bad-query
-  [offset limit]
-  (throw
-    (u/ex-response
-      (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset,
-            ", limit:"limit")")
-      400 0)))
+  (-> usage
+      (update-in [:acl]   fu/deserialize)
+      (update-in [:usage] fu/deserialize)))
 
 (defn sql
-  [id roles offset limit]
+  [id roles cimi-filter]
   (->   (hh/select :u.*)
-        (hh/from [:acl :a] [:usage_summaries :u])
-        (hh/where [:and [:= :u.id :a.resource-id]
-                        [:or
-                          (dbb/id-matches? id)
-                          (dbb/roles-in? roles)]])
+        (hh/from    [:acl :a] [:usage_summaries :u])
+        (hh/where   (u/into-vec-without-nil :and
+                                        [
+                                          [:= :u.id :a.resource-id]
+
+                                          [:or
+                                           (dbb/id-matches? id)
+                                           (dbb/roles-in? roles)]
+
+                                          (cf/sql-clauses cimi-filter)
+                                         ]))
+
         (hh/modifiers :distinct)
-        (hh/limit limit)
-        (hh/offset offset)
         (hh/order-by [:u.start_timestamp :desc])
 
         (sql/format :quoting :ansi)))
 
 (defmethod dbb/find-resources resource-name
   [collection-id options]
-  (let [[id roles]              (dbb/id-roles options)
-        {:keys [offset limit]}  (u/offset-limit options)]
-    (if (or (neg? limit) (dbb/neither-id-roles? id roles))
+  (let [[id roles]  (dbb/id-roles options)]
+    (if (dbb/neither-id-roles? id roles)
       []
-      (->> (sql id roles offset limit)
-           (j/query kh/db-spec)
-           (map deserialize-usage)))))
+      (do
+        ; (du/start-ts "find resources" nil)
+        (->>  (sql id roles (get-in options [:cimi-params :filter]))
+              ;(du/record-ts "sql built")
+
+              (j/query kh/db-spec)
+              ; (du/record-ts "sql exec")
+              (map deserialize-usage)
+              ; (du/record-ts "deserialize")
+              )))))
 
 ;;
 ;; schemas
@@ -90,10 +96,6 @@
       :start_timestamp  c/Timestamp
       :end_timestamp    c/Timestamp
       :usage            c/NonBlankString
-       ;   c/NonBlankString { ;; metric-name
-       ;     :cloud_vm_instanceid      c/NonBlankString
-       ;     :unit_minutes   c/NonBlankString }
-       ; }
     }))
 
 (def validate-fn (u/create-validation-fn Usage))

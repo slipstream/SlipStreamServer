@@ -65,7 +65,7 @@
     (ddl/create-table! "usage_summaries"  columns-summaries)
 
     (ddl/create-index! "usage_records"   "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
-    (ddl/create-index! "usage_summaries" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
+    (ddl/create-index! "usage_summaries" "IDX_TIMESTAMPS" "id" "start_timestamp", "end_timestamp")
 
     (kc/defentity usage_records)
     (kc/defentity usage_summaries)
@@ -77,7 +77,7 @@
   []
   @init-db)
 
-(defn- project-to-metric   
+(defn- project-to-metric
   [usage-event metric]
   (-> usage-event
       (dissoc :metrics)
