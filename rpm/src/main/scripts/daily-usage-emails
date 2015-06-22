@@ -1,0 +1,1 @@
+0 3 * * * root (date --utc; /usr/sbin/daily-usage-emails.sh) >> /var/log/daily-usage-emails-cron.log 2>&1
