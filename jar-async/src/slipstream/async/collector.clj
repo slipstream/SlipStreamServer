@@ -151,7 +151,7 @@
         (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
           (when (not-nil? user)            
             (try
-              (log/log-info "Will execute collect request for " (user-connector user connector))
+              (log/log-debug "Will execute collect request for " (user-connector user connector))
               (collect! user connector)
               (catch Exception e (log/log-warn "caught exception executing collect request: " (.getMessage e))))))))))
 
@@ -175,7 +175,7 @@
 
 (defn inform-inserted 
   [context u c t]
-  (log/log-info context ": inserted collect request for " (user-connector u c) " after timeout " t))    
+  (log/log-debug context ": inserted collect request for " (user-connector u c) " after timeout " t))    
 
 (defn inform-nothing-to-do 
   [context]
