@@ -289,7 +289,7 @@ public class Collector {
 
 	private static void logTiming(User user, Connector connector, long startTime, String info) {
 		long elapsed = System.currentTimeMillis() - startTime;
-		logger.info(getUserCloudLogRepr(user, connector) + " (" + elapsed + " ms) : " + info);
+		logger.finer(getUserCloudLogRepr(user, connector) + " (" + elapsed + " ms) : " + info);
 	}
 
 	private static String getUserCloudLogRepr(User user, Connector connector) {
