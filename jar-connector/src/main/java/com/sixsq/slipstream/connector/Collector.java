@@ -140,14 +140,17 @@ public class Collector {
 		for (Vm v : newVmsMap.values()) {
 			Vm old = filteredOldVmMap.get(v.getInstanceId());
 			VmRuntimeParameterMapping m = getMapping(v);
+
+			setIp(m, v);
+			setName(m, v);
+			setRunUuid(m, v);
+			setRunOwner(m, v);
+			setNodeName(m, v);
+			setNodeInstanceId(m, v);
+
 			if (old == null) {
 				setVmstate(em, m, v);
-				setIp(m, v);
-				setName(m, v);
-				setRunUuid(m, v);
-				setRunOwner(m, v);
-				setNodeName(m, v);
-				setNodeInstanceId(m, v);
+
 				em.persist(v);
 
 				if (v.getIsUsable() && vmHasRunUuid(v)) {
