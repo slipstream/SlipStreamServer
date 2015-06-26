@@ -234,6 +234,9 @@
             <mapping>
               <directory>/etc/cron.d</directory>
               <directoryIncluded>false</directoryIncluded>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
               <sources>
                 <source>
                   <location>src/main/config</location>
