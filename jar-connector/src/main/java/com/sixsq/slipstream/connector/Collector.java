@@ -109,6 +109,16 @@ public class Collector {
 		return runUuid != null && !runUuid.isEmpty();
 	}
 
+	private static boolean isVmRunOwnedByUser(VmRuntimeParameterMapping m, String user) {
+		if (m != null) {
+			RuntimeParameter rp = m.getVmstateRuntimeParameter();
+			if (rp != null) {
+				return user.equals(rp.getContainer().getUser());
+			}
+		}
+		return false;
+	}
+
 	public static int update(List<Vm> newVms, String user, String cloud) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
@@ -126,11 +136,12 @@ public class Collector {
 		for (Vm vm : oldVmList) {
 			String instanceId = vm.getInstanceId();
 			if (!newVmsMap.containsKey(instanceId)) {
-				setVmstate(em, getMapping(vm), "Unknown");
+				VmRuntimeParameterMapping m = getMapping(vm);
+				setVmstate(em, m, "Unknown");
 				em.remove(vm);
 				removed++;
 
-				if (vmHasRunUuid(vm)) {
+				if (isVmRunOwnedByUser(m, user)) {
 					UsageRecorder.insertEnd(instanceId, user, cloud);
 				}
 			} else {
@@ -153,14 +164,14 @@ public class Collector {
 
 				em.persist(v);
 
-				if (v.getIsUsable() && vmHasRunUuid(v)) {
+				if (v.getIsUsable() && isVmRunOwnedByUser(m, user)) {
 					UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics());
 				}
 			} else {
 				boolean merge = false;
 
-				if ((v.getIsUsable() != old.getIsUsable() && vmHasRunUuid(v))
-						|| (!vmHasRunUuid(old) && vmHasRunUuid(v) && v.getIsUsable())) {
+				if (((v.getIsUsable() != old.getIsUsable()) || (!vmHasRunUuid(old) && vmHasRunUuid(v) && v.getIsUsable()))
+						&& isVmRunOwnedByUser(m, user)) {
 					if (v.getIsUsable()) {
 						UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics());
 					} else {
