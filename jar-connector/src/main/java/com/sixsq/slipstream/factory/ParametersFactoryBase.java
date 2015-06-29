@@ -275,6 +275,15 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		addParameter(parameter, ParameterType.Password, true);
 	}
 
+	protected void putMandatoryPasswordParameter(String name,
+			String description, String instructions, int order) throws ValidationException {
+		S parameter = createParameter(name, description, true);
+		parameter.setCategory(getCategory());
+		parameter.setOrder(order);
+		parameter.setInstructions(instructions);
+		addParameter(parameter, ParameterType.Password, true);
+	}
+
 	protected void assignParameter(S parameter) {
 		getReferenceParameters().put(parameter.getName(), parameter);
 	}
