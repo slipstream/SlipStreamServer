@@ -263,12 +263,19 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	private void putLaunchParamLoginUserAndPassword(Map<String, String> launchParams, Run run) throws ValidationException {
 		try {
 			launchParams.put("login-username", getLoginUsername(run));
-			try {
-				launchParams.put("login-password", getLoginPassword(run));
-			} catch (ValidationException e) {
-			}
 		} catch (ConfigurationException e) {
 		}
+
+		String loginPassword = null;
+		try {
+			loginPassword = getLoginPassword(run);
+		} catch (ConfigurationException e) {
+		} catch (ValidationException e) {
+		}
+		if (loginPassword != null && !loginPassword.isEmpty()) {
+			launchParams.put("login-password", loginPassword);
+		}
+
 	}
 
 	private void putLaunchParamExtraDiskVolatile(Map<String, String> launchParams, Run run) throws ValidationException {
