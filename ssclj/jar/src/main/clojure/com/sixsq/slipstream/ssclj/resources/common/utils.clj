@@ -18,6 +18,9 @@
 ;; embedded in them
 ;;
 
+(defn de-camelcase [str]
+  (clojure.string/join "-" (map clojure.string/lower-case (clojure.string/split str #"(?=[A-Z])"))))
+
 (defn json-response
   [body]
   (-> body
@@ -168,4 +171,20 @@
           (remove nil?)
           vec)))
 
+(defn- snaked?
+  [s]
+  (re-matches #"[a-z]+(-[a-z]+)*" s))
+
+(defn snake-to-camelcase
+  "Converts s to CamelCase format.
+  s must be snake-cases, if not empty string is returned."
+  [s]
+  (println "will snake-to-camelcase=" s)
+  (if-not (snaked? s)
+    (do
+      (println s " is not snaked")
+      "")
+    (->>  (clojure.string/split s #"-")
+          (map clojure.string/capitalize)
+          (apply str))))
 

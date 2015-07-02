@@ -10,7 +10,9 @@
 
 (defn resource-name-dispatch
   [request]
-  (get-in request [:params :resource-name]))
+  (-> request
+       (get-in [:params :resource-name])
+       u/snake-to-camelcase))
 
 (defn resource-name-and-action-dispatch
   [request]
