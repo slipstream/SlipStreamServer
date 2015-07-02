@@ -18,7 +18,10 @@
     [com.sixsq.slipstream.ssclj.app.routes                      :as routes]
     [com.sixsq.slipstream.ssclj.app.params                      :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils  :as t]
-    [clojure.data.json                                          :as json]))
+    [clojure.data.json :as json]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (defn reset-records
   [f]
@@ -29,7 +32,7 @@
 
 (use-fixtures :each reset-records)
 
-(def base-uri (str p/service-context resource-name))
+(def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 (defn make-ring-app [resource-routes]
   (db/set-impl! (dbdb/get-instance))
@@ -50,6 +53,13 @@
       (request base-uri)
       t/body->json
       (t/is-status 200)))
+
+(deftest only-snake-url-succeeds
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (request (str p/service-context resource-name))
+      t/body->json
+      (t/is-status 405)))
 
 (def valid-usage-record
   { :acl {
