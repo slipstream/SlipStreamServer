@@ -111,13 +111,15 @@
   (edit-impl request))
 
 ;;
-;; Root doesn't follow the usual service-context + '/ResourceName/UUID'
+;; Root doesn't follow the usual service-context + '/resource-name/UUID'
 ;; pattern, so the routes must be defined explicitly.
 ;;
 (defroutes routes
            (GET p/service-context request
-                (crud/retrieve (assoc-in request [:params :resource-name] resource-name)))
+                (crud/retrieve (assoc-in request [:params :resource-name]
+                                         (u/de-camelcase resource-name))))
            (PUT p/service-context request
-                (crud/edit (assoc-in request [:params :resource-name] resource-name)))
+                (crud/edit (assoc-in request [:params :resource-name]
+                                     (u/de-camelcase resource-name))))
            (ANY p/service-context request
                 (throw (u/ex-bad-method request))))

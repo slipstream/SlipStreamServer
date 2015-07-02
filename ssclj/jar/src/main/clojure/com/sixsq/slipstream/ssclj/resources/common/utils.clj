@@ -171,18 +171,17 @@
           (remove nil?)
           vec)))
 
-(defn- snaked?
+(defn- lisp-cased?
   [s]
   (re-matches #"[a-z]+(-[a-z]+)*" s))
 
-(defn snake-to-camelcase
+(defn lisp-to-camelcase
   "Converts s to CamelCase format.
-  s must be snake-cases, if not empty string is returned."
+  s must be lisp-cased, if not empty string is returned."
   [s]
-  (println "will snake-to-camelcase=" s)
-  (if-not (snaked? s)
+  (if-not (lisp-cased? s)
     (do
-      (println s " is not snaked")
+      (log/warn s " is not lisp-cased.")
       "")
     (->>  (clojure.string/split s #"-")
           (map clojure.string/capitalize)

@@ -73,7 +73,6 @@
   m)
 
 (deftest get-should-return-most-recent-first-by-user
-  (println "base-uri= " base-uri)
   (-> (exec-request base-uri "" "joe")
       (t/is-key-value :count 2)
       are-desc-dates?
