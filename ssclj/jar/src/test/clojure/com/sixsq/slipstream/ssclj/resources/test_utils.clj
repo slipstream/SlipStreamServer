@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.test-utils
   (:require
+    [clojure.test :refer [is]]
     [clojure.string :as s]
     [ring.util.codec :as rc]
 
@@ -13,7 +14,7 @@
 
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [schema.core :as sc]))
 
 (defn- urlencode-param
   [p]
@@ -61,3 +62,17 @@
        (t/is-status 200)
         (t/is-key-value :count expected-count))))
 
+(defn is-valid?
+  "Asserts that schema successfully validates the resource."
+  [resource schema]
+  (is (nil? (sc/check schema resource))))
+
+(defn is-invalid?
+  "Asserts that schema rejects given resource."
+  [resource schema]
+  (is (sc/check schema resource)))
+
+(defn are-valid?
+  [resources schema]
+  (doseq [resource resources]
+    (is-valid? resource schema)))
