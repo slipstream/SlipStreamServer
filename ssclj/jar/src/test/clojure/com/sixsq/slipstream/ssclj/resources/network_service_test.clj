@@ -25,7 +25,14 @@
                         { :protocol   "TCP"
                           :direction  "outbound"
                           :address    {:security-group-name "AnotherSecGroup"}
-                          :port       {:tcp-range [30 56]}}]}
+                          :port       {:tcp-range [30 56]}}
+
+                        { :protocol   "ICMP"
+                          :direction  "inbound"
+                          :address    {:CIDR "192.168.12.33/32"}
+                          :port       {:icmp {:type 5 :code 1}}}
+                       ]
+                     }
    })
 
 (def valid-load-balancer
@@ -50,24 +57,18 @@
    :policies        {}
    })
 
-(def valid-states ["CREATING" "STARTED" "STOPPED" "ERROR"])
-
-;; TODO other types to implement
-(def valid-types ["Load Balancer" "QoS"])
-
-(defn firewall-with-state
-  [state]
+(defn firewall-with
+  [[& keys] val]
   (-> valid-firewall
-      (assoc :state state)))
+      (assoc-in keys val)))
 
-(defn firewall-with-rule
-  [rule]
-  (-> valid-firewall
-      (assoc-in [:policies :rules] [rule])))
+(deftest firewall-without-rules-is-valid
+  (tu/is-valid? (firewall-with [:policies :rules] []) NetworkService))
 
 (deftest schema-state-values
-  (tu/is-invalid?   (firewall-with-state "OF THE ART") NetworkService)
-  (tu/are-valid?    (map firewall-with-state valid-states) NetworkService))
+  (tu/is-invalid?   (firewall-with [:state] "OF THE ART") NetworkService)
+  (let [valid-states ["CREATING" "STARTED" "STOPPED" "ERROR"]]
+    (tu/are-valid?    (map #(firewall-with [:state] %) valid-states) NetworkService)))
 
 (deftest schema-tcp-port
   (doseq [invalid-port-range [ [] [1] [1 2 3] ["1" 2] [1 "2"]]]
@@ -75,14 +76,14 @@
                           :direction  "inbound"
                           :address    {:CIDR "192.168.0.0/24"}
                           :port       {:tcp-range invalid-port-range}}]
-      (tu/is-invalid? (firewall-with-rule invalid-rule) NetworkService))))
+      (tu/is-invalid? (firewall-with [:policies :rules] [invalid-rule]) NetworkService))))
 
 (deftest schema-icmp
   (let [rule  { :protocol   "TCP"
                 :direction  "inbound"
                 :address    {:CIDR "192.168.0.0/24"}
                 :port       {:icmp {:type 8 :code 0}}}]
-    (tu/is-valid? (firewall-with-rule rule) NetworkService)))
+    (tu/is-valid? (firewall-with [:policies :rules] [rule]) NetworkService)))
 
 (deftest schema-type-values
   (tu/is-invalid?   (assoc valid-firewall :type "blah") NetworkService)
