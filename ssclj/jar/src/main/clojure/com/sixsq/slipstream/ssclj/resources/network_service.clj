@@ -19,7 +19,8 @@
 (def SecurityGroupName
   {:security-group-name c/NonBlankString})
 
-(def TCPRange {:tcp-range [c/Numeric c/Numeric]})
+(def TCPRange {:tcp-range [(sc/one sc/Int "start") (sc/one sc/Int "end")]})
+(def ICMP     {:icmp {:type sc/Num :code sc/Num}})
 
 (def ^:private NetworkServiceCommon
   (merge
@@ -32,13 +33,13 @@
   {:protocol  (sc/enum "TCP" "UDP" "ICMP")
    :direction (sc/enum "inbound" "outbound")
    :address   (sc/either CIDR SecurityGroupName)
-   :port      TCPRange})
+   :port      (sc/either TCPRange ICMP)})
 
 (def ^:private NetworkServiceFirewall
   (merge
     NetworkServiceCommon
     {:type      (sc/enum "Firewall")
-     :policies [SecurityRule]}))
+     :policies  {:rules [SecurityRule]}}))
 
 (def ^:private NetworkServiceLoadBalancer
   (merge
