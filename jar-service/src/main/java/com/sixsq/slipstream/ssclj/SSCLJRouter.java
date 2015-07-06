@@ -35,21 +35,10 @@ public class SSCLJRouter extends Router {
 
 	public static final List<String> SSCLJ_RESOURCE_NAMES = Arrays.asList("event", "usage");
 
-	private String capitalize(final String s) {
-		if (s==null || s.length()<1) {
-			throw new IllegalArgumentException("Unable to capitalize empty strings");
-		}
-		return Character.toUpperCase(s.charAt(0)) + s.substring(1);
-	}
-
-	/**
-	 * Please note the convention: corresponding Clojure resource name is Java resource name capitalised.
-	 *
-	 */
 	public SSCLJRouter(Context context, String sscljResourceName) throws ValidationException {
 		super(context);
 
-		String target = SSCLJ_SERVER + "/" + capitalize(sscljResourceName);
+		String target = SSCLJ_SERVER + "/" + sscljResourceName;
 		Redirector listRedirector = new ListSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
 		attach("", listRedirector).setMatchingQuery(false);
 
