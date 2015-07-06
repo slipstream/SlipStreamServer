@@ -387,7 +387,7 @@ public class RootApplication extends Application {
 
 	private void attachSSCLJ(RootRouter router) throws ValidationException {
 		for (String sscljResourceName : SSCLJRouter.SSCLJ_RESOURCE_NAMES) {			
-			guardAndAttach(router, new SSCLJRouter(getContext(), sscljResourceName), sscljResourceName);			
+			guardAndAttach(router, new SSCLJRouter(getContext(), sscljResourceName), "api/" + sscljResourceName);
 		}
 	}
 
