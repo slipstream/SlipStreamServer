@@ -54,7 +54,20 @@
        (header authn-info-header auth-name)
        (request (str uri (urlencode-params query-string))
                 :content-type "application/x-www-form-urlencoded")
+       (t/body->json)))
+
+  ([uri query-string auth-name http-verb]
+   (-> (session (ring-app))
+       (content-type "application/json")
+       (header authn-info-header auth-name)
+       (request (str uri (urlencode-params query-string))
+                :request-method http-verb
+                :content-type "application/x-www-form-urlencoded")
        (t/body->json))))
+
+(defn exec-post
+  [uri query-string auth-name]
+  (exec-request uri query-string auth-name :post))
 
 (defn is-count
   ([uri expected-count query-string auth-name]
