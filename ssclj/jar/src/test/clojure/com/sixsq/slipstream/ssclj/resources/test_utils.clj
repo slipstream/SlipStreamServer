@@ -65,6 +65,10 @@
 (defn is-valid?
   "Asserts that schema successfully validates the resource."
   [resource schema]
+
+  (when-not (nil? (sc/check schema resource))
+    (println resource " does NOT respect schema"))
+
   (is (nil? (sc/check schema resource))))
 
 (defn is-invalid?

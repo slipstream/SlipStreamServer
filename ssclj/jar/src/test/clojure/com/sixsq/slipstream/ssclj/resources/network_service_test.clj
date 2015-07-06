@@ -8,7 +8,7 @@
 (def acl {:owner {:type "USER"   :principal "john"}
           :rules [{:type "USER"  :principal "ANON" :right "VIEW"}]})
 
-(def incomplete-network-service
+(def valid-firewall
   {
    :acl             acl
    :id              "NetworkService/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
@@ -16,6 +16,36 @@
 
    :state           "STARTED"
    :type            "Firewall"
+   :policies        [{:protocol   "TCP"
+                      :direction  "inbound"
+                      :address    {:CIDR "192.168.0.0/24"}
+                      :port       {:tcp-range [20 22]}}
+
+                     {:protocol   "TCP"
+                      :direction  "outbound"
+                      :address    {:security-group-name "AnotherSecGroup"}
+                      :port       {:tcp-range [30 56]}}]
+   })
+
+(def valid-load-balancer
+  {
+   :acl             acl
+   :id              "NetworkService/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
+   :resourceURI     resource-uri
+
+   :state           "STARTED"
+   :type            "Load Balancer"
+   :policies        {}
+   })
+
+(def valid-QoS
+  {
+   :acl             acl
+   :id              "NetworkService/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
+   :resourceURI     resource-uri
+
+   :state           "STARTED"
+   :type            "QoS"
    :policies        {}
    })
 
@@ -29,20 +59,16 @@
 
 (defn firewall-with-state
   [state]
-  (-> incomplete-network-service
-      (assoc :policies [{:protocol "TCP"}])
+  (-> valid-firewall
       (assoc :state state)))
-
-(defn firewall-with-type
-  [type]
-  (-> incomplete-network-service
-      (assoc :policies {:protocol "TCP"})
-      (assoc :type type)))
 
 (deftest schema-state-values
   (tu/is-invalid?   (firewall-with-state "OF THE ART") NetworkService)
   (tu/are-valid?    (map firewall-with-state valid-states) NetworkService))
-;
+
 (deftest schema-type-values
-  (tu/is-invalid?   (firewall-with-type "blah") NetworkService)
-  (tu/are-valid?    (map firewall-with-type valid-types) NetworkService))
+  (tu/is-invalid?   (assoc valid-firewall :type "blah") NetworkService)
+  (tu/is-valid?     valid-firewall              NetworkService)
+  (tu/is-valid?     valid-load-balancer         NetworkService)
+  (tu/is-valid?     valid-QoS                   NetworkService))
+
