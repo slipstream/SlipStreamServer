@@ -14,7 +14,8 @@
 
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [peridot.core :refer :all]
-    [schema.core :as sc]))
+    [schema.core :as sc]
+    [clojure.data.json :as json]))
 
 (defn- urlencode-param
   [p]
@@ -56,18 +57,19 @@
                 :content-type "application/x-www-form-urlencoded")
        (t/body->json)))
 
-  ([uri query-string auth-name http-verb]
+  ([uri query-string auth-name http-verb body]
    (-> (session (ring-app))
        (content-type "application/json")
        (header authn-info-header auth-name)
        (request (str uri (urlencode-params query-string))
+                :body (json/write-str body)
                 :request-method http-verb
-                :content-type "application/x-www-form-urlencoded")
+                :content-type "application/json")
        (t/body->json))))
 
 (defn exec-post
-  [uri query-string auth-name]
-  (exec-request uri query-string auth-name :post))
+  [uri auth-name body]
+  (exec-request uri "" auth-name :post body))
 
 (defn is-count
   ([uri expected-count query-string auth-name]

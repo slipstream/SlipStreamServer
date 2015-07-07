@@ -11,7 +11,6 @@
 (def valid-firewall
   {
    :acl             acl
-   :id              "NetworkService/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
    :resourceURI     resource-uri
 
    :state           "STARTED"
