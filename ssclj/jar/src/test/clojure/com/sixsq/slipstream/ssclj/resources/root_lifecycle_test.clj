@@ -14,7 +14,7 @@
 
 (use-fixtures :once db/temp-db-fixture)
 
-(def base-uri (u/de-camelcase p/service-context))
+(def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 (defn ring-app []
   (t/make-ring-app (t/concat-routes [routes])))
