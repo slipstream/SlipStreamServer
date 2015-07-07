@@ -19,6 +19,8 @@
 
 (def ^:const resource-name "Root")
 
+(def ^:const resource-url (u/de-camelcase resource-name))
+
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
 (def resource-acl {:owner {:principal "ADMIN"
@@ -86,7 +88,7 @@
                   (crud/set-operations request))))
 
 (defmethod crud/retrieve resource-name
-           [request]
+  [request]
   (retrieve-impl request))
 
 (defn edit-impl
@@ -115,11 +117,11 @@
 ;; pattern, so the routes must be defined explicitly.
 ;;
 (defroutes routes
-           (GET p/service-context request
+           (GET (str p/service-context resource-url) request
                 (crud/retrieve (assoc-in request [:params :resource-name]
                                          (u/de-camelcase resource-name))))
-           (PUT p/service-context request
+           (PUT (str p/service-context resource-url) request
                 (crud/edit (assoc-in request [:params :resource-name]
                                      (u/de-camelcase resource-name))))
-           (ANY p/service-context request
+           (ANY (str p/service-context resource-url) request
                 (throw (u/ex-bad-method request))))

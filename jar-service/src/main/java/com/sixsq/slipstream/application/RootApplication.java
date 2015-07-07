@@ -338,7 +338,9 @@ public class RootApplication extends Application {
 	private AuthenticatorsTemplateRoute guardAndAttach(Router rootRouter, Router router, String rootUri) {
 		Authenticators authenticators = getAuthenticators(rootRouter.getApplication());
 		authenticators.getLast().setNext(router);
+
 		TemplateRoute route = attach(rootRouter, rootUri, authenticators.getFirst());
+
 		return new AuthenticatorsTemplateRoute(route, authenticators);
 	}
 
@@ -386,9 +388,7 @@ public class RootApplication extends Application {
 	}
 
 	private void attachSSCLJ(RootRouter router) throws ValidationException {
-		for (String sscljResourceName : SSCLJRouter.SSCLJ_RESOURCE_NAMES) {			
-			guardAndAttach(router, new SSCLJRouter(getContext(), sscljResourceName), "api/" + sscljResourceName);
-		}
+		guardAndAttach(router, new SSCLJRouter(getContext()), "api");
 	}
 
 	public class RootRouter extends Router {

@@ -25,25 +25,21 @@ import org.restlet.Context;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class SSCLJRouter extends Router {
 
 	private static final int PORT_NUMBER = 8201;
 	private static final String SSCLJ_SERVER = String.format("http://localhost:%d/api", PORT_NUMBER);
 
-	public static final List<String> SSCLJ_RESOURCE_NAMES = Arrays.asList("event", "usage");
-
-	public SSCLJRouter(Context context, String sscljResourceName) throws ValidationException {
+	public SSCLJRouter(Context context) throws ValidationException {
 		super(context);
 
-		String target = SSCLJ_SERVER + "/" + sscljResourceName;
-		Redirector listRedirector = new ListSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
-		attach("", listRedirector).setMatchingQuery(false);
+		String target = SSCLJ_SERVER;
 
-		Redirector singleRedirector = new SingleSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
-		attach("/{ssclj-uuid}", singleRedirector);
+		Redirector redirector = new SSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
+		attach("/{resourceName}/{ssclj-uuid}", redirector).setMatchingQuery(false);
+		attach("/{resourceName}", redirector).setMatchingQuery(false);
+		attach("", redirector).setMatchingQuery(false);
+		attach("/", redirector).setMatchingQuery(false);
 	}
 
 }
