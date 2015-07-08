@@ -62,11 +62,7 @@
     c/AclAttr
     CommonAttributes))
 
-;; TODO other types to implement
-;; All Types from CIMI Spec:
-;; Load Balancer  QoS  Firewall  VPN  DHCP  DNS  NAT
-;; Gateway  Layer4 Port Forwarding  IP Routing
-;; Virtual Network Device  Other
+;; TODO other types to implement (see CIMI Spec)
 ;;
 ;; End of Schema
 ;;
@@ -82,11 +78,7 @@
 (defmethod crud/validate create-uri
    [resource]
    ((u/create-validation-fn NetworkServiceFirewallCreate) resource))
-;
-;(defmethod crud/add-acl resource-uri
-;  [resource request]
-;  (a/add-acl resource request))
-;
+
 ;;;
 ;;; Create
 ;;;
@@ -100,3 +92,12 @@
                  crud/validate)]
     (log/info create-uri ": will add NetworkService " body)
     (add-impl (assoc request :body body))))
+
+;;;
+;;; List collection
+;;;
+(def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
+(defmethod crud/query resource-name
+  [request]
+  (query-impl request))

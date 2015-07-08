@@ -75,7 +75,7 @@
   ([uri expected-count query-string auth-name]
    (-> (exec-request uri query-string auth-name)
        (t/is-status 200)
-        (t/is-key-value :count expected-count))))
+       (t/is-key-value :count expected-count))))
 
 (defn is-valid?
   "Asserts that schema successfully validates the resource."

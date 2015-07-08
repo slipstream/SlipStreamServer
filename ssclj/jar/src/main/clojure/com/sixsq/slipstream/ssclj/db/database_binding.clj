@@ -42,11 +42,17 @@
   (when-not (exist-in-db? id)
     (throw (u/ex-not-found id))))
 
+(defn- insert-acl
+  [id data]
+  (when (:acl data)
+    (acl/insert-resource id
+                         (u/resource-name (:id data))
+                         (acl/types-principals-from-acl (:acl data)))))
+
 (defn- insert-resource
   [id data]
   (insert resources (values {:id id :data (serialize data)}))
-  (when (:acl data)
-    (acl/insert-resource id "Event" (acl/types-principals-from-acl (:acl data)))))
+  (insert-acl id data))
 
 (defn- update-resource
   [id data]
