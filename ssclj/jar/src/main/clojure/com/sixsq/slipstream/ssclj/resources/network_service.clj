@@ -39,50 +39,28 @@
 (def TCPRange {:tcp-range [(sc/one sc/Int "start") (sc/one sc/Int "end")]})
 (def ICMP     {:icmp {:type sc/Num :code sc/Num}})
 
-(def ^:private NetworkServiceCommonCreate
-  (merge
-    c/CreateAttrs
-    c/AclAttr
-    {:state (sc/enum "CREATING" "STARTED" "STOPPED" "ERROR") }))
-
 (def ^:private SecurityRule
   {:protocol  (sc/enum "TCP" "UDP" "ICMP")
    :direction (sc/enum "inbound" "outbound")
    :address   (sc/either CIDR SecurityGroupName)
    :port      (sc/either TCPRange ICMP)})
 
+(def CommonAttributes
+  {:state       (sc/enum "CREATING" "STARTED" "STOPPED" "ERROR")
+   :type        (sc/enum "Firewall")
+   :policies    {(sc/optional-key :rules) [SecurityRule]}})
+
 (def ^:private NetworkServiceFirewallCreate
   (merge
-    NetworkServiceCommonCreate
-    {:type      (sc/enum "Firewall")
-     :policies  {:rules [SecurityRule]}}))
+    c/CreateAttrs
+    c/AclAttr
+    CommonAttributes))
 
-(def ^:private NetworkServiceFirewall
+(def NetworkServiceFirewall
   (merge
     c/CommonAttrs
     c/AclAttr
-    { :state (sc/enum "CREATING" "STARTED" "STOPPED" "ERROR")
-      :type      (sc/enum "Firewall")
-      :policies  {:rules [SecurityRule]} }))
-
-;(def ^:private NetworkServiceLoadBalancerCreate
-;  (merge
-;    NetworkServiceCommonCreate
-;    {:type      (sc/enum "Load Balancer")
-;     :policies {}}))
-;
-;(def ^:private NetworkServiceQosCreate
-;  (merge
-;    NetworkServiceCommonCreate
-;    {:type      (sc/enum "QoS")
-;     :policies {}}))
-
-(def NetworkServiceCreate
-  (sc/either
-    NetworkServiceFirewallCreate
-    ;; NetworkServiceLoadBalancerCreate
-    ;; NetworkServiceQosCreate
-    ))
+    CommonAttributes))
 
 ;; TODO other types to implement
 ;; All Types from CIMI Spec:
@@ -97,23 +75,21 @@
 ;; "Implementations" of multimethod declared in crud namespace
 ;;
 
-(def validate-fn (u/create-validation-fn NetworkServiceFirewall))
 (defmethod crud/validate resource-uri
   [resource]
-  (validate-fn resource))
+  ((u/create-validation-fn NetworkServiceFirewall) resource))
 
-(def create-validate-fn (u/create-validation-fn NetworkServiceFirewallCreate))
-((defmethod crud/validate create-uri
+(defmethod crud/validate create-uri
    [resource]
-   (create-validate-fn resource)))
-
-(defmethod crud/add-acl resource-uri
-  [resource request]
-  (a/add-acl resource request))
-
-;;
-;; Create
-;;
+   ((u/create-validation-fn NetworkServiceFirewallCreate) resource))
+;
+;(defmethod crud/add-acl resource-uri
+;  [resource request]
+;  (a/add-acl resource request))
+;
+;;;
+;;; Create
+;;;
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
@@ -121,6 +97,6 @@
   [{:keys [body] :as request}]
   (let [body (-> body
                  (assoc :resourceURI create-uri)
-                 (crud/validate))]
+                 crud/validate)]
     (log/info create-uri ": will add NetworkService " body)
     (add-impl (assoc request :body body))))

@@ -13,7 +13,6 @@
 
 (def base-uri (str p/service-context resource-name))
 
-(def invalid-firewall (dissoc valid-firewall :state))
 
 (defn fixture-db-impl
   [f]
@@ -22,21 +21,26 @@
 
 (use-fixtures :each fixture-db-impl)
 
+(def valid-create-firewall
+  (dissoc valid-firewall :id :created :updated))
+
+(def invalid-create-firewall (dissoc valid-create-firewall :state))
+
 (deftest post
-  (testing "When not authenticated POSTing should be forbidden"
-    (-> (exec-post base-uri nil valid-firewall)
+  (testing "When not authenticated, POSTing should be forbidden"
+    (-> (exec-post base-uri nil valid-create-firewall)
         (t/is-status 403))
-    (-> (exec-post base-uri "" valid-firewall)
-        (t/is-status 403))
-    (-> (exec-post base-uri "" invalid-firewall)
+    (-> (exec-post base-uri "" valid-create-firewall)
         (t/is-status 403)))
 
-  (testing "When authenticated POSTing a valid representation should succeed"
-    (-> (exec-post base-uri "joe" valid-firewall)
+  (testing "When authenticated, POSTing a valid representation should succeed"
+    (-> (exec-post base-uri "joe" valid-create-firewall)
         (t/is-status 201)))
 
-  (testing "When authenticated POSTing an valid representation should fail"
-    (-> (exec-post base-uri "joe" invalid-firewall)
-        (t/is-status 400))))
+  (testing "POSTing an invalid representation should fail"
+    (-> (exec-post base-uri "joe" invalid-create-firewall)
+        (t/is-status 400)))
+    (-> (exec-post base-uri "" invalid-create-firewall)
+        (t/is-status 400)))
 
 

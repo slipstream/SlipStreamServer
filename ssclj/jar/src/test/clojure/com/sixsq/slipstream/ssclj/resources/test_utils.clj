@@ -81,8 +81,8 @@
   "Asserts that schema successfully validates the resource."
   [resource schema]
 
-  (when-not (nil? (sc/check schema resource))
-    (println resource " does NOT respect schema"))
+  (when-let [schema-error (sc/check schema resource)]
+    (println resource " does NOT respect schema : " schema-error))
 
   (is (nil? (sc/check schema resource))))
 
