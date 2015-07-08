@@ -62,6 +62,22 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-migrations</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${basedir}/target/migrations</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/migrations</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -187,6 +203,40 @@
               </arguments>
             </configuration>
           </execution>
+
+          <execution>
+            <id>pyc</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <executable>python</executable>
+              <arguments>
+                <argument>-m</argument>
+                <argument>compileall</argument>
+                <argument>${basedir}/target/migrations</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>pyo</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <executable>python</executable>
+              <arguments>
+                <argument>-O</argument>
+                <argument>-m</argument>
+                <argument>compileall</argument>
+                <argument>${basedir}/target/migrations</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
         </executions>
       </plugin>
       <plugin>
@@ -508,10 +558,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>${basedir}/src/main/migrations</location>
-                  <includes>
-                    <include>**/*.*</include>
-                  </includes>
+                  <location>${basedir}/target/migrations</location>
                 </source>
               </sources>
             </mapping>
