@@ -101,3 +101,13 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+;;
+;; Single
+;;
+
+(def retrieve-impl (std-crud/retrieve-fn resource-name))
+
+(defmethod crud/retrieve resource-name
+  [request]
+  (retrieve-impl request))
