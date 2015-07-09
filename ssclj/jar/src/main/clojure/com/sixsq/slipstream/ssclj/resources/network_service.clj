@@ -103,7 +103,7 @@
   (query-impl request))
 
 ;;
-;; Single
+;; Find in collection
 ;;
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
@@ -111,3 +111,23 @@
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
+
+;;
+;; Delete in collection
+;;
+
+(def delete-impl (std-crud/delete-fn resource-name))
+
+(defmethod crud/delete resource-name
+  [request]
+  (delete-impl request))
+
+;;
+;; Edit in collection
+;;
+
+(def edit-impl (std-crud/edit-fn resource-name))
+
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))

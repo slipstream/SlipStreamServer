@@ -62,7 +62,7 @@
       (t/is-status 200)
       (t/is-key-value :count 0))
 
-  ;; although Oliver added the resource, the :acl in it do not grant him access
+  ;; although Oliver added the resource, the :acl in it does not grant him access
   (-> (exec-request base-uri "" "oliver")
       (t/is-status 200)
       (t/is-key-value :count 0))
@@ -75,31 +75,63 @@
       (t/is-status 200)
       (t/is-key-value :count 1)))
 
-(deftest find-collection
-  (testing "Finding the collection"
-    (let [uuid (-> (exec-post base-uri "john" valid-create-firewall)
-                    :response
-                    :body
-                    :resource-id
-                    (clojure.string/split #"/")
-                    second)]
-      (-> (exec-request (str base-uri "/" uuid) "" "jack")
-          (t/is-status 403))
+(defn- uuid-inserted-for-john!
+  []
+  (-> (exec-post base-uri "john" valid-create-firewall)
+      :response
+      :body
+      :resource-id
+      (clojure.string/split #"/")
+      second))
 
+(deftest find-collection
+  (let [uuid (uuid-inserted-for-john!)]
+
+    (testing "Retrieving the element is forbidden for jack"
+      (-> (exec-request (str base-uri "/" uuid) "" "jack")
+          (t/is-status 403)))
+
+    (testing "john is able to retrieve element with correct UUID"
       (-> (exec-request (str base-uri "/" uuid) "" "john")
           (t/is-status 200)
           :response
           :body
           (dissoc :id :created :updated :operations)
           (= valid-create-firewall)
-          is)
+          is))
 
+    (testing "Retrieving element with wrong uuid return 404 for everyone"
       (-> (exec-request (str base-uri "/123123") "" "jack")
           (t/is-status 404))
 
       (-> (exec-request (str base-uri "/123123") "" "john")
           (t/is-status 404)))))
 
+(deftest delete-collection
+  (let [uuid (-> (exec-post base-uri "john" valid-create-firewall)
+                 :response
+                 :body
+                 :resource-id
+                 (clojure.string/split #"/")
+                 second)]
+
+    (testing "Deleting the element with incorrect uuid returns 404"
+      (-> (exec-request (str base-uri "/666" ) "" "jack" :delete "")
+          (t/is-status 404))
+      (-> (exec-request (str base-uri "/666" ) "" "john" :delete "")
+          (t/is-status 404)))
+
+    (testing "Deleting the element with correct uuid is forbidden for jack"
+      (-> (exec-request (str base-uri "/" uuid) "" "jack" :delete "")
+          (t/is-status 403)))
+
+    (testing "Deleting the element with correct uuid is allowed for john"
+      (-> (exec-request (str base-uri "/" uuid) "" "john")
+          (t/is-status 200))
+      (-> (exec-request (str base-uri "/" uuid) "" "john" :delete "")
+          (t/is-status 204))
+      (-> (exec-request (str base-uri "/" uuid) "" "john")
+          (t/is-status 404)))))
 
 
 
