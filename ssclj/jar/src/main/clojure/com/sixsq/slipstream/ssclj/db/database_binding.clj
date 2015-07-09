@@ -57,7 +57,7 @@
 (defn- update-resource
   [id data]
   (update resources
-    (set-fields {:data data})
+    (set-fields {:data (serialize data)})
     (where {:id id})))
 
 (defn id-matches?
@@ -114,12 +114,6 @@
   [collection-id id data]
   collection-id)
 
-(defn response-created
-  [id]
-  (-> (str "created " id)
-      (u/map-response 201 id)
-      (r/header "Location" id)))
-
 (defmulti store-in-db store-dispatch-fn)
 (defmethod store-in-db :default
   [collection-id id data]
@@ -142,11 +136,16 @@
   [id]
   (delete resources (where {:id id})))
 
+(defn- response-updated
+  [id]
+  (-> (str "updated " id)
+      (u/map-response 200 id)))
+
 (defn- response-created
   [id]
   (-> (str "created " id)
-    (u/map-response 201 id)
-    (r/header "Location" id)))
+      (u/map-response 201 id)
+      (r/header "Location" id)))
 
 (defn- response-deleted
   [id]
@@ -170,7 +169,8 @@
 
   (edit [this {:keys [id] :as data}]
     (check-exist id)
-    (update-resource id data))
+    (update-resource id data)
+    (response-updated id))
 
   (query [this collection-id options]
     (find-resources collection-id options)))

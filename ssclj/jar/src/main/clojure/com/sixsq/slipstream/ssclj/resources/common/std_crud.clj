@@ -46,7 +46,9 @@
            (u/update-timestamps)
            (crud/validate)
            (db/edit)
-           (u/json-response)))))
+           du/show
+           (u/json-response)
+           du/show))))
 
 (defn delete-fn
   [resource-name]

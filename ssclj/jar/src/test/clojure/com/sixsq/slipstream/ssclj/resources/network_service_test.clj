@@ -30,8 +30,9 @@
 
 (def valid-create-firewall
   (dissoc valid-firewall :id :created :updated))
-
 (def invalid-create-firewall (dissoc valid-create-firewall :state))
+(def updated-firewall
+  (assoc valid-create-firewall :state "STOPPED"))
 
 (deftest add-collection
   (testing "When not authenticated, adding should be forbidden"
@@ -78,9 +79,7 @@
 (defn- uuid-inserted-for-john!
   []
   (-> (exec-post base-uri "john" valid-create-firewall)
-      :response
-      :body
-      :resource-id
+      (get-in [:response :body :resource-id])
       (clojure.string/split #"/")
       second))
 
@@ -94,8 +93,7 @@
     (testing "john is able to retrieve element with correct UUID"
       (-> (exec-request (str base-uri "/" uuid) "" "john")
           (t/is-status 200)
-          :response
-          :body
+          (get-in [:response :body])
           (dissoc :id :created :updated :operations)
           (= valid-create-firewall)
           is))
@@ -108,12 +106,7 @@
           (t/is-status 404)))))
 
 (deftest delete-collection
-  (let [uuid (-> (exec-post base-uri "john" valid-create-firewall)
-                 :response
-                 :body
-                 :resource-id
-                 (clojure.string/split #"/")
-                 second)]
+  (let [uuid (uuid-inserted-for-john!)]
 
     (testing "Deleting the element with incorrect uuid returns 404"
       (-> (exec-request (str base-uri "/666" ) "" "jack" :delete "")
@@ -132,6 +125,26 @@
           (t/is-status 204))
       (-> (exec-request (str base-uri "/" uuid) "" "john")
           (t/is-status 404)))))
+
+(deftest update-collection
+  (let [uuid (uuid-inserted-for-john!)]
+
+    ;(testing "Updating the element with correct uuid is forbidden for jack"
+    ;  (-> (exec-request (str base-uri "/" uuid) "" "jack" :put "")
+    ;      (t/is-status 403)))
+;
+    ;(testing "Updating the element with correct uuid is allowed for john"
+    ;  (-> (exec-request (str base-uri "/" uuid) "" "john")
+    ;      (t/is-status 200)
+    ;      (get-in [:response :body :state])
+    ;      (= "STARTED")
+    ;      is))
+
+      (-> (exec-request (str base-uri "/" uuid) "" "john" :put updated-firewall))))
+          ;; (t/is-status 200)
+          ;; )))
+   ;;     (t/is-status 403)))
+
 
 
 

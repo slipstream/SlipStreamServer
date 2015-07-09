@@ -33,10 +33,7 @@
                         { :protocol   "ICMP"
                           :direction  "inbound"
                           :address    {:CIDR "192.168.12.33/32"}
-                          :port       {:icmp {:type 5 :code 1}}}
-                       ]
-                     }
-   })
+                          :port       {:icmp {:type 5 :code 1}}}]}})
 
 (def valid-load-balancer
   {
