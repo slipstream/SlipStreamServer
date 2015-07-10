@@ -1,14 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-record-schema-test
   (require
+    [clojure.test                                       :refer :all]
     [com.sixsq.slipstream.ssclj.resources.usage-record  :refer :all]
-    [schema.core                                        :as s]
-    [clojure.test                                       :refer :all]))
-
-(defn valid?
-  [ur]
-  (nil? (s/check UsageRecord ur)))
-
-(def invalid? (complement valid?))
+    [com.sixsq.slipstream.ssclj.resources.test-utils    :as tu]))
 
 (def valid-usage-record
   { :acl {
@@ -31,4 +25,4 @@
    (assoc valid-usage-record :end_timestamp "")])
 
 (deftest test-schema
-  (is (true? (every? valid? valid-usage-records))))
+  (tu/are-valid? valid-usage-records UsageRecord))

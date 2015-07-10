@@ -3,6 +3,7 @@
   (:require
     [clojure.tools.logging    :as log]
     [clojure.edn              :as edn]
+    [clojure.string           :refer [split]]
     [clj-time.core            :as time]
     [clj-time.format          :as time-fmt]
     [schema.core              :as s]
@@ -71,6 +72,12 @@
 (defn new-resource-id
   [resource-name]
   (str resource-name "/" (random-uuid)))
+
+(defn resource-name
+  [resource-id]
+  (-> resource-id
+      (split #"/")
+      first))
 
 ;;
 ;; utilities for handling common attributes
