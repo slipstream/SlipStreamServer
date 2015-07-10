@@ -5,34 +5,39 @@
 
     [korma.core :as kc]
 
+    [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.resources.network-service-schema-test :refer [valid-firewall]]
     [com.sixsq.slipstream.ssclj.resources.test-utils :refer [exec-request exec-post is-count]]
     [com.sixsq.slipstream.ssclj.resources.network-service :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]))
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (def base-uri (str p/service-context resource-name))
 
-(defn fixture-db-impl
+(defn fixture-set-impl
   [f]
   (db/set-impl! (dbdb/get-instance))
   (f))
 
 (defn fixture-delete-all
   [f]
+  (kc/delete acl/acl)
   (kc/delete dbdb/resources)
   (f))
 
-(use-fixtures :once fixture-db-impl)
+(use-fixtures :once fixture-set-impl)
 (use-fixtures :each fixture-delete-all)
 
 (def valid-create-firewall
   (dissoc valid-firewall :id :created :updated))
-(def invalid-create-firewall (dissoc valid-create-firewall :state))
+(def invalid-create-firewall (assoc valid-create-firewall :state "INVALID STATE"))
 (def updated-firewall
   (assoc valid-create-firewall :state "STOPPED"))
+(def partial-firewall {:state "ERROR"})
+
 
 (deftest add-collection
   (testing "When not authenticated, adding should be forbidden"
@@ -52,9 +57,7 @@
         (t/is-status 400)))
 
 (deftest query-collection
-
   (exec-post base-uri "oliver" valid-create-firewall)
-  ;; resource with acl
 
   (-> (exec-request base-uri "" "")
       (t/is-status 403))
@@ -63,7 +66,7 @@
       (t/is-status 200)
       (t/is-key-value :count 0))
 
-  ;; although Oliver added the resource, the :acl in it does not grant him access
+  ;; although oliver added the resource, the :acl in it does not grant him access
   (-> (exec-request base-uri "" "oliver")
       (t/is-status 200)
       (t/is-key-value :count 0))
@@ -72,7 +75,7 @@
       (t/is-status 200)
       (t/is-key-value :count 1))
 
-  (-> (exec-request base-uri "" "olivier ADMIN")
+  (-> (exec-request base-uri "" "oliver ADMIN")
       (t/is-status 200)
       (t/is-key-value :count 1)))
 
@@ -129,22 +132,28 @@
 (deftest update-collection
   (let [uuid (uuid-inserted-for-john!)]
 
-    ;(testing "Updating the element with correct uuid is forbidden for jack"
-    ;  (-> (exec-request (str base-uri "/" uuid) "" "jack" :put "")
-    ;      (t/is-status 403)))
-;
-    ;(testing "Updating the element with correct uuid is allowed for john"
-    ;  (-> (exec-request (str base-uri "/" uuid) "" "john")
-    ;      (t/is-status 200)
-    ;      (get-in [:response :body :state])
-    ;      (= "STARTED")
-    ;      is))
+    (testing "Updating the element with correct uuid is forbidden for jack"
+      (-> (exec-request (str base-uri "/" uuid) "" "jack" :put "")
+          (t/is-status 403)))
 
-      (-> (exec-request (str base-uri "/" uuid) "" "john" :put updated-firewall))))
-          ;; (t/is-status 200)
-          ;; )))
-   ;;     (t/is-status 403)))
+    (testing "Updating the element with correct uuid is allowed for john"
+      (-> (exec-request (str base-uri "/" uuid) "" "john")
+          (t/is-key-value :state "STARTED"))
 
+      (-> (exec-request (str base-uri "/" uuid) "" "john" :put updated-firewall)
+          (t/is-status 200))
 
+      (-> (exec-request (str base-uri "/" uuid) "" "john")
+          (t/is-key-value :state "STOPPED")))
 
+    (testing "Updating with partial representation is allowed for john"
+      (-> (exec-request (str base-uri "/" uuid) "" "john" :put partial-firewall)
+          (t/is-status 200))
 
+      (-> (exec-request (str base-uri "/" uuid) "" "john")
+          (t/is-key-value :state "ERROR")
+          (t/has-key :created)))
+
+    (testing "Updating the element with invalid representation is forbidden for john"
+      (-> (exec-request (str base-uri "/" uuid) "" "john" :put invalid-create-firewall)
+          (t/is-status 400)))))
