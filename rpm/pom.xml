@@ -259,7 +259,7 @@
             <obsolete>slipstream-server</obsolete>
           </obsoletes>
           <requires>
-            <require>java-1.8.0-openjdk</require>
+            <require>jre-headless &gt;= 1.8.0</require>
             <require>slipstream-useradd${slipstream.edition}</require>
             <require>slipstream-client${slipstream.edition} &gt;= 1.3</require>
             <require>slipstream-ssclj${slipstream.edition}</require>
