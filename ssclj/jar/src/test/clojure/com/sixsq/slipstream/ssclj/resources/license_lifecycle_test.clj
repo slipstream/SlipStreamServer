@@ -15,7 +15,7 @@
 
 (use-fixtures :once db/temp-db-fixture)
 
-(def base-uri (str p/service-context resource-name))
+(def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 (defn ring-app []
   (t/make-ring-app (t/concat-routes routes/final-routes)))
@@ -61,7 +61,7 @@
                 (t/body->json)
                 (t/is-status 201)
                 (t/location))
-        abs-uri (str p/service-context uri)]
+        abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (-> (session (ring-app))
         (header authn-info-header "jane")
@@ -86,7 +86,7 @@
                 (t/body->json)
                 (t/is-status 201)
                 (t/location))
-        abs-uri (str p/service-context uri)]
+        abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
@@ -121,7 +121,7 @@
                 (t/body->json)
                 (t/is-status 201)
                 (t/location))
-        abs-uri (str p/service-context uri)]
+        abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (is uri)
 

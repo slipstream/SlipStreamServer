@@ -25,36 +25,21 @@ import org.restlet.Context;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class SSCLJRouter extends Router {
 
 	private static final int PORT_NUMBER = 8201;
 	private static final String SSCLJ_SERVER = String.format("http://localhost:%d/api", PORT_NUMBER);
 
-	public static final List<String> SSCLJ_RESOURCE_NAMES = Arrays.asList("event", "usage");
-
-	private String capitalize(final String s) {
-		if (s==null || s.length()<1) {
-			throw new IllegalArgumentException("Unable to capitalize empty strings");
-		}
-		return Character.toUpperCase(s.charAt(0)) + s.substring(1);
-	}
-
-	/**
-	 * Please note the convention: corresponding Clojure resource name is Java resource name capitalised.
-	 *
-	 */
-	public SSCLJRouter(Context context, String sscljResourceName) throws ValidationException {
+	public SSCLJRouter(Context context) throws ValidationException {
 		super(context);
 
-		String target = SSCLJ_SERVER + "/" + capitalize(sscljResourceName);
-		Redirector listRedirector = new ListSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
-		attach("", listRedirector).setMatchingQuery(false);
+		String target = SSCLJ_SERVER;
 
-		Redirector singleRedirector = new SingleSSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
-		attach("/{ssclj-uuid}", singleRedirector);
+		Redirector redirector = new SSCLJRedirector(getContext(), target, Redirector.MODE_SERVER_OUTBOUND);
+		attach("/{resourceName}/{ssclj-uuid}", redirector).setMatchingQuery(false);
+		attach("/{resourceName}", redirector).setMatchingQuery(false);
+		attach("", redirector).setMatchingQuery(false);
+		attach("/", redirector).setMatchingQuery(false);
 	}
 
 }

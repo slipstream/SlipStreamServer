@@ -1,24 +1,26 @@
 (ns com.sixsq.slipstream.ssclj.resources.event-test
   (:require
-    [clojure.test                                               :refer :all]
-    [ring.middleware.json                                       :refer [wrap-json-body wrap-json-response]]
-    [ring.middleware.params                                     :refer [wrap-params]]
-    [korma.core                                                 :as kc]
-    [peridot.core                                               :refer :all]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header    :refer [authn-info-header]]
-    [clojure.data.json                                          :as json]
-    [com.sixsq.slipstream.ssclj.api.acl                         :as acl]
-    [com.sixsq.slipstream.ssclj.db.database-binding             :as dbdb]
-    [com.sixsq.slipstream.ssclj.db.impl                         :as db]
-    [com.sixsq.slipstream.ssclj.resources.event                 :refer :all]
+    [clojure.test :refer :all]
+    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+    [ring.middleware.params :refer [wrap-params]]
+    [korma.core :as kc]
+    [peridot.core :refer :all]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [clojure.data.json :as json]
+    [com.sixsq.slipstream.ssclj.api.acl :as acl]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.event :refer :all]
 
-    [com.sixsq.slipstream.ssclj.app.params                      :as p]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
 
-    [com.sixsq.slipstream.ssclj.resources.test-utils            :refer [ring-app urlencode-params is-count]]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]))
+    [com.sixsq.slipstream.ssclj.resources.test-utils :refer [ring-app urlencode-params is-count]]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 
-(def base-uri (str p/service-context resource-name))
+(def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 (def ^:private nb-events 10)
 

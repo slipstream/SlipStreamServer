@@ -7,13 +7,14 @@
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.app.params :as p]))
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (use-fixtures :each db/flush-db-fixture)
 
 (use-fixtures :once db/temp-db-fixture)
 
-(def base-uri p/service-context)
+(def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 (defn ring-app []
   (t/make-ring-app (t/concat-routes [routes])))

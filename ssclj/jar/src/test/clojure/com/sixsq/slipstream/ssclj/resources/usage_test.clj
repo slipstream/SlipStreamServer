@@ -19,7 +19,9 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.resources.test-utils :refer [exec-request is-count]]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]))
+    [com.sixsq.slipstream.ssclj.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
 
 (defn daily-summary
   "convenience function"
@@ -47,7 +49,7 @@
 
 (use-fixtures :once insert-summaries)
 
-(def base-uri (str p/service-context resource-name))
+(def base-uri (str p/service-context (cu/de-camelcase resource-name)))
 
 (defn every-timestamps?
   [pred? ts]
