@@ -41,34 +41,62 @@ import com.sixsq.slipstream.util.Logger;
 
 public class Metering {
 
+	@SuppressWarnings("unused")
 	public static String populate(User user)
 			throws ConfigurationException, ValidationException, NotFoundException, AbortException {
-		Map<String, Integer> usageData = produceCloudUsageData(user);
-		String usages = sendToGraphite(user, usageData);
-		return usages;
+		return populate(user.getName());
 	}
 
+	public static String populate(String user)
+		throws ConfigurationException, ValidationException, NotFoundException, AbortException {
+		Map<String, Integer> usageData = produceCloudUsageData(user);
+		String data = transformUsageDataForGraphite(user, usageData);
+		sendToGraphite(data);
+
+		return data;
+	}
+
+	@SuppressWarnings("unused")
 	public static String populate(User user, Connector connector)
 			throws ConfigurationException, ValidationException, NotFoundException, AbortException {
+		return populate(user.getName(), connector);
+	}
 
+	public static String populate(String user, Connector connector)
+			throws ConfigurationException, ValidationException, NotFoundException, AbortException {
 		List<String> cloudServiceNamesList = new ArrayList<String>();
 		cloudServiceNamesList.add(connector.getConnectorInstanceName());
 
 		Map<String, Integer> usageData = produceCloudUsageData(user, cloudServiceNamesList);
-		String usages = sendToGraphite(user, usageData);
+		String data = transformUsageDataForGraphite(user, usageData);
+		sendToGraphite(data);
 
-		return usages;
+		return data;
 	}
 
-	public static Map<String, Integer> produceCloudUsageData(User user)
+	public static void populateVmMetrics(String user, String cloud, int cpu, float ram, float disk, Map<String, Integer> instanceTypes) {
+		String data = "";
+
+		data += generateGraphiteData(user, cloud, "cpu-nb", cpu);
+		data += generateGraphiteData(user, cloud, "ram-mb", ram);
+		data += generateGraphiteData(user, cloud, "disk-gb", disk);
+
+		for (Map.Entry<String, Integer> instanceType: instanceTypes.entrySet()) {
+			data += generateGraphiteData(user, cloud, "instance-type." + instanceType.getKey(), instanceType.getValue());
+		}
+
+		sendToGraphite(data);
+	}
+
+	public static Map<String, Integer> produceCloudUsageData(String user)
 			throws ConfigurationException, ValidationException {
 		return produceCloudUsageData(user, ConnectorFactory.getCloudServiceNamesList());
 	}
 
-	public static Map<String, Integer> produceCloudUsageData(User user, List<String> cloudServiceNamesList)
+	public static Map<String, Integer> produceCloudUsageData(String user, List<String> cloudServiceNamesList)
 			throws ConfigurationException, ValidationException {
 		Map<String, Integer> cloudUsage = new HashMap<String, Integer>();
-		Map<String, Integer> vmUsage = Vm.usage(user.getName());
+		Map<String, Integer> vmUsage = Vm.usage(user);
 
 		for (String cloud : cloudServiceNamesList) {
 			Integer currentUsage = vmUsage.get(cloud);
@@ -80,31 +108,35 @@ public class Metering {
 		return cloudUsage;
 	}
 
-	public static String sendToGraphite(User user, Map<String, Integer> usages) {
-		String usageData = "";
-		String errMsgBase = "Mesurements. Failed to send usage data to Graphite.";
+	public static String sendToGraphite(String data) {
+		String errorMessageBase = "Mesurements. Failed to send usage data to Graphite.";
 		try {
 			Socket conn = new Socket("localhost", 2003);
 			DataOutputStream out = new DataOutputStream(conn.getOutputStream());
-			usageData = transformUsageDataForGraphite(user, usages);
-			out.writeBytes(usageData);
+			out.writeBytes(data);
 			conn.close();
 		} catch (UnknownHostException e) {
-			Logger.severe(errMsgBase + " 'Unknown host' : " + e.getMessage());
+			Logger.severe(errorMessageBase + " 'Unknown host' : " + e.getMessage());
 		} catch (IOException e) {
-			Logger.severe(errMsgBase + " 'IO exception' : " + e.getMessage());
+			Logger.severe(errorMessageBase + " 'IO exception' : " + e.getMessage());
 		}
-		return usageData;
+		return data;
 	}
 
-	public static String transformUsageDataForGraphite(User user, Map<String, Integer> usages) {
+	private static String generateUsageMetricName(String user, String cloud, String name) {
+		return "slipstream." + user + ".usage." + name + "." + cloud;
+	}
+
+	private static String generateGraphiteData(String user, String cloud, String name, float value) {
+		int timestamp = (int) (System.currentTimeMillis() / 1000L);
+		return generateUsageMetricName(user, cloud, name) + " " + String.valueOf(value) + " " + String.valueOf(timestamp) + "\n";
+	}
+
+	public static String transformUsageDataForGraphite(String  user, Map<String, Integer> usages) {
 		String buffer = "";
 		for (Map.Entry<String, Integer> usage : usages.entrySet()) {
 			String cloud = usage.getKey();
-			String metricName = "slipstream." + user.getName() + ".usage.instance." + cloud;
-			int timestamp = (int) (System.currentTimeMillis() / 1000L);
-			int value = usage.getValue();
-			buffer += metricName + " " + String.valueOf(value) + " " + String.valueOf(timestamp) + "\n";
+			buffer += generateGraphiteData(user, cloud, "instance", usage.getValue());
 		}
 		return buffer;
 	}

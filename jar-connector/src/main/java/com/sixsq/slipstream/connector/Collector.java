@@ -25,6 +25,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metering.Metering;
 import com.sixsq.slipstream.persistence.*;
 
 import javax.persistence.EntityManager;
@@ -66,10 +67,10 @@ public class Collector {
 
 		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
 
-		Properties props = new Properties();
+		Map<String, Properties> instances = new HashMap<String, Properties>();
 		long startTime = System.currentTimeMillis();
 		try {
-			props = connector.describeInstances(user, timeout);
+			instances = connector.describeInstances(user, timeout);
 		} catch (SlipStreamException e) {
 			logger.warning("Failed contacting cloud [SlipStreamException]: "
 					+ getUserCloudLogRepr(user, connector) + " with '" + e.getMessage() + "'");
@@ -87,21 +88,29 @@ public class Collector {
 		}
 
 		long describeStopTime = System.currentTimeMillis();
-		int vmsPopulated = populateVmsForCloud(user, connector, props);
+		int vmsPopulated = populateVmsForCloud(user, connector, instances);
 		logTiming(user, connector, describeStopTime, "populate DB VMs done.");
 		return vmsPopulated;
 	}
 
-	private static int populateVmsForCloud(User user, Connector connector, Properties idsAndStates) {
+	private static int populateVmsForCloud(User user, Connector connector, Map<String, Properties> instances) {
 		String cloud = connector.getConnectorInstanceName();
+
 		List<Vm> vms = new ArrayList<Vm>();
-		for (String instanceId : idsAndStates.stringPropertyNames()) {
-			String state = (String) idsAndStates.get(instanceId);
-			Vm vm = new Vm(instanceId, cloud, state, user.getName(), connector.isVmUsable(state));
+		for (Map.Entry<String, Properties> entry: instances.entrySet()) {
+			String instanceId = entry.getKey();
+			Properties properties = entry.getValue();
+			String state = properties.getProperty(ConnectorBase.VM_STATE);
+
+			Vm vm = new Vm(instanceId, cloud, state, user.getName(), connector.isVmUsable(state),
+					properties.getProperty(ConnectorBase.VM_CPU), properties.getProperty(ConnectorBase.VM_RAM),
+					properties.getProperty(ConnectorBase.VM_DISK), properties.getProperty(ConnectorBase.VM_INSTANCE_TYPE));
 			vms.add(vm);
 		}
+
 		update(vms, user.getName(), cloud);
-		return idsAndStates.size();
+
+		return instances.size();
 	}
 
 	private static boolean vmHasRunUuid(Vm vm) {
@@ -130,6 +139,11 @@ public class Collector {
 		@SuppressWarnings("unchecked")
 		List<Vm> oldVmList = q.getResultList();
 
+		int cpu = 0;
+		float ram = 0;
+		float disk = 0;
+		Map<String, Integer> instanceTypes = new HashMap<String, Integer>();
+
 		Map<String, Vm> filteredOldVmMap = new HashMap<String, Vm>();
 		Map<String, Vm> newVmsMap = toMapByInstanceId(newVms);
 		int removed = 0;
@@ -143,11 +157,17 @@ public class Collector {
 
 				if (isVmRunOwnedByUser(m, user)) {
 					UsageRecorder.insertEnd(instanceId, user, cloud);
+
+					String instanceType = vm.getInstanceType();
+					if (instanceType != null && !instanceType.isEmpty() && !instanceTypes.containsKey(instanceType)){
+						instanceTypes.put(instanceType, 0);
+					}
 				}
 			} else {
 				filteredOldVmMap.put(instanceId, vm);
 			}
 		}
+
 		for (Vm v : newVmsMap.values()) {
 			Vm old = filteredOldVmMap.get(v.getInstanceId());
 			VmRuntimeParameterMapping m = getMapping(v);
@@ -165,7 +185,7 @@ public class Collector {
 				em.persist(v);
 
 				if (v.getIsUsable() && isVmRunOwnedByUser(m, user)) {
-					UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics());
+					UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(v));
 				}
 			} else {
 				boolean merge = false;
@@ -173,9 +193,14 @@ public class Collector {
 				if (((v.getIsUsable() != old.getIsUsable()) || (!vmHasRunUuid(old) && vmHasRunUuid(v) && v.getIsUsable()))
 						&& isVmRunOwnedByUser(m, user)) {
 					if (v.getIsUsable()) {
-						UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics());
+						UsageRecorder.insertStart(v.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(v));
 					} else {
 						UsageRecorder.insertEnd(v.getInstanceId(), user, cloud);
+
+						String instanceType = v.getInstanceType();
+						if (instanceType != null && !instanceType.isEmpty() && !instanceTypes.containsKey(instanceType)){
+							instanceTypes.put(instanceType, 0);
+						}
 					}
 				}
 
@@ -215,9 +240,36 @@ public class Collector {
 					em.merge(old);
 				}
 			}
+
+			if (isVmRunOwnedByUser(m, user) && v.getIsUsable()) {
+				Integer vmCpu = v.getCpu();
+				if (vmCpu != null)
+					cpu += vmCpu;
+
+				Float vmRam = v.getRam();
+				if (vmRam != null)
+					ram += vmRam;
+
+				Float vmDisk = v.getDisk();
+				if (vmDisk != null)
+					disk += vmDisk;
+
+				String instanceType = v.getInstanceType();
+				if (instanceType != null && !instanceType.isEmpty()){
+					Integer nb = 1;
+					if (instanceTypes.containsKey(instanceType)) {
+						nb = instanceTypes.get(instanceType) + 1;
+					}
+					instanceTypes.put(instanceType, nb);
+				}
+			}
+
 		}
 		transaction.commit();
 		em.close();
+
+		Metering.populateVmMetrics(user, cloud, cpu, ram, disk, instanceTypes);
+
 		return removed;
 	}
 

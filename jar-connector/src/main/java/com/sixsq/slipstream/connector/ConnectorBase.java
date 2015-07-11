@@ -67,7 +67,14 @@ public abstract class ConnectorBase implements Connector {
 
     abstract public void terminate(Run run, User user) throws SlipStreamException;
 
-    abstract public Properties describeInstances(User user, int timeout) throws SlipStreamException;
+    abstract public Map<String, Properties> describeInstances(User user, int timeout) throws SlipStreamException;
+
+    public static final String VM_STATE = "state";
+    public static final String VM_IP = "ip";
+    public static final String VM_CPU = "cpu";
+    public static final String VM_RAM = "ram";
+    public static final String VM_DISK = "disk";
+    public static final String VM_INSTANCE_TYPE = "instance-type";
 
     private static Logger log = Logger.getLogger(ConnectorBase.class.toString());
 

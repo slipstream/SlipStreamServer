@@ -108,8 +108,33 @@ public class Vm {
 	@Attribute(required = false)
 	private Boolean isUsable;
 
+	@Attribute(required = false)
+	private Integer cpu;
+
+	@Attribute(required = false)
+	private Float ram;
+
+	@Attribute(required = false)
+	private Float disk;
+
+	@Attribute(required = false)
+	private String instanceType;
+
 	@SuppressWarnings("unused")
 	private Vm() {
+	}
+
+	public Vm(String instanceid, String cloud, String state, String user, boolean isUsable, String cpu, String ram, String disk, String instanceType) {
+		this.instanceId = instanceid;
+		this.cloud = cloud;
+		this.state = state;
+		this.user_ = user;
+		this.isUsable = isUsable;
+		this.cpu = (cpu == null) ? null : Integer.valueOf(cpu);
+		this.ram = (ram == null) ? null : Float.valueOf(ram);
+		this.disk = (disk == null) ? null : Float.valueOf(disk);
+		this.instanceType = instanceType;
+		measurement = new Date();
 	}
 
 	public Vm(String instanceid, String cloud, String state, String user, boolean isUsable) {
@@ -360,6 +385,38 @@ public class Vm {
 
 	public void setIsUsable(boolean isUsable) {
 		this.isUsable = isUsable;
+	}
+
+	public Integer getCpu() {
+		return this.cpu;
+	}
+
+	public void setCpu(String cpu) {
+		this.cpu = Integer.valueOf(cpu);
+	}
+
+	public Float getRam() {
+		return this.ram;
+	}
+
+	public void setRam(String ram) {
+		this.ram = Float.valueOf(ram);
+	}
+
+	public Float getDisk() {
+		return this.disk;
+	}
+
+	public void setDisk(String disk) {
+		this.disk = Float.valueOf(disk);
+	}
+
+	public String getInstanceType() {
+		return this.instanceType;
+	}
+
+	public void setInstanceType(String instanceType) {
+		this.instanceType = instanceType;
 	}
 
 	public void remove() {
