@@ -212,28 +212,47 @@ public class Collector {
 				} else {
 					setVmstateIfNotYetSet(em, m, v);
 				}
-				if (old.getRunUuid() == null) {
-					setRunUuid(m, old);
+
+				if (m != null) {
+					if (old.getRunUuid() == null) {
+						setRunUuid(m, old);
+						merge = true;
+					}
+					if (old.getRunOwner() == null) {
+						setRunOwner(m, old);
+						merge = true;
+					}
+					if (old.getIp() == null) {
+						setIp(m, old);
+						merge = true;
+					}
+					if (old.getName() == null) {
+						setName(m, old);
+						merge = true;
+					}
+					if (old.getNodeName() == null) {
+						setNodeName(m, old);
+						merge = true;
+					}
+					if (old.getNodeInstanceId() == null) {
+						setNodeInstanceId(m, old);
+						merge = true;
+					}
+				}
+				if (v.getCpu() != null && !v.getCpu().equals(old.getCpu())) {
+					old.setCpu(v.getCpu());
 					merge = true;
 				}
-				if (old.getRunOwner() == null) {
-					setRunOwner(m, old);
+				if (v.getRam()!= null && !v.getRam().equals(old.getRam())) {
+					old.setRam(v.getRam());
 					merge = true;
 				}
-				if (old.getIp() == null) {
-					setIp(m, old);
+				if (v.getDisk() != null && !v.getDisk().equals(old.getDisk())) {
+					old.setDisk(v.getDisk());
 					merge = true;
 				}
-				if (old.getName() == null) {
-					setName(m, old);
-					merge = true;
-				}
-				if (old.getNodeName() == null) {
-					setNodeName(m, old);
-					merge = true;
-				}
-				if (old.getNodeInstanceId() == null) {
-					setNodeInstanceId(m, old);
+				if (v.getInstanceType() != null && !v.getInstanceType().equals(old.getInstanceType())) {
+					old.setInstanceType(v.getInstanceType());
 					merge = true;
 				}
 				if (merge) {

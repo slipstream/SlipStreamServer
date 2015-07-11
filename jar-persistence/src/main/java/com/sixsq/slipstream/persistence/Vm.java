@@ -391,24 +391,36 @@ public class Vm {
 		return this.cpu;
 	}
 
+	public void setCpu(Integer cpu) {
+		this.cpu = cpu;
+	}
+
 	public void setCpu(String cpu) {
-		this.cpu = Integer.valueOf(cpu);
+		this.cpu = (cpu == null) ? null : Integer.valueOf(cpu);
 	}
 
 	public Float getRam() {
 		return this.ram;
 	}
 
+	public void setRam(Float ram) {
+		this.ram = ram;
+	}
+
 	public void setRam(String ram) {
-		this.ram = Float.valueOf(ram);
+		this.ram = (ram == null) ? null : Float.valueOf(ram);
 	}
 
 	public Float getDisk() {
 		return this.disk;
 	}
 
+	public void setDisk(Float disk) {
+		this.disk = disk;
+	}
+
 	public void setDisk(String disk) {
-		this.disk = Float.valueOf(disk);
+		this.disk = (disk == null) ? null : Float.valueOf(disk);
 	}
 
 	public String getInstanceType() {
