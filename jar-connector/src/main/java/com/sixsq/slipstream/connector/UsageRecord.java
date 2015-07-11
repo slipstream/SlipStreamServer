@@ -88,7 +88,7 @@ public class UsageRecord {
             parameters.add("idleCheckInterval", "1000");
             parameters.add("socketConnectTimeoutMs", "1000");
 
-            resource = new ClientResource(context, SSCLJ_SERVER + "/UsageRecord");
+            resource = new ClientResource(context, SSCLJ_SERVER + "/usage-record");
             resource.setRetryOnError(false);
 
             response = resource.post(stringRep, MediaType.APPLICATION_JSON);

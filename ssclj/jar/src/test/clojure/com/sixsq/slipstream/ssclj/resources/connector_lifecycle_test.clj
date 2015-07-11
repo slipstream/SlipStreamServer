@@ -15,7 +15,7 @@
 
 (use-fixtures :once db/temp-db-fixture)
 
-(def base-uri (str p/service-context resource-name))
+(def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 (defn ring-app []
   (t/make-ring-app (t/concat-routes routes/final-routes)))
@@ -57,7 +57,7 @@
                 (t/body->json)
                 (t/is-status 201)
                 (t/location))
-        abs-uri (str p/service-context uri)]
+        abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (-> (session (ring-app))
         (header authn-info-header "jane")
@@ -82,7 +82,7 @@
                 (t/body->json)
                 (t/is-status 201)
                 (t/location))
-        abs-uri (str p/service-context uri)]
+        abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
@@ -95,17 +95,17 @@
         (request abs-uri
                  :request-method :delete)
         (t/body->json)
-        (t/is-status 204)))
+        (t/is-status 204))
 
-  ;; try adding invalid entry
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "root ADMIN")
-      (request base-uri
-               :request-method :post
-               :body (json/write-str invalid-create-entry))
-      (t/body->json)
-      (t/is-status 400))
+    ;; try adding invalid entry
+    (-> (session (ring-app))
+        (content-type "application/json")
+        (header authn-info-header "root ADMIN")
+        (request base-uri
+                 :request-method :post
+                 :body (json/write-str invalid-create-entry))
+        (t/body->json)
+        (t/is-status 400)))
 
   ;; add a new entry
   (let [uri (-> (session (ring-app))
@@ -117,7 +117,7 @@
                 (t/body->json)
                 (t/is-status 201)
                 (t/location))
-        abs-uri (str p/service-context uri)]
+        abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (is uri)
 
@@ -140,22 +140,22 @@
                       (t/is-resource-uri collection-uri)
                       (t/is-count pos?)
                       (t/entries resource-tag))]
-      (is ((set (map :id entries)) uri)))
+      (is ((set (map :id entries)) uri))
 
-    ;; delete the entry
-    (-> (session (ring-app))
-        (header authn-info-header "root ADMIN")
-        (request abs-uri
-                 :request-method :delete)
-        (t/body->json)
-        (t/is-status 204))
+      ;; delete the entry
+      (-> (session (ring-app))
+          (header authn-info-header "root ADMIN")
+          (request abs-uri
+                  :request-method :delete)
+          (t/body->json)
+          (t/is-status 204))
 
-    ;; ensure that it really is gone
-    (-> (session (ring-app))
-        (header authn-info-header "root ADMIN")
-        (request abs-uri)
-        (t/body->json)
-        (t/is-status 404))))
+      ;; ensure that it really is gone
+      (-> (session (ring-app))
+          (header authn-info-header "root ADMIN")
+          (request abs-uri)
+          (t/body->json)
+          (t/is-status 404)))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]

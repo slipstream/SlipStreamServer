@@ -3,6 +3,7 @@
   (:require
     [clojure.tools.logging    :as log]
     [clojure.edn              :as edn]
+    [clojure.string           :refer [split]]
     [clj-time.core            :as time]
     [clj-time.format          :as time-fmt]
     [schema.core              :as s]
@@ -17,6 +18,9 @@
 ;; conditions and ex-info exceptions with these responses
 ;; embedded in them
 ;;
+
+(defn de-camelcase [str]
+  (clojure.string/join "-" (map clojure.string/lower-case (clojure.string/split str #"(?=[A-Z])"))))
 
 (defn json-response
   [body]
@@ -68,6 +72,12 @@
 (defn new-resource-id
   [resource-name]
   (str resource-name "/" (random-uuid)))
+
+(defn resource-name
+  [resource-id]
+  (-> resource-id
+      (split #"/")
+      first))
 
 ;;
 ;; utilities for handling common attributes
@@ -168,4 +178,19 @@
           (remove nil?)
           vec)))
 
+(defn- lisp-cased?
+  [s]
+  (re-matches #"[a-z]+(-[a-z]+)*" s))
+
+(defn lisp-to-camelcase
+  "Converts s to CamelCase format.
+  s must be lisp-cased, if not empty string is returned."
+  [s]
+  (if-not (lisp-cased? s)
+    (do
+      (log/warn s " is not lisp-cased.")
+      "")
+    (->>  (clojure.string/split s #"-")
+          (map clojure.string/capitalize)
+          (apply str))))
 

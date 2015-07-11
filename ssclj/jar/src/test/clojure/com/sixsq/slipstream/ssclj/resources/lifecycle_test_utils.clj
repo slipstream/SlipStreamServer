@@ -14,6 +14,7 @@
 
 (defn body->json
   [m]
+
   (if-let [body (get-in m [:response :body])]
     (let [updated-body (if (string? body)
                          (json/read-str body :key-fn keyword :eof-error? false :eof-value {})
@@ -27,8 +28,16 @@
 
 (defn is-key-value [m k v]
   (let [actual (get-in m [:response :body k])]
+    (when-not (= v actual)
+      (println "Expecting " v " got " actual))
     (is (= v actual))
     m))
+
+(defn has-key [m k]
+  (-> m
+      (get-in [:response :body])
+      (contains? k)
+      is))
 
 (defn is-resource-uri [m type-uri]
   (is-key-value m :resourceURI type-uri))

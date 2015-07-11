@@ -58,13 +58,26 @@
 (expect 1 (get-index {"k" ["a" 1]} "k"))
 (expect 1 (get-index {"k" ["1" "2"]} "k"))
 
-(expect {:cimi-params {:first nil :last nil} :params {}} (process-first-last {:params {}}))
+;; default value used for :last
+(expect {:cimi-params {:first nil :last default-last} :params {}}
+        (process-first-last {:params {}}))
+(expect {:first nil :last default-last}
+        (:cimi-params (process-first-last {:params {}})))
+(expect {:first nil :last default-last}
+        (:cimi-params (process-first-last {:params {"$first" ["a"], "$last" nil}})))
+
+;; given value for :last is kept
+(let [last-other-than-default (* 2 default-last)]
+  (expect {:cimi-params {:first nil :last last-other-than-default} :params {"$last" last-other-than-default}}
+          (process-first-last {:params {"$last" last-other-than-default}})))
+
+;; :last value is adjusted
+(expect {:cimi-params {:first 2 :last (inc default-last)} :params {"$first" 2}}
+        (process-first-last {:params {"$first" 2}}))
 
 (expect {:first 1 :last 2} (:cimi-params (process-first-last {:params {"$first" 1, "$last" 2}})))
 (expect {:first 1 :last 2} (:cimi-params (process-first-last {:params {"$first" "1", "$last" "2"}})))
 (expect {:first 1 :last 2} (:cimi-params (process-first-last {:params {"$first" ["a" "1"], "$last" ["b" "2"]}})))
-(expect {:first nil :last nil} (:cimi-params (process-first-last {:params {"$first" ["a"], "$last" nil}})))
-(expect {:first nil :last nil} (:cimi-params (process-first-last {:params {}})))
 
 (expect "application/json" (set-and-extract process-format "format" "json"))
 (expect "application/json" (set-and-extract process-format "format" "JSON"))
@@ -170,3 +183,4 @@
         (set-and-extract process-filter "filter" ["a=1 or c=3" "b=2"]))
 
 
+(run-all-tests)

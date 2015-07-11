@@ -11,6 +11,13 @@
     [instaparse.core :as insta]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
+
+(def ^:const default-last
+  "Default value for $last parameter.
+  When $last is not provided, :last is adjusted
+  so that :last - :first + 1 is equals to that default value"
+  20)
+
 (defn add-cimi-param
   "Adds the given key and value to the :cimi-params map in the
   ring request, creating the map if necessary."
@@ -61,6 +68,17 @@
   (->> (get m k)
        (first-valid-long)))
 
+(defn- adjust-default-last
+  [cimi-params]
+  (let [[first last] ((juxt :first :last) cimi-params)]
+    (if (nil? last)
+      (if (nil? first)
+        (merge cimi-params {:last default-last})
+        (merge cimi-params {:last (-> first
+                                      (+ default-last)
+                                      dec)}))
+      cimi-params)))
+
 (defn process-first-last
   "Adds the keys :first and :last to the :cimi-params map in the request.
   If these are not specified or have invalid values, then nil is provided
@@ -76,6 +94,7 @@
        (map #(get-index params %))
        (zipmap [:first :last])
        (merge cimi-params)
+       (adjust-default-last)
        (assoc req :cimi-params)))
 
 (defn wrap-join-with-and

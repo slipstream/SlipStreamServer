@@ -123,6 +123,7 @@
   [acl]
   (->> acl
        :rules
+       (concat [(:owner acl)])
        (map type-principal-from-rule)))
 
 (defn insert-resource

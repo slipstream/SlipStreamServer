@@ -44,6 +44,11 @@ public class SSCLJRedirector extends Redirector {
 		targetRef.addSegment(sscljUUID);
 	}
 
+    protected void addSegmentForResourceName(Reference targetRef, Request request) {
+        String resourceName = (String) request.getAttributes().get("resourceName");
+        targetRef.addSegment(resourceName);
+    }
+
     protected void saveCIMIQueryParams(Request request) {
 
         this.cimiParameters = new ArrayList<Parameter>();
@@ -84,6 +89,12 @@ public class SSCLJRedirector extends Redirector {
 			logger.severe("Unable to add SlipstreamAuthnInfo in header:" + ve.getMessage());
 		}
 	}
+
+    protected void outboundServerRedirect(Reference targetRef, Request request, Response response) {
+        addSegmentForResourceName(targetRef, request);
+        addSegmentForSSCLJUUID(targetRef, request);
+        super.outboundServerRedirect(targetRef, request, response);
+    }
 
 	// hack inspired by this discussion http://restlet.tigris.org/ds/viewMessage.do?dsForumId=4447&dsMessageId=3076621
 	// main trick is to call addSlipstreamAuthnInfo to add slipstream header after it has been removed from request
