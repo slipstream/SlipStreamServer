@@ -339,7 +339,6 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		environment.put("SLIPSTREAM_DIID", run.getName());
 		environment.put("SLIPSTREAM_SERVICEURL", configuration.baseUrl);
 		environment.put("SLIPSTREAM_NODE_INSTANCE_NAME", nodeInstanceName);
-		environment.put("SLIPSTREAM_REPORT_DIR", SLIPSTREAM_REPORT_DIR);
 		environment.put("SLIPSTREAM_CLOUD", getCloudServiceName());
 		environment.put("SLIPSTREAM_BUNDLE_URL", configuration.getRequiredProperty("slipstream.update.clienturl"));
 		environment.put("SLIPSTREAM_BOOTSTRAP_BIN", configuration.getRequiredProperty("slipstream.update.clientbootstrapurl"));
