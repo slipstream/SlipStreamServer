@@ -262,17 +262,17 @@ public class Collector {
 
 			if (isVmRunOwnedByUser(m, user) && v.getIsUsable()) {
 				Integer vmCpu = v.getCpu();
-				if (vmCpu != null)
+				if (vmCpu != null) {
 					cpu += vmCpu;
-
+				}
 				Float vmRam = v.getRam();
-				if (vmRam != null)
+				if (vmRam != null) {
 					ram += vmRam;
-
+				}
 				Float vmDisk = v.getDisk();
-				if (vmDisk != null)
+				if (vmDisk != null) {
 					disk += vmDisk;
-
+				}
 				String instanceType = v.getInstanceType();
 				if (instanceType != null && !instanceType.isEmpty()){
 					Integer nb = 1;
