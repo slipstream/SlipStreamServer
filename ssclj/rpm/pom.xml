@@ -119,7 +119,7 @@
             SlipStream SSCLJ server
           </description>
           <requires>
-            <require>java-1.8.0-openjdk</require>
+            <require>jre-headless &gt;= 1.8.0</require>
             <require>slipstream-useradd${slipstream.edition}</require>
           </requires>
 
