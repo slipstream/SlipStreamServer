@@ -133,7 +133,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	@Override
-	public Properties describeInstances(User user, int timeout) throws SlipStreamException {
+	public Map<String, Properties> describeInstances(User user, int timeout) throws SlipStreamException {
 		validateCredentials(user);
 
 		String command = getCommandDescribeInstances() + createTimeoutParameter(timeout)
@@ -382,23 +382,41 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return environment;
 	}
 
-	public static Properties parseDescribeInstanceResult(String result)
+	private static void addToPropertiesIfExistAndNotEmpty(Properties properties, String[] parts, int column, String key) {
+		if (parts.length > column) {
+			String value = parts[column].trim();
+			if (!value.isEmpty()) properties.put(key, value);
+		}
+	}
+
+	public static Map<String, Properties> parseDescribeInstanceResult(String result)
 			throws SlipStreamException {
-		Properties states = new Properties();
+
+		Map<String, Properties> instances = new HashMap<String, Properties>();
+
 		List<String> lines = new ArrayList<String>();
 		Collections.addAll(lines, result.split("\n"));
-		lines.remove(0);
+		lines.remove(0); // Remove the header line
+
 		for (String line : lines) {
-			String[] parts = line.trim().split("\\s+");
+			Properties properties = new Properties();
+
+			String[] parts = line.trim().split(",");
 			if (parts.length < 2) {
-				throw (new SlipStreamException(
-						"Error returned by describe command. Got: " + result));
+				throw (new SlipStreamException("Error returned by describe command. Got: " + result));
 			}
-			String instanceIdKey = parts[0];
-			String status = parts[1];
-			states.put(instanceIdKey, status);
+
+			String instanceId = parts[0].trim();
+			properties.put(VM_STATE, parts[1].trim());
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 2, VM_IP);
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 3, VM_CPU);
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 4, VM_RAM);
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 5, VM_DISK);
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 6, VM_INSTANCE_TYPE);
+			instances.put(instanceId, properties);
 		}
-		return states;
+
+		return instances;
 	}
 
 	public static String[] parseRunInstanceResult(String result)

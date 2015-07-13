@@ -23,11 +23,7 @@ package com.sixsq.slipstream.connector.local;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 import java.util.logging.Logger;
 
 import com.sixsq.slipstream.connector.Collector;
@@ -228,14 +224,16 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	@Override
-	public Properties describeInstances(User user, int timeout) {
+	public Map<String, Properties> describeInstances(User user, int timeout) {
+		Map<String, Properties> instances = new HashMap<String, Properties>();
 
-		Properties ps = new Properties();
 		for(Vm v : vms) {
-			ps.put(v.getInstanceId(), randomState());
+			Properties properties = new Properties();
+			properties.put(VM_STATE, randomState());
+			instances.put(v.getInstanceId(), properties);
 		}
 
-		return ps;
+		return instances;
 	}
 
 	@Override

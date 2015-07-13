@@ -3,6 +3,8 @@ package com.sixsq.slipstream.connector;
 import java.util.*;
 import java.util.logging.Logger;
 
+import com.sixsq.slipstream.persistence.Vm;
+
 
 /**
  * 
@@ -87,12 +89,47 @@ public class UsageRecorder {
 		}
 	}
 
-	public static List<Map<String, String>> createVmMetrics() {
-		Map<String, String> metric = new HashMap<String, String>();
-		metric.put(METRIC_NAME_KEY, "vm");
-		metric.put(METRIC_VALUE_KEY, "1.0");
+	public static List<Map<String, String>> createVmMetrics(Vm vm) {
+		List<Map<String, String>> metrics = new ArrayList<Map<String, String>>(5);
+
+		Map<String, String> vmMetric = new HashMap<String, String>();
+		vmMetric.put(METRIC_NAME_KEY, "vm");
+		vmMetric.put(METRIC_VALUE_KEY, "1.0");
+		metrics.add(vmMetric);
+
+		Integer cpu = vm.getCpu();
+		if (cpu != null) {
+			Map<String, String> cpuMetric = new HashMap<String, String>();
+			cpuMetric.put(METRIC_NAME_KEY, "cpu");
+			cpuMetric.put(METRIC_VALUE_KEY, cpu.toString());
+			metrics.add(cpuMetric);
+		}
+
+		Float ram = vm.getRam();
+		if (ram != null) {
+			Map<String, String> ramMetric = new HashMap<String, String>();
+			ramMetric.put(METRIC_NAME_KEY, "ram");
+			ramMetric.put(METRIC_VALUE_KEY, ram.toString());
+			metrics.add(ramMetric);
+		}
+
+		Float disk = vm.getDisk();
+		if (disk != null) {
+			Map<String, String> diskMetric = new HashMap<String, String>();
+			diskMetric.put(METRIC_NAME_KEY, "disk");
+			diskMetric.put(METRIC_VALUE_KEY, disk.toString());
+			metrics.add(diskMetric);
+		}
+
+		String instanceType = vm.getInstanceType();
+		if (instanceType != null && !instanceType.isEmpty()) {
+			Map<String, String> instanceTypeMetric = new HashMap<String, String>();
+			instanceTypeMetric.put(METRIC_NAME_KEY, "instance-type." + instanceType);
+			instanceTypeMetric.put(METRIC_VALUE_KEY, "1.0");
+			metrics.add(instanceTypeMetric);
+		}
 				
-		return Arrays.asList(metric);
+		return metrics;
 	}
 
 	private static String keyCloudVMInstanceID(String cloud, String instanceId) {
