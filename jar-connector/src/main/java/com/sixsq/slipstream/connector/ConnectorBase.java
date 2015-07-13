@@ -85,7 +85,6 @@ public abstract class ConnectorBase implements Connector {
     private static final String MACHINE_INSTANCE_ID_NAME = Run.MACHINE_NAME_PREFIX + RuntimeParameter.INSTANCE_ID_KEY;
     protected static final String MACHINE_INSTANCE_HOSTNAME = Run.MACHINE_NAME_PREFIX + RuntimeParameter.HOSTNAME_KEY;
     protected static final String MACHINE_INSTANCE_URL_SSH = Run.MACHINE_NAME_PREFIX + RuntimeParameter.URL_SSH_KEY;
-    protected static final String SLIPSTREAM_REPORT_DIR = "/tmp/slipstream/reports";
 
     // TODO: shouldn't be there!!
     private Map<String, Map<String, String>> extraDisksInfo = new HashMap<String, Map<String, String>>();
