@@ -87,6 +87,9 @@
            ;; filtering
            (cf/cimi-filter-tree (get-in request [:cimi-params :filter]))
 
+           ;; ordering
+           (crud/sort-collection request)
+
            ;; paginating
            (pg/paginate         (get-in request [:cimi-params :first]) (get-in request [:cimi-params :last]))
 

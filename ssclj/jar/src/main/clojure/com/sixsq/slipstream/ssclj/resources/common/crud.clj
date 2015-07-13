@@ -63,6 +63,19 @@
   [request]  
   (throw (u/ex-bad-method request)))
 
+
+(defn resource-name-collection-dispatch
+  [request collection]
+  (-> request
+      (get-in [:params :resource-name])
+      u/lisp-to-camelcase))
+
+(defmulti sort-collection resource-name-collection-dispatch)
+
+(defmethod sort-collection :default
+  [request collection]
+  collection)
+
 ;;
 ;; Resource schema validation.
 ;;

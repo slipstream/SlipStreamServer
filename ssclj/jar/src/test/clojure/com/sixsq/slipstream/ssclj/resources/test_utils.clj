@@ -15,7 +15,9 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [peridot.core :refer :all]
     [schema.core :as sc]
-    [clojure.data.json :as json]))
+    [clojure.data.json :as json]
+    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [clj-time.core :as time]))
 
 (defn- urlencode-param
   [p]
@@ -95,3 +97,10 @@
   [resources schema]
   (doseq [resource resources]
     (is-valid? resource schema)))
+
+(def not-before? (complement time/before?))
+
+(defn ordered-desc?
+  [timestamps]
+  (every? (fn [[a b]] (not-before? (u/to-time a) (u/to-time b))) (partition 2 1 timestamps)))
+
