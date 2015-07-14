@@ -1,14 +1,14 @@
 (ns 
   com.sixsq.slipstream.ssclj.resources.event
   (:require
-    [clojure.tools.logging :as log]
-    [schema.core :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [clojure.tools.logging                                    :as log]
+    [schema.core                                              :as s]
+
+    [com.sixsq.slipstream.ssclj.resources.common.authz        :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.crud         :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud     :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils        :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.schema       :as c]))
 
 (def ^:const resource-tag     :events)
 (def ^:const resource-name    "Event")
@@ -101,20 +101,17 @@
 ;; collection
 ;;
 
-(defn compare-timestamps-desc
-  [e1 e2]
-  (compare (:timestamp e2) (:timestamp e1)))
-
-(defn sort-by-timestamps
+(defn sort-by-timestamps-desc
   [events]
-  (sort compare-timestamps-desc events))
+  (->>  events
+        (sort-by :timestamp)
+        reverse))
 
 (defmethod crud/sort-collection resource-name
-  [request collection]
-  (sort-by-timestamps collection))
+  [request events]
+  (sort-by-timestamps-desc events))
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 (defmethod crud/query resource-name
   [request]
-  (-> request
-      query-impl))
+  (query-impl request))
