@@ -51,15 +51,11 @@
 
 (def base-uri (str p/service-context (cu/de-camelcase resource-name)))
 
-(defn every-timestamps?
-  [pred? ts]
-  (every? (fn [[a b]] (pred? (u/to-time a) (u/to-time b))) (partition 2 1 ts)))
-
 (defn are-desc-dates?
   [m]
   (->> (get-in m [:response :body :usages])
        (map :end_timestamp)
-       (every-timestamps? (complement time/before?))
+       tu/ordered-desc?
        is)
   m)
 
