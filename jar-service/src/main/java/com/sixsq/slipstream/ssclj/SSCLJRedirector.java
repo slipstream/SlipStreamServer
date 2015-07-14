@@ -4,15 +4,19 @@ import com.sixsq.slipstream.event.TypePrincipalRight;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.Restlet;
+import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
+import org.restlet.data.Preference;
 import org.restlet.data.Reference;
 import org.restlet.engine.header.Header;
 import org.restlet.engine.header.HeaderConstants;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Template;
 import org.restlet.util.Series;
@@ -152,7 +156,22 @@ public class SSCLJRedirector extends Redirector {
                     }
                 }
             }
+
+            if (isHtml(request)) {
+                response.setEntity(new StringRepresentation(HtmlUtil.toHtmlFromJson(response.getEntityAsText(), "events", request), MediaType.TEXT_HTML));
+            }
         }
+
+    }
+
+    protected boolean isHtml(Request request) {
+        for (Preference<MediaType> mt : request.getClientInfo().getAcceptedMediaTypes()) {
+            if (mt.getMetadata().includes(MediaType.APPLICATION_XHTML)
+                    || mt.getMetadata().includes(MediaType.TEXT_HTML)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void checkIntegerPositive(String paramName, String value) {
