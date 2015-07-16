@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 public class DailyUsageSender {
 
     private static final String SSCLJ_SERVER = "http://localhost:8201/api";
+    private static final String USAGE_RESOURCE_NAME = "usage";
 
     private static final Logger logger = Logger.getLogger(DailyUsageSender.class.getName());
 
@@ -96,7 +97,7 @@ public class DailyUsageSender {
             parameters.add("idleCheckInterval", "1000");
             parameters.add("socketConnectTimeoutMs", "1000");
 
-            String uri = SSCLJ_SERVER + "/Usage?" + cimiQueryStringUsageYesterday(userNames);
+            String uri = SSCLJ_SERVER + "/" + USAGE_RESOURCE_NAME + "?" + cimiQueryStringUsageYesterday(userNames);
 
             logger.info("Will query Usage resource with uri = '" + uri + "'");
 

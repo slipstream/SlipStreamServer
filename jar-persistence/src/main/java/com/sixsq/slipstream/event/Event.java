@@ -1,17 +1,6 @@
 package com.sixsq.slipstream.event;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.logging.Logger;
-
+import com.google.gson.*;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
@@ -21,21 +10,20 @@ import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 import org.restlet.util.Series;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class Event {
 
 	public static boolean isMuted = false;
 
 	private static final String EVENT_SERVER = "http://localhost:8201/api";
+	private static final String EVENT_RESOURCE_NAME = "event";
 
 	private static final Logger logger = Logger.getLogger(Event.class.getName());
 
@@ -128,7 +116,7 @@ public class Event {
 			parameters.add("idleCheckInterval", "1000");
 			parameters.add("socketConnectTimeoutMs", "1000");
 
-			resource = new ClientResource(context, EVENT_SERVER + "/Event");
+			resource = new ClientResource(context, EVENT_SERVER + "/" + EVENT_RESOURCE_NAME);
 			resource.setRetryOnError(false);
 			response = resource.post(stringRep, MediaType.APPLICATION_JSON);
 			
