@@ -38,11 +38,10 @@
 
 (deftest truncate-filters-outside-records
   (let [urs [{:start_timestamp in-day-1 :end_timestamp in-day-2}]]
-    (is (= urs (truncate start-day end-day urs )))
+    (is (= urs (truncate start-day end-day urs)))
     (is (= urs (truncate past-1 future-1 urs)))
-    (is (= [] (truncate past-1 past-2 urs))
-    (is (= [] (truncate future-1 future-2 urs))
-      ))))
+    (is (= [] (truncate past-1 past-2 urs)))
+    (is (= [] (truncate future-1 future-2 urs)))))
 
 (deftest truncate-checks-args
   (truncate past-1 past-2 [])

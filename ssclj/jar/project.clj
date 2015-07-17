@@ -34,7 +34,7 @@
                  ;; database
                  [honeysql                                  "0.5.2"]
                  [org.clojure/java.jdbc                     "0.3.6"]
-                 [korma                                     "0.4.0"]
+                 [korma                                     "0.4.2"]
                  [org.hsqldb/hsqldb                         "2.3.2"]
                  [org.xerial/sqlite-jdbc                    "3.7.2"]]
 

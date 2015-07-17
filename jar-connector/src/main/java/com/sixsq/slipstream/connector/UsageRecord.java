@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 public class UsageRecord {
 
     private static final String SSCLJ_SERVER = "http://localhost:8201/api";
+    private static final String USAGE_RECORD_RESOURCE_NAME = "usage-record";
 
     private static final Logger logger = Logger.getLogger(UsageRecord.class.getName());
 
@@ -88,7 +89,7 @@ public class UsageRecord {
             parameters.add("idleCheckInterval", "1000");
             parameters.add("socketConnectTimeoutMs", "1000");
 
-            resource = new ClientResource(context, SSCLJ_SERVER + "/usage-record");
+            resource = new ClientResource(context, SSCLJ_SERVER + "/" + USAGE_RECORD_RESOURCE_NAME);
             resource.setRetryOnError(false);
 
             response = resource.post(stringRep, MediaType.APPLICATION_JSON);
