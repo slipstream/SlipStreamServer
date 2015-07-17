@@ -9,8 +9,6 @@
     [honeysql.helpers                                       :as hh]
     [honeysql.core                                          :as hq]
     [com.sixsq.slipstream.ssclj.database.korma-helper       :as kh]
-
-    [com.sixsq.slipstream.ssclj.usage.record-keeper         :as rc]
     [com.sixsq.slipstream.ssclj.api.acl                     :as acl]
 
     [com.sixsq.slipstream.ssclj.db.binding                  :refer [Binding]]
@@ -178,5 +176,5 @@
     (find-resources collection-id options)))
 
 (defn get-instance []
-  (init-db)
-  (DatabaseBinding. ))
+    (init-db)
+    (DatabaseBinding. ))

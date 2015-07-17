@@ -194,3 +194,6 @@
           (map clojure.string/capitalize)
           (apply str))))
 
+(defn map-multi-line
+  [m]
+  (str "\n" (clojure.pprint/write m :stream nil :right-margin 50)))

@@ -86,6 +86,7 @@
   "Starts the server and returns a map with the application
    state containing the function to stop the http-kit container."
   [port]
+  (log/info "=============== SSCLJ START ===============")
   (set-db-impl)
   (let [ring-app (create-ring-handler)
         stop-fn (start-container ring-app port)
