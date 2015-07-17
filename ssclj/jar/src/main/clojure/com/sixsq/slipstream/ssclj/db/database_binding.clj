@@ -10,7 +10,9 @@
     [honeysql.core                                          :as hq]
     [com.sixsq.slipstream.ssclj.database.korma-helper       :as kh]
 
+    [com.sixsq.slipstream.ssclj.usage.record-keeper         :as rc]
     [com.sixsq.slipstream.ssclj.api.acl                     :as acl]
+
     [com.sixsq.slipstream.ssclj.db.binding                  :refer [Binding]]
     [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
     [com.sixsq.slipstream.ssclj.database.ddl                :as ddl]
@@ -20,6 +22,7 @@
 (defn init-db
   []
   (acl/-init)
+  (rc/-init)
   (kh/korma-init)
   (ddl/create-table! "resources" (ddl/columns "id" "VARCHAR(100)" "data" "VARCHAR(10000)"))
   (defentity resources))
