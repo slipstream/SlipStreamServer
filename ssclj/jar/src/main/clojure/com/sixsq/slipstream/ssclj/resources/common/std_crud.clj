@@ -15,10 +15,10 @@
 
 (defn log-request
   [request]
-  (log/info (:request-method request)
-            (:uri request)
-            (get request :query-string "")
-            (get request :body "")))
+  (log/info (:request-method  request)
+            (:uri             request)
+            (:query-string    request)
+            (:body            request)))
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
