@@ -57,7 +57,6 @@
 (def init-db
   (delay  
     (kh/korma-init)
-    (log/info "Korma init done")    
     
     (acl/-init)
 
@@ -71,7 +70,7 @@
     (kc/defentity usage_summaries)
     (kc/select usage_records (kc/limit 1))
 
-    (log/info "Korma Entities defined")))
+    (log/info "record-keeper: Korma Entities defined")))
 
 (defn -init
   []
