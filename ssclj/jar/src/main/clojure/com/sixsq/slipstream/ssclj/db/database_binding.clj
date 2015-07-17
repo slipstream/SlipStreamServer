@@ -22,7 +22,6 @@
 (defn init-db
   []
   (acl/-init)
-  (rc/-init)
   (kh/korma-init)
   (ddl/create-table! "resources" (ddl/columns "id" "VARCHAR(100)" "data" "VARCHAR(10000)"))
   (defentity resources))
