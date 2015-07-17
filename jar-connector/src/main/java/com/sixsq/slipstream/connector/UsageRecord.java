@@ -26,7 +26,7 @@ public class UsageRecord {
     private static final Logger logger = Logger.getLogger(UsageRecord.class.getName());
 
     private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-    
+
     @SuppressWarnings("unused")
     private ACL acl;
 
