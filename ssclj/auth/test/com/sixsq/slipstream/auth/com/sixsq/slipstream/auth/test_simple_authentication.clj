@@ -23,8 +23,14 @@
 (def wrong-both         {:user-name "wrong"  :password   "wrong"})
 (def missing-user       {:password  "secret"})
 (def missing-password   {:user-name "joe"})
+(def missing-both       {})
 
-(def wrongs [wrong-user wrong-password wrong-both missing-user missing-password])
+(def wrongs [wrong-user
+             wrong-password
+             wrong-both
+             missing-user
+             missing-password
+             missing-both])
 
 (defn- rejected?
   [[ok? result]]
@@ -34,7 +40,8 @@
   [[ok? result]]
   (and
     ok?
-    (= (select-keys valid-credentials [:user-name]) result)))
+    (= (select-keys valid-credentials [:user-name]) result)
+    (not (contains? result :password))))
 
 (deftest test-auth-user-when-not-added
   (doseq [wrong (cons valid-credentials wrongs)]
