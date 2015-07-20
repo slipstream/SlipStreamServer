@@ -17,9 +17,14 @@
 
     ))
 
-;; TODO
-(def passphrase "b8ddy-pr0t0")
+;; TODO do not show private information in source code.
+(def auth-conf {:pubkey     "auth_pubkey.pem"
+                :privkey    "auth_privkey.pem"
+                :passphrase "b8ddy-pr0t0"})
 
+;;
+;; DB
+;;
 (def unique-user-name
   (str ", UNIQUE (" (ddl/double-quote-list ["user_name"])")"))
 
@@ -40,15 +45,31 @@
     (kc/select users (kc/limit 1))
 
     (log/info "Korma Entities defined")))
+;;
+;; DB
+;;
 
-(defn pkey [auth-conf]
+(defn private-key
+  [auth-conf]
   (ks/private-key
     (io/resource (:privkey auth-conf))
     (:passphrase auth-conf)))
 
+(defn public-key
+  [auth-conf]
+  (ks/public-key (io/resource (:pubkey auth-conf))))
+
 (defn init
   []
   @init-db)
+
+(defn add-user-impl
+  [user]
+  ;; TODO : check user not already present, password rules (length, complexity...)
+  (init)
+  (log/info "Will add user " (:user-name user))
+  (kc/insert users (kc/values { :user_name           (:user-name user)
+                                :encrypted_password  (hs/encrypt (:password user))})))
 
 (defn auth-user-impl
   [credentials]
@@ -67,16 +88,20 @@
     ))
 
 (def timestamp-next-day
-  (clj-time.format/unparse (:date-time clj-time.format/formatters)
-                           (t/plus (t/now) (t/days 1))))
+  (t/plus (t/now) (t/days 1)))
 
-(defn create-auth-token [auth-conf credentials]
-  (let [[ok? res] (auth-user-impl credentials)]
+(defn token-impl
+  [credentials]
+  (let [[ok? claims] (auth-user-impl credentials)]
     (if ok?
-      [true {:token (jws/sign res
-                              (pkey auth-conf)
-                              {:alg :rs256 :exp timestamp-next-day})}]
-      [false res])))
+      [true {:token (jws/sign (merge claims {:exp timestamp-next-day})
+                              (private-key auth-conf)
+                              {:alg :rs256})}]
+      [false {:message "Invalid username or password"}])))
+
+(defn check-token-impl
+  [token]
+  (jws/unsign token (public-key auth-conf) {:alg :rs256}))
 
 (deftype SimpleAuthentication
   []
@@ -84,14 +109,19 @@
 
   (add-user!
     [this user]
-    (init)
-    (log/info "Will add user " (:user-name user))
-    (kc/insert users (kc/values { :user_name           (:user-name user)
-                                  :encrypted_password  (hs/encrypt (:password user))})))
+    (add-user-impl user))
 
   (auth-user
     [this credentials]
-    (auth-user-impl credentials)))
+    (auth-user-impl credentials))
+
+  (token
+    [this credentials]
+    (token-impl credentials))
+
+  (check-token
+    [this token]
+    (check-token-impl token)))
 
 (defn get-instance
   []
