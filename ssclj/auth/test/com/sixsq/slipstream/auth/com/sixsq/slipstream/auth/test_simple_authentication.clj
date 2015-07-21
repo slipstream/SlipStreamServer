@@ -75,3 +75,6 @@
                         second
                         :token)]
     (is (= "joe" (:user-name (c/check-token sa valid-token))))))
+
+;; TODO add tests to detect token obsolete after expiration
+

@@ -26,7 +26,15 @@
                  [org.clojure/java.jdbc                     "0.3.7"]
                  [korma                                     "0.4.2"]
                  [org.hsqldb/hsqldb                         "2.3.2"]
-                 [org.xerial/sqlite-jdbc                    "3.7.2"]]
+                 [org.xerial/sqlite-jdbc                    "3.7.2"]
+
+                 ;; web
+                 [http-kit/http-kit                         "2.1.18"]
+                 [javax.servlet/servlet-api                 "2.5"]
+                 [ring/ring-core                            "1.3.0"]
+                 [ring/ring-json                            "0.3.1"]
+                 [compojure                                 "1.4.0"]
+                 [hiccup                                    "1.0.5"]]
 
   :profiles {:provided
               { :dependencies [[reply/reply "0.3.4"]]}
