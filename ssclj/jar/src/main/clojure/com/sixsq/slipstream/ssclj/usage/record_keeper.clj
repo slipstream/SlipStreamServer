@@ -122,13 +122,18 @@
       (kc/insert usage_records (kc/values usage-event-metric))
       (log/info "Done persisting metric: " usage-event-metric))))
 
-(defn- close-usage-record   
+(defn- close-usage-record
   ([usage-event close-timestamp]
-    (log/info "Will close usage event with" close-timestamp) 
-    (kc/update 
-      usage_records 
-      (kc/set-fields {:end_timestamp close-timestamp})
-      (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})))
+    (log/info "Will close usage event with" close-timestamp)
+
+    (doseq [metric (extract-metrics usage-event)]
+      (log/info "Will close metric " metric)
+      (kc/update
+        usage_records
+        (kc/set-fields {:end_timestamp close-timestamp})
+        (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)
+                   :metric_name         (:name metric)}))))
+
   ([usage-event]
     (close-usage-record usage-event (:end_timestamp usage-event))))
 
