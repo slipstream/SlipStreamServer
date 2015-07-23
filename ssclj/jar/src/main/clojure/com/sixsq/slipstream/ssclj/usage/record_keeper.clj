@@ -123,15 +123,16 @@
 
 (defn- insert-metric
   [usage-metric]
-  (log/info "Will persist usage event metric "(:metric_name usage-metric)
-            "START:" usage-metric)
+  (log/info "Will record START for metric "(:metric_name usage-metric)
+            ", usage-metric :" usage-metric)
   (kc/insert usage_records (kc/values usage-metric))
   (log/info "Done persisting metric: " usage-metric))
 
 (defn- close-usage-record
   ([usage-metric close-timestamp]
-    (log/info "Will close usage event metric " (:metric_name usage-metric)
-              "with timestamp: " close-timestamp)
+    (log/info "Will record STOP for metric " (:metric_name usage-metric)
+              "with timestamp: " close-timestamp
+              ", usage-metric: " usage-metric)
     (kc/update
         usage_records
         (kc/set-fields {:end_timestamp close-timestamp})
