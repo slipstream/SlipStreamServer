@@ -25,6 +25,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metering.Metering;
 import com.sixsq.slipstream.persistence.*;
 
 import javax.persistence.EntityManager;
@@ -137,7 +138,7 @@ public class Collector {
 
 		try {
 			updateUsageRecords(classifier, user, cloud, em);
-			// updateGraphite(classifiedVms, user, cloud, em);
+			updateGraphite(classifier, user, cloud, em);
 			transaction.begin();
 			updateDbVmsWithCloudVms(classifier, em);
 			transaction.commit();
@@ -150,6 +151,47 @@ public class Collector {
 			throw ex;
 		}
 
+	}
+
+	private static void updateGraphite(VmsClassifier classifier, String user, String cloud, EntityManager em) {
+		int cpu = 0;
+		float ram = 0;
+		float disk = 0;
+		Map<String, Integer> instanceTypes = new HashMap<String, Integer>();
+
+		for (Map.Entry<String, List<Vm>> idDbCloud : classifier.stayingVms()) {
+
+			Vm cloudVm = idDbCloud.getValue().get(1);
+			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
+
+			if (isVmRunOwnedByUser(cloudVmRtpMap, user) && cloudVm.getIsUsable()) {
+				Integer vmCpu = cloudVm.getCpu();
+				if (vmCpu != null) {
+					cpu += vmCpu;
+				}
+
+				Float vmRam = cloudVm.getRam();
+				if (vmRam != null) {
+					ram += vmRam;
+				}
+
+				Float vmDisk = cloudVm.getDisk();
+				if (vmDisk != null) {
+					disk += vmDisk;
+				}
+
+				String instanceType = cloudVm.getInstanceType();
+				if (instanceType != null && !instanceType.isEmpty()) {
+					Integer nb = 1;
+					if (instanceTypes.containsKey(instanceType)) {
+						nb = instanceTypes.get(instanceType) + 1;
+					}
+					instanceTypes.put(instanceType, nb);
+				}
+			}
+		}
+
+		Metering.populateVmMetrics(user, cloud, cpu, ram, disk, instanceTypes);
 	}
 
 	private static void updateUsageRecords(VmsClassifier classifier, String user, String cloud, EntityManager em) {

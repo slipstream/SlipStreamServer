@@ -179,7 +179,7 @@ public class CollectorTest {
 		vms = new ArrayList<Vm>();
 		vms.add(vm);
 		Collector.update(vms, username, firstCloud);
-		
+
 		vms = Vm.list(user);
 		assertThat(vms.size(), is(1));
 		assertThat(vms.get(0).getState(), is("newstate"));
