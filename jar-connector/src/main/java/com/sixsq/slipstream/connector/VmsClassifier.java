@@ -53,8 +53,8 @@ public class VmsClassifier {
         }
 
         logger.info("Classify done");
-        logger.info("Classify, nb NEW Vms     = " + newVms().size());
-        logger.info("Classify, nb GONE Vms    = " + goneVms().size());
+        logger.info("Classify, nb NEW Vms     = " + details(newVms()));
+        logger.info("Classify, nb GONE Vms    = " + details(goneVms()));
         logger.info("Classify, nb STAYING Vms = " + stayingVmsMap.keySet().size());
     }
 
@@ -84,6 +84,20 @@ public class VmsClassifier {
             map.put(v.getInstanceId(), v);
         }
         return map;
+    }
+
+    private String details(Collection<Vm> vms){
+        StringBuffer result = new StringBuffer("nb:"+vms.size());
+        result.append(" ");
+        for(Vm vm : vms) {
+            result.append(vm.getInstanceId());
+            result.append("/");
+            result.append(vm.getIp());
+            result.append(": usable? ");
+            result.append(vm.getIsUsable());
+            result.append(", ");
+        }
+        return result.toString();
     }
 
 }
