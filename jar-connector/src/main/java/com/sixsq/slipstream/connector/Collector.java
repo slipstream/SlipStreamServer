@@ -202,7 +202,7 @@ public class Collector {
 			// TODO unique place to check isVmRunOwnedByUser
 			if (isVmRunOwnedByUser(goneVmRtpMap, user)) {
 				// TODO new signature insertEndAllMetrics??
-				UsageRecorder.insertEnd(goneVm.getInstanceId(), user, cloud);
+				UsageRecorder.insertEnd(goneVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(goneVm));
 			}
 		}
 
@@ -225,7 +225,7 @@ public class Collector {
 				if (cloudVm.getIsUsable()) {
 					UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 				} else {
-					UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud);
+					UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 				}
 			}
 
