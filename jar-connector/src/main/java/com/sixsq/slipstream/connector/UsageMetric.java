@@ -10,6 +10,16 @@ public class UsageMetric {
         this.value = value;
     }
 
+    public UsageMetric(String metricName, Float value){
+        this.metricName = metricName;
+        this.value = Float.toString(value);
+    }
+
+    public UsageMetric(String metricName, Integer value){
+        this.metricName = metricName;
+        this.value = Integer.toString(value);
+    }
+
     public String getMetricName() {
         return metricName;
     }

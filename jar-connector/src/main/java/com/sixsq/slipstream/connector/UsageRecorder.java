@@ -58,7 +58,7 @@ public class UsageRecorder {
 		}
 	}
 
-	public static void insertStart(String instanceId, String user, String cloud, UsageMetric metric) {
+	private static void insertStart(String instanceId, String user, String cloud, UsageMetric metric) {
 		insertStart(instanceId, user, cloud, Collections.singletonList(metric));
 	}
 
@@ -81,17 +81,24 @@ public class UsageRecorder {
 		}
 	}
 
-	public static void insertEnd(String instanceId, String user, String cloud, UsageMetric metric) {
+	public static void insertRestart(String instanceId, String user, String cloud, UsageMetric metric) {
+		insertEnd(instanceId, user, cloud, metric.getMetricName());
+		insertStart(instanceId, user, cloud, metric);
+	}
+
+	private static void insertEnd(String instanceId, String user, String cloud, String metricName) {
 		try {
 
 			if(isMuted) {
 				return;
 			}
 
-			logger.info("Inserting usage record END for " + metric + ", " + describe(instanceId, user, cloud));
+			logger.info("Inserting usage record END for " + metricName + ", " + describe(instanceId, user, cloud));
+
+			List<UsageMetric> metricsToClose = Collections.singletonList(new UsageMetric(metricName, ""));
 
 			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud, keyCloudVMInstanceID(cloud, instanceId),
-					null, new Date(), null);
+					null, new Date(), metricsToClose);
 			UsageRecord.post(usageRecord);
 
 			logger.info("DONE Insert usage record END for " + describe(instanceId, user, cloud));

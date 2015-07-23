@@ -214,25 +214,24 @@ public class Collector {
 		}
 
 		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
+
 			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
 			Vm dbVm  = idDbCloud.getValue().get(VmsClassifier.DB_VM);
-
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
 
-			// TODO : clarify this code
 			boolean usabilityChanged = cloudVm.getIsUsable() != dbVm.getIsUsable();
-			if (
-					(usabilityChanged ||
-							(!vmHasRunUuid(dbVm) && vmHasRunUuid(cloudVm) && cloudVm.getIsUsable()))
-
-							&& isVmRunOwnedByUser(cloudVmRtpMap, user)
-
-					) {
+			boolean runUuidDiscoveredAndUsable = !vmHasRunUuid(dbVm) && vmHasRunUuid(cloudVm) && cloudVm.getIsUsable();
+			if ((usabilityChanged ||runUuidDiscoveredAndUsable) && isVmRunOwnedByUser(cloudVmRtpMap, user)) {
 				if (cloudVm.getIsUsable()) {
 					UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 				} else {
 					UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud);
 				}
+			}
+
+			boolean ramHasChanged = cloudVm.getRam() != dbVm.getRam();
+			if(ramHasChanged) {
+				UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, new UsageMetric("ram", cloudVm.getRam()));
 			}
 		}
 	}
