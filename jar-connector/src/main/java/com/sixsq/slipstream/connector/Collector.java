@@ -159,9 +159,10 @@ public class Collector {
 		float disk = 0;
 		Map<String, Integer> instanceTypes = new HashMap<String, Integer>();
 
-		for (Map.Entry<String, List<Vm>> idDbCloud : classifier.stayingVms()) {
+		for (Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
 
-			Vm cloudVm = idDbCloud.getValue().get(1);
+			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
+
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
 
 			if (isVmRunOwnedByUser(cloudVmRtpMap, user) && cloudVm.getIsUsable()) {
@@ -211,9 +212,9 @@ public class Collector {
 			}
 		}
 
-		for(Map.Entry<String, List<Vm>> idDbCloud : classifier.stayingVms()) {
-			Vm dbVm  = idDbCloud.getValue().get(0);
-			Vm cloudVm = idDbCloud.getValue().get(1);
+		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
+			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
+			Vm dbVm  = idDbCloud.getValue().get(VmsClassifier.DB_VM);
 
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
 
@@ -250,9 +251,9 @@ public class Collector {
 			em.persist(newVm);
 		}
 
-		for(Map.Entry<String, List<Vm>> idDbCloud : classifier.stayingVms()) {
-			Vm dbVm  = idDbCloud.getValue().get(0);
-			Vm cloudVm = idDbCloud.getValue().get(1);
+		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
+			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
+			Vm dbVm  = idDbCloud.getValue().get(VmsClassifier.DB_VM);
 
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
 			updateVmFromRuntimeParametersMappings(cloudVm, cloudVmRtpMap);

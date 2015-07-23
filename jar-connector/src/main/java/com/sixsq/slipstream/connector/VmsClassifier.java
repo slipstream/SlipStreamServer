@@ -7,13 +7,17 @@ import java.util.*;
 
 public class VmsClassifier {
 
+    public static final String CLOUD_VM = "CLOUD_VM";
+    public static final String DB_VM = "DB_VM";
+
     private static java.util.logging.Logger logger = Logger.getLogger(VmsClassifier.class.getName());
 
     private  Map<String, Vm> newVmsMap = new HashMap<String, Vm>();
     private  Map<String, Vm> goneVmsMap = new HashMap<String, Vm>();
 
-    // id -> [db, cloud]
-    private  Map<String, List<Vm>> stayingVmsMap = new HashMap<String, List<Vm>>();
+    // {id -> {VmKind -> Vm}}
+    // VmKind can be either CLOUD_VM or DB_VM
+    private  Map<String, Map<String, Vm>> stayingVmsMap = new HashMap<String, Map<String, Vm>>();
 
     public VmsClassifier(List<Vm> cloudVms, List<Vm> dbVms) {
         classify(cloudVms, dbVms);
@@ -32,7 +36,11 @@ public class VmsClassifier {
             boolean inDb    = dbVmsMap.containsKey(id);
 
             if (inCloud && inDb) {
-                stayingVmsMap.put(id, Arrays.asList(dbVmsMap.get(id), cloudVmsMap.get(id)));
+                // Arrays.asList(dbVmsMap.get(id), cloudVmsMap.get(id))
+                Map<String, Vm> dbAndCloud = new HashMap<String, Vm>();
+                dbAndCloud.put(CLOUD_VM, cloudVmsMap.get(id));
+                dbAndCloud.put(DB_VM, dbVmsMap.get(id));
+                stayingVmsMap.put(id, dbAndCloud);
 
             } else if (inCloud) {
                 newVmsMap.put(id, cloudVmsMap.get(id));
@@ -59,7 +67,7 @@ public class VmsClassifier {
         return newVmsMap.values();
     }
 
-    public Set<Map.Entry<String, List<Vm>>> stayingVms(){
+    public Set<Map.Entry<String, Map<String, Vm>>> stayingVms(){
         return stayingVmsMap.entrySet();
     }
 
