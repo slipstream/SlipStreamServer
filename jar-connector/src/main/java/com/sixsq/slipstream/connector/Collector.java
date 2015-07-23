@@ -170,8 +170,8 @@ public class Collector {
 		}
 
 		for(Map.Entry<String, List<Vm>> idDbCloud : classifier.stayingVms()) {
-			Vm cloudVm = idDbCloud.getValue().get(0);
-			Vm dbVm  = idDbCloud.getValue().get(1);
+			Vm dbVm  = idDbCloud.getValue().get(0);
+			Vm cloudVm = idDbCloud.getValue().get(1);
 
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
 
@@ -209,9 +209,8 @@ public class Collector {
 		}
 
 		for(Map.Entry<String, List<Vm>> idDbCloud : classifier.stayingVms()) {
-			String stayingId = idDbCloud.getKey();
-			Vm cloudVm = idDbCloud.getValue().get(0);
-			Vm dbVm  = idDbCloud.getValue().get(1);
+			Vm dbVm  = idDbCloud.getValue().get(0);
+			Vm cloudVm = idDbCloud.getValue().get(1);
 
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
 			updateVmFromRuntimeParametersMappings(cloudVm, cloudVmRtpMap);
