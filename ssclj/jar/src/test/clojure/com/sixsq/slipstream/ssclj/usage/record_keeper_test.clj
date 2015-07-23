@@ -116,7 +116,6 @@
   (is (nil? (-> (select usage_records)
                 first
                 :end_timestamp))))
-  
 
 (deftest check-close-event-without-start
   (-insertEnd event-end)

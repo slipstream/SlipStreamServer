@@ -84,25 +84,33 @@
       (assoc  :metric_name   (:name  metric))
       (assoc  :metric_value  (:value metric))))
 
-(defn- extract-metrics
+(defn- nil-timestamps-if-absent
   [usage-event]
-  (let [metrics (:metrics usage-event)]
-    (if (zero? (count metrics))
-      (log/warn "No metrics in " usage-event)      
-      metrics)))
+  (merge {:end_timestamp nil :start_timestamp nil} usage-event))
 
-(defn first-record  
-  [usage-event]
+
+(defn- usage-metrics
+  [usage-event-json]
+  (let [usage-event (-> usage-event-json
+                        cu/walk-clojurify
+                        nil-timestamps-if-absent)]
+      (for [metric (:metrics usage-event)]
+        (project-to-metric usage-event metric))))
+
+(defn last-record
+  [usage-metric]
   (-> (kc/select usage_records 
-        (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)})
+        (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)
+                   :metric_name         (:metric_name usage-metric)})
+        (kc/order :start_timestamp :DESC)
         (kc/limit 1))
       first))
 
 (defn state
-  [usage-event]
-  (let [record (first-record usage-event)] 
+  [usage-metric]
+  (let [record (last-record usage-metric)]
     (cond
-      (nil? record)                 :initial
+      (nil? record)                   :initial
       (nil? (:end_timestamp record))  :started
       :else                           :stopped)))
 
@@ -113,64 +121,52 @@
   [state action]
   (log/fatal "Action" action " is not allowed for state " state))
 
-(defn- insert-metrics   
-  [usage-event]    
-  (log/info "Will persist usage event START:" usage-event)
-  (doseq [metric (extract-metrics usage-event)]    
-    (let [usage-event-metric (project-to-metric usage-event metric)]
-      (log/info "Will persist metric: " usage-event-metric)
-      (kc/insert usage_records (kc/values usage-event-metric))
-      (log/info "Done persisting metric: " usage-event-metric))))
+(defn- insert-metric
+  [usage-metric]
+  (log/info "Will persist usage event metric "(:metric_name usage-metric)
+            "START:" usage-metric)
+  (kc/insert usage_records (kc/values usage-metric))
+  (log/info "Done persisting metric: " usage-metric))
 
 (defn- close-usage-record
-  ([usage-event close-timestamp]
-    (log/info "Will close usage event with" close-timestamp)
-
-    (doseq [metric (extract-metrics usage-event)]
-      (log/info "Will close metric " metric)
-      (kc/update
+  ([usage-metric close-timestamp]
+    (log/info "Will close usage event metric " (:metric_name usage-metric)
+              "with timestamp: " close-timestamp)
+    (kc/update
         usage_records
         (kc/set-fields {:end_timestamp close-timestamp})
-        (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-event)
-                   :metric_name         (:name metric)}))))
+        (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)
+                   :metric_name         (:metric_name usage-metric)})))
 
-  ([usage-event]
-    (close-usage-record usage-event (:end_timestamp usage-event))))
+  ([usage-metric]
+    (close-usage-record usage-metric (:end_timestamp usage-metric))))
 
 (defn reset-end   
-  [usage-event]  
-  (close-usage-record usage-event nil))   
+  [usage-metric]
+  (close-usage-record usage-metric nil))
 
 ;;
 ;;
 ;;
 
 (defn- process-event   
-  [usage-event trigger]
-  (let [current-state (state usage-event)]
+  [usage-metric trigger]
+  (let [current-state (state usage-metric)]
     (case (sm/action current-state trigger)      
-      :insert-start             (insert-metrics usage-event)
-      :severe-wrong-transition  (log-severe-wrong-transition current-state trigger)
-      :reset-end                (reset-end usage-event)      
-      :close-record             (close-usage-record usage-event))))
-
-(defn- nil-timestamps-if-absent
-  [usage-event]
-  (merge {:end_timestamp nil :start_timestamp nil} usage-event))
+      :insert-start             (insert-metric                usage-metric)
+      :severe-wrong-transition  (log-severe-wrong-transition  current-state trigger)
+      :reset-end                (reset-end                    usage-metric)
+      :close-record             (close-usage-record           usage-metric))))
 
 (defn -insertStart
-  [usage-event]  
-  (-> usage-event
-      cu/walk-clojurify
-      nil-timestamps-if-absent
-      (process-event :start)))
+  [usage-event-json]
+  (doseq [usage-metric (usage-metrics usage-event-json)]
+    (process-event usage-metric :start)))
 
 (defn -insertEnd
-  [usage-event]  
-  (-> usage-event
-      cu/walk-clojurify
-      nil-timestamps-if-absent
-      (process-event :stop)))
+  [usage-event-json]
+  (doseq [usage-metric (usage-metrics usage-event-json)]
+    (process-event usage-metric :stop)))
 
 (defn- acl-for-user-cloud   
   [summary]

@@ -49,7 +49,8 @@ public class UsageRecorder {
 
 			logger.info("Inserting usage record START for " + metrics + ", " + describe(instanceId, user, cloud));
 
-			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud, keyCloudVMInstanceID(cloud, instanceId), new Date(), null, metrics);
+			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
+					keyCloudVMInstanceID(cloud, instanceId), new Date(), null, metrics);
 			UsageRecord.post(usageRecord);
 
 			logger.info("DONE Insert usage record START for " + describe(instanceId, user, cloud));
@@ -65,10 +66,10 @@ public class UsageRecorder {
 				return;
 			}
 
-			logger.info("Inserting usage record END (all metrics) for " + describe(instanceId, user, cloud));
+			logger.info("Inserting usage record END, metrics" + metrics + ", for " + describe(instanceId, user, cloud));
 
-			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud, keyCloudVMInstanceID(cloud, instanceId),
-					null, new Date(), metrics);
+			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
+					keyCloudVMInstanceID(cloud, instanceId), null, new Date(), metrics);
 			UsageRecord.post(usageRecord);
 
 			logger.info("DONE Insert usage record END for " + describe(instanceId, user, cloud));
