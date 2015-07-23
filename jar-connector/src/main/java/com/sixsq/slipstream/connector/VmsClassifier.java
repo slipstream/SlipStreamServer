@@ -36,7 +36,6 @@ public class VmsClassifier {
             boolean inDb    = dbVmsMap.containsKey(id);
 
             if (inCloud && inDb) {
-                // Arrays.asList(dbVmsMap.get(id), cloudVmsMap.get(id))
                 Map<String, Vm> dbAndCloud = new HashMap<String, Vm>();
                 dbAndCloud.put(CLOUD_VM, cloudVmsMap.get(id));
                 dbAndCloud.put(DB_VM, dbVmsMap.get(id));

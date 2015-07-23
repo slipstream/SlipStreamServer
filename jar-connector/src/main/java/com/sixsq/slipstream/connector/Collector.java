@@ -201,6 +201,7 @@ public class Collector {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
 			// TODO unique place to check isVmRunOwnedByUser
 			if (isVmRunOwnedByUser(goneVmRtpMap, user)) {
+				// TODO new signature insertEndAllMetrics??
 				UsageRecorder.insertEnd(goneVm.getInstanceId(), user, cloud);
 			}
 		}
