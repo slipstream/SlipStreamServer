@@ -120,10 +120,7 @@ public class Collector {
 
 	private static boolean isVmRunOwnedByUser(VmRuntimeParameterMapping m, String user) {
 		if (m != null) {
-			RuntimeParameter rp = m.getVmstateRuntimeParameter();
-			if (rp != null) {
-				return user.equals(rp.getContainer().getUser());
-			}
+			return user.equals(m.getRunOwner());
 		}
 		return false;
 	}
@@ -265,6 +262,7 @@ public class Collector {
 		for(Vm goneVm : classifier.goneVms()) {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
 			setVmStateRuntimeParameter(em, goneVmRtpMap, "Unknown");
+			logger.info("updateDbVmsWithCloudVms: Deleting from VM: id=" + goneVm.getInstanceId() + ", state=" + goneVm.getState());
 			em.remove(goneVm);
 		}
 
@@ -272,6 +270,7 @@ public class Collector {
 			VmRuntimeParameterMapping newVmRtpMap = getMapping(newVm);
 			updateVmFromRuntimeParametersMappings(newVm, newVmRtpMap);
 			setVmStateRuntimeParameter(em, newVmRtpMap, newVm);
+			logger.info("updateDbVmsWithCloudVms: Persisting into VM: id=" + newVm.getInstanceId() + ", state=" + newVm.getState());
 			em.persist(newVm);
 		}
 
@@ -343,7 +342,10 @@ public class Collector {
 				merge = true;
 			}
 			if (merge) {
+				logger.info("updateDbVmsWithCloudVms: Updating db VM: id=" + dbVm.getInstanceId() + ", state=" + dbVm.getState());
 				em.merge(dbVm);
+			} else {
+				logger.info("updateDbVmsWithCloudVms: Doing nothing with VM: id=" + dbVm.getInstanceId() + ", state=" + dbVm.getState());
 			}
 
 		}
