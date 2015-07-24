@@ -87,7 +87,7 @@ public class VmsClassifier {
     }
 
     private String details(Collection<Vm> vms){
-        StringBuffer result = new StringBuffer("nb:"+vms.size());
+        StringBuffer result = new StringBuffer("nb:" + vms.size());
         result.append(" ");
         for(Vm vm : vms) {
             result.append(vm.getInstanceId());

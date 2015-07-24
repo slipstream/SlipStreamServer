@@ -226,16 +226,35 @@ public class Collector {
 			boolean runUuidDiscoveredAndUsable = !vmHasRunUuid(dbVm) && vmHasRunUuid(cloudVm) && cloudVm.getIsUsable();
 			if (usabilityChanged ||runUuidDiscoveredAndUsable) {
 				if (cloudVm.getIsUsable()) {
+					logger.info("VM becomes usable => start records all metrics");
 					UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 				} else {
+					logger.info("VM becomes unusable => stop all metrics");
 					UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 				}
-			}
+			} else {
+				List<UsageMetric> changedMetrics = new ArrayList<UsageMetric>();
 
-			if (usabilityChanged && cloudVm.getIsUsable()) {
-				boolean ramHasChanged = cloudVm.getRam() != dbVm.getRam();
-				if (ramHasChanged) {
-					UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, new UsageMetric("ram", cloudVm.getRam()));
+				if (cloudVm.getRam() != dbVm.getRam()) {
+					changedMetrics.add(new UsageMetric(ConnectorBase.VM_RAM, cloudVm.getRam()));
+				}
+				if (cloudVm.getCpu() != dbVm.getCpu()) {
+					changedMetrics.add(new UsageMetric(ConnectorBase.VM_CPU, cloudVm.getCpu()));
+				}
+				if (cloudVm.getDisk() != dbVm.getDisk()) {
+					changedMetrics.add(new UsageMetric(ConnectorBase.VM_DISK, cloudVm.getDisk()));
+				}
+				if (!changedMetrics.isEmpty()) {
+					logger.info("Will update specific metrics : " + changedMetrics);
+					UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, changedMetrics);
+				}
+
+				if (!cloudVm.getInstanceType().equals(dbVm.getInstanceType())) {
+					logger.info("Will update instance type");
+					UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud,
+							Collections.singletonList(new UsageMetric("instance-type." + dbVm.getInstanceType(), "1.0")));
+					UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud,
+							Collections.singletonList(new UsageMetric("instance-type." + cloudVm.getInstanceType(), "1.0")));
 				}
 			}
 		}

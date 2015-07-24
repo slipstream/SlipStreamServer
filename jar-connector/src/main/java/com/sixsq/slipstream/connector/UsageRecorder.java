@@ -78,9 +78,9 @@ public class UsageRecorder {
 		}
 	}
 
-	public static void insertRestart(String instanceId, String user, String cloud, UsageMetric metric) {
-		insertEnd(instanceId, user, cloud, Collections.singletonList(metric));
-		insertStart(instanceId, user, cloud, Collections.singletonList(metric));
+	public static void insertRestart(String instanceId, String user, String cloud, List<UsageMetric> metrics) {
+		insertEnd(instanceId, user, cloud, metrics);
+		insertStart(instanceId, user, cloud, metrics);
 	}
 
 	private static ACL getAcl(String user) {
@@ -98,17 +98,17 @@ public class UsageRecorder {
 
 		Integer cpu = vm.getCpu();
 		if (cpu != null) {
-			metrics.add(new UsageMetric("cpu", cpu.toString()));
+			metrics.add(new UsageMetric(ConnectorBase.VM_CPU, cpu.toString()));
 		}
 
 		Float ram = vm.getRam();
 		if (ram != null) {
-			metrics.add(new UsageMetric("ram", ram.toString()));
+			metrics.add(new UsageMetric(ConnectorBase.VM_RAM, ram.toString()));
 		}
 
 		Float disk = vm.getDisk();
 		if (disk != null) {
-			metrics.add(new UsageMetric("disk", disk.toString()));
+			metrics.add(new UsageMetric(ConnectorBase.VM_DISK, disk.toString()));
 		}
 
 		String instanceType = vm.getInstanceType();
