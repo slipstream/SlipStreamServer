@@ -28,7 +28,8 @@ public class VmsClassifier {
         Map<String, Vm> cloudVmsMap = toMapByInstanceId(cloudVms);
         Map<String, Vm> dbVmsMap    = toMapByInstanceId(dbVms);
 
-        Set<String> allInstanceIds = new HashSet<String>(cloudVmsMap.keySet());
+        Set<String> allInstanceIds = new HashSet<String>();
+        allInstanceIds.addAll(cloudVmsMap.keySet());
         allInstanceIds.addAll(dbVmsMap.keySet());
 
         for (String id : allInstanceIds) {
@@ -98,6 +99,26 @@ public class VmsClassifier {
             result.append(", ");
         }
         return result.toString();
+    }
+
+    private void logDump(String vmKind, Collection<Vm> vms) {
+        logger.info(vmKind + " : nb = " + vms.size());
+        logger.info(details(vms));
+    }
+
+    public void logDump(String context){
+        Collection<Vm> stayingCloudVms = new ArrayList<Vm>();
+        Collection<Vm> stayingDbVms = new ArrayList<Vm>();
+        for(Map<String, Vm> vm : stayingVmsMap.values()) {
+            stayingCloudVms.add(vm.get(CLOUD_VM));
+            stayingDbVms.add(vm.get(DB_VM));
+        }
+
+        logger.info(context);
+        logDump("NEW            ", newVms());
+        logDump("GONE           ", goneVms());
+        logDump("STAYING:CLOUD  ", stayingCloudVms);
+        logDump("STAYING:DB     ", stayingDbVms);
     }
 
 }

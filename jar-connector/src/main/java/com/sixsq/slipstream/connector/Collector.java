@@ -197,14 +197,16 @@ public class Collector {
 
 	private static void updateUsageRecords(VmsClassifier classifier, String user, String cloud, EntityManager em) {
 
+		classifier.logDump("updateUsageRecords START");
+
 		for(Vm goneVm : classifier.goneVms()) {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
-			// TODO unique place to check isVmRunOwnedByUser
 			if (isVmRunOwnedByUser(goneVmRtpMap, user)) {
-				// TODO new signature insertEndAllMetrics??
 				UsageRecorder.insertEnd(goneVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(goneVm));
 			}
 		}
+
+		classifier.logDump("updateUsageRecords AFTER goneVms loop");
 
 		for(Vm newVm : classifier.newVms()) {
 			VmRuntimeParameterMapping newVmRtpMap = getMapping(newVm);
@@ -212,6 +214,8 @@ public class Collector {
 				UsageRecorder.insertStart(newVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(newVm));
 			}
 		}
+
+		classifier.logDump("updateUsageRecords AFTER newVms loop");
 
 		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
 
@@ -258,9 +262,13 @@ public class Collector {
 				}
 			}
 		}
+
+		classifier.logDump("updateUsageRecords AFTER staying vms loop");
 	}
 
 	private static void updateDbVmsWithCloudVms(VmsClassifier classifier, EntityManager em) {
+
+		classifier.logDump("updateDbVmsWithCloudVms START");
 
 		for(Vm goneVm : classifier.goneVms()) {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
@@ -268,12 +276,16 @@ public class Collector {
 			em.remove(goneVm);
 		}
 
+		classifier.logDump("updateDbVmsWithCloudVms AFTER goneVms loop");
+
 		for(Vm newVm : classifier.newVms()) {
 			VmRuntimeParameterMapping newVmRtpMap = getMapping(newVm);
 			updateVmFromRuntimeParametersMappings(newVm, newVmRtpMap);
 			setVmStateRuntimeParameter(em, newVmRtpMap, newVm);
 			em.persist(newVm);
 		}
+
+		classifier.logDump("updateDbVmsWithCloudVms AFTER newVms loop");
 
 		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
 			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
@@ -347,6 +359,7 @@ public class Collector {
 			}
 
 		}
+		classifier.logDump("updateDbVmsWithCloudVms AFTER stayingVms loop");
 	}
 
 	private static void updateVmFromRuntimeParametersMappings(Vm v, VmRuntimeParameterMapping m) {
