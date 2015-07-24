@@ -218,10 +218,13 @@ public class Collector {
 			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
 			Vm dbVm  = idDbCloud.getValue().get(VmsClassifier.DB_VM);
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
+			if(!isVmRunOwnedByUser(cloudVmRtpMap, user)) {
+				continue;
+			}
 
 			boolean usabilityChanged = cloudVm.getIsUsable() != dbVm.getIsUsable();
 			boolean runUuidDiscoveredAndUsable = !vmHasRunUuid(dbVm) && vmHasRunUuid(cloudVm) && cloudVm.getIsUsable();
-			if ((usabilityChanged ||runUuidDiscoveredAndUsable) && isVmRunOwnedByUser(cloudVmRtpMap, user)) {
+			if (usabilityChanged ||runUuidDiscoveredAndUsable) {
 				if (cloudVm.getIsUsable()) {
 					UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 				} else {
@@ -229,9 +232,11 @@ public class Collector {
 				}
 			}
 
-			boolean ramHasChanged = cloudVm.getRam() != dbVm.getRam();
-			if(ramHasChanged) {
-				UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, new UsageMetric("ram", cloudVm.getRam()));
+			if (usabilityChanged && cloudVm.getIsUsable()) {
+				boolean ramHasChanged = cloudVm.getRam() != dbVm.getRam();
+				if (ramHasChanged) {
+					UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, new UsageMetric("ram", cloudVm.getRam()));
+				}
 			}
 		}
 	}
