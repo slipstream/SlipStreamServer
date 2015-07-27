@@ -59,16 +59,16 @@ public class VmsClassifier {
         logger.info("Classify, nb STAYING Vms = " + stayingVmsMap.keySet().size());
     }
 
-    public Collection<Vm> goneVms(){
-        return goneVmsMap.values();
+    public List<Vm> goneVms(){
+        return Collections.unmodifiableList(new ArrayList<Vm>(goneVmsMap.values()));
     }
 
-    public Collection<Vm> newVms(){
-        return newVmsMap.values();
+    public List<Vm> newVms(){
+        return Collections.unmodifiableList(new ArrayList<Vm>(newVmsMap.values()));
     }
 
-    public Set<Map.Entry<String, Map<String, Vm>>> stayingVms(){
-        return stayingVmsMap.entrySet();
+    public List<Map.Entry<String, Map<String, Vm>>> stayingVms(){
+        return Collections.unmodifiableList(new ArrayList<Map.Entry<String, Map<String, Vm>>>(stayingVmsMap.entrySet()));
     }
 
     /**
@@ -101,25 +101,6 @@ public class VmsClassifier {
         return result.toString();
     }
 
-    private void logDump(String vmKind, Collection<Vm> vms) {
-        logger.info(vmKind + " : nb = " + vms.size());
-        logger.info(details(vms));
-    }
-
-    public void logDump(String context){
-        Collection<Vm> stayingCloudVms = new ArrayList<Vm>();
-        Collection<Vm> stayingDbVms = new ArrayList<Vm>();
-        for(Map<String, Vm> vm : stayingVmsMap.values()) {
-            stayingCloudVms.add(vm.get(CLOUD_VM));
-            stayingDbVms.add(vm.get(DB_VM));
-        }
-
-        logger.info(context);
-        logDump("NEW            ", newVms());
-        logDump("GONE           ", goneVms());
-        logDump("STAYING:CLOUD  ", stayingCloudVms);
-        logDump("STAYING:DB     ", stayingDbVms);
-    }
 
 }
 

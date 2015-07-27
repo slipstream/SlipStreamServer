@@ -120,7 +120,10 @@ public class Collector {
 
 	private static boolean isVmRunOwnedByUser(VmRuntimeParameterMapping m, String user) {
 		if (m != null) {
-			return user.equals(m.getRunOwner());
+			RuntimeParameter rp = m.getVmstateRuntimeParameter();
+			if (rp != null) {
+				return user.equals(rp.getContainer().getUser());
+			}
 		}
 		return false;
 	}
@@ -194,7 +197,6 @@ public class Collector {
 
 	private static void updateUsageRecords(VmsClassifier classifier, String user, String cloud, EntityManager em) {
 
-		classifier.logDump("updateUsageRecords START");
 
 		for(Vm goneVm : classifier.goneVms()) {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
@@ -203,8 +205,6 @@ public class Collector {
 			}
 		}
 
-		classifier.logDump("updateUsageRecords AFTER goneVms loop");
-
 		for(Vm newVm : classifier.newVms()) {
 			VmRuntimeParameterMapping newVmRtpMap = getMapping(newVm);
 			if (newVm.getIsUsable() && isVmRunOwnedByUser(newVmRtpMap, user)) {
@@ -212,20 +212,20 @@ public class Collector {
 			}
 		}
 
-		classifier.logDump("updateUsageRecords AFTER newVms loop");
-
 		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
 
 			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
 			Vm dbVm  = idDbCloud.getValue().get(VmsClassifier.DB_VM);
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
+
 			if(!isVmRunOwnedByUser(cloudVmRtpMap, user)) {
 				continue;
 			}
 
 			boolean usabilityChanged = cloudVm.getIsUsable() != dbVm.getIsUsable();
 			boolean runUuidDiscoveredAndUsable = !vmHasRunUuid(dbVm) && vmHasRunUuid(cloudVm) && cloudVm.getIsUsable();
-			if (usabilityChanged ||runUuidDiscoveredAndUsable) {
+
+			if (usabilityChanged || runUuidDiscoveredAndUsable) {
 				if (cloudVm.getIsUsable()) {
 					logger.info("VM becomes usable => start records all metrics");
 					UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(cloudVm));
@@ -236,13 +236,13 @@ public class Collector {
 			} else {
 				List<UsageMetric> changedMetrics = new ArrayList<UsageMetric>();
 
-				if (cloudVm.getRam() != dbVm.getRam()) {
+				if (!areEquals(cloudVm.getRam(), dbVm.getRam())) {
 					changedMetrics.add(new UsageMetric(ConnectorBase.VM_RAM, cloudVm.getRam()));
 				}
-				if (cloudVm.getCpu() != dbVm.getCpu()) {
+				if (!areEquals(cloudVm.getCpu(), dbVm.getCpu())) {
 					changedMetrics.add(new UsageMetric(ConnectorBase.VM_CPU, cloudVm.getCpu()));
 				}
-				if (cloudVm.getDisk() != dbVm.getDisk()) {
+				if (!areEquals(cloudVm.getDisk(), dbVm.getDisk())) {
 					changedMetrics.add(new UsageMetric(ConnectorBase.VM_DISK, cloudVm.getDisk()));
 				}
 				if (!changedMetrics.isEmpty()) {
@@ -250,7 +250,7 @@ public class Collector {
 					UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, changedMetrics);
 				}
 
-				if (!cloudVm.getInstanceType().equals(dbVm.getInstanceType())) {
+				if (!areEquals(cloudVm.getInstanceType(), dbVm.getInstanceType())) {
 					logger.info("Will update instance type");
 					UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud,
 							Collections.singletonList(new UsageMetric("instance-type." + dbVm.getInstanceType(), "1.0")));
@@ -260,12 +260,9 @@ public class Collector {
 			}
 		}
 
-		classifier.logDump("updateUsageRecords AFTER staying vms loop");
 	}
 
 	private static void updateDbVmsWithCloudVms(VmsClassifier classifier, EntityManager em) {
-
-		classifier.logDump("updateDbVmsWithCloudVms START");
 
 		for(Vm goneVm : classifier.goneVms()) {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
@@ -274,17 +271,24 @@ public class Collector {
 			em.remove(goneVm);
 		}
 
-		classifier.logDump("updateDbVmsWithCloudVms AFTER goneVms loop");
-
 		for(Vm newVm : classifier.newVms()) {
+
 			VmRuntimeParameterMapping newVmRtpMap = getMapping(newVm);
+
+			logger.info("updateDbVmsWithCloudVms::looping newVms, newVmRtpMap=" + newVmRtpMap);
+			if(newVmRtpMap != null) {
+				logger.info("updateDbVmsWithCloudVms::looping newVms, newVmRtpMap.runownwer=" + newVmRtpMap.getRunOwner());
+			}
+
 			updateVmFromRuntimeParametersMappings(newVm, newVmRtpMap);
+
 			setVmStateRuntimeParameter(em, newVmRtpMap, newVm);
-			logger.info("updateDbVmsWithCloudVms: Persisting into VM: id=" + newVm.getInstanceId() + ", state=" + newVm.getState());
+
+			logger.info("updateDbVmsWithCloudVms: Persisting into VM: id=" + newVm.getInstanceId()
+					+ ", state=" + newVm.getState());
+			
 			em.persist(newVm);
 		}
-
-		classifier.logDump("updateDbVmsWithCloudVms AFTER newVms loop");
 
 		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
 			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
@@ -306,7 +310,6 @@ public class Collector {
 				setVmstateIfNotYetSet(em, cloudVmRtpMap, cloudVm);
 			}
 
-			// TODO : extract methods
 			// VM coordinates related
 			if (cloudVmRtpMap != null) {
 				if (dbVm.getRunUuid() == null) {
@@ -335,7 +338,6 @@ public class Collector {
 					merge = true;
 				}
 			}
-			// TODO : extract methods
 			// VM metrics related
 			if (cloudVm.getCpu() != null && !cloudVm.getCpu().equals(dbVm.getCpu())) {
 				dbVm.setCpu(cloudVm.getCpu());
@@ -361,7 +363,6 @@ public class Collector {
 			}
 
 		}
-		classifier.logDump("updateDbVmsWithCloudVms AFTER stayingVms loop");
 	}
 
 	private static void updateVmFromRuntimeParametersMappings(Vm v, VmRuntimeParameterMapping m) {
@@ -453,5 +454,13 @@ public class Collector {
 	private static String getUserCloudLogRepr(User user, Connector connector) {
 		return "[" + user.getName() + "/" + connector.getConnectorInstanceName() + "]";
 	}
+
+	public static boolean areEquals(Comparable a, Comparable b) {
+		if(a==null) {
+			return b==null;
+		}
+		return b!=null && a.compareTo(b)==0;
+	}
+
 }
 
