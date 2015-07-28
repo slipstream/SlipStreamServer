@@ -174,7 +174,10 @@
                     :value 100.5 }]})
   (rc/-insertEnd
     { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"    
-      :end_timestamp       in-day-2}))
+      :end_timestamp       in-day-2
+      :metrics [{ :name  "nb-cpu" }
+                { :name  "RAM-GB"}
+                { :name  "disk-GB"}]}))
 
 (deftest test-summarize
   (insert-record)

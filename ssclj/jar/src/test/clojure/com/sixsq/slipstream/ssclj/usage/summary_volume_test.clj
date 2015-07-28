@@ -70,14 +70,20 @@
           joe-exo-start (assoc joe-exoscale 
                               :start_timestamp (u/to-ISO-8601 day-9h)
                               :cloud_vm_instanceid vm-joe-exo-id)
-          joe-exo-end {:end_timestamp (u/to-ISO-8601 day-14h)
-                         :cloud_vm_instanceid vm-joe-exo-id}
+          joe-exo-end {  :end_timestamp (u/to-ISO-8601 day-14h)
+                         :cloud_vm_instanceid vm-joe-exo-id
+                         :metrics [ { :name  "nb-cpu"}
+                                    { :name  "RAM-GB"}
+                                    { :name  "disk-GB"}]}
 
           joe-aws-start (assoc joe-aws 
                               :start_timestamp (u/to-ISO-8601 day-11h)
                               :cloud_vm_instanceid vm-joe-aws-id)
           joe-aws-end {:end_timestamp (u/to-ISO-8601 day-13h)
-                         :cloud_vm_instanceid vm-joe-aws-id}
+                       :cloud_vm_instanceid vm-joe-aws-id
+                       :metrics [ { :name  "nb-cpu"}
+                                 { :name  "RAM-GB"}
+                                 { :name  "disk-GB"}]}
 
       ]      
       (rc/-insertStart joe-exo-start)
@@ -120,7 +126,11 @@
                               :start_timestamp (u/to-ISO-8601 start-day)
                               :cloud_vm_instanceid "vm-joe-exo-id")
         joe-exo-end { :end_timestamp (u/to-ISO-8601 fifty-seconds-after)
-                      :cloud_vm_instanceid "vm-joe-exo-id"}]      
+                      :cloud_vm_instanceid "vm-joe-exo-id"
+                      :metrics [ { :name  "nb-cpu"}
+                               { :name  "RAM-GB"}
+                               { :name  "disk-GB"}]
+                     }]
 
       (rc/-insertStart joe-exo-start)
       (rc/-insertEnd joe-exo-end)

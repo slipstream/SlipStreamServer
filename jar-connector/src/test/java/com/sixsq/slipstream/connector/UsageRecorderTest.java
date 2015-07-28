@@ -13,7 +13,7 @@ public class UsageRecorderTest {
         Vm vm = new Vm("instance-id", "cloud", "running", "user", true);
         for (int i=0; i<100; i++) {
             UsageRecorder.insertStart("123456"+i, "joe", "aws", UsageRecorder.createVmMetrics(vm));
-            UsageRecorder.insertEnd("123456"+i, "joe", "aws");
+            UsageRecorder.insertEnd("123456"+i, "joe", "aws", UsageRecorder.createVmMetrics(vm));
         }
     }
     
