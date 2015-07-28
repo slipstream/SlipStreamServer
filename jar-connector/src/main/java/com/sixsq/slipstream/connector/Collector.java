@@ -50,13 +50,8 @@ public class Collector {
 			} else {
 				res = NO_CREDENTIALS;
 			}
-		} catch (ConfigurationException e) {
-			logger.severe(e.getMessage());
-		} catch (ValidationException e) {
-			logger.warning(e.getMessage());
-		} catch (IllegalArgumentException e) {
-			logger.warning(e.getMessage());
 		} catch (Exception e) {
+			e.printStackTrace();;
 			logger.severe(e.getMessage());
 		}
 		return res;
@@ -286,7 +281,7 @@ public class Collector {
 
 			logger.info("updateDbVmsWithCloudVms: Persisting into VM: id=" + newVm.getInstanceId()
 					+ ", state=" + newVm.getState());
-			
+
 			em.persist(newVm);
 		}
 
