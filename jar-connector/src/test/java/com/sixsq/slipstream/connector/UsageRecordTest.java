@@ -20,10 +20,9 @@ public class UsageRecordTest {
         List<UsageMetric> metrics = Arrays.asList(
                 new UsageMetric("cpu", "1.0"),
                 new UsageMetric("disk", "100.0"));
+        
 
-        System.out.println("metrics are " + metrics);
-
-        Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Geneva"));
         c.set(Calendar.YEAR, 2015);
         c.set(Calendar.MONTH, 1);
         c.set(Calendar.DAY_OF_MONTH, 1);
@@ -52,7 +51,7 @@ public class UsageRecordTest {
                 "  },\n" +
                 "  \"user\": \"joe\",\n" +
                 "  \"cloud\": \"aws\",\n" +
-                "  \"start_timestamp\": \"2015-02-01T06:12:45.123Z\",\n" +
+                "  \"start_timestamp\": \"2015-02-01T07:12:45.123Z\",\n" +
                 "  \"cloud_vm_instanceid\": \"aws:123\",\n" +
                 "  \"metrics\": [\n" +
                 "    {\n" +
