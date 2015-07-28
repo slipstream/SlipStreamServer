@@ -141,10 +141,6 @@
   ([usage-metric]
     (close-usage-record usage-metric (:end_timestamp usage-metric))))
 
-(defn reset-end   
-  [usage-metric]
-  (close-usage-record usage-metric nil))
-
 ;;
 ;;
 ;;
@@ -155,7 +151,6 @@
     (case (sm/action current-state trigger)      
       :insert-start             (insert-metric                usage-metric)
       :severe-wrong-transition  (log-severe-wrong-transition  current-state trigger)
-      :reset-end                (reset-end                    usage-metric)
       :close-record             (close-usage-record           usage-metric))))
 
 (defn -insertStart

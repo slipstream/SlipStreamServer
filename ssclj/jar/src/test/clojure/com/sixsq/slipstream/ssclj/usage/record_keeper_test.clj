@@ -49,6 +49,9 @@
 (def event-second-start
   (assoc event-start :start_timestamp start-day-2))
 
+(def event-second-start
+  (assoc event-second-start :end_timestamp end-day-2))
+
 (deftest basic-insert-open
   (-insertStart event-start)  
   (let [records (select usage_records)]
@@ -107,15 +110,16 @@
     (-insertStart event-start)
     (is (= records (select usage_records)))))
 
-(deftest reappearance-should-forget-last-close
+(deftest reappearance-should-open-new-usage-record-when-scaling
   (is (empty? (select usage_records)))
+
   (-insertStart event-start)
   (-insertEnd   event-end)
-  (-insertStart event-second-start)
 
-  (is (nil? (-> (select usage_records)
-                first
-                :end_timestamp))))
+  (-insertStart event-second-start)
+  (-insertEnd event-second-start)
+
+  (is (= 6 (count (select usage_records)))))
 
 (deftest check-close-event-without-start
   (-insertEnd event-end)
