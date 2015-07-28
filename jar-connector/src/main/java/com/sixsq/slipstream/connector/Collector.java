@@ -225,41 +225,48 @@ public class Collector {
 			}
 
 			String instanceId = cloudVm.getInstanceId();
-			if(!UsageRecorder.hasRecorded(cloud, instanceId)){
-				if (cloudVm.getIsUsable()) {
-					logger.info("VM usable => start records all metrics");
-					UsageRecorder.insertStart(instanceId, user, cloud, UsageRecorder.createVmMetrics(cloudVm));
-				} else {
-					logger.info("VM becomes unusable => stop all metrics");
-					UsageRecorder.insertEnd(instanceId, user, cloud, UsageRecorder.createVmMetrics(cloudVm));
-				}
+
+			// TODO: extend VM usability to take into account Stopped VMs.  User should be billed for disks.
+			if (cloudVm.getIsUsable() && UsageRecorder.hasRecorded(cloud, instanceId)) {
+				logger.info("Processing changes for " + instanceId);
+				updateChangedMetrics(user, cloud, cloudVm, dbVm);
+			}
+
+			if (cloudVm.getIsUsable() && !UsageRecorder.hasRecorded(cloud, instanceId)) {
+				logger.info("VM usable => start records all metrics");
+				UsageRecorder.insertStart(instanceId, user, cloud, UsageRecorder.createVmMetrics(cloudVm));
+			} else if (!cloudVm.getIsUsable() && UsageRecorder.hasRecorded(cloud, instanceId)) {
+				logger.info("VM becomes unusable => stop all metrics");
+				UsageRecorder.insertEnd(instanceId, user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 			} else {
 				logger.info(instanceId + " already recorded");
 			}
-
-			List<UsageMetric> changedMetrics = new ArrayList<UsageMetric>();
-			if (!areEquals(cloudVm.getRam(), dbVm.getRam())) {
-				changedMetrics.add(new UsageMetric(ConnectorBase.VM_RAM, cloudVm.getRam()));
-			}
-			if (!areEquals(cloudVm.getCpu(), dbVm.getCpu())) {
-				changedMetrics.add(new UsageMetric(ConnectorBase.VM_CPU, cloudVm.getCpu()));
-			}
-			if (!areEquals(cloudVm.getDisk(), dbVm.getDisk())) {
-				changedMetrics.add(new UsageMetric(ConnectorBase.VM_DISK, cloudVm.getDisk()));
-			}
-			if (!changedMetrics.isEmpty()) {
-				logger.info("Will update specific metrics : " + changedMetrics);
-				UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, changedMetrics);
-			}
-
-			if (!areEquals(cloudVm.getInstanceType(), dbVm.getInstanceType())) {
-				logger.info("Will update instance type");
-				UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud,
-						Collections.singletonList(new UsageMetric("instance-type." + dbVm.getInstanceType(), "1.0")));
-				UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud,
-						Collections.singletonList(new UsageMetric("instance-type." + cloudVm.getInstanceType(), "1.0")));
-			}
 		}
+	}
+
+	private static void updateChangedMetrics(String user, String cloud, Vm cloudVm, Vm dbVm) {
+		List<UsageMetric> changedMetrics = new ArrayList<UsageMetric>();
+		if (!areEquals(cloudVm.getRam(), dbVm.getRam())) {
+            changedMetrics.add(new UsageMetric(ConnectorBase.VM_RAM, cloudVm.getRam()));
+        }
+		if (!areEquals(cloudVm.getCpu(), dbVm.getCpu())) {
+            changedMetrics.add(new UsageMetric(ConnectorBase.VM_CPU, cloudVm.getCpu()));
+        }
+		if (!areEquals(cloudVm.getDisk(), dbVm.getDisk())) {
+            changedMetrics.add(new UsageMetric(ConnectorBase.VM_DISK, cloudVm.getDisk()));
+        }
+		if (!changedMetrics.isEmpty()) {
+            logger.info("Will update specific metrics : " + changedMetrics);
+            UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, changedMetrics);
+        }
+
+		if (!areEquals(cloudVm.getInstanceType(), dbVm.getInstanceType())) {
+            logger.info("Will update instance type");
+            UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud,
+                    Collections.singletonList(new UsageMetric("instance-type." + dbVm.getInstanceType(), "1.0")));
+            UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud,
+                    Collections.singletonList(new UsageMetric("instance-type." + cloudVm.getInstanceType(), "1.0")));
+        }
 	}
 
 	private static void updateDbVmsWithCloudVms(VmsClassifier classifier, EntityManager em) {
