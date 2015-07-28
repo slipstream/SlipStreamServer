@@ -1,9 +1,9 @@
 package com.sixsq.slipstream.connector;
 
+import com.sixsq.slipstream.persistence.Vm;
+
 import java.util.*;
 import java.util.logging.Logger;
-
-import com.sixsq.slipstream.persistence.Vm;
 
 
 /**
@@ -29,34 +29,31 @@ import com.sixsq.slipstream.persistence.Vm;
  */
 public class UsageRecorder {
 
-	public static final String METRIC_NAME_KEY = "name";
-	public static final String METRIC_VALUE_KEY = "value";
 	private static Logger logger = Logger.getLogger(UsageRecorder.class.getName());
 
 	public static boolean isMuted = false;
+
+	private static Set<String> recordedVmInstanceIds = new HashSet<String>();
 
 	public static void muteForTests() {
 		isMuted = true;
 		logger.severe("You should NOT see this message in production: usage will *not* be recorded");
 	}
 
-	public static void insertStart(String instanceId, String user, String cloud, List<Map<String, String>> metrics) {
+	public static void insertStart(String instanceId, String user, String cloud, List<UsageMetric> metrics) {
 		try {
 
 			if(isMuted) {
 				return;
 			}
 
-			logger.info("Inserting usage record START for " + describe(instanceId, user, cloud));
+			logger.info("Inserting usage record START for " + metrics + ", " + describe(instanceId, user, cloud));
 
-			TypePrincipal owner = new TypePrincipal(TypePrincipal.PrincipalType.USER, user);
-			List<TypePrincipalRight> rules = Arrays.asList(
-					new TypePrincipalRight(TypePrincipal.PrincipalType.USER, user, TypePrincipalRight.Right.ALL),
-					new TypePrincipalRight(TypePrincipal.PrincipalType.ROLE, "ADMIN", TypePrincipalRight.Right.ALL));
-			ACL acl = new ACL(owner, rules);
-
-			UsageRecord usageRecord = new UsageRecord(acl, user, cloud, keyCloudVMInstanceID(cloud, instanceId), new Date(), null, metrics);
+			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
+					keyCloudVMInstanceID(cloud, instanceId), new Date(), null, metrics);
 			UsageRecord.post(usageRecord);
+
+			recordedVmInstanceIds.add(cloudInstanceId(cloud, instanceId));
 
 			logger.info("DONE Insert usage record START for " + describe(instanceId, user, cloud));
 		} catch (Exception e) {
@@ -64,24 +61,20 @@ public class UsageRecorder {
 		}
 	}
 
-	public static void insertEnd(String instanceId, String user, String cloud) {
+	public static void insertEnd(String instanceId, String user, String cloud, List<UsageMetric> metrics) {
 		try {
 
 			if(isMuted) {
 				return;
 			}
 
-			logger.info("Inserting usage record END for " + describe(instanceId, user, cloud));
+			logger.info("Inserting usage record END, metrics" + metrics + ", for " + describe(instanceId, user, cloud));
 
-			TypePrincipal owner = new TypePrincipal(TypePrincipal.PrincipalType.USER, user);
-			List<TypePrincipalRight> rules = Arrays.asList(
-					new TypePrincipalRight(TypePrincipal.PrincipalType.USER, user, TypePrincipalRight.Right.ALL),
-					new TypePrincipalRight(TypePrincipal.PrincipalType.ROLE, "ADMIN", TypePrincipalRight.Right.ALL));
-			ACL acl = new ACL(owner, rules);
-
-			UsageRecord usageRecord = new UsageRecord(acl, user, cloud, keyCloudVMInstanceID(cloud, instanceId),
-					null, new Date(), null);
+			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
+					keyCloudVMInstanceID(cloud, instanceId), null, new Date(), metrics);
 			UsageRecord.post(usageRecord);
+
+			recordedVmInstanceIds.remove(cloudInstanceId(cloud, instanceId));
 
 			logger.info("DONE Insert usage record END for " + describe(instanceId, user, cloud));
 		} catch (Exception e) {
@@ -89,44 +82,47 @@ public class UsageRecorder {
 		}
 	}
 
-	public static List<Map<String, String>> createVmMetrics(Vm vm) {
-		List<Map<String, String>> metrics = new ArrayList<Map<String, String>>(5);
+	public static boolean hasRecorded(String cloud, String instanceId) {
+		logger.info("UsageRecorder, recordedVmInstanceIds = " + recordedVmInstanceIds);
+		return recordedVmInstanceIds.contains(cloudInstanceId(cloud, instanceId));
+	}
 
-		Map<String, String> vmMetric = new HashMap<String, String>();
-		vmMetric.put(METRIC_NAME_KEY, "vm");
-		vmMetric.put(METRIC_VALUE_KEY, "1.0");
-		metrics.add(vmMetric);
+	public static void insertRestart(String instanceId, String user, String cloud, List<UsageMetric> metrics) {
+		insertEnd(instanceId, user, cloud, metrics);
+		insertStart(instanceId, user, cloud, metrics);
+	}
+
+	private static ACL getAcl(String user) {
+		TypePrincipal owner = new TypePrincipal(TypePrincipal.PrincipalType.USER, user);
+		List<TypePrincipalRight> rules = Arrays.asList(
+				new TypePrincipalRight(TypePrincipal.PrincipalType.USER, user, TypePrincipalRight.Right.ALL),
+				new TypePrincipalRight(TypePrincipal.PrincipalType.ROLE, "ADMIN", TypePrincipalRight.Right.ALL));
+		return new ACL(owner, rules);
+	}
+
+	public static List<UsageMetric> createVmMetrics(Vm vm) {
+		List<UsageMetric> metrics = new ArrayList<UsageMetric>();
+
+		metrics.add(new UsageMetric("vm", "1.0"));
 
 		Integer cpu = vm.getCpu();
 		if (cpu != null) {
-			Map<String, String> cpuMetric = new HashMap<String, String>();
-			cpuMetric.put(METRIC_NAME_KEY, "cpu");
-			cpuMetric.put(METRIC_VALUE_KEY, cpu.toString());
-			metrics.add(cpuMetric);
+			metrics.add(new UsageMetric(ConnectorBase.VM_CPU, cpu.toString()));
 		}
 
 		Float ram = vm.getRam();
 		if (ram != null) {
-			Map<String, String> ramMetric = new HashMap<String, String>();
-			ramMetric.put(METRIC_NAME_KEY, "ram");
-			ramMetric.put(METRIC_VALUE_KEY, ram.toString());
-			metrics.add(ramMetric);
+			metrics.add(new UsageMetric(ConnectorBase.VM_RAM, ram.toString()));
 		}
 
 		Float disk = vm.getDisk();
 		if (disk != null) {
-			Map<String, String> diskMetric = new HashMap<String, String>();
-			diskMetric.put(METRIC_NAME_KEY, "disk");
-			diskMetric.put(METRIC_VALUE_KEY, disk.toString());
-			metrics.add(diskMetric);
+			metrics.add(new UsageMetric(ConnectorBase.VM_DISK, disk.toString()));
 		}
 
 		String instanceType = vm.getInstanceType();
 		if (instanceType != null && !instanceType.isEmpty()) {
-			Map<String, String> instanceTypeMetric = new HashMap<String, String>();
-			instanceTypeMetric.put(METRIC_NAME_KEY, "instance-type." + instanceType);
-			instanceTypeMetric.put(METRIC_VALUE_KEY, "1.0");
-			metrics.add(instanceTypeMetric);
+			metrics.add(new UsageMetric("instance-type." + instanceType, "1.0"));
 		}
 				
 		return metrics;
@@ -144,6 +140,10 @@ public class UsageRecorder {
 //	static {
 //		ISO8601Formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 //	}
+
+	private static String cloudInstanceId(String cloud, String instanceId) {
+		return cloud + ":" + instanceId;
+	}
 
 	private static String describe(String instanceId, String user, String cloud) {
 		return "[" + user + ":" + cloud + "/" + instanceId + "]";

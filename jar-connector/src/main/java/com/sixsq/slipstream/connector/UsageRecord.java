@@ -54,14 +54,26 @@ public class UsageRecord {
     private List<Map<String, String>> metrics;
 
     public UsageRecord(ACL acl, String user, String cloud, String cloud_vm_instanceid,
-                       Date start_timestamp, Date end_timestamp, List<Map<String, String>> metrics) {
+                       Date start_timestamp, Date end_timestamp, List<UsageMetric> metrics) {
         this.acl = acl;
         this.user = user;
         this.cloud = cloud;
         this.cloud_vm_instanceid = cloud_vm_instanceid;
         this.start_timestamp = start_timestamp;
         this.end_timestamp = end_timestamp;
-        this.metrics = metrics;
+        this.metrics = convert(metrics);
+    }
+
+    private List<Map<String, String>> convert(List<UsageMetric> usageMetrics){
+        List<Map<String, String>> result = new ArrayList<Map<String, String>>();
+
+        for(UsageMetric usageMetric : usageMetrics) {
+            Map<String, String> metricMap = new HashMap<String, String>();
+            metricMap.put("name", usageMetric.getMetricName());
+            metricMap.put("value", usageMetric.getValue());
+            result.add(metricMap);
+        }
+        return result;
     }
 
     public String toJson(){
