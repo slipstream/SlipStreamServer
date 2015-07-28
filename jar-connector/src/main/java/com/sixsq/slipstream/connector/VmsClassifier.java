@@ -53,10 +53,8 @@ public class VmsClassifier {
             }
         }
 
-        logger.info("Classify done");
-        logger.info("Classify, nb NEW Vms     = " + details(newVms()));
-        logger.info("Classify, nb GONE Vms    = " + details(goneVms()));
-        logger.info("Classify, nb STAYING Vms = " + stayingVmsMap.keySet().size());
+        logger.info("Classify [new, gone, staying] [" + details(newVms()) + ", " + details(goneVms()) + ", "
+                + stayingVmsMap.keySet().size() + "]");
     }
 
     public List<Vm> goneVms(){

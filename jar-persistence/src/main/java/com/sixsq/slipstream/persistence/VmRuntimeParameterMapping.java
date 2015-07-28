@@ -20,24 +20,12 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
-import com.sixsq.slipstream.util.Logger;
+import java.util.logging.Logger;
 
 @SuppressWarnings("serial")
 @Entity
@@ -48,6 +36,8 @@ import com.sixsq.slipstream.util.Logger;
 @Table(indexes = { @Index(name = "instanceId_ix", columnList = "instanceId"),
 		@Index(name = "cloud_ix", columnList = "cloud"), @Index(name = "runUuid_ix", columnList = "runUuid") })
 public class VmRuntimeParameterMapping implements Serializable {
+
+	private static Logger logger = Logger.getLogger(VmRuntimeParameterMapping.class.getName());
 
 	@Id
 	@GeneratedValue
@@ -83,7 +73,7 @@ public class VmRuntimeParameterMapping implements Serializable {
 
 		em.close();
 		if (list.size() > 1) {
-			Logger.warning("found more than one cloud/instanceid tuple: " + cloud + " / " + instanceId);
+			com.sixsq.slipstream.util.Logger.warning("found more than one cloud/instanceid tuple: " + cloud + " / " + instanceId);
 		}
 		return list.isEmpty() ? null : list.get(0);
 	}
@@ -142,6 +132,11 @@ public class VmRuntimeParameterMapping implements Serializable {
 		VmRuntimeParameterMapping m = new VmRuntimeParameterMapping(instanceId, cloud, runOwner, name, nodeName,
 				nodeInstanceid, vmstate, hostname);
 		m.store();
+
+		logger.info("Created VMRtpMap for instanceId=" + instanceId + ", owner=" + runOwner + ", name=" + name
+				+ " vmstate=" + vmstate + ", m.id=" + m.id);
+		logger.info("VmRuntimeParameterMapping loaded by id = " + VmRuntimeParameterMapping.find(cloud, instanceId));
+
 	}
 
 	public VmRuntimeParameterMapping() {

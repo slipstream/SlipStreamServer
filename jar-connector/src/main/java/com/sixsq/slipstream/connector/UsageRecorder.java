@@ -29,11 +29,11 @@ import java.util.logging.Logger;
  */
 public class UsageRecorder {
 
-	public static final String METRIC_NAME_KEY = "name";
-	public static final String METRIC_VALUE_KEY = "value";
 	private static Logger logger = Logger.getLogger(UsageRecorder.class.getName());
 
 	public static boolean isMuted = false;
+
+	private static Set<String> recordedVmInstanceIds = new HashSet<String>();
 
 	public static void muteForTests() {
 		isMuted = true;
@@ -52,6 +52,8 @@ public class UsageRecorder {
 			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
 					keyCloudVMInstanceID(cloud, instanceId), new Date(), null, metrics);
 			UsageRecord.post(usageRecord);
+
+			recordedVmInstanceIds.add(cloudInstanceId(cloud, instanceId));
 
 			logger.info("DONE Insert usage record START for " + describe(instanceId, user, cloud));
 		} catch (Exception e) {
@@ -72,10 +74,17 @@ public class UsageRecorder {
 					keyCloudVMInstanceID(cloud, instanceId), null, new Date(), metrics);
 			UsageRecord.post(usageRecord);
 
+			recordedVmInstanceIds.remove(cloudInstanceId(cloud, instanceId));
+
 			logger.info("DONE Insert usage record END for " + describe(instanceId, user, cloud));
 		} catch (Exception e) {
 			logger.severe("Unable to insert usage record END:" + e.getMessage());
 		}
+	}
+
+	public static boolean hasRecorded(String cloud, String instanceId) {
+		logger.info("UsageRecorder, recordedVmInstanceIds = " + recordedVmInstanceIds);
+		return recordedVmInstanceIds.contains(cloudInstanceId(cloud, instanceId));
 	}
 
 	public static void insertRestart(String instanceId, String user, String cloud, List<UsageMetric> metrics) {
@@ -131,6 +140,10 @@ public class UsageRecorder {
 //	static {
 //		ISO8601Formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 //	}
+
+	private static String cloudInstanceId(String cloud, String instanceId) {
+		return cloud + ":" + instanceId;
+	}
 
 	private static String describe(String instanceId, String user, String cloud) {
 		return "[" + user + ":" + cloud + "/" + instanceId + "]";

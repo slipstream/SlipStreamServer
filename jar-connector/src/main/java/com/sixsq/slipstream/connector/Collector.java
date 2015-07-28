@@ -45,13 +45,14 @@ public class Collector {
 	public static int collect(User user, Connector connector, int timeout) {
 		int res = EXCEPTION_OCCURED;
 		try {
+
 			if (connector.isCredentialsSet(user)) {
 				res = describeInstances(user, connector, timeout);
 			} else {
 				res = NO_CREDENTIALS;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();;
+			e.printStackTrace();
 			logger.severe(e.getMessage());
 		}
 		return res;
@@ -108,17 +109,23 @@ public class Collector {
 		return instances.size();
 	}
 
-	private static boolean vmHasRunUuid(Vm vm) {
-		String runUuid = vm.getRunUuid();
-		return runUuid != null && !runUuid.isEmpty();
-	}
+	private static boolean isVmRunOwnedByUser(Vm vm, VmRuntimeParameterMapping vmRtpMap, String user) {
 
-	private static boolean isVmRunOwnedByUser(VmRuntimeParameterMapping m, String user) {
-		if (m != null) {
-			RuntimeParameter rp = m.getVmstateRuntimeParameter();
-			if (rp != null) {
+		if (vmRtpMap != null) {
+			RuntimeParameter rp = vmRtpMap.getVmstateRuntimeParameter();
+			if(rp!=null) {
+				logger.info("isVmRunOwnedByUser:: Using state runtime parameter");
 				return user.equals(rp.getContainer().getUser());
+			} else {
+				logger.warning("isVmRunOwnedByUser:: vmRtpMap.getVmstateRuntimeParameter is null");
 			}
+		}
+
+		if (vm != null) {
+			logger.info("isVmRunOwnedByUser:: Fallback to vm, vm.getRunOwner()=" + vm.getRunOwner());
+			return user.equals(vm.getRunOwner());
+		} else {
+			logger.warning("isVmRunOwnedByUser:: Unable to determine ownership of VM!");
 		}
 		return false;
 	}
@@ -160,7 +167,7 @@ public class Collector {
 
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
 
-			if (isVmRunOwnedByUser(cloudVmRtpMap, user) && cloudVm.getIsUsable()) {
+			if (isVmRunOwnedByUser(cloudVm, cloudVmRtpMap, user) && cloudVm.getIsUsable()) {
 				Integer vmCpu = cloudVm.getCpu();
 				if (vmCpu != null) {
 					cpu += vmCpu;
@@ -193,68 +200,66 @@ public class Collector {
 	private static void updateUsageRecords(VmsClassifier classifier, String user, String cloud, EntityManager em) {
 
 
-		for(Vm goneVm : classifier.goneVms()) {
+		for (Vm goneVm : classifier.goneVms()) {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
-			if (isVmRunOwnedByUser(goneVmRtpMap, user)) {
+			if (isVmRunOwnedByUser(goneVm, goneVmRtpMap, user)) {
 				UsageRecorder.insertEnd(goneVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(goneVm));
 			}
 		}
 
-		for(Vm newVm : classifier.newVms()) {
+		for (Vm newVm : classifier.newVms()) {
 			VmRuntimeParameterMapping newVmRtpMap = getMapping(newVm);
-			if (newVm.getIsUsable() && isVmRunOwnedByUser(newVmRtpMap, user)) {
+			if (newVm.getIsUsable() && isVmRunOwnedByUser(newVm, newVmRtpMap, user)) {
 				UsageRecorder.insertStart(newVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(newVm));
 			}
 		}
 
-		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
+		for (Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
 
 			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
-			Vm dbVm  = idDbCloud.getValue().get(VmsClassifier.DB_VM);
+			Vm dbVm = idDbCloud.getValue().get(VmsClassifier.DB_VM);
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
 
-			if(!isVmRunOwnedByUser(cloudVmRtpMap, user)) {
+			if (!isVmRunOwnedByUser(cloudVm, cloudVmRtpMap, user)) {
 				continue;
 			}
 
-			boolean usabilityChanged = cloudVm.getIsUsable() != dbVm.getIsUsable();
-			boolean runUuidDiscoveredAndUsable = !vmHasRunUuid(dbVm) && vmHasRunUuid(cloudVm) && cloudVm.getIsUsable();
-
-			if (usabilityChanged || runUuidDiscoveredAndUsable) {
+			String instanceId = cloudVm.getInstanceId();
+			if(!UsageRecorder.hasRecorded(cloud, instanceId)){
 				if (cloudVm.getIsUsable()) {
-					logger.info("VM becomes usable => start records all metrics");
-					UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(cloudVm));
+					logger.info("VM usable => start records all metrics");
+					UsageRecorder.insertStart(instanceId, user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 				} else {
 					logger.info("VM becomes unusable => stop all metrics");
-					UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud, UsageRecorder.createVmMetrics(cloudVm));
+					UsageRecorder.insertEnd(instanceId, user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 				}
 			} else {
-				List<UsageMetric> changedMetrics = new ArrayList<UsageMetric>();
+				logger.info(instanceId + " already recorded");
+			}
 
-				if (!areEquals(cloudVm.getRam(), dbVm.getRam())) {
-					changedMetrics.add(new UsageMetric(ConnectorBase.VM_RAM, cloudVm.getRam()));
-				}
-				if (!areEquals(cloudVm.getCpu(), dbVm.getCpu())) {
-					changedMetrics.add(new UsageMetric(ConnectorBase.VM_CPU, cloudVm.getCpu()));
-				}
-				if (!areEquals(cloudVm.getDisk(), dbVm.getDisk())) {
-					changedMetrics.add(new UsageMetric(ConnectorBase.VM_DISK, cloudVm.getDisk()));
-				}
-				if (!changedMetrics.isEmpty()) {
-					logger.info("Will update specific metrics : " + changedMetrics);
-					UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, changedMetrics);
-				}
+			List<UsageMetric> changedMetrics = new ArrayList<UsageMetric>();
+			if (!areEquals(cloudVm.getRam(), dbVm.getRam())) {
+				changedMetrics.add(new UsageMetric(ConnectorBase.VM_RAM, cloudVm.getRam()));
+			}
+			if (!areEquals(cloudVm.getCpu(), dbVm.getCpu())) {
+				changedMetrics.add(new UsageMetric(ConnectorBase.VM_CPU, cloudVm.getCpu()));
+			}
+			if (!areEquals(cloudVm.getDisk(), dbVm.getDisk())) {
+				changedMetrics.add(new UsageMetric(ConnectorBase.VM_DISK, cloudVm.getDisk()));
+			}
+			if (!changedMetrics.isEmpty()) {
+				logger.info("Will update specific metrics : " + changedMetrics);
+				UsageRecorder.insertRestart(cloudVm.getInstanceId(), user, cloud, changedMetrics);
+			}
 
-				if (!areEquals(cloudVm.getInstanceType(), dbVm.getInstanceType())) {
-					logger.info("Will update instance type");
-					UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud,
-							Collections.singletonList(new UsageMetric("instance-type." + dbVm.getInstanceType(), "1.0")));
-					UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud,
-							Collections.singletonList(new UsageMetric("instance-type." + cloudVm.getInstanceType(), "1.0")));
-				}
+			if (!areEquals(cloudVm.getInstanceType(), dbVm.getInstanceType())) {
+				logger.info("Will update instance type");
+				UsageRecorder.insertEnd(cloudVm.getInstanceId(), user, cloud,
+						Collections.singletonList(new UsageMetric("instance-type." + dbVm.getInstanceType(), "1.0")));
+				UsageRecorder.insertStart(cloudVm.getInstanceId(), user, cloud,
+						Collections.singletonList(new UsageMetric("instance-type." + cloudVm.getInstanceType(), "1.0")));
 			}
 		}
-
 	}
 
 	private static void updateDbVmsWithCloudVms(VmsClassifier classifier, EntityManager em) {
