@@ -2,7 +2,6 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.root :refer :all]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
-    [com.sixsq.slipstream.ssclj.db.filesystem-test-utils :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [clojure.test :refer :all]
     [clojure.data.json :as json]
