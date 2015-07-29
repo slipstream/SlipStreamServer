@@ -8,11 +8,19 @@
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
+    [com.sixsq.slipstream.ssclj.api.acl :as acl]
+    [korma.core :as kc]))
 
-(use-fixtures :each db/flush-db-fixture)
+(defn flush-db-fixture
+  [f]
+  (dbdb/init-db)
+  (kc/delete dbdb/resources)
+  (kc/delete acl/acl)
+  (f))
 
-(use-fixtures :once db/temp-db-fixture)
+(use-fixtures :each flush-db-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 

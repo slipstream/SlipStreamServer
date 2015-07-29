@@ -16,7 +16,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud       :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils          :as u]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils     :as fu]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]
     [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]))
 
@@ -42,8 +41,8 @@
 (defn- deserialize-usage
   [usage]
   (-> usage
-      (update-in [:acl]   fu/deserialize)
-      (update-in [:usage] fu/deserialize)))
+      (update-in [:acl]   u/deserialize)
+      (update-in [:usage] u/deserialize)))
 
 (defn sql
   [id roles cimi-filter]

@@ -12,7 +12,6 @@
     [com.sixsq.slipstream.ssclj.api.acl                     :as acl]
 
     [com.sixsq.slipstream.ssclj.db.binding                  :refer [Binding]]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
     [com.sixsq.slipstream.ssclj.database.ddl                :as ddl]
     [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
@@ -51,13 +50,13 @@
 
 (defn- insert-resource
   [id data]
-  (insert resources (values {:id id :data (serialize data)}))
+  (insert resources (values {:id id :data (u/serialize data)}))
   (insert-acl id data))
 
 (defn- update-resource
   [id data]
   (update resources
-    (set-fields {:data (serialize data)})
+    (set-fields {:data (u/serialize data)})
     (where {:id id})))
 
 (defn id-matches?
@@ -104,7 +103,7 @@
   (-> (select resources (where {:id id}) (limit 1))
       first
       :data
-      deserialize))
+      u/deserialize))
 
 (defn dispatch-fn
   [collection-id options]
@@ -129,7 +128,7 @@
      (->> (sql collection-id id roles)
           (jdbc/query kh/db-spec)                 
           (map :data)
-          (map deserialize)))))
+          (map u/deserialize)))))
 
 
 (defn- delete-resource

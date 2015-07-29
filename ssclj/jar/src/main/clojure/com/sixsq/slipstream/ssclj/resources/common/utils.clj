@@ -1,14 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils
   "General utilities for dealing with resources."
   (:require
-    [clojure.tools.logging    :as log]
-    [clojure.edn              :as edn]
-    [clojure.string           :refer [split]]
-    [clj-time.core            :as time]
-    [clj-time.format          :as time-fmt]
-    [schema.core              :as s]
-    [ring.util.response       :as r]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
+    [clojure.tools.logging                                    :as log]
+    [clojure.edn                                              :as edn]
+    [clojure.string                                           :refer [split]]
+    [clj-time.core                                            :as time]
+    [clj-time.format                                          :as time-fmt]
+    [schema.core                                              :as s]
+    [ring.util.response                                       :as r]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
+    [clojure.data.json                                        :as json])
   (:import
     [java.util UUID]
     [javax.xml.bind DatatypeConverter]))
@@ -197,3 +198,13 @@
 (defn map-multi-line
   [m]
   (str "\n" (clojure.pprint/write m :stream nil :right-margin 50)))
+
+(defn serialize
+  [resource]
+  (with-out-str
+    (json/pprint resource :key-fn name)))
+
+(defn deserialize
+  [s]
+  (json/read-str s :key-fn keyword))
+
