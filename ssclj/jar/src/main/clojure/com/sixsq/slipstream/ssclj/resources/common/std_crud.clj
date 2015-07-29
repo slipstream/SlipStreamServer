@@ -11,14 +11,16 @@
     [com.sixsq.slipstream.ssclj.db.impl                       :as db]
 
     [com.sixsq.slipstream.ssclj.resources.common.cimi-filter  :as cf]
-    [com.sixsq.slipstream.ssclj.resources.common.pagination   :as pg]))
+    [com.sixsq.slipstream.ssclj.resources.common.pagination   :as pg]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
+    ))
 
 (defn log-request
   [request]
   (log/info (:request-method  request)
             (:uri             request)
-            (:query-string    request)
-            (:body            request)))
+            (or (:query-string    request) "no-query-string")
+            (or (:body            request) "no-body")))
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
@@ -38,7 +40,7 @@
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
     (log-request request)
-    (-> (str resource-name "/" uuid)
+    (-> (str (u/de-camelcase resource-name) "/" uuid)
         db/retrieve
         (a/can-view? request)
         (crud/set-operations request)
@@ -48,7 +50,7 @@
   [resource-name]
   (fn [{{uuid :uuid} :params body :body :as request}]
     (log-request request)
-    (let [current (-> (str resource-name "/" uuid)
+    (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                       (db/retrieve)
                       (a/can-modify? request))]
       (->> body
@@ -63,7 +65,7 @@
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
     (log-request request)
-    (-> (str resource-name "/" uuid)
+    (-> (str (u/de-camelcase resource-name) "/" uuid)
         (db/retrieve)
         (a/can-modify? request)
         (db/delete))))
@@ -72,7 +74,7 @@
   [resource-name collection-acl collection-uri collection-key]
   (let [skeleton (-> {:acl         collection-acl
                       :resourceURI collection-uri
-                      :id          resource-name
+                      :id          (u/de-camelcase resource-name)
                       :count       0})]
     (fn [request entries]
       (let [count (count entries)]
@@ -88,6 +90,7 @@
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
     (fn [request]
       (log-request request)
+
       (a/can-view? {:acl collection-acl} request)
 
       (->> (select-keys request [:identity :query-params :cimi-params])

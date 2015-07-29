@@ -91,7 +91,7 @@
   (->   (hh/select :r.*)
         (hh/from [:acl :a] [:resources :r])
         (hh/where [:and
-                    [:like :r.id (str collection-id"%")]
+                    [:like :r.id (str (u/de-camelcase collection-id) "%")]
                     [:= :r.id :a.resource-id] ;; join acl with resources
                     [:or
                       (id-matches? id)        ;; an acl line with given id
