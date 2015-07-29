@@ -1,9 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.usage.daily-summary-launcher
 	(:require 
-    [clojure.tools.cli                                  :refer [parse-opts]]    
+    [clojure.tools.cli                                  :as cli]
     [clj-time.core                                      :as t]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper     :as rc]
-    [com.sixsq.slipstream.ssclj.usage.summary           :as s]    
     [com.sixsq.slipstream.ssclj.usage.utils             :as u]
     [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]
     [com.sixsq.slipstream.ssclj.usage.launcher          :as l])
@@ -23,7 +21,7 @@
 
 (defn -main 
   [& args]    
-  (let [{:keys [options arguments errors summary] :as all} (parse-opts args cli-options)
+  (let [{:keys [options arguments errors summary] :as all} (cli/parse-opts args cli-options)
         start (date-or-yesterday options)        
         end   (-> start
                   u/to-time
