@@ -29,7 +29,7 @@
     (a/can-modify? {:acl collection-acl} request)
     (->> (->  body              
               u/strip-service-attrs              
-              (crud/new-identifier resource-name)              
+              (crud/new-identifier (u/de-camelcase resource-name))
               (assoc :resourceURI resource-uri)              
               u/update-timestamps              
               (crud/add-acl request)                            
