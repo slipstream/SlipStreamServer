@@ -96,7 +96,7 @@ public class MailUsage {
     private String linkToDailyUsageJson() {
         try {
             String cimiQueryStringUsage = MailUtils.cimiQueryStringUsage(userName, startDate, endDate);
-            String resourceURL = String.format("/usage?%s", cimiQueryStringUsage);
+            String resourceURL = String.format("/api/usage?%s", cimiQueryStringUsage);
 
             return baseUrl() + resourceURL;
         }catch(ValidationException ve){

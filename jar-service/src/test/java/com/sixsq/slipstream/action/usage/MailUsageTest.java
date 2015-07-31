@@ -45,7 +45,7 @@ public class MailUsageTest {
         assertBodyContains(mailUsage, "<tr><td>DISK</td><td>216600.00</td></tr>");
         assertBodyContains(mailUsage, "<tr><td>RAM</td><td>28032.00</td></tr>");
 
-        assertBodyContains(mailUsage, "href=\"http://fake-base-url/usage?%24filter=start_timestamp%3D2015-04-16+and+end_timestamp%3D2015-04-17+and+%28user%3D%27stef%27%29\"");
+        assertBodyContains(mailUsage, "href=\"http://fake-base-url/api/usage?%24filter=start_timestamp%3D2015-04-16+and+end_timestamp%3D2015-04-17+and+%28user%3D%27stef%27%29\"");
     }
 
     private void assertBodyContains(MailUsage mailUsage, String expected) {
