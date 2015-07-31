@@ -5,7 +5,8 @@
     [environ.core :as environ]
     [clojure.edn :as edn]
     [clojure.string :as s]
-    [clojure.java.io :as io]))
+    [clojure.java.io :as io]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def default-db-spec
   { :classname    "org.hsqldb.jdbc.JDBCDriver" 
@@ -17,6 +18,7 @@
   [resource-path]
   (if-let [config-file (io/resource resource-path)]
     (do
+      (log/info "================================================")
       (log/info "Will use "(.getPath config-file)" as config file")
       config-file)
     (let [msg (str "Resource not found (must be in classpath): '" resource-path "'")]
@@ -36,8 +38,10 @@
 
 (def korma-init-done
   (delay
-    (log/info (format "Creating korma database %s" db-spec))
-    (defdb korma-db db-spec)))
+    (log/info (format "Will create korma database with db-spec"))
+    (log/info (u/map-multi-line db-spec))
+    (defdb korma-db db-spec)
+    (log/info "Korma database created")))
 
 (defn korma-init
   "Initializes korma database"

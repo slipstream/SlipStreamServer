@@ -14,9 +14,8 @@
 
     [com.sixsq.slipstream.ssclj.app.params :as p]
 
-    [com.sixsq.slipstream.ssclj.resources.test-utils :refer [ring-app urlencode-params is-count]]
+    [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [ring-app urlencode-params is-count exec-request]]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 
@@ -37,6 +36,12 @@
                   :severity "critical"
                   })
 
+(def valid-events
+  (for [i (range nb-events)]
+    (-> valid-event
+        (assoc-in [:content :resource :href] (str "Run/" i))
+        (assoc :timestamp (if (even? i) "2016-01-16T08:05:00.0Z" "2015-01-16T08:05:00.0Z")))))
+
 (defn insert-some-events
   []
   (db/set-impl! (dbdb/get-instance))
@@ -46,10 +51,10 @@
   (let [state (-> (session (ring-app))
                   (content-type "application/json")
                   (header authn-info-header "jane"))]
-    (dotimes [i nb-events]
+    (doseq [valid-event valid-events]
       (request state base-uri
                :request-method :post
-               :body (json/write-str (assoc-in valid-event [:content :resource :href] (str "Run/" i)))))))
+               :body (json/write-str valid-event)))))
 
 (defn fixture-insert-some-events
   [f]
@@ -65,6 +70,32 @@
 (defn event-is-count
   [expected-count query-string]
   (is-count base-uri expected-count query-string "jane"))
+
+(deftest events-are-retrieved-most-recent-first
+  (->> valid-events
+       (map :timestamp)
+       tu/ordered-desc?
+       false?
+       is)
+
+  (->>  (-> (exec-request base-uri "" "jane")
+            (get-in [:response :body :events]))
+        (map :timestamp)
+        tu/ordered-desc?
+        is))
+
+(defn timestamp-paginate-single
+  [n]
+  (-> (exec-request base-uri (str "?$first=" n "&$last=" n) "jane")
+      (get-in [:response :body :events])
+      first
+      :timestamp))
+
+;; Here, timestamps are retrieved one by one (due to pagination)
+(deftest events-are-retrieved-most-recent-first-when-paginated
+  (-> (map timestamp-paginate-single (range 1 (inc nb-events)))
+      tu/ordered-desc?
+      is))
 
 (deftest resources-pagination
   (event-is-count nb-events  "")

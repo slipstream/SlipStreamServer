@@ -41,13 +41,16 @@
 
 (def event-end
   { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"    
-    :end_timestamp       event-end-time})
+    :end_timestamp       event-end-time
+    :metrics [{ :name  "nb-cpu" }
+              { :name  "RAM-GB" }
+              { :name  "disk-GB"}]})
 
 (def event-second-start
-  (assoc event-start :start_timestamp start-day-2))  
+  (assoc event-start :start_timestamp start-day-2))
 
-(def event-second-end
-  (assoc event-end :end_timestamp end-day-2))  
+(def event-second-start
+  (assoc event-second-start :end_timestamp end-day-2))
 
 (deftest basic-insert-open
   (-insertStart event-start)  
@@ -73,7 +76,8 @@
           "metrics" [{"name"  "A" "value" 4 } {"name" "B" "value" 8}]}
         end-with-string-keys
         { "cloud_vm_instanceid" "exo:123"          
-          "end_timestamp"     event-end-time }]
+          "end_timestamp"     event-end-time
+          "metrics" [{"name"  "A"} {"name" "B"}]}]
     (-insertStart start-with-string-keys)
     (-insertEnd end-with-string-keys)
     (is (= 2 (count (records-for-interval start-day-1 end-day-1))))  
@@ -106,16 +110,16 @@
     (-insertStart event-start)
     (is (= records (select usage_records)))))
 
-(deftest reappearance-should-forget-last-close
+(deftest reappearance-should-open-new-usage-record-when-scaling
   (is (empty? (select usage_records)))
+
   (-insertStart event-start)
   (-insertEnd   event-end)
-  (-insertStart event-second-start)
 
-  (is (nil? (-> (select usage_records)
-                first
-                :end_timestamp))))
-  
+  (-insertStart event-second-start)
+  (-insertEnd event-second-start)
+
+  (is (= 6 (count (select usage_records)))))
 
 (deftest check-close-event-without-start
   (-insertEnd event-end)

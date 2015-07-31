@@ -26,10 +26,10 @@
 
   ;; initialize the root resource
   (let [response (add)]
-    (is 201 (:status response))
-    (is resource-name (-> response
-                          :headers
-                          (get "Location")))
+    (is (= 201 (:status response)))
+    (is (= resource-name (-> response
+                            :headers
+                            (get "Location"))))
     (is (:body response)))
 
   ;; retrieve root resource (anonymously should work)
