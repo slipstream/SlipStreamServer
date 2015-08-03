@@ -82,10 +82,10 @@
                             first
                             :encrypted_password)
         auth-ok (hs/check password-credential encrypted-in-db)]
+
     (if auth-ok
       [true (dissoc credentials :password)]
-      [false {:message "Invalid username or password"}])
-    ))
+      [false {:message "Invalid username or password"}])))
 
 (def timestamp-next-day
   (t/plus (t/now) (t/days 1)))
