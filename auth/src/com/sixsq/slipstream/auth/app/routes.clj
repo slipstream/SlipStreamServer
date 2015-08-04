@@ -1,4 +1,5 @@
 (ns com.sixsq.slipstream.auth.app.routes)
 
-(def uri-register "/register")
-(def uri-login    "/login")
+(def auth-base-url "/auth")
+(def uri-register (str auth-base-url "/register"))
+(def uri-login    (str auth-base-url "/login"))

@@ -20,15 +20,10 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
-import static org.restlet.data.MediaType.APPLICATION_XHTML;
-import static org.restlet.data.MediaType.TEXT_HTML;
-import static org.restlet.data.Status.CLIENT_ERROR_UNAUTHORIZED;
-import static org.restlet.data.Status.SUCCESS_OK;
-
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-
+import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.util.RequestUtil;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.ClientInfo;
@@ -39,13 +34,11 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
-import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.user.Passwords;
-import com.sixsq.slipstream.util.Logger;
-import com.sixsq.slipstream.util.RequestUtil;
+import java.util.List;
+
+import static org.restlet.data.MediaType.APPLICATION_XHTML;
+import static org.restlet.data.MediaType.TEXT_HTML;
+import static org.restlet.data.Status.SUCCESS_OK;
 
 public class LoginResource extends AuthnResource {
 
@@ -89,51 +82,11 @@ public class LoginResource extends AuthnResource {
 		setResponse(username);
 	}
 
-	private void validateUser(String username, String password)
-			throws ConfigurationException, ValidationException {
-
-		if (username == null || username.isEmpty() || password == null) {
-			throwUnauthorizedWithMessage();
-		}
-
-		User dbUser = User.loadByName(username);
-
-		if (dbUser == null) {
-			throwUnauthorizedWithMessage("Authentication failure. No such user: " + username);
-		}
-
-		String realPassword = dbUser.getHashedPassword();
-		if (realPassword == null) {
-			// TODO: Something is wrong. Allow the user to reset the password.
-			throwUnauthorizedWithMessage("Authentication failure. Password is not set in DB for user: " + username);
-		}
-		String hashedPassword = null;
-		try {
-			hashedPassword = Passwords.hash(password);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			throwUnauthorized();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			throwUnauthorized();
-		}
-		if (!realPassword.equals(hashedPassword)) {
-			throwUnauthorizedWithMessage("Authentication failure. Password mismatch for user: " + username);
-		}
+	private void validateUser(String username, String password) throws ConfigurationException, ValidationException {
+		AuthProxy authProxy = new AuthProxy();
+		authProxy.validateUser(username, password);
 	}
-
-	private void throwUnauthorizedWithMessage() {
-		throwUnauthorizedWithMessage("");
-	}
-
-	private void throwUnauthorizedWithMessage(String logMessage) {
-		if (logMessage != null && !logMessage.isEmpty()) {
-			Logger.warning(logMessage);
-		}
-		throw new ResourceException(CLIENT_ERROR_UNAUTHORIZED,
-				"Username/password combination not valid");
-	}
-
+	
 	private void setResponse(String username) {
 		Request request = getRequest();
 		Response response = getResponse();

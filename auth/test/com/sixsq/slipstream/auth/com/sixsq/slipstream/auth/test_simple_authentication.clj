@@ -40,9 +40,15 @@
              missing-password
              missing-both])
 
-(defn- rejected?
+(defn- auth-rejected?
   [[ok? result]]
-  (= [ok? result] [false {:message "Invalid username or password"}]))
+  (and
+    (false? ok?)
+    (.startsWith (:message result) "Invalid combination username/password for" )))
+
+(defn- token-rejected?
+  [[ok? result]]
+  (= [false "Invalid token"] [ok? (:message result)]))
 
 (defn- accepted?
   [[ok? result]]
@@ -53,14 +59,14 @@
 
 (deftest test-auth-user-when-not-added
   (doseq [wrong (cons valid-credentials wrongs)]
-    (is (rejected? (c/auth-user sa wrong)))))
+    (is (auth-rejected? (c/auth-user sa wrong)))))
 
 (deftest test-auth-user
   (c/add-user! sa valid-credentials)
   (is (accepted? (c/auth-user sa valid-credentials)))
 
   (doseq [wrong wrongs]
-    (is (rejected? (c/auth-user sa wrong)))))
+    (is (auth-rejected? (c/auth-user sa wrong)))))
 
 (deftest test-create-token
   (c/add-user! sa valid-credentials)
@@ -72,7 +78,7 @@
     (is (contains? token :token)))
 
   (doseq [wrong wrongs]
-    (is (rejected? (c/token sa wrong)))))
+    (is (token-rejected? (c/token sa wrong)))))
 
 (deftest test-check-token-when-invalid-token
   (c/add-user! sa valid-credentials)

@@ -4,6 +4,6 @@
   [handler]
   (fn [req]
     (-> req
-        (assoc :user-name (get-in req [:form-params "user-name"]))
-        (assoc :password  (get-in req [:form-params "password"]))
+        (assoc :user-name (get-in req [:params :user-name]))
+        (assoc :password  (get-in req [:params :password]))
         handler)))

@@ -29,17 +29,28 @@
     (log/info "Done adding " (dissoc credentials :password))
     (view/registered-ok (:user-name credentials))))
 
+(defn response-token-ok
+  [token]
+  { :status 200
+    :headers {"Content-Type" "text/plain"}
+    :cookies {"com.sixsq.slipstream.cookie" {:value token}}})
+
+(defn response-invalid-token
+  []
+  { :status 401
+    :headers {"Content-Type" "text/plain"}})
+
 (defn login
   [request]
-  (log/info "request" request)
+
   (let [credentials   (select-keys request [:user-name :password])
         [ok? result]  (auth/token authentication credentials)]
 
     (log/info "result " result)
 
     (if ok?
-      (view/login-ok result)
-      (view/login-error result))))
+      (response-token-ok result)
+      (response-invalid-token))))
 
 (defroutes app
 
@@ -55,6 +66,7 @@
   (-> app
       wrap-cookies
       wrap-credentials
+      wrap-params
       handler/site
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})))

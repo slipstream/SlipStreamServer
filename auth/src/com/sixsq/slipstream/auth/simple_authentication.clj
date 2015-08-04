@@ -85,7 +85,7 @@
 
     (if auth-ok
       [true (dissoc credentials :password)]
-      [false {:message "Invalid username or password"}])))
+      [false {:message (str "Invalid combination username/password for '" user-name "'")}])))
 
 (def timestamp-next-day
   (t/plus (t/now) (t/days 1)))
@@ -97,7 +97,7 @@
       [true {:token (jws/sign (merge claims {:exp timestamp-next-day})
                               (private-key auth-conf)
                               {:alg :rs256})}]
-      [false {:message "Invalid username or password"}])))
+      [false {:message "Invalid token"}])))
 
 (defn check-token-impl
   [token]
