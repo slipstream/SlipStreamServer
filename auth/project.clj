@@ -1,5 +1,5 @@
 (defproject auth "0.1.0-SNAPSHOT"
-  :description  "Prototype of Authentication Service"
+  :description  "Authentication Service"
   :url          "http://sixsq.com"
 
   :license {:name "Apache License, Version 2.0"
@@ -36,21 +36,22 @@
                  [compojure                                 "1.4.0"]
                  [hiccup                                    "1.0.5"]]
 
-  :profiles {:provided
-              { :dependencies [[reply/reply "0.3.4"]]}
+  :plugins [[lein-environ "1.0.0"]]
 
-            :dev
-            { :env {:clj-env        :development
-                    :db-config-path "config-hsqldb-mem.edn"}
-             :jvm-opts ["-Dlogfile.path=development"]
-             :dependencies [  [peridot/peridot "0.3.0"]
-                              [expectations/expectations "2.0.9"]]}
+  :profiles {
+             :provided
+             {:dependencies [[reply/reply "0.3.4"]]}
 
-            :test
-            { :env {:clj-env        :test
-                    :db-config-path "config-hsqldb-mem.edn"}
+             :dev
+             {:env          {:clj-env        :development
+                             :db-config-path "config-hsqldb-mem.edn"}
+              :jvm-opts     ["-Dlogfile.path=development"]
+              :dependencies [[peridot/peridot "0.3.0"]]}
 
-             :jvm-opts ["-Dlogfile.path=test"]
+             :test
+             {:env          {:clj-env        :test
+                             :db-config-path "config-hsqldb-mem.edn"}
 
-             :dependencies [  [peridot/peridot "0.3.0"]
-                              [expectations/expectations "2.0.9"]]}})
+              :jvm-opts     ["-Dlogfile.path=test"]
+
+              :dependencies [[peridot/peridot "0.3.0"]]}})

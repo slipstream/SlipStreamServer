@@ -47,9 +47,7 @@
   (POST uri-register request  (add-user request))
 
   (GET  uri-login    []       (view/login))
-  (POST uri-login    request  (login request))
-
-  (GET "/" [] "hello"))
+  (POST uri-login    request  (login request)))
 
 (defn- create-ring-handler
   []

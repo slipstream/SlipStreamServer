@@ -1,14 +1,19 @@
 (ns com.sixsq.slipstream.auth.com.sixsq.slipstream.auth.test-simple-authentication
   (:refer-clojure :exclude [update])
   (:require
-    [korma.core                                       :as kc]
-    [clojure.test                                     :refer :all]
-    [com.sixsq.slipstream.auth.simple-authentication  :as sa]
-    [com.sixsq.slipstream.auth.core                   :as c]))
+    [clojure.test :refer :all]
+    [korma.core :as kc]
+    [com.sixsq.slipstream.auth.database.ddl :as ddl]
+    [com.sixsq.slipstream.auth.simple-authentication :as sa]
+    [com.sixsq.slipstream.auth.core :as c]))
+
+(defonce ^:private columns-users (ddl/columns "NAME"       "VARCHAR(100)"
+                                              "PASSWORD"   "VARCHAR(200)"))
 
 (defn fixture-delete-all
   [f]
   (sa/init)
+  (ddl/create-table! "USER" columns-users)
   (kc/delete sa/users)
   (f))
 
@@ -16,13 +21,16 @@
 
 (def sa (sa/get-instance))
 
-(def valid-credentials  {:user-name "joe"    :password   "secret"})
+(defn- damage [creds key] (assoc creds key "WRONG"))
 
-(def wrong-password     {:user-name "joe"    :password   "wrong"})
-(def wrong-user         {:user-name "wrong"  :password   "secret"})
-(def wrong-both         {:user-name "wrong"  :password   "wrong"})
-(def missing-user       {:password  "secret"})
-(def missing-password   {:user-name "joe"})
+(def valid-credentials  {:user-name "super"    :password   "supeRsupeR"})
+(def wrong-password     (damage valid-credentials :password))
+(def wrong-user         (damage valid-credentials :user-name))
+(def wrong-both         (-> valid-credentials
+                            (damage :user-name)
+                            (damage :password)))
+(def missing-user       (dissoc valid-credentials :user-name))
+(def missing-password   (dissoc valid-credentials :password))
 (def missing-both       {})
 
 (def wrongs [wrong-user
@@ -50,6 +58,7 @@
 (deftest test-auth-user
   (c/add-user! sa valid-credentials)
   (is (accepted? (c/auth-user sa valid-credentials)))
+
   (doseq [wrong wrongs]
     (is (rejected? (c/auth-user sa wrong)))))
 
@@ -74,7 +83,10 @@
   (let [valid-token (-> (c/token sa valid-credentials)
                         second
                         :token)]
-    (is (= "joe" (:user-name (c/check-token sa valid-token))))))
+    (is (= "super" (:user-name (c/check-token sa valid-token))))))
+
+(deftest password-encryption-compatible-with-slipstream
+  (is (= "304D73B9607B5DFD48EAC663544F8363B8A03CAAD6ACE21B369771E3A0744AAD0773640402261BD5F5C7427EF34CC76A2626817253C94D3B03C5C41D88C64399"
+         (sa/sha512 "supeRsupeR"))))
 
 ;; TODO add tests to detect token obsolete after expiration
-

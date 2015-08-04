@@ -6,13 +6,13 @@
     [clojure.string                                   :refer [join split]]
     [com.sixsq.slipstream.auth.database.korma-helper              :as kh]))
 
-(defn simple-surrounder 
+(defn simple-surrounder
   [c]
   (fn sur [s]
     (str c s c)))
 
-(defn surrounder 
-  [c] 
+(defn surrounder
+  [c]
   (fn [s]
     (->>  (split s #"\.")
           (map (simple-surrounder c))
@@ -21,29 +21,29 @@
 (def simple-quote (surrounder \'))
 (def double-quote (surrounder \"))
 
-(defn- column-description 
+(defn- column-description
   [[name type]]
   (str (double-quote name) " " type))
 
-(defn surround-join 
+(defn surround-join
   [xs surround]
   (->>  xs
         (map surround)
         (join ",")))
 
-(defn double-quote-list 
+(defn double-quote-list
   [names]
   (surround-join names double-quote))
-  
-(defn columns 
-  [& name-types] 
+
+(defn columns
+  [& name-types]
   (->>  name-types
         (partition 2)
         (map column-description)
-        (join ",")))      
+        (join ",")))
 
-(defn create-table!   
-  [table columns & [options]]  
+(defn create-table!
+  [table columns & [options]]
   (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS " (double-quote table) " ( " columns options " ) ")])
   (log/info "Created (if needed!) table:" table ", columns:" columns ", options: "options))
 

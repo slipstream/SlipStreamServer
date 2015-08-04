@@ -7,14 +7,15 @@
     [korma.core                                       :as kc]
     [com.sixsq.slipstream.auth.core                   :as core]
     [com.sixsq.slipstream.auth.database.korma-helper  :as kh]
-    [com.sixsq.slipstream.auth.database.ddl           :as ddl]
 
     [buddy.hashers                                    :as hs]
     [buddy.sign.jws                                   :as jws]
+    [buddy.core.hash                                  :as ha]
+    [buddy.core.codecs                                :as co]
     [buddy.core.keys                                  :as ks]
+
     [clj-time.core                                    :as t]
     [clojure.java.io                                  :as io]
-
     ))
 
 ;; TODO do not show private information in source code.
@@ -25,24 +26,13 @@
 ;;
 ;; DB
 ;;
-(def unique-user-name
-  (str ", UNIQUE (" (ddl/double-quote-list ["user_name"])")"))
-
-(defonce ^:private columns-users
-  (ddl/columns
-    "user_name"            "VARCHAR(100)"
-    "encrypted_password"   "VARCHAR(200)"))
 
 (def init-db
   (delay
     (kh/korma-init)
     (log/info "Korma init done")
 
-    (ddl/create-table! "users"    columns-users unique-user-name)
-    (ddl/create-index! "users"   "IDX_USERS" "user_name")
-
-    (kc/defentity users)
-    (kc/select users (kc/limit 1))
+    (kc/defentity users (kc/table "USER"))
 
     (log/info "Korma Entities defined")))
 ;;
@@ -63,25 +53,35 @@
   []
   @init-db)
 
+(defn sha512
+  "Encrypt secret exactly as done in SlipStream Java server."
+  [secret]
+  (-> (ha/sha512 secret)
+      co/bytes->hex
+      clojure.string/upper-case))
+
+;; TODO : check user not already present, password rules (length, complexity...)
 (defn add-user-impl
   [user]
-  ;; TODO : check user not already present, password rules (length, complexity...)
   (init)
   (log/info "Will add user " (:user-name user))
-  (kc/insert users (kc/values { :user_name           (:user-name user)
-                                :encrypted_password  (hs/encrypt (:password user))})))
+  (kc/insert users (kc/values { :NAME      (:user-name user)
+                                :PASSWORD  (sha512 (:password user))})))
 
 (defn auth-user-impl
   [credentials]
   (init)
-  (let [user-name (:user-name credentials)
+  (let [user-name           (:user-name credentials)
         password-credential (:password credentials)
-        encrypted-in-db (-> (kc/select users
-                                       (kc/fields [:encrypted_password])
-                                       (kc/where {:user_name user-name}))
-                            first
-                            :encrypted_password)
-        auth-ok (hs/check password-credential encrypted-in-db)]
+        encrypted-in-db     (-> (kc/select users
+                                            (kc/fields [:PASSWORD])
+                                            (kc/where {:NAME user-name}))
+                                first
+                                :PASSWORD)
+        auth-ok (and
+                  password-credential
+                  encrypted-in-db
+                  (= (sha512 password-credential) encrypted-in-db))]
 
     (if auth-ok
       [true (dissoc credentials :password)]
