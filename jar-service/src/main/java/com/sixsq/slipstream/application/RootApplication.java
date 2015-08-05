@@ -23,6 +23,8 @@ package com.sixsq.slipstream.application;
 import java.util.ArrayList;
 import java.util.ServiceLoader;
 
+import com.sixsq.slipstream.initialstartup.CloudIds;
+import com.sixsq.slipstream.initialstartup.Modules;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -115,28 +117,46 @@ public class RootApplication extends Application {
 		try {
 
 			createStartupMetadata();
+			loadOptionalConfiguration();
 
 			initializeStatusServiceToHandleErrors();
 
 			verifyMinimumDatabaseInfo();
 
+			initializeMetadataService();
+
+			// Load the configuration early
+			Configuration.getInstance();
+
+			Collector.start();
+			GarbageCollector.start();
+
+			logServerStarted();
+
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		}
+	}
 
+	private void loadOptionalConfiguration() {
+		// Note: Connectors have already been loaded by the Configuration class
+
+		// Load modules
+        Modules.load();
+
+		// Load cloud-ids
+        CloudIds.load();
+
+		// Load users
+		Users.load();
+	}
+
+	private void initializeMetadataService() {
 		MetadataService ms = getMetadataService();
 		ms.addCommonExtensions();
 		ms.setDefaultCharacterSet(CharacterSet.UTF_8);
 		ms.addExtension("tgz", MediaType.APPLICATION_COMPRESS, true);
 		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
-
-		// Load the configuration early
-		Configuration.getInstance();
-
-		Collector.start();
-		GarbageCollector.start();
-
-		logServerStarted();
 	}
 
 	private void logServerStarted() {
@@ -169,7 +189,7 @@ public class RootApplication extends Application {
 	}
 
 	private static void verifyMinimumDatabaseInfo() throws ConfigurationException, ValidationException {
-		User user = User.loadByName("super");
+		User user = Users.loadSuper();
 		if (user == null) {
 			throw new ConfigurationException("super user is missing");
 		}

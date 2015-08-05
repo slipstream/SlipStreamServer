@@ -44,48 +44,6 @@ import static org.junit.Assert.assertEquals;
 public class XmlUtilTest extends ResourceTestBase {
 
 	@Test
-	public void ensureCleanRemovesElements()
-			throws ParserConfigurationException, XPathExpressionException {
-
-		Document document = createNewDocument();
-
-		Element root = document.getDocumentElement();
-
-		Element user = document.createElement("user");
-		root.appendChild(user);
-
-		Element services = document.createElement("services");
-		root.appendChild(services);
-
-		Element breadcrumbs = document.createElement("breadcrumbs");
-		root.appendChild(breadcrumbs);
-
-		assertEquals("1", runXpath("count(/*/user)", document));
-		assertEquals("1", runXpath("count(/*/services)", document));
-		assertEquals("1", runXpath("count(/*/breadcrumbs)", document));
-
-		XmlUtil.cleanDocumentForDeserialization(document);
-
-		assertEquals("0", runXpath("count(/*/user)", document));
-		assertEquals("0", runXpath("count(/*/services)", document));
-		assertEquals("0", runXpath("count(/*/breadcrumbs)", document));
-
-	}
-
-	@Test
-	public void ensureServicesAdded() throws ParserConfigurationException,
-			XPathExpressionException {
-
-		Document document = createNewDocument();
-
-		XmlUtil.addServices(document);
-
-		assertEquals("1", runXpath("count(/*/services)", document));
-		assertEquals("2", runXpath("count(/*/services/service)", document));
-
-	}
-
-	@Test
 	public void ensureUserInfoAdded() throws ParserConfigurationException,
 			XPathExpressionException, ConfigurationException,
 			ValidationException {
@@ -111,39 +69,6 @@ public class XmlUtilTest extends ResourceTestBase {
 		assertEquals(user2.getResourceUri(),
 				runXpath("/*/user/@resourceUri", document));
 		assertEquals("", runXpath("/*/user/@isSuper", document));
-
-	}
-
-	@Test
-	public void ensureBreadcrumbsAdded() throws ParserConfigurationException,
-			XPathExpressionException {
-
-		Document document = createNewDocument();
-
-		String pathPrefix = "alpha/beta";
-		String path = "gamma/delta/epsilon";
-
-		XmlUtil.addBreadcrumbs(document, pathPrefix, path);
-
-		assertEquals("1", runXpath("count(/*/breadcrumbs)", document));
-		assertEquals(pathPrefix, runXpath("/*/breadcrumbs/@path", document));
-
-		assertEquals("3", runXpath("count(/*/breadcrumbs/crumb)", document));
-
-		assertEquals("gamma",
-				runXpath("/*/breadcrumbs/crumb[1]/@name", document));
-		assertEquals("alpha/beta/gamma",
-				runXpath("/*/breadcrumbs/crumb[1]/@path", document));
-
-		assertEquals("delta",
-				runXpath("/*/breadcrumbs/crumb[2]/@name", document));
-		assertEquals("alpha/beta/gamma/delta",
-				runXpath("/*/breadcrumbs/crumb[2]/@path", document));
-
-		assertEquals("epsilon",
-				runXpath("/*/breadcrumbs/crumb[3]/@name", document));
-		assertEquals("alpha/beta/gamma/delta/epsilon",
-				runXpath("/*/breadcrumbs/crumb[3]/@path", document));
 
 	}
 

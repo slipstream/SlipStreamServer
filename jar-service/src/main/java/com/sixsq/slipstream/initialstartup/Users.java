@@ -20,8 +20,14 @@ package com.sixsq.slipstream.initialstartup;
  * -=================================================================-
  */
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -31,24 +37,39 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
+import com.sixsq.slipstream.user.UserResource;
+import com.sixsq.slipstream.util.Logger;
+import com.sixsq.slipstream.util.XmlUtil;
 
-// FIXME: This class should be moved into a more complete integration test.
+/*
+** Utility class to create initial super user and load users from files
+*/
 public class Users {
 
-	public static final String SIXSQ = "sixsq";
+	public static final String SUPER_USERNAME = "super";
 
-	public static void create() throws ValidationException, NotFoundException,
+    /**
+     * Name of the directory containing user definition files.
+     */
+    private static final String USERS_CONFIG_DIR = "users";
+
+    /**
+     * Name of the directory containing password definition files.
+     */
+    private static final String PASSWORDS_CONFIG_DIR = "passwords";
+
+    public static void create() throws ValidationException, NotFoundException,
 			ConfigurationException, NoSuchAlgorithmException,
 			UnsupportedEncodingException {
 		createSuperUser();
 	}
 
 	private static void createSuperUser() throws ValidationException {
-		User user = User.loadByName("super");
+		User user = loadSuper();
 		if (user != null) {
 			return;
 		}
-		user = createUser("super");
+		user = createUser(SUPER_USERNAME);
 		user.setFirstName("Super");
 		user.setLastName("User");
 		user.setEmail("super@sixsq.com");
@@ -68,6 +89,10 @@ public class Users {
 		user.store();
 	}
 
+	public static User loadSuper() throws ValidationException {
+		return User.loadByName(SUPER_USERNAME);
+	}
+
 	private static User createUser(String name) {
 		User user = null;
 		try {
@@ -78,11 +103,83 @@ public class Users {
 		return user;
 	}
 
-	public static void createServiceConfiguration()
-			throws ConfigurationException, ValidationException {
+    public static void load() {
 
-		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
+		if (!shouldLoad()) {
+			return; // users have already been loaded or altered by admin
+		}
 
-		cfg.store();
+		// load from file
+		File configFile = Configuration.findConfigurationFile();
+		if(configFile == null) {
+			return; // no config file found
+		}
+
+		File configDir = new File(configFile.getParent());
+		File usersDir = new File(configDir + File.separator + USERS_CONFIG_DIR);
+
+		List<File> files = FileLoader.loadConfigurationFiles(usersDir);
+		files.forEach( f -> { loadSingleUser(f); } );
+
 	}
+
+	private static boolean shouldLoad() {
+		List<User> users = User.list();
+
+		if (users.size() != 1) {
+			return false; // by default we should only have one user
+		}
+
+		if(!users.get(0).getName().equals(SUPER_USERNAME)) {
+			return false; // and it should be super
+		}
+
+		return true;
+	}
+
+	private static void loadSingleUser(File f) {
+
+        Logger.info("Loading config file: " + f.getPath());
+
+		User user = null;
+		try {
+            user = UserResource.xmlToUser(FileLoader.fileToString(f));
+        } catch (IOException e) {
+            Logger.warning("Failed parsing user file: " + f.getPath() + " with error: " + e.getMessage());
+        }
+        File usersDir = new File(f.getParent());
+        user = loadPasswordFile(user, new File(usersDir.getParent() + File.separator + PASSWORDS_CONFIG_DIR));
+		if(user != null) {
+            user.store();
+        }
+	}
+
+    private static User loadPasswordFile(User user, File passwordsDir) {
+
+        File[] files = passwordsDir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.equals(user.getName());
+            }
+        });
+
+        if(files.length != 0) {
+            String password = null;
+            File file = files[0];
+            Logger.info("Loading config file: " + file.getPath());
+            try {
+                password = FileLoader.fileToString(file).trim();
+            } catch (IOException e) {
+                Logger.warning("Failed parsing password file: " + file.getPath() + " with error: " + e.getMessage());
+            }
+            try {
+                user.setPassword(password);
+            } catch (NoSuchAlgorithmException e) {
+                Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
+            } catch (UnsupportedEncodingException e) {
+                Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
+            }
+        }
+        return user;
+    }
+
 }
