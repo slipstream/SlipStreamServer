@@ -189,10 +189,11 @@ public class RuntimeParameterResource extends RunBaseResource {
 		String nodeName = runtimeParameter.getNodeName();
 		try {
 			newState = attemptStateUpdate(em);
-			em.close();
 		} catch (SlipStreamDatabaseException e) {
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Error in state machine");
+		} finally {
+			em.close();
 		}
 
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
