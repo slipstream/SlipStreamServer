@@ -228,16 +228,32 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	private States attemptChangeGlobalStateToProvisioning() {
-		StateMachine sm = createStateMachine();
 		String fromToState = String.format("from %s to %s", States.Ready, States.Provisioning);
+
+		StateMachine sm;
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Run run = Run.loadFromUuid(getUuid(), em);
+		EntityTransaction transaction = em.getTransaction();
 		try {
-			sm.tryAdvanceToProvisionning();
-		} catch (InvalidStateException e) {
-			e.printStackTrace();
-			throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
-		} catch (CannotAdvanceFromTerminalStateException e) {
-			e.printStackTrace();
-			throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
+			transaction.begin();
+			sm = StateMachine.createStateMachine(run);
+			try {
+				sm.tryAdvanceToProvisionning();
+			} catch (InvalidStateException e) {
+				e.printStackTrace();
+				throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
+			} catch (CannotAdvanceFromTerminalStateException e) {
+				e.printStackTrace();
+				throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
+			}
+			transaction.commit();
+		} catch (Exception ex) {
+			if (transaction.isActive()) {
+				transaction.rollback();
+			}
+			throw ex;
+		} finally {
+			em.close();
 		}
 		States newState = sm.getState();
 		if (States.Provisioning != newState) {

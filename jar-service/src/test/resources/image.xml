@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><imageModule category="Image" creation="2015-03-11 14:02:43.682 CET" deleted="false" description="" isBase="true" isLatestVersion="true" lastModified="2015-03-11 14:02:43.693 CET" loginUser="" logoLink="" parentUri="module/p1" platform="centos" shortName="image1" version="2">
+    <authz groupCreateChildren="false" groupDelete="false" groupGet="false" groupPost="false" groupPut="false" inheritedGroupMembers="true" owner="super" ownerCreateChildren="true" ownerDelete="true" ownerGet="true" ownerPost="true" ownerPut="true" publicCreateChildren="false" publicDelete="false" publicGet="false" publicPost="false" publicPut="false">
+        <groupMembers/>
+    </authz>
+    <commit author="super">
+        <comment>Initial version of this image.</comment>
+    </commit>
+    <cloudNames length="3">
+        <string>exoscale</string>
+        <string>test-cloud</string>
+        <string>default</string>
+    </cloudNames>
+
+    <!--
+    This tag "runs" should be removed during denormalization
+    See XmlUtilTest::runsAreRemovedDuringDenormalization
+    -->
+    <runs count="2" limit="20" offset="0" totalCount="2">
+        <item abort="" cloudServiceNames="test-cloud" moduleResourceUri="module/p1/image1/2" startTime="2015-03-12 18:03:13.709 CET" status="Cancelled" tags="" type="Run" username="super" uuid="4a09718d-70ca-4f68-82f3-b8a525dc912e"/>
+        <item abort="The run has timed out" cloudServiceNames="test-cloud" moduleResourceUri="module/p1/image1/2" startTime="2015-03-11 14:02:48.103 CET" status="Cancelled" tags="" type="Run" username="super" uuid="a117475c-348f-4897-921b-7f4039cf887a"/>
+    </runs>
+
+    <targets>
+        <target name="execute"/>
+        <target name="report"/>
+        <target name="onvmadd"/>
+        <target name="onvmremove"/>
+    </targets>
+    <packages/>
+    <prerecipe/>
+    <recipe/>
+    <cloudImageIdentifiers>
+        <cloudImageIdentifier cloudImageIdentifier="123" cloudServiceName="test-cloud"/>
+    </cloudImageIdentifiers>
+    <parameters>
+        <entry>
+            <string>hostname</string>
+            <parameter category="Output" description="hostname/ip of the image" isSet="false" mandatory="true" name="hostname" order="0" order_="0" readonly="false" type="String"/>
+        </entry>
+        <entry>
+            <string>instanceid</string>
+            <parameter category="Output" description="Cloud instance id" isSet="false" mandatory="true" name="instanceid" order="0" order_="0" readonly="false" type="String"/>
+        </entry>
+        <entry>
+            <string>test-cloud.cpu</string>
+            <parameter category="test-cloud" description="Number of CPUs (i.e. virtual cores)" isSet="false" mandatory="true" name="test-cloud.cpu" order="0" order_="0" readonly="false" type="String"/>
+        </entry>
+        <entry>
+            <string>test-cloud.ram</string>
+            <parameter category="test-cloud" description="Amount of RAM, in GB" isSet="false" mandatory="true" name="test-cloud.ram" order="0" order_="0" readonly="false" type="String"/>
+        </entry>
+        <entry>
+            <string>extra.disk.volatile</string>
+            <parameter category="Cloud" description="Volatile extra disk in GB" isSet="false" mandatory="true" name="extra.disk.volatile" order="0" order_="0" readonly="false" type="String"/>
+        </entry>
+        <entry>
+            <string>network</string>
+            <parameter category="Cloud" description="Network type" isSet="true" mandatory="true" name="network" order="0" order_="0" readonly="false" type="Enum">
+                <enumValues length="2">
+                    <string>Public</string>
+                    <string>Private</string>
+                </enumValues>
+                <value>Public</value>
+                <defaultValue>Public</defaultValue>
+            </parameter>
+        </entry>
+    </parameters>
+    <notes length="0"/>
+</imageModule>

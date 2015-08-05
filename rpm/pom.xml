@@ -274,6 +274,7 @@
                                 </source>
                             </sources>
                         </mapping>
+
                         <mapping>
                             <directory>/etc/rc.d/init.d</directory>
                             <sources>
@@ -283,6 +284,19 @@
                                 </softlinkSource>
                             </sources>
                         </mapping>
+
+            <mapping>
+              <directory>/etc/systemd/system</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/systemd</location>
+                </source>
+              </sources>
+            </mapping>
 
                         <mapping>
                             <directory>${installation.dir}/etc</directory>
