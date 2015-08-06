@@ -37,6 +37,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
+import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.user.UserResource;
 import com.sixsq.slipstream.util.Logger;
 import com.sixsq.slipstream.util.XmlUtil;
@@ -86,10 +87,12 @@ public class Users {
 		user.setState(State.ACTIVE);
 		user.setSuper(true);
 
+        user = loadPassword(user);
+
 		user.store();
 	}
 
-	public static User loadSuper() throws ValidationException {
+    public static User loadSuper() throws ValidationException {
 		return User.loadByName(SUPER_USERNAME);
 	}
 
@@ -148,38 +151,67 @@ public class Users {
             Logger.warning("Failed parsing user file: " + f.getPath() + " with error: " + e.getMessage());
         }
         File usersDir = new File(f.getParent());
-        user = loadPasswordFile(user, new File(usersDir.getParent() + File.separator + PASSWORDS_CONFIG_DIR));
+        user = loadPasswordFile(user, getPasswordsDir(usersDir.getParent()));
 		if(user != null) {
             user.store();
         }
 	}
 
+    private static File getPasswordsDir(String configDirPath) {
+        return new File(configDirPath + File.separator + PASSWORDS_CONFIG_DIR);
+    }
+
     private static User loadPasswordFile(User user, File passwordsDir) {
 
-        File[] files = passwordsDir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.equals(user.getName());
-            }
-        });
+        File file = findPasswordFile(user, passwordsDir);
 
-        if(files.length != 0) {
-            String password = null;
-            File file = files[0];
-            Logger.info("Loading config file: " + file.getPath());
-            try {
-                password = FileLoader.fileToString(file).trim();
-            } catch (IOException e) {
-                Logger.warning("Failed parsing password file: " + file.getPath() + " with error: " + e.getMessage());
-            }
-            try {
-                user.setPassword(password);
-            } catch (NoSuchAlgorithmException e) {
-                Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
-            } catch (UnsupportedEncodingException e) {
-                Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
-            }
+        if(file == null) {
+            return user; // no password file found
         }
+
+        String password = null;
+        Logger.info("Loading config file: " + file.getPath());
+        try {
+            password = FileLoader.fileToString(file).trim();
+        } catch (IOException e) {
+            Logger.warning("Failed parsing password file: " + file.getPath() + " with error: " + e.getMessage());
+        }
+        try {
+            user.setPassword(password);
+        } catch (NoSuchAlgorithmException e) {
+            Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
+        } catch (UnsupportedEncodingException e) {
+            Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
+        }
+
         return user;
+    }
+
+    private static File findPasswordFile(User user, File passwordsDir) {
+
+        if(!passwordsDir.exists()) {
+            return null;
+        }
+
+        File[] files = passwordsDir.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.equals(user.getName());
+                }
+            });
+        return (files.length == 0) ? null : files[0];
+    }
+
+    private static User loadPassword(User user) {
+        File configFile = Configuration.findConfigurationFile();
+
+        if(configFile == null) {
+            return user; // no config file found
+        }
+
+        File passwordDir = getPasswordsDir(configFile.getParent());
+
+        return loadPasswordFile(user, passwordDir);
+
     }
 
 }

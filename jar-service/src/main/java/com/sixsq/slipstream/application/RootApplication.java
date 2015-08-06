@@ -20,9 +20,12 @@ package com.sixsq.slipstream.application;
  * -=================================================================-
  */
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.ServiceLoader;
 
+import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.initialstartup.CloudIds;
 import com.sixsq.slipstream.initialstartup.Modules;
 import org.restlet.Application;
@@ -176,12 +179,18 @@ public class RootApplication extends Application {
 	}
 
 	private void createStartupMetadata() {
-		try {
-			Users.create();
-		} catch (Exception ex) {
-			getLogger().warning("Error creating default users... already existing?");
-		}
-	}
+        try {
+            Users.create();
+        } catch (ValidationException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        } catch (NotFoundException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        } catch (NoSuchAlgorithmException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        } catch (UnsupportedEncodingException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        }
+    }
 
 	private void initializeStatusServiceToHandleErrors() {
 		CommonStatusService statusService = new CommonStatusService();
