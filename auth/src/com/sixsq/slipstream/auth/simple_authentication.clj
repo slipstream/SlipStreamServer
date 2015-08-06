@@ -23,6 +23,8 @@
                 :privkey    "auth_privkey.pem"
                 :passphrase "b8ddy-pr0t0"})
 
+(def ^:dynamic *nb-minutes-expiry* 2)
+
 ;;
 ;; DB
 ;;
@@ -83,22 +85,20 @@
                   password-credential
                   encrypted-in-db
                   (= (sha512 password-credential) encrypted-in-db))]
-
-    (println "password-credential " password-credential)
-    (println "encrypted-in-db " encrypted-in-db)
-
     (if auth-ok
       [true (dissoc credentials :password)]
       [false {:message (str "Invalid combination username/password for '" user-name "'")}])))
 
-(def timestamp-next-day
-  (t/plus (t/now) (t/days 1)))
+(defn expiry-timestamp
+  []
+  (t/plus (t/now) (t/minutes *nb-minutes-expiry*)))
 
 (defn enrich-claims
   [claims]
   (-> claims
+      ;; TODO add cloud name?
       (rename-keys {:user-name :com.sixsq.identifier})
-      (merge {:exp timestamp-next-day})))
+      (merge {:exp (expiry-timestamp)})))
 
 (defn token-impl
   [credentials]

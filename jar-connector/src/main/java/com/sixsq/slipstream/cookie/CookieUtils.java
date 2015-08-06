@@ -32,11 +32,8 @@ import org.restlet.data.Form;
 import org.restlet.security.Verifier;
 import org.restlet.util.Series;
 
-import java.util.Date;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 
 /**
@@ -48,6 +45,8 @@ import java.util.logging.Logger;
 public class CookieUtils {
 
 	private static final Logger logger = Logger.getLogger(CookieUtils.class.getName());
+
+	public static final String TOKEN = "token";
 
 	// For testing, the age defaults to 30 minutes. The value is given in
 	// seconds!
@@ -374,17 +373,19 @@ public class CookieUtils {
 	}
 
 	public static String getCookieUsername(Cookie cookie) {
+		return claimsInToken(cookie).get(COOKIE_IDENTIFIER);
+	}
 
-		String username = null;
-
-		if (cookie != null) {
-			Form form = new Form(cookie.getValue());
-
-			logger.info("cookie token = " + form.getFirstValue("token"));
-
-			username = form.getFirstValue(COOKIE_IDENTIFIER);
+	public static Map<String, String> claimsInToken(Cookie cookie) {
+		if (cookie == null || cookie.getValue() == null) {
+			logger.warning("No cookie provided");
+			return new HashMap<String, String>();
 		}
-		return username;
+
+		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
+		String token = cookieInfo.getFirstValue(TOKEN);
+
+		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
 	}
 
 	public static String getCookieCloudServiceName(Cookie cookie) {
@@ -402,10 +403,9 @@ public class CookieUtils {
 	public static User getCookieUser(Cookie cookie)
 			throws ConfigurationException, ValidationException {
 
-		if (cookie != null) {
-			Form form = new Form(cookie.getValue());
-			String username = form.getFirstValue(COOKIE_IDENTIFIER);
-			return User.loadByName(username);
+		String userName = getCookieUsername(cookie);
+		if (userName != null) {
+			return User.loadByName(userName);
 		}
 
 		return null;

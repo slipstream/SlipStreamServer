@@ -29,12 +29,15 @@ import com.sixsq.slipstream.util.ResourceUriUtil;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
-import org.restlet.data.*;
+import org.restlet.data.Cookie;
+import org.restlet.data.MediaType;
+import org.restlet.data.Reference;
+import org.restlet.data.Status;
 import org.restlet.security.User;
-import org.restlet.security.Verifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class CookieAuthenticator extends AuthenticatorBase {
@@ -51,35 +54,22 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
 		logger.info("will authenticate cookie " + cookie);
 
-		boolean isAuthenticated = isTokenChecked(cookie);
+		Map<String, String> claimsInToken = CookieUtils.claimsInToken(cookie);
 
-		logger.info("isAuthenticated " + isAuthenticated);
-
-		if (isAuthenticated) {
+		boolean isTokenValid = !claimsInToken.isEmpty();
+		if (isTokenValid) {
 			handleValid(request, cookie);
 		} else {
 			handleNotValid(request, response);
 		}
 
-		return isAuthenticated;
-	}
-
-	private boolean isTokenChecked(Cookie cookie) {
-		if (cookie == null || cookie.getValue() == null) {
-			logger.warning("No cookie provided");
-			return false;
-		}
-
-		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
-		// TODO hard coded
-		String token = cookieInfo.getFirstValue("token");
-
-		return com.sixsq.slipstream.auth.TokenChecker.checkToken(token);
+		return isTokenValid;
 	}
 
 	private boolean handleValid(Request request, Cookie cookie) {
-		logger.info("");
+
 		String username = setClientInfo(request, cookie);
+
 		com.sixsq.slipstream.persistence.User user = null;
 
 		try {
@@ -127,8 +117,10 @@ public class CookieAuthenticator extends AuthenticatorBase {
 
 	private String setClientInfo(Request request, Cookie cookie) {
 		request.getClientInfo().setAuthenticated(true);
+
 		String username = CookieUtils.getCookieUsername(cookie);
 		logger.info("setClientInfo, username = '" + username + "'");
+
 		User user = new User(username);
 		request.getClientInfo().setUser(user);
 		return username;
