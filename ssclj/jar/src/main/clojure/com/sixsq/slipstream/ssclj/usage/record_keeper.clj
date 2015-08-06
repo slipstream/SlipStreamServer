@@ -136,7 +136,8 @@
         usage_records
         (kc/set-fields {:end_timestamp close-timestamp})
         (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)
-                   :metric_name         (:metric_name usage-metric)})))
+                   :metric_name         (:metric_name usage-metric)
+                   :end_timestamp       nil})))
 
   ([usage-metric]
     (close-usage-record usage-metric (:end_timestamp usage-metric))))
