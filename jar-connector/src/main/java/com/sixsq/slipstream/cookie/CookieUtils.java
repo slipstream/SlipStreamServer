@@ -20,12 +20,10 @@ package com.sixsq.slipstream.cookie;
  * -=================================================================-
  */
 
-import java.util.Date;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.User;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Cookie;
@@ -34,10 +32,12 @@ import org.restlet.data.Form;
 import org.restlet.security.Verifier;
 import org.restlet.util.Series;
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
+import java.util.Date;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Logger;
 
 /**
  * Contains utilities for handling authentication cookies.
@@ -46,6 +46,8 @@ import com.sixsq.slipstream.persistence.User;
  *
  */
 public class CookieUtils {
+
+	private static final Logger logger = Logger.getLogger(CookieUtils.class.getName());
 
 	// For testing, the age defaults to 30 minutes. The value is given in
 	// seconds!
@@ -91,14 +93,32 @@ public class CookieUtils {
 	 * @param idType
 	 * @param identifier
 	 */
-	public static void addAuthnCookie(Response response, String idType,
-			String identifier) {
+	public static void addAuthnCookie(Response response, String idType, String identifier) {
+		CookieSetting cookieSetting = createAuthnCookieSetting(idType, identifier);
+		Series<CookieSetting> cookieSettings = response.getCookieSettings();
+		cookieSettings.removeAll(COOKIE_NAME);
+		cookieSettings.add(cookieSetting);
+	}
+
+	public static void addAuthnCookieFromAuthnResponse(Response response, Response authnResponse) {
+		CookieSetting authnCookie = extractAuthnCookie(authnResponse);
 
 		Series<CookieSetting> cookieSettings = response.getCookieSettings();
 		cookieSettings.removeAll(COOKIE_NAME);
-		CookieSetting cookieSetting = createAuthnCookieSetting(idType,
-				identifier);
-		cookieSettings.add(cookieSetting);
+
+		cookieSettings.add(authnCookie);
+	}
+
+	private static CookieSetting extractAuthnCookie(Response response){
+		Series<CookieSetting> cookieSettings = response.getCookieSettings();
+		for (CookieSetting cookieSetting : cookieSettings) {
+			if(CookieUtils.COOKIE_NAME.equals(cookieSetting.getName())) {
+				return cookieSetting;
+			}
+		}
+
+		logger.warning("No authn cookie in response");
+		return null;
 	}
 
 	/**
@@ -359,6 +379,9 @@ public class CookieUtils {
 
 		if (cookie != null) {
 			Form form = new Form(cookie.getValue());
+
+			logger.info("cookie token = " + form.getFirstValue("token"));
+
 			username = form.getFirstValue(COOKIE_IDENTIFIER);
 		}
 		return username;
@@ -396,7 +419,7 @@ public class CookieUtils {
 		}
 	}
 
-	private static Form extractCookieValueAsForm(Cookie cookie) {
+	public static Form extractCookieValueAsForm(Cookie cookie) {
 		String value = (cookie != null) ? cookie.getValue() : null;
 		return new Form((value != null) ? value : "");
 	}

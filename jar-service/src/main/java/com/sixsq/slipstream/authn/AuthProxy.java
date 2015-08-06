@@ -1,9 +1,8 @@
 package com.sixsq.slipstream.authn;
 
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import org.restlet.Context;
+import org.restlet.Response;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
 import org.restlet.representation.Representation;
@@ -14,8 +13,6 @@ import org.restlet.util.Series;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import static org.restlet.data.Status.CLIENT_ERROR_UNAUTHORIZED;
-
 /**
  * Proxy to Authentication Service
  */
@@ -25,8 +22,8 @@ public class AuthProxy {
 
     private static final String AUTH_SERVER = "http://localhost:8202/auth";
 
-    public void validateUser(String username, String password)
-            throws ConfigurationException, ValidationException {
+    public Response validateUser(String username, String password)
+            throws ResourceException {
         ClientResource resource = null;
         Representation response = null;
 
@@ -46,25 +43,39 @@ public class AuthProxy {
             resource.addQueryParameter("password", password);
 
             response = resource.post("", MediaType.TEXT_PLAIN);
+            logger.info("Successful connection for '" + username + "'");
 
-            if(!resource.getResponse().getStatus().isSuccess()) {
-                throwUnauthorized(username);
-            }
+            return resource.getResponse();
 
-        } catch (Exception e) {
-            throwUnauthorized(username);
+        } catch (ResourceException re) {
+            handleResourceException(re, username);
+            return null;
         } finally {
             releaseResources(resource, response);
         }
     }
 
-    private void throwUnauthorized(String username) {
+    private void handleResourceException(ResourceException re, String username) {
+        if(re.getStatus().isConnectorError()) {
+            throwConnectionError(re);
+        } else {
+            throwAuthenticationError(re, username);
+        }
+    }
+
+    private void throwConnectionError(ResourceException re) {
+        logger.severe("Error in contacting authentication server : " + re.getStatus().getDescription());
+        throw re;
+    }
+
+    private void throwAuthenticationError(ResourceException re, String username) {
         boolean noUserName = (username==null || username.isEmpty());
         String message = noUserName ?
                 "No user name provided" :
                 String.format("Username/password combination not valid for user '%s'", username);
+
         logger.warning(message);
-        throw new ResourceException(CLIENT_ERROR_UNAUTHORIZED, message);
+        throw re;
     }
 
     private void releaseResources(ClientResource resource, Representation response) {

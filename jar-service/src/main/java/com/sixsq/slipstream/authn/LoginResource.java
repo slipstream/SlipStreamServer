@@ -67,31 +67,28 @@ public class LoginResource extends AuthnResource {
 	public void login(Representation entity) throws ResourceException {
 
 		Form form = new Form(entity);
-
 		String username = form.getFirstValue("username");
 		String password = form.getFirstValue("password");
 
-		try {
-			validateUser(username, password);
-		} catch (ConfigurationException e) {
-			throwConfigurationException(e);
-		} catch (ValidationException e) {
-			throwClientValidationError(e.getMessage());
-		}
-
-		setResponse(username);
+		Response authenticationResponse = validateUser(username, password);
+		addAuthnCookie(authenticationResponse);
+		redirectOrSuccess();
 	}
 
-	private void validateUser(String username, String password) throws ConfigurationException, ValidationException {
+	private Response validateUser(String username, String password) throws ResourceException {
 		AuthProxy authProxy = new AuthProxy();
-		authProxy.validateUser(username, password);
+		return authProxy.validateUser(username, password);
 	}
-	
-	private void setResponse(String username) {
+
+	private void addAuthnCookie(Response authenticationResponse) {
+		Response response = getResponse();
+		CookieUtils.addAuthnCookieFromAuthnResponse(response, authenticationResponse);
+	}
+
+	private void redirectOrSuccess() {
+
 		Request request = getRequest();
 		Response response = getResponse();
-
-		CookieUtils.addAuthnCookie(response, username);
 
 		if (isHtmlRequested(request)) {
 			String redirectPath = extractRedirectURL(request).getRelativePart();

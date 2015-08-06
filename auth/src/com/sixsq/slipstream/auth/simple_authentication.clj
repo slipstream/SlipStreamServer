@@ -3,7 +3,7 @@
   (:require
 
     [clojure.tools.logging                            :as log]
-
+    [clojure.set                                      :refer [rename-keys]]
     [korma.core                                       :as kc]
     [com.sixsq.slipstream.auth.core                   :as core]
     [com.sixsq.slipstream.auth.database.korma-helper  :as kh]
@@ -61,6 +61,7 @@
       clojure.string/upper-case))
 
 ;; TODO : check user not already present, password rules (length, complexity...)
+;; TODO : Currently unused as DB insertion is done by Java server
 (defn add-user-impl
   [user]
   (init)
@@ -83,6 +84,9 @@
                   encrypted-in-db
                   (= (sha512 password-credential) encrypted-in-db))]
 
+    (println "password-credential " password-credential)
+    (println "encrypted-in-db " encrypted-in-db)
+
     (if auth-ok
       [true (dissoc credentials :password)]
       [false {:message (str "Invalid combination username/password for '" user-name "'")}])))
@@ -90,11 +94,17 @@
 (def timestamp-next-day
   (t/plus (t/now) (t/days 1)))
 
+(defn enrich-claims
+  [claims]
+  (-> claims
+      (rename-keys {:user-name :com.sixsq.identifier})
+      (merge {:exp timestamp-next-day})))
+
 (defn token-impl
   [credentials]
   (let [[ok? claims] (auth-user-impl credentials)]
     (if ok?
-      [true {:token (jws/sign (merge claims {:exp timestamp-next-day})
+      [true {:token (jws/sign (enrich-claims claims)
                               (private-key auth-conf)
                               {:alg :rs256})}]
       [false {:message "Invalid token"}])))

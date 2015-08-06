@@ -1,4 +1,4 @@
-(defproject auth "0.1.0-SNAPSHOT"
+(defproject com.sixsq.slipstream/auth "2.14-SNAPSHOT"
   :description  "Authentication Service"
   :url          "http://sixsq.com"
 
@@ -39,19 +39,19 @@
   :plugins [[lein-environ "1.0.0"]]
 
   :profiles {
-             :provided
-             {:dependencies [[reply/reply "0.3.4"]]}
+             :uberjar  {  :aot [#"com.sixsq.slipstream.auth.*"]
+                          :env {  :clj-env        :production
+                                  :db-config-path "config-hsqldb.edn" }
+                          :jvm-opts ["-Dlogfile.path=production"]}
 
-             :dev
-             {:env          {:clj-env        :development
-                             :db-config-path "config-hsqldb-mem.edn"}
-              :jvm-opts     ["-Dlogfile.path=development"]
-              :dependencies [[peridot/peridot "0.3.0"]]}
+             :provided {:dependencies [[reply/reply "0.3.4"]]}
 
-             :test
-             {:env          {:clj-env        :test
-                             :db-config-path "config-hsqldb-mem.edn"}
+             :dev      {  :env          { :clj-env        :development
+                                          :db-config-path "config-hsqldb.edn"}
+                          :jvm-opts     ["-Dlogfile.path=development"]
+                          :dependencies [[peridot/peridot "0.3.0"]]}
 
-              :jvm-opts     ["-Dlogfile.path=test"]
-
-              :dependencies [[peridot/peridot "0.3.0"]]}})
+             :test     {  :env          {:clj-env        :test
+                                         :db-config-path "config-hsqldb-mem.edn"}
+                          :jvm-opts     ["-Dlogfile.path=test"]
+                          :dependencies [[peridot/peridot "0.3.0"]]}})

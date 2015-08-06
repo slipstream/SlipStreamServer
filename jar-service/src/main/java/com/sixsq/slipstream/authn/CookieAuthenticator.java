@@ -20,27 +20,26 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.restlet.Context;
-import org.restlet.Request;
-import org.restlet.Response;
-import org.restlet.data.Cookie;
-import org.restlet.data.MediaType;
-import org.restlet.data.Reference;
-import org.restlet.data.Status;
-import org.restlet.security.User;
-import org.restlet.security.Verifier;
-
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
+import org.restlet.Context;
+import org.restlet.Request;
+import org.restlet.Response;
+import org.restlet.data.*;
+import org.restlet.security.User;
+import org.restlet.security.Verifier;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class CookieAuthenticator extends AuthenticatorBase {
+
+	private static final Logger logger = Logger.getLogger(CookieAuthenticator.class.getName());
 
 	public CookieAuthenticator(Context context) {
 		super(context, false);
@@ -50,21 +49,36 @@ public class CookieAuthenticator extends AuthenticatorBase {
 	protected boolean authenticate(Request request, Response response) {
 
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
+		logger.info("will authenticate cookie " + cookie);
 
-		int result = CookieUtils.verifyAuthnCookie(cookie);
-		boolean isAuthenticated;
+		boolean isAuthenticated = isTokenChecked(cookie);
 
-		if (result == Verifier.RESULT_VALID) {
-			isAuthenticated = handleValid(request, cookie);
+		logger.info("isAuthenticated " + isAuthenticated);
+
+		if (isAuthenticated) {
+			handleValid(request, cookie);
 		} else {
-			handleNotValid(request, response, result);
-			isAuthenticated = false;
+			handleNotValid(request, response);
 		}
 
 		return isAuthenticated;
 	}
 
+	private boolean isTokenChecked(Cookie cookie) {
+		if (cookie == null || cookie.getValue() == null) {
+			logger.warning("No cookie provided");
+			return false;
+		}
+
+		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
+		// TODO hard coded
+		String token = cookieInfo.getFirstValue("token");
+
+		return com.sixsq.slipstream.auth.TokenChecker.checkToken(token);
+	}
+
 	private boolean handleValid(Request request, Cookie cookie) {
+		logger.info("");
 		String username = setClientInfo(request, cookie);
 		com.sixsq.slipstream.persistence.User user = null;
 
@@ -89,10 +103,8 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		return true;
 	}
 
-	private void handleNotValid(Request request, Response response, int result) {
-		if (result == Verifier.RESULT_INVALID) {
-			CookieUtils.removeAuthnCookie(response);
-		}
+	private void handleNotValid(Request request, Response response) {
+		CookieUtils.removeAuthnCookie(response);
 
 		List<MediaType> supported = new ArrayList<MediaType>();
 		supported.add(MediaType.APPLICATION_XML);
@@ -116,6 +128,7 @@ public class CookieAuthenticator extends AuthenticatorBase {
 	private String setClientInfo(Request request, Cookie cookie) {
 		request.getClientInfo().setAuthenticated(true);
 		String username = CookieUtils.getCookieUsername(cookie);
+		logger.info("setClientInfo, username = '" + username + "'");
 		User user = new User(username);
 		request.getClientInfo().setUser(user);
 		return username;

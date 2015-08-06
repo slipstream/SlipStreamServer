@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.auth.com.sixsq.slipstream.auth.test-simple-authentication
+(ns com.sixsq.slipstream.auth.test-simple-authentication
   (:refer-clojure :exclude [update])
   (:require
     [clojure.test :refer :all]
@@ -89,7 +89,7 @@
   (let [valid-token (-> (c/token sa valid-credentials)
                         second
                         :token)]
-    (is (= "super" (:user-name (c/check-token sa valid-token))))))
+    (is (= "super" (:com.sixsq.identifier (c/check-token sa valid-token))))))
 
 (deftest password-encryption-compatible-with-slipstream
   (is (= "304D73B9607B5DFD48EAC663544F8363B8A03CAAD6ACE21B369771E3A0744AAD0773640402261BD5F5C7427EF34CC76A2626817253C94D3B03C5C41D88C64399"
