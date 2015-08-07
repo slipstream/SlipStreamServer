@@ -20,7 +20,7 @@ public class AuthProxy {
 
     private static final Logger logger = Logger.getLogger(AuthProxy.class.getName());
 
-    private static final String AUTH_SERVER = "http://localhost:8202/auth";
+    private static final String AUTH_SERVER = "https://localhost:8202/auth";
 
     public Response validateUser(String username, String password)
             throws ResourceException {

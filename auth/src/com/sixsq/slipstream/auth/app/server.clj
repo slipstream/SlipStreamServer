@@ -10,9 +10,11 @@
     [ring.middleware.json                                           :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params                                         :refer [wrap-params]]
     [ring.middleware.cookies                                        :refer [wrap-cookies]]
+    [ring.middleware.ssl                                            :refer [wrap-hsts wrap-ssl-redirect]]
 
     [com.sixsq.slipstream.auth.core                                 :as auth]
     [com.sixsq.slipstream.auth.simple-authentication                :as sa]
+    [com.sixsq.slipstream.auth.app.http-utils                       :as hu]
 
     [com.sixsq.slipstream.auth.app.middleware.wrap-credentials      :refer [wrap-credentials]]
     [com.sixsq.slipstream.auth.app.routes                           :refer :all]
@@ -29,25 +31,32 @@
     (log/info "Done adding " (dissoc credentials :password))
     (view/registered-ok (:user-name credentials))))
 
+(defn credentials
+  [request]
+  (select-keys request [:user-name :password]))
+
 (defn response-token-ok
   [token]
-  { :status 200
-    :headers {"Content-Type" "text/plain"}
-    :cookies {"com.sixsq.slipstream.cookie" {:value token}}})
+  (-> (hu/response 200)
+      (assoc :cookies {"com.sixsq.slipstream.cookie" {:value token}})))
 
 (defn response-invalid-token
   []
-  { :status 401
-    :headers {"Content-Type" "text/plain"}})
+  (hu/response 401))
+
+(defn authenticate
+  [request]
+  (let [[ok? result]  (->> request
+                      credentials
+                      (auth/auth-user authentication))]
+    (hu/response (if ok? 200 401))))
 
 (defn login
   [request]
 
-  (let [credentials   (select-keys request [:user-name :password])
-        [ok? result]  (auth/token authentication credentials)]
-
-    (log/info "result " result)
-
+  (let [[ok? result] (->> request
+                          credentials
+                          (auth/token authentication))]
     (if ok?
       (response-token-ok result)
       (response-invalid-token))))
@@ -58,7 +67,9 @@
   (POST uri-register request  (add-user request))
 
   (GET  uri-login    []       (view/login))
-  (POST uri-login    request  (login request)))
+  (POST uri-login    request  (login request))
+
+  (GET  uri-authenticate []   (authenticate request)))
 
 (defn- create-ring-handler
   []

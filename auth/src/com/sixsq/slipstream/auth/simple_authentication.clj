@@ -85,6 +85,9 @@
                   password-credential
                   encrypted-in-db
                   (= (sha512 password-credential) encrypted-in-db))]
+
+    (log/info (:user-name credentials) ": " result)
+
     (if auth-ok
       [true (dissoc credentials :password)]
       [false {:message (str "Invalid combination username/password for '" user-name "'")}])))
