@@ -2,7 +2,6 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.license :refer :all]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
-    [com.sixsq.slipstream.ssclj.db.filesystem-test-utils :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [clojure.test :refer :all]
     [clojure.data.json :as json]
@@ -10,10 +9,6 @@
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
-
-(use-fixtures :each db/flush-db-fixture)
-
-(use-fixtures :once db/temp-db-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 

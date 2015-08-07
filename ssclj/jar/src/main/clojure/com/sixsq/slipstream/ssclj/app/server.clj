@@ -17,7 +17,6 @@
     [com.sixsq.slipstream.ssclj.app.params                          :as p]
     [com.sixsq.slipstream.ssclj.resources.root                      :as root]
     [com.sixsq.slipstream.ssclj.db.impl                             :as db]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding               :as fsdb]
     [com.sixsq.slipstream.ssclj.db.database-binding                 :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils        :as du]))
 
@@ -32,9 +31,9 @@
   []
   (try
     (root/add)
-    (log/info "created Root resource")
+    (log/info "Created" root/resource-name "resource")
     (catch Exception e
-      (log/info "Root resource not created; may already exist; message: " (str e)))))
+      (log/info root/resource-name "resource not created; may already exist; message: " (str e)))))
 
 (defn- create-ring-handler
   "Creates a ring handler that wraps all of the service routes

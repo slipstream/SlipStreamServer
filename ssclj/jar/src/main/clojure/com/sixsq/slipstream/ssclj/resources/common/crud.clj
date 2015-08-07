@@ -129,7 +129,7 @@
 
 (defmethod new-identifier :default
   [json resource-name]
-  (assoc json :id (u/new-resource-id resource-name)))
+  (assoc json :id (u/new-resource-id (u/de-camelcase resource-name))))
 
 ;;
 ;; Determine the ACL to use for a new resource.

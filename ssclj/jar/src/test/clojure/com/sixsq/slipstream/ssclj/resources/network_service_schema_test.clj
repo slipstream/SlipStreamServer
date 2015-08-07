@@ -13,7 +13,7 @@
    :acl             acl
    :resourceURI     resource-uri
 
-   :id              "NetWorkService/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
+   :id              "network-service/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
    :created         "1970-04-16T08:30:00.0Z"
    :updated         "1970-04-16T19:30:00.0Z"
 
@@ -38,7 +38,7 @@
 (def valid-load-balancer
   {
    :acl             acl
-   :id              "NetworkService/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
+   :id              "network-service/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
    :resourceURI     resource-uri
 
    :state           "STARTED"
@@ -49,7 +49,7 @@
 (def valid-QoS
   {
    :acl             acl
-   :id              "NetworkService/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
+   :id              "network-service/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
    :resourceURI     resource-uri
 
    :state           "STARTED"
