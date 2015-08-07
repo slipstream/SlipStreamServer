@@ -225,14 +225,10 @@ public class Collector {
 
 			String instanceId = cloudVm.getInstanceId();
 
-			if (cloudVm.getIsUsable() && !UsageRecorder.hasRecorded(cloud, instanceId)) {
-				logger.info("VM usable => start records all metrics");
+			if (cloudVm.getIsUsable()) {
 				UsageRecorder.insertStart(instanceId, user, cloud, UsageRecorder.createVmMetrics(cloudVm));
-			} else if (!cloudVm.getIsUsable() && UsageRecorder.hasRecorded(cloud, instanceId)) {
-				logger.info("VM becomes unusable => stop all metrics");
-				UsageRecorder.insertEnd(instanceId, user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 			} else {
-				logger.info(instanceId + " already recorded");
+				UsageRecorder.insertEnd(instanceId, user, cloud, UsageRecorder.createVmMetrics(cloudVm));
 			}
 		}
 	}
