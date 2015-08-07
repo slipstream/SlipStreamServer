@@ -30,7 +30,7 @@
                                :rules [{:type "USER" :principal "jane" :right "ALL"}]}
                        :timestamp "2015-01-16T08:05:00.0Z"
                   :content  {
-                             :resource {:href "Run/45614147-aed1-4a24-889d-6365b0b1f2cd"}
+                             :resource {:href "run/45614147-aed1-4a24-889d-6365b0b1f2cd"}
                                        :state "Started"}
                   :type "state"
                   :severity "critical"
@@ -39,7 +39,7 @@
 (def valid-events
   (for [i (range nb-events)]
     (-> valid-event
-        (assoc-in [:content :resource :href] (str "Run/" i))
+        (assoc-in [:content :resource :href] (str "run/" i))
         (assoc :timestamp (if (even? i) "2016-01-16T08:05:00.0Z" "2015-01-16T08:05:00.0Z")))))
 
 (defn insert-some-events
@@ -106,22 +106,22 @@
   (event-is-count 2  "?$first=3&$last=4"))
 
 (deftest pagination-occurs-after-filtering
-  (event-is-count 1 "?$filter=content/resource/href='Run/5'")
-  (event-is-count 1 "?$filter=content/resource/href='Run/5'&$last=1")
-  (event-is-count 1 "?$last=1&$filter=content/resource/href='Run/5'"))
+  (event-is-count 1 "?$filter=content/resource/href='run/5'")
+  (event-is-count 1 "?$filter=content/resource/href='run/5'&$last=1")
+  (event-is-count 1 "?$last=1&$filter=content/resource/href='run/5'"))
 
 (deftest resources-filtering
   (doseq [i (range nb-events)]
-    (event-is-count 1 (str "?$filter=content/resource/href='Run/" i "'")))
-  (event-is-count 0 "?$filter=content/resource/href='Run/100'")
+    (event-is-count 1 (str "?$filter=content/resource/href='run/" i "'")))
+  (event-is-count 0 "?$filter=content/resource/href='run/100'")
 
-  (event-is-count 1 "?$filter=content/resource/href='Run/3' and type='state'")
-  (event-is-count 1 "?$filter=type='state' and content/resource/href='Run/3'")
-  (event-is-count 1 "?$filter=type='state'       and     content/resource/href='Run/3'")
+  (event-is-count 1 "?$filter=content/resource/href='run/3' and type='state'")
+  (event-is-count 1 "?$filter=type='state' and content/resource/href='run/3'")
+  (event-is-count 1 "?$filter=type='state'       and     content/resource/href='run/3'")
 
-  (event-is-count 1 "?$filter=content/resource/href='Run/3'")
-  (event-is-count 0 "?$filter=type='WRONG' and content/resource/href='Run/3'")
-  (event-is-count 0 "?$filter=content/resource/href='Run/3' and type='WRONG'")
+  (event-is-count 1 "?$filter=content/resource/href='run/3'")
+  (event-is-count 0 "?$filter=type='WRONG' and content/resource/href='run/3'")
+  (event-is-count 0 "?$filter=content/resource/href='run/3' and type='WRONG'")
   (event-is-count nb-events "?$filter=type='state'"))
 
 (deftest filter-and
@@ -143,4 +143,4 @@
 
 (deftest filter-multiple
   (event-is-count 0 "?$filter=type='state'&$filter=type='XXX'")
-  (event-is-count 1 "?$filter=type='state'&$filter=content/resource/href='Run/3'"))
+  (event-is-count 1 "?$filter=type='state'&$filter=content/resource/href='run/3'"))

@@ -17,7 +17,7 @@
 ;; utilities
 ;;
 
-(def ^:const resource-name "Root")
+(def ^:const resource-name "CloudEntryPoint")
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 

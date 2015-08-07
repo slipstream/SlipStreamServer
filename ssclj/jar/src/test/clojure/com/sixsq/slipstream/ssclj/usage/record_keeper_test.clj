@@ -46,11 +46,18 @@
               { :name  "RAM-GB" }
               { :name  "disk-GB"}]})
 
-(def event-second-start
-  (assoc event-start :start_timestamp start-day-2))
+(def event-starting-day-2
+  (-> event-start
+      (assoc :start_timestamp start-day-2)
+      (assoc :metrics [{    :name  "nb-cpu"
+                            :value 8 }
+                       {    :name  "RAM-GB"
+                            :value 16 }
+                       {    :name  "disk-GB"
+                            :value 300 }])))
 
-(def event-second-start
-  (assoc event-second-start :end_timestamp end-day-2))
+(def event-ending-day-2
+  (assoc event-start :end_timestamp end-day-2))
 
 (deftest basic-insert-open
   (-insertStart event-start)  
@@ -103,23 +110,33 @@
 (deftest invalid-date
   (is (thrown? IllegalArgumentException (records-for-interval end-day-2 start-day-0))))
 
-(deftest event-already-open-can-be-reopened-but-does-nothing
+(deftest event-already-open-can-be-reopened-but-doeexoscale-ch-gva:fe3c02d4-c8f9-427a-a8f8-897e422edd2cs-nothing
   (is (empty? (select usage_records)))
   (-insertStart event-start)
   (let [records (select usage_records)]
-    (-insertStart event-start)
+    (is (= 3 (count records)))
+    (-insertStart event-starting-day-2)
     (is (= records (select usage_records)))))
 
-(deftest reappearance-should-open-new-usage-record-when-scaling
+(deftest same-metric-can-be-open-close-multiple-times-when-scaling
   (is (empty? (select usage_records)))
 
   (-insertStart event-start)
   (-insertEnd   event-end)
+  (-insertStart event-starting-day-2)
+  (-insertEnd event-ending-day-2)
 
-  (-insertStart event-second-start)
-  (-insertEnd event-second-start)
-
-  (is (= 6 (count (select usage_records)))))
+  (is (=  (set
+           [["nb-cpu"   4.0   event-start-time event-end-time]
+            ["RAM-GB"   8.0   event-start-time event-end-time]
+            ["disk-GB"  100.5 event-start-time event-end-time]
+            ["nb-cpu"   8.0   start-day-2 end-day-2]
+            ["RAM-GB"   16.0  start-day-2 end-day-2]
+            ["disk-GB"  300.0 start-day-2 end-day-2]])
+          (set
+            (map
+              #((juxt :metric_name :metric_value :start_timestamp :end_timestamp) %)
+              (select usage_records))))))
 
 (deftest check-close-event-without-start
   (-insertEnd event-end)

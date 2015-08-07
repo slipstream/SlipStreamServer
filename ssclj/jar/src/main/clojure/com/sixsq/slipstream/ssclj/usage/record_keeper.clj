@@ -136,7 +136,8 @@
         usage_records
         (kc/set-fields {:end_timestamp close-timestamp})
         (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)
-                   :metric_name         (:metric_name usage-metric)})))
+                   :metric_name         (:metric_name usage-metric)
+                   :end_timestamp       nil})))
 
   ([usage-metric]
     (close-usage-record usage-metric (:end_timestamp usage-metric))))
@@ -176,7 +177,7 @@
   [summary acl]  
   (-> summary
       (update-in   [:usage] u/serialize)
-      (assoc :id   (str "Usage/" (cu/random-uuid)))
+      (assoc :id   (str "usage/" (cu/random-uuid)))
       (assoc :acl  (u/serialize acl))))  
 
 (defn insert-summary!   
@@ -184,7 +185,10 @@
   (let [acl                 (acl-for-user-cloud summary)
         summary-resource    (resource-for summary acl)]    
     (kc/insert usage_summaries (kc/values summary-resource))    
-    (acl/insert-resource (:id summary-resource) "Usage" (acl/types-principals-from-acl acl))))
+    (acl/insert-resource
+      (cu/de-camelcase (:id summary-resource))
+      "Usage"
+      (acl/types-principals-from-acl acl))))
 
 (defn records-for-interval
   [start end]

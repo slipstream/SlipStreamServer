@@ -7,7 +7,7 @@
     [compojure.core :as cc]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding :as fsdb]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]))
@@ -62,14 +62,6 @@
     (is (f count))
     m))
 
-(defn is-nil-response [m]
-  (is (nil? (:response m)))
-  m)
-
-(defn dump [m]
-  (pprint m)
-  m)
-
 (defn does-body-contain [m v]
   (let [body (get-in m [:response :body])]
     (is (= (merge body v) body))))
@@ -87,8 +79,7 @@
   (apply cc/routes rs))
 
 (defn make-ring-app [resource-routes]
-  (-> (fsdb/get-instance fsdb/default-db-prefix)
-      (db/set-impl!))
+  (db/set-impl! (dbdb/get-instance))
 
   (-> resource-routes
       (wrap-exceptions)

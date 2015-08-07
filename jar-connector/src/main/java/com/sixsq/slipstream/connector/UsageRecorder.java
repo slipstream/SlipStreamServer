@@ -47,13 +47,19 @@ public class UsageRecorder {
 				return;
 			}
 
+			if(hasRecorded(cloud, instanceId)){
+				logger.fine("Already recorded => avoiding inserting usage record START for "
+						+ metrics + ", " + describe(instanceId, user, cloud));
+				return;
+			}
+
 			logger.info("Inserting usage record START for " + metrics + ", " + describe(instanceId, user, cloud));
 
 			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
 					keyCloudVMInstanceID(cloud, instanceId), new Date(), null, metrics);
 			UsageRecord.post(usageRecord);
 
-			recordedVmInstanceIds.add(cloudInstanceId(cloud, instanceId));
+			recordedVmInstanceIds.add(keyCloudVMInstanceID(cloud, instanceId));
 
 			logger.info("DONE Insert usage record START for " + describe(instanceId, user, cloud));
 		} catch (Exception e) {
@@ -68,13 +74,19 @@ public class UsageRecorder {
 				return;
 			}
 
+			if(!hasRecorded(cloud, instanceId)){
+				logger.fine("Not recorded => avoiding inserting usage record END for "
+						+ metrics + ", " + describe(instanceId, user, cloud));
+				return;
+			}
+
 			logger.info("Inserting usage record END, metrics" + metrics + ", for " + describe(instanceId, user, cloud));
 
 			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
 					keyCloudVMInstanceID(cloud, instanceId), null, new Date(), metrics);
 			UsageRecord.post(usageRecord);
 
-			recordedVmInstanceIds.remove(cloudInstanceId(cloud, instanceId));
+			recordedVmInstanceIds.remove(keyCloudVMInstanceID(cloud, instanceId));
 
 			logger.info("DONE Insert usage record END for " + describe(instanceId, user, cloud));
 		} catch (Exception e) {
@@ -82,14 +94,9 @@ public class UsageRecorder {
 		}
 	}
 
-	public static boolean hasRecorded(String cloud, String instanceId) {
+	private static boolean hasRecorded(String cloud, String instanceId) {
 		logger.info("UsageRecorder, recordedVmInstanceIds = " + recordedVmInstanceIds);
-		return recordedVmInstanceIds.contains(cloudInstanceId(cloud, instanceId));
-	}
-
-	public static void insertRestart(String instanceId, String user, String cloud, List<UsageMetric> metrics) {
-		insertEnd(instanceId, user, cloud, metrics);
-		insertStart(instanceId, user, cloud, metrics);
+		return recordedVmInstanceIds.contains(keyCloudVMInstanceID(cloud, instanceId));
 	}
 
 	private static ACL getAcl(String user) {
@@ -129,19 +136,6 @@ public class UsageRecorder {
 	}
 
 	private static String keyCloudVMInstanceID(String cloud, String instanceId) {
-		return cloud + ":" + instanceId;
-	}
-
-//	// TODO : factor out common functions with Event class
-//	private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-//
-//	private static final DateFormat ISO8601Formatter = new SimpleDateFormat(ISO_8601_PATTERN, Locale.US);
-//
-//	static {
-//		ISO8601Formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-//	}
-
-	private static String cloudInstanceId(String cloud, String instanceId) {
 		return cloud + ":" + instanceId;
 	}
 
