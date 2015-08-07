@@ -41,7 +41,9 @@ public class MailUsage {
         String path = "/com/sixsq/slipstream/messages/email_daily_usage_template.html";
         String emailTemplate = readFile(path);
 
-        return String.format(emailTemplate, userName, humanDate, usageCloud(), directLink, unsubcribeLink, version);
+        String userOnInstance = String.format("%s on %s", userName, slipstreamInstanceName());
+
+        return String.format(emailTemplate, userOnInstance, humanDate, usageCloud(), directLink, unsubcribeLink, version);
     }
 
     private String readFile(String path) {
@@ -85,28 +87,32 @@ public class MailUsage {
     }
 
     private String unsubcribeLink() {
-        try {
-            return baseUrl() + "/user/" + userName + "?edit=true#general";
-        }catch(ValidationException ve){
-            logger.warning("Unable to get base URL");
-            return null;
-        }
+        return baseUrl() + "/user/" + userName + "?edit=true#general";
     }
 
     private String linkToDailyUsageJson() {
-        try {
-            String cimiQueryStringUsage = MailUtils.cimiQueryStringUsage(userName, startDate, endDate);
-            String resourceURL = String.format("/api/usage?%s", cimiQueryStringUsage);
+        String cimiQueryStringUsage = MailUtils.cimiQueryStringUsage(userName, startDate, endDate);
+        String resourceURL = String.format("/api/usage?%s", cimiQueryStringUsage);
 
-            return baseUrl() + resourceURL;
-        }catch(ValidationException ve){
+        return baseUrl() + resourceURL;
+    }
+
+    protected String baseUrl() {
+        try {
+            return Configuration.getInstance().baseUrl;
+        } catch(ValidationException ve){
             logger.warning("Unable to get base URL");
-            return null;
+            return "SlipStream/";
         }
     }
 
-    protected String baseUrl() throws ValidationException {
-        return Configuration.getInstance().baseUrl;
+    private String slipstreamInstanceName() {
+        if (baseUrl() == null || baseUrl().isEmpty()) {
+            return "";
+        }
+
+        int lastIndexOf = baseUrl().lastIndexOf("//");
+        return lastIndexOf>0 ? baseUrl().substring(lastIndexOf + 2) : "";
     }
 
     protected String currentVersion() {
