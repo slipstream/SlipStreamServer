@@ -127,11 +127,9 @@ public class CookieAuthenticator extends AuthenticatorBase {
 	}
 
 	private void setCloudServiceName(Request request, Cookie cookie) {
-		String cookieCloudServiceName = CookieUtils
-				.getCookieCloudServiceName(cookie);
+		String cookieCloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
 		if (cookieCloudServiceName != null) {
-			request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME,
-					cookieCloudServiceName);
+			request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME, cookieCloudServiceName);
 		}
 	}
 

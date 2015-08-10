@@ -20,32 +20,29 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.QuotaException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.junit.Test;
-
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.QuotaException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.QuotaParameter;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 public class QuotaTest {
+
+	@BeforeClass
+	public static void setupClass() {
+		Event.muteForTests();
+	}
 
 	private Run testQuotaCreateRun(User user, String cloud)
 			throws ValidationException {

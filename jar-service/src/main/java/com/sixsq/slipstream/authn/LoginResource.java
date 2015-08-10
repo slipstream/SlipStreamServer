@@ -64,25 +64,25 @@ public class LoginResource extends AuthnResource {
 	}
 
 	@Post
-	public void login(Representation entity) throws ResourceException {
+		public void login(Representation entity) throws ResourceException {
 
 		Form form = new Form(entity);
 		String username = form.getFirstValue("username");
 		String password = form.getFirstValue("password");
 
-		Response authenticationResponse = validateUser(username, password);
-		addAuthnCookie(authenticationResponse);
+		Response token = createToken(username, password);
+		addAuthnCookie(token);
 		redirectOrSuccess();
 	}
 
-	private Response validateUser(String username, String password) throws ResourceException {
+	private Response createToken(String username, String password) throws ResourceException {
 		AuthProxy authProxy = new AuthProxy();
-		return authProxy.validateUser(username, password);
+		return authProxy.createToken(username, password);
 	}
 
-	private void addAuthnCookie(Response authenticationResponse) {
+	private void addAuthnCookie(Response token) {
 		Response response = getResponse();
-		CookieUtils.addAuthnCookieFromAuthnResponse(response, authenticationResponse);
+		CookieUtils.addAuthnCookieFromAuthnResponse(response, token);
 	}
 
 	private void redirectOrSuccess() {

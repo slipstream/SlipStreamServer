@@ -7,23 +7,23 @@
     [korma.core                                       :as kc]
     [com.sixsq.slipstream.auth.core                   :as core]
     [com.sixsq.slipstream.auth.database.korma-helper  :as kh]
+    [com.sixsq.slipstream.auth.conf.config            :as cf]
 
-    [buddy.hashers                                    :as hs]
     [buddy.sign.jws                                   :as jws]
     [buddy.core.hash                                  :as ha]
     [buddy.core.codecs                                :as co]
     [buddy.core.keys                                  :as ks]
 
     [clj-time.core                                    :as t]
-    [clojure.java.io                                  :as io]
-    ))
+    [clojure.java.io                                  :as io]))
 
 ;; TODO do not show private information in source code.
 (def auth-conf {:pubkey     "auth_pubkey.pem"
                 :privkey    "auth_privkey.pem"
                 :passphrase "b8ddy-pr0t0"})
 
-(def ^:dynamic *nb-minutes-expiry* 2)
+
+(def default-nb-minutes-expiry 2)
 
 ;;
 ;; DB
@@ -86,15 +86,15 @@
                   encrypted-in-db
                   (= (sha512 password-credential) encrypted-in-db))]
 
-    (log/info (:user-name credentials) ": " result)
-
     (if auth-ok
       [true (dissoc credentials :password)]
       [false {:message (str "Invalid combination username/password for '" user-name "'")}])))
 
 (defn expiry-timestamp
   []
-  (t/plus (t/now) (t/minutes *nb-minutes-expiry*)))
+  (->> (cf/property-value :nb-minutes-expiry default-nb-minutes-expiry)
+       t/minutes
+       (t/plus (t/now))))
 
 (defn enrich-claims
   [claims]

@@ -41,17 +41,17 @@
   :profiles {
              :uberjar  {  :aot [#"com.sixsq.slipstream.auth.*"]
                           :env {  :clj-env        :production
-                                  :db-config-path "config-hsqldb.edn" }
+                                  :config-path "config-hsqldb.edn" }
                           :jvm-opts ["-Dlogfile.path=production"]}
 
              :provided {:dependencies [[reply/reply "0.3.4"]]}
 
              :dev      {  :env          { :clj-env        :development
-                                          :db-config-path "config-hsqldb.edn"}
+                                          :config-path "config-hsqldb.edn"}
                           :jvm-opts     ["-Dlogfile.path=development"]
                           :dependencies [[peridot/peridot "0.3.0"]]}
 
              :test     {  :env          {:clj-env        :test
-                                         :db-config-path "config-hsqldb-mem.edn"}
+                                         :config-path "config-hsqldb-mem.edn"}
                           :jvm-opts     ["-Dlogfile.path=test"]
                           :dependencies [[peridot/peridot "0.3.0"]]}})

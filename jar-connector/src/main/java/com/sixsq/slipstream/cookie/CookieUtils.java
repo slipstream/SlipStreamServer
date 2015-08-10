@@ -75,16 +75,6 @@ public class CookieUtils {
 	}
 
 	/**
-	 * Insert a new authentication cookie into a Response using default id type.
-	 *
-	 * @param response
-	 * @param identifier
-	 */
-	public static void addAuthnCookie(Response response, String identifier) {
-		addAuthnCookie(response, COOKIE_DEFAULT_IDTYPE, identifier);
-	}
-
-	/**
 	 * Insert a new authentication cookie into a Response using the given
 	 * values. None of the arguments can be null.
 	 *
@@ -99,8 +89,8 @@ public class CookieUtils {
 		cookieSettings.add(cookieSetting);
 	}
 
-	public static void addAuthnCookieFromAuthnResponse(Response response, Response authnResponse) {
-		CookieSetting authnCookie = extractAuthnCookie(authnResponse);
+	public static void addAuthnCookieFromAuthnResponse(Response response, Response token) {
+		CookieSetting authnCookie = extractAuthnCookie(token);
 
 		Series<CookieSetting> cookieSettings = response.getCookieSettings();
 		cookieSettings.removeAll(COOKIE_NAME);
@@ -115,18 +105,10 @@ public class CookieUtils {
 				return cookieSetting;
 			}
 		}
-
 		logger.warning("No authn cookie in response");
 		return null;
 	}
 
-	/**
-	 * Insert a new authentication cookie into a Request using the given values.
-	 * None of the arguments can be null.
-	 *
-	 * @param identifier
-	 * @param response
-	 */
 	public static void addAuthnCookie(Request request, String identifier) {
 
 		request.getCookies().clear();
@@ -136,14 +118,6 @@ public class CookieUtils {
 
 	}
 
-	/**
-	 * Insert a new authentication cookie into a Request using the given values.
-	 * None of the arguments can be null.
-	 *
-	 * @param request
-	 * @param identifier
-	 * @param cloudServiceName
-	 */
 	public static void addAuthnCookie(Request request, String identifier,
 			String cloudServiceName) {
 
@@ -154,32 +128,10 @@ public class CookieUtils {
 		request.getCookies().add(cookieSetting);
 	}
 
-	/**
-	 * Creates a new authentication cookie using the provided information. None
-	 * of the arguments may be null.
-	 *
-	 * @param request
-	 * @param idType
-	 * @param identifier
-	 *
-	 * @return new authentication cookie
-	 */
-	private static CookieSetting createAuthnCookieSetting(String idType,
-			String identifier) {
-
+	private static CookieSetting createAuthnCookieSetting(String idType, String identifier) {
 		return createAuthnCookieSetting(idType, identifier, new Properties());
 	}
 
-	/**
-	 * Creates a new authentication cookie using the provided information. None
-	 * of the arguments may be null.
-	 *
-	 * @param idType
-	 * @param identifier
-	 * @param properties
-	 *
-	 * @return new authentication cookie
-	 */
 	private static CookieSetting createAuthnCookieSetting(String idType,
 			String identifier, Properties properties) {
 
@@ -394,8 +346,7 @@ public class CookieUtils {
 
 		if (cookie != null) {
 			Form form = new Form(cookie.getValue());
-			cloudServiceName = form
-					.getFirstValue(RuntimeParameter.CLOUD_SERVICE_NAME);
+			cloudServiceName = form.getFirstValue(RuntimeParameter.CLOUD_SERVICE_NAME);
 		}
 		return cloudServiceName;
 	}

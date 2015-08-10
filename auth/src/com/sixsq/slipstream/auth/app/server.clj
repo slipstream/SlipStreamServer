@@ -10,7 +10,6 @@
     [ring.middleware.json                                           :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params                                         :refer [wrap-params]]
     [ring.middleware.cookies                                        :refer [wrap-cookies]]
-    [ring.middleware.ssl                                            :refer [wrap-hsts wrap-ssl-redirect]]
 
     [com.sixsq.slipstream.auth.core                                 :as auth]
     [com.sixsq.slipstream.auth.simple-authentication                :as sa]
@@ -22,18 +21,19 @@
 
 (def authentication (sa/get-instance))
 
+(defn extract-credentials
+  [request]
+  (select-keys request [:user-name :password]))
+
 (defn add-user
   [request]
   (log/info "request" request)
-  (let [credentials (select-keys request [:user-name :password])]
+  (let [credentials (extract-credentials request)]
     (log/info "Will add " (dissoc credentials :password))
     (auth/add-user! authentication credentials)
     (log/info "Done adding " (dissoc credentials :password))
     (view/registered-ok (:user-name credentials))))
 
-(defn credentials
-  [request]
-  (select-keys request [:user-name :password]))
 
 (defn response-token-ok
   [token]
@@ -44,32 +44,27 @@
   []
   (hu/response 401))
 
-(defn authenticate
-  [request]
-  (let [[ok? result]  (->> request
-                      credentials
-                      (auth/auth-user authentication))]
-    (hu/response (if ok? 200 401))))
+(defn log-result
+  [credentials ok?]
+  (log/info (str "'" (:user-name credentials) "' : "
+                 (if ok? "login OK" "invalid password"))))
 
 (defn login
   [request]
-
-  (let [[ok? result] (->> request
-                          credentials
-                          (auth/token authentication))]
+  (let [credentials (extract-credentials request)
+        [ok? result] (auth/token authentication credentials)]
+    (log-result credentials ok?)
     (if ok?
       (response-token-ok result)
       (response-invalid-token))))
 
 (defroutes app
 
-  (GET  uri-register []       (view/register-form))
-  (POST uri-register request  (add-user request))
+  (GET  uri-register []             (view/register-form))
+  (POST uri-register request        (add-user request))
 
-  (GET  uri-login    []       (view/login))
-  (POST uri-login    request  (login request))
-
-  (GET  uri-authenticate []   (authenticate request)))
+  (GET  uri-login    []             (view/login))
+  (POST uri-login    request        (login request)))
 
 (defn- create-ring-handler
   []
