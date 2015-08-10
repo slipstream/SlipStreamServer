@@ -4,4 +4,5 @@
   :subname      "mem://localhost:9012/devresources"
   :make-pool?   true}
 
- :nb-minutes-expiry 1}
+ ;; small value to test token expired
+ :nb-minutes-expiry 0.01}

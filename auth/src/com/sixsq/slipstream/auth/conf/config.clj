@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.auth.conf.config
-  (:require [environ.core :as environ]
-            [clojure.edn :as edn]
-            [clojure.tools.logging :as log]
-            [clojure.java.io :as io]))
+  (:require [environ.core           :as environ]
+            [clojure.edn            :as edn]
+            [clojure.tools.logging  :as log]
+            [clojure.java.io        :as io]))
 
 (defn- find-resource
   [resource-path]

@@ -25,7 +25,7 @@
     When valid, the claims is returned (typically containing user name).
     If it is not valid, an exception is thrown.")
 
-  ;; TODO
+  ;; TODO later
   ;; revoke-user
   ;; reset-user
 

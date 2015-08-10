@@ -9,6 +9,8 @@
     [com.sixsq.slipstream.auth.database.korma-helper  :as kh]
     [com.sixsq.slipstream.auth.conf.config            :as cf]
 
+    [environ.core                                     :as environ]
+
     [buddy.sign.jws                                   :as jws]
     [buddy.core.hash                                  :as ha]
     [buddy.core.codecs                                :as co]
@@ -17,13 +19,10 @@
     [clj-time.core                                    :as t]
     [clojure.java.io                                  :as io]))
 
-;; TODO do not show private information in source code.
 (def auth-conf {:pubkey     "auth_pubkey.pem"
-                :privkey    "auth_privkey.pem"
-                :passphrase "b8ddy-pr0t0"})
-
-
-(def default-nb-minutes-expiry 2)
+                :privkey    "auth_privkey.pem"})
+(def default-nb-minutes-expiry (* 24 60))
+(def signing-algorithm {:alg :rs256})
 
 ;;
 ;; DB
@@ -35,7 +34,6 @@
     (log/info "Korma init done")
 
     (kc/defentity users (kc/table "USER"))
-
     (log/info "Korma Entities defined")))
 ;;
 ;; DB
@@ -43,9 +41,11 @@
 
 (defn private-key
   [auth-conf]
-  (ks/private-key
-    (io/resource (:privkey auth-conf))
-    (:passphrase auth-conf)))
+  (if-let [passphrase (environ/env :passphrase)]
+    (ks/private-key
+      (io/resource (:privkey auth-conf))
+      passphrase)
+    (throw (IllegalStateException. "passphrase not defined"))))
 
 (defn public-key
   [auth-conf]
@@ -93,7 +93,8 @@
 (defn expiry-timestamp
   []
   (->> (cf/property-value :nb-minutes-expiry default-nb-minutes-expiry)
-       t/minutes
+       (* 60000)
+       t/millis
        (t/plus (t/now))))
 
 (defn enrich-claims
@@ -109,12 +110,12 @@
     (if ok?
       [true {:token (jws/sign (enrich-claims claims)
                               (private-key auth-conf)
-                              {:alg :rs256})}]
-      [false {:message "Invalid token"}])))
+                              signing-algorithm)}]
+      [false {:message "Invalid credentials when creating token"}])))
 
 (defn check-token-impl
   [token]
-  (jws/unsign token (public-key auth-conf) {:alg :rs256}))
+  (jws/unsign token (public-key auth-conf) signing-algorithm))
 
 (deftype SimpleAuthentication
   []

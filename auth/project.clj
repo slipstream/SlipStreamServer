@@ -47,11 +47,13 @@
              :provided {:dependencies [[reply/reply "0.3.4"]]}
 
              :dev      {  :env          { :clj-env        :development
-                                          :config-path "config-hsqldb.edn"}
+                                          :config-path "config-hsqldb.edn"
+                                          :passphrase  "b8ddy-pr0t0"}
                           :jvm-opts     ["-Dlogfile.path=development"]
                           :dependencies [[peridot/peridot "0.3.0"]]}
 
-             :test     {  :env          {:clj-env        :test
-                                         :config-path "config-hsqldb-mem.edn"}
+             :test     {  :env          {:clj-env     :test
+                                         :config-path "config-hsqldb-mem.edn"
+                                         :passphrase  "b8ddy-pr0t0"}
                           :jvm-opts     ["-Dlogfile.path=test"]
                           :dependencies [[peridot/peridot "0.3.0"]]}})
