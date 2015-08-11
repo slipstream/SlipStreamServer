@@ -118,15 +118,15 @@ public class CookieUtils {
 
 	}
 
-	public static void addAuthnCookie(Request request, String identifier,
-			String cloudServiceName) {
-
-		request.getCookies().clear();
-		CookieSetting cookieSetting = createAuthnCookieSetting(
-				COOKIE_DEFAULT_IDTYPE, identifier,
-				generateCloudServiceNameProperties(cloudServiceName));
-		request.getCookies().add(cookieSetting);
-	}
+//	public static void addAuthnCookie(Request request, String identifier,
+//			String cloudServiceName) {
+//
+//		request.getCookies().clear();
+//		CookieSetting cookieSetting = createAuthnCookieSetting(
+//				COOKIE_DEFAULT_IDTYPE, identifier,
+//				generateCloudServiceNameProperties(cloudServiceName));
+//		request.getCookies().add(cookieSetting);
+//	}
 
 	private static CookieSetting createAuthnCookieSetting(String idType, String identifier) {
 		return createAuthnCookieSetting(idType, identifier, new Properties());
@@ -148,9 +148,9 @@ public class CookieUtils {
 		return cookieSetting;
 	}
 
-	public static String createCookie(String username, String cloudServiceName) {
-		return createCookie(username, cloudServiceName, null);
-	}
+//	public static String createCookie(String username, String cloudServiceName) {
+//		return createCookie(username, cloudServiceName, null);
+//	}
 
 	public static String createCookie(String username, String cloudServiceName,
 			Properties extraProperties) {
@@ -282,45 +282,56 @@ public class CookieUtils {
 	 */
 	public static int verifyAuthnCookie(Cookie cookie) {
 
-		if (cookie == null || !COOKIE_NAME.equals(cookie.getName())) {
-			return Verifier.RESULT_MISSING;
-		}
 
-		if (!COOKIE_NAME.equals(cookie.getName())) {
+		if (cookie == null || cookie.getValue() == null) {
+			logger.warning("No cookie provided");
 			return Verifier.RESULT_INVALID;
 		}
 
-		Form cookieInfo = extractCookieValueAsForm(cookie);
+		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
+		String token = cookieInfo.getFirstValue(TOKEN);
 
-		if (!cookieInfo.getNames().containsAll(requiredCookieKeys)) {
-			return Verifier.RESULT_INVALID;
-		}
+		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
 
-		// Pull out the values from the form.
-		String signature = cookieInfo.getFirstValue(COOKIE_SIGNATURE);
-		String expiryString = cookieInfo.getFirstValue(COOKIE_EXPIRY_DATE);
-
-		// Recreate a query string without the signature.
-		cookieInfo.removeAll(COOKIE_SIGNATURE);
-		String signedQuery = cookieInfo.getQueryString();
-
-		// Ensure that the cryptographic signature is correct.
-		if (!CryptoUtils.verify(signature, signedQuery)) {
-			return Verifier.RESULT_INVALID;
-		}
-
-		// Create the expiration date.
-		Date expiryDate = dateFromExpiryString(expiryString);
-
-		if (!CookieUtils.isMachine(cookie)) {
-			// Check that the cookie has not yet expired.
-			if (expiryDate.before(new Date())) {
-				return Verifier.RESULT_STALE;
-			} else {
-				return Verifier.RESULT_VALID;
-			}
-		}
-		return Verifier.RESULT_VALID;
+//		if (cookie == null || !COOKIE_NAME.equals(cookie.getName())) {
+//			return Verifier.RESULT_MISSING;
+//		}
+//
+//		if (!COOKIE_NAME.equals(cookie.getName())) {
+//			return Verifier.RESULT_INVALID;
+//		}
+//
+//		Form cookieInfo = extractCookieValueAsForm(cookie);
+//
+//		if (!cookieInfo.getNames().containsAll(requiredCookieKeys)) {
+//			return Verifier.RESULT_INVALID;
+//		}
+//
+//		// Pull out the values from the form.
+//		String signature = cookieInfo.getFirstValue(COOKIE_SIGNATURE);
+//		String expiryString = cookieInfo.getFirstValue(COOKIE_EXPIRY_DATE);
+//
+//		// Recreate a query string without the signature.
+//		cookieInfo.removeAll(COOKIE_SIGNATURE);
+//		String signedQuery = cookieInfo.getQueryString();
+//
+//		// Ensure that the cryptographic signature is correct.
+//		if (!CryptoUtils.verify(signature, signedQuery)) {
+//			return Verifier.RESULT_INVALID;
+//		}
+//
+//		// Create the expiration date.
+//		Date expiryDate = dateFromExpiryString(expiryString);
+//
+//		if (!CookieUtils.isMachine(cookie)) {
+//			// Check that the cookie has not yet expired.
+//			if (expiryDate.before(new Date())) {
+//				return Verifier.RESULT_STALE;
+//			} else {
+//				return Verifier.RESULT_VALID;
+//			}
+//		}
+//		return Verifier.RESULT_VALID;
 
 	}
 
@@ -342,6 +353,8 @@ public class CookieUtils {
 
 	public static String getCookieCloudServiceName(Cookie cookie) {
 
+		// TODO adapt extract cloud service name from claims in token
+
 		String cloudServiceName = null;
 
 		if (cookie != null) {
@@ -352,7 +365,7 @@ public class CookieUtils {
 	}
 
 	public static User getCookieUser(Cookie cookie)
-			throws ConfigurationException, ValidationException {
+			throws ConfigurationException, ValidtionException {
 
 		String userName = getCookieUsername(cookie);
 		if (userName != null) {
@@ -375,45 +388,6 @@ public class CookieUtils {
 		return new Form((value != null) ? value : "");
 	}
 
-	public static String cookieToString(Cookie cookie) {
-
-		StringBuilder sb = new StringBuilder();
-
-		if (cookie != null) {
-
-			Form cookieInfo = extractCookieValueAsForm(cookie);
-
-			// Pull out the values from the form.
-			String signature = cookieInfo.getFirstValue(COOKIE_SIGNATURE);
-			String expiryString = cookieInfo.getFirstValue(COOKIE_EXPIRY_DATE);
-
-			// Recreate a query string without the signature.
-			cookieInfo.removeAll(COOKIE_SIGNATURE);
-			String signedQuery = cookieInfo.getQueryString();
-
-			// Create the expiration date.
-			Date expiryDate = dateFromExpiryString(expiryString);
-
-			sb.append("COOKIE: " + cookie.getName() + "\n");
-			sb.append("DOMAIN: " + cookie.getDomain() + "\n");
-			sb.append("PATH: " + cookie.getDomain() + "\n");
-			sb.append("SIGNATURE: " + signature + "\n");
-			sb.append("VALIDATED: "
-					+ CryptoUtils.verify(signature, signedQuery) + "\n");
-			sb.append("EXPIRY STRING: " + expiryString + "\n");
-			sb.append("EXPIRY DATE: " + expiryDate + "\n");
-			sb.append("CURRENT: " + !expiryDate.before(new Date()) + "\n");
-
-		} else {
-
-			sb.append("COOKIE: NULL\n");
-
-		}
-
-		return sb.toString();
-
-	}
-
 	public static String getCookieName() {
 		return COOKIE_NAME;
 	}
@@ -424,6 +398,7 @@ public class CookieUtils {
 	}
 
 	public static String getRunId(Cookie cookie) {
+		// TODO adapt extract run id from claims in token
 		Form f = extractCookieValueAsForm(cookie);
 		return f.getFirstValue(COOKIE_RUN_ID, null);
 	}

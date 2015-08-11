@@ -104,8 +104,12 @@
       (rename-keys {:user-name :com.sixsq.identifier})
       (merge {:exp (expiry-timestamp)})))
 
-(defn token-impl
-  [credentials]
+(defn check-token-impl
+  [token]
+  (jws/unsign token (public-key auth-conf) signing-algorithm))
+
+(defn create-token
+  ([credentials]
   (let [[ok? claims] (auth-user-impl credentials)]
     (if ok?
       [true {:token (jws/sign (enrich-claims claims)
@@ -113,9 +117,14 @@
                               signing-algorithm)}]
       [false {:message "Invalid credentials when creating token"}])))
 
-(defn check-token-impl
-  [token]
-  (jws/unsign token (public-key auth-conf) signing-algorithm))
+  ([claims token]
+   (try
+      (check-token-impl token)
+      [true {:token (jws/sign claims
+                              (private-key auth-conf)
+                              signing-algorithm)}]
+      (catch Exception e
+         [false {:message (str "Invalid token when creating token: " e)}]))))
 
 (deftype SimpleAuthentication
   []
@@ -131,7 +140,11 @@
 
   (token
     [this credentials]
-    (token-impl credentials))
+      (create-token credentials))
+
+  (token
+    [this claims token]
+      (create-token claims token))
 
   (check-token
     [this token]

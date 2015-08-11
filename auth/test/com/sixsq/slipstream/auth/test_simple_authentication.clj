@@ -63,7 +63,7 @@
     (= (select-keys valid-credentials [:user-name]) result)
     (not (contains? result :password))))
 
-(deftest test-auth-user-when-not-added
+(deftest all-rejected-when-no-user-added
   (doseq [wrong (cons valid-credentials wrongs)]
     (is (auth-rejected? (c/auth-user sa wrong)))))
 
@@ -103,3 +103,13 @@
     (c/check-token sa (:token token-map))
     (Thread/sleep 1500)
     (is (thrown? Exception (c/check-token sa (:token token-map))))))
+
+(deftest check-claims-token
+  (c/add-user! sa valid-credentials)
+  (let [claims      {:a 1 :b 2}
+        valid-token (-> (c/token sa valid-credentials)
+                        second
+                        :token)
+        claim-token (c/token sa claims valid-token)]
+
+    (is (= claims (c/check-token sa claim-token))))))
