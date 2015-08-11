@@ -12,6 +12,8 @@ run: stop-db start-db re-run-with-db
 
 run-fr: stop-db start-db re-run-with-db-fr
 
+run-nuvla: stop-db start-db re-run-with-db-nuvla
+
 run-hnx: stop-db start-db re-run-with-db-hnx
 
 run-prod: stop-db start-db re-run-with-db-prod
@@ -25,6 +27,9 @@ re-run-with-db:
 re-run-with-db-fr:
 	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev -Dslipstream.ui.util.localization.lang-default=fr
 
+re-run-with-db-nuvla:
+	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev -Dslipstream.ui.util.theme.current-theme=nuvla
+
 re-run-with-db-hnx:
 	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev -Dslipstream.ui.util.theme.current-theme=helixnebula
 
@@ -34,6 +39,10 @@ run-with-mem-db:
 new-ui: install-ui run
 
 new-ui-fast: install-ui-fast run
+
+new-ui-nuvla: install-ui run-nuvla
+
+new-ui-fast-nuvla: install-ui-fast run-nuvla
 
 new-ui-hnx: install-ui run-hnx
 
