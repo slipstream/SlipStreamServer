@@ -29,7 +29,6 @@ import org.restlet.Response;
 import org.restlet.data.Cookie;
 import org.restlet.data.CookieSetting;
 import org.restlet.data.Form;
-import org.restlet.security.Verifier;
 import org.restlet.util.Series;
 
 import java.util.*;
@@ -267,16 +266,16 @@ public class CookieUtils {
 	 */
 	public static int verifyAuthnCookie(Cookie cookie) {
 
-
-		if (cookie == null || cookie.getValue() == null) {
-			logger.warning("No cookie provided");
-			return Verifier.RESULT_INVALID;
-		}
-
-		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
-		String token = cookieInfo.getFirstValue(TOKEN);
-
-		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
+		return 0;
+//		if (cookie == null || cookie.getValue() == null) {
+//			logger.warning("No cookie provided");
+//			return Verifier.RESULT_INVALID;
+//		}
+//
+//		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
+//		String token = cookieInfo.getFirstValue(TOKEN);
+//
+//		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
 
 //		if (cookie == null || !COOKIE_NAME.equals(cookie.getName())) {
 //			return Verifier.RESULT_MISSING;
@@ -350,7 +349,7 @@ public class CookieUtils {
 	}
 
 	public static User getCookieUser(Cookie cookie)
-			throws ConfigurationException, ValidtionException {
+			throws ConfigurationException, ValidationException {
 
 		String userName = getCookieUsername(cookie);
 		if (userName != null) {
