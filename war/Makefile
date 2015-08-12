@@ -8,54 +8,41 @@ SQLTOOL_FILE_PRESENT=$(shell [ -f $(SQLTOOL_FILENAME) ] && echo ok || echo missi
 
 STATIC_CONTENT_LOCATION=$(shell cd ../../SlipStreamUI/clj/resources/static_content/; pwd)
 
-run: stop-db start-db re-run-with-db
+# Defaults config:
+# Source: http://stackoverflow.com/a/2826178
+LANG?=en
+# LANG?=fr
+# LANG?=de
+MODE?=dev
+# MODE?=prod
+# THEME?=nuvla
+# THEME?=helixnebula
 
-run-fr: stop-db start-db re-run-with-db-fr
+run: stop-db start-db start
 
-run-nuvla: stop-db start-db re-run-with-db-nuvla
+clean-run: stop-db clean-install-ui clean-install run
 
-run-hnx: stop-db start-db re-run-with-db-hnx
+start:
+	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
 
-run-prod: stop-db start-db re-run-with-db-prod
-
-re-run-with-db-prod:
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema
-
-re-run-with-db:
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev
-
-re-run-with-db-fr:
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev -Dslipstream.ui.util.localization.lang-default=fr
-
-re-run-with-db-nuvla:
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev -Dslipstream.ui.util.theme.current-theme=nuvla
-
-re-run-with-db-hnx:
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=dev -Dslipstream.ui.util.theme.current-theme=helixnebula
-
-run-with-mem-db:
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=dev
+start-with-mem-db:
+	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=$(MODE)
 
 new-ui: install-ui run
 
-new-ui-fast: install-ui-fast run
-
-new-ui-nuvla: install-ui run-nuvla
-
-new-ui-fast-nuvla: install-ui-fast run-nuvla
-
-new-ui-hnx: install-ui run-hnx
-
-new-ui-fast-hnx: install-ui-fast run-hnx
+new-ui-clean: clean-install-ui run
 
 install:
+	(cd ..; mvn install -Dmaven.test.skip=true)
+
+clean-install:
 	(cd ..; mvn clean install -Dmaven.test.skip=true)
 
 install-ui:
-	(cd ../../SlipStreamUI; mvn clean install -Dmaven.test.skip=true)
-
-install-ui-fast:
 	(cd ../../SlipStreamUI; mvn install -Dmaven.test.skip=true)
+
+clean-install-ui:
+	(cd ../../SlipStreamUI; mvn clean install -Dmaven.test.skip=true)
 
 apply-db-migration:
 	@(ls -1 ../rpm/src/main/migrations/; echo; echo "Choose the migration file and execute following command:"; echo "java -jar ${SQLTOOL_FILENAME} --autoCommit --inlineRc=url=jdbc:hsqldb:file:slipstreamdb,user=sa,password= ../rpm/src/main/migrations/__MIGRATION_FILE_TO_APPLY__")
