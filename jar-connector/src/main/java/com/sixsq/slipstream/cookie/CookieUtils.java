@@ -74,21 +74,6 @@ public class CookieUtils {
 		requiredCookieKeys.add(COOKIE_SIGNATURE);
 	}
 
-	/**
-	 * Insert a new authentication cookie into a Response using the given
-	 * values. None of the arguments can be null.
-	 *
-	 * @param response
-	 * @param idType
-	 * @param identifier
-	 */
-	public static void addAuthnCookie(Response response, String idType, String identifier) {
-		CookieSetting cookieSetting = createAuthnCookieSetting(idType, identifier);
-		Series<CookieSetting> cookieSettings = response.getCookieSettings();
-		cookieSettings.removeAll(COOKIE_NAME);
-		cookieSettings.add(cookieSetting);
-	}
-
 	public static void addAuthnCookieFromAuthnResponse(Response response, Response token) {
 		CookieSetting authnCookie = extractAuthnCookie(token);
 
