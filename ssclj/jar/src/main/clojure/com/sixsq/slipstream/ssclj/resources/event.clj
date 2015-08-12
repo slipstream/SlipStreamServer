@@ -1,14 +1,17 @@
 (ns 
   com.sixsq.slipstream.ssclj.resources.event
   (:require
-    [clojure.tools.logging                                    :as log]
-    [schema.core                                              :as s]
+    [clojure.tools.logging :as log]
+    [schema.core :as s]
 
-    [com.sixsq.slipstream.ssclj.resources.common.authz        :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.crud         :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud     :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils        :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema       :as c]))
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [slipstream.ui.util.clojure :as uc]
+    [slipstream.ui.views.representation :as r]
+    [slipstream.ui.util.dev-traces :as d]))
 
 (def ^:const resource-tag     :events)
 (def ^:const resource-name    "Event")
@@ -112,6 +115,20 @@
   (sort-by-timestamps-desc events))
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
+(defn e [x] (clojure.pprint/pprint x) x)
 (defmethod crud/query resource-name
   [request]
-  (query-impl request))
+  (let [resp      (query-impl request)
+        json-body (-> resp :body uc/->json)
+        html-body (r/-toHtml json-body "events" nil)]
+    (clojure.pprint/pprint resp)
+    (-> resp
+        (assoc :body html-body)
+        (assoc-in [:headers "Content-Type"] "text/HTML")
+        e))
+  )
+
+  ;(d/>>> -> request
+  ;    query-impl
+  ;    (update :body (comp (r/-toHtml "events" nil) uc/->json))))
