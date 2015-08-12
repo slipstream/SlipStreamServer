@@ -29,6 +29,7 @@ import org.restlet.Response;
 import org.restlet.data.Cookie;
 import org.restlet.data.CookieSetting;
 import org.restlet.data.Form;
+import org.restlet.security.Verifier;
 import org.restlet.util.Series;
 
 import java.util.*;
@@ -266,56 +267,45 @@ public class CookieUtils {
 	 */
 	public static int verifyAuthnCookie(Cookie cookie) {
 
-		return 0;
-//		if (cookie == null || cookie.getValue() == null) {
-//			logger.warning("No cookie provided");
-//			return Verifier.RESULT_INVALID;
-//		}
-//
-//		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
-//		String token = cookieInfo.getFirstValue(TOKEN);
-//
-//		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
+		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
 
-//		if (cookie == null || !COOKIE_NAME.equals(cookie.getName())) {
-//			return Verifier.RESULT_MISSING;
-//		}
-//
-//		if (!COOKIE_NAME.equals(cookie.getName())) {
-//			return Verifier.RESULT_INVALID;
-//		}
-//
-//		Form cookieInfo = extractCookieValueAsForm(cookie);
-//
-//		if (!cookieInfo.getNames().containsAll(requiredCookieKeys)) {
-//			return Verifier.RESULT_INVALID;
-//		}
-//
-//		// Pull out the values from the form.
-//		String signature = cookieInfo.getFirstValue(COOKIE_SIGNATURE);
-//		String expiryString = cookieInfo.getFirstValue(COOKIE_EXPIRY_DATE);
-//
-//		// Recreate a query string without the signature.
-//		cookieInfo.removeAll(COOKIE_SIGNATURE);
-//		String signedQuery = cookieInfo.getQueryString();
-//
-//		// Ensure that the cryptographic signature is correct.
-//		if (!CryptoUtils.verify(signature, signedQuery)) {
-//			return Verifier.RESULT_INVALID;
-//		}
-//
-//		// Create the expiration date.
-//		Date expiryDate = dateFromExpiryString(expiryString);
-//
-//		if (!CookieUtils.isMachine(cookie)) {
-//			// Check that the cookie has not yet expired.
-//			if (expiryDate.before(new Date())) {
-//				return Verifier.RESULT_STALE;
-//			} else {
-//				return Verifier.RESULT_VALID;
-//			}
-//		}
-//		return Verifier.RESULT_VALID;
+		if (cookie == null || !COOKIE_NAME.equals(cookie.getName())) {
+			return Verifier.RESULT_MISSING;
+		}
+
+		if (!COOKIE_NAME.equals(cookie.getName())) {
+			return Verifier.RESULT_INVALID;
+		}
+
+		if (!cookieInfo.getNames().containsAll(requiredCookieKeys)) {
+			return Verifier.RESULT_INVALID;
+		}
+
+		// Pull out the values from the form.
+		String signature = cookieInfo.getFirstValue(COOKIE_SIGNATURE);
+		String expiryString = cookieInfo.getFirstValue(COOKIE_EXPIRY_DATE);
+
+		// Recreate a query string without the signature.
+		cookieInfo.removeAll(COOKIE_SIGNATURE);
+		String signedQuery = cookieInfo.getQueryString();
+
+		// Ensure that the cryptographic signature is correct.
+		if (!CryptoUtils.verify(signature, signedQuery)) {
+			return Verifier.RESULT_INVALID;
+		}
+
+		// Create the expiration date.
+		Date expiryDate = dateFromExpiryString(expiryString);
+
+		if (!CookieUtils.isMachine(cookie)) {
+			// Check that the cookie has not yet expired.
+			if (expiryDate.before(new Date())) {
+				return Verifier.RESULT_STALE;
+			} else {
+				return Verifier.RESULT_VALID;
+			}
+		}
+		return Verifier.RESULT_VALID;
 
 	}
 
