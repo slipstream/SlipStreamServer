@@ -30,7 +30,7 @@
     [this token]
     "Verifies that the signed token (with a private key) is valid by trying to unsign it
     (with the corresponding public key).
-    When valid, the claims is returned (typically containing user name).
+    When valid, the claims are returned (e.g user name, or run id for a VM).
     If it is not valid, an exception is thrown.")
 
   ;; TODO later

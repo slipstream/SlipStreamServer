@@ -5,6 +5,9 @@
   :license {:name "Apache License, Version 2.0"
             :url  "http://www.apache.org/licenses/LICENSE-2.0"}
 
+  :resource-paths ["resources"
+                   "test/resources"]
+
   :dependencies [[org.clojure/clojure                       "1.7.0"]
 
                  ;; buddy
