@@ -60,7 +60,10 @@ public class CloudIds {
 		File usersDir = new File(configDir + File.separator + CLOUD_IDS_CONFIG_DIR);
 
 		List<File> files = FileLoader.loadConfigurationFiles(usersDir);
-		files.forEach( f -> { loadSingleCloudIds(f); } );
+		//files.forEach( f -> { loadSingleCloudIds(f); } );
+		for(File f : files) {
+			loadSingleCloudIds(f);
+		}
 
 	}
 
