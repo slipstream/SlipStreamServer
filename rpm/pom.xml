@@ -261,21 +261,11 @@
               <sources>
                 <source>
                   <location>target/dependency/jetty-distribution-${jetty.version}/</location>
-                  <includes>
-                    <include>*.txt</include>
-                    <include>*.html</include>
-                    <include>start.jar</include>
-                    <include>etc/**/*</include>
-                    <include>lib/**/*</include>
-                    <include>logs/**/*</include>
-                    <include>contexts/README.txt</include>
-                  </includes>
-                  <!-- remove references to binary files -->
+                  <!-- remove references to binary files and standard configuration file -->
                   <excludes>
                     <exclude>lib/setuid/**/*</exclude>
                     <exclude>etc/jetty-setuid.xml</exclude>
                     <exclude>etc/jetty.conf</exclude>
-                    <exclude>etc/jetty-logging.xml</exclude>
                   </excludes>
                 </source>
               </sources>
