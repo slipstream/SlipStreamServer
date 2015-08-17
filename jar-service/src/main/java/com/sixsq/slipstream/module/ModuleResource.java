@@ -321,7 +321,7 @@ public class ModuleResource extends ParameterizedResource {
 		return xmlToModule(extractEntityAsText());
 	}
 
-	private Module xmlToModule(String xml) {
+	public static Module xmlToModule(String xml) {
 
 		String category = null;
 		try {
@@ -338,9 +338,6 @@ public class ModuleResource extends ParameterizedResource {
 		} catch (SlipStreamClientException e) {
 			throwClientBadRequest("Invalid xml module: " + e.getMessage());
 		}
-
-		// Reset user
-		module.getAuthz().setUser(getUser().getName());
 
 		module.postDeserialization();
 
@@ -412,7 +409,7 @@ public class ModuleResource extends ParameterizedResource {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Class<? extends Module> getModuleClass(String category) {
+	private static Class<? extends Module> getModuleClass(String category) {
 
 		String className = "com.sixsq.slipstream.persistence." + category + "Module";
 		Class<? extends Module> moduleClass = null;

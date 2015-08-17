@@ -14,9 +14,9 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header        :refer [wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params              :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.app.routes                          :as routes]
+    [com.sixsq.slipstream.ssclj.app.params                          :as p]
     [com.sixsq.slipstream.ssclj.resources.root                      :as root]
     [com.sixsq.slipstream.ssclj.db.impl                             :as db]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding               :as fsdb]
     [com.sixsq.slipstream.ssclj.db.database-binding                 :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils        :as du]))
 
@@ -31,9 +31,9 @@
   []
   (try
     (root/add)
-    (log/info "created Root resource")
+    (log/info "Created" root/resource-name "resource")
     (catch Exception e
-      (log/info "Root resource not created; may already exist; message: " (str e)))))
+      (log/info root/resource-name "resource not created; may already exist; message: " (str e)))))
 
 (defn- create-ring-handler
   "Creates a ring handler that wraps all of the service routes
@@ -51,7 +51,7 @@
       wrap-base-uri
       wrap-params
       wrap-authn-info-header
-      (expose-metrics-as-json "/ssclj/metrics" default-registry {:pretty-print? true})
+      (expose-metrics-as-json (str p/service-context "metrics") default-registry {:pretty-print? true})
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (instrument default-registry)))
@@ -85,6 +85,7 @@
   "Starts the server and returns a map with the application
    state containing the function to stop the http-kit container."
   [port]
+  (log/info "=============== SSCLJ START ===============")
   (set-db-impl)
   (let [ring-app (create-ring-handler)
         stop-fn (start-container ring-app port)

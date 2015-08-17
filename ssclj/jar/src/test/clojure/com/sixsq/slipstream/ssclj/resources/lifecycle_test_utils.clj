@@ -7,13 +7,14 @@
     [compojure.core :as cc]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding :as fsdb]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]))
 
 (defn body->json
   [m]
+
   (if-let [body (get-in m [:response :body])]
     (let [updated-body (if (string? body)
                          (json/read-str body :key-fn keyword :eof-error? false :eof-value {})
@@ -27,8 +28,16 @@
 
 (defn is-key-value [m k v]
   (let [actual (get-in m [:response :body k])]
-    (is (= v actual) (str "Got '" actual "', wanted '" v "'"))
+    (when-not (= v actual)
+      (println "Expecting " v " got " actual))
+    (is (= v actual))
     m))
+
+(defn has-key [m k]
+  (-> m
+      (get-in [:response :body])
+      (contains? k)
+      is))
 
 (defn is-resource-uri [m type-uri]
   (is-key-value m :resourceURI type-uri))
@@ -53,14 +62,6 @@
     (is (f count))
     m))
 
-(defn is-nil-response [m]
-  (is (nil? (:response m)))
-  m)
-
-(defn dump [m]
-  (pprint m)
-  m)
-
 (defn does-body-contain [m v]
   (let [body (get-in m [:response :body])]
     (is (= (merge body v) body))))
@@ -78,8 +79,7 @@
   (apply cc/routes rs))
 
 (defn make-ring-app [resource-routes]
-  (-> (fsdb/get-instance fsdb/default-db-prefix)
-      (db/set-impl!))
+  (db/set-impl! (dbdb/get-instance))
 
   (-> resource-routes
       (wrap-exceptions)

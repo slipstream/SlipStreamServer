@@ -10,7 +10,9 @@
 
 (defn resource-name-dispatch
   [request]
-  (get-in request [:params :resource-name]))
+  (-> request
+       (get-in [:params :resource-name])
+       u/lisp-to-camelcase))
 
 (defn resource-name-and-action-dispatch
   [request]
@@ -60,6 +62,19 @@
 (defmethod do-action :default
   [request]  
   (throw (u/ex-bad-method request)))
+
+
+(defn resource-name-collection-dispatch
+  [request collection]
+  (-> request
+      (get-in [:params :resource-name])
+      u/lisp-to-camelcase))
+
+(defmulti sort-collection resource-name-collection-dispatch)
+
+(defmethod sort-collection :default
+  [request collection]
+  collection)
 
 ;;
 ;; Resource schema validation.
@@ -114,7 +129,7 @@
 
 (defmethod new-identifier :default
   [json resource-name]
-  (assoc json :id (u/new-resource-id resource-name)))
+  (assoc json :id (u/new-resource-id (u/de-camelcase resource-name))))
 
 ;;
 ;; Determine the ACL to use for a new resource.

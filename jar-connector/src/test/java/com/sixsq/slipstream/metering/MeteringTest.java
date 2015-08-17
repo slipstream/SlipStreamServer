@@ -77,7 +77,7 @@ public class MeteringTest extends RunTestBase {
 	}
 
 	private static Vm createVm(String instanceid, String cloud, String state, String user, String runId) {
-		Vm vm = new Vm(instanceid, cloud, state, user, new LocalConnector().isVmUsable(state));
+		Vm vm = new Vm(instanceid, cloud, state, user, new LocalConnector().isVmUsable(state), null, null, null, null);
 		vm.setRunUuid(runId);
 		return vm;
 	}
@@ -85,7 +85,7 @@ public class MeteringTest extends RunTestBase {
 	@Test
 	public void cloudUsageData() throws SlipStreamException {
 
-		Map<String, Integer> data = Metering.produceCloudUsageData(user);
+		Map<String, Integer> data = Metering.produceCloudUsageData(user.getName());
 
 		assertThat(2, is(data.get(CLOUD_A)));
 		assertThat(1, is(data.get(CLOUD_B)));
@@ -95,8 +95,8 @@ public class MeteringTest extends RunTestBase {
 	@Test
 	public void cloudUsageDataForGraphite() throws SlipStreamException {
 
-		Map<String, Integer> usageData = Metering.produceCloudUsageData(user);
-		String graphiteData = Metering.transformUsageDataForGraphite(user, usageData);
+		Map<String, Integer> usageData = Metering.produceCloudUsageData(user.getName());
+		String graphiteData = Metering.transformUsageDataForGraphite(user.getName(), usageData);
 
 		String cloudAdata = getCloudDataForGraphite(CLOUD_A, "2");
 		String cloudBdata = getCloudDataForGraphite(CLOUD_B, "1");

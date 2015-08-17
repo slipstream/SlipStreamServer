@@ -186,6 +186,10 @@ public class RuntimeParameter extends Metadata {
 	public static final String SCALE_DISK_ATTACH_SIZE_DEFAULT_VALUE = "";
 	public static final String SCALE_DISK_ATTACH_SIZE_DESCRIPTION = "Size of the extra disk to attach to the VM during vertical scaling";
 
+	public static final String SCALE_DISK_ATTACHED_DEVICE_KEY = "disk.attached.device";
+	public static final String SCALE_DISK_ATTACHED_DEVICE_DEFAULT_VALUE = "";
+	public static final String SCALE_DISK_ATTACHED_DEVICE_DESCRIPTION = "Attached device name after the VM's vertical scaling";
+
 	public static final String SCALE_DISK_DETACH_DEVICE_KEY = "disk.detach.device";
 	public static final String SCALE_DISK_DETACH_DEVICE_DEFAULT_VALUE = "";
 	public static final String SCALE_DISK_DETACH_DEVICE_DESCRIPTION = "Name of the block device to detach from the VM during vertical scaling";

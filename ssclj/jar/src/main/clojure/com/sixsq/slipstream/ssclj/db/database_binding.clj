@@ -9,10 +9,9 @@
     [honeysql.helpers                                       :as hh]
     [honeysql.core                                          :as hq]
     [com.sixsq.slipstream.ssclj.database.korma-helper       :as kh]
-
     [com.sixsq.slipstream.ssclj.api.acl                     :as acl]
+
     [com.sixsq.slipstream.ssclj.db.binding                  :refer [Binding]]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
     [com.sixsq.slipstream.ssclj.database.ddl                :as ddl]
     [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
@@ -42,16 +41,22 @@
   (when-not (exist-in-db? id)
     (throw (u/ex-not-found id))))
 
+(defn- insert-acl
+  [id data]
+  (when (:acl data)
+    (acl/insert-resource id
+                         (u/resource-name (:id data))
+                         (acl/types-principals-from-acl (:acl data)))))
+
 (defn- insert-resource
   [id data]
-  (insert resources (values {:id id :data (serialize data)}))
-  (when (:acl data)
-    (acl/insert-resource id "Event" (acl/types-principals-from-acl (:acl data)))))
+  (insert resources (values {:id id :data (u/serialize data)}))
+  (insert-acl id data))
 
 (defn- update-resource
   [id data]
   (update resources
-    (set-fields {:data data})
+    (set-fields {:data (u/serialize data)})
     (where {:id id})))
 
 (defn id-matches?
@@ -62,9 +67,11 @@
 
 (defn roles-in?
   [roles]
-  (if (seq roles)
-    [:and [:= :a.principal-type "ROLE"] [:in :a.principal-name roles]]
-    [:= 0 1]))
+  (cond
+    (some #{"ADMIN"} roles) [:= 1 1]
+    (seq roles)             [:and [:= :a.principal-type "ROLE"]
+                                  [:in :a.principal-name roles]]
+    :else                   [:= 0 1]))
 
 (defn neither-id-roles?
   [id roles]
@@ -79,18 +86,16 @@
       ((juxt :identity :roles))))
 
 (defn sql
-  [collection-id id roles offset limit]
+  [collection-id id roles]
   (->   (hh/select :r.*)
         (hh/from [:acl :a] [:resources :r])
         (hh/where [:and
-                    [:like :r.id (str collection-id"%")]
+                    [:like :r.id (str (u/de-camelcase collection-id) "%")]
                     [:= :r.id :a.resource-id] ;; join acl with resources
                     [:or
                       (id-matches? id)        ;; an acl line with given id
                       (roles-in? roles)]])    ;; an acl line with one of the given roles
         (hh/modifiers :distinct)
-        (hh/limit   limit)
-        (hh/offset  offset)
         (hq/format :quoting :ansi)))
 
 (defn find-resource
@@ -98,7 +103,7 @@
   (-> (select resources (where {:id id}) (limit 1))
       first
       :data
-      deserialize))
+      u/deserialize))
 
 (defn dispatch-fn
   [collection-id options]
@@ -107,12 +112,6 @@
 (defn store-dispatch-fn
   [collection-id id data]
   collection-id)
-
-(defn response-created
-  [id]
-  (-> (str "created " id)
-      (u/map-response 201 id)
-      (r/header "Location" id)))
 
 (defmulti store-in-db store-dispatch-fn)
 (defmethod store-in-db :default
@@ -123,25 +122,29 @@
 (defmulti  find-resources dispatch-fn)
 (defmethod find-resources :default
  [collection-id options]  
- (let [ [id roles]      (id-roles options)        
-        {:keys [offset limit]}  (u/offset-limit options)]
-   (if (or (neg? limit) (neither-id-roles? id roles))
+ (let [ [id roles]      (id-roles options)]
+   (if (neither-id-roles? id roles)
      []
-     (->> (sql collection-id id roles offset limit)                
+     (->> (sql collection-id id roles)
           (jdbc/query kh/db-spec)                 
           (map :data)
-          (map deserialize)))))
+          (map u/deserialize)))))
 
 
 (defn- delete-resource
   [id]
   (delete resources (where {:id id})))
 
+(defn- response-updated
+  [id]
+  (-> (str "updated " id)
+      (u/map-response 200 id)))
+
 (defn- response-created
   [id]
   (-> (str "created " id)
-    (u/map-response 201 id)
-    (r/header "Location" id)))
+      (u/map-response 201 id)
+      (r/header "Location" id)))
 
 (defn- response-deleted
   [id]
@@ -165,11 +168,12 @@
 
   (edit [this {:keys [id] :as data}]
     (check-exist id)
-    (update-resource id data))
+    (update-resource id data)
+    (response-updated id))
 
   (query [this collection-id options]
     (find-resources collection-id options)))
 
 (defn get-instance []
-  (init-db)
-  (DatabaseBinding. ))
+    (init-db)
+    (DatabaseBinding. ))

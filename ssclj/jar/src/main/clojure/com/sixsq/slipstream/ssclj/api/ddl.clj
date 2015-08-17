@@ -15,4 +15,4 @@
 (defn create-ddl
   []  
   (ddlh/create-table! "acl" columns-acl unique-acl)  
-  (ddlh/create-index! "acl" "IDX_TYPE_PRINCIPAL" "resource_type", "principal_type", "principal_name"))
+  (ddlh/create-index! "acl" "IDX_TYPE_PRINCIPAL" "resource_id" "resource_type", "principal_type", "principal_name"))

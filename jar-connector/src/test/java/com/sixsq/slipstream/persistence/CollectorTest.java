@@ -97,9 +97,8 @@ public class CollectorTest {
 		vm = new Vm("fistCloudInstance3", firstCloud, "state", username, true);
 		firstCloudVms = new ArrayList<Vm>();
 		firstCloudVms.add(vm);
-		int removed = Collector.update(firstCloudVms, username, firstCloud);
 
-		assertThat(removed, is(2));
+		Collector.update(firstCloudVms, username, firstCloud);
 
 		List<Vm> allVms = Vm.list(user);
 
@@ -179,8 +178,8 @@ public class CollectorTest {
 		vm = new Vm("instance1", firstCloud, vmState, username, connector.isVmUsable(vmState));
 		vms = new ArrayList<Vm>();
 		vms.add(vm);
-		int removed = Collector.update(vms, username, firstCloud);
-		assertThat(removed, is(0));
+		Collector.update(vms, username, firstCloud);
+
 		vms = Vm.list(user);
 		assertThat(vms.size(), is(1));
 		assertThat(vms.get(0).getState(), is("newstate"));

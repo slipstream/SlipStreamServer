@@ -7,6 +7,7 @@
     [ring.util.response :as r]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
@@ -16,7 +17,9 @@
 ;; utilities
 ;;
 
-(def ^:const resource-name "Root")
+(def ^:const resource-name "CloudEntryPoint")
+
+(def ^:const resource-url (u/de-camelcase resource-name))
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
@@ -85,7 +88,7 @@
                   (crud/set-operations request))))
 
 (defmethod crud/retrieve resource-name
-           [request]
+  [request]
   (retrieve-impl request))
 
 (defn edit-impl
@@ -110,13 +113,15 @@
   (edit-impl request))
 
 ;;
-;; Root doesn't follow the usual /ssclj/ResourceName/UUID
+;; Root doesn't follow the usual service-context + '/resource-name/UUID'
 ;; pattern, so the routes must be defined explicitly.
 ;;
 (defroutes routes
-           (GET c/service-context request
-                (crud/retrieve (assoc-in request [:params :resource-name] resource-name)))
-           (PUT c/service-context request
-                (crud/edit (assoc-in request [:params :resource-name] resource-name)))
-           (ANY c/service-context request
+           (GET (str p/service-context resource-url) request
+                (crud/retrieve (assoc-in request [:params :resource-name]
+                                         (u/de-camelcase resource-name))))
+           (PUT (str p/service-context resource-url) request
+                (crud/edit (assoc-in request [:params :resource-name]
+                                     (u/de-camelcase resource-name))))
+           (ANY (str p/service-context resource-url) request
                 (throw (u/ex-bad-method request))))

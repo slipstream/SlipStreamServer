@@ -22,7 +22,6 @@ package com.sixsq.slipstream.util;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.sql.SQLException;
 import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;

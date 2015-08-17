@@ -133,7 +133,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	@Override
-	public Properties describeInstances(User user, int timeout) throws SlipStreamException {
+	public Map<String, Properties> describeInstances(User user, int timeout) throws SlipStreamException {
 		validateCredentials(user);
 
 		String command = getCommandDescribeInstances() + createTimeoutParameter(timeout)
@@ -248,7 +248,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		launchParams.put("image-id", getImageId(run, user));
 		launchParams.put("network-type", getNetwork(run));
 		putLaunchParamPlatform(launchParams, run);
-		putLaunchParamLoginUser(launchParams, run);
+		putLaunchParamLoginUserAndPassword(launchParams, run);
 		putLaunchParamExtraDiskVolatile(launchParams, run);
 		putLaunchParamNativeContextualization(launchParams, run);
 		return launchParams;
@@ -260,11 +260,22 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 	}
 
-	private void putLaunchParamLoginUser(Map<String, String> launchParams, Run run) throws ValidationException {
+	private void putLaunchParamLoginUserAndPassword(Map<String, String> launchParams, Run run) throws ValidationException {
 		try {
 			launchParams.put("login-username", getLoginUsername(run));
 		} catch (ConfigurationException e) {
 		}
+
+		String loginPassword = null;
+		try {
+			loginPassword = getLoginPassword(run);
+		} catch (ConfigurationException e) {
+		} catch (ValidationException e) {
+		}
+		if (loginPassword != null && !loginPassword.isEmpty()) {
+			launchParams.put("login-password", loginPassword);
+		}
+
 	}
 
 	private void putLaunchParamExtraDiskVolatile(Map<String, String> launchParams, Run run) throws ValidationException {
@@ -328,7 +339,6 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		environment.put("SLIPSTREAM_DIID", run.getName());
 		environment.put("SLIPSTREAM_SERVICEURL", configuration.baseUrl);
 		environment.put("SLIPSTREAM_NODE_INSTANCE_NAME", nodeInstanceName);
-		environment.put("SLIPSTREAM_REPORT_DIR", SLIPSTREAM_REPORT_DIR);
 		environment.put("SLIPSTREAM_CLOUD", getCloudServiceName());
 		environment.put("SLIPSTREAM_BUNDLE_URL", configuration.getRequiredProperty("slipstream.update.clienturl"));
 		environment.put("SLIPSTREAM_BOOTSTRAP_BIN", configuration.getRequiredProperty("slipstream.update.clientbootstrapurl"));
@@ -371,23 +381,41 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return environment;
 	}
 
-	public static Properties parseDescribeInstanceResult(String result)
+	private static void addToPropertiesIfExistAndNotEmpty(Properties properties, String[] parts, int column, String key) {
+		if (parts.length > column) {
+			String value = parts[column].trim();
+			if (!value.isEmpty()) properties.put(key, value);
+		}
+	}
+
+	public static Map<String, Properties> parseDescribeInstanceResult(String result)
 			throws SlipStreamException {
-		Properties states = new Properties();
+
+		Map<String, Properties> instances = new HashMap<String, Properties>();
+
 		List<String> lines = new ArrayList<String>();
 		Collections.addAll(lines, result.split("\n"));
-		lines.remove(0);
+		lines.remove(0); // Remove the header line
+
 		for (String line : lines) {
-			String[] parts = line.trim().split("\\s+");
+			Properties properties = new Properties();
+
+			String[] parts = line.trim().split(",");
 			if (parts.length < 2) {
-				throw (new SlipStreamException(
-						"Error returned by describe command. Got: " + result));
+				throw (new SlipStreamException("Error returned by describe command. Got: " + result));
 			}
-			String instanceIdKey = parts[0];
-			String status = parts[1];
-			states.put(instanceIdKey, status);
+
+			String instanceId = parts[0].trim();
+			properties.put(VM_STATE, parts[1].trim());
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 2, VM_IP);
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 3, VM_CPU);
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 4, VM_RAM);
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 5, VM_DISK);
+			addToPropertiesIfExistAndNotEmpty(properties, parts, 6, VM_INSTANCE_TYPE);
+			instances.put(instanceId, properties);
 		}
-		return states;
+
+		return instances;
 	}
 
 	public static String[] parseRunInstanceResult(String result)

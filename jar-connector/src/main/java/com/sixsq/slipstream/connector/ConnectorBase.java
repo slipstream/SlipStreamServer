@@ -67,7 +67,14 @@ public abstract class ConnectorBase implements Connector {
 
     abstract public void terminate(Run run, User user) throws SlipStreamException;
 
-    abstract public Properties describeInstances(User user, int timeout) throws SlipStreamException;
+    abstract public Map<String, Properties> describeInstances(User user, int timeout) throws SlipStreamException;
+
+    public static final String VM_STATE = "state";
+    public static final String VM_IP = "ip";
+    public static final String VM_CPU = "cpu";
+    public static final String VM_RAM = "ram";
+    public static final String VM_DISK = "disk";
+    public static final String VM_INSTANCE_TYPE = "instance-type";
 
     private static Logger log = Logger.getLogger(ConnectorBase.class.toString());
 
@@ -78,7 +85,6 @@ public abstract class ConnectorBase implements Connector {
     private static final String MACHINE_INSTANCE_ID_NAME = Run.MACHINE_NAME_PREFIX + RuntimeParameter.INSTANCE_ID_KEY;
     protected static final String MACHINE_INSTANCE_HOSTNAME = Run.MACHINE_NAME_PREFIX + RuntimeParameter.HOSTNAME_KEY;
     protected static final String MACHINE_INSTANCE_URL_SSH = Run.MACHINE_NAME_PREFIX + RuntimeParameter.URL_SSH_KEY;
-    protected static final String SLIPSTREAM_REPORT_DIR = "/tmp/slipstream/reports";
 
     // TODO: shouldn't be there!!
     private Map<String, Map<String, String>> extraDisksInfo = new HashMap<String, Map<String, String>>();
@@ -460,7 +466,8 @@ public abstract class ConnectorBase implements Connector {
     }
 
     private String getOrchestratorImageLoginUsername() throws ConfigurationException, ValidationException {
-        return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.ssh.username"));
+        String key = constructKey(SystemConfigurationParametersFactoryBase.ORCHESTRATOR_USERNAME_KEY);
+        return Configuration.getInstance().getRequiredProperty(key);
     }
 
     private String getMachineImageLoginUsername(Run run) throws ValidationException {
@@ -481,7 +488,8 @@ public abstract class ConnectorBase implements Connector {
     }
 
     private String getOrchestratorImageLoginPassword() throws ConfigurationException, ValidationException {
-        return Configuration.getInstance().getRequiredProperty(constructKey("orchestrator.ssh.password"));
+        String key = constructKey(SystemConfigurationParametersFactoryBase.ORCHESTRATOR_PASSWORD_KEY);
+        return Configuration.getInstance().getRequiredProperty(key);
     }
 
     private String getMachineImageLoginPassword(Run run) throws ValidationException {

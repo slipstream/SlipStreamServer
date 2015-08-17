@@ -24,6 +24,7 @@ import java.util.*;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactoryBase;
+import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
@@ -32,6 +33,9 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 		ParametersFactoryBase<ServiceConfigurationParameter> {
 
 	protected Map<String, ServiceConfigurationParameter> referenceParameters = new HashMap<String, ServiceConfigurationParameter>();
+
+	public static final String ORCHESTRATOR_USERNAME_KEY = "orchestrator.ssh.username";
+	public static final String ORCHESTRATOR_PASSWORD_KEY = "orchestrator.ssh.password";
 
 	public static final String NATIVE_CONTEXTUALIZATION_KEY = "native-contextualization";
 
@@ -144,6 +148,16 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 				NATIVE_CONTEXTUALIZATION_DEFAULT,
 				"Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>",
 				10);
+	}
+
+	protected void putMandatoryOrchestratorUsernameAndPassword() throws ValidationException {
+		putMandatoryParameter(constructKey(ORCHESTRATOR_USERNAME_KEY),
+				"Orchestrator username", ParameterType.String,
+				"Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.");
+
+		putMandatoryPasswordParameter(constructKey(ORCHESTRATOR_PASSWORD_KEY),
+				"Orchestrator password",
+				"Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.");
 	}
 
 }

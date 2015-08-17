@@ -387,8 +387,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Utility method to search through possible locations of the configuration
-	 * file and to load the configuration from the first existing file.
+	 * Utility method to load configuration properties, if found.
 	 *
 	 * @param defaults
 	 *            Properties object containing default values or null
@@ -400,16 +399,32 @@ public class Configuration {
 	 */
 	private static Properties loadConfiguration(Properties defaults) throws ConfigurationException {
 
+		Properties props = defaults;
+		File configFile = findConfigurationFile();
+
+		if(configFile != null) {
+			props = loadConfigurationFiles(configFile.toURI(), defaults);
+		}
+
+		return props;
+	}
+
+	/**
+	 * Utility method to search through possible locations of the configuration
+	 * file and return the most appropriate one.
+	 *
+	 * @return File object containing configuration or null if none found
+	 *
+	 * @throws ConfigurationException
+	 *             if any error occurs while reading configuration files
+	 */
+	public static File findConfigurationFile() throws ConfigurationException {
+
 		// Check first if a system property is set that defines the location of
 		// the configuration information.
 		String name = System.getProperty(CONFIG_SYSTEM_PROPERTY);
 		if (name != null) {
-			URI uri = (new File(name)).toURI();
-
-			// The property was defined, so try to read the configuration from
-			// the named file. If there is an error, abort the processing
-			// without trying to find another configuration file.
-			return loadConfigurationFiles(uri, defaults);
+			return new File(name);
 		}
 
 		// Try the current working directory.
@@ -418,7 +433,7 @@ public class Configuration {
 			File userdir = new File(cwd);
 			File configFile = new File(userdir, CONFIG_FILENAME);
 			if (configFile.canRead()) {
-				return loadConfigurationFiles(configFile.toURI(), defaults);
+				return configFile;
 			}
 		}
 
@@ -428,12 +443,12 @@ public class Configuration {
 			File ssHomeDir = new File(home + File.separator + HOME_CONFIG_DIRECTORY);
 			File configFile = new File(ssHomeDir, CONFIG_FILENAME);
 			if (configFile.canRead()) {
-				return loadConfigurationFiles(configFile.toURI(), defaults);
+				return configFile;
 			}
 		}
 
-		// Nothing found. Use only the default parameters.
-		return defaults;
+		// Nothing found
+		return null;
 	}
 
 	/**
@@ -520,24 +535,7 @@ public class Configuration {
 		// The property was defined, so try to read the configuration from
 		// the named file. If there is an error, abort the processing
 		// without trying to find another configuration file.
-		InputStream inputStream = null;
-		try {
-			URL url = uri.toURL();
-			inputStream = url.openStream();
-			properties.load(inputStream);
-		} catch (MalformedURLException e) {
-			throw new ConfigurationException("Invalid configuration URL.");
-		} catch (IOException e) {
-			throw new ConfigurationException("Error loading configuration file.");
-		} finally {
-			try {
-				if (inputStream != null) {
-					inputStream.close();
-				}
-			} catch (IOException consumed) {
-				// Ignore errors on close.
-			}
-		}
+        properties = loadPropertiesFile(uri, properties);
 
 		// Remove read only entries
 		for(Entry<Object, Object> e : properties.entrySet()) {
@@ -555,7 +553,30 @@ public class Configuration {
 		return properties;
 	}
 
-	public ServiceConfiguration getParameters() {
+    public static Properties loadPropertiesFile(URI uri, Properties properties) {
+        InputStream inputStream = null;
+        try {
+            URL url = uri.toURL();
+            inputStream = url.openStream();
+            properties.load(inputStream);
+        } catch (MalformedURLException e) {
+            throw new ConfigurationException("Invalid configuration URL.");
+        } catch (IOException e) {
+            throw new ConfigurationException("Error loading configuration file.");
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException consumed) {
+                // Ignore errors on close.
+            }
+        }
+
+        return properties;
+    }
+
+    public ServiceConfiguration getParameters() {
 		return serviceConfiguration;
 	}
 

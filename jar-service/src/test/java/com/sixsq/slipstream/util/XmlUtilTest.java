@@ -119,39 +119,6 @@ public class XmlUtilTest extends ResourceTestBase {
 	}
 
 	@Test
-	public void ensureBreadcrumbsAdded() throws ParserConfigurationException,
-			XPathExpressionException {
-
-		Document document = createNewDocument();
-
-		String pathPrefix = "alpha/beta";
-		String path = "gamma/delta/epsilon";
-
-		XmlUtil.addBreadcrumbs(document, pathPrefix, path);
-
-		assertEquals("1", runXpath("count(/*/breadcrumbs)", document));
-		assertEquals(pathPrefix, runXpath("/*/breadcrumbs/@path", document));
-
-		assertEquals("3", runXpath("count(/*/breadcrumbs/crumb)", document));
-
-		assertEquals("gamma",
-				runXpath("/*/breadcrumbs/crumb[1]/@name", document));
-		assertEquals("alpha/beta/gamma",
-				runXpath("/*/breadcrumbs/crumb[1]/@path", document));
-
-		assertEquals("delta",
-				runXpath("/*/breadcrumbs/crumb[2]/@name", document));
-		assertEquals("alpha/beta/gamma/delta",
-				runXpath("/*/breadcrumbs/crumb[2]/@path", document));
-
-		assertEquals("epsilon",
-				runXpath("/*/breadcrumbs/crumb[3]/@name", document));
-		assertEquals("alpha/beta/gamma/delta/epsilon",
-				runXpath("/*/breadcrumbs/crumb[3]/@path", document));
-
-	}
-
-	@Test
 	public void runsAreRemovedDuringDenormalization () throws IOException {
 		String originalXML = IOUtils.toString(getClass().getResourceAsStream("/image.xml"));
 		Assert.assertTrue(originalXML.contains("</runs>"));

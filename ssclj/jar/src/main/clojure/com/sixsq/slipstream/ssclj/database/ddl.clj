@@ -1,9 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.database.ddl
   (:require
-    [clojure.tools.logging                                        :as log]
-    [clojure.java.jdbc                                :refer :all :as jdbc]
-    [clojure.string                                   :refer [join split]]
-    [com.sixsq.slipstream.ssclj.database.korma-helper             :as kh]))
+    [clojure.tools.logging :as log]
+    [clojure.java.jdbc :refer :all :as jdbc]
+    [clojure.string :refer [join split]]
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (defn simple-surrounder 
   [c]
@@ -44,7 +45,9 @@
 (defn create-table!   
   [table columns & [options]]  
   (jdbc/execute! kh/db-spec [(str "CREATE TABLE IF NOT EXISTS " (double-quote table) " ( " columns options " ) ")])
-  (log/info "Created (if needed!) table:" table ", columns:" columns ", options: "options))
+  (log/info "Created (if needed!) table:" table)
+  (log/info table", columns:" columns)
+  (log/info table", options:" options))
 
 (defn create-index!
   [table index-name & column-names]

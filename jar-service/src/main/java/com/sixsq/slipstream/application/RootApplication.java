@@ -20,9 +20,14 @@ package com.sixsq.slipstream.application;
  * -=================================================================-
  */
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.ServiceLoader;
 
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.initialstartup.CloudIds;
+import com.sixsq.slipstream.initialstartup.Modules;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -115,28 +120,46 @@ public class RootApplication extends Application {
 		try {
 
 			createStartupMetadata();
+			loadOptionalConfiguration();
 
 			initializeStatusServiceToHandleErrors();
 
 			verifyMinimumDatabaseInfo();
 
+			initializeMetadataService();
+
+			// Load the configuration early
+			Configuration.getInstance();
+
+			Collector.start();
+			GarbageCollector.start();
+
+			logServerStarted();
+
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		}
+	}
 
+	private void loadOptionalConfiguration() {
+		// Note: Connectors have already been loaded by the Configuration class
+
+		// Load modules
+        Modules.load();
+
+		// Load cloud-ids
+        CloudIds.load();
+
+		// Load users
+		Users.load();
+	}
+
+	private void initializeMetadataService() {
 		MetadataService ms = getMetadataService();
 		ms.addCommonExtensions();
 		ms.setDefaultCharacterSet(CharacterSet.UTF_8);
 		ms.addExtension("tgz", MediaType.APPLICATION_COMPRESS, true);
 		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
-
-		// Load the configuration early
-		Configuration.getInstance();
-
-		Collector.start();
-		GarbageCollector.start();
-
-		logServerStarted();
 	}
 
 	private void logServerStarted() {
@@ -156,12 +179,18 @@ public class RootApplication extends Application {
 	}
 
 	private void createStartupMetadata() {
-		try {
-			Users.create();
-		} catch (Exception ex) {
-			getLogger().warning("Error creating default users... already existing?");
-		}
-	}
+        try {
+            Users.create();
+        } catch (ValidationException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        } catch (NotFoundException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        } catch (NoSuchAlgorithmException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        } catch (UnsupportedEncodingException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        }
+    }
 
 	private void initializeStatusServiceToHandleErrors() {
 		CommonStatusService statusService = new CommonStatusService();
@@ -169,7 +198,7 @@ public class RootApplication extends Application {
 	}
 
 	private static void verifyMinimumDatabaseInfo() throws ConfigurationException, ValidationException {
-		User user = User.loadByName("super");
+		User user = Users.loadSuper();
 		if (user == null) {
 			throw new ConfigurationException("super user is missing");
 		}
@@ -338,7 +367,9 @@ public class RootApplication extends Application {
 	private AuthenticatorsTemplateRoute guardAndAttach(Router rootRouter, Router router, String rootUri) {
 		Authenticators authenticators = getAuthenticators(rootRouter.getApplication());
 		authenticators.getLast().setNext(router);
+
 		TemplateRoute route = attach(rootRouter, rootUri, authenticators.getFirst());
+
 		return new AuthenticatorsTemplateRoute(route, authenticators);
 	}
 
@@ -386,9 +417,7 @@ public class RootApplication extends Application {
 	}
 
 	private void attachSSCLJ(RootRouter router) throws ValidationException {
-		for (String sscljResourceName : SSCLJRouter.SSCLJ_RESOURCE_NAMES) {			
-			guardAndAttach(router, new SSCLJRouter(getContext(), sscljResourceName), sscljResourceName);			
-		}
+		guardAndAttach(router, new SSCLJRouter(getContext()), "api");
 	}
 
 	public class RootRouter extends Router {

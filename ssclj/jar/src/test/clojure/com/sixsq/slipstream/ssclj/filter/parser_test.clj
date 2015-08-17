@@ -38,6 +38,7 @@
 
 ;; valid dates
 (let [passes (passes-fn :DateValue)]
+  (expect passes "2012-01")
   (expect passes "2012-01-02")
   (expect passes "2012-01-02T13:14:25Z")
   (expect passes "2012-01-02T13:14:25.6Z")
@@ -100,3 +101,5 @@
   (expect fails "a1/")
   (expect fails "/a1")
   (expect fails "a/1"))
+
+(run-all-tests)

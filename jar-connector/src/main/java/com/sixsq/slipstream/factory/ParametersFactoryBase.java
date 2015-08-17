@@ -180,6 +180,7 @@ public abstract class ParametersFactoryBase<S extends Parameter> {
 			ParameterType type, String instructions) throws ValidationException {
 		S parameter = createParameter(name, null, description, true);
 		parameter.setType(type);
+		parameter.setCategory(getCategory());
 		parameter.setInstructions(instructions);
 		assignParameter(parameter);
 	}
@@ -270,6 +271,15 @@ public abstract class ParametersFactoryBase<S extends Parameter> {
 			String description, String instructions) throws ValidationException {
 		S parameter = createParameter(name, description, true);
 		parameter.setCategory(getCategory());
+		parameter.setInstructions(instructions);
+		addParameter(parameter, ParameterType.Password, true);
+	}
+
+	protected void putMandatoryPasswordParameter(String name,
+			String description, String instructions, int order) throws ValidationException {
+		S parameter = createParameter(name, description, true);
+		parameter.setCategory(getCategory());
+		parameter.setOrder(order);
 		parameter.setInstructions(instructions);
 		addParameter(parameter, ParameterType.Password, true);
 	}

@@ -2,20 +2,15 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.license-template :refer :all]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
-    [com.sixsq.slipstream.ssclj.db.filesystem-test-utils :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
-(use-fixtures :each db/flush-db-fixture)
-
-(use-fixtures :once db/temp-db-fixture)
-
-(def base-uri (str c/service-context resource-name))
+(def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 (defn ring-app []
   (t/make-ring-app (t/concat-routes routes/final-routes)))
@@ -59,7 +54,7 @@
                 (t/body->json)
                 (t/is-status 201)
                 (t/location))
-        abs-uri (str c/service-context uri)]
+        abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
@@ -94,7 +89,7 @@
                 (t/body->json)
                 (t/is-status 201)
                 (t/location))
-        abs-uri (str c/service-context uri)]
+        abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (is uri)
 
@@ -135,7 +130,7 @@
         (t/is-status 404))))
 
 (deftest bad-methods
-  (let [resource-uri (str c/service-context (u/new-resource-id resource-name))]
+  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
     (doall
       (for [[uri method] [[base-uri :options]
                           [base-uri :delete]

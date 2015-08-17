@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.authz
   (:require 
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils        :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]))
 
 (derive ::modify ::view)
 (derive ::all ::modify)
@@ -31,11 +32,12 @@
   [{:keys [identity roles] :as id-map} {:keys [type principal right] :as rules}]
   (let [right (get rights-keywords right)]
     (cond
-      (and (= type "USER") (= principal identity)) right
+      (contains? (set roles) "ADMIN")                         ::all
+      (and (= type "USER") (= principal identity))            right
       (and (= type "ROLE") (contains? (set roles) principal)) right
-      (and (= type "ROLE") (= principal "USER") identity) right
-      (and (= type "ROLE") (= principal "ANON")) right
-      :else nil)))
+      (and (= type "ROLE") (= principal "USER") identity)     right
+      (and (= type "ROLE") (= principal "ANON"))              right
+      :else                                                   nil)))
 
 (defn extract-rights
   "Returns a set containing all of the applicable rights from an ACL

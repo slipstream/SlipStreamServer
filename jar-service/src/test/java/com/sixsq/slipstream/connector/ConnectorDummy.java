@@ -59,7 +59,7 @@ public class ConnectorDummy extends ConnectorBase {
 	}
 
 	@Override
-	public Properties describeInstances(User user, int timeout) {
+	public Map<String, Properties> describeInstances(User user, int timeout) {
 		return null;
 	}
 

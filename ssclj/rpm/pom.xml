@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>2.10-SNAPSHOT</version>
+    <version>2.15-SNAPSHOT</version>
   </parent>
 
   <!-- NOTE: This project MUST have same version as proxy module. -->
@@ -106,20 +106,20 @@
         <extensions>true</extensions>
         <configuration>
           <classifier>${package.os}</classifier>
-          <release>${RELEASE}</release>
+          <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream SSCLJ Server</summary>
           <name>slipstream-ssclj${slipstream.edition}</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
-          <copyright>Apache</copyright>
+          <license>Apache 2.0</license>
           <url>http://sixsq.com</url>
           <needarch>noarch</needarch>
           <description>
             SlipStream SSCLJ server
           </description>
           <requires>
-            <require>java-1.8.0-openjdk</require>
+            <require>jre-headless &gt;= 1.8.0</require>
             <require>slipstream-useradd${slipstream.edition}</require>
           </requires>
 
@@ -234,6 +234,9 @@
             <mapping>
               <directory>/etc/cron.d</directory>
               <directoryIncluded>false</directoryIncluded>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
               <sources>
                 <source>
                   <location>src/main/config</location>
@@ -245,13 +248,6 @@
             </mapping>
 
           </mappings>
-
-<prepareScriptlet>
-<script>
-# Turn off the brp-python-bytecompile script                                                        
-%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
-</script>
- </prepareScriptlet>
 
         </configuration>
 

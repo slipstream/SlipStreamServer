@@ -14,11 +14,19 @@
   [ts]
   (time/plus ts (time/days 1)))
 
+(defn inc-minutes
+  [ts minutes]
+  (time/plus ts (time/minutes minutes)))
+
 (defn timestamp-next-day
   [& args]
    (->> (apply time/date-time args)      
         inc-day
         (time-fmt/unparse (:date-time time-fmt/formatters))))
+
+(defn to-ISO-8601
+  [ts]
+  (time-fmt/unparse (:date-time time-fmt/formatters) ts))
 
 (defn to-time
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
@@ -26,9 +34,6 @@
   [s]
   (time-fmt/parse (:date-time time-fmt/formatters) s))
 
-(defn to-ISO-8601
-  [ts]
-  (time-fmt/unparse (:date-time time-fmt/formatters) ts))
 
 (defn to-interval   
   [start end]    

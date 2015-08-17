@@ -8,7 +8,7 @@
   :test-paths     ["src/test/clojure"]
   :resource-paths ["src/main/resources"]
 
-  :dependencies [[org.clojure/clojure                       "1.6.0"]
+  :dependencies [[org.clojure/clojure                       "1.7.0"]
                  [org.clojure/tools.logging                 "0.3.0"]
                  [org.clojure/tools.namespace               "0.2.5"]
                  [org.clojure/tools.cli                     "0.3.1"]
@@ -34,7 +34,7 @@
                  ;; database
                  [honeysql                                  "0.5.2"]
                  [org.clojure/java.jdbc                     "0.3.6"]
-                 [korma                                     "0.4.0"]
+                 [korma                                     "0.4.2"]
                  [org.hsqldb/hsqldb                         "2.3.2"]
                  [org.xerial/sqlite-jdbc                    "3.7.2"]]
 

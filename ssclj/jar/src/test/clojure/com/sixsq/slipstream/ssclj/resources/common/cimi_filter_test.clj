@@ -25,8 +25,19 @@
 
 (def events [event1 event2])
 
+(deftest test-to-int
+  (is (= 123 (to-int "123")))
+  (is (nil? (to-int nil)))
+  (is (nil? (to-int ""))))
+
 (deftest filter-cimi-simple-expression
-  "Dotted notation is used to locate nested attribute"
+  (is (= [] (cimi-filter events "xxx='state'")))
+  (is (= [] (cimi-filter events "xxx!='state'")))
+  (is (= [] (cimi-filter events "xxx>123")))
+  (is (= [] (cimi-filter events "xxx=123")))
+  (is (= [] (cimi-filter events "xxx!=123")))
+  (is (= [] (cimi-filter events "xxx<123")))
+
   (is (= [event1] (cimi-filter events "type='state'")))
   (is (= [event1] (cimi-filter events "(type='state')")))
   (is (= [event2] (cimi-filter events "type='critical'")))
@@ -44,22 +55,19 @@
   (is (= events     (cimi-filter events "content/resource/href='run/1234' or type='critical' or type='state'"))))
 
 (deftest filter-cimi-nested-expression
-  "Dotted notation is used to locate nested attribute"
-  (is (= [event1] (cimi-filter events "content/resource/href='run/1234'")))
-  (is (= [event2] (cimi-filter events "content/resource/href='run/7890'")))
-  (is (= []       (cimi-filter events "content/resource/href='run/1111'"))))
+  (testing "Dotted notation is used to locate nested attribute"
+    (is (= [event1] (cimi-filter events "content/resource/href='run/1234'")))
+    (is (= [event2] (cimi-filter events "content/resource/href='run/7890'")))
+    (is (= [] (cimi-filter events "content/resource/href='run/1111'")))))
 
 (deftest filter-cimi-expression-quotes
-  "Values must be simple or double quoted, and quotation must be consistent"
-  (is (= [event1] (cimi-filter events "content/resource/href='run/1234'")))
-  (is (= [event2] (cimi-filter events "content/resource/href=\"run/7890\"")))
+  (testing "Values must be simple or double quoted, and quotation must be consistent"
+    (is (= [event1] (cimi-filter events "content/resource/href='run/1234'")))
+    (is (= [event2] (cimi-filter events "content/resource/href=\"run/7890\"")))
 
-  (is (thrown? IllegalArgumentException (doall (cimi-filter events "content/resource/href=run/7890"))))
-  (is (thrown? IllegalArgumentException (doall (cimi-filter events "content/resource/href=\"run/7890'"))))
-  (is (thrown? IllegalArgumentException (doall (cimi-filter events "content/resource/href='run/7890\"")))))
-
-(deftest filter-cimi-checks-attribute-presence
-  (is (thrown? IllegalArgumentException (doall (cimi-filter events "abc=123")))))
+    (is (thrown? IllegalArgumentException (doall (cimi-filter events "content/resource/href=run/7890"))))
+    (is (thrown? IllegalArgumentException (doall (cimi-filter events "content/resource/href=\"run/7890'"))))
+    (is (thrown? IllegalArgumentException (doall (cimi-filter events "content/resource/href='run/7890\""))))))
 
 (deftest filter-cimi-various-operators
   (is (= [event2] (cimi-filter events "type!='state'")))
@@ -72,7 +80,11 @@
   (is (= [event1] (cimi-filter events "created<'2016-01-01'")))
 
   (is (= events   (cimi-filter events "created>'2014-01-01'")))
-  (is (= [event2] (cimi-filter events "created>'2016-01-01'"))))
+  (is (= [event2] (cimi-filter events "created>'2016-01-01'")))
+
+  (is (= [event1] (cimi-filter events "created=2015-05-15")))
+  (is (= [event2] (cimi-filter events "created=2016-05-15")))
+  )
 
 (deftest filter-cimi-multiple-ands
   (is (= events   (cimi-filter events "content/state='init'")))

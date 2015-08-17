@@ -5,6 +5,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,24 +46,29 @@ public class VmTest {
 	public void cloudInstanceIdUserMustBeUnique() throws Exception {
 		boolean exceptionOccured = false;
 		boolean firstInsertAccepted = false;
+
+		EntityManager em = PersistenceUtil.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
 		try {
-			EntityManager em = PersistenceUtil.createEntityManager();
-			EntityTransaction transaction = em.getTransaction();
 			transaction.begin();
 
-			String sqlInsert1 = String.format("INSERT INTO Vm VALUES (10, 'lokal', 'instance100', null, null, null, 'up', '%s', null, null, null, null, null)", user);
-			String sqlInsert2 = String.format("INSERT INTO Vm VALUES (20, 'lokal', 'instance100', null, null, null, 'down', '%s', null, null, null, null, null)", user);
+			String sqlInsert1 = String.format("INSERT INTO Vm (ID, CLOUD, INSTANCEID, STATE, USER_) VALUES (10, 'lokal', 'instance100', 'up', '%s');", user.getName());
+			String sqlInsert2 = String.format("INSERT INTO Vm (ID, CLOUD, INSTANCEID, STATE, USER_) VALUES (10, 'lokal', 'instance100', 'down', '%s');", user.getName());
 
 			Query query1 = em.createNativeQuery(sqlInsert1);
 			Query query2 = em.createNativeQuery(sqlInsert2);
 
-			assertEquals(1, query1.executeUpdate());
+			int res = query1.executeUpdate();
+			assertEquals(1, res);
 			firstInsertAccepted = true;
 
-			query2.executeUpdate();
+			res = query2.executeUpdate();
 			transaction.commit();
 		} catch (PersistenceException pe) {
 			exceptionOccured = true;
+			transaction.rollback();
+			boolean isCorrectException = pe.getCause().getCause().getClass() == SQLIntegrityConstraintViolationException.class;
+			assertTrue("The cause of the cause sould be SQLIntegrityConstraintViolationException.", isCorrectException);
 		}
 
 		assertTrue("First insert should have worked", firstInsertAccepted);

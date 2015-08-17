@@ -3,11 +3,11 @@
     [com.sixsq.slipstream.ssclj.resources.root :refer :all]
     [schema.core :as s]
     [expectations :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
+    [com.sixsq.slipstream.ssclj.app.params :as p]))
 
 (let [timestamp "1964-08-25T10:00:00.0Z"
       root {:id          resource-name
-            :resourceURI c/service-context
+            :resourceURI p/service-context
             :created     timestamp
             :updated     timestamp
             :acl         resource-acl

@@ -1,12 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils
   "General utilities for dealing with resources."
   (:require
-    [clojure.tools.logging    :as log]
-    [clojure.edn              :as edn]
-    [clj-time.core            :as time]
-    [clj-time.format          :as time-fmt]
-    [schema.core              :as s]
-    [ring.util.response       :as r])
+    [clojure.tools.logging                                    :as log]
+    [clojure.edn                                              :as edn]
+    [clojure.string                                           :refer [split]]
+    [clj-time.core                                            :as time]
+    [clj-time.format                                          :as time-fmt]
+    [schema.core                                              :as s]
+    [ring.util.response                                       :as r]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
+    [clojure.data.json                                        :as json])
   (:import
     [java.util UUID]
     [javax.xml.bind DatatypeConverter]))
@@ -16,6 +19,9 @@
 ;; conditions and ex-info exceptions with these responses
 ;; embedded in them
 ;;
+
+(defn de-camelcase [str]
+  (clojure.string/join "-" (map clojure.string/lower-case (clojure.string/split str #"(?=[A-Z])"))))
 
 (defn json-response
   [body]
@@ -67,6 +73,12 @@
 (defn new-resource-id
   [resource-name]
   (str resource-name "/" (random-uuid)))
+
+(defn resource-name
+  [resource-id]
+  (-> resource-id
+      (split #"/")
+      first))
 
 ;;
 ;; utilities for handling common attributes
@@ -145,45 +157,6 @@
       (String.)
       (edn/read-string)))
 
-(defn bad-query
-  [offset limit]
-  (throw
-    (ex-response
-      (str  "Wrong query string, offset and limit must be positive integers, got (offset:"offset,
-            ", limit:"limit")")
-      400 0)))
-
-(defn get-offset
-  [^String first]
-  (max 0 (dec (Integer. first))))
-
-(defn- first-last-to-offset-limit
-  "Converts $first and $last to (SQL equivalent) offset and limit"
-  [[^String first ^String last]]
-  (try
-    (cond
-      (every? nil? [first last]) {:offset 0                  :limit 0}
-      (nil? first)               {:offset 0                  :limit (Integer. last)}
-      (nil? last)                {:offset (get-offset first) :limit 0}
-      :else                      {:offset (get-offset first) :limit (- (Integer. last) (get-offset first))})
-    (catch NumberFormatException nfe
-      (bad-query first last))))
-
-(defn- first-last
-  "Extracts $first and $last from query-params of options"
-  [options]
-  (->> options
-       :query-params
-       ((juxt #(get % "$first") #(get % "$last")))))
-
-(defn offset-limit
-  "Extracts $first and $last from query-params of options and
-  converts it to (SQL equivalent) offset and limit"
-  [options]
-  (-> options
-      first-last
-      first-last-to-offset-limit))
-
 (defn- clojurify
   [exp]
   (cond
@@ -197,4 +170,41 @@
        (clojure.walk/prewalk clojurify)
        clojure.walk/keywordize-keys))
 
+(defn into-vec-without-nil
+  [op xs]
+  (when (->>  xs
+              (remove nil?)
+              seq)
+    (->>  (into [op] xs)
+          (remove nil?)
+          vec)))
+
+(defn- lisp-cased?
+  [s]
+  (re-matches #"[a-z]+(-[a-z]+)*" s))
+
+(defn lisp-to-camelcase
+  "Converts s to CamelCase format.
+  s must be lisp-cased, if not empty string is returned."
+  [s]
+  (if-not (lisp-cased? s)
+    (do
+      (log/warn s " is not lisp-cased.")
+      "")
+    (->>  (clojure.string/split s #"-")
+          (map clojure.string/capitalize)
+          (apply str))))
+
+(defn map-multi-line
+  [m]
+  (str "\n" (clojure.pprint/write m :stream nil :right-margin 50)))
+
+(defn serialize
+  [resource]
+  (with-out-str
+    (json/pprint resource :key-fn name)))
+
+(defn deserialize
+  [s]
+  (json/read-str s :key-fn keyword))
 

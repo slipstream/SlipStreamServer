@@ -38,11 +38,10 @@
 
 (deftest truncate-filters-outside-records
   (let [urs [{:start_timestamp in-day-1 :end_timestamp in-day-2}]]
-    (is (= urs (truncate start-day end-day urs )))
+    (is (= urs (truncate start-day end-day urs)))
     (is (= urs (truncate past-1 future-1 urs)))
-    (is (= [] (truncate past-1 past-2 urs))
-    (is (= [] (truncate future-1 future-2 urs))
-      ))))
+    (is (= [] (truncate past-1 past-2 urs)))
+    (is (= [] (truncate future-1 future-2 urs)))))
 
 (deftest truncate-checks-args
   (truncate past-1 past-2 [])
@@ -175,7 +174,10 @@
                     :value 100.5 }]})
   (rc/-insertEnd
     { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"    
-      :end_timestamp       in-day-2}))
+      :end_timestamp       in-day-2
+      :metrics [{ :name  "nb-cpu" }
+                { :name  "RAM-GB"}
+                { :name  "disk-GB"}]}))
 
 (deftest test-summarize
   (insert-record)

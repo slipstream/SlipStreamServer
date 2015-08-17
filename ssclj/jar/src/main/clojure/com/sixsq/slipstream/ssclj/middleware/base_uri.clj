@@ -1,7 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.middleware.base-uri
   "middleware to add the :base-uri key and value to the request"
   (:require
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.app.params :as p]))
 
 (defn get-host-port
   "Get the host:port value for the request, preferring the 'host'
@@ -19,7 +20,7 @@
 
 (defn construct-base-uri
   [req]
-  (format "%s://%s/ssclj/" (get-scheme req) (get-host-port req)))
+  (format "%s://%s%s" (get-scheme req) (get-host-port req) p/service-context))
 
 (defn wrap-base-uri
   "adds the :base-uri key to the request with the base URI value"
