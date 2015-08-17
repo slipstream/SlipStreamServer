@@ -67,11 +67,7 @@ public class Modules {
 		File usersDir = new File(configDir + File.separator + MODULES_CONFIG_DIR);
 
 		List<File> files = FileLoader.loadConfigurationFiles(usersDir);
-		//files.forEach( f -> { loadSingleModule(f); } );
-		for(File f : files) {
-			loadSingleModule(f);
-		}
-
+		files.forEach( f -> { loadSingleModule(f); } );
 	}
 
 	private static boolean shouldLoad() {

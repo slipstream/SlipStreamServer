@@ -122,11 +122,7 @@ public class Users {
 		File usersDir = new File(configDir + File.separator + USERS_CONFIG_DIR);
 
 		List<File> files = FileLoader.loadConfigurationFiles(usersDir);
-		//files.forEach( f -> { loadSingleUser(f); } );
-		for(File f : files) {
-			loadSingleUser(f);
-		}
-
+		files.forEach( f -> { loadSingleUser(f); } );
 	}
 
 	private static boolean shouldLoad() {
