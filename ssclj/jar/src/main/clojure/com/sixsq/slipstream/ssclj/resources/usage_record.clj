@@ -1,9 +1,9 @@
-(ns com.sixsq.slipstream.ssclj.resources.usage-record  
+(ns com.sixsq.slipstream.ssclj.resources.usage-record
   (:require
     [clojure.tools.logging                                  :as log]
     [schema.core                                            :as s]
     [com.sixsq.slipstream.ssclj.db.database-binding         :as dbb]
-    [com.sixsq.slipstream.ssclj.resources.common.authz      :as a]  
+    [com.sixsq.slipstream.ssclj.resources.common.authz      :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud       :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud   :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
@@ -12,6 +12,7 @@
 
 (def ^:const resource-tag     :usage-records)
 (def ^:const resource-name    "UsageRecord")
+(def ^:const resource-url (u/de-camelcase resource-name))
 (def ^:const collection-name  "UsageRecordCollection")
 
 (def ^:const resource-uri   (str c/slipstream-schema-uri resource-name))

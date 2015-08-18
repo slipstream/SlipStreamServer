@@ -11,6 +11,7 @@
 
 (def ^:const resource-tag     :network-services)
 (def ^:const resource-name    "NetworkService")
+(def ^:const resource-url (u/de-camelcase resource-name))
 (def ^:const collection-name  "NetworkServiceCollection")
 
 (def ^:const resource-uri     (str c/cimi-schema-uri resource-name))

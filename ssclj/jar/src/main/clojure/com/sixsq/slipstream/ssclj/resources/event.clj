@@ -12,6 +12,7 @@
 
 (def ^:const resource-tag     :events)
 (def ^:const resource-name    "Event")
+(def ^:const resource-url (u/de-camelcase resource-name))
 (def ^:const collection-name  "EventCollection")
 
 (def ^:const resource-uri (str c/cimi-schema-uri resource-name))
