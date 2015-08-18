@@ -13,9 +13,9 @@
 (def ^:const resource-name    "NetworkService")
 (def ^:const collection-name  "NetworkServiceCollection")
 
-(def ^:const resource-uri     (str c/slipstream-schema-uri resource-name))
+(def ^:const resource-uri     (str c/cimi-schema-uri resource-name))
 (def ^:const create-uri       (str resource-uri "Create"))
-(def ^:const collection-uri   (str c/slipstream-schema-uri collection-name))
+(def ^:const collection-uri   (str c/cimi-schema-uri collection-name))
 
 (def collection-acl {:owner { :type      "ROLE"
                               :principal "ADMIN" }
