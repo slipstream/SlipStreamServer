@@ -69,6 +69,9 @@ public class RunView {
 	@Attribute(required = false)
 	public String tags;
 
+	@Attribute(required=false)
+	private String serviceUrl;
+
 	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
 			String status, Date startTime, String username, RunType type, String cloudServiceNames, String abort) {
 		this.resourceUri = resourceUrl;
@@ -113,6 +116,14 @@ public class RunView {
 		copy.setHostname(hostname);
 		copy.setTags(tags);
 		return copy;
+	}
+
+	public String getServiceUrl() {
+		return serviceUrl;
+	}
+
+	public void setServiceUrl(String serviceUrl) {
+		this.serviceUrl = serviceUrl;
 	}
 
 	public String getCloudServiceNames() {
