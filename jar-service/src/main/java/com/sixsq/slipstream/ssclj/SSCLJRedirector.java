@@ -75,19 +75,23 @@ public class SSCLJRedirector extends Redirector {
     }
 
 	@SuppressWarnings("unchecked")
-	protected void addSlipstreamAuthnInfo(Request request, Reference baseRef) {
+	protected void addSlipStreamHeaders(Request request, Reference baseRef) {
 		try {
 
             @SuppressWarnings("rawtypes")
 			Series<Header> requestHeaders = new Series(Header.class);
 			request.getAttributes().put(ATTRIBUTE_HEADERS, requestHeaders);
 
+            // this header provides the authentication information to the
+            // proxied service
 			String username = request.getClientInfo().getUser().getName();
 			boolean isSuper = User.loadByName(username).isSuper();
 			String role = isSuper ? " " + TypePrincipalRight.ADMIN : "";
 
             requestHeaders.add(new Header(SLIPSTREAM_AUTHN_INFO, username + role));
 
+            // these headers are required to reconstruct the base URI of the
+            // server in the proxied service
             String protocol = baseRef.getSchemeProtocol().getSchemeName();
             String hostPort = baseRef.getHostDomain();
             int port = baseRef.getHostPort();
@@ -109,7 +113,7 @@ public class SSCLJRedirector extends Redirector {
     }
 
 	// hack inspired by this discussion http://restlet.tigris.org/ds/viewMessage.do?dsForumId=4447&dsMessageId=3076621
-	// main trick is to call addSlipstreamAuthnInfo to add slipstream header after it has been removed from request
+	// main trick is to call addSlipStreamHeaders to add slipstream header after it has been removed from request
 	//
 	protected void serverRedirect(Restlet next, Reference targetRef,
             Request request, Response response) {
@@ -136,7 +140,7 @@ public class SSCLJRedirector extends Redirector {
             request.getAttributes().remove(HeaderConstants.ATTRIBUTE_HEADERS);
 
             // hack
-            addSlipstreamAuthnInfo(request, baseRef);
+            addSlipStreamHeaders(request, baseRef);
             addCIMIQueryParams(request);
             // hack end
 
