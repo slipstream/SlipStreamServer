@@ -5,6 +5,7 @@ import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -76,7 +77,7 @@ public class SSCLJRedirector extends Redirector {
     }
 
 	@SuppressWarnings("unchecked")
-	protected void addSlipStreamHeaders(Request request, Reference baseRef) {
+	protected void addSlipStreamHeaders(Request request) {
 		try {
 
             @SuppressWarnings("rawtypes")
@@ -93,23 +94,17 @@ public class SSCLJRedirector extends Redirector {
 
             // these headers are required to reconstruct the base URI of the
             // server in the proxied service
-            Series headers = (Series) request.getAttributes().get("org.restlet.http.headers");
+            Reference baseRef = ResourceUriUtil.getBaseRef(request);
 
-            String protocol = headers.getFirstValue(X_FORWARDED_PROTO);
-            if (protocol == null) {
-                protocol = "http";
-            }
+            String protocol = baseRef.getScheme(true);
             requestHeaders.add(new Header(X_FORWARDED_PROTO, protocol));
 
-            String host = headers.getFirstValue(X_FORWARDED_FOR);
-            if (host == null) {
-                host = baseRef.getHostDomain();
-            }
+            String host = baseRef.getHostDomain(true);
             requestHeaders.add(new Header(X_FORWARDED_FOR, host));
 
-            String port = headers.getFirstValue(X_FORWARDED_PORT);
-            if (port != null) {
-                requestHeaders.add(new Header(X_FORWARDED_PORT, port));
+            int port = baseRef.getHostPort();
+            if (port > 0) {
+                requestHeaders.add(new Header(X_FORWARDED_PORT, Integer.toString(port)));
             }
 
         } catch (ValidationException ve) {
@@ -151,7 +146,7 @@ public class SSCLJRedirector extends Redirector {
             request.getAttributes().remove(HeaderConstants.ATTRIBUTE_HEADERS);
 
             // hack
-            addSlipStreamHeaders(request, baseRef);
+            addSlipStreamHeaders(request);
             addCIMIQueryParams(request);
             // hack end
 
