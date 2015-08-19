@@ -5,9 +5,10 @@
 
 (defn get-host-port
   "Gets the originating host and port, preferring the 'forwarded'
-   headers, if they exist."
+   headers, if they exist.  The 'x-forwarded-for' is used instead
+   of 'x-forwarded-host'."
   [{:keys [headers server-name server-port]}]
-  (if-let [host (get headers "x-forwarded-host")]
+  (if-let [host (get headers "x-forwarded-for")]
     (if-let [port (get headers "x-forwarded-port")]
       (format "%s:%s" host port)
       host)

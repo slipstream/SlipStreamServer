@@ -9,6 +9,7 @@ import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.Restlet;
+import org.restlet.data.Form;
 import org.restlet.data.Parameter;
 import org.restlet.data.Reference;
 import org.restlet.engine.header.Header;
@@ -29,7 +30,7 @@ public class SSCLJRedirector extends Redirector {
 
     private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
-    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
     private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
     private static final String CIMI_KEY_FIRST_PARAM = "$first";
@@ -93,15 +94,23 @@ public class SSCLJRedirector extends Redirector {
 
             // these headers are required to reconstruct the base URI of the
             // server in the proxied service
-            String protocol = baseRef.getSchemeProtocol().getSchemeName();
+            Form headers = (Form) request.getAttributes().get("org.restlet.http.headers");
+
+            String protocol = headers.getFirstValue(X_FORWARDED_PROTO);
+            if (protocol == null) {
+                protocol = "http";
+            }
             requestHeaders.add(new Header(X_FORWARDED_PROTO, protocol));
 
-            String host = baseRef.getHostDomain();
-            requestHeaders.add(new Header(X_FORWARDED_HOST, host));
+            String host = headers.getFirstValue(X_FORWARDED_FOR);
+            if (host == null) {
+                host = baseRef.getHostDomain();
+            }
+            requestHeaders.add(new Header(X_FORWARDED_FOR, host));
 
-            int port = baseRef.getHostPort();
-            if (port > 0) {
-                requestHeaders.add(new Header(X_FORWARDED_HOST, Integer.toString(port)));
+            String port = headers.getFirstValue(X_FORWARDED_PORT);
+            if (port != null) {
+                requestHeaders.add(new Header(X_FORWARDED_PORT, port));
             }
 
         } catch (ValidationException ve) {
