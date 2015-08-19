@@ -59,7 +59,7 @@
            [resource request]
   (try
     (a/can-modify? resource request)
-    (let [ops [{:rel (:edit c/action-uri) :href "#"}]]
+    (let [ops [{:rel (:edit c/action-uri) :href resource-url}]]
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))
