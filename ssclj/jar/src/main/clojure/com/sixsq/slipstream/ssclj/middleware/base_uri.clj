@@ -1,19 +1,21 @@
 (ns com.sixsq.slipstream.ssclj.middleware.base-uri
   "middleware to add the :base-uri key and value to the request"
   (:require
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.app.params :as p]))
 
 (defn get-host-port
-  "Get the host:port value for the request, preferring the 'host'
-   header value over local server name and port."
+  "Gets the originating host and port, preferring the 'forwarded'
+   headers, if they exist."
   [{:keys [headers server-name server-port]}]
-  (or (get headers "host")
-      (format "%s:%d" server-name server-port)))
+  (if-let [host (get headers "x-forwarded-host")]
+    (if-let [port (get headers "x-forwarded-port")]
+      (format "%s:%s" host port)
+      host)
+    (format "%s:%s" server-name server-port)))
 
 (defn get-scheme
-  "Get the scheme to use for the base URI, preferring the header
-   set by the proxy for the remote scheme being used (usually https)."
+  "Get the scheme for the originating host, preferring the 'forwarded'
+   header, it it exists."
   [{:keys [headers scheme]}]
   (or (get headers "x-forwarded-proto")
       (name scheme)))

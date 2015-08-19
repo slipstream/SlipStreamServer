@@ -28,8 +28,9 @@ public class SSCLJRedirector extends Redirector {
 	private static final Logger logger = Logger.getLogger(Redirector.class.getName());
 
     private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
-    private static final String X_FORWARDED_PROTO_HEADER = "x_forwarded_proto_header";
-    private static final String HOST_HEADER = "host";
+    private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
     private static final String CIMI_KEY_FIRST_PARAM = "$first";
     private static final String CIMI_KEY_LAST_PARAM = "$last";
@@ -93,15 +94,17 @@ public class SSCLJRedirector extends Redirector {
             // these headers are required to reconstruct the base URI of the
             // server in the proxied service
             String protocol = baseRef.getSchemeProtocol().getSchemeName();
-            String hostPort = baseRef.getHostDomain();
+            requestHeaders.add(new Header(X_FORWARDED_PROTO, protocol));
+
+            String host = baseRef.getHostDomain();
+            requestHeaders.add(new Header(X_FORWARDED_HOST, host));
+
             int port = baseRef.getHostPort();
             if (port > 0) {
-                hostPort += ":" + Integer.toString(port);
+                requestHeaders.add(new Header(X_FORWARDED_HOST, Integer.toString(port)));
             }
-            requestHeaders.add(new Header(X_FORWARDED_PROTO_HEADER, protocol));
-            requestHeaders.add(new Header(HOST_HEADER, hostPort));
 
-		} catch (ValidationException ve) {
+        } catch (ValidationException ve) {
 			logger.severe("Unable to add headers:" + ve.getMessage());
 		}
 	}
