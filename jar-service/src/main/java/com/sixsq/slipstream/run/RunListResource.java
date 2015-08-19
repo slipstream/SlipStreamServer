@@ -33,6 +33,8 @@ import java.util.Map.Entry;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
 
+import com.sixsq.slipstream.dashboard.Dashboard;
+import com.sixsq.slipstream.dashboard.DashboardResource;
 import org.hibernate.StaleObjectStateException;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -68,7 +70,6 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.run.RunViewList;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.RequestUtil;
@@ -89,6 +90,7 @@ public class RunListResource extends BaseResource {
 	public static final String BYPASS_SSH_CHECK_KEY = "bypass-ssh-check";
 	public static final String KEEP_RUNNING_KEY = "keep-running";
 	public static final String TAGS_KEY = "tags";
+	public static final String REDIRECT_TO_DASHBOARD = "redirect_to_dashboard";
 
 	String refqname = null;
 
@@ -161,7 +163,7 @@ public class RunListResource extends BaseResource {
 			User user = getUser();
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
-			RunType type = parseType(form);
+			RunType type = parseType(form, module);
 
 			validateUserPublicKey(user, type, form);
 
@@ -191,10 +193,26 @@ public class RunListResource extends BaseResource {
 			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex.getMessage()));
 		}
 
-		String location = "/" + Run.RESOURCE_URI_PREFIX + run.getName();
-		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), location);
+		setResponseLocation(run, form);
 
 		getResponse().setStatus(Status.SUCCESS_CREATED);
+	}
+
+	private void setResponseLocation(Run run, Form form) {
+		// if the query parameter 'redirect' is set, then redirect to its value
+		// this is a gap solution, such that the CLI can retrieve the uuid, while
+		// the ui can redirect to the dashboard
+		String redirect = form.getFirstValue(REDIRECT_TO_DASHBOARD);
+
+		String location;
+		if(redirect != null) {
+			location = "/" + DashboardResource.RESOURCE_URI_PREFIX;
+		} else {
+			location = "/" + Run.RESOURCE_URI_PREFIX + run.getName();
+		}
+
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), location);
+
 		getResponse().setLocationRef(absolutePath);
 	}
 
@@ -324,6 +342,7 @@ public class RunListResource extends BaseResource {
 		keysToFilter.add(RunListResource.KEEP_RUNNING_KEY);
 		keysToFilter.add(RunListResource.BYPASS_SSH_CHECK_KEY);
 		keysToFilter.add(RunListResource.TAGS_KEY);
+		keysToFilter.add(RunListResource.REDIRECT_TO_DASHBOARD);
 
 		if (keysToFilter.contains(entry.getKey())) {
 			return true;
@@ -331,8 +350,9 @@ public class RunListResource extends BaseResource {
 		return false;
 	}
 
-	private RunType parseType(Form form) {
-		String type = form.getFirstValue(RunListResource.TYPE, true, RunType.Orchestration.toString());
+	private RunType parseType(Form form, Module module) {
+		RunType defaultRunType = module.getCategory() == ModuleCategory.Image ? RunType.Run : RunType.Orchestration;
+		String type = form.getFirstValue(RunListResource.TYPE, true, defaultRunType.toString());
 		try {
 			return RunType.valueOf(type);
 		} catch (IllegalArgumentException e) {

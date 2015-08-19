@@ -183,10 +183,4 @@ public class RunTestBase {
 		return run;
 	}
 
-	protected void setRuntimeParameterState(Run run, String key, States state)
-			throws ValidationException {
-		run.getRuntimeParameters().put(key,
-				new RuntimeParameter(run, key, state.toString(), ""));
-	}
-
 }
