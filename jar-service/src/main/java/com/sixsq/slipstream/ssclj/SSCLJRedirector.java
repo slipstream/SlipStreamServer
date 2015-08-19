@@ -27,7 +27,9 @@ public class SSCLJRedirector extends Redirector {
 
 	private static final Logger logger = Logger.getLogger(Redirector.class.getName());
 
-	private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
+    private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
+    private static final String X_FORWARDED_PROTO_HEADER = "x_forwarded_proto_header";
+    private static final String HOST_HEADER = "host";
 
     private static final String CIMI_KEY_FIRST_PARAM = "$first";
     private static final String CIMI_KEY_LAST_PARAM = "$last";
@@ -73,7 +75,7 @@ public class SSCLJRedirector extends Redirector {
     }
 
 	@SuppressWarnings("unchecked")
-	protected void addSlipstreamAuthnInfo(Request request) {
+	protected void addSlipstreamAuthnInfo(Request request, Reference baseRef) {
 		try {
 
             @SuppressWarnings("rawtypes")
@@ -84,9 +86,19 @@ public class SSCLJRedirector extends Redirector {
 			boolean isSuper = User.loadByName(username).isSuper();
 			String role = isSuper ? " " + TypePrincipalRight.ADMIN : "";
 
-			requestHeaders.add(new Header(SLIPSTREAM_AUTHN_INFO, username + role));
+            requestHeaders.add(new Header(SLIPSTREAM_AUTHN_INFO, username + role));
+
+            String protocol = baseRef.getSchemeProtocol().getSchemeName();
+            String hostPort = baseRef.getHostDomain();
+            int port = baseRef.getHostPort();
+            if (port > 0) {
+                hostPort += ":" + Integer.toString(port);
+            }
+            requestHeaders.add(new Header(X_FORWARDED_PROTO_HEADER, protocol));
+            requestHeaders.add(new Header(HOST_HEADER, hostPort));
+
 		} catch (ValidationException ve) {
-			logger.severe("Unable to add SlipstreamAuthnInfo in header:" + ve.getMessage());
+			logger.severe("Unable to add headers:" + ve.getMessage());
 		}
 	}
 
@@ -124,7 +136,7 @@ public class SSCLJRedirector extends Redirector {
             request.getAttributes().remove(HeaderConstants.ATTRIBUTE_HEADERS);
 
             // hack
-            addSlipstreamAuthnInfo(request);
+            addSlipstreamAuthnInfo(request, baseRef);
             addCIMIQueryParams(request);
             // hack end
 
