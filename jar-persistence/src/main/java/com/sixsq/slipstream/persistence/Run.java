@@ -330,9 +330,17 @@ public class Run extends Parameterized<Run, RunParameter> {
 				abortMessage);
 
 		try {
+			runView.setServiceUrl(run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_URL_SERVICE_KEY));
+		} catch (NotFoundException e) {
+			// it ok if it's not there
+		}
+
+		try {
 			runView.setTags(run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_TAGS_KEY));
 		} catch (NotFoundException e) {
+			// it ok if it's not there
 		}
+
 		return runView;
 	}
 
