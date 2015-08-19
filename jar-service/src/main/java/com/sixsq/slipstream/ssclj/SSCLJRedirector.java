@@ -77,7 +77,7 @@ public class SSCLJRedirector extends Redirector {
     }
 
 	@SuppressWarnings("unchecked")
-	protected void addSlipStreamHeaders(Request request) {
+	protected void addSlipStreamHeaders(Request request, Reference baseRef) {
 		try {
 
             @SuppressWarnings("rawtypes")
@@ -94,7 +94,6 @@ public class SSCLJRedirector extends Redirector {
 
             // these headers are required to reconstruct the base URI of the
             // server in the proxied service
-            Reference baseRef = ResourceUriUtil.getBaseRef(request);
 
             String protocol = baseRef.getScheme(true);
             requestHeaders.add(new Header(X_FORWARDED_PROTO, protocol));
@@ -138,6 +137,9 @@ public class SSCLJRedirector extends Redirector {
             Reference resourceRef = request.getResourceRef();
             Reference baseRef = resourceRef.getBaseRef();
 
+            // Save the value before mucking with the request.
+            Reference baseRefFromHeaders = ResourceUriUtil.getBaseRef(request);
+
             // Reset the protocol and let the dispatcher handle the protocol
             request.setProtocol(null);
 
@@ -146,7 +148,7 @@ public class SSCLJRedirector extends Redirector {
             request.getAttributes().remove(HeaderConstants.ATTRIBUTE_HEADERS);
 
             // hack
-            addSlipStreamHeaders(request);
+            addSlipStreamHeaders(request, baseRefFromHeaders);
             addCIMIQueryParams(request);
             // hack end
 
