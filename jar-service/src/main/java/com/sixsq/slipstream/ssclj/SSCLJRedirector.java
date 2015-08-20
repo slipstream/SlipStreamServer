@@ -117,9 +117,10 @@ public class SSCLJRedirector extends Redirector {
         super.outboundServerRedirect(targetRef, request, response);
     }
 
-	// hack inspired by this discussion http://restlet.tigris.org/ds/viewMessage.do?dsForumId=4447&dsMessageId=3076621
-	// main trick is to call addSlipStreamHeaders to add slipstream header after it has been removed from request
-	//
+    // FIXME: Need for hack to get SlipStream headers added to proxy request.
+    // Hack inspired by this discussion http://restlet.tigris.org/ds/viewMessage.do?dsForumId=4447&dsMessageId=3076621
+    // main trick is to call addSlipStreamHeaders to add slipstream header after it has been removed from request
+    //
 	protected void serverRedirect(Restlet next, Reference targetRef,
             Request request, Response response) {
 
