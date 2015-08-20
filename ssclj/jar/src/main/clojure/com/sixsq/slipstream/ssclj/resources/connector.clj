@@ -13,6 +13,8 @@
 
 (def ^:const resource-name "Connector")
 
+(def ^:const resource-url (u/de-camelcase resource-name))
+
 (def ^:const collection-name "ConnectorCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))

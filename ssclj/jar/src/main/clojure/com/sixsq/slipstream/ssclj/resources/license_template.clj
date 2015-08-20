@@ -12,6 +12,8 @@
 
 (def ^:const resource-name "LicenseTemplate")
 
+(def ^:const resource-url (u/de-camelcase resource-name))
+
 (def ^:const collection-name "LicenseTemplateCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
