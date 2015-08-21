@@ -209,7 +209,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	 * Intended to inform users about constraints or requirements on the
 	 * module requirements - e.g. required ports.
 	 */
-	@Element(required = false)
+	@Element(required = false, data = true)
 	@Column(length = 65536)
 	private String note;
 	
