@@ -398,7 +398,7 @@ public class RunListResource extends BaseResource {
 		// Create the repository structure
 		if (!createdOk) {
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
-					"Error creating repository structure");
+					"Error creating repository structure: " + absRepositoryLocation);
 		}
 	}
 
