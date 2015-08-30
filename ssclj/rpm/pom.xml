@@ -202,7 +202,7 @@
             </mapping>
 
             <mapping>
-              <directory>${installation.dir}/etc</directory>
+              <directory>${installation.dir}/resources</directory>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
