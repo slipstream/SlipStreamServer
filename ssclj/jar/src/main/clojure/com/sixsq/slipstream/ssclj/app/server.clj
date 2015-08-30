@@ -62,6 +62,9 @@
    the http-kit container."
   [ring-app port]
   (log/info "starting the http-kit container on port" port)
+  (log/info "java vendor: " (System/getProperty "java.vendor"))
+  (log/info "java version: " (System/getProperty "java.version"))
+  (log/info "java classpath: " (System/getProperty "java.class.path"))
   (run-server ring-app {:port port :ip "127.0.0.1"}))
 
 (declare stop)
