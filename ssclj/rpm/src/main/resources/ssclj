@@ -1,13 +1,2 @@
 # Defaults for the SlipStream API server.
-#
-# The following variables can be set to change the behavior of the
-# SlipStream API server.  The values below are the defaults, if other
-# values are not set.
-#
-# Normally this settings do not need to be specified.  Change them
-# only if you know what you're doing!
-
-#SSCLJ_HOME=/opt/slipstream/ssclj
-#SSCLJ_CLASS=com.sixsq.slipstream.ssclj.app.main
 #SSCLJ_PORT=8201
-#SSCLJ_USER=slipstream

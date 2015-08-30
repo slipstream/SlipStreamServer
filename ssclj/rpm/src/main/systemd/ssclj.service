@@ -4,21 +4,18 @@ After=syslog.target
 After=network.target
 
 [Service]
-Environment=SSCLJ_HOME=/opt/slipstream/ssclj
-Environment=SSCLJ_CLASS=com.sixsq.slipstream.ssclj.app.main
 Environment=SSCLJ_PORT=8201
-Environment=SSCLJ_USER=slipstream
 EnvironmentFile=-/etc/default/ssclj
 
-User=$SSCLJ_USER
+User=slipstream
 
-WorkingDirectory=$SSCLJ_HOME
+WorkingDirectory=/opt/slipstream/ssclj
 
 ExecStart=/usr/bin/java \
             -Ddb.config.path=db.spec \
             -Dlogfile.path=production \
             -cp "lib/ssclj.jar:resources:lib/ext/*" \
-            $SSCLJ_CLASS $SSCLJ_PORT
+            com.sixsq.slipstream.ssclj.app.main $SSCLJ_PORT
 ExecStop=/bin/kill -TERM $MAINPID
 
 [Install]
