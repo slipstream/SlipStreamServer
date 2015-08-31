@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]))
 
-(def ^:const resource-tag :licenses)
+(def ^:const resource-tag :licenseTemplate)
 
 (def ^:const resource-name "LicenseTemplate")
 
