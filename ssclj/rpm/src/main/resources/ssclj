@@ -1,1 +1,2 @@
-
+# Defaults for the SlipStream API server.
+#SSCLJ_PORT=8201

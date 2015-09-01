@@ -1,13 +1,22 @@
 [Unit]
 Description=SlipStream API
-After=syslog.target network.target
+After=syslog.target
+After=network.target
 
 [Service]
-RemainAfterExit=yes
-Type=oneshot
-ExecStart=/etc/init.d/ssclj start
-ExecStop=/etc/init.d/ssclj stop
-ExecReload=/etc/init.d/ssclj restart
+Environment=SSCLJ_PORT=8201
+EnvironmentFile=-/etc/default/ssclj
+
+User=slipstream
+
+WorkingDirectory=/opt/slipstream/ssclj
+
+ExecStart=/usr/bin/java \
+            -Ddb.config.path=db.spec \
+            -Dlogfile.path=production \
+            -cp "lib/ssclj.jar:resources:lib/ext/*" \
+            com.sixsq.slipstream.ssclj.app.main $SSCLJ_PORT
+ExecStop=/bin/kill -TERM $MAINPID
 
 [Install]
 WantedBy=multi-user.target
