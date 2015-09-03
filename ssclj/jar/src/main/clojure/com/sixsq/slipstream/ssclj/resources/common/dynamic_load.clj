@@ -16,7 +16,7 @@
   [sym]
   (->>  (name sym)
         (re-matches #"^com\.sixsq\.slipstream\.ssclj\.resources\.[\w-]+$")
-        first)) 
+        first))
 
 (defn resources
   "Returns the namespaces of all resources available on the classpath."
@@ -60,7 +60,7 @@
    resource."
   [resource-ns]
   (if-let [vtag (get-ns-var "resource-tag" resource-ns)]
-    (if-let [vtype (get-ns-var "resource-name" resource-ns)]
+    (if-let [vtype (get-ns-var "resource-url" resource-ns)]
       [(deref vtag) {:href (deref vtype)}])))
 
 (defn resource-routes

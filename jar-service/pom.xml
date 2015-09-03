@@ -18,7 +18,7 @@
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamServer</artifactId>
-		<version>2.14-SNAPSHOT</version>
+		<version>2.16-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -55,6 +55,14 @@
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamUI</artifactId>
+		</dependency>
+
+                <!-- required for passing tests on clean build -->
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+                        <artifactId>SlipStreamServer-ui-static-content</artifactId>
+                        <version>${project.version}</version>
+                        <type>zip</type>
 		</dependency>
 
 		<dependency>
@@ -190,11 +198,13 @@
 						<phase>generate-test-resources</phase>
 						<configuration>
 							<outputDirectory>${project.build.directory}/configuration</outputDirectory>
-							<delimiter>@</delimiter>
+							<delimiters>
+								<delimiter>${*}</delimiter>
+							</delimiters>
 							<overwrite>true</overwrite>
 							<resources>
 								<resource>
-									<directory>${basedir}/jar/src/main/configuration</directory>
+									<directory>${basedir}/src/main/configuration</directory>
 									<filtering>true</filtering>
 								</resource>
 							</resources>
@@ -211,10 +221,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<systemPropertyVariables>
-						<property>
-							<name>slipstream.config.file</name>
-							<value>${project.build.directory}/configuration/slipstream.conf</value>
-						</property>
+						<slipstream.config.file>${project.build.directory}/configuration/slipstream.conf</slipstream.config.file>
 					</systemPropertyVariables>
 					<excludes>
 						<exclude>${slipstream.test.excludes}</exclude>

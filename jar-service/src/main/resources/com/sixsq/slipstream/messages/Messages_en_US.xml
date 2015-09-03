@@ -34,7 +34,7 @@ Please update your password and other information here:
 
 Any questions can be emailed to support@sixsq.com.
 
-Thanks for your interest in SlipStream(TM).
+Thanks for your interest in SlipStream.
 </entry>
 
 <entry key="MSG_PASSWORD_RESET">
@@ -87,7 +87,7 @@ Once confirmed your account will be activated.
 </entry>
 
 <entry key="MSG_CONFIRM_RESET">
-A request has been made to reset your SlipStream(TM) account
+A request has been made to reset your SlipStream account
 password.  To validate this request, visit the link:
 
 {0}

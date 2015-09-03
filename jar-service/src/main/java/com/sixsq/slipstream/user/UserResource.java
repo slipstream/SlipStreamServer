@@ -21,6 +21,8 @@ package com.sixsq.slipstream.user;
  */
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -30,6 +32,7 @@ import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
+import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
@@ -238,7 +241,7 @@ public class UserResource extends ParameterizedResource<User> {
 	}
 
 	@Put("form")
-	public void modifyOrCreateFromForm(Representation entity)
+	public void updateOrCreateFromForm(Representation entity)
 			throws ResourceException {
 
 		if (!canPut()) {
@@ -293,7 +296,7 @@ public class UserResource extends ParameterizedResource<User> {
 		return xmlToUser(extractXml());
 	}
 
-	private User xmlToUser(String xml) {
+	public static User xmlToUser(String xml) {
 
 		String denormalized = XmlUtil.denormalize(xml);
 

@@ -157,7 +157,7 @@ public abstract class BaseResource extends ServerResource {
 		Util.throwClientForbiddenError(e);
 	}
 
-	protected void throwClientBadRequest(String message) {
+	protected static void throwClientBadRequest(String message) {
 		Util.throwClientBadRequest(message);
 	}
 
@@ -189,7 +189,7 @@ public abstract class BaseResource extends ServerResource {
 		Util.throwServerError(e);
 	}
 
-	protected void throwServerError(String message) {
+	protected static void throwServerError(String message) {
 		Util.throwServerError(message);
 	}
 

@@ -5,4 +5,4 @@
   :make-pool?   true}
 
  ;; small value to test token expired
- :nb-minutes-expiry 0.01}
+ :nb-minutes-expiry 120}

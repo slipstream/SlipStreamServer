@@ -1,4 +1,4 @@
-(ns 
+(ns
   com.sixsq.slipstream.ssclj.resources.event
   (:require
     [clojure.tools.logging                                    :as log]
@@ -12,10 +12,11 @@
 
 (def ^:const resource-tag     :events)
 (def ^:const resource-name    "Event")
+(def ^:const resource-url (u/de-camelcase resource-name))
 (def ^:const collection-name  "EventCollection")
 
-(def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
-(def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
+(def ^:const resource-uri (str c/cimi-schema-uri resource-name))
+(def ^:const collection-uri (str c/cimi-schema-uri collection-name))
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
@@ -29,7 +30,7 @@
 (def ^:private severity-levels (s/enum "critical" "high" "medium" "low"))
 (def ^:private event-types (s/enum "state" "alarm"))
 
-(def ^:private EventContent 
+(def ^:private EventContent
   { :resource c/ResourceLink
     :state    s/Str})
 
@@ -37,7 +38,7 @@
   (merge
     c/CreateAttrs
     c/AclAttr
-    { 
+    {
       :id           c/NonBlankString
       :timestamp    c/Timestamp
       :content      EventContent
@@ -62,14 +63,14 @@
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
-  [request]  
+  [request]
   (log/info resource-uri ": will add event " (:body request))
   (add-impl request))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
 ;;
-;; single 
+;; single
 ;;
 (defmethod crud/retrieve resource-name
   [request]
@@ -83,7 +84,7 @@
 
 ;;
 ;; available operations
-;; 
+;;
 (defmethod crud/set-operations resource-uri
   [resource request]
   (try

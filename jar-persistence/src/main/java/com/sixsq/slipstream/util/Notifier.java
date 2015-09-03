@@ -99,7 +99,7 @@ public class Notifier {
 
 			msg.setRecipients(Message.RecipientType.TO, recipients);
 
-			msg.setSubject("SlipStream(TM) Message");
+			msg.setSubject("SlipStream Message");
 
 			if(isHTML) {
 				msg.setContent(message, "text/html; charset=utf-8");

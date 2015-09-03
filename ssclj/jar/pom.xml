@@ -3,7 +3,8 @@
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>ssclj</artifactId>
   <packaging>jar</packaging>
-  <version>2.14-SNAPSHOT</version>
+
+  <version>2.16-SNAPSHOT</version>
   <name>ssclj</name>
   <description>Clojure REST resources</description>
   <url>http://sixsq.com</url>
@@ -30,6 +31,7 @@
     <outputDirectory>target/classes</outputDirectory>
     <plugins/>
   </build>
+
   <repositories>
     <repository>
       <id>central</id>

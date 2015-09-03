@@ -22,6 +22,7 @@
 
 (def ^:const resource-tag     :usages)
 (def ^:const resource-name    "Usage")
+(def ^:const resource-url (u/de-camelcase resource-name))
 (def ^:const collection-name  "UsageCollection")
 
 (def ^:const resource-uri     (str c/slipstream-schema-uri resource-name))

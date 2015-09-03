@@ -91,7 +91,7 @@ public class BasicAuthenticator extends AuthenticatorBase {
 		return false;
 	}
 
-		private void redirectOrUnauthorized(Request request, Response response, int result) {
+	private void redirectOrUnauthorized(Request request, Response response, int result) {
 
 		if (result == Verifier.RESULT_INVALID) {
 			CookieUtils.removeAuthnCookie(response);
