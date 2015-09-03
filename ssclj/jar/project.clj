@@ -36,9 +36,7 @@
                  [org.clojure/java.jdbc                     "0.3.6"]
                  [korma                                     "0.4.2"]
                  [org.hsqldb/hsqldb                         "2.3.2"]
-                 [org.xerial/sqlite-jdbc                    "3.7.2"]
-
-                 [com.sixsq.slipstream/SlipStreamUI         "2.14-SNAPSHOT"]]
+                 [org.xerial/sqlite-jdbc                    "3.7.2"]]
 
   :plugins      [[lein-expectations                         "0.0.7"]
                  [lein-autoexpect                           "1.4.2"]

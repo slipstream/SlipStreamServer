@@ -97,9 +97,6 @@
       tu/ordered-desc?
       is))
 
-(deftest event-returned-as-html-1
-  (println (-> (exec-request base-uri "" "jane") :response :body)))
-
 (deftest resources-pagination
   (event-is-count nb-events  "")
   (event-is-count 0   "?$first=10&$last=5")
