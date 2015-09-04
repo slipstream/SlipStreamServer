@@ -23,6 +23,7 @@ package com.sixsq.slipstream.application;
 import java.util.ArrayList;
 import java.util.ServiceLoader;
 
+import com.sixsq.slipstream.event.EventRouter;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -202,6 +203,7 @@ public class RootApplication extends Application {
 			attachConfiguration(router);
 			attachServiceCatalog(router); // needs to be after configuration
 			attachReports(router);
+			attachEvent(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -389,6 +391,10 @@ public class RootApplication extends Application {
 
 	private void attachSSCLJ(RootRouter router) throws ValidationException {
 		guardAndAttach(router, new SSCLJRouter(getContext()), "api");
+	}
+
+	private void attachEvent(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new EventRouter(getContext()), "event");
 	}
 
 	public class RootRouter extends Router {

@@ -8,8 +8,8 @@ public class EventRouter extends Router {
     public EventRouter(Context context) {
         super(context);
 
-        attach("", EventResource.class);
-        attach("/", EventResource.class);
+        attach("", EventListResource.class);
+        attach("/", EventListResource.class);
     }
 
 }
