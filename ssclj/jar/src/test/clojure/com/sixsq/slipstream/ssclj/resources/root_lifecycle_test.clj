@@ -34,7 +34,7 @@
   ;; initialize the root resource
   (let [response (add)]
     (is (= 201 (:status response)))
-    (is (= resource-name (-> response
+    (is (= resource-url (-> response
                             :headers
                             (get "Location"))))
     (is (:body response)))

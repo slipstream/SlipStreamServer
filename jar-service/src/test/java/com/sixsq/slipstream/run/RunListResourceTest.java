@@ -21,6 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -35,6 +36,8 @@ import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
+import com.sixsq.slipstream.persistence.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -55,16 +58,6 @@ import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Node;
-import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.XmlUtil;
@@ -85,12 +78,22 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 
-		try {
-			user = UserTest.storeUser(user);
-		} catch (Exception ex) {
+		UserParameter keyParameter = new UserParameter(
+				new LocalUserParametersFactory()
+						.constructKey(LocalUserParametersFactory.KEY_PARAMETER_NAME), "value", "desc");
+		user.setParameter(keyParameter);
 
-		}
+        UserParameter secretParameter = new UserParameter(
+                new LocalUserParametersFactory()
+                        .constructKey(LocalUserParametersFactory.SECRET_PARAMETER_NAME), "value", "desc");
+        user.setParameter(secretParameter);
 
+        UserParameter publicKey = new UserParameter(ExecutionControlUserParametersFactory.CATEGORY +
+                "." + UserParameter.SSHKEY_PARAMETER_NAME, "value", "desc");
+        user.setParameter(publicKey);
+
+		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
+		user = user.store();
 	}
 
 	private static void removeAllRuns() throws ConfigurationException, ValidationException {
@@ -120,6 +123,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		baseImage = new ImageModule("RuntimeParameterResourceTestBaseImage");
 		baseImage.setImageId("1234", cloudServiceName);
 		baseImage.setIsBase(true);
+		baseImage.setAuthz(new Authz(user.getName(),baseImage));
 		baseImage = baseImage.store();
 
 		user = User.loadByName(user.getName());
@@ -207,36 +211,58 @@ public class RunListResourceTest extends ResourceTestBase {
 	}
 
 	@Test
-	@Ignore
-	public void overrideParameters() throws ConfigurationException,
+	public void createImageRun() throws ConfigurationException,
 			NotFoundException, AbortException, ValidationException {
-		int multiplicityOverride = 2;
-		String overrideValue = "another value";
 
-		UserParameter keyParameter = new UserParameter(
-				new LocalUserParametersFactory()
-						.constructKey(LocalUserParametersFactory.KEY_PARAMETER_NAME));
-		user.setParameter(keyParameter);
-		UserParameter secretParameter = new UserParameter(
-				new LocalUserParametersFactory()
-						.constructKey(LocalUserParametersFactory.SECRET_PARAMETER_NAME));
-		user.setParameter(secretParameter);
-		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
-		user = user.store();
+        Form form = new Form();
+        form.add(RunListResource.REFQNAME, baseImage.getResourceUri());
 
-		List<NodeParameter> override = new ArrayList<NodeParameter>();
-		NodeParameter parameter = new NodeParameter(PARAMETER_NAME);
-		parameter.setUnsafeValue(overrideValue);
-		override.add(parameter);
-
-		Request request = createPostRequest(override, multiplicityOverride,
-				deployment.getResourceUri());
+        Request request = createPostRequest(form.getWebRepresentation());
 		Response response = executeRequest(request);
 
 		assertEquals(Status.SUCCESS_CREATED, response.getStatus());
+		assertThat(response.getLocationRef().getPath(), startsWith("/run/"));
+	}
 
-		assertMultiplicityOverride(multiplicityOverride, response);
-		assertParameterOverride(PARAMETER_NAME, response, overrideValue);
+	@Test
+	public void createDeploymentRun() throws ConfigurationException,
+			NotFoundException, AbortException, ValidationException {
+
+        Form form = new Form();
+        form.add(RunListResource.REFQNAME, deployment.getResourceUri());
+
+        Request request = createPostRequest(form.getWebRepresentation());
+
+		Response response = executeRequest(request);
+
+		assertEquals(Status.SUCCESS_CREATED, response.getStatus());
+		assertThat(response.getLocationRef().getPath(), startsWith("/run/"));
+	}
+
+	@Test
+	public void createImageRunWithRedirect() throws ConfigurationException,
+			NotFoundException, AbortException, ValidationException {
+
+        Form form = new Form();
+        form.add(RunListResource.REFQNAME, baseImage.getResourceUri());
+        form.add(RunListResource.REDIRECT_TO_DASHBOARD, "true");
+
+        Request request = createPostRequest(form.getWebRepresentation());
+
+		Response response = executeRequest(request);
+
+		assertEquals(Status.SUCCESS_CREATED, response.getStatus());
+		assertThat(response.getLocationRef().getPath(), is("/dashboard"));
+	}
+
+	private Request createPostRequest(String moduleUri) throws ConfigurationException,
+			ValidationException {
+		Form form = new Form();
+		form.add(RunListResource.REFQNAME, moduleUri);
+
+		Request request = createPostRequest(form.getWebRepresentation());
+		addUserToRequest(user, request);
+		return request;
 	}
 
 	private void assertMultiplicityOverride(Integer multiplicityOverride,
@@ -250,10 +276,10 @@ public class RunListResourceTest extends ResourceTestBase {
 		String uuid = response.getLocationRef().getLastSegment();
 
 		RuntimeParameter multiplicity = RuntimeParameter.loadFromUuidAndKey(
-				uuid, multiplicityParameterName);
+                uuid, multiplicityParameterName);
 
 		assertThat(multiplicity.getValue(),
-				is(String.valueOf(multiplicityOverride.toString())));
+                is(String.valueOf(multiplicityOverride.toString())));
 	}
 
 	private void assertParameterOverride(String parameterName,
@@ -280,6 +306,8 @@ public class RunListResourceTest extends ResourceTestBase {
 				""));
 		image.setImageId("abc", LocalConnector.CLOUD_SERVICE_NAME);
 
+		image.setAuthz(new Authz(user.getName(), image));
+
 		image = image.store();
 
 		Node node = new Node(NODE_NAME, image);
@@ -288,6 +316,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		deployment = new DeploymentModule(moduleName + "Deployment");
 		deployment.setNode(node);
+		deployment.setAuthz(new Authz(user.getName(), deployment));
 		deployment = (DeploymentModule) deployment.store();
 	}
 
@@ -297,9 +326,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		Form form = createRunForm(parameters, multiplicity);
 		form.add(RunListResource.REFQNAME, moduleUri);
 
-		Request request = createPostRequest(form.getWebRepresentation());
-		addUserToRequest(user, request);
-		return request;
+		return createPostRequest(form.getWebRepresentation());
 	}
 
 	private Form createRunForm(List<NodeParameter> parameters,
@@ -311,9 +338,9 @@ public class RunListResourceTest extends ResourceTestBase {
 			form.add(name, value);
 		}
 		form.add(
-				buildNodeName(NODE_NAME,
-						RuntimeParameter.MULTIPLICITY_PARAMETER_NAME),
-				muliplicity.toString());
+                buildNodeName(NODE_NAME,
+                        RuntimeParameter.MULTIPLICITY_PARAMETER_NAME),
+                muliplicity.toString());
 
 		return form;
 	}
@@ -324,7 +351,9 @@ public class RunListResourceTest extends ResourceTestBase {
 
 	private Request createPostRequest(Representation entity)
 			throws ConfigurationException, ValidationException {
-		return createPostRequest(new HashMap<String, Object>(), entity);
+        Request request = createPostRequest(new HashMap<String, Object>(), entity);
+        addUserToRequest(user, request);
+        return request;
 	}
 
 	private Response getRunList(Integer offset, Integer limit, String cloudServiceName)
@@ -342,8 +371,8 @@ public class RunListResourceTest extends ResourceTestBase {
 		return executeRequest(req);
 	}
 
-	private Response executeRequest(Request request) {
-		return executeRequest(request, new RunListResource());
-	}
+    private Response executeRequest(Request request) {
+        return executeRequest(request, new RunListResource());
+    }
 
 }

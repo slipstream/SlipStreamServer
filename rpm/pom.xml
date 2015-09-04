@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>2.14-SNAPSHOT</version>
+    <version>2.16-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
@@ -32,31 +32,9 @@
             <phase>process-resources</phase>
             <configuration>
               <outputDirectory>${basedir}/target/jetty-config</outputDirectory>
-              <nonFilteredFileExtensions>
-                <nonFilteredFileExtension>jks</nonFilteredFileExtension>
-              </nonFilteredFileExtensions>
               <resources>
                 <resource>
                   <directory>${basedir}/src/main/jetty-config</directory>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>filter-service-configs</id>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <phase>process-resources</phase>
-            <configuration>
-              <outputDirectory>${basedir}/target/service-config</outputDirectory>
-              <nonFilteredFileExtensions>
-                <nonFilteredFileExtension>jks</nonFilteredFileExtension>
-              </nonFilteredFileExtensions>
-              <resources>
-                <resource>
-                  <directory>${basedir}/src/main/service-config</directory>
                   <filtering>true</filtering>
                 </resource>
               </resources>
@@ -268,31 +246,26 @@
             <require>slipstream-ssclj${slipstream.edition}</require>
             <require>libcloud-slipstream-downloads${slipstream.edition}</require>
           </requires>
+
+          <defaultDirmode>755</defaultDirmode>
+          <defaultFilemode>644</defaultFilemode>
+          <defaultGroupname>slipstream</defaultGroupname>
+          <defaultUsername>slipstream</defaultUsername>
+          
           <mappings>
+
             <mapping>
               <directory>${installation.dir}</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
                   <location>target/dependency/jetty-distribution-${jetty.version}/</location>
-                  <includes>
-                    <include>*.txt</include>
-                    <include>*.html</include>
-                    <include>start.jar</include>
-                    <include>etc/**/*</include>
-                    <include>lib/**/*</include>
-                    <include>logs/**/*</include>
-                    <include>contexts/README.txt</include>
-                  </includes>
-                  <!-- remove references to binary files -->
+                  <!-- remove references to binary files and standard configuration file -->
                   <excludes>
                     <exclude>lib/setuid/**/*</exclude>
                     <exclude>etc/jetty-setuid.xml</exclude>
                     <exclude>etc/jetty.conf</exclude>
-                    <exclude>etc/jetty-logging.xml</exclude>
                   </excludes>
                 </source>
               </sources>
@@ -301,8 +274,6 @@
             <mapping>
               <directory>${jetty.connector.dir}</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -317,8 +288,6 @@
             <mapping>
               <directory>${installation.dir}/etc</directory>
               <filemode>775</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -354,8 +323,6 @@
             <mapping>
               <directory>${installation.dir}/etc</directory>
               <filemode>755</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -402,8 +369,6 @@
             <mapping>
               <directory>${installation.dir}/resources</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -414,11 +379,10 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>${installation.dir}/webapps</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -431,11 +395,10 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>${installation.dir}/webapps/slipstream.war/static-content/js</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <configuration>true</configuration>
               <directoryIncluded>false</directoryIncluded>
               <sources>
@@ -444,11 +407,10 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>${installation.dir}/webapps/slipstream.war/static-content/errors</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <configuration>true</configuration>
               <directoryIncluded>false</directoryIncluded>
               <sources>
@@ -457,11 +419,10 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>${installation.dir}/webapps/slipstream.war/static-content/themes/helixnebula/errors</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <configuration>true</configuration>
               <directoryIncluded>false</directoryIncluded>
               <sources>
@@ -470,11 +431,10 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>${installation.dir}/lib/logging</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -482,11 +442,10 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>${installation.dir}</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <configuration>true</configuration>
               <directoryIncluded>false</directoryIncluded>
               <sources>
@@ -495,29 +454,22 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>${installation.dir}/tmp</directory>
-              <filemode>755</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
             </mapping>
+
             <mapping>
               <directory>${slipstream.base.dir}/downloads</directory>
-              <filemode>755</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
             </mapping>
+
             <mapping>
               <directory>/etc/slipstream</directory>
-              <filemode>755</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
             </mapping>
+
             <mapping>
               <directory>/etc/slipstream</directory>
               <filemode>660</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <configuration>true</configuration>
               <directoryIncluded>false</directoryIncluded>
               <sources>
@@ -526,19 +478,16 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>/etc/slipstream/connectors</directory>
-              <filemode>755</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <configuration>true</configuration>
             </mapping>
+
             <mapping>
               <directory>/var/tmp/slipstream</directory>
-              <filemode>755</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
             </mapping>
+
             <mapping>
               <directory>${installation.dir}/etc</directory>
               <filemode>664</filemode>
@@ -553,11 +502,10 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>${installation.dir}/migrations</directory>
               <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -565,6 +513,7 @@
                 </source>
               </sources>
             </mapping>
+
             <mapping>
               <directory>/etc/default</directory>
               <sources>
@@ -574,6 +523,7 @@
                 </softlinkSource>
               </sources>
             </mapping>
+
           </mappings>
 
           <postinstallScriptlet>

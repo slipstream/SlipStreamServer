@@ -6,6 +6,9 @@
 
 (def ^:const slipstream-schema-uri "http://sixsq.com/slipstream/1/")
 
+;; using draft 2.0.0c
+(def ^:const cimi-schema-uri "http://schemas.dmtf.org/cimi/2/")
+
 ;;
 ;; actions
 ;;
