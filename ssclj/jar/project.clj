@@ -4,7 +4,7 @@
   :license {:name "Apache License, Version 2.0"
             :url  "http://www.apache.org/licenses/LICENSE-2.0"}
 
-  :source-paths   ["src/main/clojure"]  
+  :source-paths   ["src/main/clojure"]
   :test-paths     ["src/test/clojure"]
   :resource-paths ["src/main/resources"]
 
@@ -64,18 +64,18 @@
                   "DB Seeding: (require '[com.sixsq.slipstream.ssclj.resources.seeds.event :as es])\n"
                   "            (es/seed! 10 :bob)\n"))
                 }
-  
+
   :profiles {
-    :provided 
+    :provided
       { :dependencies [[reply/reply "0.3.4"]]}
 
-    :uberjar 
+    :uberjar
       { :aot [#"com.sixsq.slipstream.ssclj.api.acl*"]
         :env {  :clj-env        :production
                 :db-config-path "config-hsqldb-mem.edn"}
         :jvm-opts ["-Dlogfile.path=production"]}
 
-    :dev 
+    :dev
       { :env {  :clj-env        :development
                 :db-config-path "config-hsqldb-mem.edn"}
         :jvm-opts ["-Dlogfile.path=development"]
@@ -84,11 +84,8 @@
     :test
       { :env {  :clj-env        :test
                 :db-config-path "config-hsqldb-mem.edn"}
-        
+
         :jvm-opts ["-Dlogfile.path=test"]
 
         :dependencies [ [peridot/peridot "0.3.0"]
                         [expectations/expectations "2.0.9"]]}})
-
-
-  
