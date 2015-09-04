@@ -60,7 +60,7 @@
                   "\n"
                   ;; This line is related to the SlipStream project:
                   "API Server: (require '[com.sixsq.slipstream.ssclj.app.server :as server])\n"
-                  "            (def state (server/start 8201))\n"))
+                  "            (def state (server/start 8201))\n"
                   "DB Seeding: (require '[com.sixsq.slipstream.ssclj.resources.seeds.event :as es])\n"
                   "            (es/seed! 10 :bob)\n"))
                 }
