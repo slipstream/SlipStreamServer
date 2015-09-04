@@ -46,6 +46,23 @@
                  [jonase/eastwood                           "0.2.1"]
                  [lein-cloverage                            "1.0.3"]]
 
+  :repl-options {;; What to print when the repl session starts.
+                :welcome
+                (println (str
+                  ;; These first lines are the default ones:
+                  "\n"
+                  "      Docs: (doc function-name-here)\n"
+                  "            (find-doc \"part-of-name-here\")\n"
+                  "    Source: (source function-name-here)\n"
+                  "   Javadoc: (javadoc java-object-or-class-here)\n"
+                  "      Exit: Control+D or (exit) or (quit)\n"
+                  "   Results: Stored in vars *1, *2, *3, an exception in *e\n"
+                  "\n"
+                  ;; This line is related to the SlipStream project:
+                  "API Server: (require '[com.sixsq.slipstream.ssclj.app.server :as server])\n"
+                  "            (def state (server/start 8201))\n"))
+                }
+  
   :profiles {
     :provided 
       { :dependencies [[reply/reply "0.3.4"]]}
