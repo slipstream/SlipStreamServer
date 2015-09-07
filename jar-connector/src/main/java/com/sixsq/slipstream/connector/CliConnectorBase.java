@@ -468,7 +468,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 					"Cloud Username cannot be empty"
 							+ errorMessageLastPart));
 		}
-		if (getSecret(user) == null || getKey(user).isEmpty()) {
+		if (getSecret(user) == null || getSecret(user).isEmpty()) {
 			throw (new ValidationException(
 					"Cloud Password cannot be empty"
 							+ errorMessageLastPart));
