@@ -2,6 +2,7 @@ package com.sixsq.slipstream.event;
 
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
+import com.sixsq.slipstream.util.RequestUtil;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
@@ -50,7 +51,12 @@ public class EventListResource extends BaseResource {
         parameters.add("idleCheckInterval", "1000");
         parameters.add("socketConnectTimeoutMs", "1000");
 
-        String uri = SSCLJ_SERVER + "/" + EVENT_RESOURCE_NAME;
+        int limit = RequestUtil.getLimit(getRequest());
+        int offset = RequestUtil.getOffset(getRequest());
+        int first = offset + 1;
+        int last = offset + limit;
+
+        String uri = SSCLJ_SERVER + "/" + EVENT_RESOURCE_NAME + "?$first=" + first + "&$last=" + last;
 
         logger.info("Will query Event resource with uri = '" + uri + "'");
 
@@ -66,5 +72,8 @@ public class EventListResource extends BaseResource {
 
         return resource.get().getText();
     }
+
+
+
 }
 
