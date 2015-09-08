@@ -109,7 +109,7 @@ public class Metering {
 	}
 
 	public static String sendToGraphite(String data) {
-		String errorMessageBase = "Mesurements. Failed to send usage data to Graphite.";
+		String errorMessageBase = "Measurements. Failed to send usage data to Graphite.";
 		try {
 			Socket conn = new Socket("localhost", 2003);
 			DataOutputStream out = new DataOutputStream(conn.getOutputStream());
