@@ -2,6 +2,7 @@ SQLTOOL_RC_FILENAME=~/sqltool.rc
 SQLTOOL_RC_FILE_PRESENT=$(shell [ -f $(SQLTOOL_RC_FILENAME) ] && echo ok || echo missing )
 
 SLIPSTREAM_DB_RUNNING=$(shell [ -f 'slipstreamdb.lck' ] && echo 'yes' || echo 'no' )
+SSCLJ_DB_RUNNING=$(shell [ -f 'sscljdb.lck' ] && echo 'yes' || echo 'no' )
 
 SQLTOOL_FILENAME=hsqldb/hsqldb-2.3.2/hsqldb/lib/sqltool.jar
 SQLTOOL_FILE_PRESENT=$(shell [ -f $(SQLTOOL_FILENAME) ] && echo ok || echo missing )
@@ -18,14 +19,12 @@ MODE?=dev
 # THEME?=nuvla
 # THEME?=helixnebula
 
-run: stop-db start-db start
+run: start-db
+	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
 
 clean-run: stop-db clean-install-ui clean-install run
 
-start:
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
-
-start-with-mem-db:
+run-with-mem-db:
 	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=$(MODE)
 
 new-ui: install-ui run
@@ -50,17 +49,38 @@ apply-db-migration:
 start-db-ui: start-db
 	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.util.DatabaseManagerSwing -user sa -url jdbc:hsqldb:hsql://localhost/slipstream
 
-start-db: check-sql-tool-file
-	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.server.Server --database.0 file:slipstreamdb --dbname.0 slipstream &
+start-db-ui-ssclj: start-db
+	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.util.DatabaseManagerSwing -user sa -url jdbc:hsqldb:hsql://localhost/ssclj
 
-stop-db:
-ifeq ("$(SQLTOOL_FILE_PRESENT)","ok")
+start-db: check-sqltool-jar-file
+ifeq ("$(SLIPSTREAM_DB_RUNNING)","yes")
+	$(info slipstream DB already running. Nothing to start.)
+else
+	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.server.Server --database.0 file:slipstreamdb --dbname.0 slipstream --database.1 file:sscljdb --dbname.1 ssclj &
+endif
+
+stop-db: check-sqltool-jar-file
 ifeq ("$(SLIPSTREAM_DB_RUNNING)","yes")
 	java -jar ${SQLTOOL_FILENAME} --sql 'SHUTDOWN;' slipstream
 else
-	$(info DB was not running. Nothing to stop.)
+	$(info slipstream DB was not running. Nothing to stop.)
 endif
+ifeq ("$(SSCLJ_DB_RUNNING)","yes")
+	java -jar ${SQLTOOL_FILENAME} --sql 'SHUTDOWN;' ssclj
 else
+	$(info ssclj DB was not running. Nothing to stop.)
+endif
+
+check-db-running: check-sqltool-jar-file
+ifneq ("$(SLIPSTREAM_DB_RUNNING)","yes")
+	$(error Start DB with 'make start-db')
+endif
+ifneq ("$(SSCLJ_DB_RUNNING)","yes")
+	$(error Start DB with 'make start-db')
+endif
+
+check-sqltool-jar-file: check-sqltool-rc-file
+ifneq ("$(SQLTOOL_FILE_PRESENT)","ok")
 	$(info sqltool.jar is not found at ${SQLTOOL_FILENAME})
 	$(info hsqldb tools can be istalled following the instruction here:)
 	$(info   - http://hsqldb.org/doc/guide/ch03.html)
@@ -71,13 +91,18 @@ else
 	$(error File ${SQLTOOL_FILENAME} missing...)
 endif
 
-check-sql-tool-file:
+check-sqltool-rc-file:
 ifneq ("$(SQLTOOL_RC_FILE_PRESENT)","ok")
 	$(info To create the ${SQLTOOL_RC_FILENAME} execute following lines:)
 	$(info )
 	$(info cat << EOF > ${SQLTOOL_RC_FILENAME})
 	$(info urlid slipstream)
 	$(info url jdbc:hsqldb:hsql://localhost/slipstream)
+	$(info username SA)
+	$(info password)
+	$(info )
+	$(info urlid ssclj)
+	$(info url jdbc:hsqldb:hsql://localhost/ssclj)
 	$(info username SA)
 	$(info password)
 	$(info EOF)
