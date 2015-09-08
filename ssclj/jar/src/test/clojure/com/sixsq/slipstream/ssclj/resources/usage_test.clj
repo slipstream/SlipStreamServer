@@ -106,26 +106,28 @@
     (-> (exec-request (str base-uri "/" uuid) ""  "intruder")
         (t/is-status 403))))
 
+(defn- are-counts
+  ([expected-count expected-paginated-count query-string auth-name]
+   (-> (exec-request base-uri query-string auth-name)
+       (t/is-status 200)
+       (t/is-key-value       :count  expected-count)
+       (t/is-key-value count :usages expected-paginated-count)))
+  ([expected-count query-string auth-name]
+   (are-counts expected-count expected-count query-string auth-name)))
+
 (deftest pagination-full
-  (-> (exec-request base-uri "?$first=0&$last=10" "mike")
-      (t/is-status 200)
-      (t/is-key-value :count 3)))
+  (are-counts 3 "?$first=1&$last=10" "mike"))
 
 (deftest pagination-only-one
-  (-> (exec-request base-uri "?$first=1&$last=1" "mike")
-      (t/is-status 200)
-      (t/is-key-value :count 1)))
+  (are-counts 3 1 "?$first=1&$last=1" "mike"))
 
 (deftest pagination-outside-bounds
-  (-> (exec-request base-uri "?$first=10&$last=15" "mike")
-      (t/is-status 200)
-      (t/is-key-value :count 0)))
+  (are-counts 3 0 "?$first=10&$last=15" "mike"))
 
 (deftest pagination-first-larger-than-last
-  (-> (exec-request base-uri "?$first=10&$last=5" "mike")
-      (t/is-key-value :count 0)))
+  (are-counts 3 0 "?$first=10&$last=5" "mike"))
 
-(defn expect-pagination
+(defn- expect-pagination
   [code query-strings]
   (doseq [query-string query-strings]
     (-> (exec-request base-uri query-string "mike")
@@ -141,48 +143,48 @@
 
 (deftest pagination-does-not-check-max-limit
   (expect-pagination 200
-    [ "?$first=1&$last=1000000"]))
+    ["?$first=1&$last=1000000"]))
 
 (deftest admin-sees-everything
-  (is-count base-uri 5 "" "super ADMIN"))
+  (are-counts 5 "" "super ADMIN"))
 
 (deftest simple-filter-with-admin
-  (is-count base-uri 2 "?$filter=user='joe'"   "super ADMIN")
-  (is-count base-uri 3 "?$filter=user='mike'"  "super ADMIN"))
+  (are-counts 2 "?$filter=user='joe'"   "super ADMIN")
+  (are-counts 3 "?$filter=user='mike'"  "super ADMIN"))
 
 (deftest filter-int-value-when-no-value
-  (is-count base-uri 0 "?$filter=xxx<100" "super ADMIN"))
+  (are-counts 0 "?$filter=xxx<100" "super ADMIN"))
 
 (deftest filter-int-value
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes<100" "super ADMIN")
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes > 400" "super ADMIN")
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes < 50" "super ADMIN")
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes < 50 and usage/ram/unit_minutes > 30" "super ADMIN")
-  (is-count base-uri 2 "?$filter=usage/ram/unit_minutes > 100 and usage/ram/unit_minutes < 500" "super ADMIN")
+  (are-counts 1 "?$filter=usage/ram/unit_minutes<100" "super ADMIN")
+  (are-counts 1 "?$filter=usage/ram/unit_minutes > 400" "super ADMIN")
+  (are-counts 1 "?$filter=usage/ram/unit_minutes < 50" "super ADMIN")
+  (are-counts 1 "?$filter=usage/ram/unit_minutes < 50 and usage/ram/unit_minutes > 30" "super ADMIN")
+  (are-counts 2 "?$filter=usage/ram/unit_minutes > 100 and usage/ram/unit_minutes < 500" "super ADMIN")
 
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 40" "super ADMIN")
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 100" "super ADMIN")
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 200" "super ADMIN")
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 300" "super ADMIN")
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes = 500" "super ADMIN"))
+  (are-counts 1 "?$filter=usage/ram/unit_minutes = 40" "super ADMIN")
+  (are-counts 1 "?$filter=usage/ram/unit_minutes = 100" "super ADMIN")
+  (are-counts 1 "?$filter=usage/ram/unit_minutes = 200" "super ADMIN")
+  (are-counts 1 "?$filter=usage/ram/unit_minutes = 300" "super ADMIN")
+  (are-counts 1 "?$filter=usage/ram/unit_minutes = 500" "super ADMIN"))
 
 (deftest filter-with-cimi-filter-unknown-to-db
-  (is-count base-uri 2 "?$filter=user='joe'" "super ADMIN")
+  (are-counts 2 "?$filter=user='joe'" "super ADMIN")
   ;; usage/ram/unit will *not* be filtered at sql level
-  (is-count base-uri 1 "?$filter=usage/ram/unit_minutes='100.0'" "super ADMIN"))
+  (are-counts 1 "?$filter=usage/ram/unit_minutes='100.0'" "super ADMIN"))
 
 (defn- one-line
   [s]
   (clojure.string/replace s #"\n" ""))
 
 (deftest filter-with-admin
-  (is-count base-uri 2 (one-line
+  (are-counts 2 (one-line
                 "?$filter=
                  start_timestamp='2015-04-16T00:00:00.000Z'
                  and
                  end_timestamp='2015-04-17T00:00:00.000Z'") "super ADMIN")
 
-  (is-count base-uri 1 (one-line
+  (are-counts 1 (one-line
                 "?$filter=
                  user='joe'
                  and
@@ -190,10 +192,10 @@
                  and
                  end_timestamp='2015-04-17T00:00:00.000Z'") "super ADMIN")
 
-  (is-count base-uri 2 "?$filter=user='joe'" "super ADMIN")
-  (is-count base-uri 3 "?$filter=user='mike'" "super ADMIN")
+  (are-counts 2 "?$filter=user='joe'" "super ADMIN")
+  (are-counts 3 "?$filter=user='mike'" "super ADMIN")
 
-  (is-count base-uri 1 (one-line
+  (are-counts 1 (one-line
                 "?$filter=
                  user='joe'
                  and
@@ -201,7 +203,7 @@
                  and
                  end_timestamp='2015-04-18T00:00:00.000Z'") "super ADMIN")
 
-  (is-count base-uri 0 (one-line
+  (are-counts 0 (one-line
               "?$filter=
                user='joe'
                and
@@ -209,7 +211,7 @@
                and
                end_timestamp='2015-04-19T00:00:00.000Z'") "super ADMIN")
 
-  (is-count base-uri 1 (one-line
+  (are-counts 1 (one-line
               "?$filter=
                user='mike'
                and
@@ -218,7 +220,7 @@
                end_timestamp='2015-04-19T00:00:00.000Z'") "super ADMIN"))
 
 (deftest date-comparisons
-  (is-count base-uri 1 "?$filter=user='joe' and start_timestamp=2015-04-17 and end_timestamp=2015-04-18" "super ADMIN")
-  (is-count base-uri 1 "?$filter=user='joe' and start_timestamp=2015-04-16 and end_timestamp=2015-04-17" "super ADMIN")
-  (is-count base-uri 2 "?$filter=user='joe' and start_timestamp>2015-04-15" "super ADMIN")
+  (are-counts 1 "?$filter=user='joe' and start_timestamp=2015-04-17 and end_timestamp=2015-04-18" "super ADMIN")
+  (are-counts 1 "?$filter=user='joe' and start_timestamp=2015-04-16 and end_timestamp=2015-04-17" "super ADMIN")
+  (are-counts 2 "?$filter=user='joe' and start_timestamp>2015-04-15" "super ADMIN")
   )

@@ -74,16 +74,16 @@
   [resource-name collection-acl collection-uri collection-key]
   (let [skeleton (-> {:acl         collection-acl
                       :resourceURI collection-uri
-                      :id          (u/de-camelcase resource-name)
-                      :count       0})]
+                      :id          (u/de-camelcase resource-name)})]
     (fn [request entries]
-      (let [count (count entries)]
-        (if (zero? count)
-          skeleton
-          (-> skeleton
-              (crud/set-operations request)
-              (assoc :count count)
-              (assoc collection-key entries)))))))
+      (let [paginated-entries (->> entries
+                                 (pg/paginate (get-in request [:cimi-params :first])
+                                              (get-in request [:cimi-params :last]))
+                                 (map #(crud/set-operations % request)))]
+        (-> skeleton
+            (crud/set-operations request)
+            (assoc :count (count entries))
+            (assoc collection-key paginated-entries))))))
 
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
@@ -105,13 +105,8 @@
            ;; ordering
            (crud/sort-collection request)
 
-           ;; paginating
-           (pg/paginate         (get-in request [:cimi-params :first]) (get-in request [:cimi-params :last]))
-
            ;; access controlling
            (filter #(a/authorized-view? % request))
-
-           (map #(crud/set-operations % request))
 
            (wrapper-fn request)
 
