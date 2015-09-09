@@ -29,6 +29,7 @@ import com.sixsq.slipstream.event.EventRouter;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.initialstartup.CloudIds;
 import com.sixsq.slipstream.initialstartup.Modules;
+import com.sixsq.slipstream.usage.UsageRouter;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -233,6 +234,7 @@ public class RootApplication extends Application {
 			attachServiceCatalog(router); // needs to be after configuration
 			attachReports(router);
 			attachEvent(router);
+			attachUsage(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -424,6 +426,10 @@ public class RootApplication extends Application {
 
 	private void attachEvent(RootRouter router) throws ValidationException {
 		guardAndAttach(router, new EventRouter(getContext()), "event");
+	}
+
+	private void attachUsage(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new UsageRouter(getContext()), "usage");
 	}
 
 	public class RootRouter extends Router {
