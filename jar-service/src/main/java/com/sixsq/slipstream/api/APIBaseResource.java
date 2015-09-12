@@ -3,7 +3,6 @@ package com.sixsq.slipstream.api;
 
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
@@ -19,11 +18,16 @@ import org.restlet.util.Series;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public class APIBaseResource extends BaseResource {
+/**
+ * Gets JSON for a resource (from API server) and renders it to HTML
+ * Subclassed for collection and single resource.
+ *
+ */
+public abstract class APIBaseResource extends BaseResource {
 
-    private static final String SSCLJ_SERVER = "http://localhost:8201/api";
+    protected static final String SSCLJ_SERVER = "http://localhost:8201/api";
     private static final Logger logger = Logger.getLogger(APIBaseResource.class.getName());
-    private String resourceName;
+    protected String resourceName;
 
     public APIBaseResource(String resourceName) {
         this.resourceName = resourceName;
@@ -33,7 +37,7 @@ public class APIBaseResource extends BaseResource {
     public Representation toHtml() {
 
         try {
-            String html = HtmlUtil.toHtmlFromJson(getCollectionListAsJSON(), getPageRepresentation(), getUser(), getRequest());
+            String html = HtmlUtil.toHtmlFromJson(getAPIResourceAsJSON(), getPageRepresentation(), getUser(), getRequest());
             return new StringRepresentation(html, MediaType.TEXT_HTML);
         } catch (Exception e) {
             String message = "Unable to contact API Server: " + e.getMessage();
@@ -42,11 +46,9 @@ public class APIBaseResource extends BaseResource {
     }
 
     @Override
-    protected String getPageRepresentation() {
-        return resourceName + "s";
-    }
+    protected abstract String getPageRepresentation();
 
-    private String getCollectionListAsJSON() throws IOException {
+    private String getAPIResourceAsJSON() throws IOException {
 
         Context context = new Context();
         Series<Parameter> parameters = context.getParameters();
@@ -55,15 +57,8 @@ public class APIBaseResource extends BaseResource {
         parameters.add("idleCheckInterval", "1000");
         parameters.add("socketConnectTimeoutMs", "1000");
 
-        int limit = RequestUtil.getLimit(getRequest());
-        int offset = RequestUtil.getOffset(getRequest());
-        int first = offset + 1;
-        int last = offset + limit;
-
-        String uri = SSCLJ_SERVER + "/" + this.resourceName + "?$first=" + first + "&$last=" + last;
-
+        String uri = uri();
         logger.info("Will query resource with uri = '" + uri + "'");
-
         ClientResource resource = new ClientResource(context, uri);
 
         resource.setRetryOnError(false);
@@ -76,5 +71,7 @@ public class APIBaseResource extends BaseResource {
 
         return resource.get().getText();
     }
+
+    protected abstract String uri();
 
 }

@@ -127,7 +127,6 @@
 (defn retrieve-fn
   [request]
   (fn [{{uuid :uuid} :params :as request}]
-    (std-crud/log-request request)
     (-> (str (u/de-camelcase resource-name) "/" uuid)
         find-resource
         (a/can-view? request)

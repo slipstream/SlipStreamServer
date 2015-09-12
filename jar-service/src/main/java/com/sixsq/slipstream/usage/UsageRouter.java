@@ -10,5 +10,7 @@ public class UsageRouter extends Router {
 
         attach("", UsageListResource.class);
         attach("/", UsageListResource.class);
+
+        attach("/{resource-id}", UsageResource.class);
     }
 }

@@ -9,6 +9,7 @@
     [metrics.ring.expose                                            :refer [expose-metrics-as-json]]
     [metrics.jvm.core                                               :refer [instrument-jvm]]
     [org.httpkit.server                                             :refer [run-server]]
+    [com.sixsq.slipstream.ssclj.middleware.logger                   :refer [wrap-logger]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri                 :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler        :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header        :refer [wrap-authn-info-header]]
@@ -45,6 +46,7 @@
   (instrument-jvm default-registry)
 
   (-> (routes/get-main-routes)
+      wrap-logger
       handler/site
       wrap-exceptions
       wrap-cimi-params

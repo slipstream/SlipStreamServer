@@ -15,17 +15,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
     ))
 
-(defn log-request
-  [request]
-  (log/info (:request-method  request)
-            (:uri             request)
-            (or (:query-string    request) "no-query-string")
-            (or (:body            request) "no-body")))
-
 (defn add-fn
   [resource-name collection-acl resource-uri]
   (fn [{:keys [body] :as request}]
-    (log-request request)
     (a/can-modify? {:acl collection-acl} request)
     (->> (->  body              
               u/strip-service-attrs              
@@ -39,7 +31,6 @@
 (defn retrieve-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
-    (log-request request)
     (-> (str (u/de-camelcase resource-name) "/" uuid)
         db/retrieve
         (a/can-view? request)
@@ -49,7 +40,6 @@
 (defn edit-fn
   [resource-name]
   (fn [{{uuid :uuid} :params body :body :as request}]
-    (log-request request)
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                       (db/retrieve)
                       (a/can-modify? request))]
@@ -64,7 +54,6 @@
 (defn delete-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
-    (log-request request)
     (-> (str (u/de-camelcase resource-name) "/" uuid)
         (db/retrieve)
         (a/can-modify? request)
@@ -89,7 +78,6 @@
   [resource-name collection-acl collection-uri collection-key]
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
     (fn [request]
-      (log-request request)
 
       (a/can-view? {:acl collection-acl} request)
 
