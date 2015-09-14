@@ -215,8 +215,40 @@
             </configuration>
           </execution>
 
+          <execution>
+            <id>copy-etc-default-slipstream</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <executable>cp</executable>
+              <arguments>
+                <argument>${basedir}/src/main/scripts/etc-default-slipstream</argument>
+                <argument>${basedir}/target/etc-default-slipstream</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>update-java-version</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <executable>sed</executable>
+              <arguments>
+                <argument>-i</argument>
+                <argument>-e</argument>
+                <argument>s/CHANGE_ME_JRE_VERSION/${server.jre.version}/</argument>
+                <argument>${basedir}/target/etc-default-slipstream</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>rpm-maven-plugin</artifactId>
@@ -236,11 +268,8 @@
           <obsoletes>
             <obsolete>slipstream-server</obsolete>
           </obsoletes>
-          <conflicts>
-            <conflict>java-1.7.0-openjdk</conflict>
-          </conflicts>
           <requires>
-            <require>jre-headless &gt;= 1.8.0</require>
+            <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd${slipstream.edition}</require>
             <require>slipstream-client${slipstream.edition} &gt;= 1.3</require>
             <require>slipstream-ssclj${slipstream.edition}</require>
@@ -497,7 +526,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>${basedir}/src/main/scripts/etc-default-slipstream</location>
+                  <location>target/etc-default-slipstream</location>
                   <destination>default.slipstream</destination>
                 </source>
               </sources>

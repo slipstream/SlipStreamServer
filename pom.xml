@@ -58,6 +58,7 @@
     <logger.level>INFO</logger.level>
     <logger.filepattern>${project.build.directory}/instance/SlipStreamServer/var/log/slipstream.%g
     </logger.filepattern>
+    <server.jre.version>1.8.0</server.jre.version>
 
   </properties>
 

@@ -95,10 +95,48 @@
               </artifactItems>
             </configuration>
           </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+       <groupId>org.codehaus.mojo</groupId>
+       <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+
+          <execution>
+            <id>copy-etc-default-ssclj</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <executable>cp</executable>
+              <arguments>
+                <argument>${basedir}/src/main/resources/ssclj</argument>
+                <argument>${basedir}/target/etc-default-ssclj</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>update-java-version</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <executable>sed</executable>
+              <arguments>
+                <argument>-i</argument>
+                <argument>-e</argument>
+                <argument>s/CHANGE_ME_JRE_VERSION/${server.jre.version}/</argument>
+                <argument>${basedir}/target/etc-default-ssclj</argument>
+              </arguments>
+            </configuration>
+          </execution>
 
         </executions>
-
       </plugin>
+
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -119,7 +157,7 @@
             SlipStream SSCLJ server
           </description>
           <requires>
-            <require>jre-headless &gt;= 1.8.0</require>
+            <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd${slipstream.edition}</require>
           </requires>
 
@@ -183,10 +221,8 @@
               <configuration>noreplace</configuration>
               <sources>
                 <source>
-                  <location>src/main/resources</location>
-                  <includes>
-                    <include>ssclj</include>
-                  </includes>
+                  <location>target/etc-default-ssclj</location>
+                  <destination>ssclj</destination>
                 </source>
               </sources>
             </mapping>
