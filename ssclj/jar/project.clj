@@ -59,13 +59,14 @@
                   "   Results: Stored in vars *1, *2, *3, an exception in *e\n"
                   "\n"
                   ;; This line is related to the SlipStream project:
-                  "API Server: (require '[com.sixsq.slipstream.ssclj.app.server :as server])\n"
-                  "            (def state (server/start 8201))\n"
-                  "Event Seeding: (require '[com.sixsq.slipstream.ssclj.resources.seeds.event :as es])\n"
-                  "               (es/seed! 10 :bob)\n"
-                  "Usage Seeding: (require '[com.sixsq.slipstream.ssclj.usage.seeds.usages :as us])\n"
-                  "               (us/seed-summaries! 10 :bob [\"aws\" \"exo\"])\n"
-                           ))
+                  "API Server:      (require '[com.sixsq.slipstream.ssclj.app.server :as server])\n"
+                  "                 (def state (server/start 8201))\n"
+                  "Event Seeding:   (require '[com.sixsq.slipstream.ssclj.resources.seeds.event :as es])\n"
+                  "                 (es/seed! 10 :bob)\n"
+                  "Usage Seeding:   (require '[com.sixsq.slipstream.ssclj.usage.seeds.usages :as us])\n"
+                  "                 (us/seed-summaries! 10 :bob [\"aws\" \"exo\"])\n"
+                  "\n"
+                  "Or all at once:  (require '[com.sixsq.slipstream.ssclj.api.dev-server :as api])\n"))
                 }
 
   :profiles {
