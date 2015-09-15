@@ -13,17 +13,19 @@
   (str (time/plus (time/today-at-midnight) (time/days n))))
 
 (defn- daily-usage
-  [username cloud day-number metric-name metric-value]
+  [username cloud day-number metrics-map]
   {:user            username
    :cloud           cloud
    :start_timestamp (days-from-now day-number)
    :end_timestamp   (days-from-now (inc day-number))
-   :usage           {metric-name {:unit_minutes metric-value}}})
+   :usage           (->> metrics-map
+                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (into {}))})
 
 (defn usages
   [nb username clouds]
   (for [day-number (range nb) cloud clouds]
-    (daily-usage (name username) cloud day-number :ram 100.0)))
+    (daily-usage (name username) cloud day-number {:ram 100.0 :disk 140000 :cpu 8})))
 
 (defn insert-to-db
   [usages]
