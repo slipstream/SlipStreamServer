@@ -214,39 +214,35 @@
               </arguments>
             </configuration>
           </execution>
-
-          <execution>
-            <id>copy-etc-default-slipstream</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>compile</phase>
-            <configuration>
-              <executable>cp</executable>
-              <arguments>
-                <argument>${basedir}/src/main/scripts/etc-default-slipstream</argument>
-                <argument>${basedir}/target/etc-default-slipstream</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>update-java-version</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>compile</phase>
-            <configuration>
-              <executable>sed</executable>
-              <arguments>
-                <argument>-i</argument>
-                <argument>-e</argument>
-                <argument>s/CHANGE_ME_JRE_VERSION/${server.jre.version}/</argument>
-                <argument>${basedir}/target/etc-default-slipstream</argument>
-              </arguments>
-            </configuration>
-          </execution>
-
         </executions>
+      </plugin>
+
+      <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-resources-plugin</artifactId>
+
+       <executions>
+         <execution>
+           <id>copy-resources</id>
+           <phase>package</phase>
+           <goals>
+             <goal>copy-resources</goal>
+           </goals>
+           <configuration>
+             <outputDirectory>${project.build.directory}</outputDirectory>
+             <overwrite>true</overwrite>
+             <resources>
+               <resource>
+                 <directory>${basedir}/src/main/scripts/</directory>
+                 <includes>
+                     <include>etc-default-slipstream</include>
+                 </includes>
+                 <filtering>true</filtering>
+               </resource>
+             </resources>
+           </configuration>
+         </execution>
+       </executions>
       </plugin>
 
       <plugin>

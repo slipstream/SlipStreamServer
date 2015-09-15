@@ -1,0 +1,3 @@
+# Defaults for the SlipStream API server.
+#SSCLJ_PORT=8201
+export JAVA=/etc/alternatives/jre_${server.jre.version}/bin/java
