@@ -288,11 +288,20 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 	}
 
-	private void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run) throws ValidationException {
+	private void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run)
+			throws ValidationException {
 		String key = SystemConfigurationParametersFactoryBase.NATIVE_CONTEXTUALIZATION_KEY;
 		String nativeContextualization = Configuration.getInstance().getProperty(constructKey(key));
 		if (nativeContextualization != null) {
 			launchParams.put(key, nativeContextualization);
+		}
+	}
+
+	protected void putLaunchParamSecurityGroups(Map<String, String> launchParams, Run run, User user)
+			throws ValidationException {
+		String securityGroups = getSecurityGroups(run, user);
+		if (securityGroups != null && !securityGroups.isEmpty()) {
+			launchParams.put("security-groups", securityGroups);
 		}
 	}
 
@@ -482,7 +491,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 					"Cloud Username cannot be empty"
 							+ errorMessageLastPart));
 		}
-		if (getSecret(user) == null || getKey(user).isEmpty()) {
+		if (getSecret(user) == null || getSecret(user).isEmpty()) {
 			throw (new ValidationException(
 					"Cloud Password cannot be empty"
 							+ errorMessageLastPart));
