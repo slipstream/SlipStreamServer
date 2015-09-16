@@ -41,6 +41,8 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ModuleParametersFactoryBase;
+import com.sixsq.slipstream.factory.ParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
@@ -287,11 +289,20 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 	}
 
-	private void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run) throws ValidationException {
+	private void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run)
+			throws ValidationException {
 		String key = SystemConfigurationParametersFactoryBase.NATIVE_CONTEXTUALIZATION_KEY;
 		String nativeContextualization = Configuration.getInstance().getProperty(constructKey(key));
 		if (nativeContextualization != null) {
 			launchParams.put(key, nativeContextualization);
+		}
+	}
+
+	protected void putLaunchParamSecurityGroups(Map<String, String> launchParams, Run run, User user)
+			throws ValidationException {
+		String securityGroups = getSecurityGroups(run, user);
+		if (securityGroups != null && !securityGroups.isEmpty()) {
+			launchParams.put("security-groups", securityGroups);
 		}
 	}
 
@@ -379,6 +390,19 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		environment.put("IS_ORCHESTRATOR", isOrchestrator);
 
 		return environment;
+	}
+
+	protected String getSecurityGroups(Run run, User user) throws ValidationException {
+		return (isInOrchestrationContext(run)) ? getOrchestratorSecurityGroups(user) : getImageSecurityGroups(run);
+	}
+
+	protected String getOrchestratorSecurityGroups(User user) throws ValidationException {
+		return getCloudParameterValue(user, ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME);
+	}
+
+	protected String getImageSecurityGroups(Run run) throws ValidationException {
+		ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
+		return getParameterValue(ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME, machine);
 	}
 
 	private static void addToPropertiesIfExistAndNotEmpty(Properties properties, String[] parts, int column, String key) {
