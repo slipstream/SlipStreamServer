@@ -41,6 +41,7 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
@@ -379,6 +380,19 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		environment.put("IS_ORCHESTRATOR", isOrchestrator);
 
 		return environment;
+	}
+
+	protected String getSecurityGroups(Run run, User user) throws ValidationException {
+		return (isInOrchestrationContext(run)) ? getOrchestratorSecurityGroups(user) : getImageSecurityGroups(run);
+	}
+
+	protected String getOrchestratorSecurityGroups(User user) throws ValidationException {
+		return getCloudParameterValue(user, ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME, "");
+	}
+
+	protected String getImageSecurityGroups(Run run) throws ValidationException {
+		ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
+		return getParameterValue(ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME, machine);
 	}
 
 	private static void addToPropertiesIfExistAndNotEmpty(Properties properties, String[] parts, int column, String key) {

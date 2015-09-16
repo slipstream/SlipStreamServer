@@ -113,6 +113,12 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 				"Orchestrator instance type  " + getCategory());
 	}
 
+	protected void putMandatoryOrchestratorSecurityGroups() throws ValidationException {
+		putMandatoryParameter(
+				super.constructKey(SECURITY_GROUPS_PARAMETER_NAME),
+				"Orchestrator security groups (comma separated list)", SECURITY_GROUPS_ALLOW_ALL);
+	}
+
 	protected void putMandatoryUpdateUrl() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(UserParametersFactoryBase.UPDATE_CLIENTURL_PARAMETER_NAME),
