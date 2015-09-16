@@ -47,16 +47,16 @@ apply-db-migration:
 	@(ls -1 ../rpm/src/main/migrations/; echo; echo "Choose the migration file and execute following command:"; echo "java -jar ${SQLTOOL_FILENAME} --autoCommit --inlineRc=url=jdbc:hsqldb:file:slipstreamdb,user=sa,password= ../rpm/src/main/migrations/__MIGRATION_FILE_TO_APPLY__")
 
 start-db-ui: start-db
-	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.util.DatabaseManagerSwing -user sa -url jdbc:hsqldb:hsql://localhost/slipstream
+	java -cp ${SQLTOOL_FILENAME} org.hsqldb.util.DatabaseManagerSwing -user sa -url jdbc:hsqldb:hsql://localhost/slipstream
 
 start-db-ui-ssclj: start-db
-	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.util.DatabaseManagerSwing -user sa -url jdbc:hsqldb:hsql://localhost/ssclj
+	java -cp ${SQLTOOL_FILENAME} org.hsqldb.util.DatabaseManagerSwing -user sa -url jdbc:hsqldb:hsql://localhost/ssclj
 
 start-db: check-sqltool-jar-file
 ifeq ("$(SLIPSTREAM_DB_RUNNING)","yes")
 	$(info slipstream DB already running. Nothing to start.)
 else
-	java -cp ~/.m2/repository/org/hsqldb/hsqldb/2.3.2/hsqldb-2.3.2.jar org.hsqldb.server.Server --database.0 file:slipstreamdb --dbname.0 slipstream --database.1 file:sscljdb --dbname.1 ssclj &
+	java -cp ${SQLTOOL_FILENAME} org.hsqldb.server.Server --database.0 file:slipstreamdb --dbname.0 slipstream --database.1 file:sscljdb --dbname.1 ssclj &
 endif
 
 stop-db: check-sqltool-jar-file
