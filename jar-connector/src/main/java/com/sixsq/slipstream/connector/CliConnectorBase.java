@@ -41,6 +41,8 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ModuleParametersFactoryBase;
+import com.sixsq.slipstream.factory.ParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
@@ -287,11 +289,20 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 	}
 
-	private void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run) throws ValidationException {
+	private void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run)
+			throws ValidationException {
 		String key = SystemConfigurationParametersFactoryBase.NATIVE_CONTEXTUALIZATION_KEY;
 		String nativeContextualization = Configuration.getInstance().getProperty(constructKey(key));
 		if (nativeContextualization != null) {
 			launchParams.put(key, nativeContextualization);
+		}
+	}
+
+	protected void putLaunchParamSecurityGroups(Map<String, String> launchParams, Run run, User user)
+			throws ValidationException {
+		String securityGroups = getSecurityGroups(run, user);
+		if (securityGroups != null && !securityGroups.isEmpty()) {
+			launchParams.put("security-groups", securityGroups);
 		}
 	}
 
@@ -381,6 +392,19 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return environment;
 	}
 
+	protected String getSecurityGroups(Run run, User user) throws ValidationException {
+		return (isInOrchestrationContext(run)) ? getOrchestratorSecurityGroups(user) : getImageSecurityGroups(run);
+	}
+
+	protected String getOrchestratorSecurityGroups(User user) throws ValidationException {
+		return getCloudParameterValue(user, ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME);
+	}
+
+	protected String getImageSecurityGroups(Run run) throws ValidationException {
+		ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
+		return getParameterValue(ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME, machine);
+	}
+
 	private static void addToPropertiesIfExistAndNotEmpty(Properties properties, String[] parts, int column, String key) {
 		if (parts.length > column) {
 			String value = parts[column].trim();
@@ -468,7 +492,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 					"Cloud Username cannot be empty"
 							+ errorMessageLastPart));
 		}
-		if (getSecret(user) == null || getKey(user).isEmpty()) {
+		if (getSecret(user) == null || getSecret(user).isEmpty()) {
 			throw (new ValidationException(
 					"Cloud Password cannot be empty"
 							+ errorMessageLastPart));

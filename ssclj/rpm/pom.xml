@@ -95,9 +95,35 @@
               </artifactItems>
             </configuration>
           </execution>
-
         </executions>
+      </plugin>
 
+      <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-resources-plugin</artifactId>
+
+       <executions>
+         <execution>
+           <id>copy-resources</id>
+           <phase>package</phase>
+           <goals>
+             <goal>copy-resources</goal>
+           </goals>
+           <configuration>
+             <outputDirectory>${project.build.directory}</outputDirectory>
+             <overwrite>true</overwrite>
+             <resources>
+               <resource>
+                 <directory>${basedir}/src/main/resources/</directory>
+                 <includes>
+                     <include>etc-default-ssclj</include>
+                 </includes>
+                 <filtering>true</filtering>
+               </resource>
+             </resources>
+           </configuration>
+         </execution>
+       </executions>
       </plugin>
 
       <plugin>
@@ -119,7 +145,7 @@
             SlipStream SSCLJ server
           </description>
           <requires>
-            <require>jre-headless &gt;= 1.8.0</require>
+            <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd${slipstream.edition}</require>
           </requires>
 
@@ -183,10 +209,8 @@
               <configuration>noreplace</configuration>
               <sources>
                 <source>
-                  <location>src/main/resources</location>
-                  <includes>
-                    <include>ssclj</include>
-                  </includes>
+                  <location>target/etc-default-ssclj</location>
+                  <destination>ssclj</destination>
                 </source>
               </sources>
             </mapping>
@@ -202,7 +226,7 @@
             </mapping>
 
             <mapping>
-              <directory>${installation.dir}/etc</directory>
+              <directory>${installation.dir}/resources</directory>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
