@@ -15,17 +15,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
     ))
 
-(defn log-request
-  [request]
-  (log/info (:request-method  request)
-            (:uri             request)
-            (or (:query-string    request) "no-query-string")
-            (or (:body            request) "no-body")))
-
 (defn add-fn
   [resource-name collection-acl resource-uri]
   (fn [{:keys [body] :as request}]
-    (log-request request)
     (a/can-modify? {:acl collection-acl} request)
     (->> (->  body              
               u/strip-service-attrs              
@@ -39,7 +31,6 @@
 (defn retrieve-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
-    (log-request request)
     (-> (str (u/de-camelcase resource-name) "/" uuid)
         db/retrieve
         (a/can-view? request)
@@ -49,7 +40,6 @@
 (defn edit-fn
   [resource-name]
   (fn [{{uuid :uuid} :params body :body :as request}]
-    (log-request request)
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                       (db/retrieve)
                       (a/can-modify? request))]
@@ -64,7 +54,6 @@
 (defn delete-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
-    (log-request request)
     (-> (str (u/de-camelcase resource-name) "/" uuid)
         (db/retrieve)
         (a/can-modify? request)
@@ -74,22 +63,21 @@
   [resource-name collection-acl collection-uri collection-key]
   (let [skeleton (-> {:acl         collection-acl
                       :resourceURI collection-uri
-                      :id          (u/de-camelcase resource-name)
-                      :count       0})]
+                      :id          (u/de-camelcase resource-name)})]
     (fn [request entries]
-      (let [count (count entries)]
-        (if (zero? count)
-          skeleton
-          (-> skeleton
-              (crud/set-operations request)
-              (assoc :count count)
-              (assoc collection-key entries)))))))
+      (let [paginated-entries (->> entries
+                                 (pg/paginate (get-in request [:cimi-params :first])
+                                              (get-in request [:cimi-params :last]))
+                                 (map #(crud/set-operations % request)))]
+        (-> skeleton
+            (crud/set-operations request)
+            (assoc :count (count entries))
+            (assoc collection-key paginated-entries))))))
 
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
     (fn [request]
-      (log-request request)
 
       (a/can-view? {:acl collection-acl} request)
 
@@ -105,13 +93,8 @@
            ;; ordering
            (crud/sort-collection request)
 
-           ;; paginating
-           (pg/paginate         (get-in request [:cimi-params :first]) (get-in request [:cimi-params :last]))
-
            ;; access controlling
            (filter #(a/authorized-view? % request))
-
-           (map #(crud/set-operations % request))
 
            (wrapper-fn request)
 
