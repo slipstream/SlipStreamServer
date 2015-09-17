@@ -73,7 +73,7 @@ public abstract class ModuleParametersFactoryBase extends
 		putMandatoryParameter(SECURITY_GROUPS_PARAMETER_NAME, "Security Groups (comma separated list)",
 				SECURITY_GROUPS_ALLOW_ALL,
 				"If you don't know what is a security group or if you don't want to take care of them, you can use the "
-				+ "special value " + SECURITY_GROUPS_ALLOW_ALL + " to let SlipStream generate a security group with "
+				+ "special value <code>" + SECURITY_GROUPS_ALLOW_ALL + "</code> to let SlipStream generate a security group with "
 				+ "everything allowed.");
 	}
 
