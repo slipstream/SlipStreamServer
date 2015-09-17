@@ -22,16 +22,20 @@
       (update-in m [:response :body] (constantly updated-body)))
     m))
 
-(defn is-status [m status]
+(defn is-status
+  [m status]
   (is (= status (get-in m [:response :status])))
   m)
 
-(defn is-key-value [m k v]
-  (let [actual (get-in m [:response :body k])]
-    (when-not (= v actual)
-      (println "Expecting " v " got " actual))
-    (is (= v actual))
-    m))
+(defn is-key-value
+  ([m f k v]
+   (let [actual (-> m :response :body k f)]
+     (when-not (= v actual)
+       (println "Expecting " v " got " actual))
+     (is (= v actual))
+     m))
+  ([m k v]
+   (is-key-value m identity k v)))
 
 (defn has-key [m k]
   (-> m

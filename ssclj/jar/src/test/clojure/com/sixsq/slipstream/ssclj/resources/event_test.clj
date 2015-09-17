@@ -67,9 +67,8 @@
 ;; Note that these tests need nb-events > 5
 ;;
 
-(defn event-is-count
-  [expected-count query-string]
-  (is-count base-uri expected-count query-string "jane"))
+(def ^:private are-counts
+  (partial tu/are-counts :events base-uri "jane"))
 
 (deftest events-are-retrieved-most-recent-first
   (->> valid-events
@@ -98,49 +97,49 @@
       is))
 
 (deftest resources-pagination
-  (event-is-count nb-events  "")
-  (event-is-count 0   "?$first=10&$last=5")
+  (are-counts nb-events   "")
+  (are-counts nb-events 0 "?$first=10&$last=5")
 
-  (event-is-count (- nb-events 2)   "?$first=3")
-  (event-is-count 2  "?$last=2")
-  (event-is-count 2  "?$first=3&$last=4"))
+  (are-counts nb-events (- nb-events 2) "?$first=3")
+  (are-counts nb-events 2               "?$last=2")
+  (are-counts nb-events 2               "?$first=3&$last=4"))
 
 (deftest pagination-occurs-after-filtering
-  (event-is-count 1 "?$filter=content/resource/href='run/5'")
-  (event-is-count 1 "?$filter=content/resource/href='run/5'&$last=1")
-  (event-is-count 1 "?$last=1&$filter=content/resource/href='run/5'"))
+  (are-counts 1 "?$filter=content/resource/href='run/5'")
+  (are-counts 1 "?$filter=content/resource/href='run/5'&$last=1")
+  (are-counts 1 "?$last=1&$filter=content/resource/href='run/5'"))
 
 (deftest resources-filtering
   (doseq [i (range nb-events)]
-    (event-is-count 1 (str "?$filter=content/resource/href='run/" i "'")))
-  (event-is-count 0 "?$filter=content/resource/href='run/100'")
+    (are-counts 1 (str "?$filter=content/resource/href='run/" i "'")))
+  (are-counts 0 "?$filter=content/resource/href='run/100'")
 
-  (event-is-count 1 "?$filter=content/resource/href='run/3' and type='state'")
-  (event-is-count 1 "?$filter=type='state' and content/resource/href='run/3'")
-  (event-is-count 1 "?$filter=type='state'       and     content/resource/href='run/3'")
+  (are-counts 1 "?$filter=content/resource/href='run/3' and type='state'")
+  (are-counts 1 "?$filter=type='state' and content/resource/href='run/3'")
+  (are-counts 1 "?$filter=type='state'       and     content/resource/href='run/3'")
 
-  (event-is-count 1 "?$filter=content/resource/href='run/3'")
-  (event-is-count 0 "?$filter=type='WRONG' and content/resource/href='run/3'")
-  (event-is-count 0 "?$filter=content/resource/href='run/3' and type='WRONG'")
-  (event-is-count nb-events "?$filter=type='state'"))
+  (are-counts 1 "?$filter=content/resource/href='run/3'")
+  (are-counts 0 "?$filter=type='WRONG' and content/resource/href='run/3'")
+  (are-counts 0 "?$filter=content/resource/href='run/3' and type='WRONG'")
+  (are-counts nb-events "?$filter=type='state'"))
 
 (deftest filter-and
-  (event-is-count nb-events "$filter=type='state' and timestamp='2015-01-16T08:05:00.0Z'")
-  (event-is-count 0 "?$filter=type='state' and type='XXX'")
-  (event-is-count 0 "?$filter=type='YYY' and type='state'")
-  (event-is-count 0 "?$filter=(type='state') and (type='XXX')")
-  (event-is-count 0 "?$filter=(type='YYY') and (type='state')"))
+  (are-counts nb-events "$filter=type='state' and timestamp='2015-01-16T08:05:00.0Z'")
+  (are-counts 0 "?$filter=type='state' and type='XXX'")
+  (are-counts 0 "?$filter=type='YYY' and type='state'")
+  (are-counts 0 "?$filter=(type='state') and (type='XXX')")
+  (are-counts 0 "?$filter=(type='YYY') and (type='state')"))
 
 (deftest filter-or
-  (event-is-count 0 "?$filter=type='XXX'")
-  (event-is-count nb-events "?$filter=type='state'")
-  (event-is-count nb-events "?$filter=type='state' or type='XXXX'")
-  (event-is-count nb-events "?$filter=type='XXXX' or type='state'")
-  (event-is-count nb-events "?$filter=(type='state') or (type='XXX')")
-  (event-is-count nb-events "?$filter=(type='XXXXX') or (type='state')")
-  (event-is-count 0 "?$filter=type='XXXXX' or type='YYYY'")
-  (event-is-count 0 "?$filter=(type='XXXXX') or (type='YYYY')"))
+  (are-counts 0 "?$filter=type='XXX'")
+  (are-counts nb-events "?$filter=type='state'")
+  (are-counts nb-events "?$filter=type='state' or type='XXXX'")
+  (are-counts nb-events "?$filter=type='XXXX' or type='state'")
+  (are-counts nb-events "?$filter=(type='state') or (type='XXX')")
+  (are-counts nb-events "?$filter=(type='XXXXX') or (type='state')")
+  (are-counts 0 "?$filter=type='XXXXX' or type='YYYY'")
+  (are-counts 0 "?$filter=(type='XXXXX') or (type='YYYY')"))
 
 (deftest filter-multiple
-  (event-is-count 0 "?$filter=type='state'&$filter=type='XXX'")
-  (event-is-count 1 "?$filter=type='state'&$filter=content/resource/href='run/3'"))
+  (are-counts 0 "?$filter=type='state'&$filter=type='XXX'")
+  (are-counts 1 "?$filter=type='state'&$filter=content/resource/href='run/3'"))

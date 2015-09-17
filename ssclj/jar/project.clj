@@ -4,7 +4,7 @@
   :license {:name "Apache License, Version 2.0"
             :url  "http://www.apache.org/licenses/LICENSE-2.0"}
 
-  :source-paths   ["src/main/clojure"]  
+  :source-paths   ["src/main/clojure"]
   :test-paths     ["src/test/clojure"]
   :resource-paths ["src/main/resources"]
 
@@ -46,30 +46,50 @@
                  [jonase/eastwood                           "0.2.1"]
                  [lein-cloverage                            "1.0.3"]]
 
+  :repl-options {;; What to print when the repl session starts.
+                :welcome
+                (println (str
+                  ;; These first lines are the default ones:
+                  "\n"
+                  "      Docs: (doc function-name-here)\n"
+                  "            (find-doc \"part-of-name-here\")\n"
+                  "    Source: (source function-name-here)\n"
+                  "   Javadoc: (javadoc java-object-or-class-here)\n"
+                  "      Exit: Control+D or (exit) or (quit)\n"
+                  "   Results: Stored in vars *1, *2, *3, an exception in *e\n"
+                  "\n"
+                  ;; This line is related to the SlipStream project:
+                  "API Server:      (require '[com.sixsq.slipstream.ssclj.app.server :as server])\n"
+                  "                 (def state (server/start 8201))\n"
+                  "Event Seeding:   (require '[com.sixsq.slipstream.ssclj.resources.seeds.event :as es])\n"
+                  "                 (es/seed! 10 :bob)\n"
+                  "Usage Seeding:   (require '[com.sixsq.slipstream.ssclj.usage.seeds.usages :as us])\n"
+                  "                 (us/seed-summaries! 10 :bob [\"aws\" \"exo\"])\n"
+                  "\n"
+                  "Or all at once:  (require '[com.sixsq.slipstream.ssclj.api.dev-server :as api])\n"))
+                }
+
   :profiles {
-    :provided 
+    :provided
       { :dependencies [[reply/reply "0.3.4"]]}
 
-    :uberjar 
+    :uberjar
       { :aot [#"com.sixsq.slipstream.ssclj.api.acl*"]
         :env {  :clj-env        :production
                 :db-config-path "config-hsqldb-mem.edn"}
         :jvm-opts ["-Dlogfile.path=production"]}
 
-    :dev 
+    :dev
       { :env {  :clj-env        :development
-                :db-config-path "config-hsqldb-mem.edn"}
+                :db-config-path "config-hsqldb.edn"}
         :jvm-opts ["-Dlogfile.path=development"]
         :dependencies [ [peridot/peridot "0.3.0"]
                         [expectations/expectations "2.0.9"]]}
     :test
       { :env {  :clj-env        :test
                 :db-config-path "config-hsqldb-mem.edn"}
-        
+
         :jvm-opts ["-Dlogfile.path=test"]
 
         :dependencies [ [peridot/peridot "0.3.0"]
                         [expectations/expectations "2.0.9"]]}})
-
-
-  
