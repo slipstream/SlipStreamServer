@@ -30,7 +30,7 @@ import com.sixsq.slipstream.persistence.ParameterType;
 public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 
 	public static final String SECURITY_GROUPS_PARAMETER_NAME = "security.groups";
-	public static final String SECURITY_GROUPS_ALLOW_ALL = "[allow all]";
+	public static final String SECURITY_GROUPS_ALLOW_ALL = "slipstream_managed";
 
 	private String category;
 
