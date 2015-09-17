@@ -42,6 +42,7 @@ public class HtmlUtil {
 
 	private static final String USER_KEY = "user";
 	private static final String USERNAME_KEY = "username";
+	private static final String USER_URI_KEY = "uri";
 	private static final String IS_SUPER_KEY = "super?";
 
 	public static String toHtml(Object metadata, String page, User user, Request request) {
@@ -82,6 +83,7 @@ public class HtmlUtil {
 			Map<String, Object> userMap = new HashMap<String, Object>();
 			userMap.put(USERNAME_KEY, user.getName());
 			userMap.put(IS_SUPER_KEY, user.isSuper());
+			userMap.put(USER_URI_KEY, user.getResourceUri());
 			options.put(USER_KEY, userMap);
 		}
 
