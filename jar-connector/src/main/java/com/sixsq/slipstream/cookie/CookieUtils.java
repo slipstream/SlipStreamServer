@@ -94,14 +94,13 @@ public class CookieUtils {
 		return null;
 	}
 
-	public static void addAuthnCookie(Request request, String identifier) {
-
-		request.getCookies().clear();
-		CookieSetting cookieSetting = createAuthnCookieSetting(
-				COOKIE_DEFAULT_IDTYPE, identifier);
-		request.getCookies().add(cookieSetting);
-
-	}
+//	public static void addAuthnCookie(Request request, String identifier) {
+//		request.getCookies().clear();
+//		CookieSetting cookieSetting = createAuthnCookieSetting(
+//				COOKIE_DEFAULT_IDTYPE, identifier);
+//		request.getCookies().add(cookieSetting);
+//
+//	}
 
 //	public static void addAuthnCookie(Request request, String identifier,
 //			String cloudServiceName) {
@@ -113,30 +112,31 @@ public class CookieUtils {
 //		request.getCookies().add(cookieSetting);
 //	}
 
-	private static CookieSetting createAuthnCookieSetting(String idType, String identifier) {
-		return createAuthnCookieSetting(idType, identifier, new Properties());
-	}
+//	private static CookieSetting createAuthnCookieSetting(String idType, String identifier) {
+//		return createAuthnCookieSetting(idType, identifier, new Properties());
+//	}
 
-	private static CookieSetting createAuthnCookieSetting(String idType,
-			String identifier, Properties properties) {
-
-		String finalQuery = createCookieValue(idType, identifier, properties);
-
-		CookieSetting cookieSetting = new CookieSetting(COOKIE_NAME, finalQuery);
-
-		cookieSetting.setPath("/");
-
-		cookieSetting.setDomain("");
-
-		cookieSetting.setMaxAge(COOKIE_DEFAULT_AGE);
-
-		return cookieSetting;
-	}
+//	private static CookieSetting createAuthnCookieSetting(String idType,
+//			String identifier, Properties properties) {
+//
+//		String finalQuery = createCookieValue(idType, identifier, properties);
+//
+//		CookieSetting cookieSetting = new CookieSetting(COOKIE_NAME, finalQuery);
+//
+//		cookieSetting.setPath("/");
+//
+//		cookieSetting.setDomain("");
+//
+//		cookieSetting.setMaxAge(COOKIE_DEFAULT_AGE);
+//
+//		return cookieSetting;
+//	}
 
 //	public static String createCookie(String username, String cloudServiceName) {
 //		return createCookie(username, cloudServiceName, null);
 //	}
 
+	// TODO called by ConnectorBase::generateCookie
 	public static String createCookie(String username, String cloudServiceName,
 			Properties extraProperties) {
 		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
@@ -148,6 +148,7 @@ public class CookieUtils {
 				+ "; Path:/";
 	}
 
+	// TODO Used by createCookie
 	private static Properties generateCloudServiceNameProperties(
 			String cloudServiceName) {
 		Properties properties = new Properties();
@@ -155,6 +156,7 @@ public class CookieUtils {
 		return properties;
 	}
 
+	// TODO Used by createCookie
 	public static String createCookieValue(String idType, String identifier,
 			Properties properties) {
 		// Create the expiration date for the cookie. This is added to be sure
@@ -267,6 +269,9 @@ public class CookieUtils {
 	 */
 	public static int verifyAuthnCookie(Cookie cookie) {
 
+		// TODO : To be replaced
+		System.out.println("verifyAuthnCookie");
+
 		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
 
 		if (cookie == null || !COOKIE_NAME.equals(cookie.getName())) {
@@ -329,6 +334,9 @@ public class CookieUtils {
 
 		// TODO adapt extract cloud service name from claims in token
 
+		// TODO
+		System.out.println("getCookieCloudServiceName");
+
 		String cloudServiceName = null;
 
 		if (cookie != null) {
@@ -340,12 +348,10 @@ public class CookieUtils {
 
 	public static User getCookieUser(Cookie cookie)
 			throws ConfigurationException, ValidationException {
-
 		String userName = getCookieUsername(cookie);
 		if (userName != null) {
 			return User.loadByName(userName);
 		}
-
 		return null;
 	}
 
@@ -373,6 +379,8 @@ public class CookieUtils {
 
 	public static String getRunId(Cookie cookie) {
 		// TODO adapt extract run id from claims in token
+		System.out.println("getRunId");
+
 		Form f = extractCookieValueAsForm(cookie);
 		return f.getFirstValue(COOKIE_RUN_ID, null);
 	}

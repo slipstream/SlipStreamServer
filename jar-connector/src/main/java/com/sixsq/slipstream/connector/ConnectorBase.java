@@ -20,42 +20,20 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.credentials.Credentials;
+import com.sixsq.slipstream.exceptions.*;
+import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.run.RuntimeParameterMediator;
+import com.sixsq.slipstream.util.FileUtil;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
-
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.credentials.Credentials;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.InvalidElementException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.NotImplementedException;
-import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ExtraDisk;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.run.RuntimeParameterMediator;
-import com.sixsq.slipstream.util.FileUtil;
 
 public abstract class ConnectorBase implements Connector {
 
@@ -376,10 +354,15 @@ public abstract class ConnectorBase implements Connector {
         extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
         extraProperties.put(CookieUtils.COOKIE_RUN_ID, runId);
         extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
+
+        // TODO
+        System.out.println("generating cookie for runid " + runId);
         return CookieUtils.createCookie(identifier, getConnectorInstanceName(), extraProperties);
     }
 
     protected String getCookieForEnvironmentVariable(String identifier, String runId) {
+        // TODO
+        System.out.println("getting cookie for env variable, id =" + identifier+", runId=" + runId);
         return "\"" + generateCookie(identifier, runId) + "\"";
     }
 
