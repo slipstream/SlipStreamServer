@@ -113,6 +113,17 @@
   (edit-impl request))
 
 ;;
+;; initialization: create cloud entry point if necessary
+;;
+(defn initialize
+  []
+  (try
+    (add)
+    (log/info "Created" resource-name "resource")
+    (catch Exception e
+      (log/warn resource-name "resource not created; may already exist; message: " (str e)))))
+
+;;
 ;; Root doesn't follow the usual service-context + '/resource-name/UUID'
 ;; pattern, so the routes must be defined explicitly.
 ;;

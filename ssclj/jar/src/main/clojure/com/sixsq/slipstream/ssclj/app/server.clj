@@ -19,6 +19,7 @@
     [com.sixsq.slipstream.ssclj.resources.root                      :as root]
     [com.sixsq.slipstream.ssclj.db.impl                             :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding                 :as dbdb]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load       :as resources]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils        :as du]))
 
 ;; FIXME: make this dynamic depending on the service configuration
@@ -27,14 +28,6 @@
   ; (-> (fsdb/get-instance fsdb/default-db-prefix)
   ;     (db/set-impl!)))
   (db/set-impl! (dbdb/get-instance)))
-
-(defn create-root
-  []
-  (try
-    (root/add)
-    (log/info "Created" root/resource-name "resource")
-    (catch Exception e
-      (log/info root/resource-name "resource not created; may already exist; message: " (str e)))))
 
 (defn- create-ring-handler
   "Creates a ring handler that wraps all of the service routes
@@ -75,7 +68,7 @@
   (log/info "java version: " (System/getProperty "java.version"))
   (log/info "java classpath: " (System/getProperty "java.class.path"))
   (set-db-impl)
-  (create-root)
+  (resources/initialize)
   (-> (create-ring-handler)
       (start-container port)))
 
