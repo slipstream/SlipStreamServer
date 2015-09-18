@@ -1,15 +1,27 @@
 (ns com.sixsq.slipstream.ssclj.app.main
   (:gen-class)
   (:require
-    [com.sixsq.slipstream.ssclj.app.server :refer [start register-shutdown-hook]]
-    [clojure.tools.logging :as log]))
+    [com.sixsq.slipstream.ssclj.app.server :refer [start stop]]))
+
+(def ^:const default-port 8200)
 
 (defn valid-port?
   "If the port number is valid, then returns the port itself;
-   otherwise returns nil."
+   otherwise returns false."
   [port]
-  (if (< 0 port 65536)
-    port))
+  (and (< 0 port 65536) port))
+
+(defn- create-shutdown-hook
+  [stop-fn]
+  (proxy [Thread] [] (run [] (stop stop-fn))))
+
+(defn register-shutdown-hook
+  "Registers a shutdown hook in the JVM to shutdown the application
+   container cleanly."
+  [stop-fn]
+  (let [hook (create-shutdown-hook stop-fn)]
+    (.. (Runtime/getRuntime)
+        (addShutdownHook hook))))
 
 (defn parse-port
   "Parses the given string into a port value.  If the port is not
@@ -17,13 +29,14 @@
   [^String s]
   (try
     (valid-port? (Integer/valueOf s))
-    (catch Exception e
+    (catch Exception _
       nil)))
 
 (defn -main
-  "Starts the cimi server using the command line arguments.  Takes as
-   possible arguments the port number and Couchbase configuration file."
+  "Starts the application container using the given port (as a string)
+   or the default port."
   [& [port]]
-  (let [port (or (parse-port port) 8200)]
-    (->> (start port)
-         (register-shutdown-hook))))
+  (-> (parse-port port)
+      (or default-port)
+      (start)
+      (register-shutdown-hook)))
