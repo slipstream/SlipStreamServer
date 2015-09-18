@@ -12,14 +12,14 @@
   (or (< 0 port 65536) port))
 
 (defn- create-shutdown-hook
-  [state]
-  (proxy [Thread] [] (run [] (stop state))))
+  [stop-fn]
+  (proxy [Thread] [] (run [] (stop stop-fn))))
 
 (defn register-shutdown-hook
   "Registers a shutdown hook in the JVM to shutdown the application
    container cleanly."
-  [state]
-  (let [hook (create-shutdown-hook state)]
+  [stop-fn]
+  (let [hook (create-shutdown-hook stop-fn)]
     (.. (Runtime/getRuntime)
         (addShutdownHook hook))))
 
