@@ -9,7 +9,7 @@
   "If the port number is valid, then returns the port itself;
    otherwise returns false."
   [port]
-  (or (< 0 port 65536) port))
+  (and (< 0 port 65536) port))
 
 (defn- create-shutdown-hook
   [stop-fn]
