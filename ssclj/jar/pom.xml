@@ -63,6 +63,10 @@
       <artifactId>http-kit</artifactId>
     </dependency>
     <dependency>
+      <groupId>aleph</groupId>
+      <artifactId>aleph</artifactId>
+    </dependency>
+    <dependency>
       <groupId>clojurewerkz</groupId>
       <artifactId>scrypt</artifactId>
     </dependency>
