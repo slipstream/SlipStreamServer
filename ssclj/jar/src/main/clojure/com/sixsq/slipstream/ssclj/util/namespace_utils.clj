@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.util.namespace-utils
   "Utilities for dynamic loading of namespaces and vars."
+  (:refer-clojure :exclude [resolve])
   (:require
     [clojure.tools.logging :as log]
     [clojure.java.classpath :as cp]
