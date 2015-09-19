@@ -1,21 +1,22 @@
 (ns com.sixsq.slipstream.ssclj.app.main
   (:gen-class)
   (:require
-    [com.sixsq.slipstream.ssclj.app.server :refer [start stop]]))
+    [com.sixsq.slipstream.ssclj.app.server :as server]))
 
 (def ^:const default-port 8200)
 
-(defn- create-shutdown-hook
+(defn- hook
+  "A JVM shutdown hook is just a Thread that runs a function
+   in the 'run' method."
   [stop-fn]
-  (proxy [Thread] [] (run [] (stop stop-fn))))
+  (proxy [Thread] [] (run [] (server/stop stop-fn))))
 
 (defn register-shutdown-hook
   "Registers a shutdown hook in the JVM to shutdown the application
    container cleanly."
   [stop-fn]
-  (let [hook (create-shutdown-hook stop-fn)]
-    (.. (Runtime/getRuntime)
-        (addShutdownHook hook))))
+  (.. (Runtime/getRuntime)
+      (addShutdownHook (hook stop-fn))))
 
 (defn parse-port
   "Parses the given string into an port value (int).  If the input
@@ -33,5 +34,5 @@
   [& [port]]
   (-> (parse-port port)
       (or default-port)
-      (start)
+      (server/start)
       (register-shutdown-hook)))
