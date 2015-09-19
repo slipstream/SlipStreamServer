@@ -5,12 +5,6 @@
 
 (def ^:const default-port 8200)
 
-(defn valid-port?
-  "If the port number is valid, then returns the port itself;
-   otherwise returns false."
-  [port]
-  (and (< 0 port 65536) port))
-
 (defn- create-shutdown-hook
   [stop-fn]
   (proxy [Thread] [] (run [] (stop stop-fn))))
@@ -24,11 +18,12 @@
         (addShutdownHook hook))))
 
 (defn parse-port
-  "Parses the given string into a port value.  If the port is not
-   valid, then function returns nil."
+  "Parses the given string into an port value (int).  If the input
+   string is not a valid number or not a valid port, nil is returned."
   [^String s]
   (try
-    (valid-port? (Integer/valueOf s))
+    (let [port (Integer/valueOf s)]
+      (if (< 0 port 65536) port))
     (catch Exception _
       nil)))
 
