@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.dynamic-load
   "Utilities for loading information from CIMI resources dynamically."
   (:require
-    [clojure.tools.logging                                    :as log]
-    [com.sixsq.slipstream.ssclj.util.namespace-utils          :as dyn]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]))
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.util.namespace-utils :as dyn]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (defn resource?
   "If the given symbol represents a resource namespace, the symbol
@@ -28,14 +28,14 @@
    Function returns nil if either value cannot be found for the
    resource."
   [resource-ns]
-  (if-let [vtag (dyn/get-ns-var "resource-tag" resource-ns)]
-    (if-let [vtype (dyn/get-ns-var "resource-url" resource-ns)]
+  (if-let [vtag (dyn/resolve "resource-tag" resource-ns)]
+    (if-let [vtype (dyn/resolve "resource-url" resource-ns)]
       [(deref vtag) {:href (deref vtype)}])))
 
 (defn- initialize-resource
   "Run a resource's initialization function if it exists."
   [resource-ns]
-  (if-let [fvar (dyn/get-ns-var "initialize" resource-ns)]
+  (if-let [fvar (dyn/resolve "initialize" resource-ns)]
     (try
       ((deref fvar))
       (log/info "initialized resource" (ns-name resource-ns))
@@ -47,7 +47,7 @@
    discovered on the classpath."
   []
   (->> (resource-namespaces)
-       (map (partial dyn/get-ns-var "routes"))
+       (map (partial dyn/resolve "routes"))
        (remove nil?)
        (map deref)))
 

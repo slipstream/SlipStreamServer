@@ -33,10 +33,11 @@
        (map load-namespace)
        (remove nil?)))
 
-(defn get-ns-var
+(defn resolve
   "Retrieves the named var in the given namespace, returning
    nil if the var could not be found.  Function logs the success or
-   failure of the request."
+   failure of the request.  The argument order is reverse from the
+   usual 'resolve' function to allow for thread-last forms."
   [varname resource-ns]
 
   (let [v (ns-resolve resource-ns (symbol varname))]
