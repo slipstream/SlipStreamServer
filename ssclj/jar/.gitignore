@@ -23,3 +23,11 @@
 lib
 .idea/
 *.iml
+
+# debugging #
+#############
+
+sscljdb*
+db.path
+log4j.properties
+
