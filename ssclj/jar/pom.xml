@@ -103,6 +103,10 @@
       <version>2.1.18</version>
     </dependency>
     <dependency>
+      <groupId>aleph</groupId>
+      <artifactId>aleph</artifactId>
+    </dependency>
+    <dependency>
       <groupId>clojurewerkz</groupId>
       <artifactId>scrypt</artifactId>
       <version>1.2.0</version>

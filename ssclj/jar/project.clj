@@ -9,34 +9,36 @@
   :resource-paths ["src/main/resources"]
 
   :dependencies [[org.clojure/clojure                       "1.7.0"]
-                 [org.clojure/tools.logging                 "0.3.0"]
-                 [org.clojure/tools.namespace               "0.2.5"]
+                 [org.clojure/tools.logging                 "0.3.1"]
+                 [org.clojure/tools.namespace               "0.2.10"]
                  [org.clojure/tools.cli                     "0.3.1"]
-                 [org.clojure/data.json                     "0.2.5"]
-                 [prismatic/schema                          "0.2.6"]
+                 [org.clojure/data.json                     "0.2.6"]
                  [org.clojure/java.classpath                "0.2.2"]
-                 [http-kit/http-kit                         "2.1.18"]
+                 [prismatic/schema                          "1.0.1"]
                  [clojurewerkz/scrypt                       "1.2.0"]
-                 [ring/ring-core                            "1.3.0"]
-                 [ring/ring-json                            "0.3.1"]
-                 [javax.servlet/servlet-api                 "2.5"]
-                 [compojure/compojure                       "1.1.8"]
-                 [clj-time/clj-time                         "0.8.0"]
-                 [clj-stacktrace/clj-stacktrace             "0.2.7"]
-                 [metrics-clojure/metrics-clojure           "2.1.0"]
-                 [metrics-clojure-ring/metrics-clojure-ring "2.1.0"]
-                 [metrics-clojure-jvm/metrics-clojure-jvm   "2.1.0"]
+                 [clj-time/clj-time                         "0.11.0"]
+                 [clj-stacktrace/clj-stacktrace             "0.2.8"]
+                 [metrics-clojure/metrics-clojure           "2.5.1"]
+                 [metrics-clojure-ring/metrics-clojure-ring "2.5.1"]
+                 [metrics-clojure-jvm/metrics-clojure-jvm   "2.5.1"]
                  [fs/fs                                     "1.3.3"]
-                 [org.slf4j/slf4j-log4j12                   "1.7.7"]
-                 [instaparse                                "1.4.0"]
+                 [org.slf4j/slf4j-log4j12                   "1.7.12"]
+                 [instaparse                                "1.4.1"]
                  ;; Environment settings
                  [environ                                   "1.0.0"]
                  ;; database
-                 [honeysql                                  "0.5.2"]
-                 [org.clojure/java.jdbc                     "0.3.6"]
+                 [honeysql                                  "0.6.1"]
+                 [org.clojure/java.jdbc                     "0.4.1"]
                  [korma                                     "0.4.2"]
-                 [org.hsqldb/hsqldb                         "2.3.2"]
-                 [org.xerial/sqlite-jdbc                    "3.7.2"]]
+                 [org.hsqldb/hsqldb                         "2.3.3"]
+                 [org.xerial/sqlite-jdbc                    "3.8.11.1"]
+                 ;; http related
+                 [javax.servlet/javax.servlet-api           "3.1.0"]
+                 [ring/ring-core                            "1.4.0"]
+                 [ring/ring-json                            "0.4.0"]
+                 [compojure/compojure                       "1.4.0"]
+                 [http-kit/http-kit                         "2.1.19"]
+                 [aleph                                     "0.4.0"]]
 
   :plugins      [[lein-expectations                         "0.0.7"]
                  [lein-autoexpect                           "1.4.2"]
@@ -83,13 +85,13 @@
       { :env {  :clj-env        :development
                 :db-config-path "config-hsqldb.edn"}
         :jvm-opts ["-Dlogfile.path=development"]
-        :dependencies [ [peridot/peridot "0.3.0"]
-                        [expectations/expectations "2.0.9"]]}
+        :dependencies [ [peridot/peridot "0.4.1"]
+                        [expectations/expectations "2.1.3"]]}
     :test
       { :env {  :clj-env        :test
                 :db-config-path "config-hsqldb-mem.edn"}
 
         :jvm-opts ["-Dlogfile.path=test"]
 
-        :dependencies [ [peridot/peridot "0.3.0"]
-                        [expectations/expectations "2.0.9"]]}})
+        :dependencies [ [peridot/peridot "0.4.1"]
+                        [expectations/expectations "2.1.3"]]}})
