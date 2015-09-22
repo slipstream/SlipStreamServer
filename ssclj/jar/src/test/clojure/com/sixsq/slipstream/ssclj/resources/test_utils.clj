@@ -79,6 +79,15 @@
        (t/is-status 200)
        (t/is-key-value :count expected-count))))
 
+(defn are-counts
+  ([key-to-count base-uri auth-name expected-count query-string]
+   (are-counts key-to-count base-uri auth-name expected-count expected-count query-string))
+  ([key-to-count base-uri auth-name expected-count expected-paginated-count query-string]
+   (-> (exec-request base-uri query-string auth-name)
+       (t/is-status 200)
+       (t/is-key-value       :count       expected-count)
+       (t/is-key-value count key-to-count expected-paginated-count))))
+
 (defn is-valid?
   "Asserts that schema successfully validates the resource."
   [resource schema]

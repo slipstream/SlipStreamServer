@@ -21,6 +21,7 @@
 package com.sixsq.slipstream.util;
 
 import java.util.Map;
+import java.util.HashMap;
 
 import org.restlet.Request;
 import org.restlet.data.Status;
@@ -38,6 +39,11 @@ import com.sixsq.slipstream.persistence.User;
  *
  */
 public class HtmlUtil {
+
+	private static final String USER_KEY = "user";
+	private static final String USERNAME_KEY = "username";
+	private static final String USER_URI_KEY = "uri";
+	private static final String IS_SUPER_KEY = "super?";
 
 	public static String toHtml(Object metadata, String page, User user, Request request) {
 		return toHtml(metadata, page, user, RequestUtil.constructOptions(request));
@@ -65,7 +71,23 @@ public class HtmlUtil {
 	}
 
 	public static String toHtmlFromJson(String json, String page, Request request) {
-		return toHtmlFromJson(json, page, RequestUtil.constructOptions(request));
+		return toHtmlFromJson(json, page, null, request);
+	}
+
+	public static String toHtmlFromJson(String json, String page, User user, Request request) {
+		Map<String, Object> options = RequestUtil.constructOptions(request);
+
+		if (user != null) {
+			// TODO: Refactor adding asMap() method to User class with all attributes
+			//       (currently only name and isSuper are coded for event resource).
+			Map<String, Object> userMap = new HashMap<String, Object>();
+			userMap.put(USERNAME_KEY, user.getName());
+			userMap.put(IS_SUPER_KEY, user.isSuper());
+			userMap.put(USER_URI_KEY, user.getResourceUri());
+			options.put(USER_KEY, userMap);
+		}
+
+		return toHtmlFromJson(json, page, options);
 	}
 
 	private static String toHtmlFromJson(String json, String page, Map<String, Object> options) {
