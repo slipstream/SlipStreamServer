@@ -118,6 +118,8 @@ public class User extends Parameterized<User, UserParameter> {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date activeSince = null;
 
+	private String authenticationToken;
+
 	@SuppressWarnings("unused")
 	private User() {
 
@@ -524,5 +526,15 @@ public class User extends Parameterized<User, UserParameter> {
 		String key = Parameter.constructKey(ParameterCategory.getDefault(),	UserParameter.KEY_MAIL_USAGE);
 		return getParameterValue(key, UserParameter.MAIL_USAGE_DEFAULT);
 	}
+
+	public void setAuthenticationToken(String authenticationToken) {
+		this.authenticationToken = authenticationToken;
+	}
+
+	public String getAuthenticationToken() {
+		return authenticationToken;
+	}
+
+
 
 }

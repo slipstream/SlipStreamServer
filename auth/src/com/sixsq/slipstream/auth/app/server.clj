@@ -2,6 +2,7 @@
   (:require
 
     [clojure.tools.logging                                          :as log]
+    [clojure.data.json                                              :as json]
 
     [org.httpkit.server                                             :refer [run-server]]
     [compojure.core                                                 :refer :all]
@@ -15,15 +16,33 @@
     [com.sixsq.slipstream.auth.simple-authentication                :as sa]
     [com.sixsq.slipstream.auth.app.http-utils                       :as hu]
 
-    [com.sixsq.slipstream.auth.app.middleware.wrap-credentials      :refer [wrap-credentials]]
     [com.sixsq.slipstream.auth.app.routes                           :refer :all]
     [com.sixsq.slipstream.auth.app.views.auth                       :as view] ))
 
 (def authentication (sa/get-instance))
 
-(defn extract-credentials
+(defn deserialize
+  [s]
+  (log/info "deserializing " s)
+  (let [res (json/read-str s :key-fn keyword)]
+    (log/info "res " (class res) " : " res)
+    res))
+
+(defn- select-in-params
+  [request keys]
+  (-> request
+      :params
+      (select-keys keys)))
+
+(defn- extract-credentials
   [request]
-  (select-keys request [:user-name :password]))
+  (select-in-params request [:user-name :password]))
+
+(defn extract-claims-token
+  [request]
+  (-> request
+      (select-in-params [:claims :token])
+      (update-in [:claims] deserialize)))
 
 (defn add-user
   [request]
@@ -33,7 +52,6 @@
     (auth/add-user! authentication credentials)
     (log/info "Done adding " (dissoc credentials :password))
     (view/registered-ok (:user-name credentials))))
-
 
 (defn response-token-ok
   [token]
@@ -58,20 +76,30 @@
       (response-token-ok result)
       (response-invalid-token))))
 
+(defn build-token
+  [request]
+  (log/info "Will build-token")
+  (let [{:keys [claims token]}  (extract-claims-token request)
+        [ok? result]            (auth/token authentication claims token)]
+    (if ok?
+      (hu/response-with-body 200 (:token result))
+      (response-invalid-token))))
+
 (defroutes app
 
   (GET  uri-register []             (view/register-form))
   (POST uri-register request        (add-user request))
 
   (GET  uri-login    []             (view/login))
-  (POST uri-login    request        (login request)))
+  (POST uri-login    request        (login request))
+
+  (POST uri-token    request        (build-token request)))
 
 (defn- create-ring-handler
   []
   (log/info "creating ring handler")
   (-> app
       wrap-cookies
-      wrap-credentials
       wrap-params
       handler/site
       (wrap-json-body {:keywords? true})

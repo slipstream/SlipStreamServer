@@ -349,21 +349,20 @@ public abstract class ConnectorBase implements Connector {
         return new HashMap<String, ModuleParameter>();
     }
 
-    protected String generateCookie(String identifier, String runId) {
-        Properties extraProperties = new Properties();
-        extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
-        extraProperties.put(CookieUtils.COOKIE_RUN_ID, runId);
-        extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
+    protected String generateCookie(User user, Run run) {
+//        Properties extraProperties = new Properties();
+//        extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
+//        extraProperties.put(CookieUtils.COOKIE_RUN_ID, runId);
+//        extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
 
-        // TODO
-        System.out.println("generating cookie for runid " + runId);
-        return CookieUtils.createCookie(identifier, getConnectorInstanceName(), extraProperties);
+        return CookieUtils.createCookie(user, run, getConnectorInstanceName());
     }
 
-    protected String getCookieForEnvironmentVariable(String identifier, String runId) {
+    protected String getCookieForEnvironmentVariable(User user, Run run) {
         // TODO
-        System.out.println("getting cookie for env variable, id =" + identifier+", runId=" + runId);
-        return "\"" + generateCookie(identifier, runId) + "\"";
+        System.out.println("getting cookie for env variable, username =" + user.getName()
+                +", runId=" + run.getUuid());
+        return "\"" + generateCookie(user, run) + "\"";
     }
 
     protected abstract String constructKey(String key) throws ValidationException;

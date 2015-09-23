@@ -22,6 +22,7 @@ package com.sixsq.slipstream.cookie;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import org.restlet.Request;
@@ -137,15 +138,33 @@ public class CookieUtils {
 //	}
 
 	// TODO called by ConnectorBase::generateCookie
-	public static String createCookie(String username, String cloudServiceName,
-			Properties extraProperties) {
-		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
-		if (extraProperties != null) {
-			properties.putAll(extraProperties);
-		}
-		return getCookieName() + "="
-				+ CookieUtils.createCookieValue("local", username, properties)
-				+ "; Path:/";
+	public static String createCookie(User user, Run run, String cloudServiceName) {
+			// Properties extraProperties) {
+
+		Properties claims = new Properties();
+		claims.put(CookieUtils.COOKIE_IS_MACHINE, "true");
+		claims.put(CookieUtils.COOKIE_RUN_ID, run.getUuid());
+		// claims.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
+
+		claims.put(RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName);
+
+//		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
+//		if (claims != null) {
+//			properties.putAll(claims);
+//		}
+
+		logger.info("Will generate machine token with auth token :" + user.getAuthenticationToken());
+		logger.info("Will generate machine token with claims :" + claims);
+
+		String token = (new AuthProxy()).createToken(claims, user.getAuthenticationToken());
+
+		logger.info("Generated token " + token);
+
+		return token;
+
+//		return getCookieName() + "="
+//				+ CookieUtils.createCookieValue("local", user.getName(), claims)
+//				+ "; Path:/";
 	}
 
 	// TODO Used by createCookie
@@ -324,25 +343,25 @@ public class CookieUtils {
 			return new HashMap<String, String>();
 		}
 
-		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
-		String token = cookieInfo.getFirstValue(TOKEN);
-
+		String token = tokenInCookie(cookie);
 		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
+	}
+
+	public static String tokenInCookie(Cookie cookie) {
+		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
+		return cookieInfo.getFirstValue(TOKEN);
 	}
 
 	public static String getCookieCloudServiceName(Cookie cookie) {
 
 		// TODO adapt extract cloud service name from claims in token
-
-		// TODO
-		System.out.println("getCookieCloudServiceName");
-
 		String cloudServiceName = null;
 
 		if (cookie != null) {
 			Form form = new Form(cookie.getValue());
 			cloudServiceName = form.getFirstValue(RuntimeParameter.CLOUD_SERVICE_NAME);
 		}
+		logger.info("getCookieCloudServiceName : "+ cloudServiceName);
 		return cloudServiceName;
 	}
 

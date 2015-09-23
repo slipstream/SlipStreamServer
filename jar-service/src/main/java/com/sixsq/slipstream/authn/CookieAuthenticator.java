@@ -52,7 +52,7 @@ public class CookieAuthenticator extends AuthenticatorBase {
 	protected boolean authenticate(Request request, Response response) {
 
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		logger.info("will authenticate cookie " + cookie);
+		logger.fine("will authenticate cookie " + cookie);
 
 		Map<String, String> claimsInToken = CookieUtils.claimsInToken(cookie);
 
@@ -83,6 +83,8 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		if(user == null) {
 			return false;
 		}
+
+		user.setAuthenticationToken(CookieUtils.tokenInCookie(cookie));
 		setCloudServiceName(request, cookie);
 		setUserInRequest(user, request);
 

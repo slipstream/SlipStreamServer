@@ -100,7 +100,6 @@
 (defn enrich-claims
   [claims]
   (-> claims
-      ;; TODO add cloud name?
       (rename-keys {:user-name :com.sixsq.identifier})
       (merge {:exp (expiry-timestamp)})))
 
@@ -118,6 +117,7 @@
       [false {:message "Invalid credentials when creating token"}])))
 
   ([claims token]
+   (log/info "Will create token for claims=" claims)
    (try
       (check-token-impl token)
       [true {:token (jws/sign claims

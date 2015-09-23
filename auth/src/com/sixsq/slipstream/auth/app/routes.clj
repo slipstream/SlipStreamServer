@@ -3,3 +3,4 @@
 (def auth-base-url "/auth")
 (def uri-register     (str auth-base-url "/register"))
 (def uri-login        (str auth-base-url "/login"))
+(def uri-token        (str auth-base-url "/token"))

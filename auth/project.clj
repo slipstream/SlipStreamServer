@@ -9,6 +9,7 @@
                    "test/resources"]
 
   :dependencies [[org.clojure/clojure                       "1.7.0"]
+                 [org.clojure/data.json                     "0.2.6"]
 
                  ;; buddy
                  [buddy/buddy-core                          "0.6.0"]
