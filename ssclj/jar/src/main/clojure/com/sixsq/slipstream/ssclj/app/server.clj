@@ -1,25 +1,27 @@
 (ns com.sixsq.slipstream.ssclj.app.server
   (:require
-    [clojure.tools.logging                                          :as log]
-    [compojure.handler                                              :as handler]
-    [ring.middleware.json                                           :refer [wrap-json-body wrap-json-response]]
-    [ring.middleware.params                                         :refer [wrap-params]]
-    [metrics.core                                                   :refer [default-registry]]
-    [metrics.ring.instrument                                        :refer [instrument]]
-    [metrics.ring.expose                                            :refer [expose-metrics-as-json]]
-    [metrics.jvm.core                                               :refer [instrument-jvm]]
-    [org.httpkit.server                                             :refer [run-server]]
-    [com.sixsq.slipstream.ssclj.middleware.logger                   :refer [wrap-logger]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri                 :refer [wrap-base-uri]]
-    [com.sixsq.slipstream.ssclj.middleware.exception-handler        :refer [wrap-exceptions]]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header        :refer [wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params              :refer [wrap-cimi-params]]
-    [com.sixsq.slipstream.ssclj.app.routes                          :as routes]
-    [com.sixsq.slipstream.ssclj.app.params                          :as p]
-    [com.sixsq.slipstream.ssclj.resources.root                      :as root]
-    [com.sixsq.slipstream.ssclj.db.impl                             :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding                 :as dbdb]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils        :as du]))
+    [clojure.tools.logging :as log]
+    [compojure.handler :as handler]
+    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+    [ring.middleware.params :refer [wrap-params]]
+    [metrics.core :refer [default-registry]]
+    [metrics.ring.instrument :refer [instrument]]
+    [metrics.ring.expose :refer [expose-metrics-as-json]]
+    [metrics.jvm.core :refer [instrument-jvm]]
+    [com.sixsq.slipstream.ssclj.app.httpkit-container :as httpkit]
+    [com.sixsq.slipstream.ssclj.app.aleph-container :as aleph]
+    [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
+    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
+    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
+    [com.sixsq.slipstream.ssclj.app.routes :as routes]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.resources.root :as root]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 ;; FIXME: make this dynamic depending on the service configuration
 (defn set-db-impl
@@ -27,14 +29,6 @@
   ; (-> (fsdb/get-instance fsdb/default-db-prefix)
   ;     (db/set-impl!)))
   (db/set-impl! (dbdb/get-instance)))
-
-(defn create-root
-  []
-  (try
-    (root/add)
-    (log/info "Created" root/resource-name "resource")
-    (catch Exception e
-      (log/info root/resource-name "resource not created; may already exist; message: " (str e)))))
 
 (defn- create-ring-handler
   "Creates a ring handler that wraps all of the service routes
@@ -58,50 +52,30 @@
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (instrument default-registry)))
 
-(defn- start-container
-  "Starts the http-kit container with the given ring application and
-   on the given port.  Returns the function to be called to shutdown
-   the http-kit container."
-  [ring-app port]
-  (log/info "starting the http-kit container on port" port)
-  (log/info "java vendor: " (System/getProperty "java.vendor"))
-  (log/info "java version: " (System/getProperty "java.version"))
-  (log/info "java classpath: " (System/getProperty "java.class.path"))
-  (run-server ring-app {:port port :ip "127.0.0.1"}))
-
-(declare stop)
-
-(defn- create-shutdown-hook
-  [state]
-  (proxy [Thread] [] (run [] (stop state))))
-
-(defn register-shutdown-hook
-  "This function registers a shutdown hook to close the database
-   client cleanly and to shutdown the http-kit container when the
-   JVM exits.  This only needs to be called in a context in which
-   the stop function will not be explicitly called."
-  [state]
-  (let [hook (create-shutdown-hook state)]
-    (.. (Runtime/getRuntime)
-        (addShutdownHook hook))
-    (log/info "registered shutdown hook")))
-
 (defn start
-  "Starts the server and returns a map with the application
-   state containing the function to stop the http-kit container."
-  [port]
-  (log/info "=============== SSCLJ START ===============")
-  (set-db-impl)
-  (let [ring-app (create-ring-handler)
-        stop-fn (start-container ring-app port)
-        state {:stop-fn stop-fn}]
-    (create-root)
-    state))
+  "Starts the server and returns a function that when called, will
+   stop the application server."
+  ([port]
+    (start port "httpkit"))
+  ([port impl]
+   (log/info "=============== SSCLJ START" port "===============")
+   (log/info "java vendor: " (System/getProperty "java.vendor"))
+   (log/info "java version: " (System/getProperty "java.version"))
+   (log/info "java classpath: " (System/getProperty "java.class.path"))
+   (set-db-impl)
+   (resources/initialize)
+   (if (= impl "aleph")
+     (-> (create-ring-handler)
+         (aleph/start-container port))
+     (-> (create-ring-handler)
+         (httpkit/start-container port)))))
 
 (defn stop
-  "Stops the http-kit container.  Takes the global state map
-   generated by the start function as the argument."
-  [{:keys [stop-fn]}]
-  (log/info "shutting down http-kit container")
-  (if stop-fn
-    (stop-fn)))
+  "Stops the application server by calling the function that was
+   created when the application server was started."
+  [stop-fn]
+  (try
+    (and stop-fn (stop-fn))
+    (log/info "shutdown application container")
+    (catch Exception e
+      (log/warn "application container shutdown failed:" (.getMessage e)))))
