@@ -172,6 +172,8 @@
             <mapping>
               <directory>/var/log/slipstream/ssclj</directory>
               <directoryIncluded>true</directoryIncluded>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
             </mapping>
 
             <mapping>
