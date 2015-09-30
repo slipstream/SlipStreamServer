@@ -124,7 +124,7 @@ fresh-test-db: remove-db
 	curl -sSLO https://gist.github.com/rbf/fcfecf39587f2688dcd6/raw/slipstreamdb.script
 	curl -sSLO https://gist.github.com/rbf/fcfecf39587f2688dcd6/raw/slipstreamdb.properties
 
-patch-test-pom: fresh-test-db
+patch-test-pom:
 	curl -sSLO https://gist.github.com/rbf/fcfecf39587f2688dcd6/raw/set_up_connectors_in_server_pom.patch
 	git apply set_up_connectors_in_server_pom.patch
 	$(info This patch modified the war/pom.xml to use all public connectors (but Okeanos) and the private EC2 connector.)
