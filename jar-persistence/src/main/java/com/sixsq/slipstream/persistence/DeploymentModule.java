@@ -20,10 +20,7 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,13 +32,14 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.CollectionType;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 @Entity
 @SuppressWarnings("serial")
-public class DeploymentModule extends Module {
+public class DeploymentModule extends TargetedModule {
 
 	@ElementMap(required = false)
 	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -258,11 +256,14 @@ public class DeploymentModule extends Module {
 	}
 
 	public DeploymentModule store() {
+		setModuleToTargets();
+
 		if(nodes != null) {
 			for(Node n : nodes.values()) {
 				n.setModule(this);
 			}
 		}
+
 		return (DeploymentModule) store(true);
 	}
 

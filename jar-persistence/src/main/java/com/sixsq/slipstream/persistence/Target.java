@@ -54,7 +54,7 @@ public class Target implements Serializable {
 	private String name;
 
 	@ManyToOne
-	private ImageModule module;
+	private TargetedModule module;
 
 	@SuppressWarnings("unused")
 	private Target() {
@@ -69,11 +69,11 @@ public class Target implements Serializable {
 		this.script = script;
 	}
 
-	public ImageModule getModule() {
+	public TargetedModule getModule() {
 		return module;
 	}
 
-	public void setModule(ImageModule module) {
+	public void setModule(TargetedModule module) {
 		this.module = module;
 	}
 

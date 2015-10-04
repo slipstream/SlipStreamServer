@@ -49,7 +49,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
  */
 @Entity
 @SuppressWarnings("serial")
-public class ImageModule extends Module {
+public class ImageModule extends TargetedModule {
 
 	public static final String INSTANCE_TYPE_KEY = "instance.type";
 	public static final String INSTANCE_TYPE_INHERITED = "inherited";
@@ -65,10 +65,6 @@ public class ImageModule extends Module {
 	public static final String EXTRADISK_VOLATILE_PARAM = EXTRADISK_PARAM_PREFIX + "." + EXTRADISK_NAME_VOLATILE;
 	private static final String VOLATILE_DISK_VALUE_REGEX = "^[0-9]*$";
 	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
-
-	@ElementList(required = false)
-	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	private Set<Target> targets = new HashSet<Target>();
 
 	@ElementList(required = false)
 	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -288,22 +284,6 @@ public class ImageModule extends Module {
 		this.prerecipe = prerecipe;
 	}
 
-	public Set<Target> getTargets() {
-		return targets;
-	}
-
-	public void setTargets(Set<Target> targets) {
-		this.targets.clear();
-		for (Target t : targets) {
-			setTarget(t);
-		}
-	}
-
-	private void setTarget(Target target) {
-		target.setModule(this);
-		targets.add(target);
-	}
-
 	public Set<Package> getPackages() {
 		return packages;
 	}
@@ -391,19 +371,18 @@ public class ImageModule extends Module {
 
 	public ImageModule store() {
 		setVersion();
-		if (targets != null) {
-			for (Target t : targets) {
-				t.setModule(this);
-			}
-		}
+		setModuleToTargets();
+
 		if (packages != null) {
 			for (Package p : packages) {
 				p.setModule(this);
 			}
 		}
+
 		for (CloudImageIdentifier id : getCloudImageIdentifiers()) {
 			id.setResourceUri(getResourceUri() + "/" + id.getCloudServiceName());
 		}
+
 		return (ImageModule) store(false);
 	}
 
