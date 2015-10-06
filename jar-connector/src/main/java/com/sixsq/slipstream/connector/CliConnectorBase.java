@@ -288,7 +288,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 	}
 
-	private void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run)
+	protected void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run)
 			throws ValidationException {
 		String key = SystemConfigurationParametersFactoryBase.NATIVE_CONTEXTUALIZATION_KEY;
 		String nativeContextualization = Configuration.getInstance().getProperty(constructKey(key));
