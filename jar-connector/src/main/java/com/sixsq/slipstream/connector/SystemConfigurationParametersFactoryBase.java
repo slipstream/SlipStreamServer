@@ -114,7 +114,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 	protected void putMandatoryOrchestratorSecurityGroups() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(SECURITY_GROUPS_PARAMETER_NAME),
-				"Orchestrator security group", SECURITY_GROUPS_ALLOW_ALL);
+				"Orchestrator security groups (comma separated list)", SECURITY_GROUPS_ALLOW_ALL);
 	}
 
 	protected void putMandatoryUpdateUrl() throws ValidationException {

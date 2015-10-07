@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>2.17-SNAPSHOT</version>
+    <version>2.18-SNAPSHOT</version>
   </parent>
 
   <!-- NOTE: This project MUST have same version as proxy module. -->
@@ -172,6 +172,8 @@
             <mapping>
               <directory>/var/log/slipstream/ssclj</directory>
               <directoryIncluded>true</directoryIncluded>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
             </mapping>
 
             <mapping>

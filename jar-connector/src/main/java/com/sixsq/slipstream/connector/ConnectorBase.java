@@ -112,6 +112,12 @@ public abstract class ConnectorBase implements Connector {
         return paramValue;
     }
 
+    protected String getCloudParameterValue(User user, String paramName, String defaultValue)
+            throws ValidationException {
+        String qualifiedParamName = constructKey(paramName);
+        return user.getParameterValue(qualifiedParamName, defaultValue);
+    }
+
     protected String getDefaultCloudServiceName(User user) throws ValidationException {
         return user.getDefaultCloudService();
     }

@@ -385,7 +385,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	protected String getOrchestratorSecurityGroups(User user) throws ValidationException {
-		return getCloudParameterValue(user, ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME);
+		return getCloudParameterValue(user, ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME, "");
 	}
 
 	protected String getImageSecurityGroups(Run run) throws ValidationException {
