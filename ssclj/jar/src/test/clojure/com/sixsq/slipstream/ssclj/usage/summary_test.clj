@@ -208,7 +208,7 @@
 
 (deftest test-summarize-and-store
   (insert-record)
-  (summarize-and-store start-day end-day)
+  (summarize-and-store! start-day end-day)
   (let [summaries-from-db (select usage_summaries)
         result "{\"disk-GB\":{\"unit_minutes\":33868.5},
                  \"RAM-GB\":{\"unit_minutes\":2696.0},
