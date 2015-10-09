@@ -55,13 +55,53 @@ One usage summary
  "instance-type.Huge":{"unit_minutes":1440.0}}
 
 
-#### Process
+### Process
 
-Each day at 3 AM, a cron job computes and stores the summaries for all users on each cloud.
-TODO : detail cron -> script.sh -> clojure script -> clojure namespace.
+#### Computation of Usage Summaries
+
+Each day at 2 AM (UTC), a cron job computes and stores the summaries for all users on each cloud.
+Here are the details of the execution on nuv.la:
+
+```
+cron job: 
+/etc/cron.d/create-daily-usage 
+
+--> triggers at 2 AM
+
+/usr/sbin/create-daily-usage.sh (simple wrapper around clojure launcher without arguments)
+
+--> that calls  
+
+com.sixsq.slipstream.ssclj.usage.daily_summary_launcher
+```
+
+`daily_summary_launcher` by default (no arguments) computes the summaries for yesterday.
+It can also be called with optional arguments `-d date`
+e.g: 
+
+```
+daily_summary_launcher -d 20150921
+```
+
+#### Send Usage emails
 
 Each day at 3 AM, a cron job sends via email (to users having set the preference) these usage summaries.
-TODO : detail cron -> script.sh -> clojure script -> clojure namespace.
+Here are the details of the execution on nuv.la:
+
+cron job:
+/etc/cron.d/daily-usage-emails
+
+--> triggers at 3 AM
+
+/usr/sbin/send-daily-usage-emails.sh
+
+--> that calls
+
+com.sixsq.slipstream.action.DailyUsageSender (Java class actually doing the job)
+
+The DailyUsageSender queries the Usage Summary resource with the help of the CIMI filter.
+
+
 
 
 
