@@ -73,15 +73,14 @@
 
 (defn analyze-args   
   [args]  
-  (let [{:keys [options arguments errors summary] :as all} (parse-opts args cli-options)]      
-    ; (clojure.pprint/pprint all)  ;; TODO
+  (let [{:keys [options arguments errors summary] :as all} (parse-opts args cli-options)]
     (cond
       (:help options)             [:help    (usage summary)]      
       errors                      [:error   (error-msg errors)]
       (mandatory-absent? options) [:help    (usage summary)]      
       :else                       (check-order options))))
 
-(defn do-summarize   
+(defn do-summarize!
   [[start end]]
   (rc/-init)
   (s/summarize-and-store! start end)
@@ -93,5 +92,5 @@
     (case code
       :help           (exit 0 data)      
       :error          (exit 1 data)
-      :success        (exit 0 (do-summarize data)))))
+      :success        (exit 0 (do-summarize! data)))))
       

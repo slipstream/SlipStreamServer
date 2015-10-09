@@ -28,6 +28,10 @@
   [ts]
   (time-fmt/unparse (:date-time time-fmt/formatters) ts))
 
+(defn now-to-ISO-8601
+  []
+  (-> (time/now) to-ISO-8601))
+
 (defn to-time
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
    instance on success and nil on failure."

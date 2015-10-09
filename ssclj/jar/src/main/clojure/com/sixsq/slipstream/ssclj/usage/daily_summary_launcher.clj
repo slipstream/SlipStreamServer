@@ -27,4 +27,4 @@
                   u/to-time
                   (t/plus (t/days 1))
                   u/to-ISO-8601)]
-    (l/do-summarize [start end])))
+    (l/do-summarize! [start end])))
