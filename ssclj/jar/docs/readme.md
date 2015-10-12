@@ -21,7 +21,7 @@ How many usage records:
 java -jar /opt/hsqldb/lib/sqltool.jar --inlineRc=url=jdbc:hsqldb:hsql://localhost:9001/ssclj,user=sa,password= --sql 'select count(*) from "usage_records";'
 ``
 
-Some (limited to 10) usage records for `ixsq_dev` on `ec2-eu-west`:
+Some (limited to 10) usage records for `sixsq_dev` on `ec2-eu-west`:
 
 ```
 java -jar /opt/hsqldb/lib/sqltool.jar --inlineRc=url=jdbc:hsqldb:hsql://localhost:9001/ssclj,user=sa,password= --sql "select * from \"usage_records\" where \"cloud\"='ec2-eu-west' and \"user\"='sixsq_dev' limit 10;"
@@ -47,8 +47,9 @@ This is also a REST resource.
 A Usage Summary is the aggregation of all metrics for a given time interval, user and cloud.
 e.g:
 
+TODO
 One usage summary
-
+TODO
 {"vm":{"unit_minutes":1440.0},
  "ram":{"unit_minutes":4.718592E7},
  "disk":{"unit_minutes":0.0},

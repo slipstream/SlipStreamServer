@@ -70,42 +70,40 @@
       (assoc-in summary [:usage record-metric] record-comsumption))))
 
 (defn empty-summary-for-record
-  [record start end]
+  [record start end grouping-cols]
   (-> record
-    (dissoc :cloud_vm_instanceid :metric_name :metric_value)
-    (assoc :start_timestamp start)
-    (assoc :end_timestamp end)))
+      (select-keys grouping-cols)
+      (assoc :start_timestamp start)
+      (assoc :end_timestamp end)
+      (assoc :usage {})))
 
-(defn merge-usage-user-cloud
-  [records-user-cloud start end]
-  (let [summary-first-record (empty-summary-for-record (first records-user-cloud) start end)]
-    (reduce merge-summary-record summary-first-record records-user-cloud)))
+(defn- merge-usages
+  [records start end grouping-cols]
+  (let [summary-first-record (empty-summary-for-record (first records) start end grouping-cols)]
+    (reduce merge-summary-record summary-first-record records)))
 
-(defn user-cloud
-  [record]
-  (select-keys record [:user :cloud]))
-
-(defn summarize-per-user-cloud
-  [start-time end-time per-user-cloud]
-  (for [records-user-cloud per-user-cloud]
-    (merge-usage-user-cloud records-user-cloud start-time end-time)))
+(defn- summarize-groups-of-records
+  [start end grouping-cols records-grouped]
+  (for [records records-grouped]
+    (merge-usages records start end grouping-cols)))
 
 (defn summarize-records
-  [records start-time end-time]
+  [records start-time end-time grouping-cols]
   (->> records
-    (truncate start-time end-time)
-    (group-by user-cloud)
-    vals
-    (summarize-per-user-cloud start-time end-time)))
+       (truncate start-time end-time)
+       (group-by (fn[record] (select-keys record grouping-cols)))
+       vals
+       (summarize-groups-of-records start-time end-time grouping-cols)))
 
 (defn summarize
-  [start-time end-time]
-  (summarize-records (rc/records-for-interval start-time end-time) start-time end-time))
+  [start-time end-time grouping-cols]
+  (summarize-records (rc/records-for-interval start-time end-time) start-time end-time grouping-cols))
 
 (defn summarize-and-store!
-  [start-time end-time]
-  (let [summaries (summarize start-time end-time)]
-    (log/info "Will persist" (count summaries) "summaries for " (u/disp-interval start-time end-time))
+  [start-time end-time grouping-cols]
+  (let [summaries (summarize start-time end-time grouping-cols)]
+    (log/info "Will persist" (count summaries) "summaries for "
+              (u/disp-interval start-time end-time) "on" grouping-cols)
     (doseq [summary summaries]
       (rc/insert-summary! summary))))
 

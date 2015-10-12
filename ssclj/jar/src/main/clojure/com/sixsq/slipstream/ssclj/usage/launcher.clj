@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.usage.launcher
   (:require 
     [clojure.string                                     :as string]
-    [clojure.tools.cli                                  :refer [parse-opts]]    
+    [clojure.tools.cli                                  :as cli]
     [com.sixsq.slipstream.ssclj.usage.record-keeper     :as rc]
     [com.sixsq.slipstream.ssclj.usage.summary           :as s]
     [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]
@@ -73,7 +73,7 @@
 
 (defn analyze-args   
   [args]  
-  (let [{:keys [options arguments errors summary] :as all} (parse-opts args cli-options)]
+  (let [{:keys [options arguments errors summary] :as all} (cli/parse-opts args cli-options)]
     (cond
       (:help options)             [:help    (usage summary)]      
       errors                      [:error   (error-msg errors)]

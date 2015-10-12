@@ -14,6 +14,10 @@
   [ts]
   (time/plus ts (time/days 1)))
 
+(defn inc-month
+  [ts]
+  (time/plus ts (time/months 1)))
+
 (defn inc-minutes
   [ts minutes]
   (time/plus ts (time/minutes minutes)))

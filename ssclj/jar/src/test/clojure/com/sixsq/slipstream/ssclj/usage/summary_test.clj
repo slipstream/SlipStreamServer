@@ -11,18 +11,16 @@
     [clj-time.format                                :as f]
     [clj-time.core                                  :as t]))
 
-(def past-1 (u/timestamp 2015 04 12))
-(def past-2 (u/timestamp 2015 04 13))
-(def after-day (u/timestamp 2015 04 17 3))
-
-(def start-day  (u/timestamp 2015 04 16))
-(def in-day-1  (u/timestamp 2015 04 16 9 33))
-(def in-day-2  (u/timestamp 2015 04 16 15 10))
-
-(def end-day    (u/timestamp 2015 04 17))
-
-(def future-1 (u/timestamp 2015 04 20))
-(def future-2 (u/timestamp 2015 04 22))
+(def past-1      (u/timestamp 2015 04 12))
+(def past-2      (u/timestamp 2015 04 13))
+(def start-day   (u/timestamp 2015 04 16))
+(def in-day-1    (u/timestamp 2015 04 16 9 33))
+(def in-day-2    (u/timestamp 2015 04 16 15 10))
+(def end-day     (u/timestamp 2015 04 17))
+(def future-1    (u/timestamp 2015 04 20))
+(def future-2    (u/timestamp 2015 04 22))
+(def start-april (u/timestamp 2015 04))
+(def start-may   (u/timestamp 2015 05))
 
 (defn delete-all [f]
   (rc/-init)
@@ -72,7 +70,7 @@
 (def record-2  
   { :cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
     :user                "sixsq_dev"
-    :cloud               "exoscale-ch-gva"
+    :cloud               "aws"
     :start_timestamp     start-day  
     :end_timestamp       in-day-2
     :metric_name         "nb-cpu"
@@ -107,24 +105,38 @@
 
 (deftest test-summarize-records
   (is (=
-    [{ 
-    :user                "sixsq_dev"
-    :cloud               "exoscale-ch-gva"
-    :start_timestamp     start-day   
-    :end_timestamp       end-day
-    :usage 
-      {
-        "nb-cpu"
-          {            
-            :unit_minutes   (float (+ (* 6 910) (* 4 337)))
-          }
-       "RAM"
-        { 
-          :unit_minutes   13872.0
-        }
+    [{
+      :user                "sixsq_dev"
+      :cloud               "exoscale-ch-gva"
+      :start_timestamp     start-day
+      :end_timestamp       end-day
+      :usage
+                           {
+                            "nb-cpu"
+                            {
+                             :unit_minutes   1348.0
+                             }
+                            "RAM"
+                            {
+                             :unit_minutes   13872.0
+                             }
+                            }
       }
-     }]    
-    (summarize-records [record-1 record-2 record-3] start-day end-day)))
+     {
+      :user                "sixsq_dev"
+      :cloud               "aws"
+      :start_timestamp     start-day
+      :end_timestamp       end-day
+      :usage
+                           {
+                            "nb-cpu"
+                            {
+                             :unit_minutes 5460.0
+                             }
+                            }
+      }
+     ]
+    (summarize-records [record-1 record-2 record-3] start-day end-day [:user :cloud])))
 
   (is (=
     [{ 
@@ -140,7 +152,7 @@
           }
       }
      }]
-     (summarize-records [record-4] start-day end-day)))
+     (summarize-records [record-4] start-day end-day [:user :cloud])))
 
   (is (=
     [{ 
@@ -156,7 +168,7 @@
           }
       }
      }]
-     (summarize-records [record-5] start-day end-day)))
+     (summarize-records [record-5] start-day end-day [:user :cloud])))
   )
 
 (defn insert-record   
@@ -187,28 +199,16 @@
     :cloud               "exoscale-ch-gva"
     :start_timestamp     start-day   
     :end_timestamp       end-day
-    :usage 
-      {
-        "nb-cpu"
-        {          
-          :unit_minutes   (* 4.0 337)
-        }
-        "RAM-GB"
-        {         
-          :unit_minutes   (* 8.0 337)
-        }
-        "disk-GB"
-        {
-          :unit_minutes   (* 100.5 337)
-        }
-      }
+    :usage              { "nb-cpu" { :unit_minutes   (* 4.0 337) }
+                          "RAM-GB" { :unit_minutes   (* 8.0 337) }
+                         "disk-GB" { :unit_minutes   (* 100.5 337)}}
      }]
-    (summarize start-day end-day)))
+    (summarize start-day end-day [:user :cloud])))
   )
 
 (deftest test-summarize-and-store
   (insert-record)
-  (summarize-and-store! start-day end-day)
+  (summarize-and-store! start-day end-day [:user :cloud])
   (let [summaries-from-db (select usage_summaries)
         result "{\"disk-GB\":{\"unit_minutes\":33868.5},
                  \"RAM-GB\":{\"unit_minutes\":2696.0},
@@ -217,6 +217,37 @@
     (is (= 1 (count summaries-from-db)))
     (is (= (json/read-str result)
            (-> summaries-from-db
-               (first)
-               (:usage)
-               (json/read-str))))))
+               first
+               :usage
+               json/read-str)))))
+
+(deftest test-summarize-and-store-by-cloud
+  (insert-record)
+  (summarize-and-store! start-day end-day [:cloud])
+  (let [summaries-from-db (select usage_summaries)
+        result "{\"disk-GB\":{\"unit_minutes\":33868.5},
+                 \"RAM-GB\":{\"unit_minutes\":2696.0},
+                 \"nb-cpu\":{\"unit_minutes\":1348.0}}"]
+
+    (is (= 1 (count summaries-from-db)))
+    (is (= (json/read-str result)
+           (-> summaries-from-db
+               first
+               :usage
+               json/read-str)))))
+
+(deftest test-summarize-records-by-cloud
+  (is (= [{
+           :cloud           "exoscale-ch-gva"
+           :start_timestamp start-april
+           :end_timestamp   start-may
+           :usage           { "nb-cpu" { :unit_minutes 1348.0}
+                             "RAM"     { :unit_minutes 13872.0}}
+           }
+          {:cloud           "aws"
+           :start_timestamp start-april
+           :end_timestamp   start-may
+           :usage           {"Disk"   {:unit_minutes 4176000.0}
+                             "nb-cpu" {:unit_minutes 5460.0}}}]
+         (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may [:cloud]))))
+
