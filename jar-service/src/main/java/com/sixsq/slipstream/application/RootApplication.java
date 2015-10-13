@@ -30,6 +30,9 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.initialstartup.CloudIds;
 import com.sixsq.slipstream.initialstartup.Modules;
 import com.sixsq.slipstream.usage.UsageRouter;
+import com.sixsq.slipstream.resource.AppStoreResource;
+import com.sixsq.slipstream.resource.ProjectsResource;
+import com.sixsq.slipstream.resource.ModulesChooserResource;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -41,6 +44,7 @@ import org.restlet.data.Status;
 import org.restlet.resource.Directory;
 import org.restlet.resource.ServerResource;
 import org.restlet.routing.Filter;
+import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
@@ -70,11 +74,11 @@ import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.metrics.GraphiteRouter;
 import com.sixsq.slipstream.module.ModuleRouter;
+import com.sixsq.slipstream.module.ModuleListRouter;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.ServiceCatalogRouter;
-import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
@@ -218,6 +222,7 @@ public class RootApplication extends Application {
 		RootRouter router = new RootRouter(getContext());
 
 		try {
+			attachModulesChooser(router);
 			attachSSCLJ(router);
 			attachMetering(router);
 			attachAction(router);
@@ -227,7 +232,7 @@ public class RootApplication extends Application {
 			attachVms(router);
 			attachRun(router);
 			attachTeapot(router);
-			attachWelcome(router);
+			attachRootRedirect(router);
 			attachLogin(router);
 			attachLogout(router);
 			attachConfiguration(router);
@@ -235,6 +240,8 @@ public class RootApplication extends Application {
 			attachReports(router);
 			attachEvent(router);
 			attachUsage(router);
+			attachAppStore(router);
+			attachProjects(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -377,6 +384,12 @@ public class RootApplication extends Application {
 		return new AuthenticatorsTemplateRoute(route, authenticators);
 	}
 
+	private void attachRedirectionFromRoot(Router rootRouter, String targetUri) {
+		Redirector redirector = new Redirector(getContext(), targetUri, Redirector.MODE_CLIENT_TEMPORARY);
+		rootRouter.attach("", redirector);
+		rootRouter.attach("/", redirector);
+	}
+
 	private void attachUser(RootRouter router) {
 		guardAndAttach(router, new UserRouter(getContext()), User.RESOURCE_URL_PREFIX);
 	}
@@ -395,16 +408,8 @@ public class RootApplication extends Application {
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 	}
 
-	private void attachWelcome(RootRouter router) {
-		AuthenticatorsTemplateRoute authenticatorsRoute = guardAndAttach(router, WelcomeResource.class, "/");
-		TemplateRoute route = authenticatorsRoute.getTemplateRoute();
-		Authenticator authenticator = authenticatorsRoute.getAuthenticators().getFirst();
-
-		route.getTemplate().setMatchingMode(Template.MODE_EQUALS);
-
-		route = router.attach("/?chooser={chooser}", authenticator);
-		route.setMatchingQuery(true);
-		route.getTemplate().getVariables().put("chooser", new Variable(Variable.TYPE_URI_QUERY));
+	private void attachRootRedirect(RootRouter router) {
+		attachRedirectionFromRoot(router, "dashboard");
 	}
 
 	private void enableTunnelService() {
@@ -430,6 +435,18 @@ public class RootApplication extends Application {
 
 	private void attachUsage(RootRouter router) throws ValidationException {
 		guardAndAttach(router, new UsageRouter(getContext()), "usage");
+	}
+
+	private void attachAppStore(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new ModuleListRouter(getContext(), AppStoreResource.class), "appstore");
+	}
+
+	private void attachProjects(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new ModuleListRouter(getContext(), ProjectsResource.class), "projects");
+	}
+
+	private void attachModulesChooser(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new ModuleListRouter(getContext(), ModulesChooserResource.class), "chooser");
 	}
 
 	public class RootRouter extends Router {
