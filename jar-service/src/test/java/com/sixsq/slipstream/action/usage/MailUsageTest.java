@@ -38,13 +38,13 @@ public class MailUsageTest {
 
         assertBodyContains(mailUsage, "Usage Report for stef on nuv.la");
         assertBodyContains(mailUsage, "Daily usage for Apr 16, 2015");
-        assertBodyContains(mailUsage, "<tr><td style=\"width:40%\">instance-type.Medium</td><td style=\"width:60%\">1.40 (h)</td></tr>");
-        assertBodyContains(mailUsage, "<tr><td style=\"width:40%\">vm</td><td style=\"width:60%\">28.14 (h)</td></tr>");
-        assertBodyContains(mailUsage, "<tr><td style=\"width:40%\">RAM</td><td style=\"width:60%\">31.19 (GBh)</td></tr>");
+        assertBodyContains(mailUsage, "<tr><td style=\"width:50%\">instance-type.Medium</td><td style=\"width:50%\">1.40 (h)</td></tr>");
+        assertBodyContains(mailUsage, "<tr><td style=\"width:50%\">vm</td><td style=\"width:50%\">28.14 (h)</td></tr>");
+        assertBodyContains(mailUsage, "<tr><td style=\"width:50%\">RAM</td><td style=\"width:50%\">31.19 (GBh)</td></tr>");
 
-        assertBodyContains(mailUsage, "<tr><td style=\"width:40%\">instance-type.Huge</td><td style=\"width:60%\">24.00 (h)</td></tr>");
-        assertBodyContains(mailUsage, "<tr><td style=\"width:40%\">vm</td><td style=\"width:60%\">24.00 (h)</td></tr>");
-        assertBodyContains(mailUsage, "<tr><td style=\"width:40%\">ram</td><td style=\"width:60%\">768.00 (GBh)</td></tr>");
+        assertBodyContains(mailUsage, "<tr><td style=\"width:50%\">instance-type.Huge</td><td style=\"width:50%\">24.00 (h)</td></tr>");
+        assertBodyContains(mailUsage, "<tr><td style=\"width:50%\">vm</td><td style=\"width:50%\">24.00 (h)</td></tr>");
+        assertBodyContains(mailUsage, "<tr><td style=\"width:50%\">ram</td><td style=\"width:50%\">768.00 (GBh)</td></tr>");
 
         assertBodyContains(mailUsage, "href=\"https://nuv.la/api/usage?%24filter=start_timestamp%3D2015-04-16+and+end_timestamp%3D2015-04-17+and+%28user%3D%27stef%27%29\"");
     }

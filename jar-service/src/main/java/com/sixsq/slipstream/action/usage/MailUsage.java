@@ -79,7 +79,7 @@ public class MailUsage {
                 "    </thead><tbody>\n");
 
             for(Map.Entry<String, Double> metric : usageSummary.getMetrics().entrySet()) {
-                sb.append(String.format("<tr><td style=\"width:40%%\">%s</td><td style=\"width:60%%\">%s</td></tr>\n", metric.getKey(),
+                sb.append(String.format("<tr><td style=\"width:50%%\">%s</td><td style=\"width:50%%\">%s</td></tr>\n", metric.getKey(),
                         MailUtils.formatMetricValue(metric.getKey(), metric.getValue())));
             }
             sb.append("</tbody> </table> </div></div></div></div></div>\n");
