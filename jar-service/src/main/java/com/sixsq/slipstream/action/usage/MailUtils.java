@@ -67,4 +67,25 @@ public class MailUtils {
     public static String humanFormat(Date date) {
         return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
     }
+
+    private static boolean isVMMetric(String metricName) {
+        return metricName!=null &&
+                (metricName.toLowerCase().startsWith("instance-type") || "vm".equals(metricName.toLowerCase()));
+    }
+    private static boolean isRAMMetric(String metricName) {
+        return metricName!=null && "ram".equals(metricName.toLowerCase());
+    }
+
+    public static String formatMetricValue(String metricName, double metricValueInMinutes) {
+
+        if(isVMMetric(metricName)) {
+            double metricValueInHours = metricValueInMinutes / 60.0;
+            return String.format("%.2f (h)", metricValueInHours);
+        } else if (isRAMMetric(metricName)) {
+            double metricValueInGBHours = metricValueInMinutes / 60.0 / 1024.0;
+            return String.format("%.2f (GBh)", metricValueInGBHours);
+        }
+
+        return String.format("%.2f", metricValueInMinutes);
+    }
 }
