@@ -68,22 +68,22 @@ public class MailUtils {
         return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
     }
 
-    private static boolean isHourMetric(String metricName) {
+    private static boolean isMinuteMetric(String metricName) {
         return metricName!=null &&
                 (metricName.toLowerCase().startsWith("instance-type") || "vm".equals(metricName.toLowerCase()) ||
                         "cpu".equals(metricName.toLowerCase()));
     }
-    private static boolean isHourGBMetric(String metricName) {
+    private static boolean isGBMinuteMetric(String metricName) {
         return metricName!=null &&
                 ("ram".equals(metricName.toLowerCase()) || "disk".equals(metricName.toLowerCase()));
     }
 
     public static String formatMetricValue(String metricName, double metricValueInMinutes) {
 
-        if(isHourMetric(metricName)) {
+        if(isMinuteMetric(metricName)) {
             double metricValueInHours = metricValueInMinutes / 60.0;
             return String.format("%.2f (h)", metricValueInHours);
-        } else if (isHourGBMetric(metricName)) {
+        } else if (isGBMinuteMetric(metricName)) {
             double metricValueInGBHours = metricValueInMinutes / 60.0 / 1024.0;
             return String.format("%.2f (GBh)", metricValueInGBHours);
         }
