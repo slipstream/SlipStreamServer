@@ -221,7 +221,7 @@
                :usage
                json/read-str)))))
 
-(deftest test-summarize-and-store-by-cloud
+(deftest summarize-and-store-by-cloud
   (insert-record)
   (summarize-and-store! start-day end-day [:cloud])
   (let [summaries-from-db (select usage_summaries)
@@ -236,7 +236,7 @@
                :usage
                json/read-str)))))
 
-(deftest test-summarize-records-by-cloud
+(deftest summarize-records-by-cloud
   (is (= [{
            :cloud           "exoscale-ch-gva"
            :start_timestamp start-april
@@ -251,3 +251,24 @@
                              "nb-cpu" {:unit_minutes 5460.0}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may [:cloud]))))
 
+(deftest summarize-records-by-cloud-except-users
+  (is (= []
+         (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may
+                            [:cloud] ["sixsq_dev" "joe"])))
+  (is (= [{:cloud           "aws"
+           :end_timestamp   "2015-05-01T00:00:00.000Z"
+           :start_timestamp "2015-04-01T00:00:00.000Z"
+           :usage           {"Disk" {:unit_minutes 4176000.0}}}]
+         (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may
+                            [:cloud] ["sixsq_dev"])))
+  (is (= [{:cloud           "exoscale-ch-gva"
+           :end_timestamp   "2015-05-01T00:00:00.000Z"
+           :start_timestamp "2015-04-01T00:00:00.000Z"
+           :usage           {"RAM"    {:unit_minutes 13872.0}
+                             "nb-cpu" {:unit_minutes 1348.0}}}
+           {:cloud           "aws"
+            :end_timestamp   "2015-05-01T00:00:00.000Z"
+            :start_timestamp "2015-04-01T00:00:00.000Z"
+            :usage           {"nb-cpu" {:unit_minutes 5460.0}}}]
+         (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may
+                            [:cloud] ["joe"]))))

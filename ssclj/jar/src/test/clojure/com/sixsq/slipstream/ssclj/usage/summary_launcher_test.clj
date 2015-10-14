@@ -10,8 +10,17 @@
 (deftest daily-main-can-be-launched-with-args
   (dl/-main "-d" "2015-01-01"))
 
-(deftest monthly-main-can-be-launched-with-args
+(deftest daily-main-checks-args
+  (is (thrown? IllegalArgumentException (dl/-main "-x" "2015-01-01")))
+  (is (thrown? IllegalArgumentException (dl/-main "-d" "2015-01"))))
+
+(deftest monthly-main-can-be-launched-without-args
   (ml/-main))
 
-(deftest daily-main-can-be-launched-with-args
-  (ml/-main "-m" "2015-01"))
+(deftest monthly-main-can-be-launched-with-args
+  (ml/-main "-m" "2015-01")
+  (ml/-main "-m" "2015-01" "-e" "joe,jack"))
+
+(deftest monthly-main-checks-args
+  (is (thrown? IllegalArgumentException (ml/-main "-x" "2015-01")))
+  (is (thrown? IllegalArgumentException (ml/-main "-m" "2015-01-01"))))

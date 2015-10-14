@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.usage.summary
  (:require
-  [clojure.set                                      :as s]
   [clojure.tools.logging                            :as log]
   [clj-time.core                                    :as t]
   [com.sixsq.slipstream.ssclj.usage.utils           :as u]
@@ -12,7 +11,7 @@
 ;; Usage records must intersect with interval.
 ;;
 
-(defn intersect?
+(defn- intersect?
   [start-time end-time]
   (fn [usage-record]
     (and
@@ -21,17 +20,17 @@
         (nil? (:end_timestamp usage-record))
         (t/after? (u/to-time (:end_timestamp usage-record)) (u/to-time start-time))))))
 
-(defn filter-inside-interval
+(defn- filter-inside-interval
   [start-time end-time usage_records]
   (filter (intersect? start-time end-time) usage_records))
 
-(defn shift-start
+(defn- shift-start
   [start]
   (fn [record]
     (let [record-start-time (:start_timestamp record)]
       (assoc record :start_timestamp (u/max-time start record-start-time)))))
 
-(defn shift-end
+(defn- shift-end
   [end]
   (fn [record]
     (let [record-end-time (:end_timestamp record)]
@@ -45,6 +44,10 @@
        (map (shift-start start-time))
        (map (shift-end end-time))))
 
+(defn- remove-users
+  [except-users records]
+  (remove #((set except-users) (:user %)) records))
+
 (defn contribution
   [record]
   (let [value (:metric_value record)
@@ -53,15 +56,15 @@
                        (/ 60.0))]
     (* value nb-minutes)))
 
-(defn comsumption
+(defn- comsumption
   [record]
   { :unit_minutes (contribution record)})
 
-(defn sum-consumptions
+(defn- sum-consumptions
   [cons1 cons2]
   (update-in cons1 [:unit_minutes] #(+ % (:unit_minutes cons2))))
 
-(defn merge-summary-record
+(defn- merge-summary-record
   [summary record]
   (let [record-metric (:metric_name record)
         record-comsumption (comsumption record)]
@@ -69,7 +72,7 @@
       (assoc-in summary [:usage record-metric] (sum-consumptions consumption-to-increase record-comsumption))
       (assoc-in summary [:usage record-metric] record-comsumption))))
 
-(defn empty-summary-for-record
+(defn- empty-summary-for-record
   [record start end grouping-cols]
   (-> record
       (select-keys grouping-cols)
@@ -88,22 +91,23 @@
     (merge-usages records start end grouping-cols)))
 
 (defn summarize-records
-  [records start-time end-time grouping-cols]
+  [records start-time end-time grouping-cols & [except-users]]
   (->> records
+       (remove-users except-users)
        (truncate start-time end-time)
        (group-by (fn[record] (select-keys record grouping-cols)))
        vals
        (summarize-groups-of-records start-time end-time grouping-cols)))
 
 (defn summarize
-  [start-time end-time grouping-cols]
-  (summarize-records (rc/records-for-interval start-time end-time) start-time end-time grouping-cols))
+  [start-time end-time grouping-cols & [except-users]]
+  (summarize-records (rc/records-for-interval start-time end-time) start-time end-time grouping-cols except-users))
 
 (defn summarize-and-store!
-  [start-time end-time grouping-cols]
-  (let [summaries (summarize start-time end-time grouping-cols)]
+  [start-time end-time grouping-cols & [except-users]]
+  (let [summaries (summarize start-time end-time grouping-cols except-users)]
     (log/info "Will persist" (count summaries) "summaries for "
-              (u/disp-interval start-time end-time) "on" grouping-cols)
+              (u/disp-interval start-time end-time) "except" except-users ", on" grouping-cols)
     (doseq [summary summaries]
       (rc/insert-summary! summary))))
 
