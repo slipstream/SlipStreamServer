@@ -22,10 +22,26 @@
                          (map (fn [[k v]] {k {:unit_minutes v}}))
                          (into {}))})
 
+(defn- daily-records
+  [username cloud day-number metrics-map]
+  (for [[k v] metrics-map]
+    { :user            username
+      :cloud           cloud
+      :start_timestamp (days-from-now day-number)
+      :end_timestamp   (days-from-now (inc day-number))
+      :metric_name     k
+      :metric_value    v}))
+
 (defn usages
   [nb username clouds]
   (for [day-number (range nb) cloud clouds]
     (daily-usage (name username) cloud day-number {:ram 47185920 :disk 450.67 :cpu 1250})))
+
+(defn usage-records
+  [nb username clouds]
+  (flatten
+    (for [day-number (range nb) cloud clouds]
+      (daily-records (name username) cloud day-number {"ram" 2185520 "disk" 120.67 "cpu" 1250}))))
 
 (defn insert-to-db
   [usages]
@@ -42,3 +58,14 @@
   (-> nb
       (usages username clouds)
       insert-to-db))
+
+(defn seed-records!
+  [nb username clouds & {:keys [clean]}]
+  (db/set-impl! (dbdb/get-instance))
+  (acl/-init)
+  (rc/-init)
+  (when clean
+    (kc/delete rc/usage_records))
+  (let [records (usage-records nb username clouds)]
+    (doseq [record records]
+      (kc/insert rc/usage_records (kc/values record)))))

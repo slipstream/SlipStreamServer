@@ -84,6 +84,21 @@ e.g:
 daily_summary_launcher -d 20150921
 ```
 
+To summarize manually one given month from the command line:
+
+```
+jva -Ddb.config.path=src/main/resources/config-hsqldb.edn \
+   -cp ".:target/SlipStreamCljResources-jar-2.18-SNAPSHOT-jar-with-dependencies.jar" \
+    com.sixsq.slipstream.ssclj.usage.monthly_summary_launcher \
+    -m 2016-03     
+```
+
+To get one monthly usage for a given cloud:
+
+``
+curl -H "slipstream-authn-info: azure azure" "http://localhost:8201/api/usage?%24filter=start_timestamp%3D2016-03-01%20and%20end_timestamp%3D2016-04-01"
+```
+
 #### Send Usage emails
 
 Each day at 3 AM, a cron job sends via email (to users having set the preference) these usage summaries.
