@@ -46,6 +46,6 @@ public class MailUtilsTest {
 
     @Test
     public void formatValueUnknownUnit() {
-        assertEquals("16.13", MailUtils.formatMetricValue("anything", 16.133333333333333));
+        assertEquals("0.27 (h)", MailUtils.formatMetricValue("anything", 16.133333333333333));
     }
 }

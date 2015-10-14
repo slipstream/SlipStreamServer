@@ -68,26 +68,25 @@ public class MailUtils {
         return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
     }
 
-    private static boolean isMinuteMetric(String metricName) {
-        return metricName!=null &&
-                (metricName.toLowerCase().startsWith("instance-type") || "vm".equals(metricName.toLowerCase()) ||
-                        "cpu".equals(metricName.toLowerCase()));
+    private static boolean isKBMinuteMetric(String metricName) {
+        return metricName != null && "ram".equals(metricName.toLowerCase());
     }
+
     private static boolean isGBMinuteMetric(String metricName) {
-        return metricName!=null &&
-                ("ram".equals(metricName.toLowerCase()) || "disk".equals(metricName.toLowerCase()));
+        return metricName != null && "disk".equals(metricName.toLowerCase());
     }
 
     public static String formatMetricValue(String metricName, double metricValueInMinutes) {
 
-        if(isMinuteMetric(metricName)) {
-            double metricValueInHours = metricValueInMinutes / 60.0;
-            return String.format("%.2f (h)", metricValueInHours);
-        } else if (isGBMinuteMetric(metricName)) {
+        if (isKBMinuteMetric(metricName)) {
             double metricValueInGBHours = metricValueInMinutes / 60.0 / 1024.0;
             return String.format("%.2f (GBh)", metricValueInGBHours);
+        } else if (isGBMinuteMetric(metricName)) {
+            double metricValueInGBHours = metricValueInMinutes / 60.0;
+            return String.format("%.2f (GBh)", metricValueInGBHours);
+        } else {
+            double metricValueInHours = metricValueInMinutes / 60.0;
+            return String.format("%.2f (h)", metricValueInHours);
         }
-
-        return String.format("%.2f", metricValueInMinutes);
     }
 }
