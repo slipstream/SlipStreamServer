@@ -25,7 +25,7 @@
 (defn usages
   [nb username clouds]
   (for [day-number (range nb) cloud clouds]
-    (daily-usage (name username) cloud day-number {:ram 100.0 :disk 140000 :cpu 8})))
+    (daily-usage (name username) cloud day-number {:ram 47185920 :disk 450.67 :cpu 1250})))
 
 (defn insert-to-db
   [usages]
