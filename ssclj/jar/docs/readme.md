@@ -87,7 +87,7 @@ daily_summary_launcher -d 20150921
 To summarize manually one given month from the command line:
 
 ```
-jva -Ddb.config.path=src/main/resources/config-hsqldb.edn \
+java -Ddb.config.path=src/main/resources/config-hsqldb.edn \
    -cp ".:target/SlipStreamCljResources-jar-2.18-SNAPSHOT-jar-with-dependencies.jar" \
     com.sixsq.slipstream.ssclj.usage.monthly_summary_launcher \
     -m 2016-03     
