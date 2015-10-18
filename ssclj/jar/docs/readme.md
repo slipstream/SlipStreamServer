@@ -84,6 +84,8 @@ e.g:
 daily_summary_launcher -d 20150921
 ```
 
+#### Manual checks
+
 To summarize manually one given month from the command line:
 
 ```
