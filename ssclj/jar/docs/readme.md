@@ -19,9 +19,8 @@ How many usage records:
 
 ```
 java -jar /opt/hsqldb/lib/sqltool.jar --inlineRc=url=jdbc:hsqldb:hsql://localhost:9001/ssclj,user=sa,password= --sql 'select count(*) from "usage_records";'
-``
+```
 
-Some (limited to 10) usage records for `sixsq_dev` on `ec2-eu-west`:
 
 ```
 java -jar /opt/hsqldb/lib/sqltool.jar --inlineRc=url=jdbc:hsqldb:hsql://localhost:9001/ssclj,user=sa,password= --sql "select * from \"usage_records\" where \"cloud\"='ec2-eu-west' and \"user\"='sixsq_dev' limit 10;"
@@ -39,6 +38,7 @@ ec2-eu-west:i-877b852d | sixsq_dev | ec2-eu-west | 2015-05-22T03:18:27.708Z | 20
 ec2-eu-west:i-f97b8553 | sixsq_dev | ec2-eu-west | 2015-05-22T03:18:27.669Z | 2015-05-22T04:22:12.589Z | vm          |        1.0E0
 ec2-eu-west:i-4741b9ed | sixsq_dev | ec2-eu-west | 2015-05-23T03:19:48.401Z | 2015-05-23T04:23:51.568Z | vm          |        1.0E0
 ec2-eu-west:i-cb41b961 | sixsq_dev | ec2-eu-west | 2015-05-23T03:19:48.464Z | 2015-05-23T04:23:51.651Z | vm          |        1.0E0
+
 
 ### Usage summaries
 
@@ -97,13 +97,13 @@ java -Ddb.config.path=src/main/resources/config-hsqldb.edn \
 
 To get one monthly usage for a given cloud:
 
-``
+```
 curl -H "slipstream-authn-info: azure azure" "http://localhost:8201/api/usage?%24filter=start_timestamp%3D2016-03-01%20and%20end_timestamp%3D2016-04-01"
 ```
 
 #### Send Usage emails
 
-Each day at 3 AM, a cron job sends via email (to users having set the preference) these usage summaries.
+Each day at 3 AM UTC, a cron job sends via email (to users having set the preference) these usage summaries.
 Here are the details of the execution on nuv.la:
 
 cron job:
