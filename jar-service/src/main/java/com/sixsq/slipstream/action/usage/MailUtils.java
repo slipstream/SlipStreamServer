@@ -67,4 +67,26 @@ public class MailUtils {
     public static String humanFormat(Date date) {
         return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
     }
+
+    private static boolean isKBMinuteMetric(String metricName) {
+        return metricName != null && "ram".equals(metricName.toLowerCase());
+    }
+
+    private static boolean isGBMinuteMetric(String metricName) {
+        return metricName != null && "disk".equals(metricName.toLowerCase());
+    }
+
+    public static String formatMetricValue(String metricName, double metricValueInMinutes) {
+
+        if (isKBMinuteMetric(metricName)) {
+            double metricValueInGBHours = metricValueInMinutes / 60.0 / 1024.0;
+            return String.format("%.2f (GBh)", metricValueInGBHours);
+        } else if (isGBMinuteMetric(metricName)) {
+            double metricValueInGBHours = metricValueInMinutes / 60.0;
+            return String.format("%.2f (GBh)", metricValueInGBHours);
+        } else {
+            double metricValueInHours = metricValueInMinutes / 60.0;
+            return String.format("%.2f (h)", metricValueInHours);
+        }
+    }
 }
