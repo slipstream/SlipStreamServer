@@ -77,7 +77,7 @@ public class LoginResource extends AuthnResource {
 
 	private Response createToken(String username, String password) throws ResourceException {
 		AuthProxy authProxy = new AuthProxy();
-		return authProxy.createToken(username, password);
+		return authProxy.createAuthnToken(username, password);
 	}
 
 	private void addAuthnCookie(Response token) {

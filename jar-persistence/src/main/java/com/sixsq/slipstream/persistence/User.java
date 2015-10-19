@@ -20,6 +20,17 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.user.Passwords;
+import com.sixsq.slipstream.user.UserView;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementMap;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.persistence.*;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -27,28 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Query;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.ElementMap;
-
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.InvalidElementException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.user.Passwords;
-import com.sixsq.slipstream.user.UserView;
 
 /**
  * Unit test:
@@ -72,11 +61,15 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public static final String NEW_NAME = "new";
 
-    private static final Random rnd = new Random();
+	private static final Random rnd = new Random();
 
 	public enum State {
 		NEW, ACTIVE, DELETED, SUSPENDED
 	}
+
+	@Attribute(required = false)
+	@Column(length = 1000)
+	private String authnToken;
 
 	@Attribute
 	@Id
@@ -117,8 +110,6 @@ public class User extends Parameterized<User, UserParameter> {
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date activeSince = null;
-
-	private String authenticationToken;
 
 	@SuppressWarnings("unused")
 	private User() {
@@ -340,10 +331,10 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	private static String randomPassword() {
-        long v = rnd.nextLong();
-        while (v == Long.MIN_VALUE) {
-            v = rnd.nextLong();
-        }
+		long v = rnd.nextLong();
+		while (v == Long.MIN_VALUE) {
+			v = rnd.nextLong();
+		}
 		return Long.toString(Math.abs(v), 36);
 	}
 
@@ -527,14 +518,11 @@ public class User extends Parameterized<User, UserParameter> {
 		return getParameterValue(key, UserParameter.MAIL_USAGE_DEFAULT);
 	}
 
-	public void setAuthenticationToken(String authenticationToken) {
-		this.authenticationToken = authenticationToken;
+	public String getAuthnToken() {
+		return authnToken;
 	}
 
-	public String getAuthenticationToken() {
-		return authenticationToken;
+	public void setAuthnToken(String authnToken) {
+		this.authnToken = authnToken;
 	}
-
-
-
 }

@@ -72,7 +72,7 @@ public class BasicAuthenticator extends AuthenticatorBase {
 			}
 
 			try {
-				Response token = (new AuthProxy()).createToken(username, password);
+				Response token = (new AuthProxy()).createAuthnToken(username, password);
 				CookieUtils.addAuthnCookieFromAuthnResponse(response, token);
 
 				// CookieUtils.addAuthnCookie(response, "local", username); TODO, local?

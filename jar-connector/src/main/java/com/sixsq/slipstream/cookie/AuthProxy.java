@@ -31,7 +31,7 @@ public class AuthProxy {
 
         try {
 
-            logger.info("Will create token");
+            logger.info("Will create claims token with auth token:" + authenticationToken);
 
             Context context = new Context();
             Series<Parameter> parameters = context.getParameters();

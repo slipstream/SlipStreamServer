@@ -22,7 +22,7 @@ public class AuthProxy {
 
     private static final String AUTH_SERVER = "http://localhost:8202/auth";
 
-    public Response createToken(String username, String password)
+    public Response createAuthnToken(String username, String password)
             throws ResourceException {
         ClientResource resource = null;
         Representation response = null;

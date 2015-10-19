@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 
 public abstract class ConnectorBase implements Connector {
 
-	abstract public String getCloudServiceName();
+    abstract public String getCloudServiceName();
 
     abstract public Run launch(Run run, User user) throws SlipStreamException;
 
@@ -92,7 +92,7 @@ public abstract class ConnectorBase implements Connector {
         if (isInOrchestrationContext(run)) {
             imageId = getOrchestratorImageId(user);
         } else {
-        	String cloudService = run.getCloudServiceNameForNode(Run.MACHINE_NAME);
+            String cloudService = run.getCloudServiceNameForNode(Run.MACHINE_NAME);
             imageId = ((ImageModule) run.getModule()).extractBaseImageId(cloudService);
         }
         return imageId;
@@ -103,7 +103,7 @@ public abstract class ConnectorBase implements Connector {
     }
 
     protected String getCloudParameterValue(User user, String paramName)
-    		throws ConfigurationException, ValidationException {
+            throws ConfigurationException, ValidationException {
         String qualifiedParamName = constructKey(paramName);
         String paramValue = user.getParameterValue(qualifiedParamName, null);
         if (paramValue == null) {
@@ -136,12 +136,12 @@ public abstract class ConnectorBase implements Connector {
     }
 
     protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress)
-    		throws NotFoundException, ValidationException, ServerExecutionEnginePluginException {
+            throws NotFoundException, ValidationException, ServerExecutionEnginePluginException {
         return updateInstanceIdAndIpOnRun(run, instanceId, ipAddress, getOrchestratorName(run));
     }
 
     protected Run updateInstanceIdAndIpOnRun(Run run, String instanceId, String ipAddress, String orchestratorName)
-    		throws NotFoundException, ValidationException, ServerExecutionEnginePluginException {
+            throws NotFoundException, ValidationException, ServerExecutionEnginePluginException {
 
         if (isInOrchestrationContext(run)) {
             updateOrchestratorInstanceIdOnRun(run, instanceId, orchestratorName);
@@ -259,36 +259,36 @@ public abstract class ConnectorBase implements Connector {
 
     protected String getPrivateSshKeyFileName() throws ConfigurationException, ValidationException {
         String privateSshKeyFile = Configuration.getInstance()
-                                                .getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY);
+                .getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY);
         return privateSshKeyFile;
     }
 
     public static String getServerPublicSshKeyFilename() throws ConfigurationException, ValidationException {
-		return Configuration.getInstance().getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY);
+        return Configuration.getInstance().getProperty(ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY);
     }
 
     private String getUserPublicSshKey(User user) throws ValidationException, IOException {
-		return user.getParameter(
-				ExecutionControlUserParametersFactory.CATEGORY + "." + UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
-				.getValue();
+        return user.getParameter(
+                ExecutionControlUserParametersFactory.CATEGORY + "." + UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
+                .getValue();
     }
 
     private String getUserOrServerPublicSshKey(User user) throws ValidationException, IOException {
-		String userPublicSshKey = getUserPublicSshKey(user);
-		if (userPublicSshKey == null || userPublicSshKey.trim().isEmpty()) {
-			return FileUtil.fileToString(getServerPublicSshKeyFilename());
-		} else {
-			return userPublicSshKey;
-		}
-	}
+        String userPublicSshKey = getUserPublicSshKey(user);
+        if (userPublicSshKey == null || userPublicSshKey.trim().isEmpty()) {
+            return FileUtil.fileToString(getServerPublicSshKeyFilename());
+        } else {
+            return userPublicSshKey;
+        }
+    }
 
     protected String getPublicSshKey(Run run, User user) throws ValidationException, IOException {
-    	if (run.getType() == RunType.Run) {
-			return getUserOrServerPublicSshKey(user);
-    	} else {
-			String publicSshKeyFile = getPublicSshKeyFileName(run, user);
-			return FileUtil.fileToString(publicSshKeyFile);
-    	}
+        if (run.getType() == RunType.Run) {
+            return getUserOrServerPublicSshKey(user);
+        } else {
+            String publicSshKeyFile = getPublicSshKeyFileName(run, user);
+            return FileUtil.fileToString(publicSshKeyFile);
+        }
     }
 
     protected String getPublicSshKeyFileName(Run run, User user) throws IOException, ValidationException {
@@ -355,20 +355,21 @@ public abstract class ConnectorBase implements Connector {
         return new HashMap<String, ModuleParameter>();
     }
 
-    protected String generateCookie(User user, Run run) {
-//        Properties extraProperties = new Properties();
-//        extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
-//        extraProperties.put(CookieUtils.COOKIE_RUN_ID, runId);
-//        extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
+    protected String generateCookie(String identifier, String runId) {
+        Properties extraProperties = new Properties();
+        extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
+        extraProperties.put(CookieUtils.COOKIE_RUN_ID, runId);
+        extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
 
-        return CookieUtils.createCookie(user, run, getConnectorInstanceName());
+        String cookie = CookieUtils.createCookie(identifier, getConnectorInstanceName(), extraProperties);
+
+        getLog().info("Generated cookie = " + cookie);
+
+        return cookie;
     }
 
-    protected String getCookieForEnvironmentVariable(User user, Run run) {
-        // TODO
-        System.out.println("getting cookie for env variable, username =" + user.getName()
-                +", runId=" + run.getUuid());
-        return "\"" + generateCookie(user, run) + "\"";
+    protected String getCookieForEnvironmentVariable(String identifier, String runId) {
+        return "\"" + generateCookie(identifier, runId) + "\"";
     }
 
     protected abstract String constructKey(String key) throws ValidationException;
@@ -380,7 +381,7 @@ public abstract class ConnectorBase implements Connector {
     }
 
     protected String getInstanceName(Run run) {
-    	return (isInOrchestrationContext(run)) ? getOrchestratorName(run) : Run.MACHINE_NAME;
+        return (isInOrchestrationContext(run)) ? getOrchestratorName(run) : Run.MACHINE_NAME;
     }
 
     public String getOrchestratorName(Run run) {
@@ -440,10 +441,10 @@ public abstract class ConnectorBase implements Connector {
 
     @Override
     public boolean isCredentialsSet(User user) {
-    	String key = getKey(user);
-    	String secret = getSecret(user);
+        String key = getKey(user);
+        String secret = getSecret(user);
 
-    	return !(key == null || "".equals(key) || secret == null || "".equals(secret));
+        return !(key == null || "".equals(key) || secret == null || "".equals(secret));
     }
 
     protected String getLoginUsername(Run run) throws ConfigurationException, ValidationException {
@@ -492,19 +493,19 @@ public abstract class ConnectorBase implements Connector {
     }
 
     protected String getEndpoint(User user) throws ValidationException {
-    	String paramName = getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME;
-    	UserParameter endpointParam = user.getParameter(paramName);
-    	if (endpointParam != null) {
-    		return endpointParam.getValue();
-    	}
-    	throw new ValidationException("Failed to get endpoint. Parameter not found: " + paramName);
+        String paramName = getConnectorInstanceName() + "." + UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME;
+        UserParameter endpointParam = user.getParameter(paramName);
+        if (endpointParam != null) {
+            return endpointParam.getValue();
+        }
+        throw new ValidationException("Failed to get endpoint. Parameter not found: " + paramName);
     }
 
-	@Override
-	public boolean isVmUsable(String vmState) {
-		return "running".equalsIgnoreCase(vmState)
-				|| "active".equalsIgnoreCase(vmState)
-				|| "on".equalsIgnoreCase(vmState);
-	}
+    @Override
+    public boolean isVmUsable(String vmState) {
+        return "running".equalsIgnoreCase(vmState)
+                || "active".equalsIgnoreCase(vmState)
+                || "on".equalsIgnoreCase(vmState);
+    }
 
 }

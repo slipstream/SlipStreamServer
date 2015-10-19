@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 public abstract class CliConnectorBase extends ConnectorBase {
 
-	public static final String CLI_LOCATION = "/usr/bin";
+	public static final String CLI_LOCATION = "/usr/local/bin";
 
 	protected Logger log;
 
@@ -127,7 +127,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		validateCredentials(user);
 
 		String command = getCommandDescribeInstances() + createTimeoutParameter(timeout)
-		        + createCliParameters(getUserParams(user));
+				+ createCliParameters(getUserParams(user));
 
 		String result;
 		String[] commands = { "sh", "-c", command };
@@ -145,8 +145,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	private String createTimeoutParameter(int timeout) {
-	    return " -t " + timeout + " ";
-    }
+		return " -t " + timeout + " ";
+	}
 
 	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {
@@ -176,8 +176,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 
 		String command = getCommandTerminateInstances() +
-						 createCliParameters(getUserParams(user)) +
-						 " --instance-ids-file " + tempFile.getPath();
+				createCliParameters(getUserParams(user)) +
+				" --instance-ids-file " + tempFile.getPath();
 
 		String[] commands = { "sh", "-c", command};
 		try {
@@ -343,7 +343,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		environment.put("SLIPSTREAM_BOOTSTRAP_BIN", configuration.getRequiredProperty("slipstream.update.clientbootstrapurl"));
 
 		environment.put("SLIPSTREAM_USERNAME", username);
-		environment.put("SLIPSTREAM_COOKIE", generateCookie(user, run));
+		environment.put("SLIPSTREAM_COOKIE", generateCookie(username, run.getUuid()));
 		environment.put("SLIPSTREAM_VERBOSITY_LEVEL", verbosityLevel);
 
 		environment.put("CLOUDCONNECTOR_BUNDLE_URL", getCloudConnectorBundleUrl(user));

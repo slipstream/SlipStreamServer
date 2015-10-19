@@ -22,7 +22,6 @@ package com.sixsq.slipstream.cookie;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import org.restlet.Request;
@@ -76,7 +75,7 @@ public class CookieUtils {
 	}
 
 	public static void addAuthnCookieFromAuthnResponse(Response response, Response token) {
-		CookieSetting authnCookie = extractAuthnCookie(token);
+		CookieSetting authnCookie = extractAuthnTokenCookie(token);
 
 		Series<CookieSetting> cookieSettings = response.getCookieSettings();
 		cookieSettings.removeAll(COOKIE_NAME);
@@ -84,90 +83,125 @@ public class CookieUtils {
 		cookieSettings.add(authnCookie);
 	}
 
-	private static CookieSetting extractAuthnCookie(Response response){
+	/**
+	 * Insert a new authentication cookie into a Response using default id type.
+	 *
+	 * @param response
+	 * @param identifier
+	 */
+	public static void addAuthnCookie(Response response, String identifier) {
+		addAuthnCookie(response, COOKIE_DEFAULT_IDTYPE, identifier);
+	}
+
+	/**
+	 * Insert a new authentication cookie into a Response using the given
+	 * values. None of the arguments can be null.
+	 *
+	 * @param response
+	 * @param idType
+	 * @param identifier
+	 */
+	public static void addAuthnCookie(Response response, String idType,
+									  String identifier) {
+
 		Series<CookieSetting> cookieSettings = response.getCookieSettings();
-		for (CookieSetting cookieSetting : cookieSettings) {
-			if(CookieUtils.COOKIE_NAME.equals(cookieSetting.getName())) {
-				return cookieSetting;
-			}
+		cookieSettings.removeAll(COOKIE_NAME);
+		CookieSetting cookieSetting = createAuthnCookieSetting(idType,
+				identifier);
+		cookieSettings.add(cookieSetting);
+	}
+
+	/**
+	 * Insert a new authentication cookie into a Request using the given values.
+	 * None of the arguments can be null.
+	 *
+	 * @param identifier
+	 * @param response
+	 */
+	public static void addAuthnCookie(Request request, String identifier) {
+
+		request.getCookies().clear();
+		CookieSetting cookieSetting = createAuthnCookieSetting(
+				COOKIE_DEFAULT_IDTYPE, identifier);
+		request.getCookies().add(cookieSetting);
+
+	}
+
+	/**
+	 * Insert a new authentication cookie into a Request using the given values.
+	 * None of the arguments can be null.
+	 *
+	 * @param request
+	 * @param identifier
+	 * @param cloudServiceName
+	 */
+	public static void addAuthnCookie(Request request, String identifier,
+									  String cloudServiceName) {
+
+		request.getCookies().clear();
+		CookieSetting cookieSetting = createAuthnCookieSetting(
+				COOKIE_DEFAULT_IDTYPE, identifier,
+				generateCloudServiceNameProperties(cloudServiceName));
+		request.getCookies().add(cookieSetting);
+	}
+
+	/**
+	 * Creates a new authentication cookie using the provided information. None
+	 * of the arguments may be null.
+	 *
+	 * @param request
+	 * @param idType
+	 * @param identifier
+	 *
+	 * @return new authentication cookie
+	 */
+	private static CookieSetting createAuthnCookieSetting(String idType,
+														  String identifier) {
+
+		return createAuthnCookieSetting(idType, identifier, new Properties());
+	}
+
+	/**
+	 * Creates a new authentication cookie using the provided information. None
+	 * of the arguments may be null.
+	 *
+	 * @param idType
+	 * @param identifier
+	 * @param properties
+	 *
+	 * @return new authentication cookie
+	 */
+	private static CookieSetting createAuthnCookieSetting(String idType,
+														  String identifier, Properties properties) {
+
+		String finalQuery = createCookieValue(idType, identifier, properties);
+
+		CookieSetting cookieSetting = new CookieSetting(COOKIE_NAME, finalQuery);
+
+		cookieSetting.setPath("/");
+
+		cookieSetting.setDomain("");
+
+		cookieSetting.setMaxAge(COOKIE_DEFAULT_AGE);
+
+		return cookieSetting;
+	}
+
+	public static String createCookie(String username, String cloudServiceName) {
+		return createCookie(username, cloudServiceName, null);
+	}
+
+	public static String createCookie(String username, String cloudServiceName,
+									  Properties extraProperties) {
+		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
+		if (extraProperties != null) {
+			properties.putAll(extraProperties);
 		}
-		logger.warning("No authn cookie in response");
-		return null;
+		return getCookieName() + "="
+				+ CookieUtils.createCookieValue("local", username, properties)
+				+ "; Path:/";
 	}
 
-//	public static void addAuthnCookie(Request request, String identifier) {
-//		request.getCookies().clear();
-//		CookieSetting cookieSetting = createAuthnCookieSetting(
-//				COOKIE_DEFAULT_IDTYPE, identifier);
-//		request.getCookies().add(cookieSetting);
-//
-//	}
-
-//	public static void addAuthnCookie(Request request, String identifier,
-//			String cloudServiceName) {
-//
-//		request.getCookies().clear();
-//		CookieSetting cookieSetting = createAuthnCookieSetting(
-//				COOKIE_DEFAULT_IDTYPE, identifier,
-//				generateCloudServiceNameProperties(cloudServiceName));
-//		request.getCookies().add(cookieSetting);
-//	}
-
-//	private static CookieSetting createAuthnCookieSetting(String idType, String identifier) {
-//		return createAuthnCookieSetting(idType, identifier, new Properties());
-//	}
-
-//	private static CookieSetting createAuthnCookieSetting(String idType,
-//			String identifier, Properties properties) {
-//
-//		String finalQuery = createCookieValue(idType, identifier, properties);
-//
-//		CookieSetting cookieSetting = new CookieSetting(COOKIE_NAME, finalQuery);
-//
-//		cookieSetting.setPath("/");
-//
-//		cookieSetting.setDomain("");
-//
-//		cookieSetting.setMaxAge(COOKIE_DEFAULT_AGE);
-//
-//		return cookieSetting;
-//	}
-
-//	public static String createCookie(String username, String cloudServiceName) {
-//		return createCookie(username, cloudServiceName, null);
-//	}
-
-	// TODO called by ConnectorBase::generateCookie
-	public static String createCookie(User user, Run run, String cloudServiceName) {
-			// Properties extraProperties) {
-
-		Properties claims = new Properties();
-		claims.put(CookieUtils.COOKIE_IS_MACHINE, "true");
-		claims.put(CookieUtils.COOKIE_RUN_ID, run.getUuid());
-		// claims.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
-
-		claims.put(RuntimeParameter.CLOUD_SERVICE_NAME, cloudServiceName);
-
-//		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
-//		if (claims != null) {
-//			properties.putAll(claims);
-//		}
-
-		logger.info("Will generate machine token with auth token :" + user.getAuthenticationToken());
-		logger.info("Will generate machine token with claims :" + claims);
-
-		String token = (new AuthProxy()).createToken(claims, user.getAuthenticationToken());
-
-		logger.info("Generated token " + token);
-
-		return token;
-
-//		return getCookieName() + "="
-//				+ CookieUtils.createCookieValue("local", user.getName(), claims)
-//				+ "; Path:/";
-	}
-
-	// TODO Used by createCookie
 	private static Properties generateCloudServiceNameProperties(
 			String cloudServiceName) {
 		Properties properties = new Properties();
@@ -175,9 +209,8 @@ public class CookieUtils {
 		return properties;
 	}
 
-	// TODO Used by createCookie
 	public static String createCookieValue(String idType, String identifier,
-			Properties properties) {
+										   Properties properties) {
 		// Create the expiration date for the cookie. This is added to be sure
 		// that the server has control over this even if a malicious client
 		// extends the date of a cookie.
@@ -198,13 +231,17 @@ public class CookieUtils {
 			form.add((String) entry.getKey(), (String) entry.getValue());
 		}
 
-		// Create the signed form of the query (i.e. without the signature
-		// added).
-		String signedQuery = form.getQueryString();
-		String signature = CryptoUtils.sign(signedQuery);
+		try {
+			User user = User.loadByName(identifier);
+			String authnToken = user.getAuthnToken();
+			logger.info("token used to create token for claims " + authnToken);
+			String claimsToken = (new AuthProxy()).createToken(properties, authnToken);
+			logger.info("token for claims = " + claimsToken);
+			form.add(COOKIE_SIGNATURE, claimsToken);
+		} catch (ValidationException e) {
+			logger.severe("Unable to create cookie value");
+		}
 
-		// Add the signature to the form and create final query string.
-		form.add(COOKIE_SIGNATURE, signature);
 		String finalQuery = form.getQueryString();
 		return finalQuery;
 	}
@@ -277,6 +314,26 @@ public class CookieUtils {
 		return request.getCookies().getFirst(COOKIE_NAME);
 	}
 
+	private static CookieSetting extractAuthnTokenCookie(Response response){
+		Series<CookieSetting> cookieSettings = response.getCookieSettings();
+		for (CookieSetting cookieSetting : cookieSettings) {
+			if(CookieUtils.COOKIE_NAME.equals(cookieSetting.getName())) {
+				return cookieSetting;
+			}
+		}
+		logger.warning("No authn cookie in response");
+		return null;
+	}
+
+	private static boolean checkValidClaimsInToken(String signature) {
+		Map<String, String> claimsInToken = com.sixsq.slipstream.auth.TokenChecker.claimsInToken(signature);
+
+		logger.info("checkValidClaimsInToken, signature = " + signature);
+		logger.info("checkValidClaimsInToken, claimsInToken = " + claimsInToken);
+
+		return claimsInToken != null && !claimsInToken.isEmpty();
+	}
+
 	/**
 	 * Verify that the given authentication cookie is valid. This checks that
 	 * the name is correct, information is complete, the signature is correct,
@@ -288,11 +345,6 @@ public class CookieUtils {
 	 */
 	public static int verifyAuthnCookie(Cookie cookie) {
 
-		// TODO : To be replaced
-		System.out.println("verifyAuthnCookie");
-
-		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
-
 		if (cookie == null || !COOKIE_NAME.equals(cookie.getName())) {
 			return Verifier.RESULT_MISSING;
 		}
@@ -300,6 +352,8 @@ public class CookieUtils {
 		if (!COOKIE_NAME.equals(cookie.getName())) {
 			return Verifier.RESULT_INVALID;
 		}
+
+		Form cookieInfo = extractCookieValueAsForm(cookie);
 
 		if (!cookieInfo.getNames().containsAll(requiredCookieKeys)) {
 			return Verifier.RESULT_INVALID;
@@ -311,10 +365,8 @@ public class CookieUtils {
 
 		// Recreate a query string without the signature.
 		cookieInfo.removeAll(COOKIE_SIGNATURE);
-		String signedQuery = cookieInfo.getQueryString();
 
-		// Ensure that the cryptographic signature is correct.
-		if (!CryptoUtils.verify(signature, signedQuery)) {
+		if(!checkValidClaimsInToken(signature)) {
 			return Verifier.RESULT_INVALID;
 		}
 
@@ -334,7 +386,17 @@ public class CookieUtils {
 	}
 
 	public static String getCookieUsername(Cookie cookie) {
-		return claimsInToken(cookie).get(COOKIE_IDENTIFIER);
+
+		if(isMachine(cookie)) {
+			String username = null;
+			if (cookie != null) {
+				Form form = new Form(cookie.getValue());
+				username = form.getFirstValue(COOKIE_IDENTIFIER);
+			}
+			return username;
+		} else {
+			return claimsInToken(cookie).get(COOKIE_IDENTIFIER);
+		}
 	}
 
 	public static Map<String, String> claimsInToken(Cookie cookie) {
@@ -344,6 +406,7 @@ public class CookieUtils {
 		}
 
 		String token = tokenInCookie(cookie);
+		logger.info("token in cookie = " + token);
 		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
 	}
 
@@ -354,14 +417,13 @@ public class CookieUtils {
 
 	public static String getCookieCloudServiceName(Cookie cookie) {
 
-		// TODO adapt extract cloud service name from claims in token
 		String cloudServiceName = null;
 
 		if (cookie != null) {
 			Form form = new Form(cookie.getValue());
-			cloudServiceName = form.getFirstValue(RuntimeParameter.CLOUD_SERVICE_NAME);
+			cloudServiceName = form
+					.getFirstValue(RuntimeParameter.CLOUD_SERVICE_NAME);
 		}
-		logger.info("getCookieCloudServiceName : "+ cloudServiceName);
 		return cloudServiceName;
 	}
 
@@ -382,7 +444,7 @@ public class CookieUtils {
 		}
 	}
 
-	public static Form extractCookieValueAsForm(Cookie cookie) {
+	private static Form extractCookieValueAsForm(Cookie cookie) {
 		String value = (cookie != null) ? cookie.getValue() : null;
 		return new Form((value != null) ? value : "");
 	}
@@ -397,9 +459,6 @@ public class CookieUtils {
 	}
 
 	public static String getRunId(Cookie cookie) {
-		// TODO adapt extract run id from claims in token
-		System.out.println("getRunId");
-
 		Form f = extractCookieValueAsForm(cookie);
 		return f.getFirstValue(COOKIE_RUN_ID, null);
 	}

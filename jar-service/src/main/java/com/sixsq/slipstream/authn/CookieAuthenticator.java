@@ -34,6 +34,7 @@ import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.security.User;
+import org.restlet.security.Verifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,11 +53,20 @@ public class CookieAuthenticator extends AuthenticatorBase {
 	protected boolean authenticate(Request request, Response response) {
 
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
-		logger.fine("will authenticate cookie " + cookie);
 
-		Map<String, String> claimsInToken = CookieUtils.claimsInToken(cookie);
+		logger.info("will authenticate cookie " + cookie);
+		boolean isTokenValid = false;
 
-		boolean isTokenValid = !claimsInToken.isEmpty();
+		if(CookieUtils.isMachine(cookie)) {
+			logger.info("Will call verifyAuthnCookie");
+			isTokenValid = CookieUtils.verifyAuthnCookie(cookie) == Verifier.RESULT_VALID;
+			logger.info("Done calling verifyAuthnCookie: isTokenValid=" + isTokenValid);
+		} else {
+			logger.info("Will call claimsInToken");
+			Map<String, String> claimsInToken = CookieUtils.claimsInToken(cookie);
+			isTokenValid = !claimsInToken.isEmpty();
+		}
+
 		if (isTokenValid) {
 			handleValid(request, cookie);
 		} else {
@@ -84,9 +94,17 @@ public class CookieAuthenticator extends AuthenticatorBase {
 			return false;
 		}
 
-		user.setAuthenticationToken(CookieUtils.tokenInCookie(cookie));
 		setCloudServiceName(request, cookie);
 		setUserInRequest(user, request);
+
+		logger.info("handle valid, cookie = " + cookie);
+		String tokenInCookie = CookieUtils.tokenInCookie(cookie);
+		if(tokenInCookie!=null) {
+			logger.info("handle valid, tokenInCookie = " + tokenInCookie);
+			user.setAuthnToken(tokenInCookie);
+			user = user.store();
+			logger.info("user.authnToken = " + user.getAuthnToken());
+		}
 
 		if (!CookieUtils.isMachine(cookie)) {
 			setLastOnline(cookie);

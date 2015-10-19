@@ -105,6 +105,7 @@
 
 (defn check-token-impl
   [token]
+  (log/info "will unsign token:" token)
   (jws/unsign token (public-key auth-conf) signing-algorithm))
 
 (defn create-token
@@ -124,7 +125,8 @@
                               (private-key auth-conf)
                               signing-algorithm)}]
       (catch Exception e
-         [false {:message (str "Invalid token when creating token: " e)}]))))
+        (log/error "exception in token creation " e)
+        [false {:message (str "Invalid token when creating token: " e)}]))))
 
 (deftype SimpleAuthentication
   []
