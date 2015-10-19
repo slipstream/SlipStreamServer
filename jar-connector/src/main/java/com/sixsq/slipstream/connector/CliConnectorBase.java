@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 public abstract class CliConnectorBase extends ConnectorBase {
 
-	public static final String CLI_LOCATION = "/usr/local/bin";
+	public static final String CLI_LOCATION = "/usr/bin";
 
 	protected Logger log;
 
