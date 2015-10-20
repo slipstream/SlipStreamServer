@@ -234,6 +234,9 @@ public class CookieUtils {
 		try {
 			User user = User.loadByName(identifier);
 			String authnToken = user.getAuthnToken();
+
+			properties.put(COOKIE_IDENTIFIER, identifier);
+
 			logger.info("token used to create token for claims " + authnToken);
 			String claimsToken = (new AuthProxy()).createToken(properties, authnToken);
 			logger.info("token for claims = " + claimsToken);
@@ -325,13 +328,32 @@ public class CookieUtils {
 		return null;
 	}
 
-	private static boolean checkValidClaimsInToken(String signature) {
+	private static boolean checkValidClaimsInToken(Cookie cookie, String signature) {
+
 		Map<String, String> claimsInToken = com.sixsq.slipstream.auth.TokenChecker.claimsInToken(signature);
 
 		logger.info("checkValidClaimsInToken, signature = " + signature);
 		logger.info("checkValidClaimsInToken, claimsInToken = " + claimsInToken);
+		logger.info("checkValidClaimsInToken, cookie = " + cookie);
 
-		return claimsInToken != null && !claimsInToken.isEmpty();
+		boolean invalidClaims = claimsInToken == null || claimsInToken.isEmpty();
+
+		if(invalidClaims) {
+			logger.severe("Invalid claims for " + cookie);
+			return false;
+		}
+
+		Form form = new Form(cookie.getValue());
+		String usernameInCookie = form.getFirstValue(COOKIE_IDENTIFIER);
+		String runIdInCookie = form.getFirstValue(COOKIE_RUN_ID);
+
+		boolean cookieAndClaimsMatch =
+				usernameInCookie!=null && usernameInCookie.equals(claimsInToken.get(COOKIE_IDENTIFIER)) &&
+				runIdInCookie!=null && runIdInCookie.equals(claimsInToken.get(COOKIE_RUN_ID));
+
+		logger.info("checkValidClaimsInToken, cookieAndClaimsMatch = " + cookieAndClaimsMatch);
+		
+		return !invalidClaims && cookieAndClaimsMatch;
 	}
 
 	/**
@@ -366,7 +388,7 @@ public class CookieUtils {
 		// Recreate a query string without the signature.
 		cookieInfo.removeAll(COOKIE_SIGNATURE);
 
-		if(!checkValidClaimsInToken(signature)) {
+		if(!checkValidClaimsInToken(cookie, signature)) {
 			return Verifier.RESULT_INVALID;
 		}
 

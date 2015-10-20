@@ -59,6 +59,8 @@ public class CookieAuthenticator extends AuthenticatorBase {
 
 		if(CookieUtils.isMachine(cookie)) {
 			logger.info("Will call verifyAuthnCookie");
+			logger.info("Will call verifyAuthnCookie for " + CookieUtils.getCookieUsername(cookie));
+
 			isTokenValid = CookieUtils.verifyAuthnCookie(cookie) == Verifier.RESULT_VALID;
 			logger.info("Done calling verifyAuthnCookie: isTokenValid=" + isTokenValid);
 		} else {
