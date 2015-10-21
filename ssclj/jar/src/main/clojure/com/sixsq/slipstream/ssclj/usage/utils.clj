@@ -14,6 +14,10 @@
   [ts]
   (time/plus ts (time/days 1)))
 
+(defn inc-month
+  [ts]
+  (time/plus ts (time/months 1)))
+
 (defn inc-minutes
   [ts minutes]
   (time/plus ts (time/minutes minutes)))
@@ -27,6 +31,10 @@
 (defn to-ISO-8601
   [ts]
   (time-fmt/unparse (:date-time time-fmt/formatters) ts))
+
+(defn now-to-ISO-8601
+  []
+  (-> (time/now) to-ISO-8601))
 
 (defn to-time
   "Tries to parse the given string as a DateTime value.  Returns the DateTime

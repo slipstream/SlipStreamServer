@@ -116,7 +116,7 @@ backup-db:
 	if [ -f slipstreamdb.script ];     then cp -v slipstreamdb.script      $(BACKUP_DIR); fi;
 	if [ -f slipstreamdb.properties ]; then cp -v slipstreamdb.properties  $(BACKUP_DIR); fi;
 
-remove-db: backup-db
+remove-db: stop-db backup-db
 	if [ -f slipstreamdb.script ];     then rm -v slipstreamdb.script;     fi;
 	if [ -f slipstreamdb.properties ]; then rm -v slipstreamdb.properties; fi;
 
