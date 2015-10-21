@@ -31,7 +31,6 @@ import com.sixsq.slipstream.initialstartup.CloudIds;
 import com.sixsq.slipstream.initialstartup.Modules;
 import com.sixsq.slipstream.usage.UsageRouter;
 import com.sixsq.slipstream.resource.AppStoreResource;
-import com.sixsq.slipstream.resource.ProjectsResource;
 import com.sixsq.slipstream.resource.ModulesChooserResource;
 import org.restlet.Application;
 import org.restlet.Context;
