@@ -75,7 +75,7 @@ public class ModuleListResource extends BaseResource {
 	}
 
 	protected String getPageRepresentation() {
-		return "project";
+		return "modules";
 	}
 
 	protected ModuleViewList retrieveFilteredModuleViewList() {

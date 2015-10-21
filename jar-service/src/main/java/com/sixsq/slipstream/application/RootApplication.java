@@ -241,7 +241,6 @@ public class RootApplication extends Application {
 			attachEvent(router);
 			attachUsage(router);
 			attachAppStore(router);
-			attachProjects(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -439,10 +438,6 @@ public class RootApplication extends Application {
 
 	private void attachAppStore(RootRouter router) throws ValidationException {
 		guardAndAttach(router, new ModuleListRouter(getContext(), AppStoreResource.class), "appstore");
-	}
-
-	private void attachProjects(RootRouter router) throws ValidationException {
-		guardAndAttach(router, new ModuleListRouter(getContext(), ProjectsResource.class), "projects");
 	}
 
 	private void attachModulesChooser(RootRouter router) throws ValidationException {
