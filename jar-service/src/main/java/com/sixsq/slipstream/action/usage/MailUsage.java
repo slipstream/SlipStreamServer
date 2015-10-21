@@ -75,11 +75,12 @@ public class MailUsage {
                 "    <div class=\"panel-group\"> <div class=\"panel ss-section panel-default\"> <div class=\"panel-heading ss-section-activator\"> <h4 class=\"panel-title\">\n" +
                 usageSummary.cloud  +
                 "    </h4> </div><div class=\"panel-collapse collapse in\"> <div class=\"panel-body ss-section-content\"> <div class=\"table-responsive ss-table\"> <table class=\"table table-hover table-condensed\"> <thead>\n" +
-                "    <tr><th>Metric</th><th>Quantity (Units * minute)</th></tr>\n" +
+                "    <tr><th>Metric</th><th>Quantity</th></tr>\n" +
                 "    </thead><tbody>\n");
 
             for(Map.Entry<String, Double> metric : usageSummary.getMetrics().entrySet()) {
-                sb.append(String.format("<tr><td>%s</td><td>%.2f</td></tr>\n", metric.getKey(), metric.getValue()));
+                sb.append(String.format("<tr><td style=\"width:50%%\">%s</td><td style=\"width:50%%\">%s</td></tr>\n", metric.getKey(),
+                        MailUtils.formatMetricValue(metric.getKey(), metric.getValue())));
             }
             sb.append("</tbody> </table> </div></div></div></div></div>\n");
         }

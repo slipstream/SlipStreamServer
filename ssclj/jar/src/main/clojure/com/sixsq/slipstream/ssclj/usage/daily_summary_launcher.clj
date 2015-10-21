@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.usage.daily-summary-launcher
-	(:require 
-    [clojure.tools.cli                                  :as cli]
-    [clj-time.core                                      :as t]
-    [com.sixsq.slipstream.ssclj.usage.utils             :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]
-    [com.sixsq.slipstream.ssclj.usage.launcher          :as l])
+  (:require
+    [clojure.tools.cli :as cli]
+    [clj-time.core :as t]
+    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
+    [com.sixsq.slipstream.ssclj.usage.summary-launcher :as sl])
   (:gen-class))
 
 (def cli-options  
@@ -19,12 +19,14 @@
           (t/minus (t/days 1))
           u/to-ISO-8601)))
 
-(defn -main 
+(defn -main
+  "See tests for examples on how to call from clojure REPL"
   [& args]    
-  (let [{:keys [options arguments errors summary] :as all} (cli/parse-opts args cli-options)
-        start (date-or-yesterday options)        
-        end   (-> start
-                  u/to-time
-                  (t/plus (t/days 1))
-                  u/to-ISO-8601)]
-    (l/do-summarize [start end])))
+  (let [{:keys [options errors]} (cli/parse-opts args cli-options)
+        start             (date-or-yesterday options)
+        end               (-> start
+                              u/to-time
+                              u/inc-day
+                              u/to-ISO-8601)]
+    (sl/throw-when-errors errors)
+    (sl/do-summarize! [start end] [:user :cloud] [])))
