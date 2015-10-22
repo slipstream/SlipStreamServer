@@ -75,20 +75,12 @@ public class ModuleListResource extends BaseResource {
 	}
 
 	protected String getPageRepresentation() {
-		return "project";
+		return "modules";
 	}
 
 	protected ModuleViewList retrieveFilteredModuleViewList() {
 
-		ModuleViewList modules = new ModuleViewList(
-				Module.viewList(resourceUri));
-
-		if ("/".equals(getRequest().getResourceRef().getPath())) {
-			ModuleViewList published = new ModuleViewList(
-					Module.viewPublishedList());
-			modules.getList().addAll(published.getList());
-		}
-
+		ModuleViewList modules = new ModuleViewList(Module.viewList(resourceUri));
 		return filterAuthz(modules);
 	}
 
