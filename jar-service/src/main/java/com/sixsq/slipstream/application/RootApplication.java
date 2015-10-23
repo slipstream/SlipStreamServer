@@ -29,6 +29,7 @@ import com.sixsq.slipstream.event.EventRouter;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.initialstartup.CloudIds;
 import com.sixsq.slipstream.initialstartup.Modules;
+import com.sixsq.slipstream.resource.RootRedirectResource;
 import com.sixsq.slipstream.usage.UsageRouter;
 import com.sixsq.slipstream.resource.AppStoreResource;
 import com.sixsq.slipstream.resource.ModulesChooserResource;
@@ -382,10 +383,9 @@ public class RootApplication extends Application {
 		return new AuthenticatorsTemplateRoute(route, authenticators);
 	}
 
-	private void attachRedirectionFromRoot(Router rootRouter, String targetUri) {
-		Redirector redirector = new Redirector(getContext(), targetUri, Redirector.MODE_CLIENT_TEMPORARY);
-		rootRouter.attach("", redirector);
-		rootRouter.attach("/", redirector);
+	private void attachRootRedirect(RootRouter rootRouter) {
+		rootRouter.attach("", RootRedirectResource.class);
+		rootRouter.attach("/", RootRedirectResource.class);
 	}
 
 	private void attachUser(RootRouter router) {
@@ -404,10 +404,6 @@ public class RootApplication extends Application {
 		TemplateRoute route;
 		route = router.attach("/action/", new ActionRouter());
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
-	}
-
-	private void attachRootRedirect(RootRouter router) {
-		attachRedirectionFromRoot(router, "dashboard");
 	}
 
 	private void enableTunnelService() {
