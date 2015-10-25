@@ -428,13 +428,19 @@ public class CookieUtils {
 		}
 
 		String token = tokenInCookie(cookie);
-		logger.info("token in cookie = " + token);
+		logger.info("Token in cookie = " + token);
 		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
 	}
 
 	public static String tokenInCookie(Cookie cookie) {
 		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
-		return cookieInfo.getFirstValue(TOKEN);
+		String token = cookieInfo.getFirstValue(TOKEN);
+		if(token!=null && token.contains(",com.sixsq.slipstream.cookie=")) {
+			logger.info("Cookie value contains cookie key");
+			token = token.substring(0, token.indexOf(",com.sixsq.slipstream.cookie="));
+		}
+
+		return token;
 	}
 
 	public static String getCookieCloudServiceName(Cookie cookie) {

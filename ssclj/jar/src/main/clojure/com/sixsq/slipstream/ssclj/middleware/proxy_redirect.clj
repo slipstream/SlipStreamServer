@@ -20,15 +20,19 @@
 (defonce client
          (ppasync/create-client {:force-redirects               false
                                  :follow-redirects              false
-                                 :connect-timeout-milliseconds  10000
-                                 :socket-timeout-milliseconds   10000 }))
+                                 :connect-timeout-milliseconds  60000
+                                 :socket-timeout-milliseconds   60000 }))
 
 (defn- uri-starts-with?
   [uri prefix]
   (.startsWith uri prefix))
+
 (defn- build-url
-  [host path]
-  (.toString (java.net.URL. (java.net.URL. host) path)))
+  [host path query-string]
+  (str (.toString (java.net.URL. (java.net.URL. host) path))
+       (if query-string
+         (str "?" query-string)
+         "")))
 
 (defn slurp-binary
   "Reads len bytes from InputStream is and returns a byte array."
@@ -41,13 +45,10 @@
 (defn- slurp-body
   [request]
   (if-let [len (when (:body request) (get-in request [:headers "content-length"]))]
-    (do
-      (log/info "will slurp " len " bytes")
-      (-> request
+    (-> request
         :body
         (slurp-binary (Integer/parseInt len))
-        String.))))
-
+        String.)))
 
 (def ^{:private true, :doc "RFC6265 cookie-octet"}
   re-cookie-octet
@@ -140,10 +141,49 @@ set-cookie-attrs
              (write-attr-map (dissoc value :value)))
       (write-value key value encoder))))
 
+(defn str-set-cookie
+  [response]
+  (let [cookie-in-response (parse-cookies response codec/form-encode)]
+    (if-not (empty? cookie-in-response)
+      (str (get (first cookie-in-response) 0) "=" (:value (get (first cookie-in-response) 1)))
+      "")))
+
+(defn merge-cookies
+  [request response]
+  (let [cookie-in-request       (get-in request [:headers "cookie"])
+        cookie-in-response      (parse-cookies response codec/form-encode)]
+    (if-not (empty? cookie-in-response)
+      (str cookie-in-request "; " (str-set-cookie response))
+      cookie-in-request)))
+
+(defn- split-equals
+  [key-val]
+  (let [index-equals (.indexOf key-val "=")
+        len (count key-val)]
+    (if (> index-equals -1)
+      [(.substring key-val 0 index-equals)
+       (.substring key-val (inc index-equals) len)]
+      [])))
+
+(defn to-query-params
+  [query-string]
+  (if (nil? query-string)
+    {}
+    (let [kvs (str/split query-string #"&")]
+      (into {} (remove empty? (map split-equals kvs))))))
+
+(defn rewrite-location
+  [location old-host new-host]
+  (if (and location old-host new-host)
+    (str/replace location old-host new-host)
+    ""))
+
 (defn- redirect
   [host request-uri request]
+  (log/info "+++++++++++++++++++++++++++")
+  (log/info "request :headers cookie = " (get-in request [:headers "cookie"]))
 
-  (let [redirected-url  (build-url host request-uri)
+  (let [redirected-url  (build-url host request-uri (:query-string request))
 
         request-fn (case (:request-method request)
                      :get     ppcommon/get
@@ -153,31 +193,21 @@ set-cookie-attrs
                      :put     ppcommon/put)
 
         response (request-fn client redirected-url
-                             {:query-params (or {} (:params request))
-                                            :body         (slurp-body request)
+                             {:query-params (merge (to-query-params (:query-string request)) (:params request))
+                              :body         (slurp-body request)
                               :headers      (-> request
                                                 :headers
-                                                (dissoc "host" "content-length"))})
-        merged-cookies (merge (:cookies request) (parse-cookies @response codec/form-encode))]
+                                                (dissoc "host" "content-length"))})]
 
-    (log/info "redirect, status = " (:status @response))
-    (log/info "redirect, (:cookies request) = " (:cookies request))
-    (log/info "redirect, response cookies = " (parse-cookies @response codec/form-encode))
-    (log/info "redirect, NEW cookies = " (codec/url-decode (str/join "; " (write-cookies merged-cookies codec/form-encode))))
-
-    (if (<= 300 (:status @response) 307)
-      (do
-        (log/info "redirection, new loc = " (-> @response :headers (get "location")))
-        (redirect host (-> @response :headers (get "location"))
-                  (-> request
-                      (assoc :request-method :get)
-                      (assoc :body nil)
-                      ;(assoc :cookies merged-cookies)
-                      (assoc-in [:headers "Cookie"]
-                                (codec/url-decode (str/join "; " (write-cookies merged-cookies codec/form-encode))))
-                      )))
-
-      (-> @response))))
+    (log/info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    (log/info "response, status     = " (:status @response))
+    (log/info "response, set-cookie = " (get-in @response [:headers "set-cookie"]))
+      (-> @response
+          ; (assoc-in  [:headers "cookie"]     (merge-cookies request @response))
+          (assoc-in  [:headers "set-cookie"] (str-set-cookie @response))
+          (update-in [:headers "location"] #(rewrite-location %
+                                                              host
+                                                              (get-in request [:headers "origin"]))))))
 
 (defn wrap-proxy-redirect
   [handler except-uri host]

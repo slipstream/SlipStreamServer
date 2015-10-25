@@ -60,9 +60,10 @@
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (instrument default-registry)
 
+      wrap-cookies
+
       (wrap-proxy-redirect "/api" "http://localhost:8080")
 
-      wrap-cookies
       wrap-logger)
 
   )
