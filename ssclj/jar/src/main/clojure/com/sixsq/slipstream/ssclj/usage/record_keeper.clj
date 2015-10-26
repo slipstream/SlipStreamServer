@@ -52,7 +52,11 @@
     "cloud"                 "VARCHAR(100)"
     "start_timestamp"       "VARCHAR(30)"
     "end_timestamp"         "VARCHAR(30)"
+    "compute_timestamp"     "VARCHAR(30)"
     "usage"                 "VARCHAR(10000)"))
+
+(defonce ^:private unique-summaries
+  (str ", UNIQUE (" (ddl/double-quote-list ["user" "cloud" "start_timestamp" "end_timestamp"])")"))
 
 (def init-db
   (delay  
@@ -61,7 +65,7 @@
     (acl/-init)
 
     (ddl/create-table! "usage_records"    columns-record)
-    (ddl/create-table! "usage_summaries"  columns-summaries)
+    (ddl/create-table! "usage_summaries"  columns-summaries unique-summaries)
 
     (ddl/create-index! "usage_records"   "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
     (ddl/create-index! "usage_summaries" "IDX_TIMESTAMPS" "id" "start_timestamp", "end_timestamp")
@@ -180,11 +184,19 @@
       (assoc :id   (str "usage/" (cu/random-uuid)))
       (assoc :acl  (u/serialize acl))))  
 
+(defn clause-where
+  [row cols]
+  (zipmap cols (map #(% row) cols)))
+
 (defn insert-summary!   
   [summary]
   (let [acl                 (acl-for-user-cloud summary)
-        summary-resource    (resource-for summary acl)]    
-    (kc/insert usage_summaries (kc/values summary-resource))    
+        summary-resource    (resource-for summary acl)]
+
+    (kc/delete usage_summaries (kc/where (clause-where summary-resource [:user :cloud :start_timestamp :end_timestamp])))
+
+    (kc/insert usage_summaries (kc/values (merge summary-resource {:compute_timestamp (u/now-to-ISO-8601)})))
+
     (acl/insert-resource
       (cu/de-camelcase (:id summary-resource))
       "Usage"

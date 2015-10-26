@@ -44,15 +44,14 @@ public class UsageSummariesTest {
 
         UsageSummary usage1 = usageSummaries.usages.get(0);
         Assert.assertEquals("cloud-0", usage1.cloud);
-        Assert.assertEquals(5344.0, usage1.getMetrics().get("RAM"));
-        Assert.assertEquals(185400.0, usage1.getMetrics().get("DISK"));
-        Assert.assertEquals(4720.0, usage1.getMetrics().get("vm"));
+        Assert.assertEquals(1916151.47, usage1.getMetrics().get("RAM"));
+        Assert.assertEquals(84.2, usage1.getMetrics().get("instance-type.Medium"));
+        Assert.assertEquals(1688.23, usage1.getMetrics().get("vm"));
 
         UsageSummary usage2 = usageSummaries.usages.get(1);
         Assert.assertEquals("cloud-3", usage2.cloud);
-        Assert.assertEquals(28032.0, usage2.getMetrics().get("RAM"));
-        Assert.assertEquals(216600.0, usage2.getMetrics().get("DISK"));
-        Assert.assertEquals(2882.0, usage2.getMetrics().get("vm"));
+        Assert.assertEquals(47185920.0, usage2.getMetrics().get("ram"));
+        Assert.assertEquals(1440.0, usage2.getMetrics().get("instance-type.Huge"));
+        Assert.assertEquals(1440.0, usage2.getMetrics().get("vm"));
     }
 }
-

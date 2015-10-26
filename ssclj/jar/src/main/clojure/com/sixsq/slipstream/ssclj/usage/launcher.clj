@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.usage.launcher
   (:require 
     [clojure.string                                     :as string]
-    [clojure.tools.cli                                  :refer [parse-opts]]    
+    [clojure.tools.cli                                  :as cli]
     [com.sixsq.slipstream.ssclj.usage.record-keeper     :as rc]
     [com.sixsq.slipstream.ssclj.usage.summary           :as s]
     [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]
@@ -73,18 +73,17 @@
 
 (defn analyze-args   
   [args]  
-  (let [{:keys [options arguments errors summary] :as all} (parse-opts args cli-options)]      
-    ; (clojure.pprint/pprint all)  ;; TODO
+  (let [{:keys [options arguments errors summary] :as all} (cli/parse-opts args cli-options)]
     (cond
       (:help options)             [:help    (usage summary)]      
       errors                      [:error   (error-msg errors)]
       (mandatory-absent? options) [:help    (usage summary)]      
       :else                       (check-order options))))
 
-(defn do-summarize   
+(defn do-summarize!
   [[start end]]
   (rc/-init)
-  (s/summarize-and-store start end)
+  (s/summarize-and-store! start end)
   (str "Summary done for " (u/disp-interval start end)))
 
 (defn -main 
@@ -93,5 +92,5 @@
     (case code
       :help           (exit 0 data)      
       :error          (exit 1 data)
-      :success        (exit 0 (do-summarize data)))))
+      :success        (exit 0 (do-summarize! data)))))
       

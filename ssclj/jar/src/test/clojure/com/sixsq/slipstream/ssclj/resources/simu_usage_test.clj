@@ -79,7 +79,7 @@
   (->> days
        (map uu/to-ISO-8601)
        (partition 2 1)
-       (map (fn[[s e]] (us/summarize-and-store s e)))
+       (map (fn[[s e]] (us/summarize-and-store! s e)))
        dorun))
 
 ;;

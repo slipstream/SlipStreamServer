@@ -201,11 +201,10 @@ set-cookie-attrs
 
     (log/info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     (log/info "response, status     = " (:status @response))
-    (log/info "response, set-cookie = " (get-in @response [:headers "set-cookie"]))
+    
       (-> @response
-          ; (assoc-in  [:headers "cookie"]     (merge-cookies request @response))
           (assoc-in  [:headers "set-cookie"] (str-set-cookie @response))
-          (update-in [:headers "location"] #(rewrite-location %
+          (update-in [:headers "location"]  #(rewrite-location %
                                                               host
                                                               (get-in request [:headers "origin"]))))))
 
