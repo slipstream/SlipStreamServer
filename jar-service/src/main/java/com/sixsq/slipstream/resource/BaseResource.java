@@ -20,19 +20,6 @@ package com.sixsq.slipstream.resource;
  * -=================================================================-
  */
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
-import org.restlet.Request;
-import org.restlet.data.Form;
-import org.restlet.data.Cookie;
-import org.restlet.data.MediaType;
-import org.restlet.data.Reference;
-import org.restlet.data.Status;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
-
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.Util;
@@ -41,11 +28,20 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.RequestUtil;
+import org.restlet.Request;
+import org.restlet.data.*;
+import org.restlet.representation.Representation;
+import org.restlet.resource.ResourceException;
+import org.restlet.resource.ServerResource;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 public abstract class BaseResource extends ServerResource {
 
 	public static final String MODULE_RESOURCE_URI_KEY = "moduleResourceUri";
 
+	public static final String CIMI_FILTER_KEY = "filter";
 	public static final String PAGING_OFFSET_KEY = "offset";
 	public static final String PAGING_LIMIT_KEY = "limit";
 	public static final String PAGING_CLOUD_KEY = "cloud";

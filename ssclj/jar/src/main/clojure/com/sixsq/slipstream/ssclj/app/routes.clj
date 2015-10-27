@@ -1,12 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.app.routes
   (:require
+    ;; [com.sixsq.slipstream.auth.app.routes :as ar]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [com.sixsq.slipstream.ssclj.resources.common.crud         :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils        :as u]
-    [com.sixsq.slipstream.ssclj.app.params                    :as p]
-    [ring.middleware.head                                     :refer [wrap-head]]
-    [compojure.core                                           :refer [defroutes let-routes routes POST GET PUT DELETE ANY]]
-    [compojure.route                                          :as route]))
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [ring.middleware.head :refer [wrap-head]]
+    [compojure.core :refer [defroutes let-routes routes POST GET PUT DELETE ANY]]
+    [compojure.route :as route]))
 
 (def collection-routes
   (let-routes [uri (str p/service-context ":resource-name")]
@@ -47,6 +48,7 @@
    collection-routes
    resource-routes
    action-routes
+   ;; ar/auth-routes
    (not-found)])
 
 (defn get-main-routes

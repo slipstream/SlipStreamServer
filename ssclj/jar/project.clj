@@ -24,6 +24,8 @@
                  [fs/fs                                     "1.3.3"]
                  [org.slf4j/slf4j-log4j12                   "1.7.12"]
                  [instaparse                                "1.4.1"]
+                 ;; Authentication service
+                 ;; [com.sixsq.slipstream/auth                 "2.19-SNAPSHOT"]
                  ;; Environment settings
                  [environ                                   "1.0.0"]
                  ;; database

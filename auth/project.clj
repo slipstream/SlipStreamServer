@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/auth "2.18-SNAPSHOT"
+(defproject com.sixsq.slipstream/auth "2.19-SNAPSHOT"
   :description  "Authentication Service"
   :url          "http://sixsq.com"
 
@@ -45,14 +45,14 @@
   :profiles {
              :uberjar  {  :aot [#"com.sixsq.slipstream.auth.*"]
                           :env {  :clj-env        :production
-                                  :config-path "config-hsqldb.edn" }
+                                  :config-path "config-hsqldb-mem.edn" }
                           :jvm-opts ["-Dlogfile.path=production"]}
 
 
              :provided {:dependencies [[reply/reply "0.3.4"]]}
 
              :dev      {  :env          { :clj-env        :development
-                                          :config-path "config-hsqldb.edn"
+                                          :config-path "config-hsqldb-mem.edn"
                                           :passphrase  "b8ddy-pr0t0"}
                           :jvm-opts     ["-Dlogfile.path=development"]
                           :dependencies [[peridot/peridot "0.3.0"]]}
