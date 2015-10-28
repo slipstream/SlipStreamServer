@@ -26,7 +26,7 @@
       (throw (IllegalArgumentException. msg)))))
 
 (def db-spec
-  (if-let [config-path (environ/env :db-config-path)]
+  (if-let [config-path (environ/env :config-path)]
     (-> config-path
         find-resource
         slurp

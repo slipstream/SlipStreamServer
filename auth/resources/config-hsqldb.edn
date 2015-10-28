@@ -1,8 +1,7 @@
-{
- :db {
-  :classname    "org.hsqldb.jdbc.JDBCDriver" 
-  :subprotocol  "hsqldb" 
-  :subname      "hsql://localhost:9001/slipstream"
-  :make-pool?   true}
+{:slipstream-db           {
+                           :classname   "org.hsqldb.jdbc.JDBCDriver"
+                           :subprotocol "hsqldb"
+                           :subname     "hsql://localhost:9001/slipstream"
+                           :make-pool?  true}
 
- :nb-minutes-expiry 120}
+ :token-nb-minutes-expiry 120}

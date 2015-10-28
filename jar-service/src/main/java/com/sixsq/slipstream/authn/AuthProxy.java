@@ -20,8 +20,16 @@ public class AuthProxy {
 
     private static final Logger logger = Logger.getLogger(AuthProxy.class.getName());
 
-    private static final String AUTH_SERVER = "http://localhost:8202/auth";
+    private static final String AUTH_SERVER = "http://localhost:8201/auth";
 
+    /**
+     * POST to http://localhost:8201/auth/login with user-name and password parameters
+     *
+     * @param username
+     * @param password
+     * @return 401 when authentication failed, else response contains a cookie with the authentication token
+     * @throws ResourceException
+     */
     public Response createAuthnToken(String username, String password)
             throws ResourceException {
         ClientResource resource = null;

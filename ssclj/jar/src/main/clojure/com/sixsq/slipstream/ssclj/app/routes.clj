@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.app.routes
   (:require
-    ;; [com.sixsq.slipstream.auth.app.routes :as ar]
+    [com.sixsq.slipstream.auth.app.auth-service :as as]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -43,12 +43,18 @@
     (fn [{:keys [uri]}]
       (u/map-response "unknown resource" 404 uri))))
 
+(def auth-routes
+  (let-routes [uri-login (str p/auth-context "login")
+               uri-token (str p/auth-context "token")]
+    (POST uri-login request (as/login request))
+    (POST uri-token request (as/build-token request))))
+
 (def final-routes
   [
    collection-routes
    resource-routes
    action-routes
-   ;; ar/auth-routes
+   auth-routes
    (not-found)])
 
 (defn get-main-routes

@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.auth.core :as auth]
     [com.sixsq.slipstream.auth.simple-authentication :as sa]
     [com.sixsq.slipstream.auth.app.http-utils :as hu]
-    ))
+    [clojure.data.json :as json]))
 
 ;; TODO : make this configurable
 ;; implementation chosen at run-time
@@ -20,6 +20,12 @@
 (defn- extract-credentials
   [request]
   (select-in-params request [:user-name :password]))
+
+(defn- extract-claims-token
+  [request]
+  (-> request
+      (select-in-params [:claims :token])
+      (update-in [:claims] #(json/read-str % :key-fn keyword))))
 
 (defn- log-result
   [credentials ok?]
@@ -42,4 +48,13 @@
     (log-result credentials ok?)
     (if ok?
       (response-token-ok result)
+      (response-invalid-token))))
+
+(defn build-token
+  [request]
+  (log/info "Will build-token")
+  (let [{:keys [claims token]}  (extract-claims-token request)
+        [ok? result]            (auth/token authentication claims token)]
+    (if ok?
+      (hu/response-with-body 200 (:token result))
       (response-invalid-token))))

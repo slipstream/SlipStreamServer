@@ -92,7 +92,7 @@
 
 (defn expiry-timestamp
   []
-  (->> (cf/property-value :nb-minutes-expiry default-nb-minutes-expiry)
+  (->> (cf/property-value :token-nb-minutes-expiry default-nb-minutes-expiry)
        (* 60000)
        t/millis
        (t/plus (t/now))))

@@ -25,7 +25,7 @@
                  [org.slf4j/slf4j-log4j12                   "1.7.12"]
                  [instaparse                                "1.4.1"]
                  ;; Authentication service
-                 ;; [com.sixsq.slipstream/auth                 "2.19-SNAPSHOT"]
+                 [com.sixsq.slipstream/auth                 "2.19-SNAPSHOT" :exclusions [cheshire]]
                  ;; Environment settings
                  [environ                                   "1.0.0"]
                  ;; database
@@ -37,7 +37,7 @@
                  ;; http related
                  [javax.servlet/javax.servlet-api           "3.1.0"]
                  [ring/ring-core                            "1.4.0"]
-                 [ring/ring-json                            "0.4.0"]
+                 [ring/ring-json                            "0.4.0" :exclusions [cheshire]]
                  [compojure/compojure                       "1.4.0"]
                  [http-kit/http-kit                         "2.1.19"]
                  [puppetlabs/http-client                    "0.4.4"]
@@ -81,18 +81,20 @@
     :uberjar
       { :aot [#"com.sixsq.slipstream.ssclj.api.acl*"]
         :env {  :clj-env        :production
-                :db-config-path "config-hsqldb-mem.edn"}
+                :config-path    "config-hsqldb-mem.edn"}
         :jvm-opts ["-Dlogfile.path=production"]}
 
     :dev
       { :env {  :clj-env        :development
-                :db-config-path "config-hsqldb.edn"}
+                :config-path    "config-hsqldb.edn"
+                :passphrase     "b8ddy-pr0t0"}
         :jvm-opts ["-Dlogfile.path=development"]
         :dependencies [ [peridot/peridot "0.4.1"]
                         [expectations/expectations "2.1.3"]]}
     :test
       { :env {  :clj-env        :test
-                :db-config-path "config-hsqldb-mem.edn"}
+                :config-path    "config-hsqldb-mem.edn"
+                :passphrase     "b8ddy-pr0t0"}
 
         :jvm-opts ["-Dlogfile.path=test"]
 

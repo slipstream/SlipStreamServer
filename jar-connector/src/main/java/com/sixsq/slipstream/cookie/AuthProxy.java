@@ -22,8 +22,17 @@ public class AuthProxy {
 
     private static final Logger logger = Logger.getLogger(AuthProxy.class.getName());
 
-    private static final String AUTH_SERVER = "http://localhost:8202/auth";
+    private static final String AUTH_SERVER = "http://localhost:8201/auth";
 
+    /**
+     * POST to http://localhost:8201/auth/token with claims and authentication token parameters
+     *
+     * claims contains run information
+     * authentication token was acquired with POST on /login
+     *
+     * @return 401 when provided authentication token is invalid, else response contains a signed token for claims.
+     * @throws ResourceException
+     */
     public String createToken(Properties claims, String authenticationToken)
             throws ResourceException {
         ClientResource resource = null;

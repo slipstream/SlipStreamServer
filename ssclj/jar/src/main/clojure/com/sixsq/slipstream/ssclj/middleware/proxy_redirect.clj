@@ -24,8 +24,8 @@
                                  :socket-timeout-milliseconds   60000 }))
 
 (defn- uri-starts-with?
-  [uri prefix]
-  (.startsWith uri prefix))
+  [uri prefixes]
+  (some #(.startsWith uri %) prefixes))
 
 (defn- build-url
   [host path query-string]
@@ -209,9 +209,9 @@ set-cookie-attrs
                                                               (get-in request [:headers "origin"]))))))
 
 (defn wrap-proxy-redirect
-  [handler except-uri host]
+  [handler except-uris host]
   (fn [request]
     (let [request-uri (:uri request)]
-      (if (uri-starts-with? request-uri except-uri)
+      (if (uri-starts-with? request-uri except-uris)
         (handler request)
         (redirect host request-uri request)))))

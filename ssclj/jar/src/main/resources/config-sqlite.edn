@@ -1,5 +1,0 @@
-{:db
-  { :classname "org.sqlite.JDBC" ; must be in classpath
-    :subprotocol "sqlite"
-    :subname "src/test/db/resources.sqlite"
-    :make-pool?   true}}

@@ -62,7 +62,7 @@
 
       wrap-cookies
 
-      (wrap-proxy-redirect "/api" "http://localhost:8080")
+      (wrap-proxy-redirect ["/api" "/auth"] "http://localhost:8080")
 
       wrap-logger)
 

@@ -1,5 +1,14 @@
-{:db { 
-  :classname    "org.hsqldb.jdbc.JDBCDriver" 
-  :subprotocol  "hsqldb" 
-  :subname      "mem://localhost:9012/devresources"
-  :make-pool?   true}}
+{:db                      {
+                           :classname   "org.hsqldb.jdbc.JDBCDriver"
+                           :subprotocol "hsqldb"
+                           :subname     "mem://localhost:9012/devresources"
+                           :make-pool?  true}
+
+
+ :slipstream-db           {
+                           :classname   "org.hsqldb.jdbc.JDBCDriver"
+                           :subprotocol "hsqldb"
+                           :subname     "mem://localhost:9012/slipstreamdevresources"
+                           :make-pool?  true}
+
+ :token-nb-minutes-expiry 120}
