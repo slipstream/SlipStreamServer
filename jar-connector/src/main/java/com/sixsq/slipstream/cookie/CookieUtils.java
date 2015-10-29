@@ -333,8 +333,6 @@ public class CookieUtils {
 		Map<String, String> claimsInToken = com.sixsq.slipstream.auth.TokenChecker.claimsInToken(signature);
 
 		logger.info("checkValidClaimsInToken, signature = " + signature);
-		logger.info("checkValidClaimsInToken, claimsInToken = " + claimsInToken);
-		logger.info("checkValidClaimsInToken, cookie = " + cookie);
 
 		boolean invalidClaims = claimsInToken == null || claimsInToken.isEmpty();
 
@@ -351,8 +349,6 @@ public class CookieUtils {
 				usernameInCookie!=null && usernameInCookie.equals(claimsInToken.get(COOKIE_IDENTIFIER)) &&
 				runIdInCookie!=null && runIdInCookie.equals(claimsInToken.get(COOKIE_RUN_ID));
 
-		logger.info("checkValidClaimsInToken, cookieAndClaimsMatch = " + cookieAndClaimsMatch);
-		
 		return !invalidClaims && cookieAndClaimsMatch;
 	}
 

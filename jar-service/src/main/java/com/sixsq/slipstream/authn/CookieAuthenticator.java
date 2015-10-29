@@ -54,17 +54,14 @@ public class CookieAuthenticator extends AuthenticatorBase {
 
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
 
-		logger.info("will authenticate cookie " + cookie);
+		logger.fine("will authenticate cookie " + cookie);
 		boolean isTokenValid = false;
 
 		if(CookieUtils.isMachine(cookie)) {
-			logger.info("Will call verifyAuthnCookie");
-			logger.info("Will call verifyAuthnCookie for " + CookieUtils.getCookieUsername(cookie));
-
 			isTokenValid = CookieUtils.verifyAuthnCookie(cookie) == Verifier.RESULT_VALID;
-			logger.info("Done calling verifyAuthnCookie: isTokenValid=" + isTokenValid);
+			logger.fine("Done calling verifyAuthnCookie: isTokenValid=" + isTokenValid);
 		} else {
-			logger.info("Will call claimsInToken");
+			logger.fine("Will call claimsInToken");
 			Map<String, String> claimsInToken = CookieUtils.claimsInToken(cookie);
 			isTokenValid = !claimsInToken.isEmpty();
 		}
@@ -99,13 +96,13 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		setCloudServiceName(request, cookie);
 		setUserInRequest(user, request);
 
-		logger.info("handle valid, cookie = " + cookie);
+		logger.fine("handle valid, cookie = " + cookie);
 		String tokenInCookie = CookieUtils.tokenInCookie(cookie);
 		if(tokenInCookie!=null) {
-			logger.info("handle valid, tokenInCookie = " + tokenInCookie);
+			logger.fine("handle valid, tokenInCookie = " + tokenInCookie);
 			user.setAuthnToken(tokenInCookie);
 			user = user.store();
-			logger.info("user.authnToken = " + user.getAuthnToken());
+			logger.fine("user.authnToken = " + user.getAuthnToken());
 		}
 
 		if (!CookieUtils.isMachine(cookie)) {
