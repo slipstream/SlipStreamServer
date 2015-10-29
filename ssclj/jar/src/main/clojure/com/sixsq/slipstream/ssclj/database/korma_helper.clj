@@ -31,7 +31,7 @@
         find-resource
         slurp
         edn/read-string
-        :db)
+        :api-db)
     (do
       (log/warn "Using default db spec: " default-db-spec)
       default-db-spec)))

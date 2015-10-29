@@ -7,7 +7,7 @@
 
 (defn db-spec
   []
-  (cf/property-value :slipstream-db))
+  (cf/property-value :auth-db))
 
 (def korma-init-done
   (delay
