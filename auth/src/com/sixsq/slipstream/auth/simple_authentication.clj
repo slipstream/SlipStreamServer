@@ -41,15 +41,18 @@
 
 (defn private-key
   [auth-conf]
-  (if-let [passphrase (environ/env :passphrase)]
-    (ks/private-key
-      (io/resource (:privkey auth-conf))
-      passphrase)
-    (throw (IllegalStateException. "passphrase not defined"))))
+  (let [passphrase (environ/env :passphrase)
+        privkey    (io/resource (:privkey auth-conf))]
+    (if (and passphrase privkey)
+      (ks/private-key privkey passphrase)
+      (throw (IllegalStateException. "Passphrase not defined or private key not accessible (must be in the classpath).")))))
 
 (defn public-key
   [auth-conf]
-  (ks/public-key (io/resource (:pubkey auth-conf))))
+  (let [pubkey (io/resource (:pubkey auth-conf))]
+    (if pubkey
+      (ks/public-key pubkey)
+      (throw (IllegalStateException. "Public key not accessible (must be in the classpath).")))))
 
 (defn init
   []
