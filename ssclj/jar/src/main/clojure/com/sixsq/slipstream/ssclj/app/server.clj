@@ -80,11 +80,11 @@
    (log/info "java classpath: " (System/getProperty "java.class.path"))
    (set-db-impl)
    (resources/initialize)
-   (if (= impl "aleph")
+   (if (= impl "httpkit")
      (-> (create-ring-handler)
-         (aleph/start-container port))
+         (httpkit/start-container port))
      (-> (create-ring-handler)
-         (httpkit/start-container port)))))
+         (aleph/start-container port)))))
 
 (defn stop
   "Stops the application server by calling the function that was
