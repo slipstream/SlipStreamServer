@@ -12,7 +12,7 @@ User=slipstream
 WorkingDirectory=/opt/slipstream/ssclj
 
 ExecStart=/usr/bin/java \
-            -Ddb.config.path=db.spec \
+            -Dconfig.path=db.spec \
             -Dlogfile.path=production \
             -cp "lib/ssclj.jar:resources:lib/ext/*" \
             com.sixsq.slipstream.ssclj.app.main $SSCLJ_PORT
