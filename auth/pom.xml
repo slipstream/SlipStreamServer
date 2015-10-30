@@ -21,6 +21,7 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+
   <build>
     <sourceDirectory>src</sourceDirectory>
     <testSourceDirectory>test</testSourceDirectory>
@@ -40,6 +41,7 @@
     <directory>target</directory>
     <outputDirectory>target/classes</outputDirectory>
     <plugins>
+
       <plugin>
         <groupId>com.theoryinpractise</groupId>
         <artifactId>clojure-maven-plugin</artifactId>
@@ -61,6 +63,7 @@
         </executions>
 
         <configuration>
+          <clojureOptions>-Dconfig-path=config-hsqldb-mem.edn -Dpassphrase=b8ddy-pr0t0</clojureOptions>
           <sourceDirectories>
             <sourceDirectory>src</sourceDirectory>
           </sourceDirectories>
