@@ -17,11 +17,12 @@
 
 ;; Inspired by : https://github.com/tailrecursion/ring-proxy
 
-(defonce client
-         (ppasync/create-client {:force-redirects               false
-                                 :follow-redirects              false
-                                 :connect-timeout-milliseconds  60000
-                                 :socket-timeout-milliseconds   60000 }))
+(def
+  client (delay
+           (ppasync/create-client {:force-redirects              false
+                                   :follow-redirects             false
+                                   :connect-timeout-milliseconds 60000
+                                   :socket-timeout-milliseconds  60000})))
 
 (defn- uri-starts-with?
   [uri prefixes]
@@ -192,7 +193,7 @@ set-cookie-attrs
                      :delete  ppcommon/delete
                      :put     ppcommon/put)
 
-        response (request-fn client redirected-url
+        response (request-fn @client redirected-url
                              {:query-params (merge (to-query-params (:query-string request)) (:params request))
                               :body         (slurp-body request)
                               :headers      (-> request
