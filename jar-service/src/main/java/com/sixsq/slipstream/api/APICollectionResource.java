@@ -15,15 +15,25 @@ public class APICollectionResource extends APIBaseResource {
 
     @Override
     protected String uri() {
-        return SSCLJ_SERVER + "/" + this.resourceName + cimiFilter();
+        return SSCLJ_SERVER + "/" + this.resourceName + cimiParams();
     }
 
-    private String cimiFilter() {
+    private String cimiParams() {
         int limit = RequestUtil.getLimit(getRequest());
         int offset = RequestUtil.getOffset(getRequest());
         int first = offset + 1;
         int last = offset + limit;
-        return "?$first=" + first + "&$last=" + last;
+
+        return "?$first=" + first + "&$last=" + last + cimiFilter();
+    }
+
+    private String cimiFilter() {
+        String cimiFilter = RequestUtil.getCIMIFilter(getRequest());
+        if (cimiFilter != null && !cimiFilter.isEmpty()) {
+            return "&$filter=" + cimiFilter;
+        } else {
+            return "";
+        }
     }
 
 }

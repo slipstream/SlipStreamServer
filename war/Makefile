@@ -20,12 +20,12 @@ MODE?=dev
 # THEME?=helixnebula
 
 run: start-db
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
+	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
 
 clean-run: stop-db clean-install-ui clean-install run
 
 run-with-mem-db:
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=$(MODE)
+	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=$(MODE)
 
 new-ui: install-ui run
 
