@@ -38,7 +38,8 @@
                  [ring/ring-json                            "0.4.0"]
                  [compojure/compojure                       "1.4.0"]
                  [http-kit/http-kit                         "2.1.19"]
-                 [aleph                                     "0.4.0"]]
+                 [aleph                                     "0.4.0"]
+                 [puppetlabs/http-client                    "0.4.4" :exclusions [[cheshire/cheshire]]]]
 
   :plugins      [[lein-expectations                         "0.0.7"]
                  [lein-autoexpect                           "1.4.2"]

@@ -181,6 +181,11 @@
       <groupId>honeysql</groupId>
       <artifactId>honeysql</artifactId>      
     </dependency>
+    <dependency>
+      <groupId>puppetlabs</groupId>
+      <artifactId>http-client</artifactId>
+      <version>0.4.4</version>
+    </dependency>
   </dependencies>
 
   <profiles>

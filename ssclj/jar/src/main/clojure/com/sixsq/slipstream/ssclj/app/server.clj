@@ -15,6 +15,7 @@
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
+    [com.sixsq.slipstream.ssclj.middleware.proxy-redirect :refer [wrap-proxy-redirect]]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.root :as root]
@@ -50,7 +51,8 @@
       (expose-metrics-as-json (str p/service-context "metrics") default-registry {:pretty-print? true})
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
-      (instrument default-registry)))
+      (instrument default-registry)
+      (wrap-proxy-redirect ["/api" "/auth"] "http://localhost:8080")))
 
 (defn start
   "Starts the server and returns a function that when called, will
