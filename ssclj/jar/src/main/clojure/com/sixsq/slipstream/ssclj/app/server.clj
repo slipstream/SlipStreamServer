@@ -15,7 +15,6 @@
     [com.sixsq.slipstream.ssclj.app.httpkit-container :as httpkit]
     [com.sixsq.slipstream.ssclj.app.aleph-container :as aleph]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
-    [com.sixsq.slipstream.ssclj.middleware.proxy-redirect :refer [wrap-proxy-redirect]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
@@ -62,11 +61,7 @@
 
       wrap-cookies
 
-     ;; (wrap-proxy-redirect ["/api" "/auth"] "http://localhost:8080")
-
-      wrap-logger)
-
-  )
+      wrap-logger))
 
 (defn start
   "Starts the server and returns a function that when called, will
