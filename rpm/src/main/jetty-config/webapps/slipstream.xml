@@ -15,6 +15,7 @@ Configure and deploy the SlipStream web application in $(jetty.home)/webapps/roo
   <Set name="contextPath">/</Set>
   <Set name="tempDirectory"><SystemProperty name="jetty.home" default="."/>/tmp/war</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/slipstream.war</Set>
+  <Set name="war"><SystemProperty name="passphrase" default=""/>sl1pstre8m</Set>
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
