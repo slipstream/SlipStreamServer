@@ -108,7 +108,7 @@
 
 (defn check-token-impl
   [token]
-  (log/info "will unsign token:" token)
+  (log/debug "will unsign token:" token)
   (jws/unsign token (public-key auth-conf) signing-algorithm))
 
 (defn create-token

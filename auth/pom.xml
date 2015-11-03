@@ -63,7 +63,7 @@
         </executions>
 
         <configuration>
-          <clojureOptions>-Dconfig-path=config-hsqldb-mem.edn -Dpassphrase=b8ddy-pr0t0</clojureOptions>
+          <clojureOptions>-Dconfig-path=config-hsqldb-mem.edn -Dpassphrase=sl1pstre8m</clojureOptions>
           <sourceDirectories>
             <sourceDirectory>src</sourceDirectory>
           </sourceDirectories>

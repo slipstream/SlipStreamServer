@@ -424,7 +424,7 @@ public class CookieUtils {
 		}
 
 		String token = tokenInCookie(cookie);
-		logger.info("Token in cookie = " + token);
+		logger.fine("Token in cookie = " + token);
 		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
 	}
 

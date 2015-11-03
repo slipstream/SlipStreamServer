@@ -90,14 +90,14 @@
    :dev
      { :env {  :clj-env        :development
                :config-path    "config-hsqldb.edn"
-               :passphrase     "b8ddy-pr0t0"}
+               :passphrase     "sl1pstre8m"}
        :jvm-opts ["-Dlogfile.path=development"]
        :dependencies [ [peridot/peridot "0.4.1"]
                        [expectations/expectations "2.1.3"]]}
    :test
      { :env {  :clj-env        :test
                :config-path    "config-hsqldb-mem.edn"
-               :passphrase     "b8ddy-pr0t0"}
+               :passphrase     "sl1pstre8m"}
 
        :jvm-opts ["-Dlogfile.path=test"]
 
