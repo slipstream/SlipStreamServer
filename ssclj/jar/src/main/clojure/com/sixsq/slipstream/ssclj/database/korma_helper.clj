@@ -40,7 +40,7 @@
   (delay
     (log/info (format "Will create korma database with db-spec"))
     (log/info (u/map-multi-line db-spec))
-    (defdb korma-db db-spec)
+    (defdb korma-api-db db-spec)
     (log/info "Korma database created")))
 
 (defn korma-init

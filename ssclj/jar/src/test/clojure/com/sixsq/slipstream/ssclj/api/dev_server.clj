@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.api.dev-server
   (:require
     [korma.core                                       :as kc]
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
     [com.sixsq.slipstream.ssclj.app.server            :as server]
     [com.sixsq.slipstream.ssclj.resources.seeds.event :as es]
     [com.sixsq.slipstream.ssclj.usage.seeds.usages    :as us]))
@@ -13,7 +14,9 @@
     (server/start *server-port*)))
 
 (kc/defentity resources)
+(kc/database resources kh/korma-api-db)
 (kc/defentity usage_summaries)
+(kc/database usage_summaries kh/korma-api-db)
 
 (defn db-content
   []

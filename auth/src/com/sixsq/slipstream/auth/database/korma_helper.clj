@@ -13,7 +13,7 @@
   (delay
     (let [current-db-spec (db-spec)]
       (log/info (format "Creating korma database %s" current-db-spec))
-      (defdb korma-db current-db-spec))))
+      (defdb korma-auth-db current-db-spec))))
 
 (defn korma-init
   "Initializes korma database"
