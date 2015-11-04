@@ -234,8 +234,6 @@ public class RuntimeParameter extends Metadata {
 		return nodeName + RuntimeParameter.NODE_MULTIPLICITY_INDEX_SEPARATOR + nodeInstanceId;
 	}
 
-	public static final int VALUE_MAX_LENGTH = 4096;
-
 	@Id
 	private String resourceUri;
 
@@ -243,7 +241,7 @@ public class RuntimeParameter extends Metadata {
 	private String key_;
 
 	@Text(required = false, data = true)
-	@Column(length = VALUE_MAX_LENGTH)
+	@Column(length = 4096)
 	private String value = "";
 
 	@Attribute
