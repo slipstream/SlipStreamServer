@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.sixsq.slipstream.connector.CloudService;
-import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -152,20 +150,13 @@ public class BuildImageFactory extends RunFactory {
 		String cloudServiceName = run.getCloudServiceNameForNode(nodeInstanceName);
 		filter.add(cloudServiceName);
 
-		Connector connector = null;
-		Map<String, ModuleParameter> parameters = new HashMap<>();
-		try {
-			connector = ConnectorFactory.getConnector(cloudServiceName);
-			parameters = connector.getImageParametersTemplate();
-		} catch (ValidationException e) {
-		}
-		parameters.putAll(image.getParameters());
-
-		for (ModuleParameter param : parameters.values()) {
-			if (filter.contains(param.getCategory())) {
-				run.assignRuntimeParameter(constructParamName(nodeInstanceName, param.getName()),
-						extractInitialValue(param, image, run, cloudServiceName),
-						param.getDescription());
+		if (image.getParameters() != null) {
+			for (ModuleParameter param : image.getParameterList()) {
+				if (filter.contains(param.getCategory())) {
+					run.assignRuntimeParameter(constructParamName(nodeInstanceName, param.getName()),
+							extractInitialValue(param, run),
+							param.getDescription());
+				}
 			}
 		}
 
@@ -183,17 +174,10 @@ public class BuildImageFactory extends RunFactory {
 
 	}
 
-	private static String extractInitialValue(ModuleParameter parameter, ImageModule image, Run run,
-											  String cloudService) throws ValidationException {
+	private static String extractInitialValue(ModuleParameter parameter, Run run) {
 		String parameterName = parameter.getName();
 
 		String value = run.getParameterValue(constructParamName(nodeInstanceName, parameterName), null);
-		if (value == null && image != null && cloudService.equals(parameter.getCategory())) {
-			ModuleParameter imageParameter = image.getParameter(parameterName);
-			if (imageParameter != null) {
-				value = imageParameter.getValue();
-			}
-		}
 		if (value == null) {
 			value = parameter.getValue();
 		}
