@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.sixsq.slipstream.connector.CloudService;
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -150,13 +152,15 @@ public class BuildImageFactory extends RunFactory {
 		String cloudServiceName = run.getCloudServiceNameForNode(nodeInstanceName);
 		filter.add(cloudServiceName);
 
-		if (image.getParameters() != null) {
-			for (ModuleParameter param : image.getParameterList()) {
-				if (filter.contains(param.getCategory())) {
-					run.assignRuntimeParameter(constructParamName(nodeInstanceName, param.getName()),
-							extractInitialValue(param, run),
-							param.getDescription());
-				}
+		Connector connector = ConnectorFactory.getConnector(cloudServiceName);
+		Map<String, ModuleParameter> parameters = connector.getImageParametersTemplate();
+		parameters.putAll(image.getParameters());
+
+		for (ModuleParameter param : parameters.values()) {
+			if (filter.contains(param.getCategory())) {
+				run.assignRuntimeParameter(constructParamName(nodeInstanceName, param.getName()),
+						extractInitialValue(param, image, run, cloudServiceName),
+						param.getDescription());
 			}
 		}
 
@@ -174,12 +178,17 @@ public class BuildImageFactory extends RunFactory {
 
 	}
 
-	private static String extractInitialValue(ModuleParameter parameter, Run run) {
+	private static String extractInitialValue(ModuleParameter parameter, ImageModule image, Run run,
+											  String cloudService) throws ValidationException {
 		String parameterName = parameter.getName();
 
 		String value = run.getParameterValue(constructParamName(nodeInstanceName, parameterName), null);
 		if (value == null) {
-			value = parameter.getValue();
+			if (cloudService.equals(parameter.getCategory())) {
+				value = image.extractParameter(parameterName).getValue();
+			} else {
+				value = parameter.getValue();
+			}
 		}
 
 		return value;
