@@ -20,10 +20,11 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.ConnectorFactory;
 import org.apache.commons.lang.StringUtils;
 
 import com.sixsq.slipstream.connector.CloudService;
@@ -41,6 +42,7 @@ import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
@@ -207,20 +209,11 @@ public class DeploymentFactory extends RunFactory {
 
 		String cloudService = run.getCloudServiceNameForNode(node.getName());
 		ImageModule image = node.getImage();
-		Map<String, ModuleParameter> parameters = new HashMap<>();
-		Connector connector = null;
 
-		try {
-			connector = ConnectorFactory.getConnector(cloudService);
-			parameters = connector.getImageParametersTemplate();
-		} catch (ValidationException e) {
-		}
-		parameters.putAll(image.getParameters());
-
-		for (ModuleParameter param : parameters.values()) {
+		for (ModuleParameter param : image.getParameterList()) {
 			String category = param.getCategory();
 			if (filter.contains(category) || cloudService.equals(category))	{
-				String initialValue = extractInitialValue(param, node, run, cloudService);
+				String initialValue = extractInitialValue(param, node, run);
 				run.createRuntimeParameter(node, nodeInstanceId,
 						param.getName(),
 						initialValue,
@@ -288,23 +281,15 @@ public class DeploymentFactory extends RunFactory {
 				+ index + RuntimeParameter.NODE_PROPERTY_SEPARATOR + parts[1];
 	}
 
-	public static String extractInitialValue(ModuleParameter parameter, Node node, Run run, String cloudService)
-			throws ValidationException {
+	public static String extractInitialValue(ModuleParameter parameter, Node node, Run run) {
 		String parameterName = parameter.getName();
-		ImageModule image = node.getImage();
 
 		String value = run.getParameterValue(constructNodeParamName(node, parameterName), null);
 		if (value == null) {
 			value = extractNodeParameterValue(node.getParameter(parameterName));
-		}
-		if (value == null && image != null && cloudService.equals(parameter.getCategory())) {
-			ModuleParameter imageParameter = image.getParameter(parameterName);
-			if (imageParameter != null) {
-				value = imageParameter.getValue();
+			if (value == null) {
+				value = parameter.getValue();
 			}
-		}
-		if (value == null) {
-			value = parameter.getValue();
 		}
 
 		return value;
