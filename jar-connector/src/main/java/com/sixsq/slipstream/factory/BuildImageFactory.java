@@ -152,8 +152,13 @@ public class BuildImageFactory extends RunFactory {
 		String cloudServiceName = run.getCloudServiceNameForNode(nodeInstanceName);
 		filter.add(cloudServiceName);
 
-		Connector connector = ConnectorFactory.getConnector(cloudServiceName);
-		Map<String, ModuleParameter> parameters = connector.getImageParametersTemplate();
+		Connector connector = null;
+		Map<String, ModuleParameter> parameters = new HashMap<>();
+		try {
+			connector = ConnectorFactory.getConnector(cloudServiceName);
+			parameters = connector.getImageParametersTemplate();
+		} catch (ValidationException e) {
+		}
 		parameters.putAll(image.getParameters());
 
 		for (ModuleParameter param : parameters.values()) {
@@ -183,12 +188,14 @@ public class BuildImageFactory extends RunFactory {
 		String parameterName = parameter.getName();
 
 		String value = run.getParameterValue(constructParamName(nodeInstanceName, parameterName), null);
-		if (value == null) {
-			if (cloudService.equals(parameter.getCategory())) {
-				value = image.extractParameter(parameterName).getValue();
-			} else {
-				value = parameter.getValue();
+		if (value == null && image != null && cloudService.equals(parameter.getCategory())) {
+			ModuleParameter imageParameter = image.getParameter(parameterName);
+			if (imageParameter != null) {
+				value = imageParameter.getValue();
 			}
+		}
+		if (value == null) {
+			value = parameter.getValue();
 		}
 
 		return value;
