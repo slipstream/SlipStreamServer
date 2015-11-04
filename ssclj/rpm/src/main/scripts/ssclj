@@ -173,7 +173,7 @@ if [ ! -f "$SSCLJ_JAR" ]; then
   exit 1
 fi
 
-RUN_ARGS=(${JAVA_OPTIONS[@]} -Dpassphrase=sl1pstre8m -Dconfig.path=db.spec -Dlogfile.path=production -cp "$SSCLJ_HOME/resources:$SSCLJ_JAR" $SSCLJ_CLASS $SSCLJ_PORT)
+RUN_ARGS=(${JAVA_OPTIONS[@]} -Dconfig.path=db.spec -Dlogfile.path=production -cp "$SSCLJ_HOME/resources:$SSCLJ_JAR" $SSCLJ_CLASS $SSCLJ_PORT)
 RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
 
 

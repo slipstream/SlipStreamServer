@@ -41,7 +41,7 @@
 
 (defn private-key
   [auth-conf]
-  (let [passphrase (environ/env :passphrase)
+  (let [passphrase (cf/property-value :passphrase)
         privkey    (io/resource (:privkey auth-conf))]
     (if (and passphrase privkey)
       (ks/private-key privkey passphrase)
