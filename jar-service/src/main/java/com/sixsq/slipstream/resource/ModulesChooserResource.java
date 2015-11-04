@@ -5,10 +5,12 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 
+import com.sixsq.slipstream.module.ModuleView.ModuleViewList;
+import com.sixsq.slipstream.module.ModuleListResource;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ServiceCatalogs;
-import com.sixsq.slipstream.persistence.Welcome;
 import com.sixsq.slipstream.util.HtmlUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 
@@ -32,53 +34,20 @@ import com.sixsq.slipstream.util.SerializationUtil;
  * -=================================================================-
  */
 
-public class WelcomeResource extends SimpleResource {
+public class ModulesChooserResource extends ModuleListResource {
 
-	@Get("xml|txt")
-	public Representation toXml() {
+	@Override
+	protected ModuleViewList retrieveFilteredModuleViewList() {
 
-		String result = SerializationUtil.toXmlString(retrieveWelcome());
-		return new StringRepresentation(result);
+		ModuleViewList modules = new ModuleViewList(Module.viewList("module/"));
+		ModuleViewList published = new ModuleViewList(Module.viewPublishedList());
+		modules.getList().addAll(published.getList());
+		return filterAuthz(modules);
 	}
 
-	@Get("html")
-	public Representation toHtml() {
-
-		return new StringRepresentation(HtmlUtil.toHtml(retrieveWelcome(), getPageRepresentation(), getUser(),
-				getRequest()), MediaType.TEXT_HTML);
-	}
-
-	private Welcome retrieveWelcome() {
-
-		Welcome welcome = new Welcome();
-
-		welcome.setModules(retrieveFilteredModuleViewList());
-
-		try {
-			if (ServiceCatalogsResource.serviceCatalogsEnabled()) {
-				welcome.setServiceCatalogues(retrieveServiceCatalogs());
-			}
-		} catch (ConfigurationException e) {
-			throwConfigurationException(e);
-		} catch (ValidationException e) {
-			throwClientValidationError(e.getMessage());
-		}
-
-		return welcome;
-	}
-
-	private ServiceCatalogs retrieveServiceCatalogs() throws ValidationException {
-
-		ServiceCatalogs scs = new ServiceCatalogs();
-		scs.loadAll();
-		scs.updateForEditing(getUser());
-
-		return scs;
-
-	}
-
+	@Override
 	protected String getPageRepresentation() {
-		return "welcome";
+		return "chooser";
 	}
 
 }

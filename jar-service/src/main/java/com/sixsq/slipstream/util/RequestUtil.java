@@ -207,4 +207,8 @@ public class RequestUtil {
 		return limit;
 	}
 
+	public static String getCIMIFilter(Request request) {
+		return getQueryValue(request, BaseResource.CIMI_FILTER_KEY);
+	}
+
 }

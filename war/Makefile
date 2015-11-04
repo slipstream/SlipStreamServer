@@ -20,12 +20,12 @@ MODE?=dev
 # THEME?=helixnebula
 
 run: start-db
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
+	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
 
 clean-run: stop-db clean-install-ui clean-install run
 
 run-with-mem-db:
-	mvn jetty:run-war -Dstatic.content.location=file://${STATIC_CONTENT_LOCATION} -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=$(MODE)
+	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=$(MODE)
 
 new-ui: install-ui run
 
@@ -116,7 +116,7 @@ backup-db:
 	if [ -f slipstreamdb.script ];     then cp -v slipstreamdb.script      $(BACKUP_DIR); fi;
 	if [ -f slipstreamdb.properties ]; then cp -v slipstreamdb.properties  $(BACKUP_DIR); fi;
 
-remove-db: backup-db
+remove-db: stop-db backup-db
 	if [ -f slipstreamdb.script ];     then rm -v slipstreamdb.script;     fi;
 	if [ -f slipstreamdb.properties ]; then rm -v slipstreamdb.properties; fi;
 

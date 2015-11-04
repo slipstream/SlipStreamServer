@@ -124,6 +124,14 @@ public class RuntimeParameterResource extends RunBaseResource {
 		return runtimeParameter.getValue();
 	}
 
+	private String truncateMiddle(int maxLength, String text, String truncateMessage) {
+		if (text != null && text.length() > maxLength) {
+			int partsize = (maxLength - truncateMessage.length()) / 2;
+			text = text.substring(0, partsize-1) + truncateMessage + text.substring(text.length() - partsize);
+		}
+		return text;
+	}
+
 	@Put
 	public void update(Representation entity) throws ResourceException,
 			NotFoundException, ValidationException {
@@ -142,6 +150,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 		if (isGlobalAbort || isNodeAbort) {
 			if (!runtimeParameter.isSet()) {
+				value = truncateMiddle(RuntimeParameter.VALUE_MAX_LENGTH, value, "\n(truncated)\n");
 				abortOrReset(value, em);
 				setValue(value);
 			}
@@ -158,6 +167,10 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	private void setValue(String value) {
+		if (value != null && value.length() > RuntimeParameter.VALUE_MAX_LENGTH) {
+			throwClientBadRequest("Value too long (" + value.length() + "). " +
+					"Maximum length allowed: " + RuntimeParameter.VALUE_MAX_LENGTH + ".");
+		}
 		runtimeParameter.setValue(value);
 		RuntimeParameterMediator.processSpecialValue(runtimeParameter);
 	}
@@ -211,10 +224,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 			sm = StateMachine.createStateMachine(run);
 			try {
 				sm.tryAdvanceToProvisionning();
-			} catch (InvalidStateException e) {
-				e.printStackTrace();
-				throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
-			} catch (CannotAdvanceFromTerminalStateException e) {
+			} catch (InvalidStateException | CannotAdvanceFromTerminalStateException e) {
 				e.printStackTrace();
 				throwClientBadRequest(String.format("Failed to advance state %s: %s", fromToState, e.getMessage()));
 			}
@@ -252,15 +262,8 @@ public class RuntimeParameterResource extends RunBaseResource {
 		States state;
 		try {
 			state = sc.updateState(nodeName);
-		} catch (CannotAdvanceFromTerminalStateException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					e.getMessage());
-		} catch (InvalidStateException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					e.getMessage());
-		} catch (SlipStreamClientException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT,
-					e.getMessage());
+		} catch (InvalidStateException | SlipStreamClientException e) {
+			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, e.getMessage());
 		}
 		return state;
 	}

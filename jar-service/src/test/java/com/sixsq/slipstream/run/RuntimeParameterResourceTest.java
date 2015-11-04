@@ -21,6 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -195,6 +196,47 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 		run.remove();
 
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_NOT_FOUND));
+	}
+
+	@Test
+	public void runtimeParameterResourcePutTooLong() throws FileNotFoundException, IOException, SlipStreamException {
+
+		Run run = createAndStoreRunImage("runtimeParameterResourcePutTooLong");
+
+		String key = "node.1:key";
+		String value = new String(new char[RuntimeParameter.VALUE_MAX_LENGTH+1]).replace('\0', 'x');
+
+		run.assignRuntimeParameter(key, "", "");
+		run.store();
+
+		Request request = createPutRequest(run.getUuid(), key, new StringRepresentation(value));
+		Response response = executeRequest(request);
+
+		run.remove();
+
+		assertThat(response.getStatus().getCode(), is(Status.CLIENT_ERROR_BAD_REQUEST.getCode()));
+	}
+
+	@Test
+	public void runtimeParameterResourcePutAbortTooLong() throws FileNotFoundException, IOException, SlipStreamException {
+
+		Run run = createAndStoreRunImage("runtimeParameterResourcePutAbortTooLong");
+
+		String key = "node.1:abort";
+		String value = new String(new char[RuntimeParameter.VALUE_MAX_LENGTH+1]).replace('\0', 'x');
+
+		run.assignRuntimeParameter(key, "", "");
+		run.store();
+
+		Request request = createPutRequest(run.getUuid(), key, new StringRepresentation(value));
+		Response response = executeRequest(request);
+		RuntimeParameter runtimeParameter = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
+
+		run.remove();
+
+		assertNotNull(runtimeParameter);
+		assertThat(runtimeParameter.getValue().length(), lessThanOrEqualTo(RuntimeParameter.VALUE_MAX_LENGTH));
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 	}
 
 	@Test
