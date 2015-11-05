@@ -22,6 +22,7 @@ package com.sixsq.slipstream.user;
 
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -30,9 +31,11 @@ import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.XmlUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -46,6 +49,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
@@ -468,23 +472,24 @@ public class UserResourceTest extends ResourceTestBase {
 		withState.remove();
 	}
 
-//	@Test
-//	public void systemParameterMerge() throws SlipStreamClientException {
-//		Request request = createGetRequest(superUser, otherUser.getName());
-//
-//		// Pick a category that we know always exists
-//		String category = "SlipStream_Support";
-//		CookieUtils.addAuthnCookie(request, otherUser.getName(), category);
-//
-//		Response response = executeRequest(request);
-//
-//		String denormalized = XmlUtil.denormalize(response.getEntityAsText());
-//		User user = (User) SerializationUtil.fromXml(denormalized, User.class);
-//
-//		UserParameter systemParameter = user
-//				.getParameter("slipstream.support.email");
-//		assertNotNull(systemParameter);
-//	}
+	@Test
+	@Ignore
+	public void systemParameterMerge() throws SlipStreamClientException {
+		Request request = createGetRequest(superUser, otherUser.getName());
+
+		// Pick a category that we know always exists
+		String category = "SlipStream_Support";
+		CookieUtils.addAuthnCookie(request, otherUser.getName(), category);
+
+		Response response = executeRequest(request);
+
+		String denormalized = XmlUtil.denormalize(response.getEntityAsText());
+		User user = (User) SerializationUtil.fromXml(denormalized, User.class);
+
+		UserParameter systemParameter = user
+				.getParameter("slipstream.support.email");
+		assertNotNull(systemParameter);
+	}
 
 	private Request createDeleteRequest(User targetUser, User user)
 			throws ConfigurationException, ValidationException {

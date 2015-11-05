@@ -26,17 +26,13 @@ public class APICollectionResource extends APIBaseResource {
         int first = offset + 1;
         int last = offset + limit;
 
-        String cimiFilter = "?$first=" + first + "&$last=" + last + cimiFilter();
-
-        getLogger().info("cimiParams = " + cimiFilter);
-
-        return cimiFilter;
+        return "?$first=" + first + "&$last=" + last + cimiFilter();
     }
 
     private String cimiFilter() {
         String cimiFilter = RequestUtil.getCIMIFilter(getRequest());
 
-        getLogger().info("cimiFilter = " + cimiFilter);
+        getLogger().fine("cimiFilter = " + cimiFilter);
 
         if (cimiFilter != null && !cimiFilter.isEmpty()) {
             try {
