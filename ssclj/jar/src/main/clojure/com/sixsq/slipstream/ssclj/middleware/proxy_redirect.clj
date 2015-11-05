@@ -4,16 +4,12 @@
     [clojure.tools.logging :as log]
     [clojure.string :as str]
     [puppetlabs.http.client.async :as ppasync]
-    [puppetlabs.http.client.sync :as ppsync]
     [puppetlabs.http.client.common :as ppcommon]
     [ring.util.codec :as codec]
     [ring.middleware.cookies :refer [wrap-cookies]]
     [ring.util.parsing :as rp]
     [clj-time.core :refer [in-seconds]]
-    [clj-time.format :refer [formatters unparse with-locale]]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    ))
+    [clj-time.format :refer [formatters unparse with-locale]]))
 
 ;; Inspired by : https://github.com/tailrecursion/ring-proxy
 
@@ -101,61 +97,13 @@ re-cookie
   [key value encoder]
   (encoder {key value}))
 
-(def ^{:private true
-       :doc "Attributes defined by RFC6265 that apply to the Set-Cookie header."}
-set-cookie-attrs
-  {:domain "Domain", :max-age "Max-Age", :path "Path"
-   :secure "Secure", :expires "Expires", :http-only "HttpOnly"})
 
-(defn- valid-attr?
-  "Is the attribute valid?"
-  [[key value]]
-  (and (contains? set-cookie-attrs key)
-       (not (.contains (str value) ";"))
-       (case key
-         :max-age (or (instance? Interval value) (integer? value))
-         :expires (or (instance? DateTime value) (string? value))
-         true)))
-
-(def ^:private rfc822-formatter
-  (with-locale (formatters :rfc822) java.util.Locale/US))
-
-(defn- write-attr-map
-  "Write a map of cookie attributes to a string."
-  [attrs]
-  {:pre [(every? valid-attr? attrs)]}
-  (for [[key value] attrs]
-    (let [attr-name (name (set-cookie-attrs key))]
-      (cond
-        (instance? Interval value) (str ";" attr-name "=" (in-seconds value))
-        (instance? DateTime value) (str ";" attr-name "=" (unparse rfc822-formatter value))
-        (true? value)  (str ";" attr-name)
-        (false? value) ""
-        :else (str ";" attr-name "=" value)))))
-
-(defn- write-cookies
-  "Turn a map of cookies into a seq of strings for a Set-Cookie header."
-  [cookies encoder]
-  (for [[key value] cookies]
-    (if (map? value)
-      (apply str (write-value key (:value value) encoder)
-             (write-attr-map (dissoc value :value)))
-      (write-value key value encoder))))
-
-(defn str-set-cookie
+(defn- str-set-cookie
   [response]
   (let [cookie-in-response (parse-cookies response codec/form-encode)]
     (if-not (empty? cookie-in-response)
       (str (get (first cookie-in-response) 0) "=" (:value (get (first cookie-in-response) 1)))
       "")))
-
-(defn merge-cookies
-  [request response]
-  (let [cookie-in-request       (get-in request [:headers "cookie"])
-        cookie-in-response      (parse-cookies response codec/form-encode)]
-    (if-not (empty? cookie-in-response)
-      (str cookie-in-request "; " (str-set-cookie response))
-      cookie-in-request)))
 
 (defn- split-equals
   [key-val]
@@ -173,16 +121,22 @@ set-cookie-attrs
     (let [kvs (str/split query-string #"&")]
       (into {} (remove empty? (map split-equals kvs))))))
 
+(defn- base-url
+  [request]
+  (str (name (:scheme request)) "://" (:server-name request) ":"(:server-port request)))
+
 (defn rewrite-location
   [location old-host new-host]
-  (if (and location old-host new-host)
-    (str/replace location old-host new-host)
-    ""))
+  (let [result
+    (if (and old-host new-host)
+      (if (and location (not= location old-host))
+        (str/replace location old-host new-host)
+        (str new-host "/dashboard"))
+      (or location ""))]
+    result))
 
 (defn- redirect
   [host request-uri request]
-  (log/info "+++++++++++++++++++++++++++")
-  (log/info "request :headers cookie = " (get-in request [:headers "cookie"]))
 
   (let [redirected-url  (build-url host request-uri (:query-string request))
 
@@ -200,14 +154,13 @@ set-cookie-attrs
                                                 :headers
                                                 (dissoc "host" "content-length"))})]
 
-    (log/info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    (log/info "response, status     = " (:status @response))
+    (log/debug "response, status     = " (:status @response))
 
     (-> @response
         (assoc-in  [:headers "set-cookie"] (str-set-cookie @response))
         (update-in [:headers "location"]  #(rewrite-location %
                                                              host
-                                                             (get-in request [:headers "origin"]))))))
+                                                             (base-url request))))))
 
 (defn wrap-proxy-redirect
   [handler except-uris host]

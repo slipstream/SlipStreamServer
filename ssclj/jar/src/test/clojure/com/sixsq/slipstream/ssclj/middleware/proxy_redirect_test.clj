@@ -11,10 +11,11 @@
   (is (= {"edit" "true" "display" ""} (to-query-params "edit=true&display="))))
 
 (deftest test-rewrite-location
-  (is (= "http://localhost:8201/user/MvAdrichem"
-         (rewrite-location "http://localhost:8080/user/MvAdrichem"
-                           "http://localhost:8080"
-                           "http://localhost:8201")))
-  (is (= "" (rewrite-location nil
-                              "http://localhost:8080"
-                              "http://localhost:8201"))))
+  (let [old "http://localhost:8080"
+        new "http://localhost:8201"]
+
+    (is (= "http://localhost:8201/user/MvAdrichem"
+           (rewrite-location "http://localhost:8080/user/MvAdrichem" old new)))
+
+    (is (= "http://localhost:8201/dashboard"
+           (rewrite-location "http://localhost:8080" old new)))))
