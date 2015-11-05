@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 public abstract class BaseResource extends ServerResource {
 
 	public static final String MODULE_RESOURCE_URI_KEY = "moduleResourceUri";
-
 	public static final String CIMI_FILTER_KEY = "filter";
 	public static final String PAGING_OFFSET_KEY = "offset";
 	public static final String PAGING_LIMIT_KEY = "limit";
