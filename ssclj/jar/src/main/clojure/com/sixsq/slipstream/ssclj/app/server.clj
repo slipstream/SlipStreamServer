@@ -58,7 +58,7 @@
   "Starts the server and returns a function that when called, will
    stop the application server."
   ([port]
-    (start port "httpkit"))
+    (start port "aleph"))
   ([port impl]
    (log/info "=============== SSCLJ START" port "===============")
    (log/info "java vendor: " (System/getProperty "java.vendor"))
