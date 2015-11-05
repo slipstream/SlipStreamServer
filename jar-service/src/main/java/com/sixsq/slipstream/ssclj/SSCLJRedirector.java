@@ -61,7 +61,7 @@ public class SSCLJRedirector extends Redirector {
         String last     = RequestUtil.getQueryValue(request,    CIMI_KEY_LAST_PARAM);
         String filter   = RequestUtil.getQueryValue(request,    CIMI_KEY_FILTER_PARAM);
 
-        logger.info("cimi filter = " + filter);
+        logger.fine("cimi filter = " + filter);
 
         checkIntegerPositive(CIMI_KEY_FIRST_PARAM, first);
         checkIntegerPositive(CIMI_KEY_LAST_PARAM, last);
