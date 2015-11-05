@@ -2,6 +2,8 @@ package com.sixsq.slipstream.api;
 
 import com.sixsq.slipstream.util.RequestUtil;
 
+import java.io.UnsupportedEncodingException;
+
 public class APICollectionResource extends APIBaseResource {
 
     public APICollectionResource(String resourceName) {
@@ -29,8 +31,16 @@ public class APICollectionResource extends APIBaseResource {
 
     private String cimiFilter() {
         String cimiFilter = RequestUtil.getCIMIFilter(getRequest());
+
+        getLogger().fine("cimiFilter = " + cimiFilter);
+
         if (cimiFilter != null && !cimiFilter.isEmpty()) {
-            return "&$filter=" + cimiFilter;
+            try {
+                return "&" + java.net.URLEncoder.encode("$filter=" + cimiFilter, "UTF-8");
+            } catch (UnsupportedEncodingException uee) {
+                getLogger().warning("Unable to retrieve CIMI filter : " + uee);
+                return "";
+            }
         } else {
             return "";
         }

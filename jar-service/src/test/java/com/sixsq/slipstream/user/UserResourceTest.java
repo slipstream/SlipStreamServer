@@ -20,26 +20,6 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Map;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.restlet.Request;
-import org.restlet.Response;
-import org.restlet.data.Form;
-import org.restlet.data.Status;
-
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.cookie.CookieUtils;
@@ -52,6 +32,26 @@ import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.restlet.Request;
+import org.restlet.Response;
+import org.restlet.data.Form;
+import org.restlet.data.Status;
+
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 public class UserResourceTest extends ResourceTestBase {
 
@@ -473,6 +473,7 @@ public class UserResourceTest extends ResourceTestBase {
 	}
 
 	@Test
+	@Ignore
 	public void systemParameterMerge() throws SlipStreamClientException {
 		Request request = createGetRequest(superUser, otherUser.getName());
 

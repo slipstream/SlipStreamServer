@@ -20,30 +20,27 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.persistence.Package;
+import com.sixsq.slipstream.util.CommonTestUtil;
+import com.sixsq.slipstream.util.ResourceTestBase;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Package;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.util.CommonTestUtil;
-import com.sixsq.slipstream.util.ResourceTestBase;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 
@@ -58,6 +55,8 @@ public class RuntimeParameterResourceTestBase extends ResourceTestBase {
 		user = CommonTestUtil.createTestUser();
 
 		CommonTestUtil.addSshKeys(user);
+
+		Event.muteForTests();
 	}
 
 	public static void classTearDown() throws ValidationException {

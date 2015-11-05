@@ -31,6 +31,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>auth</artifactId>
+      <version>2.19-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
     </dependency>
@@ -179,7 +184,12 @@
     </dependency>
     <dependency>
       <groupId>honeysql</groupId>
-      <artifactId>honeysql</artifactId>      
+      <artifactId>honeysql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>puppetlabs</groupId>
+      <artifactId>http-client</artifactId>
+      <version>0.4.4</version>
     </dependency>
   </dependencies>
 
@@ -197,7 +207,7 @@
           <plugin>
             <groupId>com.theoryinpractise</groupId>
             <artifactId>clojure-maven-plugin</artifactId>
-            
+
             <executions>
               <execution>
                 <id>syntax-check-source</id>
@@ -227,9 +237,9 @@
               </execution>
 
             </executions>
-            
+
           </plugin>
-          
+
         </plugins>
       </build>
     </profile>
@@ -278,9 +288,9 @@
       <plugin>
         <groupId>com.theoryinpractise</groupId>
         <artifactId>clojure-maven-plugin</artifactId>
-        
+
         <executions>
-          
+
           <execution>
             <id>minimal-compile</id>
             <goals>
@@ -301,9 +311,9 @@
               <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
             </configuration>
           </execution>
-          
+
         </executions>
-        
+
       </plugin>
 
     </plugins>

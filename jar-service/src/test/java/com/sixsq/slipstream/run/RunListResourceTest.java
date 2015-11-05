@@ -20,47 +20,35 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
+import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.exceptions.AbortException;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import com.sixsq.slipstream.util.ResourceTestBase;
+import com.sixsq.slipstream.util.XmlUtil;
+import org.junit.*;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
-import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
-import com.sixsq.slipstream.connector.local.LocalConnector;
-import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
-import com.sixsq.slipstream.exceptions.AbortException;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.user.UserTest;
-import com.sixsq.slipstream.util.ResourceTestBase;
-import com.sixsq.slipstream.util.XmlUtil;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class RunListResourceTest extends ResourceTestBase {
 
@@ -88,12 +76,16 @@ public class RunListResourceTest extends ResourceTestBase {
                         .constructKey(LocalUserParametersFactory.SECRET_PARAMETER_NAME), "value", "desc");
         user.setParameter(secretParameter);
 
+
+		Event.muteForTests();
+
         UserParameter publicKey = new UserParameter(ExecutionControlUserParametersFactory.CATEGORY +
                 "." + UserParameter.SSHKEY_PARAMETER_NAME, "value", "desc");
         user.setParameter(publicKey);
 
 		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
 		user = user.store();
+
 	}
 
 	private static void removeAllRuns() throws ConfigurationException, ValidationException {

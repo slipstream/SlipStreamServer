@@ -39,6 +39,8 @@
 
 (defentity usage_summaries)
 (defentity acl)
+(database usage_summaries kh/korma-api-db)
+(database acl kh/korma-api-db)
 
 (defn- deserialize-usage
   [usage]

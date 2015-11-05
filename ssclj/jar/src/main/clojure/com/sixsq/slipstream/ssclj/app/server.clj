@@ -2,12 +2,16 @@
   (:require
     [clojure.tools.logging :as log]
     [compojure.handler :as handler]
+
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params :refer [wrap-params]]
+    [ring.middleware.cookies :refer [wrap-cookies]]
+
     [metrics.core :refer [default-registry]]
     [metrics.ring.instrument :refer [instrument]]
     [metrics.ring.expose :refer [expose-metrics-as-json]]
     [metrics.jvm.core :refer [instrument-jvm]]
+
     [com.sixsq.slipstream.ssclj.app.httpkit-container :as httpkit]
     [com.sixsq.slipstream.ssclj.app.aleph-container :as aleph]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
@@ -17,7 +21,6 @@
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.root :as root]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
@@ -39,24 +42,32 @@
 
   (instrument-jvm default-registry)
 
+  (compojure.core/routes )
+
   (-> (routes/get-main-routes)
-      wrap-logger
+
       handler/site
       wrap-exceptions
       wrap-cimi-params
       wrap-base-uri
       wrap-params
       wrap-authn-info-header
+
       (expose-metrics-as-json (str p/service-context "metrics") default-registry {:pretty-print? true})
+
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
-      (instrument default-registry)))
+      (instrument default-registry)
+
+      wrap-cookies
+
+      wrap-logger))
 
 (defn start
   "Starts the server and returns a function that when called, will
    stop the application server."
   ([port]
-    (start port "httpkit"))
+    (start port "aleph"))
   ([port impl]
    (log/info "=============== SSCLJ START" port "===============")
    (log/info "java vendor: " (System/getProperty "java.vendor"))
@@ -64,11 +75,11 @@
    (log/info "java classpath: " (System/getProperty "java.class.path"))
    (set-db-impl)
    (resources/initialize)
-   (if (= impl "aleph")
+   (if (= impl "httpkit")
      (-> (create-ring-handler)
-         (aleph/start-container port))
+         (httpkit/start-container port))
      (-> (create-ring-handler)
-         (httpkit/start-container port)))))
+         (aleph/start-container port)))))
 
 (defn stop
   "Stops the application server by calling the function that was

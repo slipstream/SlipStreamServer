@@ -20,32 +20,21 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Logger;
-
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.credentials.Credentials;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ProcessException;
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
-import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
-import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.factory.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ProcessUtils;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
 
 public abstract class CliConnectorBase extends ConnectorBase {
 
@@ -138,7 +127,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		validateCredentials(user);
 
 		String command = getCommandDescribeInstances() + createTimeoutParameter(timeout)
-		        + createCliParameters(getUserParams(user));
+				+ createCliParameters(getUserParams(user));
 
 		String result;
 		String[] commands = { "sh", "-c", command };
@@ -156,8 +145,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	private String createTimeoutParameter(int timeout) {
-	    return " -t " + timeout + " ";
-    }
+		return " -t " + timeout + " ";
+	}
 
 	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {
@@ -187,8 +176,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 
 		String command = getCommandTerminateInstances() +
-						 createCliParameters(getUserParams(user)) +
-						 " --instance-ids-file " + tempFile.getPath();
+				createCliParameters(getUserParams(user)) +
+				" --instance-ids-file " + tempFile.getPath();
 
 		String[] commands = { "sh", "-c", command};
 		try {
@@ -288,7 +277,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		}
 	}
 
-	protected void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run)
+	private void putLaunchParamNativeContextualization(Map<String, String> launchParams, Run run)
 			throws ValidationException {
 		String key = SystemConfigurationParametersFactoryBase.NATIVE_CONTEXTUALIZATION_KEY;
 		String nativeContextualization = Configuration.getInstance().getProperty(constructKey(key));
