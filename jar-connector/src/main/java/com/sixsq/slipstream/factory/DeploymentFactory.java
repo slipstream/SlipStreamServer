@@ -206,10 +206,15 @@ public class DeploymentFactory extends RunFactory {
 		}
 
 		String cloudService = run.getCloudServiceNameForNode(node.getName());
-		Connector connector = ConnectorFactory.getConnector(cloudService);
 		ImageModule image = node.getImage();
+		Map<String, ModuleParameter> parameters = new HashMap<>();
+		Connector connector = null;
 
-		Map<String, ModuleParameter> parameters = connector.getImageParametersTemplate();
+		try {
+			connector = ConnectorFactory.getConnector(cloudService);
+			parameters = connector.getImageParametersTemplate();
+		} catch (ValidationException e) {
+		}
 		parameters.putAll(image.getParameters());
 
 		for (ModuleParameter param : parameters.values()) {
@@ -286,17 +291,20 @@ public class DeploymentFactory extends RunFactory {
 	public static String extractInitialValue(ModuleParameter parameter, Node node, Run run, String cloudService)
 			throws ValidationException {
 		String parameterName = parameter.getName();
+		ImageModule image = node.getImage();
 
 		String value = run.getParameterValue(constructNodeParamName(node, parameterName), null);
 		if (value == null) {
 			value = extractNodeParameterValue(node.getParameter(parameterName));
-			if (value == null) {
-				if (cloudService.equals(parameter.getCategory())) {
-					value = node.getImage().extractParameter(parameterName).getValue();
-				} else {
-					value = parameter.getValue();
-				}
+		}
+		if (value == null && image != null && cloudService.equals(parameter.getCategory())) {
+			ModuleParameter imageParameter = image.getParameter(parameterName);
+			if (imageParameter != null) {
+				value = imageParameter.getValue();
 			}
+		}
+		if (value == null) {
+			value = parameter.getValue();
 		}
 
 		return value;

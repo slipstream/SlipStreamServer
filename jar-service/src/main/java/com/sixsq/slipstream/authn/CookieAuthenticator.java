@@ -20,9 +20,12 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -33,14 +36,14 @@ import org.restlet.data.Status;
 import org.restlet.security.User;
 import org.restlet.security.Verifier;
 
-import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.util.RequestUtil;
-import com.sixsq.slipstream.util.ResourceUriUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class CookieAuthenticator extends AuthenticatorBase {
+
+	private static final Logger logger = Logger.getLogger(CookieAuthenticator.class.getName());
 
 	public CookieAuthenticator(Context context) {
 		super(context, false);
@@ -51,21 +54,31 @@ public class CookieAuthenticator extends AuthenticatorBase {
 
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
 
-		int result = CookieUtils.verifyAuthnCookie(cookie);
-		boolean isAuthenticated;
+		logger.fine("will authenticate cookie " + cookie);
+		boolean isTokenValid = false;
 
-		if (result == Verifier.RESULT_VALID) {
-			isAuthenticated = handleValid(request, cookie);
+		if(CookieUtils.isMachine(cookie)) {
+			isTokenValid = CookieUtils.verifyAuthnCookie(cookie) == Verifier.RESULT_VALID;
+			logger.fine("Done calling verifyAuthnCookie: isTokenValid=" + isTokenValid);
 		} else {
-			handleNotValid(request, response, result);
-			isAuthenticated = false;
+			logger.fine("Will call claimsInToken");
+			Map<String, String> claimsInToken = CookieUtils.claimsInToken(cookie);
+			isTokenValid = !claimsInToken.isEmpty();
 		}
 
-		return isAuthenticated;
+		if (isTokenValid) {
+			handleValid(request, cookie);
+		} else {
+			handleNotValid(request, response);
+		}
+
+		return isTokenValid;
 	}
 
 	private boolean handleValid(Request request, Cookie cookie) {
+
 		String username = setClientInfo(request, cookie);
+
 		com.sixsq.slipstream.persistence.User user = null;
 
 		try {
@@ -79,8 +92,18 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		if(user == null) {
 			return false;
 		}
+
 		setCloudServiceName(request, cookie);
 		setUserInRequest(user, request);
+
+		logger.fine("handle valid, cookie = " + cookie);
+		String tokenInCookie = CookieUtils.tokenInCookie(cookie);
+		if(tokenInCookie!=null) {
+			logger.fine("handle valid, tokenInCookie = " + tokenInCookie);
+			user.setAuthnToken(tokenInCookie);
+			user = user.store();
+			logger.fine("user.authnToken = " + user.getAuthnToken());
+		}
 
 		if (!CookieUtils.isMachine(cookie)) {
 			setLastOnline(cookie);
@@ -89,10 +112,8 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		return true;
 	}
 
-	private void handleNotValid(Request request, Response response, int result) {
-		if (result == Verifier.RESULT_INVALID) {
-			CookieUtils.removeAuthnCookie(response);
-		}
+	private void handleNotValid(Request request, Response response) {
+		CookieUtils.removeAuthnCookie(response);
 
 		List<MediaType> supported = new ArrayList<MediaType>();
 		supported.add(MediaType.APPLICATION_XML);
@@ -115,18 +136,19 @@ public class CookieAuthenticator extends AuthenticatorBase {
 
 	private String setClientInfo(Request request, Cookie cookie) {
 		request.getClientInfo().setAuthenticated(true);
+
 		String username = CookieUtils.getCookieUsername(cookie);
+		logger.info("setClientInfo, username = '" + username + "'");
+
 		User user = new User(username);
 		request.getClientInfo().setUser(user);
 		return username;
 	}
 
 	private void setCloudServiceName(Request request, Cookie cookie) {
-		String cookieCloudServiceName = CookieUtils
-				.getCookieCloudServiceName(cookie);
+		String cookieCloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
 		if (cookieCloudServiceName != null) {
-			request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME,
-					cookieCloudServiceName);
+			request.getAttributes().put(RuntimeParameter.CLOUD_SERVICE_NAME, cookieCloudServiceName);
 		}
 	}
 

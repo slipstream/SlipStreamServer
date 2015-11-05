@@ -1,24 +1,35 @@
 (ns com.sixsq.slipstream.ssclj.middleware.logger
-  (:require [clojure.tools.logging :as log]))
+  (:require
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]))
 
 (defn- display-querystring
   [request]
   (let [to-display (-> request :query-string (or "no-query-string"))]
-    (str "?" to-display)))
+    (str "?" (str/replace to-display #"&?password=([^&]*)" ""))))
 
-(defn display-authn-info
+(defn- display-authn-info
   [request]
   (let [to-display (-> request :headers (get "slipstream-authn-info")
                        (or "no-authn-info"))]
     (str "[" to-display "]")))
 
-(defn log-request
+(defn request-to-str
   [request]
-  (log/info (-> request :request-method)
-            (-> request :uri)
-            (-> request display-authn-info)
-            (-> request display-querystring)
-            (-> request :body (or "no-body")))
+  (str
+    (-> request :request-method)
+    " "
+    (-> request :uri)
+    " "
+    (-> request display-authn-info)
+    " "
+    (-> request display-querystring)
+    " "
+    (-> request :body (or "no-body"))))
+
+(defn- log-request
+  [request]
+  (log/info (request-to-str request))
   request)
 
 (defn wrap-logger

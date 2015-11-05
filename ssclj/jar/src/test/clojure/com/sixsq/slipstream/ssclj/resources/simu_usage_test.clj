@@ -21,8 +21,8 @@
 (def start-day          [2015 1])
 
 ;; parameters to tweak
-(def nb-days            1000)
-(def nb-records-per-day 100)
+(def nb-days            10)
+(def nb-records-per-day 10)
 
 (defn some-strings
   [s n]

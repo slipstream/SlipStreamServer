@@ -20,27 +20,22 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-
-import org.junit.Test;
-
+import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.CommonTestUtil;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 
 public class ConnectorTest extends ConnectorDummy {
 
@@ -48,6 +43,11 @@ public class ConnectorTest extends ConnectorDummy {
 
 	public ConnectorTest() {
 		super(INSTANCE_NAME);
+	}
+
+	@BeforeClass
+	public static void setupClass() {
+		Event.muteForTests();
 	}
 
 	@Test

@@ -114,7 +114,7 @@ public class Collector {
 		if (vmRtpMap != null) {
 			RuntimeParameter rp = vmRtpMap.getVmstateRuntimeParameter();
 			if(rp!=null) {
-				logger.info("isVmRunOwnedByUser:: Using state runtime parameter");
+				logger.fine("isVmRunOwnedByUser:: Using state runtime parameter");
 				return user.equals(rp.getContainer().getUser());
 			} else {
 				logger.warning("isVmRunOwnedByUser:: vmRtpMap.getVmstateRuntimeParameter is null");
@@ -122,7 +122,7 @@ public class Collector {
 		}
 
 		if (vm != null) {
-			logger.info("isVmRunOwnedByUser:: Fallback to vm, vm.getRunOwner()=" + vm.getRunOwner());
+			logger.fine("isVmRunOwnedByUser:: Fallback to vm, vm.getRunOwner()=" + vm.getRunOwner());
 			return user.equals(vm.getRunOwner());
 		} else {
 			logger.warning("isVmRunOwnedByUser:: Unable to determine ownership of VM!");
@@ -238,7 +238,7 @@ public class Collector {
 		for(Vm goneVm : classifier.goneVms()) {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
 			setVmStateRuntimeParameter(em, goneVmRtpMap, "Unknown");
-			logger.info("updateDbVmsWithCloudVms: Deleting from VM: id=" + goneVm.getInstanceId() + ", state=" + goneVm.getState());
+			logger.fine("updateDbVmsWithCloudVms: Deleting from VM: id=" + goneVm.getInstanceId() + ", state=" + goneVm.getState());
 			em.remove(goneVm);
 		}
 
@@ -246,16 +246,16 @@ public class Collector {
 
 			VmRuntimeParameterMapping newVmRtpMap = getMapping(newVm);
 
-			logger.info("updateDbVmsWithCloudVms::looping newVms, newVmRtpMap=" + newVmRtpMap);
+			logger.fine("updateDbVmsWithCloudVms::looping newVms, newVmRtpMap=" + newVmRtpMap);
 			if(newVmRtpMap != null) {
-				logger.info("updateDbVmsWithCloudVms::looping newVms, newVmRtpMap.runownwer=" + newVmRtpMap.getRunOwner());
+				logger.fine("updateDbVmsWithCloudVms::looping newVms, newVmRtpMap.runownwer=" + newVmRtpMap.getRunOwner());
 			}
 
 			updateVmFromRuntimeParametersMappings(newVm, newVmRtpMap);
 
 			setVmStateRuntimeParameter(em, newVmRtpMap, newVm);
 
-			logger.info("updateDbVmsWithCloudVms: Persisting into VM: id=" + newVm.getInstanceId()
+			logger.fine("updateDbVmsWithCloudVms: Persisting into VM: id=" + newVm.getInstanceId()
 					+ ", state=" + newVm.getState());
 
 			em.persist(newVm);

@@ -20,22 +20,6 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Map;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.restlet.Request;
-import org.restlet.Response;
-import org.restlet.data.Status;
-import org.restlet.representation.Representation;
-import org.restlet.representation.StringRepresentation;
-
-import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.CloudImageIdentifier;
@@ -44,6 +28,16 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
+import org.junit.*;
+import org.restlet.Request;
+import org.restlet.Response;
+import org.restlet.data.Status;
+import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
+
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 
@@ -198,7 +192,7 @@ public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 				cloudResourceUri);
 		attributes.put("version", version);
 		request.getAttributes().putAll(attributes);
-		CookieUtils.addAuthnCookie(request, user.getName());
+		// TODO CookieUtils.addAuthnCookie(request, user.getName());
 		return request;
 	}
 
@@ -222,7 +216,7 @@ public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 			attributes.put("region", region);
 		}
 		request.getAttributes().putAll(attributes);
-		CookieUtils.addAuthnCookie(request, user.getName());
+		// TODO CookieUtils.addAuthnCookie(request, user.getName());
 		return request;
 	}
 
