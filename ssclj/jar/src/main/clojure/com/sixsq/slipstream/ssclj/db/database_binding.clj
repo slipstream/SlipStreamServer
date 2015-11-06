@@ -22,8 +22,7 @@
   (kh/korma-init)
   (ddl/create-table! "resources" (ddl/columns "id" "VARCHAR(100)" "data" "VARCHAR(10000)"))
   (ddl/create-index! "resources" "INDEX_ID" "id")
-  (defentity resources)
-  (database resources kh/korma-api-db))
+  (defentity resources (database kh/korma-api-db)))
 
 ;;
 ;; Korma SQL primitives
