@@ -25,6 +25,7 @@
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
+    [com.sixsq.slipstream.ssclj.util.config :as cf]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 ;; FIXME: make this dynamic depending on the service configuration
@@ -57,7 +58,7 @@
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (instrument default-registry)
-      (wrap-proxy-redirect ["/api" "/auth"] "http://localhost:8080")
+      (wrap-proxy-redirect ["/api" "/auth"] (cf/property-value :upstream-server))
       wrap-cookies
       wrap-logger))
 
