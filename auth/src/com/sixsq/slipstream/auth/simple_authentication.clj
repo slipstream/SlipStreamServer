@@ -32,9 +32,7 @@
   (delay
     (kh/korma-init)
     (log/info "Korma init done")
-
-    (kc/defentity users (kc/table "USER"))
-    (kc/database users kh/korma-auth-db)
+    (kc/defentity users (kc/table "USER") (kc/database kh/korma-auth-db))
     (log/info "Korma Entities defined")))
 ;;
 ;; DB
