@@ -21,6 +21,7 @@
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
@@ -79,7 +80,8 @@
      (-> (create-ring-handler)
          (httpkit/start-container port))
      (-> (create-ring-handler)
-         (aleph/start-container port)))))
+         (aleph/start-container port)))
+   (graphite/start-graphite-reporter)))
 
 (defn stop
   "Stops the application server by calling the function that was
