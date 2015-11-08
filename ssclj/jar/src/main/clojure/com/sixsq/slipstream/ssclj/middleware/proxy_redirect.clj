@@ -1,5 +1,4 @@
 (ns com.sixsq.slipstream.ssclj.middleware.proxy-redirect
-  (:import [org.joda.time DateTime Interval])
   (:require
     [clojure.tools.logging :as log]
     [clojure.string :as str]
@@ -97,7 +96,6 @@ re-cookie
   [key value encoder]
   (encoder {key value}))
 
-
 (defn- str-set-cookie
   [response]
   (let [cookie-in-response (parse-cookies response codec/form-encode)]
@@ -123,17 +121,31 @@ re-cookie
 
 (defn- base-url
   [request]
-  (str (name (:scheme request)) "://" (:server-name request) ":"(:server-port request)))
+  (str "https://" (get-in request [:headers "host"])))
+
+(defn- after-scheme
+  [url]
+  (.substring url (.indexOf url "//")))
+
+(defn- same-after-scheme?
+  [urla urlb]
+  (= (after-scheme urla) (after-scheme urlb)))
 
 (defn rewrite-location
-  [location old-host new-host]
-  (let [result
-    (if (and old-host new-host)
-      (if (and location (not= location old-host))
-        (str/replace location old-host new-host)
-        (str new-host "/dashboard"))
-      (or location ""))]
-    result))
+[location old-host new-host]
+
+(let [result
+      (if (and old-host new-host)
+        (if (and location (not (same-after-scheme? location old-host)))
+          (str/replace location (after-scheme old-host) (after-scheme new-host))
+          (str new-host "/dashboard"))
+        (or location ""))]
+
+  (log/debug "rewrite location " location)
+  (log/debug "rewrite old host" old-host)
+  (log/debug "rewrite new host" new-host)
+  (log/debug "rewrite result" result)
+  result))
 
 (defn- redirect
   [host request-uri request]
@@ -155,6 +167,7 @@ re-cookie
                                                 (dissoc "host" "content-length"))})]
 
     (log/debug "response, status     = " (:status @response))
+    (clojure.pprint/pprint request)
 
     (-> @response
         (assoc-in  [:headers "set-cookie"] (str-set-cookie @response))
