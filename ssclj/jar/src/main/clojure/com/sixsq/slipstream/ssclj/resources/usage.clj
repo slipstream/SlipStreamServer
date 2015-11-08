@@ -37,8 +37,8 @@
 
 (defonce init-record-keeper (rc/-init))
 
-(defentity usage_summaries)
-(defentity acl)
+(defentity usage_summaries (database kh/korma-api-db))
+(defentity acl (database kh/korma-api-db))
 
 (defn- deserialize-usage
   [usage]

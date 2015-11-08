@@ -165,6 +165,15 @@ fi
 
 
 #####################################################
+# See if SSCLJ_GRAPHITE_HOST is defined
+#####################################################
+GRAPHITE_OPTION=''
+if [ -n "$SSCLJ_GRAPHITE_HOST" ]; then
+  GRAPHITE_OPTION="-Dgraphite.host=${SSCLJ_GRAPHITE_HOST}"
+fi
+
+
+#####################################################
 # Define the command for starting the service
 #####################################################
 SSCLJ_JAR=$SSCLJ_HOME/lib/ssclj.jar
@@ -173,7 +182,7 @@ if [ ! -f "$SSCLJ_JAR" ]; then
   exit 1
 fi
 
-RUN_ARGS=(${JAVA_OPTIONS[@]} -Ddb.config.path=db.spec -Dlogfile.path=production -cp "$SSCLJ_HOME/resources:$SSCLJ_HOME/lib/ext/*:$SSCLJ_JAR" $SSCLJ_CLASS $SSCLJ_PORT)
+RUN_ARGS=(${JAVA_OPTIONS[@]} ${GRAPHITE_OPTION} -Dconfig.path=db.spec -Dlogfile.path=production -cp "$SSCLJ_HOME/resources:$SSCLJ_JAR" $SSCLJ_CLASS $SSCLJ_PORT)
 RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
 
 

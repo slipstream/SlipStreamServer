@@ -72,6 +72,8 @@
 
     (kc/defentity usage_records)
     (kc/defentity usage_summaries)
+    (kc/database usage_records kh/korma-api-db)
+    (kc/database usage_summaries kh/korma-api-db)
     (kc/select usage_records (kc/limit 1))
 
     (log/info "record-keeper: Korma Entities defined")))

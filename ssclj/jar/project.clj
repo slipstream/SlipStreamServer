@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/ssclj "2.10.0-SNAPSHOT"
+(defproject com.sixsq.slipstream/ssclj "2.19-SNAPSHOT"
   :description    "Clojure REST resources"
   :url            "http://sixsq.com"
   :license {:name "Apache License, Version 2.0"
@@ -19,26 +19,35 @@
                  [clj-time/clj-time                         "0.11.0"]
                  [clj-stacktrace/clj-stacktrace             "0.2.8"]
                  [metrics-clojure/metrics-clojure           "2.5.1"]
-                 [metrics-clojure-ring/metrics-clojure-ring "2.5.1"]
+                 [metrics-clojure-ring/metrics-clojure-ring "2.5.1"
+                   :exclusions [[cheshire/cheshire]] ]
                  [metrics-clojure-jvm/metrics-clojure-jvm   "2.5.1"]
+                 [metrics-clojure-graphite/metrics-clojure-graphite   "2.5.1"]
+
                  [fs/fs                                     "1.3.3"]
                  [org.slf4j/slf4j-log4j12                   "1.7.12"]
                  [instaparse                                "1.4.1"]
-                 ;; Environment settings
+                ; ;; Authentication service
+                 [com.sixsq.slipstream/auth                 "2.19-SNAPSHOT"]
+                ; ;; Environment settings
                  [environ                                   "1.0.0"]
-                 ;; database
+                ; ;; database
                  [honeysql                                  "0.6.1"]
                  [org.clojure/java.jdbc                     "0.4.1"]
                  [korma                                     "0.4.2"]
                  [org.hsqldb/hsqldb                         "2.3.3"]
                  [org.xerial/sqlite-jdbc                    "3.8.11.1"]
-                 ;; http related
+                ; ;; http related
                  [javax.servlet/javax.servlet-api           "3.1.0"]
                  [ring/ring-core                            "1.4.0"]
                  [ring/ring-json                            "0.4.0"]
                  [compojure/compojure                       "1.4.0"]
                  [http-kit/http-kit                         "2.1.19"]
-                 [aleph                                     "0.4.0"]]
+
+                 [puppetlabs/http-client                    "0.4.4"
+                  :exclusions [[cheshire/cheshire]] ]
+                 [aleph                                     "0.4.0"]
+                 ]
 
   :plugins      [[lein-expectations                         "0.0.7"]
                  [lein-autoexpect                           "1.4.2"]
@@ -71,27 +80,29 @@
                   "Or all at once:  (require '[com.sixsq.slipstream.ssclj.api.dev-server :as api])\n"))
                 }
 
-  :profiles {
-    :provided
-      { :dependencies [[reply/reply "0.3.4"]]}
+ :profiles {
+  ; :provided
+  ;   { :dependencies [[reply/reply "0.3.4" :exlusions [[cheshire/cheshire]]]] }
 
-    :uberjar
-      { :aot [#"com.sixsq.slipstream.ssclj.api.acl*"]
-        :env {  :clj-env        :production
-                :db-config-path "config-hsqldb-mem.edn"}
-        :jvm-opts ["-Dlogfile.path=production"]}
+   :uberjar
+     { :aot [#"com.sixsq.slipstream.ssclj.api.acl*"]
+       :env {  :clj-env        :production
+               :config-path    "config-hsqldb-mem.edn"}
+       :jvm-opts ["-Dlogfile.path=production"]}
 
-    :dev
-      { :env {  :clj-env        :development
-                :db-config-path "config-hsqldb.edn"}
-        :jvm-opts ["-Dlogfile.path=development"]
-        :dependencies [ [peridot/peridot "0.4.1"]
-                        [expectations/expectations "2.1.3"]]}
-    :test
-      { :env {  :clj-env        :test
-                :db-config-path "config-hsqldb-mem.edn"}
+   :dev
+     { :env {  :clj-env        :development
+               :config-path    "config-hsqldb.edn"}
+       :jvm-opts ["-Dlogfile.path=development"]
+       :dependencies [ [peridot/peridot "0.4.1"]
+                       [expectations/expectations "2.1.3"]]}
+   :test
+     { :env {  :clj-env        :test
+               :config-path    "config-hsqldb-mem.edn"}
 
-        :jvm-opts ["-Dlogfile.path=test"]
+       :jvm-opts ["-Dlogfile.path=test"]
 
-        :dependencies [ [peridot/peridot "0.4.1"]
-                        [expectations/expectations "2.1.3"]]}})
+       :dependencies [ [peridot/peridot "0.4.1"]
+                       [expectations/expectations "2.1.3"]]}
+  }
+  )

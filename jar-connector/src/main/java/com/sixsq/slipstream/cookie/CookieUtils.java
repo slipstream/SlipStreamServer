@@ -20,12 +20,10 @@ package com.sixsq.slipstream.cookie;
  * -=================================================================-
  */
 
-import java.util.Date;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.User;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Cookie;
@@ -34,10 +32,9 @@ import org.restlet.data.Form;
 import org.restlet.security.Verifier;
 import org.restlet.util.Series;
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 /**
  * Contains utilities for handling authentication cookies.
@@ -46,6 +43,10 @@ import com.sixsq.slipstream.persistence.User;
  *
  */
 public class CookieUtils {
+
+	private static final Logger logger = Logger.getLogger(CookieUtils.class.getName());
+
+	public static final String TOKEN = "token";
 
 	// For testing, the age defaults to 30 minutes. The value is given in
 	// seconds!
@@ -73,6 +74,15 @@ public class CookieUtils {
 		requiredCookieKeys.add(COOKIE_SIGNATURE);
 	}
 
+	public static void addAuthnCookieFromAuthnResponse(Response response, Response token) {
+		CookieSetting authnCookie = extractAuthnTokenCookie(token);
+
+		Series<CookieSetting> cookieSettings = response.getCookieSettings();
+		cookieSettings.removeAll(COOKIE_NAME);
+
+		cookieSettings.add(authnCookie);
+	}
+
 	/**
 	 * Insert a new authentication cookie into a Response using default id type.
 	 *
@@ -92,7 +102,7 @@ public class CookieUtils {
 	 * @param identifier
 	 */
 	public static void addAuthnCookie(Response response, String idType,
-			String identifier) {
+									  String identifier) {
 
 		Series<CookieSetting> cookieSettings = response.getCookieSettings();
 		cookieSettings.removeAll(COOKIE_NAME);
@@ -126,7 +136,7 @@ public class CookieUtils {
 	 * @param cloudServiceName
 	 */
 	public static void addAuthnCookie(Request request, String identifier,
-			String cloudServiceName) {
+									  String cloudServiceName) {
 
 		request.getCookies().clear();
 		CookieSetting cookieSetting = createAuthnCookieSetting(
@@ -146,7 +156,7 @@ public class CookieUtils {
 	 * @return new authentication cookie
 	 */
 	private static CookieSetting createAuthnCookieSetting(String idType,
-			String identifier) {
+														  String identifier) {
 
 		return createAuthnCookieSetting(idType, identifier, new Properties());
 	}
@@ -162,7 +172,7 @@ public class CookieUtils {
 	 * @return new authentication cookie
 	 */
 	private static CookieSetting createAuthnCookieSetting(String idType,
-			String identifier, Properties properties) {
+														  String identifier, Properties properties) {
 
 		String finalQuery = createCookieValue(idType, identifier, properties);
 
@@ -182,7 +192,7 @@ public class CookieUtils {
 	}
 
 	public static String createCookie(String username, String cloudServiceName,
-			Properties extraProperties) {
+									  Properties extraProperties) {
 		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
 		if (extraProperties != null) {
 			properties.putAll(extraProperties);
@@ -200,7 +210,7 @@ public class CookieUtils {
 	}
 
 	public static String createCookieValue(String idType, String identifier,
-			Properties properties) {
+										   Properties properties) {
 		// Create the expiration date for the cookie. This is added to be sure
 		// that the server has control over this even if a malicious client
 		// extends the date of a cookie.
@@ -221,13 +231,20 @@ public class CookieUtils {
 			form.add((String) entry.getKey(), (String) entry.getValue());
 		}
 
-		// Create the signed form of the query (i.e. without the signature
-		// added).
-		String signedQuery = form.getQueryString();
-		String signature = CryptoUtils.sign(signedQuery);
+		try {
+			User user = User.loadByName(identifier);
+			String authnToken = user.getAuthnToken();
 
-		// Add the signature to the form and create final query string.
-		form.add(COOKIE_SIGNATURE, signature);
+			properties.put(COOKIE_IDENTIFIER, identifier);
+
+			logger.info("token used to create token for claims " + authnToken);
+			String claimsToken = (new AuthProxy()).createToken(properties, authnToken);
+			logger.info("token for claims = " + claimsToken);
+			form.add(COOKIE_SIGNATURE, claimsToken);
+		} catch (ValidationException e) {
+			logger.severe("Unable to create cookie value");
+		}
+
 		String finalQuery = form.getQueryString();
 		return finalQuery;
 	}
@@ -300,6 +317,41 @@ public class CookieUtils {
 		return request.getCookies().getFirst(COOKIE_NAME);
 	}
 
+	private static CookieSetting extractAuthnTokenCookie(Response response){
+		Series<CookieSetting> cookieSettings = response.getCookieSettings();
+		for (CookieSetting cookieSetting : cookieSettings) {
+			if(CookieUtils.COOKIE_NAME.equals(cookieSetting.getName())) {
+				return cookieSetting;
+			}
+		}
+		logger.warning("No authn cookie in response");
+		return null;
+	}
+
+	private static boolean checkValidClaimsInToken(Cookie cookie, String signature) {
+
+		Map<String, String> claimsInToken = com.sixsq.slipstream.auth.TokenChecker.claimsInToken(signature);
+
+		logger.info("checkValidClaimsInToken, signature = " + signature);
+
+		boolean invalidClaims = claimsInToken == null || claimsInToken.isEmpty();
+
+		if(invalidClaims) {
+			logger.severe("Invalid claims for " + cookie);
+			return false;
+		}
+
+		Form form = new Form(cookie.getValue());
+		String usernameInCookie = form.getFirstValue(COOKIE_IDENTIFIER);
+		String runIdInCookie = form.getFirstValue(COOKIE_RUN_ID);
+
+		boolean cookieAndClaimsMatch =
+				usernameInCookie!=null && usernameInCookie.equals(claimsInToken.get(COOKIE_IDENTIFIER)) &&
+				runIdInCookie!=null && runIdInCookie.equals(claimsInToken.get(COOKIE_RUN_ID));
+
+		return !invalidClaims && cookieAndClaimsMatch;
+	}
+
 	/**
 	 * Verify that the given authentication cookie is valid. This checks that
 	 * the name is correct, information is complete, the signature is correct,
@@ -331,10 +383,8 @@ public class CookieUtils {
 
 		// Recreate a query string without the signature.
 		cookieInfo.removeAll(COOKIE_SIGNATURE);
-		String signedQuery = cookieInfo.getQueryString();
 
-		// Ensure that the cryptographic signature is correct.
-		if (!CryptoUtils.verify(signature, signedQuery)) {
+		if(!checkValidClaimsInToken(cookie, signature)) {
 			return Verifier.RESULT_INVALID;
 		}
 
@@ -355,13 +405,38 @@ public class CookieUtils {
 
 	public static String getCookieUsername(Cookie cookie) {
 
-		String username = null;
-
-		if (cookie != null) {
-			Form form = new Form(cookie.getValue());
-			username = form.getFirstValue(COOKIE_IDENTIFIER);
+		if(isMachine(cookie)) {
+			String username = null;
+			if (cookie != null) {
+				Form form = new Form(cookie.getValue());
+				username = form.getFirstValue(COOKIE_IDENTIFIER);
+			}
+			return username;
+		} else {
+			return claimsInToken(cookie).get(COOKIE_IDENTIFIER);
 		}
-		return username;
+	}
+
+	public static Map<String, String> claimsInToken(Cookie cookie) {
+		if (cookie == null || cookie.getValue() == null) {
+			logger.warning("No cookie provided");
+			return new HashMap<String, String>();
+		}
+
+		String token = tokenInCookie(cookie);
+		logger.fine("Token in cookie = " + token);
+		return com.sixsq.slipstream.auth.TokenChecker.claimsInToken(token);
+	}
+
+	public static String tokenInCookie(Cookie cookie) {
+		Form cookieInfo = CookieUtils.extractCookieValueAsForm(cookie);
+		String token = cookieInfo.getFirstValue(TOKEN);
+		if(token!=null && token.contains(",com.sixsq.slipstream.cookie=")) {
+			logger.info("Cookie value contains cookie key");
+			token = token.substring(0, token.indexOf(",com.sixsq.slipstream.cookie="));
+		}
+
+		return token;
 	}
 
 	public static String getCookieCloudServiceName(Cookie cookie) {
@@ -378,13 +453,10 @@ public class CookieUtils {
 
 	public static User getCookieUser(Cookie cookie)
 			throws ConfigurationException, ValidationException {
-
-		if (cookie != null) {
-			Form form = new Form(cookie.getValue());
-			String username = form.getFirstValue(COOKIE_IDENTIFIER);
-			return User.loadByName(username);
+		String userName = getCookieUsername(cookie);
+		if (userName != null) {
+			return User.loadByName(userName);
 		}
-
 		return null;
 	}
 
@@ -399,45 +471,6 @@ public class CookieUtils {
 	private static Form extractCookieValueAsForm(Cookie cookie) {
 		String value = (cookie != null) ? cookie.getValue() : null;
 		return new Form((value != null) ? value : "");
-	}
-
-	public static String cookieToString(Cookie cookie) {
-
-		StringBuilder sb = new StringBuilder();
-
-		if (cookie != null) {
-
-			Form cookieInfo = extractCookieValueAsForm(cookie);
-
-			// Pull out the values from the form.
-			String signature = cookieInfo.getFirstValue(COOKIE_SIGNATURE);
-			String expiryString = cookieInfo.getFirstValue(COOKIE_EXPIRY_DATE);
-
-			// Recreate a query string without the signature.
-			cookieInfo.removeAll(COOKIE_SIGNATURE);
-			String signedQuery = cookieInfo.getQueryString();
-
-			// Create the expiration date.
-			Date expiryDate = dateFromExpiryString(expiryString);
-
-			sb.append("COOKIE: " + cookie.getName() + "\n");
-			sb.append("DOMAIN: " + cookie.getDomain() + "\n");
-			sb.append("PATH: " + cookie.getDomain() + "\n");
-			sb.append("SIGNATURE: " + signature + "\n");
-			sb.append("VALIDATED: "
-					+ CryptoUtils.verify(signature, signedQuery) + "\n");
-			sb.append("EXPIRY STRING: " + expiryString + "\n");
-			sb.append("EXPIRY DATE: " + expiryDate + "\n");
-			sb.append("CURRENT: " + !expiryDate.before(new Date()) + "\n");
-
-		} else {
-
-			sb.append("COOKIE: NULL\n");
-
-		}
-
-		return sb.toString();
-
 	}
 
 	public static String getCookieName() {
