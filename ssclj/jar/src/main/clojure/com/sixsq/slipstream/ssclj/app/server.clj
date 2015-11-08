@@ -21,6 +21,7 @@
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
@@ -75,11 +76,11 @@
    (log/info "java classpath: " (System/getProperty "java.class.path"))
    (set-db-impl)
    (resources/initialize)
-   (if (= impl "httpkit")
-     (-> (create-ring-handler)
-         (httpkit/start-container port))
-     (-> (create-ring-handler)
-         (aleph/start-container port)))))
+   (let [handler (create-ring-handler)]
+     (graphite/start-graphite-reporter)
+     (if (= impl "httpkit")
+       (httpkit/start-container handler port)
+       (aleph/start-container handler port)))))
 
 (defn stop
   "Stops the application server by calling the function that was

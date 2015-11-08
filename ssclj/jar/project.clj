@@ -22,6 +22,8 @@
                  [metrics-clojure-ring/metrics-clojure-ring "2.5.1"
                    :exclusions [[cheshire/cheshire]] ]
                  [metrics-clojure-jvm/metrics-clojure-jvm   "2.5.1"]
+                 [metrics-clojure-graphite/metrics-clojure-graphite   "2.5.1"]
+
                  [fs/fs                                     "1.3.3"]
                  [org.slf4j/slf4j-log4j12                   "1.7.12"]
                  [instaparse                                "1.4.1"]

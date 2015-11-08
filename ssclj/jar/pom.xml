@@ -112,6 +112,10 @@
       <artifactId>metrics-clojure-jvm</artifactId>
     </dependency>
     <dependency>
+      <groupId>metrics-clojure-graphite</groupId>
+      <artifactId>metrics-clojure-graphite</artifactId>
+    </dependency>
+    <dependency>
       <groupId>fs</groupId>
       <artifactId>fs</artifactId>
     </dependency>
