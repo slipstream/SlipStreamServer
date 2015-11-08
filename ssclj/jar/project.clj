@@ -43,6 +43,7 @@
                  [ring/ring-json                            "0.4.0"]
                  [compojure/compojure                       "1.4.0"]
                  [http-kit/http-kit                         "2.1.19"]
+
                  [puppetlabs/http-client                    "0.4.4"
                   :exclusions [[cheshire/cheshire]] ]
                  [aleph                                     "0.4.0"]

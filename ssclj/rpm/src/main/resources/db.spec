@@ -8,5 +8,8 @@
                            :subprotocol "hsqldb"
                            :subname     "hsql://localhost:9001/slipstream"
                            :make-pool?  true}
+
  :token-nb-minutes-expiry 120
- :passphrase              "sl1pstre8m"}
+ :passphrase              "sl1pstre8m"
+ 
+ :upstream-server         "http://localhost:8182"}
