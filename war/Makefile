@@ -32,16 +32,16 @@ new-ui: install-ui run
 new-ui-clean: clean-install-ui run
 
 install:
-	(cd ..; mvn install -Dmaven.test.skip=true)
+	(cd ..; mvn install -Dmaven.test.skip=true -DskipTests)
 
 clean-install:
-	(cd ..; mvn clean install -Dmaven.test.skip=true)
+	(cd ..; mvn clean install -Dmaven.test.skip=true -DskipTests)
 
 install-ui:
-	(cd ../../SlipStreamUI; mvn install -Dmaven.test.skip=true)
+	(cd ../../SlipStreamUI; mvn install -Dmaven.test.skip=true -DskipTests)
 
 clean-install-ui:
-	(cd ../../SlipStreamUI; mvn clean install -Dmaven.test.skip=true)
+	(cd ../../SlipStreamUI; mvn clean install -Dmaven.test.skip=true -DskipTests)
 
 apply-db-migration:
 	@(ls -1 ../rpm/src/main/migrations/; echo; echo "Choose the migration file and execute following command:"; echo "java -jar ${SQLTOOL_FILENAME} --autoCommit --inlineRc=url=jdbc:hsqldb:file:slipstreamdb,user=sa,password= ../rpm/src/main/migrations/__MIGRATION_FILE_TO_APPLY__")
