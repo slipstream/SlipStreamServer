@@ -15,6 +15,8 @@
                       :duration-unit TimeUnit/MILLISECONDS
                       :filter MetricFilter/ALL}))
 
+;; TODO: add a stop function for clean shutdown
+
 (defn start-graphite-reporter
   []
   (if-let [host (env :graphite-host)]
