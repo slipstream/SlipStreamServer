@@ -17,11 +17,11 @@
 ;; utilities
 ;;
 
-(def ^:const resource-name "Root")
+(def ^:const resource-name "CloudEntryPoint")
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
+(def ^:const resource-uri (str c/cimi-schema-uri resource-name))
 
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
@@ -59,7 +59,7 @@
            [resource request]
   (try
     (a/can-modify? resource request)
-    (let [ops [{:rel (:edit c/action-uri) :href "#"}]]
+    (let [ops [{:rel (:edit c/action-uri) :href resource-url}]]
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))
@@ -74,14 +74,14 @@
    adds the minimal Root resource to the database."
   []
   (let [record (-> {:acl         resource-acl
-                    :id          resource-name
+                    :id          resource-url
                     :resourceURI resource-uri}
                    (u/update-timestamps))]
     (db/add resource-name record)))
 
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]
-  (r/response (-> (db/retrieve resource-name)
+  (r/response (-> (db/retrieve resource-url)
                   (a/can-view? request)
                   (assoc :baseURI base-uri)
                   (merge resource-links)
@@ -93,7 +93,7 @@
 
 (defn edit-impl
   [{:keys [body] :as request}]
-  (let [current (-> (db/retrieve resource-name)
+  (let [current (-> (db/retrieve resource-url)
                     (assoc :acl resource-acl)
                     (a/can-modify? request))
         updated (-> body
@@ -113,15 +113,26 @@
   (edit-impl request))
 
 ;;
+;; initialization: create cloud entry point if necessary
+;;
+(defn initialize
+  []
+  (try
+    (add)
+    (log/info "Created" resource-name "resource")
+    (catch Exception e
+      (log/warn resource-name "resource not created; may already exist; message: " (str e)))))
+
+;;
 ;; Root doesn't follow the usual service-context + '/resource-name/UUID'
 ;; pattern, so the routes must be defined explicitly.
 ;;
 (defroutes routes
            (GET (str p/service-context resource-url) request
                 (crud/retrieve (assoc-in request [:params :resource-name]
-                                         (u/de-camelcase resource-name))))
+                                         resource-url)))
            (PUT (str p/service-context resource-url) request
                 (crud/edit (assoc-in request [:params :resource-name]
-                                     (u/de-camelcase resource-name))))
+                                     resource-url)))
            (ANY (str p/service-context resource-url) request
                 (throw (u/ex-bad-method request))))

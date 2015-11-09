@@ -4,6 +4,7 @@
   (:require
 
     [clojure.java.jdbc                                          :as j]
+    [clojure.tools.logging                                      :as log]
     [korma.core                                                 :refer :all]
     [honeysql.core                                              :as sql]
     [honeysql.helpers                                           :as hh]
@@ -16,12 +17,12 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud       :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils          :as u]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils     :as fu]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]
     [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]))
 
 (def ^:const resource-tag     :usages)
 (def ^:const resource-name    "Usage")
+(def ^:const resource-url (u/de-camelcase resource-name))
 (def ^:const collection-name  "UsageCollection")
 
 (def ^:const resource-uri     (str c/slipstream-schema-uri resource-name))
@@ -36,14 +37,14 @@
 
 (defonce init-record-keeper (rc/-init))
 
-(defentity usage_summaries)
-(defentity acl)
+(defentity usage_summaries (database kh/korma-api-db))
+(defentity acl (database kh/korma-api-db))
 
 (defn- deserialize-usage
   [usage]
   (-> usage
-      (update-in [:acl]   fu/deserialize)
-      (update-in [:usage] fu/deserialize)))
+      (update-in [:acl]   u/deserialize)
+      (update-in [:usage] u/deserialize)))
 
 (defn sql
   [id roles cimi-filter]
@@ -71,15 +72,9 @@
     (if (dbb/neither-id-roles? id roles)
       []
       (do
-        ; (du/start-ts "find resources" nil)
         (->>  (sql id roles (get-in options [:cimi-params :filter]))
-              ;(du/record-ts "sql built")
-
               (j/query kh/db-spec)
-              ; (du/record-ts "sql exec")
-              (map deserialize-usage)
-              ; (du/record-ts "deserialize")
-              )))))
+              (map deserialize-usage))))))
 
 ;;
 ;; schemas
@@ -114,23 +109,25 @@
 ;; single
 ;;
 
-(defn- check-exist
-  [resource id]
-  (if (empty? resource)
-    (throw (u/ex-not-found id))
-    resource))
+(defn- check-presence
+  [resources id]
+  (if (empty? resources)
+    (do
+      (log/warn "Resource not found, id=" id)
+      (throw (u/ex-not-found id)))
+    resources))
 
 (defn find-resource
   [id]
   (-> (select usage_summaries (where {:id id}) (limit 1))
-      (check-exist id)
+      (check-presence id)
       first
       deserialize-usage))
 
 (defn retrieve-fn
   [request]
   (fn [{{uuid :uuid} :params :as request}]
-    (-> (str resource-name "/" uuid)
+    (-> (str (u/de-camelcase resource-name) "/" uuid)
         find-resource
         (a/can-view? request)
         (crud/set-operations request)

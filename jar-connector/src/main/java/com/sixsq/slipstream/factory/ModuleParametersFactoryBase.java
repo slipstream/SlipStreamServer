@@ -28,7 +28,7 @@ import com.sixsq.slipstream.persistence.ModuleParameter;
 
 public abstract class ModuleParametersFactoryBase extends
 		ParametersFactoryBase<ModuleParameter> {
-	
+
 	protected Map<String, ModuleParameter> referenceParameters = new HashMap<String, ModuleParameter>();
 
 	protected Map<String, ModuleParameter> getReferenceParameters() {
@@ -67,6 +67,14 @@ public abstract class ModuleParametersFactoryBase extends
 		p.setCategory(getCategory());
 		p.setMandatory(true);
 		return p;
+	}
+
+	protected void addSecurityGroupsParameter() throws ValidationException {
+		putMandatoryParameter(SECURITY_GROUPS_PARAMETER_NAME, "Security Groups (comma separated list)",
+				SECURITY_GROUPS_ALLOW_ALL,
+				"If you don't know what is a security group or if you don't want to take care of them, you can use the "
+				+ "special value <code>" + SECURITY_GROUPS_ALLOW_ALL + "</code> to let SlipStream generate a security group with "
+				+ "everything allowed.");
 	}
 
 }

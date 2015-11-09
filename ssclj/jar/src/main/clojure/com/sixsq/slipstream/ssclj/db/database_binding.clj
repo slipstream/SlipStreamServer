@@ -12,7 +12,6 @@
     [com.sixsq.slipstream.ssclj.api.acl                     :as acl]
 
     [com.sixsq.slipstream.ssclj.db.binding                  :refer [Binding]]
-    [com.sixsq.slipstream.ssclj.db.filesystem-binding-utils :refer [serialize deserialize]]
     [com.sixsq.slipstream.ssclj.database.ddl                :as ddl]
     [com.sixsq.slipstream.ssclj.resources.common.utils      :as u]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
@@ -22,7 +21,8 @@
   (acl/-init)
   (kh/korma-init)
   (ddl/create-table! "resources" (ddl/columns "id" "VARCHAR(100)" "data" "VARCHAR(10000)"))
-  (defentity resources))
+  (ddl/create-index! "resources" "INDEX_ID" "id")
+  (defentity resources (database kh/korma-api-db)))
 
 ;;
 ;; Korma SQL primitives
@@ -51,13 +51,13 @@
 
 (defn- insert-resource
   [id data]
-  (insert resources (values {:id id :data (serialize data)}))
+  (insert resources (values {:id id :data (u/serialize data)}))
   (insert-acl id data))
 
 (defn- update-resource
   [id data]
   (update resources
-    (set-fields {:data (serialize data)})
+    (set-fields {:data (u/serialize data)})
     (where {:id id})))
 
 (defn id-matches?
@@ -91,7 +91,7 @@
   (->   (hh/select :r.*)
         (hh/from [:acl :a] [:resources :r])
         (hh/where [:and
-                    [:like :r.id (str collection-id"%")]
+                    [:like :r.id (str (u/de-camelcase collection-id) "%")]
                     [:= :r.id :a.resource-id] ;; join acl with resources
                     [:or
                       (id-matches? id)        ;; an acl line with given id
@@ -104,7 +104,7 @@
   (-> (select resources (where {:id id}) (limit 1))
       first
       :data
-      deserialize))
+      u/deserialize))
 
 (defn dispatch-fn
   [collection-id options]
@@ -129,7 +129,7 @@
      (->> (sql collection-id id roles)
           (jdbc/query kh/db-spec)                 
           (map :data)
-          (map deserialize)))))
+          (map u/deserialize)))))
 
 
 (defn- delete-resource

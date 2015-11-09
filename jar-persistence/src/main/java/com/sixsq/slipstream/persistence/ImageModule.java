@@ -203,10 +203,43 @@ public class ImageModule extends Module {
 	}
 
 	/**
-	 * @return parent module. If the module doesn't have a parent, returns null
-	 * @throws ValidationException
+	 * This method will look into the parent image if the parameter doesn't exist, not if it's empty.
+	 * @return the value of the parameter.
+	 * @throws ValidationException if the parameter doesn't exist in the image hierarchy.
 	 */
-	public ImageModule getParentModule() throws ValidationException {
+	public ModuleParameter extractParameter(String parameterName) throws ValidationException {
+
+		ModuleParameter parameter = getParameter(parameterName);
+		if (parameter == null) {
+			throw (new ValidationException("Parameter " + parameterName + " not found."));
+		}
+		return parameter;
+	}
+
+	/**
+	 * Override the method in {@link Parameterized} to add recursivity.
+	 * This method will look into the parent image if the parameter doesn't exist, not if it's empty.
+	 * @return the value of the parameter or null if it doesn't exist in the image hierarchy.
+	 */
+	@Override
+	public ModuleParameter getParameter(String name) {
+		ModuleParameter parameter = super.getParameter(name);
+		if (parameter != null) {
+			return parameter;
+		}
+
+		ImageModule parentModule = getParentModule();
+		if (parentModule == null) {
+			return null;
+		}
+
+		return parentModule.getParameter(name);
+	}
+
+	/**
+	 * @return parent module. If the module doesn't have a parent, returns null
+	 */
+	public ImageModule getParentModule() {
 		if (parentModule != null) {
 			return parentModule;
 		}
@@ -447,7 +480,7 @@ public class ImageModule extends Module {
 		if (getNote() != null) {
 			notes.add(getNote());
 		}
-		return notes.toArray(new String[0]);
+		return notes.toArray(new String[notes.size()]);
 	}
 
 	/**

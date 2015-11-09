@@ -33,6 +33,8 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class DashboardResource extends BaseResource {
 
+	public static final String RESOURCE_URI_PREFIX = "dashboard";
+
 	@Get("xml")
 	public Representation toXml() {
 
@@ -78,7 +80,7 @@ public class DashboardResource extends BaseResource {
 
 	@Override
 	protected String getPageRepresentation() {
-		return "dashboard";
+		return RESOURCE_URI_PREFIX;
 	}
 
 }

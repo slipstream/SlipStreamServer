@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>2.13-SNAPSHOT</version>
+    <version>2.19-SNAPSHOT</version>
   </parent>
 
   <repositories>
@@ -30,6 +30,11 @@
   </repositories>
 
   <dependencies>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>auth</artifactId>
+      <version>2.19-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
@@ -61,6 +66,10 @@
     <dependency>
       <groupId>http-kit</groupId>
       <artifactId>http-kit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>aleph</groupId>
+      <artifactId>aleph</artifactId>
     </dependency>
     <dependency>
       <groupId>clojurewerkz</groupId>
@@ -101,6 +110,10 @@
     <dependency>
       <groupId>metrics-clojure-jvm</groupId>
       <artifactId>metrics-clojure-jvm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>metrics-clojure-graphite</groupId>
+      <artifactId>metrics-clojure-graphite</artifactId>
     </dependency>
     <dependency>
       <groupId>fs</groupId>
@@ -175,7 +188,11 @@
     </dependency>
     <dependency>
       <groupId>honeysql</groupId>
-      <artifactId>honeysql</artifactId>      
+      <artifactId>honeysql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>puppetlabs</groupId>
+      <artifactId>http-client</artifactId>
     </dependency>
   </dependencies>
 
@@ -193,7 +210,7 @@
           <plugin>
             <groupId>com.theoryinpractise</groupId>
             <artifactId>clojure-maven-plugin</artifactId>
-            
+
             <executions>
               <execution>
                 <id>syntax-check-source</id>
@@ -223,9 +240,22 @@
               </execution>
 
             </executions>
-            
+
           </plugin>
-          
+
+          <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>.</directory>
+                  <includes>
+                    <include>**/*.lein-env</include>
+                  </includes>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
@@ -274,9 +304,9 @@
       <plugin>
         <groupId>com.theoryinpractise</groupId>
         <artifactId>clojure-maven-plugin</artifactId>
-        
+
         <executions>
-          
+
           <execution>
             <id>minimal-compile</id>
             <goals>
@@ -292,13 +322,14 @@
                 <namespace>com.sixsq.slipstream.ssclj.usage.summary</namespace>
                 <namespace>com.sixsq.slipstream.ssclj.usage.launcher</namespace>
                 <namespace>com.sixsq.slipstream.ssclj.usage.daily-summary-launcher</namespace>
+                <namespace>com.sixsq.slipstream.ssclj.usage.monthly-summary-launcher</namespace>
               </namespaces>
               <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
             </configuration>
           </execution>
-          
+
         </executions>
-        
+
       </plugin>
 
     </plugins>

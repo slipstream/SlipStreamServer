@@ -13,7 +13,7 @@
     :started  { :start  :severe-wrong-transition 
                 :stop   :close-record}
 
-    :stopped  { :start  :reset-end 
+    :stopped  { :start  :insert-start
                 :stop   :severe-wrong-transition}})
 
 (defn action

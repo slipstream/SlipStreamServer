@@ -99,18 +99,22 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 		return parameter;
 	}
 
-	protected void putMandatoryOrchestrationImageId()
-			throws ValidationException {
+	protected void putMandatoryOrchestrationImageId() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(UserParametersFactoryBase.ORCHESTRATOR_IMAGEID_PARAMETER_NAME),
 				"Image Id of the orchestrator for " + getCategory());
 	}
 
-	protected void putMandatoryOrchestratorInstanceType()
-			throws ValidationException {
+	protected void putMandatoryOrchestratorInstanceType() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(UserParametersFactoryBase.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME),
 				"Orchestrator instance type  " + getCategory());
+	}
+
+	protected void putMandatoryOrchestratorSecurityGroups() throws ValidationException {
+		putMandatoryParameter(
+				super.constructKey(SECURITY_GROUPS_PARAMETER_NAME),
+				"Orchestrator security groups (comma separated list)", SECURITY_GROUPS_ALLOW_ALL);
 	}
 
 	protected void putMandatoryUpdateUrl() throws ValidationException {

@@ -9,13 +9,13 @@ public class MailUsageTestHelper {
                         "  \"usages\" : [ {\n" +
                         "    \"usage\" : {\n" +
                         "      \"RAM\" : {\n" +
-                        "        \"unit_minutes\" : 5344.0\n" +
+                        "        \"unit_minutes\" : 1916151.47\n" +
                         "      },\n" +
-                        "      \"DISK\" : {\n" +
-                        "        \"unit_minutes\" : 185400.0\n" +
+                        "      \"instance-type.Medium\" : {\n" +
+                        "        \"unit_minutes\" : 84.20\n" +
                         "      },\n" +
                         "      \"vm\" : {\n" +
-                        "        \"unit_minutes\" : 4720.0\n" +
+                        "        \"unit_minutes\" : 1688.23\n" +
                         "      }\n" +
                         "    },\n" +
                         "    \"end_timestamp\" : \"2015-06-16T00:00:00.000Z\",\n" +
@@ -40,14 +40,14 @@ public class MailUsageTestHelper {
                         "    \"id\" : \"Usage/0954a8f0-7ccb-4386-9797-308defa76ad7\"\n" +
                         "  }, {\n" +
                         "    \"usage\" : {\n" +
-                        "      \"DISK\" : {\n" +
-                        "        \"unit_minutes\" : 216600.0\n" +
+                        "      \"ram\" : {\n" +
+                        "        \"unit_minutes\" : 47185920.0\n" +
                         "      },\n" +
-                        "      \"RAM\" : {\n" +
-                        "        \"unit_minutes\" : 28032.0\n" +
+                        "      \"instance-type.Huge\" : {\n" +
+                        "        \"unit_minutes\" : 1440.0\n" +
                         "      },\n" +
                         "      \"vm\" : {\n" +
-                        "        \"unit_minutes\" : 2882.0\n" +
+                        "        \"unit_minutes\" : 1440.0\n" +
                         "      }\n" +
                         "    },\n" +
                         "    \"end_timestamp\" : \"2015-06-16T00:00:00.000Z\",\n" +

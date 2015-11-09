@@ -20,35 +20,21 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.InvalidElementException;
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
-import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.SerializationUtil;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 
 public class UserTest {
 
@@ -310,6 +296,7 @@ public class UserTest {
 		user.setFirstName("Te");
 		user.setLastName("st");
 		user.setEmail("test@example.com");
+		user.setAuthnToken("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXUyJ9.eyJjb20uc2l4c3EuaWRlbnRpZmllciI6InN1cGVyIiwiZXhwIjoxNDQ1MjYyNzE2fQ.UDJJ93hnBCEy2H1_se6rrKvLGoOEbNPXEHF7njmPS9eP7FlNdLvLu4i7FuwlJcAWrNLVU3NrR2JSMucIld_wLdSNukYmsrK_HrKMOpN3jnSvfbfSfHPHlycTELzOXVBAbkAqdpaZpzn3lds0OyayxCu-dC3cvh3fv-15P79-nO6nb56IHeoXPS-hnZ2Cdm3DQA07pLHoFvVjoYsYFpCg1UJxivrweYvAjl3j9gxLRWAFeNW_82ZrtbMCHDB_KEd5dto36raQC9zpDrmXTA5SkzIptuYLCHpcijnTOpWRf1G4bZLyPhqpkiMAbWPxHumqsd1cXzvomh788KLsWRYZwA");
 
 		try {
 			user.setKeepRunning(UserParameter.KEEP_RUNNING_ON_ERROR);

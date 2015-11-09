@@ -5,6 +5,7 @@ import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.RequestUtil;
+import com.sixsq.slipstream.util.ResourceUriUtil;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -27,7 +28,10 @@ public class SSCLJRedirector extends Redirector {
 
 	private static final Logger logger = Logger.getLogger(Redirector.class.getName());
 
-	private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
+    private static final String SLIPSTREAM_AUTHN_INFO = "slipstream-authn-info";
+    private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
+    private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
 
     private static final String CIMI_KEY_FIRST_PARAM = "$first";
     private static final String CIMI_KEY_LAST_PARAM = "$last";
@@ -57,6 +61,8 @@ public class SSCLJRedirector extends Redirector {
         String last     = RequestUtil.getQueryValue(request,    CIMI_KEY_LAST_PARAM);
         String filter   = RequestUtil.getQueryValue(request,    CIMI_KEY_FILTER_PARAM);
 
+        logger.fine("cimi filter = " + filter);
+
         checkIntegerPositive(CIMI_KEY_FIRST_PARAM, first);
         checkIntegerPositive(CIMI_KEY_LAST_PARAM, last);
 
@@ -73,20 +79,37 @@ public class SSCLJRedirector extends Redirector {
     }
 
 	@SuppressWarnings("unchecked")
-	protected void addSlipstreamAuthnInfo(Request request) {
+	protected void addSlipStreamHeaders(Request request, Reference baseRef) {
 		try {
 
             @SuppressWarnings("rawtypes")
 			Series<Header> requestHeaders = new Series(Header.class);
 			request.getAttributes().put(ATTRIBUTE_HEADERS, requestHeaders);
 
+            // this header provides the authentication information to the
+            // proxied service
 			String username = request.getClientInfo().getUser().getName();
 			boolean isSuper = User.loadByName(username).isSuper();
 			String role = isSuper ? " " + TypePrincipalRight.ADMIN : "";
 
-			requestHeaders.add(new Header(SLIPSTREAM_AUTHN_INFO, username + role));
-		} catch (ValidationException ve) {
-			logger.severe("Unable to add SlipstreamAuthnInfo in header:" + ve.getMessage());
+            requestHeaders.add(new Header(SLIPSTREAM_AUTHN_INFO, username + role));
+
+            // these headers are required to reconstruct the base URI of the
+            // server in the proxied service
+
+            String protocol = baseRef.getScheme(true);
+            requestHeaders.add(new Header(X_FORWARDED_PROTO, protocol));
+
+            String host = baseRef.getHostDomain(true);
+            requestHeaders.add(new Header(X_FORWARDED_FOR, host));
+
+            int port = baseRef.getHostPort();
+            if (port > 0) {
+                requestHeaders.add(new Header(X_FORWARDED_PORT, Integer.toString(port)));
+            }
+
+        } catch (ValidationException ve) {
+			logger.severe("Unable to add headers:" + ve.getMessage());
 		}
 	}
 
@@ -96,9 +119,10 @@ public class SSCLJRedirector extends Redirector {
         super.outboundServerRedirect(targetRef, request, response);
     }
 
-	// hack inspired by this discussion http://restlet.tigris.org/ds/viewMessage.do?dsForumId=4447&dsMessageId=3076621
-	// main trick is to call addSlipstreamAuthnInfo to add slipstream header after it has been removed from request
-	//
+    // FIXME: Need for hack to get SlipStream headers added to proxy request.
+    // Hack inspired by this discussion http://restlet.tigris.org/ds/viewMessage.do?dsForumId=4447&dsMessageId=3076621
+    // main trick is to call addSlipStreamHeaders to add slipstream header after it has been removed from request
+    //
 	protected void serverRedirect(Restlet next, Reference targetRef,
             Request request, Response response) {
 
@@ -116,6 +140,9 @@ public class SSCLJRedirector extends Redirector {
             Reference resourceRef = request.getResourceRef();
             Reference baseRef = resourceRef.getBaseRef();
 
+            // Save the value before mucking with the request.
+            Reference baseRefFromHeaders = ResourceUriUtil.getBaseRef(request);
+
             // Reset the protocol and let the dispatcher handle the protocol
             request.setProtocol(null);
 
@@ -124,7 +151,7 @@ public class SSCLJRedirector extends Redirector {
             request.getAttributes().remove(HeaderConstants.ATTRIBUTE_HEADERS);
 
             // hack
-            addSlipstreamAuthnInfo(request);
+            addSlipStreamHeaders(request, baseRefFromHeaders);
             addCIMIQueryParams(request);
             // hack end
 

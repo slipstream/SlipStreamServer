@@ -287,10 +287,16 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	private Module xmlToModule() {
-		return xmlToModule(extractXml());
+
+		Module module = xmlToModule(extractXml());
+
+		// Reset user
+		module.getAuthz().setUser(getUser().getName());
+
+		return module;
 	}
 
-	private Module xmlToModule(String xml) {
+	public static Module xmlToModule(String xml) {
 
 		String denormalized = XmlUtil.denormalize(xml);
 
@@ -304,9 +310,6 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			e.printStackTrace();
 			throwClientBadRequest("Invalid xml module: " + e.getMessage());
 		}
-
-		// Reset user
-		module.getAuthz().setUser(getUser().getName());
 
 		module.postDeserialization();
 
@@ -358,7 +361,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Class<? extends Module> getModuleClass(String moduleAsXml) {
+	private static Class<? extends Module> getModuleClass(String moduleAsXml) {
 
 		String category = null;
 		try {
@@ -385,7 +388,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		return moduleClass;
 	}
 
-	protected String extractCategory(String moduleAsXml)
+	protected static String extractCategory(String moduleAsXml)
 			throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;

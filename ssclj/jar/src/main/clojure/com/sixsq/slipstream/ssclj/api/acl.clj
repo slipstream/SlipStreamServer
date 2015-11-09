@@ -31,7 +31,7 @@
 
 (defn create-entities   
   []
-  (defentity acl)
+  (defentity acl (database kh/korma-api-db))
   (select acl (limit 1))) ;; korma "warmup"
     
 ;; 

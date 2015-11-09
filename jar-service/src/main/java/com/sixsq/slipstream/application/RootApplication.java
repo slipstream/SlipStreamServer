@@ -20,9 +20,19 @@ package com.sixsq.slipstream.application;
  * -=================================================================-
  */
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.ServiceLoader;
 
+import com.sixsq.slipstream.event.EventRouter;
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.initialstartup.CloudIds;
+import com.sixsq.slipstream.initialstartup.Modules;
+import com.sixsq.slipstream.resource.RootRedirectResource;
+import com.sixsq.slipstream.usage.UsageRouter;
+import com.sixsq.slipstream.resource.AppStoreResource;
+import com.sixsq.slipstream.resource.ModulesChooserResource;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -34,6 +44,7 @@ import org.restlet.data.Status;
 import org.restlet.resource.Directory;
 import org.restlet.resource.ServerResource;
 import org.restlet.routing.Filter;
+import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
@@ -63,11 +74,11 @@ import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.Users;
 import com.sixsq.slipstream.metrics.GraphiteRouter;
 import com.sixsq.slipstream.module.ModuleRouter;
+import com.sixsq.slipstream.module.ModuleListRouter;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.ServiceCatalogRouter;
-import com.sixsq.slipstream.resource.WelcomeResource;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
@@ -115,28 +126,46 @@ public class RootApplication extends Application {
 		try {
 
 			createStartupMetadata();
+			loadOptionalConfiguration();
 
 			initializeStatusServiceToHandleErrors();
 
 			verifyMinimumDatabaseInfo();
 
+			initializeMetadataService();
+
+			// Load the configuration early
+			Configuration.getInstance();
+
+			Collector.start();
+			GarbageCollector.start();
+
+			logServerStarted();
+
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		}
+	}
 
+	private void loadOptionalConfiguration() {
+		// Note: Connectors have already been loaded by the Configuration class
+
+		// Load modules
+        Modules.load();
+
+		// Load cloud-ids
+        CloudIds.load();
+
+		// Load users
+		Users.load();
+	}
+
+	private void initializeMetadataService() {
 		MetadataService ms = getMetadataService();
 		ms.addCommonExtensions();
 		ms.setDefaultCharacterSet(CharacterSet.UTF_8);
 		ms.addExtension("tgz", MediaType.APPLICATION_COMPRESS, true);
 		ms.addExtension("multipart", MediaType.MULTIPART_ALL);
-
-		// Load the configuration early
-		Configuration.getInstance();
-
-		Collector.start();
-		GarbageCollector.start();
-
-		logServerStarted();
 	}
 
 	private void logServerStarted() {
@@ -156,12 +185,18 @@ public class RootApplication extends Application {
 	}
 
 	private void createStartupMetadata() {
-		try {
-			Users.create();
-		} catch (Exception ex) {
-			getLogger().warning("Error creating default users... already existing?");
-		}
-	}
+        try {
+            Users.create();
+        } catch (ValidationException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        } catch (NotFoundException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        } catch (NoSuchAlgorithmException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        } catch (UnsupportedEncodingException e) {
+            getLogger().warning("Error creating default users... already existing?");
+        }
+    }
 
 	private void initializeStatusServiceToHandleErrors() {
 		CommonStatusService statusService = new CommonStatusService();
@@ -169,7 +204,7 @@ public class RootApplication extends Application {
 	}
 
 	private static void verifyMinimumDatabaseInfo() throws ConfigurationException, ValidationException {
-		User user = User.loadByName("super");
+		User user = Users.loadSuper();
 		if (user == null) {
 			throw new ConfigurationException("super user is missing");
 		}
@@ -187,6 +222,7 @@ public class RootApplication extends Application {
 		RootRouter router = new RootRouter(getContext());
 
 		try {
+			attachModulesChooser(router);
 			attachSSCLJ(router);
 			attachMetering(router);
 			attachAction(router);
@@ -196,12 +232,15 @@ public class RootApplication extends Application {
 			attachVms(router);
 			attachRun(router);
 			attachTeapot(router);
-			attachWelcome(router);
+			attachRootRedirect(router);
 			attachLogin(router);
 			attachLogout(router);
 			attachConfiguration(router);
 			attachServiceCatalog(router); // needs to be after configuration
 			attachReports(router);
+			attachEvent(router);
+			attachUsage(router);
+			attachAppStore(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -344,6 +383,11 @@ public class RootApplication extends Application {
 		return new AuthenticatorsTemplateRoute(route, authenticators);
 	}
 
+	private void attachRootRedirect(RootRouter rootRouter) {
+		rootRouter.attach("", RootRedirectResource.class);
+		rootRouter.attach("/", RootRedirectResource.class);
+	}
+
 	private void attachUser(RootRouter router) {
 		guardAndAttach(router, new UserRouter(getContext()), User.RESOURCE_URL_PREFIX);
 	}
@@ -362,18 +406,6 @@ public class RootApplication extends Application {
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 	}
 
-	private void attachWelcome(RootRouter router) {
-		AuthenticatorsTemplateRoute authenticatorsRoute = guardAndAttach(router, WelcomeResource.class, "/");
-		TemplateRoute route = authenticatorsRoute.getTemplateRoute();
-		Authenticator authenticator = authenticatorsRoute.getAuthenticators().getFirst();
-
-		route.getTemplate().setMatchingMode(Template.MODE_EQUALS);
-
-		route = router.attach("/?chooser={chooser}", authenticator);
-		route.setMatchingQuery(true);
-		route.getTemplate().getVariables().put("chooser", new Variable(Variable.TYPE_URI_QUERY));
-	}
-
 	private void enableTunnelService() {
 		getTunnelService().setExtensionsTunnel(true);
 		getTunnelService().setEnabled(true);
@@ -389,6 +421,22 @@ public class RootApplication extends Application {
 
 	private void attachSSCLJ(RootRouter router) throws ValidationException {
 		guardAndAttach(router, new SSCLJRouter(getContext()), "api");
+	}
+
+	private void attachEvent(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new EventRouter(getContext()), "event");
+	}
+
+	private void attachUsage(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new UsageRouter(getContext()), "usage");
+	}
+
+	private void attachAppStore(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new ModuleListRouter(getContext(), AppStoreResource.class), "appstore");
+	}
+
+	private void attachModulesChooser(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new ModuleListRouter(getContext(), ModulesChooserResource.class), "chooser");
 	}
 
 	public class RootRouter extends Router {

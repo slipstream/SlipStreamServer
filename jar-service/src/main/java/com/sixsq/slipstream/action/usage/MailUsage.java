@@ -41,7 +41,9 @@ public class MailUsage {
         String path = "/com/sixsq/slipstream/messages/email_daily_usage_template.html";
         String emailTemplate = readFile(path);
 
-        return String.format(emailTemplate, userName, humanDate, usageCloud(), directLink, unsubcribeLink, version);
+        String userOnInstance = String.format("%s on %s", userName, slipstreamInstanceName());
+
+        return String.format(emailTemplate, userOnInstance, humanDate, usageCloud(), directLink, unsubcribeLink, version);
     }
 
     private String readFile(String path) {
@@ -73,11 +75,12 @@ public class MailUsage {
                 "    <div class=\"panel-group\"> <div class=\"panel ss-section panel-default\"> <div class=\"panel-heading ss-section-activator\"> <h4 class=\"panel-title\">\n" +
                 usageSummary.cloud  +
                 "    </h4> </div><div class=\"panel-collapse collapse in\"> <div class=\"panel-body ss-section-content\"> <div class=\"table-responsive ss-table\"> <table class=\"table table-hover table-condensed\"> <thead>\n" +
-                "    <tr><th>Metric</th><th>Quantity (Units * minute)</th></tr>\n" +
+                "    <tr><th>Metric</th><th>Quantity</th></tr>\n" +
                 "    </thead><tbody>\n");
 
             for(Map.Entry<String, Double> metric : usageSummary.getMetrics().entrySet()) {
-                sb.append(String.format("<tr><td>%s</td><td>%.2f</td></tr>\n", metric.getKey(), metric.getValue()));
+                sb.append(String.format("<tr><td style=\"width:50%%\">%s</td><td style=\"width:50%%\">%s</td></tr>\n", metric.getKey(),
+                        MailUtils.formatMetricValue(metric.getKey(), metric.getValue())));
             }
             sb.append("</tbody> </table> </div></div></div></div></div>\n");
         }
@@ -85,28 +88,32 @@ public class MailUsage {
     }
 
     private String unsubcribeLink() {
-        try {
-            return baseUrl() + "/user/" + userName + "?edit=true#general";
-        }catch(ValidationException ve){
-            logger.warning("Unable to get base URL");
-            return null;
-        }
+        return baseUrl() + "/user/" + userName + "?edit=true#general";
     }
 
     private String linkToDailyUsageJson() {
-        try {
-            String cimiQueryStringUsage = MailUtils.cimiQueryStringUsage(userName, startDate, endDate);
-            String resourceURL = String.format("/usage?%s", cimiQueryStringUsage);
+        String cimiQueryStringUsage = MailUtils.cimiQueryStringUsage(userName, startDate, endDate);
+        String resourceURL = String.format("/api/usage?%s", cimiQueryStringUsage);
 
-            return baseUrl() + resourceURL;
-        }catch(ValidationException ve){
+        return baseUrl() + resourceURL;
+    }
+
+    protected String baseUrl() {
+        try {
+            return Configuration.getInstance().baseUrl;
+        } catch(ValidationException ve){
             logger.warning("Unable to get base URL");
-            return null;
+            return "SlipStream/";
         }
     }
 
-    protected String baseUrl() throws ValidationException {
-        return Configuration.getInstance().baseUrl;
+    private String slipstreamInstanceName() {
+        if (baseUrl() == null || baseUrl().isEmpty()) {
+            return "";
+        }
+
+        int lastIndexOf = baseUrl().lastIndexOf("//");
+        return lastIndexOf>0 ? baseUrl().substring(lastIndexOf + 2) : "";
     }
 
     protected String currentVersion() {

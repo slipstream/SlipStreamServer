@@ -3,4 +3,5 @@ export JETTY_RUN=/var/run
 export JETTY_PID=$JETTY_RUN/slipstream.pid
 export JETTY_USER=slipstream
 export TMPDIR=/opt/slipstream/server/tmp
-
+export JAVA=/etc/alternatives/jre_${server.jre.version}/bin/java
+export PASSPHRASE=sl1pstre8m

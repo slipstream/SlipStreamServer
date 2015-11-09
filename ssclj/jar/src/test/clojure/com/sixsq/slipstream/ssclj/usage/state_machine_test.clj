@@ -14,5 +14,5 @@
   (leads-to :started :start :severe-wrong-transition)
   (leads-to :started :stop  :close-record)
 
-  (leads-to :stopped :start :reset-end)
+  (leads-to :stopped :start :insert-start)
   (leads-to :stopped :stop  :severe-wrong-transition))

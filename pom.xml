@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamServer</artifactId>
-  <version>2.13-SNAPSHOT</version>
+  <version>2.19-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SlipStream Server</name>
   <url>http://sixsq.com/</url>
@@ -10,11 +10,12 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStream</artifactId>
-    <version>2.13-SNAPSHOT</version>
+    <version>2.19-SNAPSHOT</version>
     <relativePath>../SlipStream</relativePath>
   </parent>
 
   <modules>
+    <module>auth</module>
     <module>jar-persistence</module>
     <module>jar-connector</module>
     <module>jar-async</module>
@@ -58,6 +59,7 @@
     <logger.level>INFO</logger.level>
     <logger.filepattern>${project.build.directory}/instance/SlipStreamServer/var/log/slipstream.%g
     </logger.filepattern>
+    <server.jre.version>1.8.0</server.jre.version>
 
   </properties>
 

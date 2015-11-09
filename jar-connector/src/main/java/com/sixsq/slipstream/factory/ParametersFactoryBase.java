@@ -29,6 +29,9 @@ import com.sixsq.slipstream.persistence.ParameterType;
 
 public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 
+	public static final String SECURITY_GROUPS_PARAMETER_NAME = "security.groups";
+	public static final String SECURITY_GROUPS_ALLOW_ALL = "slipstream_managed";
+
 	private String category;
 
 	protected abstract void initReferenceParameters()
@@ -166,6 +169,14 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		S parameter = createParameter(name, null, description, true);
 		parameter.setOrder(order);
 		parameter.setValue(value);
+		assignParameter(parameter);
+	}
+
+	protected void putMandatoryParameter(String name, String description,
+			String value, String instructions) throws ValidationException {
+		S parameter = createParameter(name, null, description, true);
+		parameter.setValue(value);
+		parameter.setInstructions(instructions);
 		assignParameter(parameter);
 	}
 

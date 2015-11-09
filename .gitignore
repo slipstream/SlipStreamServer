@@ -29,3 +29,11 @@ scrap.jpage
 
 downloads/*
 ssclj/jar/testdb/
+/target
+/classes
+/checkouts
+pom.xml.asc
+*.jar
+*.class
+*.lein-*
+*.nrepl-port

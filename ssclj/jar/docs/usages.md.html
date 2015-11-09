@@ -1,0 +1,184 @@
+## Usages
+
+### Usage Records
+
+`Usage records` represent the most atomic piece of information regarding usages.
+It is a REST resource managed by the API server. As it is a technical resource (used only internally by Web Server and 
+not exposed to SlipStream users, only POST operation is currently supported). 
+
+A usage record is typically created by Web server during the lifecycle of a VM.
+A POST is made with a new usage record (that does not contain an end_timestamp) when a VM is started.
+When it is stopped, another POST is made with the same information but including the `end_timestamp`.
+See UsageRecorder class for more details.
+
+_Note that a single usage record is stored in database on multiple rows (one for each metric)._
+
+Start a usage record
+
+******************************
+*    ----                    *
+*    ^                       *
+*    |                       *
+*    |                       *
+*   -o--------------------   *
+*    t0                      *
+******************************
+
+Close a usage record
+
+
+******************************
+*    --------                *
+*    ^      |                *
+*    |      |                *
+*    |      |                *
+*   -o------v------------    *
+*    t0     t1               *
+******************************
+
+#### Some useful SQL commands
+
+To count the number of usage records:
+
+```
+java -jar /opt/hsqldb/lib/sqltool.jar --inlineRc=url=jdbc:hsqldb:hsql://localhost:9001/ssclj,user=sa,password= --sql 'select count(*) from "usage_records";'
+```
+
+To list the 3 first usage records of `sixsq_dev` on `ec-eu-west`
+
+```
+java -jar /opt/hsqldb/lib/sqltool.jar --inlineRc=url=jdbc:hsqldb:hsql://localhost:9001/ssclj,user=sa,password= --sql "select * from \"usage_records\" where \"cloud\"='ec2-eu-west' and \"user\"='sixsq_dev' limit 3;"
+```
+
+cloud_vm_instanceid    | user      | cloud       | start_timestamp          | end_timestamp            | metric_name | metric_value
+---------------------- | --------- | ----------- | ------------------------ | ------------------------ | ----------- | ------------
+ec2-eu-west:i-8034d12a | sixsq_dev | ec2-eu-west | 2015-05-08T02:18:17.816Z | 2015-05-08T02:23:29.097Z | vm          |        1.0E0
+ec2-eu-west:i-a5e7080f | sixsq_dev | ec2-eu-west | 2015-05-13T10:24:59.443Z | 2015-05-13T10:32:59.859Z | vm          |        1.0E0
+ec2-eu-west:i-f56a9a5f | sixsq_dev | ec2-eu-west | 2015-05-19T11:25:52.620Z | 2015-05-19T11:29:01.093Z | vm          |        1.0E0
+
+### Usage summaries
+
+This is also a REST resource.
+
+A Usage Summary is the aggregation of all metrics for a given time interval, user and cloud.
+For example, here is one usage summary for
+
++ `sixsq_dev`
++ on `exoscale-ch-gva`
++ for the period [2015-10-21T00:00:00.000Z, 2015-10-22T00:00:00.000Z[
+
+
+```
+{
+"id" : "usage/a70b781a-3434-4412-9241-b20cd1a0f8f0",
+"acl" : {
+"owner" : {
+"type" : "USER",
+"principal" : "sixsq_dev"
+},
+"rules" : [ {
+"type" : "USER",
+"principal" : "sixsq_dev",
+"right" : "ALL"
+}, {
+"type" : "ROLE",
+"principal" : "exoscale-ch-gva",
+"right" : "ALL"
+} ]
+},
+"user" : "sixsq_dev",
+"cloud" : "exoscale-ch-gva",
+"start_timestamp" : "2015-10-21T00:00:00.000Z",
+"end_timestamp" : "2015-10-22T00:00:00.000Z",
+"usage" : {
+"vm" : {
+"unit_minutes" : 1440.0
+},
+"ram" : {
+"unit_minutes" : 4.718592E7
+},
+"disk" : {
+"unit_minutes" : 0.0
+},
+"instance-type.Huge" : {
+"unit_minutes" : 1440.0
+}
+}
+}
+```
+
+### Process
+
+#### Computation of Usage Summaries
+
+Each day at 2 AM (UTC), a cron job computes and stores the summaries for all users on each cloud.
+Here are the details of the execution on nuv.la:
+
+
+**************************************************************************************
+*                                                                                    *
+* .--------------------------------.  .---------------------------------.            *
+* | /etc/cron.d/create-daily-usage +->| /usr/sbin/create-daily-usage.sh |-> ...      *
+* '--------------------------------'  '---------------------------------'            *
+*                                                                                    *
+*      .---------------------------------------------------------.                   *
+* ...> | com.sixsq.slipstream.ssclj.usage.daily_summary_launcher |                   *
+*      '---------------------------------------------------------'                   *
+*                                                                                    *
+**************************************************************************************
+
+
+`daily_summary_launcher` by default (no arguments) computes the summaries for yesterday.
+
+
+It can also be called with optional arguments `-d date`
+e.g: 
+
+```
+daily_summary_launcher -d 2015-09-21
+```
+
+#### Send Usage emails
+
+Each day at 3 AM UTC, a cron job sends via email (to users having set the preference) these usage summaries.
+Here are the details of the execution on nuv.la:
+
+**************************************************************************************
+*                                                                                    *
+* .--------------------------------.  .--------------------------------------.       *
+* | /etc/cron.d/daily-usage-emails +->| /usr/sbin/send-daily-usage-emails.sh |-> ... *
+* '--------------------------------'  '--------------------------------------'       *
+*                                                                                    *
+*      .---------------------------------------------------------.                   *
+* ...> | com.sixsq.slipstream.action.DailyUsageSender            |                   *
+*      '---------------------------------------------------------'                   *
+*                                                                                    *
+**************************************************************************************
+
+The DailyUsageSender queries the Usage Summary resource with the help of the CIMI filter.
+
+
+#### Manual checks
+
+To summarize manually one given month from the command line:
+
+```
+java -Dconfig.path=src/main/resources/config-hsqldb.edn \
+   -cp ".:target/SlipStreamCljResources-jar-2.18-SNAPSHOT-jar-with-dependencies.jar" \
+    com.sixsq.slipstream.ssclj.usage.monthly_summary_launcher \
+    -m 2016-03     
+```
+
+To get one monthly usage for a given cloud:
+
+```
+curl -H "slipstream-authn-info: azure azure" "http://localhost:8201/api/usage?%24filter=start_timestamp%3D2016-03-01%20and%20end_timestamp%3D2016-04-01"
+```
+
+<style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
+
+
+
+
+
+

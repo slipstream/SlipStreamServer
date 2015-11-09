@@ -1,57 +1,26 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.dynamic-load
   "Utilities for loading information from CIMI resources dynamically."
   (:require
-    [compojure.core                                           :refer :all]
-    [compojure.route                                          :as route]
-    [ring.util.response                                       :as r]
-    [clojure.tools.logging                                    :as log]
-    [clojure.java.classpath                                   :as cp]
-    [clojure.tools.namespace.find                             :as nsf]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]))
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.util.namespace-utils :as dyn]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (defn resource?
   "If the given symbol represents a resource namespace, the symbol
-   is returned; nil otherwise.  Resource namespaces have the prefix
-   'com.sixsq.slipstream.ssclj.resources.'. "
+   is returned; false otherwise.  Resource namespaces have the prefix
+   'com.sixsq.slipstream.ssclj.resources.' and do not contain the
+   string 'test'."
   [sym]
-  (->>  (name sym)
-        (re-matches #"^com\.sixsq\.slipstream\.ssclj\.resources\.[\w-]+$")
-        first)) 
+  (let [ns-name (name sym)]
+    (and
+      (re-matches #"^com\.sixsq\.slipstream\.ssclj\.resources\.[\w-]+$" ns-name)
+      (not (.contains ns-name "test"))
+      sym)))
 
-(defn resources
-  "Returns the namespaces of all resources available on the classpath."
+(defn resource-namespaces
+  "Returns a sequence of the resource namespaces on the classpath."
   []
-  (->> (cp/classpath)
-       (nsf/find-namespaces)
-       (filter resource?)))
-
-(defn load-resource
-  "Dynamically loads the given namespace, returning the namespace.
-   Will return nil if the namespace could not be loaded."
-  [resource-ns]
-  (try
-    (require resource-ns)
-    (log/debug "loaded resource namespace :" (name resource-ns))
-    resource-ns
-    (catch Exception e
-      (log/warn "could not load resource namespace:" (name resource-ns)))))
-
-(defn get-ns-var
-  "Retrieves the named var in the given namespace, returning
-   nil if the var could not be found.  Function logs the success or
-   failure of the request."
-  [varname resource-ns]
-  (if (.contains (name resource-ns) "test")
-    (log/debug "avoiding retrieving" varname "for" (name resource-ns))
-    (if-let [value (->  resource-ns
-                        name
-                        (str "/" varname)
-                        symbol
-                        find-var)]
-    (do
-      (log/debug "retrieved" varname "for" (name resource-ns) "\n")
-      value)
-    (log/debug "did NOT retrieve" varname "for" (name resource-ns) "\n"))))
+  (dyn/load-filtered-namespaces resource?))
 
 (defn get-resource-link
   "Returns a vector with the resource tag keyword and map with the
@@ -59,18 +28,26 @@
    Function returns nil if either value cannot be found for the
    resource."
   [resource-ns]
-  (if-let [vtag (get-ns-var "resource-tag" resource-ns)]
-    (if-let [vtype (get-ns-var "resource-name" resource-ns)]
+  (if-let [vtag (dyn/resolve "resource-tag" resource-ns)]
+    (if-let [vtype (dyn/resolve "resource-url" resource-ns)]
       [(deref vtag) {:href (deref vtype)}])))
+
+(defn- initialize-resource
+  "Run a resource's initialization function if it exists."
+  [resource-ns]
+  (if-let [fvar (dyn/resolve "initialize" resource-ns)]
+    (try
+      ((deref fvar))
+      (log/info "initialized resource" (ns-name resource-ns))
+      (catch Exception e
+        (log/error "initializing" (ns-name resource-ns) "failed:" (.getMessage e))))))
 
 (defn resource-routes
   "Returns a lazy sequence of all of the routes for resources
    discovered on the classpath."
   []
-  (->> (resources)
-       (map load-resource)
-       (remove nil?)
-       (map (partial get-ns-var "routes"))
+  (->> (resource-namespaces)
+       (map (partial dyn/resolve "routes"))
        (remove nil?)
        (map deref)))
 
@@ -78,8 +55,13 @@
   "Returns a lazy sequence of all of the resource links for resources
    discovered on the classpath."
   []
-  (->> (resources)
-       (map load-resource)
-       (remove nil?)
+  (->> (resource-namespaces)
        (map get-resource-link)
        (remove nil?)))
+
+(defn initialize
+  "Runs the initialize function for all resources that define it."
+  []
+  (doall
+    (->> (resource-namespaces)
+         (map initialize-resource))))
