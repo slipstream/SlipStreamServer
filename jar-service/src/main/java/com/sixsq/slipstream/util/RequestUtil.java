@@ -1,5 +1,13 @@
 package com.sixsq.slipstream.util;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.restlet.Request;
+import org.restlet.data.Parameter;
+import org.restlet.data.Reference;
+
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
@@ -8,13 +16,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.BaseResource;
-import org.restlet.Request;
-import org.restlet.data.Parameter;
-import org.restlet.data.Reference;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RequestUtil {
 
