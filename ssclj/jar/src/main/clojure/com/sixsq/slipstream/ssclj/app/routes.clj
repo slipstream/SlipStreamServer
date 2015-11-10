@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.app.reports :as reports]
     [ring.middleware.head :refer [wrap-head]]
     [compojure.core :refer [defroutes let-routes routes POST GET PUT DELETE ANY]]
     [compojure.route :as route]))
@@ -50,11 +51,12 @@
     (POST uri-token request (as/build-token request))))
 
 (def final-routes
-  [
-   collection-routes
+  [collection-routes
    resource-routes
    action-routes
    auth-routes
+   reports/download-route
+   reports/upload-route
    (not-found)])
 
 (defn get-main-routes
