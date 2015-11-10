@@ -38,14 +38,15 @@
   [run user]
   (let [ch (chan)]
     (go
-      (let [[v c] (alts! [ch (timeout timeout-launch)])]
+      (let [[v c] (alts! [ch (timeout timeout-launch)])
+            run-uuid (.getUuid run)]
         (if (nil? v)
-          (let [msg (str "Timeout launching run " (.getUuid run))]
-            (log/log-error msg)
+          (do
+            (log/log-error "Timeout launching run" run-uuid)
             (swap! errors inc)
-            (Run/abort msg)
-          (let [msg (str "Launched run " (.getUuid run))]
-            (log/log-info msg)
+            (Run/abort "Timeout launching run" run-uuid))
+          (do
+            (log/log-info "Launched run" run-uuid)
             (swap! completed inc)))))
     (go (>! ch (Launcher/launch run user)))))
 
