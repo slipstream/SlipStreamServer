@@ -38,6 +38,13 @@
       (.read rdr buf)
       buf)))
 
+(defn- slurp-body-binary
+  [request]
+  (if-let [len (when (:body request) (get-in request [:headers "content-length"]))]
+    (-> request
+        :body
+        (slurp-binary (Integer/parseInt len)))))
+
 (defn- slurp-body
   [request]
   (if-let [len (when (:body request) (get-in request [:headers "content-length"]))]
@@ -161,7 +168,11 @@ re-cookie
 
         response (request-fn @client redirected-url
                              {:query-params (merge (to-query-params (:query-string request)) (:params request))
-                              :body         (slurp-body request)
+                              :body         (if-let [accept (get-in request [:request "accept-encoding"])]
+                                              (if (.startsWith accept "gzip")
+                                                (slurp-body-binary request)
+                                                (slurp-body request))
+                                              (slurp-body request))
                               :headers      (-> request
                                                 :headers
                                                 (dissoc "host" "content-length"))})]
