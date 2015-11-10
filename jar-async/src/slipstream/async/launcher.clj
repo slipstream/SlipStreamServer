@@ -38,27 +38,28 @@
   [run user]
   (let [ch (chan)]
     (go
-      (let [[v c] (alts! [ch (timeout timeout-launch)])]
+      (let [[v c] (alts! [ch (timeout timeout-launch)])
+            run-uuid (.getUuid run)]
         (if (nil? v)
           (do
-            (log/log-error "Oops... timeout")
+            (log/log-error "Timeout launching run" run-uuid)
             (swap! errors inc)
-            (Run/abort "Timeout launching run" (.getUuid run)))
+            (Run/abort "Timeout launching run" run-uuid))
           (do
-            (log/log-info "Launched!")
+            (log/log-info "Launched run" run-uuid)
             (swap! completed inc)))))
     (go (>! ch (Launcher/launch run user)))))
 
 ; Start launch readers
 (defn launch-readers
   []
-  (log/log-info "Starting " number-of-readers " readers...")
+  (log/log-debug "Starting " number-of-readers " readers...")
   (doseq [i (range number-of-readers)]
     (go
       (while true
         (let [[[run user] ch] (alts! [launcher-chan (timeout timeout-processing-loop)])]
           (if (nil? run)
-            (log/log-info "Launch reader " i " loop idle. Looping...")
+            (log/log-debug "Launch reader " i " loop idle. Looping...")
             (try
               (launch! run user)
               (catch Exception e (log/log-error "caught exception: " (.getMessage e))))))))))

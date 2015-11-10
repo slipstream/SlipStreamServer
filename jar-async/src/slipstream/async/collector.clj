@@ -99,11 +99,11 @@
 
 (defn log-timeout
   [user connector elapsed]
-  (log/log-error (build-msg user connector elapsed "Timed out in waiting for collecting vms")))
+  (log/log-error (build-msg user connector elapsed "Timed out when waiting for collecting vms")))
 
 (defn log-failure
   [user connector elapsed]
-  (log/log-error (build-msg user connector elapsed "Failed collecting vms")))
+  (log/log-error (build-msg user connector elapsed "Failed collecting VMs")))
 
 (defn log-collected
   [user connector elapsed v]
@@ -120,7 +120,7 @@
       (let [res (alts! [ch (timeout timeout-collect)])]
         (if (nil? res)
           (log/log-error  "Timeout updating metrics for user "  (get-name user))
-          (log/log-info   "Executed update-metric request for " (get-name user)))))
+          (log/log-debug   "Executed update metric request for " (get-name user)))))
     (go (>! ch (updator/update-metric user connector)))))
 
 (defn collect!
@@ -144,7 +144,7 @@
 ; Start collector readers
 (defn collect-readers
   [chan]
-  (log/log-info "Starting " number-of-readers " collector readers...")
+  (log/log-debug "Starting " number-of-readers " collector readers...")
   (doseq [i (range number-of-readers)]
     (go
       (while true
@@ -179,7 +179,7 @@
 
 (defn inform-nothing-to-do 
   [context]
-  (log/log-info context ": no users to collect."))
+  (log/log-debug context ": no users to collect."))
 
 (defn show-current-channel-usage   
   [context]
