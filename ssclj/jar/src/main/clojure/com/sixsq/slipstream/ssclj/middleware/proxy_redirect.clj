@@ -167,7 +167,6 @@ re-cookie
                                                 (dissoc "host" "content-length"))})]
 
     (log/debug "response, status     = " (:status @response))
-    (clojure.pprint/pprint request)
 
     (-> @response
         (assoc-in  [:headers "set-cookie"] (str-set-cookie @response))
