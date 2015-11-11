@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
   (:import [java.io IOException]))
 
-(def ^:const report-root "/var/tmp/slipstream/reports")
+(def ^:const report-root "/var/tmp/slipstream/reports/")
 
 (defn copy-stream-to-file [body file]
   (if (and body file)
