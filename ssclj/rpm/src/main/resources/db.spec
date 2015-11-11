@@ -1,15 +1,20 @@
 {:api-db                  {
-                           :classname   "org.hsqldb.jdbc.JDBCDriver"
-                           :subprotocol "hsqldb"
-                           :subname     "hsql://localhost:9001/ssclj"
+                           :classname   "org.postgresql.Driver"
+                           :subprotocol "postgresql"
+                           :user        "postgres"
+                           :password    "password"
+                           :subname     "//localhost:5432/ssclj"
                            :make-pool?  true}
  :auth-db                 {
-                           :classname   "org.hsqldb.jdbc.JDBCDriver"
-                           :subprotocol "hsqldb"
-                           :subname     "hsql://localhost:9001/slipstream"
+                           :classname   "org.postgresql.Driver"
+                           :user        "postgres"
+                           :password    "password"
+                           :subprotocol "postgresql"
+                           :subname     "//localhost:5432/slipstream"
                            :make-pool?  true}
 
  :token-nb-minutes-expiry 120
  :passphrase              "sl1pstre8m"
- 
+
  :upstream-server         "http://localhost:8182"}
+
