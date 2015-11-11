@@ -47,14 +47,6 @@
         (slurp-binary (Integer/parseInt len))
         ByteArrayInputStream.)))
 
-(defn- slurp-body
-  [request]
-  (if-let [len (when (:body request) (get-in request [:headers "content-length"]))]
-    (-> request
-        :body
-        (slurp-binary (Integer/parseInt len))
-        String.)))
-
 (def ^{:private true, :doc "RFC6265 cookie-octet"}
 re-cookie-octet
   #"[!#$%&'()*+\-./0-9:<=>?@A-Z\[\]\^_`a-z\{\|\}~]")
@@ -156,13 +148,6 @@ re-cookie
   (log/debug "rewrite result" result)
   result))
 
-(defn- extract-body
-  [request]
-  (let [accept (get-in request [:headers "accept-encoding"])]
-    (if (and accept (.startsWith accept "gzip"))
-      (slurp-body-binary request)
-      (slurp-body request))))
-
 (defn- redirect
   [host request-uri request]
 
@@ -177,7 +162,7 @@ re-cookie
 
         response (request-fn @client redirected-url
                              {:query-params (merge (to-query-params (:query-string request)) (:params request))
-                              :body         (extract-body request)
+                              :body         (slurp-body-binary request)
                               :headers      (-> request
                                                 :headers
                                                 (dissoc "host" "content-length"))})]
