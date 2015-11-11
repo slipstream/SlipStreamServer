@@ -207,8 +207,8 @@
 			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL82Dialect"/>
 			<property name="hibernate.connection.url" value="jdbc:postgresql://localhost:5432/slipstream"/>
 			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-			<property name="hibernate.connection.username" value="root"/>
-			<property name="hibernate.connection.password" value="root"/>
+			<property name="hibernate.connection.username" value="postgres"/>
+			<property name="hibernate.connection.password" value="password"/>
 
 			<property name="hibernate.show_sql" value="false"/>
 			<property name="hibernate.format_sql" value="false"/>
