@@ -8,7 +8,8 @@
     [ring.middleware.cookies :refer [wrap-cookies]]
     [ring.util.parsing :as rp]
     [clj-time.core :refer [in-seconds]]
-    [clj-time.format :refer [formatters unparse with-locale]]))
+    [clj-time.format :refer [formatters unparse with-locale]])
+  (:import (java.io ByteArrayInputStream)))
 
 ;; Inspired by : https://github.com/tailrecursion/ring-proxy
 
@@ -38,13 +39,13 @@
       (.read rdr buf)
       buf)))
 
-(defn- slurp-body
+(defn- slurp-body-binary
   [request]
   (if-let [len (when (:body request) (get-in request [:headers "content-length"]))]
     (-> request
         :body
         (slurp-binary (Integer/parseInt len))
-        String.)))
+        ByteArrayInputStream.)))
 
 (def ^{:private true, :doc "RFC6265 cookie-octet"}
 re-cookie-octet
@@ -161,13 +162,12 @@ re-cookie
 
         response (request-fn @client redirected-url
                              {:query-params (merge (to-query-params (:query-string request)) (:params request))
-                              :body         (slurp-body request)
+                              :body         (slurp-body-binary request)
                               :headers      (-> request
                                                 :headers
                                                 (dissoc "host" "content-length"))})]
 
     (log/debug "response, status     = " (:status @response))
-    (clojure.pprint/pprint request)
 
     (-> @response
         (assoc-in  [:headers "set-cookie"] (str-set-cookie @response))
@@ -182,3 +182,4 @@ re-cookie
       (if (uri-starts-with? request-uri except-uris)
         (handler request)
         (redirect host request-uri request)))))
+

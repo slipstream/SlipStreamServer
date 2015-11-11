@@ -31,7 +31,7 @@
         (if (nil? no-of-purged)
           (log/log-error
             "Timeout garbage collecting runs")
-          (log/log-info
+          (log/log-debug
             (str "Purged " no-of-purged " runs")))))
     (go (>! ch (purge)))))
 
@@ -40,7 +40,7 @@
 ; Start collector readers
 (defn collect-readers
   []
-  (log/log-info "Starting " number-of-readers " garbage collector readers...")
+  (log/log-debug "Starting " number-of-readers " garbage collector readers...")
   (doseq [i (range number-of-readers)]
     (go
       (while true
