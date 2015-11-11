@@ -196,8 +196,8 @@
 			<property name="hibernate.connection.username" value="postgres"/>
 			<property name="hibernate.connection.password" value="password"/>
 
-			<property name="hibernate.show_sql" value="true"/>
-			<property name="hibernate.format_sql" value="true"/>
+			<property name="hibernate.show_sql" value="false"/>
+			<property name="hibernate.format_sql" value="false"/>
 			<property name="hibernate.hbm2ddl.auto" value="update"/>
 		</properties>
 	</persistence-unit>
@@ -210,8 +210,8 @@
 			<property name="hibernate.connection.username" value="root"/>
 			<property name="hibernate.connection.password" value="root"/>
 
-			<property name="hibernate.show_sql" value="true"/>
-			<property name="hibernate.format_sql" value="true"/>
+			<property name="hibernate.show_sql" value="false"/>
+			<property name="hibernate.format_sql" value="false"/>
 			<property name="hibernate.hbm2ddl.auto" value="update"/>
 
 			<property name="hibernate.c3p0.min_size" value="5" />

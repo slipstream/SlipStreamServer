@@ -57,7 +57,7 @@ Configure and deploy the SlipStream web application in $(jetty.home)/webapps/roo
         </Call>
         <Call name="setProperty">
           <Arg>persistence.unit</Arg>
-          <Arg>hsqldb-schema</Arg>
+          <Arg>postgres-schema</Arg>
         </Call>
       </New>
     </Arg>
