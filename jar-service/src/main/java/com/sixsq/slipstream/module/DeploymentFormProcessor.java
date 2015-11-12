@@ -44,7 +44,7 @@ import com.sixsq.slipstream.persistence.User;
  * @see DeploymentFormProcesorTest
  *
  */
-public class DeploymentFormProcessor extends ModuleFormProcessor {
+public class DeploymentFormProcessor extends TargetedFormProcessor {
 
 	public DeploymentFormProcessor(User user) {
 		super(user);

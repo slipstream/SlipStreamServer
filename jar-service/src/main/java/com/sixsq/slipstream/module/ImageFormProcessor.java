@@ -37,7 +37,7 @@ import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.Target;
 import com.sixsq.slipstream.persistence.User;
 
-public class ImageFormProcessor extends ModuleFormProcessor {
+public class ImageFormProcessor extends TargetedFormProcessor {
 
 	public static final String PRERECIPE_SCRIPT_NAME = "prerecipe--script";
 	public static final String MODULE_REFERENCE_NAME = "moduleReference";
@@ -68,7 +68,6 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 		parsePreRecipe(getForm());
 		parseRecipe(getForm());
 		parseNewImage(getForm());
-		parseTargets(getForm());
 
 		parseImageId(getForm());
 	}
@@ -172,25 +171,6 @@ public class ImageFormProcessor extends ModuleFormProcessor {
 
 		if (newIsBase != oldIsBase || !newReferenceImage.equals(oldReferenceImage)) {
 			needsRebuild = true;
-		}
-	}
-
-	private void parseTargets(Form form) throws ValidationException {
-
-		Set<Target> targets = new HashSet<Target>();
-
-		for (String targetName : Target.getTargetScriptNames()) {
-			addTarget(form, targets, targetName);
-		}
-
-		castToModule().setTargets(targets);
-
-	}
-
-	private void addTarget(Form form, Set<Target> targets, String targetName) {
-		String target = form.getFirstValue(targetName + "--script");
-		if (target != null) {
-			targets.add(new Target(targetName, target));
 		}
 	}
 
