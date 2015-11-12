@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>2.19-SNAPSHOT</version>
+    <version>2.19</version>
   </parent>
 
   <!-- NOTE: This project MUST have same version as proxy module. -->
