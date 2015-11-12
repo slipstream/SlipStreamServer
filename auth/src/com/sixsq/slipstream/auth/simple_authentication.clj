@@ -32,7 +32,7 @@
   (delay
     (kh/korma-init)
     (log/info "Korma init done")
-    (kc/defentity users (kc/table "USER") (kc/database kh/korma-auth-db))
+    (kc/defentity users (kc/table "user_") (kc/database kh/korma-auth-db))
     (log/info "Korma Entities defined")))
 ;;
 ;; DB
@@ -70,8 +70,8 @@
   [user]
   (init)
   (log/info "Will add user " (:user-name user))
-  (kc/insert users (kc/values { :NAME      (:user-name user)
-                                :PASSWORD  (sha512 (:password user))})))
+  (kc/insert users (kc/values { :name      (:user-name user)
+                                :password  (sha512 (:password user))})))
 
 (defn auth-user-impl
   [credentials]
@@ -79,10 +79,10 @@
   (let [user-name           (:user-name credentials)
         password-credential (:password credentials)
         encrypted-in-db     (-> (kc/select users
-                                            (kc/fields [:PASSWORD])
-                                            (kc/where {:NAME user-name}))
+                                            (kc/fields [:password])
+                                            (kc/where {:name user-name}))
                                 first
-                                :PASSWORD)
+                                :password)
         auth-ok (and
                   password-credential
                   encrypted-in-db

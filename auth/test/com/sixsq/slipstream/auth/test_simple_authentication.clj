@@ -7,13 +7,13 @@
     [com.sixsq.slipstream.auth.simple-authentication :as sa]
     [com.sixsq.slipstream.auth.core :as c]))
 
-(defonce ^:private columns-users (ddl/columns "NAME"       "VARCHAR(100)"
-                                              "PASSWORD"   "VARCHAR(200)"))
+(defonce ^:private columns-users (ddl/columns "name"       "VARCHAR(100)"
+                                              "password"   "VARCHAR(200)"))
 
 (defn fixture-delete-all
   [f]
   (sa/init)
-  (ddl/create-table! "USER" columns-users)
+  (ddl/create-table! "user_" columns-users)
   (kc/delete sa/users)
   (f))
 
