@@ -4,9 +4,7 @@
     [clojure.string :as str]
     [puppetlabs.http.client.async :as ppasync]
     [puppetlabs.http.client.common :as ppcommon]
-    [ring.util.codec :as codec]
     [ring.middleware.cookies :refer [wrap-cookies]]
-    [ring.util.parsing :as rp]
     [clj-time.core :refer [in-seconds]]
     [clj-time.format :refer [formatters unparse with-locale]])
   (:import (java.io ByteArrayInputStream)))
@@ -47,62 +45,10 @@
         (slurp-binary (Integer/parseInt len))
         ByteArrayInputStream.)))
 
-(def ^{:private true, :doc "RFC6265 cookie-octet"}
-re-cookie-octet
-  #"[!#$%&'()*+\-./0-9:<=>?@A-Z\[\]\^_`a-z\{\|\}~]")
-
-(def ^{:private true, :doc "RFC6265 cookie-value"}
-re-cookie-value
-  (re-pattern (str "\"" re-cookie-octet "*\"|" re-cookie-octet "*")))
-
-(def ^{:private true, :doc "RFC6265 set-cookie-string"}
-re-cookie
-  (re-pattern (str "\\s*(" rp/re-token ")=(" re-cookie-value ")\\s*[;,]?")))
-
-(defn- parse-cookie-header
-  "Turn a HTTP Cookie header into a list of name/value pairs."
-  [header]
-  (for [[_ name value] (re-seq re-cookie header)]
-    [name value]))
-
-(defn- strip-quotes
-  "Strip quotes from a cookie value."
-  [value]
-  (str/replace value #"^\"|\"$" ""))
-
-(defn- decode-values [cookies decoder]
-  (for [[name value] cookies]
-    (if-let [value (decoder (strip-quotes value))]
-      [name {:value value}])))
-
-(defn urldecode-values
-  [cookies]
-  (for [[name map-value] cookies]
-    [name {:value (codec/url-decode (:value map-value))}]))
-
-(defn- parse-cookies
-  "Parse the cookies from a request map."
-  [request encoder]
-  (if-let [cookie (get-in request [:headers "set-cookie"])]
-    (->> cookie
-         parse-cookie-header
-         ((fn [c] (decode-values c encoder)))
-         urldecode-values
-         (remove nil?)
-         (into {}))
-    {}))
-
 (defn- write-value
   "Write the main cookie value."
   [key value encoder]
   (encoder {key value}))
-
-(defn- str-set-cookie
-  [response]
-  (let [cookie-in-response (parse-cookies response codec/form-encode)]
-    (if-not (empty? cookie-in-response)
-      (str (get (first cookie-in-response) 0) "=" (:value (get (first cookie-in-response) 1)))
-      "")))
 
 (defn- split-equals
   [key-val]
@@ -170,7 +116,6 @@ re-cookie
     (log/debug "response, status     = " (:status @response))
 
     (-> @response
-        (assoc-in  [:headers "set-cookie"] (str-set-cookie @response))
         (update-in [:headers "location"]  #(rewrite-location %
                                                              host
                                                              (base-url request))))))
