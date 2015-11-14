@@ -97,9 +97,9 @@
   result))
 
 (defn update-location-header
-      [response host]
+      [response host req-host]
       (if-let [location (get-in response location-header-path)]
-              (update-in response location-header-path #(rewrite-location % host (base-url response)))
+              (update-in response location-header-path #(rewrite-location % host req-host))
               response))
 
 (defn- redirect
@@ -123,7 +123,7 @@
 
     (log/debug "response, status     = " (:status @response))
 
-    (update-location-header @response host)))
+    (update-location-header @response host (base-url request))))
 
 (defn wrap-proxy-redirect
   [handler except-uris host]

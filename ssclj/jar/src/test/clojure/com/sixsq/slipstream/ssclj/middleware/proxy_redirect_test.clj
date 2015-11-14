@@ -32,10 +32,14 @@
 
 (deftest no-location-header-creation
          (let [response {:headers {"dummy" "value"}}]
-              (is (= response (update-location-header response "http://myhost.example.org")))))
+              (is (= response (update-location-header response
+                                                      "http://myhost.example.org"
+                                                      "http://myhost.example.org")))))
 
 (deftest location-header-updated
          (let [response {:headers {"location" "http://myhost.example.org"
                                    "host" "myhost.example.org"}}]
-              (is (= {:headers {"location" "https://myhost.example.org/dashboard"
-                                "host" "myhost.example.org"}} (update-location-header response "http://myhost.example.org")))))
+              (is (= {:headers {"location" "http://myhost.example.org/dashboard"
+                                "host" "myhost.example.org"}} (update-location-header response
+                                                                                      "http://myhost.example.org"
+                                                                                      "http://myhost.example.org")))))
