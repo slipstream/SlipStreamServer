@@ -13,10 +13,8 @@
     (println (str "Server started at localhost:" *server-port*))
     (server/start *server-port*)))
 
-(kc/defentity resources)
-(kc/database resources kh/korma-api-db)
-(kc/defentity usage_summaries)
-(kc/database usage_summaries kh/korma-api-db)
+(kc/defentity resources (kc/database kh/korma-api-db))
+(kc/defentity usage_summaries (kc/database kh/korma-api-db))
 
 (defn db-content
   []

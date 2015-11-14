@@ -129,7 +129,7 @@ patch-test-pom:
 	git apply set_up_connectors_in_server_pom.patch
 	$(info This patch modified the war/pom.xml to use all public connectors (but Okeanos) and the private EC2 connector.)
 	$(info To download the code for this last connector and build it perform following commands:)
-	$(info cd ../../ && git clone git@github.com:SixSq/SlipStreamConnector-EC2.git && cd SlipStreamConnector-EC2 && mvn clean install)
+	$(info (cd ../../ && git clone git@github.com:SixSq/SlipStreamConnector-EC2.git && cd SlipStreamConnector-EC2 && mvn clean install))
 
 list: goals
 
