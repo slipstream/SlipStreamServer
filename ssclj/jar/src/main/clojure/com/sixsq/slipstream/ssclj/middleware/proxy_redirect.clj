@@ -11,6 +11,8 @@
 
 ;; Inspired by : https://github.com/tailrecursion/ring-proxy
 
+(def ^:const location-header-path [:headers "location"])
+
 (def
   client (delay
            (ppasync/create-client {:force-redirects              false
@@ -94,6 +96,12 @@
   (log/debug "rewrite result" result)
   result))
 
+(defn update-location-header
+      [response host]
+      (if-let [location (get-in response location-header-path)]
+              (update-in response location-header-path #(rewrite-location % host (base-url response)))
+              response))
+
 (defn- redirect
   [host request-uri request]
 
@@ -115,10 +123,7 @@
 
     (log/debug "response, status     = " (:status @response))
 
-    (-> @response
-        (update-in [:headers "location"]  #(rewrite-location %
-                                                             host
-                                                             (base-url request))))))
+    (update-location-header @response host)))
 
 (defn wrap-proxy-redirect
   [handler except-uris host]
