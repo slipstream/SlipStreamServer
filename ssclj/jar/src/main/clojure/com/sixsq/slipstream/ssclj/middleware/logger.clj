@@ -1,7 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.middleware.logger
   (:require
     [clojure.string :as str]
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [clojure.pprint :refer [pprint]]))
 
 (defn- display-querystring
   [request]
@@ -16,7 +17,9 @@
 
 (defn request-to-str
   [request]
-  (str
+      (with-out-str
+        (pprint request))
+  #_(str
     (-> request :request-method)
     " "
     (-> request :uri)
