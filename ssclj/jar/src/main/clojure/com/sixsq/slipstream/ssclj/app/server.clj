@@ -5,6 +5,8 @@
 
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params :refer [wrap-params]]
+    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+    [ring.middleware.nested-params :refer [wrap-nested-params]]
     [ring.middleware.cookies :refer [wrap-cookies]]
 
     [metrics.core :refer [default-registry]]
@@ -49,10 +51,12 @@
 
   (-> (routes/get-main-routes)
 
-      handler/site
+      ;;handler/site
       wrap-exceptions
       wrap-cimi-params
       wrap-base-uri
+      wrap-keyword-params
+      wrap-nested-params
       wrap-params
       wrap-authn-info-header
       (expose-metrics-as-json (str p/service-context "metrics") default-registry {:pretty-print? true})
