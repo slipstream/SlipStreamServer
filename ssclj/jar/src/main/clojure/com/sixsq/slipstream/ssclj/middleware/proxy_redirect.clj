@@ -7,7 +7,10 @@
     [clj-time.core :refer [in-seconds]]
     [clj-time.format :refer [formatters unparse with-locale]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :as buri])
-  (:import (java.io ByteArrayInputStream)
+  (:import
+    [java.io ByteArrayInputStream]
+    [java.io InputStream]
+    [java.net URL]
     [java.net URI]))
 
 ;; Inspired by : https://github.com/tailrecursion/ring-proxy
@@ -20,14 +23,14 @@
 
 (defn- build-url
   [host path query-string]
-  (str (.toString (java.net.URL. (java.net.URL. host) path))
+  (str (.toString (URL. (URL. host) path))
        (if query-string
          (str "?" query-string)
          "")))
 
 (defn slurp-binary
   "Reads len bytes from InputStream is and returns a byte array."
-  [^java.io.InputStream is len]
+  [^InputStream is len]
   (with-open [rdr is]
     (let [buf (byte-array len)]
       (.read rdr buf)
@@ -58,63 +61,63 @@
       (into {} (remove empty? (map split-equals kvs))))))
 
 (defn strip-leading-slashes
-      [s]
-      (second (re-matches #"^(?:/*)?(.*)$" s)))
+  [s]
+  (second (re-matches #"^(?:/*)?(.*)$" s)))
 
 (defn strip-trailing-slashes
-      [s]
-      (second (re-matches #"^(.*?)(?:/*)?$" s)))
+  [s]
+  (second (re-matches #"^(.*?)(?:/*)?$" s)))
 
 (defn update-location
-      [location base-uri]
-      (let [uri (URI. location)
-            path (or (.getRawPath uri) "")
-            query (.getRawQuery uri)
-            fragment (.getRawFragment uri)]
-           (str (strip-trailing-slashes base-uri)
-                "/"
-                (if path (strip-leading-slashes path) "")
-                (if query (str "?" query) "")
-                (if fragment (str "#" fragment) ""))))
+  [location base-uri]
+  (let [uri (URI. location)
+        path (or (.getRawPath uri) "")
+        query (.getRawQuery uri)
+        fragment (.getRawFragment uri)]
+    (str (strip-trailing-slashes base-uri)
+         "/"
+         (if path (strip-leading-slashes path) "")
+         (if query (str "?" query) "")
+         (if fragment (str "#" fragment) ""))))
 
 (defn update-location-header
-      [response base-uri]
-      (if-let [location (get-in response location-header-path)]
-              (update-in response location-header-path #(update-location % base-uri))
-              response))
+  [response base-uri]
+  (if (get-in response location-header-path)
+    (update-in response location-header-path #(update-location % base-uri))
+    response))
 
 ;; NOTE: this method uses the synchronous calls for the http client.  The persistent
 ;; asynchronous client appears to either be caching credentials (allowing inappropriate
 ;; reuse by different users) or not to be thread-safe.
 (defn- redirect
-       [host request-uri request]
+  [host request-uri request]
 
-       (let [redirected-url  (build-url host request-uri (:query-string request))
+  (let [redirected-url  (build-url host request-uri (:query-string request))
 
-             request-fn (case (:request-method request)
-                              :get     ppsync/get
-                              :head    ppsync/head
-                              :post    ppsync/post
-                              :delete  ppsync/delete
-                              :put     ppsync/put)
+        request-fn (case (:request-method request)
+                     :get     ppsync/get
+                     :head    ppsync/head
+                     :post    ppsync/post
+                     :delete  ppsync/delete
+                     :put     ppsync/put)
 
-             forwarded-headers (-> request
-                                   :headers
-                                   (dissoc "host" "content-length"))
+        forwarded-headers (-> request
+                              :headers
+                              (dissoc "host" "content-length"))
 
-             response (request-fn redirected-url
-                                  {:query-params (merge (to-query-params (:query-string request)) (:params request))
-                                   :body         (slurp-body-binary request)
-                                   :headers      forwarded-headers
-                                   :force-redirects              false
-                                   :follow-redirects             false
-                                   :connect-timeout-milliseconds 60000
-                                   :socket-timeout-milliseconds  60000})]
+        response (request-fn redirected-url
+                             {:query-params (merge (to-query-params (:query-string request)) (:params request))
+                              :body         (slurp-body-binary request)
+                              :headers      forwarded-headers
+                              :force-redirects              false
+                              :follow-redirects             false
+                              :connect-timeout-milliseconds 60000
+                              :socket-timeout-milliseconds  60000})]
 
-            (log/debug "sent headers: " forwarded-headers)
-            (log/debug "response, status     = " (:status response))
+    (log/debug "sent headers: " forwarded-headers)
+    (log/debug "response, status     = " (:status response))
 
-            (update-location-header response (buri/construct-base-uri request "/"))))
+    (update-location-header response (buri/construct-base-uri request "/"))))
 
 (defn wrap-proxy-redirect
   [handler except-uris host]
