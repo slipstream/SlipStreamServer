@@ -3,6 +3,7 @@
     [clojure.tools.logging :as log]
     [clojure.string :as str]
     [puppetlabs.http.client.async :as ppasync]
+    [puppetlabs.http.client.sync :as ppsync]
     [puppetlabs.http.client.common :as ppcommon]
     [ring.middleware.cookies :refer [wrap-cookies]]
     [clj-time.core :refer [in-seconds]]
@@ -102,28 +103,52 @@
               (update-in response location-header-path #(rewrite-location % host req-host))
               response))
 
+;; FIXME: Persistent client seems to be either caching credentials or not thread-safe.
+#_(defn- redirect
+       [host request-uri request]
+
+       (let [redirected-url  (build-url host request-uri (:query-string request))
+
+             request-fn (case (:request-method request)
+                              :get     ppcommon/get
+                              :head    ppcommon/head
+                              :post    ppcommon/post
+                              :delete  ppcommon/delete
+                              :put     ppcommon/put)
+
+             response (request-fn @client redirected-url
+                                  {:query-params (merge (to-query-params (:query-string request)) (:params request))
+                                   :body         (slurp-body-binary request)
+                                   :headers      (-> request
+                                                     :headers
+                                                     (dissoc "host" "content-length"))})]
+
+            (log/debug "response, status     = " (:status @response))
+
+            (update-location-header @response host (base-url request))))
+
 (defn- redirect
-  [host request-uri request]
+       [host request-uri request]
 
-  (let [redirected-url  (build-url host request-uri (:query-string request))
+       (let [redirected-url  (build-url host request-uri (:query-string request))
 
-        request-fn (case (:request-method request)
-                     :get     ppcommon/get
-                     :head    ppcommon/head
-                     :post    ppcommon/post
-                     :delete  ppcommon/delete
-                     :put     ppcommon/put)
+             request-fn (case (:request-method request)
+                              :get     ppsync/get
+                              :head    ppsync/head
+                              :post    ppsync/post
+                              :delete  ppsync/delete
+                              :put     ppsync/put)
 
-        response (request-fn @client redirected-url
-                             {:query-params (merge (to-query-params (:query-string request)) (:params request))
-                              :body         (slurp-body-binary request)
-                              :headers      (-> request
-                                                :headers
-                                                (dissoc "host" "content-length"))})]
+             response (request-fn redirected-url
+                                  {:query-params (merge (to-query-params (:query-string request)) (:params request))
+                                   :body         (slurp-body-binary request)
+                                   :headers      (-> request
+                                                     :headers
+                                                     (dissoc "host" "content-length"))})]
 
-    (log/debug "response, status     = " (:status @response))
+            (log/debug "response, status     = " (:status response))
 
-    (update-location-header @response host (base-url request))))
+            (update-location-header response host (base-url request))))
 
 (defn wrap-proxy-redirect
   [handler except-uris host]

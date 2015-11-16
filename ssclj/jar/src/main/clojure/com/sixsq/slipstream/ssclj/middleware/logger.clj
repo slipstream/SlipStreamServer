@@ -17,9 +17,9 @@
 
 (defn request-to-str
   [request]
-      (with-out-str
+      #_(with-out-str
         (pprint request))
-  #_(str
+  (str
     (-> request :request-method)
     " "
     (-> request :uri)
