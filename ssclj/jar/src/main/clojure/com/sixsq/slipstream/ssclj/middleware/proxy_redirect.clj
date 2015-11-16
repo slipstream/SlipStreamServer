@@ -2,24 +2,17 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.string :as str]
-    [puppetlabs.http.client.async :as ppasync]
     [puppetlabs.http.client.sync :as ppsync]
-    [puppetlabs.http.client.common :as ppcommon]
     [ring.middleware.cookies :refer [wrap-cookies]]
     [clj-time.core :refer [in-seconds]]
-    [clj-time.format :refer [formatters unparse with-locale]])
-  (:import (java.io ByteArrayInputStream)))
+    [clj-time.format :refer [formatters unparse with-locale]]
+    [com.sixsq.slipstream.ssclj.middleware.base-uri :as buri])
+  (:import (java.io ByteArrayInputStream)
+    [java.net URI]))
 
 ;; Inspired by : https://github.com/tailrecursion/ring-proxy
 
 (def ^:const location-header-path [:headers "location"])
-
-(def
-  client (delay
-           (ppasync/create-client {:force-redirects              false
-                                   :follow-redirects             false
-                                   :connect-timeout-milliseconds 60000
-                                   :socket-timeout-milliseconds  60000})))
 
 (defn- uri-starts-with?
   [uri prefixes]
@@ -48,11 +41,6 @@
         (slurp-binary (Integer/parseInt len))
         ByteArrayInputStream.)))
 
-(defn- write-value
-  "Write the main cookie value."
-  [key value encoder]
-  (encoder {key value}))
-
 (defn- split-equals
   [key-val]
   (let [index-equals (.indexOf key-val "=")
@@ -69,64 +57,35 @@
     (let [kvs (str/split query-string #"&")]
       (into {} (remove empty? (map split-equals kvs))))))
 
-(defn- base-url
-  [request]
-  (str "https://" (get-in request [:headers "host"])))
+(defn strip-leading-slashes
+      [s]
+      (second (re-matches #"^(?:/*)?(.*)$" s)))
 
-(defn- after-scheme
-  [url]
-  (.substring url (.indexOf url "//")))
+(defn strip-trailing-slashes
+      [s]
+      (second (re-matches #"^(.*?)(?:/*)?$" s)))
 
-(defn- same-after-scheme?
-  [urla urlb]
-  (= (after-scheme urla) (after-scheme urlb)))
-
-(defn rewrite-location
-[location old-host new-host]
-
-(let [result
-      (if (and old-host new-host)
-        (if (and location (not (same-after-scheme? location old-host)))
-          (str/replace location (after-scheme old-host) (after-scheme new-host))
-          (str new-host "/dashboard"))
-        (or location ""))]
-
-  (log/debug "rewrite location " location)
-  (log/debug "rewrite old host" old-host)
-  (log/debug "rewrite new host" new-host)
-  (log/debug "rewrite result" result)
-  result))
+(defn update-location
+      [location base-uri]
+      (let [uri (URI. location)
+            path (or (.getRawPath uri) "")
+            query (.getRawQuery uri)
+            fragment (.getRawFragment uri)]
+           (str (strip-trailing-slashes base-uri)
+                "/"
+                (if path (strip-leading-slashes path) "")
+                (if query (str "?" query) "")
+                (if fragment (str "#" fragment) ""))))
 
 (defn update-location-header
-      [response host req-host]
+      [response base-uri]
       (if-let [location (get-in response location-header-path)]
-              (update-in response location-header-path #(rewrite-location % host req-host))
+              (update-in response location-header-path #(update-location % base-uri))
               response))
 
-;; FIXME: Persistent client seems to be either caching credentials or not thread-safe.
-#_(defn- redirect
-       [host request-uri request]
-
-       (let [redirected-url  (build-url host request-uri (:query-string request))
-
-             request-fn (case (:request-method request)
-                              :get     ppcommon/get
-                              :head    ppcommon/head
-                              :post    ppcommon/post
-                              :delete  ppcommon/delete
-                              :put     ppcommon/put)
-
-             response (request-fn @client redirected-url
-                                  {:query-params (merge (to-query-params (:query-string request)) (:params request))
-                                   :body         (slurp-body-binary request)
-                                   :headers      (-> request
-                                                     :headers
-                                                     (dissoc "host" "content-length"))})]
-
-            (log/debug "response, status     = " (:status @response))
-
-            (update-location-header @response host (base-url request))))
-
+;; NOTE: this method uses the synchronous calls for the http client.  The persistent
+;; asynchronous client appears to either be caching credentials (allowing inappropriate
+;; reuse by different users) or not to be thread-safe.
 (defn- redirect
        [host request-uri request]
 
@@ -139,16 +98,23 @@
                               :delete  ppsync/delete
                               :put     ppsync/put)
 
+             forwarded-headers (-> request
+                                   :headers
+                                   (dissoc "host" "content-length"))
+
              response (request-fn redirected-url
                                   {:query-params (merge (to-query-params (:query-string request)) (:params request))
                                    :body         (slurp-body-binary request)
-                                   :headers      (-> request
-                                                     :headers
-                                                     (dissoc "host" "content-length"))})]
+                                   :headers      forwarded-headers
+                                   :force-redirects              false
+                                   :follow-redirects             false
+                                   :connect-timeout-milliseconds 60000
+                                   :socket-timeout-milliseconds  60000})]
 
+            (log/debug "sent headers: " forwarded-headers)
             (log/debug "response, status     = " (:status response))
 
-            (update-location-header response host (base-url request))))
+            (update-location-header response (buri/construct-base-uri request "/"))))
 
 (defn wrap-proxy-redirect
   [handler except-uris host]
