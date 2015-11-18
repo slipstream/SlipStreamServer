@@ -5,14 +5,17 @@
 
 (defn get-host-port
   "Gets the originating host and port, preferring the 'forwarded'
-   headers, if they exist.  The 'x-forwarded-for' is used instead
-   of 'x-forwarded-host'."
+   headers, if they exist. If neither the x-forwarded-host or host
+   headers exist, then the default is the server-name and server-port
+   from the ring request."
   [{:keys [headers server-name server-port]}]
-  (if-let [host (get headers "x-forwarded-for")]
+  (if-let [host (get headers "x-forwarded-host")]
     (if-let [port (get headers "x-forwarded-port")]
       (format "%s:%s" host port)
       host)
-    (format "%s:%s" server-name server-port)))
+    (if-let [host (get headers "host")]
+      host
+      (format "%s:%s" server-name server-port))))
 
 (defn get-scheme
   "Get the scheme for the originating host, preferring the 'forwarded'
@@ -22,8 +25,10 @@
       (name scheme)))
 
 (defn construct-base-uri
-  [req]
-  (format "%s://%s%s" (get-scheme req) (get-host-port req) p/service-context))
+  ([req]
+    (construct-base-uri req p/service-context))
+  ([req service-context]
+        (format "%s://%s%s" (get-scheme req) (get-host-port req) service-context)))
 
 (defn wrap-base-uri
   "adds the :base-uri key to the request with the base URI value"

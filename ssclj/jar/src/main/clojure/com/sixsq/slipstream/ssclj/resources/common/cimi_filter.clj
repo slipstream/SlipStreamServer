@@ -71,7 +71,7 @@
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (when actual (.startsWith actual value)))))
+           (fn [^String value ^String actual] (when actual (.startsWith actual value)))))
 
 (defmethod mk-pred-attribute-value [">" :DateValue]
   [attribute-full-name op [type value]]
