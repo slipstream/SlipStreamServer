@@ -14,6 +14,10 @@
   [ts]
   (time/plus ts (time/days 1)))
 
+(defn inc-week
+  [ts]
+  (time/plus ts (time/days 7)))
+
 (defn inc-month
   [ts]
   (time/plus ts (time/months 1)))
@@ -22,11 +26,18 @@
   [ts minutes]
   (time/plus ts (time/minutes minutes)))
 
-(defn timestamp-next-day
-  [& args]
-   (->> (apply time/date-time args)      
-        inc-day
-        (time-fmt/unparse (:date-time time-fmt/formatters))))
+(defn timestamp-next-frequence
+  "Some examples:
+  (timestamp-next-frequence :daily 2005 11 23)   -> 2005-11-24T00:00:00.000Z
+  (timestamp-next-frequence :weekly 2005 11 23)  -> 2005-11-30T00:00:00.000Z
+  (timestamp-next-frequence :monthly 2005 11 23) -> 2005-12-23T00:00:00.000Z"
+  [frequence & args]
+  (let [time-adder-fn (frequence {:daily   inc-day
+                                  :weekly  inc-week
+                                  :monthly inc-month})]
+    (->> (apply time/date-time args)
+         time-adder-fn
+         (time-fmt/unparse (:date-time time-fmt/formatters)))))
 
 (defn to-ISO-8601
   [ts]

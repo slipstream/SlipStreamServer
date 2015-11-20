@@ -52,6 +52,7 @@
     "cloud"                 "VARCHAR(100)"
     "start_timestamp"       "VARCHAR(30)"
     "end_timestamp"         "VARCHAR(30)"
+    "frequence"             "VARCHAR(30)"
     "compute_timestamp"     "VARCHAR(30)"
     "usage"                 "VARCHAR(10000)"))
 

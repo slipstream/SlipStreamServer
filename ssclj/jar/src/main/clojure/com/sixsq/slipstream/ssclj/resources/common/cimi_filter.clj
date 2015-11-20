@@ -165,12 +165,12 @@
   ;; FIXME decouple from usage specific known columns
   ([[_ a] [_ o] v]
    (case o
-     "="  (cond (some #{a} ["user" "cloud"])                     [:=     (keyword (str "u." a)) v]
+     "="  (cond (some #{a} ["user" "cloud" "frequence"])         [:=     (keyword (str "u." a)) v]
                 (some #{a} ["start_timestamp" "end_timestamp"])  [:like  (keyword (str "u." a)) (str v "%")])
 
-     "<" (when  (some #{a} ["user" "cloud" "start_timestamp" "end_timestamp"])
+     "<" (when  (some #{a} ["user" "cloud" "frequence" "start_timestamp" "end_timestamp"])
                 [:<     (keyword (str "u." a)) v])
-     ">" (when  (some #{a} ["user" "cloud" "start_timestamp" "end_timestamp"])
+     ">" (when  (some #{a} ["user" "cloud" "frequence" "start_timestamp" "end_timestamp"])
                 [:>     (keyword (str "u." a)) v]))))
 
 (defn sql-or
