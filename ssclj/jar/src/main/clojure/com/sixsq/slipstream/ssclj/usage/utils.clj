@@ -10,12 +10,17 @@
   (->> (apply time/date-time args)      
        (time-fmt/unparse (:date-time time-fmt/formatters))))  
 
+(defn period-fn
+  [frequency]
+  (frequency {:daily time/days :weekly time/weeks :monthly time/months}))
+
+(defn dec-by-frequency
+  [dt frequency]
+  (time/minus dt ((period-fn frequency) 1)))
+
 (defn inc-by-frequency
   [dt frequency]
-  (time/plus dt (condp = frequency
-                  :daily    (time/days 1)
-                  :weekly   (time/days 7)
-                  :monthly  (time/months 1))))
+  (time/plus dt ((period-fn frequency) 1)))
 
 (defn inc-minutes
   [ts minutes]
