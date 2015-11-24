@@ -39,9 +39,9 @@
         start                     (month-or-last-month options)
         end                       (-> start
                                       u/to-time
-                                      u/inc-month
+                                      (u/inc-by-frequency :monthly)
                                       u/to-ISO-8601)
         except-users              (except-users options)]
 
     (sl/throw-when-errors errors)
-    (sl/do-summarize! [start end] [:cloud] except-users)))
+    (sl/do-summarize! [start end] :monthly [:cloud] except-users)))

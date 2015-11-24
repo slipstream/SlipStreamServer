@@ -16,6 +16,7 @@
   [username cloud day-number metrics-map]
   {:user            username
    :cloud           cloud
+   :frequency       "daily"
    :start_timestamp (days-from-now day-number)
    :end_timestamp   (days-from-now (inc day-number))
    :usage           (->> metrics-map
@@ -32,10 +33,45 @@
       :metric_name     k
       :metric_value    v}))
 
+(defmulti usages-for-freq (comp first list))
+
+(defmethod usages-for-freq :monthly
+  [_ username cloud day-number]
+  {:user            username
+   :cloud           cloud
+   :frequency       "monthly"
+   :start_timestamp (days-from-now (* 30 day-number))
+   :end_timestamp   (days-from-now (* 30 (inc day-number)))
+   :usage           (->> {:ram 97185920 :disk 950.67 :cpu 9250}
+                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (into {}))})
+
+(defmethod usages-for-freq :weekly
+  [_ username cloud day-number]
+  {:user            username
+   :cloud           cloud
+   :frequency       "weekly"
+   :start_timestamp (days-from-now (* 7 day-number))
+   :end_timestamp   (days-from-now (* 7 (inc day-number)))
+   :usage           (->> {:ram 571859200 :disk 5000.67 :cpu 52500}
+                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (into {}))})
+
+(defmethod usages-for-freq :daily
+  [_ username cloud day-number]
+  {:user            username
+   :cloud           cloud
+   :frequency       "daily"
+   :start_timestamp (days-from-now day-number)
+   :end_timestamp   (days-from-now (inc day-number))
+   :usage           (->> {:ram 47185920 :disk 450.67 :cpu 1250}
+                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (into {}))})
+
 (defn usages
   [nb username clouds]
-  (for [day-number (range nb) cloud clouds]
-    (daily-usage (name username) cloud day-number {:ram 47185920 :disk 450.67 :cpu 1250})))
+  (for [day-number (range nb) cloud clouds frequency [:daily :weekly :monthly]]
+    (usages-for-freq frequency (name username) cloud day-number)))
 
 (defn usage-records
   [nb username clouds]

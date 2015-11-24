@@ -24,13 +24,13 @@
 
 
 (defn- summary
-  [user cloud frequence [year month day] usage]
-  {:user                user
-   :cloud               cloud
-   :frequence           (name frequence)
-   :start_timestamp     (u/timestamp year month day)
-   :end_timestamp       (u/timestamp-next-frequence frequence year month day)
-   :usage               usage })
+  [user cloud frequency [year month day] usage]
+  {:user            user
+   :cloud           cloud
+   :frequency       (name frequency)
+   :start_timestamp (u/timestamp year month day)
+   :end_timestamp   (u/timestamp-next-frequency frequency year month day)
+   :usage           usage})
 
 (defn insert-daily-summaries
   [f]
@@ -78,18 +78,18 @@
   m)
 
 (deftest get-should-return-most-recent-first-by-user
-  (-> (exec-request base-uri "?$filter=frequence='daily'" "joe")
+  (-> (exec-request base-uri "?$filter=frequency='daily'" "joe")
       (t/is-key-value :count 2)
       are-desc-dates?
       (are-all-usages? :user "joe"))
 
-  (-> (exec-request base-uri "?$filter=frequence='daily'" "mike")
+  (-> (exec-request base-uri "?$filter=frequency='daily'" "mike")
       (t/is-key-value :count 3)
       are-desc-dates?
       (are-all-usages? :user "mike")))
 
 (deftest acl-filter-cloud-with-role
-  (-> (exec-request base-uri "?$filter=frequence='daily'" "john exo1 exo")
+  (-> (exec-request base-uri "?$filter=frequency='daily'" "john exo1 exo")
       (t/is-key-value :count 3)
       are-desc-dates?
       (are-all-usages? :cloud "exo")))
@@ -122,24 +122,24 @@
   (partial tu/are-counts :usages base-uri "super ADMIN"))
 
 (deftest pagination-full
-  (are-counts "mike" 3 "?$filter=frequence='daily'&$first=1&$last=10")
-  (are-counts "mike" 2 "?$filter=frequence='weekly'&$first=1&$last=10")
-  (are-counts "mike" 2 "?$filter=frequence='monthly'&$first=1&$last=10"))
+  (are-counts "mike" 3 "?$filter=frequency='daily'&$first=1&$last=10")
+  (are-counts "mike" 2 "?$filter=frequency='weekly'&$first=1&$last=10")
+  (are-counts "mike" 2 "?$filter=frequency='monthly'&$first=1&$last=10"))
 
 (deftest pagination-only-one
-  (are-counts "mike" 3 1 "?$filter=frequence='daily'&$first=1&$last=1")
-  (are-counts "mike" 2 1 "?$filter=frequence='weekly'&$first=1&$last=1")
-  (are-counts "mike" 2 1 "?$filter=frequence='monthly'&$first=1&$last=1"))
+  (are-counts "mike" 3 1 "?$filter=frequency='daily'&$first=1&$last=1")
+  (are-counts "mike" 2 1 "?$filter=frequency='weekly'&$first=1&$last=1")
+  (are-counts "mike" 2 1 "?$filter=frequency='monthly'&$first=1&$last=1"))
 
 (deftest pagination-outside-bounds
-  (are-counts "mike" 3 0 "?$filter=frequence='daily'&$first=10&$last=15")
-  (are-counts "mike" 2 0 "?$filter=frequence='weekly'&$first=10&$last=15")
-  (are-counts "mike" 2 0 "?$filter=frequence='monthly'&$first=10&$last=15"))
+  (are-counts "mike" 3 0 "?$filter=frequency='daily'&$first=10&$last=15")
+  (are-counts "mike" 2 0 "?$filter=frequency='weekly'&$first=10&$last=15")
+  (are-counts "mike" 2 0 "?$filter=frequency='monthly'&$first=10&$last=15"))
 
 (deftest pagination-first-larger-than-last
-  (are-counts "mike" 3 0 "?$filter=frequence='daily'&$first=10&$last=5")
-  (are-counts "mike" 2 0 "?$filter=frequence='weekly'&$first=10&$last=5")
-  (are-counts "mike" 2 0 "?$filter=frequence='monthly'&$first=10&$last=5"))
+  (are-counts "mike" 3 0 "?$filter=frequency='daily'&$first=10&$last=5")
+  (are-counts "mike" 2 0 "?$filter=frequency='weekly'&$first=10&$last=5")
+  (are-counts "mike" 2 0 "?$filter=frequency='monthly'&$first=10&$last=5"))
 
 (defn- expect-pagination
   [code query-strings]
@@ -161,29 +161,29 @@
 
 (deftest admin-sees-everything
   (are-counts-for-admin 11 "")
-  (are-counts-for-admin 5 "?$filter=frequence='daily'")
-  (are-counts-for-admin 3 "?$filter=frequence='weekly'")
-  (are-counts-for-admin 3 "?$filter=frequence='monthly'"))
+  (are-counts-for-admin 5 "?$filter=frequency='daily'")
+  (are-counts-for-admin 3 "?$filter=frequency='weekly'")
+  (are-counts-for-admin 3 "?$filter=frequency='monthly'"))
 
 (deftest simple-filter-with-admin
-  (are-counts-for-admin 2 "?$filter=frequence='daily'&$filter=user='joe'"  )
-  (are-counts-for-admin 3 "?$filter=frequence='daily'&$filter=user='mike'" ))
+  (are-counts-for-admin 2 "?$filter=frequency='daily'&$filter=user='joe'"  )
+  (are-counts-for-admin 3 "?$filter=frequency='daily'&$filter=user='mike'" ))
 
 (deftest filter-int-value-when-no-value
   (are-counts-for-admin 0 "?$filter=xxx<100"))
 
 (deftest filter-int-value
-  (are-counts-for-admin 1 "?$filter=frequence='daily' and usage/ram/unit_minutes<100")
-  (are-counts-for-admin 1 "?$filter=frequence='daily' and usage/ram/unit_minutes > 400")
-  (are-counts-for-admin 1 "?$filter=frequence='daily' and usage/ram/unit_minutes < 50")
-  (are-counts-for-admin 1 "?$filter=frequence='daily' and usage/ram/unit_minutes < 50 and usage/ram/unit_minutes > 30")
-  (are-counts-for-admin 2 "?$filter=frequence='daily' and usage/ram/unit_minutes > 100 and usage/ram/unit_minutes < 500")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit_minutes<100")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit_minutes > 400")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit_minutes < 50")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit_minutes < 50 and usage/ram/unit_minutes > 30")
+  (are-counts-for-admin 2 "?$filter=frequency='daily' and usage/ram/unit_minutes > 100 and usage/ram/unit_minutes < 500")
 
-  (are-counts-for-admin 1 "?$filter=frequence='daily' and usage/ram/unit_minutes = 40")
-  (are-counts-for-admin 1 "?$filter=frequence='daily' and usage/ram/unit_minutes = 100")
-  (are-counts-for-admin 1 "?$filter=frequence='daily' and usage/ram/unit_minutes = 200")
-  (are-counts-for-admin 1 "?$filter=frequence='daily' and usage/ram/unit_minutes = 300")
-  (are-counts-for-admin 1 "?$filter=frequence='daily' and usage/ram/unit_minutes = 500"))
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit_minutes = 40")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit_minutes = 100")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit_minutes = 200")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit_minutes = 300")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit_minutes = 500"))
 
 (defn- one-line
   [s]
@@ -231,4 +231,4 @@
 (deftest date-comparisons
   (are-counts-for-admin 1 "?$filter=user='joe' and start_timestamp=2015-04-17 and end_timestamp=2015-04-18")
   (are-counts-for-admin 1 "?$filter=user='joe' and start_timestamp=2015-04-16 and end_timestamp=2015-04-17")
-  (are-counts-for-admin 2 "?$filter=frequence='daily' and user='joe' and start_timestamp>2015-04-15"))
+  (are-counts-for-admin 2 "?$filter=frequency='daily' and user='joe' and start_timestamp>2015-04-15"))

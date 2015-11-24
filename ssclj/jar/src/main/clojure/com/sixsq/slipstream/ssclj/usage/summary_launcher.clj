@@ -17,6 +17,6 @@
   (when errors (throw (exception-from-errors errors))))
 
 (defn do-summarize!
-  [[start end] columns except-users]
+  [[start end] frequency columns except-users]
   (rc/-init)
-  (s/summarize-and-store! start end columns except-users))
+  (s/summarize-and-store! start end frequency columns except-users))

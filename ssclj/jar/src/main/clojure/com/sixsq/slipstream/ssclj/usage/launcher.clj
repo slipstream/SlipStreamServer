@@ -83,7 +83,7 @@
 (defn do-summarize!
   [[start end]]
   (rc/-init)
-  (s/summarize-and-store! start end)
+  (s/summarize-and-store! start end :daily [:user :cloud])
   (str "Summary done for " (u/disp-interval start end)))
 
 (defn -main 

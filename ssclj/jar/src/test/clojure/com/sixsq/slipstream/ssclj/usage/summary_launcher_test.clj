@@ -1,14 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.usage.summary-launcher-test
   (:require 
-    [com.sixsq.slipstream.ssclj.usage.daily-summary-launcher 	  :as dl]
+    [com.sixsq.slipstream.ssclj.usage.user-summary-launcher 	  :as dl]
     [com.sixsq.slipstream.ssclj.usage.monthly-summary-launcher  :as ml]
     [clojure.test                               				        :refer :all]))
 
 (deftest daily-main-can-be-launched-without-args
-  (dl/-main))
+  (dl/-main "-f" "daily"))
 
 (deftest daily-main-can-be-launched-with-args
-  (dl/-main "-d" "2015-01-01"))
+  (dl/-main "-d" "2015-01-01" "-f" "daily")
+  (dl/-main "--date" "2015-01-01" "--frequency" "daily"))
 
 (deftest daily-main-checks-args
   (is (thrown? IllegalArgumentException (dl/-main "-x" "2015-01-01")))
