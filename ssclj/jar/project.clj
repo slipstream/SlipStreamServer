@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/ssclj "2.19-SNAPSHOT"
+(defproject com.sixsq.slipstream/ssclj "2.19.1-SNAPSHOT"
   :description    "Clojure REST resources"
   :url            "http://sixsq.com"
   :license {:name "Apache License, Version 2.0"
@@ -11,10 +11,10 @@
   :dependencies [[org.clojure/clojure                       "1.7.0"]
                  [org.clojure/tools.logging                 "0.3.1"]
                  [org.clojure/tools.namespace               "0.2.10"]
-                 [org.clojure/tools.cli                     "0.3.1"]
+                 [org.clojure/tools.cli                     "0.3.3"]
                  [org.clojure/data.json                     "0.2.6"]
-                 [org.clojure/java.classpath                "0.2.2"]
-                 [prismatic/schema                          "1.0.1"]
+                 [org.clojure/java.classpath                "0.2.3"]
+                 [prismatic/schema                          "1.0.3"]
                  [clojurewerkz/scrypt                       "1.2.0"]
                  [clj-time/clj-time                         "0.11.0"]
                  [clj-stacktrace/clj-stacktrace             "0.2.8"]
@@ -25,18 +25,18 @@
                  [metrics-clojure-graphite/metrics-clojure-graphite   "2.5.1"]
 
                  [fs/fs                                     "1.3.3"]
-                 [org.slf4j/slf4j-log4j12                   "1.7.12"]
+                 [org.slf4j/slf4j-log4j12                   "1.7.13"]
                  [instaparse                                "1.4.1"]
                 ; ;; Authentication service
-                 [com.sixsq.slipstream/auth                 "2.19-SNAPSHOT"]
+                 [com.sixsq.slipstream/auth                 "2.19.1-SNAPSHOT"]
                 ; ;; Environment settings
-                 [environ                                   "1.0.0"]
+                 [environ                                   "1.0.1"]
                 ; ;; database
-                 [honeysql                                  "0.6.1"]
-                 [org.clojure/java.jdbc                     "0.4.1"]
+                 [honeysql                                  "0.6.2"]
+                 [org.clojure/java.jdbc                     "0.4.2"]
                  [korma                                     "0.4.2"]
                  [org.hsqldb/hsqldb                         "2.3.3"]
-                 [org.xerial/sqlite-jdbc                    "3.8.11.1"]
+                 [org.xerial/sqlite-jdbc                    "3.8.11.2"]
                 ; ;; http related
                  [javax.servlet/javax.servlet-api           "3.1.0"]
                  [ring/ring-core                            "1.4.0"]
@@ -44,12 +44,13 @@
                  [compojure/compojure                       "1.4.0"]
                  [http-kit/http-kit                         "2.1.19"]
 
-                 [puppetlabs/http-client                    "0.4.4"
+                 [puppetlabs/http-client                    "0.4.5"
                   :exclusions [[cheshire/cheshire]] ]
                  [aleph                                     "0.4.0"]
                  ]
 
-  :plugins      [[lein-expectations                         "0.0.7"]
+  :plugins      [[lein-ancient                              "0.6.8"]
+                 [lein-expectations                         "0.0.7"]
                  [lein-autoexpect                           "1.4.2"]
                  [lein-environ                              "1.0.0"]
                  [com.jakemccrary/lein-test-refresh         "0.5.5"]
@@ -95,7 +96,7 @@
                :config-path    "config-hsqldb.edn"}
        :jvm-opts ["-Dlogfile.path=development"]
        :dependencies [ [peridot/peridot "0.4.1"]
-                       [expectations/expectations "2.1.3"]]}
+                       [expectations/expectations "2.1.4"]]}
    :test
      { :env {  :clj-env        :test
                :config-path    "config-hsqldb-mem.edn"}
@@ -103,6 +104,6 @@
        :jvm-opts ["-Dlogfile.path=test"]
 
        :dependencies [ [peridot/peridot "0.4.1"]
-                       [expectations/expectations "2.1.3"]]}
+                       [expectations/expectations "2.1.4"]]}
   }
   )
