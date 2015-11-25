@@ -69,6 +69,7 @@
     :default [:user :cloud]
     :parse-fn split-trim-keywordize]
    ["-n" "--number to compute" "Number of periods to compute (backward!)"
+    :parse-fn read-string
     :default 1]])
 
 (defn- date-or-previous
@@ -125,4 +126,5 @@
   (let [[start frequency except-users grouped-by n] (parse-args args)]
     (rc/-init)
     (doseq [[start end] (backward-periods start n frequency)]
+      (println "summarizing " start " -> " end)
       (s/summarize-and-store! start end frequency grouped-by except-users))))

@@ -43,7 +43,7 @@
   (is (= ["2015-04-16T00:00:00.000Z" :weekly [] [:user :cloud] 1]
          (us/parse-args ["-f" "weekly" "-d" "2015-04-16"])))
   (is (= ["2015-04-16T00:00:00.000Z" :weekly [] [:user :cloud] 5]
-         (us/parse-args ["-f" "weekly" "-d" "2015-04-16" "-n" 5])))
+         (us/parse-args ["-f" "weekly" "-d" "2015-04-16" "-n" "5"])))
 
   (is (= ["2015-04-16T00:00:00.000Z" :monthly [] [:user :cloud] 1]
          (us/parse-args ["-f" "monthly" "-d" "2015-04-16"]))))
