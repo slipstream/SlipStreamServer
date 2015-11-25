@@ -7,7 +7,6 @@
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.usage.summary :as s]
-    [clj-time.core :as t]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc])
   (:gen-class))
 
@@ -22,17 +21,18 @@
   [dt]
   (time/minus dt (time/days (dec (time/day-of-week dt)))))
 
-(defn- start-at-frequency
+(defn- now-at-frequency
+  "Returns the beginning of the current day, week or month"
   [frequency]
-  (let [start-day (t/today-at 0 0)]
+  (let [start-day (time/today-at 0 0)]
     (case frequency
       :daily    start-day
       :weekly   (date-at-monday start-day)
-      :monthly  (t/date-time (t/year start-day) (t/month start-day)))))
+      :monthly  (time/date-time (time/year start-day) (time/month start-day)))))
 
 (defn- previous-at-frequency
   [frequency]
-  (-> (start-at-frequency frequency)
+  (-> (now-at-frequency frequency)
       (u/dec-by-frequency frequency)
       u/to-ISO-8601))
 
@@ -67,19 +67,29 @@
     :default []]
    ["-g" "--grouped-by dimensions" "e.g [:user :cloud], or [:cloud]"
     :default [:user :cloud]
-    :parse-fn split-trim-keywordize]])
+    :parse-fn split-trim-keywordize]
+   ["-n" "--number to compute" "Number of periods to compute (backward!)"
+    :default 1]])
 
 (defn- date-or-previous
   [options frequency]
   (or (:date options)
       (previous-at-frequency frequency)))
 
-(defn- next-period
-  [ts frequency]
+(defn- move-ts
+  [ts frequency move-fn]
   (-> ts
       u/to-time
-      (u/inc-by-frequency frequency)
+      (move-fn frequency)
       u/to-ISO-8601))
+
+(defn- next-ts
+  [frequency ts]
+  (move-ts ts frequency u/inc-by-frequency))
+
+(defn- previous-ts
+  [frequency ts]
+  (move-ts ts frequency u/dec-by-frequency))
 
 (defn- check-required
   [required-options options]
@@ -95,14 +105,24 @@
         _                         (check-required #{:frequency} options)
         frequency                 (:frequency options)
         start                     (date-or-previous options frequency)
-        end                       (next-period start frequency)
         except-users              (:except options)
-        grouped-by                (:grouped-by options)]
-    [start end frequency except-users grouped-by]))
+        grouped-by                (:grouped-by options)
+        n                         (:number options)]
+    [start frequency except-users grouped-by n]))
+
+(defn backward-periods
+  [start n frequency]
+  (->> start
+       (next-ts frequency)
+       (iterate (partial previous-ts frequency))
+       (take (inc n))
+       reverse
+       (partition 2 1)))
 
 (defn -main
   "See tests for examples on how to call from clojure REPL"
   [& args]
-  (let [[start end frequency except-users grouped-by] (parse-args args)]
+  (let [[start frequency except-users grouped-by n] (parse-args args)]
     (rc/-init)
-    (s/summarize-and-store! start end frequency grouped-by except-users)))
+    (doseq [[start end] (backward-periods start n frequency)]
+      (s/summarize-and-store! start end frequency grouped-by except-users))))
