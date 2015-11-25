@@ -4,5 +4,5 @@
                            :subname     "mem://localhost:9012/devresources"
                            :make-pool?  true}
 
- :token-nb-minutes-expiry 120
+ :token-nb-minutes-expiry 10080
  :passphrase              "sl1pstre8m"}

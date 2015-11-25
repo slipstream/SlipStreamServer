@@ -38,6 +38,8 @@ import java.util.List;
 
 import static org.restlet.data.MediaType.APPLICATION_XHTML;
 import static org.restlet.data.MediaType.TEXT_HTML;
+import static org.restlet.data.Status.CLIENT_ERROR_UNAUTHORIZED;
+import static org.restlet.data.Status.SERVER_ERROR_INTERNAL;
 import static org.restlet.data.Status.SUCCESS_OK;
 
 public class LoginResource extends AuthnResource {
@@ -64,15 +66,23 @@ public class LoginResource extends AuthnResource {
 	}
 
 	@Post
-		public void login(Representation entity) throws ResourceException {
+	public void login(Representation entity) throws ResourceException {
 
 		Form form = new Form(entity);
 		String username = form.getFirstValue("username");
 		String password = form.getFirstValue("password");
 
-		Response token = createToken(username, password);
-		addAuthnCookie(token);
-		redirectOrSuccess();
+		try {
+			Response token = createToken(username, password);
+			addAuthnCookie(token);
+			redirectOrSuccess();
+		} catch (ResourceException re) {
+			if (re.getStatus().getCode() == CLIENT_ERROR_UNAUTHORIZED.getCode()) {
+				getResponse().setStatus(CLIENT_ERROR_UNAUTHORIZED);
+			} else {
+				getResponse().setStatus(SERVER_ERROR_INTERNAL);
+			}
+		}
 	}
 
 	private Response createToken(String username, String password) throws ResourceException {
