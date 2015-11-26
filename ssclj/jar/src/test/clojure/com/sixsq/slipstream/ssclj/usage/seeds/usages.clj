@@ -78,7 +78,7 @@
   [nb username clouds]
   (flatten
     (for [day-number (range nb) cloud clouds]
-      (daily-records (name username) cloud day-number {"ram" 2185520 "disk" 120.67 "cpu" 1250}))))
+      (daily-records (name username) cloud day-number {"ram" 4096 "disk" 120 "cpu" 2}))))
 
 (defn insert-to-db
   [usages]
