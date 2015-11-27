@@ -13,7 +13,7 @@
                            :subname     "//localhost:5432/slipstream"
                            :make-pool?  true}
 
- :token-nb-minutes-expiry 120
+ :token-nb-minutes-expiry 10080
  :passphrase              "sl1pstre8m"
 
  :upstream-server         "http://localhost:8182"}

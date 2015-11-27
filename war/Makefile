@@ -7,6 +7,9 @@ SSCLJ_DB_RUNNING=$(shell [ -f 'sscljdb.lck' ] && echo 'yes' || echo 'no' )
 SQLTOOL_FILENAME=hsqldb/hsqldb-2.3.2/hsqldb/lib/sqltool.jar
 SQLTOOL_FILE_PRESENT=$(shell [ -f $(SQLTOOL_FILENAME) ] && echo ok || echo missing )
 
+SSCLJ_SERVER_PID_FILE=ssclj-server.pid
+SSCLJ_SERVER_PID_FILE_PRESENT=$(shell [ -f $(SSCLJ_SERVER_PID_FILE) ] && echo ok || echo missing )
+
 STATIC_CONTENT_LOCATION=$(shell cd ../../SlipStreamUI/clj/resources/static_content/; pwd)
 
 # Defaults config:
@@ -19,7 +22,7 @@ MODE?=dev
 # THEME?=nuvla
 # THEME?=helixnebula
 
-run: start-db
+run: start-db start-ssclj-server
 	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
 
 clean-run: stop-db clean-install-ui clean-install run
@@ -48,6 +51,25 @@ apply-db-migration:
 
 start-db-ui: start-db
 	java -cp ${SQLTOOL_FILENAME} org.hsqldb.util.DatabaseManagerSwing -user sa -url jdbc:hsqldb:hsql://localhost/slipstream
+
+SSCLJ_PORT=8201
+start-ssclj-server: start-db
+ifneq ("$(SSCLJ_SERVER_PID_FILE_PRESENT)","ok")
+	java -Dconfig.path=config-hsqldb.edn -Dlogfile.path=dev -cp ../ssclj/jar/src/main/resources:../ssclj/jar/target/SlipStreamCljResources-jar-2.19.2-SNAPSHOT-jar-with-dependencies.jar com.sixsq.slipstream.ssclj.app.main $(SSCLJ_PORT) & echo "$$!" > $(SSCLJ_SERVER_PID_FILE)
+else
+	$(info SSCLJ server already running with PID $(shell cat $(SSCLJ_SERVER_PID_FILE)) on port $(SSCLJ_PORT))
+endif
+
+check-ssclj-server:
+	curl -sSLf http://localhost:$(SSCLJ_PORT)/api/cloud-entry-point
+
+stop-ssclj-server:
+ifeq ("$(SSCLJ_SERVER_PID_FILE_PRESENT)","ok")
+	kill $(shell cat $(SSCLJ_SERVER_PID_FILE)) && rm $(SSCLJ_SERVER_PID_FILE)
+	$(info SSCLJ server stopped.)
+else
+	$(info SSCLJ server was not running. Nothing to stop.)
+endif
 
 start-db-ui-ssclj: start-db
 	java -cp ${SQLTOOL_FILENAME} org.hsqldb.util.DatabaseManagerSwing -user sa -url jdbc:hsqldb:hsql://localhost/ssclj

@@ -10,7 +10,7 @@
 (defn create-reporter
   [host]
   (graphite/reporter {:host host
-                      :prefix "slipstream"
+                      :prefix "ssclj"
                       :rate-unit TimeUnit/SECONDS
                       :duration-unit TimeUnit/MILLISECONDS
                       :filter MetricFilter/ALL}))

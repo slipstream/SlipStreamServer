@@ -21,7 +21,7 @@
 
 (def auth-conf {:pubkey     "auth_pubkey.pem"
                 :privkey    "auth_privkey.pem"})
-(def default-nb-minutes-expiry (* 24 60))
+(def default-nb-minutes-expiry (* 7 24 60))
 (def signing-algorithm {:alg :rs256})
 
 ;;
