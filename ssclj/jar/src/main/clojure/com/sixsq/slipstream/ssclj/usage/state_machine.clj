@@ -8,13 +8,13 @@
 ;; 
 (def ^:private state-transitions
   { :initial  { :start  :insert-start            
-                :stop   :severe-wrong-transition}
+                :stop   :wrong-transition}
 
-    :started  { :start  :severe-wrong-transition 
+    :started  { :start  :wrong-transition
                 :stop   :close-record}
 
     :stopped  { :start  :insert-start
-                :stop   :severe-wrong-transition}})
+                :stop   :wrong-transition}})
 
 (defn action
   [state trigger]

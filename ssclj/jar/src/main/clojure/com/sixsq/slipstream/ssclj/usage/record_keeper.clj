@@ -120,9 +120,9 @@
 ;;
 ;; actions
 ;;
-(defn- log-severe-wrong-transition  
+(defn- log-wrong-transition
   [state action]
-  (log/fatal "Action" action " is not allowed for state " state))
+  (log/info "Action" action " is not allowed for state " state))
 
 (defn- insert-metric
   [usage-metric]
@@ -155,7 +155,7 @@
   (let [current-state (state usage-metric)]
     (case (sm/action current-state trigger)      
       :insert-start             (insert-metric                usage-metric)
-      :severe-wrong-transition  (log-severe-wrong-transition  current-state trigger)
+      :wrong-transition         (log-wrong-transition  current-state trigger)
       :close-record             (close-usage-record           usage-metric))))
 
 (defn -insertStart
