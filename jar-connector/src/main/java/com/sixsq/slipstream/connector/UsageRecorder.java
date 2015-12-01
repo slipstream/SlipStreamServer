@@ -75,9 +75,8 @@ public class UsageRecorder {
 			}
 
 			if(!hasRecorded(cloud, instanceId)){
-				logger.fine("Not recorded => avoiding inserting usage record END for "
+				logger.fine("Not recorded but still inserting usage record END for "
 						+ metrics + ", " + describe(instanceId, user, cloud));
-				return;
 			}
 
 			logger.info("Inserting usage record END, metrics" + metrics + ", for " + describe(instanceId, user, cloud));

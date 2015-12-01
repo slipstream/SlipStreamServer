@@ -9,10 +9,10 @@
 
 (deftest transitions
   (leads-to :initial :start :insert-start)
-  (leads-to :initial :stop  :severe-wrong-transition)
+  (leads-to :initial :stop  :wrong-transition)
 
-  (leads-to :started :start :severe-wrong-transition)
+  (leads-to :started :start :wrong-transition)
   (leads-to :started :stop  :close-record)
 
   (leads-to :stopped :start :insert-start)
-  (leads-to :stopped :stop  :severe-wrong-transition))
+  (leads-to :stopped :stop  :wrong-transition))
