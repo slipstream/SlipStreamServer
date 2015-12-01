@@ -2,7 +2,11 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.string :as str]
-    [puppetlabs.http.client.sync :as ppsync]
+
+    [puppetlabs.http.client.sync :as http]
+    ;; [clj-http.client :as http]
+    ;; [aleph.http :as http]
+
     [ring.middleware.cookies :refer [wrap-cookies]]
     [clj-time.core :refer [in-seconds]]
     [clj-time.format :refer [formatters unparse with-locale]]
@@ -95,18 +99,20 @@
   (let [redirected-url  (build-url host request-uri (:query-string request))
 
         request-fn (case (:request-method request)
-                     :get     ppsync/get
-                     :head    ppsync/head
-                     :post    ppsync/post
-                     :delete  ppsync/delete
-                     :put     ppsync/put)
+                     :get     http/get
+                     :head    http/head
+                     :post    http/post
+                     :delete  http/delete
+                     :put     http/put)
 
         forwarded-headers (-> request
                               :headers
-                              (dissoc "host" "content-length"))
+                              (dissoc "content-length"))
+
+        query-params      (merge (to-query-params (:query-string request)) (:params request))
 
         response (request-fn redirected-url
-                             {:query-params (merge (to-query-params (:query-string request)) (:params request))
+                             {:query-params query-params
                               :body         (slurp-body-binary request)
                               :headers      forwarded-headers
                               :force-redirects              false
@@ -114,6 +120,7 @@
                               :connect-timeout-milliseconds 60000
                               :socket-timeout-milliseconds  60000})]
 
+    (log/debug "redirected URL = " redirected-url)
     (log/debug "sent headers: " forwarded-headers)
     (log/debug "response, status     = " (:status response))
 
