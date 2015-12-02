@@ -24,16 +24,16 @@ package com.sixsq.slipstream.module;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Target;
-import com.sixsq.slipstream.persistence.TargetedModule;
+import com.sixsq.slipstream.persistence.TargetContainerModule;
 import com.sixsq.slipstream.persistence.User;
 import org.restlet.data.Form;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class TargetedFormProcessor extends ModuleFormProcessor  {
+public abstract class TargetContainerModuleFormProcessor extends ModuleFormProcessor  {
 
-    public TargetedFormProcessor(User user) {
+    public TargetContainerModuleFormProcessor(User user) {
         super(user);
     }
 
@@ -63,8 +63,8 @@ public abstract class TargetedFormProcessor extends ModuleFormProcessor  {
         }
     }
 
-    private TargetedModule castToModule() {
-        return (TargetedModule) getParametrized();
+    private TargetContainerModule castToModule() {
+        return (TargetContainerModule) getParametrized();
     }
 
 }

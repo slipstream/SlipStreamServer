@@ -49,7 +49,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
  */
 @Entity
 @SuppressWarnings("serial")
-public class ImageModule extends TargetedModule {
+public class ImageModule extends TargetContainerModule {
 
 	public static final String INSTANCE_TYPE_KEY = "instance.type";
 	public static final String INSTANCE_TYPE_INHERITED = "inherited";

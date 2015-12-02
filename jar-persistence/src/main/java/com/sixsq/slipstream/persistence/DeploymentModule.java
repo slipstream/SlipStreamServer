@@ -32,14 +32,13 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.CollectionType;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
 @Entity
 @SuppressWarnings("serial")
-public class DeploymentModule extends TargetedModule {
+public class DeploymentModule extends TargetContainerModule {
 
 	@ElementMap(required = false)
 	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

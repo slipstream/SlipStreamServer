@@ -29,17 +29,17 @@ import java.util.Set;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public abstract class TargetedModule extends Module {
+public abstract class TargetContainerModule extends Module {
 
     @ElementList(required = false)
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     protected Set<Target> targets = new HashSet<Target>();
 
-    protected TargetedModule() {
+    protected TargetContainerModule() {
         super();
     }
 
-    protected TargetedModule(String name, ModuleCategory category) throws ValidationException {
+    protected TargetContainerModule(String name, ModuleCategory category) throws ValidationException {
         super(name, category);
     }
 
