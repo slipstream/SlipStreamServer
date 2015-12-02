@@ -4,6 +4,7 @@
     [clojure.tools.logging                              :as log]
     [clojure.java.jdbc                                  :refer :all :as jdbc]
     [korma.core                                         :as kc]
+    [korma.db                                           :as kd]
     [com.sixsq.slipstream.ssclj.usage.state-machine     :as sm]
     [com.sixsq.slipstream.ssclj.api.acl                 :as acl]
     [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]
@@ -52,6 +53,7 @@
     "cloud"                 "VARCHAR(100)"
     "start_timestamp"       "VARCHAR(30)"
     "end_timestamp"         "VARCHAR(30)"
+    "frequency"             "VARCHAR(30)"
     "compute_timestamp"     "VARCHAR(30)"
     "usage"                 "VARCHAR(10000)"))
 
@@ -177,6 +179,13 @@
       :rules [{:type "USER" :principal user  :right "ALL"}
               {:type "ROLE" :principal cloud :right "ALL"}]}))
 
+(defn- id-map-for-summary
+  [summary]
+  (let [user  (:user summary)
+        cloud (:cloud summary)]
+    { :identity user
+      :roles [cloud] }))
+
 (defn resource-for   
   [summary acl]  
   (-> summary
@@ -188,19 +197,21 @@
   [row cols]
   (zipmap cols (map #(% row) cols)))
 
-(defn insert-summary!   
+(defn insert-summary!
   [summary]
-  (let [acl                 (acl-for-user-cloud summary)
-        summary-resource    (resource-for summary acl)]
-
-    (kc/delete usage_summaries (kc/where (clause-where summary-resource [:user :cloud :start_timestamp :end_timestamp])))
+  (let [acl (acl-for-user-cloud summary)
+        summary-resource (resource-for summary acl)
+        previous-computations (kc/select usage_summaries
+                                         (kc/where
+                                           (clause-where
+                                             summary-resource [:user :cloud :start_timestamp :end_timestamp])))
+        _
+          (doseq [previous-computation previous-computations]
+            (kc/delete usage_summaries (kc/where {:id (:id previous-computation)}))
+            (acl/-deleteResource (:id previous-computation) "Usage" (id-map-for-summary previous-computation)))]
 
     (kc/insert usage_summaries (kc/values (merge summary-resource {:compute_timestamp (u/now-to-ISO-8601)})))
-
-    (acl/insert-resource
-      (cu/de-camelcase (:id summary-resource))
-      "Usage"
-      (acl/types-principals-from-acl acl))))
+    (acl/insert-resource (:id summary-resource) "Usage" (acl/types-principals-from-acl acl))))
 
 (defn records-for-interval
   [start end]

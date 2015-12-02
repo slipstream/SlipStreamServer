@@ -10,31 +10,21 @@
   (->> (apply time/date-time args)      
        (time-fmt/unparse (:date-time time-fmt/formatters))))  
 
-(defn inc-day   
-  [ts]
-  (time/plus ts (time/days 1)))
+(defn period-fn
+  [frequency]
+  (frequency {:daily time/days :weekly time/weeks :monthly time/months}))
 
-(defn inc-month
-  [ts]
-  (time/plus ts (time/months 1)))
+(defn dec-by-frequency
+  [dt frequency]
+  (time/minus dt ((period-fn frequency) 1)))
+
+(defn inc-by-frequency
+  [dt frequency]
+  (time/plus dt ((period-fn frequency) 1)))
 
 (defn inc-minutes
   [ts minutes]
   (time/plus ts (time/minutes minutes)))
-
-(defn timestamp-next-day
-  [& args]
-   (->> (apply time/date-time args)      
-        inc-day
-        (time-fmt/unparse (:date-time time-fmt/formatters))))
-
-(defn to-ISO-8601
-  [ts]
-  (time-fmt/unparse (:date-time time-fmt/formatters) ts))
-
-(defn now-to-ISO-8601
-  []
-  (-> (time/now) to-ISO-8601))
 
 (defn to-time
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
@@ -42,6 +32,23 @@
   [s]
   (time-fmt/parse (:date-time time-fmt/formatters) s))
 
+(defn to-ISO-8601
+  [dt]
+  (time-fmt/unparse (:date-time time-fmt/formatters) dt))
+
+(defn now-to-ISO-8601
+  []
+  (-> (time/now) to-ISO-8601))
+
+(defn timestamp-next-frequency
+  "Some examples:
+  (timestamp-next-frequency :daily 2005 11 23)   -> 2005-11-24T00:00:00.000Z
+  (timestamp-next-frequency :weekly 2005 11 23)  -> 2005-11-30T00:00:00.000Z
+  (timestamp-next-frequency :monthly 2005 11 23) -> 2005-12-23T00:00:00.000Z"
+  [frequency & args]
+  (-> (apply time/date-time args)
+      (inc-by-frequency frequency)
+      to-ISO-8601))
 
 (defn to-interval   
   [start end]    

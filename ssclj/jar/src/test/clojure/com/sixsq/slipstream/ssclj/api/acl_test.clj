@@ -17,7 +17,7 @@
 (use-fixtures :each clean-database)
 
 (deftest parse-authn
-  (is (=  [["user"  "joe"] ["role" "USER"]]
+  (is (=  [["USER"  "joe"] ["ROLE" "USER"]]
           (acl/parse-authn  { "current" "joe"
                                   "authentications" {
                                     "joe" { "identity" "joe" "roles" ["USER"]}
@@ -76,4 +76,4 @@
   (acl/-deleteResource "run/1" "run" {:identity "mick" :roles ["ROLE1"]})
   
   (is (empty? (acl/-getResourceIds "run" {:identity "joe" :roles ["ROLE1"]})))
-  (is (empty? (acl/-getResourceIds "run" {:identity "mick" :roles ["ROLE1"]}))))  
+  (is (empty? (acl/-getResourceIds "run" {:identity "mick" :roles ["ROLE1"]}))))

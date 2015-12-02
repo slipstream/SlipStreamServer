@@ -73,39 +73,40 @@
       (assoc-in summary [:usage record-metric] record-comsumption))))
 
 (defn- empty-summary-for-record
-  [record start end grouping-cols]
+  [record start end frequency grouping-cols]
   (-> record
       (select-keys grouping-cols)
+      (assoc :frequency (name frequency))
       (assoc :start_timestamp start)
       (assoc :end_timestamp end)
       (assoc :usage {})))
 
 (defn- merge-usages
-  [records start end grouping-cols]
-  (let [summary-first-record (empty-summary-for-record (first records) start end grouping-cols)]
+  [records start end frequency grouping-cols]
+  (let [summary-first-record (empty-summary-for-record (first records) start end frequency grouping-cols)]
     (reduce merge-summary-record summary-first-record records)))
 
 (defn- summarize-groups-of-records
-  [start end grouping-cols records-grouped]
+  [start end frequency grouping-cols records-grouped]
   (for [records records-grouped]
-    (merge-usages records start end grouping-cols)))
+    (merge-usages records start end frequency grouping-cols)))
 
 (defn summarize-records
-  [records start-time end-time grouping-cols & [except-users]]
+  [records start-time end-time frequency grouping-cols & [except-users]]
   (->> records
        (remove-users except-users)
        (truncate start-time end-time)
        (group-by (fn[record] (select-keys record grouping-cols)))
        vals
-       (summarize-groups-of-records start-time end-time grouping-cols)))
+       (summarize-groups-of-records start-time end-time frequency grouping-cols)))
 
 (defn summarize
-  [start-time end-time grouping-cols & [except-users]]
-  (summarize-records (rc/records-for-interval start-time end-time) start-time end-time grouping-cols except-users))
+  [start-time end-time frequency grouping-cols & [except-users]]
+  (summarize-records (rc/records-for-interval start-time end-time) start-time end-time frequency grouping-cols except-users))
 
 (defn summarize-and-store!
-  [start-time end-time grouping-cols & [except-users]]
-  (let [summaries (summarize start-time end-time grouping-cols except-users)]
+  [start-time end-time frequency grouping-cols & [except-users]]
+  (let [summaries (summarize start-time end-time frequency grouping-cols except-users)]
     (log/info "Will persist" (count summaries) "summaries for "
               (u/disp-interval start-time end-time) "except" except-users ", on" grouping-cols)
     (doseq [summary summaries]

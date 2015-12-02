@@ -48,7 +48,7 @@
 
 (defn some-days
   []
-  (take nb-days (iterate uu/inc-day (apply time/date-time start-day))))
+  (take nb-days (iterate #(uu/inc-by-frequency % :daily) (apply time/date-time start-day))))
 
 (defn usage-record
   [user cloud metric start-timestamp end-timestamp]
@@ -79,7 +79,7 @@
   (->> days
        (map uu/to-ISO-8601)
        (partition 2 1)
-       (map (fn[[s e]] (us/summarize-and-store! s e)))
+       (map (fn[[s e]] (us/summarize-and-store! s e :daily [:user :cloud])))
        dorun))
 
 ;;

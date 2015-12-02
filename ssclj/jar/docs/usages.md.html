@@ -115,28 +115,48 @@ Each day at 2 AM (UTC), a cron job computes and stores the summaries for all use
 Here are the details of the execution on nuv.la:
 
 
+***************************************************************************************
+*                                                                                     *
+* .--------------------------------.  .---------------------------------------.       *
+* | /etc/cron.d/create-daily-usage +->| /usr/sbin/create-daily-usage.sh       |-> ... *
+* '--------------------------------'  '---------------------------------------'       *
+*                                                                                     *
+*      .---------------------------------------------------------.                    *
+* ...> | com.sixsq.slipstream.ssclj.usage.summarizer             |                    *
+*      '---------------------------------------------------------'                    *
+*                                                                                     *
+***************************************************************************************
+
+
+It can also be called with optional arguments `-d date`
+
+
+Same actions are done weekly and monthly:
+
+***************************************************************************************
+*                                                                                     *
+* .---------------------------------.  .----------------------------------.           *
+* | /etc/cron.d/create-weekly-usage +->| /usr/sbin/create-weekly-usage.sh |-> ...     *
+* '---------------------------------'  '----------------------------------'           *
+*                                                                                     *
+*      .---------------------------------------------------------.                    *
+* ...> | com.sixsq.slipstream.ssclj.usage.summarizer             |                    *
+*      '---------------------------------------------------------'                    *
+*                                                                                     *
+***************************************************************************************
+
 **************************************************************************************
 *                                                                                    *
-* .--------------------------------.  .---------------------------------.            *
-* | /etc/cron.d/create-daily-usage +->| /usr/sbin/create-daily-usage.sh |-> ...      *
-* '--------------------------------'  '---------------------------------'            *
+* .----------------------------------.  .-----------------------------------.        *
+* | /etc/cron.d/create-monthly-usage +->| /usr/sbin/create-monthly-usage.sh |-> ...  *
+* '----------------------------------'  '-----------------------------------'        *
 *                                                                                    *
 *      .---------------------------------------------------------.                   *
-* ...> | com.sixsq.slipstream.ssclj.usage.daily_summary_launcher |                   *
+* ...> | com.sixsq.slipstream.ssclj.usage.summarizer             |                   *
 *      '---------------------------------------------------------'                   *
 *                                                                                    *
 **************************************************************************************
 
-
-`daily_summary_launcher` by default (no arguments) computes the summaries for yesterday.
-
-
-It can also be called with optional arguments `-d date`
-e.g: 
-
-```
-daily_summary_launcher -d 2015-09-21
-```
 
 #### Send Usage emails
 
@@ -163,16 +183,10 @@ The DailyUsageSender queries the Usage Summary resource with the help of the CIM
 To summarize manually one given month from the command line:
 
 ```
-java -Dconfig.path=src/main/resources/config-hsqldb.edn \
-   -cp ".:target/SlipStreamCljResources-jar-2.18-SNAPSHOT-jar-with-dependencies.jar" \
-    com.sixsq.slipstream.ssclj.usage.monthly_summary_launcher \
-    -m 2016-03     
-```
-
-To get one monthly usage for a given cloud:
-
-```
-curl -H "slipstream-authn-info: azure azure" "http://localhost:8201/api/usage?%24filter=start_timestamp%3D2016-03-01%20and%20end_timestamp%3D2016-04-01"
+java -Dconfig.path=config-hsqldb.edn \
+    -cp /Users/st/projects/ss/SlipStreamServer/ssclj/jar/src/main/resources:/Users/st/.m2/repository/com/sixsq/slipstream/SlipStreamCljResources-jar/2.19.2-SNAPSHOT/SlipStreamCljResources-jar-2.19.2-SNAPSHOT-jar-with-dependencies.jar \
+    com.sixsq.slipstream.ssclj.usage.summarizer \
+    -f monthly
 ```
 
 <style class="fallback">body{white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="http://casual-effects.com/markdeep/latest/markdeep.min.js"></script>

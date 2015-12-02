@@ -99,7 +99,7 @@
   (doseq [i (range nb-weeks)]
     (let [start-week (t/plus (t/date-time 2014) (t/weeks i))
           end-week (t/plus start-week (t/weeks 1))]
-      (summarize-and-store! (u/to-ISO-8601 start-week) (u/to-ISO-8601 end-week) [:user :cloud]))))
+      (summarize-and-store! (u/to-ISO-8601 start-week) (u/to-ISO-8601 end-week) :daily [:user :cloud]))))
 
 (defn check-summaries
   []  
@@ -136,7 +136,7 @@
 
       (rc/-insertStart joe-exo-start)
       (rc/-insertEnd joe-exo-end)
-      (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) [:user :cloud])
+      (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
       (let [summary (-> (select usage_summaries)
                         first
@@ -174,7 +174,7 @@
       (rc/-insertEnd joe-exo-end)
       (rc/-insertEnd jack-exo-end)
 
-      (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) [:user :cloud])
+      (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
       
       (let [summaries (select usage_summaries)]
         (is (= [
@@ -193,7 +193,7 @@
 
       (rc/-insertStart joe-exo-start)
 
-      (summarize-and-store! (u/to-ISO-8601 (t/minus start-day (t/days 1))) (u/to-ISO-8601 end-day) [:user :cloud])
+      (summarize-and-store! (u/to-ISO-8601 (t/minus start-day (t/days 1))) (u/to-ISO-8601 end-day) :daily [:user :cloud])
       
       (let [summaries (select usage_summaries)]
         (is (= [{:disk-GB {:unit_minutes 144720.0}, :RAM-GB {:unit_minutes 11520.0}, :nb-cpu {:unit_minutes 2880.0}}] 
@@ -207,8 +207,8 @@
                             :cloud_vm_instanceid "vm-joe-exo-id")]
 
     (rc/-insertStart joe-exo-start)
-    (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) [:user :cloud])
-    (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) [:user :cloud])
+    (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
+    (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
     (is (= 1 (-> usage_summaries select count )))))
 
 
