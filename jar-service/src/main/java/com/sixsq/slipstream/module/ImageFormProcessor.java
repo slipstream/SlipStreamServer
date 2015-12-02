@@ -34,10 +34,9 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Package;
 import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.Target;
 import com.sixsq.slipstream.persistence.User;
 
-public class ImageFormProcessor extends TargetedFormProcessor {
+public class ImageFormProcessor extends TargetContainerModuleFormProcessor {
 
 	public static final String PRERECIPE_SCRIPT_NAME = "prerecipe--script";
 	public static final String MODULE_REFERENCE_NAME = "moduleReference";
