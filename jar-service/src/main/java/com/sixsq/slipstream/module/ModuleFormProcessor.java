@@ -20,21 +20,14 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
+import com.sixsq.slipstream.persistence.*;
 import org.restlet.data.Form;
 
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.Authz;
-import com.sixsq.slipstream.persistence.Commit;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.user.FormProcessor;
 
 public abstract class ModuleFormProcessor extends
