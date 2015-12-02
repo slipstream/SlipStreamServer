@@ -26,6 +26,7 @@ import static com.sixsq.slipstream.messages.MessageUtils.MSG_REGISTRATION_SENT;
 
 import java.io.IOException;
 
+import com.sixsq.slipstream.user.UserResource;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -70,6 +71,8 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 		notifyUser(newUser, action);
 
 		newUser.store();
+
+		UserResource.postEventRegistered(newUser);
 
 		setPostResponse(MessageUtils.format(MSG_REGISTRATION_SENT),
 				MediaType.TEXT_PLAIN);

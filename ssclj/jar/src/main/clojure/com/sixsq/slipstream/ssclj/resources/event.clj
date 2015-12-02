@@ -28,7 +28,7 @@
 ;;
 
 (def ^:private severity-levels (s/enum "critical" "high" "medium" "low"))
-(def ^:private event-types (s/enum "state" "alarm"))
+(def ^:private event-types (s/enum "state" "alarm" "action" "system"))
 
 (def ^:private EventContent
   { :resource c/ResourceLink

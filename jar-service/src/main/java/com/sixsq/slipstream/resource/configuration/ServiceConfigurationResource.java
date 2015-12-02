@@ -20,6 +20,8 @@ package com.sixsq.slipstream.resource.configuration;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.persistence.User;
 import org.restlet.data.Form;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -62,6 +64,8 @@ public class ServiceConfigurationResource extends
 
 		ConnectorFactory.resetConnectors();
 
+		postEventUpdated();
+
 		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), CONFIGURATION_PATH);
 		getResponse().redirectSeeOther(absolutePath);
 	}
@@ -99,6 +103,8 @@ public class ServiceConfigurationResource extends
 		}
 		configuration.store();
 		ConnectorFactory.resetConnectors();
+
+		postEventReloaded();
 
 		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), getRequest().getResourceRef().getPath());
 		getResponse().setLocationRef(absolutePath);
@@ -146,6 +152,22 @@ public class ServiceConfigurationResource extends
 	protected ServiceConfiguration loadParameterized(
 			String targetParameterizedUri) throws ValidationException {
 		throw (new NotImplementedException());
+	}
+
+	private void postEventUpdated() {
+		String username = getUser().getName();
+		postEventSystemConfiguration(Event.Severity.medium, "System configuration updated by '" + username + "'");
+	}
+
+	private void postEventReloaded() {
+		postEventSystemConfiguration(Event.Severity.high,
+				"System configuration reloaded from configuration file by '" + getUser().getName() + "'");
+	}
+
+	private void postEventSystemConfiguration(Event.Severity severity, String message) {
+		String resourceRef = getPageRepresentation();
+
+		Event.postEvent(resourceRef, severity, message, getUser().getName(), Event.EventType.action);
 	}
 
 }
