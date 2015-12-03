@@ -1,7 +1,6 @@
 package com.sixsq.slipstream.event;
 
 import com.google.gson.*;
-import com.sixsq.slipstream.persistence.User;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
