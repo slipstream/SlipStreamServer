@@ -25,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.ServiceLoader;
 
+import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.event.EventRouter;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.initialstartup.CloudIds;
@@ -124,6 +125,7 @@ public class RootApplication extends Application {
 		super();
 
 		try {
+			createShutdownHook();
 
 			createStartupMetadata();
 			loadOptionalConfiguration();
@@ -145,6 +147,16 @@ public class RootApplication extends Application {
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		}
+	}
+
+	private void createShutdownHook() {
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String message = "Server shutdown";
+				Event.postEvent("system", Event.Severity.high, message, "system", Event.EventType.system);
+			}
+		}));
 	}
 
 	private void loadOptionalConfiguration() {
@@ -174,6 +186,7 @@ public class RootApplication extends Application {
 		Logger.info(message);
 		Logger.warning(message);
 		Logger.severe(message);
+		Event.postEvent("system", Event.Severity.high, message, "system", Event.EventType.system);
 	}
 
 	protected void loadConnectors() {

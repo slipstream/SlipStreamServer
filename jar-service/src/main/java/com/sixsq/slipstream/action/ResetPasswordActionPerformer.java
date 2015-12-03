@@ -26,6 +26,7 @@ import static com.sixsq.slipstream.messages.MessageUtils.MSG_PASSWORD_RESET;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
+import com.sixsq.slipstream.user.UserResource;
 import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.Status;
@@ -66,6 +67,8 @@ public class ResetPasswordActionPerformer extends OneShotActionPerformer {
 		}
 
 		user.store();
+
+		UserResource.postEventPasswordReseted(user);
 	}
 
 	private void informUserPasswordChanged(User user, String baseUrlSlash,

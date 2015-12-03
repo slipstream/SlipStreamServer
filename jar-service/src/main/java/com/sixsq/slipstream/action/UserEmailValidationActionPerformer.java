@@ -27,6 +27,7 @@ import static com.sixsq.slipstream.messages.MessageUtils.MSG_NEW_USER_NOTIFICATI
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
+import com.sixsq.slipstream.user.UserResource;
 import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.representation.Representation;
@@ -72,6 +73,8 @@ public class UserEmailValidationActionPerformer extends OneShotActionPerformer {
 		}
 
 		user.store();
+
+		UserResource.postEventValidated(user);
 
 		informAdministratorOfUserCreation(user, baseUrlSlash, userResourceUrl);
 	}

@@ -23,11 +23,15 @@ package com.sixsq.slipstream.module;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.util.*;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -54,22 +58,8 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.Util;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactory;
-import com.sixsq.slipstream.persistence.Authz;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Metadata;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.ProjectModule;
-import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.run.RunViewList;
-import com.sixsq.slipstream.util.ModuleUriUtil;
-import com.sixsq.slipstream.util.RequestUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.XmlUtil;
 
 /**
  * Unit test see
@@ -154,6 +144,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			throwClientValidationError(e.getMessage());
 		}
 
+		postEventCopied(targetFullName);
+
 		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + target.getResourceUri());
 		getResponse().setLocationRef(absolutePath);
 		getResponse().setStatus(Status.SUCCESS_CREATED);
@@ -179,6 +171,8 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		} catch (ValidationException e) {
 			throwClientConflicError(e.getMessage());
 		}
+
+		postEventDeleted();
 	}
 
 	private void redirectToParent() throws ValidationException {
@@ -351,6 +345,11 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		module.store();
 
+		if (isExisting()) {
+			postEventUpdated();
+		} else {
+			postEventCreated();
+		}
 	}
 
 	private void checkConsistentModule(String moduleUri, String targetUri)
@@ -639,7 +638,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	@Override
 	protected boolean isChooser() {
 		String c = (String) getRequest().getAttributes().get("chooser");
-		return (c == null) ? false : true;
+		return c != null;
 	}
 
 	@Override
@@ -655,6 +654,33 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		runs.populate(getUser(), module.getResourceUri(), 0, Run.DEFAULT_LIMIT);
 		module.setRuns(runs);
 		return module;
+	}
+
+	private void postEventCreated() {
+		postEventModule(Event.Severity.medium, "Created by '" + getUser().getName() + "'");
+	}
+
+	private void postEventUpdated() {
+		postEventModule(Event.Severity.medium, "Updated by '" + getUser().getName() + "'");
+	}
+
+	private void postEventCopied(String target) {
+		postEventModule(Event.Severity.medium, "Copied to '" + target + "' by '" + getUser().getName() + "'");
+	}
+
+	private void postEventDeleted() {
+		postEventModule(Event.Severity.high, "Deleted by '" + getUser().getName() + "'");
+	}
+
+	private void postEventModule(Event.Severity severity, String message) {
+		String resourceRef = null;
+		try {
+			resourceRef = ModuleUriUtil.extractVersionLessResourceUri(getTargetParameterizeUri());
+		} catch (ValidationException e) {
+			getLogger().log(Level.WARNING, "Failed to generate event for '" + getTargetParameterizeUri() + "'", e);
+		}
+
+		Event.postEvent(resourceRef, severity, message, getUser().getName(), Event.EventType.action);
 	}
 
 }
