@@ -189,6 +189,8 @@ public class RunListResource extends BaseResource {
 
 			setLastExecute(user);
 
+			run.postEventCreated();
+
 		} catch (SlipStreamClientException ex) {
 			throw (new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex.getMessage()));
 		}

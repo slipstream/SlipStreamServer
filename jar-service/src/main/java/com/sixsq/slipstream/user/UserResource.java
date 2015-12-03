@@ -23,18 +23,22 @@ package com.sixsq.slipstream.user;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sixsq.slipstream.event.ACL;
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.event.TypePrincipal;
+import com.sixsq.slipstream.event.TypePrincipalRight;
 import org.restlet.data.Cookie;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
-import org.restlet.resource.Get;
-import org.restlet.resource.Post;
-import org.restlet.resource.Put;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
@@ -61,6 +65,10 @@ import com.sixsq.slipstream.util.FileUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
+
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
+import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
 
 /**
  * @see UserResourceTest
@@ -348,6 +356,9 @@ public class UserResource extends ParameterizedResource<User> {
 
 		if (!isExisting()) {
 			setParameterized(user);
+			postEventCreated(user);
+		} else {
+			postEventUpdated(user);
 		}
 
 		setResponseForPut();
@@ -403,6 +414,56 @@ public class UserResource extends ParameterizedResource<User> {
 	protected User loadParameterized(String targetParameterizedName)
 			throws ConfigurationException, ValidationException {
 		return User.loadByName(targetParameterizedName);
+	}
+
+	@Delete
+	@Override
+	public void deleteResource() {
+		super.deleteResource();
+
+		postEventDeleted(getParameterized());
+	}
+
+	public static void postEventRegistered(User user) {
+		postEventUser(Event.Severity.medium, "User '" + user.getName() + "' has registered", user.getName(), "system");
+	}
+
+	public static void postEventValidated(User user) {
+		postEventUser(Event.Severity.medium, "User '" + user.getName() + "' has validated his account", user.getName(),
+				"system");
+	}
+
+	public static void postEventPasswordReseted(User user) {
+		postEventUser(Event.Severity.medium, "User '" + user.getName() + "' has reseted his password", user.getName(),
+				"system");
+	}
+
+	private void postEventCreated(User user) {
+		postEventUserAction(Event.Severity.medium, "created", user);
+	}
+
+	private void postEventUpdated(User user) {
+		postEventUserAction(Event.Severity.medium, "updated", user);
+	}
+
+	private void postEventDeleted(User user) {
+		postEventUserAction(Event.Severity.high, "deleted", user);
+	}
+
+	private void postEventUserAction(Event.Severity severity, String action, User user) {
+		String message = "User '" + user.getName() + "' " + action + " by '" + getUser().getName() + "'";
+
+		postEventUser(severity, message, user.getName());
+	}
+
+	private void postEventUser(Event.Severity severity, String message, String username) {
+		postEventUser(severity, message, username, getUser().getName());
+	}
+
+	private static void postEventUser(Event.Severity severity, String message, String username, String ownerUsername) {
+		String resourceRef = getResourceRoot() + username;
+
+		Event.postEvent(resourceRef, severity, message, ownerUsername, Event.EventType.action);
 	}
 
 }

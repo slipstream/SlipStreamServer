@@ -241,10 +241,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 		if (garbageCollected == null) {
 			run.setParameter(new RunParameter(Run.GARBAGE_COLLECTED_PARAMETER_NAME, "true",
 					Run.GARBAGE_COLLECTED_PARAMETER_DESCRIPTION));
-			run.postEventGarbageCollected();
 		} else if (!garbageCollected.isTrue()) {
 			garbageCollected.setValue("true");
-			run.postEventGarbageCollected();
 		}
 	}
 
@@ -977,17 +975,13 @@ public class Run extends Parameterized<Run, RunParameter> {
 		postEventStateTransition(newState, false);
 	}
 
-	private void postEventGarbageCollected() {
-		postEvent(Event.Severity.medium, "Garbage collected");
-	}
-
 	public void postEventTerminate() {
-		postEvent(Event.Severity.medium, "Terminated");
+		postEventRun(Event.Severity.medium, "Terminated", EventType.action);
 	}
 
 	public void postEventScaleUp(String nodename, List<String> nodeInstanceNames, int nbInstancesToAdd) {
 		String message = "Scaling up '" + nodename + "' with " + nbInstancesToAdd + " new instances: " + nodeInstanceNames;
-		postEvent(Event.Severity.medium, message);
+		postEventRun(Event.Severity.medium, message, EventType.action);
 	}
 
 	public void postEventScaleDown(String nodename, List<String> nodeInstanceIds) {
@@ -998,38 +992,46 @@ public class Run extends Parameterized<Run, RunParameter> {
 		}
 
 		String message = "Scaling down '" + nodename + "' by deleting " + nbInstancesToDelete +" instances: " + nodeInstanceIds;
-		postEvent(Event.Severity.medium, message);
+		postEventRun(Event.Severity.medium, message, EventType.action);
 	}
 
 	private void postEventStateTransition(States newState, boolean forcePost) {
 		boolean stateWillChange = this.state != newState;
 		boolean shouldPost = forcePost || stateWillChange;
 		if (shouldPost) {
-			postEvent(Event.Severity.medium, newState.toString());
+			postEventRun(Event.Severity.medium, newState.toString(), EventType.state);
 		}
 	}
 
 	private void postEventAbort(String origin, String abortMessage) {
 		String message = "Abort from '" + origin + "', message:" + abortMessage;
-		postEvent(Event.Severity.high, message);
+		postEventRun(Event.Severity.high, message, EventType.state);
 	}
 
 	private void postEventRecoveryMode(String newValue) {
 		String message = "Recovery mode set to '" + newValue + "'";
-		postEvent(Event.Severity.high, message);
+		postEventRun(Event.Severity.high, message, EventType.state);
 	}
 
-	private void postEvent(Event.Severity severity, String message) {
-		TypePrincipal owner = new TypePrincipal(USER, getUser());
-		List<TypePrincipalRight> rules = Arrays.asList(
-				new TypePrincipalRight(USER, getUser(), ALL),
-				new TypePrincipalRight(ROLE, "ADMIN", ALL));
-		ACL acl = new ACL(owner, rules);
+	public void postEventCreated() {
+		String message = "Created";
+		postEventRun(Event.Severity.medium, message, EventType.action);
+	}
 
+	public void postEventGarbageCollectorTimedOut() {
+		String message = "GarbageCollector: The Run has timed out";
+		postEventRun(Event.Severity.medium, message, EventType.system);
+	}
+
+	public void postEventGarbageCollectorTerminated() {
+		String message = "GarbageCollector: The Run was terminated";
+		postEventRun(Event.Severity.medium, message, EventType.system);
+	}
+
+	private void postEventRun(Event.Severity severity, String message, EventType type) {
 		String resourceRef = RESOURCE_URI_PREFIX + uuid;
-		Event event = new Event(acl, now(), resourceRef, message, severity, EventType.state);
 
-		Event.post(event);
+		Event.postEvent(resourceRef, severity, message, getUser(), type);
 	}
 
 	public Date getLastStateChange() {
