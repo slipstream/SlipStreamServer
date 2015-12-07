@@ -98,10 +98,9 @@ public class CookieAuthenticator extends AuthenticatorBase {
 
 		logger.fine("handle valid, cookie = " + cookie);
 		String tokenInCookie = CookieUtils.tokenInCookie(cookie);
-		if(tokenInCookie!=null) {
+		if(tokenInCookie != null) {
 			logger.fine("handle valid, tokenInCookie = " + tokenInCookie);
-			user.setAuthnToken(tokenInCookie);
-			user = user.store();
+			user.storeAuthnToken(tokenInCookie);
 			logger.fine("user.authnToken = " + user.getAuthnToken());
 		}
 

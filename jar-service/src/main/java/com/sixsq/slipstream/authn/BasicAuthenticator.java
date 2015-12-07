@@ -29,6 +29,8 @@ import com.sixsq.slipstream.util.ResourceUriUtil;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
+import org.restlet.data.Cookie;
+import org.restlet.data.CookieSetting;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
@@ -47,7 +49,7 @@ public class BasicAuthenticator extends AuthenticatorBase {
 
 	@Override
 	protected boolean authenticate(Request request, Response response) {
-
+		
 		if (request.getClientInfo().isAuthenticated()) {
 			return true;
 		}
@@ -73,9 +75,12 @@ public class BasicAuthenticator extends AuthenticatorBase {
 
 			try {
 				Response token = (new AuthProxy()).createAuthnToken(username, password);
-				CookieUtils.addAuthnCookieFromAuthnResponse(response, token);
 
-				// CookieUtils.addAuthnCookie(response, "local", username); TODO, local?
+				CookieSetting authnCookie = CookieUtils.extractAuthnTokenCookie(token);
+				String tokenValue = CookieUtils.tokenInCookie(authnCookie);
+
+				CookieUtils.addAuthnCookieFromAuthnResponse(response, token);
+				user.storeAuthnToken(tokenValue);
 
 				setClientInfo(request, username);
 				setUserInRequest(user, request);
