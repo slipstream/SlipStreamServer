@@ -317,7 +317,7 @@ public class CookieUtils {
 		return request.getCookies().getFirst(COOKIE_NAME);
 	}
 
-	private static CookieSetting extractAuthnTokenCookie(Response response){
+	public static CookieSetting extractAuthnTokenCookie(Response response){
 		Series<CookieSetting> cookieSettings = response.getCookieSettings();
 		for (CookieSetting cookieSetting : cookieSettings) {
 			if(CookieUtils.COOKIE_NAME.equals(cookieSetting.getName())) {
