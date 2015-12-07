@@ -230,6 +230,7 @@
 
             <mapping>
               <directory>${installation.dir}/resources</directory>
+              <configuration>noreplace</configuration>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
