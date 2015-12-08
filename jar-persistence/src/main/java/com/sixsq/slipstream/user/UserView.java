@@ -61,11 +61,14 @@ public class UserView {
 	@Attribute(required = false)
 	public String organization;
 
+	@Attribute(required = false)
+	public String roles;
+
 	@Attribute(required = false, name = "issuper")
 	private boolean isSuperUser;
 
 	public UserView(String name, String firstName, String lastName, String email, User.State state, Date lastOnline,
-			Date lastExecute, Date activeSince, String organization, Boolean isSuperUser) {
+			Date lastExecute, Date activeSince, String organization, String roles, Boolean isSuperUser) {
 
 		this.name = name;
 		this.resourceUri = User.constructResourceUri(name);
@@ -92,6 +95,7 @@ public class UserView {
 		this.activeSince = activeSince;
 
         this.organization = organization;
+        this.roles = roles;
         this.isSuperUser = isSuperUser;
 	}
 
