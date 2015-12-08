@@ -2,7 +2,6 @@
   (:refer-clojure :exclude [update])
   (:require
     [com.sixsq.slipstream.ssclj.database.korma-helper             :as kh]
-    [clojure.java.jdbc                                            :refer :all :as jdbc]
     [clojure.tools.logging                                        :as log]
     [clojure.set                                                  :as s]
     [clojure.walk                                                 :as w]
@@ -92,7 +91,7 @@
     (throw (IllegalArgumentException. "Can not be called with an empty map")))
     (let [user-name (:identity authn)
           role-names (:roles authn)]
-      (concat [["user" user-name]] (map (fn[r] ["role" r]) role-names))))
+      (concat [["USER" user-name]] (map (fn[r] ["ROLE" r]) role-names))))
 
 (defn extract-current   
   [authns]
@@ -163,7 +162,7 @@
   
 (defn -deleteResource
   [^String id ^String type ^java.util.Map authn]  
-  (check-init-called) 
+  (check-init-called)
   (delete acl (where (apply or (rows id type (parse-authn authn)))))
   true)
   

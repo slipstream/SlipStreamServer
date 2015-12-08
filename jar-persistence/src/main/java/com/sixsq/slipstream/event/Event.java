@@ -18,6 +18,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
+import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
+
 public class Event {
 
 	public static boolean isMuted = false;
@@ -60,7 +64,7 @@ public class Event {
 	}
 
 	public static enum EventType {
-		state, alarm;
+		state, alarm, action, system;
 	}
 
 	public Event(ACL acl, Date timestamp, String resourceRef, String state, Severity severity, EventType type){
@@ -70,6 +74,19 @@ public class Event {
 		this.content = buildContent(resourceRef, state);
 		this.severity = severity;
 		this.type = type;
+	}
+
+	public static void postEvent(String resourceRef, Event.Severity severity, String message, String username,
+								 EventType type) {
+		TypePrincipal owner = new TypePrincipal(USER, username);
+		List<TypePrincipalRight> rules = Arrays.asList(
+				new TypePrincipalRight(USER, username, ALL),
+				new TypePrincipalRight(ROLE, "ADMIN", ALL));
+		ACL acl = new ACL(owner, rules);
+
+		Event event = new Event(acl, new Date(), resourceRef, message, severity, type);
+
+		Event.post(event);
 	}
 
 	public static void muteForTests() {

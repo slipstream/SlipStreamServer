@@ -71,10 +71,9 @@
   (let [[id roles]  (dbb/id-roles options)]
     (if (dbb/neither-id-roles? id roles)
       []
-      (do
-        (->>  (sql id roles (get-in options [:cimi-params :filter]))
-              (j/query kh/db-spec)
-              (map deserialize-usage))))))
+      (->>  (sql id roles (get-in options [:cimi-params :filter]))
+            (j/query kh/db-spec)
+            (map deserialize-usage)))))
 
 ;;
 ;; schemas

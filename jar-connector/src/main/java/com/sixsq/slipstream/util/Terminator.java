@@ -71,6 +71,9 @@ public class Terminator {
 				! run.isMutable() &&
 				(run.getState() == States.Initializing || isGarbageCollected)) {
 			terminate(run.getResourceUri());
+			run.postEventGarbageCollectorTerminated();
+		} else if (!isGarbageCollected) {
+			run.postEventGarbageCollectorTimedOut();
 		}
 
 	}

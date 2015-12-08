@@ -67,9 +67,16 @@ public abstract class APIBaseResource extends BaseResource {
             headers = new Series<Header>(Header.class);
             resource.getRequestAttributes().put("org.restlet.http.headers", headers);
         }
-        headers.add("slipstream-authn-info", getUser().getName());
+        headers.add("slipstream-authn-info", getNameRoles());
 
         return resource.get().getText();
+    }
+
+    private String getNameRoles() {
+        String userName = getUser().getName();
+        String roleAdminIfSuper = getUser().isSuper() ? " ADMIN" : "";
+
+        return userName + roleAdminIfSuper;
     }
 
     protected abstract String uri();

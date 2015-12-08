@@ -5,19 +5,21 @@
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [clj-time.core :as time]))
 
-(defn days-from-now
-  [n]
-  (str (time/plus (time/today-at-midnight) (time/days n))))
+(defn days-ago-at-hour
+  ([n h]
+   (str (time/minus (time/today-at h 0 0 0) (time/days n))))
+  ([n]
+   (days-ago-at-hour n 0)))
 
 (defn- daily-usage
   [username cloud day-number metrics-map]
   {:user            username
    :cloud           cloud
-   :start_timestamp (days-from-now day-number)
-   :end_timestamp   (days-from-now (inc day-number))
+   :frequency       "daily"
+   :start_timestamp (days-ago-at-hour day-number)
+   :end_timestamp   (days-ago-at-hour (inc day-number))
    :usage           (->> metrics-map
                          (map (fn [[k v]] {k {:unit_minutes v}}))
                          (into {}))})
@@ -27,21 +29,56 @@
   (for [[k v] metrics-map]
     { :user            username
       :cloud           cloud
-      :start_timestamp (days-from-now day-number)
-      :end_timestamp   (days-from-now (inc day-number))
+      :start_timestamp (days-ago-at-hour day-number)
+      :end_timestamp   (days-ago-at-hour day-number 10)
       :metric_name     k
       :metric_value    v}))
 
+(defmulti usages-for-freq (comp first list))
+
+(defmethod usages-for-freq :monthly
+  [_ username cloud day-number]
+  {:user            username
+   :cloud           cloud
+   :frequency       "monthly"
+   :start_timestamp (days-ago-at-hour (* 30 day-number))
+   :end_timestamp   (days-ago-at-hour (* 30 (inc day-number)))
+   :usage           (->> {:ram 97185920 :disk 950.67 :cpu 9250}
+                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (into {}))})
+
+(defmethod usages-for-freq :weekly
+  [_ username cloud day-number]
+  {:user            username
+   :cloud           cloud
+   :frequency       "weekly"
+   :start_timestamp (days-ago-at-hour (* 7 day-number))
+   :end_timestamp   (days-ago-at-hour (* 7 (inc day-number)))
+   :usage           (->> {:ram 571859200 :disk 5000.67 :cpu 52500}
+                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (into {}))})
+
+(defmethod usages-for-freq :daily
+  [_ username cloud day-number]
+  {:user            username
+   :cloud           cloud
+   :frequency       "daily"
+   :start_timestamp (days-ago-at-hour day-number)
+   :end_timestamp   (days-ago-at-hour (inc day-number))
+   :usage           (->> {:ram 47185920 :disk 450.67 :cpu 1250}
+                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (into {}))})
+
 (defn usages
   [nb username clouds]
-  (for [day-number (range nb) cloud clouds]
-    (daily-usage (name username) cloud day-number {:ram 47185920 :disk 450.67 :cpu 1250})))
+  (for [day-number (range nb) cloud clouds frequency [:daily :weekly :monthly]]
+    (usages-for-freq frequency (name username) cloud day-number)))
 
 (defn usage-records
   [nb username clouds]
   (flatten
     (for [day-number (range nb) cloud clouds]
-      (daily-records (name username) cloud day-number {"ram" 2185520 "disk" 120.67 "cpu" 1250}))))
+      (daily-records (name username) cloud day-number {"ram" 4096 "disk" 120 "cpu" 2}))))
 
 (defn insert-to-db
   [usages]
