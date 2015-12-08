@@ -20,15 +20,14 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
-import org.junit.Test;
-import org.w3c.dom.Document;
-
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.SerializationUtil;
+import org.junit.Test;
+import org.w3c.dom.Document;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 public class ServiceConfigurationParameterTest {
 
@@ -48,6 +47,16 @@ public class ServiceConfigurationParameterTest {
 	public void keyCantStartWithDot() throws SlipStreamClientException {
 
 		new ServiceConfigurationParameter(".123", "ok", "ok");
+	}
+
+	@Test(expected = ValidationException.class)
+	public void keyCantStartWithDigit() throws SlipStreamClientException {
+		new ServiceConfigurationParameter("1abc", "ok", "ok");
+	}
+
+	@Test(expected = ValidationException.class)
+	public void keyCantStartWithSpace() throws SlipStreamClientException {
+		new ServiceConfigurationParameter(" abc", "ok", "ok");
 	}
 
 	@Test
