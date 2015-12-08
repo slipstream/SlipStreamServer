@@ -263,6 +263,37 @@ public class UserTest {
 	}
 
 	@Test
+	public void rolesShouldBeValidNamesCommaSeparated() {
+		assert(validateRoles(""));
+		assert(validateRoles("A"));
+		assert(validateRoles("ADMIN"));
+		assert(validateRoles("cyclone-fr1"));
+		assert(validateRoles("ADMIN,cyclone-fr1"));
+		assert(validateRoles("ADMIN, cyclone-fr1"));
+		assert(validateRoles("ADMIN  ,  cyclone-fr1"));
+		assert(validateRoles("ADMIN  		,	  	cyclone-fr1")); // tabs
+		assert(validateRoles("exoscale, cyclone-fr1, ec2-ap-northeast-1, ec2-ap-southeast-1"));
+
+		assert(validateRoles(",,,"));
+		assert(validateRoles("cyclone._--__...fr1"));
+
+		assertFalse(validateRoles("ADMIN exoscale"));
+		assertFalse(validateRoles("1abc"));
+		assertFalse(validateRoles("ADMIN%"));
+	}
+
+	private boolean validateRoles(String roles) {
+		try {
+			User user = UserTest.createUser("testingroles");
+			user.setRoles(roles);
+			user.validate();
+			return true;
+		} catch (ValidationException e) {
+			return false;
+		}
+	}
+
+	@Test
 	public void online() {
 		assertThat(user.isOnline(), is(false));
 

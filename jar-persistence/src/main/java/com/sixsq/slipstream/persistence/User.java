@@ -93,6 +93,9 @@ public class User extends Parameterized<User, UserParameter> {
 	@Attribute(required = false)
 	private String organization;
 
+	@Attribute(required = false)
+	private String roles;
+
 	private String password;
 
 	@Attribute(required = false, name = "issuper")
@@ -529,9 +532,30 @@ public class User extends Parameterized<User, UserParameter> {
 		this.authnToken = authnToken;
 	}
 
+	public String getRoles() {
+		return roles;
+	}
+
+	public void setRoles(String roles) throws ValidationException {
+		if (roles != null) {
+			checkValidRoles(roles);
+		}
+		this.roles = roles;
+	}
+
+	private void checkValidRoles(String roles) throws ValidationException {
+		String validRole = "(([a-zA-Z][\\w\\d._-]*))*";
+		String spacesCommaSpaces = "(\\s)*,(\\s)*";
+		boolean isValid = Pattern.matches(validRole + "(" + spacesCommaSpaces + validRole + ")*", roles);
+		if(!isValid){
+			throw new ValidationException("Invalid roles " + roles);
+		}
+	}
+
 	public void storeAuthnToken(String authnToken) {
 		setAuthnToken(authnToken);
 		store();
 		logger.info("Stored authentication token: " + authnToken);
 	}
+
 }

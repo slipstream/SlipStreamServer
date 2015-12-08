@@ -20,17 +20,15 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.regex.Pattern;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Root;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Root;
-
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
+import java.util.regex.Pattern;
 
 
 @Entity
@@ -94,7 +92,7 @@ public class ServiceConfigurationParameter extends
 		if ("".equals(getName())) {
 			throw (new ValidationException("Key cannot be empty"));
 		}
-		if (!Pattern.matches("\\w[\\w\\d._-]+", getName())) {
+		if (!Pattern.matches("[a-zA-Z][\\w\\d._-]+", getName())) {
 			throw new ValidationException(
 					"Key must start with a letter and contain only letters, digits, dots, dash and underscores.");
 		}
