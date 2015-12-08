@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -52,6 +53,8 @@ import java.util.regex.Pattern;
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
 		@NamedQuery(name = "userViewList", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization, u.isSuperUser) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
+
+	private static Logger logger = Logger.getLogger(User.class.getName());
 
 	public static final String REQUEST_KEY = "authenticated_user";
 
@@ -533,8 +536,10 @@ public class User extends Parameterized<User, UserParameter> {
 		return roles;
 	}
 
-	public void setRoles(String roles) throws ValidationException{
-		checkValidRoles(roles);
+	public void setRoles(String roles) throws ValidationException {
+		if (roles != null) {
+			checkValidRoles(roles);
+		}
 		this.roles = roles;
 	}
 
@@ -545,6 +550,12 @@ public class User extends Parameterized<User, UserParameter> {
 		if(!isValid){
 			throw new ValidationException("Invalid roles " + roles);
 		}
+	}
+
+	public void storeAuthnToken(String authnToken) {
+		setAuthnToken(authnToken);
+		store();
+		logger.info("Stored authentication token: " + authnToken);
 	}
 
 }
