@@ -25,7 +25,7 @@ MODE?=dev
 run: start-db start-ssclj-server
 	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
 
-clean-run: stop-db clean-install-ui clean-install run
+clean-run: stop-ssclj-server stop-db clean-install-ui clean-install start-db start-ssclj-server run
 
 run-with-mem-db:
 	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=$(MODE)
