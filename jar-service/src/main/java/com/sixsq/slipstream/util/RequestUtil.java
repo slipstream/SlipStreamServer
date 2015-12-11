@@ -211,4 +211,8 @@ public class RequestUtil {
 		return getQueryValue(request, BaseResource.CIMI_FILTER_KEY);
 	}
 
+	public static String getActiveOnly(Request request) {
+		return getQueryValue(request, BaseResource.ACTIVE_ONLY_KEY);
+	}
+
 }
