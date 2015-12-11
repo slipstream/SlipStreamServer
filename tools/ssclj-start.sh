@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 SSCLJ_PORT=${1-8201}
+CONFIG_FILE=${2-config-db.edn}
 
 _DIRNAME=$(dirname $0)
 PID_FILE=$_DIRNAME/ssclj-server.pid
@@ -11,7 +12,7 @@ PID_FILE=$_DIRNAME/ssclj-server.pid
 
 SSCLJ_JAR=$(find $_BASE/ssclj/jar/ -name 'SlipStreamCljResources-jar-*-jar-with-dependencies.jar')
 java \
-    -Dconfig.path=config-db.edn \
+    -Dconfig.path=$CONFIG_FILE \
     -Dlogfile.path=dev \
     -cp $_BASE/ssclj/jar/src/main/resources:$SSCLJ_JAR \
     com.sixsq.slipstream.ssclj.app.main \
