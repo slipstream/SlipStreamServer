@@ -1,11 +1,13 @@
 (ns com.sixsq.slipstream.auth.app.auth-service
   (:require
+    [clojure.data.json :as json]
     [clojure.tools.logging :as log]
+
+    [clj-http.client :as http]
 
     [com.sixsq.slipstream.auth.core :as auth]
     [com.sixsq.slipstream.auth.simple-authentication :as sa]
-    [com.sixsq.slipstream.auth.app.http-utils :as hu]
-    [clojure.data.json :as json]))
+    [com.sixsq.slipstream.auth.app.http-utils :as hu]))
 
 ;; TODO : make this configurable
 ;; implementation chosen at run-time
@@ -16,6 +18,12 @@
   (-> request
       :params
       (select-keys keys)))
+
+(defn- param-value
+  [request key]
+  (-> request
+      :params
+      (get key)))
 
 (defn- extract-credentials
   [request]
@@ -41,14 +49,56 @@
   []
   (hu/response 401))
 
-(defn login
+(defn dispatch-on-authn-method
   [request]
-  (let [credentials (extract-credentials request)
-        [ok? result] (auth/token authentication credentials)]
+  (-> request
+      (param-value :authn-method)
+      keyword))
+
+(defmulti login dispatch-on-authn-method)
+
+(defmethod login :internal
+  [request]
+  (log/info "Internal authentication")
+  (let [credentials   (extract-credentials request)
+        [ok? result]  (auth/token authentication credentials)]
     (log-result credentials ok?)
     (if ok?
       (response-token-ok result)
       (response-invalid-token))))
+
+(defmethod login :github
+  [_]
+  (log/info "Github authentication.")
+  (hu/response-redirect
+    307
+    ;; TODO build URL with client id
+    "https://github.com/login/oauth/authorize?client_id=cd03c88b13517f931f09&scope=user:email"))
+
+;; TODO code specific to github should be in dedicated namespace
+(defn callback-github
+  [request]
+  (let [oauth-code              (param-value request :code)
+        access-token-response   (http/post
+                                  "https://github.com/login/oauth/access_token"
+                                  {:headers      {"Accept"        "application/json"}
+                                   :form-params  {:client_id      "cd03c88b13517f931f09"
+                                                  :client_secret  "6435cde7c22f0d543b07f13e311e0514c33460ad"
+                                                  :code           oauth-code}})
+        access-token            (-> access-token-response
+                                    :body
+                                    (json/read-str :key-fn keyword)
+                                    :access_token)
+
+        user-info               (http/get
+                                  "https://api.github.com/user"
+                                  {:headers      {"Authorization" (str "token " access-token)}})]
+
+    (clojure.pprint/pprint user-info)
+
+    (hu/response-with-body 200 (str "login ok for : " (:login (json/read-str (:body user-info) :key-fn keyword))))))
+    ;; TODO : match user information from github with what's in DB
+    ;; and returns same token as internal authentication
 
 (defn build-token
   [request]

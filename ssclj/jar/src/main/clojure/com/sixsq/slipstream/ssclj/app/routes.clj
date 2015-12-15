@@ -44,10 +44,15 @@
       (u/map-response "unknown resource" 404 uri))))
 
 (def auth-routes
-  (let-routes [uri-login (str p/auth-context "login")
-               uri-token (str p/auth-context "token")]
+  (let-routes [uri-login              (str p/auth-context "login")
+               uri-token              (str p/auth-context "token")
+
+               uri-github             (str p/auth-context "callback-github")]
+
     (POST uri-login request (as/login request))
-    (POST uri-token request (as/build-token request))))
+    (POST uri-token request (as/build-token request))
+
+    (GET uri-github request (as/callback-github request))))
 
 (def final-routes
   [

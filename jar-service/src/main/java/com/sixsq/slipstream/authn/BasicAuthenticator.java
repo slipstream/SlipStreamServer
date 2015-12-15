@@ -29,7 +29,6 @@ import com.sixsq.slipstream.util.ResourceUriUtil;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
-import org.restlet.data.Cookie;
 import org.restlet.data.CookieSetting;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
@@ -74,7 +73,7 @@ public class BasicAuthenticator extends AuthenticatorBase {
 			}
 
 			try {
-				Response token = (new AuthProxy()).createAuthnToken(username, password);
+				Response token = (new AuthProxy()).authenticate(username, password, AuthProxy.INTERNAL_AUTHENTICATION);
 
 				CookieSetting authnCookie = CookieUtils.extractAuthnTokenCookie(token);
 				String tokenValue = CookieUtils.tokenInCookie(authnCookie);

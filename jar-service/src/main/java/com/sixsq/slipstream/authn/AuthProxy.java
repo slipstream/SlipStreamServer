@@ -22,15 +22,23 @@ public class AuthProxy {
 
     private static final String AUTH_SERVER = "http://localhost:8201/auth";
 
+    public static final String INTERNAL_AUTHENTICATION = "internal";
+    public static final String GITHUB_AUTHENTICATION = "github";
+
     /**
-     * POST to http://localhost:8201/auth/login with user-name and password parameters
+     * POST to http://localhost:8201/auth/login with user-name, password and authn-method parameters
      *
      * @param username
      * @param password
-     * @return 401 when authentication failed, else response contains a cookie with the authentication token
+     * @param authenticationMethod
+     *
+     * @return 401 when authentication failed,
+     * else for internal authentication a text response contains a cookie with the authentication token
+     * else for external authentication forwards the HTML response (typically login page from ID provider)
+     *
      * @throws ResourceException
      */
-    public Response createAuthnToken(String username, String password)
+    public Response authenticate(String username, String password, String authenticationMethod)
             throws ResourceException {
         ClientResource resource = null;
         Representation response = null;
@@ -49,9 +57,11 @@ public class AuthProxy {
 
             resource.addQueryParameter("user-name", username);
             resource.addQueryParameter("password", password);
+            resource.addQueryParameter("authn-method", authenticationMethod);
+
+            resource.setEntityBuffering(true);
 
             response = resource.post("", MediaType.TEXT_PLAIN);
-            logger.info("Successful connection for '" + username + "'");
 
             return resource.getResponse();
 

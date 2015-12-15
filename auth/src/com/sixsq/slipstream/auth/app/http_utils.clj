@@ -11,4 +11,9 @@
     :headers {"Content-Type" "text/plain"}
     :body body})
 
+(defn response-redirect
+  [code url]
+  (-> code
+      response
+      (assoc-in [:headers "location"] url)))
 
