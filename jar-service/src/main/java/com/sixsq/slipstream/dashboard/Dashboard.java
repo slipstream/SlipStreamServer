@@ -80,7 +80,7 @@ public class Dashboard {
 	@ElementList
 	private transient List<UsageElement> usage = new ArrayList<UsageElement>();
 
-	public void populate(User user, int offset, int limit, String cloudServiceName) throws SlipStreamException {
+	public void populate(User user, int offset, int limit, String cloudServiceName, boolean activeOnly) throws SlipStreamException {
 
 		user = User.loadByName(user.getName());  // ensure user is loaded from database
 
@@ -95,12 +95,12 @@ public class Dashboard {
 			usage.add(new UsageElement(cloud, quota, currentUsage));
 		}
 
-		runs = getRuns(user, offset, limit, cloudServiceName);
+		runs = getRuns(user, offset, limit, cloudServiceName, activeOnly);
 	}
 
-	private RunViewList getRuns(User user, int offset, int limit, String cloudServiceName) throws ConfigurationException, ValidationException{
+	private RunViewList getRuns(User user, int offset, int limit, String cloudServiceName, boolean activeOnly) throws ConfigurationException, ValidationException{
 		RunViewList runViewList = new RunViewList();
-		runViewList.populate(user, offset, limit, cloudServiceName);
+		runViewList.populate(user, offset, limit, cloudServiceName, activeOnly);
 		return runViewList;
 	}
 

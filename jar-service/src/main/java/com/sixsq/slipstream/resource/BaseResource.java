@@ -50,6 +50,7 @@ public abstract class BaseResource extends ServerResource {
 	public static final String USER_KEY = "user";
 	public static final String EDIT_KEY = "edit";
 	public static final String NEW_KEY = "new";
+	public static final String ACTIVE_ONLY_KEY = "activeOnly";
 
 	public static final int LIMIT_DEFAULT = 20;
 	public static final int LIMIT_MAX = 500;
@@ -220,7 +221,7 @@ public abstract class BaseResource extends ServerResource {
 			return false;
 		}
 		String trimmed = value.trim().toLowerCase();
-		return ("true".equals(trimmed) || "yes".equals(trimmed) || "on".equals(trimmed));
+		return ("true".equals(trimmed) || "yes".equals(trimmed) || "on".equals(trimmed) || "1".equals(trimmed));
 	}
 
 	private boolean isSetInQuery(String key) {
@@ -306,5 +307,9 @@ public abstract class BaseResource extends ServerResource {
 			throwClientForbiddenError("You don't have the permission to use the query parameter 'user'");
 		}
 		return user;
+	}
+
+	protected boolean getActiveOnly() {
+		return isTrue(RequestUtil.getActiveOnly(getRequest()));
 	}
 }

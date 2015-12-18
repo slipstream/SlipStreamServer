@@ -124,7 +124,7 @@ public class RunListResource extends BaseResource {
 
 		RunViewList list = new RunViewList();
 		try {
-			list.populate(getUser(), getModuleResourceUri(), getOffset(), limit, getCloud());
+			list.populate(getUser(), getModuleResourceUri(), getOffset(), limit, getCloud(), getActiveOnly());
 		} catch (ConfigurationException e) {
 			throwConfigurationException(e);
 		} catch (ValidationException e) {
