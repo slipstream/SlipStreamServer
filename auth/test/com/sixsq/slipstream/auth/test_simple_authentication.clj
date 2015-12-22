@@ -7,8 +7,11 @@
     [com.sixsq.slipstream.auth.simple-authentication :as sa]
     [com.sixsq.slipstream.auth.core :as c]))
 
-(defonce ^:private columns-users (ddl/columns "NAME"       "VARCHAR(100)"
-                                              "PASSWORD"   "VARCHAR(200)"))
+(defonce ^:private columns-users (ddl/columns "NAME"        "VARCHAR(100)"
+                                              "PASSWORD"    "VARCHAR(200)"
+                                              "EMAIL"       "VARCHAR(200)"
+                                              "AUTHNMETHOD" "VARCHAR(200)"
+                                              "AUTHNID"     "VARCHAR(200)"))
 
 (defn fixture-delete-all
   [f]
@@ -100,15 +103,6 @@
   (is (= "304D73B9607B5DFD48EAC663544F8363B8A03CAAD6ACE21B369771E3A0744AAD0773640402261BD5F5C7427EF34CC76A2626817253C94D3B03C5C41D88C64399"
          (sa/sha512 "supeRsupeR"))))
 
-(comment
-  ;; Test too fragile or slow
-  (deftest token-invalid-after-expiry
-    (c/add-user! sa valid-credentials)
-    (let [[_ token-map] (c/token sa valid-credentials)]
-      (c/check-token sa (:token token-map))
-      (Thread/sleep 10000)
-      (is (thrown? Exception (c/check-token sa (:token token-map)))))))
-
 (deftest check-claims-token
   (c/add-user! sa valid-credentials)
   (let [claims {:a 1 :b 2}
@@ -118,3 +112,46 @@
                         token-value)]
     (is (= claims (c/check-token sa claim-token)))))
 
+(deftest test-users-by-email
+  (c/add-user! sa {:user-name "jack"
+                   :password  "123456"
+                   :email     "jack@sixsq.com"})
+  (c/add-user! sa {:user-name "joe"
+                   :password  "123456"
+                   :email     "joe@sixsq.com"})
+  (c/add-user! sa {:user-name "joe-alias"
+                   :password  "123456"
+                   :email     "joe@sixsq.com"})
+
+  (is (= []                   (sa/find-usernames-by-email "unknown@xxx.com")))
+  (is (= ["jack"]             (sa/find-usernames-by-email "jack@sixsq.com")))
+  (is (= ["joe" "joe-alias"]  (sa/find-usernames-by-email "joe@sixsq.com"))))
+
+(deftest test-users-by-authn
+  (c/add-user! sa {:user-name     "joe-slipstream"
+                   :password      "123456"
+                   :email         "joe@sixsq.com"
+                   :authn-method  "github"
+                   :authn-id      "joe"})
+
+  (c/add-user! sa {:user-name     "jack-slipstream"
+                   :password      "123456"
+                   :email         "jack@sixsq.com"
+                   :authn-method  "github"
+                   :authn-id      "jack"})
+
+  (c/add-user! sa {:user-name     "alice-slipstream"
+                   :password      "123456"
+                   :email         "alice@sixsq.com"})
+
+  (is (nil? (sa/find-username-by-authn "unknown-authn-method" "id")))
+  (is (nil? (sa/find-username-by-authn "github" "john")))
+  (is (= "joe-slipstream" (sa/find-username-by-authn "github" "joe"))))
+
+(deftest test-users-by-authn-detect-inconsistent-data
+  (dotimes [_ 2] (c/add-user! sa {:user-name     "joe-slipstream"
+                                  :password      "123456"
+                                  :email         "joe@sixsq.com"
+                                  :authn-method  "github"
+                                  :authn-id      "joe"}))
+  (is (thrown? Exception "joe-slipstream" (sa/find-username-by-authn "github" "joe"))))

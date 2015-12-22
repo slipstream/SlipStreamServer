@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.util.config :as cf]
     [ring.middleware.head :refer [wrap-head]]
     [compojure.core :refer [defroutes let-routes routes POST GET PUT DELETE ANY]]
     [compojure.route :as route]))
@@ -52,7 +53,7 @@
     (POST uri-login request (as/login request))
     (POST uri-token request (as/build-token request))
 
-    (GET uri-github request (as/callback-github request))))
+    (GET uri-github request (as/callback-github request (cf/property-value :upstream-server)))))
 
 (def final-routes
   [

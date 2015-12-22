@@ -1,4 +1,5 @@
 (ns com.sixsq.slipstream.auth.app.auth-service
+  (:refer-clojure :exclude [update])
   (:require
     [clojure.data.json :as json]
     [clojure.tools.logging :as log]
@@ -71,16 +72,37 @@
   [_]
   (log/info "Github authentication.")
   (hu/response-redirect
-    307
     ;; TODO build URL with client id
     "https://github.com/login/oauth/authorize?client_id=cd03c88b13517f931f09&scope=user:email"))
 
+(defn parse-github-user
+  [user-info-body]
+  (-> user-info-body
+      (json/read-str :key-fn keyword)
+      (select-keys [:login :email :name])))
+
+(defn map-slipstream-github-user!
+  [username github-login]
+  (log/info "Mapping slipstream user with github for" (str "'" username "'"))
+  (sa/map-slipstream-github username github-login))
+
+(defn match-github-user
+  [github-user-info]
+  (sa/init)
+  (if-let [user-name-mapped (sa/find-username-by-authn "github" (:login github-user-info))]
+    {:com.sixsq.identifier user-name-mapped :exp (sa/expiry-timestamp)}
+    (let [user-names-same-email (sa/find-usernames-by-email (:email github-user-info))]
+      (if (= 1 (count user-names-same-email))
+        (do
+          (map-slipstream-github-user! (first user-names-same-email) (:login github-user-info))
+          {:com.sixsq.identifier (first user-names-same-email) :exp (sa/expiry-timestamp)})
+        {:com.sixsq.identifier "joe" :exp (sa/expiry-timestamp)}))))
+
 ;; TODO code specific to github should be in dedicated namespace
 (defn callback-github
-  [request]
+  [request redirect-server]
   (let [oauth-code              (param-value request :code)
-        access-token-response   (http/post
-                                  "https://github.com/login/oauth/access_token"
+        access-token-response   (http/post "https://github.com/login/oauth/access_token"
                                   {:headers      {"Accept"        "application/json"}
                                    :form-params  {:client_id      "cd03c88b13517f931f09"
                                                   :client_secret  "6435cde7c22f0d543b07f13e311e0514c33460ad"
@@ -90,15 +112,20 @@
                                     (json/read-str :key-fn keyword)
                                     :access_token)
 
-        user-info               (http/get
-                                  "https://api.github.com/user"
-                                  {:headers      {"Authorization" (str "token " access-token)}})]
+        user-info-response      (http/get "https://api.github.com/user"
+                                  {:headers      {"Authorization" (str "token " access-token)}})
 
-    (clojure.pprint/pprint user-info)
+        user-info               (-> user-info-response :body parse-github-user)
 
-    (hu/response-with-body 200 (str "login ok for : " (:login (json/read-str (:body user-info) :key-fn keyword))))))
-    ;; TODO : match user information from github with what's in DB
-    ;; and returns same token as internal authentication
+        matched-user            (match-github-user user-info)
+
+        token                   (sa/sign-claims matched-user)]
+
+    (log/info "github user-info" user-info)
+
+    (-> (hu/response-redirect (str redirect-server "/dashboard"))
+        (assoc :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
+                                                        :path  "/"}}))))
 
 (defn build-token
   [request]

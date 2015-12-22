@@ -9,8 +9,6 @@
     [com.sixsq.slipstream.auth.database.korma-helper  :as kh]
     [com.sixsq.slipstream.auth.conf.config            :as cf]
 
-    [environ.core                                     :as environ]
-
     [buddy.sign.jws                                   :as jws]
     [buddy.core.hash                                  :as ha]
     [buddy.core.codecs                                :as co]
@@ -70,8 +68,11 @@
   [user]
   (init)
   (log/info "Will add user " (:user-name user))
-  (kc/insert users (kc/values { :NAME      (:user-name user)
-                                :PASSWORD  (sha512 (:password user))})))
+  (kc/insert users (kc/values { :NAME         (:user-name user)
+                                :PASSWORD     (sha512 (:password user))
+                                :EMAIL        (:email user)
+                                :AUTHNMETHOD  (:authn-method user)
+                                :AUTHNID      (:authn-id user)})))
 
 (defn auth-user-impl
   [credentials]
@@ -107,28 +108,53 @@
 
 (defn check-token-impl
   [token]
-  (log/debug "will unsign token:" token)
+  (log/info "will unsign token:" token)
   (jws/unsign token (public-key auth-conf) signing-algorithm))
+
+(defn sign-claims
+  [claims]
+  (jws/sign claims (private-key auth-conf) signing-algorithm))
 
 (defn create-token
   ([credentials]
   (let [[ok? claims] (auth-user-impl credentials)]
     (if ok?
-      [true {:token (jws/sign (enrich-claims claims)
-                              (private-key auth-conf)
-                              signing-algorithm)}]
+      [true {:token (sign-claims (enrich-claims claims))}]
       [false {:message "Invalid credentials when creating token"}])))
 
   ([claims token]
    (log/info "Will create token for claims=" claims)
    (try
       (check-token-impl token)
-      [true {:token (jws/sign claims
-                              (private-key auth-conf)
-                              signing-algorithm)}]
+      [true {:token (sign-claims claims)}]
       (catch Exception e
         (log/error "exception in token creation " e)
         [false {:message (str "Invalid token when creating token: " e)}]))))
+
+(defn map-slipstream-github
+  [slipstream-username github-login]
+  (->> (kc/update users
+                  (kc/set-fields (zipmap [:AUTHNMETHOD :AUTHNID] ["github" github-login]))
+                  (kc/where {:NAME slipstream-username}))
+       (map :NAME)))
+
+(defn find-usernames-by-email
+  [email]
+  (->> (kc/select users
+                  (kc/fields [:NAME])
+                  (kc/where {:EMAIL email}))
+       (map :NAME)))
+
+(defn find-username-by-authn
+  [authn-method authn-id]
+  (let [matched-users
+        (kc/select users
+                  (kc/fields [:NAME])
+                  (kc/where (zipmap [:AUTHNMETHOD :AUTHNID] [authn-method authn-id])))]
+    (if (> (count matched-users) 1)
+      (throw (Exception. (str "There should be only one result for " authn-method "/" authn-id)))
+      (-> (first matched-users)
+          :NAME))))
 
 (deftype SimpleAuthentication
   []

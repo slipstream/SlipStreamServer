@@ -4,10 +4,15 @@
     [com.sixsq.slipstream.ssclj.middleware.logger :refer :all]))
 
 (deftest log-does-not-display-password
-  (is (=  "GET auth/login [super ADMIN] ?a=1&b=2 abcdef"
-          (request-to-str
-            { :request-method "GET"
-              :uri "auth/login"
-              :headers {"slipstream-authn-info" "super ADMIN"}
-              :query-string "a=1&password=secret&b=2"
-              :body "abcdef"}))))
+  (is (=  "200 (2142 ms) GET auth/login [super ADMIN] ?a=1&b=2 abcdef"
+          (display-request-response
+            { :request-method :get
+              :uri            "auth/login"
+              :headers        {"slipstream-authn-info" "super ADMIN"}
+              :query-string   "a=1&password=secret&b=2"
+              :body           "abcdef"
+              :logger-start   1450701200947}
+
+            { :status 200}
+
+            1450701203089))))

@@ -12,8 +12,8 @@
     :body body})
 
 (defn response-redirect
-  [code url]
-  (-> code
+  [url]
+  (-> 307
       response
       (assoc-in [:headers "location"] url)))
 
