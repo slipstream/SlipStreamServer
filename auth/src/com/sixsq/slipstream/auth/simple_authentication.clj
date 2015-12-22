@@ -131,12 +131,26 @@
         (log/error "exception in token creation " e)
         [false {:message (str "Invalid token when creating token: " e)}]))))
 
-(defn map-slipstream-github
+(defn map-slipstream-github!
   [slipstream-username github-login]
-  (->> (kc/update users
-                  (kc/set-fields (zipmap [:AUTHNMETHOD :AUTHNID] ["github" github-login]))
-                  (kc/where {:NAME slipstream-username}))
-       (map :NAME)))
+  (kc/update users
+             (kc/set-fields (zipmap [:AUTHNMETHOD :AUTHNID] ["github" github-login]))
+             (kc/where {:NAME slipstream-username}))
+  slipstream-username)
+
+(defn create-slipstream-user-from-github!
+  [github-user-info]
+  (let [login-github (:login github-user-info)
+        email-github (:email github-user-info)
+        slipstream-username (str "github-" login-github)
+        resourceuri (str "user/" slipstream-username)
+        ]
+    (kc/insert users (kc/values
+                       (zipmap ["RESOURCEURI" "DELETED" "JPAVERSION" "ISSUPERUSER"
+                                "STATE" "NAME" "EMAIL" "AUTHNMETHOD" "AUTHNID"]
+                               [resourceuri false 0 false
+                                "ACTIVE" slipstream-username email-github "github" login-github])))
+    slipstream-username))
 
 (defn find-usernames-by-email
   [email]

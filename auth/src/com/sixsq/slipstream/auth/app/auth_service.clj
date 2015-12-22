@@ -75,6 +75,11 @@
     ;; TODO build URL with client id
     "https://github.com/login/oauth/authorize?client_id=cd03c88b13517f931f09&scope=user:email"))
 
+(defn name
+  "docstring"
+  [arglist]
+  )
+
 (defn parse-github-user
   [user-info-body]
   (-> user-info-body
@@ -84,19 +89,24 @@
 (defn map-slipstream-github-user!
   [username github-login]
   (log/info "Mapping slipstream user with github for" (str "'" username "'"))
-  (sa/map-slipstream-github username github-login))
+  (sa/map-slipstream-github! username github-login))
+
+(defn create-slipstream-user-from-github!
+  [github-user-info]
+  (log/info "Creating slipstream user with github for" (str "'" (:login github-user-info) "'"))
+  (sa/create-slipstream-user-from-github! github-user-info))
 
 (defn match-github-user
   [github-user-info]
   (sa/init)
   (if-let [user-name-mapped (sa/find-username-by-authn "github" (:login github-user-info))]
-    {:com.sixsq.identifier user-name-mapped :exp (sa/expiry-timestamp)}
+    user-name-mapped
     (let [user-names-same-email (sa/find-usernames-by-email (:email github-user-info))]
-      (if (= 1 (count user-names-same-email))
-        (do
-          (map-slipstream-github-user! (first user-names-same-email) (:login github-user-info))
-          {:com.sixsq.identifier (first user-names-same-email) :exp (sa/expiry-timestamp)})
-        {:com.sixsq.identifier "joe" :exp (sa/expiry-timestamp)}))))
+      (condp = (count user-names-same-email)
+        0 (create-slipstream-user-from-github!  github-user-info)
+        1 (map-slipstream-github-user!          (first user-names-same-email) (:login github-user-info))
+        ;; TODO multiple emails match github email
+        "joe"))))
 
 ;; TODO code specific to github should be in dedicated namespace
 (defn callback-github
@@ -119,7 +129,7 @@
 
         matched-user            (match-github-user user-info)
 
-        token                   (sa/sign-claims matched-user)]
+        token                   (sa/sign-claims {:com.sixsq.identifier matched-user :exp (sa/expiry-timestamp)})]
 
     (log/info "github user-info" user-info)
 
