@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.auth.token-checker
   (:refer-clojure :exclude [update])
   (:require
-    [com.sixsq.slipstream.auth.simple-authentication :as sa]
+    [com.sixsq.slipstream.auth.sign :as sg]
     [clojure.tools.logging :as log])
   (:gen-class
     :name com.sixsq.slipstream.auth.TokenChecker
@@ -12,7 +12,7 @@
   (try
       (log/debug "Will check authentication token: " token)
       (-> token
-          sa/check-token-impl
+          sg/check-token
           clojure.walk/stringify-keys)
       (catch Exception e
         (do
