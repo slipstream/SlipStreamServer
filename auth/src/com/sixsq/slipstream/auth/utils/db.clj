@@ -1,4 +1,5 @@
 (ns com.sixsq.slipstream.auth.utils.db
+  (:import (java.util Date))
   (:require [clojure.tools.logging :as log]
             [korma.core :as kc]
             [korma.db :refer [defdb]]
@@ -56,9 +57,11 @@
         resourceuri (str "user/" slipstream-username)]
     (kc/insert users (kc/values
                        (zipmap ["RESOURCEURI" "DELETED" "JPAVERSION" "ISSUPERUSER"
-                                "STATE" "NAME" "EMAIL" "AUTHNMETHOD" "AUTHNID"]
+                                "STATE" "NAME" "EMAIL" "AUTHNMETHOD" "AUTHNID"
+                                "CREATION"]
                                [resourceuri false 0 false
-                                "ACTIVE" slipstream-username email authn-method authn-login])))
+                                "ACTIVE" slipstream-username email authn-method authn-login
+                                (Date.)])))
     slipstream-username))
 
 (defn insert-user

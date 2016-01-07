@@ -38,7 +38,14 @@
                                           "PASSWORD"    "VARCHAR(200)"
                                           "EMAIL"       "VARCHAR(200)"
                                           "AUTHNMETHOD" "VARCHAR(200)"
-                                          "AUTHNID"     "VARCHAR(200)"))
+                                          "AUTHNID"     "VARCHAR(200)"
+                                          "CREATION"    "TIMESTAMP"
+                                          "DELETED"     "BOOLEAN"
+                                          "ISSUPERUSER" "BOOLEAN"
+                                          "RESOURCEURI" "VARCHAR(200)"
+                                          "JPAVERSION"  "INTEGER"
+                                          "STATE"       "VARCHAR(200)"
+                                          ))
 
 (defn- create-table!
   [table columns & [options]]
