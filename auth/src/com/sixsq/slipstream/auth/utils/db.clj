@@ -53,16 +53,17 @@
 (defn create-user
   [authn-method authn-login email]
   (init)
-  (let [slipstream-username (str authn-method "-" authn-login)
-        resourceuri (str "user/" slipstream-username)]
-    (kc/insert users (kc/values
-                       (zipmap ["RESOURCEURI" "DELETED" "JPAVERSION" "ISSUPERUSER"
-                                "STATE" "NAME" "EMAIL" "AUTHNMETHOD" "AUTHNID"
-                                "CREATION"]
-                               [resourceuri false 0 false
-                                "ACTIVE" slipstream-username email authn-method authn-login
-                                (Date.)])))
-    slipstream-username))
+  (kc/insert users (kc/values {"RESOURCEURI" (str "user/" authn-login)
+                               "DELETED"     false
+                               "JPAVERSION"  0
+                               "ISSUPERUSER" false
+                               "STATE"       "ACTIVE"
+                               "NAME"        authn-login
+                               "EMAIL"       email
+                               "AUTHNMETHOD" authn-method
+                               "AUTHNID"     authn-login
+                               "CREATION"    (Date.)}))
+  authn-login)
 
 (defn insert-user
   [name password email authn-method authn-id]

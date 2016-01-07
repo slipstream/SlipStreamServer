@@ -14,7 +14,7 @@
 (use-fixtures :each fixture-delete-all)
 
 (deftest test-user-creation
-  (is (= "github-st" (db/create-user "github" "st" "st@s.com")))
+  (is (= "st" (db/create-user "github" "st" "st@s.com")))
   (let [users-created (kc/select db/users)]
     (is (= 1 (count users-created)))
     (is (= {:AUTHNID     "st"
@@ -23,8 +23,8 @@
             :EMAIL       "st@s.com"
             :ISSUPERUSER false
             :JPAVERSION  0
-            :NAME        "github-st"
+            :NAME        "st"
             :PASSWORD    nil
-            :RESOURCEURI "user/github-st"
+            :RESOURCEURI "user/st"
             :STATE       "ACTIVE"}
            (-> users-created first (dissoc :CREATION))))))
