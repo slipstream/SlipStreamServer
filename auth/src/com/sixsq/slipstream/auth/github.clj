@@ -34,11 +34,9 @@
   (if-let [user-name-mapped (db/find-username-by-authn "github" (:login github-user-info))]
     (user-already-mapped user-name-mapped)
     (let [user-names-same-email (db/find-usernames-by-email (:email github-user-info))]
-      (condp = (count user-names-same-email)
-        0 (create-slipstream-user-from-github! github-user-info)
-        1 (map-slipstream-github! (first user-names-same-email) (:login github-user-info))
-        ;; TODO multiple emails match github email
-        "joe"))))
+      (if (empty? user-names-same-email)
+        (create-slipstream-user-from-github! github-user-info)
+        (map-slipstream-github! (first user-names-same-email) (:login github-user-info))))))
 
 (defn callback-github
   [request redirect-server]
