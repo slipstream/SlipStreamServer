@@ -2,23 +2,14 @@
   (:refer-clojure :exclude [update])
   (:require
     [clojure.test :refer :all]
-    [korma.core :as kc]
-    [com.sixsq.slipstream.auth.database.ddl :as ddl]
+    [com.sixsq.slipstream.auth.ddl :as ddl]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.internal-authentication :as ia]
     [com.sixsq.slipstream.auth.sign :as sg]))
 
-(defonce ^:private columns-users (ddl/columns "NAME"        "VARCHAR(100)"
-                                              "PASSWORD"    "VARCHAR(200)"
-                                              "EMAIL"       "VARCHAR(200)"
-                                              "AUTHNMETHOD" "VARCHAR(200)"
-                                              "AUTHNID"     "VARCHAR(200)"))
-
 (defn fixture-delete-all
   [f]
-  (db/init)
-  (ddl/create-table! "USER" columns-users)
-  (kc/delete db/users)
+  (ddl/create-fake-empty-user-table)
   (f))
 
 (use-fixtures :each fixture-delete-all)
@@ -42,28 +33,16 @@
              missing-password
              missing-both])
 
-(defn- auth-rejected?
-  [[ok? result]]
-  (and
-    (false? ok?)
-    (.startsWith (:message result) "Invalid combination username/password for" )))
-
 (defn- token-refused?
   [[ok? result]]
   (= [false "Invalid credentials when creating token"] [ok? (:message result)]))
 
 (defn- token-created?
   [[ok? token]]
+  (println "token " token)
   (is ok?)
   (is (map? token))
   (is (contains? token :token)))
-
-(defn- auth-accepted?
-  [[ok? result]]
-  (and
-    ok?
-    (= (select-keys valid-credentials [:user-name]) result)
-    (not (contains? result :password))))
 
 (defn token-value
   [[_ token]]
@@ -71,20 +50,20 @@
 
 (deftest all-rejected-when-no-user-added
   (doseq [wrong (cons valid-credentials wrongs)]
-    (is (auth-rejected? (ia/auth-user wrong)))))
+    (is (not (ia/valid? wrong))))
+  (is (not (ia/valid? valid-credentials))))
 
-(deftest test-auth-user
+(deftest test-valid-credentials
   (ia/add-user! valid-credentials)
-  (is (auth-accepted? (ia/auth-user valid-credentials)))
 
+  (is (ia/valid? valid-credentials))
   (doseq [wrong wrongs]
-    (is (auth-rejected? (ia/auth-user wrong)))))
+    (is (not (ia/valid? wrong)))))
 
 (deftest test-create-token
   (ia/add-user! valid-credentials)
 
   (is (token-created? (ia/create-token valid-credentials)))
-
   (doseq [wrong wrongs]
     (is (token-refused? (ia/create-token wrong)))))
 
@@ -98,6 +77,12 @@
                         token-value)]
     (is (= "super" (:com.sixsq.identifier (sg/check-token valid-token))))))
 
+(deftest test-create-token-removes_password-from-token
+  (ia/add-user! valid-credentials)
+  (let [valid-token (-> (ia/create-token valid-credentials)
+                        token-value)]
+    (is (nil? (:password (sg/check-token valid-token))))))
+
 (deftest password-encryption-compatible-with-slipstream
   (is (= "304D73B9607B5DFD48EAC663544F8363B8A03CAAD6ACE21B369771E3A0744AAD0773640402261BD5F5C7427EF34CC76A2626817253C94D3B03C5C41D88C64399"
          (sg/sha512 "supeRsupeR"))))
@@ -109,7 +94,7 @@
                         token-value)
         claim-token (-> (ia/create-token claims valid-token)
                         token-value)]
-    (is (= claims (sg/check-token claim-token)))))
+    (is (= (claims (sg/check-token claim-token))))))
 
 (deftest test-users-by-email
   (ia/add-user! {:user-name "jack"

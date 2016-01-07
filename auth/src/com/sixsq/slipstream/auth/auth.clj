@@ -1,12 +1,9 @@
-(ns com.sixsq.slipstream.auth.app.auth-service
+(ns com.sixsq.slipstream.auth.auth
   (:refer-clojure :exclude [update])
   (:require
     [clojure.data.json :as json]
     [clojure.tools.logging :as log]
-
-    [com.sixsq.slipstream.auth.core :as auth]
-    [com.sixsq.slipstream.auth.internal-authentication :as sa]
-
+    [com.sixsq.slipstream.auth.internal-authentication :as ia]
     [com.sixsq.slipstream.auth.utils.http :as uh]))
 
 (defn- extract-credentials
@@ -44,11 +41,11 @@
 (defmethod login :internal
   [request]
   (log/info "Internal authentication")
-  (let [credentials   (extract-credentials request)
-        [ok? result]  (auth/token authentication credentials)]
+  (let [credentials  (extract-credentials request)
+        [ok? token]  (ia/create-token credentials)]
     (log-result credentials ok?)
     (if ok?
-      (response-token-ok result)
+      (response-token-ok token)
       (response-invalid-token))))
 
 (defmethod login :github
@@ -62,7 +59,7 @@
   [request]
   (log/info "Will build-token")
   (let [{:keys [claims token]}  (extract-claims-token request)
-        [ok? result]            (auth/token authentication claims token)]
+        [ok? token]            (ia/create-token claims token)]
     (if ok?
-      (uh/response-with-body 200 (:token result))
+      (uh/response-with-body 200 (:token token))
       (response-invalid-token))))

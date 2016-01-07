@@ -2,7 +2,7 @@
   (:require [buddy.sign.jws :as jws]
             [buddy.core.keys :as ks]
             [clojure.java.io :as io]
-            [com.sixsq.slipstream.auth.conf.config :as cf]
+            [com.sixsq.slipstream.auth.utils.config :as cf]
             [buddy.core.codecs :as co]
             [buddy.core.hash :as ha]
             [clj-time.core :as t]

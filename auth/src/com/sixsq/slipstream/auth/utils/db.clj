@@ -2,7 +2,7 @@
   (:require [clojure.tools.logging :as log]
             [korma.core :as kc]
             [korma.db :refer [defdb]]
-            [com.sixsq.slipstream.auth.conf.config :as cf]))
+            [com.sixsq.slipstream.auth.utils.config :as cf]))
 
 (defn db-spec
   []
@@ -14,7 +14,7 @@
       (log/info (format "Creating korma database %s" current-db-spec))
       (defdb korma-auth-db current-db-spec))
       (log/info "Korma init done")
-      (kc/defentity users (kc/table "USER") (kc/database kh/korma-auth-db))
+      (kc/defentity users (kc/table "USER") (kc/database korma-auth-db))
       (log/info "Korma Entities defined")))
 
 (defn init

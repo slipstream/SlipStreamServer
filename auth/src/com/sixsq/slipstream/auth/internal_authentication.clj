@@ -19,32 +19,28 @@
                   (:authn-method user)
                   (:authn-id user)))
 
-(defn auth-user
+(defn valid?
   [credentials]
   (let [user-name           (:user-name credentials)
         password-credential (:password credentials)
-        encrypted-in-db     (db/find-password-for-user-name user-name)
-        auth-ok             (and
-                              password-credential
-                              encrypted-in-db
-                              (= (sg/sha512 password-credential) encrypted-in-db))]
+        encrypted-in-db     (db/find-password-for-user-name user-name)]
+    (and
+      password-credential
+      encrypted-in-db
+      (= (sg/sha512 password-credential) encrypted-in-db))))
 
-    (if auth-ok
-      [true (dissoc credentials :password)]
-      [false {:message (str "Invalid combination username/password for '" user-name "'")}])))
-
-(defn enrich-claims
-  [claims]
-  (-> claims
+(defn- adapt-credentials
+  [credentials]
+  (-> credentials
+      (dissoc :password)
       (rename-keys {:user-name :com.sixsq.identifier})
       (merge {:exp (sg/expiry-timestamp)})))
 
 (defn create-token
   ([credentials]
-  (let [[ok? claims] (auth-user credentials)]
-    (if ok?
-      [true  {:token (sg/sign-claims (enrich-claims claims))}]
-      [false {:message "Invalid credentials when creating token"}])))
+  (if (valid? credentials)
+    [true  {:token (sg/sign-claims (adapt-credentials credentials))}]
+    [false {:message "Invalid credentials when creating token"}]))
 
   ([claims token]
    (log/info "Will create token for claims=" claims)

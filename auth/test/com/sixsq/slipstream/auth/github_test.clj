@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.auth.app.auth-service-test
+(ns com.sixsq.slipstream.auth.github-test
   (:refer-clojure :exclude [update])
   (:require
     [clojure.test :refer :all]

@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.auth.conf.config
+(ns com.sixsq.slipstream.auth.utils.config
   (:require [environ.core           :as environ]
             [clojure.edn            :as edn]
             [clojure.tools.logging  :as log]
