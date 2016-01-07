@@ -17,6 +17,10 @@
       response
       (assoc-in [:headers "location"] url)))
 
+(defn response-forbidden
+  []
+  (response 401))
+
 (defn param-value
   [request key]
   (-> request

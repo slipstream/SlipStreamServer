@@ -1,19 +1,20 @@
-(ns com.sixsq.slipstream.auth.ddl
+(ns com.sixsq.slipstream.auth.test-helper
   (:refer-clojure :exclude [update])
   (:require
     [clojure.tools.logging :as log]
     [clojure.java.jdbc :refer :all :as jdbc]
     [clojure.string :refer [join split]]
     [com.sixsq.slipstream.auth.utils.db :as db]
-    [korma.core :as kc]))
+    [korma.core :as kc]
+    [com.sixsq.slipstream.auth.sign :as sg]))
 
 
-(defn simple-surrounder
+(defn- simple-surrounder
   [c]
   (fn sur [s]
     (str c s c)))
 
-(defn surrounder
+(defn- surrounder
   [c]
   (fn [s]
     (->>  (split s #"\.")
@@ -26,7 +27,7 @@
   [[name type]]
   (str (double-quote name) " " type))
 
-(defn columns
+(defn- columns
   [& name-types]
   (->>  name-types
         (partition 2)
@@ -39,7 +40,7 @@
                                           "AUTHNMETHOD" "VARCHAR(200)"
                                           "AUTHNID"     "VARCHAR(200)"))
 
-(defn create-table!
+(defn- create-table!
   [table columns & [options]]
   (jdbc/execute! (db/db-spec) [(str "CREATE TABLE IF NOT EXISTS " (double-quote table) " ( " columns options " ) ")])
   (log/info "Created (if needed!) table:" table ", columns:" columns ", options: "options))
@@ -49,3 +50,13 @@
   (db/init)
   (create-table! "USER" columns-users)
   (kc/delete db/users))
+
+(defn add-user!
+  [user]
+  (db/init)
+  (log/info "Will add user " (:user-name user))
+  (db/insert-user (:user-name user)
+                  (sg/sha512 (:password user))
+                  (:email user)
+                  (:authn-method user)
+                  (:authn-id user)))

@@ -5,14 +5,22 @@
     [clj-http.client :as http]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.http :as uh]
-    [com.sixsq.slipstream.auth.sign :as sg]))
+    [com.sixsq.slipstream.auth.sign :as sg]
+    [com.sixsq.slipstream.auth.utils.config :as cf]))
+
+(defn- user-already-mapped
+  [user-name]
+  (log/info (str "Github user '" user-name "' already mapped => login ok."))
+  user-name)
 
 (defn- map-slipstream-github!
   [slipstream-username github-login]
+  (log/info (str "Mapping github user '" github-login "' to existing SlipStream user '" slipstream-username "'"))
   (db/update-user-authn-info slipstream-username "github" github-login))
 
 (defn- create-slipstream-user-from-github!
   [github-user-info]
+  (log/info (str "Creating new SlipStream user with github user '" (:login github-user-info) "'"))
   (db/create-user "github" (:login github-user-info) (:email github-user-info)))
 
 (defn parse-github-user
@@ -24,7 +32,7 @@
 (defn- match-github-user
   [github-user-info]
   (if-let [user-name-mapped (db/find-username-by-authn "github" (:login github-user-info))]
-    user-name-mapped
+    (user-already-mapped user-name-mapped)
     (let [user-names-same-email (db/find-usernames-by-email (:email github-user-info))]
       (condp = (count user-names-same-email)
         0 (create-slipstream-user-from-github! github-user-info)
@@ -37,8 +45,8 @@
   (let [oauth-code            (uh/param-value request :code)
         access-token-response (http/post "https://github.com/login/oauth/access_token"
                                          {:headers     {"Accept" "application/json"}
-                                          :form-params {:client_id     "cd03c88b13517f931f09"
-                                                        :client_secret "6435cde7c22f0d543b07f13e311e0514c33460ad"
+                                          :form-params {:client_id     (cf/property-value :github-client-id)
+                                                        :client_secret (cf/property-value :github-client-secret)
                                                         :code          oauth-code}})
         access-token          (-> access-token-response
                                   :body
@@ -54,8 +62,15 @@
 
         token                 (sg/sign-claims {:com.sixsq.identifier matched-user :exp (sg/expiry-timestamp)})]
 
-    (log/info "github user-info" user-info)
-
     (-> (uh/response-redirect (str redirect-server "/dashboard"))
         (assoc :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
                                                         :path  "/"}}))))
+
+(defn login
+  []
+  (log/info "Github authentication")
+  (uh/response-redirect
+    (format
+      "https://github.com/login/oauth/authorize?client_id=%s&scope=user:email"
+      (cf/property-value :github-client-id))))
+

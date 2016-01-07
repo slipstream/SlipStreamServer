@@ -1,23 +1,26 @@
 (ns com.sixsq.slipstream.auth.internal-authentication
   (:refer-clojure :exclude [update])
   (:require
-    [clojure.tools.logging                            :as log]
-    [clojure.set                                      :refer [rename-keys]]
+    [clojure.tools.logging :as log]
+    [clojure.set :refer [rename-keys]]
 
-    [com.sixsq.slipstream.auth.sign                   :as sg]
-    [com.sixsq.slipstream.auth.utils.db               :as db]))
+    [com.sixsq.slipstream.auth.sign :as sg]
+    [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.auth.utils.http :as uh]))
 
+(defn- extract-credentials
+  [request]
+  (uh/select-in-params request [:user-name :password]))
 
-;; TODO : Currently unused as DB insertion is done by Java server
-(defn add-user!
-  [user]
-  (db/init)
-  (log/info "Will add user " (:user-name user))
-  (db/insert-user (:user-name user)
-                  (sg/sha512 (:password user))
-                  (:email user)
-                  (:authn-method user)
-                  (:authn-id user)))
+(defn- log-result
+  [credentials ok?]
+  (log/info (str "'" (:user-name credentials) "' : "
+                 (if ok? "login OK" "invalid password"))))
+
+(defn- response-token-ok
+  [token]
+  (-> (uh/response 200)
+      (assoc :cookies {"com.sixsq.slipstream.cookie" {:value token}})))
 
 (defn valid?
   [credentials]
@@ -50,3 +53,13 @@
       (catch Exception e
         (log/error "exception in token creation " e)
         [false {:message (str "Invalid token when creating token: " e)}]))))
+
+(defn login
+  [request]
+  (log/info "Internal authentication")
+  (let [credentials  (extract-credentials request)
+        [ok? token]  (create-token credentials)]
+    (log-result credentials ok?)
+    (if ok?
+      (response-token-ok token)
+      (uh/response-forbidden))))
