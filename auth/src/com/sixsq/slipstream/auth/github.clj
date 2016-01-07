@@ -45,8 +45,8 @@
   (let [oauth-code            (uh/param-value request :code)
         access-token-response (http/post "https://github.com/login/oauth/access_token"
                                          {:headers     {"Accept" "application/json"}
-                                          :form-params {:client_id     (cf/property-value :github-client-id)
-                                                        :client_secret (cf/property-value :github-client-secret)
+                                          :form-params {:client_id     (cf/mandatory-property-value :github-client-id)
+                                                        :client_secret (cf/mandatory-property-value :github-client-secret)
                                                         :code          oauth-code}})
         access-token          (-> access-token-response
                                   :body
@@ -72,5 +72,5 @@
   (uh/response-redirect
     (format
       "https://github.com/login/oauth/authorize?client_id=%s&scope=user:email"
-      (cf/property-value :github-client-id))))
+      (cf/mandatory-property-value :github-client-id))))
 

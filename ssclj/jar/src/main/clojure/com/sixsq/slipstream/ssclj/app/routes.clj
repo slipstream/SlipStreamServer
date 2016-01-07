@@ -10,7 +10,7 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.util.config :as cf]
 
-    [com.sixsq.slipstream.auth.auth :as as]
+    [com.sixsq.slipstream.auth.auth :as auth]
     [com.sixsq.slipstream.auth.github :as gh]))
 
 (def collection-routes
@@ -52,8 +52,8 @@
                uri-token              (str p/auth-context "token")
                uri-github             (str p/auth-context "callback-github")]
 
-    (POST uri-login request (as/login request))
-    (POST uri-token request (as/build-token request))
+    (POST uri-login request (auth/login request))
+    (POST uri-token request (auth/build-token request))
 
     (GET uri-github request (gh/callback-github request (cf/property-value :upstream-server)))))
 

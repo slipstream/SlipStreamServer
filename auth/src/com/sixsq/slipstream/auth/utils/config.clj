@@ -31,4 +31,11 @@
     (log/info "property" name "=" v)
     v))
 
+(defn- read-mandatory-property-value
+  [name]
+  (if-let [v (read-property-value name)]
+    v
+    (throw (IllegalStateException. (str "Mandatory property not defined '" name "'")))))
+
 (def property-value (memoize read-property-value))
+(def mandatory-property-value (memoize read-mandatory-property-value))

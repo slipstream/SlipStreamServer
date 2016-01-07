@@ -39,7 +39,6 @@
 
 (defn- token-created?
   [[ok? token]]
-  (println "token " token)
   (is ok?)
   (is (map? token))
   (is (contains? token :token)))
