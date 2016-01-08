@@ -16,12 +16,12 @@
 (defn- map-slipstream-github!
   [slipstream-username github-login]
   (log/info (str "Mapping github user '" github-login "' to existing SlipStream user '" slipstream-username "'"))
-  (db/update-user-authn-info slipstream-username "github" github-login))
+  (db/update-user-authn-info slipstream-username github-login))
 
 (defn- create-slipstream-user-from-github!
   [github-user-info]
   (log/info (str "Creating new SlipStream user with github user '" (:login github-user-info) "'"))
-  (db/create-user "github" (:login github-user-info) (:email github-user-info)))
+  (db/create-user! "github" (:login github-user-info) (:email github-user-info)))
 
 (defn parse-github-user
   [user-info-body]
@@ -31,7 +31,7 @@
 
 (defn- match-github-user
   [github-user-info]
-  (if-let [user-name-mapped (db/find-username-by-authn "github" (:login github-user-info))]
+  (if-let [user-name-mapped (db/find-username-by-authn (:login github-user-info))]
     (user-already-mapped user-name-mapped)
     (let [user-names-same-email (db/find-usernames-by-email (:email github-user-info))]
       (if (empty? user-names-same-email)

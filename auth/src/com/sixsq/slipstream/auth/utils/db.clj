@@ -31,48 +31,63 @@
        (map :NAME)))
 
 (defn find-username-by-authn
-  [authn-method authn-id]
+  [authn-id]
   (init)
   (let [matched-users
         (kc/select users
                    (kc/fields [:NAME])
-                   (kc/where (zipmap [:AUTHNMETHOD :AUTHNID] [authn-method authn-id])))]
+                   (kc/where {:GITHUBLOGIN authn-id}))]
     (if (> (count matched-users) 1)
-      (throw (Exception. (str "There should be only one result for " authn-method "/" authn-id)))
+      (throw (Exception. (str "There should be only one result for " authn-id)))
       (-> (first matched-users)
           :NAME))))
 
 (defn update-user-authn-info
-  [slipstream-username authn-method authn-id]
+  [slipstream-username authn-id]
   (init)
   (kc/update users
-             (kc/set-fields (zipmap [:AUTHNMETHOD :AUTHNID] [authn-method authn-id]))
-             (kc/where {:NAME slipstream-username}))
+             (kc/set-fields {:GITHUBLOGIN authn-id})
+             (kc/where      {:NAME slipstream-username}))
   slipstream-username)
 
-(defn create-user
+(defn- inc-string
+  [s]
+  (if (empty? s)
+    1
+    (inc (read-string s))))
+
+(defn- append-number-or-inc
+  [name]
+  (if-let [tokens (re-find #"(\w*)(_)(\d*)" name)]
+    (str (nth tokens 1) "_" (inc-string (nth tokens 3)))
+    (str name "_1")))
+
+(defn name-no-collision
+  [name existing-names]
+  (if ((set existing-names) name)
+    (recur (append-number-or-inc name) existing-names)
+    name))
+
+(defn- existing-user-names
+  []
+  (->> (kc/select users (kc/fields [:NAME]))
+       (map :NAME)))
+
+(defn create-user!
   [authn-method authn-login email]
   (init)
-  (kc/insert users (kc/values {"RESOURCEURI" (str "user/" authn-login)
-                               "DELETED"     false
-                               "JPAVERSION"  0
-                               "ISSUPERUSER" false
-                               "STATE"       "ACTIVE"
-                               "NAME"        authn-login
-                               "EMAIL"       email
-                               "AUTHNMETHOD" authn-method
-                               "AUTHNID"     authn-login
-                               "CREATION"    (Date.)}))
-  authn-login)
+  (let [slipstream-user-name (name-no-collision authn-login (existing-user-names))]
+    (kc/insert users (kc/values {"RESOURCEURI" (str "user/" slipstream-user-name)
+                                 "DELETED"     false
+                                 "JPAVERSION"  0
+                                 "ISSUPERUSER" false
+                                 "STATE"       "ACTIVE"
+                                 "NAME"        slipstream-user-name
+                                 "EMAIL"       email
+                                 "GITHUBLOGIN" authn-login
+                                 "CREATION"    (Date.)}))
+    slipstream-user-name))
 
-(defn insert-user
-  [name password email authn-method authn-id]
-  (init)
-  (kc/insert users (kc/values {:NAME         name
-                               :PASSWORD     password
-                               :EMAIL        email
-                               :AUTHNMETHOD  authn-method
-                               :AUTHNID      authn-id})))
 
 (defn find-password-for-user-name
   [user-name]
