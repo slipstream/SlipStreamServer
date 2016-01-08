@@ -23,7 +23,7 @@
             :ISSUPERUSER false
             :JPAVERSION  0
             :NAME        "st"
-            :PASSWORD    nil
+            :PASSWORD    "unused"
             :RESOURCEURI "user/st"
             :STATE       "ACTIVE"}
            (-> users-created first (dissoc :CREATION))))))

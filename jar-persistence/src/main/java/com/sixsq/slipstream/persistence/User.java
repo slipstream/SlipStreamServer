@@ -373,12 +373,10 @@ public class User extends Parameterized<User, UserParameter> {
 		}
 
 		// For security reasons, the password must not be null or the empty
-		// string. Except when external authentication is used.
-		if (user.getGithubLogin() == null) {
-			String password = user.getHashedPassword();
-			if (password == null || "".equals(password)) {
-				throw new InvalidElementException("Password cannot be empty.");
-			}
+		// string.
+		String password = user.getHashedPassword();
+		if (password == null || "".equals(password)) {
+			throw new InvalidElementException("Password cannot be empty.");
 		}
 
 		// Ensure that the email address is valid.
@@ -561,10 +559,6 @@ public class User extends Parameterized<User, UserParameter> {
 		setAuthnToken(authnToken);
 		store();
 		logger.info("Stored authentication token: " + authnToken);
-	}
-
-	public String getGithubLogin(){
-		return githubLogin;
 	}
 
 }

@@ -83,11 +83,11 @@
                                  "ISSUPERUSER" false
                                  "STATE"       "ACTIVE"
                                  "NAME"        slipstream-user-name
+                                 "PASSWORD"    "unused"
                                  "EMAIL"       email
                                  "GITHUBLOGIN" authn-login
                                  "CREATION"    (Date.)}))
     slipstream-user-name))
-
 
 (defn find-password-for-user-name
   [user-name]

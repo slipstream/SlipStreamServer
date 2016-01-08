@@ -113,11 +113,6 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 	private void processPassword(Form form, User dbUser)
 			throws ValidationException {
 
-		boolean isUserExternallyAuthenticated = dbUser.getGithubLogin() != null;
-		if (isUserExternallyAuthenticated) {
-			return;
-		}
-
 		Passwords passwords;
 		try {
 			passwords = extractPasswords(form);
