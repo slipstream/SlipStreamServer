@@ -554,8 +554,8 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public void storeAuthnToken(String authnToken) {
 
-		boolean alreadyStored = authnToken!=null && authnToken.equals(this.authnToken);
-		if(alreadyStored) {
+		boolean alreadyStored = authnToken != null && authnToken.equals(this.authnToken);
+		if (alreadyStored) {
 			return;
 		}
 
