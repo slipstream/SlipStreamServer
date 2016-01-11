@@ -2,6 +2,9 @@ package com.sixsq.slipstream.statemachine;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /*
  * +=================================================================+
@@ -40,6 +43,12 @@ public enum States {
     						 States.Aborted,
     						 States.Unknown,
     						 States.Done);
+    }
+
+    public static List<States> active() {
+        Set<States> states = new HashSet<States>(Arrays.asList(States.values()));
+        states.removeAll(completed());
+        return new ArrayList<States>(states);
     }
 
     public static List<States> transition() {

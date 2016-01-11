@@ -60,28 +60,28 @@ public class RunViewList {
 		return runs;
 	}
 
-	public void populate(User user, int offset, int limit, String cloudServiceName) throws ConfigurationException, ValidationException {
-		populate(user, null, offset, limit, cloudServiceName);
+	public void populate(User user, int offset, int limit, String cloudServiceName, boolean activeOnly) throws ConfigurationException, ValidationException {
+		populate(user, null, offset, limit, cloudServiceName, activeOnly);
 	}
 
-	public void populate(User user, String moduleResourceUri, int offset, int limit) throws ConfigurationException, ValidationException {
-		populate(user, moduleResourceUri, offset, limit, null);
+	public void populate(User user, String moduleResourceUri, int offset, int limit, boolean activeOnly) throws ConfigurationException, ValidationException {
+		populate(user, moduleResourceUri, offset, limit, null, activeOnly);
 	}
 
-	public void populate(User user, String moduleResourceUri, int offset, int limit, String cloudServiceName)
+	public void populate(User user, String moduleResourceUri, int offset, int limit, String cloudServiceName, boolean activeOnly)
 			throws ConfigurationException, ValidationException {
 		user.validate();
-		populateRuns(user, moduleResourceUri, offset, limit, cloudServiceName);
+		populateRuns(user, moduleResourceUri, offset, limit, cloudServiceName, activeOnly);
 	}
 
-	private void populateRuns(User user, String moduleResourceUri, int offset, int limit, String cloudServiceName)
+	private void populateRuns(User user, String moduleResourceUri, int offset, int limit, String cloudServiceName, boolean activeOnly)
 			throws ConfigurationException, ValidationException {
 		this.offset = offset;
 		this.limit = limit;
 		this.cloud = cloudServiceName;
 
-		totalCount = RunView.fetchListViewCount(user, moduleResourceUri, cloudServiceName);
-		runs = RunView.fetchListView(user, moduleResourceUri, offset, limit, cloudServiceName);
+		totalCount = RunView.fetchListViewCount(user, moduleResourceUri, cloudServiceName, activeOnly);
+		runs = RunView.fetchListView(user, moduleResourceUri, offset, limit, cloudServiceName, activeOnly);
 		count = runs.size();
 	}
 
