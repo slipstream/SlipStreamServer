@@ -45,14 +45,7 @@ public class AuthProxy {
 
         try {
 
-            Context context = new Context();
-            Series<Parameter> parameters = context.getParameters();
-            parameters.add("socketTimeout", "1000");
-            parameters.add("idleTimeout", "1000");
-            parameters.add("idleCheckInterval", "1000");
-            parameters.add("socketConnectTimeoutMs", "1000");
-
-            resource = new ClientResource(context, AUTH_SERVER + "/login");
+            resource = new ClientResource(createContext(), AUTH_SERVER + "/login");
             resource.setRetryOnError(false);
 
             resource.addQueryParameter("user-name", username);
@@ -71,6 +64,27 @@ public class AuthProxy {
         } finally {
             releaseResources(resource, response);
         }
+    }
+
+    public Response logout() {
+        ClientResource resource = new ClientResource(createContext(), AUTH_SERVER + "/logout");
+        resource.setRetryOnError(false);
+        resource.setEntityBuffering(true);
+
+        resource.post("", MediaType.TEXT_PLAIN);
+
+        return resource.getResponse();
+    }
+
+    private Context createContext() {
+        Context context = new Context();
+        Series<Parameter> parameters = context.getParameters();
+        parameters.add("socketTimeout", "1000");
+        parameters.add("idleTimeout", "1000");
+        parameters.add("idleCheckInterval", "1000");
+        parameters.add("socketConnectTimeoutMs", "1000");
+
+        return context;
     }
 
     private void handleResourceException(ResourceException re, String username) {

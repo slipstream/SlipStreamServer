@@ -23,10 +23,11 @@
             :ISSUPERUSER false
             :JPAVERSION  0
             :NAME        "st"
-            :PASSWORD    "unused"
             :RESOURCEURI "user/st"
             :STATE       "ACTIVE"}
-           (-> users-created first (dissoc :CREATION))))))
+           (-> users-created first (dissoc :CREATION :PASSWORD))))
+    (is (-> users-created first :PASSWORD))
+    (is (-> users-created first :CREATION))))
 
 (deftest test-user-creation-avoids-user-same-name
   (th/add-user-for-test! {:user-name "stef" :password "secret"})

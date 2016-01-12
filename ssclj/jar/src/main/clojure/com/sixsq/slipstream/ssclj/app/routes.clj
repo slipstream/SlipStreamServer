@@ -49,13 +49,17 @@
 
 (def auth-routes
   (let-routes [uri-login              (str p/auth-context "login")
+               uri-logout             (str p/auth-context "logout")
+
                uri-token              (str p/auth-context "token")
                uri-github             (str p/auth-context "callback-github")]
 
-    (POST uri-login request (auth/login request))
-    (POST uri-token request (auth/build-token request))
+    (POST uri-login   request (auth/login request))
+    (POST uri-logout  request (auth/logout request))
 
-    (GET uri-github request (gh/callback-github request (cf/property-value :upstream-server)))))
+    (POST uri-token   request (auth/build-token request))
+
+    (GET uri-github   request (gh/callback-github request (cf/property-value :upstream-server)))))
 
 (def final-routes
   [

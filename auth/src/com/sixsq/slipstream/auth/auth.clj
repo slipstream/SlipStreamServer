@@ -19,7 +19,7 @@
       (uh/param-value :authn-method)
       keyword))
 
-(defmulti login dispatch-on-authn-method)
+(defmulti login   dispatch-on-authn-method)
 
 (defmethod login :internal
   [request]
@@ -28,6 +28,10 @@
 (defmethod login :github
   [_]
   (gh/login))
+
+(defn logout
+  [_]
+  (ia/logout))
 
 (defn build-token
   [request]

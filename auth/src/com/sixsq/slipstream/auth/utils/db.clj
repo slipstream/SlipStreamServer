@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.auth.utils.db
-  (:import (java.util Date))
+  (:import (java.util Date UUID))
   (:require [clojure.tools.logging :as log]
             [korma.core :as kc]
             [korma.db :refer [defdb]]
@@ -73,6 +73,10 @@
   (->> (kc/select users (kc/fields [:NAME]))
        (map :NAME)))
 
+(defn random-password
+  []
+  (str (UUID/randomUUID)))
+
 (defn create-user!
   [authn-method authn-login email]
   (init)
@@ -83,7 +87,7 @@
                                  "ISSUPERUSER" false
                                  "STATE"       "ACTIVE"
                                  "NAME"        slipstream-user-name
-                                 "PASSWORD"    "unused"
+                                 "PASSWORD"    (random-password)
                                  "EMAIL"       email
                                  "GITHUBLOGIN" authn-login
                                  "CREATION"    (Date.)}))

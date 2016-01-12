@@ -20,12 +20,12 @@ package com.sixsq.slipstream.authn;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.cookie.CookieUtils;
+import org.restlet.Response;
 import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.ResourceException;
-
-import com.sixsq.slipstream.cookie.CookieUtils;
 
 /**
  * The DELETE action on this resource will remove any authentication cookies from
@@ -47,7 +47,10 @@ public class LogoutResource extends AuthnResource {
 
 	@Delete
 	public void removeCookie(Representation entity) {
-        CookieUtils.removeAuthnCookie(getResponse());
+
+		Response logoutResponse = (new AuthProxy()).logout();
+		CookieUtils.addAuthnCookieFromAuthnResponse(getResponse(), logoutResponse);
+
 		Reference redirectURL = extractRedirectURL(getRequest(), "login");
 		getResponse().redirectSeeOther(redirectURL);
 	}

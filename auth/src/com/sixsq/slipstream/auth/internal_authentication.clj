@@ -20,7 +20,8 @@
 (defn- response-token-ok
   [token]
   (-> (uh/response 200)
-      (assoc :cookies {"com.sixsq.slipstream.cookie" {:value token}})))
+      (assoc :cookies {"com.sixsq.slipstream.cookie" {:value token
+                                                      :path  "/"}})))
 
 (defn valid?
   [credentials]
@@ -63,3 +64,11 @@
     (if ok?
       (response-token-ok token)
       (uh/response-forbidden))))
+
+(defn logout
+  []
+  (log/info "Logout Internal authentication")
+  (-> (uh/response 200)
+      (assoc :cookies {"com.sixsq.slipstream.cookie" {:value    "INVALID"
+                                                      :path     "/"
+                                                      :max-age  0}})))
