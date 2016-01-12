@@ -173,16 +173,7 @@ if [ -n "$SSCLJ_GRAPHITE_HOST" ]; then
 fi
 
 
-#####################################################
-# Define the command for starting the service
-#####################################################
-SSCLJ_JAR=$SSCLJ_HOME/lib/ssclj.jar
-if [ ! -f "$SSCLJ_JAR" ]; then
-  echo "SSCLJ jar file (${SSCLJ_JAR}) not found." 2>&2
-  exit 1
-fi
-
-RUN_ARGS=(${JAVA_OPTIONS[@]} ${GRAPHITE_OPTION} -Dconfig.path=db.spec -Dlogfile.path=production -cp "$SSCLJ_HOME/resources:$SSCLJ_JAR" $SSCLJ_CLASS $SSCLJ_PORT)
+RUN_ARGS=(${JAVA_OPTIONS[@]} ${GRAPHITE_OPTION} -Dconfig.path=db.spec -Dlogfile.path=production -cp "$SSCLJ_HOME/resources:$SSCLJ_HOME/lib/*" $SSCLJ_CLASS $SSCLJ_PORT)
 RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
 
 
