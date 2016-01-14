@@ -4,7 +4,7 @@
     [clojure.tools.logging :as log]
     [environ.core :as environ]
     [clojure.edn :as edn]
-    [clojure.string :as s]
+    [superstring.core :as s]
     [clojure.java.io :as io]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 

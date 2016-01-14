@@ -3,7 +3,7 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.java.jdbc :refer :all :as jdbc]
-    [clojure.string :refer [join split]]
+    [superstring.core :refer [join split]]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [korma.core :as kc]
     [com.sixsq.slipstream.auth.sign :as sg]))

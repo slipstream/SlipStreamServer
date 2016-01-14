@@ -3,7 +3,7 @@
   (:require
     [clojure.tools.logging                                    :as log]
     [clojure.edn                                              :as edn]
-    [clojure.string                                           :refer [split]]
+    [superstring.core                                           :refer [split]]
     [clj-time.core                                            :as time]
     [clj-time.format                                          :as time-fmt]
     [schema.core                                              :as s]
@@ -21,7 +21,7 @@
 ;;
 
 (defn de-camelcase [str]
-  (clojure.string/join "-" (map clojure.string/lower-case (clojure.string/split str #"(?=[A-Z])"))))
+  (superstring.core/join "-" (map superstring.core/lower-case (superstring.core/split str #"(?=[A-Z])"))))
 
 (defn json-response
   [body]
@@ -191,8 +191,8 @@
     (do
       (log/warn s " is not lisp-cased.")
       "")
-    (->>  (clojure.string/split s #"-")
-          (map clojure.string/capitalize)
+    (->>  (superstring.core/split s #"-")
+          (map superstring.core/capitalize)
           (apply str))))
 
 (defn map-multi-line

@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.middleware.logger
   (:require
-    [clojure.string :as str]
+    [superstring.core :as str]
     [clojure.tools.logging :as log]))
 
 (defn- display-querystring

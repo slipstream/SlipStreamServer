@@ -10,6 +10,7 @@
 
   :dependencies [[org.clojure/clojure                       "1.7.0"]
                  [org.clojure/data.json                     "0.2.6"]
+                 [superstring                               "2.1.0"]
 
                  ;; buddy
                  [buddy/buddy-core                          "0.6.0"]

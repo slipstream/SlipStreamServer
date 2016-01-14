@@ -94,6 +94,10 @@
       <artifactId>clojure</artifactId>
     </dependency>
     <dependency>
+      <groupId>superstring</groupId>
+      <artifactId>superstring</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>data.json</artifactId>
     </dependency>

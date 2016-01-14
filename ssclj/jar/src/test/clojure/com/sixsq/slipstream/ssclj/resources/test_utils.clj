@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.test-utils
   (:require
     [clojure.test :refer [is]]
-    [clojure.string :as s]
+    [superstring.core :as s]
     [ring.util.codec :as rc]
 
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]

@@ -7,7 +7,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.middleware.accepted-mime-types :as mime]
-    [clojure.string :as s]
+    [superstring.core :as s]
     [instaparse.core :as insta]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
@@ -102,7 +102,7 @@
    a logical AND."
   [filters]
   (->>  (map #(str "(" % ")") filters)
-        (clojure.string/join " and ")))
+        (superstring.core/join " and ")))
 
 (defn throw-illegal-for-invalid-filter
   [parse-result]
