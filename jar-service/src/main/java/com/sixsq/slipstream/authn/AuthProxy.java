@@ -22,36 +22,39 @@ public class AuthProxy {
 
     private static final String AUTH_SERVER = "http://localhost:8201/auth";
 
+    public static final String INTERNAL_AUTHENTICATION = "internal";
+    public static final String GITHUB_AUTHENTICATION = "github";
+
     /**
-     * POST to http://localhost:8201/auth/login with user-name and password parameters
+     * POST to http://localhost:8201/auth/login with user-name, password and authn-method parameters
      *
      * @param username
      * @param password
-     * @return 401 when authentication failed, else response contains a cookie with the authentication token
+     * @param authenticationMethod
+     *
+     * @return 401 when authentication failed,
+     * else for internal authentication a text response contains a cookie with the authentication token
+     * else for external authentication forwards the HTML response (typically login page from ID provider)
+     *
      * @throws ResourceException
      */
-    public Response createAuthnToken(String username, String password)
+    public Response authenticate(String username, String password, String authenticationMethod)
             throws ResourceException {
         ClientResource resource = null;
         Representation response = null;
 
         try {
 
-            Context context = new Context();
-            Series<Parameter> parameters = context.getParameters();
-            parameters.add("socketTimeout", "1000");
-            parameters.add("idleTimeout", "1000");
-            parameters.add("idleCheckInterval", "1000");
-            parameters.add("socketConnectTimeoutMs", "1000");
-
-            resource = new ClientResource(context, AUTH_SERVER + "/login");
+            resource = new ClientResource(createContext(), AUTH_SERVER + "/login");
             resource.setRetryOnError(false);
 
             resource.addQueryParameter("user-name", username);
             resource.addQueryParameter("password", password);
+            resource.addQueryParameter("authn-method", authenticationMethod);
+
+            resource.setEntityBuffering(true);
 
             response = resource.post("", MediaType.TEXT_PLAIN);
-            logger.info("Successful connection for '" + username + "'");
 
             return resource.getResponse();
 
@@ -61,6 +64,27 @@ public class AuthProxy {
         } finally {
             releaseResources(resource, response);
         }
+    }
+
+    public Response logout() {
+        ClientResource resource = new ClientResource(createContext(), AUTH_SERVER + "/logout");
+        resource.setRetryOnError(false);
+        resource.setEntityBuffering(true);
+
+        resource.post("", MediaType.TEXT_PLAIN);
+
+        return resource.getResponse();
+    }
+
+    private Context createContext() {
+        Context context = new Context();
+        Series<Parameter> parameters = context.getParameters();
+        parameters.add("socketTimeout", "1000");
+        parameters.add("idleTimeout", "1000");
+        parameters.add("idleCheckInterval", "1000");
+        parameters.add("socketConnectTimeoutMs", "1000");
+
+        return context;
     }
 
     private void handleResourceException(ResourceException re, String username) {

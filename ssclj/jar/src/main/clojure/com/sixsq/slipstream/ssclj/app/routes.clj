@@ -1,13 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.app.routes
   (:require
-    [com.sixsq.slipstream.auth.app.auth-service :as as]
+    [ring.middleware.head :refer [wrap-head]]
+    [compojure.core :refer [defroutes let-routes routes POST GET PUT DELETE ANY]]
+    [compojure.route :as route]
+
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [ring.middleware.head :refer [wrap-head]]
-    [compojure.core :refer [defroutes let-routes routes POST GET PUT DELETE ANY]]
-    [compojure.route :as route]))
+    [com.sixsq.slipstream.ssclj.util.config :as cf]
+
+    [com.sixsq.slipstream.auth.auth :as auth]
+    [com.sixsq.slipstream.auth.github :as gh]))
 
 (def collection-routes
   (let-routes [uri (str p/service-context ":resource-name")]
@@ -44,10 +48,18 @@
       (u/map-response "unknown resource" 404 uri))))
 
 (def auth-routes
-  (let-routes [uri-login (str p/auth-context "login")
-               uri-token (str p/auth-context "token")]
-    (POST uri-login request (as/login request))
-    (POST uri-token request (as/build-token request))))
+  (let-routes [uri-login              (str p/auth-context "login")
+               uri-logout             (str p/auth-context "logout")
+
+               uri-token              (str p/auth-context "token")
+               uri-github             (str p/auth-context "callback-github")]
+
+    (POST uri-login   request (auth/login request))
+    (POST uri-logout  request (auth/logout request))
+
+    (POST uri-token   request (auth/build-token request))
+
+    (GET uri-github   request (gh/callback-github request (cf/property-value :upstream-server)))))
 
 (def final-routes
   [

@@ -71,11 +71,13 @@ public class LoginResource extends AuthnResource {
 		Form form = new Form(entity);
 		String username = form.getFirstValue("username");
 		String password = form.getFirstValue("password");
+		String authenticationMethod = form.getFirstValue("authn-method");
 
 		try {
-			Response token = createToken(username, password);
-			addAuthnCookie(token);
-			redirectOrSuccess();
+			Response authenticationResponse = authenticate(username, password, authenticationMethod);
+
+			processAuthenticationResponse(authenticationResponse, authenticationMethod);
+
 		} catch (ResourceException re) {
 			if (re.getStatus().getCode() == CLIENT_ERROR_UNAUTHORIZED.getCode()) {
 				getResponse().setStatus(CLIENT_ERROR_UNAUTHORIZED);
@@ -85,9 +87,19 @@ public class LoginResource extends AuthnResource {
 		}
 	}
 
-	private Response createToken(String username, String password) throws ResourceException {
+	private void processAuthenticationResponse(Response authenticationResponse, String authenticationMethod){
+		if(AuthProxy.INTERNAL_AUTHENTICATION.equals(authenticationMethod)) {
+			addAuthnCookie(authenticationResponse);
+			redirectOrSuccess();
+		} else if(AuthProxy.GITHUB_AUTHENTICATION.equals(authenticationMethod)) {
+			getResponse().redirectSeeOther(authenticationResponse.getLocationRef());
+		}
+	}
+
+	private Response authenticate(String username, String password, String authenticationMethod)
+			throws ResourceException {
 		AuthProxy authProxy = new AuthProxy();
-		return authProxy.createAuthnToken(username, password);
+		return authProxy.authenticate(username, password, authenticationMethod);
 	}
 
 	private void addAuthnCookie(Response token) {
