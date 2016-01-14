@@ -74,6 +74,9 @@ public class User extends Parameterized<User, UserParameter> {
 	@Column(length = 1000)
 	private String authnToken;
 
+	@Attribute(required = false)
+	private String githubLogin;
+
 	@Attribute
 	@Id
 	private String resourceUri;

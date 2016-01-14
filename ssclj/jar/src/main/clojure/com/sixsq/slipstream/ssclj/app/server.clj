@@ -17,6 +17,7 @@
     [com.sixsq.slipstream.ssclj.app.httpkit-container :as httpkit]
     [com.sixsq.slipstream.ssclj.app.aleph-container :as aleph]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
+    [com.sixsq.slipstream.ssclj.middleware.record-start :refer [wrap-record-start]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
@@ -53,6 +54,7 @@
 
       ;;handler/site
       wrap-exceptions
+      wrap-logger
       wrap-cimi-params
       wrap-base-uri
       wrap-keyword-params
@@ -65,7 +67,7 @@
       (instrument default-registry)
       (wrap-proxy-redirect ["/api" "/auth"] (cf/property-value :upstream-server))
       wrap-cookies
-      wrap-logger))
+      wrap-record-start))
 
 
 (defn start

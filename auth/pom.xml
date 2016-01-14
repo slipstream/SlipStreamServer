@@ -145,6 +145,10 @@
       <groupId>peridot</groupId>
       <artifactId>peridot</artifactId>
     </dependency>
+    <dependency>
+      <groupId>puppetlabs</groupId>
+      <artifactId>http-client</artifactId>
+    </dependency>
   </dependencies>
 
 </project>

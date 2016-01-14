@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/auth "2.19.1-SNAPSHOT"
+(defproject com.sixsq.slipstream/auth "2.22-SNAPSHOT"
   :description  "Authentication Service"
   :url          "http://sixsq.com"
 
@@ -15,6 +15,9 @@
                  [buddy/buddy-core                          "0.6.0"]
                  [buddy/buddy-hashers                       "0.6.0"]
                  [buddy/buddy-sign                          "0.6.0"]
+
+                 ;; HTTP
+                 [clj-http                                  "2.0.0"]
 
                  ;; logging
                  [org.clojure/tools.logging                 "0.3.0"]
