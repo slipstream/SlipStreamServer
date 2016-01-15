@@ -3,10 +3,10 @@
   (:require
     [clojure.tools.logging                                    :as log]
     [clojure.edn                                              :as edn]
-    [clojure.string                                           :refer [split]]
+    [superstring.core                                         :as s]
     [clj-time.core                                            :as time]
     [clj-time.format                                          :as time-fmt]
-    [schema.core                                              :as s]
+    [schema.core                                              :as schema]
     [ring.util.response                                       :as r]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
     [clojure.data.json                                        :as json])
@@ -20,8 +20,10 @@
 ;; embedded in them
 ;;
 
+;; NOTE: this cannot be replaced with s/lisp-case because it
+;; will treat a '/' in a resource name as a word separator. 
 (defn de-camelcase [str]
-  (clojure.string/join "-" (map clojure.string/lower-case (clojure.string/split str #"(?=[A-Z])"))))
+  (s/join "-" (map s/lower-case (s/split str #"(?=[A-Z])"))))
 
 (defn json-response
   [body]
@@ -77,7 +79,7 @@
 (defn resource-name
   [resource-id]
   (-> resource-id
-      (split #"/")
+      (s/split #"/")
       first))
 
 ;;
@@ -121,7 +123,7 @@
    violations of the schema and a 400 ring response. If everything's
    OK, then the resource itself is returned."
    [schema]
-   (let [checker (s/checker schema)]
+   (let [checker (schema/checker schema)]
     (fn [resource]
       (if-let [msg (checker resource)]        
         (let [msg (str "resource does not satisfy defined schema: " msg)
@@ -191,9 +193,7 @@
     (do
       (log/warn s " is not lisp-cased.")
       "")
-    (->>  (clojure.string/split s #"-")
-          (map clojure.string/capitalize)
-          (apply str))))
+    (s/pascal-case s)))
 
 (defn map-multi-line
   [m]

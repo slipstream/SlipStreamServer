@@ -52,6 +52,10 @@
       <artifactId>data.json</artifactId>
     </dependency>
     <dependency>
+      <groupId>superstring</groupId>
+      <artifactId>superstring</artifactId>
+    </dependency>
+    <dependency>
       <groupId>prismatic</groupId>
       <artifactId>schema</artifactId>
     </dependency>

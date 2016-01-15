@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.usage.summarizer
   (:require
     [clojure.set :as set]
-    [clojure.string :as string]
+    [superstring.core :as string]
     [clojure.tools.cli :as cli]
     [clj-time.core :as time]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]

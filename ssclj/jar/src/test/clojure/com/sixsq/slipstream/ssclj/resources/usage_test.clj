@@ -100,7 +100,7 @@
                       first
                       :id)
         uuid (-> full-uuid
-                 (clojure.string/split #"/")
+                 (superstring.core/split #"/")
                  second)]
     [uuid full-uuid]))
 
@@ -187,7 +187,7 @@
 
 (defn- one-line
   [s]
-  (clojure.string/replace s #"\n" ""))
+  (superstring.core/replace s #"\n" ""))
 
 (deftest filter-with-admin
   (are-counts-for-admin 2 (one-line

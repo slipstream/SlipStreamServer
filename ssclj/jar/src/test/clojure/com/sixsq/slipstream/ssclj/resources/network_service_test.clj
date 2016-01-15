@@ -83,7 +83,7 @@
   []
   (-> (exec-post base-uri "john" valid-create-firewall)
       (get-in [:response :body :resource-id])
-      (clojure.string/split #"/")
+      (superstring.core/split #"/")
       second))
 
 (deftest find-collection
