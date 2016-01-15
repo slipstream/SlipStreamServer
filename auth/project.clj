@@ -20,20 +20,20 @@
                  [clj-http                                  "2.0.0"]
 
                  ;; logging
-                 [org.clojure/tools.logging                 "0.3.0"]
+                 [org.clojure/tools.logging                 "0.3.1"]
                  [log4j/log4j                               "1.2.17"
                                         :exclusions [ javax.mail/mail
                                                       javax.jms/jms
                                                       com.sun.jdmk/jmxtools
                                                       com.sun.jmx/jmxri]]
                  ;; Environment settings
-                 [environ                                   "1.0.0"]
+                 [environ                                   "1.0.1"]
 
                  ;; database
-                 [org.clojure/java.jdbc                     "0.3.7"]
+                 [org.clojure/java.jdbc                     "0.4.2"]
                  [korma                                     "0.4.2"]
-                 [org.hsqldb/hsqldb                         "2.3.2"]
-                 [org.xerial/sqlite-jdbc                    "3.7.2"]
+                 [org.hsqldb/hsqldb                         "2.3.3"]
+                 [org.xerial/sqlite-jdbc                    "3.8.11.2"]
 
                  ]
 
@@ -46,7 +46,7 @@
                           :jvm-opts ["-Dlogfile.path=production"]}
 
 
-             :provided {:dependencies [[reply/reply "0.3.4"]]}
+             :provided {:dependencies [[reply/reply "0.3.7"]]}
 
              :dev      {  :env          { :clj-env        :development
                                           :config-path "config-hsqldb-mem.edn"
