@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.ssclj.util.config :as cf]
 
     [com.sixsq.slipstream.auth.auth :as auth]
-    [com.sixsq.slipstream.auth.github :as gh]))
+    [com.sixsq.slipstream.auth.github :as gh]
+    [com.sixsq.slipstream.auth.cyclone :as cy]))
 
 (def collection-routes
   (let-routes [uri (str p/service-context ":resource-name")]
@@ -52,14 +53,16 @@
                uri-logout             (str p/auth-context "logout")
 
                uri-token              (str p/auth-context "token")
-               uri-github             (str p/auth-context "callback-github")]
+               uri-github             (str p/auth-context "callback-github")
+               uri-cyclone            (str p/auth-context "callback-cyclone")]
 
     (POST uri-login   request (auth/login request))
     (POST uri-logout  request (auth/logout request))
 
     (POST uri-token   request (auth/build-token request))
 
-    (GET uri-github   request (gh/callback-github request (cf/property-value :upstream-server)))))
+    (GET uri-github   request (gh/callback-github request (cf/property-value :upstream-server)))
+    (GET uri-cyclone  request (cy/callback-cyclone request (cf/property-value :upstream-server)))))
 
 (def final-routes
   [

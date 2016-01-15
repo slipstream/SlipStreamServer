@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.auth.internal-authentication
+(ns com.sixsq.slipstream.auth.internal
   (:refer-clojure :exclude [update])
   (:require
     [clojure.tools.logging :as log]
@@ -49,7 +49,7 @@
   ([claims token]
    (log/info "Will create token for claims=" claims)
    (try
-      (sg/check-token token)
+      (sg/unsign-claims token)
       [true {:token (sg/sign-claims claims)}]
       (catch Exception e
         (log/error "exception in token creation " e)
@@ -57,7 +57,7 @@
 
 (defn login
   [request]
-  (log/info "Internal authentication")
+  (log/info "Internal authentication.")
   (let [credentials  (extract-credentials request)
         [ok? token]  (create-token credentials)]
     (log-result credentials ok?)

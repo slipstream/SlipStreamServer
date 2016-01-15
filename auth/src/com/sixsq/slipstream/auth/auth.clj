@@ -3,9 +3,11 @@
   (:require
     [clojure.data.json :as json]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.auth.internal-authentication :as ia]
+    [com.sixsq.slipstream.auth.internal :as ia]
     [com.sixsq.slipstream.auth.github :as gh]
-    [com.sixsq.slipstream.auth.utils.http :as uh]))
+    [com.sixsq.slipstream.auth.cyclone :as cy]
+    [com.sixsq.slipstream.auth.utils.http :as uh]
+    [com.sixsq.slipstream.auth.utils.config :as cf]))
 
 (defn- extract-claims-token
   [request]
@@ -29,6 +31,10 @@
   [_]
   (gh/login))
 
+(defmethod login :cyclone
+  [_]
+  (cy/login (cf/mandatory-property-value :upstream-server)))
+
 (defn logout
   [_]
   (ia/logout))
@@ -37,7 +43,7 @@
   [request]
   (log/info "Will build-token")
   (let [{:keys [claims token]}  (extract-claims-token request)
-        [ok? token]            (ia/create-token claims token)]
+        [ok? token]             (ia/create-token claims token)]
     (if ok?
       (uh/response-with-body 200 (:token token))
       (uh/response-forbidden))))

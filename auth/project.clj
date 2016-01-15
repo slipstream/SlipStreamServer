@@ -12,9 +12,9 @@
                  [org.clojure/data.json                     "0.2.6"]
 
                  ;; buddy
-                 [buddy/buddy-core                          "0.6.0"]
-                 [buddy/buddy-hashers                       "0.6.0"]
-                 [buddy/buddy-sign                          "0.6.0"]
+                 [buddy/buddy-core                          "0.9.0"]
+                 [buddy/buddy-hashers                       "0.9.0"]
+                 [buddy/buddy-sign                          "0.9.0"]
 
                  ;; HTTP
                  [clj-http                                  "2.0.0"]

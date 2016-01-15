@@ -93,6 +93,8 @@ public class LoginResource extends AuthnResource {
 			redirectOrSuccess();
 		} else if(AuthProxy.GITHUB_AUTHENTICATION.equals(authenticationMethod)) {
 			getResponse().redirectSeeOther(authenticationResponse.getLocationRef());
+		} else if(AuthProxy.CYCLONE_AUTHENTICATION.equals(authenticationMethod)) {
+			getResponse().redirectSeeOther(authenticationResponse.getLocationRef());
 		}
 	}
 

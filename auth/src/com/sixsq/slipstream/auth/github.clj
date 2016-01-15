@@ -66,7 +66,7 @@
 
 (defn login
   []
-  (log/info "Github authentication")
+  (log/info "Github authentication.")
   (uh/response-redirect
     (format
       "https://github.com/login/oauth/authorize?client_id=%s&scope=user:email"
