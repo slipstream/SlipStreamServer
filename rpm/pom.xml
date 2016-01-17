@@ -40,6 +40,7 @@
               </resources>
             </configuration>
           </execution>
+
           <execution>
             <id>copy-migrations</id>
             <goals>
@@ -56,6 +57,28 @@
               </resources>
             </configuration>
           </execution>
+
+          <execution>
+            <id>copy-resources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/scripts/</directory>
+                  <includes>
+                    <include>etc-default-slipstream</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          
         </executions>
       </plugin>
       <plugin>
@@ -215,34 +238,6 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-resources-plugin</artifactId>
-
-       <executions>
-         <execution>
-           <id>copy-resources</id>
-           <phase>package</phase>
-           <goals>
-             <goal>copy-resources</goal>
-           </goals>
-           <configuration>
-             <outputDirectory>${project.build.directory}</outputDirectory>
-             <overwrite>true</overwrite>
-             <resources>
-               <resource>
-                 <directory>${basedir}/src/main/scripts/</directory>
-                 <includes>
-                     <include>etc-default-slipstream</include>
-                 </includes>
-                 <filtering>true</filtering>
-               </resource>
-             </resources>
-           </configuration>
-         </execution>
-       </executions>
       </plugin>
 
       <plugin>
