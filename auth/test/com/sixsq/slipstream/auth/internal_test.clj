@@ -97,14 +97,14 @@
 
 (deftest test-users-by-email
   (th/add-user-for-test! {:user-name "jack"
-                   :password  "123456"
-                   :email     "jack@sixsq.com"})
+                          :password  "123456"
+                          :email     "jack@sixsq.com"})
   (th/add-user-for-test! {:user-name "joe"
-                   :password  "123456"
-                   :email     "joe@sixsq.com"})
+                          :password  "123456"
+                          :email     "joe@sixsq.com"})
   (th/add-user-for-test! {:user-name "joe-alias"
-                   :password  "123456"
-                   :email     "joe@sixsq.com"})
+                          :password  "123456"
+                          :email     "joe@sixsq.com"})
 
   (is (= []                   (db/find-usernames-by-email "unknown@xxx.com")))
   (is (= ["jack"]             (db/find-usernames-by-email "jack@sixsq.com")))
@@ -114,12 +114,12 @@
   (th/add-user-for-test! {:user-name     "joe-slipstream"
                           :password      "123456"
                           :email         "joe@sixsq.com"
-                          :authn-id      "joe"})
+                          :github-id      "joe"})
 
   (th/add-user-for-test! {:user-name     "jack-slipstream"
                           :password      "123456"
                           :email         "jack@sixsq.com"
-                          :authn-id      "jack"})
+                          :github-id      "jack"})
 
   (th/add-user-for-test! {:user-name     "alice-slipstream"
                           :password      "123456"
@@ -132,5 +132,5 @@
   (dotimes [_ 2] (th/add-user-for-test! {:user-name     "joe-slipstream"
                                          :password      "123456"
                                          :email         "joe@sixsq.com"
-                                         :authn-id      "joe"}))
+                                         :github-id      "joe"}))
   (is (thrown? Exception "joe-slipstream" (db/find-username-by-authn :github "joe"))))

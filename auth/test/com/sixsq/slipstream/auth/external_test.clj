@@ -28,7 +28,7 @@
             :STATE       "ACTIVE"}
            (dissoc created-user :CREATION :PASSWORD)))))
 
-(deftest match-new-user-cyclone
+(deftest match-new-user-github
   (is (= [] (kc/select db/users)))
   (match-external-user! :cyclone "st" "st@sixsq.com")
   (let [created-user (first (kc/select db/users))]
@@ -44,7 +44,7 @@
            (dissoc created-user :CREATION :PASSWORD)))))
 
 (deftest match-existing-user
-  (db/create-user! :github nil "st@sixsq.com")
+  (th/add-user-for-test! {:user-name "joe" :password "secret" :email "st@sixsq.com"})
   (let [users-before-match (kc/select db/users)]
     (is (= 1 (count users-before-match)))
     (is (nil? (:GITHUBLOGIN (first users-before-match)))))
@@ -54,7 +54,12 @@
     (is (= "st" (:GITHUBLOGIN (first users-after-match))))))
 
 (deftest match-already-mapped
-  (db/create-user! :github "st" "st@sixsq.com")
-  (let [users-before-match (kc/select db/users)]
+  (let [user-info {:user-name "joe" :password "secret" :github-id "st" :email "st@sixsq.com"}
+        _         (th/add-user-for-test! user-info)
+        [user]    (kc/select db/users)]
+
     (match-external-user! :github "st" "st@sixsq.com")
-    (is (= users-before-match (kc/select db/users)))))
+    (is (= [user] (kc/select db/users)))
+
+    (match-external-user! :cyclone "st" "st@sixsq.com")
+    (is (= [(assoc user :CYCLONELOGIN "st")] (kc/select db/users)))))
