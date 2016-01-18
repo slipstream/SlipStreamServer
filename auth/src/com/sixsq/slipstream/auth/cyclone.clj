@@ -1,37 +1,42 @@
 (ns com.sixsq.slipstream.auth.cyclone
   (:require [clojure.tools.logging :as log]
-            [com.sixsq.slipstream.auth.utils.http :as uh]
-            [clj-http.client :as http]
             [clojure.data.json :as json]
+            [clj-http.client :as http]
+            [com.sixsq.slipstream.auth.utils.config :as cf]
+            [com.sixsq.slipstream.auth.utils.http :as uh]
             [com.sixsq.slipstream.auth.sign :as sg]
             [com.sixsq.slipstream.auth.external :as ex]))
 
 (def ^:private cyclone-base-url
   "https://federation.cyclone-project.eu/auth/realms/master/protocol/openid-connect")
 
-(def ^:private redirect_uri "http://localhost:8201/auth/callback-cyclone")
+(defn- redirect_uri
+  []
+  (str (cf/mandatory-property-value :auth-server) "/auth/callback-cyclone"))
 
-(def ^:private cyclone-code-url
+(defn- cyclone-code-url
+  []
   (str cyclone-base-url
-       (format "/auth?client_id=slipstream&redirect_uri=%s&response_type=code" redirect_uri)))
+       (format "/auth?client_id=slipstream&redirect_uri=%s&response_type=code" (redirect_uri))))
 
-(def ^:private cyclone-token-url
+(defn- cyclone-token-url
+  []
   (str cyclone-base-url "/token"))
 
 (defn login
   [_]
   (log/info "Cyclone authentication.")
-  (uh/response-redirect cyclone-code-url))
+  (uh/response-redirect (cyclone-code-url)))
 
 (defn callback-cyclone
   [request redirect-server]
   (try
     (let [code            (uh/param-value request :code)
-          token-response  (http/post cyclone-token-url
+          token-response  (http/post (cyclone-token-url)
                                     {:headers     {"Accept" "application/json"}
                                      :form-params {:grant_type   "authorization_code"
                                                    :code         code
-                                                   :redirect_uri redirect_uri
+                                                   :redirect_uri (redirect_uri)
                                                    :client_id    "slipstream"}})
           access-token    (-> token-response
                            :body
