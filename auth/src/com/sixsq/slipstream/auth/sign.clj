@@ -25,7 +25,7 @@
       co/bytes->hex
       clojure.string/upper-case))
 
-(defn private-key
+(defn- read-private-key
   [private-key-pem]
   (let [passphrase (cf/property-value :passphrase)
         privkey (io/resource private-key-pem)]
@@ -33,12 +33,16 @@
       (ks/private-key privkey passphrase)
       (throw (IllegalStateException. "Passphrase not defined or private key not accessible (must be in the classpath).")))))
 
-(defn- public-key
+(defn- read-public-key
   [public-key-pem]
   (let [pubkey (io/resource public-key-pem)]
     (if pubkey
       (ks/public-key pubkey)
       (throw (IllegalStateException. "Public key not accessible (must be in the classpath).")))))
+
+(def public-key (memoize read-public-key))
+
+(def private-key (memoize read-private-key))
 
 (defn sign-claims
   [claims]
