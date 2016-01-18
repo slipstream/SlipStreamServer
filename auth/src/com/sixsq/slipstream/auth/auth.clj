@@ -9,12 +9,6 @@
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.config :as cf]))
 
-(defn- extract-claims-token
-  [request]
-  (-> request
-      (uh/select-in-params [:claims :token])
-      (update-in [:claims] #(json/read-str % :key-fn keyword))))
-
 (defn dispatch-on-authn-method
   [request]
   (-> request
@@ -38,6 +32,12 @@
 (defn logout
   [_]
   (ia/logout))
+
+(defn- extract-claims-token
+  [request]
+  (-> request
+      (uh/select-in-params [:claims :token])
+      (update-in [:claims] #(json/read-str % :key-fn keyword))))
 
 (defn build-token
   [request]

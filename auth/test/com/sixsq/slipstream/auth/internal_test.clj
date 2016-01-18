@@ -125,12 +125,12 @@
                           :password      "123456"
                           :email         "alice@sixsq.com"})
 
-  (is (nil? (db/find-username-by-authn "unknownid")))
-  (is (= "joe-slipstream" (db/find-username-by-authn "joe"))))
+  (is (nil? (db/find-username-by-authn :github "unknownid")))
+  (is (= "joe-slipstream" (db/find-username-by-authn :github "joe"))))
 
 (deftest test-users-by-authn-detect-inconsistent-data
   (dotimes [_ 2] (th/add-user-for-test! {:user-name     "joe-slipstream"
                                          :password      "123456"
                                          :email         "joe@sixsq.com"
                                          :authn-id      "joe"}))
-  (is (thrown? Exception "joe-slipstream" (db/find-username-by-authn "joe"))))
+  (is (thrown? Exception "joe-slipstream" (db/find-username-by-authn :github "joe"))))

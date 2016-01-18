@@ -1,9 +1,11 @@
 (ns com.sixsq.slipstream.auth.utils.db
   (:import (java.util Date UUID))
-  (:require [clojure.tools.logging :as log]
-            [korma.core :as kc]
-            [korma.db :refer [defdb]]
-            [com.sixsq.slipstream.auth.utils.config :as cf]))
+  (:require
+    [clojure.string :as s]
+    [clojure.tools.logging :as log]
+    [korma.core :as kc]
+    [korma.db :refer [defdb]]
+    [com.sixsq.slipstream.auth.utils.config :as cf]))
 
 (defn db-spec
   []
@@ -30,23 +32,34 @@
                   (kc/where {:EMAIL email}))
        (map :NAME)))
 
+(defn- column-name
+  [authn-method]
+  (-> authn-method
+      name
+      (str "login")
+      s/upper-case))
+
+(defn- column-keyword
+  [authn-method]
+  (keyword (column-name authn-method)))
+
 (defn find-username-by-authn
-  [authn-id]
+  [authn-method authn-id]
   (init)
   (let [matched-users
         (kc/select users
                    (kc/fields [:NAME])
-                   (kc/where {:GITHUBLOGIN authn-id}))]
+                   (kc/where {(column-keyword authn-method) authn-id}))]
     (if (> (count matched-users) 1)
       (throw (Exception. (str "There should be only one result for " authn-id)))
       (-> (first matched-users)
           :NAME))))
 
 (defn update-user-authn-info
-  [slipstream-username authn-id]
+  [authn-method slipstream-username authn-id]
   (init)
   (kc/update users
-             (kc/set-fields {:GITHUBLOGIN authn-id})
+             (kc/set-fields {(column-keyword authn-method) authn-id})
              (kc/where      {:NAME slipstream-username}))
   slipstream-username)
 
@@ -81,16 +94,16 @@
   [authn-method authn-login email]
   (init)
   (let [slipstream-user-name (name-no-collision authn-login (existing-user-names))]
-    (kc/insert users (kc/values {"RESOURCEURI" (str "user/" slipstream-user-name)
-                                 "DELETED"     false
-                                 "JPAVERSION"  0
-                                 "ISSUPERUSER" false
-                                 "STATE"       "ACTIVE"
-                                 "NAME"        slipstream-user-name
-                                 "PASSWORD"    (random-password)
-                                 "EMAIL"       email
-                                 "GITHUBLOGIN" authn-login
-                                 "CREATION"    (Date.)}))
+    (kc/insert users (kc/values {"RESOURCEURI"              (str "user/" slipstream-user-name)
+                                 "DELETED"                  false
+                                 "JPAVERSION"               0
+                                 "ISSUPERUSER"              false
+                                 "STATE"                    "ACTIVE"
+                                 "NAME"                     slipstream-user-name
+                                 "PASSWORD"                 (random-password)
+                                 "EMAIL"                    email
+                                 (column-name authn-method) authn-login
+                                 "CREATION"                 (Date.)}))
     slipstream-user-name))
 
 (defn find-password-for-user-name

@@ -77,6 +77,9 @@ public class User extends Parameterized<User, UserParameter> {
 	@Attribute(required = false)
 	private String githubLogin;
 
+	@Attribute(required = false)
+	private String cycloneLogin;
+
 	@Attribute
 	@Id
 	private String resourceUri;
