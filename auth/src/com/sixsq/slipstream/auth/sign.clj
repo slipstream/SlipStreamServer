@@ -5,8 +5,7 @@
             [com.sixsq.slipstream.auth.utils.config :as cf]
             [buddy.core.codecs :as co]
             [buddy.core.hash :as ha]
-            [clj-time.core :as t]
-            [clojure.tools.logging :as log]))
+            [clj-time.core :as t]))
 
 (def default-nb-minutes-expiry (* 7 24 60))
 (def signing-algorithm {:alg :rs256})
@@ -52,5 +51,4 @@
   ([token]
    (unsign-claims token "auth_pubkey.pem"))
   ([token pubkey-pem]
-   (log/info "will unsign token:" token) ;; TODO
    (jws/unsign token (public-key pubkey-pem) signing-algorithm)))

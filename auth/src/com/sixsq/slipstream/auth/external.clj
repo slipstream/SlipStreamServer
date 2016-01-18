@@ -20,7 +20,7 @@
   (log/info (str "Creating new SlipStream user with external user '" external-login "'"))
   (db/create-user! authn-method external-login external-email))
 
-(defn- match-external-user!
+(defn match-external-user!
   [authn-method external-login external-email]
   (if-let [user-name-mapped (db/find-username-by-authn authn-method external-login)]
     (mapped-user authn-method user-name-mapped)

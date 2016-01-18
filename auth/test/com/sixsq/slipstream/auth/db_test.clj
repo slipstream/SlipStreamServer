@@ -17,7 +17,8 @@
   (is (= "st" (db/create-user! "github" "st" "st@s.com")))
   (let [users-created (kc/select db/users)]
     (is (= 1 (count users-created)))
-    (is (= {:GITHUBLOGIN "st"
+    (is (= {:CYCLONELOGIN nil
+            :GITHUBLOGIN "st"
             :DELETED     false
             :EMAIL       "st@s.com"
             :ISSUPERUSER false
