@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.middleware.proxy-redirect
   (:require
     [clojure.tools.logging :as log]
-    [clojure.string :as str]
+    [superstring.core :as str]
 
     [puppetlabs.http.client.sync :as http]
     ;; [clj-http.client :as http]

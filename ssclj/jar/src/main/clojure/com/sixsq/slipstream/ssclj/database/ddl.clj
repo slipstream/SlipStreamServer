@@ -2,7 +2,7 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.java.jdbc :refer :all :as jdbc]
-    [clojure.string :refer [join split]]
+    [superstring.core :refer [join split]]
     [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 

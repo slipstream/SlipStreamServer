@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.cimi-filter
   (:refer-clojure :exclude [update])
   (:require
-    [clojure.string :refer [split]]
+    [superstring.core :refer [split]]
     [instaparse.core :as insta]
     [instaparse.transform :as it]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]

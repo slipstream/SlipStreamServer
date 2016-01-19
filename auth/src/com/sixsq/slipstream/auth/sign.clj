@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.auth.sign
-  (:require [buddy.sign.jws :as jws]
+  (:require [superstring.core :as s]
+            [buddy.sign.jws :as jws]
             [buddy.core.keys :as ks]
             [clojure.java.io :as io]
             [com.sixsq.slipstream.auth.utils.config :as cf]
@@ -22,7 +23,7 @@
   [secret]
   (-> (ha/sha512 secret)
       co/bytes->hex
-      clojure.string/upper-case))
+      s/upper-case))
 
 (defn- read-private-key
   [private-key-pem]

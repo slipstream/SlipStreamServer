@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.middleware.authn-info-header
   (:require 
-    [clojure.string                                             :as str]
+    [superstring.core                                             :as str]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]))
 
 ;; NOTE: ring uses lowercased values of header names!

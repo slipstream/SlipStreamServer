@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.usage.record-keeper
   (:require 
-    [clojure.string                                     :only [join]]
+    [superstring.core                                     :only [join]]
     [clojure.tools.logging                              :as log]
     [clojure.java.jdbc                                  :refer :all :as jdbc]
     [korma.core                                         :as kc]
