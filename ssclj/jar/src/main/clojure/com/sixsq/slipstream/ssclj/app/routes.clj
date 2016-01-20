@@ -61,8 +61,8 @@
 
     (POST uri-token   request (auth/build-token request))
 
-    (GET uri-github   request (gh/callback-github request (cf/property-value :upstream-server)))
-    (GET uri-cyclone  request (cy/callback-cyclone request (cf/property-value :upstream-server)))))
+    (GET uri-github   request (gh/callback-github request (cf/property-value :main-server)))
+    (GET uri-cyclone  request (cy/callback-cyclone request (cf/property-value :main-server)))))
 
 (def final-routes
   [

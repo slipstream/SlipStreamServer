@@ -12,8 +12,15 @@
  :token-nb-minutes-expiry 120
  :passphrase              "sl1pstre8m"
 
+ ;; Used by front server when redirecting (URL accessed only locally)
  :upstream-server         "http://localhost:8080"
- :auth-server             "http://localhost:8201"
 
+ ;; Used by external authentication providers
+ :main-server             "http://localhost:8080"
+
+ ;; Application must be registered on Github
+ ;; See https://github.com/settings/applications/new
+ ;; Homepage URL can be <SlipStream end point>
+ ;; The Authorization callback URL must be <SlipStream end point>/auth/callback-github
  :github-client-id        "cd03c88b13517f931f09"
  :github-client-secret    "6435cde7c22f0d543b07f13e311e0514c33460ad"}

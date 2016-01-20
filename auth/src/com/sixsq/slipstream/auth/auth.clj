@@ -27,7 +27,7 @@
 
 (defmethod login :cyclone
   [_]
-  (cy/login (cf/mandatory-property-value :upstream-server)))
+  (cy/login))
 
 (defn logout
   [_]

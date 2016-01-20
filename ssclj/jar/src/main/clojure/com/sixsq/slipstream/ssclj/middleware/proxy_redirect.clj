@@ -10,7 +10,8 @@
     [ring.middleware.cookies :refer [wrap-cookies]]
     [clj-time.core :refer [in-seconds]]
     [clj-time.format :refer [formatters unparse with-locale]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri :as buri])
+    [com.sixsq.slipstream.ssclj.middleware.base-uri :as buri]
+    [com.sixsq.slipstream.ssclj.util.config :as cf])
   (:import
     [java.io ByteArrayInputStream]
     [java.io InputStream]
@@ -72,17 +73,25 @@
   [s]
   (second (re-matches #"^(.*?)(?:/*)?$" s)))
 
+(defn- external?
+  "True when host of location is not the upstream server"
+  [location]
+  (not= (.getHost (URI. location))
+        (.getHost (URI. (cf/property-value :upstream-server)))))
+
 (defn update-location
   [location base-uri]
-  (let [uri (URI. location)
-        path (or (.getRawPath uri) "")
-        query (.getRawQuery uri)
-        fragment (.getRawFragment uri)]
-    (str (strip-trailing-slashes base-uri)
-         "/"
-         (if path (strip-leading-slashes path) "")
-         (if query (str "?" query) "")
-         (if fragment (str "#" fragment) ""))))
+  (if (external? location)
+    location
+    (let [uri (URI. location)
+          path (or (.getRawPath uri) "")
+          query (.getRawQuery uri)
+          fragment (.getRawFragment uri)]
+      (str (strip-trailing-slashes base-uri)
+           "/"
+           (if path (strip-leading-slashes path) "")
+           (if query (str "?" query) "")
+           (if fragment (str "#" fragment) "")))))
 
 (defn update-location-header
   [response base-uri]

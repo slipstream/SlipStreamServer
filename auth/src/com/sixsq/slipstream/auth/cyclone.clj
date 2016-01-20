@@ -12,7 +12,7 @@
 
 (defn- redirect_uri
   []
-  (str (cf/mandatory-property-value :auth-server) "/auth/callback-cyclone"))
+  (str (cf/mandatory-property-value :main-server) "/auth/callback-cyclone"))
 
 (defn- cyclone-code-url
   []
@@ -24,7 +24,7 @@
   (str cyclone-base-url "/token"))
 
 (defn login
-  [_]
+  []
   (log/info "Cyclone authentication.")
   (uh/response-redirect (cyclone-code-url)))
 
