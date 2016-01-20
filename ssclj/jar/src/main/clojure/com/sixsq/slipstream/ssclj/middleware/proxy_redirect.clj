@@ -10,7 +10,9 @@
     [ring.middleware.cookies :refer [wrap-cookies]]
     [clj-time.core :refer [in-seconds]]
     [clj-time.format :refer [formatters unparse with-locale]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri :as buri])
+    [com.sixsq.slipstream.ssclj.middleware.base-uri :as buri]
+    [ring.util.response :as r]
+    [clj-stacktrace.repl :as st])
   (:import
     [java.io ByteArrayInputStream]
     [java.io InputStream]
@@ -126,11 +128,27 @@
 
     (update-location-header response (buri/construct-base-uri request "/"))))
 
+(defn- error-message
+  [exception]
+  (str  "Error when contacting upstream server. SlipStream server may be stopped. Please contact administrator.\n"
+        "Detailed error message:\n"
+        (.getMessage exception)))
+
+(defn- error-response
+  [exception]
+  (-> exception
+      error-message
+      r/response
+      (r/status 500)))
+
 (defn wrap-proxy-redirect
   [handler except-uris host]
   (fn [request]
     (let [request-uri (:uri request)]
       (if (uri-starts-with? request-uri except-uris)
         (handler request)
-        (redirect host request-uri request)))))
-
+        (try
+          (redirect host request-uri request)
+          (catch Exception e
+            (log/error (st/pst-str e))
+            (error-response e)))))))
