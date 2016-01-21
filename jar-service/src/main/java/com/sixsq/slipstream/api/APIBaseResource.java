@@ -3,6 +3,7 @@ package com.sixsq.slipstream.api;
 
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.HtmlUtil;
+import org.apache.commons.lang.StringUtils;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
@@ -16,6 +17,9 @@ import org.restlet.resource.ResourceException;
 import org.restlet.util.Series;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -73,10 +77,16 @@ public abstract class APIBaseResource extends BaseResource {
     }
 
     private String getNameRoles() {
-        String userName = getUser().getName();
-        String roleAdminIfSuper = getUser().isSuper() ? " ADMIN" : "";
 
-        return userName + roleAdminIfSuper;
+        List<String> nameRoles = new ArrayList<>();
+
+        nameRoles.add(getUser().getName());
+        if(getUser().isSuper()) {
+            nameRoles.add("ADMIN");
+        }
+        nameRoles.addAll(Arrays.asList(StringUtils.split(getUser().getRoles(), ",")));
+
+        return StringUtils.join(nameRoles, " ");
     }
 
     protected abstract String uri();
