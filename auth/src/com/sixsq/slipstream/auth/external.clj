@@ -31,11 +31,12 @@
 
 (defn redirect-with-matched-user
   [authn-method external-login external-email redirect-server]
+  (if (and (not-empty external-login) (not-empty external-email))
+    (let [matched-user (match-external-user! authn-method external-login external-email)
+          token (sg/sign-claims {:com.sixsq.identifier matched-user
+                                 :exp                  (sg/expiry-timestamp)})]
 
-  (let [matched-user (match-external-user! authn-method external-login external-email)
-        token (sg/sign-claims {:com.sixsq.identifier matched-user
-                               :exp                  (sg/expiry-timestamp)})]
-
-    (-> (uh/response-redirect (str redirect-server "/dashboard"))
-        (assoc :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
-                                                        :path  "/"}}))))
+      (-> (uh/response-redirect (str redirect-server "/dashboard"))
+          (assoc :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
+                                                          :path  "/"}})))
+    (uh/response-redirect (str redirect-server "/login"))))

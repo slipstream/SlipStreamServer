@@ -56,7 +56,10 @@
 
       (log/debug "Github user-info " user-info)
 
-      (ex/redirect-with-matched-user :github (:login user-info) (retrieve-email user-info access-token) redirect-server))
+      (ex/redirect-with-matched-user :github
+                                     (:login user-info)
+                                     (retrieve-email user-info access-token)
+                                     redirect-server))
 
     (catch Exception e
       (log/error "Invalid Github authentication " e)
