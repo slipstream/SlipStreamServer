@@ -81,10 +81,12 @@ public abstract class APIBaseResource extends BaseResource {
         List<String> nameRoles = new ArrayList<>();
 
         nameRoles.add(getUser().getName());
-        if(getUser().isSuper()) {
+        if (getUser().isSuper()) {
             nameRoles.add("ADMIN");
         }
-        nameRoles.addAll(Arrays.asList(StringUtils.split(getUser().getRoles(), ",")));
+        if (getUser().getRoles() != null) {
+            nameRoles.addAll(Arrays.asList(StringUtils.split(getUser().getRoles(), ",")));
+        }
 
         return StringUtils.join(nameRoles, " ");
     }
