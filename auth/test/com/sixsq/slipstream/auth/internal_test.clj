@@ -1,10 +1,10 @@
-(ns com.sixsq.slipstream.auth.internal-authentication-test
+(ns com.sixsq.slipstream.auth.internal-test
   (:refer-clojure :exclude [update])
   (:require
     [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.test-helper :as th]
     [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.auth.internal-authentication :as ia]
+    [com.sixsq.slipstream.auth.internal :as ia]
     [com.sixsq.slipstream.auth.sign :as sg]))
 
 (defn fixture-delete-all
@@ -68,19 +68,19 @@
 
 (deftest test-check-token-when-invalid-token
   (th/add-user-for-test! valid-credentials)
-  (is (thrown? Exception (sg/check-token {:token "invalid token"}))))
+  (is (thrown? Exception (sg/unsign-claims {:token "invalid token"}))))
 
 (deftest test-check-token-when-valid-token-retrieves-claims
   (th/add-user-for-test! valid-credentials)
   (let [valid-token (-> (ia/create-token valid-credentials)
                         token-value)]
-    (is (= "super" (:com.sixsq.identifier (sg/check-token valid-token))))))
+    (is (= "super" (:com.sixsq.identifier (sg/unsign-claims valid-token))))))
 
 (deftest test-create-token-removes_password-from-token
   (th/add-user-for-test! valid-credentials)
   (let [valid-token (-> (ia/create-token valid-credentials)
                         token-value)]
-    (is (nil? (:password (sg/check-token valid-token))))))
+    (is (nil? (:password (sg/unsign-claims valid-token))))))
 
 (deftest password-encryption-compatible-with-slipstream
   (is (= "304D73B9607B5DFD48EAC663544F8363B8A03CAAD6ACE21B369771E3A0744AAD0773640402261BD5F5C7427EF34CC76A2626817253C94D3B03C5C41D88C64399"
@@ -93,18 +93,18 @@
                         token-value)
         claim-token (-> (ia/create-token claims valid-token)
                         token-value)]
-    (is (= (claims (sg/check-token claim-token))))))
+    (is (= (claims (sg/unsign-claims claim-token))))))
 
 (deftest test-users-by-email
   (th/add-user-for-test! {:user-name "jack"
-                   :password  "123456"
-                   :email     "jack@sixsq.com"})
+                          :password  "123456"
+                          :email     "jack@sixsq.com"})
   (th/add-user-for-test! {:user-name "joe"
-                   :password  "123456"
-                   :email     "joe@sixsq.com"})
+                          :password  "123456"
+                          :email     "joe@sixsq.com"})
   (th/add-user-for-test! {:user-name "joe-alias"
-                   :password  "123456"
-                   :email     "joe@sixsq.com"})
+                          :password  "123456"
+                          :email     "joe@sixsq.com"})
 
   (is (= []                   (db/find-usernames-by-email "unknown@xxx.com")))
   (is (= ["jack"]             (db/find-usernames-by-email "jack@sixsq.com")))
@@ -114,23 +114,23 @@
   (th/add-user-for-test! {:user-name     "joe-slipstream"
                           :password      "123456"
                           :email         "joe@sixsq.com"
-                          :authn-id      "joe"})
+                          :github-id      "joe"})
 
   (th/add-user-for-test! {:user-name     "jack-slipstream"
                           :password      "123456"
                           :email         "jack@sixsq.com"
-                          :authn-id      "jack"})
+                          :github-id      "jack"})
 
   (th/add-user-for-test! {:user-name     "alice-slipstream"
                           :password      "123456"
                           :email         "alice@sixsq.com"})
 
-  (is (nil? (db/find-username-by-authn "unknownid")))
-  (is (= "joe-slipstream" (db/find-username-by-authn "joe"))))
+  (is (nil? (db/find-username-by-authn :github "unknownid")))
+  (is (= "joe-slipstream" (db/find-username-by-authn :github "joe"))))
 
 (deftest test-users-by-authn-detect-inconsistent-data
   (dotimes [_ 2] (th/add-user-for-test! {:user-name     "joe-slipstream"
                                          :password      "123456"
                                          :email         "joe@sixsq.com"
-                                         :authn-id      "joe"}))
-  (is (thrown? Exception "joe-slipstream" (db/find-username-by-authn "joe"))))
+                                         :github-id      "joe"}))
+  (is (thrown? Exception "joe-slipstream" (db/find-username-by-authn :github "joe"))))

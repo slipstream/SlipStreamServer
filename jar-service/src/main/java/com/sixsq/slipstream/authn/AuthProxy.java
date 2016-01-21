@@ -24,6 +24,7 @@ public class AuthProxy {
 
     public static final String INTERNAL_AUTHENTICATION = "internal";
     public static final String GITHUB_AUTHENTICATION = "github";
+    public static final String CYCLONE_AUTHENTICATION = "cyclone";
 
     /**
      * POST to http://localhost:8201/auth/login with user-name, password and authn-method parameters

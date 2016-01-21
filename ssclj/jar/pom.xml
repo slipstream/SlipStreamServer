@@ -241,6 +241,9 @@
               </execution>
 
               <execution>
+                <configuration>
+                  <clojureOptions>-Dconfig-path=config-hsqldb-mem.edn -Dpassphrase=sl1pstre8m</clojureOptions>
+                </configuration>
                 <id>clojure-tests</id>
                 <goals>
                   <goal>test</goal>

@@ -8,7 +8,6 @@
     [korma.core :as kc]
     [com.sixsq.slipstream.auth.sign :as sg]))
 
-
 (defn- simple-surrounder
   [c]
   (fn sur [s]
@@ -38,6 +37,7 @@
                                           "PASSWORD" "VARCHAR(200)"
                                           "EMAIL" "VARCHAR(200)"
                                           "GITHUBLOGIN" "VARCHAR(200)"
+                                          "CYCLONELOGIN" "VARCHAR(200)"
                                           "CREATION" "TIMESTAMP"
                                           "DELETED" "BOOLEAN"
                                           "ISSUPERUSER" "BOOLEAN"
@@ -63,4 +63,4 @@
   (kc/insert db/users (kc/values {:NAME         (:user-name user)
                                   :PASSWORD     (sg/sha512 (:password user))
                                   :EMAIL        (:email user)
-                                  :GITHUBLOGIN  (:authn-id user)})))
+                                  :GITHUBLOGIN  (:github-id user)})))

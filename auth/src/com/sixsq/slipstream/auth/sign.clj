@@ -6,11 +6,8 @@
             [com.sixsq.slipstream.auth.utils.config :as cf]
             [buddy.core.codecs :as co]
             [buddy.core.hash :as ha]
-            [clj-time.core :as t]
-            [clojure.tools.logging :as log]))
+            [clj-time.core :as t]))
 
-(def auth-conf {:pubkey     "auth_pubkey.pem"
-                :privkey    "auth_privkey.pem"})
 (def default-nb-minutes-expiry (* 7 24 60))
 (def signing-algorithm {:alg :rs256})
 
@@ -28,26 +25,31 @@
       co/bytes->hex
       s/upper-case))
 
-(defn private-key
-  [auth-conf]
+(defn- read-private-key
+  [private-key-pem]
   (let [passphrase (cf/property-value :passphrase)
-        privkey (io/resource (:privkey auth-conf))]
+        privkey (io/resource private-key-pem)]
     (if (and passphrase privkey)
       (ks/private-key privkey passphrase)
       (throw (IllegalStateException. "Passphrase not defined or private key not accessible (must be in the classpath).")))))
 
-(defn public-key
-  [auth-conf]
-  (let [pubkey (io/resource (:pubkey auth-conf))]
+(defn- read-public-key
+  [public-key-pem]
+  (let [pubkey (io/resource public-key-pem)]
     (if pubkey
       (ks/public-key pubkey)
       (throw (IllegalStateException. "Public key not accessible (must be in the classpath).")))))
 
+(def public-key (memoize read-public-key))
+
+(def private-key (memoize read-private-key))
+
 (defn sign-claims
   [claims]
-  (jws/sign claims (private-key auth-conf) signing-algorithm))
+  (jws/sign claims (private-key "auth_privkey.pem") signing-algorithm))
 
-(defn check-token
-  [token]
-  (log/debug "will unsign token:" token)
-  (jws/unsign token (public-key auth-conf) signing-algorithm))
+(defn unsign-claims
+  ([token]
+   (unsign-claims token "auth_pubkey.pem"))
+  ([token pubkey-pem]
+   (jws/unsign token (public-key pubkey-pem) signing-algorithm)))
