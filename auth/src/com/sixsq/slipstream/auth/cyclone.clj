@@ -12,7 +12,7 @@
 
 (defn- redirect_uri
   []
-  (str (cf/mandatory-property-value :main-server) "/auth/callback-cyclone"))
+  (str (cf/mandatory-property-value :auth-server) "/auth/callback-cyclone"))
 
 (defn- cyclone-code-url
   []

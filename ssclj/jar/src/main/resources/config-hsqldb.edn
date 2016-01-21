@@ -16,6 +16,7 @@
  :upstream-server         "http://localhost:8080"
 
  ;; Used by external authentication providers
+ :auth-server             "http://localhost:8201"
  :main-server             "http://localhost:8080"
 
  ;; Application must be registered on Github

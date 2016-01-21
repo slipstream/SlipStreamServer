@@ -18,6 +18,9 @@
  ;; The following properties require adaptations
 
  ;; Used by external authentication providers
+ ;; auth-server and main-server typically contain same value
+ ;; when nginx is the front proxy server
+ :auth-server             "SlipStream URL"
  :main-server             "SlipStream URL"
 
  ;; Application must be registered on Github

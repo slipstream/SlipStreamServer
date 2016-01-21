@@ -17,7 +17,7 @@
 
 (defn- create-slipstream-user!
   [authn-method external-login external-email]
-  (log/info (str "Creating new SlipStream user with external user '" external-login "'"))
+  (log/info (str "Creating new SlipStream user with external (" authn-method ") user '" external-login "'"))
   (db/create-user! authn-method external-login external-email))
 
 (defn match-external-user!
@@ -39,4 +39,4 @@
       (-> (uh/response-redirect (str redirect-server "/dashboard"))
           (assoc :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
                                                           :path  "/"}})))
-    (uh/response-redirect (str redirect-server "/login"))))
+    (uh/response-redirect (str redirect-server "/login?flash-now-warning=auth-failed"))))
