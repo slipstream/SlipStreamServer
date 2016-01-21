@@ -14,6 +14,27 @@
       (json/read-str :key-fn keyword)
       (select-keys [:login :email])))
 
+(defn primary-or-verified
+  "Return primary verified email (if found) else fallbacks to any (non deterministic) verified email"
+  [emails]
+  (let [verified (filter :verified emails)]
+    (if-let [primary (first (filter :primary verified))]
+      (:email primary)
+      (:email (first verified)))))
+
+(defn- retrieve-private-email
+  [access-token]
+  (let [user-emails-response (http/get "https://api.github.com/user/emails"
+                               {:headers {"Authorization" (str "token " access-token)}})
+        user-emails (-> user-emails-response :body (json/read-str :key-fn keyword))]
+    (primary-or-verified user-emails)))
+
+(defn- retrieve-email
+  [user-info access-token]
+  (if-let [public-email (:email user-info)]
+    public-email
+    (retrieve-private-email access-token)))
+
 (defn callback-github
   [request redirect-server]
   (try
@@ -27,11 +48,16 @@
                            :body
                            (json/read-str :key-fn keyword)
                            :access_token)
+
           user-info-response (http/get "https://api.github.com/user"
                                        {:headers {"Authorization" (str "token " access-token)}})
+
           user-info (parse-github-user user-info-response)]
 
-      (ex/redirect-with-matched-user :github (:login user-info) (:email user-info) redirect-server))
+      (log/debug "Github user-info " user-info)
+
+      (ex/redirect-with-matched-user :github (:login user-info) (retrieve-email user-info access-token) redirect-server))
+
     (catch Exception e
       (log/error "Invalid Github authentication " e)
       (uh/response-redirect (str redirect-server "/dashboard")))))

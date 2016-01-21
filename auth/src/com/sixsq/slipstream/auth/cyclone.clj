@@ -43,7 +43,7 @@
                            (json/read-str :key-fn keyword)
                            :access_token)
           claims          (sg/unsign-claims access-token "cyclone_pubkey.pem")]
-
+      (log/debug "Cyclone claims " claims)
       (ex/redirect-with-matched-user :cyclone (:preferred_username claims) (:email claims) redirect-server))
     (catch Exception e
       (log/error "Invalid Cyclone authentication " e)
