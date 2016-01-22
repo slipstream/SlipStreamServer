@@ -57,7 +57,7 @@
       (log/debug "Github user-info " user-info)
 
       (ex/redirect-with-matched-user :github
-                                     (:login user-info)
+                                     (-> user-info :login ex/sanitize-login-name)
                                      (retrieve-email user-info access-token)
                                      redirect-server))
 

@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.auth.external
   (:require [clojure.tools.logging :as log]
+            [superstring.core :as s]
             [com.sixsq.slipstream.auth.utils.db :as db]
             [com.sixsq.slipstream.auth.sign :as sg]
             [com.sixsq.slipstream.auth.utils.http :as uh]))
@@ -40,3 +41,8 @@
           (assoc :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
                                                           :path  "/"}})))
     (uh/response-redirect (str redirect-server "/login?flash-now-warning=auth-failed"))))
+
+(defn sanitize-login-name
+  "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
+  [s]
+  (s/replace s #"[^a-zA-Z0-9_]" "_"))

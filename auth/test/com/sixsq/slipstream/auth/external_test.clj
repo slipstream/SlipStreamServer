@@ -63,3 +63,8 @@
 
     (match-external-user! :cyclone "st" "st@sixsq.com")
     (is (= [(assoc user :CYCLONELOGIN "st")] (kc/select db/users)))))
+
+(deftest test-sanitize-login-name
+  (is (= "st"           (sanitize-login-name "st")))
+  (is (= "Paul_Newman"  (sanitize-login-name "Paul Newman")))
+  (is (= "abc_def_123"  (sanitize-login-name "abc-def-123"))))
