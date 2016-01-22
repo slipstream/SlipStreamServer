@@ -28,6 +28,12 @@
   (log/info "Cyclone authentication.")
   (uh/response-redirect (cyclone-code-url)))
 
+(defn- login-name
+  [claims]
+  (if-let [name (:name claims)]
+    (ex/sanitize-login-name name)
+    (ex/sanitize-login-name (:preferred_username claims))))
+
 (defn callback-cyclone
   [request redirect-server]
   (try
@@ -44,7 +50,7 @@
                            :access_token)
           claims          (sg/unsign-claims access-token "cyclone_pubkey.pem")]
       (log/debug "Cyclone claims " claims)
-      (ex/redirect-with-matched-user :cyclone (:preferred_username claims) (:email claims) redirect-server))
+      (ex/redirect-with-matched-user :cyclone (login-name claims) (:email claims) redirect-server))
     (catch Exception e
       (log/error "Invalid Cyclone authentication " e)
       (uh/response-redirect (str redirect-server "/dashboard")))))
