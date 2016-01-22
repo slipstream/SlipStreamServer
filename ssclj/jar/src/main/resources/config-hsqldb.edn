@@ -17,7 +17,7 @@
 
  ;; Used by external authentication providers
  :auth-server             "http://localhost:8201"
- :main-server             "http://localhost:8080"
+ :main-server             "http://localhost:8201"
 
  ;; Application must be registered on Github
  ;; See https://github.com/settings/applications/new
