@@ -28,11 +28,13 @@
   (log/info "Cyclone authentication.")
   (uh/response-redirect (cyclone-code-url)))
 
-(defn- login-name
+(defn login-name
   [claims]
-  (if-let [name (:name claims)]
-    (ex/sanitize-login-name name)
-    (ex/sanitize-login-name (:preferred_username claims))))
+  (->> claims
+       ((juxt :name :preferred_username))
+       (remove empty?)
+       first
+       ex/sanitize-login-name))
 
 (defn callback-cyclone
   [request redirect-server]

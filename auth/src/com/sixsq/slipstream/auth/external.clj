@@ -45,4 +45,4 @@
 (defn sanitize-login-name
   "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
   [s]
-  (s/replace s #"[^a-zA-Z0-9_]" "_"))
+  (when s (s/replace s #"[^a-zA-Z0-9_]" "_")))
