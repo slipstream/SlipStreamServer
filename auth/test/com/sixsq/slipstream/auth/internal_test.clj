@@ -133,4 +133,4 @@
                                          :password      "123456"
                                          :email         "joe@sixsq.com"
                                          :github-id      "joe"}))
-  (is (thrown? Exception "joe-slipstream" (db/find-username-by-authn :github "joe"))))
+  (is (thrown-with-msg? Exception #"one result for joe" (db/find-username-by-authn :github "joe"))))
