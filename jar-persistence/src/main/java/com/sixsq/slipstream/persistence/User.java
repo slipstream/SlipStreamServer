@@ -577,6 +577,12 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	public void storeAuthnToken(String authnToken) {
+
+		boolean alreadyStored = authnToken != null && authnToken.equals(this.authnToken);
+		if (alreadyStored) {
+			return;
+		}
+
 		setAuthnToken(authnToken);
 		store();
 		logger.info("Stored authentication token: " + authnToken);
