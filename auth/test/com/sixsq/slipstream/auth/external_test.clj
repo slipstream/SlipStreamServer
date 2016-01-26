@@ -13,7 +13,7 @@
 
 (use-fixtures :each fixture-delete-all)
 
-(deftest match-new-user-github
+(deftest match-new-github-user-github
   (is (= [] (kc/select db/users)))
   (match-external-user! :github "st" "st@sixsq.com")
   (let [created-user (first (kc/select db/users))]
@@ -28,7 +28,7 @@
             :STATE       "ACTIVE"}
            (dissoc created-user :CREATION :PASSWORD)))))
 
-(deftest match-new-user-github
+(deftest match-new-cyclone-user-github
   (is (= [] (kc/select db/users)))
   (match-external-user! :cyclone "st" "st@sixsq.com")
   (let [created-user (first (kc/select db/users))]
