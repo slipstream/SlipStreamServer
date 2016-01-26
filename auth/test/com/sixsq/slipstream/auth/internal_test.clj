@@ -93,7 +93,7 @@
                         token-value)
         claim-token (-> (ia/create-token claims valid-token)
                         token-value)]
-    (is (= (claims (sg/unsign-claims claim-token))))))
+    (is (= claims (sg/unsign-claims claim-token)))))
 
 (deftest test-users-by-email
   (th/add-user-for-test! {:user-name "jack"
