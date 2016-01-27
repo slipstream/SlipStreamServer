@@ -42,9 +42,23 @@
       (.read rdr buf)
       buf)))
 
-(defn- slurp-body-binary
+(defn- not-delete?
   [request]
-    (if-let [len (when (and (not= :delete (:request-method request)) (:body request)) (get-in request [:headers "content-length"]))]
+  (not= :delete (:request-method request)))
+
+(defn- body?
+  [request]
+  (:body request))
+
+(defn- content-length
+  [request]
+  (get-in request [:headers "content-length"]))
+
+(defn slurp-body-binary
+  [request]
+  (when-let [len (and (not-delete? request)
+                      (body? request)
+                      (content-length request))]
     (-> request
         :body
         (slurp-binary (Integer/parseInt len))
