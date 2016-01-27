@@ -12,7 +12,7 @@
   (try
       (log/debug "Will check authentication token: " token)
       (-> token
-          sg/check-token
+          sg/unsign-claims
           clojure.walk/stringify-keys)
       (catch Exception e
         (do

@@ -74,17 +74,25 @@
   [s]
   (second (re-matches #"^(.*?)(?:/*)?$" s)))
 
+(defn- external?
+  "True when host of location is not the upstream server"
+  [location]
+  (not= (.getHost (URI. location))
+        (.getHost (URI. (cf/property-value :upstream-server)))))
+
 (defn update-location
   [location base-uri]
-  (let [uri (URI. location)
-        path (or (.getRawPath uri) "")
-        query (.getRawQuery uri)
-        fragment (.getRawFragment uri)]
-    (str (strip-trailing-slashes base-uri)
-         "/"
-         (if path (strip-leading-slashes path) "")
-         (if query (str "?" query) "")
-         (if fragment (str "#" fragment) ""))))
+  (if (external? location)
+    location
+    (let [uri (URI. location)
+          path (or (.getRawPath uri) "")
+          query (.getRawQuery uri)
+          fragment (.getRawFragment uri)]
+      (str (strip-trailing-slashes base-uri)
+           "/"
+           (if path (strip-leading-slashes path) "")
+           (if query (str "?" query) "")
+           (if fragment (str "#" fragment) "")))))
 
 (defn update-location-header
   [response base-uri]

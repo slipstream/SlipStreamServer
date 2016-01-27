@@ -33,6 +33,7 @@ import javax.mail.internet.InternetAddress;
 import javax.persistence.*;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -70,12 +71,17 @@ public class User extends Parameterized<User, UserParameter> {
 		NEW, ACTIVE, DELETED, SUSPENDED
 	}
 
+	private static final List<String> FORBIDDEN_ROLES = Arrays.asList("ADMIN", "USER", "ROLE", "ANON");
+
 	@Attribute(required = false)
 	@Column(length = 1000)
 	private String authnToken;
 
 	@Attribute(required = false)
 	private String githubLogin;
+
+	@Attribute(required = false)
+	private String cycloneLogin;
 
 	@Attribute
 	@Id
@@ -546,16 +552,37 @@ public class User extends Parameterized<User, UserParameter> {
 		this.roles = roles;
 	}
 
+	private void checkNoForbiddenRoles(String roles) throws ValidationException {
+		if (roles == null || roles.isEmpty()) {
+			return;
+		}
+		for (String role : roles.split(",")) {
+			String trimedUppercaseRole = role.trim().toUpperCase();
+			if (FORBIDDEN_ROLES.contains(trimedUppercaseRole)) {
+				throw new ValidationException("List of roles '" + roles + "' contains forbidden role : '" + trimedUppercaseRole + "'");
+			}
+		}
+	}
+
 	private void checkValidRoles(String roles) throws ValidationException {
 		String validRole = "(([a-zA-Z][\\w\\d._-]*))*";
 		String spacesCommaSpaces = "(\\s)*,(\\s)*";
 		boolean isValid = Pattern.matches(validRole + "(" + spacesCommaSpaces + validRole + ")*", roles);
+
 		if(!isValid){
 			throw new ValidationException("Invalid roles " + roles);
+		} else {
+			checkNoForbiddenRoles(roles);
 		}
 	}
 
 	public void storeAuthnToken(String authnToken) {
+
+		boolean alreadyStored = authnToken != null && authnToken.equals(this.authnToken);
+		if (alreadyStored) {
+			return;
+		}
+
 		setAuthnToken(authnToken);
 		store();
 		logger.info("Stored authentication token: " + authnToken);

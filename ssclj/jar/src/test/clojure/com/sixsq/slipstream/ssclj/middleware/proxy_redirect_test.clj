@@ -11,31 +11,35 @@
   (is (= {"edit" "true" "display" ""} (to-query-params "edit=true&display="))))
 
 (deftest check-update-location
-         (is (= "https://example.org/"
-                (update-location "http://localhost" "https://example.org")))
-         (is (= "https://example.org/appstore"
-                (update-location "http://localhost/appstore" "https://example.org")))
-         (is (= "https://example.org/appstore?query=3"
-                (update-location "http://localhost/appstore?query=3" "https://example.org")))
-         (is (= "https://example.org/appstore#myfrag"
-                (update-location "http://localhost/appstore#myfrag" "https://example.org")))
-         (is (= "https://example.org/"
-                (update-location "http://localhost" "https://example.org/")))
-         (is (= "https://example.org/appstore"
-                (update-location "http://localhost/appstore" "https://example.org/")))
-         (is (= "https://example.org/appstore?query=3"
-                (update-location "http://localhost/appstore?query=3" "https://example.org/")))
-         (is (= "https://example.org/appstore#myfrag"
-                (update-location "http://localhost/appstore#myfrag" "https://example.org/"))))
+  (is (= "https://example.org/"
+         (update-location "http://localhost" "https://example.org")))
+  (is (= "https://example.org/appstore"
+         (update-location "http://localhost/appstore" "https://example.org")))
+  (is (= "https://example.org/appstore?query=3"
+         (update-location "http://localhost/appstore?query=3" "https://example.org")))
+  (is (= "https://example.org/appstore#myfrag"
+         (update-location "http://localhost/appstore#myfrag" "https://example.org")))
+  (is (= "https://example.org/"
+         (update-location "http://localhost" "https://example.org/")))
+  (is (= "https://example.org/appstore"
+         (update-location "http://localhost/appstore" "https://example.org/")))
+  (is (= "https://example.org/appstore?query=3"
+         (update-location "http://localhost/appstore?query=3" "https://example.org/")))
+  (is (= "https://example.org/appstore#myfrag"
+         (update-location "http://localhost/appstore#myfrag" "https://example.org/"))))
+
+(deftest update-location-keeps-external-location
+  (let [external-location "http://github.com//login/oauth/authorize?client_id=123456&scope=user:email"]
+    (is (= external-location (update-location external-location "https://example.org")))))
 
 (deftest no-location-header-creation
-         (let [response {:headers {"dummy" "value"}}]
-              (is (= response
-                     (update-location-header response "http://myhost.example.org")))))
+  (let [response {:headers {"dummy" "value"}}]
+    (is (= response
+           (update-location-header response "http://myhost.example.org")))))
 
 (deftest location-header-updated
-         (let [response {:headers {"location" "http://myhost.example.org"
-                                   "host" "myhost.example.org"}}]
-              (is (= {:headers {"location" "http://myhost.example.org/"
-                                "host" "myhost.example.org"}}
-                     (update-location-header response "http://myhost.example.org")))))
+  (let [response {:headers {"location" "http://localhost"
+                            "host"     "myhost.example.org"}}]
+    (is (= {:headers {"location" "http://myhost.example.org/"
+                      "host"     "myhost.example.org"}}
+           (update-location-header response "http://myhost.example.org")))))

@@ -23,12 +23,19 @@ MODE?=dev
 # THEME?=helixnebula
 
 run: start-db start-ssclj-server
-	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" -Dpersistence.unit=hsqldb-schema -Dslipstream.ui.util.dev.mode=$(MODE) -Dslipstream.ui.util.localization.lang-default=$(LANG) -Dslipstream.ui.util.theme.current-theme=$(THEME)
+	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" \
+										-Dorg.eclipse.jetty.annotations.maxWait=120 \
+										-Dpersistence.unit=hsqldb-schema \
+										-Dslipstream.ui.util.dev.mode=$(MODE) \
+										-Dslipstream.ui.util.localization.lang-default=$(LANG) \
+										-Dslipstream.ui.util.theme.current-theme=$(THEME)
 
 clean-run: stop-ssclj-server stop-db clean-install-ui clean-install start-db start-ssclj-server run
 
 run-with-mem-db:
-	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" -Dpersistence.unit=hsqldb-mem-schema -Dslipstream.ui.util.dev.mode=$(MODE)
+	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" \
+										-Dpersistence.unit=hsqldb-mem-schema \
+										-Dslipstream.ui.util.dev.mode=$(MODE)
 
 new-ui: install-ui run
 
@@ -79,7 +86,10 @@ start-db: check-sqltool-jar-file
 ifeq ("$(SLIPSTREAM_DB_RUNNING)","yes")
 	$(info slipstream DB already running. Nothing to start.)
 else
-	java -cp ${SQLTOOL_FILENAME} org.hsqldb.server.Server --database.0 file:slipstreamdb --dbname.0 slipstream --database.1 file:sscljdb --dbname.1 ssclj &
+	java -cp ${SQLTOOL_FILENAME} org.hsqldb.server.Server --database.0 file:slipstreamdb \
+																												--dbname.0 slipstream \
+																												--database.1 file:sscljdb \
+																												--dbname.1 ssclj &
 endif
 
 stop-db: check-sqltool-jar-file
