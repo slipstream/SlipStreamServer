@@ -11,6 +11,7 @@
     [clj-time.core :refer [in-seconds]]
     [clj-time.format :refer [formatters unparse with-locale]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :as buri]
+    [com.sixsq.slipstream.ssclj.util.config :as cf]
     [ring.util.response :as r]
     [clj-stacktrace.repl :as st])
   (:import
