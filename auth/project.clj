@@ -8,7 +8,7 @@
   :resource-paths ["resources"
                    "test/resources"]
 
-  :dependencies [[org.clojure/clojure                       "1.7.0"]
+  :dependencies [[org.clojure/clojure                       "1.8.0"]
                  [org.clojure/data.json                     "0.2.6"]
                  [superstring                               "2.1.0"]
 

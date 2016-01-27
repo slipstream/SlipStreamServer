@@ -1,7 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.middleware.proxy-redirect-test
   (:require
+    [clojure.java.io :as io]
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.middleware.proxy-redirect :refer :all]))
+    [com.sixsq.slipstream.ssclj.middleware.proxy-redirect :refer :all])
+  (:import (java.io ByteArrayInputStream)))
 
 (deftest test-to-query-params
   (is (= {} (to-query-params "")))
@@ -43,3 +45,13 @@
     (is (= {:headers {"location" "http://myhost.example.org/"
                       "host"     "myhost.example.org"}}
            (update-location-header response "http://myhost.example.org")))))
+
+(deftest test-slurp-binary
+  (let [req {:body    (-> "a" .getBytes ByteArrayInputStream.)
+             :headers {"content-length" "1"}}]
+    (is (slurp-body-binary req))
+    (is (nil? (slurp-body-binary nil)))
+    (is (nil? (slurp-body-binary {})))
+    (is (nil? (slurp-body-binary (assoc req :request-method :delete))))
+    (is (nil? (slurp-body-binary (dissoc req :body))))))
+

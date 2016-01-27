@@ -38,7 +38,7 @@
     (-> request display-querystring)
     (-> request :body (or "no-body"))))
 
-(defn- log-request-response
+(defn log-request-response
   [request response]
   (log/info (display-request-response request response (System/currentTimeMillis))))
 

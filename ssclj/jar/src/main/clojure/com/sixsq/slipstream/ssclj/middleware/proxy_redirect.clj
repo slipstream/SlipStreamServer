@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.middleware.proxy-redirect
   (:require
     [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.middleware.logger :as ml]
     [superstring.core :as str]
 
     [puppetlabs.http.client.sync :as http]
@@ -43,9 +44,23 @@
       (.read rdr buf)
       buf)))
 
-(defn- slurp-body-binary
+(defn- not-delete?
   [request]
-  (if-let [len (when (:body request) (get-in request [:headers "content-length"]))]
+  (not= :delete (:request-method request)))
+
+(defn- body?
+  [request]
+  (not (nil? (:body request))))
+
+(defn- content-length
+  [request]
+  (get-in request [:headers "content-length"]))
+
+(defn slurp-body-binary
+  [request]
+  (when-let [len (and (not-delete? request)
+                      (body? request)
+                      (content-length request))]
     (-> request
         :body
         (slurp-binary (Integer/parseInt len))
@@ -129,13 +144,18 @@
                               :force-redirects              false
                               :follow-redirects             false
                               :connect-timeout-milliseconds 60000
-                              :socket-timeout-milliseconds  60000})]
+                              :socket-timeout-milliseconds  60000})
+
+        location-updated-response (update-location-header response (buri/construct-base-uri request "/"))]
 
     (log/debug "redirected URL = " redirected-url)
     (log/debug "sent headers: " forwarded-headers)
     (log/debug "response, status     = " (:status response))
 
-    (update-location-header response (buri/construct-base-uri request "/"))))
+    (ml/log-request-response request location-updated-response)
+
+    location-updated-response))
+
 
 (defn- error-message
   [exception]
