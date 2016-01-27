@@ -48,7 +48,7 @@
 
 (defn- body?
   [request]
-  (:body request))
+  (not (nil? (:body request))))
 
 (defn- content-length
   [request]
