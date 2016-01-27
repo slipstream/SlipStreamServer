@@ -54,25 +54,19 @@ public class CookieAuthenticator extends AuthenticatorBase {
 
 		Cookie cookie = CookieUtils.extractAuthnCookie(request);
 
-		logger.fine("will authenticate cookie " + cookie);
 		boolean isTokenValid = false;
-
 		if(CookieUtils.isMachine(cookie)) {
 			isTokenValid = CookieUtils.verifyAuthnCookie(cookie) == Verifier.RESULT_VALID;
-			logger.fine("Done calling verifyAuthnCookie: isTokenValid=" + isTokenValid);
 		} else {
-			logger.fine("Will call claimsInToken");
 			Map<String, String> claimsInToken = CookieUtils.claimsInToken(cookie);
 			isTokenValid = !claimsInToken.isEmpty();
 		}
 
 		if (isTokenValid) {
-			handleValid(request, cookie);
+			return handleValid(request, cookie);
 		} else {
-			handleNotValid(request, response);
+			return handleNotValid(request, response);
 		}
-
-		return isTokenValid;
 	}
 
 	private boolean handleValid(Request request, Cookie cookie) {
@@ -80,7 +74,6 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		String username = setClientInfo(request, cookie);
 
 		com.sixsq.slipstream.persistence.User user = null;
-
 		try {
 			user = com.sixsq.slipstream.persistence.User.loadByName(username);
 		} catch (ConfigurationException e) {
@@ -88,7 +81,6 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		} catch (ValidationException e) {
 			return false;
 		}
-
 		if(user == null) {
 			return false;
 		}
@@ -96,12 +88,9 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		setCloudServiceName(request, cookie);
 		setUserInRequest(user, request);
 
-		logger.fine("handle valid, cookie = " + cookie);
 		String tokenInCookie = CookieUtils.tokenInCookie(cookie);
 		if(tokenInCookie != null) {
-			logger.fine("handle valid, tokenInCookie = " + tokenInCookie);
 			user.storeAuthnToken(tokenInCookie);
-			logger.fine("user.authnToken = " + user.getAuthnToken());
 		}
 
 		if (!CookieUtils.isMachine(cookie)) {
@@ -111,7 +100,7 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		return true;
 	}
 
-	private void handleNotValid(Request request, Response response) {
+	private boolean handleNotValid(Request request, Response response) {
 		CookieUtils.removeAuthnCookie(response);
 
 		List<MediaType> supported = new ArrayList<MediaType>();
@@ -131,6 +120,8 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		} else {
 			response.setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
 		}
+
+		return false;
 	}
 
 	private String setClientInfo(Request request, Cookie cookie) {
