@@ -46,20 +46,24 @@
     (-> request display-querystring)
     (-> request :body (or "no-body"))))
 
-(defn- loggable?
+(defn- log-level
   [request]
   (let [uri (:uri request)]
-    (not (re-matches #".*(?:\.js|\.css|\.png|\.woff|\.svg)$" uri))))
+    (if (re-matches #".*(?:\.js|\.css|\.png|\.woff|\.woff2|\.svg)$" uri)
+      :debug
+      :info)))
 
-(defn log-response
+(defn- log-response
   [request response start]
-  (when (loggable? request)
-    (log/info (display-response request response start (System/currentTimeMillis)))))
+  (log/log
+    (log-level request)
+    (display-response request response start (System/currentTimeMillis))))
 
-(defn log-request
+(defn- log-request
   [request]
-  (when (loggable? request)
-    (log/info (display-request request))))
+  (log/log
+    (log-level request)
+    (display-request request)))
 
 (defn wrap-logger
   "Logs both request and response e.g:
