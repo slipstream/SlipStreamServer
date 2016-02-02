@@ -1,14 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.middleware.proxy-redirect
   (:require
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.middleware.logger :as ml]
     [superstring.core :as str]
 
     ;; [puppetlabs.http.client.sync :as http]
-    ;; [clj-http.client :as http]
-    [aleph.http :as http]
+    [clj-http.client :as http]
+    ;; [aleph.http :as http]
 
-    [ring.middleware.cookies :refer [wrap-cookies]]
     [clj-time.core :refer [in-seconds]]
     [clj-time.format :refer [formatters unparse with-locale]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :as buri]
@@ -24,6 +22,7 @@
 ;; Inspired by : https://github.com/tailrecursion/ring-proxy
 
 (def ^:const location-header-path [:headers "location"])
+(def ^:const cookies-path         [:cookies "com.sixsq.slipstream.cookie"])
 
 (defn- uri-starts-with?
   [uri prefixes]
@@ -90,6 +89,13 @@
     (update-in response location-header-path #(update-location % base-uri))
     response))
 
+(defn clean-cookies
+  [response]
+  (if (get-in response cookies-path)
+    ;; Note that :expires not considered as valid attribute
+    (update-in response cookies-path #(select-keys % [:value :domain :max-age :path :secure :http-only]))
+    response))
+
 ;; NOTE: this method uses the synchronous calls for the http client.  The persistent
 ;; asynchronous client appears to either be caching credentials (allowing inappropriate
 ;; reuse by different users) or not to be thread-safe.
@@ -109,14 +115,17 @@
 
         request-body        (slurp-body-binary request)
 
-        response            (->
-                               @(request-fn redirected-url
+        response            (-> (request-fn redirected-url
                                        {:query-params                 (:params request)
                                         :body                         request-body
                                         :headers                      forwarded-headers
 
+                                        :socket-timeout               60000
+                                        :conn-timeout                 60000
+
                                         :connection-timeout           60000
                                         :request-timeout              60000
+
                                         :follow-redirects?            false
                                         :pool-timeout                 60000
 
@@ -128,8 +137,8 @@
                                         ;:connect-timeout-milliseconds 60000
                                         ;:socket-timeout-milliseconds  60000
                                         })
-                                (update-location-header (buri/construct-base-uri request "/")))]
-
+                                (update-location-header (buri/construct-base-uri request "/"))
+                                clean-cookies)]
     response))
 
 (defn- error-message

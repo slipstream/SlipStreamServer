@@ -63,9 +63,12 @@
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (instrument default-registry)
+
       (wrap-proxy-redirect ["/api" "/auth"] (cf/property-value :upstream-server))
+
       wrap-cookies
-      wrap-logger))
+      wrap-logger
+      ))
 
 
 (defn start

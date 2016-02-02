@@ -40,20 +40,27 @@
   [request response current-time-millis]
   (display-space-separated
     (-> response :status)
-    (-> request (display-elapsed-time-millis current-time-millis))
+    (-> response (display-elapsed-time-millis current-time-millis))
     (-> request :request-method name (.toUpperCase))
     (-> request :uri)
     (-> request display-authn-info)
     (-> request display-querystring)
     (-> request :body (or "no-body"))))
 
+(defn- loggable?
+  [request]
+  (let [uri (:uri request)]
+    (not (re-matches #".*(?:\.js|\.css|\.png|\.woff|\.svg)$" uri))))
+
 (defn log-request-response
   [request response]
-  (log/info (display-request-response request response (System/currentTimeMillis))))
+  (when (loggable? request)
+    (log/info (display-request-response request response (System/currentTimeMillis)))))
 
 (defn log-request
   [request]
-  (log/info (display-request request)))
+  (when (loggable? request)
+    (log/info (display-request request))))
 
 (defn wrap-logger
   "Logs both request and response e.g:
