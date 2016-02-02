@@ -19,9 +19,8 @@
     (str "[" to-display "]")))
 
 (defn- display-elapsed-time-millis
-  [request current-time-millis]
-  (when-let [logger-start (:logger-start request)]
-    (str "(" (- current-time-millis logger-start) " ms)")))
+  [start current-time-millis]
+  (str "(" (- current-time-millis start) " ms)"))
 
 (defn- display-space-separated
   [& messages]
@@ -36,11 +35,11 @@
     (-> request display-querystring)
     (-> request :body (or "no-body"))))
 
-(defn display-request-response
-  [request response current-time-millis]
+(defn display-response
+  [request response start current-time-millis]
   (display-space-separated
     (-> response :status)
-    (-> response (display-elapsed-time-millis current-time-millis))
+    (display-elapsed-time-millis start current-time-millis)
     (-> request :request-method name (.toUpperCase))
     (-> request :uri)
     (-> request display-authn-info)
@@ -52,10 +51,10 @@
   (let [uri (:uri request)]
     (not (re-matches #".*(?:\.js|\.css|\.png|\.woff|\.svg)$" uri))))
 
-(defn log-request-response
-  [request response]
+(defn log-response
+  [request response start]
   (when (loggable? request)
-    (log/info (display-request-response request response (System/currentTimeMillis)))))
+    (log/info (display-response request response start (System/currentTimeMillis)))))
 
 (defn log-request
   [request]
@@ -70,9 +69,7 @@
   [handler]
   (fn [request]
     (log-request request)
-    (let [response
-          (-> request
-              (assoc :logger-start (System/currentTimeMillis))
-              handler)]
-      (log-request-response request response)
+    (let [start       (System/currentTimeMillis)
+          response    (handler request)]
+      (log-response request response start)
       response)))
