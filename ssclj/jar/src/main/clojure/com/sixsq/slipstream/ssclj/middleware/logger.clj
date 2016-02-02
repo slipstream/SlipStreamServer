@@ -27,6 +27,15 @@
   [& messages]
   (apply str (str/join " " messages)))
 
+(defn display-request
+  [request]
+  (display-space-separated
+    (-> request :request-method name (.toUpperCase))
+    (-> request :uri)
+    (-> request display-authn-info)
+    (-> request display-querystring)
+    (-> request :body (or "no-body"))))
+
 (defn display-request-response
   [request response current-time-millis]
   (display-space-separated
@@ -41,6 +50,10 @@
 (defn log-request-response
   [request response]
   (log/info (display-request-response request response (System/currentTimeMillis))))
+
+(defn log-request
+  [request]
+  (log/info (display-request request)))
 
 (defn wrap-logger
   "Logs elements from request and response. e.g:

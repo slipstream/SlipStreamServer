@@ -50,8 +50,8 @@
   (let [req {:body    (-> "a" .getBytes ByteArrayInputStream.)
              :headers {"content-length" "1"}}]
     (is (slurp-body-binary req))
+    (is (slurp-body-binary (assoc req :request-method :delete)))
     (is (nil? (slurp-body-binary nil)))
     (is (nil? (slurp-body-binary {})))
-    (is (nil? (slurp-body-binary (assoc req :request-method :delete))))
     (is (nil? (slurp-body-binary (dissoc req :body))))))
 
