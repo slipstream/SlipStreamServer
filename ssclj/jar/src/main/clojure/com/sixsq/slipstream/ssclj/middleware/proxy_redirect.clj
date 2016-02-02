@@ -56,22 +56,6 @@
         (slurp-binary (Integer/parseInt len))
         ByteArrayInputStream.)))
 
-(defn- split-equals
-  [key-val]
-  (let [index-equals (.indexOf key-val "=")
-        len (count key-val)]
-    (if (> index-equals -1)
-      [(.substring key-val 0 index-equals)
-       (.substring key-val (inc index-equals) len)]
-      [])))
-
-(defn to-query-params
-  [query-string]
-  (if (nil? query-string)
-    {}
-    (let [kvs (str/split query-string #"&")]
-      (into {} (remove empty? (map split-equals kvs))))))
-
 (defn strip-leading-slashes
   [s]
   (second (re-matches #"^(?:/*)?(.*)$" s)))
@@ -112,44 +96,41 @@
 (defn- redirect
   [host request-uri request]
 
-  (let [redirected-url  (build-url host request-uri (:query-string request))
+  (let [redirected-url      (build-url host request-uri (:query-string request))
 
-        request-fn (case (:request-method request)
-                     :get     http/get
-                     :head    http/head
-                     :post    http/post
-                     :delete  http/delete
-                     :put     http/put)
+        request-fn          (case (:request-method request)
+                              :get     http/get
+                              :head    http/head
+                              :post    http/post
+                              :delete  http/delete
+                              :put     http/put)
 
-        forwarded-headers (-> request
-                              :headers
-                              (dissoc "content-length"))
+        forwarded-headers   (-> request :headers (dissoc "content-length"))
 
-        query-params      (merge (to-query-params (:query-string request)) (:params request))
+        request-body        (slurp-body-binary request)
 
-        response (request-fn redirected-url
-                             {:query-params                 query-params
-                              :body                         (slurp-body-binary request)
-                              :headers                      forwarded-headers
+        response            (->
+                               @(request-fn redirected-url
+                                       {:query-params                 (:params request)
+                                        :body                         request-body
+                                        :headers                      forwarded-headers
 
-                              :connection-timeout           60000
-                              :request-timeout              60000
-                              :follow-redirects?            false
-                              :pool-timeout                 60000
+                                        :connection-timeout           60000
+                                        :request-timeout              60000
+                                        :follow-redirects?            false
+                                        :pool-timeout                 60000
 
-                              ; puppet-labs configuration
-                              ;:force-redirects              false
-                              ;:follow-redirects             false
-                              ;:connect-timeout-milliseconds 60000
-                              ;:socket-timeout-milliseconds  60000
-                              })
+                                        :throw-exceptions             false
 
-        location-updated-response (update-location-header @response (buri/construct-base-uri request "/"))]
+                                        ; puppet-labs configuration
+                                        ;:force-redirects              false
+                                        ;:follow-redirects             false
+                                        ;:connect-timeout-milliseconds 60000
+                                        ;:socket-timeout-milliseconds  60000
+                                        })
+                                (update-location-header (buri/construct-base-uri request "/")))]
 
-    (ml/log-request-response request location-updated-response)
-
-    location-updated-response))
-
+    response))
 
 (defn- error-message
   [exception]
@@ -174,7 +155,6 @@
           (redirect host request-uri request)
           (catch Exception e
             (if-let [response-in-ex (ex-data e)]
-              ;; FIXME work-around to aleph sending exception instead of regular responses
               response-in-ex
               (do
                 (log/error (st/pst-str e))

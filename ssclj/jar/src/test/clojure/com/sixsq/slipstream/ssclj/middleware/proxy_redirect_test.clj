@@ -5,13 +5,6 @@
     [com.sixsq.slipstream.ssclj.middleware.proxy-redirect :refer :all])
   (:import (java.io ByteArrayInputStream)))
 
-(deftest test-to-query-params
-  (is (= {} (to-query-params "")))
-  (is (= {} (to-query-params nil)))
-  (is (= {"edit" "true"} (to-query-params "edit=true")))
-  (is (= {"edit" "true" "display" "none"} (to-query-params "edit=true&display=none")))
-  (is (= {"edit" "true" "display" ""} (to-query-params "edit=true&display="))))
-
 (deftest check-update-location
   (is (= "https://example.org/"
          (update-location "http://localhost" "https://example.org")))

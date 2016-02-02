@@ -56,11 +56,16 @@
   (log/info (display-request request)))
 
 (defn wrap-logger
-  "Logs elements from request and response. e.g:
-   2015-09-11 13:37:04,619 INFO  - 200 (125 ms) :get /api/usage [bob ADMIN] ?$first=1&$last=20 no-body
+  "Logs both request and response e.g:
+  2016-02-02 11:32:19,310 INFO  - GET /vms [no-authn-info] ?cloud=&offset=0&limit=20&moduleResourceUri=&activeOnly=1 no-body
+  2016-02-02 11:32:19,510 INFO  - 200 (200 ms) GET /vms [no-authn-info] ?cloud=&offset=0&limit=20&moduleResourceUri=&activeOnly=1 no-body
   "
   [handler]
   (fn [request]
-    (let [response (handler request)]
+    (log-request request)
+    (let [response
+          (-> request
+              (assoc :logger-start (System/currentTimeMillis))
+              handler)]
       (log-request-response request response)
       response)))
