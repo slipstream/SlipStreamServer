@@ -49,7 +49,7 @@
 (defn- log-level
   [request]
   (let [uri (:uri request)]
-    (if (re-matches #".*(?:\.js|\.css|\.png|\.woff|\.woff2|\.svg)$" uri)
+    (if (re-matches #".*(?:\.js|\.css|\.png|\.woff|\.woff2|\.svg|\.ttf)$" uri)
       :debug
       :info)))
 

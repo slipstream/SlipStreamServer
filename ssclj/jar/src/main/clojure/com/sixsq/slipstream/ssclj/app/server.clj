@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.app.server
   (:require
     [clojure.tools.logging :as log]
-    [compojure.handler :as handler]
 
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params :refer [wrap-params]]
@@ -21,15 +20,12 @@
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
-    [com.sixsq.slipstream.ssclj.middleware.proxy-redirect :refer [wrap-proxy-redirect]]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
-    [com.sixsq.slipstream.ssclj.util.config :as cf]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
 
 ;; FIXME: make this dynamic depending on the service configuration
 (defn set-db-impl
@@ -63,13 +59,8 @@
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (instrument default-registry)
-
-      (wrap-proxy-redirect ["/api" "/auth"] (cf/property-value :upstream-server))
-
       wrap-cookies
-      wrap-logger
-      ))
-
+      wrap-logger))
 
 (defn start
   "Starts the server and returns a function that when called, will
