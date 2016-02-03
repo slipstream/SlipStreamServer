@@ -19,35 +19,61 @@
     (str "[" to-display "]")))
 
 (defn- display-elapsed-time-millis
-  [request current-time-millis]
-  (when-let [logger-start (:logger-start request)]
-    (str "(" (- current-time-millis logger-start) " ms)")))
+  [start current-time-millis]
+  (str "(" (- current-time-millis start) " ms)"))
 
 (defn- display-space-separated
   [& messages]
   (apply str (str/join " " messages)))
 
-(defn display-request-response
-  [request response current-time-millis]
+(defn display-request
+  [request]
   (display-space-separated
-    (-> response :status)
-    (-> request (display-elapsed-time-millis current-time-millis))
     (-> request :request-method name (.toUpperCase))
     (-> request :uri)
     (-> request display-authn-info)
     (-> request display-querystring)
     (-> request :body (or "no-body"))))
 
-(defn log-request-response
-  [request response]
-  (log/info (display-request-response request response (System/currentTimeMillis))))
+(defn display-response
+  [request response start current-time-millis]
+  (display-space-separated
+    (-> response :status)
+    (display-elapsed-time-millis start current-time-millis)
+    (-> request :request-method name (.toUpperCase))
+    (-> request :uri)
+    (-> request display-authn-info)
+    (-> request display-querystring)
+    (-> request :body (or "no-body"))))
+
+(defn- log-level
+  [request]
+  (let [uri (:uri request)]
+    (if (re-matches #".*(?:\.js|\.css|\.png|\.woff|\.woff2|\.svg|\.ttf)$" uri)
+      :debug
+      :info)))
+
+(defn- log-response
+  [request response start]
+  (log/log
+    (log-level request)
+    (display-response request response start (System/currentTimeMillis))))
+
+(defn- log-request
+  [request]
+  (log/log
+    (log-level request)
+    (display-request request)))
 
 (defn wrap-logger
-  "Logs elements from request and response. e.g:
-   2015-09-11 13:37:04,619 INFO  - 200 (125 ms) :get /api/usage [bob ADMIN] ?$first=1&$last=20 no-body
+  "Logs both request and response e.g:
+  2016-02-02 11:32:19,310 INFO  - GET /vms [no-authn-info] ?cloud=&offset=0&limit=20&moduleResourceUri=&activeOnly=1 no-body
+  2016-02-02 11:32:19,510 INFO  - 200 (200 ms) GET /vms [no-authn-info] ?cloud=&offset=0&limit=20&moduleResourceUri=&activeOnly=1 no-body
   "
   [handler]
   (fn [request]
-    (let [response (handler request)]
-      (log-request-response request response)
+    (log-request request)
+    (let [start       (System/currentTimeMillis)
+          response    (handler request)]
+      (log-response request response start)
       response)))

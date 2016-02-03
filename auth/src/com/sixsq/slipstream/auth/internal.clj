@@ -6,7 +6,9 @@
 
     [com.sixsq.slipstream.auth.sign :as sg]
     [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.auth.utils.http :as uh]))
+    [com.sixsq.slipstream.auth.utils.http :as uh])
+  (:import (java.util Date TimeZone)
+           (java.text SimpleDateFormat)))
 
 (defn- extract-credentials
   [request]
@@ -57,6 +59,7 @@
 
 (defn login
   [request]
+
   (log/info "Internal authentication.")
   (let [credentials  (extract-credentials request)
         [ok? token]  (create-token credentials)]
@@ -65,10 +68,19 @@
       (response-token-ok token)
       (uh/response-forbidden))))
 
+(def ^:private sdf
+  (doto (SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss z")
+        (.setTimeZone (TimeZone/getTimeZone "GMT"))))
+
+(defn now-gmt
+  []
+  (.format sdf (Date.)))
+
 (defn logout
   []
   (log/info "Logout Internal authentication")
   (-> (uh/response 200)
-      (assoc :cookies {"com.sixsq.slipstream.cookie" {:value    "INVALID"
-                                                      :path     "/"
-                                                      :max-age  0}})))
+      (assoc :cookies {"com.sixsq.slipstream.cookie" {:value   "INVALID"
+                                                      :path    "/"
+                                                      :max-age 0
+                                                      :expires (now-gmt)}})))

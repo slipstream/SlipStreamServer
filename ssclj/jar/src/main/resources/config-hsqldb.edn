@@ -17,11 +17,11 @@
 
  ;; Used by external authentication providers
  :auth-server             "http://localhost:8201"
- :main-server             "http://localhost:8201"
+ :main-server             "http://localhost:8080"
 
  ;; Application must be registered on Github
  ;; See https://github.com/settings/applications/new
  ;; Homepage URL can be <SlipStream end point>
  ;; The Authorization callback URL must be <SlipStream end point>/auth/callback-github
  :github-client-id        "cd03c88b13517f931f09"
- :github-client-secret    "6435cde7c22f0d543b07f13e311e0514c33460ad"}
+ :github-client-secret    "d7c2b7aa21deaea90a311074e49e6fa193b6fb35"}
