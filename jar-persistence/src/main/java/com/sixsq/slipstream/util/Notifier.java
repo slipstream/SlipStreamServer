@@ -78,6 +78,16 @@ public class Notifier {
 		return sendNotification(cfg, email, message, false);
 	}
 
+	private static void logEmailDetails(InternetAddress email, boolean isHTML, String message) {
+		String notificationType = isHTML ? "HTML " : "";
+		logger.info(String.format("sending %snotification to %s", notificationType, email));
+
+		if(!isHTML) {
+			logger.info("Message:");
+			logger.info(message);
+		}
+	}
+
 	private static boolean sendNotification(ServiceConfiguration cfg,
 			InternetAddress email, String message, boolean isHTML) {
 
@@ -89,8 +99,7 @@ public class Notifier {
 			Session session = createSmtpSession(cfg);
 			String password = getMailPassword(cfg);
 
-            String logmsg = String.format("sending notification to %s%nMessage: %s%n", email, message);
-			logger.info(logmsg);
+			logEmailDetails(email, isHTML, message);
 
 			Message msg = new MimeMessage(session);
 			msg.setFrom(admin);
