@@ -24,20 +24,21 @@
 (defn match-external-user!
   [authn-method external-login external-email]
   (if-let [user-name-mapped (db/find-username-by-authn authn-method external-login)]
-    (mapped-user authn-method user-name-mapped)
+    [(mapped-user authn-method user-name-mapped) "/dashboard"]
     (let [user-names-same-email (db/find-usernames-by-email external-email)]
       (if (empty? user-names-same-email)
-        (create-slipstream-user! authn-method external-login external-email)
-        (map-slipstream-user! authn-method (first user-names-same-email) external-login)))))
+        (let [name-new-user (create-slipstream-user! authn-method external-login external-email)]
+          [name-new-user (format "/user/%s?edit=true" name-new-user)])
+        [(map-slipstream-user! authn-method (first user-names-same-email) external-login) "/dashboard"]))))
 
 (defn redirect-with-matched-user
   [authn-method external-login external-email redirect-server]
   (if (and (not-empty external-login) (not-empty external-email))
-    (let [matched-user (match-external-user! authn-method external-login external-email)
-          token (sg/sign-claims {:com.sixsq.identifier matched-user
-                                 :exp                  (sg/expiry-timestamp)})]
+    (let [[matched-user redirect-url] (match-external-user! authn-method external-login external-email)
+          token                       (sg/sign-claims {:com.sixsq.identifier matched-user
+                                                       :exp                  (sg/expiry-timestamp)})]
 
-      (-> (uh/response-redirect (str redirect-server "/dashboard"))
+      (-> (uh/response-redirect (str redirect-server redirect-url))
           (assoc :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
                                                           :path  "/"}})))
     (uh/response-redirect (str redirect-server "/login?flash-now-warning=auth-failed"))))
