@@ -263,6 +263,7 @@
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd${slipstream.edition}</require>
             <require>slipstream-client${slipstream.edition} &gt;= 1.3</require>
+            <require>slipstream-client-clojure${slipstream.edition}</require>
             <require>slipstream-ssclj${slipstream.edition}</require>
             <require>libcloud-slipstream-downloads${slipstream.edition}</require>
           </requires>
