@@ -45,7 +45,11 @@ public class Launcher {
 			sl.run();
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			run = Run.abort(ex.getMessage(), run.getUuid());
+			String message = ex.getMessage();
+			if (message == null) {
+				message = ex.toString();
+			}
+			run = Run.abort(message, run.getUuid());
 			run = run.store();
 		}
 		return run;

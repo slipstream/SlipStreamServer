@@ -78,8 +78,7 @@ public class Terminator {
 
 	}
 
-	public static void terminate(String runResourceUri) throws ValidationException,
-			CannotAdvanceFromTerminalStateException, InvalidStateException {
+	public static void terminate(String runResourceUri) throws SlipStreamException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 
@@ -102,17 +101,12 @@ public class Terminator {
 		em.close();
 	}
 
-	private static void terminateInstances(Run run, User user) throws ValidationException {
+	private static void terminateInstances(Run run, User user) throws SlipStreamException {
 		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
 
 		for (String cloudServiceName : run.getCloudServiceNamesList()) {
 			Connector connector = ConnectorFactory.getConnector(cloudServiceName);
-			try {
-				connector.terminate(run, user);
-			} catch (SlipStreamException e) {
-				throw new ResourceException(
-						Status.CLIENT_ERROR_CONFLICT, "Failed terminating VMs", e);
-			}
+			connector.terminate(run, user);
 		}
 	}
 
