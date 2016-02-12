@@ -181,6 +181,15 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 	}
 
 	protected void putMandatoryParameter(String name, String description,
+										 String value, String instructions, int order) throws ValidationException {
+		S parameter = createParameter(name, null, description, true);
+		parameter.setValue(value);
+		parameter.setInstructions(instructions);
+		parameter.setOrder(order);
+		assignParameter(parameter);
+	}
+
+	protected void putMandatoryParameter(String name, String description,
 			int order) throws ValidationException {
 		S parameter = createParameter(name, null, description, true);
 		parameter.setOrder(order);
