@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-record-schema-test
-  (require
+  (:require
     [clojure.test                                       :refer :all]
     [com.sixsq.slipstream.ssclj.resources.usage-record  :refer :all]
     [com.sixsq.slipstream.ssclj.resources.test-utils    :as tu]))

@@ -48,7 +48,10 @@
   (s/constrained NonBlankString u/valid-timestamp? 'valid-timestamp?))
 
 (def OptionalTimestamp
-  (s/either BlankString Timestamp))
+  (s/constrained s/Str (fn [x] (or (str/blank? x) (u/valid-timestamp? x))) 'valid-timestamp-or-blank?))
+
+(def KeywordOrString
+  (s/pred (fn [x] (or (keyword? x) (string? x))) 'keyword-or-string?))
 
 ;;
 ;; schema definitions for common attributes
@@ -68,7 +71,7 @@
 
 (def Properties
   (s/constrained
-    {(s/either s/Keyword s/Str) s/Str}
+    {KeywordOrString s/Str}
     seq 'not-empty?))
 
 ;;
