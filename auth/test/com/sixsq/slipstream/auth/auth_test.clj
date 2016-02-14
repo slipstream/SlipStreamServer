@@ -29,6 +29,6 @@
         cookies (get-in logout-response [:cookies "com.sixsq.slipstream.cookie"])]
     (is (= 200 (:status logout-response)))
     (is (= "INVALID" (:value cookies)))
-    (is (= 0 (:max-age cookies)))))
+    (is (zero? (:max-age cookies)))))
 
 

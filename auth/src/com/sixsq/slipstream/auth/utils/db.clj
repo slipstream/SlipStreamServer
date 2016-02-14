@@ -27,10 +27,9 @@
 (defn find-usernames-by-email
   [email]
   (init)
-  (->> (kc/select users
-                  (kc/fields [:NAME])
-                  (kc/where {:EMAIL email}))
-       (map :NAME)))
+  (map
+    :NAME
+    (kc/select users (kc/fields [:NAME]) (kc/where {:EMAIL email}))))
 
 (defn- column-name
   [authn-method]
@@ -52,8 +51,7 @@
                    (kc/where {(column-keyword authn-method) authn-id}))]
     (if (> (count matched-users) 1)
       (throw (Exception. (str "There should be only one result for " authn-id)))
-      (-> (first matched-users)
-          :NAME))))
+      (:NAME (first matched-users)))))
 
 (defn update-user-authn-info
   [authn-method slipstream-username authn-id]
@@ -83,8 +81,7 @@
 
 (defn- existing-user-names
   []
-  (->> (kc/select users (kc/fields [:NAME]))
-       (map :NAME)))
+  (map :NAME (kc/select users (kc/fields [:NAME]))))
 
 (defn random-password
   []

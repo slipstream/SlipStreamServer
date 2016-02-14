@@ -72,14 +72,12 @@
 
 (deftest test-check-token-when-valid-token-retrieves-claims
   (th/add-user-for-test! valid-credentials)
-  (let [valid-token (-> (ia/create-token valid-credentials)
-                        token-value)]
+  (let [valid-token (token-value (ia/create-token valid-credentials))]
     (is (= "super" (:com.sixsq.identifier (sg/unsign-claims valid-token))))))
 
 (deftest test-create-token-removes_password-from-token
   (th/add-user-for-test! valid-credentials)
-  (let [valid-token (-> (ia/create-token valid-credentials)
-                        token-value)]
+  (let [valid-token (token-value (ia/create-token valid-credentials))]
     (is (nil? (:password (sg/unsign-claims valid-token))))))
 
 (deftest password-encryption-compatible-with-slipstream
@@ -89,10 +87,8 @@
 (deftest check-claims-token
   (th/add-user-for-test! valid-credentials)
   (let [claims {:a 1 :b 2}
-        valid-token (-> (ia/create-token valid-credentials)
-                        token-value)
-        claim-token (-> (ia/create-token claims valid-token)
-                        token-value)]
+        valid-token (token-value (ia/create-token valid-credentials))
+        claim-token (token-value (ia/create-token claims valid-token))]
     (is (= claims (sg/unsign-claims claim-token)))))
 
 (deftest test-users-by-email
