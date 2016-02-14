@@ -26,12 +26,12 @@
   (cond
     (number? x) (int x)
     (empty? x)  nil
-    (string? x) (. Integer parseInt x)
+    (string? x) (Integer/parseInt x)
     :else       nil))
 
 (defn as-int
   [^String s]
-  [:IntValue (. Integer parseInt s)])
+  [:IntValue (Integer/parseInt s)])
 
 (defn as-string
   [^String s]
@@ -77,13 +77,13 @@
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (when actual (> (compare actual value) 0)))))
+           (fn [value actual] (when actual (pos? (compare actual value))))))
 
 (defmethod mk-pred-attribute-value ["<" :DateValue]
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (when actual (< (compare actual value) 0)))))
+           (fn [value actual] (when actual (neg? (compare actual value))))))
 
 (defmethod mk-pred-attribute-value ["=" :IntValue]
   [attribute-full-name op [type value]]
@@ -107,7 +107,7 @@
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (when actual (< (compare actual value) 0)))))
+           (fn [value actual] (when actual (neg? (compare actual value))))))
 
 (defmethod mk-pred-attribute-value ["<" :IntValue]
   [attribute-full-name op [type value]]
@@ -119,7 +119,7 @@
   [attribute-full-name op [type value]]
   (mk-pred attribute-full-name
            value
-           (fn [value actual] (when actual (> (compare actual value) 0)))))
+           (fn [value actual] (when actual (pos? (compare actual value))))))
 
 (defmethod mk-pred-attribute-value [">" :IntValue]
   [attribute-full-name op [type value]]

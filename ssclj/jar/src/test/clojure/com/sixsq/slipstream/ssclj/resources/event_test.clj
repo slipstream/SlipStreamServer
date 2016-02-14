@@ -77,8 +77,7 @@
        false?
        is)
 
-  (->>  (-> (exec-request base-uri "" "jane")
-            (get-in [:response :body :events]))
+  (->>  (get-in (exec-request base-uri "" "jane") [:response :body :events])
         (map :timestamp)
         tu/ordered-desc?
         is))

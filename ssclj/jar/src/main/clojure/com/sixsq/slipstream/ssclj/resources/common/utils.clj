@@ -1,15 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils
   "General utilities for dealing with resources."
   (:require
-    [clojure.tools.logging                                    :as log]
-    [clojure.edn                                              :as edn]
-    [superstring.core                                         :as s]
-    [clj-time.core                                            :as time]
-    [clj-time.format                                          :as time-fmt]
-    [schema.core                                              :as schema]
-    [ring.util.response                                       :as r]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
-    [clojure.data.json                                        :as json])
+    [clojure.tools.logging :as log]
+    [clojure.edn :as edn]
+    [superstring.core :as s]
+    [clj-time.core :as time]
+    [clj-time.format :as time-fmt]
+    [schema.core :as schema]
+    [ring.util.response :as r]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [clojure.data.json :as json])
   (:import
     [java.util UUID]
     [javax.xml.bind DatatypeConverter]))
@@ -21,7 +21,7 @@
 ;;
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
-;; will treat a '/' in a resource name as a word separator. 
+;; will treat a '/' in a resource name as a word separator.
 (defn de-camelcase [str]
   (s/join "-" (map s/lower-case (s/split str #"(?=[A-Z])"))))
 
@@ -60,8 +60,9 @@
 
 (defn ex-bad-method
   [{:keys [uri request-method] :as request}]
-  (-> (str "invalid method (" (name request-method) ") for " uri)    
-      (ex-response 405 uri)))
+  (ex-response
+    (str "invalid method (" (name request-method) ") for " uri)
+    405 uri))
 
 ;;
 ;; resource ID utilities
@@ -122,14 +123,14 @@
    given schema.  The generated function raises an exception with the
    violations of the schema and a 400 ring response. If everything's
    OK, then the resource itself is returned."
-   [schema]
-   (let [checker (schema/checker schema)]
+  [schema]
+  (let [checker (schema/checker schema)]
     (fn [resource]
-      (if-let [msg (checker resource)]        
+      (if-let [msg (checker resource)]
         (let [msg (str "resource does not satisfy defined schema: " msg)
-          response (->  {:status  400 :message msg}
-                        json-response
-                        (r/status 400))]
+              response (-> {:status 400 :message msg}
+                           json-response
+                           (r/status 400))]
           (log/warn msg)
           (throw (ex-info msg response)))
         resource))))
@@ -162,8 +163,8 @@
 (defn- clojurify
   [exp]
   (cond
-    (instance? java.util.Map  exp) (into {} exp)
-    (instance? java.util.List exp) (into [] exp)
+    (instance? java.util.Map exp) (into {} exp)
+    (instance? java.util.List exp) (vec exp)
     :else exp))
 
 (defn walk-clojurify
@@ -174,12 +175,12 @@
 
 (defn into-vec-without-nil
   [op xs]
-  (when (->>  xs
-              (remove nil?)
-              seq)
-    (->>  (into [op] xs)
-          (remove nil?)
-          vec)))
+  (when (->> xs
+             (remove nil?)
+             seq)
+    (->> (into [op] xs)
+         (remove nil?)
+         vec)))
 
 (defn- lisp-cased?
   [s]

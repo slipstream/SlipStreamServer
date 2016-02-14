@@ -23,11 +23,11 @@
 
 (def valid-create-entry
   {:licenseTemplate
-    {:licenseData (u/encode-base64 valid-entry)}})
+   {:licenseData (u/encode-base64 valid-entry)}})
 
 (def invalid-create-entry
   {:licenseTemplate
-    {:licenseData (u/encode-base64 (assoc valid-entry :invalid "BAD"))}})
+   {:licenseData (u/encode-base64 (assoc valid-entry :invalid "BAD"))}})
 
 (deftest lifecycle
 
@@ -164,9 +164,8 @@
                           [base-uri :put]
                           [resource-uri :options]
                           [resource-uri :post]]]
-        (do
-          (-> (session (ring-app))
-              (request uri
-                       :request-method method
-                       :body (json/write-str {:dummy "value"}))
-              (t/is-status 405)))))))
+        (-> (session (ring-app))
+            (request uri
+                     :request-method method
+                     :body (json/write-str {:dummy "value"}))
+            (t/is-status 405))))))

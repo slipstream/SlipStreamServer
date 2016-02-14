@@ -65,8 +65,7 @@
 (defn get-index
   "Get the first valid long value for the given named attribute."
   [m k]
-  (->> (get m k)
-       (first-valid-long)))
+  (first-valid-long (get m k)))
 
 (defn- adjust-default-last
   [cimi-params]
@@ -101,8 +100,7 @@
   "Wraps individual filters in parentheses and then combines them with
    a logical AND."
   [filters]
-  (->>  (map #(str "(" % ")") filters)
-        (superstring.core/join " and ")))
+  (s/join " and " (map #(str "(" % ")") filters)))
 
 (defn throw-illegal-for-invalid-filter
   [parse-result]

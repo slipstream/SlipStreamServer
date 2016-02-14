@@ -52,11 +52,11 @@
 
 (def validate-fn (u/create-validation-fn Root))
 (defmethod crud/validate resource-uri
-           [resource]
+  [resource]
   (validate-fn resource))
 
 (defmethod crud/set-operations resource-uri
-           [resource request]
+  [resource request]
   (try
     (a/can-modify? resource request)
     (let [ops [{:rel (:edit c/action-uri) :href resource-url}]]
@@ -73,10 +73,10 @@
    if necessary.  It cannot be added through the API.  This function
    adds the minimal Root resource to the database."
   []
-  (let [record (-> {:acl         resource-acl
-                    :id          resource-url
-                    :resourceURI resource-uri}
-                   (u/update-timestamps))]
+  (let [record (u/update-timestamps
+                 {:acl         resource-acl
+                  :id          resource-url
+                  :resourceURI resource-uri})]
     (db/add resource-name record)))
 
 (defn retrieve-impl
@@ -104,12 +104,11 @@
                     (merge resource-links)
                     (crud/set-operations request)
                     (crud/validate))]
-    (->> (apply dissoc updated stripped-keys)
-         (db/edit))
+    (db/edit (apply dissoc updated stripped-keys))
     (r/response updated)))
 
 (defmethod crud/edit resource-name
-           [request]
+  [request]
   (edit-impl request))
 
 ;;
@@ -129,10 +128,10 @@
 ;;
 (defroutes routes
            (GET (str p/service-context resource-url) request
-                (crud/retrieve (assoc-in request [:params :resource-name]
-                                         resource-url)))
+             (crud/retrieve (assoc-in request [:params :resource-name]
+                                      resource-url)))
            (PUT (str p/service-context resource-url) request
-                (crud/edit (assoc-in request [:params :resource-name]
-                                     resource-url)))
+             (crud/edit (assoc-in request [:params :resource-name]
+                                  resource-url)))
            (ANY (str p/service-context resource-url) request
-                (throw (u/ex-bad-method request))))
+             (throw (u/ex-bad-method request))))

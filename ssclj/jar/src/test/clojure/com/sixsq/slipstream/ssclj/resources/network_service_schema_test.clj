@@ -59,8 +59,7 @@
 
 (defn firewall-with
   [[& keys] val]
-  (-> valid-firewall
-      (assoc-in keys val)))
+  (assoc-in valid-firewall keys val))
 
 (deftest firewall-without-rules-is-valid
   (tu/is-valid? (firewall-with [:policies :rules] []) NetworkServiceFirewall)

@@ -154,7 +154,7 @@
               :right     "ALL"}]]
   (expect nil? (s/check AccessControlRules rules))
   (expect nil? (s/check AccessControlRules (next rules)))
-  (expect (s/check AccessControlRules (next (next rules))))
+  (expect (s/check AccessControlRules (nnext rules)))
   (expect (s/check AccessControlRules (cons 1 rules))))
 
 (let [acl {:owner {:principal "::ADMIN"

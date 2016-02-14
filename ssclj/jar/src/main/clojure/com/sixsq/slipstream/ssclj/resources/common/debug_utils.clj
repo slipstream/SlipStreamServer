@@ -1,11 +1,11 @@
-(ns com.sixsq.slipstream.ssclj.resources.common.debug-utils  
+(ns com.sixsq.slipstream.ssclj.resources.common.debug-utils
   (:require [clojure.pprint :refer [pp pprint]]))
 
 (defn show
   [x]
   (println "SHOW----")
   (println ":-> " (class x))
-  (pprint x) 
+  (pprint x)
   (println "--------")
   x)
 
@@ -21,16 +21,16 @@
   [msg x]
   (let [now     (System/currentTimeMillis)
         elapsed (- now @last-timestamp)]
-    (if (> @last-timestamp 0)
+    (if (pos? @last-timestamp)
       (println msg "elapsed :" elapsed "ms")
       (println msg "------------"))
     (dosync (ref-set last-timestamp now))
     x))
 
-(defmacro e-> 
+(defmacro e->
  [& body]
  `(-> ~@(interleave body (repeat show))))
 
-(defmacro e->> 
+(defmacro e->>
  [& body]
  `(->> ~@(interleave body (repeat show))))

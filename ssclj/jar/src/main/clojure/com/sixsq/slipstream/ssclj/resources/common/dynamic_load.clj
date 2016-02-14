@@ -63,5 +63,4 @@
   "Runs the initialize function for all resources that define it."
   []
   (doall
-    (->> (resource-namespaces)
-         (map initialize-resource))))
+    (map initialize-resource (resource-namespaces))))

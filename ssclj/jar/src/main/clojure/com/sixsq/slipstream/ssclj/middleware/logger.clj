@@ -30,7 +30,7 @@
   [request]
   (display-space-separated
     (-> request :request-method name (.toUpperCase))
-    (-> request :uri)
+    (-> request :uri request)
     (-> request display-authn-info)
     (-> request display-querystring)
     (-> request :body (or "no-body"))))

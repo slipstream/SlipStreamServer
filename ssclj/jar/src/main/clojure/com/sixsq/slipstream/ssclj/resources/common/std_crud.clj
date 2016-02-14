@@ -19,14 +19,15 @@
   [resource-name collection-acl resource-uri]
   (fn [{:keys [body] :as request}]
     (a/can-modify? {:acl collection-acl} request)
-    (->> (->  body              
-              u/strip-service-attrs              
-              (crud/new-identifier (u/de-camelcase resource-name))
-              (assoc :resourceURI resource-uri)              
-              u/update-timestamps              
-              (crud/add-acl request)                            
-              crud/validate)
-         (db/add resource-name))))
+    (db/add
+      resource-name
+      (-> body
+          u/strip-service-attrs
+          (crud/new-identifier (u/de-camelcase resource-name))
+          (assoc :resourceURI resource-uri)
+          u/update-timestamps
+          (crud/add-acl request)
+          crud/validate))))
 
 (defn retrieve-fn
   [resource-name]

@@ -112,8 +112,7 @@
 
 (deftest get-uuid-without-correct-authn
   (let [[uuid _] (last-uuid)]
-    (-> (exec-request (str base-uri "/" uuid) ""  "intruder")
-        (t/is-status 403))))
+    (t/is-status (exec-request (str base-uri "/" uuid) "" "intruder") 403)))
 
 (def ^:private are-counts
   (partial tu/are-counts :usages base-uri))
@@ -144,8 +143,7 @@
 (defn- expect-pagination
   [code query-strings]
   (doseq [query-string query-strings]
-    (-> (exec-request base-uri query-string "mike")
-        (t/is-status code))))
+    (t/is-status (exec-request base-uri query-string "mike") code)))
 
 (deftest pagination-wrong-query-ignores-invalid
   (expect-pagination 200
