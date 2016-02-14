@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.event-schema-test
-  (require
+  (:require
     [schema.core                                          :as s]
     [expectations                                         :refer :all]
     [com.sixsq.slipstream.ssclj.resources.event           :refer :all]
@@ -7,7 +7,7 @@
 
 (def event-timestamp "2015-01-16T08:05:00.0Z")
 
-(def valid-event { 
+(def valid-event {
   :acl {
     :owner {
       :type "USER" :principal "joe"}
@@ -20,7 +20,7 @@
   :timestamp event-timestamp
   :content  {
     :resource {:href "Run/45614147-aed1-4a24-889d-6365b0b1f2cd"}
-    :state "Started"} 
+    :state "Started"}
   :type "state"
   :severity "critical"
 })

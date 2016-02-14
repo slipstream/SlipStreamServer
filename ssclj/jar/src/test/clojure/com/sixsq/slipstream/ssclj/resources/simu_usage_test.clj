@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.simu-usage-test
   (:require
     [clojure.test                                       :refer :all]
-    [clojure.java.shell                                 :only [sh] :as sh]
+    [clojure.java.shell                                 :refer [sh] :as sh]
     [com.sixsq.slipstream.ssclj.resources.usage-record  :refer :all]
     [com.sixsq.slipstream.ssclj.usage.record-keeper     :as rc]
     [korma.core                                         :as kc]

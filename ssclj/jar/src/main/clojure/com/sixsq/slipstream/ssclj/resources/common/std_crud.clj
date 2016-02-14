@@ -1,18 +1,18 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.std-crud
   "Standard CRUD functions for resources."
   (:require
-    [clojure.walk                                             :as w]
-    [clojure.pprint                                           :refer [pprint]]
-    [clojure.tools.logging                                    :as log]
+    [clojure.walk :as w]
+    [clojure.pprint :refer [pprint]]
+    [clojure.tools.logging :as log]
 
-    [com.sixsq.slipstream.ssclj.resources.common.authz        :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.utils        :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.crud         :as crud]
-    [com.sixsq.slipstream.ssclj.db.impl                       :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]
 
-    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter  :as cf]
-    [com.sixsq.slipstream.ssclj.resources.common.pagination   :as pg]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils  :as du]
+    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter :as cf]
+    [com.sixsq.slipstream.ssclj.resources.common.pagination :as pg]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     ))
 
 (defn add-fn
@@ -62,14 +62,14 @@
 
 (defn collection-wrapper-fn
   [resource-name collection-acl collection-uri collection-key]
-  (let [skeleton (-> {:acl         collection-acl
-                      :resourceURI collection-uri
-                      :id          (u/de-camelcase resource-name)})]
+  (let [skeleton {:acl         collection-acl
+                  :resourceURI collection-uri
+                  :id          (u/de-camelcase resource-name)}]
     (fn [request entries]
       (let [paginated-entries (->> entries
-                                 (pg/paginate (get-in request [:cimi-params :first])
-                                              (get-in request [:cimi-params :last]))
-                                 (map #(crud/set-operations % request)))]
+                                   (pg/paginate (get-in request [:cimi-params :first])
+                                                (get-in request [:cimi-params :last]))
+                                   (map #(crud/set-operations % request)))]
         (-> skeleton
             (crud/set-operations request)
             (assoc :count (count entries))
