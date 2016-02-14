@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.middleware.logger-test
-  (require
+  (:require
     [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer :all]))
 
