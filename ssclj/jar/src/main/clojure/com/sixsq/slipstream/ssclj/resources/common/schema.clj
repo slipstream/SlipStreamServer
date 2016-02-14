@@ -29,32 +29,27 @@
 ;; schema definitions for basic types
 ;;
 
-(def NotEmpty
-  (s/pred seq "not-empty?"))
-
 (def PosInt
-  (s/both s/Int (s/pred pos? "pos?")))
+  (s/constrained s/Int pos?))
 
 (def NonNegInt
-  (s/both s/Int (s/pred (complement neg?) "not-neg?")))
+  (s/constrained s/Int (complement neg?)))
 
 (def NonBlankString
-  (s/both s/Str (s/pred (complement str/blank?) "not-blank?")))
+  (s/constrained s/Str (complement str/blank?)))
 
 (def BlankString
-  (s/both s/Str (s/pred str/blank? "blank?")))
+  (s/constrained s/Str str/blank?))
 
 (def NonEmptyStrList
-  (s/both [NonBlankString] NotEmpty))
+  (s/constrained [NonBlankString] seq 'not-empty?))
 
 (def Timestamp
-  (s/both NonBlankString (s/pred u/valid-timestamp? "valid-timestamp?")))
+  (s/constrained NonBlankString u/valid-timestamp? 'valid-timestamp?))
 
 (def OptionalTimestamp
   (s/either BlankString Timestamp))
 
-(def Numeric
-  (s/both NonBlankString (s/pred u/valid-number? "valid-number?")))
 ;;
 ;; schema definitions for common attributes
 ;;
@@ -63,18 +58,18 @@
   {:href NonBlankString})
 
 (def ResourceLinks
-  (s/both [ResourceLink] NotEmpty))
+  (s/constrained [ResourceLink] seq 'not-empty?))
 
 (def Operation
   (merge ResourceLink {:rel NonBlankString}))
 
 (def Operations
-  (s/both [Operation] NotEmpty))
+  (s/constrained [Operation] seq 'not-empty?))
 
 (def Properties
-  (s/both
+  (s/constrained
     {(s/either s/Keyword s/Str) s/Str}
-    NotEmpty))
+    seq 'not-empty?))
 
 ;;
 ;; Common Attributes
@@ -129,7 +124,7 @@
   (merge AccessControlId {:right access-control-rights}))
 
 (def AccessControlRules
-  (s/both [AccessControlRule] NotEmpty))
+  (s/constrained [AccessControlRule] seq 'not-empty?))
 
 (def AccessControlList
   {:owner                  AccessControlId

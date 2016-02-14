@@ -38,10 +38,10 @@
   {(s/optional-key :serviceName) c/NonBlankString})
 
 (def ConnectorTemplateRef
-  (s/both
+  (s/constrained
     (merge ConnectorTemplateAttrs
            {(s/optional-key :href) c/NonBlankString})
-    c/NotEmpty))
+    seq 'not-empty?))
 
 ;;
 ;; multimethods for validation and operations

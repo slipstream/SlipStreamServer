@@ -5,21 +5,6 @@
     [expectations :refer :all]))
 
 ;;
-;; NotEmpty
-;;
-
-(expect nil? (s/check NotEmpty "ok"))
-(expect nil? (s/check NotEmpty ["ok"]))
-(expect nil? (s/check NotEmpty [1 2]))
-(expect nil? (s/check NotEmpty {"ok" "value"}))
-(expect nil? (s/check NotEmpty {1 2}))
-(expect nil? (s/check NotEmpty "\t"))
-(expect nil? (s/check NotEmpty " "))
-(expect (s/check NotEmpty ""))
-(expect (s/check NotEmpty []))
-(expect (s/check NotEmpty {}))
-
-;;
 ;; PosInt
 ;;
 

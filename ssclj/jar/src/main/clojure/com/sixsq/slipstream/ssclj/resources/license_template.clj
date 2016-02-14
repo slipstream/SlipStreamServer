@@ -38,10 +38,10 @@
   {(s/optional-key :licenseData) c/NonBlankString})
 
 (def LicenseTemplateRef
-  (s/both
+  (s/constrained
     (merge LicenseTemplateAttrs
            {(s/optional-key :href) c/NonBlankString})
-    c/NotEmpty))
+    seq 'not-empty?))
 
 ;;
 ;; multimethods for validation and operations
