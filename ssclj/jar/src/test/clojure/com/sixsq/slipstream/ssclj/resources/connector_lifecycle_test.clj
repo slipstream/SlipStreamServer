@@ -26,7 +26,7 @@
 
 (def invalid-create-entry
   {:connectorTemplate
-    (assoc valid-entry :invalid "BAD")})
+   (assoc valid-entry :invalid "BAD")})
 
 (deftest lifecycle
 
@@ -144,7 +144,7 @@
       (-> (session (ring-app))
           (header authn-info-header "root ADMIN")
           (request abs-uri
-                  :request-method :delete)
+                   :request-method :delete)
           (t/body->json)
           (t/is-status 204))
 
@@ -163,9 +163,8 @@
                           [base-uri :put]
                           [resource-uri :options]
                           [resource-uri :post]]]
-        (do
-          (-> (session (ring-app))
-              (request uri
-                       :request-method method
-                       :body (json/write-str {:dummy "value"}))
-              (t/is-status 405)))))))
+        (-> (session (ring-app))
+            (request uri
+                     :request-method method
+                     :body (json/write-str {:dummy "value"}))
+            (t/is-status 405))))))

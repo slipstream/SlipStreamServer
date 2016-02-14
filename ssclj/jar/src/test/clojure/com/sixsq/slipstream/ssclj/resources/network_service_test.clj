@@ -84,8 +84,7 @@
   (let [uuid (uuid-inserted-for-john!)]
 
     (testing "Retrieving the element is forbidden for jack"
-      (-> (exec-request (str base-uri "/" uuid) "" "jack")
-          (t/is-status 403)))
+      (t/is-status (exec-request (str base-uri "/" uuid) "" "jack") 403))
 
     (testing "john is able to retrieve element with correct UUID"
       (-> (exec-request (str base-uri "/" uuid) "" "john")

@@ -52,10 +52,9 @@
 
 (defn- split-trim-keywordize
   [s]
-  (->>  (split-trim s)
-        (map keyword)))
+  (map keyword (split-trim s)))
 
-(def cli-options  
+(def cli-options
   [["-d" "--date DATE" "Date to summarize, yyyy-mm-dd, e.g 2015-04-16"
     :parse-fn #(str % "T00:00:00.000Z")
     :validate [cu/valid-timestamp? "Must be a valid date, e.g 2015-01-15"]]
