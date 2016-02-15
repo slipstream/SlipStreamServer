@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.cimi-filter-test
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter  :refer :all]
-    [clojure.test                                             :refer :all]))
+    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter :refer :all]
+    [clojure.test :refer :all]))
 
 (def event1
   {:content
@@ -41,18 +41,18 @@
   (is (= [event1] (cimi-filter events "type='state'")))
   (is (= [event1] (cimi-filter events "(type='state')")))
   (is (= [event2] (cimi-filter events "type='critical'")))
-  (is (= []       (cimi-filter events "type='unknown'"))))
+  (is (= [] (cimi-filter events "type='unknown'"))))
 
 (deftest filter-or
-  (is (= [event1]   (cimi-filter events "type='state' or type='BB'")))
-  (is (= [event2]   (cimi-filter events "type='critical' or type='BB'")))
-  (is (= []         (cimi-filter events "type='AA' or type='BB'")))
-  (is (= events     (cimi-filter events "type='state' or type='critical'")))
-  (is (= events     (cimi-filter events "type='critical' or type='state'")))
-  (is (= events     (cimi-filter events "(type='state') or (type='critical')")))
-  (is (= events     (cimi-filter events "(type='critical') or (type='state')")))
-  (is (= events     (cimi-filter events "content/resource/href='run/1234' or type='critical'")))
-  (is (= events     (cimi-filter events "content/resource/href='run/1234' or type='critical' or type='state'"))))
+  (is (= [event1] (cimi-filter events "type='state' or type='BB'")))
+  (is (= [event2] (cimi-filter events "type='critical' or type='BB'")))
+  (is (= [] (cimi-filter events "type='AA' or type='BB'")))
+  (is (= events (cimi-filter events "type='state' or type='critical'")))
+  (is (= events (cimi-filter events "type='critical' or type='state'")))
+  (is (= events (cimi-filter events "(type='state') or (type='critical')")))
+  (is (= events (cimi-filter events "(type='critical') or (type='state')")))
+  (is (= events (cimi-filter events "content/resource/href='run/1234' or type='critical'")))
+  (is (= events (cimi-filter events "content/resource/href='run/1234' or type='critical' or type='state'"))))
 
 (deftest filter-cimi-nested-expression
   (testing "Dotted notation is used to locate nested attribute"
@@ -72,14 +72,14 @@
 (deftest filter-cimi-various-operators
   (is (= [event2] (cimi-filter events "type!='state'")))
   (is (= [event1] (cimi-filter events "type!='critical'")))
-  (is (= events   (cimi-filter events "type!='unknown'"))))
+  (is (= events (cimi-filter events "type!='unknown'"))))
 
 (deftest filter-cimi-date-comparisons
-  (is (= []       (cimi-filter events "created<'2015-05-15'")))
-  (is (= events   (cimi-filter events "created<'2017-05-15'")))
+  (is (= [] (cimi-filter events "created<'2015-05-15'")))
+  (is (= events (cimi-filter events "created<'2017-05-15'")))
   (is (= [event1] (cimi-filter events "created<'2016-01-01'")))
 
-  (is (= events   (cimi-filter events "created>'2014-01-01'")))
+  (is (= events (cimi-filter events "created>'2014-01-01'")))
   (is (= [event2] (cimi-filter events "created>'2016-01-01'")))
 
   (is (= [event1] (cimi-filter events "created=2015-05-15")))
@@ -87,7 +87,7 @@
   )
 
 (deftest filter-cimi-multiple-ands
-  (is (= events   (cimi-filter events "content/state='init'")))
+  (is (= events (cimi-filter events "content/state='init'")))
   (is (= [event1] (cimi-filter events "content/state='init' and type='state'")))
   (is (= [event1] (cimi-filter events "(content/state='init' and type='state')")))
   (is (= [event2] (cimi-filter events "content/state='init' and type!='state'")))
@@ -98,7 +98,7 @@
 
 (deftest filter-and-higher-priority-than-or
   (is (= [event2] (cimi-filter events
-    "id='Event/12312312312312312323123' and type='state' or type='critical'")))
+                               "id='Event/12312312312312312323123' and type='state' or type='critical'")))
   (is (= [event1] (cimi-filter events
-    "id='Event/06779f74-e99c-44c8-87d5-0b9d5e7ceedd' or type='state' and type='critical'"))))
+                               "id='Event/06779f74-e99c-44c8-87d5-0b9d5e7ceedd' or type='state' and type='critical'"))))
 

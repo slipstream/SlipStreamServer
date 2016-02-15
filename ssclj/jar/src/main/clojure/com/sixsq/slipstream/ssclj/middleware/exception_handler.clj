@@ -6,10 +6,9 @@
 
 (defn treat-unexpected-exception
   [e]
-  (let [msg (str "Unexpected exception thrown: " (.getMessage e))
-        body {:status 500 :message msg}
-        response (-> (r/response body)
-                     (r/status 500))]
+  (let [msg      (str "Unexpected exception thrown: " (.getMessage e))
+        body     {:status 500 :message msg}
+        response (r/status (r/response body) 500)]
     (log/error msg "\n" (st/pst-str e))
     response))
 

@@ -3,37 +3,37 @@
   (:refer-clojure :exclude [update])
   (:require
 
-    [clojure.java.jdbc                                          :as j]
-    [clojure.tools.logging                                      :as log]
-    [korma.core                                                 :refer :all]
-    [honeysql.core                                              :as sql]
-    [honeysql.helpers                                           :as hh]
+    [clojure.java.jdbc :as j]
+    [clojure.tools.logging :as log]
+    [korma.core :refer :all]
+    [honeysql.core :as sql]
+    [honeysql.helpers :as hh]
 
-    [com.sixsq.slipstream.ssclj.usage.record-keeper             :as rc]
-    [com.sixsq.slipstream.ssclj.database.korma-helper           :as kh]
-    [com.sixsq.slipstream.ssclj.db.database-binding             :as dbb]
-    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter    :as cf]
-    [com.sixsq.slipstream.ssclj.resources.common.authz          :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.crud           :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud       :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils          :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]
-    [com.sixsq.slipstream.ssclj.resources.common.schema         :as c]))
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbb]
+    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter :as cf]
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
-(def ^:const resource-tag     :usages)
-(def ^:const resource-name    "Usage")
+(def ^:const resource-tag :usages)
+(def ^:const resource-name "Usage")
 (def ^:const resource-url (u/de-camelcase resource-name))
-(def ^:const collection-name  "UsageCollection")
+(def ^:const collection-name "UsageCollection")
 
-(def ^:const resource-uri     (str c/slipstream-schema-uri resource-name))
-(def ^:const collection-uri   (str c/slipstream-schema-uri collection-name))
+(def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
+(def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
-(def collection-acl {:owner {:principal   "ADMIN"
-                             :type        "ROLE"}
+(def collection-acl {:owner {:principal "ADMIN"
+                             :type      "ROLE"}
 
-                     :rules [{:principal  "ANON"
-                              :type       "ROLE"
-                              :right      "VIEW"}]})
+                     :rules [{:principal "ANON"
+                              :type      "ROLE"
+                              :right     "VIEW"}]})
 
 (defonce init-record-keeper (rc/-init))
 
@@ -43,37 +43,37 @@
 (defn- deserialize-usage
   [usage]
   (-> usage
-      (update-in [:acl]   u/deserialize)
+      (update-in [:acl] u/deserialize)
       (update-in [:usage] u/deserialize)))
 
 (defn sql
   [id roles cimi-filter]
-  (->   (hh/select :u.*)
-        (hh/from    [:acl :a] [:usage_summaries :u])
-        (hh/where   (u/into-vec-without-nil :and
+  (-> (hh/select :u.*)
+      (hh/from [:acl :a] [:usage_summaries :u])
+      (hh/where (u/into-vec-without-nil :and
                                         [
-                                          [:= :u.id :a.resource-id]
+                                         [:= :u.id :a.resource-id]
 
-                                          [:or
-                                           (dbb/id-matches? id)
-                                           (dbb/roles-in? roles)]
+                                         [:or
+                                          (dbb/id-matches? id)
+                                          (dbb/roles-in? roles)]
 
-                                          (cf/sql-clauses cimi-filter)
+                                         (cf/sql-clauses cimi-filter)
                                          ]))
 
-        (hh/modifiers :distinct)
-        (hh/order-by [:u.start_timestamp :desc])
+      (hh/modifiers :distinct)
+      (hh/order-by [:u.start_timestamp :desc])
 
-        (sql/format :quoting :ansi)))
+      (sql/format :quoting :ansi)))
 
 (defmethod dbb/find-resources resource-name
   [collection-id options]
-  (let [[id roles]  (dbb/id-roles options)]
+  (let [[id roles] (dbb/id-roles options)]
     (if (dbb/neither-id-roles? id roles)
       []
-      (->>  (sql id roles (get-in options [:cimi-params :filter]))
-            (j/query kh/db-spec)
-            (map deserialize-usage)))))
+      (->> (sql id roles (get-in options [:cimi-params :filter]))
+           (j/query kh/db-spec)
+           (map deserialize-usage)))))
 
 ;;
 ;; schemas
@@ -84,13 +84,13 @@
     c/CreateAttrs
     c/AclAttr
     {
-      :id               c/NonBlankString
-      :user             c/NonBlankString
-      :cloud            c/NonBlankString
-      :start_timestamp  c/Timestamp
-      :end_timestamp    c/Timestamp
-      :usage            c/NonBlankString
-    }))
+     :id              c/NonBlankString
+     :user            c/NonBlankString
+     :cloud           c/NonBlankString
+     :start_timestamp c/Timestamp
+     :end_timestamp   c/Timestamp
+     :usage           c/NonBlankString
+     }))
 
 (def validate-fn (u/create-validation-fn Usage))
 

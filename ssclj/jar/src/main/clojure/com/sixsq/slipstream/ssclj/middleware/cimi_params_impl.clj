@@ -65,8 +65,7 @@
 (defn get-index
   "Get the first valid long value for the given named attribute."
   [m k]
-  (->> (get m k)
-       (first-valid-long)))
+  (first-valid-long (get m k)))
 
 (defn- adjust-default-last
   [cimi-params]
@@ -101,8 +100,7 @@
   "Wraps individual filters in parentheses and then combines them with
    a logical AND."
   [filters]
-  (->>  (map #(str "(" % ")") filters)
-        (superstring.core/join " and ")))
+  (s/join " and " (map #(str "(" % ")") filters)))
 
 (defn throw-illegal-for-invalid-filter
   [parse-result]
@@ -117,12 +115,12 @@
   then an exception is thrown."
   [{:keys [params] :or {:params {}} :as req}]
   (if-let [filter-param (get params "$filter")]
-    (->>  filter-param
-          (as-vector)
-          (wrap-join-with-and)
-          (parser/parse-cimi-filter)
-          (throw-illegal-for-invalid-filter)
-          (add-cimi-param req :filter))
+    (->> filter-param
+         (as-vector)
+         (wrap-join-with-and)
+         (parser/parse-cimi-filter)
+         (throw-illegal-for-invalid-filter)
+         (add-cimi-param req :filter))
     req))
 
 (defn comma-split
@@ -181,13 +179,13 @@
 
   [{:keys [params] :or {:params {}} :as req}]
   (let [select (get params "$select")
-        v (when select
-            (->> select
-                 (as-vector)
-                 (mapcat comma-split)
-                 (cons "resourceURI")
-                 (set)
-                 (reduce-select-set)))]
+        v      (when select
+                 (->> select
+                      (as-vector)
+                      (mapcat comma-split)
+                      (cons "resourceURI")
+                      (set)
+                      (reduce-select-set)))]
     (add-cimi-param req :select v)))
 
 (defn process-format

@@ -24,16 +24,16 @@
 (def ^:private nb-events 10)
 
 (def valid-event {
-                  :acl {
-                        :owner {
-                                :type "USER" :principal "jane"}
-                               :rules [{:type "USER" :principal "jane" :right "ALL"}]}
-                       :timestamp "2015-01-16T08:05:00.0Z"
-                  :content  {
-                             :resource {:href "run/45614147-aed1-4a24-889d-6365b0b1f2cd"}
-                                       :state "Started"}
-                  :type "state"
-                  :severity "critical"
+                  :acl       {
+                              :owner {
+                                      :type "USER" :principal "jane"}
+                              :rules [{:type "USER" :principal "jane" :right "ALL"}]}
+                  :timestamp "2015-01-16T08:05:00.0Z"
+                  :content   {
+                              :resource {:href "run/45614147-aed1-4a24-889d-6365b0b1f2cd"}
+                              :state    "Started"}
+                  :type      "state"
+                  :severity  "critical"
                   })
 
 (def valid-events
@@ -77,11 +77,10 @@
        false?
        is)
 
-  (->>  (-> (exec-request base-uri "" "jane")
-            (get-in [:response :body :events]))
-        (map :timestamp)
-        tu/ordered-desc?
-        is))
+  (->> (get-in (exec-request base-uri "" "jane") [:response :body :events])
+       (map :timestamp)
+       tu/ordered-desc?
+       is))
 
 (defn timestamp-paginate-single
   [n]
@@ -97,12 +96,12 @@
       is))
 
 (deftest resources-pagination
-  (are-counts nb-events   "")
+  (are-counts nb-events "")
   (are-counts nb-events 0 "?$first=10&$last=5")
 
   (are-counts nb-events (- nb-events 2) "?$first=3")
-  (are-counts nb-events 2               "?$last=2")
-  (are-counts nb-events 2               "?$first=3&$last=4"))
+  (are-counts nb-events 2 "?$last=2")
+  (are-counts nb-events 2 "?$first=3&$last=4"))
 
 (deftest pagination-occurs-after-filtering
   (are-counts 1 "?$filter=content/resource/href='run/5'")

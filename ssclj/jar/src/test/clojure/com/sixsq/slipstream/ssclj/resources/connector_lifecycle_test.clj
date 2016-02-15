@@ -26,7 +26,7 @@
 
 (def invalid-create-entry
   {:connectorTemplate
-    (assoc valid-entry :invalid "BAD")})
+   (assoc valid-entry :invalid "BAD")})
 
 (deftest lifecycle
 
@@ -46,15 +46,15 @@
       (t/is-status 403))
 
   ;; adding, retrieving and  deleting entry as user should succeed
-  (let [uri (-> (session (ring-app))
-                (content-type "application/json")
-                (header authn-info-header "jane")
-                (request base-uri
-                         :request-method :post
-                         :body (json/write-str valid-create-entry))
-                (t/body->json)
-                (t/is-status 201)
-                (t/location))
+  (let [uri     (-> (session (ring-app))
+                    (content-type "application/json")
+                    (header authn-info-header "jane")
+                    (request base-uri
+                             :request-method :post
+                             :body (json/write-str valid-create-entry))
+                    (t/body->json)
+                    (t/is-status 201)
+                    (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (-> (session (ring-app))
@@ -71,15 +71,15 @@
         (t/is-status 204)))
 
   ;; adding as user, retrieving and deleting entry as ADMIN should work
-  (let [uri (-> (session (ring-app))
-                (content-type "application/json")
-                (header authn-info-header "jane")
-                (request base-uri
-                         :request-method :post
-                         :body (json/write-str valid-create-entry))
-                (t/body->json)
-                (t/is-status 201)
-                (t/location))
+  (let [uri     (-> (session (ring-app))
+                    (content-type "application/json")
+                    (header authn-info-header "jane")
+                    (request base-uri
+                             :request-method :post
+                             :body (json/write-str valid-create-entry))
+                    (t/body->json)
+                    (t/is-status 201)
+                    (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (-> (session (ring-app))
@@ -106,15 +106,15 @@
         (t/is-status 400)))
 
   ;; add a new entry
-  (let [uri (-> (session (ring-app))
-                (content-type "application/json")
-                (header authn-info-header "root ADMIN")
-                (request base-uri
-                         :request-method :post
-                         :body (json/write-str valid-create-entry))
-                (t/body->json)
-                (t/is-status 201)
-                (t/location))
+  (let [uri     (-> (session (ring-app))
+                    (content-type "application/json")
+                    (header authn-info-header "root ADMIN")
+                    (request base-uri
+                             :request-method :post
+                             :body (json/write-str valid-create-entry))
+                    (t/body->json)
+                    (t/is-status 201)
+                    (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (is uri)
@@ -144,7 +144,7 @@
       (-> (session (ring-app))
           (header authn-info-header "root ADMIN")
           (request abs-uri
-                  :request-method :delete)
+                   :request-method :delete)
           (t/body->json)
           (t/is-status 204))
 
@@ -163,9 +163,8 @@
                           [base-uri :put]
                           [resource-uri :options]
                           [resource-uri :post]]]
-        (do
-          (-> (session (ring-app))
-              (request uri
-                       :request-method method
-                       :body (json/write-str {:dummy "value"}))
-              (t/is-status 405)))))))
+        (-> (session (ring-app))
+            (request uri
+                     :request-method method
+                     :body (json/write-str {:dummy "value"}))
+            (t/is-status 405))))))

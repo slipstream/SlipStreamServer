@@ -40,19 +40,19 @@
   (kc/delete rc/usage_summaries)
   (kc/delete acl/acl)
 
-  (rc/insert-summary! (summary "joe" "exo"   :daily [2015 04 16] {:ram { :unit_minutes 100.0}}))
-  (rc/insert-summary! (summary "joe" "exo"   :daily [2015 04 17] {:ram { :unit_minutes 200.0}}))
-  (rc/insert-summary! (summary "mike" "aws"  :daily [2015 04 18] {:ram { :unit_minutes 500.0}}))
-  (rc/insert-summary! (summary "mike" "exo"  :daily [2015 04 16] {:ram { :unit_minutes 300.0}}))
-  (rc/insert-summary! (summary "mike" "aws"  :daily [2015 04 17] {:ram { :unit_minutes 40.0}}))
+  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit_minutes 100.0}}))
+  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit_minutes 200.0}}))
+  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit_minutes 500.0}}))
+  (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit_minutes 300.0}}))
+  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit_minutes 40.0}}))
 
-  (rc/insert-summary! (summary "joe"  "exo"   :weekly [2015 04 15] {:ram { :unit_minutes 300.0}}))
-  (rc/insert-summary! (summary "mike" "aws"   :weekly [2015 04 15] {:ram { :unit_minutes 540.0}}))
-  (rc/insert-summary! (summary "mike" "exo"   :weekly [2015 04 15] {:ram { :unit_minutes 300.0}}))
+  (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit_minutes 300.0}}))
+  (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit_minutes 540.0}}))
+  (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit_minutes 300.0}}))
 
-  (rc/insert-summary! (summary "joe"  "exo"   :monthly [2015 04 15] {:ram { :unit_minutes 300.0}}))
-  (rc/insert-summary! (summary "mike" "aws"   :monthly [2015 04 15] {:ram { :unit_minutes 540.0}}))
-  (rc/insert-summary! (summary "mike" "exo"   :monthly [2015 04 15] {:ram { :unit_minutes 300.0}}))
+  (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit_minutes 300.0}}))
+  (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit_minutes 540.0}}))
+  (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit_minutes 300.0}}))
 
   (f))
 
@@ -99,21 +99,20 @@
   (let [full-uuid (-> (kc/select rc/usage_summaries (kc/limit 1))
                       first
                       :id)
-        uuid (-> full-uuid
-                 (superstring.core/split #"/")
-                 second)]
+        uuid      (-> full-uuid
+                      (superstring.core/split #"/")
+                      second)]
     [uuid full-uuid]))
 
 (deftest get-uuid-with-correct-authn
   (let [[uuid full-uuid] (last-uuid)]
-    (-> (exec-request (str base-uri "/" uuid) ""  "john exo")
+    (-> (exec-request (str base-uri "/" uuid) "" "john exo")
         (t/is-key-value :id full-uuid)
         (t/is-status 200))))
 
 (deftest get-uuid-without-correct-authn
   (let [[uuid _] (last-uuid)]
-    (-> (exec-request (str base-uri "/" uuid) ""  "intruder")
-        (t/is-status 403))))
+    (t/is-status (exec-request (str base-uri "/" uuid) "" "intruder") 403)))
 
 (def ^:private are-counts
   (partial tu/are-counts :usages base-uri))
@@ -144,20 +143,19 @@
 (defn- expect-pagination
   [code query-strings]
   (doseq [query-string query-strings]
-    (-> (exec-request base-uri query-string "mike")
-        (t/is-status code))))
+    (t/is-status (exec-request base-uri query-string "mike") code)))
 
 (deftest pagination-wrong-query-ignores-invalid
   (expect-pagination 200
-      ["?$first=a&$last=10"])
+                     ["?$first=a&$last=10"])
   (expect-pagination 200
-      ["?$first=-1&$last=10"
-      "?$first=1&$last=-10"
-      "?$first=-1&$last=-10"]))
+                     ["?$first=-1&$last=10"
+                      "?$first=1&$last=-10"
+                      "?$first=-1&$last=-10"]))
 
 (deftest pagination-does-not-check-max-limit
   (expect-pagination 200
-    ["?$first=1&$last=1000000"]))
+                     ["?$first=1&$last=1000000"]))
 
 (deftest admin-sees-everything
   (are-counts-for-admin 11 "")
@@ -166,8 +164,8 @@
   (are-counts-for-admin 3 "?$filter=frequency='monthly'"))
 
 (deftest simple-filter-with-admin
-  (are-counts-for-admin 2 "?$filter=frequency='daily'&$filter=user='joe'"  )
-  (are-counts-for-admin 3 "?$filter=frequency='daily'&$filter=user='mike'" ))
+  (are-counts-for-admin 2 "?$filter=frequency='daily'&$filter=user='joe'")
+  (are-counts-for-admin 3 "?$filter=frequency='daily'&$filter=user='mike'"))
 
 (deftest filter-int-value-when-no-value
   (are-counts-for-admin 0 "?$filter=xxx<100"))
@@ -191,42 +189,42 @@
 
 (deftest filter-with-admin
   (are-counts-for-admin 2 (one-line
-                "?$filter=
-                 start_timestamp='2015-04-16T00:00:00.000Z'
-                 and
-                 end_timestamp='2015-04-17T00:00:00.000Z'"))
+                            "?$filter=
+                             start_timestamp='2015-04-16T00:00:00.000Z'
+                             and
+                             end_timestamp='2015-04-17T00:00:00.000Z'"))
 
   (are-counts-for-admin 1 (one-line
-                "?$filter=
-                 user='joe'
-                 and
-                 start_timestamp='2015-04-16T00:00:00.000Z'
-                 and
-                 end_timestamp='2015-04-17T00:00:00.000Z'"))
+                            "?$filter=
+                             user='joe'
+                             and
+                             start_timestamp='2015-04-16T00:00:00.000Z'
+                             and
+                             end_timestamp='2015-04-17T00:00:00.000Z'"))
 
   (are-counts-for-admin 1 (one-line
-                "?$filter=
-                 user='joe'
-                 and
-                 start_timestamp='2015-04-17T00:00:00.000Z'
-                 and
-                 end_timestamp='2015-04-18T00:00:00.000Z'"))
+                            "?$filter=
+                             user='joe'
+                             and
+                             start_timestamp='2015-04-17T00:00:00.000Z'
+                             and
+                             end_timestamp='2015-04-18T00:00:00.000Z'"))
 
   (are-counts-for-admin 0 (one-line
-              "?$filter=
-               user='joe'
-               and
-               start_timestamp='2015-04-18T00:00:00.000Z'
-               and
-               end_timestamp='2015-04-19T00:00:00.000Z'"))
+                            "?$filter=
+                             user='joe'
+                             and
+                             start_timestamp='2015-04-18T00:00:00.000Z'
+                             and
+                             end_timestamp='2015-04-19T00:00:00.000Z'"))
 
   (are-counts-for-admin 1 (one-line
-              "?$filter=
-               user='mike'
-               and
-               start_timestamp='2015-04-18T00:00:00.000Z'
-               and
-               end_timestamp='2015-04-19T00:00:00.000Z'")))
+                            "?$filter=
+                             user='mike'
+                             and
+                             start_timestamp='2015-04-18T00:00:00.000Z'
+                             and
+                             end_timestamp='2015-04-19T00:00:00.000Z'")))
 
 (deftest date-comparisons
   (are-counts-for-admin 1 "?$filter=user='joe' and start_timestamp=2015-04-17 and end_timestamp=2015-04-18")

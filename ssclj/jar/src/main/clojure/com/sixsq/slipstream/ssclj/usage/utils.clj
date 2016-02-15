@@ -1,14 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.usage.utils
- (:require 
-  [clojure.tools.logging  :as log]
-  [clojure.data.json      :as json]
-  [clj-time.core          :as time]
-  [clj-time.format        :as time-fmt]))
+  (:require
+    [clojure.tools.logging :as log]
+    [clojure.data.json :as json]
+    [clj-time.core :as time]
+    [clj-time.format :as time-fmt]))
 
 (defn timestamp
   [& args]
-  (->> (apply time/date-time args)      
-       (time-fmt/unparse (:date-time time-fmt/formatters))))  
+  (time-fmt/unparse
+    (:date-time time-fmt/formatters)
+    (apply time/date-time args)))
 
 (defn period-fn
   [frequency]
@@ -38,7 +39,7 @@
 
 (defn now-to-ISO-8601
   []
-  (-> (time/now) to-ISO-8601))
+  (to-ISO-8601 (time/now)))
 
 (defn timestamp-next-frequency
   "Some examples:
@@ -50,27 +51,27 @@
       (inc-by-frequency frequency)
       to-ISO-8601))
 
-(defn to-interval   
-  [start end]    
+(defn to-interval
+  [start end]
   (time/interval (to-time start) (to-time end)))
 
-(defn disp-interval   
-  [start end]      
+(defn disp-interval
+  [start end]
   (str "[" start " / " end "]"))
 
-(defn- log-and-throw 
+(defn- log-and-throw
   [msg-error]
   (log/error msg-error)
   (throw (IllegalArgumentException. msg-error)))
 
-(defn check  
-  [pred e msg-error]  
+(defn check
+  [pred e msg-error]
   (if-not (pred e)
     (log-and-throw msg-error)
     e))
 
-(defn start-before-end?   
-  [[t1 t2]]  
+(defn start-before-end?
+  [[t1 t2]]
   (time/before? (to-time t1) (to-time t2)))
 
 (defn check-order
@@ -80,19 +81,19 @@
 (defn serialize
   [m]
   (with-out-str
-   (json/pprint m :key-fn name)))
+    (json/pprint m :key-fn name)))
 
 (defn deserialize
   [s]
   (json/read-str s :key-fn keyword))
 
-(defn max-time   
+(defn max-time
   [t1 t2]
   (if (time/after? (to-time t1) (to-time t2))
     t1
     t2))
 
-(defn min-time   
+(defn min-time
   [t1 t2]
   (cond
     (nil? t1) t2

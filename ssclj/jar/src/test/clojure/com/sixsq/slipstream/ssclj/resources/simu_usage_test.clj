@@ -1,27 +1,27 @@
 (ns com.sixsq.slipstream.ssclj.resources.simu-usage-test
   (:require
-    [clojure.test                                       :refer :all]
-    [clojure.java.shell                                 :only [sh] :as sh]
-    [com.sixsq.slipstream.ssclj.resources.usage-record  :refer :all]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper     :as rc]
-    [korma.core                                         :as kc]
+    [clojure.test :refer :all]
+    [clojure.java.shell :refer [sh] :as sh]
+    [com.sixsq.slipstream.ssclj.resources.usage-record :refer :all]
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
+    [korma.core :as kc]
 
-    [com.sixsq.slipstream.ssclj.usage.summary           :as us]
+    [com.sixsq.slipstream.ssclj.usage.summary :as us]
 
-    [com.sixsq.slipstream.ssclj.api.acl                 :as acl]
+    [com.sixsq.slipstream.ssclj.api.acl :as acl]
 
-    [clj-time.core                                      :as time]
-    [com.sixsq.slipstream.ssclj.usage.utils             :as uu]
-    [com.sixsq.slipstream.ssclj.resources.test-utils    :as tu]
-    [com.sixsq.slipstream.ssclj.resources.common.utils  :as cu]))
+    [clj-time.core :as time]
+    [com.sixsq.slipstream.ssclj.usage.utils :as uu]
+    [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
 
 
-(def nb-clouds          10)
-(def nb-users           10)
-(def start-day          [2015 1])
+(def nb-clouds 10)
+(def nb-users 10)
+(def start-day [2015 1])
 
 ;; parameters to tweak
-(def nb-days            10)
+(def nb-days 10)
 (def nb-records-per-day 10)
 
 (defn some-strings
@@ -30,10 +30,10 @@
        (map #(str s "-" %))
        (take n)))
 
-(def some-users   (some-strings "user" nb-users))
+(def some-users (some-strings "user" nb-users))
 ;(def some-users   ["joe"])
 
-(def some-clouds  (some-strings "cloud" nb-clouds))
+(def some-clouds (some-strings "cloud" nb-clouds))
 (def some-metrics [{:name "vm" :value "1.0"}
                    {:name "vm" :value "2.0"}
                    {:name "vm" :value "3.0"}
@@ -42,8 +42,8 @@
                    {:name "DISK" :value "100.0"}
                    {:name "DISK" :value "200.0"}])
 
-(defn rand-user   [] (rand-nth some-users))
-(defn rand-cloud  [] (rand-nth some-clouds))
+(defn rand-user [] (rand-nth some-users))
+(defn rand-cloud [] (rand-nth some-clouds))
 (defn rand-metric [] (rand-nth some-metrics))
 
 (defn some-days
@@ -53,22 +53,22 @@
 (defn usage-record
   [user cloud metric start-timestamp end-timestamp]
   {
-   :cloud_vm_instanceid    (str cloud ":" (cu/random-uuid))
-   :user                   user
-   :cloud                  cloud
-   :start_timestamp        start-timestamp
-   :end_timestamp          end-timestamp
-   :metric_name            (:name metric)
-   :metric_value           (:value metric) })
+   :cloud_vm_instanceid (str cloud ":" (cu/random-uuid))
+   :user                user
+   :cloud               cloud
+   :start_timestamp     start-timestamp
+   :end_timestamp       end-timestamp
+   :metric_name         (:name metric)
+   :metric_value        (:value metric)})
 
 (defn rand-usage-record
   "Returns a random usage record inside the given date"
   [date]
-  (let [nb-minutes-day  (* 24 60)
-        minute-start    (rand-int nb-minutes-day)
-        minute-end      (+ minute-start (rand-int (- nb-minutes-day minute-start)))
-        start           (uu/to-ISO-8601 (uu/inc-minutes date minute-start))
-        end             (uu/to-ISO-8601 (uu/inc-minutes date minute-end))]
+  (let [nb-minutes-day (* 24 60)
+        minute-start   (rand-int nb-minutes-day)
+        minute-end     (+ minute-start (rand-int (- nb-minutes-day minute-start)))
+        start          (uu/to-ISO-8601 (uu/inc-minutes date minute-start))
+        end            (uu/to-ISO-8601 (uu/inc-minutes date minute-end))]
 
     (usage-record (rand-user) (rand-cloud) (rand-metric) start end)))
 
@@ -79,7 +79,7 @@
   (->> days
        (map uu/to-ISO-8601)
        (partition 2 1)
-       (map (fn[[s e]] (us/summarize-and-store! s e :daily [:user :cloud])))
+       (map (fn [[s e]] (us/summarize-and-store! s e :daily [:user :cloud])))
        dorun))
 
 ;;
@@ -124,4 +124,4 @@
   [qs]
   (println
     (str "time curl -H \"slipstream-authn-info: super ADMIN\" -X GET \"http://localhost:8201/api/Usage"
-       (tu/urlencode-params qs) "\"")))
+         (tu/urlencode-params qs) "\"")))

@@ -18,14 +18,14 @@
   (let [users-created (kc/select db/users)]
     (is (= 1 (count users-created)))
     (is (= {:CYCLONELOGIN nil
-            :GITHUBLOGIN "st"
-            :DELETED     false
-            :EMAIL       "st@s.com"
-            :ISSUPERUSER false
-            :JPAVERSION  0
-            :NAME        "st"
-            :RESOURCEURI "user/st"
-            :STATE       "ACTIVE"}
+            :GITHUBLOGIN  "st"
+            :DELETED      false
+            :EMAIL        "st@s.com"
+            :ISSUPERUSER  false
+            :JPAVERSION   0
+            :NAME         "st"
+            :RESOURCEURI  "user/st"
+            :STATE        "ACTIVE"}
            (-> users-created first (dissoc :CREATION :PASSWORD))))
     (is (-> users-created first :PASSWORD))
     (is (-> users-created first :CREATION))))
@@ -37,16 +37,16 @@
     (is (= 2 (count users-created)))))
 
 (deftest test-name-no-collision
-  (is (= "_"         (db/name-no-collision "_"         [])))
-  (is (= "_1"        (db/name-no-collision "_"         ["_"])))
-  (is (= ""          (db/name-no-collision ""          [])))
-  (is (= "_1"        (db/name-no-collision ""          [""])))
+  (is (= "_" (db/name-no-collision "_" [])))
+  (is (= "_1" (db/name-no-collision "_" ["_"])))
+  (is (= "" (db/name-no-collision "" [])))
+  (is (= "_1" (db/name-no-collision "" [""])))
 
   (is (= ["joe", "joe_1", "joe_2"]
          (reduce #(conj %1 (db/name-no-collision %2 %1)) [] (repeat 3 "joe"))))
 
-  (is (= "joe_"      (db/name-no-collision "joe_"      ["joe", "joe_1"])))
-  (is (= "joe_1"     (db/name-no-collision "joe_"      ["joe", "joe_"])))
-  (is (= "joe_2"     (db/name-no-collision "joe_"      ["joe", "joe_", "joe_1"])))
-  (is (= "joe_11"    (db/name-no-collision "joe_10"    ["joe_10"])))
+  (is (= "joe_" (db/name-no-collision "joe_" ["joe", "joe_1"])))
+  (is (= "joe_1" (db/name-no-collision "joe_" ["joe", "joe_"])))
+  (is (= "joe_2" (db/name-no-collision "joe_" ["joe", "joe_", "joe_1"])))
+  (is (= "joe_11" (db/name-no-collision "joe_10" ["joe_10"])))
   (is (= "joe_1_2_4" (db/name-no-collision "joe_1_2_3" ["joe_1_2_3"]))))

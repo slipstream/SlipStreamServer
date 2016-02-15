@@ -12,12 +12,12 @@
                          :right     "VIEW"}]})
 
 (let [timestamp "1964-08-25T10:00:00.0Z"
-      root {:id          resource-name
-            :resourceURI p/service-context
-            :created     timestamp
-            :updated     timestamp
-            :acl         valid-acl
-            :serviceName     "http://cloud.example.org/"}]
+      root      {:id          resource-name
+                 :resourceURI p/service-context
+                 :created     timestamp
+                 :updated     timestamp
+                 :acl         valid-acl
+                 :serviceName "http://cloud.example.org/"}]
 
   (expect nil? (s/check Connector root))
   (expect (s/check Connector (dissoc root :created)))

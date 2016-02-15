@@ -25,8 +25,8 @@
 (defn- retrieve-private-email
   [access-token]
   (let [user-emails-response (http/get "https://api.github.com/user/emails"
-                               {:headers {"Authorization" (str "token " access-token)}})
-        user-emails (-> user-emails-response :body (json/read-str :key-fn keyword))]
+                                       {:headers {"Authorization" (str "token " access-token)}})
+        user-emails          (-> user-emails-response :body (json/read-str :key-fn keyword))]
     (primary-or-verified user-emails)))
 
 (defn- retrieve-email
@@ -38,21 +38,21 @@
 (defn callback-github
   [request redirect-server]
   (try
-    (let [oauth-code (uh/param-value request :code)
+    (let [oauth-code            (uh/param-value request :code)
           access-token-response (http/post "https://github.com/login/oauth/access_token"
                                            {:headers     {"Accept" "application/json"}
                                             :form-params {:client_id     (cf/mandatory-property-value :github-client-id)
                                                           :client_secret (cf/mandatory-property-value :github-client-secret)
                                                           :code          oauth-code}})
-          access-token (-> access-token-response
-                           :body
-                           (json/read-str :key-fn keyword)
-                           :access_token)
+          access-token          (-> access-token-response
+                                    :body
+                                    (json/read-str :key-fn keyword)
+                                    :access_token)
 
-          user-info-response (http/get "https://api.github.com/user"
-                                       {:headers {"Authorization" (str "token " access-token)}})
+          user-info-response    (http/get "https://api.github.com/user"
+                                          {:headers {"Authorization" (str "token " access-token)}})
 
-          user-info (parse-github-user user-info-response)]
+          user-info             (parse-github-user user-info-response)]
 
       (log/debug "Github user-info " user-info)
 

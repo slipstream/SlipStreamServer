@@ -21,9 +21,10 @@
 
 (defn- response-token-ok
   [token]
-  (-> (uh/response 200)
-      (assoc :cookies {"com.sixsq.slipstream.cookie" {:value token
-                                                      :path  "/"}})))
+  (assoc
+    (uh/response 200)
+    :cookies
+    {"com.sixsq.slipstream.cookie" {:value token, :path "/"}}))
 
 (defn valid?
   [credentials]
@@ -44,25 +45,25 @@
 
 (defn create-token
   ([credentials]
-  (if (valid? credentials)
-    [true  {:token (sg/sign-claims (adapt-credentials credentials))}]
-    [false {:message "Invalid credentials when creating token"}]))
+   (if (valid? credentials)
+     [true {:token (sg/sign-claims (adapt-credentials credentials))}]
+     [false {:message "Invalid credentials when creating token"}]))
 
   ([claims token]
    (log/info "Will create token for claims=" claims)
    (try
-      (sg/unsign-claims token)
-      [true {:token (sg/sign-claims claims)}]
-      (catch Exception e
-        (log/error "exception in token creation " e)
-        [false {:message (str "Invalid token when creating token: " e)}]))))
+     (sg/unsign-claims token)
+     [true {:token (sg/sign-claims claims)}]
+     (catch Exception e
+       (log/error "exception in token creation " e)
+       [false {:message (str "Invalid token when creating token: " e)}]))))
 
 (defn login
   [request]
 
   (log/info "Internal authentication.")
-  (let [credentials  (extract-credentials request)
-        [ok? token]  (create-token credentials)]
+  (let [credentials (extract-credentials request)
+        [ok? token] (create-token credentials)]
     (log-result credentials ok?)
     (if ok?
       (response-token-ok token)
@@ -70,7 +71,7 @@
 
 (def ^:private sdf
   (doto (SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss z")
-        (.setTimeZone (TimeZone/getTimeZone "GMT"))))
+    (.setTimeZone (TimeZone/getTimeZone "GMT"))))
 
 (defn now-gmt
   []
@@ -79,8 +80,8 @@
 (defn logout
   []
   (log/info "Logout Internal authentication")
-  (-> (uh/response 200)
-      (assoc :cookies {"com.sixsq.slipstream.cookie" {:value   "INVALID"
-                                                      :path    "/"
-                                                      :max-age 0
-                                                      :expires (now-gmt)}})))
+  (assoc
+    (uh/response 200)
+    :cookies
+    {"com.sixsq.slipstream.cookie"
+     {:value "INVALID", :path "/", :max-age 0, :expires (now-gmt)}}))

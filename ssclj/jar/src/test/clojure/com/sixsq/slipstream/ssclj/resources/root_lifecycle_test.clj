@@ -96,9 +96,8 @@
     (for [[uri method] [[base-uri :options]
                         [base-uri :delete]
                         [base-uri :post]]]
-      (do
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (t/is-status 405))))))
+      (-> (session (ring-app))
+          (request uri
+                   :request-method method
+                   :body (json/write-str {:dummy "value"}))
+          (t/is-status 405)))))

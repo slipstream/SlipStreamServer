@@ -16,30 +16,30 @@
 
 (def collection-routes
   (let-routes [uri (str p/service-context ":resource-name")]
-              (POST uri request
-                    (crud/add request))
-              (GET uri request
-                    (crud/query request))
-              (ANY uri request
-                    (throw (u/ex-bad-method request)))))
+    (POST uri request
+      (crud/add request))
+    (GET uri request
+      (crud/query request))
+    (ANY uri request
+      (throw (u/ex-bad-method request)))))
 
 (def resource-routes
   (let-routes [uri (str p/service-context ":resource-name/:uuid")]
-              (GET uri request
-                   (crud/retrieve request))
-              (PUT uri request
-                   (crud/edit request))
-              (DELETE uri request
-                   (crud/delete request))
-              (ANY uri request
-                   (throw (u/ex-bad-method request)))))
+    (GET uri request
+      (crud/retrieve request))
+    (PUT uri request
+      (crud/edit request))
+    (DELETE uri request
+      (crud/delete request))
+    (ANY uri request
+      (throw (u/ex-bad-method request)))))
 
 (def action-routes
   (let-routes [uri (str p/service-context ":resource-name/:uuid/:action")]
-              (POST uri request
-                    (crud/do-action request))
-              (ANY uri request
-                   (throw (u/ex-bad-method request)))))
+    (POST uri request
+      (crud/do-action request))
+    (ANY uri request
+      (throw (u/ex-bad-method request)))))
 
 (defn not-found
   "Route always returns a 404 error response as a JSON map."
@@ -49,20 +49,20 @@
       (u/map-response "unknown resource" 404 uri))))
 
 (def auth-routes
-  (let-routes [uri-login              (str p/auth-context "login")
-               uri-logout             (str p/auth-context "logout")
+  (let-routes [uri-login   (str p/auth-context "login")
+               uri-logout  (str p/auth-context "logout")
 
-               uri-token              (str p/auth-context "token")
-               uri-github             (str p/auth-context "callback-github")
-               uri-cyclone            (str p/auth-context "callback-cyclone")]
+               uri-token   (str p/auth-context "token")
+               uri-github  (str p/auth-context "callback-github")
+               uri-cyclone (str p/auth-context "callback-cyclone")]
 
-    (POST uri-login   request (auth/login request))
-    (POST uri-logout  request (auth/logout request))
+    (POST uri-login request (auth/login request))
+    (POST uri-logout request (auth/logout request))
 
-    (POST uri-token   request (auth/build-token request))
+    (POST uri-token request (auth/build-token request))
 
-    (GET uri-github   request (gh/callback-github request (cf/property-value :main-server)))
-    (GET uri-cyclone  request (cy/callback-cyclone request (cf/property-value :main-server)))))
+    (GET uri-github request (gh/callback-github request (cf/property-value :main-server)))
+    (GET uri-cyclone request (cy/callback-cyclone request (cf/property-value :main-server)))))
 
 (def final-routes
   [

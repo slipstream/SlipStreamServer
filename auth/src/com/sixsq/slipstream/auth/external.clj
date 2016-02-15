@@ -35,12 +35,13 @@
   [authn-method external-login external-email redirect-server]
   (if (and (not-empty external-login) (not-empty external-email))
     (let [[matched-user redirect-url] (match-external-user! authn-method external-login external-email)
-          token                       (sg/sign-claims {:com.sixsq.identifier matched-user
-                                                       :exp                  (sg/expiry-timestamp)})]
+          token (sg/sign-claims {:com.sixsq.identifier matched-user
+                                 :exp                  (sg/expiry-timestamp)})]
 
-      (-> (uh/response-redirect (str redirect-server redirect-url))
-          (assoc :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
-                                                          :path  "/"}})))
+      (assoc
+        (uh/response-redirect (str redirect-server redirect-url))
+        :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
+                                                 :path  "/"}}))
     (uh/response-redirect (str redirect-server "/login?flash-now-warning=auth-failed"))))
 
 (defn sanitize-login-name

@@ -16,9 +16,9 @@
     (let [current-db-spec (db-spec)]
       (log/info (format "Creating korma database %s" current-db-spec))
       (defdb korma-auth-db current-db-spec))
-      (log/info "Korma init done")
-      (kc/defentity users (kc/table "USER") (kc/database korma-auth-db))
-      (log/info "Korma Entities defined")))
+    (log/info "Korma init done")
+    (kc/defentity users (kc/table "USER") (kc/database korma-auth-db))
+    (log/info "Korma Entities defined")))
 
 (defn init
   []
@@ -27,10 +27,9 @@
 (defn find-usernames-by-email
   [email]
   (init)
-  (->> (kc/select users
-                  (kc/fields [:NAME])
-                  (kc/where {:EMAIL email}))
-       (map :NAME)))
+  (map
+    :NAME
+    (kc/select users (kc/fields [:NAME]) (kc/where {:EMAIL email}))))
 
 (defn- column-name
   [authn-method]
@@ -52,15 +51,14 @@
                    (kc/where {(column-keyword authn-method) authn-id}))]
     (if (> (count matched-users) 1)
       (throw (Exception. (str "There should be only one result for " authn-id)))
-      (-> (first matched-users)
-          :NAME))))
+      (:NAME (first matched-users)))))
 
 (defn update-user-authn-info
   [authn-method slipstream-username authn-id]
   (init)
   (kc/update users
              (kc/set-fields {(column-keyword authn-method) authn-id})
-             (kc/where      {:NAME slipstream-username}))
+             (kc/where {:NAME slipstream-username}))
   slipstream-username)
 
 (defn- inc-string
@@ -83,8 +81,7 @@
 
 (defn- existing-user-names
   []
-  (->> (kc/select users (kc/fields [:NAME]))
-       (map :NAME)))
+  (map :NAME (kc/select users (kc/fields [:NAME]))))
 
 (defn random-password
   []

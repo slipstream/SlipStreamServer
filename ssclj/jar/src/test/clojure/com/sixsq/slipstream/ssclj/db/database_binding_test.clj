@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.db.database-binding-test
-  (:refer-clojure                                           :exclude [update])
-  (:require    
-    [com.sixsq.slipstream.ssclj.db.database-binding         :as dbb] 
-    [com.sixsq.slipstream.ssclj.resources.common.utils      :as cu]
-    [korma.core                                             :refer :all]
-    [expectations                                           :refer :all]
-    [clojure.tools.logging                                  :as log]))
+  (:refer-clojure :exclude [update])
+  (:require
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbb]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
+    [korma.core :refer :all]
+    [expectations :refer :all]
+    [clojure.tools.logging :as log]))
 
 (def db (dbb/get-instance))
 
@@ -14,7 +14,7 @@
 (log/info "All resources deleted")
 
 ;; Given a clean database
-(def data {:id "type/123" :name "alfred" :age 23
+(def data {:id  "type/123" :name "alfred" :age 23
            :acl {:owner {:type "USER" :principal "alfred"}
                  :rules [{:type "USER" :principal "alfred" :right "ALL"}]}})
 (def response-add (.add db "Type" data))
@@ -24,7 +24,7 @@
 (expect "type/123" (get-in response-add [:headers "Location"]))
 (expect "application/json" (get-in response-add [:headers "Content-Type"]))
 (expect {:status 201 :message "created type/123" :resource-id "type/123"} (:body response-add))
-;; Then the result is a ring response 
+;; Then the result is a ring response
 ;; with status, headers and body correctly filled
 
 (def resources-in-db (select resources))
@@ -41,7 +41,7 @@
 (try
   (.add db "type" data)
   (expect false "should have been caught")
-  (catch Exception e 
+  (catch Exception e
     (log/info "caught exception: class=" (class e))))
 ;; Then it is not allowed to re-add a data with the same id
 
@@ -54,7 +54,7 @@
 ;; Then it equals what was added
 
 (def collection (.query db "type" {:identity
-                                   {:current "alfred"
+                                   {:current         "alfred"
                                     :authentications {"alfred" {:identity "alfred" :roles []}}}}))
 
 (expect (list data) collection)

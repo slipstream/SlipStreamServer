@@ -26,9 +26,9 @@
   [frequency]
   (let [start-day (time/today-at 0 0)]
     (case frequency
-      :daily    start-day
-      :weekly   (date-at-monday start-day)
-      :monthly  (time/date-time (time/year start-day) (time/month start-day)))))
+      :daily start-day
+      :weekly (date-at-monday start-day)
+      :monthly (time/date-time (time/year start-day) (time/month start-day)))))
 
 (defn- previous-at-frequency
   [frequency]
@@ -52,10 +52,9 @@
 
 (defn- split-trim-keywordize
   [s]
-  (->>  (split-trim s)
-        (map keyword)))
+  (map keyword (split-trim s)))
 
-(def cli-options  
+(def cli-options
   [["-d" "--date DATE" "Date to summarize, yyyy-mm-dd, e.g 2015-04-16"
     :parse-fn #(str % "T00:00:00.000Z")
     :validate [cu/valid-timestamp? "Must be a valid date, e.g 2015-01-15"]]
@@ -101,14 +100,14 @@
 
 (defn parse-args
   [args]
-  (let [{:keys [options errors]}  (cli/parse-opts args cli-options)
-        _                         (throw-when-errors errors)
-        _                         (check-required #{:frequency} options)
-        frequency                 (:frequency options)
-        start                     (date-or-previous options frequency)
-        except-users              (:except options)
-        grouped-by                (:grouped-by options)
-        n                         (:number options)]
+  (let [{:keys [options errors]} (cli/parse-opts args cli-options)
+        _            (throw-when-errors errors)
+        _            (check-required #{:frequency} options)
+        frequency    (:frequency options)
+        start        (date-or-previous options frequency)
+        except-users (:except options)
+        grouped-by   (:grouped-by options)
+        n            (:number options)]
     [start frequency except-users grouped-by n]))
 
 (defn backward-periods

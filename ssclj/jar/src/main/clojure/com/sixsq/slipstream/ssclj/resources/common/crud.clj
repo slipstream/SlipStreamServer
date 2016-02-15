@@ -11,8 +11,8 @@
 (defn resource-name-dispatch
   [request]
   (-> request
-       (get-in [:params :resource-name])
-       u/lisp-to-camelcase))
+      (get-in [:params :resource-name])
+      u/lisp-to-camelcase))
 
 (defn resource-name-and-action-dispatch
   [request]
@@ -34,33 +34,33 @@
 (defmulti query resource-name-dispatch)
 
 (defmethod query :default
-  [request]  
+  [request]
   (throw (u/ex-bad-method request)))
 
 
 (defmulti retrieve resource-name-dispatch)
 
 (defmethod retrieve :default
-  [request]  
+  [request]
   (throw (u/ex-bad-method request)))
 
 (defmulti edit resource-name-dispatch)
 
 (defmethod edit :default
-  [request]  
+  [request]
   (throw (u/ex-bad-method request)))
 
 
 (defmulti delete resource-name-dispatch)
 
 (defmethod delete :default
-  [request]  
+  [request]
   (throw (u/ex-bad-method request)))
 
 (defmulti do-action resource-name-and-action-dispatch)
 
 (defmethod do-action :default
-  [request]  
+  [request]
   (throw (u/ex-bad-method request)))
 
 
@@ -87,7 +87,7 @@
           :resourceURI)
 
 (defmethod validate :default
-           [resource]
+  [resource]
   (throw (ex-info (str "unknown resource type: " (:resourceURI resource)) resource)))
 
 ;;
@@ -106,12 +106,12 @@
   [resource request]
   (try
     (a/can-modify? resource request)
-    (let [href (:id resource)
+    (let [href        (:id resource)
           resourceURI (:resourceURI resource)
-          ops (if (.endsWith resourceURI "Collection")
-                [{:rel (:add c/action-uri) :href href}]
-                [{:rel (:edit c/action-uri) :href href}
-                 {:rel (:delete c/action-uri) :href href}])]
+          ops         (if (.endsWith resourceURI "Collection")
+                        [{:rel (:add c/action-uri) :href href}]
+                        [{:rel (:edit c/action-uri) :href href}
+                         {:rel (:delete c/action-uri) :href href}])]
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))
@@ -124,8 +124,8 @@
 ;;
 
 (defmulti new-identifier
-  (fn [json resource-name]
-    resource-name))
+          (fn [json resource-name]
+            resource-name))
 
 (defmethod new-identifier :default
   [json resource-name]
@@ -137,8 +137,8 @@
 ;;
 
 (defmulti add-acl
-  (fn [{:keys [resourceURI]} request]
-    resourceURI))
+          (fn [{:keys [resourceURI]} request]
+            resourceURI))
 
 (defmethod add-acl :default
   [json request]

@@ -16,15 +16,15 @@
 
 (defn- damage [creds key] (assoc creds key "WRONG"))
 
-(def valid-credentials  {:user-name "super"    :password   "supeRsupeR"})
-(def wrong-password     (damage valid-credentials :password))
-(def wrong-user         (damage valid-credentials :user-name))
-(def wrong-both         (-> valid-credentials
-                            (damage :user-name)
-                            (damage :password)))
-(def missing-user       (dissoc valid-credentials :user-name))
-(def missing-password   (dissoc valid-credentials :password))
-(def missing-both       {})
+(def valid-credentials {:user-name "super" :password "supeRsupeR"})
+(def wrong-password (damage valid-credentials :password))
+(def wrong-user (damage valid-credentials :user-name))
+(def wrong-both (-> valid-credentials
+                    (damage :user-name)
+                    (damage :password)))
+(def missing-user (dissoc valid-credentials :user-name))
+(def missing-password (dissoc valid-credentials :password))
+(def missing-both {})
 
 (def wrongs [wrong-user
              wrong-password
@@ -72,14 +72,12 @@
 
 (deftest test-check-token-when-valid-token-retrieves-claims
   (th/add-user-for-test! valid-credentials)
-  (let [valid-token (-> (ia/create-token valid-credentials)
-                        token-value)]
+  (let [valid-token (token-value (ia/create-token valid-credentials))]
     (is (= "super" (:com.sixsq.identifier (sg/unsign-claims valid-token))))))
 
 (deftest test-create-token-removes_password-from-token
   (th/add-user-for-test! valid-credentials)
-  (let [valid-token (-> (ia/create-token valid-credentials)
-                        token-value)]
+  (let [valid-token (token-value (ia/create-token valid-credentials))]
     (is (nil? (:password (sg/unsign-claims valid-token))))))
 
 (deftest password-encryption-compatible-with-slipstream
@@ -88,11 +86,9 @@
 
 (deftest check-claims-token
   (th/add-user-for-test! valid-credentials)
-  (let [claims {:a 1 :b 2}
-        valid-token (-> (ia/create-token valid-credentials)
-                        token-value)
-        claim-token (-> (ia/create-token claims valid-token)
-                        token-value)]
+  (let [claims      {:a 1 :b 2}
+        valid-token (token-value (ia/create-token valid-credentials))
+        claim-token (token-value (ia/create-token claims valid-token))]
     (is (= claims (sg/unsign-claims claim-token)))))
 
 (deftest test-users-by-email
@@ -106,31 +102,31 @@
                           :password  "123456"
                           :email     "joe@sixsq.com"})
 
-  (is (= []                   (db/find-usernames-by-email "unknown@xxx.com")))
-  (is (= ["jack"]             (db/find-usernames-by-email "jack@sixsq.com")))
-  (is (= ["joe" "joe-alias"]  (db/find-usernames-by-email "joe@sixsq.com"))))
+  (is (= [] (db/find-usernames-by-email "unknown@xxx.com")))
+  (is (= ["jack"] (db/find-usernames-by-email "jack@sixsq.com")))
+  (is (= ["joe" "joe-alias"] (db/find-usernames-by-email "joe@sixsq.com"))))
 
 (deftest test-users-by-authn
-  (th/add-user-for-test! {:user-name     "joe-slipstream"
-                          :password      "123456"
-                          :email         "joe@sixsq.com"
-                          :github-id      "joe"})
+  (th/add-user-for-test! {:user-name "joe-slipstream"
+                          :password  "123456"
+                          :email     "joe@sixsq.com"
+                          :github-id "joe"})
 
-  (th/add-user-for-test! {:user-name     "jack-slipstream"
-                          :password      "123456"
-                          :email         "jack@sixsq.com"
-                          :github-id      "jack"})
+  (th/add-user-for-test! {:user-name "jack-slipstream"
+                          :password  "123456"
+                          :email     "jack@sixsq.com"
+                          :github-id "jack"})
 
-  (th/add-user-for-test! {:user-name     "alice-slipstream"
-                          :password      "123456"
-                          :email         "alice@sixsq.com"})
+  (th/add-user-for-test! {:user-name "alice-slipstream"
+                          :password  "123456"
+                          :email     "alice@sixsq.com"})
 
   (is (nil? (db/find-username-by-authn :github "unknownid")))
   (is (= "joe-slipstream" (db/find-username-by-authn :github "joe"))))
 
 (deftest test-users-by-authn-detect-inconsistent-data
-  (dotimes [_ 2] (th/add-user-for-test! {:user-name     "joe-slipstream"
-                                         :password      "123456"
-                                         :email         "joe@sixsq.com"
-                                         :github-id      "joe"}))
+  (dotimes [_ 2] (th/add-user-for-test! {:user-name "joe-slipstream"
+                                         :password  "123456"
+                                         :email     "joe@sixsq.com"
+                                         :github-id "joe"}))
   (is (thrown-with-msg? Exception #"one result for joe" (db/find-username-by-authn :github "joe"))))

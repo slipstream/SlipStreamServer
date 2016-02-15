@@ -5,10 +5,10 @@
 
 (defn- display-querystring
   [request]
-  (str "?" (->  request
-                :query-string
-                (or "no-query-string")
-                (str/replace #"&?password=([^&]*)" ""))))
+  (str "?" (-> request
+               :query-string
+               (or "no-query-string")
+               (str/replace #"&?password=([^&]*)" ""))))
 
 (defn- display-authn-info
   [request]
@@ -73,7 +73,7 @@
   [handler]
   (fn [request]
     (log-request request)
-    (let [start       (System/currentTimeMillis)
-          response    (handler request)]
+    (let [start    (System/currentTimeMillis)
+          response (handler request)]
       (log-response request response start)
       response)))

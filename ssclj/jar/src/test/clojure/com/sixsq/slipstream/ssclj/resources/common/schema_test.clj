@@ -5,21 +5,6 @@
     [expectations :refer :all]))
 
 ;;
-;; NotEmpty
-;;
-
-(expect nil? (s/check NotEmpty "ok"))
-(expect nil? (s/check NotEmpty ["ok"]))
-(expect nil? (s/check NotEmpty [1 2]))
-(expect nil? (s/check NotEmpty {"ok" "value"}))
-(expect nil? (s/check NotEmpty {1 2}))
-(expect nil? (s/check NotEmpty "\t"))
-(expect nil? (s/check NotEmpty " "))
-(expect (s/check NotEmpty ""))
-(expect (s/check NotEmpty []))
-(expect (s/check NotEmpty {}))
-
-;;
 ;; PosInt
 ;;
 
@@ -154,7 +139,7 @@
               :right     "ALL"}]]
   (expect nil? (s/check AccessControlRules rules))
   (expect nil? (s/check AccessControlRules (next rules)))
-  (expect (s/check AccessControlRules (next (next rules))))
+  (expect (s/check AccessControlRules (nnext rules)))
   (expect (s/check AccessControlRules (cons 1 rules))))
 
 (let [acl {:owner {:principal "::ADMIN"
@@ -178,7 +163,7 @@
 ;; Common CIMI attributes
 ;;
 
-(let [date "2012-01-01T01:23:45.678Z"
+(let [date    "2012-01-01T01:23:45.678Z"
       minimal {:id          "a"
                :resourceURI "http://example.org/data"
                :created     date

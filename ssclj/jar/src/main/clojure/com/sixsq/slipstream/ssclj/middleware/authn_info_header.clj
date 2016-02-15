@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.middleware.authn-info-header
-  (:require 
-    [superstring.core                                             :as str]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils    :as du]))
+  (:require
+    [superstring.core :as str]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 ;; NOTE: ring uses lowercased values of header names!
 (def ^:const authn-info-header
   "slipstream-authn-info")
 
 (defn extract-authn-info
-  [request]  
+  [request]
   (let [hcontent (get-in request [:headers authn-info-header])]
     (->> (str/split (or hcontent "") #"\s+")
          (remove str/blank?)
@@ -31,5 +31,5 @@
     (->> request
          (extract-authn-info)
          (create-identity-map)
-         (assoc request :identity)                  
+         (assoc request :identity)
          (handler))))

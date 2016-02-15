@@ -39,18 +39,18 @@
 (defn callback-cyclone
   [request redirect-server]
   (try
-    (let [code            (uh/param-value request :code)
-          token-response  (http/post (cyclone-token-url)
+    (let [code           (uh/param-value request :code)
+          token-response (http/post (cyclone-token-url)
                                     {:headers     {"Accept" "application/json"}
                                      :form-params {:grant_type   "authorization_code"
                                                    :code         code
                                                    :redirect_uri (redirect_uri)
                                                    :client_id    "slipstream"}})
-          access-token    (-> token-response
-                           :body
-                           (json/read-str :key-fn keyword)
-                           :access_token)
-          claims          (sg/unsign-claims access-token "cyclone_pubkey.pem")]
+          access-token   (-> token-response
+                             :body
+                             (json/read-str :key-fn keyword)
+                             :access_token)
+          claims         (sg/unsign-claims access-token "cyclone_pubkey.pem")]
       (log/debug "Cyclone claims " claims)
       (ex/redirect-with-matched-user :cyclone (login-name claims) (:email claims) redirect-server))
     (catch Exception e

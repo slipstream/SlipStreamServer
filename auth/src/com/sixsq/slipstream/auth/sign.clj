@@ -28,7 +28,7 @@
 (defn- read-private-key
   [private-key-pem]
   (let [passphrase (cf/property-value :passphrase)
-        privkey (io/resource private-key-pem)]
+        privkey    (io/resource private-key-pem)]
     (if (and passphrase privkey)
       (ks/private-key privkey passphrase)
       (throw (IllegalStateException. "Passphrase not defined or private key not accessible (must be in the classpath).")))))

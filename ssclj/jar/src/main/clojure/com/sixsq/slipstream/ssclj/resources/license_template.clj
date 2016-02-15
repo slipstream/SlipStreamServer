@@ -38,10 +38,10 @@
   {(s/optional-key :licenseData) c/NonBlankString})
 
 (def LicenseTemplateRef
-  (s/both
+  (s/constrained
     (merge LicenseTemplateAttrs
            {(s/optional-key :href) c/NonBlankString})
-    c/NotEmpty))
+    seq 'not-empty?))
 
 ;;
 ;; multimethods for validation and operations
@@ -49,11 +49,11 @@
 
 (def validate-fn (u/create-validation-fn LicenseTemplate))
 (defmethod crud/validate resource-uri
-           [resource]
+  [resource]
   (validate-fn resource))
 
 (defmethod crud/add-acl resource-uri
-           [resource request]
+  [resource request]
   (a/add-acl resource request))
 
 ;;
@@ -63,29 +63,29 @@
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
-           [request]
+  [request]
   (add-impl request))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
 (defmethod crud/retrieve resource-name
-           [request]
+  [request]
   (retrieve-impl request))
 
 (def edit-impl (std-crud/edit-fn resource-name))
 
 (defmethod crud/edit resource-name
-           [request]
+  [request]
   (edit-impl request))
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
 (defmethod crud/delete resource-name
-           [request]
+  [request]
   (delete-impl request))
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
 (defmethod crud/query resource-name
-           [request]
+  [request]
   (query-impl request))

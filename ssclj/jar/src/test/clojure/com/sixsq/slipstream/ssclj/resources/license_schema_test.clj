@@ -12,15 +12,15 @@
                          :right     "VIEW"}]})
 
 (let [timestamp "1964-08-25T10:00:00.0Z"
-      root {:id          resource-name
-            :resourceURI p/service-context
-            :created     timestamp
-            :updated     timestamp
-            :acl         valid-acl
-            :owner       "Legal Person"
-            :type        "CloudX Connector"
-            :expiry      "2020-08-25T00:00:00.000Z"
-            :userLimit   0}]
+      root      {:id          resource-name
+                 :resourceURI p/service-context
+                 :created     timestamp
+                 :updated     timestamp
+                 :acl         valid-acl
+                 :owner       "Legal Person"
+                 :type        "CloudX Connector"
+                 :expiry      "2020-08-25T00:00:00.000Z"
+                 :userLimit   0}]
 
   (expect nil? (s/check License root))
   (expect (s/check License (dissoc root :created)))

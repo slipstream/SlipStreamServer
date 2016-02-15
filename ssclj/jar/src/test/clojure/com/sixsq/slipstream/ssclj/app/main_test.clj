@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.app.main-test
-    (:require
-      [expectations :refer :all]
-      [com.sixsq.slipstream.ssclj.app.main :refer :all]))
+  (:require
+    [expectations :refer :all]
+    [com.sixsq.slipstream.ssclj.app.main :refer :all]))
 
 (expect nil (parse-port nil))
 (expect nil (parse-port (System/getProperties)))

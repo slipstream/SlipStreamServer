@@ -17,5 +17,5 @@
 (defn paginate
   [first last col]
   (-> col
-      (cut-first  first)
-      (cut-last   first last)))
+      (cut-first first)
+      (cut-last first last)))
