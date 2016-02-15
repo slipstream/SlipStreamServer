@@ -9,17 +9,17 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def default-db-spec
-  { :classname    "org.hsqldb.jdbc.JDBCDriver" 
-    :subprotocol  "hsqldb" 
-    :subname      "mem://localhost:9012/devresources"
-    :make-pool?   true })
+  {:classname   "org.hsqldb.jdbc.JDBCDriver"
+   :subprotocol "hsqldb"
+   :subname     "mem://localhost:9012/devresources"
+   :make-pool?  true})
 
 (defn- find-resource
   [resource-path]
   (if-let [config-file (io/resource resource-path)]
     (do
       (log/info "================================================")
-      (log/info "Will use "(.getPath config-file)" as config file")
+      (log/info "Will use " (.getPath config-file) " as config file")
       config-file)
     (let [msg (str "Resource not found (must be in classpath): '" resource-path "'")]
       (log/error msg)

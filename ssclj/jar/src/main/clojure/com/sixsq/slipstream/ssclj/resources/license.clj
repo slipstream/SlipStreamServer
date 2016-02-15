@@ -50,16 +50,16 @@
 
 (def validate-fn (u/create-validation-fn License))
 (defmethod crud/validate resource-uri
-           [resource]
+  [resource]
   (validate-fn resource))
 
 (def create-validate-fn (u/create-validation-fn LicenseCreate))
 (defmethod crud/validate create-uri
-           [resource]
+  [resource]
   (create-validate-fn resource))
 
 (defmethod crud/add-acl resource-uri
-           [resource request]
+  [resource request]
   (a/add-acl resource request))
 
 ;;
@@ -84,7 +84,7 @@
 
 ;; requires a LicenseTemplate to create new license
 (defmethod crud/add resource-name
-           [{:keys [body] :as request}]
+  [{:keys [body] :as request}]
   (let [body (-> body
                  (assoc :resourceURI create-uri)
                  (crud/validate)
@@ -95,23 +95,23 @@
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
 (defmethod crud/retrieve resource-name
-           [request]
+  [request]
   (retrieve-impl request))
 
 (def edit-impl (std-crud/edit-fn resource-name))
 
 (defmethod crud/edit resource-name
-           [request]
+  [request]
   (edit-impl request))
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
 (defmethod crud/delete resource-name
-           [request]
+  [request]
   (delete-impl request))
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
 (defmethod crud/query resource-name
-           [request]
+  [request]
   (query-impl request))

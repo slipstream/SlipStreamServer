@@ -26,9 +26,9 @@
 
 (defn construct-base-uri
   ([req]
-    (construct-base-uri req p/service-context))
+   (construct-base-uri req p/service-context))
   ([req service-context]
-        (format "%s://%s%s" (get-scheme req) (get-host-port req) service-context)))
+   (format "%s://%s%s" (get-scheme req) (get-host-port req) service-context)))
 
 (defn wrap-base-uri
   "adds the :base-uri key to the request with the base URI value"

@@ -28,9 +28,9 @@
     x))
 
 (defmacro e->
- [& body]
- `(-> ~@(interleave body (repeat show))))
+  [& body]
+  `(-> ~@(interleave body (repeat show))))
 
 (defmacro e->>
- [& body]
- `(->> ~@(interleave body (repeat show))))
+  [& body]
+  `(->> ~@(interleave body (repeat show))))

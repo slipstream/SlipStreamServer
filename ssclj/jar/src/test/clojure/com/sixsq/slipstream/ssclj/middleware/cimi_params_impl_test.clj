@@ -8,7 +8,7 @@
   "Sets the $key-name value in the parameters and then extracts
    the value of :key-name from :cimi-params in the result."
   [f key-name v]
-  (let [kw (keyword key-name)
+  (let [kw    (keyword key-name)
         pname (str "$" key-name)]
     (->> {:params {pname v}}
          (f)

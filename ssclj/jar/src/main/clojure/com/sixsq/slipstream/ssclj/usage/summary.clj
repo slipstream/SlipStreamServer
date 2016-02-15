@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.usage.summary
- (:require
-  [clojure.tools.logging                            :as log]
-  [clj-time.core                                    :as t]
-  [com.sixsq.slipstream.ssclj.usage.utils           :as u]
-  [com.sixsq.slipstream.ssclj.usage.record-keeper   :as rc]))
+  (:require
+    [clojure.tools.logging :as log]
+    [clj-time.core :as t]
+    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]))
 
 ;;
 ;; Cuts (truncate start or end timestamp) and aggregates usage records inside an interval.
@@ -50,7 +50,7 @@
 
 (defn contribution
   [record]
-  (let [value (:metric_value record)
+  (let [value      (:metric_value record)
         nb-minutes (-> (u/to-interval (:start_timestamp record) (:end_timestamp record))
                        t/in-seconds
                        (/ 60.0))]
@@ -58,7 +58,7 @@
 
 (defn- comsumption
   [record]
-  { :unit_minutes (contribution record)})
+  {:unit_minutes (contribution record)})
 
 (defn- sum-consumptions
   [cons1 cons2]
@@ -66,7 +66,7 @@
 
 (defn- merge-summary-record
   [summary record]
-  (let [record-metric (:metric_name record)
+  (let [record-metric      (:metric_name record)
         record-comsumption (comsumption record)]
     (if-let [consumption-to-increase (get-in summary [:usage record-metric])]
       (assoc-in summary [:usage record-metric] (sum-consumptions consumption-to-increase record-comsumption))
@@ -96,7 +96,7 @@
   (->> records
        (remove-users except-users)
        (truncate start-time end-time)
-       (group-by (fn[record] (select-keys record grouping-cols)))
+       (group-by (fn [record] (select-keys record grouping-cols)))
        vals
        (summarize-groups-of-records start-time end-time frequency grouping-cols)))
 

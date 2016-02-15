@@ -15,7 +15,7 @@
       (uh/param-value :authn-method)
       keyword))
 
-(defmulti login   dispatch-on-authn-method)
+(defmulti login dispatch-on-authn-method)
 
 (defmethod login :internal
   [request]
@@ -42,8 +42,8 @@
 (defn build-token
   [request]
   (log/info "Will build-token")
-  (let [{:keys [claims token]}  (extract-claims-token request)
-        [ok? token]             (ia/create-token claims token)]
+  (let [{:keys [claims token]} (extract-claims-token request)
+        [ok? token] (ia/create-token claims token)]
     (if ok?
       (uh/response-with-body 200 (:token token))
       (uh/response-forbidden))))

@@ -172,7 +172,7 @@
 
 (defn- acl-for-user-cloud
   [summary]
-  (let [user (:user summary)
+  (let [user  (:user summary)
         cloud (:cloud summary)]
 
     {:owner {:type "USER" :principal user}
@@ -181,7 +181,7 @@
 
 (defn- id-map-for-summary
   [summary]
-  (let [user (:user summary)
+  (let [user  (:user summary)
         cloud (:cloud summary)]
     {:identity user
      :roles    [cloud]}))
@@ -199,16 +199,16 @@
 
 (defn insert-summary!
   [summary]
-  (let [acl (acl-for-user-cloud summary)
-        summary-resource (resource-for summary acl)
+  (let [acl                   (acl-for-user-cloud summary)
+        summary-resource      (resource-for summary acl)
         previous-computations (kc/select usage_summaries
                                          (kc/where
                                            (clause-where
                                              summary-resource [:user :cloud :start_timestamp :end_timestamp])))
         _
-        (doseq [previous-computation previous-computations]
-          (kc/delete usage_summaries (kc/where {:id (:id previous-computation)}))
-          (acl/-deleteResource (:id previous-computation) "Usage" (id-map-for-summary previous-computation)))]
+                              (doseq [previous-computation previous-computations]
+                                (kc/delete usage_summaries (kc/where {:id (:id previous-computation)}))
+                                (acl/-deleteResource (:id previous-computation) "Usage" (id-map-for-summary previous-computation)))]
 
     (kc/insert usage_summaries (kc/values (merge summary-resource {:compute_timestamp (u/now-to-ISO-8601)})))
     (acl/insert-resource (:id summary-resource) "Usage" (acl/types-principals-from-acl acl))))

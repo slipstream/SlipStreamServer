@@ -10,11 +10,11 @@
 (defn -claimsInToken
   [^String token]
   (try
-      (log/debug "Will check authentication token: " token)
-      (-> token
-          sg/unsign-claims
-          clojure.walk/stringify-keys)
-      (catch Exception e
-        (do
-          (log/warn "Invalid authentication token : " token ", cause" e)
-          {}))))
+    (log/debug "Will check authentication token: " token)
+    (-> token
+        sg/unsign-claims
+        clojure.walk/stringify-keys)
+    (catch Exception e
+      (do
+        (log/warn "Invalid authentication token : " token ", cause" e)
+        {}))))

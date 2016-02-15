@@ -1,39 +1,39 @@
 (ns com.sixsq.slipstream.ssclj.api.acl
   (:refer-clojure :exclude [update])
   (:require
-    [com.sixsq.slipstream.ssclj.database.korma-helper             :as kh]
-    [clojure.tools.logging                                        :as log]
-    [clojure.set                                                  :as s]
-    [clojure.walk                                                 :as w]
-    [korma.core                                                   :refer :all]
-    [com.sixsq.slipstream.ssclj.api.ddl                           :as ddl]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils      :as du])
+    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
+    [clojure.tools.logging :as log]
+    [clojure.set :as s]
+    [clojure.walk :as w]
+    [korma.core :refer :all]
+    [com.sixsq.slipstream.ssclj.api.ddl :as ddl]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
   (:gen-class
     :name com.sixsq.slipstream.ssclj.api.Acl
     :methods [
 
-    #^{:static true} [init            [] void]
+              #^{:static true} [init [] void]
 
-    #^{:static true} [insertResource  [String String java.util.Map] int]
-    #^{:static true} [getResourceIds  [String java.util.Map] java.util.Set]
-    #^{:static true} [hasResourceId   [String String java.util.Map] boolean]
-    #^{:static true} [deleteResource  [String String java.util.Map] boolean]
+              #^{:static true} [insertResource [String String java.util.Map] int]
+              #^{:static true} [getResourceIds [String java.util.Map] java.util.Set]
+              #^{:static true} [hasResourceId [String String java.util.Map] boolean]
+              #^{:static true} [deleteResource [String String java.util.Map] boolean]
 
-    ;;
-    ;; Utils functions
-    ;;
-    #^{:static true} [idMap           [String java.util.List] java.util.Map]
+              ;;
+              ;; Utils functions
+              ;;
+              #^{:static true} [idMap [String java.util.List] java.util.Map]
 
-    ;; TODO st protect in some environments
-    #^{:static true} [deleteAll       [] void]
-    #^{:static true} [populate        [String String int] void]]))
+              ;; TODO st protect in some environments
+              #^{:static true} [deleteAll [] void]
+              #^{:static true} [populate [String String int] void]]))
 
-(defn create-entities   
+(defn create-entities
   []
   (defentity acl (database kh/korma-api-db))
-  (select acl (limit 1))) ;; korma "warmup"
-    
-;; 
+  (select acl (limit 1)))                                   ;; korma "warmup"
+
+;;
 ;;
 (def do-init
   (delay
@@ -45,23 +45,23 @@
 (defn -init
   []
   @do-init)
-;; 
+;;
 ;;
 
 ;;
 ;;
-(defn- check-not-empty   
+(defn- check-not-empty
   [type-names]
   (if (empty? type-names)
     (throw (IllegalArgumentException. "Can not be called with an empty set"))))
 
 (defn- rows
-  ([id type type-names]    
-    (check-not-empty type-names)
-    (set (for [[ptype pname] type-names] {:resource_id id :resource_type type :principal_type ptype :principal_name pname})))
+  ([id type type-names]
+   (check-not-empty type-names)
+   (set (for [[ptype pname] type-names] {:resource_id id :resource_type type :principal_type ptype :principal_name pname})))
   ([type type-names]
-    (check-not-empty type-names)
-    (set (for [[ptype pname] type-names] {:resource_type type :principal_type ptype :principal_name pname}))))    
+   (check-not-empty type-names)
+   (set (for [[ptype pname] type-names] {:resource_type type :principal_type ptype :principal_name pname}))))
 
 ;;
 ;; An entire row is also the clause to query it in db
@@ -83,38 +83,38 @@
   "Parses
   { :identity \"joe\"
     :roles [\"ROLE1\" \"ROLE2\"] }
-    into 
-  a vector of 2-tuples (type name) 
+    into
+  a vector of 2-tuples (type name)
  [ [\"user\" \"joe\"] [\"role\" \"ROLE1\"] [\"role\" \"ROLE2\"] ]"
   [authn]
   (if (empty? authn)
     (throw (IllegalArgumentException. "Can not be called with an empty map")))
-    (let [user-name (:identity authn)
-          role-names (:roles authn)]
-      (concat [["USER" user-name]] (map (fn[r] ["ROLE" r]) role-names))))
+  (let [user-name  (:identity authn)
+        role-names (:roles authn)]
+    (concat [["USER" user-name]] (map (fn [r] ["ROLE" r]) role-names))))
 
-(defn extract-current   
+(defn extract-current
   [authns]
   (if-let [current (:current authns)]
     (get-in authns [:authentications (keyword current)])
     authns))
 
-(defn parse-authn   
+(defn parse-authn
   [authn-map]
-  (->>  authn-map
-        (into {})
-        w/keywordize-keys
-        extract-current
-        parse-id-map))
+  (->> authn-map
+       (into {})
+       w/keywordize-keys
+       extract-current
+       parse-id-map))
 
 ;; API
 ;;
 
-(defn -idMap   
+(defn -idMap
   [user roles]
   {:identity user :roles roles})
 
-(defn- type-principal-from-rule   
+(defn- type-principal-from-rule
   [{:keys [type principal]}]
   [type principal])
 
@@ -129,13 +129,13 @@
   [^String id ^String type types-principals]
   (check-init-called)
   (let [
-    candidates        (rows id type types-principals)
-    existings         (filter-existing candidates)
-    actual-inserts    (s/difference candidates existings)]
-    (when (seq actual-inserts)            
+        candidates     (rows id type types-principals)
+        existings      (filter-existing candidates)
+        actual-inserts (s/difference candidates existings)]
+    (when (seq actual-inserts)
       ;; loop of single inserts instead of bulk one because korma translates this
       ;; into SQL not supported by sqlite : http://stackoverflow.com/questions/1609637/is-it-possible-to-insert-multiple-rows-at-a-time-in-an-sqlite-database
-      (doseq [actual-insert actual-inserts]                
+      (doseq [actual-insert actual-inserts]
         (insert acl (values actual-insert))))
 
     (log-warn-existing existings)
@@ -145,40 +145,40 @@
   [^String id ^String type ^java.util.Map authn]
   (check-init-called)
   (insert-resource id type (parse-authn authn)))
-  
+
 (defn -getResourceIds
   [^String type ^java.util.Map authn]
-  (check-init-called)  
+  (check-init-called)
   (->> (select acl
-          (where (apply or (rows type (parse-authn authn))))
-          (fields [:resource_id]))
-    (map :resource_id)
-    (into #{})))
+               (where (apply or (rows type (parse-authn authn))))
+               (fields [:resource_id]))
+       (map :resource_id)
+       (into #{})))
 
 (defn -hasResourceId
   [^String id ^String type ^java.util.Map authn]
   (check-init-called)
   (not (empty? (select acl (where (apply or (rows id type (parse-authn authn))))))))
-  
+
 (defn -deleteResource
-  [^String id ^String type ^java.util.Map authn]  
+  [^String id ^String type ^java.util.Map authn]
   (check-init-called)
   (delete acl (where (apply or (rows id type (parse-authn authn)))))
   true)
-  
+
 ;; Convenience functions that support tests
 ;;
 (def ^:dynamic *bulk-size* 5000)
 
-(defn delete-all 
-  [] 
-  (check-init-called)  
+(defn delete-all
+  []
+  (check-init-called)
   (delete acl)
   (log/info "All ACL deleted"))
 
 (defn- row
   [type user i]
-  {:resource_id (str type"/"i) :principal_type "USER" :principal_name (str user i)})
+  {:resource_id (str type "/" i) :principal_type "USER" :principal_name (str user i)})
 
 (defn- bulk
   [type user start size]
@@ -188,11 +188,11 @@
 
 (defn populate
   [type user nb]
-  (assert (> nb *bulk-size*) (str "Bulk populate works with at least "*bulk-size* " elements"))
-  (println "Will populate " nb  "elements, "type"/"user)
+  (assert (> nb *bulk-size*) (str "Bulk populate works with at least " *bulk-size* " elements"))
+  (println "Will populate " nb "elements, " type "/" user)
   (let [nb-bulks (/ nb *bulk-size*)]
     (doseq [i (range 1 (inc nb-bulks))]
-      (println (* i *bulk-size*) " " (int (* 100 (/ i nb-bulks))) "%" )
+      (println (* i *bulk-size*) " " (int (* 100 (/ i nb-bulks))) "%")
       (insert acl (values (bulk type user (* (dec i) *bulk-size*) *bulk-size*))))))
 
 ;; Java API

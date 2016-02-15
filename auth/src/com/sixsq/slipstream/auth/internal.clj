@@ -28,9 +28,9 @@
 
 (defn valid?
   [credentials]
-  (let [user-name (:user-name credentials)
+  (let [user-name           (:user-name credentials)
         password-credential (:password credentials)
-        encrypted-in-db (db/find-password-for-user-name user-name)]
+        encrypted-in-db     (db/find-password-for-user-name user-name)]
     (and
       password-credential
       encrypted-in-db

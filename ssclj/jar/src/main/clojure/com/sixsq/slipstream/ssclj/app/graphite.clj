@@ -1,26 +1,26 @@
 (ns com.sixsq.slipstream.ssclj.app.graphite
   (:require
-   [clojure.tools.logging :as log]
-   [metrics.reporters.graphite :as graphite]
-   [environ.core :refer [env]])
+    [clojure.tools.logging :as log]
+    [metrics.reporters.graphite :as graphite]
+    [environ.core :refer [env]])
   (:import
-   [java.util.concurrent TimeUnit]
-   [com.codahale.metrics MetricFilter]))
+    [java.util.concurrent TimeUnit]
+    [com.codahale.metrics MetricFilter]))
 
 (defn create-reporter
   [host]
-  (graphite/reporter {:host host
-                      :prefix "ssclj"
-                      :rate-unit TimeUnit/SECONDS
+  (graphite/reporter {:host          host
+                      :prefix        "ssclj"
+                      :rate-unit     TimeUnit/SECONDS
                       :duration-unit TimeUnit/MILLISECONDS
-                      :filter MetricFilter/ALL}))
+                      :filter        MetricFilter/ALL}))
 
 ;; TODO: add a stop function for clean shutdown
 
 (defn start-graphite-reporter
   []
   (if-let [host (env :graphite-host)]
-    (try 
+    (try
       (-> host
           (create-reporter)
           (graphite/start 10))

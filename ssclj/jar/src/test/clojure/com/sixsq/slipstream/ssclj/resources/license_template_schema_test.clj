@@ -12,12 +12,12 @@
                          :right     "VIEW"}]})
 
 (let [timestamp "1964-08-25T10:00:00.0Z"
-      root {:id          resource-name
-            :resourceURI p/service-context
-            :created     timestamp
-            :updated     timestamp
-            :acl         valid-acl
-            :licenseData "BASE64_LICENSE_DATA"}]
+      root      {:id          resource-name
+                 :resourceURI p/service-context
+                 :created     timestamp
+                 :updated     timestamp
+                 :acl         valid-acl
+                 :licenseData "BASE64_LICENSE_DATA"}]
 
   (expect nil? (s/check LicenseTemplate root))
   (expect (s/check LicenseTemplate (dissoc root :created)))

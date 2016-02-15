@@ -127,7 +127,7 @@
   (let [checker (schema/checker schema)]
     (fn [resource]
       (if-let [msg (checker resource)]
-        (let [msg (str "resource does not satisfy defined schema: " msg)
+        (let [msg      (str "resource does not satisfy defined schema: " msg)
               response (-> {:status 400 :message msg}
                            json-response
                            (r/status 400))]

@@ -21,21 +21,21 @@
 
 (defn- urlencode-param
   [p]
-  (->>  (re-seq #"([^=]*)=(.*)" p)
-        first
-        next
-        (map rc/url-encode)
-        (s/join "=")))
+  (->> (re-seq #"([^=]*)=(.*)" p)
+       first
+       next
+       (map rc/url-encode)
+       (s/join "=")))
 
 (defn urlencode-params
   [query-string]
   (if (empty? query-string)
     query-string
     (let [params (subs query-string 1)]
-      (->>  (s/split params #"&")
-            (map urlencode-param)
-            (s/join "&")
-            (str "?")))))
+      (->> (s/split params #"&")
+           (map urlencode-param)
+           (s/join "&")
+           (str "?")))))
 
 (defn make-ring-app [resource-routes]
   (-> resource-routes
@@ -85,7 +85,7 @@
   ([key-to-count base-uri auth-name expected-count expected-paginated-count query-string]
    (-> (exec-request base-uri query-string auth-name)
        (t/is-status 200)
-       (t/is-key-value       :count       expected-count)
+       (t/is-key-value :count expected-count)
        (t/is-key-value count key-to-count expected-paginated-count))))
 
 (defn is-valid?

@@ -1,19 +1,19 @@
 (ns
   com.sixsq.slipstream.ssclj.resources.event
   (:require
-    [clojure.tools.logging                                    :as log]
-    [schema.core                                              :as s]
+    [clojure.tools.logging :as log]
+    [schema.core :as s]
 
-    [com.sixsq.slipstream.ssclj.resources.common.authz        :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.crud         :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud     :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils        :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema       :as c]))
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
-(def ^:const resource-tag     :events)
-(def ^:const resource-name    "Event")
+(def ^:const resource-tag :events)
+(def ^:const resource-name "Event")
 (def ^:const resource-url (u/de-camelcase resource-name))
-(def ^:const collection-name  "EventCollection")
+(def ^:const collection-name "EventCollection")
 
 (def ^:const resource-uri (str c/cimi-schema-uri resource-name))
 (def ^:const collection-uri (str c/cimi-schema-uri collection-name))
@@ -31,19 +31,19 @@
 (def ^:private event-types (s/enum "state" "alarm" "action" "system"))
 
 (def ^:private EventContent
-  { :resource c/ResourceLink
-    :state    s/Str})
+  {:resource c/ResourceLink
+   :state    s/Str})
 
 (def Event
   (merge
     c/CreateAttrs
     c/AclAttr
     {
-      :id           c/NonBlankString
-      :timestamp    c/Timestamp
-      :content      EventContent
-      :type         event-types
-      :severity     severity-levels}))
+     :id        c/NonBlankString
+     :timestamp c/Timestamp
+     :content   EventContent
+     :type      event-types
+     :severity  severity-levels}))
 
 ;;
 ;; "Implementations" of multimethod declared in crud namespace
@@ -89,11 +89,11 @@
   [resource request]
   (try
     (a/can-modify? resource request)
-    (let [href (:id resource)
+    (let [href                (:id resource)
           ^String resourceURI (:resourceURI resource)
-          ops (if (.endsWith resourceURI "Collection")
-                [{:rel (:add c/action-uri) :href href}]
-                [{:rel (:delete c/action-uri) :href href}])]
+          ops                 (if (.endsWith resourceURI "Collection")
+                                [{:rel (:add c/action-uri) :href href}]
+                                [{:rel (:delete c/action-uri) :href href}])]
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))
@@ -104,9 +104,9 @@
 
 (defn sort-by-timestamps-desc
   [events]
-  (->>  events
-        (sort-by :timestamp)
-        reverse))
+  (->> events
+       (sort-by :timestamp)
+       reverse))
 
 (defmethod crud/sort-collection resource-name
   [request events]

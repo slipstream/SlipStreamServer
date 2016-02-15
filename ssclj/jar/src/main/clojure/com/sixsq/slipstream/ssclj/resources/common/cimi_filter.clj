@@ -17,17 +17,17 @@
 ;; see dmtf.org/sites/default/files/standards/documents/dsp0263_1.0.1.pdf section 4.1.6.1
 ;;
 
-(defn- remove-quotes    [s] (subs s 1 (dec (count s))))
-(defn wrap-anti-quotes  [s] (str "\"" s "\""))
-(defn- anti-quotes      [s] (-> s remove-quotes wrap-anti-quotes))
+(defn- remove-quotes [s] (subs s 1 (dec (count s))))
+(defn wrap-anti-quotes [s] (str "\"" s "\""))
+(defn- anti-quotes [s] (-> s remove-quotes wrap-anti-quotes))
 
 (defn to-int
   [x]
   (cond
     (number? x) (int x)
-    (empty? x)  nil
+    (empty? x) nil
     (string? x) (Integer/parseInt x)
-    :else       nil))
+    :else nil))
 
 (defn as-int
   [^String s]
@@ -47,9 +47,9 @@
 
 (defn- attribute-value
   [resource attribute-full-name]
-  (->>  attribute-full-name
-        attribute-path
-        (get-in resource)))
+  (->> attribute-full-name
+       attribute-path
+       (get-in resource)))
 
 (defn mk-pred
   [attribute-full-name value compare-fn]
@@ -58,8 +58,8 @@
       (compare-fn value actual-value))))
 
 (defmulti mk-pred-attribute-value
-  (fn [attribute-full-name op [type value]]
-    [op type]))
+          (fn [attribute-full-name op [type value]]
+            [op type]))
 
 (defmethod mk-pred-attribute-value ["=" :StringValue]
   [attribute-full-name op [type value]]
@@ -132,9 +132,9 @@
 ;;
 (defn handle-comp
   ([x]
-    x)
+   x)
   ([[_ a] [_ o] v]
-    (mk-pred-attribute-value a o v)))
+   (mk-pred-attribute-value a o v)))
 
 (defn or-preds
   [& preds]
@@ -149,14 +149,14 @@
 ;; fixme: this does not handle booleans.
 ;;
 (def ^:private transformations
-  {:SingleQuoteString   as-string
-   :DoubleQuoteString   as-string
-   :DateValue           as-date
-   :IntValue            as-int
+  {:SingleQuoteString as-string
+   :DoubleQuoteString as-string
+   :DateValue         as-date
+   :IntValue          as-int
 
-   :Comp                handle-comp
-   :AndExpr             and-preds
-   :Filter              or-preds })
+   :Comp              handle-comp
+   :AndExpr           and-preds
+   :Filter            or-preds})
 
 (defn sql-comp
   ([x]
@@ -165,13 +165,13 @@
   ;; FIXME decouple from usage specific known columns
   ([[_ a] [_ o] v]
    (case o
-     "="  (cond (some #{a} ["user" "cloud" "frequency"])         [:=     (keyword (str "u." a)) v]
-                (some #{a} ["start_timestamp" "end_timestamp"])  [:like  (keyword (str "u." a)) (str v "%")])
+     "=" (cond (some #{a} ["user" "cloud" "frequency"]) [:= (keyword (str "u." a)) v]
+               (some #{a} ["start_timestamp" "end_timestamp"]) [:like (keyword (str "u." a)) (str v "%")])
 
-     "<" (when  (some #{a} ["user" "cloud" "frequency" "start_timestamp" "end_timestamp"])
-                [:<     (keyword (str "u." a)) v])
-     ">" (when  (some #{a} ["user" "cloud" "frequency" "start_timestamp" "end_timestamp"])
-                [:>     (keyword (str "u." a)) v]))))
+     "<" (when (some #{a} ["user" "cloud" "frequency" "start_timestamp" "end_timestamp"])
+           [:< (keyword (str "u." a)) v])
+     ">" (when (some #{a} ["user" "cloud" "frequency" "start_timestamp" "end_timestamp"])
+           [:> (keyword (str "u." a)) v]))))
 
 (defn sql-or
   [& clauses]
@@ -185,14 +185,14 @@
 ;; fixme: this does not handle booleans.
 ;;
 (def ^:private sql-transformations
-  {:SingleQuoteString   remove-quotes
-   :DoubleQuoteString   anti-quotes
-   :DateValue           identity
-   :IntValue            to-int
+  {:SingleQuoteString remove-quotes
+   :DoubleQuoteString anti-quotes
+   :DateValue         identity
+   :IntValue          to-int
 
-   :Comp                sql-comp
-   :AndExpr             sql-and
-   :Filter              sql-or })
+   :Comp              sql-comp
+   :AndExpr           sql-and
+   :Filter            sql-or})
 
 (defn to-predicates
   [tree]

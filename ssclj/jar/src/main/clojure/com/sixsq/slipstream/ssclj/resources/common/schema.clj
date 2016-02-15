@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.schema
   (:require
-    [superstring.core                                     :as str]
-    [schema.core                                        :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.utils  :as u]))
+    [superstring.core :as str]
+    [schema.core :as s]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def ^:const slipstream-schema-uri "http://sixsq.com/slipstream/1/")
 

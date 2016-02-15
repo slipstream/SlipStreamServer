@@ -48,13 +48,13 @@
 
 (defn is-operation-present [m op]
   (let [operations (get-in m [:response :body :operations])
-        op (some #(.endsWith % op) (map :rel operations))]
+        op         (some #(.endsWith % op) (map :rel operations))]
     (is op))
   m)
 
 (defn is-operation-absent [m op]
   (let [operations (get-in m [:response :body :operations])
-        op (some #(.endsWith % op) (map :rel operations))]
+        op         (some #(.endsWith % op) (map :rel operations))]
     (is (nil? op)))
   m)
 

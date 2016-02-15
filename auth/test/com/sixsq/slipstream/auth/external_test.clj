@@ -17,30 +17,30 @@
   (is (= [] (kc/select db/users)))
   (match-external-user! :github "st" "st@sixsq.com")
   (let [created-user (first (kc/select db/users))]
-    (is (= {:DELETED     false
-            :EMAIL       "st@sixsq.com"
+    (is (= {:DELETED      false
+            :EMAIL        "st@sixsq.com"
             :CYCLONELOGIN nil
-            :GITHUBLOGIN "st"
-            :ISSUPERUSER false
-            :JPAVERSION  0
-            :NAME        "st"
-            :RESOURCEURI "user/st"
-            :STATE       "ACTIVE"}
+            :GITHUBLOGIN  "st"
+            :ISSUPERUSER  false
+            :JPAVERSION   0
+            :NAME         "st"
+            :RESOURCEURI  "user/st"
+            :STATE        "ACTIVE"}
            (dissoc created-user :CREATION :PASSWORD)))))
 
 (deftest match-new-cyclone-user-github
   (is (= [] (kc/select db/users)))
   (match-external-user! :cyclone "st" "st@sixsq.com")
   (let [created-user (first (kc/select db/users))]
-    (is (= {:DELETED     false
-            :EMAIL       "st@sixsq.com"
+    (is (= {:DELETED      false
+            :EMAIL        "st@sixsq.com"
             :CYCLONELOGIN "st"
-            :GITHUBLOGIN nil
-            :ISSUPERUSER false
-            :JPAVERSION  0
-            :NAME        "st"
-            :RESOURCEURI "user/st"
-            :STATE       "ACTIVE"}
+            :GITHUBLOGIN  nil
+            :ISSUPERUSER  false
+            :JPAVERSION   0
+            :NAME         "st"
+            :RESOURCEURI  "user/st"
+            :STATE        "ACTIVE"}
            (dissoc created-user :CREATION :PASSWORD)))))
 
 (deftest match-existing-user
@@ -56,7 +56,7 @@
 (deftest match-already-mapped
   (let [user-info {:user-name "joe" :password "secret" :github-id "st" :email "st@sixsq.com"}
         _         (th/add-user-for-test! user-info)
-        [user]    (kc/select db/users)]
+        [user] (kc/select db/users)]
 
     (match-external-user! :github "st" "st@sixsq.com")
     (is (= [user] (kc/select db/users)))
@@ -65,6 +65,6 @@
     (is (= [(assoc user :CYCLONELOGIN "st")] (kc/select db/users)))))
 
 (deftest test-sanitize-login-name
-  (is (= "st"           (sanitize-login-name "st")))
-  (is (= "Paul_Newman"  (sanitize-login-name "Paul Newman")))
-  (is (= "abc_def_123"  (sanitize-login-name "abc-def-123"))))
+  (is (= "st" (sanitize-login-name "st")))
+  (is (= "Paul_Newman" (sanitize-login-name "Paul Newman")))
+  (is (= "abc_def_123" (sanitize-login-name "abc-def-123"))))

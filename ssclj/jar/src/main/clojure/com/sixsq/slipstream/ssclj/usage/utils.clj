@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.usage.utils
- (:require
-  [clojure.tools.logging  :as log]
-  [clojure.data.json      :as json]
-  [clj-time.core          :as time]
-  [clj-time.format        :as time-fmt]))
+  (:require
+    [clojure.tools.logging :as log]
+    [clojure.data.json :as json]
+    [clj-time.core :as time]
+    [clj-time.format :as time-fmt]))
 
 (defn timestamp
   [& args]
@@ -81,7 +81,7 @@
 (defn serialize
   [m]
   (with-out-str
-   (json/pprint m :key-fn name)))
+    (json/pprint m :key-fn name)))
 
 (defn deserialize
   [s]

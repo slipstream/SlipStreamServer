@@ -16,9 +16,9 @@
     (let [current-db-spec (db-spec)]
       (log/info (format "Creating korma database %s" current-db-spec))
       (defdb korma-auth-db current-db-spec))
-      (log/info "Korma init done")
-      (kc/defentity users (kc/table "USER") (kc/database korma-auth-db))
-      (log/info "Korma Entities defined")))
+    (log/info "Korma init done")
+    (kc/defentity users (kc/table "USER") (kc/database korma-auth-db))
+    (log/info "Korma Entities defined")))
 
 (defn init
   []
@@ -58,7 +58,7 @@
   (init)
   (kc/update users
              (kc/set-fields {(column-keyword authn-method) authn-id})
-             (kc/where      {:NAME slipstream-username}))
+             (kc/where {:NAME slipstream-username}))
   slipstream-username)
 
 (defn- inc-string

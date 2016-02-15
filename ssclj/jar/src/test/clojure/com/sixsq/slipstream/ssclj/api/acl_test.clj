@@ -17,15 +17,15 @@
 (use-fixtures :each clean-database)
 
 (deftest parse-authn
-  (is (=  [["USER"  "joe"] ["ROLE" "USER"]]
-          (acl/parse-authn  { "current" "joe"
-                                  "authentications" {
-                                    "joe" { "identity" "joe" "roles" ["USER"]}
-                                    "rob" { "identity" "rob"}}}))))
+  (is (= [["USER" "joe"] ["ROLE" "USER"]]
+         (acl/parse-authn {"current"         "joe"
+                           "authentications" {
+                                              "joe" {"identity" "joe" "roles" ["USER"]}
+                                              "rob" {"identity" "rob"}}}))))
 
 (deftest getResourceIds-should-check-arguments
-  (is  (thrown? IllegalArgumentException (acl/-getResourceIds "run" {})))
-  (is  (thrown? IllegalArgumentException (acl/-getResourceIds "run" nil))))
+  (is (thrown? IllegalArgumentException (acl/-getResourceIds "run" {})))
+  (is (thrown? IllegalArgumentException (acl/-getResourceIds "run" nil))))
 
 (deftest insert-allow-redundant-but-no-duplicates-in-db
 
@@ -69,9 +69,9 @@
 
   (acl/-deleteResource "run/1" "run" {:identity "joe"})
 
-  (is  (empty?  (acl/-getResourceIds "run" {:identity "joe"})))
-  (is  (= #{"run/1"}  (acl/-getResourceIds "run" {:identity "mick"})))
-  (is  (= #{"run/1"}  (acl/-getResourceIds "run" {:identity "alfred" :roles ["ROLE1"]})))
+  (is (empty? (acl/-getResourceIds "run" {:identity "joe"})))
+  (is (= #{"run/1"} (acl/-getResourceIds "run" {:identity "mick"})))
+  (is (= #{"run/1"} (acl/-getResourceIds "run" {:identity "alfred" :roles ["ROLE1"]})))
 
   (acl/-deleteResource "run/1" "run" {:identity "mick" :roles ["ROLE1"]})
 

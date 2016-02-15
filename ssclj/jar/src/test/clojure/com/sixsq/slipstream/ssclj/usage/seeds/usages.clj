@@ -27,12 +27,12 @@
 (defn- daily-records
   [username cloud day-number metrics-map]
   (for [[k v] metrics-map]
-    { :user            username
-      :cloud           cloud
-      :start_timestamp (days-ago-at-hour day-number)
-      :end_timestamp   (days-ago-at-hour day-number 10)
-      :metric_name     k
-      :metric_value    v}))
+    {:user            username
+     :cloud           cloud
+     :start_timestamp (days-ago-at-hour day-number)
+     :end_timestamp   (days-ago-at-hour day-number 10)
+     :metric_name     k
+     :metric_value    v}))
 
 (defmulti usages-for-freq (comp first list))
 

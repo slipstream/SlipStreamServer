@@ -2,14 +2,14 @@
 
 (defn response
   [code]
-  { :status code
+  {:status  code
    :headers {"Content-Type" "text/plain"}})
 
 (defn response-with-body
   [code body]
-  { :status code
+  {:status  code
    :headers {"Content-Type" "text/plain"}
-   :body body})
+   :body    body})
 
 (defn response-redirect
   [url]

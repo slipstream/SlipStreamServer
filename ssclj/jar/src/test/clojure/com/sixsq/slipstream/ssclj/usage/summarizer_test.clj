@@ -51,8 +51,8 @@
 (deftest cloud-summary-launcher
   (time/do-at
     (time/date-time 2015 12 1 3 14)
-  (is (= ["2015-11-01T00:00:00.000Z" :monthly ["test1" "test2"] [:cloud] 1]
-         (us/parse-args ["-f" "monthly" "-e" "test1, test2" "-g" "cloud"])))))
+    (is (= ["2015-11-01T00:00:00.000Z" :monthly ["test1" "test2"] [:cloud] 1]
+           (us/parse-args ["-f" "monthly" "-e" "test1, test2" "-g" "cloud"])))))
 
 (deftest test-backward
   (is (= [["2015-10-30T00:00:00.000Z" "2015-10-31T00:00:00.000Z"]

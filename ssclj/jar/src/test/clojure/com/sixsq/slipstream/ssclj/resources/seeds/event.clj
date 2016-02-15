@@ -21,23 +21,23 @@
 (defn- event-template
   []
   {
-    :acl {
-      :owner {
-        :type "USER" :principal :placeholder}
-        :rules [{:type "USER" :principal :placeholder :right "ALL"}]}
-        :timestamp (rnd-date-str)
-        :content  {
-         :resource {:href :placeholder}
-         :state "Started"}
-         :type "state"
-         :severity (rand-nth ["critical" "high" "medium" "low"])})
+   :acl       {
+               :owner {
+                       :type "USER" :principal :placeholder}
+               :rules [{:type "USER" :principal :placeholder :right "ALL"}]}
+   :timestamp (rnd-date-str)
+   :content   {
+               :resource {:href :placeholder}
+               :state    "Started"}
+   :type      "state"
+   :severity  (rand-nth ["critical" "high" "medium" "low"])})
 
 (defn events
   [nb-events username]
   (for [i (range nb-events)]
     (-> (event-template)
-        (assoc-in [:acl :owner :principal]    (name username))
-        (assoc-in [:acl :rules 0 :principal]  (name username))
+        (assoc-in [:acl :owner :principal] (name username))
+        (assoc-in [:acl :rules 0 :principal] (name username))
         (assoc-in [:content :resource :href] (str "run/" i)))))
 
 

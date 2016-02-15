@@ -6,12 +6,12 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]))
 
 (let [timestamp "1964-08-25T10:00:00.0Z"
-      root {:id          resource-name
-            :resourceURI p/service-context
-            :created     timestamp
-            :updated     timestamp
-            :acl         resource-acl
-            :baseURI     "http://cloud.example.org/"}]
+      root      {:id          resource-name
+                 :resourceURI p/service-context
+                 :created     timestamp
+                 :updated     timestamp
+                 :acl         resource-acl
+                 :baseURI     "http://cloud.example.org/"}]
 
   (expect nil? (s/check Root root))
   (expect nil? (s/check Root (assoc root :resources {:href "Resource/uuid"})))

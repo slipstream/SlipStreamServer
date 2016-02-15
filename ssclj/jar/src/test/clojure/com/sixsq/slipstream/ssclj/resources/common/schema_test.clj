@@ -163,7 +163,7 @@
 ;; Common CIMI attributes
 ;;
 
-(let [date "2012-01-01T01:23:45.678Z"
+(let [date    "2012-01-01T01:23:45.678Z"
       minimal {:id          "a"
                :resourceURI "http://example.org/data"
                :created     date

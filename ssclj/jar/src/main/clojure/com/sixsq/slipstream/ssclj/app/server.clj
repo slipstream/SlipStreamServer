@@ -43,7 +43,7 @@
 
   (instrument-jvm default-registry)
 
-  (compojure.core/routes )
+  (compojure.core/routes)
 
   (-> (routes/get-main-routes)
 
@@ -66,7 +66,7 @@
   "Starts the server and returns a function that when called, will
    stop the application server."
   ([port]
-    (start port "aleph"))
+   (start port "aleph"))
   ([port impl]
    (log/info "=============== SSCLJ START" port "===============")
    (log/info "java vendor: " (System/getProperty "java.vendor"))

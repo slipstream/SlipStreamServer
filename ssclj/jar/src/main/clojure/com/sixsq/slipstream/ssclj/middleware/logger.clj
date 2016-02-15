@@ -5,10 +5,10 @@
 
 (defn- display-querystring
   [request]
-  (str "?" (->  request
-                :query-string
-                (or "no-query-string")
-                (str/replace #"&?password=([^&]*)" ""))))
+  (str "?" (-> request
+               :query-string
+               (or "no-query-string")
+               (str/replace #"&?password=([^&]*)" ""))))
 
 (defn- display-authn-info
   [request]
@@ -30,7 +30,7 @@
   [request]
   (display-space-separated
     (-> request :request-method name (.toUpperCase))
-    (-> request :uri request)
+    (-> request :uri)
     (-> request display-authn-info)
     (-> request display-querystring)
     (-> request :body (or "no-body"))))
@@ -73,7 +73,7 @@
   [handler]
   (fn [request]
     (log-request request)
-    (let [start       (System/currentTimeMillis)
-          response    (handler request)]
+    (let [start    (System/currentTimeMillis)
+          response (handler request)]
       (log-response request response start)
       response)))
