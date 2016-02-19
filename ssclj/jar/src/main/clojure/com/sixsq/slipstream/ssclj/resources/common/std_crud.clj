@@ -23,7 +23,7 @@
       resource-name
       (-> body
           u/strip-service-attrs
-          (crud/new-identifier (u/de-camelcase resource-name))
+          (crud/new-identifier resource-name)
           (assoc :resourceURI resource-uri)
           u/update-timestamps
           (crud/add-acl request)
