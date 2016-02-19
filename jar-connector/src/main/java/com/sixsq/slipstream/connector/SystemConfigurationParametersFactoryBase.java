@@ -78,6 +78,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 			throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				name, value, description);
+		parameter.setCategory(getCategory());
 		parameter.setMandatory(mandatory);
 		return parameter;
 	}
@@ -87,6 +88,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 			String description, boolean mandatory) throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				name, "", description);
+		parameter.setCategory(getCategory());
 		parameter.setMandatory(mandatory);
 		return parameter;
 	}
@@ -96,6 +98,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 			boolean value, String description) throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				name, String.valueOf(value), description);
+		parameter.setCategory(getCategory());
 		return parameter;
 	}
 
