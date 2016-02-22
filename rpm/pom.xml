@@ -80,7 +80,7 @@
           </execution>
 
           <execution>
-            <id>copy-resources</id>
+            <id>copy-slipstream.service</id>
             <phase>package</phase>
             <goals>
               <goal>copy-resources</goal>
