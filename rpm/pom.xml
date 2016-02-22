@@ -78,7 +78,28 @@
               </resources>
             </configuration>
           </execution>
-          
+
+          <execution>
+            <id>copy-resources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/systemd</directory>
+                  <includes>
+                    <include>slipstream.service</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
         </executions>
       </plugin>
       <plugin>
@@ -172,22 +193,6 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
-          <execution>
-            <id>update-initd-chkconfig</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>sed</executable>
-              <arguments>
-                <argument>-i</argument>
-                <argument>-e</argument>
-                <argument>s/#chkconfig:.*/# chkconfig: 36 80 25/</argument>
-                <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
-              </arguments>
-            </configuration>
-          </execution>
           <execution>
             <id>update-initd-etc-default</id>
             <phase>process-resources</phase>

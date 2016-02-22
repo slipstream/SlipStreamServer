@@ -1,13 +1,14 @@
 [Unit]
 Description=SlipStream Service
 After=syslog.target network.target
+After=hsqldb.service ssclj.service
 
 [Service]
 RemainAfterExit=yes
 Type=oneshot
-ExecStart=/etc/init.d/slipstream start
-ExecStop=/etc/init.d/slipstream stop
-ExecReload=/etc/init.d/slipstream restart
+ExecStart=${installation.dir}/etc/rc.slipstream start
+ExecStop=${installation.dir}/etc/rc.slipstream stop
+ExecReload=${installation.dir}/etc/rc.slipstream restart
 
 [Install]
 WantedBy=multi-user.target
