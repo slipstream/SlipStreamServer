@@ -78,6 +78,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 			throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				name, value, description);
+		parameter.setCategory(getCategory());
 		parameter.setMandatory(mandatory);
 		return parameter;
 	}
@@ -87,6 +88,7 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 			String description, boolean mandatory) throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				name, "", description);
+		parameter.setCategory(getCategory());
 		parameter.setMandatory(mandatory);
 		return parameter;
 	}
@@ -96,52 +98,60 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 			boolean value, String description) throws ValidationException {
 		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
 				name, String.valueOf(value), description);
+		parameter.setCategory(getCategory());
 		return parameter;
 	}
 
 	protected void putMandatoryOrchestrationImageId() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(UserParametersFactoryBase.ORCHESTRATOR_IMAGEID_PARAMETER_NAME),
-				"Image Id of the orchestrator for " + getCategory());
+				"Image Id of the orchestrator for " + getCategory(),
+				15);
 	}
 
 	protected void putMandatoryOrchestratorInstanceType() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(UserParametersFactoryBase.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME),
-				"Orchestrator instance type  " + getCategory());
+				"Orchestrator instance type  " + getCategory(),
+				20);
 	}
 
 	protected void putMandatoryOrchestratorSecurityGroups() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(SECURITY_GROUPS_PARAMETER_NAME),
-				"Orchestrator security groups (comma separated list)", SECURITY_GROUPS_ALLOW_ALL);
+				"Orchestrator security groups (comma separated list)", SECURITY_GROUPS_ALLOW_ALL,
+				25);
 	}
 
 	protected void putMandatoryUpdateUrl() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(UserParametersFactoryBase.UPDATE_CLIENTURL_PARAMETER_NAME),
 				"URL pointing to the tarball containing the client for "
-						+ getCategory());
+						+ getCategory(),
+				950);
 	}
 
 	protected void putMandatoryEndpoint() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME),
 				"Service endpoint for " + getCategory()
-						+ " (e.g. http://example.com:5000)");
+						+ " (e.g. http://example.com:5000)",
+				10);
 	}
 
 	protected void putMandatoryQuotaVm() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(QuotaParameter.QUOTA_VM_PARAMETER_NAME),
-				"VM quota for " + getCategory() + " (i.e. maximum number of VMs allowed)");
+				"VM quota for " + getCategory() + " (i.e. maximum number of VMs allowed)",
+				910);
 	}
 
 	protected void putMandatoryMaxIaasWorkers() throws ValidationException {
 		putMandatoryParameter(
 				super.constructKey(RuntimeParameter.MAX_JAAS_WORKERS_KEY),
 				RuntimeParameter.MAX_JAAS_WORKERS_DESCRIPTION,
-				RuntimeParameter.MAX_JAAS_WORKERS_DEFAULT);
+				RuntimeParameter.MAX_JAAS_WORKERS_DEFAULT,
+				915);
 	}
 
 	protected void putMandatoryContextualizationType() throws ValidationException {
@@ -151,17 +161,19 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 				getNativeContextualizationOptions(),
 				NATIVE_CONTEXTUALIZATION_DEFAULT,
 				"Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>",
-				10);
+				920);
 	}
 
 	protected void putMandatoryOrchestratorUsernameAndPassword() throws ValidationException {
 		putMandatoryParameter(constructKey(ORCHESTRATOR_USERNAME_KEY),
 				"Orchestrator username", ParameterType.String,
-				"Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.");
+				"Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.",
+				30);
 
 		putMandatoryPasswordParameter(constructKey(ORCHESTRATOR_PASSWORD_KEY),
 				"Orchestrator password",
-				"Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.");
+				"Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.",
+				31);
 	}
 
 }
