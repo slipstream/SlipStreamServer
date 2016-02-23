@@ -86,6 +86,26 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-ssclj.service</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/systemd</directory>
+                  <includes>
+                    <include>ssclj.service</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -143,14 +163,14 @@
 
           <postinstallScriptlet>
             <script>
-              /sbin/chkconfig --add ssclj || true
+/usr/bin/systemctl enable ssclj.service
             </script>
           </postinstallScriptlet>
 
           <preremoveScriptlet>
             <script>
-              /sbin/service ssclj stop || true
-              /sbin/chkconfig --del ssclj || true
+/usr/bin/systemctl stop ssclj.service || true
+/usr/bin/systemctl disable ssclj.service || true
             </script>
           </preremoveScriptlet>
 
@@ -167,35 +187,6 @@
               <filemode>755</filemode>
               <username>slipstream</username>
               <groupname>slipstream</groupname>
-            </mapping>
-
-            <mapping>
-              <directory>/etc/rc.d/init.d/</directory>
-              <filemode>755</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>src/main/scripts</location>
-                  <includes>
-                    <include>ssclj</include>
-                  </includes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>/etc/systemd/system</directory>
-              <filemode>644</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>src/main/systemd</location>
-                </source>
-              </sources>
             </mapping>
 
             <mapping>
@@ -267,6 +258,19 @@
                     <include>create-weekly-usage</include>
                     <include>create-monthly-usage</include>
                   </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/usr/lib/systemd/system</directory>
+              <filemode>664</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>${project.build.directory}/ssclj.service</location>
                 </source>
               </sources>
             </mapping>
