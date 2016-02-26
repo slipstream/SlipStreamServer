@@ -42,20 +42,41 @@ import com.sixsq.slipstream.run.RunViewList;
 public class Dashboard {
 
 	public static class UsageElement {
+
 		@Attribute
 		private String cloud;
+
 		@Attribute
 		private int quota;
+
 		@Attribute
-		private int currentUsage;
+		private int userUsage;
+
+		@Attribute
+		private int userInactiveUsage;
+
+		@Attribute
+		private int othersUsage;
+
+		@Attribute
+		private int pendingUsage;
+
+		@Attribute
+		private int unknownUsage;
 
 		public UsageElement() {
         }
 
-		public UsageElement(String cloud, int quota, int currentUsage) {
+		public UsageElement(String cloud, int quota, int userUsage, int userInactiveUsage, int othersUsage,
+							int pendingUsage, int unknownUsage)
+		{
 			this.cloud = cloud;
 			this.quota = quota;
-			this.currentUsage = currentUsage;
+			this.userUsage = userUsage;
+			this.userInactiveUsage = userInactiveUsage;
+			this.othersUsage = othersUsage;
+			this.unknownUsage = unknownUsage;
+			this.pendingUsage = pendingUsage;
 		}
 
         public String getCloud() {
@@ -65,43 +86,36 @@ public class Dashboard {
         public int getQuota() {
             return quota;
         }
-
-        public int getCurrentUsage() {
-            return currentUsage;
-        }
     }
-
-	@Element(required=false)
-	private RunViewList runs;
 
 	@ElementList
 	private transient List<String> clouds = new ArrayList<String>();
 
 	@ElementList
-	private transient List<UsageElement> usage = new ArrayList<UsageElement>();
+	private transient List<UsageElement> usages = new ArrayList<UsageElement>();
 
-	public void populate(User user, int offset, int limit, String cloudServiceName, boolean activeOnly) throws SlipStreamException {
+	public void populate(User user) throws SlipStreamException {
 
 		user = User.loadByName(user.getName());  // ensure user is loaded from database
 
-		Map<String, Integer> cloudUsage = Vm.usage(user.getName());
+		Map<String, Map<String, Integer>> cloudUsage = Vm.usage(user.getName());
 		clouds = ConnectorFactory.getCloudServiceNamesList();
 
 		for (String cloud : clouds) {
 			Integer quota = Integer.parseInt(Quota.getValue(user, cloud));
-			Integer currentUsage = cloudUsage.get(cloud);
-			if (currentUsage == null) currentUsage = 0;
+			if (cloudUsage.containsKey(cloud)) {
+				Map<String, Integer> usage = cloudUsage.get(cloud);
 
-			usage.add(new UsageElement(cloud, quota, currentUsage));
+				int userUsage = usage.getOrDefault("userUsage", 0);
+				int userInactiveUsage = usage.getOrDefault("userInactiveUsage", 0);
+				int othersUsage = usage.getOrDefault("othersUsage", 0);
+				int pendingUsage = usage.getOrDefault("pendingUsage", 0);
+				int unknownUsage = usage.getOrDefault("unknownUsage", 0);
+
+				usages.add(new UsageElement(cloud, quota, userUsage, userInactiveUsage, othersUsage, pendingUsage,
+						                    unknownUsage));
+			}
 		}
-
-		runs = getRuns(user, offset, limit, cloudServiceName, activeOnly);
-	}
-
-	private RunViewList getRuns(User user, int offset, int limit, String cloudServiceName, boolean activeOnly) throws ConfigurationException, ValidationException{
-		RunViewList runViewList = new RunViewList();
-		runViewList.populate(user, offset, limit, cloudServiceName, activeOnly);
-		return runViewList;
 	}
 
 }

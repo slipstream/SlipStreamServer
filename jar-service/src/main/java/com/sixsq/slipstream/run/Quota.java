@@ -40,18 +40,18 @@ import com.sixsq.slipstream.persistence.User;
 
 public class Quota {
 
-	public static void validate(User user, Map<String, Integer> request,
-			Map<String, Integer> usage) throws ValidationException,
-			QuotaException {
+	public static void validate(User user, Map<String, Integer> request, Map<String, Map<String, Integer>> usage)
+			throws ValidationException, QuotaException {
 		for (Map.Entry<String, Integer> entry : request.entrySet()) {
 			String cloud = entry.getKey();
 			int nodesRequested = entry.getValue();
 
 			Integer quota = Integer.parseInt(getValue(user, cloud));
 
-			Integer currentUsage = usage.get(cloud);
-			if (currentUsage == null)
-				currentUsage = 0;
+			Integer currentUsage = 0;
+			if (usage.containsKey(cloud)) {
+				currentUsage = usage.get(cloud).getOrDefault("userUsage", 0);
+			}
 
 			if ((currentUsage + nodesRequested) > quota) {
 				throw new QuotaException(

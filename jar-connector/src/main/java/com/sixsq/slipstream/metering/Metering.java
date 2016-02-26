@@ -96,15 +96,18 @@ public class Metering {
 	public static Map<String, Integer> produceCloudUsageData(String user, List<String> cloudServiceNamesList)
 			throws ConfigurationException, ValidationException {
 		Map<String, Integer> cloudUsage = new HashMap<String, Integer>();
-		Map<String, Integer> vmUsage = Vm.usage(user);
+		Map<String, Map<String, Integer>> vmUsage = Vm.usage(user);
 
 		for (String cloud : cloudServiceNamesList) {
-			Integer currentUsage = vmUsage.get(cloud);
-			if (currentUsage == null) {
-				currentUsage = 0;
+			Integer currentUsage = 0;
+
+			if (vmUsage.containsKey(cloud)) {
+				currentUsage += vmUsage.get(cloud).getOrDefault("userUsage", 0);
 			}
+
 			cloudUsage.put(cloud, currentUsage);
 		}
+
 		return cloudUsage;
 	}
 
