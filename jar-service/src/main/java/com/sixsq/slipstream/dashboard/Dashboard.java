@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.sixsq.slipstream.exceptions.ValidationException;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
@@ -43,6 +44,10 @@ public class Dashboard {
 	@ElementList
 	private transient List<CloudUsage> usages = new ArrayList<CloudUsage>();
 
+	private Integer getQuota(User user, String cloud) throws ValidationException {
+		return Integer.parseInt(Quota.getValue(user, cloud));
+	}
+
 	public void populate(User user) throws SlipStreamException {
 
 		user = User.loadByName(user.getName());  // ensure user is loaded from database
@@ -50,17 +55,19 @@ public class Dashboard {
 		clouds = ConnectorFactory.getCloudServiceNamesList();
 		Map<String, CloudUsage> cloudUsages = Vm.usage(user.getName());
 
-		for (Map.Entry<String, CloudUsage> entry : cloudUsages.entrySet()) {
-			String cloud = entry.getKey();
-			CloudUsage usage = entry.getValue();
+		CloudUsage allClouds = new CloudUsage("All Clouds");
 
-			if (!clouds.contains(cloud)) continue;
+		for (String cloud : clouds) {
+			CloudUsage usage = cloudUsages.containsKey(cloud) ? cloudUsages.get(cloud) : new CloudUsage(cloud);
 
-			Integer quota = Integer.parseInt(Quota.getValue(user, cloud));
-			usage.setQuota(quota);
+			usage.setQuota(getQuota(user, cloud));
+
+			allClouds.add(usage);
 
 			usages.add(usage);
 		}
+
+		usages.add(allClouds);
 	}
 
 }

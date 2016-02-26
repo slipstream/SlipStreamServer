@@ -113,4 +113,22 @@ public class CloudUsage {
         this.unknownUsage++;
     }
 
+    public void add(CloudUsage usage) {
+        add(usage, true);
+    }
+
+    public void add(CloudUsage usage, boolean addQuota) {
+        if (addQuota && usage.quota != null) {
+            if (this.quota == null) {
+                this.quota = 0;
+            }
+            this.quota += usage.quota;
+        }
+        this.userUsage += usage.userUsage;
+        this.userInactiveUsage += usage.userInactiveUsage;
+        this.othersUsage += usage.othersUsage;
+        this.unknownUsage += usage.unknownUsage;
+        this.pendingUsage += usage.pendingUsage;
+    }
+
 }
