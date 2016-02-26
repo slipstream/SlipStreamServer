@@ -60,20 +60,25 @@
         (a/can-modify? request)
         (db/delete))))
 
+(defn- paginate-post-sql
+  [request entries]
+  (pg/paginate (get-in request [:cimi-params :first])
+               (get-in request [:cimi-params :last])
+               entries))
+
 (defn collection-wrapper-fn
   [resource-name collection-acl collection-uri collection-key]
-  (let [skeleton {:acl         collection-acl
-                  :resourceURI collection-uri
-                  :id          (u/de-camelcase resource-name)}]
-    (fn [request entries]
-      (let [paginated-entries (->> entries
-                                   (pg/paginate (get-in request [:cimi-params :first])
-                                                (get-in request [:cimi-params :last]))
-                                   (map #(crud/set-operations % request)))]
-        (-> skeleton
-            (crud/set-operations request)
-            (assoc :count (count entries))
-            (assoc collection-key paginated-entries))))))
+  (fn [request entries]
+    (let [skeleton {:acl         collection-acl
+                    :resourceURI collection-uri
+                    :id          (u/de-camelcase resource-name)}
+          paginated-entries (->> entries
+                                 (paginate-post-sql request)
+                                 (map #(crud/set-operations % request)))]
+      (-> skeleton
+          (crud/set-operations request)
+          (assoc :count (count entries))
+          (assoc collection-key paginated-entries)))))
 
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
@@ -86,8 +91,6 @@
 
            (db/query resource-name)
 
-           u/walk-clojurify
-
            ;; filtering
            (cf/cimi-filter-tree (get-in request [:cimi-params :filter]))
 
@@ -97,6 +100,7 @@
            ;; access controlling
            (filter #(a/authorized-view? % request))
 
+           ;; pagination and inclusion in skeleton
            (wrapper-fn request)
 
            (u/json-response)))))
