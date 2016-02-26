@@ -227,22 +227,19 @@ public class Vm {
 		return where;
 	}
 
-	private static void incrementUsage(Map<String, Map<String, Integer>> usages, String cloud, String key) {
+	private static CloudUsage addCloudIntoUsage(Map<String, CloudUsage> usages, String cloud) {
+		CloudUsage usage;
+
 		if (!usages.containsKey(cloud)) {
-			Map<String, Integer> usage = new HashMap<>();
+			usage = new CloudUsage(cloud);
 			usages.put(cloud, usage);
-		}
-
-		Map<String, Integer> usage = usages.get(cloud);
-
-		if (!usage.containsKey(key)) {
-			usage.put(key, 1);
 		} else {
-			usage.put(key, usage.get(key) + 1);
+			usage = usages.get(cloud);
 		}
+		return usage;
 	}
 
-	public static Map<String, Map<String, Integer>> usage(String user) {
+	public static Map<String, CloudUsage> usage(String user) {
 		List<?> vms;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
@@ -251,7 +248,7 @@ public class Vm {
 			em.close();
 		}
 
-		Map<String, Map<String, Integer>> usages = new HashMap<>();
+		Map<String, CloudUsage> usages = new HashMap<>();
 		for (Object vm : vms) {
 			Date measurement = (Date) ((Object[]) vm)[0];
 			String runUuid = (String) ((Object[]) vm)[1];
@@ -261,16 +258,16 @@ public class Vm {
 
 			if (user.equals(runOwner)) {
 				if (isUsable) {
-					incrementUsage(usages, cloud, "userUsage");
+					addCloudIntoUsage(usages, cloud).incrementUserUsage();
 				} else {
-					incrementUsage(usages, cloud, "userInactiveUsage");
+					addCloudIntoUsage(usages, cloud).incrementUserInactiveUsage();
 				}
 			} else if (runUuid != null) {
-				incrementUsage(usages, cloud, "othersUsage");
+				addCloudIntoUsage(usages, cloud).incrementOthersUsage();
 			} else if (((new Date()).getTime() - measurement.getTime()) < PENDING_TIMEOUT) {
-				incrementUsage(usages, cloud, "pendingUsage");
+				addCloudIntoUsage(usages, cloud).incrementPendingUsage();
 			} else {
-				incrementUsage(usages, cloud, "unknownUsage");
+				addCloudIntoUsage(usages, cloud).incrementUnknownUsage();
 			}
 		}
 

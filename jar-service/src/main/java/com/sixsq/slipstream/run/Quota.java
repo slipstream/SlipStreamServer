@@ -25,11 +25,7 @@ import java.util.Map;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.exceptions.QuotaException;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.QuotaParameter;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.*;
 
 /**
  * Unit test:
@@ -40,8 +36,9 @@ import com.sixsq.slipstream.persistence.User;
 
 public class Quota {
 
-	public static void validate(User user, Map<String, Integer> request, Map<String, Map<String, Integer>> usage)
+	public static void validate(User user, Map<String, Integer> request, Map<String, CloudUsage> usage)
 			throws ValidationException, QuotaException {
+
 		for (Map.Entry<String, Integer> entry : request.entrySet()) {
 			String cloud = entry.getKey();
 			int nodesRequested = entry.getValue();
@@ -50,7 +47,7 @@ public class Quota {
 
 			Integer currentUsage = 0;
 			if (usage.containsKey(cloud)) {
-				currentUsage = usage.get(cloud).getOrDefault("userUsage", 0);
+				currentUsage = usage.get(cloud).getUserUsage();
 			}
 
 			if ((currentUsage + nodesRequested) > quota) {

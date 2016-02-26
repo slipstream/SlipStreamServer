@@ -24,97 +24,42 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.connector.ConnectorFactory;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.CloudUsage;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.run.Quota;
-import com.sixsq.slipstream.run.RunViewList;
 
 @Root
 public class Dashboard {
-
-	public static class UsageElement {
-
-		@Attribute
-		private String cloud;
-
-		@Attribute
-		private int quota;
-
-		@Attribute
-		private int userUsage;
-
-		@Attribute
-		private int userInactiveUsage;
-
-		@Attribute
-		private int othersUsage;
-
-		@Attribute
-		private int pendingUsage;
-
-		@Attribute
-		private int unknownUsage;
-
-		public UsageElement() {
-        }
-
-		public UsageElement(String cloud, int quota, int userUsage, int userInactiveUsage, int othersUsage,
-							int pendingUsage, int unknownUsage)
-		{
-			this.cloud = cloud;
-			this.quota = quota;
-			this.userUsage = userUsage;
-			this.userInactiveUsage = userInactiveUsage;
-			this.othersUsage = othersUsage;
-			this.unknownUsage = unknownUsage;
-			this.pendingUsage = pendingUsage;
-		}
-
-        public String getCloud() {
-            return cloud;
-        }
-
-        public int getQuota() {
-            return quota;
-        }
-    }
 
 	@ElementList
 	private transient List<String> clouds = new ArrayList<String>();
 
 	@ElementList
-	private transient List<UsageElement> usages = new ArrayList<UsageElement>();
+	private transient List<CloudUsage> usages = new ArrayList<CloudUsage>();
 
 	public void populate(User user) throws SlipStreamException {
 
 		user = User.loadByName(user.getName());  // ensure user is loaded from database
 
-		Map<String, Map<String, Integer>> cloudUsage = Vm.usage(user.getName());
 		clouds = ConnectorFactory.getCloudServiceNamesList();
+		Map<String, CloudUsage> cloudUsages = Vm.usage(user.getName());
 
-		for (String cloud : clouds) {
+		for (Map.Entry<String, CloudUsage> entry : cloudUsages.entrySet()) {
+			String cloud = entry.getKey();
+			CloudUsage usage = entry.getValue();
+
+			if (!clouds.contains(cloud)) continue;
+
 			Integer quota = Integer.parseInt(Quota.getValue(user, cloud));
-			if (cloudUsage.containsKey(cloud)) {
-				Map<String, Integer> usage = cloudUsage.get(cloud);
+			usage.setQuota(quota);
 
-				int userUsage = usage.getOrDefault("userUsage", 0);
-				int userInactiveUsage = usage.getOrDefault("userInactiveUsage", 0);
-				int othersUsage = usage.getOrDefault("othersUsage", 0);
-				int pendingUsage = usage.getOrDefault("pendingUsage", 0);
-				int unknownUsage = usage.getOrDefault("unknownUsage", 0);
-
-				usages.add(new UsageElement(cloud, quota, userUsage, userInactiveUsage, othersUsage, pendingUsage,
-						                    unknownUsage));
-			}
+			usages.add(usage);
 		}
 	}
 

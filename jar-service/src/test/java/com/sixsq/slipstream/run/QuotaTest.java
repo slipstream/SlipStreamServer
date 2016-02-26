@@ -73,11 +73,9 @@ public class QuotaTest {
 		User user = testQuotaCreateUser();
 		setQuota(user, cloud, "10");
 
-		Map<String, Map<String, Integer>> usage = new HashMap<>();
+		Map<String, CloudUsage> usage = new HashMap<>();
 
-		Map<String, Integer> cloudUsage = new HashMap<>();
-		cloudUsage.put("userUsage", 9);
-		usage.put(cloud, cloudUsage);
+		usage.put(cloud, new CloudUsage(cloud, null, 9, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -94,11 +92,9 @@ public class QuotaTest {
 		User user = testQuotaCreateUser();
 		setQuota(user, cloud, "10");
 
-		Map<String, Map<String, Integer>> usage = new HashMap<>();
+		Map<String, CloudUsage> usage = new HashMap<>();
 
-		Map<String, Integer> cloudUsage = new HashMap<>();
-		cloudUsage.put("userUsage", 9);
-		usage.put(cloud, cloudUsage);
+		usage.put(cloud, new CloudUsage(cloud, null, 9, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -114,7 +110,7 @@ public class QuotaTest {
 		User user = testQuotaCreateUser();
 		setQuota(user, cloud, "10");
 
-		Map<String, Map<String, Integer>> usage = new HashMap<>();
+		Map<String, CloudUsage> usage = new HashMap<>();
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -129,11 +125,9 @@ public class QuotaTest {
 		String cloud = "cloud1";
 		User user = testQuotaCreateUser();
 
-		Map<String, Map<String, Integer>> usage = new HashMap<>();
+		Map<String, CloudUsage> usage = new HashMap<>();
 
-		Map<String, Integer> cloudUsage = new HashMap<>();
-		cloudUsage.put("userUsage", 9);
-		usage.put(cloud, cloudUsage);
+		usage.put(cloud, new CloudUsage(cloud, null, 9, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -148,11 +142,9 @@ public class QuotaTest {
 		String cloud = "cloud1";
 		User user = testQuotaCreateUser();
 
-		Map<String, Map<String, Integer>> usage = new HashMap<>();
+		Map<String, CloudUsage> usage = new HashMap<>();
 
-		Map<String, Integer> cloudUsage = new HashMap<>();
-		cloudUsage.put("userUsage", 19);
-		usage.put(cloud, cloudUsage);
+		usage.put(cloud, new CloudUsage(cloud, null, 19, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
