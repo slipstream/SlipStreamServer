@@ -47,7 +47,7 @@ public class Quota {
 
 			Integer currentUsage = 0;
 			if (usage.containsKey(cloud)) {
-				currentUsage = usage.get(cloud).getUserUsage();
+				currentUsage = usage.get(cloud).getUserVmUsage();
 			}
 
 			if ((currentUsage + nodesRequested) > quota) {

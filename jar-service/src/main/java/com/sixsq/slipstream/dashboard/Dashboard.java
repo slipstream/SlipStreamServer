@@ -24,14 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.sixsq.slipstream.exceptions.ValidationException;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.CloudUsage;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.run.Quota;
 
@@ -41,11 +42,15 @@ public class Dashboard {
 	@ElementList
 	private transient List<String> clouds = new ArrayList<String>();
 
-	@ElementList
+	@ElementList(name = "cloudUsages")
 	private transient List<CloudUsage> usages = new ArrayList<CloudUsage>();
 
 	private Integer getQuota(User user, String cloud) throws ValidationException {
 		return Integer.parseInt(Quota.getValue(user, cloud));
+	}
+
+	private int getActiveRunCount(User user, String cloud) throws ValidationException {
+		return Run.viewListCount(user, null, cloud, true);
 	}
 
 	public void populate(User user) throws SlipStreamException {
@@ -60,7 +65,8 @@ public class Dashboard {
 		for (String cloud : clouds) {
 			CloudUsage usage = cloudUsages.containsKey(cloud) ? cloudUsages.get(cloud) : new CloudUsage(cloud);
 
-			usage.setQuota(getQuota(user, cloud));
+			usage.setVmQuota(getQuota(user, cloud));
+			usage.setUserRunUsage(getActiveRunCount(user, cloud));
 
 			allClouds.add(usage);
 

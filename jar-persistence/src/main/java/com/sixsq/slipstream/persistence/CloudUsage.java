@@ -29,88 +29,101 @@ public class CloudUsage {
     private String cloud;
 
     @Attribute
-    private Integer quota = null;
+    private Integer vmQuota = null;
 
     @Attribute
-    private int userUsage = 0;
+    private Integer userRunUsage = null;
 
     @Attribute
-    private int userInactiveUsage = 0;
+    private int userVmUsage = 0;
 
     @Attribute
-    private int othersUsage = 0;
+    private int userInactiveVmUsage = 0;
 
     @Attribute
-    private int pendingUsage = 0;
+    private int othersVmUsage = 0;
 
     @Attribute
-    private int unknownUsage = 0;
+    private int pendingVmUsage = 0;
+
+    @Attribute
+    private int unknownVmUsage = 0;
 
     public CloudUsage(String cloud) {
         this.cloud = cloud;
     }
 
-    public CloudUsage(String cloud, Integer quota, int userUsage, int userInactiveUsage, int othersUsage,
-					  int pendingUsage, int unknownUsage) {
+    public CloudUsage(String cloud, Integer vmQuota, Integer userRunUsage, int userVmUsage, int userInactiveVmUsage,
+                      int othersVmUsage, int pendingVmUsage, int unknownVmUsage)
+    {
         this.cloud = cloud;
-        this.quota = quota;
-        this.userUsage = userUsage;
-        this.userInactiveUsage = userInactiveUsage;
-        this.othersUsage = othersUsage;
-        this.unknownUsage = unknownUsage;
-        this.pendingUsage = pendingUsage;
+        this.vmQuota = vmQuota;
+        this.userRunUsage = userRunUsage;
+        this.userVmUsage = userVmUsage;
+        this.userInactiveVmUsage = userInactiveVmUsage;
+        this.othersVmUsage = othersVmUsage;
+        this.unknownVmUsage = unknownVmUsage;
+        this.pendingVmUsage = pendingVmUsage;
     }
 
     public String getCloud() {
         return this.cloud;
     }
 
-    public Integer getQuota() {
-        return this.quota;
+    public Integer getVmQuota() {
+        return this.vmQuota;
     }
 
-    public void setQuota(Integer quota) {
-        this.quota = quota;
+    public void setVmQuota(Integer vmQuota) {
+        this.vmQuota = vmQuota;
     }
 
-    public int getUserUsage() {
-        return this.userUsage;
+    public Integer getUserRunUsage() {
+        return userRunUsage;
     }
 
-    public void incrementUserUsage() {
-        this.userUsage++;
+    public void setUserRunUsage(Integer userRunUsage) {
+        this.userRunUsage = userRunUsage;
     }
 
-    public int getUserInactiveUsage() {
-        return userInactiveUsage;
+    public int getUserVmUsage() {
+        return this.userVmUsage;
     }
 
-    public void incrementUserInactiveUsage() {
-        this.userInactiveUsage++;
+    public void incrementUserVmUsage() {
+        this.userVmUsage++;
     }
 
-    public int getOthersUsage() {
-        return othersUsage;
+    public int getUserInactiveVmUsage() {
+        return userInactiveVmUsage;
     }
 
-    public void incrementOthersUsage() {
-        this.othersUsage++;
+    public void incrementUserInactiveVmUsage() {
+        this.userInactiveVmUsage++;
     }
 
-    public int getPendingUsage() {
-        return pendingUsage;
+    public int getOthersVmUsage() {
+        return othersVmUsage;
     }
 
-    public void incrementPendingUsage() {
-        this.pendingUsage++;
+    public void incrementOthersVmUsage() {
+        this.othersVmUsage++;
     }
 
-    public int getUnknownUsage() {
-        return unknownUsage;
+    public int getPendingVmUsage() {
+        return pendingVmUsage;
     }
 
-    public void incrementUnknownUsage() {
-        this.unknownUsage++;
+    public void incrementPendingVmUsage() {
+        this.pendingVmUsage++;
+    }
+
+    public int getUnknownVmUsage() {
+        return unknownVmUsage;
+    }
+
+    public void incrementUnknownVmUsage() {
+        this.unknownVmUsage++;
     }
 
     public void add(CloudUsage usage) {
@@ -118,17 +131,26 @@ public class CloudUsage {
     }
 
     public void add(CloudUsage usage, boolean addQuota) {
-        if (addQuota && usage.quota != null) {
-            if (this.quota == null) {
-                this.quota = 0;
+
+        if (addQuota && usage.vmQuota != null) {
+            if (this.vmQuota == null) {
+                this.vmQuota = 0;
             }
-            this.quota += usage.quota;
+            this.vmQuota += usage.vmQuota;
         }
-        this.userUsage += usage.userUsage;
-        this.userInactiveUsage += usage.userInactiveUsage;
-        this.othersUsage += usage.othersUsage;
-        this.unknownUsage += usage.unknownUsage;
-        this.pendingUsage += usage.pendingUsage;
+
+        if (usage.userRunUsage != null) {
+            if (this.userRunUsage == null) {
+                this.userRunUsage = 0;
+            }
+            this.userRunUsage += usage.userRunUsage;
+        }
+
+        this.userVmUsage += usage.userVmUsage;
+        this.userInactiveVmUsage += usage.userInactiveVmUsage;
+        this.othersVmUsage += usage.othersVmUsage;
+        this.unknownVmUsage += usage.unknownVmUsage;
+        this.pendingVmUsage += usage.pendingVmUsage;
     }
 
 }

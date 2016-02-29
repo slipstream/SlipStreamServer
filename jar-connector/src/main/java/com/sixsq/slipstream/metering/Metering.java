@@ -103,7 +103,7 @@ public class Metering {
 			Integer currentUsage = 0;
 
 			if (vmUsage.containsKey(cloud)) {
-				currentUsage += vmUsage.get(cloud).getUserUsage();
+				currentUsage += vmUsage.get(cloud).getUserVmUsage();
 			}
 
 			cloudUsage.put(cloud, currentUsage);

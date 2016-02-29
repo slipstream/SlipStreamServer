@@ -258,16 +258,16 @@ public class Vm {
 
 			if (user.equals(runOwner)) {
 				if (isUsable) {
-					addCloudIntoUsage(usages, cloud).incrementUserUsage();
+					addCloudIntoUsage(usages, cloud).incrementUserVmUsage();
 				} else {
-					addCloudIntoUsage(usages, cloud).incrementUserInactiveUsage();
+					addCloudIntoUsage(usages, cloud).incrementUserInactiveVmUsage();
 				}
 			} else if (runUuid != null) {
-				addCloudIntoUsage(usages, cloud).incrementOthersUsage();
+				addCloudIntoUsage(usages, cloud).incrementOthersVmUsage();
 			} else if (((new Date()).getTime() - measurement.getTime()) < PENDING_TIMEOUT) {
-				addCloudIntoUsage(usages, cloud).incrementPendingUsage();
+				addCloudIntoUsage(usages, cloud).incrementPendingVmUsage();
 			} else {
-				addCloudIntoUsage(usages, cloud).incrementUnknownUsage();
+				addCloudIntoUsage(usages, cloud).incrementUnknownVmUsage();
 			}
 		}
 

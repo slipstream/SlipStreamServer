@@ -75,7 +75,7 @@ public class QuotaTest {
 
 		Map<String, CloudUsage> usage = new HashMap<>();
 
-		usage.put(cloud, new CloudUsage(cloud, null, 9, 0, 0, 0, 0));
+		usage.put(cloud, new CloudUsage(cloud, null, null, 9, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -94,7 +94,7 @@ public class QuotaTest {
 
 		Map<String, CloudUsage> usage = new HashMap<>();
 
-		usage.put(cloud, new CloudUsage(cloud, null, 9, 0, 0, 0, 0));
+		usage.put(cloud, new CloudUsage(cloud, null, null, 9, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -127,7 +127,7 @@ public class QuotaTest {
 
 		Map<String, CloudUsage> usage = new HashMap<>();
 
-		usage.put(cloud, new CloudUsage(cloud, null, 9, 0, 0, 0, 0));
+		usage.put(cloud, new CloudUsage(cloud, null, null, 9, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -144,7 +144,7 @@ public class QuotaTest {
 
 		Map<String, CloudUsage> usage = new HashMap<>();
 
-		usage.put(cloud, new CloudUsage(cloud, null, 19, 0, 0, 0, 0));
+		usage.put(cloud, new CloudUsage(cloud, null, null, 19, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 

@@ -159,8 +159,8 @@ public class CollectorTest {
 		// actual tests
 		Map<String, CloudUsage> usage = Vm.usage(user);
 		assertThat(usage.size(), is(2));
-		assertThat(usage.get(firstCloud).getUserUsage(), is(2));
-		assertThat(usage.get(secondCloud).getUserUsage(), is(1));
+		assertThat(usage.get(firstCloud).getUserVmUsage(), is(2));
+		assertThat(usage.get(secondCloud).getUserVmUsage(), is(1));
 	}
 
 	@Test
