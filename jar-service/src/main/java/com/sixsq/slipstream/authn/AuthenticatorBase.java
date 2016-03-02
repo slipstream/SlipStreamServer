@@ -1,8 +1,9 @@
 package com.sixsq.slipstream.authn;
 
-import javax.persistence.OptimisticLockException;
-import javax.persistence.RollbackException;
-
+import com.sixsq.slipstream.cookie.CookieUtils;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.User.State;
 import org.hibernate.StaleObjectStateException;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -11,10 +12,8 @@ import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 import org.restlet.security.Authenticator;
 
-import com.sixsq.slipstream.cookie.CookieUtils;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.User.State;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.RollbackException;
 
 public abstract class AuthenticatorBase extends Authenticator {
 
@@ -42,15 +41,15 @@ public abstract class AuthenticatorBase extends Authenticator {
 			throw new ResourceException(Status.CLIENT_ERROR_UNAUTHORIZED);
 		}
 
-		if (user == null) {
+		if (user == null || isNotAuthorizedToLogin(user)) {
 			throw new ResourceException(Status.CLIENT_ERROR_UNAUTHORIZED);
 		}
 
 		setLastOnline(user);
 	}
 
-	protected boolean isActive(User user) {
-		return State.ACTIVE == user.getState();
+	protected boolean isNotAuthorizedToLogin(User user) {
+		return State.DELETED == user.getState() || State.SUSPENDED == user.getState();
 	}
 
 	static public void setUserInRequest(User user, Request request) {

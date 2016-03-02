@@ -29,7 +29,10 @@
   (init)
   (map
     :NAME
-    (kc/select users (kc/fields [:NAME]) (kc/where {:EMAIL email}))))
+    (kc/select users (kc/fields [:NAME]) (kc/where
+                                           {:EMAIL email
+                                            :STATE [in ["NEW" "ACTIVE"]]
+                                            }))))
 
 (defn- column-name
   [authn-method]
@@ -48,7 +51,9 @@
   (let [matched-users
         (kc/select users
                    (kc/fields [:NAME])
-                   (kc/where {(column-keyword authn-method) authn-id}))]
+                   (kc/where {(column-keyword authn-method) authn-id
+                              :STATE [in ["NEW" "ACTIVE"]]
+                              }))]
     (if (> (count matched-users) 1)
       (throw (Exception. (str "There should be only one result for " authn-id)))
       (:NAME (first matched-users)))))
@@ -58,7 +63,8 @@
   (init)
   (kc/update users
              (kc/set-fields {(column-keyword authn-method) authn-id})
-             (kc/where {:NAME slipstream-username}))
+             (kc/where {:NAME slipstream-username
+                        :STATE [in ["NEW" "ACTIVE"]]}))
   slipstream-username)
 
 (defn- inc-string
