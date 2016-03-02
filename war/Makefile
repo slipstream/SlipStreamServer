@@ -22,7 +22,8 @@ MODE?=dev
 # THEME?=nuvla
 # THEME?=helixnebula
 
-run: start-db start-ssclj-server
+# run: start-db start-ssclj-server
+run: start-db
 	mvn jetty:run-war -Dstatic.content.location="file://${STATIC_CONTENT_LOCATION}" \
 										-Dorg.eclipse.jetty.annotations.maxWait=120 \
 										-Dpersistence.unit=hsqldb-schema \

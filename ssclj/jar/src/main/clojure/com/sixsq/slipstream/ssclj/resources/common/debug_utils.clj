@@ -9,12 +9,17 @@
   (println "--------")
   x)
 
+(defn show-timestamp
+  [x]
+  (println "\n" (System/currentTimeMillis))
+  x)
+
 (def ^:private last-timestamp (ref -1))
 
 (defn start-ts
   [msg x]
   (println msg " START")
-  (dosync (ref-set last-timestamp -1))
+  (dosync (ref-set last-timestamp (System/currentTimeMillis)))
   x)
 
 (defn record-ts
