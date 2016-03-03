@@ -6,8 +6,7 @@
     [com.sixsq.slipstream.auth.internal :as ia]
     [com.sixsq.slipstream.auth.github :as gh]
     [com.sixsq.slipstream.auth.cyclone :as cy]
-    [com.sixsq.slipstream.auth.utils.http :as uh]
-    [com.sixsq.slipstream.auth.utils.config :as cf]))
+    [com.sixsq.slipstream.auth.utils.http :as uh]))
 
 (defn dispatch-on-authn-method
   [request]
