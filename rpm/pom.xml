@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>2.23.2-SNAPSHOT</version>
+    <version>2.24-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
@@ -78,7 +78,28 @@
               </resources>
             </configuration>
           </execution>
-          
+
+          <execution>
+            <id>copy-slipstream.service</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/systemd</directory>
+                  <includes>
+                    <include>slipstream.service</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
         </executions>
       </plugin>
       <plugin>
@@ -172,22 +193,6 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
-          <execution>
-            <id>update-initd-chkconfig</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>sed</executable>
-              <arguments>
-                <argument>-i</argument>
-                <argument>-e</argument>
-                <argument>s/#chkconfig:.*/# chkconfig: 36 80 25/</argument>
-                <argument>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</argument>
-              </arguments>
-            </configuration>
-          </execution>
           <execution>
             <id>update-initd-etc-default</id>
             <phase>process-resources</phase>
@@ -314,29 +319,6 @@
                 <source>
                   <location>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</location>
                   <destination>rc.slipstream</destination>
-                </source>
-              </sources>
-            </mapping>
-            
-            <mapping>
-              <directory>/etc/rc.d/init.d</directory>
-              <sources>
-                <softlinkSource>
-                  <destination>slipstream</destination>
-                  <location>${installation.dir}/etc/rc.slipstream</location>
-                </softlinkSource>
-              </sources>
-            </mapping>
-            
-            <mapping>
-              <directory>/etc/systemd/system</directory>
-              <filemode>644</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>src/main/systemd</location>
                 </source>
               </sources>
             </mapping>
@@ -545,11 +527,23 @@
               </sources>
             </mapping>
 
+            <mapping>
+              <directory>/usr/lib/systemd/system</directory>
+              <filemode>664</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>${project.build.directory}/slipstream.service</location>
+                </source>
+              </sources>
+            </mapping>
           </mappings>
 
           <postinstallScriptlet>
             <script>
-/sbin/chkconfig --add slipstream
+/usr/bin/systemctl enable slipstream.service
 /bin/chown -R slipstream: ${slipstream.base.dir}
 /bin/chown slipstream: /etc/slipstream/slipstream.conf
 /bin/chmod 0660 /etc/slipstream/slipstream.conf
@@ -559,6 +553,14 @@
 /bin/find /opt/slipstream/server/webapps/slipstream.war/static-content/ -type d -exec /bin/chmod 775 {} \;
             </script>
           </postinstallScriptlet>
+
+          <preremoveScriptlet>
+            <script>
+/usr/bin/systemctl stop slipstream.service || true
+/usr/bin/systemctl disable slipstream.service || true
+            </script>
+          </preremoveScriptlet>
+
         </configuration>
         <executions>
           <execution>
