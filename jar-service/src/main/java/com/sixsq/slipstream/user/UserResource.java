@@ -419,7 +419,13 @@ public class UserResource extends ParameterizedResource<User> {
 	@Delete
 	@Override
 	public void deleteResource() {
-		super.deleteResource();
+
+		if (!canDelete()) {
+			throwClientForbiddenError();
+		}
+
+		getTargetUser().setState(State.DELETED);
+		getTargetUser().store();
 
 		postEventDeleted(getParameterized());
 	}

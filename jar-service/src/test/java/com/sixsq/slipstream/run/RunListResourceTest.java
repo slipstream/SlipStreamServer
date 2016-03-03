@@ -20,7 +20,6 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
 import com.sixsq.slipstream.event.Event;
@@ -29,6 +28,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.XmlUtil;
 import org.junit.*;
@@ -79,9 +79,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		Event.muteForTests();
 
-        UserParameter publicKey = new UserParameter(ExecutionControlUserParametersFactory.CATEGORY +
-                "." + UserParameter.SSHKEY_PARAMETER_NAME, "value", "desc");
-        user.setParameter(publicKey);
+		CommonTestUtil.addSshKeys(user);
 
 		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
 		user = user.store();
