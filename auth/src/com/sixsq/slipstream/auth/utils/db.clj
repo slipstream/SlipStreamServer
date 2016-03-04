@@ -24,15 +24,15 @@
   []
   @init-db)
 
+(def ^:private active-user ["NEW" "ACTIVE"])
+
 (defn find-usernames-by-email
   [email]
   (init)
-  (map
-    :NAME
-    (kc/select users (kc/fields [:NAME]) (kc/where
-                                           {:EMAIL email
-                                            :STATE [in ["NEW" "ACTIVE"]]
-                                            }))))
+  (map :NAME (kc/select users
+                        (kc/fields [:NAME])
+                        (kc/where {:EMAIL email
+                                   :STATE [in active-user]}))))
 
 (defn- column-name
   [authn-method]
@@ -45,15 +45,15 @@
   [authn-method]
   (keyword (column-name authn-method)))
 
+
 (defn find-username-by-authn
   [authn-method authn-id]
   (init)
   (let [matched-users
         (kc/select users
                    (kc/fields [:NAME])
-                   (kc/where {(column-keyword authn-method) authn-id
-                              :STATE [in ["NEW" "ACTIVE"]]
-                              }))]
+                   (kc/where  {(column-keyword authn-method) authn-id
+                               :STATE [in active-user]}))]
     (if (> (count matched-users) 1)
       (throw (Exception. (str "There should be only one result for " authn-id)))
       (:NAME (first matched-users)))))
@@ -63,8 +63,7 @@
   (init)
   (kc/update users
              (kc/set-fields {(column-keyword authn-method) authn-id})
-             (kc/where {:NAME slipstream-username
-                        :STATE [in ["NEW" "ACTIVE"]]}))
+             (kc/where {:NAME slipstream-username}))
   slipstream-username)
 
 (defn- inc-string
@@ -113,7 +112,8 @@
   [user-name]
   (init)
   (-> (kc/select users
-                 (kc/fields [:PASSWORD])
-                 (kc/where {:NAME user-name}))
+                 (kc/fields :PASSWORD)
+                 (kc/where {:NAME user-name
+                            :STATE [in active-user]}))
       first
       :PASSWORD))

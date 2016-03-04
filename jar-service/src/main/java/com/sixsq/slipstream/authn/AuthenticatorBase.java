@@ -3,7 +3,6 @@ package com.sixsq.slipstream.authn;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.User.State;
 import org.hibernate.StaleObjectStateException;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -41,15 +40,11 @@ public abstract class AuthenticatorBase extends Authenticator {
 			throw new ResourceException(Status.CLIENT_ERROR_UNAUTHORIZED);
 		}
 
-		if (user == null || isNotAuthorizedToLogin(user)) {
+		if (user == null) {
 			throw new ResourceException(Status.CLIENT_ERROR_UNAUTHORIZED);
 		}
 
 		setLastOnline(user);
-	}
-
-	protected boolean isNotAuthorizedToLogin(User user) {
-		return State.DELETED == user.getState() || State.SUSPENDED == user.getState();
 	}
 
 	static public void setUserInRequest(User user, Request request) {
