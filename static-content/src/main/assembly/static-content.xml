@@ -19,7 +19,7 @@
         <include>font/**/*</include>
         <include>themes/**/*</include>
         <include>errors/**/*</include>
-        <include>html/**/*</include>
+        <include>/terms.html</include>
       </includes>
     </fileSet>
   </fileSets>
