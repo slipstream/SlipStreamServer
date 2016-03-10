@@ -400,6 +400,18 @@
             </mapping>
 
             <mapping>
+              <directory>${installation.dir}/webapps/slipstream.war/static-content</directory>
+              <filemode>664</filemode>
+              <configuration>true</configuration>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/webapps/slipstream.war/static-content/terms.html</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
               <directory>${installation.dir}/webapps/slipstream.war/static-content/js</directory>
               <filemode>664</filemode>
               <configuration>true</configuration>
