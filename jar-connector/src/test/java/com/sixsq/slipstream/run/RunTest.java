@@ -283,7 +283,9 @@ public class RunTest extends RunTestBase {
 		dontfindit.store();
 		Metadata run3 = createAndStoreRun(dontfindit, RunType.Machine);
 
-		List<RunView> runList = Run.viewList(new User("user"), findit.getResourceUri());
+		RunsQueryParameters params = new RunsQueryParameters(new User("user"), 0, 20, null, null, null,
+				findit.getResourceUri(), false);
+		List<RunView> runList = Run.viewList(params);
 
 		assertEquals(2, runList.size());
 
@@ -310,7 +312,9 @@ public class RunTest extends RunTestBase {
 		Run myOtherRun = createAndStoreRun(image, RunType.Machine);
 		Run notMyRun = createAndStoreRun(image, "other", RunType.Machine);
 
-		List<RunView> runList = Run.viewList(new User("user"), image.getResourceUri());
+		RunsQueryParameters params = new RunsQueryParameters(new User("user"), 0, 20, null, null, null,
+				image.getResourceUri(), false);
+		List<RunView> runList = Run.viewList(params);
 
 		assertEquals(2, runList.size());
 

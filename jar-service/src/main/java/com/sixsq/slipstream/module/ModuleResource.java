@@ -31,6 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.run.RunsQueryParameters;
 import com.sixsq.slipstream.util.*;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -651,7 +652,9 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		Module module = getParameterized();
 		// Add runs for this specific module version (will not apply to project)
 		RunViewList runs = new RunViewList();
-		runs.populate(getUser(), module.getResourceUri(), 0, Run.DEFAULT_LIMIT, getActiveOnly());
+		RunsQueryParameters parameters = new RunsQueryParameters(getUser(), 0, Run.DEFAULT_LIMIT, null, null, null,
+				module.getResourceUri(), getActiveOnly());
+		runs.populate(parameters);
 		module.setRuns(runs);
 		return module;
 	}

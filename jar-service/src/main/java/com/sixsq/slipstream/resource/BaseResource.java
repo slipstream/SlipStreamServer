@@ -304,7 +304,7 @@ public abstract class BaseResource extends ServerResource {
 	protected String getUserFilter() {
 		String user = getQueryValue(USER_KEY);
 		if (user != null && !getUser().isSuper()) {
-			throwClientForbiddenError("You don't have the permission to use the query parameter 'user'");
+			throwClientForbiddenError("You don't have the permission to use the query parameter '" + USER_KEY + "'");
 		}
 		return user;
 	}

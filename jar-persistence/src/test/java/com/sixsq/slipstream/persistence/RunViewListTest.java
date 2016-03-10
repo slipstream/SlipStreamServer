@@ -25,6 +25,7 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.run.RunView;
 import com.sixsq.slipstream.run.RunViewList;
+import com.sixsq.slipstream.run.RunsQueryParameters;
 import com.sixsq.slipstream.statemachine.States;
 import org.hibernate.LazyInitializationException;
 import org.junit.After;
@@ -76,7 +77,8 @@ public class RunViewListTest {
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_URL_SERVICE_KEY, "value", "description");
 		run.store();
 
-		List<RunView> runs = RunView.fetchListView(user, 0, 20);
+		RunsQueryParameters params = new RunsQueryParameters(user, 0, 20, null, null, null, null, false);
+		List<RunView> runs = Run.viewList(params);
 
 		assertThat(runs.size(), is(1));
 
@@ -87,9 +89,9 @@ public class RunViewListTest {
 
 	@Test
 	public void buildListWithCleanRun() throws ValidationException, NotFoundException, AbortException {
-		Module image = new ImageModule();
 
-		List<RunView> runs = RunView.fetchListView(user, 0, 20);
+		RunsQueryParameters params = new RunsQueryParameters(user, 0, 20, null, null, null, null, false);
+		List<RunView> runs = Run.viewList(params);
 
 		assertThat(runs.size(), is(1));
 

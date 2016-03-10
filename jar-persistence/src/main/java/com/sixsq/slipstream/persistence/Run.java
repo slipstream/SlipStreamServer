@@ -63,6 +63,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Expression;
 
+import com.sixsq.slipstream.run.RunsQueryParameters;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CollectionType;
 import org.simpleframework.xml.Attribute;
@@ -347,18 +348,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return (currentPredicate != null) ? builder.and(currentPredicate, newPredicate) : newPredicate;
 	}
 
-	public static List<RunView> viewList(User user, String moduleResourceUri)
-			throws ConfigurationException, ValidationException {
-		return viewList(user, moduleResourceUri, null, null, null, false);
-	}
-
-//	public static List<RunView> viewList(User user, String moduleResourceUri, Integer offset,
-//			Integer limit, String cloudServiceName) throws ConfigurationException, ValidationException {
-//		return viewList(user, moduleResourceUri, offset, limit, cloudServiceName, false);
-//	}
-
-	public static List<RunView> viewList(User user, String moduleResourceUri, Integer offset,
-		    Integer limit, String cloudServiceName, boolean activeOnly) throws ConfigurationException, ValidationException {
+	public static List<RunView> viewList(RunsQueryParameters queryParameters)
+			throws ConfigurationException, ValidationException
+	{
 		List<RunView> views = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
@@ -366,16 +358,16 @@ public class Run extends Parameterized<Run, RunParameter> {
 			CriteriaQuery<Run> critQuery = builder.createQuery(Run.class);
 			Root<Run> rootQuery = critQuery.from(Run.class);
 			critQuery.select(rootQuery);
-			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, moduleResourceUri, cloudServiceName, activeOnly);
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, queryParameters);
 			if (where != null) {
 				critQuery.where(where);
 			}
 			critQuery.orderBy(builder.desc(rootQuery.get("startTime")));
 			TypedQuery<Run> query = em.createQuery(critQuery);
-			if (offset != null) {
-				query.setFirstResult(offset);
+			if (queryParameters.offset != null) {
+				query.setFirstResult(queryParameters.offset);
 			}
-			query.setMaxResults((limit != null) ? limit : DEFAULT_LIMIT);
+			query.setMaxResults((queryParameters.limit != null) ? queryParameters.limit : DEFAULT_LIMIT);
 			List<Run> runs = query.getResultList();
 			views = convertRunsToRunViews(runs);
 		} finally {
@@ -384,8 +376,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return views;
 	}
 
-	public static int viewListCount(User user, String moduleResourceUri, String cloudServiceName, boolean activeOnly)
-			throws ConfigurationException, ValidationException {
+	public static int viewListCount(RunsQueryParameters queryParameters)
+			throws ConfigurationException, ValidationException
+	{
 		int count = 0;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
@@ -393,7 +386,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			CriteriaQuery<Long> critQuery = builder.createQuery(Long.class);
 			Root<Run> rootQuery = critQuery.from(Run.class);
 			critQuery.select(builder.count(rootQuery));
-			Predicate where = viewListCommonQueryOptions(builder, rootQuery, user, moduleResourceUri, cloudServiceName, activeOnly);
+			Predicate where = viewListCommonQueryOptions(builder, rootQuery, queryParameters);
 			if (where != null){
 				critQuery.where(where);
 			}
@@ -405,24 +398,38 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return count;
 	}
 
-	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Run> rootQuery, User user,
-			String moduleResourceUri, String cloudServiceName, boolean activeOnly) {
+	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Run> rootQuery,
+														RunsQueryParameters queryParameters)
+	{
+		User user = queryParameters.user;
+		String owner = (queryParameters.runOwner != null)? queryParameters.runOwner : queryParameters.userFilter;
+		String moduleResourceUri = queryParameters.moduleResourceUri;
+		String cloud = queryParameters.cloud;
+		boolean activeOnly = queryParameters.activeOnly;
+
 		Predicate where = null;
+
 		if (!user.isSuper()) {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), user.getName()));
+		} else if (owner != null) {
+			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), owner));
 		}
+
 		if (moduleResourceUri != null && !"".equals(moduleResourceUri)) {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("moduleResourceUri"), moduleResourceUri));
 		}
-		if (cloudServiceName != null && !"".equals(cloudServiceName)) {
+
+		if (cloud != null && !"".equals(cloud)) {
 			// TODO: Replace the 'like' by an 'equals'
-			where = andPredicate(builder, where, builder.like(rootQuery.<String>get("cloudServiceNames"), "%" + cloudServiceName + "%"));
+			where = andPredicate(builder, where, builder.like(rootQuery.<String>get("cloudServiceNames"), "%" + cloud + "%"));
 		}
+
 		if (activeOnly) {
 			Expression<String> exp = rootQuery.<String>get("state");
 			Predicate predicate = exp.in(States.active());
 			where = andPredicate(builder, where, predicate);
 		}
+
 		return where;
 	}
 
