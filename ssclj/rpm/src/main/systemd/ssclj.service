@@ -2,6 +2,7 @@
 Description=SlipStream API
 After=syslog.target
 After=network.target
+After=hsqldb.service
 
 [Service]
 Environment=SSCLJ_PORT=8201
@@ -9,7 +10,7 @@ EnvironmentFile=-/etc/default/ssclj
 
 User=slipstream
 
-WorkingDirectory=/opt/slipstream/ssclj
+WorkingDirectory=${installation.dir}
 
 ExecStart=/usr/bin/java \
             -Dconfig.path=db.spec \

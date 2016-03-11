@@ -128,9 +128,7 @@
       []
       (->> (sql collection-id id roles)
            (jdbc/query kh/db-spec)
-           (map :data)
-           (map u/deserialize)))))
-
+           (map (comp u/deserialize :data))))))
 
 (defn- delete-resource
   [id]

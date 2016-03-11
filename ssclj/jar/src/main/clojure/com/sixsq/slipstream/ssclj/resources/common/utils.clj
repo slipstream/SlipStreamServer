@@ -163,15 +163,13 @@
 (defn- clojurify
   [exp]
   (cond
-    (instance? java.util.Map exp) (into {} exp)
+    (instance? java.util.Map exp)  (into {} (map (fn[[k v]] [(keyword k) v]) exp))
     (instance? java.util.List exp) (vec exp)
     :else exp))
 
 (defn walk-clojurify
   [java-map]
-  (->> java-map
-       (clojure.walk/prewalk clojurify)
-       clojure.walk/keywordize-keys))
+  (clojure.walk/prewalk clojurify java-map))
 
 (defn into-vec-without-nil
   [op xs]

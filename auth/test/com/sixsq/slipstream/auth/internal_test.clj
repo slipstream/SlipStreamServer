@@ -91,6 +91,15 @@
         claim-token (token-value (ia/create-token claims valid-token))]
     (is (= claims (sg/unsign-claims claim-token)))))
 
+(deftest test-users-by-email-skips-deleted
+  (th/add-user-for-test! {:user-name "jack"
+                          :password  "123456"
+                          :email     "jack@sixsq.com"
+                          :state     "DELETED"})
+
+  (is (= [] (db/find-usernames-by-email "unknown@xxx.com")))
+  (is (= [] (db/find-usernames-by-email "jack@sixsq.com"))))
+
 (deftest test-users-by-email
   (th/add-user-for-test! {:user-name "jack"
                           :password  "123456"
@@ -105,6 +114,14 @@
   (is (= [] (db/find-usernames-by-email "unknown@xxx.com")))
   (is (= ["jack"] (db/find-usernames-by-email "jack@sixsq.com")))
   (is (= ["joe" "joe-alias"] (db/find-usernames-by-email "joe@sixsq.com"))))
+
+(deftest test-users-by-authn-skips-deleted
+  (th/add-user-for-test! {:user-name "joe-slipstream"
+                          :password  "123456"
+                          :email     "joe@sixsq.com"
+                          :github-id "joe"
+                          :state     "DELETED"})
+  (is (nil? (db/find-username-by-authn :github "joe"))))
 
 (deftest test-users-by-authn
   (th/add-user-for-test! {:user-name "joe-slipstream"

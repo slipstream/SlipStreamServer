@@ -55,7 +55,7 @@ public class AuthnResource extends BaseResource {
 	}
 
 	protected Reference extractRedirectURL(Request request) {
-		return extractRedirectURL(request, null);
+		return extractRedirectURL(request, "/dashboard");
 	}
 
 	/**
