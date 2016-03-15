@@ -150,8 +150,9 @@
   (when (open-instance-type? usage-metric)
     (let [metrics-same-vm
           (kc/select usage_records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)}))]
-      (doseq [metric metrics-same-vm]
-        (when (open-instance-type? metric))
+      (doseq [metric metrics-same-vm
+              :when (open-instance-type? metric)
+              ]
           (close-usage-record metric (:start_timestamp usage-metric))))))
 
 (defn- insert-metric

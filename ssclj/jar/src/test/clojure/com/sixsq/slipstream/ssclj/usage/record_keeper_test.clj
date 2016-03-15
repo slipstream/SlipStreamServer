@@ -169,8 +169,14 @@
   (-insertStart event-change-to-large)
 
   (is (= (:start_timestamp event-change-to-large)
-
          (->> (select usage_records (where {:cloud_vm_instanceid "exoscale-ch-gva:vm1"
                                             :metric_name         "instance-type.Small"}))
               first
-              :end_timestamp))))
+              :end_timestamp)))
+  (is (nil? (->> (select usage_records (where {:cloud_vm_instanceid "exoscale-ch-gva:vm1"
+                                               :metric_name         "nb-cpu"}))
+                 first
+                 :end_timestamp)))
+  (is (nil? (->> (select usage_records (where {:cloud_vm_instanceid "exoscale-ch-gva:vm2"}))
+                 first
+                 :end_timestamp))))
