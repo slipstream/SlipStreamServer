@@ -20,18 +20,6 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Logger;
-
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -47,9 +35,21 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ProcessUtils;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Logger;
+
 public abstract class CliConnectorBase extends ConnectorBase {
 
-	public static final String CLI_LOCATION = "/usr/local/bin";
+	public static final String CLI_LOCATION = "/usr/bin";
 
 	protected Logger log;
 
