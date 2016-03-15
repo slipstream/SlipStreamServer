@@ -2,9 +2,7 @@
   (:require
     [superstring.core :refer [join]]
     [clojure.tools.logging :as log]
-    [clojure.java.jdbc :refer :all :as jdbc]
     [korma.core :as kc]
-    [korma.db :as kd]
     [com.sixsq.slipstream.ssclj.usage.state-machine :as sm]
     [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
@@ -126,12 +124,6 @@
   [state action]
   (log/info "Action" action " is not allowed for state " state))
 
-(defn- insert-metric
-  [usage-metric]
-  (log/info "Will record START for metric " (:metric_name usage-metric)
-            ", usage-metric :" usage-metric)
-  (kc/insert usage_records (kc/values usage-metric))
-  (log/info "Done persisting metric: " usage-metric))
 
 (defn- close-usage-record
   ([usage-metric close-timestamp]
@@ -147,6 +139,30 @@
 
   ([usage-metric]
    (close-usage-record usage-metric (:end_timestamp usage-metric))))
+
+(defn- open-instance-type?
+  [metric]
+  (and (.startsWith (:metric_name metric) "instance-type.")
+       (nil? (:end_timestamp metric))))
+
+(defn close-metric-when-instance-type-change
+  [usage-metric]
+  (when (open-instance-type? usage-metric)
+    (println "OPEN INSTANCE!!!")
+    (let [metrics-same-vm
+          (kc/select usage_records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)}))]
+      (doseq [metric metrics-same-vm]
+        (when (open-instance-type? metric))
+          (close-usage-record metric (:start_timestamp usage-metric))))))
+
+(defn- insert-metric
+  [usage-metric]
+  (log/info "Will record START for metric " (:metric_name usage-metric)
+            ", usage-metric :" usage-metric)
+  (close-metric-when-instance-type-change usage-metric)
+  (kc/insert usage_records (kc/values usage-metric))
+  (log/info "Done persisting metric: " usage-metric))
+
 
 ;;
 ;;

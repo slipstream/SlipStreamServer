@@ -56,6 +56,21 @@
                        {:name  "disk-GB"
                         :value 300}])))
 
+(def event-start-small-vm1
+  (-> event-start
+      (assoc :cloud_vm_instanceid "exoscale-ch-gva:vm1")
+      (assoc :metrics [{:name  "instance-type.Small" :value 1}
+                       {:name  "nb-cpu"              :value 8}])))
+
+(def event-start-small-vm2
+  (-> event-start-small-vm1
+      (assoc :cloud_vm_instanceid "exoscale-ch-gva:vm2")))
+
+(def event-change-to-large
+  (-> event-start-small-vm1
+      (assoc :start_timestamp end-day-2)
+      (assoc :metrics [{:name  "instance-type.Large" :value 1}])))
+
 (def event-ending-day-2
   (assoc event-start :end_timestamp end-day-2))
 
@@ -147,3 +162,15 @@
   (-insertEnd event-end)
   (is (= 3 (count (records-for-interval middle-event end-day-2))))
   (is (= 3 (count (records-for-interval start-day-0 middle-event)))))
+
+(deftest close-instance-type-when-changed-for-same-vm
+  (-insertStart event-start-small-vm1)
+  (-insertStart event-start-small-vm2)
+  (-insertStart event-change-to-large)
+
+  (is (= (:start_timestamp event-change-to-large)
+
+         (->> (select usage_records (where {:cloud_vm_instanceid "exoscale-ch-gva:vm1"
+                                            :metric_name         "instance-type.Small"}))
+              first
+              :end_timestamp))))

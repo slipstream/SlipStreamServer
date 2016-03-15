@@ -49,7 +49,7 @@ import com.sixsq.slipstream.util.ProcessUtils;
 
 public abstract class CliConnectorBase extends ConnectorBase {
 
-	public static final String CLI_LOCATION = "/usr/bin";
+	public static final String CLI_LOCATION = "/usr/local/bin";
 
 	protected Logger log;
 
