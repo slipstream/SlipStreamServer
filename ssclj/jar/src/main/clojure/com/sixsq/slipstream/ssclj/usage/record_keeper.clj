@@ -148,7 +148,6 @@
 (defn close-metric-when-instance-type-change
   [usage-metric]
   (when (open-instance-type? usage-metric)
-    (println "OPEN INSTANCE!!!")
     (let [metrics-same-vm
           (kc/select usage_records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)}))]
       (doseq [metric metrics-same-vm]
