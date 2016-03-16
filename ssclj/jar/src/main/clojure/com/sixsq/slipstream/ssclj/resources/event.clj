@@ -64,7 +64,6 @@
 
 (defmethod crud/add resource-name
   [request]
-  (log/info resource-uri ": will add event " (:body request))
   (add-impl request))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
