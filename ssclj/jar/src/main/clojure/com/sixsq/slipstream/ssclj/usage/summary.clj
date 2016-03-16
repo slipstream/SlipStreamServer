@@ -2,6 +2,7 @@
   (:require
     [clojure.tools.logging :as log]
     [clj-time.core :as t]
+    [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]))
 
@@ -76,6 +77,7 @@
   [record start end frequency grouping-cols]
   (-> record
       (select-keys grouping-cols)
+      (assoc :grouping (s/join "," (map name grouping-cols)))
       (assoc :frequency (name frequency))
       (assoc :start_timestamp start)
       (assoc :end_timestamp end)

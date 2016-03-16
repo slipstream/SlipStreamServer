@@ -27,7 +27,7 @@ public class APICollectionResource extends APIBaseResource {
         return "?$first=" + first + "&$last=" + last + cimiFilter();
     }
 
-    private String cimiFilter() {
+    protected String cimiFilter() {
         String cimiFilter = RequestUtil.getCIMIFilter(getRequest());
         if (cimiFilter != null && !cimiFilter.isEmpty()) {
             return "&$filter=" + cimiFilter;
