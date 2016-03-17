@@ -32,12 +32,9 @@
    :user                "sixsq_dev"
    :cloud               "exoscale-ch-gva"
    :start_timestamp     event-start-time
-   :metrics             [{:name  "nb-cpu"
-                          :value 4}
-                         {:name  "RAM-GB"
-                          :value 8}
-                         {:name  "disk-GB"
-                          :value 100.5}]})
+   :metrics             [{:name  "nb-cpu"   :value 4}
+                         {:name  "RAM-GB"   :value 8}
+                         {:name  "disk-GB"  :value 100.5}]})
 
 (def event-end
   {:cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
@@ -49,12 +46,9 @@
 (def event-starting-day-2
   (-> event-start
       (assoc :start_timestamp start-day-2)
-      (assoc :metrics [{:name  "nb-cpu"
-                        :value 8}
-                       {:name  "RAM-GB"
-                        :value 16}
-                       {:name  "disk-GB"
-                        :value 300}])))
+      (assoc :metrics [{:name  "nb-cpu"   :value 8}
+                       {:name  "RAM-GB"   :value 16}
+                       {:name  "disk-GB"  :value 300}])))
 
 (def event-start-small-vm1
   (-> event-start
@@ -107,7 +101,6 @@
 
 (deftest records-for-interval-for-open-records
   (-insertStart event-start)
-  (log/debug "after insert, usage records " (select usage_records))
   (is (= 3 (count (records-for-interval start-day-0 end-day-2))))
   (is (= 3 (count (records-for-interval start-day-1 end-day-1))))
   (is (zero? (count (records-for-interval start-day-0 end-day-0))))
@@ -125,13 +118,32 @@
 (deftest invalid-date
   (is (thrown? IllegalArgumentException (records-for-interval end-day-2 start-day-0))))
 
-(deftest event-already-open-can-be-reopened-but-doeexoscale-ch-gva:fe3c02d4-c8f9-427a-a8f8-897e422edd2cs-nothing
+(defn- name-value
+  [usage-record]
+  ((juxt :metric_name :metric_value) usage-record))
+
+(deftest event-already-open-are-closed-and-restarted-with-new-values
   (is (empty? (select usage_records)))
   (-insertStart event-start)
-  (let [records (select usage_records)]
-    (is (= 3 (count records)))
-    (-insertStart event-starting-day-2)
-    (is (= records (select usage_records)))))
+  (let [records-before  (select usage_records)
+        _               (-insertStart event-starting-day-2)
+        records-after   (select usage_records)
+
+        records-modified (->> records-after (filter #(= (:start_timestamp event-start)
+                                                       (:start_timestamp %))))
+        new-records     (->> records-after (filter #(= (:start_timestamp event-starting-day-2)
+                                                        (:start_timestamp %))))]
+
+    (is (= 3 (count records-before)))
+    (is (= 6 (count records-after)))
+
+    (doseq [record-modified records-modified]
+      (is (= (:start_timestamp event-starting-day-2) (:end_timestamp record-modified))))
+
+    (doseq [new-record new-records]
+      (is (= (:start_timestamp event-starting-day-2) (:start_timestamp new-record))))
+
+    (is (=  (map name-value records-modified) (map name-value records-before)))))
 
 (deftest same-metric-can-be-open-close-multiple-times-when-scaling
   (is (empty? (select usage_records)))

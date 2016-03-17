@@ -161,6 +161,10 @@
   (kc/insert usage_records (kc/values usage-metric))
   (log/info "Done persisting metric: " usage-metric))
 
+(defn close-restart-record
+  [usage-metric]
+  (close-usage-record usage-metric (:start_timestamp usage-metric))
+  (insert-metric usage-metric))
 
 ;;
 ;;
@@ -170,9 +174,10 @@
   [usage-metric trigger]
   (let [current-state (state usage-metric)]
     (case (sm/action current-state trigger)
-      :insert-start (insert-metric usage-metric)
+      :close-restart    (close-restart-record usage-metric)
+      :insert-start     (insert-metric usage-metric)
       :wrong-transition (log-wrong-transition current-state trigger)
-      :close-record (close-usage-record usage-metric))))
+      :close-record     (close-usage-record usage-metric))))
 
 (defn -insertStart
   [usage-event-json]
