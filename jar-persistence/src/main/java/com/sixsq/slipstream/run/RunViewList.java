@@ -22,6 +22,7 @@ package com.sixsq.slipstream.run;
 
 import java.util.List;
 
+import com.sixsq.slipstream.persistence.Run;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -60,28 +61,21 @@ public class RunViewList {
 		return runs;
 	}
 
+	// TODO LS: To be removed once #646 is merged.
 	public void populate(User user, int offset, int limit, String cloudServiceName, boolean activeOnly) throws ConfigurationException, ValidationException {
-		populate(user, null, offset, limit, cloudServiceName, activeOnly);
-	}
-
-	public void populate(User user, String moduleResourceUri, int offset, int limit, boolean activeOnly) throws ConfigurationException, ValidationException {
-		populate(user, moduleResourceUri, offset, limit, null, activeOnly);
-	}
-
-	public void populate(User user, String moduleResourceUri, int offset, int limit, String cloudServiceName, boolean activeOnly)
-			throws ConfigurationException, ValidationException {
 		user.validate();
-		populateRuns(user, moduleResourceUri, offset, limit, cloudServiceName, activeOnly);
+		RunsQueryParameters params = new RunsQueryParameters(user, offset, limit, cloudServiceName, null, null, null, activeOnly);
+		populate(params);
 	}
 
-	private void populateRuns(User user, String moduleResourceUri, int offset, int limit, String cloudServiceName, boolean activeOnly)
+	public void populate(RunsQueryParameters queryParameters)
 			throws ConfigurationException, ValidationException {
-		this.offset = offset;
-		this.limit = limit;
-		this.cloud = cloudServiceName;
+		this.offset = queryParameters.offset;
+		this.limit = queryParameters.limit;
+		this.cloud = queryParameters.cloud;
 
-		totalCount = RunView.fetchListViewCount(user, moduleResourceUri, cloudServiceName, activeOnly);
-		runs = RunView.fetchListView(user, moduleResourceUri, offset, limit, cloudServiceName, activeOnly);
+		totalCount = Run.viewListCount(queryParameters);
+		runs = Run.viewList(queryParameters);
 		count = runs.size();
 	}
 

@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.vm;
+package com.sixsq.slipstream.persistence;
 
 /*
  * +=================================================================+
@@ -20,19 +20,23 @@ package com.sixsq.slipstream.vm;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.persistence.QueryParameters;
-import com.sixsq.slipstream.persistence.User;
+public class QueryParameters {
 
+    public final User user;
+    public final Integer offset;
+    public final Integer limit;
+    public final String cloud;
+    public final String runOwner;
+    public final String userFilter;
 
-public class VmsQueryParameters extends QueryParameters {
-
-	public final String runUuid;
-
-	public VmsQueryParameters(User user, Integer offset, Integer limit, String cloud, String runOwner,
-							   String userFilter, String runUuid)
-	{
-		super(user, offset, limit, cloud, runOwner, userFilter);
-		this.runUuid = runUuid;
-	}
+    public QueryParameters(User user, Integer offset, Integer limit, String cloud, String runOwner,
+                              String userFilter) {
+        this.user = user;
+        this.offset = offset;
+        this.limit = limit;
+        this.cloud = cloud;
+        this.runOwner = runOwner;
+        this.userFilter = userFilter;
+    }
 
 }

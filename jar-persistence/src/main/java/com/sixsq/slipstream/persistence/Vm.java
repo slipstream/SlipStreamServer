@@ -204,24 +204,28 @@ public class Vm {
 	}
 
 	private static Predicate viewListCommonQueryOptions(CriteriaBuilder builder, Root<Vm> rootQuery,
-			VmsQueryParameters parameters) {
-
+			VmsQueryParameters parameters)
+	{
 		Predicate where = null;
+
 		if (!parameters.user.isSuper()) {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), parameters.user.getName()));
-		}
-		if (parameters.user.isSuper() && parameters.userFilter != null) {
+		} else if (parameters.userFilter != null) {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("user_"), parameters.userFilter));
 		}
+
 		if (parameters.runUuid != null && !"".equals(parameters.runUuid)) {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("runUuid"), parameters.runUuid));
 		}
+
 		if (parameters.runOwner != null && !"".equals(parameters.runOwner)) {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("runOwner"), parameters.runOwner));
 		}
+
 		if (parameters.cloud != null && !"".equals(parameters.cloud)) {
 			where = andPredicate(builder, where, builder.equal(rootQuery.get("cloud"), parameters.cloud));
 		}
+
 		return where;
 	}
 

@@ -54,11 +54,10 @@ public class VmsResource extends BaseResource {
 	private Vms getVms() {
 		Vms vms = new Vms();
 		VmsQueryParameters parameters = new VmsQueryParameters(getUser(), getOffset(), getLimit(), getCloud(),
-				getRunUuid(), getRunOwner(), getUserFilter());
+				getRunOwner(), getUserFilter(), getRunUuid());
 
 		try {
 			vms.populate(parameters);
-		} catch (SlipStreamClientException e) {
 		} catch (SlipStreamException e) {
 		}
 
