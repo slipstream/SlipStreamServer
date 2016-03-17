@@ -394,6 +394,7 @@
                     <exclude>slipstream.war/static-content/errors/**/*</exclude>
                     <exclude>slipstream.war/static-content/themes/**/errors/**/*</exclude>
                     <exclude>slipstream.war/static-content/js/support.js</exclude>
+                    <exclude>slipstream.war/static-content/terms.html</exclude>
                   </excludes>
                 </source>
               </sources>
