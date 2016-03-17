@@ -110,13 +110,18 @@
                (kc/order :start_timestamp :DESC)
                (kc/limit 1))))
 
-(defn state
+(defn- state
   [usage-metric]
   (let [record (last-record usage-metric)]
     (cond
       (nil? record) :initial
       (nil? (:end_timestamp record)) :started
       :else :stopped)))
+
+(defn- open-instance-type?
+  [metric]
+  (and (.startsWith (:metric_name metric) "instance-type.")
+       (nil? (:end_timestamp metric))))
 
 ;;
 ;; actions
@@ -131,12 +136,7 @@
        " " (:cloud_vm_instanceid usage-metric)
        " " (:metric_name usage-metric)))
 
-(defn- open-usage-record
-  [usage-metric]
-  (log/info "Open " (metric-summary usage-metric))
-  (kc/insert usage_records (kc/values usage-metric)))
-
-(defn- close-usage-record
+(defn- close-record
   ([usage-metric close-timestamp]
    (log/info "Close " (:end_timestamp usage-metric) (metric-summary usage-metric))
    (kc/update
@@ -147,12 +147,7 @@
                 :end_timestamp       nil})))
 
   ([usage-metric]
-   (close-usage-record usage-metric (:end_timestamp usage-metric))))
-
-(defn- open-instance-type?
-  [metric]
-  (and (.startsWith (:metric_name metric) "instance-type.")
-       (nil? (:end_timestamp metric))))
+   (close-record usage-metric (:end_timestamp usage-metric))))
 
 (defn close-metric-when-instance-type-change
   [usage-metric]
@@ -160,20 +155,18 @@
     (let [metrics-same-vm
           (kc/select usage_records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)}))]
       (doseq [metric metrics-same-vm :when (open-instance-type? metric)]
-          (close-usage-record metric (:start_timestamp usage-metric))))))
+        (close-record metric (:start_timestamp usage-metric))))))
 
-(defn- insert-metric
+(defn- open-record
   [usage-metric]
-  (log/info "Will record START for metric " (:metric_name usage-metric)
-            ", usage-metric :" usage-metric)
+  (log/info "Open " (metric-summary usage-metric))
   (close-metric-when-instance-type-change usage-metric)
-  (kc/insert usage_records (kc/values usage-metric))
-  (log/info "Done persisting metric: " usage-metric))
+  (kc/insert usage_records (kc/values usage-metric)))
 
 (defn close-restart-record
   [usage-metric]
-  (close-usage-record usage-metric (:start_timestamp usage-metric))
-  (insert-metric usage-metric))
+  (close-record usage-metric (:start_timestamp usage-metric))
+  (open-record usage-metric))
 
 ;;
 ;;
@@ -184,9 +177,9 @@
   (let [current-state (state usage-metric)]
     (case (sm/action current-state trigger)
       :close-restart    (close-restart-record usage-metric)
-      :insert-start     (insert-metric usage-metric)
+      :insert-start     (open-record usage-metric)
       :wrong-transition (log-wrong-transition current-state trigger)
-      :close-record     (close-usage-record usage-metric))))
+      :close-record     (close-record usage-metric))))
 
 (defn -insertStart
   [usage-event-json]
