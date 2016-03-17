@@ -1,7 +1,6 @@
 package com.sixsq.slipstream.connector;
 
 import com.sixsq.slipstream.persistence.Vm;
-import org.bouncycastle.math.ec.ScaleYPointMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
