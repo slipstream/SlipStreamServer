@@ -52,6 +52,7 @@
            "start_timestamp" "VARCHAR(30)"
            "end_timestamp" "VARCHAR(30)"
            "frequency" "VARCHAR(30)"
+           "grouping" "VARCHAR(100)"
            "compute_timestamp" "VARCHAR(30)"
            "usage" "VARCHAR(10000)"))
 

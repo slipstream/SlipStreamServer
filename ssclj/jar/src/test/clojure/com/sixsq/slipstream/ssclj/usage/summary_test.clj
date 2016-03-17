@@ -111,6 +111,7 @@
           :start_timestamp start-day
           :end_timestamp   end-day
           :frequency       "daily"
+          :grouping        "user,cloud"
           :usage
                            {
                             "nb-cpu"
@@ -129,6 +130,7 @@
           :start_timestamp start-day
           :end_timestamp   end-day
           :frequency       "daily"
+          :grouping        "user,cloud"
           :usage
                            {
                             "nb-cpu"
@@ -147,6 +149,7 @@
           :start_timestamp start-day
           :end_timestamp   end-day
           :frequency       "daily"
+          :grouping        "user,cloud"
           :usage
                            {
                             "Disk"
@@ -164,6 +167,7 @@
           :start_timestamp start-day
           :end_timestamp   end-day
           :frequency       "daily"
+          :grouping        "user,cloud"
           :usage
                            {
                             "Disk"
@@ -204,6 +208,7 @@
           :start_timestamp start-day
           :end_timestamp   end-day
           :frequency       "daily"
+          :grouping        "user,cloud"
           :usage           {"nb-cpu"  {:unit_minutes (* 4.0 337)}
                             "RAM-GB"  {:unit_minutes (* 8.0 337)}
                             "disk-GB" {:unit_minutes (* 100.5 337)}}
@@ -247,6 +252,7 @@
            :start_timestamp start-april
            :end_timestamp   start-may
            :frequency       "daily"
+           :grouping        "cloud"
            :usage           {"nb-cpu" {:unit_minutes 1348.0}
                              "RAM"    {:unit_minutes 13872.0}}
            }
@@ -254,6 +260,7 @@
            :start_timestamp start-april
            :end_timestamp   start-may
            :frequency       "daily"
+           :grouping        "cloud"
            :usage           {"Disk"   {:unit_minutes 4176000.0}
                              "nb-cpu" {:unit_minutes 5460.0}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may :daily [:cloud]))))
@@ -266,6 +273,7 @@
            :end_timestamp   "2015-05-01T00:00:00.000Z"
            :start_timestamp "2015-04-01T00:00:00.000Z"
            :frequency       "daily"
+           :grouping        "cloud"
            :usage           {"Disk" {:unit_minutes 4176000.0}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may :daily
                             [:cloud] ["sixsq_dev"])))
@@ -273,12 +281,14 @@
            :end_timestamp   "2015-05-01T00:00:00.000Z"
            :start_timestamp "2015-04-01T00:00:00.000Z"
            :frequency       "daily"
+           :grouping        "cloud"
            :usage           {"RAM"    {:unit_minutes 13872.0}
                              "nb-cpu" {:unit_minutes 1348.0}}}
           {:cloud           "aws"
            :end_timestamp   "2015-05-01T00:00:00.000Z"
            :start_timestamp "2015-04-01T00:00:00.000Z"
            :frequency       "daily"
+           :grouping        "cloud"
            :usage           {"nb-cpu" {:unit_minutes 5460.0}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may :daily
                             [:cloud] ["joe"]))))

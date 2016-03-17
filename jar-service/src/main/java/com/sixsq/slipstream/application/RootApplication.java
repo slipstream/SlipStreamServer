@@ -20,20 +20,47 @@ package com.sixsq.slipstream.application;
  * -=================================================================-
  */
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.ServiceLoader;
-
+import com.sixsq.slipstream.action.ActionRouter;
+import com.sixsq.slipstream.authn.BasicAuthenticator;
+import com.sixsq.slipstream.authn.CookieAuthenticator;
+import com.sixsq.slipstream.authn.LoginResource;
+import com.sixsq.slipstream.authn.LogoutResource;
+import com.sixsq.slipstream.authn.RegistrationResource;
+import com.sixsq.slipstream.authn.ResetPasswordResource;
+import com.sixsq.slipstream.authz.SuperEnroler;
+import com.sixsq.slipstream.cloudusage.CloudUsageRouter;
+import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
+import com.sixsq.slipstream.dashboard.DashboardRouter;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.event.EventRouter;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.Util;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.CloudIds;
 import com.sixsq.slipstream.initialstartup.Modules;
-import com.sixsq.slipstream.resource.RootRedirectResource;
-import com.sixsq.slipstream.usage.UsageRouter;
+import com.sixsq.slipstream.initialstartup.Users;
+import com.sixsq.slipstream.metrics.GraphiteRouter;
+import com.sixsq.slipstream.module.ModuleListRouter;
+import com.sixsq.slipstream.module.ModuleRouter;
+import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.AppStoreResource;
 import com.sixsq.slipstream.resource.ModulesChooserResource;
+import com.sixsq.slipstream.resource.ReportRouter;
+import com.sixsq.slipstream.resource.RootRedirectResource;
+import com.sixsq.slipstream.resource.ServiceCatalogRouter;
+import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
+import com.sixsq.slipstream.run.RunRouter;
+import com.sixsq.slipstream.run.VmsRouter;
+import com.sixsq.slipstream.ssclj.SSCLJRouter;
+import com.sixsq.slipstream.usage.UsageRouter;
+import com.sixsq.slipstream.user.UserRouter;
+import com.sixsq.slipstream.util.ConfigurationUtil;
+import com.sixsq.slipstream.util.Logger;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -45,48 +72,18 @@ import org.restlet.data.Status;
 import org.restlet.resource.Directory;
 import org.restlet.resource.ServerResource;
 import org.restlet.routing.Filter;
-import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
-import org.restlet.routing.Variable;
 import org.restlet.security.Authenticator;
 import org.restlet.service.MetadataService;
-
 import slipstream.async.Collector;
 import slipstream.async.GarbageCollector;
 
-import com.sixsq.slipstream.action.ActionRouter;
-import com.sixsq.slipstream.authn.BasicAuthenticator;
-import com.sixsq.slipstream.authn.CookieAuthenticator;
-import com.sixsq.slipstream.authn.LoginResource;
-import com.sixsq.slipstream.authn.LogoutResource;
-import com.sixsq.slipstream.authn.RegistrationResource;
-import com.sixsq.slipstream.authn.ResetPasswordResource;
-import com.sixsq.slipstream.authz.SuperEnroler;
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
-import com.sixsq.slipstream.dashboard.DashboardRouter;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.Util;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
-import com.sixsq.slipstream.initialstartup.Users;
-import com.sixsq.slipstream.metrics.GraphiteRouter;
-import com.sixsq.slipstream.module.ModuleRouter;
-import com.sixsq.slipstream.module.ModuleListRouter;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.resource.ReportRouter;
-import com.sixsq.slipstream.resource.ServiceCatalogRouter;
-import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
-import com.sixsq.slipstream.run.RunRouter;
-import com.sixsq.slipstream.run.VmsRouter;
-import com.sixsq.slipstream.ssclj.SSCLJRouter;
-import com.sixsq.slipstream.user.UserRouter;
-import com.sixsq.slipstream.util.ConfigurationUtil;
-import com.sixsq.slipstream.util.Logger;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.ServiceLoader;
 
 public class RootApplication extends Application {
 
@@ -253,6 +250,7 @@ public class RootApplication extends Application {
 			attachReports(router);
 			attachEvent(router);
 			attachUsage(router);
+			attachCloudUsage(router);
 			attachAppStore(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
@@ -442,6 +440,10 @@ public class RootApplication extends Application {
 
 	private void attachUsage(RootRouter router) throws ValidationException {
 		guardAndAttach(router, new UsageRouter(getContext()), "usage");
+	}
+
+	private void attachCloudUsage(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new CloudUsageRouter(getContext()), "cloud-usage");
 	}
 
 	private void attachAppStore(RootRouter router) throws ValidationException {

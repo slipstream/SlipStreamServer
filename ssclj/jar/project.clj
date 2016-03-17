@@ -48,7 +48,7 @@
 
                  [puppetlabs/http-client                    "0.4.5"
                   :exclusions [[cheshire/cheshire]] ]
-                 [aleph                                     "0.4.0"]
+                 [aleph                                     "0.4.1-beta4"]
                  ]
 
   :plugins      [[lein-ancient                              "0.6.8"]
