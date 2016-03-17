@@ -2,8 +2,16 @@ package com.sixsq.slipstream.connector;
 
 import com.sixsq.slipstream.persistence.Vm;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 
 /**
@@ -34,6 +42,7 @@ public class UsageRecorder {
 	public static boolean isMuted = false;
 
 	private static Set<String> recordedVmInstanceIds = new HashSet<String>();
+	private static Map<String, Long> closeAttemptsVmInstanceIds = new HashMap<String, Long>();
 
 	public static void muteForTests() {
 		isMuted = true;
@@ -74,9 +83,9 @@ public class UsageRecorder {
 				return;
 			}
 
-			if(!hasRecorded(cloud, instanceId)){
-				logger.fine("Not recorded but still inserting usage record END for "
-						+ metrics + ", " + describe(instanceId, user, cloud));
+			if(hasAttemptedToClose(cloud, instanceId)) {
+				recordAttemptClose(cloud, instanceId);
+				return;
 			}
 
 			logger.info("Inserting usage record END, metrics" + metrics + ", for " + describe(instanceId, user, cloud));
@@ -86,6 +95,7 @@ public class UsageRecorder {
 			UsageRecord.post(usageRecord);
 
 			recordedVmInstanceIds.remove(keyCloudVMInstanceID(cloud, instanceId));
+			recordAttemptClose(cloud, instanceId);
 
 			logger.info("DONE Insert usage record END for " + describe(instanceId, user, cloud));
 		} catch (Exception e) {
@@ -96,6 +106,27 @@ public class UsageRecorder {
 	private static boolean hasRecorded(String cloud, String instanceId) {
 		logger.info("UsageRecorder, recordedVmInstanceIds = " + recordedVmInstanceIds);
 		return recordedVmInstanceIds.contains(keyCloudVMInstanceID(cloud, instanceId));
+	}
+
+	private static boolean hasAttemptedToClose(String cloud, String instanceId) {
+		return closeAttemptsVmInstanceIds.get(keyCloudVMInstanceID(cloud, instanceId)) != null;
+	}
+
+	private static void recordAttemptClose(String cloud, String instanceId) {
+		purgeOldAttemptsClose();
+
+		closeAttemptsVmInstanceIds.put(keyCloudVMInstanceID(cloud, instanceId), System.currentTimeMillis());
+	}
+
+	private static void purgeOldAttemptsClose() {
+		long now = System.currentTimeMillis();
+		long oneHourMillis = 1000 * 60 * 60;
+
+		closeAttemptsVmInstanceIds =
+				closeAttemptsVmInstanceIds.entrySet()
+						.stream()
+						.filter(e -> (now - e.getValue()) < oneHourMillis)
+						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	private static ACL getAcl(String user) {

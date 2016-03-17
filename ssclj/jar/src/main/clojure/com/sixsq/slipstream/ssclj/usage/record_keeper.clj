@@ -127,18 +127,20 @@
   [state action]
   (log/info "Action" action " is not allowed for state " state))
 
-(defn- insert-metric
+(defn- metric-summary
   [usage-metric]
-  (log/info "Will record START for metric " (:metric_name usage-metric)
-            ", usage-metric :" usage-metric)
-  (kc/insert usage_records (kc/values usage-metric))
-  (log/info "Done persisting metric: " usage-metric))
+  (str (:start_timestamp usage-metric)
+       " " (:cloud_vm_instanceid usage-metric)
+       " " (:metric_name usage-metric)))
+
+(defn- open-usage-record
+  [usage-metric]
+  (log/info "Open " (metric-summary usage-metric))
+  (kc/insert usage_records (kc/values usage-metric)))
 
 (defn- close-usage-record
   ([usage-metric close-timestamp]
-   (log/info "Will record STOP for metric " (:metric_name usage-metric)
-             "with timestamp: " close-timestamp
-             ", usage-metric: " usage-metric)
+   (log/info "Close " (:end_timestamp usage-metric) (metric-summary usage-metric))
    (kc/update
      usage_records
      (kc/set-fields {:end_timestamp close-timestamp})
@@ -157,7 +159,7 @@
   [usage-metric trigger]
   (let [current-state (state usage-metric)]
     (case (sm/action current-state trigger)
-      :insert-start (insert-metric usage-metric)
+      :insert-start (open-usage-record usage-metric)
       :wrong-transition (log-wrong-transition current-state trigger)
       :close-record (close-usage-record usage-metric))))
 

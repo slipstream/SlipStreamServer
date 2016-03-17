@@ -63,9 +63,7 @@
 
 (defmethod crud/add resource-name
   [request]
-  (log/info resource-uri ": Will add usage record" (:body request))
   (add-impl request))
-; (log/info resource-uri ": Done adding usage record" (:body request)))
 
 (defmethod crud/set-operations resource-uri
   [resource request]
