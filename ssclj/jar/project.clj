@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/ssclj "2.23.2-SNAPSHOT"
+(defproject com.sixsq.slipstream/ssclj "3.1-SNAPSHOT"
   :description    "Clojure REST resources"
   :url            "http://sixsq.com"
   :license {:name "Apache License, Version 2.0"
@@ -29,7 +29,7 @@
                  [org.slf4j/slf4j-log4j12                   "1.7.13"]
                  [instaparse                                "1.4.1"]
                 ; ;; Authentication service
-                 [com.sixsq.slipstream/auth                 "2.23.2-SNAPSHOT"]
+                 [com.sixsq.slipstream/auth                 "3.1-SNAPSHOT"]
                 ; ;; Environment settings
                  [environ                                   "1.0.1"]
                 ; ;; database

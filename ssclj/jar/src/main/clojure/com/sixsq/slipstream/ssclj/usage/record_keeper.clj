@@ -2,9 +2,7 @@
   (:require
     [superstring.core :refer [join]]
     [clojure.tools.logging :as log]
-    [clojure.java.jdbc :refer :all :as jdbc]
     [korma.core :as kc]
-    [korma.db :as kd]
     [com.sixsq.slipstream.ssclj.usage.state-machine :as sm]
     [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
@@ -151,6 +149,32 @@
   ([usage-metric]
    (close-usage-record usage-metric (:end_timestamp usage-metric))))
 
+(defn- open-instance-type?
+  [metric]
+  (and (.startsWith (:metric_name metric) "instance-type.")
+       (nil? (:end_timestamp metric))))
+
+(defn close-metric-when-instance-type-change
+  [usage-metric]
+  (when (open-instance-type? usage-metric)
+    (let [metrics-same-vm
+          (kc/select usage_records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)}))]
+      (doseq [metric metrics-same-vm :when (open-instance-type? metric)]
+          (close-usage-record metric (:start_timestamp usage-metric))))))
+
+(defn- insert-metric
+  [usage-metric]
+  (log/info "Will record START for metric " (:metric_name usage-metric)
+            ", usage-metric :" usage-metric)
+  (close-metric-when-instance-type-change usage-metric)
+  (kc/insert usage_records (kc/values usage-metric))
+  (log/info "Done persisting metric: " usage-metric))
+
+(defn close-restart-record
+  [usage-metric]
+  (close-usage-record usage-metric (:start_timestamp usage-metric))
+  (insert-metric usage-metric))
+
 ;;
 ;;
 ;;
@@ -159,9 +183,10 @@
   [usage-metric trigger]
   (let [current-state (state usage-metric)]
     (case (sm/action current-state trigger)
-      :insert-start (open-usage-record usage-metric)
+      :close-restart    (close-restart-record usage-metric)
+      :insert-start     (insert-metric usage-metric)
       :wrong-transition (log-wrong-transition current-state trigger)
-      :close-record (close-usage-record usage-metric))))
+      :close-record     (close-usage-record usage-metric))))
 
 (defn -insertStart
   [usage-event-json]

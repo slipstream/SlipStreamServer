@@ -11,7 +11,7 @@
   (leads-to :initial :start :insert-start)
   (leads-to :initial :stop :wrong-transition)
 
-  (leads-to :started :start :wrong-transition)
+  (leads-to :started :start :close-restart)
   (leads-to :started :stop :close-record)
 
   (leads-to :stopped :start :insert-start)
