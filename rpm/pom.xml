@@ -394,7 +394,20 @@
                     <exclude>slipstream.war/static-content/errors/**/*</exclude>
                     <exclude>slipstream.war/static-content/themes/**/errors/**/*</exclude>
                     <exclude>slipstream.war/static-content/js/support.js</exclude>
+                    <exclude>slipstream.war/static-content/terms.html</exclude>
                   </excludes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/webapps/slipstream.war/static-content</directory>
+              <filemode>664</filemode>
+              <configuration>true</configuration>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/webapps/slipstream.war/static-content/terms.html</location>
                 </source>
               </sources>
             </mapping>
