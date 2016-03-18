@@ -60,12 +60,14 @@ import com.sixsq.slipstream.vm.VmsQueryParameters;
 @NamedQueries({
 		@NamedQuery(name = "byUserAndCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
 		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.isUsable = 1 AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
+		@NamedQuery(name = "byUser", query = "SELECT v.measurement, v.runUuid, v.runOwner, v.cloud, v.isUsable FROM Vm v WHERE v.user_ = :user"),
 		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run")
 })
 
 public class Vm {
 
 	public final static String RESOURCE_URL_PREFIX = "vms/";
+	public static final int PENDING_TIMEOUT = 15000;
 
 	@Id
 	@GeneratedValue
@@ -229,18 +231,51 @@ public class Vm {
 		return where;
 	}
 
-	public static Map<String, Integer> usage(String user) {
+	private static CloudUsage addCloudIntoUsage(Map<String, CloudUsage> usages, String cloud) {
+		CloudUsage usage;
+
+		if (!usages.containsKey(cloud)) {
+			usage = new CloudUsage(cloud);
+			usages.put(cloud, usage);
+		} else {
+			usage = usages.get(cloud);
+		}
+		return usage;
+	}
+
+	public static Map<String, CloudUsage> usage(String user) {
+		List<?> vms;
 		EntityManager em = PersistenceUtil.createEntityManager();
-
-		List<?> res = em.createNamedQuery("usageByUser").setParameter("user", user).getResultList();
-		em.close();
-
-		Map<String, Integer> usageData = new HashMap<String, Integer>(res.size());
-		for (Object object : res) {
-			usageData.put((String) ((Object[]) object)[0], ((Long) ((Object[]) object)[1]).intValue());
+		try {
+			vms = em.createNamedQuery("byUser").setParameter("user", user).getResultList();
+		} finally {
+			em.close();
 		}
 
-		return usageData;
+		Map<String, CloudUsage> usages = new HashMap<>();
+		for (Object vm : vms) {
+			Date measurement = (Date) ((Object[]) vm)[0];
+			String runUuid = (String) ((Object[]) vm)[1];
+			String runOwner = (String) ((Object[]) vm)[2];
+			String cloud = (String) ((Object[]) vm)[3];
+			Boolean isUsable = (Boolean) ((Object[]) vm)[4];
+
+			if (user.equals(runOwner)) {
+				if (isUsable) {
+					addCloudIntoUsage(usages, cloud).incrementUserVmUsage();
+				} else {
+					addCloudIntoUsage(usages, cloud).incrementUserInactiveVmUsage();
+				}
+			} else if (runUuid != null) {
+				addCloudIntoUsage(usages, cloud).incrementOthersVmUsage();
+			} else if (((new Date()).getTime() - measurement.getTime()) < PENDING_TIMEOUT) {
+				addCloudIntoUsage(usages, cloud).incrementPendingVmUsage();
+			} else {
+				addCloudIntoUsage(usages, cloud).incrementUnknownVmUsage();
+			}
+		}
+
+		return usages;
 	}
 
 	/**

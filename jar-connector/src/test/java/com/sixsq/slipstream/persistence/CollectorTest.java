@@ -118,24 +118,29 @@ public class CollectorTest {
 		String vmState;
 		List<Vm> vms = new ArrayList<Vm>();
 
+		String user = "user1";
+
 		// cloud1
 		vmState = "running";
-		vm = new Vm("instance1", firstCloud, vmState, "user1", connector.isVmUsable(vmState));
+		vm = new Vm("instance1", firstCloud, vmState, user, connector.isVmUsable(vmState));
 		vm.setRunUuid("e06cf0dd-5266-472d-90b4-2a1a27af9dfa");
+		vm.setRunOwner(user);
 		vms.add(vm);
 
 		vmState = "Running";
-		vm = new Vm("instance2", firstCloud, vmState, "user1", connector.isVmUsable(vmState));
+		vm = new Vm("instance2", firstCloud, vmState, user, connector.isVmUsable(vmState));
 		vm.setRunUuid("10ac7940-6151-4d0f-b90c-0213b094bcd0");
+		vm.setRunOwner(user);
 		vms.add(vm);
 
 		vmState = "terminated";
-		vm = new Vm("instance3", firstCloud, vmState, "user1", connector.isVmUsable(vmState));
+		vm = new Vm("instance3", firstCloud, vmState, user, connector.isVmUsable(vmState));
 		vm.setRunUuid("abf3a90f-c024-411b-8536-164b4617c636");
+		vm.setRunOwner(user);
 		vms.add(vm);
 
 		vmState = "running";
-		vm = new Vm("instance5", firstCloud, vmState, "user1", connector.isVmUsable(vmState));
+		vm = new Vm("instance5", firstCloud, vmState, user, connector.isVmUsable(vmState));
 		vm.setRunUuid("Unknown");
 		vms.add(vm);
 
@@ -144,17 +149,18 @@ public class CollectorTest {
 		// cloud2
 		vms.clear();
 		vmState = "on";
-		vm = new Vm("instance4", secondCloud, vmState, "user1", connector.isVmUsable(vmState));
+		vm = new Vm("instance4", secondCloud, vmState, user, connector.isVmUsable(vmState));
 		vm.setRunUuid("8e519c11-e46b-43d0-a370-c738655e1c06");
+		vm.setRunOwner(user);
 		vms.add(vm);
 
 		Collector.update(vms, "user1", secondCloud);
 
 		// actual tests
-		Map<String, Integer> usage = Vm.usage("user1");
+		Map<String, CloudUsage> usage = Vm.usage(user);
 		assertThat(usage.size(), is(2));
-		assertThat(usage.get(firstCloud), is(2));
-		assertThat(usage.get(secondCloud), is(1));
+		assertThat(usage.get(firstCloud).getUserVmUsage(), is(2));
+		assertThat(usage.get(secondCloud).getUserVmUsage(), is(1));
 	}
 
 	@Test

@@ -73,8 +73,9 @@ public class QuotaTest {
 		User user = testQuotaCreateUser();
 		setQuota(user, cloud, "10");
 
-		Map<String, Integer> usage = new HashMap<String, Integer>();
-		usage.put(cloud, 9);
+		Map<String, CloudUsage> usage = new HashMap<>();
+
+		usage.put(cloud, new CloudUsage(cloud, null, null, 9, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -87,11 +88,13 @@ public class QuotaTest {
 	public void validateFail() throws ValidationException,
 			ConfigurationException, QuotaException {
 		String cloud = "cloud1";
+
 		User user = testQuotaCreateUser();
 		setQuota(user, cloud, "10");
 
-		Map<String, Integer> usage = new HashMap<String, Integer>();
-		usage.put(cloud, 9);
+		Map<String, CloudUsage> usage = new HashMap<>();
+
+		usage.put(cloud, new CloudUsage(cloud, null, null, 9, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -102,13 +105,12 @@ public class QuotaTest {
 	}
 
 	@Test
-	public void validateNoUsage() throws ValidationException,
-			ConfigurationException, QuotaException {
+	public void validateNoUsage() throws ValidationException, ConfigurationException, QuotaException {
 		String cloud = "cloud1";
 		User user = testQuotaCreateUser();
 		setQuota(user, cloud, "10");
 
-		Map<String, Integer> usage = new HashMap<String, Integer>();
+		Map<String, CloudUsage> usage = new HashMap<>();
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -119,13 +121,13 @@ public class QuotaTest {
 	}
 
 	@Test
-	public void validateNoQuotaOk() throws ValidationException,
-			ConfigurationException, QuotaException {
+	public void validateNoQuotaOk() throws ValidationException, ConfigurationException, QuotaException {
 		String cloud = "cloud1";
 		User user = testQuotaCreateUser();
 
-		Map<String, Integer> usage = new HashMap<String, Integer>();
-		usage.put(cloud, 9);
+		Map<String, CloudUsage> usage = new HashMap<>();
+
+		usage.put(cloud, new CloudUsage(cloud, null, null, 9, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
@@ -136,13 +138,13 @@ public class QuotaTest {
 	}
 
 	@Test(expected = QuotaException.class)
-	public void validateNoQuotaFail() throws ValidationException,
-			ConfigurationException, QuotaException {
+	public void validateNoQuotaFail() throws ValidationException, ConfigurationException, QuotaException {
 		String cloud = "cloud1";
 		User user = testQuotaCreateUser();
 
-		Map<String, Integer> usage = new HashMap<String, Integer>();
-		usage.put(cloud, 19);
+		Map<String, CloudUsage> usage = new HashMap<>();
+
+		usage.put(cloud, new CloudUsage(cloud, null, null, 19, 0, 0, 0, 0));
 
 		Run run1 = testQuotaCreateRun(user, cloud);
 
