@@ -35,6 +35,7 @@ import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.CloudUsage;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.Logger;
@@ -96,15 +97,18 @@ public class Metering {
 	public static Map<String, Integer> produceCloudUsageData(String user, List<String> cloudServiceNamesList)
 			throws ConfigurationException, ValidationException {
 		Map<String, Integer> cloudUsage = new HashMap<String, Integer>();
-		Map<String, Integer> vmUsage = Vm.usage(user);
+		Map<String, CloudUsage> vmUsage = Vm.usage(user);
 
 		for (String cloud : cloudServiceNamesList) {
-			Integer currentUsage = vmUsage.get(cloud);
-			if (currentUsage == null) {
-				currentUsage = 0;
+			Integer currentUsage = 0;
+
+			if (vmUsage.containsKey(cloud)) {
+				currentUsage += vmUsage.get(cloud).getUserVmUsage();
 			}
+
 			cloudUsage.put(cloud, currentUsage);
 		}
+
 		return cloudUsage;
 	}
 
