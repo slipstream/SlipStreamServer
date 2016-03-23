@@ -20,21 +20,6 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-
-import org.restlet.data.MediaType;
-import org.restlet.data.Status;
-import org.restlet.representation.Representation;
-import org.restlet.resource.Delete;
-import org.restlet.resource.Get;
-import org.restlet.resource.Post;
-import org.restlet.resource.Put;
-import org.restlet.resource.ResourceException;
-
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -45,6 +30,19 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
+import org.restlet.data.MediaType;
+import org.restlet.data.Status;
+import org.restlet.representation.Representation;
+import org.restlet.resource.Delete;
+import org.restlet.resource.Get;
+import org.restlet.resource.Post;
+import org.restlet.resource.Put;
+import org.restlet.resource.ResourceException;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 public class RuntimeParameterResource extends RunBaseResource {
 
@@ -101,9 +99,20 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	@Delete
 	public void resetRuntimeParameter() throws ResourceException {
+
 		runtimeParameter.setValue("");
 		runtimeParameter.setIsSet(false);
 		runtimeParameter.store();
+
+		EntityManager em = PersistenceUtil.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
+		try {
+			transaction.begin();
+			abortOrReset(null, em);
+			transaction.commit();
+		} finally {
+			em.close();
+		}
 
 		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 	}

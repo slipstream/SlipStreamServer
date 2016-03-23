@@ -20,25 +20,22 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
-import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
-import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
-
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
+import com.sixsq.slipstream.credentials.Credentials;
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.event.Event.EventType;
+import com.sixsq.slipstream.exceptions.AbortException;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.run.RunView;
+import com.sixsq.slipstream.run.RunsQueryParameters;
+import com.sixsq.slipstream.statemachine.States;
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.CollectionType;
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementArray;
+import org.simpleframework.xml.ElementMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -59,30 +56,24 @@ import javax.persistence.Transient;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Expression;
-
-import com.sixsq.slipstream.run.RunsQueryParameters;
-import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.CollectionType;
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementArray;
-import org.simpleframework.xml.ElementMap;
-
-import com.sixsq.slipstream.credentials.Credentials;
-import com.sixsq.slipstream.event.ACL;
-import com.sixsq.slipstream.event.Event;
-import com.sixsq.slipstream.event.Event.EventType;
-import com.sixsq.slipstream.event.TypePrincipal;
-import com.sixsq.slipstream.event.TypePrincipalRight;
-import com.sixsq.slipstream.exceptions.AbortException;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.run.RunView;
-import com.sixsq.slipstream.statemachine.States;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 @Entity(name="Run")
@@ -140,29 +131,34 @@ public class Run extends Parameterized<Run, RunParameter> {
 	}
 
 	public static Run abortOrReset(String abortMessage, String nodename,
-			EntityManager em, String uuid) {
+								   EntityManager em, String uuid) {
 
 		Run run = Run.loadFromUuid(uuid, em);
 
-		run.postEventAbort(nodename, abortMessage);
-
 		RuntimeParameter globalAbort = getGlobalAbort(run);
 		String nodeAbortKey = getNodeAbortKey(nodename);
-		RuntimeParameter nodeAbort = run.getRuntimeParameters().get(
-				nodeAbortKey);
-		if ("".equals(abortMessage)) {
+		RuntimeParameter nodeAbort = run.getRuntimeParameters().get(nodeAbortKey);
+		if (abortMessage == null || "".equals(abortMessage)) {
+			run.postEventAbortReset(nodename);
+
 			globalAbort.reset();
 			if (nodeAbort != null) {
 				nodeAbort.reset();
 			}
 			resetRecoveryMode(run);
-		} else if (!globalAbort.isSet()) {
-			setGlobalAbortState(abortMessage, globalAbort);
+		} else {
+			run.postEventAbort(nodename, abortMessage);
+
 			if (nodeAbort != null) {
 				nodeAbort.setValue(abortMessage);
 			}
-			if (run.state == States.Provisioning) {
-				setRecoveryMode(run);
+
+			if (!globalAbort.isSet()) {
+				setGlobalAbortState(abortMessage, globalAbort);
+
+				if (run.state == States.Provisioning) {
+					setRecoveryMode(run);
+				}
 			}
 		}
 
@@ -1023,6 +1019,11 @@ public class Run extends Parameterized<Run, RunParameter> {
 
 	private void postEventAbort(String origin, String abortMessage) {
 		String message = "Abort from '" + origin + "', message:" + abortMessage;
+		postEventRun(Event.Severity.high, message, EventType.state);
+	}
+
+	private void postEventAbortReset(String origin) {
+		String message = "Reset abort from '" + origin + "'";
 		postEventRun(Event.Severity.high, message, EventType.state);
 	}
 
