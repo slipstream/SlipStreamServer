@@ -171,19 +171,15 @@ public class DeploymentModule extends TargetContainerModule {
 		}
 	}
 
-	private void validateInputParametersExistsInNodeImage(Node node)
-			throws ValidationException {
-		boolean foundit = false;
-		for (String iparam : node.getParameterMappings().keySet()) {
-			foundit = false;
-			for (ModuleParameter param : node.getImage().getParameterList()) {
-				if (param.getName().equals(iparam)) {
-					foundit = true;
-					break;
-				}
-			}
-			if (!foundit) {
-				throw (new ValidationException("Input parameter: " + iparam
+	private void validateInputParametersExistsInNodeImage(Node node) throws ValidationException
+	{
+		for (String paramName : node.getParameterMappings().keySet()) {
+			ImageModule image = node.getImage();
+
+			if (!image.getParameters().containsKey(paramName)
+				&& !image.getInputParametersExpanded().containsKey(paramName))
+			{
+				throw (new ValidationException("Input parameter: " + paramName
 						+ " doesn't exist in image: " + node.getName()));
 			}
 		}

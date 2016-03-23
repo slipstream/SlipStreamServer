@@ -299,8 +299,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		Module module = null;
 		try {
-			module = (Module) SerializationUtil.fromXml(denormalized,
-					moduleClass);
+			module = (Module) SerializationUtil.fromXml(denormalized, moduleClass);
 		} catch (SlipStreamClientException e) {
 			e.printStackTrace();
 			throwClientBadRequest("Invalid xml module: " + e.getMessage());

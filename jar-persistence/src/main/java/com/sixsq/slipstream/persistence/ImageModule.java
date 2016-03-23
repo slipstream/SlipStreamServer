@@ -20,11 +20,9 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -33,10 +31,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementArray;
-import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.*;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -66,9 +61,28 @@ public class ImageModule extends TargetContainerModule {
 	private static final String VOLATILE_DISK_VALUE_REGEX = "^[0-9]*$";
 	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
 
+	private static class BuildState implements Serializable {
+		@Attribute
+		public final String moduleUri;
+
+		@Attribute
+		public final String buildedOn;
+
+		public BuildState(String moduleUri, List<String> clouds) {
+			this.moduleUri = moduleUri;
+			this.buildedOn = clouds.stream().collect(Collectors.joining(","));
+		}
+	}
+
 	@ElementList(required = false)
 	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Package> packages = new HashSet<Package>();
+
+	@Transient
+	private Set<Package> packagesExpanded;
+
+	@Transient
+	protected Map<String, ModuleParameter> inputParametersExpanded;
 
 	@Element(required = false, data = true)
 	@Column(length = 65536)
@@ -88,6 +102,9 @@ public class ImageModule extends TargetContainerModule {
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@ElementList(required = false, data = true)
 	private Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
+
+	@Transient
+	private Set<BuildState> buildStates;
 
 	@Transient
 	private volatile ImageModule parentModule;
@@ -141,6 +158,22 @@ public class ImageModule extends TargetContainerModule {
 
 	public boolean hasToRunBuildRecipes(String cloudService) {
 		return !isVirtual() && getImageId(cloudService) == null;
+	}
+
+	public List<String> getCloudNamesWhereBuilded() {
+		List<String> cloudNames = new LinkedList<>();
+
+		if (!isVirtual() && !isBase()) {
+			String cloudId = null;
+			for (CloudImageIdentifier c : getCloudImageIdentifiers()) {
+				cloudId = c.getCloudMachineIdentifer();
+				if (cloudId != null) {
+					cloudNames.add(c.getCloudServiceName());
+				}
+			}
+		}
+
+		return cloudNames;
 	}
 
 	private void validateBaseImage(String cloudService, boolean throwOnError) throws ValidationException {
@@ -230,6 +263,39 @@ public class ImageModule extends TargetContainerModule {
 		}
 
 		return parentModule.getParameter(name);
+	}
+
+	@ElementMap(required = false)
+	public Map<String, ModuleParameter> getInputParametersExpanded() {
+		if (inputParametersExpanded == null) {
+			inputParametersExpanded = new HashMap<>();
+			findAndAddInheritedApplicationParameters(inputParametersExpanded, this);
+		}
+		return inputParametersExpanded;
+	}
+
+	@ElementMap(required = false)
+	public void setInputParametersExpanded(Map<String, ModuleParameter> parameters) {
+
+	}
+
+	private void findAndAddInheritedApplicationParameters(Map<String, ModuleParameter> params, ImageModule image) {
+
+		for (Map.Entry<String, ModuleParameter> entry : image.getParameters().entrySet()) {
+			String parameterName = entry.getKey();
+			ModuleParameter parameter = entry.getValue();
+
+			String category = parameter.getCategory();
+
+			if (ParameterCategory.Input.toString().equals(category)) {
+				params.putIfAbsent(parameterName, parameter);
+			}
+		}
+
+		ImageModule parent = image.getParentModule();
+		if (parent != null) {
+			findAndAddInheritedApplicationParameters(params, parent);
+		}
 	}
 
 	/**
@@ -471,6 +537,51 @@ public class ImageModule extends TargetContainerModule {
 	private void setNotes(String[] notes) {
 	}
 
+	@ElementList(required = false, entry = "packageExpanded")
+	public Set<Package> getPackagesExpanded() {
+
+		if(packagesExpanded == null) {
+			packagesExpanded = new HashSet<>();
+			findAndAddPackages(this);
+		}
+
+		return packagesExpanded;
+	}
+
+	@ElementList(required = false, entry = "packageExpanded")
+	public void setPackagesExpanded(Set<Package> packagesExpanded) {
+	}
+
+	private void findAndAddPackages(ImageModule image) {
+		ImageModule parent = image.getParentModule();
+		if (parent != null)
+			findAndAddPackages(parent);
+
+		packagesExpanded.addAll(image.getPackages());
+	}
+
+	@ElementList(required = false)
+	public Set<BuildState> getBuildStates() {
+
+		if (buildStates == null) {
+			buildStates = new HashSet<>();
+			findAndAddBuildStates(this);
+		}
+
+		return buildStates;
+	}
+
+	@ElementList(required = false)
+	public void setBuildStates(Set<BuildState> buildStates) { }
+
+	private void findAndAddBuildStates(ImageModule image) {
+		ImageModule parent = image.getParentModule();
+		if (parent != null)
+			findAndAddBuildStates(parent);
+
+		buildStates.add(new BuildState(image.getResourceUri(), image.getCloudNamesWhereBuilded()));
+	}
+
 	public ImageModule copy() throws ValidationException {
 
 		ImageModule copy = (ImageModule) copyTo(new ImageModule(getName()));
@@ -528,6 +639,14 @@ public class ImageModule extends TargetContainerModule {
 		for (CloudImageIdentifier c : getCloudImageIdentifiers()) {
 			c.setContainer(this);
 		}
+	}
+
+	@Override
+	protected void expandTargets() {
+		super.expandTargets();
+
+		targetsExpanded.add(new TargetExpanded(this, TargetExpanded.BuildRecipe.PRE_RECIPE));
+		targetsExpanded.add(new TargetExpanded(this, TargetExpanded.BuildRecipe.RECIPE));
 	}
 
 }

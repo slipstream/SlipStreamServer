@@ -215,7 +215,13 @@ public class DeploymentFactory extends RunFactory {
 			parameters = connector.getImageParametersTemplate();
 		} catch (ValidationException e) {
 		}
+
 		parameters.putAll(image.getParameters());
+
+		ImageModule parent = image.getParentModule();
+		if (parent != null) {
+			findAndAddImagesApplicationParameters(parameters, parent);
+		}
 
 		for (ModuleParameter param : parameters.values()) {
 			String category = param.getCategory();

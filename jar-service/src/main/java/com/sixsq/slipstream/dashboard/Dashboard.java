@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.sixsq.slipstream.run.RunsQueryParameters;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
@@ -50,7 +51,7 @@ public class Dashboard {
 	}
 
 	private int getActiveRunCount(User user, String cloud) throws ValidationException {
-		return Run.viewListCount(user, null, cloud, true);
+		return Run.viewListCount(new RunsQueryParameters(user, null, null, cloud, null, null, null, true));
 	}
 
 	public void populate(User user) throws SlipStreamException {

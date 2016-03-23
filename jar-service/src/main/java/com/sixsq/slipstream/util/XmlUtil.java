@@ -125,7 +125,7 @@ public class XmlUtil {
 	 * Denormalize xml representation of a module, which is natively
 	 * denormalized to facilitate xslt (for example) processing
 	 *
-	 * @param imported
+	 * @param external
 	 * @return
 	 */
 	public static String denormalize(String external) {

@@ -52,8 +52,9 @@ public class ParametersFactory {
 		return disks;
 	}
 
-	private static Map<String, ModuleParameter> getImageParametersTemplate(
-			Map<String, Connector> connectors) throws ValidationException {
+	private static Map<String, ModuleParameter> getImageParametersTemplate(Map<String, Connector> connectors)
+			throws ValidationException
+	{
 		Map<String, ModuleParameter> parameters = new HashMap<String, ModuleParameter>();
 		for (Connector c : connectors.values()) {
 			parameters.putAll(c.getImageParametersTemplate());
@@ -135,8 +136,7 @@ public class ParametersFactory {
 		Map<String, Connector> connectors = ConnectorFactory.getConnectors();
 		Map<String, ModuleParameter> templateParameters = new HashMap<String, ModuleParameter>();
 		if (module.getCategory() == ModuleCategory.Image) {
-			templateParameters = ParametersFactory
-					.getImageParametersTemplate(connectors);
+			templateParameters = ParametersFactory.getImageParametersTemplate(connectors);
 		}
 
 		setParameters(module, templateParameters);

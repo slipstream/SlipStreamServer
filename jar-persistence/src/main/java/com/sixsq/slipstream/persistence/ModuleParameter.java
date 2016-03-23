@@ -20,10 +20,7 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
@@ -162,11 +159,9 @@ public class ModuleParameter extends Parameter<Module> {
 	private String getDefaultValueFromParent() throws ValidationException {
 		String defaultValue = null;
 		if (getContainer() instanceof ImageModule) {
-			ImageModule parentModule = ((ImageModule) getContainer())
-					.getParentModule();
+			ImageModule parentModule = ((ImageModule) getContainer()).getParentModule();
 			if (parentModule != null) {
-				ModuleParameter parentParameter = parentModule
-						.getParameter(getName());
+				ModuleParameter parentParameter = parentModule.getParameter(getName());
 				if (parentParameter != null) {
 					defaultValue = parentParameter.getValue();
 				}
