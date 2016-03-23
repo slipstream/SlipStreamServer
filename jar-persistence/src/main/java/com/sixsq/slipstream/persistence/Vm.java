@@ -59,7 +59,6 @@ import com.sixsq.slipstream.vm.VmsQueryParameters;
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames={"cloud", "instanceId", "user_"})})
 @NamedQueries({
 		@NamedQuery(name = "byUserAndCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
-		@NamedQuery(name = "usageByUser", query = "SELECT v.cloud, COUNT(v.runUuid) FROM Vm v WHERE v.user_ = :user AND v.isUsable = 1 AND v.runUuid IS NOT NULL AND v.runUuid <> 'Unknown' GROUP BY v.cloud ORDER BY v.cloud"),
 		@NamedQuery(name = "byUser", query = "SELECT v.measurement, v.runUuid, v.runOwner, v.cloud, v.isUsable FROM Vm v WHERE v.user_ = :user"),
 		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run")
 })
@@ -67,7 +66,7 @@ import com.sixsq.slipstream.vm.VmsQueryParameters;
 public class Vm {
 
 	public final static String RESOURCE_URL_PREFIX = "vms/";
-	public static final int PENDING_TIMEOUT = 15000;
+	public static final int PENDING_TIMEOUT = 900000; // 15 mn
 
 	@Id
 	@GeneratedValue
