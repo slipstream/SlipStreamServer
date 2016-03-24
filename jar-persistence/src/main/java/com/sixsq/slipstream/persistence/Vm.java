@@ -66,7 +66,7 @@ import com.sixsq.slipstream.vm.VmsQueryParameters;
 public class Vm {
 
 	public final static String RESOURCE_URL_PREFIX = "vms/";
-	public static final int PENDING_TIMEOUT = 15000;
+	public static final int PENDING_TIMEOUT = 900000; // 15 mn
 
 	@Id
 	@GeneratedValue
