@@ -134,8 +134,7 @@ public class RunResource extends RunBaseResource {
 		return "run";
 	}
 
-	private Run constructRun(EntityManager em)
-			throws SlipStreamClientException {
+	private Run constructRun(EntityManager em) throws SlipStreamClientException {
 
 		Run run = Run.load(this.run.getResourceUri(), em);
 

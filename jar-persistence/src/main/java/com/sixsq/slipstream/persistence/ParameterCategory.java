@@ -20,6 +20,9 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum ParameterCategory {
 	General,
 	Dummy1, // was Amazon
@@ -33,4 +36,9 @@ public enum ParameterCategory {
 	public static String getDefault() {
 		return General.toString();
 	}
+
+	public static List<String> applicationParameters() {
+		return Arrays.asList(Input.toString(), Output.toString());
+	}
+
 }

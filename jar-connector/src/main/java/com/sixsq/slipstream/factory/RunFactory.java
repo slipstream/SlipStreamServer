@@ -34,16 +34,7 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.FileUtil;
 
 public abstract class RunFactory {
@@ -369,6 +360,22 @@ public abstract class RunFactory {
 
 	public static String constructParamName(String nodename, String paramname) {
 		return RuntimeParameter.constructParamName(nodename, paramname);
+	}
+
+	protected static void findAndAddImagesApplicationParameters(Map<String, ModuleParameter> parameters,
+																ImageModule image)
+	{
+		for (Map.Entry<String, ModuleParameter> entry : image.getParameters().entrySet()) {
+			ModuleParameter parameter = entry.getValue();
+			if (ParameterCategory.applicationParameters().contains(parameter.getCategory())) {
+				parameters.putIfAbsent(entry.getKey(), parameter);
+			}
+		}
+
+		ImageModule parent = image.getParentModule();
+		if (parent != null) {
+			findAndAddImagesApplicationParameters(parameters, parent);
+		}
 	}
 
 }

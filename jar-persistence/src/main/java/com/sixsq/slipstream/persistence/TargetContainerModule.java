@@ -33,7 +33,10 @@ public abstract class TargetContainerModule extends Module {
 
     @ElementList(required = false)
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    protected Set<Target> targets = new HashSet<Target>();
+    protected Set<Target> targets = new HashSet<>();
+
+    @Transient
+    protected Set<TargetExpanded> targetsExpanded;
 
     protected TargetContainerModule() {
         super();
@@ -64,6 +67,28 @@ public abstract class TargetContainerModule extends Module {
             for (Target t : targets) {
                 t.setModule(this);
             }
+        }
+    }
+
+    @ElementList(required = false)
+    public Set<TargetExpanded> getTargetsExpanded() {
+        if (targetsExpanded == null) {
+            targetsExpanded = new HashSet<>();
+            expandTargets();
+        }
+        return targetsExpanded;
+    }
+
+    @ElementList(required = false)
+    public void setTargetsExpanded(Set<TargetExpanded> targetsExpanded) {
+
+    }
+
+    protected void expandTargets() {
+        setModuleToTargets();
+
+        for (Target t : targets) {
+            targetsExpanded.add(new TargetExpanded(t));
         }
     }
 

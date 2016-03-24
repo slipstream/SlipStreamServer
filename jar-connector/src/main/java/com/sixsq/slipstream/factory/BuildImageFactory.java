@@ -159,7 +159,13 @@ public class BuildImageFactory extends RunFactory {
 			parameters = connector.getImageParametersTemplate();
 		} catch (ValidationException e) {
 		}
+
 		parameters.putAll(image.getParameters());
+
+		ImageModule parent = image.getParentModule();
+		if (parent != null) {
+			findAndAddImagesApplicationParameters(parameters, parent);
+		}
 
 		for (ModuleParameter param : parameters.values()) {
 			if (filter.contains(param.getCategory())) {
@@ -246,9 +252,11 @@ public class BuildImageFactory extends RunFactory {
 		paramsToFilter.add(RuntimeParameter.CLOUD_SERVICE_NAME);
 
 		String paramName = parameter.getName();
-		if (!image.getParameters().containsKey(paramName) && !paramsToFilter.contains(paramName)) {
-			throw new ValidationException("Unknown parameter: " + parameter.getName() + " in node: "
-					+ nodeInstanceName);
+		if (!image.getParameters().containsKey(paramName)
+				&& !image.getInputParametersExpanded().containsKey(paramName)
+				&& !paramsToFilter.contains(paramName))
+		{
+			throw new ValidationException("Unknown parameter: " + parameter.getName() + " in node: " +nodeInstanceName);
 		}
 	}
 

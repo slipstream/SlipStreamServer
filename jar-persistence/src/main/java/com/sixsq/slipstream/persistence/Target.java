@@ -48,16 +48,16 @@ public class Target implements Serializable {
 
 	@Text(required = false, data = true)
 	@Column(length = 65536)
-	private String script = "";
+	protected String script = "";
 
 	@Attribute
-	private String name;
+	protected String name;
 
 	@ManyToOne
-	private TargetContainerModule module;
+	protected TargetContainerModule module;
 
 	@SuppressWarnings("unused")
-	private Target() {
+	protected Target() {
 	}
 
 	public Target(String name) {
@@ -67,6 +67,11 @@ public class Target implements Serializable {
 	public Target(String name, String script) {
 		this(name);
 		this.script = script;
+	}
+
+	public Target(String name, String script, TargetContainerModule module) {
+		this(name, script);
+		this.module = module;
 	}
 
 	public TargetContainerModule getModule() {
