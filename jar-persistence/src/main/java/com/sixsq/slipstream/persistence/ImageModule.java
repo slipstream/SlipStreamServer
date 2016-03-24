@@ -66,11 +66,11 @@ public class ImageModule extends TargetContainerModule {
 		public final String moduleUri;
 
 		@Attribute
-		public final String buildedOn;
+		public final String builtOn;
 
 		public BuildState(String moduleUri, List<String> clouds) {
 			this.moduleUri = moduleUri;
-			this.buildedOn = clouds.stream().collect(Collectors.joining(","));
+			this.builtOn = clouds.stream().collect(Collectors.joining(","));
 		}
 	}
 
@@ -160,7 +160,7 @@ public class ImageModule extends TargetContainerModule {
 		return !isVirtual() && getImageId(cloudService) == null;
 	}
 
-	public List<String> getCloudNamesWhereBuilded() {
+	public List<String> getCloudNamesWhereBuilt() {
 		List<String> cloudNames = new LinkedList<>();
 
 		if (!isVirtual() && !isBase()) {
@@ -579,7 +579,7 @@ public class ImageModule extends TargetContainerModule {
 		if (parent != null)
 			findAndAddBuildStates(parent);
 
-		buildStates.add(new BuildState(image.getResourceUri(), image.getCloudNamesWhereBuilded()));
+		buildStates.add(new BuildState(image.getResourceUri(), image.getCloudNamesWhereBuilt()));
 	}
 
 	public ImageModule copy() throws ValidationException {

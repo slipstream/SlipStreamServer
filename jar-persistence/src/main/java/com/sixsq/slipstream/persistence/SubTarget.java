@@ -39,8 +39,9 @@ public class SubTarget extends Target implements Serializable {
     public final int order;
 
     public SubTarget(Target target, int order) {
-        if (target.module == null)
+        if (target.module == null) {
             throw new SlipStreamInternalException("Module has to be set when creating a SubTarget.");
+        }
 
         this.script = target.script;
         this.name = target.name;
