@@ -24,6 +24,7 @@ import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
@@ -41,6 +42,7 @@ import org.restlet.resource.ResourceException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceException;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -110,6 +112,9 @@ public class RuntimeParameterResource extends RunBaseResource {
 			transaction.begin();
 			abortOrReset(null, em);
 			transaction.commit();
+		} catch (PersistenceException e) {
+			transaction.rollback();
+			throw new SlipStreamDatabaseException(e.getMessage());
 		} finally {
 			em.close();
 		}
