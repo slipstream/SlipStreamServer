@@ -2,7 +2,15 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.schema :refer :all]
     [schema.core :as s]
-    [expectations :refer :all]))
+    [expectations :refer :all]
+    [clojure.set :as set]))
+
+;;
+;; actions
+;;
+
+(expect (set/union core-actions prefixed-actions) (set (keys action-uri)))
+(expect (set (map name core-actions)) (set (vals (select-keys action-uri core-actions))))
 
 ;;
 ;; PosInt
