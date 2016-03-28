@@ -2,7 +2,8 @@
   (:require
     [superstring.core :as str]
     [schema.core :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [clojure.set :as set]))
 
 (def ^:const slipstream-schema-uri "http://sixsq.com/slipstream/1/")
 
@@ -13,17 +14,22 @@
 ;; actions
 ;;
 
-(def ^:const valid-actions
-  #{:add :edit :delete
-    :start :stop :restart :pause :suspend
-    :export :import :capture :snapshot})
+;; core actions do not have a URI prefix
+(def ^:const core-actions
+  #{:add :edit :delete :insert :remove})
+
+;; additional resource actions have a URI prefix
+(def ^:const action-prefix "http://schemas.dmtf.org/cimi/2/action/")
+(def ^:const prefixed-actions
+  #{:start :stop :restart :pause :suspend
+    :export :import :capture :snapshot
+    :forceSync :swapBackup :restore :enable :disable})
 
 (def ^:const action-uri
-  (let [root "http://sixsq.com/slipstream/1/Action/"]
-    (into {} (map (fn [k] [k (str root (name k))]) valid-actions))))
-
-(def ^:const valid-action-uris
-  (vals action-uri))
+  (doall
+    (merge
+      (into {} (map (juxt identity name) core-actions))
+      (into {} (map (juxt identity #(str action-prefix (name %))) prefixed-actions)))))
 
 ;;
 ;; schema definitions for basic types
