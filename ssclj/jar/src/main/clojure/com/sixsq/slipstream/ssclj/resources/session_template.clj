@@ -28,13 +28,22 @@
 ;; schemas
 ;;
 
+(def SessionCredentials
+  (s/constrained
+    {s/Keyword c/NonBlankString}
+    seq 'not-empty?))
+
 (def SessionTemplate
   (merge c/CommonAttrs
          c/AclAttr
-         {:licenseData c/NonBlankString}))
+         {:authn-method                 c/NonBlankString
+          (s/optional-key :logo)        c/ResourceLink
+          (s/optional-key :credentials) SessionCredentials}))
 
 (def SessionTemplateAttrs
-  {(s/optional-key :licenseData) c/NonBlankString})
+  {(s/optional-key :authn-method) c/NonBlankString
+   (s/optional-key :logo)         c/ResourceLink
+   (s/optional-key :credentials)  SessionCredentials})
 
 (def SessionTemplateRef
   (s/constrained

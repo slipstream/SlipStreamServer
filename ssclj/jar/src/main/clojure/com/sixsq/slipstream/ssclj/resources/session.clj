@@ -5,7 +5,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]))
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.auth.auth :as auth]
+    [schema.core :as s]))
 
 (def ^:const resource-tag :sessions)
 
@@ -25,7 +27,7 @@
                              :type      "ROLE"}
                      :rules [{:principal "USER"
                               :type      "ROLE"
-                              :right     "MODIFY"}]})
+                              :right     "VIEW"}]})
 ;;
 ;; schemas
 ;;
@@ -33,14 +35,13 @@
 (def Session
   (merge c/CommonAttrs
          c/AclAttr
-         {:owner     c/NonBlankString
-          :type      c/NonBlankString
-          :expiry    c/Timestamp
-          :userLimit c/NonNegInt}))
+         {:username     c/NonBlankString
+          :authn-method c/NonBlankString
+          :last-active  c/Timestamp}))
 
 (def SessionCreate
   (merge c/CreateAttrs
-         {:licenseTemplate tpl/SessionTemplateRef}))
+         {:sessionTemplate tpl/SessionTemplateRef}))
 
 ;;
 ;; multimethods for validation and operations
@@ -64,31 +65,50 @@
 ;; template processing
 ;;
 
+(defn add-credentials-to-request [request tpl]
+  (let [{:keys [authn-method credentials]} tpl]
+    (->> request
+         :params
+         (merge credentials)
+         (assoc :authn-method authn-method)
+         (assoc request :params))))
+
+(defn do-login [request]
+  (let [{:keys [status cookies]} (auth/login request)]
+    (if (not= status 200)
+      (throw (ex-info "login failed" {:status status :message "login failed"}))
+      ["dummy" cookies])))
+
 (defn tpl->session
-  [{:keys [licenseData] :as tpl}]
+  [tpl request]
   (let [tpl (-> tpl
-                (std-crud/resolve-hrefs)
-                (dissoc :licenseData))]
-    (->> licenseData
-         (u/decrypt)
-         (u/decode-base64)
-         (merge tpl))))
+                std-crud/resolve-hrefs
+                tpl/validate-fn)
+        updated-request (add-credentials-to-request request tpl)
+        [username cookies] (do-login updated-request)]
+    {:cookies cookies
+     :body    {:username     username
+               :authn-method (:authn-method tpl)
+               :last-active  (u/now)}}))
 
 ;;
 ;; CRUD operations
 ;;
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri)) )
 
 ;; requires a SessionTemplate to create new Session
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
-  (let [body (-> body
-                 (assoc :resourceURI create-uri)
-                 (crud/validate)
-                 (:licenseTemplate)
-                 (tpl->session))]
-    (add-impl (assoc request :body body))))
+  (let [tpl (-> body
+                (assoc :resourceURI create-uri)
+                (crud/validate)
+                (:sessionTemplate))
+        {:keys [cookies body]} (tpl->session tpl request)]
+    (-> body
+        (assoc request :body)
+        (add-impl)
+        (assoc :cookies cookies))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 

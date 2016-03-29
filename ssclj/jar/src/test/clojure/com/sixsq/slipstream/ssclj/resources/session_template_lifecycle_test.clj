@@ -16,7 +16,10 @@
   (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-entry
-  {:licenseData "BASE64_LICENSE_DATA"})
+  {:authn-method "internal"
+   :logo         {:href "public/logo.png"}
+   :credentials  {:user-name "user"
+                  :password  "password"}})
 
 (deftest lifecycle
 
@@ -44,16 +47,16 @@
       (t/body->json)
       (t/is-status 403))
 
-  ;; viewing and modifications only allowed by ADMIN (for now)
-  (let [uri     (-> (session (ring-app))
-                    (content-type "application/json")
-                    (header authn-info-header "root ADMIN")
-                    (request base-uri
-                             :request-method :post
-                             :body (json/write-str valid-entry))
-                    (t/body->json)
-                    (t/is-status 201)
-                    (t/location))
+  ;; adding only allowed by ADMIN (for now)
+  (let [uri (-> (session (ring-app))
+                (content-type "application/json")
+                (header authn-info-header "root ADMIN")
+                (request base-uri
+                         :request-method :post
+                         :body (json/write-str valid-entry))
+                (t/body->json)
+                (t/is-status 201)
+                (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (-> (session (ring-app))
@@ -80,15 +83,15 @@
       (t/is-status 400))
 
   ;; add a new entry
-  (let [uri     (-> (session (ring-app))
-                    (content-type "application/json")
-                    (header authn-info-header "root ADMIN")
-                    (request base-uri
-                             :request-method :post
-                             :body (json/write-str valid-entry))
-                    (t/body->json)
-                    (t/is-status 201)
-                    (t/location))
+  (let [uri (-> (session (ring-app))
+                (content-type "application/json")
+                (header authn-info-header "root ADMIN")
+                (request base-uri
+                         :request-method :post
+                         :body (json/write-str valid-entry))
+                (t/body->json)
+                (t/is-status 201)
+                (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
 
     (is uri)
