@@ -20,32 +20,20 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import java.util.*;
-
+import com.sixsq.slipstream.connector.CloudService;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
-import org.apache.commons.lang.StringUtils;
-
-import com.sixsq.slipstream.connector.CloudService;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamInternalException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.CloudImageIdentifier;
-import com.sixsq.slipstream.persistence.DeploymentModule;
-import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Node;
-import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.*;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DeploymentFactory extends RunFactory {
 
@@ -276,15 +264,17 @@ public class DeploymentFactory extends RunFactory {
 	public static void addParameterMapping(Run run, NodeParameter param, int i) {
 		String name = insertMultiplicityIndexInParameterName(param.getValue(), 1);
 		RuntimeParameter input = run.getRuntimeParameters().get(name);
-		input.setMapsOthers(true);
-		input.addMappedRuntimeParameterName(insertMultiplicityIndexInParameterName(
-				param.getContainer().getName()
-						+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
-						+ param.getName(), i));
-		if (input.isSet()) {
-			input.setValue(input.getValue());
+		if (null != input) {
+			input.setMapsOthers(true);
+			input.addMappedRuntimeParameterName(insertMultiplicityIndexInParameterName(
+					param.getContainer().getName()
+							+ RuntimeParameter.NODE_PROPERTY_SEPARATOR
+							+ param.getName(), i));
+			if (input.isSet()) {
+				input.setValue(input.getValue());
+			}
+			run.getRuntimeParameters().put(input.getName(), input);
 		}
-		run.getRuntimeParameters().put(input.getName(), input);
 	}
 
 	public static String insertMultiplicityIndexInParameterName(String name,
