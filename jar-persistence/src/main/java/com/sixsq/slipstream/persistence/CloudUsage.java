@@ -28,10 +28,10 @@ public class CloudUsage {
     @Attribute
     private String cloud;
 
-    @Attribute
+    @Attribute(empty = "0")
     private Integer vmQuota = null;
 
-    @Attribute
+    @Attribute(empty = "0")
     private Integer userRunUsage = null;
 
     @Attribute
