@@ -22,13 +22,16 @@
             :DELETED      false
             :EMAIL        "st@s.com"
             :ISSUPERUSER  false
+            :ROLES        "alpha-role, beta-role"
             :JPAVERSION   0
             :NAME         "st"
             :RESOURCEURI  "user/st"
             :STATE        "ACTIVE"}
            (-> users-created first (dissoc :CREATION :PASSWORD))))
     (is (-> users-created first :PASSWORD))
-    (is (-> users-created first :CREATION))))
+    (is (-> users-created first :CREATION))
+
+    (is (= "USER alpha-role beta-role" (db/find-roles-for-user-name "st")))))
 
 (deftest test-user-creation-avoids-user-same-name
   (th/add-user-for-test! {:user-name "stef" :password "secret"})
@@ -50,3 +53,16 @@
   (is (= "joe_2" (db/name-no-collision "joe_" ["joe", "joe_", "joe_1"])))
   (is (= "joe_11" (db/name-no-collision "joe_10" ["joe_10"])))
   (is (= "joe_1_2_4" (db/name-no-collision "joe_1_2_3" ["joe_1_2_3"]))))
+
+(deftest test-format-roles
+  (are [x super? roles] (= x (db/format-roles super? roles))
+                        "ADMIN" true nil
+                        "USER" false nil
+                        "ADMIN" true ""
+                        "USER" false ""
+                        "ADMIN" true " , , "
+                        "USER" false " , , "
+                        "ADMIN a" true "a"
+                        "USER a" false "a"
+                        "ADMIN a b" true ", a, ,  ,  b,  ,"
+                        "USER a b" false ", a, ,  ,  b,  ,"))

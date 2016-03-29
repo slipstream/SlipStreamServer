@@ -22,6 +22,7 @@
             :CYCLONELOGIN nil
             :GITHUBLOGIN  "st"
             :ISSUPERUSER  false
+            :ROLES        "alpha-role, beta-role"
             :JPAVERSION   0
             :NAME         "st"
             :RESOURCEURI  "user/st"
@@ -37,6 +38,7 @@
             :CYCLONELOGIN "st"
             :GITHUBLOGIN  nil
             :ISSUPERUSER  false
+            :ROLES        "alpha-role, beta-role"
             :JPAVERSION   0
             :NAME         "st"
             :RESOURCEURI  "user/st"
@@ -56,7 +58,7 @@
 (deftest match-already-mapped
   (let [user-info {:user-name "joe" :password "secret"
                    :github-id "st" :email "st@sixsq.com" :state "ACTIVE"}
-        _         (th/add-user-for-test! user-info)
+        _ (th/add-user-for-test! user-info)
         [user] (kc/select db/users)]
 
     (match-external-user! :github "st" "st@sixsq.com")
@@ -74,7 +76,7 @@
         new-user (second users-after-match)]
     (is (= 2 (count users-after-match)))
     (is (= "st" (:GITHUBLOGIN new-user)))
-    (is (= "st_1" (:NAME      new-user)))))
+    (is (= "st_1" (:NAME new-user)))))
 
 (deftest test-sanitize-login-name
   (is (= "st" (sanitize-login-name "st")))

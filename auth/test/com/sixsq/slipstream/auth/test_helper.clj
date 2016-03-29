@@ -41,6 +41,7 @@
                                           "CREATION" "TIMESTAMP"
                                           "DELETED" "BOOLEAN"
                                           "ISSUPERUSER" "BOOLEAN"
+                                          "ROLES" "VARCHAR(255)"
                                           "RESOURCEURI" "VARCHAR(200)"
                                           "JPAVERSION" "INTEGER"
                                           "STATE" "VARCHAR(200)"

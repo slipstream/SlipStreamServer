@@ -36,6 +36,7 @@
   (if (and (not-empty external-login) (not-empty external-email))
     (let [[matched-user redirect-url] (match-external-user! authn-method external-login external-email)
           token (sg/sign-claims {:com.sixsq.identifier matched-user
+                                 :com.sixsq.roles      (db/find-roles-for-user-name matched-user)
                                  :exp                  (sg/expiry-timestamp)})]
 
       (assoc
