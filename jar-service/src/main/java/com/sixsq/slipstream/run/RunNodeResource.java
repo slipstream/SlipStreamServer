@@ -268,15 +268,15 @@ public class RunNodeResource extends RunBaseResource {
 	protected static int getNumberOfInstancesToAdd(Form form) {
 		Set<String> formParams = form.getNames();
 		try {
-			if (formParams.isEmpty()) {
+			if (formParams.contains(NUMBER_INSTANCES_ADD_FORM_PARAM)) {
+				return Integer.parseInt(form.getFirstValue(NUMBER_INSTANCES_ADD_FORM_PARAM));
+			} else if (formParams.isEmpty()) {
 				return Integer.parseInt(NUMBER_INSTANCES_ADD_DEFAULT);
-			}
-			if (!formParams.contains(NUMBER_INSTANCES_ADD_FORM_PARAM)) {
+			} else {
 				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
 						"No form parameter " + NUMBER_INSTANCES_ADD_FORM_PARAM +
 								"=# found in the scale-up request.");
 			}
-			return Integer.parseInt(form.getFirstValue(NUMBER_INSTANCES_ADD_FORM_PARAM));
 		} catch (NumberFormatException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
 					"Number of instances to add should be an integer.");
