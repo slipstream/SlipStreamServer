@@ -26,19 +26,21 @@ import org.junit.rules.ExpectedException;
 import org.restlet.data.Form;
 import org.restlet.resource.ResourceException;
 
+import static org.junit.Assert.assertEquals;
+
 public class RunNodeResourceTest {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void getNumberOfInstancesToAdd() {
-		assert Integer.parseInt(RunNodeResource.NUMBER_INSTANCES_ADD_DEFAULT) ==
-				RunNodeResource.getNumberOfInstancesToAdd(new Form(""));
-		assert Integer.parseInt(RunNodeResource.NUMBER_INSTANCES_ADD_DEFAULT) ==
-				RunNodeResource.getNumberOfInstancesToAdd(new Form("n=1"));
-		assert 0 == RunNodeResource.getNumberOfInstancesToAdd(new Form("n=0"));
-		assert 0 == RunNodeResource.getNumberOfInstancesToAdd(new Form("n=0&foo=bar"));
-		assert 0 == RunNodeResource.getNumberOfInstancesToAdd(new Form("foo=bar&n=0"));
+		assertEquals(Integer.parseInt(RunNodeResource.NUMBER_INSTANCES_ADD_DEFAULT),
+				RunNodeResource.getNumberOfInstancesToAdd(new Form("")));
+		assertEquals(Integer.parseInt(RunNodeResource.NUMBER_INSTANCES_ADD_DEFAULT),
+				RunNodeResource.getNumberOfInstancesToAdd(new Form("n=1")));
+		assertEquals(0, RunNodeResource.getNumberOfInstancesToAdd(new Form("n=0")));
+		assertEquals(0, RunNodeResource.getNumberOfInstancesToAdd(new Form("n=0&foo=bar")));
+		assertEquals(0, RunNodeResource.getNumberOfInstancesToAdd(new Form("foo=bar&n=0")));
 
 		exception.expect(ResourceException.class);
 		RunNodeResource.getNumberOfInstancesToAdd(new Form("n="));
