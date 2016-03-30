@@ -286,6 +286,10 @@
             <additionalClasspathElement>${basedir}/src/main/clojure</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/src/test/clojure</additionalClasspathElement>
           </additionalClasspathElements>
+          <systemPropertyVariables>
+            <config-path>config-hsqldb-mem.edn</config-path>
+            <passphrase>sl1pstre8m</passphrase>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
 

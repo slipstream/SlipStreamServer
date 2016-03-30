@@ -52,8 +52,8 @@
   (let [matched-users
         (kc/select users
                    (kc/fields [:NAME])
-                   (kc/where  {(column-keyword authn-method) authn-id
-                               :STATE [in active-user]}))]
+                   (kc/where {(column-keyword authn-method) authn-id
+                              :STATE                        [in active-user]}))]
     (if (> (count matched-users) 1)
       (throw (Exception. (str "There should be only one result for " authn-id)))
       (:NAME (first matched-users)))))
@@ -100,6 +100,7 @@
                                  "DELETED"                  false
                                  "JPAVERSION"               0
                                  "ISSUPERUSER"              false
+                                 "ROLES"                    "alpha-role, beta-role"
                                  "STATE"                    "ACTIVE"
                                  "NAME"                     slipstream-user-name
                                  "PASSWORD"                 (random-password)
@@ -113,7 +114,24 @@
   (init)
   (-> (kc/select users
                  (kc/fields :PASSWORD)
-                 (kc/where {:NAME user-name
+                 (kc/where {:NAME  user-name
                             :STATE [in active-user]}))
       first
       :PASSWORD))
+
+(defn format-roles [super? roles-string]
+  (let [initial-role (if super? ["ADMIN"] ["USER"])
+        roles (->> (s/split (or roles-string "") #"[\s,]+")
+                   (remove nil?)
+                   (remove s/blank?))]
+    (s/join " " (concat initial-role roles))))
+
+(defn find-roles-for-user-name
+  [user-name]
+  (init)
+  (let [user-entry (-> (kc/select users
+                                  (kc/fields :ROLES :ISSUPERUSER)
+                                  (kc/where {:NAME  user-name
+                                             :STATE [in active-user]}))
+                       first)]
+    (format-roles (:ISSUPERUSER user-entry) (:ROLES user-entry))))
