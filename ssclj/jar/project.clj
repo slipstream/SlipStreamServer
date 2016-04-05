@@ -29,7 +29,7 @@
                  [org.slf4j/slf4j-log4j12                   "1.7.13"]
                  [instaparse                                "1.4.1"]
                 ; ;; Authentication service
-                 [com.sixsq.slipstream/auth                 "3.1-SNAPSHOT"]
+                 [com.sixsq.slipstream/auth                 "3.2-SNAPSHOT"]
                 ; ;; Environment settings
                  [environ                                   "1.0.1"]
                 ; ;; database

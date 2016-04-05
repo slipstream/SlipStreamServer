@@ -29,7 +29,7 @@
   {:licenseTemplate
    {:licenseData (u/encode-base64 (assoc valid-entry :invalid "BAD"))}})
 
-(deftest lifecycle
+#_(deftest lifecycle
 
   ;; anonymous create should fail
   (-> (session (ring-app))
@@ -156,7 +156,7 @@
         (t/body->json)
         (t/is-status 404))))
 
-(deftest bad-methods
+#_(deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
     (doall
       (for [[uri method] [[base-uri :options]

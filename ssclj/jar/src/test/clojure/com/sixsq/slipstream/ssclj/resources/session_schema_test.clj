@@ -11,32 +11,59 @@
                          :type      "ROLE"
                          :right     "VIEW"}]})
 
+;; Session
 (let [timestamp "1964-08-25T10:00:00.0Z"
-      root      {:id          resource-name
-                 :resourceURI p/service-context
-                 :created     timestamp
-                 :updated     timestamp
-                 :acl         valid-acl
-                 :owner       "Legal Person"
-                 :type        "CloudX Connector"
-                 :expiry      "2020-08-25T00:00:00.000Z"
-                 :userLimit   0}]
+      root {:id           resource-name
+            :resourceURI  p/service-context
+            :created      timestamp
+            :updated      timestamp
+            :acl          valid-acl
+            :username     "joe_user"
+            :authn-method "internal"
+            :last-active  timestamp}]
 
   (expect nil? (s/check Session root))
+
+  (expect (s/check Session (dissoc root :resourceURI)))
   (expect (s/check Session (dissoc root :created)))
   (expect (s/check Session (dissoc root :updated)))
   (expect (s/check Session (dissoc root :acl)))
 
-  (expect (s/check Session (dissoc root :owner)))
-  (expect (s/check Session (dissoc root :type)))
+  (expect (s/check Session (dissoc root :username)))
+  (expect (s/check Session (dissoc root :authn-method)))
+  (expect (s/check Session (dissoc root :last-active)))
 
-  (expect (s/check Session (dissoc root :expiry)))
-  (expect (s/check Session (assoc root :expiry "invalid timestamp")))
+  (expect (s/check Session (assoc root :last-active "invalid timestamp"))))
 
-  (expect (s/check Session (dissoc root :userLimit)))
-  (expect (s/check Session (assoc root :userLimit -1)))
-  (expect (s/check Session (assoc root :userLimit "a")))
-  (expect nil? (s/check Session (assoc root :userLimit 1000))))
+
+;; SessionCreate
+(let [timestamp "1964-08-25T10:00:00.0Z"
+      template {:href         "sessionTemplate/uuid"
+                :authn-method "internal"
+                :logo         {:href "media/uuid"}
+                :credentials  {:username "joe-username"
+                               :password "joe-password"}}
+      root {:name            "session-template-test"
+            :description     "test of session template"
+            :resourceURI     p/service-context
+            :created         timestamp
+            :updated         timestamp
+            :sessionTemplate template}]
+
+  (expect nil? (s/check SessionCreate root))
+  (expect nil? (s/check SessionCreate (dissoc root :name)))
+  (expect nil? (s/check SessionCreate (dissoc root :description)))
+  (expect nil? (s/check SessionCreate (dissoc root :created)))
+  (expect nil? (s/check SessionCreate (dissoc root :updated)))
+
+  (expect nil? (s/check SessionCreate (assoc root :sessionTemplate (dissoc template :href))))
+  (expect nil? (s/check SessionCreate (assoc root :sessionTemplate (dissoc template :authn-method))))
+  (expect nil? (s/check SessionCreate (assoc root :sessionTemplate (dissoc template :logo))))
+  (expect nil? (s/check SessionCreate (assoc root :sessionTemplate (dissoc template :credentials))))
+
+  (expect (s/check SessionCreate (dissoc root :resourceURI)))
+  (expect (s/check SessionCreate (dissoc root :sessionTemplate)))
+  (expect (s/check SessionCreate (assoc root :sessionTemplate {}))))
 
 
 (run-tests [*ns*])

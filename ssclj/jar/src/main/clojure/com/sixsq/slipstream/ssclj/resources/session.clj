@@ -25,9 +25,9 @@
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
-                     :rules [{:principal "USER"
+                     :rules [{:principal "ANON"
                               :type      "ROLE"
-                              :right     "VIEW"}]})
+                              :right     "ALL"}]})
 ;;
 ;; schemas
 ;;
@@ -95,7 +95,7 @@
 ;; CRUD operations
 ;;
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri)) )
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 ;; requires a SessionTemplate to create new Session
 (defmethod crud/add resource-name
