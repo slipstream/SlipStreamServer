@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/ssclj "3.1-SNAPSHOT"
+(defproject com.sixsq.slipstream/ssclj "3.2-SNAPSHOT"
   :description    "Clojure REST resources"
   :url            "http://sixsq.com"
   :license {:name "Apache License, Version 2.0"
