@@ -20,25 +20,6 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-
-import org.apache.commons.lang.StringUtils;
-import org.restlet.data.Form;
-import org.restlet.data.MediaType;
-import org.restlet.data.Method;
-import org.restlet.data.Status;
-import org.restlet.representation.Representation;
-import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.Delete;
-import org.restlet.resource.Get;
-import org.restlet.resource.Post;
-import org.restlet.resource.ResourceException;
-
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -57,11 +38,29 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
+import org.apache.commons.lang.StringUtils;
+import org.restlet.data.Form;
+import org.restlet.data.MediaType;
+import org.restlet.data.Method;
+import org.restlet.data.Status;
+import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
+import org.restlet.resource.Delete;
+import org.restlet.resource.Get;
+import org.restlet.resource.Post;
+import org.restlet.resource.ResourceException;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 public class RunNodeResource extends RunBaseResource {
 
-	private final static String NUMBER_INSTANCES_ADD_FORM_PARAM = "n";
-	private final static String NUMBER_INSTANCES_ADD_DEFAULT = "1";
+	public final static String NUMBER_INSTANCES_ADD_FORM_PARAM = "n";
+	public final static String NUMBER_INSTANCES_ADD_DEFAULT = "1";
 
 	private final static String INSTANCE_IDS_REMOVE_FORM_PARAM = "ids";
 	private final static String DELETE_INSTANCE_IDS_ONLY_FORM_PARAM = "delete-ids-only";
@@ -135,15 +134,15 @@ public class RunNodeResource extends RunBaseResource {
 
 			transaction.begin();
 
-			int noOfInst = getNumberOfInstancesToAdd(entity);
+			int noOfInst = getNumberOfInstancesToAdd(new Form(entity));
 
 			Node node = getNode(run, nodename);
 			for (int i = 0; i < noOfInst; i++) {
 				instanceNames.add(createNodeInstanceOnRun(run, node));
 			}
-			
+
 			run.postEventScaleUp(nodename, instanceNames, noOfInst);
-			
+
 			incrementNodeMultiplicityOnRun(noOfInst, run);
 			StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
 
@@ -257,11 +256,27 @@ public class RunNodeResource extends RunBaseResource {
 		}
 	}
 
-	private int getNumberOfInstancesToAdd(Representation entity) {
-		Form form = new Form(entity);
+	/*
+	Empty request form adds NUMBER_INSTANCES_ADD_DEFAULT node instances.
+
+	Requesting zero instances is allowed by simply NUMBER_INSTANCES_ADD_FORM_PARAM=0.
+
+	Throws ResourceException on
+	- non-empty request form without NUMBER_INSTANCES_ADD_FORM_PARAM form parameter;
+	- failure to parse NUMBER_INSTANCES_ADD_FORM_PARAM value.
+	**/
+	protected static int getNumberOfInstancesToAdd(Form form) {
+		Set<String> formParams = form.getNames();
 		try {
-			return Integer.parseInt(form.getFirstValue(NUMBER_INSTANCES_ADD_FORM_PARAM,
-					NUMBER_INSTANCES_ADD_DEFAULT));
+			if (formParams.contains(NUMBER_INSTANCES_ADD_FORM_PARAM)) {
+				return Integer.parseInt(form.getFirstValue(NUMBER_INSTANCES_ADD_FORM_PARAM));
+			} else if (formParams.isEmpty()) {
+				return Integer.parseInt(NUMBER_INSTANCES_ADD_DEFAULT);
+			} else {
+				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+						"No form parameter " + NUMBER_INSTANCES_ADD_FORM_PARAM +
+								"=# found in the scale-up request.");
+			}
 		} catch (NumberFormatException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
 					"Number of instances to add should be an integer.");

@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.2-SNAPSHOT</version>
   </parent>
 
   <repositories>
@@ -33,7 +33,7 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>auth</artifactId>
-      <version>3.1-SNAPSHOT</version>
+      <version>3.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
@@ -286,6 +286,10 @@
             <additionalClasspathElement>${basedir}/src/main/clojure</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/src/test/clojure</additionalClasspathElement>
           </additionalClasspathElements>
+          <systemPropertyVariables>
+            <config-path>config-hsqldb-mem.edn</config-path>
+            <passphrase>sl1pstre8m</passphrase>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
 

@@ -25,7 +25,9 @@
   (expect passes "\"a1\"")
   (expect passes "\"\\\"a\"")
   (expect passes "\"a\\\"\"")
-  (expect passes "\"a\\\"a\""))
+  (expect passes "\"a\\\"a\"")
+  (expect passes "\"b0\"")
+  (expect passes "\"b-0\""))
 
 ;; valid single quoted strings
 (let [passes (passes-fn :SingleQuoteString)]
@@ -34,7 +36,9 @@
   (expect passes "'a1'")
   (expect passes "'\\'a'")
   (expect passes "'a\\''")
-  (expect passes "'a\\'a'"))
+  (expect passes "'a\\'a'")
+  (expect passes "'b0'")
+  (expect passes "'b-0'"))
 
 ;; valid dates
 (let [passes (passes-fn :DateValue)]
@@ -69,7 +73,11 @@
   (expect passes "alpha=3 and beta=4")
   (expect passes "alpha=3 or beta=4")
   (expect passes "alpha=3 and beta=4 or gamma=5 and delta=6")
-  (expect passes "alpha=3 and (beta=4 or gamma=5) and delta=6"))
+  (expect passes "alpha=3 and (beta=4 or gamma=5) and delta=6")
+  (expect passes "b='b0'")
+  (expect passes "b='b-0'")
+  (expect passes "'b0'=b")
+  (expect passes "'b-0'=b"))
 
 ;; invalid filters
 (let [fails (fails-fn :Filter)]

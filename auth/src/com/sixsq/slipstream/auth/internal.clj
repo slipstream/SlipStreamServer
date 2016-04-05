@@ -37,10 +37,11 @@
       (= (sg/sha512 password-credential) encrypted-in-db))))
 
 (defn- adapt-credentials
-  [credentials]
+  [{:keys [user-name] :as credentials}]
   (-> credentials
       (dissoc :password)
       (rename-keys {:user-name :com.sixsq.identifier})
+      (merge {:com.sixsq.roles (db/find-roles-for-user-name user-name)})
       (merge {:exp (sg/expiry-timestamp)})))
 
 (defn create-token
