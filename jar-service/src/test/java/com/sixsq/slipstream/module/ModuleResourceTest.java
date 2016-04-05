@@ -181,6 +181,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 		Request request = createPutRequest(projectName,
 				form.getWebRepresentation(), anotherUser);
 		Response response = executeRequest(request);
+		System.err.println(request.toString());
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 		project.remove();
 	}
@@ -194,6 +195,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 		Request request = createPutRequest("existingProject",
 				form.getWebRepresentation(), user);
 		Response response = executeRequest(request);
+		System.err.println(request.toString());
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 		project.remove();
 	}
@@ -209,6 +211,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 				form.getWebRepresentation(), user, TEST_REQUEST_NAME
 						+ "?new=true");
 		Response response = executeRequest(request);
+		System.err.println(request.toString());
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_FORBIDDEN));
 		project.remove();
 	}
