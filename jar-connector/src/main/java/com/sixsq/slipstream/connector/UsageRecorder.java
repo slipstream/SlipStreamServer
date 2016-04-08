@@ -62,7 +62,7 @@ public class UsageRecorder {
 				return;
 			}
 
-			logger.info("Inserting usage record START for " + metrics + ", " + describe(instanceId, user, cloud));
+			logger.fine("Inserting usage record START for " + metrics + ", " + describe(instanceId, user, cloud));
 
 			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
 					keyCloudVMInstanceID(cloud, instanceId), new Date(), null, metrics);
@@ -88,7 +88,7 @@ public class UsageRecorder {
 				return;
 			}
 
-			logger.info("Inserting usage record END, metrics" + metrics + ", for " + describe(instanceId, user, cloud));
+			logger.fine("Inserting usage record END, metrics" + metrics + ", for " + describe(instanceId, user, cloud));
 
 			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
 					keyCloudVMInstanceID(cloud, instanceId), null, new Date(), metrics);
@@ -104,7 +104,7 @@ public class UsageRecorder {
 	}
 
 	private static boolean hasRecorded(String cloud, String instanceId) {
-		logger.info("UsageRecorder, recordedVmInstanceIds = " + recordedVmInstanceIds);
+		logger.fine("UsageRecorder, recordedVmInstanceIds = " + recordedVmInstanceIds);
 		return recordedVmInstanceIds.contains(keyCloudVMInstanceID(cloud, instanceId));
 	}
 
