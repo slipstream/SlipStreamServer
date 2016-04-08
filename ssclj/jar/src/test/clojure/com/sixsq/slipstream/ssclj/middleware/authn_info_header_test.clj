@@ -5,7 +5,7 @@
     [expectations :refer :all]))
 
 (defn mk-cookie [token]
-  {authn-cookie {:value token
+  {authn-cookie {:value (str "token=" token)
                  :path  "/"}})
 
 (def cookie-id (mk-cookie (sign/sign-claims {:com.sixsq.identifier "uname2"})))
@@ -78,4 +78,5 @@
                                       :roles    ["r1" "r2"]}}}
           (:identity (handler {:headers {authn-info-header "uname r1 r2"}
                                :cookies cookie-id-roles}))))
+
 
