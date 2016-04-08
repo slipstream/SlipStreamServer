@@ -30,21 +30,21 @@
                      {:status status} start end))))
 
 (deftest log-does-not-display-password
-  (is-request-formatted "GET auth/login [super/ADMIN] ?a=1&b=2 body-content"
+  (is-request-formatted "GET auth/login [super/ADMIN] ?a=1&b=2"
                         :user "super" :roles ["ADMIN"] :query-string "a=1&password=secret&b=2"))
 
 (deftest test-formatting
-  (is-reponse-formatted (format "200 (%d ms) GET auth/login [super/ADMIN] ?a=1&b=2 body-content" (- end start))
+  (is-reponse-formatted (format "200 (%d ms) GET auth/login [super/ADMIN] ?a=1&b=2" (- end start))
                         :user "super" :roles ["ADMIN"] :query-string "a=1&password=secret&b=2"
                         :start start :end end :status 200)
 
-  (is-request-formatted "GET auth/login [joe/] ?c=3 body-content"
+  (is-request-formatted "GET auth/login [joe/] ?c=3"
                         :user "joe" :query-string "c=3")
 
-  (is-request-formatted "GET auth/login [joe/] ? body-content"
+  (is-request-formatted "GET auth/login [joe/] ?"
                         :user "joe")
 
-  (is-request-formatted "GET auth/login [joe/R1,R2] ? body-content"
+  (is-request-formatted "GET auth/login [joe/R1,R2] ?"
                         :user "joe" :roles ["R1" "R2"]))
 
 

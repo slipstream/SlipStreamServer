@@ -16,10 +16,6 @@
   (let [[user roles] (aih/extract-info request)]
     (apply str "[" user "/" (str/join "," roles) "]")))
 
-(defn display-body
-  [request]
-  (or (:body request) "''"))
-
 (defn- display-elapsed-time-millis
   [start current-time-millis]
   (str "(" (- current-time-millis start) " ms)"))
@@ -34,8 +30,7 @@
     (-> request :request-method name (.toUpperCase))
     (-> request :uri)
     (-> request display-authn-info)
-    (-> request display-querystring)
-    (-> request display-body)))
+    (-> request display-querystring)))
 
 (defn formatted-response
   [formatted-request response start current-time-millis]
