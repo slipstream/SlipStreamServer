@@ -1,22 +1,24 @@
 (ns com.sixsq.slipstream.ssclj.middleware.logger
   (:require
     [superstring.core :as str]
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]))
 
 (defn- display-querystring
   [request]
   (str "?" (-> request
                :query-string
-               (or "no-query-string")
+               (or "")
                (str/replace #"&?password=([^&]*)" ""))))
 
 (defn- display-authn-info
   [request]
-  (let [to-display (-> request
-                       :headers
-                       (get "slipstream-authn-info")
-                       (or "no-authn-info"))]
-    (str "[" to-display "]")))
+  (let [[user roles] (aih/extract-info request)]
+    (apply str "[" user "/" (str/join "," roles) "]")))
+
+(defn display-body
+  [request]
+  (or (:body request) "''"))
 
 (defn- display-elapsed-time-millis
   [start current-time-millis]
@@ -26,44 +28,21 @@
   [& messages]
   (apply str (str/join " " messages)))
 
-(defn display-request
+(defn formatted-request
   [request]
   (display-space-separated
     (-> request :request-method name (.toUpperCase))
     (-> request :uri)
     (-> request display-authn-info)
     (-> request display-querystring)
-    (-> request :body (or "no-body"))))
+    (-> request display-body)))
 
-(defn display-response
-  [request response start current-time-millis]
+(defn formatted-response
+  [formatted-request response start current-time-millis]
   (display-space-separated
     (-> response :status)
     (display-elapsed-time-millis start current-time-millis)
-    (-> request :request-method name (.toUpperCase))
-    (-> request :uri)
-    (-> request display-authn-info)
-    (-> request display-querystring)
-    (-> request :body (or "no-body"))))
-
-(defn- log-level
-  [request]
-  (let [uri (:uri request)]
-    (if (re-matches #".*(?:\.js|\.css|\.png|\.woff|\.woff2|\.svg|\.ttf)$" uri)
-      :debug
-      :info)))
-
-(defn- log-response
-  [request response start]
-  (log/log
-    (log-level request)
-    (display-response request response start (System/currentTimeMillis))))
-
-(defn- log-request
-  [request]
-  (log/log
-    (log-level request)
-    (display-request request)))
+    formatted-request))
 
 (defn wrap-logger
   "Logs both request and response e.g:
@@ -72,8 +51,9 @@
   "
   [handler]
   (fn [request]
-    (log-request request)
-    (let [start    (System/currentTimeMillis)
-          response (handler request)]
-      (log-response request response start)
+    (let [start             (System/currentTimeMillis)
+          formatted-request (formatted-request request)
+          _                 (log/info formatted-request)
+          response          (handler request)
+          _                 (log/info (formatted-response formatted-request response start (System/currentTimeMillis)))]
       response)))

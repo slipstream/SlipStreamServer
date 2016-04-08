@@ -33,7 +33,7 @@
         (when identifier
           [identifier roles])))
     (catch Exception ex
-      (log/warn ex)
+      (log/warn (str "Error in extract-cookie-info: " (.getMessage ex)))
       nil)))
 
 (defn extract-info [request]
