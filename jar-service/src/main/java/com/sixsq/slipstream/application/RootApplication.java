@@ -56,7 +56,6 @@ import com.sixsq.slipstream.resource.ServiceCatalogRouter;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
-import com.sixsq.slipstream.ssclj.SSCLJRouter;
 import com.sixsq.slipstream.usage.UsageRouter;
 import com.sixsq.slipstream.user.UserRouter;
 import com.sixsq.slipstream.util.ConfigurationUtil;
@@ -233,7 +232,6 @@ public class RootApplication extends Application {
 
 		try {
 			attachModulesChooser(router);
-			attachSSCLJ(router);
 			attachMetering(router);
 			attachAction(router);
 			attachModule(router);
@@ -428,10 +426,6 @@ public class RootApplication extends Application {
 
 	private void attachMetering(RootRouter router) throws ConfigurationException, ValidationException {
 		guardAndAttach(router, new GraphiteRouter(getContext()), GraphiteRouter.ROOT_URI);
-	}
-
-	private void attachSSCLJ(RootRouter router) throws ValidationException {
-		guardAndAttach(router, new SSCLJRouter(getContext()), "api");
 	}
 
 	private void attachEvent(RootRouter router) throws ValidationException {
