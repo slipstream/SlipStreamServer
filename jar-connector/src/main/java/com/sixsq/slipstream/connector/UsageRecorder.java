@@ -42,7 +42,6 @@ public class UsageRecorder {
 	public static boolean isMuted = false;
 
 	private static Set<String> recordedVmInstanceIds = new HashSet<String>();
-	private static Map<String, Long> closeAttemptsVmInstanceIds = new HashMap<String, Long>();
 
 	public static void muteForTests() {
 		isMuted = true;
@@ -82,12 +81,7 @@ public class UsageRecorder {
 			if(isMuted) {
 				return;
 			}
-
-			if(hasAttemptedToClose(cloud, instanceId)) {
-				recordAttemptClose(cloud, instanceId);
-				return;
-			}
-
+			
 			logger.fine("Inserting usage record END, metrics" + metrics + ", for " + describe(instanceId, user, cloud));
 
 			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
@@ -95,7 +89,6 @@ public class UsageRecorder {
 			UsageRecord.post(usageRecord);
 
 			recordedVmInstanceIds.remove(keyCloudVMInstanceID(cloud, instanceId));
-			recordAttemptClose(cloud, instanceId);
 
 			logger.info("DONE Insert usage record END for " + describe(instanceId, user, cloud));
 		} catch (Exception e) {
@@ -106,27 +99,6 @@ public class UsageRecorder {
 	private static boolean hasRecorded(String cloud, String instanceId) {
 		logger.fine("UsageRecorder, recordedVmInstanceIds = " + recordedVmInstanceIds);
 		return recordedVmInstanceIds.contains(keyCloudVMInstanceID(cloud, instanceId));
-	}
-
-	private static boolean hasAttemptedToClose(String cloud, String instanceId) {
-		return closeAttemptsVmInstanceIds.get(keyCloudVMInstanceID(cloud, instanceId)) != null;
-	}
-
-	private static void recordAttemptClose(String cloud, String instanceId) {
-		purgeOldAttemptsClose();
-
-		closeAttemptsVmInstanceIds.put(keyCloudVMInstanceID(cloud, instanceId), System.currentTimeMillis());
-	}
-
-	private static void purgeOldAttemptsClose() {
-		long now = System.currentTimeMillis();
-		long oneHourMillis = 1000 * 60 * 60;
-
-		closeAttemptsVmInstanceIds =
-				closeAttemptsVmInstanceIds.entrySet()
-						.stream()
-						.filter(e -> (now - e.getValue()) < oneHourMillis)
-						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	private static ACL getAcl(String user) {

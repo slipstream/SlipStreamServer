@@ -16,7 +16,7 @@
   "Default value for $last parameter.
   When $last is not provided, :last is adjusted
   so that :last - :first + 1 is equals to that default value"
-  20)
+  10000)
 
 (defn add-cimi-param
   "Adds the given key and value to the :cimi-params map in the
