@@ -12,7 +12,8 @@
   [request]
   (-> request
       (uh/param-value :authn-method)
-      keyword))
+      keyword
+      (or :internal)))
 
 (defmulti login dispatch-on-authn-method)
 

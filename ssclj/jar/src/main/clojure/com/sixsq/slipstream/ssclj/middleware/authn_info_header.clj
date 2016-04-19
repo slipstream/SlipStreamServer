@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.middleware.authn-info-header
   (:require
     [superstring.core :as s]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.sign :as sign]))
 
 ;; NOTE: ring uses lowercased values of header names!
@@ -23,7 +24,7 @@
   [request]
   (try
     (if-let [token (get-in request [:cookies authn-cookie :value])]
-      (let [claims (sign/unsign-claims token)
+      (let [claims (sign/unsign-claims (-> token (s/split #"^token=") second))
             identifier (:com.sixsq.identifier claims)
             roles (remove s/blank? (-> claims
                                        :com.sixsq.roles
@@ -32,6 +33,7 @@
         (when identifier
           [identifier roles])))
     (catch Exception ex
+      (log/warn (str "Error in extract-cookie-info: " (.getMessage ex)))
       nil)))
 
 (defn extract-info [request]
