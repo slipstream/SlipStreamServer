@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/auth "3.1-SNAPSHOT"
+(defproject com.sixsq.slipstream/auth "3.2-SNAPSHOT"
   :description  "Authentication Service"
   :url          "http://sixsq.com"
 
