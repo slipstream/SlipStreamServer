@@ -9,6 +9,8 @@
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
+    [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]))
 
@@ -24,8 +26,11 @@
 
 (defn is-status
   [m status]
-  (is (= status (get-in m [:response :status])))
-  m)
+  (let [actual  (get-in m [:response :status])
+        result  (= status (get-in m [:response :status]))]
+    (when-not result
+      (println "Expecting status " status " got " actual))
+  (is result)))
 
 (defn is-key-value
   ([m f k v]
@@ -87,7 +92,9 @@
 
   (-> resource-routes
       (wrap-exceptions)
+      (wrap-cimi-params)
       (wrap-base-uri)
       (wrap-authn-info-header)
       (wrap-json-body {:keywords? true})
-      (wrap-json-response {:pretty true :escape-non-ascii true})))
+      (wrap-json-response {:pretty true :escape-non-ascii true})
+      (wrap-logger)))

@@ -56,7 +56,7 @@
               :value 510.0}]})
 
 (def event-end-template
-  {:cloud_vm_instanceid "exoscale-ch-gva:abcd"})
+  {:cloud-vm-instanceid "exoscale-ch-gva:abcd"})
 
 (defn fill-joe
   [nb-days]
@@ -71,28 +71,28 @@
 
           joe-exo-start (assoc joe-exoscale
                           :start_timestamp (u/to-ISO-8601 day-9h)
-                          :cloud_vm_instanceid vm-joe-exo-id)
+                          :cloud-vm-instanceid vm-joe-exo-id)
           joe-exo-end   {:end_timestamp       (u/to-ISO-8601 day-14h)
-                         :cloud_vm_instanceid vm-joe-exo-id
+                         :cloud-vm-instanceid vm-joe-exo-id
                          :metrics             [{:name "nb-cpu"}
                                                {:name "RAM-GB"}
                                                {:name "disk-GB"}]}
 
           joe-aws-start (assoc joe-aws
                           :start_timestamp (u/to-ISO-8601 day-11h)
-                          :cloud_vm_instanceid vm-joe-aws-id)
+                          :cloud-vm-instanceid vm-joe-aws-id)
           joe-aws-end   {:end_timestamp       (u/to-ISO-8601 day-13h)
-                         :cloud_vm_instanceid vm-joe-aws-id
+                         :cloud-vm-instanceid vm-joe-aws-id
                          :metrics             [{:name "nb-cpu"}
                                                {:name "RAM-GB"}
                                                {:name "disk-GB"}]}
 
           ]
-      (rc/-insertStart joe-exo-start)
-      (rc/-insertStart joe-aws-start)
+      (rc/insert-usage-event joe-exo-start)
+      (rc/insert-usage-event joe-aws-start)
 
-      (rc/-insertEnd joe-exo-end)
-      (rc/-insertEnd joe-aws-end))))
+      (rc/insertEnd joe-exo-end)
+      (rc/insertEnd joe-aws-end))))
 
 (defn summarize-joe-weekly
   [nb-weeks]
@@ -126,16 +126,16 @@
 
         joe-exo-start       (assoc joe-exoscale
                               :start_timestamp (u/to-ISO-8601 start-day)
-                              :cloud_vm_instanceid "vm-joe-exo-id")
+                              :cloud-vm-instanceid "vm-joe-exo-id")
         joe-exo-end         {:end_timestamp       (u/to-ISO-8601 fifty-seconds-after)
-                             :cloud_vm_instanceid "vm-joe-exo-id"
+                             :cloud-vm-instanceid "vm-joe-exo-id"
                              :metrics             [{:name "nb-cpu"}
                                                    {:name "RAM-GB"}
                                                    {:name "disk-GB"}]
                              }]
 
-    (rc/-insertStart joe-exo-start)
-    (rc/-insertEnd joe-exo-end)
+    (rc/insert-usage-event joe-exo-start)
+    (rc/insertEnd joe-exo-end)
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
     (let [summary (-> (select usage_summaries)
@@ -159,20 +159,20 @@
 
         joe-exo-start  (assoc joe-exoscale
                          :start_timestamp (u/to-ISO-8601 start-day)
-                         :cloud_vm_instanceid "vm-joe-exo-id")
+                         :cloud-vm-instanceid "vm-joe-exo-id")
         joe-exo-end    {:end_timestamp       (u/to-ISO-8601 end-day)
-                        :cloud_vm_instanceid "vm-joe-exo-id"}
+                        :cloud-vm-instanceid "vm-joe-exo-id"}
 
         jack-exo-start (assoc jack-exoscale
                          :start_timestamp (u/to-ISO-8601 start-day)
-                         :cloud_vm_instanceid "vm-jack-exo-id")
+                         :cloud-vm-instanceid "vm-jack-exo-id")
         jack-exo-end   {:end_timestamp       (u/to-ISO-8601 end-day)
-                        :cloud_vm_instanceid "vm-jack-exo-id"}]
+                        :cloud-vm-instanceid "vm-jack-exo-id"}]
 
-    (rc/-insertStart joe-exo-start)
-    (rc/-insertStart jack-exo-start)
-    (rc/-insertEnd joe-exo-end)
-    (rc/-insertEnd jack-exo-end)
+    (rc/insert-usage-event joe-exo-start)
+    (rc/insert-usage-event jack-exo-start)
+    (rc/insertEnd joe-exo-end)
+    (rc/insertEnd jack-exo-end)
 
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
@@ -189,9 +189,9 @@
         end-day       (t/plus (t/date-time 2014) (t/days 1))
         joe-exo-start (assoc joe-exoscale
                         :start_timestamp (u/to-ISO-8601 start-day)
-                        :cloud_vm_instanceid "vm-joe-exo-id")]
+                        :cloud-vm-instanceid "vm-joe-exo-id")]
 
-    (rc/-insertStart joe-exo-start)
+    (rc/insert-usage-event joe-exo-start)
 
     (summarize-and-store! (u/to-ISO-8601 (t/minus start-day (t/days 1))) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
@@ -204,9 +204,9 @@
         end-day       (t/plus start-day (t/days 1))
         joe-exo-start (assoc joe-exoscale
                         :start_timestamp (u/to-ISO-8601 start-day)
-                        :cloud_vm_instanceid "vm-joe-exo-id")]
+                        :cloud-vm-instanceid "vm-joe-exo-id")]
 
-    (rc/-insertStart joe-exo-start)
+    (rc/insert-usage-event joe-exo-start)
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
     (is (= 1 (-> usage_summaries select count)))))

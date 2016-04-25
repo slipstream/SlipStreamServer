@@ -29,21 +29,24 @@
     c/CreateAttrs
     c/AclAttr
     {
-     :id                               c/NonBlankString
-     :cloud_vm_instanceid              c/NonBlankString
-     :user                             c/NonBlankString
-     :cloud                            c/NonBlankString
-     (s/optional-key :start_timestamp) c/Timestamp
-     (s/optional-key :end_timestamp)   c/OptionalTimestamp
-     (s/optional-key :metrics)         [{:name  c/NonBlankString
-                                         :value c/NonBlankString}]}))
+     :id                                c/NonBlankString
+     :cloud-vm-instanceid               c/NonBlankString
+     :user                              c/NonBlankString
+     :cloud                             c/NonBlankString
+     (s/optional-key :start-timestamp)  c/Timestamp
+     (s/optional-key :end-timestamp)    c/OptionalTimestamp
+     :metric-name                       c/NonBlankString
+     :metric-value                      c/NonBlankString}))
 
-(defmethod dbb/store-in-db resource-name
-  [collection-id id data]
-  (let [data-stripped (select-keys data [:cloud_vm_instanceid :user :cloud :start_timestamp :end_timestamp :metrics])]
-    (if (nil? (:end_timestamp data))
-      (rc/-insertStart data-stripped)
-      (rc/-insertEnd data-stripped))))
+;; TODO : DELETE
+;(defmethod dbb/store-in-db resource-name
+;  [collection-id id data]
+;  (println "UsageRecord dbb/store-in-db")
+;
+;  (let [data-stripped (select-keys data [:cloud-vm-instanceid :user :cloud :start_timestamp :end_timestamp :metrics])]
+;    (if (nil? (:end_timestamp data))
+;      (rc/insertStart data-stripped)
+;      (rc/insertEnd data-stripped))))
 
 ;;
 ;; "Implementations" of multimethod declared in crud namespace
@@ -56,7 +59,7 @@
   (validate-fn resource))
 
 ;;
-;; Create
+;; Add
 ;;
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
@@ -79,9 +82,18 @@
       (dissoc resource :operations))))
 
 ;;
-;; collection
+;; Query
 ;;
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+;;
+;; edit
+;;
+
+(def edit-impl (std-crud/edit-fn resource-name))
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))

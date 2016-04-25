@@ -28,7 +28,7 @@
 (use-fixtures :each delete-all)
 
 (def event-start
-  {:cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+  {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
    :user                "sixsq_dev"
    :cloud               "exoscale-ch-gva"
    :start_timestamp     event-start-time
@@ -37,7 +37,7 @@
                          {:name  "disk-GB"  :value 100.5}]})
 
 (def event-end
-  {:cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+  {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
    :end_timestamp       event-end-time
    :metrics             [{:name "nb-cpu"}
                          {:name "RAM-GB"}
@@ -52,13 +52,13 @@
 
 (def event-start-small-vm1
   (-> event-start
-      (assoc :cloud_vm_instanceid "exoscale-ch-gva:vm1")
+      (assoc :cloud-vm-instanceid "exoscale-ch-gva:vm1")
       (assoc :metrics [{:name  "instance-type.Small" :value 1}
                        {:name  "nb-cpu"              :value 8}])))
 
 (def event-start-small-vm2
   (-> event-start-small-vm1
-      (assoc :cloud_vm_instanceid "exoscale-ch-gva:vm2")))
+      (assoc :cloud-vm-instanceid "exoscale-ch-gva:vm2")))
 
 (def event-change-to-large
   (-> event-start-small-vm1
@@ -69,15 +69,15 @@
   (assoc event-start :end_timestamp end-day-2))
 
 (deftest basic-insert-open
-  (-insertStart event-start)
+  (insert-usage-event event-start)
   (let [records (select usage_records)]
     (is (= 3 (count records)))
     (is (= event-start-time (:start_timestamp (first records))))
     (is (nil? (:end_timestamp (first records))))))
 
 (deftest basic-insert
-  (-insertStart event-start)
-  (-insertEnd event-end)
+  (insert-usage-event event-start)
+  (insertEnd event-end)
   (let [records (select usage_records)]
     (is (= 3 (count records)))
     (is (= event-start-time (:start_timestamp (first records))))
@@ -94,13 +94,13 @@
         {"cloud_vm_instanceid" "exo:123"
          "end_timestamp"       event-end-time
          "metrics"             [{"name" "A"} {"name" "B"}]}]
-    (-insertStart start-with-string-keys)
-    (-insertEnd end-with-string-keys)
+    (insert-usage-event start-with-string-keys)
+    (insertEnd end-with-string-keys)
     (is (= 2 (count (records-for-interval start-day-1 end-day-1))))
     (is (zero? (count (records-for-interval start-day-2 end-day-2))))))
 
 (deftest records-for-interval-for-open-records
-  (-insertStart event-start)
+  (insert-usage-event event-start)
   (is (= 3 (count (records-for-interval start-day-0 end-day-2))))
   (is (= 3 (count (records-for-interval start-day-1 end-day-1))))
   (is (zero? (count (records-for-interval start-day-0 end-day-0))))
@@ -108,10 +108,10 @@
   (is (= 3 (count (records-for-interval start-day-2 end-day-2)))))
 
 (deftest records-for-interval-for-closed-records
-  (-insertStart event-start)
+  (insert-usage-event event-start)
   (is (every? nil? (map :end_timestamp (records-for-interval start-day-0 end-day-2))))
   (is (= 3 (count (records-for-interval start-day-0 end-day-2))))
-  (-insertEnd event-end)
+  (insertEnd event-end)
   (is (every? #(= event-end-time %) (map :end_timestamp (records-for-interval start-day-0 end-day-2))))
   (is (zero? (count (records-for-interval start-day-2 end-day-2)))))
 
@@ -124,9 +124,9 @@
 
 (deftest event-already-open-are-closed-and-restarted-with-new-values
   (is (empty? (select usage_records)))
-  (-insertStart event-start)
+  (insert-usage-event event-start)
   (let [records-before  (select usage_records)
-        _               (-insertStart event-starting-day-2)
+        _               (insert-usage-event event-starting-day-2)
         records-after   (select usage_records)
 
         records-modified (->> records-after (filter #(= (:start_timestamp event-start)
@@ -148,10 +148,10 @@
 (deftest same-metric-can-be-open-close-multiple-times-when-scaling
   (is (empty? (select usage_records)))
 
-  (-insertStart event-start)
-  (-insertEnd event-end)
-  (-insertStart event-starting-day-2)
-  (-insertEnd event-ending-day-2)
+  (insert-usage-event event-start)
+  (insertEnd event-end)
+  (insert-usage-event event-starting-day-2)
+  (insertEnd event-ending-day-2)
 
   (is (= (set
            [["nb-cpu" 4.0 event-start-time event-end-time]
@@ -166,29 +166,29 @@
              (select usage_records))))))
 
 (deftest check-close-event-without-start
-  (-insertEnd event-end)
+  (insertEnd event-end)
   (is (zero? (count (select usage_records)))))
 
 (deftest check-with-middle-time
-  (-insertStart event-start)
-  (-insertEnd event-end)
+  (insert-usage-event event-start)
+  (insertEnd event-end)
   (is (= 3 (count (records-for-interval middle-event end-day-2))))
   (is (= 3 (count (records-for-interval start-day-0 middle-event)))))
 
 (deftest close-instance-type-when-changed-for-same-vm
-  (-insertStart event-start-small-vm1)
-  (-insertStart event-start-small-vm2)
-  (-insertStart event-change-to-large)
+  (insert-usage-event event-start-small-vm1)
+  (insert-usage-event event-start-small-vm2)
+  (insert-usage-event event-change-to-large)
 
   (is (= (:start_timestamp event-change-to-large)
-         (->> (select usage_records (where {:cloud_vm_instanceid "exoscale-ch-gva:vm1"
+         (->> (select usage_records (where {:cloud-vm-instanceid "exoscale-ch-gva:vm1"
                                             :metric_name         "instance-type.Small"}))
               first
               :end_timestamp)))
-  (is (nil? (->> (select usage_records (where {:cloud_vm_instanceid "exoscale-ch-gva:vm1"
+  (is (nil? (->> (select usage_records (where {:cloud-vm-instanceid "exoscale-ch-gva:vm1"
                                                :metric_name         "nb-cpu"}))
                  first
                  :end_timestamp)))
-  (is (nil? (->> (select usage_records (where {:cloud_vm_instanceid "exoscale-ch-gva:vm2"}))
+  (is (nil? (->> (select usage_records (where {:cloud-vm-instanceid "exoscale-ch-gva:vm2"}))
                  first
                  :end_timestamp))))

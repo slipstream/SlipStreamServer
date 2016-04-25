@@ -59,7 +59,7 @@
   (is (= 11692.8 (contribution {:start_timestamp start-day :end_timestamp end-day :metric_value 8.12}))))
 
 (def record-1
-  {:cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+  {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
    :user                "sixsq_dev"
    :cloud               "exoscale-ch-gva"
    :start_timestamp     in-day-1
@@ -68,7 +68,7 @@
    :metric_value        4})
 
 (def record-2
-  {:cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+  {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
    :user                "sixsq_dev"
    :cloud               "aws"
    :start_timestamp     start-day
@@ -77,7 +77,7 @@
    :metric_value        6})
 
 (def record-3
-  {:cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+  {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
    :user                "sixsq_dev"
    :cloud               "exoscale-ch-gva"
    :start_timestamp     in-day-1
@@ -86,7 +86,7 @@
    :metric_value        16})
 
 (def record-4
-  {:cloud_vm_instanceid "aws:445623"
+  {:cloud-vm-instanceid "aws:445623"
    :user                "joe"
    :cloud               "aws"
    :start_timestamp     past-1
@@ -95,7 +95,7 @@
    :metric_value        100})
 
 (def record-5
-  {:cloud_vm_instanceid "aws:445623"
+  {:cloud-vm-instanceid "aws:445623"
    :user                "joe"
    :cloud               "aws"
    :start_timestamp     past-1
@@ -181,8 +181,8 @@
 
 (defn insert-record
   []
-  (rc/-insertStart
-    {:cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+  (rc/insert-usage-event
+    {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
      :user                "sixsq_dev"
      :cloud               "exoscale-ch-gva"
      :start_timestamp     in-day-1
@@ -192,8 +192,8 @@
                             :value 8}
                            {:name  "disk-GB"
                             :value 100.5}]})
-  (rc/-insertEnd
-    {:cloud_vm_instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+  (rc/insertEnd
+    {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
      :end_timestamp       in-day-2
      :metrics             [{:name "nb-cpu"}
                            {:name "RAM-GB"}

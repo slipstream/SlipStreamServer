@@ -12,7 +12,7 @@
 
    :id                  "UsageRecord/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
    :resourceURI         resource-uri
-   :cloud_vm_instanceid "exoscale-ch-gva:9010d739-6933-4652-9db1-7bdafcac01cb"
+   :cloud-vm-instanceid "exoscale-ch-gva:9010d739-6933-4652-9db1-7bdafcac01cb"
    :user                "joe"
    :cloud               "aws"
    :start_timestamp     "2015-05-04T15:32:22.853Z"

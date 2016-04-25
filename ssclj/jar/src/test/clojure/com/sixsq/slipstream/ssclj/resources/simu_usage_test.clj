@@ -53,7 +53,7 @@
 (defn usage-record
   [user cloud metric start-timestamp end-timestamp]
   {
-   :cloud_vm_instanceid (str cloud ":" (cu/random-uuid))
+   :cloud-vm-instanceid (str cloud ":" (cu/random-uuid))
    :user                user
    :cloud               cloud
    :start_timestamp     start-timestamp
