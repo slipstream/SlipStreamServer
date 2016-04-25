@@ -59,8 +59,9 @@
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (instrument default-registry)
+      wrap-logger
       wrap-cookies
-      wrap-logger))
+      ))
 
 (defn start
   "Starts the server and returns a function that when called, will

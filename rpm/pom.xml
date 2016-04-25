@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.2-SNAPSHOT</version>
+    <version>3.3-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
@@ -312,13 +312,13 @@
             </mapping>
             
             <mapping>
-              <directory>${installation.dir}/etc</directory>
+              <directory>${installation.dir}/etc/rc</directory>
               <filemode>775</filemode>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
                   <location>target/dependency/jetty-distribution-${jetty.version}/bin/jetty.sh</location>
-                  <destination>rc.slipstream</destination>
+                  <destination>slipstream</destination>
                 </source>
               </sources>
             </mapping>
