@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-record
   (:require
-    [clojure.tools.logging :as log]
     [schema.core :as s]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbb]
+    [korma.core :as kc]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (def ^:const resource-tag :usage-records)
 (def ^:const resource-name "UsageRecord")
@@ -97,3 +97,25 @@
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
+
+;;
+(defn last-record
+  "Retrieves the most recent (start-timestamp) usage record with the same cloud-vm-instanceid and metric name.
+  fixme: check performance *after* the switch to elastic search."
+  [usage-record]
+  (->> (kc/select dbdb/resources)
+       (map (comp u/deserialize :data))
+       (filter #(= (:cloud-vm-instanceid %) (:cloud-vm-instanceid usage-record)))
+       (filter #(= (:metric-name %) (:metric-name usage-record)))
+       (sort-by :start-timestamp)
+       last))
+
+(defn open-records
+  "Retrieves open usage records with the same cloud-vm-instanceid and metric name.
+  fixme: check performance *after* the switch to elastic search."
+  [usage-record]
+  (->> (kc/select dbdb/resources)
+       (map (comp u/deserialize :data))
+       (filter #(= (:cloud-vm-instanceid %) (:cloud-vm-instanceid usage-record)))
+       (filter #(= (:metric-name %) (:metric-name usage-record)))
+       (filter #(nil? (:end-timestamp %)))))

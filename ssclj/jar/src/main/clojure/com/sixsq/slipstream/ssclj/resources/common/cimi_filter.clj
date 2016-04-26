@@ -4,9 +4,7 @@
     [superstring.core :refer [split]]
     [instaparse.core :as insta]
     [instaparse.transform :as it]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
 
 ;;

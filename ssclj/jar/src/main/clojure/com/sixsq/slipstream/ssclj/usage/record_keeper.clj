@@ -5,11 +5,13 @@
     [korma.core :as kc]
     [com.sixsq.slipstream.ssclj.usage.state-machine :as sm]
     [com.sixsq.slipstream.ssclj.api.acl :as acl]
+    [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
     [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]))
 
 ;;
 ;; Inserts in db usage records and retrieves them for a given interval.
@@ -53,13 +55,12 @@
 
 (def init-db
   (delay
-    (kh/korma-init)
 
+    (kh/korma-init)
     (acl/-init)
 
     (ddl/create-table! "usage_records" columns-record)
     (ddl/create-table! "usage_summaries" columns-summaries unique-summaries)
-
     (ddl/create-index! "usage_records" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
     (ddl/create-index! "usage_summaries" "IDX_TIMESTAMPS" "id" "start_timestamp", "end_timestamp")
 
@@ -84,7 +85,6 @@
   [usage-event]
   (merge {:end-timestamp nil :start-timestamp nil} usage-event))
 
-
 (defn- usage-metrics
   [usage-event-json]
   (let [usage-event (-> usage-event-json
@@ -93,18 +93,10 @@
     (for [metric (:metrics usage-event)]
       (project-to-metric usage-event metric))))
 
-(defn- last-record
-  [usage-metric]
-  (first
-    (kc/select usage_records
-               (kc/where {:cloud-vm-instanceid (:cloud-vm-instanceid usage-metric)
-                          :metric-name         (:metric-name usage-metric)})
-               (kc/order :start-timestamp :DESC)
-               (kc/limit 1))))
-
 (defn- state
   [usage-metric]
-  (let [record (last-record usage-metric)]
+  (println "last record " (ur/last-record usage-metric))
+  (let [record (ur/last-record usage-metric)]
     (cond
       (nil? record) :initial
       (nil? (:end-timestamp record)) :started
@@ -130,13 +122,17 @@
 
 (defn- close-record
   ([usage-metric close-timestamp]
+   (println "closing record")
    (log/info "Close " (:end-timestamp usage-metric) (metric-summary usage-metric))
-   (kc/update
-     usage_records
-     (kc/set-fields {:end-timestamp close-timestamp})
-     (kc/where {:cloud-vm-instanceid (:cloud-vm-instanceid usage-metric)
-                :metric-name         (:metric-name usage-metric)
-                :end-timestamp       nil})))
+
+   (for [ur (ur/open-records usage-metric)]
+     (println "Will close " (metric-summary ur))))
+   ;(kc/update
+   ;  usage_records
+   ;  (kc/set-fields {:end-timestamp close-timestamp})
+   ;  (kc/where {:cloud-vm-instanceid (:cloud-vm-instanceid usage-metric)
+   ;             :metric-name         (:metric-name usage-metric)
+   ;             :end-timestamp       nil})))
 
   ([usage-metric]
    (close-record usage-metric (:end-timestamp usage-metric))))
@@ -152,8 +148,8 @@
 (defn- open-record
   [usage-metric]
   (log/info "Open " (metric-summary usage-metric))
-  (close-metric-when-instance-type-change usage-metric)
-  (kc/insert usage_records (kc/values usage-metric)))
+  ;; (close-metric-when-instance-type-change usage-metric)
+  (db/add "UsageRecord" (assoc usage-metric :id (str "usage-record/" (cu/random-uuid)))))
 
 (defn- close-restart-record
   [usage-metric]
@@ -167,8 +163,6 @@
 (defn- process-event
   [usage-metric trigger]
   (let [current-state (state usage-metric)]
-    (println "current state" current-state ", trigger" trigger)
-    (println "action " (sm/action current-state trigger))
     (case (sm/action current-state trigger)
       :close-restart    (close-restart-record usage-metric)
       :insert-start     (open-record usage-metric)
@@ -182,12 +176,12 @@
 
 (defn- insertEnd
   [usage-event-json]
+  (println "insert END")
   (doseq [usage-metric (usage-metrics usage-event-json)]
     (process-event usage-metric :stop)))
 
 (defn insert-usage-event
   [usage-event]
-  (println "inserting event " usage-event)
   (if (nil? (:end-timestamp usage-event))
     (insertStart usage-event)
     (insertEnd usage-event)))

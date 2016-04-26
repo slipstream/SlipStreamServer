@@ -43,7 +43,6 @@
 (defmethod crud/validate
   resource-uri
   [resource]
-  (println "validating")
   (validate-fn resource))
 
 ;;
@@ -53,6 +52,7 @@
 
 (defmethod crud/add resource-name
   [request]
-  (println "usage event ADD")
-  (rk/insert-usage-event (:body request)))
+  (rk/insert-usage-event (:body request))
+  (u/map-response "Usage records created/updated" 201 nil))
+
 
