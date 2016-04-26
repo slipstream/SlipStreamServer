@@ -28,6 +28,10 @@
                      :rules [{:principal "ANON"
                               :type      "ROLE"
                               :right     "ALL"}]})
+
+;; FIXME: Need to add correct ACL to resources.
+(def resource-acl {:owner {:principal "ADMIN"
+                           :type      "ROLE"}})
 ;;
 ;; schemas
 ;;
@@ -66,30 +70,39 @@
 ;;
 
 (defn add-credentials-to-request [request tpl]
-  (let [{:keys [authn-method credentials]} tpl]
-    (->> request
-         :params
-         (merge credentials)
-         (assoc :authn-method authn-method)
-         (assoc request :params))))
+  (let [{:keys [authn-method credentials]} tpl
+        updated-params (-> request
+                           :params
+                           (merge credentials)
+                           (assoc :authn-method authn-method))]
+    (assoc request :params updated-params)))
 
+;; FIXME: Use correct login from authn module.
+(defn dummy-login [_]
+  {:status   200
+   :username "USER_1"
+   :cookies  ["COOKIE_1" "COOKIE_2"]})
+
+;; FIXME: Understand how to deal with workflow.
 (defn do-login [request]
-  (let [{:keys [status cookies]} (auth/login request)]
+  (let [{:keys [status username cookies]} (dummy-login request)]
     (if (not= status 200)
       (throw (ex-info "login failed" {:status status :message "login failed"}))
-      ["dummy" cookies])))
+      [username cookies])))
 
+;; FIXME: Understand how to deal with workflow.
 (defn tpl->session
   [tpl request]
   (let [tpl (-> tpl
-                std-crud/resolve-hrefs
-                tpl/validate-fn)
+                (dissoc :logo)
+                std-crud/resolve-hrefs)
         updated-request (add-credentials-to-request request tpl)
         [username cookies] (do-login updated-request)]
     {:cookies cookies
      :body    {:username     username
                :authn-method (:authn-method tpl)
-               :last-active  (u/now)}}))
+               :last-active  (u/now)
+               :acl          resource-acl}}))
 
 ;;
 ;; CRUD operations
@@ -104,9 +117,8 @@
                 (assoc :resourceURI create-uri)
                 (crud/validate)
                 (:sessionTemplate))
-        {:keys [cookies body]} (tpl->session tpl request)]
-    (-> body
-        (assoc request :body)
+        {:keys [cookies body] :as r} (tpl->session tpl request)]
+    (-> (assoc request :body body)
         (add-impl)
         (assoc :cookies cookies))))
 

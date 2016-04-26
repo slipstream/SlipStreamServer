@@ -15,148 +15,166 @@
 (defn ring-app []
   (t/make-ring-app (t/concat-routes routes/final-routes)))
 
-(def valid-entry
-  {:owner     "Legal Person"
-   :type      "CloudX Connector"
-   :expiry    "2020-08-25T00:00:00.000Z"
-   :userLimit 0})
+(def timestamp "1964-08-25T10:00:00.0Z")
+
+;; Do not provide values for :href.
+;; The referenced resource won't exist!
+(def valid-template
+  {:authn-method "internal"
+   :logo {:href "media/uuid"}
+   :credentials  {:username "joe-username"
+                  :password "joe-password"}})
 
 (def valid-create-entry
-  {:licenseTemplate
-   {:licenseData (u/encode-base64 valid-entry)}})
+  {:name            "session-template-test"
+   :description     "test of session template"
+   :resourceURI     p/service-context
+   :created         timestamp
+   :updated         timestamp
+   :sessionTemplate valid-template})
 
 (def invalid-create-entry
-  {:licenseTemplate
-   {:licenseData (u/encode-base64 (assoc valid-entry :invalid "BAD"))}})
+  {:name            "session-template-test"
+   :description     "test of session template"
+   :resourceURI     p/service-context
+   :created         timestamp
+   :updated         timestamp
+   :sessionTemplate (assoc valid-template :invalid "BAD")})
 
-#_(deftest lifecycle
+(defn dump [m]
+  (clojure.pprint/pprint m)
+  m)
 
-  ;; anonymous create should fail
+(deftest lifecycle
+
+  ;; anonymous create should succeed if credentials are correct
   (-> (session (ring-app))
       (content-type "application/json")
       (request base-uri
                :request-method :post
                :body (json/write-str valid-create-entry))
+      (dump)
       (t/body->json)
-      (t/is-status 403))
+      (t/is-status 201))
 
-  ;; anonymous query should also fail
+  ;; anonymous query should work, but only return user's sessions
   (-> (session (ring-app))
       (request base-uri)
+
       (t/body->json)
-      (t/is-status 403))
+      (t/is-status 200))
 
   ;; adding, retrieving and  deleting entry as user should succeed
-  (let [uri     (-> (session (ring-app))
-                    (content-type "application/json")
-                    (header authn-info-header "jane")
-                    (request base-uri
-                             :request-method :post
-                             :body (json/write-str valid-create-entry))
-                    (t/body->json)
-                    (t/is-status 201)
-                    (t/location))
-        abs-uri (str p/service-context (u/de-camelcase uri))]
+  #_(let [uri (-> (session (ring-app))
+                  (content-type "application/json")
+                  (header authn-info-header "jane")
+                  (request base-uri
+                           :request-method :post
+                           :body (json/write-str valid-create-entry))
+                  (t/body->json)
+                  (t/is-status 201)
+                  (t/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
 
-    (-> (session (ring-app))
-        (header authn-info-header "jane")
-        (request abs-uri)
-        (t/body->json)
-        (t/is-status 200))
+      (-> (session (ring-app))
+          (header authn-info-header "jane")
+          (request abs-uri)
+          (t/body->json)
+          (t/is-status 200))
 
-    (-> (session (ring-app))
-        (header authn-info-header "jane")
-        (request abs-uri
-                 :request-method :delete)
-        (t/body->json)
-        (t/is-status 204)))
+      (-> (session (ring-app))
+          (header authn-info-header "jane")
+          (request abs-uri
+                   :request-method :delete)
+          (t/body->json)
+          (t/is-status 204)))
 
   ;; adding as user, retrieving and deleting entry as ADMIN should work
-  (let [uri     (-> (session (ring-app))
-                    (content-type "application/json")
-                    (header authn-info-header "jane")
-                    (request base-uri
-                             :request-method :post
-                             :body (json/write-str valid-create-entry))
-                    (t/body->json)
-                    (t/is-status 201)
-                    (t/location))
-        abs-uri (str p/service-context (u/de-camelcase uri))]
+  #_(let [uri (-> (session (ring-app))
+                  (content-type "application/json")
+                  (header authn-info-header "jane")
+                  (request base-uri
+                           :request-method :post
+                           :body (json/write-str valid-create-entry))
+                  (t/body->json)
+                  (t/is-status 201)
+                  (t/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
 
-    (-> (session (ring-app))
-        (header authn-info-header "root ADMIN")
-        (request abs-uri)
-        (t/body->json)
-        (t/is-status 200))
+      (-> (session (ring-app))
+          (header authn-info-header "root ADMIN")
+          (request abs-uri)
+          (t/body->json)
+          (t/is-status 200))
 
-    (-> (session (ring-app))
-        (header authn-info-header "root ADMIN")
-        (request abs-uri
-                 :request-method :delete)
-        (t/body->json)
-        (t/is-status 204)))
+      (-> (session (ring-app))
+          (header authn-info-header "root ADMIN")
+          (request abs-uri
+                   :request-method :delete)
+          (t/body->json)
+          (t/is-status 204)))
 
   ;; try adding invalid entry
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "root ADMIN")
-      (request base-uri
-               :request-method :post
-               :body (json/write-str invalid-create-entry))
-      (t/body->json)
-      (t/is-status 400))
+  #_(-> (session (ring-app))
+        (content-type "application/json")
+        (header authn-info-header "root ADMIN")
+        (request base-uri
+                 :request-method :post
+                 :body (json/write-str invalid-create-entry))
+        (t/body->json)
+        (t/is-status 400))
 
   ;; add a new entry
-  (let [uri     (-> (session (ring-app))
-                    (content-type "application/json")
-                    (header authn-info-header "root ADMIN")
-                    (request base-uri
-                             :request-method :post
-                             :body (json/write-str valid-create-entry))
-                    (t/body->json)
-                    (t/is-status 201)
-                    (t/location))
-        abs-uri (str p/service-context (u/de-camelcase uri))]
+  #_(let [uri (-> (session (ring-app))
+                  (content-type "application/json")
+                  (header authn-info-header "root ADMIN")
+                  (request base-uri
+                           :request-method :post
+                           :body (json/write-str valid-create-entry))
+                  (t/body->json)
+                  (t/is-status 201)
+                  (t/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
 
-    (is uri)
+      (is uri)
 
-    ;; verify that the new entry is accessible
-    (-> (session (ring-app))
-        (header authn-info-header "root ADMIN")
-        (request abs-uri)
-        (t/body->json)
-        (t/is-status 200)
-        (dissoc :acl)                                       ;; ACL added automatically
-        (t/does-body-contain valid-entry))
+      ;; verify that the new entry is accessible
+      (-> (session (ring-app))
+          (header authn-info-header "root ADMIN")
+          (request abs-uri)
+          (t/body->json)
+          (t/is-status 200)
+          (dissoc :acl)                                     ;; ACL added automatically
+          (t/does-body-contain valid-template))
 
-    ;; query to see that entry is listed
-    (let [entries (-> (session (ring-app))
-                      (content-type "application/json")
-                      (header authn-info-header "root ADMIN")
-                      (request base-uri)
-                      (t/body->json)
-                      (t/is-status 200)
-                      (t/is-resource-uri collection-uri)
-                      (t/is-count pos?)
-                      (t/entries resource-tag))]
-      (is ((set (map :id entries)) uri)))
+      ;; query to see that entry is listed
+      (let [entries (-> (session (ring-app))
+                        (content-type "application/json")
+                        (header authn-info-header "root ADMIN")
+                        (request base-uri)
+                        (t/body->json)
+                        (t/is-status 200)
+                        (t/is-resource-uri collection-uri)
+                        (t/is-count pos?)
+                        (t/entries resource-tag))]
+        (is ((set (map :id entries)) uri)))
 
-    ;; delete the entry
-    (-> (session (ring-app))
-        (header authn-info-header "root ADMIN")
-        (request abs-uri
-                 :request-method :delete)
-        (t/body->json)
-        (t/is-status 204))
+      ;; delete the entry
+      (-> (session (ring-app))
+          (header authn-info-header "root ADMIN")
+          (request abs-uri
+                   :request-method :delete)
+          (t/body->json)
+          (t/is-status 204))
 
-    ;; ensure that it really is gone
-    (-> (session (ring-app))
-        (header authn-info-header "root ADMIN")
-        (request abs-uri)
-        (t/body->json)
-        (t/is-status 404))))
+      ;; ensure that it really is gone
+      (-> (session (ring-app))
+          (header authn-info-header "root ADMIN")
+          (request abs-uri)
+          (t/body->json)
+          (t/is-status 404))))
 
-#_(deftest bad-methods
+(deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
     (doall
       (for [[uri method] [[base-uri :options]
@@ -167,5 +185,5 @@
         (-> (session (ring-app))
             (request uri
                      :request-method method
-                     :body (json/write-str {:dummy "value"}))
+                     :body (json/write-str valid-create-entry))
             (t/is-status 405))))))
