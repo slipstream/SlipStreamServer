@@ -95,7 +95,6 @@
 
 (defn- state
   [usage-metric]
-  (println "last record " (ur/last-record usage-metric))
   (let [record (ur/last-record usage-metric)]
     (cond
       (nil? record) :initial
@@ -122,17 +121,9 @@
 
 (defn- close-record
   ([usage-metric close-timestamp]
-   (println "closing record")
-   (log/info "Close " (:end-timestamp usage-metric) (metric-summary usage-metric))
-
-   (for [ur (ur/open-records usage-metric)]
-     (println "Will close " (metric-summary ur))))
-   ;(kc/update
-   ;  usage_records
-   ;  (kc/set-fields {:end-timestamp close-timestamp})
-   ;  (kc/where {:cloud-vm-instanceid (:cloud-vm-instanceid usage-metric)
-   ;             :metric-name         (:metric-name usage-metric)
-   ;             :end-timestamp       nil})))
+   (log/info "Close " close-timestamp (metric-summary usage-metric))
+   (doseq [ur (ur/open-records usage-metric)]
+     (db/edit (assoc ur :end-timestamp close-timestamp))))
 
   ([usage-metric]
    (close-record usage-metric (:end-timestamp usage-metric))))
