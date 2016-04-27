@@ -19,7 +19,8 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]))
 
 (defn reset-records
   [f]
@@ -66,6 +67,10 @@
     :start-timestamp start-timestamp
     :metric-name metric-name
     :metric-value metric-value))
+
+(defn build-close-usage-record
+  [cloud-vm-instance-id start-timestamp metric-name metric-value end-timestamp]
+  (assoc (build-usage-record cloud-vm-instance-id start-timestamp metric-name metric-value) :end-timestamp end-timestamp))
 
 (def closed-usage-record
   (assoc valid-usage-record :end-timestamp  "2015-05-04T15:40:15.432Z"))
@@ -171,3 +176,26 @@
 
     (is (tu/submap? ur3 (last-record ur5)))
     (is (nil? (last-record ur4)))))
+
+(deftest test-records-for-interval
+  (let [state (-> (session (ring-app))
+                  (content-type "application/json")
+                  (header authn-info-header "joe"))
+        ur1 (build-close-usage-record "cloud:1" "2015-05-01T00:00:00.000Z" "disk" "1150.0" "2015-05-01T04:00:00.000Z")
+        ur2 (build-usage-record "cloud:1" "2015-05-01T00:00:00.000Z" "disk" "1150.0")
+        ]
+    (request state base-uri :request-method :post :body (json/write-str ur1))
+    (request state base-uri :request-method :post :body (json/write-str ur2))
+
+    (is (thrown? IllegalArgumentException (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-04-29T00:00:00.000Z")))
+    (is (empty? (ur/records-for-interval "2015-04-01T00:00:00.000Z" "2015-04-29T00:00:00.000Z")))
+    (is (= 1 (count (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-06-10T00:00:00.000Z"))))
+    (is (nil? (:time-stamp (first (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-06-10T00:00:00.000Z")))))
+    (is (= 2 (count (ur/records-for-interval "2015-04-01T00:00:00.000Z" "2015-06-01T00:00:00.000Z"))))
+    (is (= 2 (count (ur/records-for-interval "2015-04-01T00:00:00.000Z" "2015-05-01T02:00:00.000Z"))))
+    (is (= 2 (count (ur/records-for-interval "2015-05-01T02:00:00.000Z" "2015-05-01T03:00:00.000Z" ))))
+    (is (= 2 (count (ur/records-for-interval "2015-05-01T02:00:00.000Z" "2015-06-01T00:00:00.000Z" ))))))
+
+
+
+

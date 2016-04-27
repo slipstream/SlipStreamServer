@@ -47,8 +47,7 @@
   (make-ring-app (t/concat-routes routes/final-routes)))
 
 (def open-usage-event
-  {:acl                 {
-                         :owner {:type "USER" :principal "joe"}
+  {:acl                 {:owner {:type "USER" :principal "joe"}
                          :rules [{:type "ROLE" :principal "ANON" :right "ALL"}]}
    :cloud-vm-instanceid "exo:one"
    :user                "joe"

@@ -6,13 +6,14 @@
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.usage.utils :as u]))
 
 (def ^:const resource-tag :usage-records)
 (def ^:const resource-name "UsageRecord")
-(def ^:const resource-url (u/de-camelcase resource-name))
+(def ^:const resource-url (cu/de-camelcase resource-name))
 (def ^:const collection-name "UsageRecordCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
@@ -38,21 +39,11 @@
      :metric-name                       c/NonBlankString
      :metric-value                      c/NonBlankString}))
 
-;; TODO : DELETE
-;(defmethod dbb/store-in-db resource-name
-;  [collection-id id data]
-;  (println "UsageRecord dbb/store-in-db")
-;
-;  (let [data-stripped (select-keys data [:cloud-vm-instanceid :user :cloud :start_timestamp :end_timestamp :metrics])]
-;    (if (nil? (:end_timestamp data))
-;      (rc/insertStart data-stripped)
-;      (rc/insertEnd data-stripped))))
-
 ;;
 ;; "Implementations" of multimethod declared in crud namespace
 ;;
 
-(def validate-fn (u/create-validation-fn UsageRecord))
+(def validate-fn (cu/create-validation-fn UsageRecord))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -119,3 +110,18 @@
        (filter #(= (:cloud-vm-instanceid %) (:cloud-vm-instanceid usage-record)))
        (filter #(= (:metric-name %) (:metric-name usage-record)))
        (filter #(nil? (:end-timestamp %)))))
+
+(defn- before
+  [ts1 ts2]
+  (<= (compare ts1 ts2) 0))
+
+(defn records-for-interval
+  "Retrieves all usage records intersecting with given interval.
+  fixme: check performance *after* the switch to elastic search."
+  [start end]
+  (u/check-order [start end])
+  (->> (kc/select dbdb/resources)
+       (map (comp u/deserialize :data))
+       (filter #(or (nil? (:end-timestamp %))
+                    (before start (:end-timestamp %))))
+       (filter #(before (:start-timestamp %) end))))

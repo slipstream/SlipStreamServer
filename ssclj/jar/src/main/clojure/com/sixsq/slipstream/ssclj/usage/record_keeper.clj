@@ -3,6 +3,7 @@
     [superstring.core :refer [join]]
     [clojure.tools.logging :as log]
     [korma.core :as kc]
+    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.usage.state-machine :as sm]
     [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
@@ -56,8 +57,10 @@
 (def init-db
   (delay
 
+    (dbdb/init-db)
     (kh/korma-init)
     (acl/-init)
+
 
     (ddl/create-table! "usage_records" columns-record)
     (ddl/create-table! "usage_summaries" columns-summaries unique-summaries)
@@ -167,7 +170,6 @@
 
 (defn- insertEnd
   [usage-event-json]
-  (println "insert END")
   (doseq [usage-metric (usage-metrics usage-event-json)]
     (process-event usage-metric :stop)))
 
@@ -222,8 +224,5 @@
 
 (defn records-for-interval
   [start end]
-  (u/check-order [start end])
-  (kc/select usage_records (kc/where
-                             (and
-                               (or (= nil :end-timestamp) (>= :end-timestamp start))
-                               (<= :start-timestamp end)))))
+  (ur/records-for-interval start end))
+

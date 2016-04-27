@@ -16,10 +16,10 @@
   [start-time end-time]
   (fn [usage-record]
     (and
-      (t/before? (u/to-time (:start_timestamp usage-record)) (u/to-time end-time))
+      (t/before? (u/to-time (:start-timestamp usage-record)) (u/to-time end-time))
       (or
-        (nil? (:end_timestamp usage-record))
-        (t/after? (u/to-time (:end_timestamp usage-record)) (u/to-time start-time))))))
+        (nil? (:end-timestamp usage-record))
+        (t/after? (u/to-time (:end-timestamp usage-record)) (u/to-time start-time))))))
 
 (defn- filter-inside-interval
   [start-time end-time usage_records]
@@ -28,14 +28,14 @@
 (defn- shift-start
   [start]
   (fn [record]
-    (let [record-start-time (:start_timestamp record)]
-      (assoc record :start_timestamp (u/max-time start record-start-time)))))
+    (let [record-start-time (:start-timestamp record)]
+      (assoc record :start-timestamp (u/max-time start record-start-time)))))
 
 (defn- shift-end
   [end]
   (fn [record]
-    (let [record-end-time (:end_timestamp record)]
-      (assoc record :end_timestamp (u/min-time end record-end-time)))))
+    (let [record-end-time (:end-timestamp record)]
+      (assoc record :end-timestamp (u/min-time end record-end-time)))))
 
 (defn truncate
   [start-time end-time records]
@@ -52,7 +52,7 @@
 (defn contribution
   [record]
   (let [value      (:metric_value record)
-        nb-minutes (-> (u/to-interval (:start_timestamp record) (:end_timestamp record))
+        nb-minutes (-> (u/to-interval (:start-timestamp record) (:end-timestamp record))
                        t/in-seconds
                        (/ 60.0))]
     (* value nb-minutes)))
@@ -79,8 +79,8 @@
       (select-keys grouping-cols)
       (assoc :grouping (s/join "," (map name grouping-cols)))
       (assoc :frequency (name frequency))
-      (assoc :start_timestamp start)
-      (assoc :end_timestamp end)
+      (assoc :start-timestamp start)
+      (assoc :end-timestamp end)
       (assoc :usage {})))
 
 (defn- merge-usages
