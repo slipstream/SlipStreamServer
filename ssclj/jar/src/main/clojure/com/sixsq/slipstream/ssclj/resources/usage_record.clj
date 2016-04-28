@@ -121,6 +121,7 @@
   [start end]
   (u/check-order [start end])
   (->> (kc/select dbdb/resources)
+       (filter #(.startsWith (:id %) "usage-record/"))
        (map (comp u/deserialize :data))
        (filter #(or (nil? (:end-timestamp %))
                     (before start (:end-timestamp %))))

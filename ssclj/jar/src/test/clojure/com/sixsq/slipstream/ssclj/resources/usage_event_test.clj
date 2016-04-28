@@ -189,8 +189,3 @@
                 (sort-by :start-timestamp)
                 (map (juxt :start-timestamp :end-timestamp)))))))
 
-
-;; code records-for-interval (used by consolidation)
-
-;; test the response contains id of usage-records impacted
-

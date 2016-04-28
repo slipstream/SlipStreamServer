@@ -28,49 +28,12 @@
 ;; (i.e records whose [start-end timestamps] intersect with the interval)
 ;;
 
-(defonce ^:private columns-record
-         (ddl/columns
-           "cloud_vm_instanceid" "VARCHAR(100)"
-           "user" "VARCHAR(100)"
-           "cloud" "VARCHAR(100)"
-           "start_timestamp" "VARCHAR(30)"
-           "end_timestamp" "VARCHAR(30)"
-           "metric_name" "VARCHAR(100)"
-           "metric_value" "FLOAT"))
-
-(defonce ^:private columns-summaries
-         (ddl/columns
-           "id" "VARCHAR(100)"
-           "acl" "VARCHAR(1000)"
-           "user" "VARCHAR(100)"
-           "cloud" "VARCHAR(100)"
-           "start_timestamp" "VARCHAR(30)"
-           "end_timestamp" "VARCHAR(30)"
-           "frequency" "VARCHAR(30)"
-           "grouping" "VARCHAR(100)"
-           "compute_timestamp" "VARCHAR(30)"
-           "usage" "VARCHAR(10000)"))
-
-(defonce ^:private unique-summaries
-         (str ", UNIQUE (" (ddl/double-quote-list ["user" "cloud" "start_timestamp" "end_timestamp"]) ")"))
 
 (def init-db
   (delay
-
     (dbdb/init-db)
     (kh/korma-init)
     (acl/-init)
-
-
-    (ddl/create-table! "usage_records" columns-record)
-    (ddl/create-table! "usage_summaries" columns-summaries unique-summaries)
-    (ddl/create-index! "usage_records" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
-    (ddl/create-index! "usage_summaries" "IDX_TIMESTAMPS" "id" "start_timestamp", "end_timestamp")
-
-    (kc/defentity usage_records (kc/database kh/korma-api-db))
-    (kc/defentity usage_summaries (kc/database kh/korma-api-db))
-    (kc/select usage_records (kc/limit 1))
-
     (log/info "record-keeper: Korma Entities defined")))
 
 (defn -init
@@ -104,11 +67,6 @@
       (nil? (:end-timestamp record)) :started
       :else :stopped)))
 
-(defn- open-instance-type?
-  [metric]
-  (and (.startsWith (:metric-name metric) "instance-type.")
-       (nil? (:end-timestamp metric))))
-
 ;;
 ;; actions
 ;;
@@ -127,17 +85,8 @@
    (log/info "Close " close-timestamp (metric-summary usage-metric))
    (doseq [ur (ur/open-records usage-metric)]
      (db/edit (assoc ur :end-timestamp close-timestamp))))
-
   ([usage-metric]
    (close-record usage-metric (:end-timestamp usage-metric))))
-
-(defn- close-metric-when-instance-type-change
-  [usage-metric]
-  (when (open-instance-type? usage-metric)
-    (let [metrics-same-vm
-          (kc/select usage_records (kc/where {:cloud-vm-instanceid (:cloud-vm-instanceid usage-metric)}))]
-      (doseq [metric metrics-same-vm :when (open-instance-type? metric)]
-        (close-record metric (:start-timestamp usage-metric))))))
 
 (defn- open-record
   [usage-metric]
@@ -149,10 +98,6 @@
   [usage-metric]
   (close-record usage-metric (:start-timestamp usage-metric))
   (open-record usage-metric))
-
-;;
-;;
-;;
 
 (defn- process-event
   [usage-metric trigger]
@@ -188,13 +133,6 @@
      :rules [{:type "USER" :principal user :right "ALL"}
              {:type "ROLE" :principal cloud :right "ALL"}]}))
 
-(defn- id-map-for-summary
-  [summary]
-  (let [user  (:user summary)
-        cloud (:cloud summary)]
-    {:identity user
-     :roles    [cloud]}))
-
 (defn- resource-for
   [summary acl]
   (-> summary
@@ -202,25 +140,11 @@
       (assoc :id (str "usage/" (cu/random-uuid)))
       (assoc :acl (u/serialize acl))))
 
-(defn- clause-where
-  [row cols]
-  (zipmap cols (map #(% row) cols)))
-
 (defn insert-summary!
   [summary]
   (let [acl                   (acl-for-user-cloud summary)
-        summary-resource      (resource-for summary acl)
-        previous-computations (kc/select usage_summaries
-                                         (kc/where
-                                           (clause-where
-                                             summary-resource [:user :cloud :start-timestamp :end-timestamp])))
-        _
-                              (doseq [previous-computation previous-computations]
-                                (kc/delete usage_summaries (kc/where {:id (:id previous-computation)}))
-                                (acl/-deleteResource (:id previous-computation) "Usage" (id-map-for-summary previous-computation)))]
-
-    (kc/insert usage_summaries (kc/values (merge summary-resource {:compute-timestamp (u/now-to-ISO-8601)})))
-    (acl/insert-resource (:id summary-resource) "Usage" (acl/types-principals-from-acl acl))))
+        summary-resource      (resource-for summary acl)]
+    (db/add "Usage" (merge summary-resource {:compute-timestamp (u/now-to-ISO-8601)}))))
 
 (defn records-for-interval
   [start end]

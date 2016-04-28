@@ -28,32 +28,33 @@
   {:user            user
    :cloud           cloud
    :frequency       (name frequency)
-   :start_timestamp (u/timestamp year month day)
-   :end_timestamp   (u/timestamp-next-frequency frequency year month day)
+   :start-timestamp (u/timestamp year month day)
+   :end-timestamp   (u/timestamp-next-frequency frequency year month day)
    :usage           usage})
 
 (defn insert-daily-summaries
   [f]
   (db/set-impl! (dbdb/get-instance))
+  (dbdb/init-db)
   (acl/-init)
   (rc/-init)
-  (kc/delete rc/usage_summaries)
   (kc/delete acl/acl)
+  (kc/delete dbdb/resources)
 
-  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit_minutes 100.0}}))
-  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit_minutes 200.0}}))
-  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit_minutes 500.0}}))
-  (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit_minutes 300.0}}))
-  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit_minutes 40.0}}))
+  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit-minutes 100.0}}))
+  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit-minutes 200.0}}))
+  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit-minutes 500.0}}))
+  (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit-minutes 300.0}}))
+  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit-minutes 40.0}}))
 
-  (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit_minutes 300.0}}))
-  (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit_minutes 540.0}}))
-  (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit_minutes 300.0}}))
+  (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}))
+  (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit-minutes 540.0}}))
+  (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}))
 
-  (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit_minutes 300.0}}))
-  (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit_minutes 540.0}}))
-  (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit_minutes 300.0}}))
-
+  (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}))
+  (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}))
+  (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}))
+  (println "INSERTED")
   (f))
 
 (use-fixtures :once insert-daily-summaries)
@@ -63,7 +64,7 @@
 (defn are-desc-dates?
   [m]
   (->> (get-in m [:response :body :usages])
-       (map :end_timestamp)
+       (map :end-timestamp)
        tu/ordered-desc?
        is)
   m)
@@ -96,7 +97,7 @@
 
 (defn last-uuid
   []
-  (let [full-uuid (-> (kc/select rc/usage_summaries (kc/limit 1))
+  (let [full-uuid (-> (->> (kc/select dbdb/resources (kc/limit 1)) (filter #(.startsWith (:id %) "usage/")))
                       first
                       :id)
         uuid      (-> full-uuid

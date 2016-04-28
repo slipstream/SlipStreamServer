@@ -21,8 +21,8 @@
 
 (def valid-usage-records
   [valid-usage-record
-   (assoc valid-usage-record :end_timestamp "2015-05-04T16:32:22.853Z")
-   (assoc valid-usage-record :end_timestamp "")])
+   (assoc valid-usage-record :end-timestamp "2015-05-04T16:32:22.853Z")
+   (assoc valid-usage-record :end-timestamp "")])
 
 (deftest test-schema
   (tu/are-valid? valid-usage-records UsageRecord))

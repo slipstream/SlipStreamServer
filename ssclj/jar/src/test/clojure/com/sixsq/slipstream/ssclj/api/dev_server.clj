@@ -14,7 +14,6 @@
            (server/start *server-port*)))
 
 (kc/defentity resources (kc/database kh/korma-api-db))
-(kc/defentity usage_summaries (kc/database kh/korma-api-db))
 
 (defn db-content
   []
@@ -22,9 +21,6 @@
                    (map :id)
                    (map (partial re-find #"(.*)/.*"))
                    (map second)
-                   frequencies)
-   :summaries (->> (kc/select usage_summaries)
-                   (map :user)
                    frequencies)})
 
 (defn empty-db?

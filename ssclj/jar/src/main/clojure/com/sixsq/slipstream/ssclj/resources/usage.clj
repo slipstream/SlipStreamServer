@@ -36,8 +36,6 @@
                               :right     "VIEW"}]})
 
 (defonce init-record-keeper (rc/-init))
-
-(defentity usage_summaries (database kh/korma-api-db))
 (defentity acl (database kh/korma-api-db))
 
 (defn- deserialize-usage
@@ -66,15 +64,6 @@
 
       (sql/format :quoting :ansi)))
 
-(defmethod dbb/find-resources resource-name
-  [collection-id options]
-  (let [[id roles] (dbb/id-roles options)]
-    (if (dbb/neither-id-roles? id roles)
-      []
-      (->> (sql id roles (get-in options [:cimi-params :filter]))
-           (j/query kh/db-spec)
-           (map deserialize-usage)))))
-
 ;;
 ;; schemas
 ;;
@@ -87,12 +76,23 @@
      :id              c/NonBlankString
      :user            c/NonBlankString
      :cloud           c/NonBlankString
-     :start_timestamp c/Timestamp
-     :end_timestamp   c/Timestamp
+     :start-timestamp c/Timestamp
+     :end-timestamp   c/Timestamp
      :usage           c/NonBlankString
+     :grouping        c/NonBlankString
+     :frequency       c/NonBlankString
      }))
 
 (def validate-fn (u/create-validation-fn Usage))
+(defmethod crud/validate
+  resource-uri
+  [resource]
+  (validate-fn resource))
+
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+(defmethod crud/add resource-name
+  [request]
+  (add-impl request))
 
 ;;
 ;; collection
@@ -135,3 +135,4 @@
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-fn request))
+

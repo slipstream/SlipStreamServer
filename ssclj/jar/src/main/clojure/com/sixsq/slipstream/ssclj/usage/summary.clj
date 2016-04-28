@@ -4,7 +4,8 @@
     [clj-time.core :as t]
     [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]))
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 ;;
 ;; Cuts (truncate start or end timestamp) and aggregates usage records inside an interval.
@@ -22,8 +23,8 @@
         (t/after? (u/to-time (:end-timestamp usage-record)) (u/to-time start-time))))))
 
 (defn- filter-inside-interval
-  [start-time end-time usage_records]
-  (filter (intersect? start-time end-time) usage_records))
+  [start-time end-time usage-records]
+  (filter (intersect? start-time end-time) usage-records))
 
 (defn- shift-start
   [start]
@@ -51,7 +52,7 @@
 
 (defn contribution
   [record]
-  (let [value      (:metric_value record)
+  (let [value      (:metric-value record)
         nb-minutes (-> (u/to-interval (:start-timestamp record) (:end-timestamp record))
                        t/in-seconds
                        (/ 60.0))]
@@ -59,15 +60,15 @@
 
 (defn- comsumption
   [record]
-  {:unit_minutes (contribution record)})
+  {:unit-minutes (contribution record)})
 
 (defn- sum-consumptions
   [cons1 cons2]
-  (update-in cons1 [:unit_minutes] #(+ % (:unit_minutes cons2))))
+  (update-in cons1 [:unit-minutes] #(+ % (:unit-minutes cons2))))
 
 (defn- merge-summary-record
   [summary record]
-  (let [record-metric      (:metric_name record)
+  (let [record-metric      (:metric-name record)
         record-comsumption (comsumption record)]
     (if-let [consumption-to-increase (get-in summary [:usage record-metric])]
       (assoc-in summary [:usage record-metric] (sum-consumptions consumption-to-increase record-comsumption))
