@@ -3,7 +3,6 @@
   (:require
     [clojure.walk :as w]
     [clojure.pprint :refer [pprint]]
-    [clojure.tools.logging :as log]
 
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -27,13 +26,14 @@
           (assoc :resourceURI resource-uri)
           u/update-timestamps
           (crud/add-acl request)
-          crud/validate))))
+          crud/validate)
+      {})))
 
 (defn retrieve-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
     (-> (str (u/de-camelcase resource-name) "/" uuid)
-        db/retrieve
+        (db/retrieve {})
         (a/can-view? request)
         (crud/set-operations request)
         (u/json-response))))
@@ -42,23 +42,23 @@
   [resource-name]
   (fn [{{uuid :uuid} :params body :body :as request}]
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
-                      (db/retrieve)
+                      (db/retrieve {})
                       (a/can-modify? request))]
       (->> body
            (u/strip-service-attrs)
            (merge current)
            (u/update-timestamps)
            (crud/validate)
-           (db/edit)
+           (db/edit {})
            (u/json-response)))))
 
 (defn delete-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
     (-> (str (u/de-camelcase resource-name) "/" uuid)
-        (db/retrieve)
+        (db/retrieve {})
         (a/can-modify? request)
-        (db/delete))))
+        (db/delete {}))))
 
 (defn- paginate-post-sql
   [request entries]
@@ -113,7 +113,7 @@
    returned unchanged."
   [{:keys [href] :as resource}]
   (if href
-    (-> (db/retrieve href)
+    (-> (db/retrieve href {})
         (u/strip-common-attrs)
         (merge resource)
         (dissoc :href))

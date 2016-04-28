@@ -77,11 +77,11 @@
                  {:acl         resource-acl
                   :id          resource-url
                   :resourceURI resource-uri})]
-    (db/add resource-name record)))
+    (db/add resource-name record {})))
 
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]
-  (r/response (-> (db/retrieve resource-url)
+  (r/response (-> (db/retrieve resource-url {})
                   (a/can-view? request)
                   (assoc :baseURI base-uri)
                   (merge resource-links)
@@ -93,7 +93,7 @@
 
 (defn edit-impl
   [{:keys [body] :as request}]
-  (let [current (-> (db/retrieve resource-url)
+  (let [current (-> (db/retrieve resource-url {})
                     (assoc :acl resource-acl)
                     (a/can-modify? request))
         updated (-> body
@@ -104,7 +104,7 @@
                     (merge resource-links)
                     (crud/set-operations request)
                     (crud/validate))]
-    (db/edit (apply dissoc updated stripped-keys))
+    (db/edit (apply dissoc updated stripped-keys) {})
     (r/response updated)))
 
 (defmethod crud/edit resource-name

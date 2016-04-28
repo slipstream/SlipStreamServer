@@ -49,7 +49,10 @@
                  [puppetlabs/http-client                    "0.4.5"
                   :exclusions [[cheshire/cheshire]] ]
                  [aleph                                     "0.4.1-beta4"]
-                 ]
+
+                 ;; Elastic search
+                 [org.elasticsearch/elasticsearch           "2.3.1"]
+                 [me.raynes/fs                              "1.4.6"]]
 
   :plugins      [[lein-ancient                              "0.6.8"]
                  [lein-expectations                         "0.0.7"]

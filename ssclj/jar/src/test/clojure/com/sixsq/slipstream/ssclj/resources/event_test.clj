@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [clojure.data.json :as json]
     [com.sixsq.slipstream.ssclj.api.acl :as acl]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.event :refer :all]
 
@@ -44,10 +44,10 @@
 
 (defn insert-some-events
   []
-  (db/set-impl! (dbdb/get-instance))
-  (dbdb/init-db)
-  (kc/delete dbdb/resources)
-  (kc/delete acl/acl)
+  (db/set-impl! (esb/get-instance))
+
+  ;; (kc/delete dbdb/resources) TODO equivalent to erase all resources?
+
   (let [state (-> (session (ring-app))
                   (content-type "application/json")
                   (header authn-info-header "jane"))]
