@@ -18,12 +18,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class UsageRecord {
+public class UsageEvent {
 
     private static final String SSCLJ_SERVER = "http://localhost:8201/api";
-    private static final String USAGE_RECORD_RESOURCE_NAME = "usage-record";
+    private static final String USAGE_EVENT_RESOURCE_NAME = "usage-event";
 
-    private static final Logger logger = Logger.getLogger(UsageRecord.class.getName());
+    private static final Logger logger = Logger.getLogger(UsageEvent.class.getName());
 
     private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
@@ -53,8 +53,8 @@ public class UsageRecord {
 
     private List<Map<String, String>> metrics;
 
-    public UsageRecord(ACL acl, String user, String cloud, String cloud_vm_instanceid,
-                       Date start_timestamp, Date end_timestamp, List<UsageMetric> metrics) {
+    public UsageEvent(ACL acl, String user, String cloud, String cloud_vm_instanceid,
+                      Date start_timestamp, Date end_timestamp, List<UsageMetric> metrics) {
         this.acl = acl;
         this.user = user;
         this.cloud = cloud;
@@ -86,12 +86,12 @@ public class UsageRecord {
         return gson.toJson(this);
     }
 
-    public static void post(UsageRecord usageRecord) {
+    public static void post(UsageEvent usageEvent) {
         ClientResource resource = null;
         Representation response = null;
 
         try {
-            StringRepresentation stringRep = new StringRepresentation(usageRecord.toJson());
+            StringRepresentation stringRep = new StringRepresentation(usageEvent.toJson());
             stringRep.setMediaType(MediaType.APPLICATION_JSON);
 
             Context context = new Context();
@@ -101,7 +101,7 @@ public class UsageRecord {
             parameters.add("idleCheckInterval", "1000");
             parameters.add("socketConnectTimeoutMs", "1000");
 
-            resource = new ClientResource(context, SSCLJ_SERVER + "/" + USAGE_RECORD_RESOURCE_NAME);
+            resource = new ClientResource(context, SSCLJ_SERVER + "/" + USAGE_EVENT_RESOURCE_NAME);
             resource.setRetryOnError(false);
 
             response = resource.post(stringRep, MediaType.APPLICATION_JSON);
