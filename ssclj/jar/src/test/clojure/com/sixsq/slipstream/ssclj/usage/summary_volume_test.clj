@@ -9,14 +9,15 @@
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]))
+    [com.sixsq.slipstream.ssclj.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]))
 
 (defn delete-all [f]
   (rc/-init)
   (dbdb/init-db)
   (kc/delete dbdb/resources)
   (kc/delete acl/acl)
-  (db/set-impl! (dbdb/get-instance))
+  (db/set-impl! (esb/get-instance))
   (f))
 (use-fixtures :each delete-all)
 

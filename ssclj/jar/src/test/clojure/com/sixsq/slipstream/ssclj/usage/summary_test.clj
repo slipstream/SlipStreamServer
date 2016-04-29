@@ -9,7 +9,8 @@
     [korma.core :as kc]
     [clojure.test :refer :all]
     [korma.core :refer :all]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]))
+    [com.sixsq.slipstream.ssclj.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]))
 
 (def past-1 (u/timestamp 2015 04 12))
 (def past-2 (u/timestamp 2015 04 13))
@@ -23,11 +24,8 @@
 (def start-may (u/timestamp 2015 05))
 
 (defn delete-all [f]
-  (rc/-init)
-  (dbdb/init-db)
-  (kc/delete dbdb/resources)
-  (kc/delete acl/acl)
-  (db/set-impl! (dbdb/get-instance))
+  ;; (kc/delete dbdb/resources) TODO re-implement
+  (db/set-impl! (esb/get-instance))
   (f))
 (use-fixtures :each delete-all)
 

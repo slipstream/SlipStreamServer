@@ -34,7 +34,7 @@
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 (defn make-ring-app [resource-routes]
-  (db/set-impl! (dbdb/get-instance))
+  (db/set-impl! (esb/get-instance))
   (-> resource-routes
       wrap-exceptions
       wrap-base-uri

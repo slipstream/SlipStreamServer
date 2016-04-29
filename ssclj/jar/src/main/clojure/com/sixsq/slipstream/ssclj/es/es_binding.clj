@@ -4,14 +4,15 @@
 (ns com.sixsq.slipstream.ssclj.es.es-binding
   (:require
     [ring.util.response :as r]
+    [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.es.es-util :as esu]
     [com.sixsq.slipstream.ssclj.es.acl :as acl]
-    )
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
   (:import (com.sixsq.slipstream.ssclj.db.binding Binding)
            (org.elasticsearch.index.engine DocumentAlreadyExistsException)))
 
-(def ^:const ^:private index "resources-index")
+(def ^:const index "resources-index")
 
 (defn create-client
   []
@@ -29,16 +30,20 @@
   [data]
   (update-in data [:acl :rules] #(vec (set (conj % {:type "ROLE" :principal "ADMIN" :right "ALL"})))))
 
+(defn- split-id
+  [id]
+  (s/split id #"/"))
+
 (defn- data->doc
   "Prepares data before insertion in index
   That includes
-  - assoc id (which is type/uuid)
+  - assoc id (which is type/uuid) when not already present
   - add ADMIN role with right ALL
   - denormalize ACLs
   - jsonify "
   [type data]
-  (let [uuid  (cu/random-uuid)
-        id    (str type "/" uuid)
+  (let [uuid  (if (:id data) "1" (cu/random-uuid))
+        id    (or (:id data) (str type "/" uuid))
         json  (-> data
                   force-admin-role-right-all
                   acl/denormalize-acl
@@ -71,17 +76,30 @@
   [id]
   (cu/ex-conflict id))
 
+(defn- response-deleted
+  [id]
+  (cu/map-response (str id " deleted") 204 id))
+
+(defn- response-updated
+  [id]
+  (cu/map-response (str "updated " id) 200 id))
+
 (defn- check-identity-present
   [options]
-  (when (and (empty? (:user-name options))
-             (every? empty? (:user-roles options)))
-    (throw (IllegalArgumentException. "A non empty user name or user role is mandatory."))))
+  ;; TODO ??
+  (println "bypassing check-identity-present options"))
+  ;(clojure.pprint/pprint options)
+  ;(when (and (empty? (:user-name options))
+  ;           (every? empty? (:user-roles options)))
+  ;  (throw (IllegalArgumentException. "A non empty user name or user role is mandatory."))))
 
 (defn find-data
   [client index id options action]
   (check-identity-present options)
   (let [[type docid] (split-id id)]
+    (println "find data " type " " docid)
     (-> (esu/read client index type docid)
+        du/show
         (.getSourceAsString)
         doc->data
         (acl/check-can-do options action))))
@@ -89,31 +107,44 @@
 (deftype ESBinding []
   Binding
   (add [_ type data options]
+    (println "ESBINDING Adding id data" (:id data))
     (let [[id uuid json] (data->doc type data)]
       (try
       (if (esu/create client index type uuid json)
         (response-created id)
         (response-error))
       (catch DocumentAlreadyExistsException e
-        (response-conflict 123))))) ;; TODO Retrieve id from exception
+        (response-conflict id)))))
 
-  (retrieve [this id options]
+  (retrieve [_ id options]
     ;; (check-exist id) TODO equivalent
+    (println "ES binding retrieving " id " options" options)
     (find-data client index id options "VIEW"))
 
-  (delete [this {:keys [id]}]
-    (check-exist id)
-    (delete-resource id)
+  (delete [_ {:keys [id]} options]
+    ;; (check-exist id) TODO equivalent
+    (find-data client index id options "ALL")
+    (let [[type docid] (split-id id)]
+      (.isFound (esu/delete client index type docid)))
     (response-deleted id))
 
-  (edit [this {:keys [id] :as data}]
-    (check-exist id)
-    (update-resource id data)
-    (response-updated id))
+  (edit [_ {:keys [id] :as data} options]
+    ;; (check-exist id) TODO equivalent
+    (find-data client index id options "MODIFY")
+    (let [[type docid] (split-id id)]
+      (if (esu/update client index type docid (esu/edn->json data))
+        (response-updated id)
+        (response-conflict id))))
 
-  (query [this collection-id options]
-    (find-resources collection-id options)))
+  (query [_ collection-id options]
+    (check-identity-present options)
+    (let [response (esu/search client index type options)
+          result (esu/json->edn (str response))
+          hits (->> (-> result :hits :hits)
+                    (map :_source)
+                    (map acl/normalize-acl))]
+      hits)))
 
-(defn get-instance []
-  (init-es)
+(defn get-instance
+  []
   (ESBinding.))

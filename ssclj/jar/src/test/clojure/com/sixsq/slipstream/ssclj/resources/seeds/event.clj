@@ -53,7 +53,7 @@
 
 (defn seed!
   [nb-events username & {:keys [clean]}]
-  (db/set-impl! (dbdb/get-instance))
+  (db/set-impl! (esb/get-instance))
   (dbdb/init-db)
   (when clean
     (kc/delete dbdb/resources))

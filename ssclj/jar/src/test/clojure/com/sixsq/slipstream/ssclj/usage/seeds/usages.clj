@@ -87,7 +87,7 @@
 
 (defn seed-summaries!
   [nb username clouds]
-  (db/set-impl! (dbdb/get-instance))
+  (db/set-impl! (esb/get-instance))
   (acl/-init)
   (rc/-init)
   (-> nb
@@ -96,7 +96,7 @@
 
 (defn seed-records!
   [nb username clouds & {:keys [clean]}]
-  (db/set-impl! (dbdb/get-instance))
+  (db/set-impl! (esb/get-instance))
   (acl/-init)
   (rc/-init)
   (when clean

@@ -1,40 +1,30 @@
 (ns com.sixsq.slipstream.ssclj.resources.event-test
   (:require
     [clojure.test :refer :all]
+    [peridot.core :refer :all]
+    [clojure.data.json :as json]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params :refer [wrap-params]]
-    [korma.core :as kc]
-    [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [clojure.data.json :as json]
-    [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.event :refer :all]
-
     [com.sixsq.slipstream.ssclj.app.params :as p]
-
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [ring-app urlencode-params is-count exec-request]]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
-
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-(def ^:private nb-events 10)
+(def ^:private nb-events 2)
 
-(def valid-event {
-                  :acl       {
-                              :owner {
-                                      :type "USER" :principal "jane"}
+(def valid-event {:acl       {:owner {:type "USER" :principal "jane"}
                               :rules [{:type "USER" :principal "jane" :right "ALL"}]}
                   :timestamp "2015-01-16T08:05:00.0Z"
-                  :content   {
-                              :resource {:href "run/45614147-aed1-4a24-889d-6365b0b1f2cd"}
+                  :content   {:resource {:href "run/45614147-aed1-4a24-889d-6365b0b1f2cd"}
                               :state    "Started"}
                   :type      "state"
-                  :severity  "critical"
-                  })
+                  :severity  "critical"})
 
 (def valid-events
   (for [i (range nb-events)]

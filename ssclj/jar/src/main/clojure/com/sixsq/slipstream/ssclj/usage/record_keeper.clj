@@ -1,15 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.usage.record-keeper
   (:require
-    [superstring.core :refer [join]]
     [clojure.tools.logging :as log]
-    [korma.core :as kc]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.usage.state-machine :as sm]
-    [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
-    [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.ssclj.db.impl :as db]))
@@ -27,18 +21,6 @@
 ;; The records-for-interval retrieves the usage_records for a given interval.
 ;; (i.e records whose [start-end timestamps] intersect with the interval)
 ;;
-
-
-(def init-db
-  (delay
-    (dbdb/init-db)
-    (kh/korma-init)
-    (acl/-init)
-    (log/info "record-keeper: Korma Entities defined")))
-
-(defn -init
-  []
-  @init-db)
 
 (defn- project-to-metric
   [usage-event metric]
@@ -81,48 +63,49 @@
        " " (:metric-name usage-metric)))
 
 (defn- close-record
-  ([usage-metric close-timestamp]
+  ([usage-metric close-timestamp options]
    (log/info "Close " close-timestamp (metric-summary usage-metric))
    (doseq [ur (ur/open-records usage-metric)]
-     (db/edit (assoc ur :end-timestamp close-timestamp))))
-  ([usage-metric]
-   (close-record usage-metric (:end-timestamp usage-metric))))
+     (db/edit (assoc ur :end-timestamp close-timestamp) options)))
+  ([usage-metric options]
+   (close-record usage-metric (:end-timestamp usage-metric) options)))
 
 (defn- open-record
-  [usage-metric]
+  [usage-metric options]
   (log/info "Open " (metric-summary usage-metric))
-  ;; (close-metric-when-instance-type-change usage-metric)
-  (db/add "UsageRecord" (assoc usage-metric :id (str "usage-record/" (cu/random-uuid)))))
+  (db/add "UsageRecord"
+          (assoc usage-metric :id (str "usage-record/" (cu/random-uuid)))
+          options))
 
 (defn- close-restart-record
-  [usage-metric]
-  (close-record usage-metric (:start-timestamp usage-metric))
-  (open-record usage-metric))
+  [usage-metric options]
+  (close-record usage-metric (:start-timestamp usage-metric) options)
+  (open-record usage-metric options))
 
-(defn- process-event
-  [usage-metric trigger]
+(defn- process-metric-event
+  [usage-metric trigger options]
   (let [current-state (state usage-metric)]
     (case (sm/action current-state trigger)
-      :close-restart    (close-restart-record usage-metric)
-      :insert-start     (open-record usage-metric)
+      :close-restart    (close-restart-record usage-metric options)
+      :insert-start     (open-record usage-metric options)
       :wrong-transition (log-wrong-transition current-state trigger)
-      :close-record     (close-record usage-metric))))
+      :close-record     (close-record usage-metric options))))
 
 (defn- insertStart
-  [usage-event-json]
+  [usage-event-json options]
   (doseq [usage-metric (usage-metrics usage-event-json)]
-    (process-event usage-metric :start)))
+    (process-metric-event usage-metric :start options)))
 
 (defn- insertEnd
-  [usage-event-json]
+  [usage-event-json options]
   (doseq [usage-metric (usage-metrics usage-event-json)]
-    (process-event usage-metric :stop)))
+    (process-metric-event usage-metric :stop options)))
 
 (defn insert-usage-event
-  [usage-event]
+  [usage-event options]
   (if (nil? (:end-timestamp usage-event))
-    (insertStart usage-event)
-    (insertEnd usage-event)))
+    (insertStart usage-event options)
+    (insertEnd usage-event options)))
 
 (defn- acl-for-user-cloud
   [summary]
@@ -141,10 +124,12 @@
       (assoc :acl (u/serialize acl))))
 
 (defn insert-summary!
-  [summary]
+  [summary options]
   (let [acl                   (acl-for-user-cloud summary)
         summary-resource      (resource-for summary acl)]
-    (db/add "Usage" (merge summary-resource {:compute-timestamp (u/now-to-ISO-8601)}))))
+    (db/add "Usage"
+            (merge summary-resource {:compute-timestamp (u/now-to-ISO-8601)})
+            options)))
 
 (defn records-for-interval
   [start end]

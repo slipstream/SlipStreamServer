@@ -1,8 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-record
   (:require
     [schema.core :as s]
-    [korma.core :as kc]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
@@ -94,7 +92,7 @@
   "Retrieves the most recent (start-timestamp) usage record with the same cloud-vm-instanceid and metric name.
   fixme: check performance *after* the switch to elastic search."
   [usage-record]
-  (->> (kc/select dbdb/resources)
+  (->> nil ;; TODO with ES
        (map (comp u/deserialize :data))
        (filter #(= (:cloud-vm-instanceid %) (:cloud-vm-instanceid usage-record)))
        (filter #(= (:metric-name %) (:metric-name usage-record)))
@@ -105,7 +103,7 @@
   "Retrieves open usage records with the same cloud-vm-instanceid and metric name.
   fixme: check performance *after* the switch to elastic search."
   [usage-record]
-  (->> (kc/select dbdb/resources)
+  (->> nil ;; TODO with ES
        (map (comp u/deserialize :data))
        (filter #(= (:cloud-vm-instanceid %) (:cloud-vm-instanceid usage-record)))
        (filter #(= (:metric-name %) (:metric-name usage-record)))
@@ -120,7 +118,7 @@
   fixme: check performance *after* the switch to elastic search."
   [start end]
   (u/check-order [start end])
-  (->> (kc/select dbdb/resources)
+  (->> nil ;; TODO with ES
        (filter #(.startsWith (:id %) "usage-record/"))
        (map (comp u/deserialize :data))
        (filter #(or (nil? (:end-timestamp %))

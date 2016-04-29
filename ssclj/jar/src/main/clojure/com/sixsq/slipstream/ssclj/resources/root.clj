@@ -53,6 +53,8 @@
 (def validate-fn (u/create-validation-fn Root))
 (defmethod crud/validate resource-uri
   [resource]
+  (println "VALIDATING")
+  (clojure.pprint/pprint resource)
   (validate-fn resource))
 
 (defmethod crud/set-operations resource-uri
@@ -75,13 +77,15 @@
   []
   (let [record (u/update-timestamps
                  {:acl         resource-acl
-                  :id          resource-url
+                  :id          resource-url ;; TODO : special case id is given and resource is a "singleton"
                   :resourceURI resource-uri})]
+    (println "ADDING ROOT")
     (db/add resource-name record {})))
 
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]
-  (r/response (-> (db/retrieve resource-url {})
+  (println "RETRIEVING")
+  (r/response (-> (db/retrieve (str resource-url "/1") {})
                   (a/can-view? request)
                   (assoc :baseURI base-uri)
                   (merge resource-links)

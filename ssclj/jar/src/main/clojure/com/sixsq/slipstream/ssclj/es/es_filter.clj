@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.es.es-filter
   (:require
     [clojure.walk :as w]
-    [sixsq.server.cimi.parser :as p]
+    [com.sixsq.slipstream.ssclj.filter.parser :as p]
     [superstring.core :as s])
   (:import
     [org.elasticsearch.index.query QueryBuilders]

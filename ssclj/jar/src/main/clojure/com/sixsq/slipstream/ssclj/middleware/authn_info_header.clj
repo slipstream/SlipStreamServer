@@ -2,7 +2,8 @@
   (:require
     [superstring.core :as s]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.auth.sign :as sign]))
+    [com.sixsq.slipstream.auth.sign :as sign]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 ;; NOTE: ring uses lowercased values of header names!
 (def ^:const authn-info-header
@@ -50,14 +51,23 @@
        :authentications {username id-map}})
     {}))
 
+(defn add-user-name-roles
+  [request]
+  (let [[user-name roles] (extract-info request)]
+    (-> request
+        (assoc :user-name user-name)
+        (assoc :user-roles roles))))
+
 (defn wrap-authn-info-header
   "Middleware that adds an identity map to the request based on
    information in the slipstream-authn-info header or authentication
    cookie.  If both are provided, the header takes precedence."
   [handler]
   (fn [request]
+    (println "wrap-authn-info-header")
     (->> request
          (extract-info)
          (create-identity-map)
          (assoc request :identity)
+         add-user-name-roles
          (handler))))

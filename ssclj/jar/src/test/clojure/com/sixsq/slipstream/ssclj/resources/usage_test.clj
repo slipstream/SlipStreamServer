@@ -1,18 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-test
   (:require
     [clojure.test :refer :all]
-
-    [clj-time.core :as time]
-    [korma.core :as kc]
-
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-
-    [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.usage :refer :all]
@@ -20,7 +10,8 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [exec-request is-count]]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]))
 
 
 (defn- summary
@@ -34,27 +25,18 @@
 
 (defn insert-daily-summaries
   [f]
-  (db/set-impl! (dbdb/get-instance))
-  (dbdb/init-db)
-  (acl/-init)
-  (rc/-init)
-  (kc/delete acl/acl)
-  (kc/delete dbdb/resources)
-
-  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit-minutes 100.0}}))
-  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit-minutes 200.0}}))
-  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit-minutes 500.0}}))
-  (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit-minutes 300.0}}))
-  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit-minutes 40.0}}))
-
-  (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}))
-  (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit-minutes 540.0}}))
-  (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}))
-
-  (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}))
-  (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}))
-  (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}))
-  (println "INSERTED")
+  (db/set-impl! (esb/get-instance))
+  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit-minutes 100.0}}) {:user-name "joe"})
+  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit-minutes 200.0}}) {:user-name "joe"})
+  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit-minutes 500.0}}) {:user-name "joe"})
+  (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit-minutes 300.0} }) {:user-name "joe"})
+  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit-minutes 40.0}}) {:user-name "joe"})
+  (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
+  (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "joe"})
+  (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
+  (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
+  (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "joe"})
+  (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
   (f))
 
 (use-fixtures :once insert-daily-summaries)
@@ -97,9 +79,11 @@
 
 (defn last-uuid
   []
-  (let [full-uuid (-> (->> (kc/select dbdb/resources (kc/limit 1)) (filter #(.startsWith (:id %) "usage/")))
-                      first
-                      :id)
+  (let [full-uuid 123
+        ;(-> (->> (kc/select dbdb/resources (kc/limit 1)) (filter #(.startsWith (:id %) "usage/")))
+        ;              first
+        ;              :id)
+        ;; TODO replace with ES equivalent
         uuid      (-> full-uuid
                       (superstring.core/split #"/")
                       second)]

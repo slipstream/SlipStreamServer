@@ -27,7 +27,7 @@
     [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
 
-(defn set-db-impl
+(defn- set-persistence-impl
   []
   (db/set-impl! (esb/get-instance)))
 
@@ -70,7 +70,7 @@
    (log/info "java vendor: " (System/getProperty "java.vendor"))
    (log/info "java version: " (System/getProperty "java.version"))
    (log/info "java classpath: " (System/getProperty "java.class.path"))
-   (set-db-impl)
+   (set-persistence-impl)
    (resources/initialize)
    (let [handler (create-ring-handler)]
      (graphite/start-graphite-reporter)
