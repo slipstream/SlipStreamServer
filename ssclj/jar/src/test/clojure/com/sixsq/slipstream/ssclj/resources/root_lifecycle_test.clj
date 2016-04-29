@@ -31,43 +31,41 @@
 
   ;; initialize the root resource
   (let [response (add)]
-    (clojure.pprint/pprint response)
     (is (= 201 (:status response)))
-    (is (= resource-url (-> response
-                            :headers
-                            (get "Location"))))
+    (is (= (str resource-url "/1") (-> response
+                                       :headers
+                                       (get "Location"))))
     (is (:body response))
 
   ;; retrieve root resource (anonymously should work)
   (-> (session (ring-app))
       (request base-uri)
       (t/body->json)
+      (t/is-status 200)
+      (t/is-resource-uri resource-uri)
+      ;; (t/is-operation-absent "edit") TODO
+      (t/is-operation-absent "delete"))
+
+  ;; retrieve root resource (root should have edit rights)
+  (-> (session (ring-app))
+      (header authn-info-header "root ADMIN")
+      (request base-uri)
+      (t/body->json)
+      (t/is-status 200)
+      (t/is-resource-uri resource-uri)
+      (t/is-operation-present "edit")
+      (t/is-operation-absent "delete"))
+
+  ;; updating root resource as user should fail
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (header authn-info-header "jane")
+      (request base-uri
+               :request-method :put
+               :body (json/write-str {:name "dummy"}))
+      (t/body->json)
       du/show
-      )))
-;      (t/is-status 200)
-;      (t/is-resource-uri resource-uri)
-;      (t/is-operation-absent "edit")
-;      (t/is-operation-absent "delete")))
-;;
-;  ;; retrieve root resource (root should have edit rights)
-;  (-> (session (ring-app))
-;      (header authn-info-header "root ADMIN")
-;      (request base-uri)
-;      (t/body->json)
-;      (t/is-status 200)
-;      (t/is-resource-uri resource-uri)
-;      (t/is-operation-present "edit")
-;      (t/is-operation-absent "delete"))
-;
-;  ;; updating root resource as user should fail
-;  (-> (session (ring-app))
-;      (content-type "application/json")
-;      (header authn-info-header "jane")
-;      (request base-uri
-;               :request-method :put
-;               :body (json/write-str {:name "dummy"}))
-;      (t/body->json)
-;      (t/is-status 403))
+      (t/is-status 403))))
 ;
 ;  ;; update the entry, verify updated doc is returned
 ;  ;; must be done as administrator

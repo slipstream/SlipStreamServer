@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.es.es-util :as esu]
     [com.sixsq.slipstream.ssclj.es.acl :as acl]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
   (:import (com.sixsq.slipstream.ssclj.db.binding Binding)
            (org.elasticsearch.index.engine DocumentAlreadyExistsException)))
 
@@ -43,7 +44,7 @@
   - jsonify "
   [type data]
   (let [uuid  (if (:id data) "1" (cu/random-uuid))
-        id    (or (:id data) (str type "/" uuid))
+        id    (str (u/de-camelcase type) "/" uuid)
         json  (-> data
                   force-admin-role-right-all
                   acl/denormalize-acl
@@ -97,9 +98,8 @@
   [client index id options action]
   (check-identity-present options)
   (let [[type docid] (split-id id)]
-    (println "find data " type " " docid)
+    (println "find data type " type "docid" docid "action" action)
     (-> (esu/read client index type docid)
-        du/show
         (.getSourceAsString)
         doc->data
         (acl/check-can-do options action))))
@@ -107,14 +107,14 @@
 (deftype ESBinding []
   Binding
   (add [_ type data options]
-    (println "ESBINDING Adding id data" (:id data))
     (let [[id uuid json] (data->doc type data)]
+      (println "ESBINDING Adding type" type " id=" id "uuid=" uuid)
       (try
-      (if (esu/create client index type uuid json)
-        (response-created id)
-        (response-error))
-      (catch DocumentAlreadyExistsException e
-        (response-conflict id)))))
+        (if (esu/create client index (u/de-camelcase type) uuid json)
+          (response-created id)
+          (response-error))
+        (catch DocumentAlreadyExistsException e
+          (response-conflict id)))))
 
   (retrieve [_ id options]
     ;; (check-exist id) TODO equivalent
@@ -129,12 +129,19 @@
     (response-deleted id))
 
   (edit [_ {:keys [id] :as data} options]
-    ;; (check-exist id) TODO equivalent
-    (find-data client index id options "MODIFY")
-    (let [[type docid] (split-id id)]
-      (if (esu/update client index type docid (esu/edn->json data))
-        (response-updated id)
-        (response-conflict id))))
+
+    (try
+      ;; (check-exist id) TODO equivalent
+
+      (println "ES binding edit , id " id)
+      (find-data client index id options "MODIFY")
+
+      (let [[type docid] (split-id id)]
+        (if (esu/update client index type docid (esu/edn->json data))
+          (response-updated id)
+          (response-conflict id)))
+      (catch Exception e
+        (u/ex-unauthorized id))))
 
   (query [_ collection-id options]
     (check-identity-present options)

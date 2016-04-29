@@ -85,22 +85,41 @@
   [tpr]
   (select-keys tpr [:type :principal]))
 
+(defn rule-applies?
+  [rule capacity]
+  (= (type-principal rule) (type-principal capacity)))
+
+(defn rule-allows?
+  [rule action]
+  (isa? (rights (:right rule)) (rights action)))
+
 (defn rule-allow-capacity?
   [rule capacity]
-  (and (= (type-principal rule) (type-principal capacity))
-       (isa? (rights (:right rule)) (rights (:right capacity)))))
+  (and (rule-applies? rule capacity) (rule-allows? rule (:right capacity))))
+
+(defn anonymous-rule?
+  [rule]
+  (= (type-principal rule) {:type "ROLE" :principal "ANON"}))
+
+(defn anonymous-allows?
+  [rules action]
+  (some #(and (anonymous-rule? %) (rule-allows? % action)) rules))
 
 (defn check-can-do
   [data options action]
+  (let [rules      (rules-with-owner (:acl data))
+        capacities (capacities options action)]
   (if (or (empty? (:acl data))
+          (anonymous-allows? rules action)
           (some identity
-                (for [c (capacities options action)
-                      r (rules-with-owner (:acl data))
+                (for [c capacities
+                      r rules
                       :when (rule-allow-capacity? r c)] true)))
     data
-    (throw (Exception.
+    (throw (ex-info
              (str "Unautorized. ACL " (:acl data)
                   " does not authorize [" (:user-name options) "/"
-                  (s/join "," (:user-roles options)) "] for action " action)))))
+                  (s/join "," (:user-roles options)) "] for action " action)
+             {:code 403})))))
 
 

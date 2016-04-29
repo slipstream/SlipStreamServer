@@ -26,11 +26,12 @@
 
 (defn is-status
   [m status]
-  (let [actual  (get-in m [:response :status])
-        result  (= status (get-in m [:response :status]))]
+  (let [actual (get-in m [:response :status])
+        result (= status (get-in m [:response :status]))]
     (when-not result
       (println "Expecting status " status " got " actual))
-  (is result)))
+    (is result)
+    m))
 
 (defn is-key-value
   ([m f k v]
