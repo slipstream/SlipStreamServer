@@ -66,8 +66,7 @@
   [resource request action]
   (if (authorized-do? resource request action)
     resource
-    resource))
-    ;; TODO (throw (u/ex-unauthorized (:resource-id resource)))))
+    (throw (u/ex-unauthorized (:resource-id resource)))))
 
 (defn can-modify?
   "Determines if the resource can be modified by the user in the request.

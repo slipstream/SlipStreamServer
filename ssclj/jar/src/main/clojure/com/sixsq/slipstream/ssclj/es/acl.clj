@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.es.acl
   (:require
     [superstring.core :as s]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.es.es-filter :as ef]))
 
 (defn- rule-of-type?
@@ -107,19 +108,21 @@
 
 (defn check-can-do
   [data options action]
-  (let [rules      (rules-with-owner (:acl data))
+  (let [rules (rules-with-owner (:acl data))
         capacities (capacities options action)]
-  (if (or (empty? (:acl data))
-          (anonymous-allows? rules action)
-          (some identity
-                (for [c capacities
-                      r rules
-                      :when (rule-allow-capacity? r c)] true)))
-    data
-    (throw (ex-info
-             (str "Unautorized. ACL " (:acl data)
-                  " does not authorize [" (:user-name options) "/"
-                  (s/join "," (:user-roles options)) "] for action " action)
-             {:code 403})))))
+    (if (or (empty? (:acl data))
+            (anonymous-allows? rules action)
+            (some identity
+                  (for [c capacities
+                        r rules
+                        :when (rule-allow-capacity? r c)] true)))
+      data
+      (do
+        (println "!!!!!! KO for action" action)
+        (throw
+          (cu/ex-response (str "Unautorized. ACL " (:acl data)
+                             " does not authorize [" (:user-name options) "/"
+                             (s/join "," (:user-roles options)) "] for action " action)
+                        403 (:id data)))))))
 
 

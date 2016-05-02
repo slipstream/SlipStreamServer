@@ -29,7 +29,7 @@
   (let [actual (get-in m [:response :status])
         result (= status (get-in m [:response :status]))]
     (when-not result
-      (println "Expecting status " status " got " actual))
+      (println "!!!! Expecting status " status " got " actual))
     (is result)
     m))
 
@@ -37,7 +37,7 @@
   ([m f k v]
    (let [actual (-> m :response :body k f)]
      (when-not (= v actual)
-       (println "Expecting " v " got " actual))
+       (println "???? Expecting " v " got " actual))
      (is (= v actual))
      m))
   ([m k v]
@@ -52,15 +52,17 @@
 (defn is-resource-uri [m type-uri]
   (is-key-value m :resourceURI type-uri))
 
-(defn is-operation-present [m op]
+(defn is-operation-present [m expected-op]
   (let [operations (get-in m [:response :body :operations])
-        op         (some #(.endsWith % op) (map :rel operations))]
+        op         (some #(.endsWith % expected-op) (map :rel operations))]
+    (when-not op (println "???? Missing " expected-op " in " (map :rel operations)))
     (is op))
   m)
 
-(defn is-operation-absent [m op]
+(defn is-operation-absent [m absent-op]
   (let [operations (get-in m [:response :body :operations])
-        op         (some #(.endsWith % op) (map :rel operations))]
+        op         (some #(.endsWith % absent-op) (map :rel operations))]
+    (when op (println "???? Present " absent-op " in " (map :rel operations)))
     (is (nil? op)))
   m)
 

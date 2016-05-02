@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
   (:import (com.sixsq.slipstream.ssclj.db.binding Binding)
-           (org.elasticsearch.index.engine DocumentAlreadyExistsException)))
+           (org.elasticsearch.index.engine DocumentAlreadyExistsException)
+           (clojure.lang ExceptionInfo)))
 
 (def ^:const index "resources-index")
 
@@ -85,6 +86,10 @@
   [id]
   (cu/map-response (str "updated " id) 200 id))
 
+(defn response-exception
+  [ei]
+  (ex-data ei))
+
 (defn- check-identity-present
   [options]
   ;; TODO ??
@@ -98,7 +103,6 @@
   [client index id options action]
   (check-identity-present options)
   (let [[type docid] (split-id id)]
-    (println "find data type " type "docid" docid "action" action)
     (-> (esu/read client index type docid)
         (.getSourceAsString)
         doc->data
@@ -108,7 +112,6 @@
   Binding
   (add [_ type data options]
     (let [[id uuid json] (data->doc type data)]
-      (println "ESBINDING Adding type" type " id=" id "uuid=" uuid)
       (try
         (if (esu/create client index (u/de-camelcase type) uuid json)
           (response-created id)
@@ -133,15 +136,18 @@
     (try
       ;; (check-exist id) TODO equivalent
 
-      (println "ES binding edit , id " id)
+      (println "ES binding edit , data ")
+      (clojure.pprint/pprint data)
+
       (find-data client index id options "MODIFY")
 
       (let [[type docid] (split-id id)]
         (if (esu/update client index type docid (esu/edn->json data))
-          (response-updated id)
+          (r/response data)
           (response-conflict id)))
-      (catch Exception e
-        (u/ex-unauthorized id))))
+      (catch ExceptionInfo ei
+        (println "CAUGHT EI " (ex-data ei))
+        (response-exception ei))))
 
   (query [_ collection-id options]
     (check-identity-present options)

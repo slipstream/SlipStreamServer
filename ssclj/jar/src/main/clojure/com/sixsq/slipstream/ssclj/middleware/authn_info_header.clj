@@ -64,7 +64,6 @@
    cookie.  If both are provided, the header takes precedence."
   [handler]
   (fn [request]
-    (println "wrap-authn-info-header")
     (->> request
          (extract-info)
          (create-identity-map)

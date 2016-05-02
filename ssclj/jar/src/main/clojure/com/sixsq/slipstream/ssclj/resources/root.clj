@@ -60,6 +60,7 @@
   (try
     (a/can-modify? resource request)
     (let [ops [{:rel (:edit c/action-uri) :href resource-url}]]
+      (println "ROOT SETTING OPERATIONS ops" ops)
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))
@@ -82,7 +83,7 @@
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]
   (r/response (-> (db/retrieve (str resource-url "/1") {})
-                  (a/can-view? request)
+                  ;; (a/can-view? request)
                   (assoc :baseURI base-uri)
                   (merge resource-links)
                   (crud/set-operations request))))
@@ -93,7 +94,6 @@
 
 (defn edit-impl
   [{:keys [body] :as request}]
-  (println "ROOT edit impl resource-url" resource-url)
   (let [current (-> (db/retrieve (str resource-url "/1") {})
                     (assoc :acl resource-acl)
                     (a/can-modify? request))
@@ -105,8 +105,8 @@
                     (merge resource-links)
                     (crud/set-operations request)
                     (crud/validate))]
-    (db/edit (apply dissoc updated stripped-keys) {})
-    (r/response updated)))
+
+    (db/edit updated request)))
 
 (defmethod crud/edit resource-name
   [request]

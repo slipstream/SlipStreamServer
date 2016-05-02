@@ -10,11 +10,15 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.es.es-util :as esu]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
+  ;; (:import (org.elasticsearch.index IndexNotFoundException))
+  )
 
 (defn flush-db-fixture
   [f]
-  (esu/erase-index esb/client esb/index)
+  (try
+    (esu/erase-index esb/client esb/index)
+    (catch Exception _))
   (f))
 
 (use-fixtures :each flush-db-fixture)
@@ -43,7 +47,7 @@
       (t/body->json)
       (t/is-status 200)
       (t/is-resource-uri resource-uri)
-      ;; (t/is-operation-absent "edit") TODO
+      (t/is-operation-absent "edit")
       (t/is-operation-absent "delete"))
 
   ;; retrieve root resource (root should have edit rights)
@@ -54,49 +58,51 @@
       (t/is-status 200)
       (t/is-resource-uri resource-uri)
       (t/is-operation-present "edit")
-      (t/is-operation-absent "delete"))
+      (t/is-operation-absent "delete")
+      )
 
   ;; updating root resource as user should fail
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "jane")
+      (header authn-info-header "jane-updater")
       (request base-uri
                :request-method :put
                :body (json/write-str {:name "dummy"}))
       (t/body->json)
-      du/show
-      (t/is-status 403))))
-;
-;  ;; update the entry, verify updated doc is returned
-;  ;; must be done as administrator
-;  (-> (session (ring-app))
-;      (content-type "application/json")
-;      (header authn-info-header "root ADMIN")
-;      (request base-uri
-;               :request-method :put
-;               :body (json/write-str {:name "dummy"}))
-;      (t/body->json)
-;      (t/is-status 200)
-;      (t/is-resource-uri resource-uri)
-;      (t/is-operation-present "edit")
-;      (t/is-key-value :name "dummy"))
-;
-;  ;; verify that subsequent reads find the right data
-;  (-> (session (ring-app))
-;      (request base-uri)
-;      (t/body->json)
-;      (t/is-status 200)
-;      (t/is-resource-uri resource-uri)
-;      (t/is-operation-absent "edit")
-;      (t/is-key-value :name "dummy")))
-;
-;(deftest bad-methods
-;  (doall
-;    (for [[uri method] [[base-uri :options]
-;                        [base-uri :delete]
-;                        [base-uri :post]]]
-;      (-> (session (ring-app))
-;          (request uri
-;                   :request-method method
-;                   :body (json/write-str {:dummy "value"}))
-;          (t/is-status 405)))))
+      (t/is-status 403))
+
+  ;; update the entry, verify updated doc is returned
+  ;; must be done as administrator
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (header authn-info-header "root ADMIN")
+      (request base-uri
+               :request-method :put
+               :body (json/write-str {:name "dummy"}))
+      (t/body->json)
+      (t/is-status 200)
+      (t/is-resource-uri resource-uri)
+      (t/is-operation-present "edit")
+      (t/is-key-value :name "dummy"))
+
+  ;; verify that subsequent reads find the right data
+  (-> (session (ring-app))
+      (request base-uri)
+      (t/body->json)
+      (t/is-status 200)
+      (t/is-resource-uri resource-uri)
+      (t/is-operation-absent "edit")
+      (t/is-key-value :name "dummy"))))
+
+(deftest bad-methods
+  (doall
+    (for [[uri method] [[base-uri :options]
+                        [base-uri :delete]
+                        [base-uri :post]]]
+      (-> (session (ring-app))
+          (request uri
+                   :request-method method
+                   :body (json/write-str {:dummy "value"}))
+          (t/is-status 405)))))
+
+

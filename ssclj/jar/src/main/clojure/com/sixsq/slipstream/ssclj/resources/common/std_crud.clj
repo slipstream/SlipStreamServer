@@ -33,8 +33,8 @@
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
     (-> (str (u/de-camelcase resource-name) "/" uuid)
-        (db/retrieve {})
-        (a/can-view? request)
+        (db/retrieve request)
+        ;; (a/can-view? request)
         (crud/set-operations request)
         (u/json-response))))
 
@@ -85,7 +85,7 @@
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
     (fn [request]
 
-      (a/can-view? {:acl collection-acl} request)
+      ;; (a/can-view? {:acl collection-acl} request)
 
       (->> (select-keys request [:identity :query-params :cimi-params])
 

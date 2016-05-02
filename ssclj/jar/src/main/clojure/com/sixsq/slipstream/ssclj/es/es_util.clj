@@ -27,9 +27,7 @@
 
 (defn create
   [^Client client index type docid json]
-
   (println "ES UTILS CREATE " type "/" docid)
-
   (.. client
       (prepareIndex index type docid)
       (setCreate true)

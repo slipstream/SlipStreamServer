@@ -104,6 +104,7 @@
 
 (defmethod set-operations :default
   [resource request]
+  (println "DEFAULT SETTING OPERATIONS")
   (try
     (a/can-modify? resource request)
     (let [href        (:id resource)
