@@ -6,7 +6,7 @@ Comp            ::= Attribute Op Value
                     | WS <'('> Filter <')'> WS
 Op              ::= '<' | '<=' | '=' | '>=' | '>' | '!='
 
-Attribute       ::= WS #'[a-zA-Z_]\w*(/[a-zA-Z_]\w*)*' WS
+Attribute       ::= WS #'[a-zA-Z_][\w-]*(/[a-zA-Z_\-][\w-]*)*' WS
 <Value>         ::= IntValue | DateValue | StringValue | BoolValue
 IntValue        ::= WS #'\d+' WS
 DateValue       ::= WS #'\d+-\d+(-\d+)?(T\d+:\d+:\d+(\.\d+)?(Z|[+-]\d+:\d+))?' WS

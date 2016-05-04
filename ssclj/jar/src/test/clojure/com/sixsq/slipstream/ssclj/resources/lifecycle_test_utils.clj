@@ -12,7 +12,17 @@
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]))
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
+    [com.sixsq.slipstream.ssclj.es.es-util :as esu]))
+
+(defn flush-db-fixture
+  [f]
+  (try
+    (esu/erase-index esb/client esb/index)
+    (println "flush db fixture DONE")
+    (catch Exception e
+      (println (.getMessage e))))
+  (f))
 
 (defn body->json
   [m]

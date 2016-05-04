@@ -36,16 +36,21 @@
   [id]
   (s/split id #"/"))
 
+;; TODO
 (defn- data->doc
   "Prepares data before insertion in index
   That includes
-  - assoc id (which is type/uuid) when not already present
   - add ADMIN role with right ALL
   - denormalize ACLs
   - jsonify "
   [type data]
-  (let [uuid  (if (:id data) "1" (cu/random-uuid))
-        id    (str (u/de-camelcase type) "/" uuid)
+  (let [
+
+        ;uuid  (if (:id data) "1" (cu/random-uuid))
+        ;id    (str (u/de-camelcase type) "/" uuid)
+
+        [id uuid] [(:id data) (second (split-id (:id data)))]
+
         json  (-> data
                   force-admin-role-right-all
                   acl/denormalize-acl
@@ -102,6 +107,7 @@
 (defn find-data
   [client index id options action]
   (check-identity-present options)
+  (println "find-data id" id)
   (let [[type docid] (split-id id)]
     (-> (esu/read client index type docid)
         (.getSourceAsString)
@@ -136,7 +142,7 @@
     (try
       ;; (check-exist id) TODO equivalent
 
-      (println "ES binding edit , data ")
+      (println "ES binding edit , id=" id "data ")
       (clojure.pprint/pprint data)
 
       (find-data client index id options "MODIFY")
@@ -151,7 +157,7 @@
 
   (query [_ collection-id options]
     (check-identity-present options)
-    (let [response (esu/search client index type options)
+    (let [response (esu/search client index collection-id options)
           result (esu/json->edn (str response))
           hits (->> (-> result :hits :hits)
                     (map :_source)

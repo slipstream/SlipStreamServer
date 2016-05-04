@@ -61,28 +61,34 @@
   [:Value (Boolean/valueOf s)])
 
 (defmethod convert :DateValue [[_ ^String s]]
+  (println "data value to convert " s " / " (Date. s))
+
   [:Value (Date. s)])
 
 (defmethod convert :Comp [v]
-  (println v)
-  (let [args  (rest v)
-        args (if (= 1 (count args))
-               (apply concat args)
-               args)
-        {:keys [Attribute Op Value] :as m} (into {} args)
-        order (ffirst args)]
-    (case [Op order]
-      ["=" :Attribute] (term-query Attribute Value)
-      [">=" :Attribute] (range-ge-query Attribute Value)
-      [">" :Attribute] (range-gt-query Attribute Value)
-      ["<=" :Attribute] (range-le-query Attribute Value)
-      ["<" :Attribute] (range-lt-query Attribute Value)
-      ["=" :Value] (term-query Attribute Value)
-      [">=" :Value] (range-le-query Attribute Value)
-      [">" :Value] (range-lt-query Attribute Value)
-      ["<=" :Value] (range-ge-query Attribute Value)
-      ["<" :Value] (range-gt-query Attribute Value)
-      m)))
+  (println "converting v=" v)
+  (if (= 2 (count v))
+    (first (rest v))
+    (let [args (rest v)
+          _ (println "converting args" args)
+          _ (println "converting count args" (count args))
+          args (if (= 1 (count args))
+                 (apply concat args)
+                 args)
+          {:keys [Attribute Op Value] :as m} (into {} args)
+          order (ffirst args)]
+      (case [Op order]
+        ["=" :Attribute] (term-query Attribute Value)
+        [">=" :Attribute] (range-ge-query Attribute Value)
+        [">" :Attribute] (range-gt-query Attribute Value)
+        ["<=" :Attribute] (range-le-query Attribute Value)
+        ["<" :Attribute] (range-lt-query Attribute Value)
+        ["=" :Value] (term-query Attribute Value)
+        [">=" :Value] (range-le-query Attribute Value)
+        [">" :Value] (range-lt-query Attribute Value)
+        ["<=" :Value] (range-ge-query Attribute Value)
+        ["<" :Value] (range-gt-query Attribute Value)
+        m))))
 
 (defmethod convert :PropExpr [[_ Prop Op Value]]
   (let [result [[:Attribute (str "property." (second Prop))] Op Value]]
@@ -108,8 +114,13 @@
 (defmethod convert :default [v]
   v)
 
-(defn- compile-filter [s]
-  (w/postwalk convert (p/parse-cimi-filter s)))
+(defn compile-filter [s]
+  (let [parsed (p/parse-cimi-filter s)]
+
+    (println "parsed")
+    (clojure.pprint/pprint parsed)
+
+    (w/postwalk convert parsed)))
 
 (defn compile-cimi-filter [cimi-params]
   (if-let [cimi-filter (get-in cimi-params [:cimi-params :filter])]

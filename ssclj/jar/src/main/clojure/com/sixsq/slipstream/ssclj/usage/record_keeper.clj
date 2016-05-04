@@ -22,6 +22,8 @@
 ;; (i.e records whose [start-end timestamps] intersect with the interval)
 ;;
 
+(def date-in-future "2100-01-01T00:00:00.000Z")
+
 (defn- project-to-metric
   [usage-event metric]
   (-> usage-event
@@ -74,7 +76,9 @@
   [usage-metric options]
   (log/info "Open " (metric-summary usage-metric))
   (db/add "UsageRecord"
-          (assoc usage-metric :id (str "usage-record/" (cu/random-uuid)))
+          (-> usage-metric
+              (assoc :id (str "usage-record/" (cu/random-uuid)))
+              (assoc :end-timestamp date-in-future))
           options))
 
 (defn- close-restart-record

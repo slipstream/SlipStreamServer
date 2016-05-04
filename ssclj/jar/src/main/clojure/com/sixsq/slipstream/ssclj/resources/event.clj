@@ -101,16 +101,6 @@
 ;; collection
 ;;
 
-(defn sort-by-timestamps-desc
-  [events]
-  (->> events
-       (sort-by :timestamp)
-       reverse))
-
-(defmethod crud/sort-collection resource-name
-  [request events]
-  (sort-by-timestamps-desc events))
-
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 (defmethod crud/query resource-name
   [request]

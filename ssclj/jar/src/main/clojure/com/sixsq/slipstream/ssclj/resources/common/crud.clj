@@ -70,12 +70,6 @@
       (get-in [:params :resource-name])
       u/lisp-to-camelcase))
 
-(defmulti sort-collection resource-name-collection-dispatch)
-
-(defmethod sort-collection :default
-  [request collection]
-  collection)
-
 ;;
 ;; Resource schema validation.
 ;;
@@ -104,7 +98,6 @@
 
 (defmethod set-operations :default
   [resource request]
-  (println "DEFAULT SETTING OPERATIONS")
   (try
     (a/can-modify? resource request)
     (let [href        (:id resource)

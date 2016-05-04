@@ -77,7 +77,8 @@
   (expect passes "b='b0'")
   (expect passes "b='b-0'")
   (expect passes "'b0'=b")
-  (expect passes "'b-0'=b"))
+  (expect passes "'b-0'=b")
+  (expect passes "cloud-vm-instanceid='exo:123-456'"))
 
 ;; invalid filters
 (let [fails (fails-fn :Filter)]

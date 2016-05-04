@@ -34,7 +34,6 @@
   (fn [{{uuid :uuid} :params :as request}]
     (-> (str (u/de-camelcase resource-name) "/" uuid)
         (db/retrieve request)
-        ;; (a/can-view? request)
         (crud/set-operations request)
         (u/json-response))))
 
@@ -42,15 +41,14 @@
   [resource-name]
   (fn [{{uuid :uuid} :params body :body :as request}]
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
-                      (db/retrieve {})
-                      (a/can-modify? request))]
-      (->> body
-           (u/strip-service-attrs)
-           (merge current)
-           (u/update-timestamps)
-           (crud/validate)
-           (db/edit {})
-           (u/json-response)))))
+                      (db/retrieve request)
+                      (a/can-modify? request))
+          merged (merge current body)]
+      (-> merged
+          (u/update-timestamps)
+          (crud/validate)
+          (db/edit request)
+          (u/json-response)))))
 
 (defn delete-fn
   [resource-name]
@@ -60,47 +58,31 @@
         (a/can-modify? request)
         (db/delete {}))))
 
-(defn- paginate-post-sql
-  [request entries]
-  (pg/paginate (get-in request [:cimi-params :first])
-               (get-in request [:cimi-params :last])
-               entries))
-
 (defn collection-wrapper-fn
   [resource-name collection-acl collection-uri collection-key]
   (fn [request entries]
     (let [skeleton {:acl         collection-acl
                     :resourceURI collection-uri
                     :id          (u/de-camelcase resource-name)}
-          paginated-entries (->> entries
-                                 (paginate-post-sql request)
-                                 (map #(crud/set-operations % request)))]
+          entries-with-operations (->> entries
+                                       (map #(crud/set-operations % request)))]
       (-> skeleton
           (crud/set-operations request)
           (assoc :count (count entries))
-          (assoc collection-key paginated-entries)))))
+          (assoc collection-key entries-with-operations)))))
 
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
     (fn [request]
 
-      ;; (a/can-view? {:acl collection-acl} request)
+      ;; (a/can-view? {:acl collection-acl} request) TODO
 
-      (->> (select-keys request [:identity :query-params :cimi-params])
+      (->> (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
 
            (db/query resource-name)
 
-           ;; filtering
-           (cf/cimi-filter-tree (get-in request [:cimi-params :filter]))
-
-           ;; ordering
-           (crud/sort-collection request)
-
-           ;; access controlling
-           (filter #(a/authorized-view? % request))
-
-           ;; pagination and inclusion in skeleton
+           ;; inclusion in skeleton
            (wrapper-fn request)
 
            (u/json-response)))))

@@ -10,18 +10,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.es.es-util :as esu]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
-  ;; (:import (org.elasticsearch.index IndexNotFoundException))
-  )
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
-(defn flush-db-fixture
-  [f]
-  (try
-    (esu/erase-index esb/client esb/index)
-    (catch Exception _))
-  (f))
-
-(use-fixtures :each flush-db-fixture)
+(use-fixtures :each t/flush-db-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
@@ -58,8 +49,7 @@
       (t/is-status 200)
       (t/is-resource-uri resource-uri)
       (t/is-operation-present "edit")
-      (t/is-operation-absent "delete")
-      )
+      (t/is-operation-absent "delete"))
 
   ;; updating root resource as user should fail
   (-> (session (ring-app))

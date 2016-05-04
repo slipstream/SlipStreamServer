@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-record
   (:require
     [schema.core :as s]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
@@ -85,19 +86,28 @@
 (def edit-impl (std-crud/edit-fn resource-name))
 (defmethod crud/edit resource-name
   [request]
+  (println "crud/edit for usage-record")
   (edit-impl request))
 
 ;;
 (defn last-record
-  "Retrieves the most recent (start-timestamp) usage record with the same cloud-vm-instanceid and metric name.
-  fixme: check performance *after* the switch to elastic search."
+  "Retrieves the most recent (start-timestamp) usage record with the same cloud-vm-instanceid and metric name."
   [usage-record]
-  (->> nil ;; TODO with ES
-       (map (comp u/deserialize :data))
-       (filter #(= (:cloud-vm-instanceid %) (:cloud-vm-instanceid usage-record)))
-       (filter #(= (:metric-name %) (:metric-name usage-record)))
-       (sort-by :start-timestamp)
-       last))
+  (let [filter
+        (str "cloud-vm-instanceid='" (:cloud-vm-instanceid usage-record)
+             "' and metric-name='"   (:metric-name usage-record) "'")]
+    (first (db/query "usage-record" {
+                              :cimi-params {:filter filter
+                                            :orderby [["start-timestamp" :desc]]}
+                              ;; :user-roles ["ADMIN"]
+                              :user-name "joe" ;; TODO should be done with ADMIN role
+                              }))))
+  ;(->> nil ;; TODO with ES
+  ;     (map (comp u/deserialize :data))
+  ;     (filter #(= (:cloud-vm-instanceid %) (:cloud-vm-instanceid usage-record)))
+  ;     (filter #(= (:metric-name %) (:metric-name usage-record)))
+  ;     (sort-by :start-timestamp)
+  ;     last))
 
 (defn open-records
   "Retrieves open usage records with the same cloud-vm-instanceid and metric name.
@@ -109,18 +119,14 @@
        (filter #(= (:metric-name %) (:metric-name usage-record)))
        (filter #(nil? (:end-timestamp %)))))
 
-(defn- before
-  [ts1 ts2]
-  (<= (compare ts1 ts2) 0))
-
 (defn records-for-interval
   "Retrieves all usage records intersecting with given interval.
   fixme: check performance *after* the switch to elastic search."
   [start end]
   (u/check-order [start end])
-  (->> nil ;; TODO with ES
-       (filter #(.startsWith (:id %) "usage-record/"))
-       (map (comp u/deserialize :data))
-       (filter #(or (nil? (:end-timestamp %))
-                    (before start (:end-timestamp %))))
-       (filter #(before (:start-timestamp %) end))))
+  (let [filter (str  "end-timestamp >= '" start "' and start-timestamp <= '" end "'")]
+    (println "filter = " filter)
+    (db/query "usage-record" {
+                              :cimi-params {:filter filter}
+                              :user-name "joe" ;; TODO should be done with ADMIN role
+                              })))

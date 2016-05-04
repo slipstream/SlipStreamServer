@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.es.acl :as acl]
     [com.sixsq.slipstream.ssclj.es.es-order :as od]
     [com.sixsq.slipstream.ssclj.es.es-filter :as ef]
-    )
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
   (:import
     [org.elasticsearch.node NodeBuilder Node]
     [org.elasticsearch.common.settings Settings]
@@ -19,7 +19,8 @@
     [org.elasticsearch.action.search SearchType]
     (org.elasticsearch.action.bulk BulkRequestBuilder)      ;; TODO
     (org.elasticsearch.action ActionRequestBuilder)
-    (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)))
+    (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
+    (org.elasticsearch.index.query QueryBuilders)))
 
 ;;
 ;; Elastic Search implementations of CRUD actions
@@ -27,7 +28,6 @@
 
 (defn create
   [^Client client index type docid json]
-  (println "ES UTILS CREATE " type "/" docid)
   (.. client
       (prepareIndex index type docid)
       (setCreate true)
@@ -58,19 +58,33 @@
 
 (defn search
   [^Client client index type options]
+  (println "SEARCH index" index)
+  (println "SEARCH OPTIONS" options)
+  (println "SEARCH type " type)
   (let [query                         (-> options
                                           ef/compile-cimi-filter
-                                          (acl/and-acl options))
+                                          (acl/and-acl options)
+                                          )
+
         [from size]                   (pg/from-size options)
+
         ^ActionRequestBuilder request (.. client
                                           (prepareSearch (into-array String [index]))
-                                          (setTypes (into-array String [type]))
+                                          (setTypes (into-array String [(u/de-camelcase type)]))
                                           (setSearchType SearchType/DEFAULT)
                                           (setQuery query)
                                           (setFrom from)
                                           (setSize size))
+
         request-with-sort             (od/add-sorters-from-cimi request options)]
+    (println "ES request " request-with-sort)
     (.get request-with-sort)))
+
+(defn json->edn [json]
+  (when json (json/read-str json :key-fn keyword)))
+
+(defn edn->json [edn]
+  (json/write-str edn))
 
 ;;
 ;; Convenience (for tests) functions
@@ -84,16 +98,23 @@
       (delete (DeleteIndexRequest. index))
       (get)))
 
+(defn dump
+  [^Client client index type]
+  (-> (.. client
+          (prepareSearch (into-array String [index]))
+          (setTypes (into-array String [type]))
+          (setSearchType SearchType/DEFAULT)
+          (setQuery (QueryBuilders/matchAllQuery))
+          (get))
+      str
+      json->edn
+      :hits
+      :hits))
 
 ;;
 ;; Util functions
 ;;
 
-(defn json->edn [json]
-  (when json (json/read-str json :key-fn keyword)))
-
-(defn edn->json [edn]
-  (json/write-str edn))
 
 (defn create-test-node
   "Creates a local elasticsearch node which holds data but
@@ -120,6 +141,7 @@
 
 (defn create-index
   [^Client client index-name]
+  (println "CREATING INDEX " index-name)
   (let [settings (.. (Settings/builder)
                      (put "index.max_result_window" pg/max-result-window)
                      (put "index.number_of_shards" 3)

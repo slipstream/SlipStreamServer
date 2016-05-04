@@ -6,6 +6,7 @@
 
 (defn treat-unexpected-exception
   [e]
+  (.printStackTrace e)
   (let [msg      (str "Unexpected exception thrown: " (.getMessage e))
         body     {:status 500 :message msg}
         response (r/status (r/response body) 500)]
