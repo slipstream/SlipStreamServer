@@ -104,6 +104,7 @@
   ;           (every? empty? (:user-roles options)))
   ;  (throw (IllegalArgumentException. "A non empty user name or user role is mandatory."))))
 
+
 (defn find-data
   [client index id options action]
   (check-identity-present options)
@@ -113,6 +114,10 @@
         (.getSourceAsString)
         doc->data
         (acl/check-can-do options action))))
+
+(defn count-no-pagination
+  [collection-id options]
+  (esu/count-no-pagination client index collection-id options))
 
 (deftype ESBinding []
   Binding

@@ -17,7 +17,8 @@
     [schema.core :as sc]
     [clojure.data.json :as json]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [clj-time.core :as time]))
+    [clj-time.core :as time]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (defn- urlencode-param
   [p]

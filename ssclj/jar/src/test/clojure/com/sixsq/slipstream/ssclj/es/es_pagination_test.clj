@@ -24,11 +24,11 @@
   (is-first-last->from-size [-1 1] [0 0]))
 
 (deftest from-size-incomplete-params
-  (is-first-last->from-size [nil nil] [0 max-result-window])
+  (is-first-last->from-size [nil nil] [0 max-return-size])
   (is-first-last->from-size [nil 10] [0 10])
-  (is-first-last->from-size [3 nil] [2 max-result-window]))
+  (is-first-last->from-size [3 nil] [2 max-return-size]))
 
 (deftest from-size-last-too-big
-  (is-first-last->from-size [1 max-result-window] [0 max-result-window])
+  (is-first-last->from-size [1 max-return-size] [0 max-return-size])
   (is (thrown? IllegalArgumentException
-               (first-last->from-size [1 (inc max-result-window)]))))
+               (first-last->from-size [1 (inc max-return-size)]))))

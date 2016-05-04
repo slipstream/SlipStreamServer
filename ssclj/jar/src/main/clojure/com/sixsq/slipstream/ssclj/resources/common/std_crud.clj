@@ -8,6 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
 
     [com.sixsq.slipstream.ssclj.resources.common.cimi-filter :as cf]
     [com.sixsq.slipstream.ssclj.resources.common.pagination :as pg]
@@ -68,24 +69,25 @@
                                        (map #(crud/set-operations % request)))]
       (-> skeleton
           (crud/set-operations request)
-          (assoc :count (count entries))
           (assoc collection-key entries-with-operations)))))
 
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
-  (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
-    (fn [request]
+  (fn [request]
+    ;; (a/can-view? {:acl collection-acl} request) TODO
+    (let [wrapper-fn          (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)
+          options             (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+          entries             (db/query resource-name options)
+          wrapped-entries     (wrapper-fn request entries)
+          entries-and-count   (assoc wrapped-entries :count (esb/count-no-pagination resource-name options))]
+      (u/json-response entries-and-count))))
 
-      ;; (a/can-view? {:acl collection-acl} request) TODO
+;(->> (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+;     (db/query resource-name)
+;     ;; inclusion in skeleton
+;     (wrapper-fn request)
+;     (u/json-response)))))
 
-      (->> (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
-
-           (db/query resource-name)
-
-           ;; inclusion in skeleton
-           (wrapper-fn request)
-
-           (u/json-response)))))
 
 (defn resolve-href
   "Pulls in the resource identified by the value of the :href key

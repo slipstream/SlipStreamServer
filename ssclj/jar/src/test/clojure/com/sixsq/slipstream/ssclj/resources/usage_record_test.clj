@@ -45,7 +45,7 @@
    :user                "joe"
    :cloud               "aws"
    :start-timestamp     "2015-05-04T15:32:22.853Z"
-   :end-timestamp       rc/date-in-future
+   :end-timestamp       ur/date-in-future
    :metric-name         "vm"
    :metric-value        "1.0"})
 
@@ -72,7 +72,6 @@
       (content-type "application/json")
       (request base-uri)
       t/body->json
-      du/show
       (t/is-status 200)))
 
 (deftest only-snake-url-succeeds

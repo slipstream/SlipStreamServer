@@ -1,6 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.es.es-pagination)
 
-(def ^:const max-result-window 10000)
+(def ^:const max-result-window 5000)
+
+(def ^:const max-return-size 10000)
 
 (defn- get-in-no-nil
   [m ks default-value]
@@ -18,9 +20,9 @@
 
 (defn- throw-if-size-too-big
   [size]
-  (when (> size max-result-window)
+  (when (> size max-return-size)
     (throw (IllegalArgumentException.
-             (str "Size " size " too big. (limit is " max-result-window ")")))))
+             (str "Size " size " too big. (limit is " max-return-size ")")))))
 
 (defn from-size
   "Returns [from size] from cimi first and last."
@@ -28,7 +30,7 @@
   (let [first (first-value cimi-params)
         last  (last-value cimi-params)
         from  (dec first)
-        size  (if last (inc (- last first)) max-result-window)]
+        size  (if last (inc (- last first)) max-return-size)]
     (throw-if-size-too-big size)
     (if (some neg? [from size])
       [0 0]

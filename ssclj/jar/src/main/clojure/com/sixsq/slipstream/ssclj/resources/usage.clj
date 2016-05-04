@@ -3,8 +3,6 @@
   (:refer-clojure :exclude [update])
   (:require
     [korma.core :refer :all]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -25,8 +23,6 @@
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
-(defonce init-record-keeper (rc/-init))
-(defentity acl (database kh/korma-api-db))
 
 ;;
 ;; schemas

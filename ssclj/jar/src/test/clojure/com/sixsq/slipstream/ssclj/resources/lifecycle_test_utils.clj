@@ -47,7 +47,7 @@
   ([m f k v]
    (let [actual (-> m :response :body k f)]
      (when-not (= v actual)
-       (println "???? Expecting " v " got " actual))
+       (println "???? Expecting " v " got " actual " for " k))
      (is (= v actual))
      m))
   ([m k v]

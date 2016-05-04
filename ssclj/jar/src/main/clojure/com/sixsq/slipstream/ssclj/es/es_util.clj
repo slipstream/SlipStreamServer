@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.ssclj.es.acl :as acl]
     [com.sixsq.slipstream.ssclj.es.es-order :as od]
     [com.sixsq.slipstream.ssclj.es.es-filter :as ef]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
   (:import
     [org.elasticsearch.node NodeBuilder Node]
     [org.elasticsearch.common.settings Settings]
@@ -24,6 +25,12 @@
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
     (org.elasticsearch.index.query QueryBuilders)
     (org.elasticsearch.index IndexNotFoundException)))
+
+(defn json->edn [json]
+  (when json (json/read-str json :key-fn keyword)))
+
+(defn edn->json [edn]
+  (json/write-str edn))
 
 ;;
 ;; Elastic Search implementations of CRUD actions
@@ -59,6 +66,24 @@
       (prepareDelete index type docid)
       (get)))
 
+(defn count-no-pagination
+  [^Client client index type options]
+  (println "Same-search-no-pagination")
+  (try
+    (let [query (-> options
+                    ef/compile-cimi-filter
+                    (acl/and-acl options))
+          ^ActionRequestBuilder count-request (.. client
+                                                  (prepareSearch (into-array String [index]))
+                                                  (setTypes (into-array String [(u/de-camelcase type)]))
+                                                  (setSearchType SearchType/QUERY_THEN_FETCH)
+                                                  (setSize 0)
+                                                  (setQuery query))]
+      (-> (.get count-request) str json->edn :hits :total))
+  (catch IndexNotFoundException infe
+    (log/warn (str "Searching no pagination for index '" index "' not yet created, returns empty"))
+    0)))
+
 (defn search
   [^Client client index type options]
   (println "SEARCH index" index)
@@ -67,11 +92,10 @@
   (try
     (let [query (-> options
                     ef/compile-cimi-filter
-                    (acl/and-acl options)
-                    )
+                    (acl/and-acl options))
 
           [from size] (pg/from-size options)
-
+          _ (println from " . " size)
           ^ActionRequestBuilder request (.. client
                                             (prepareSearch (into-array String [index]))
                                             (setTypes (into-array String [(u/de-camelcase type)]))
@@ -81,17 +105,11 @@
                                             (setSize size))
 
           request-with-sort (od/add-sorters-from-cimi request options)]
-      ;; TODO (println "ES request " request-with-sort)
       (.get request-with-sort))
     (catch IndexNotFoundException infe
       (log/warn (str "Searching for index '" index "' not yet created, returns empty"))
       [])))
 
-(defn json->edn [json]
-  (when json (json/read-str json :key-fn keyword)))
-
-(defn edn->json [edn]
-  (json/write-str edn))
 
 ;;
 ;; Convenience (for tests) functions

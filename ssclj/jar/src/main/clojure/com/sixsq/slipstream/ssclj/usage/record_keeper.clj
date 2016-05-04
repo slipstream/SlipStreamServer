@@ -80,7 +80,7 @@
   (db/add "UsageRecord"
           (-> usage-metric
               (assoc :id (str "usage-record/" (cu/random-uuid)))
-              (assoc :end-timestamp date-in-future))
+              (assoc :end-timestamp ur/date-in-future))
           options))
 
 (defn- close-restart-record
