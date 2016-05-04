@@ -6,8 +6,7 @@
     [clj-time.core :as time]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.usage.summary :as s]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc])
+    [com.sixsq.slipstream.ssclj.usage.summary :as s])
   (:gen-class))
 
 (defn- exception-from-errors
@@ -123,7 +122,6 @@
   "See tests for examples on how to call from clojure REPL"
   [& args]
   (let [[start frequency except-users grouped-by n] (parse-args args)]
-    (rc/-init)
     (doseq [[start end] (backward-periods start n frequency)]
       (println "summarizing " start " -> " end)
       (s/summarize-and-store! start end frequency grouped-by except-users))))

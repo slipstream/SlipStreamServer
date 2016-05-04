@@ -82,8 +82,7 @@
                   "                 (es/seed! 10 :bob)\n"
                   "Usage Seeding:   (require '[com.sixsq.slipstream.ssclj.usage.seeds.usages :as us])\n"
                   "                 (us/seed-summaries! 10 :bob [\"aws\" \"exo\"])\n"
-                  "\n"
-                  "Or all at once:  (require '[com.sixsq.slipstream.ssclj.api.dev-server :as api])\n"))
+                  ))
                 }
 
  :profiles {

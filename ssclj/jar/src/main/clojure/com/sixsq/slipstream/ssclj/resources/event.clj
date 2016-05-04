@@ -1,9 +1,7 @@
 (ns
   com.sixsq.slipstream.ssclj.resources.event
   (:require
-    [clojure.tools.logging :as log]
     [schema.core :as s]
-
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]

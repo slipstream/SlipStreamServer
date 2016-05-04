@@ -18,6 +18,7 @@
 (defn flush-db-fixture
   [f]
   (try
+    (db/set-impl! esb/get-instance)
     (esu/erase-index esb/client esb/index)
     (println "flush db fixture DONE")
     (catch Exception e

@@ -1,11 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.usage.seeds.usages
   (:require
-    [korma.core :as kc]
-    [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-    [clj-time.core :as time]))
+    [clj-time.core :as time]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
 
 (defn days-ago-at-hour
   ([n h]
@@ -83,13 +82,11 @@
 (defn insert-to-db
   [usages]
   (doseq [usage usages]
-    (rc/insert-summary! usage)))
+    (rc/insert-summary! usage {})))
 
 (defn seed-summaries!
   [nb username clouds]
   (db/set-impl! (esb/get-instance))
-  (acl/-init)
-  (rc/-init)
   (-> nb
       (usages username clouds)
       insert-to-db))
@@ -97,10 +94,8 @@
 (defn seed-records!
   [nb username clouds & {:keys [clean]}]
   (db/set-impl! (esb/get-instance))
-  (acl/-init)
-  (rc/-init)
-  (when clean
-    (kc/delete rc/usage_records))
+  ;; TODO ES equivalent (when clean
+    ;;(kc/delete rc/usage_records))
   (let [records (usage-records nb username clouds)]
     (doseq [record records]
-      (db/add "UsageRecord" (assoc record :id (str "usage-record/" (cu/random-uuid)))))))
+      (db/add "UsageRecord" (assoc record :id (str "usage-record/" (cu/random-uuid))) {}))))

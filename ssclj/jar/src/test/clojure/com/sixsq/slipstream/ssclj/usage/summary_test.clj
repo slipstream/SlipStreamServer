@@ -4,9 +4,6 @@
     [com.sixsq.slipstream.ssclj.usage.summary :refer :all]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-    [com.sixsq.slipstream.ssclj.api.acl :as acl]
-    [korma.core :as kc]
     [clojure.test :refer :all]
     [korma.core :refer :all]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
@@ -186,13 +183,13 @@
                            {:name  "RAM-GB"
                             :value 8}
                            {:name  "disk-GB"
-                            :value 100.5}]})
+                            :value 100.5}]} {})
   (rc/insert-usage-event
     {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
      :end-timestamp       in-day-2
      :metrics             [{:name "nb-cpu"}
                            {:name "RAM-GB"}
-                           {:name "disk-GB"}]}))
+                           {:name "disk-GB"}]} {}))
 
 (deftest test-summarize
   (insert-record)
@@ -213,8 +210,10 @@
 
 (defn- summaries-from-db
   []
-  (->> (select dbdb/resources)
-       (filter #(.startsWith (:id %) "usage/"))))
+  ;; TODO adapt to ES
+  )
+  ;(->> (select dbdb/resources)
+  ;     (filter #(.startsWith (:id %) "usage/"))))
 
 (deftest test-summarize-and-store-by-user-cloud
   (insert-record)

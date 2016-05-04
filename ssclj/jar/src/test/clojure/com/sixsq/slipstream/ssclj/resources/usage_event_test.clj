@@ -71,11 +71,11 @@
 
     (is (= (-> open-usage-event
                (dissoc :metrics :acl)
-               (assoc :metric-name "disk" :metric-value "1260.0" :end-timestamp rk/date-in-future))
+               (assoc :metric-name "disk" :metric-value "1260.0" :end-timestamp ur/date-in-future))
            (-> ur1 (dissoc :id :acl))))
     (is (= (-> open-usage-event
                (dissoc :metrics :acl)
-               (assoc :metric-name "vm" :metric-value "1.0" :end-timestamp rk/date-in-future))
+               (assoc :metric-name "vm" :metric-value "1.0" :end-timestamp ur/date-in-future))
            (-> ur2 (dissoc :id :acl))))))
 
 (defn all-records

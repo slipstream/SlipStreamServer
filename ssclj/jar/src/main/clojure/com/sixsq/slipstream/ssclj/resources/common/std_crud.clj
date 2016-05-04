@@ -3,17 +3,11 @@
   (:require
     [clojure.walk :as w]
     [clojure.pprint :refer [pprint]]
-
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
-
-    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter :as cf]
-    [com.sixsq.slipstream.ssclj.resources.common.pagination :as pg]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    ))
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]))
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
