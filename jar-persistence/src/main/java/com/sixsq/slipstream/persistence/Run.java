@@ -1082,6 +1082,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			this.groups += Run.NODE_NAMES_SEPARATOR;
 		}
 		this.groups += serviceName + SERVICENAME_NODENAME_SEPARATOR + group;
+		getGroups();
 	}
 
 	@Attribute
