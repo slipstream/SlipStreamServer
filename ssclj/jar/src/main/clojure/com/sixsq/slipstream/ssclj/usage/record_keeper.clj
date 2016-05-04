@@ -22,7 +22,9 @@
 ;; (i.e records whose [start-end timestamps] intersect with the interval)
 ;;
 
-(def date-in-future "2100-01-01T00:00:00.000Z")
+(defn end-in-future?
+  [usage-event]
+  (= ur/date-in-future (:end-timestamp usage-event)))
 
 (defn- project-to-metric
   [usage-event metric]
@@ -48,7 +50,7 @@
   (let [record (ur/last-record usage-metric)]
     (cond
       (nil? record) :initial
-      (nil? (:end-timestamp record)) :started
+      (end-in-future? record) :started
       :else :stopped)))
 
 ;;
@@ -62,11 +64,11 @@
   [usage-metric]
   (str (:start-timestamp usage-metric)
        " " (:cloud-vm-instanceid usage-metric)
-       " " (:metric-name usage-metric)))
+       " [" (:metric-name usage-metric) "/" (:metric-value usage-metric) "]"))
 
 (defn- close-record
   ([usage-metric close-timestamp options]
-   (log/info "Close " close-timestamp (metric-summary usage-metric))
+   (log/info "Closing usage-record " close-timestamp (metric-summary usage-metric))
    (doseq [ur (ur/open-records usage-metric)]
      (db/edit (assoc ur :end-timestamp close-timestamp) options)))
   ([usage-metric options]
@@ -74,7 +76,7 @@
 
 (defn- open-record
   [usage-metric options]
-  (log/info "Open " (metric-summary usage-metric))
+  (log/info "Opening usage-record " (metric-summary usage-metric))
   (db/add "UsageRecord"
           (-> usage-metric
               (assoc :id (str "usage-record/" (cu/random-uuid)))

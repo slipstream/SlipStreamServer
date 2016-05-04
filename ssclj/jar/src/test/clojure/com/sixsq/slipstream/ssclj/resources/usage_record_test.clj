@@ -72,6 +72,7 @@
       (content-type "application/json")
       (request base-uri)
       t/body->json
+      du/show
       (t/is-status 200)))
 
 (deftest only-snake-url-succeeds
@@ -197,7 +198,7 @@
     (is (thrown? IllegalArgumentException (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-04-29T00:00:00.000Z")))
     (is (empty? (ur/records-for-interval "2015-04-01T00:00:00.000Z" "2015-04-29T00:00:00.000Z")))
     (is (= 1 (count (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-06-10T00:00:00.000Z"))))
-    (is (=  rc/date-in-future (:end-timestamp (first (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-06-10T00:00:00.000Z")))))
+    (is (rc/end-in-future? (first (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-06-10T00:00:00.000Z"))))
     (is (= 2 (count (ur/records-for-interval "2015-04-01T00:00:00.000Z" "2015-06-01T00:00:00.000Z"))))
     (is (= 2 (count (ur/records-for-interval "2015-04-01T00:00:00.000Z" "2015-05-01T02:00:00.000Z"))))
     (is (= 2 (count (ur/records-for-interval "2015-05-01T02:00:00.000Z" "2015-05-01T03:00:00.000Z" ))))

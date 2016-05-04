@@ -21,7 +21,7 @@
     (esu/erase-index esb/client esb/index)
     (println "flush db fixture DONE")
     (catch Exception e
-      (println (.getMessage e))))
+      (println "Ignoring "(.getMessage e))))
   (f))
 
 (defn body->json

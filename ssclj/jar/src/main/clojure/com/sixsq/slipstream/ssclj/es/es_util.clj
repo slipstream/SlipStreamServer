@@ -3,6 +3,8 @@
   (:require
     [clojure.java.io :as io]
     [clojure.data.json :as json]
+    [clojure.tools.logging :as log]
+
     [me.raynes.fs :as fs]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.es.es-pagination :as pg]
@@ -20,7 +22,8 @@
     (org.elasticsearch.action.bulk BulkRequestBuilder)      ;; TODO
     (org.elasticsearch.action ActionRequestBuilder)
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
-    (org.elasticsearch.index.query QueryBuilders)))
+    (org.elasticsearch.index.query QueryBuilders)
+    (org.elasticsearch.index IndexNotFoundException)))
 
 ;;
 ;; Elastic Search implementations of CRUD actions
@@ -61,24 +64,28 @@
   (println "SEARCH index" index)
   (println "SEARCH OPTIONS" options)
   (println "SEARCH type " type)
-  (let [query                         (-> options
-                                          ef/compile-cimi-filter
-                                          (acl/and-acl options)
-                                          )
+  (try
+    (let [query (-> options
+                    ef/compile-cimi-filter
+                    (acl/and-acl options)
+                    )
 
-        [from size]                   (pg/from-size options)
+          [from size] (pg/from-size options)
 
-        ^ActionRequestBuilder request (.. client
-                                          (prepareSearch (into-array String [index]))
-                                          (setTypes (into-array String [(u/de-camelcase type)]))
-                                          (setSearchType SearchType/DEFAULT)
-                                          (setQuery query)
-                                          (setFrom from)
-                                          (setSize size))
+          ^ActionRequestBuilder request (.. client
+                                            (prepareSearch (into-array String [index]))
+                                            (setTypes (into-array String [(u/de-camelcase type)]))
+                                            (setSearchType SearchType/DEFAULT)
+                                            (setQuery query)
+                                            (setFrom from)
+                                            (setSize size))
 
-        request-with-sort             (od/add-sorters-from-cimi request options)]
-    (println "ES request " request-with-sort)
-    (.get request-with-sort)))
+          request-with-sort (od/add-sorters-from-cimi request options)]
+      ;; TODO (println "ES request " request-with-sort)
+      (.get request-with-sort))
+    (catch IndexNotFoundException infe
+      (log/warn (str "Searching for index '" index "' not yet created, returns empty"))
+      [])))
 
 (defn json->edn [json]
   (when json (json/read-str json :key-fn keyword)))

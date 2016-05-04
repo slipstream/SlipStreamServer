@@ -24,6 +24,8 @@
                               :type      "ROLE"
                               :right     "ALL"}]})
 
+(def date-in-future "2100-01-01T00:00:00.000Z")
+
 (def UsageRecord
   (merge
     c/CreateAttrs
@@ -102,26 +104,21 @@
                               ;; :user-roles ["ADMIN"]
                               :user-name "joe" ;; TODO should be done with ADMIN role
                               }))))
-  ;(->> nil ;; TODO with ES
-  ;     (map (comp u/deserialize :data))
-  ;     (filter #(= (:cloud-vm-instanceid %) (:cloud-vm-instanceid usage-record)))
-  ;     (filter #(= (:metric-name %) (:metric-name usage-record)))
-  ;     (sort-by :start-timestamp)
-  ;     last))
 
 (defn open-records
-  "Retrieves open usage records with the same cloud-vm-instanceid and metric name.
-  fixme: check performance *after* the switch to elastic search."
+  "Retrieves open usage records with the same cloud-vm-instanceid and metric name."
   [usage-record]
-  (->> nil ;; TODO with ES
-       (map (comp u/deserialize :data))
-       (filter #(= (:cloud-vm-instanceid %) (:cloud-vm-instanceid usage-record)))
-       (filter #(= (:metric-name %) (:metric-name usage-record)))
-       (filter #(nil? (:end-timestamp %)))))
+  (let [filter
+        (str "cloud-vm-instanceid='" (:cloud-vm-instanceid usage-record)
+             "' and metric-name='" (:metric-name usage-record) "'"
+             " and end-timestamp='" date-in-future "'")]
+    (db/query "usage-record" {:cimi-params {:filter filter}
+                              ;; :user-roles ["ADMIN"]
+                              :user-name   "joe"            ;; TODO should be done with ADMIN role
+                              })))
 
 (defn records-for-interval
-  "Retrieves all usage records intersecting with given interval.
-  fixme: check performance *after* the switch to elastic search."
+  "Retrieves all usage records intersecting with given interval."
   [start end]
   (u/check-order [start end])
   (let [filter (str  "end-timestamp >= '" start "' and start-timestamp <= '" end "'")]

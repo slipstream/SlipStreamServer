@@ -67,11 +67,10 @@
 
 (defmethod convert :Comp [v]
   (println "converting v=" v)
+  ;; TODO : work around
   (if (= 2 (count v))
     (first (rest v))
     (let [args (rest v)
-          _ (println "converting args" args)
-          _ (println "converting count args" (count args))
           args (if (= 1 (count args))
                  (apply concat args)
                  args)
