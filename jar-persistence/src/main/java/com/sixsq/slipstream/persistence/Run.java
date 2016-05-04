@@ -300,18 +300,18 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return run;
 	}
 
-	private static List<RunView> convertRunsToRunViews(List<Run> runs)
+	private static List<RunView> convertRunsToRunViews(List<Run> runs, Map<String, Long> vmCountPerRun)
 			throws ConfigurationException, ValidationException {
 		List<RunView> views = new ArrayList<RunView>();
 		RunView runView;
 		for (Run r : runs) {
-			runView = convertRunToRunView(r);
+			runView = convertRunToRunView(r, vmCountPerRun);
 			views.add(runView);
 		}
 		return views;
 	}
 
-	private static RunView convertRunToRunView(Run run) {
+	private static RunView convertRunToRunView(Run run, Map<String, Long> vmCountPerRun) {
 
 		if (run == null) {
 			return null;
@@ -320,10 +320,9 @@ public class Run extends Parameterized<Run, RunParameter> {
 		RuntimeParameter globalAbort = Run.getGlobalAbort(run);
 		String abortMessage = (globalAbort != null)? globalAbort.getValue() : "";
 
-		RunView runView;
-		runView = new RunView(run.getResourceUri(), run.getUuid(), run.getModuleResourceUrl(),
+		RunView runView = new RunView(run.getResourceUri(), run.getUuid(), run.getModuleResourceUrl(),
 				run.getState().toString(), run.getStart(), run.getUser(), run.getType(), run.getCloudServiceNames(),
-				abortMessage);
+				abortMessage, vmCountPerRun.getOrDefault(run.getUuid(), 0L));
 
 		try {
 			runView.setServiceUrl(run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_URL_SERVICE_KEY));
@@ -347,6 +346,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 	public static List<RunView> viewList(RunsQueryParameters queryParameters)
 			throws ConfigurationException, ValidationException
 	{
+		return viewList(queryParameters, new HashMap<>());
+	}
+
+	public static List<RunView> viewList(RunsQueryParameters queryParameters, Map<String, Long> vmCountPerRun)
+			throws ConfigurationException, ValidationException
+	{
 		List<RunView> views = null;
 		EntityManager em = PersistenceUtil.createEntityManager();
 		try {
@@ -365,7 +370,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 			}
 			query.setMaxResults((queryParameters.limit != null) ? queryParameters.limit : DEFAULT_LIMIT);
 			List<Run> runs = query.getResultList();
-			views = convertRunsToRunViews(runs);
+			views = convertRunsToRunViews(runs, vmCountPerRun);
 		} finally {
 			em.close();
 		}
