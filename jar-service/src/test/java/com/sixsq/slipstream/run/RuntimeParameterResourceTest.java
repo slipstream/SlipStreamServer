@@ -85,7 +85,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterResourceGetUnknownKey() throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourceGetUnknownKey() throws IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("RuntimeParameterResourceGetUnknownKey");
 
@@ -102,7 +102,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterResourceGetNotYetSetValue() throws FileNotFoundException, IOException,
+	public void runtimeParameterResourceGetNotYetSetValue() throws IOException,
 			SlipStreamException {
 
 		Run run = createAndStoreRunImage("runtimeParameterResourceGetNotYetSetValue");
@@ -119,7 +119,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterResourceGet() throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourceGet() throws IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("RuntimeParameterResourceGet");
 
@@ -138,7 +138,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterResourcePutExisting() throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourcePutExisting() throws IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("runtimeParameterResourcePutExisting");
 
@@ -179,7 +179,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterResourcePutNotExisting() throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourcePutNotExisting() throws IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("runtimeParameterResourcePutNotExisting");
 
@@ -199,7 +199,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterResourcePutTooLong() throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourcePutTooLong() throws IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("runtimeParameterResourcePutTooLong");
 
@@ -218,7 +218,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterResourcePutAbortTooLong() throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourcePutAbortTooLong() throws IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("runtimeParameterResourcePutAbortTooLong");
 
@@ -240,7 +240,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterRetrieveFromContainerRun() throws FileNotFoundException, IOException,
+	public void runtimeParameterRetrieveFromContainerRun() throws IOException,
 			SlipStreamException {
 
 		Run run = createAndStoreRunImage("RuntimeParameterRetrieveFromContainerRun");
@@ -262,7 +262,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterReset() throws SlipStreamException, FileNotFoundException, IOException {
+	public void runtimeParameterReset() throws SlipStreamException, IOException {
 
 		String key = "node.1:key";
 		String value = "value of key";
@@ -288,7 +288,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void wrongNodeTriggersAbort() throws SlipStreamException, FileNotFoundException, IOException {
+	public void wrongNodeTriggersAbort() throws SlipStreamException, IOException {
 
 		String key = "wrong.1:key";
 		Run run = createAndStoreRunImage("wrongNodeTriggersAbort");
@@ -305,7 +305,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void wrongKeyTriggersAbort() throws SlipStreamException, FileNotFoundException, IOException {
+	public void wrongKeyTriggersAbort() throws SlipStreamException, IOException {
 
 		String key = "ss:wrong";
 		Run run = createAndStoreRunImage("wrongKeyTriggersAbort");
@@ -322,7 +322,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void cantSetAbortTwice() throws SlipStreamException, FileNotFoundException, IOException {
+	public void cantSetAbortTwice() throws SlipStreamException, IOException {
 
 		String key = "ss:abort";
 		Run run = createAndStoreRunImage("cantSetAbortTwice");
@@ -347,7 +347,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void errorSetsNodeAndGlobalAbort() throws FileNotFoundException, IOException, SlipStreamException {
+	public void errorSetsNodeAndGlobalAbort() throws IOException, SlipStreamException {
 
 		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase() + RuntimeParameter.ABORT_KEY;
 		String globalAbortKey = RuntimeParameter.GLOBAL_ABORT_KEY;
@@ -368,7 +368,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void cancelAbort() throws FileNotFoundException, IOException, SlipStreamException {
+	public void cancelAbort() throws IOException, SlipStreamException {
 
 		String machineAbortKey = Run.MACHINE_NAME_PREFIX.toLowerCase() + RuntimeParameter.ABORT_KEY;
 		String globalAbortKey = RuntimeParameter.GLOBAL_ABORT_KEY;
@@ -412,7 +412,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void runtimeParameterResourceGetStress() throws FileNotFoundException, IOException, SlipStreamException {
+	public void runtimeParameterResourceGetStress() throws IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("runtimeParameterResourceGetStress");
 
@@ -430,7 +430,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void isAbort() throws FileNotFoundException, IOException, SlipStreamException {
+	public void isAbort() throws IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("isAbort");
 
@@ -448,7 +448,7 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 	}
 
 	@Test
-	public void getValueAndSet() throws FileNotFoundException, IOException, SlipStreamException {
+	public void getValueAndSet() throws IOException, SlipStreamException {
 
 		Run run = createAndStoreRunImage("getValueAndSet");
 
@@ -474,6 +474,19 @@ public class RuntimeParameterResourceTest extends RuntimeParameterResourceTestBa
 		assertThat(value, is("value of key"));
 		assertTrue(isSet);
 		
+		run.remove();
+	}
+
+	@Test
+	public void runtimeParameterResourceGetSsGroups() throws IOException, SlipStreamException {
+
+		Run run = createAndStoreRunImage("runtimeParameterResourceGetSsGroups");
+
+		String key = "ss:groups";
+		String value = "local:machine";
+
+		executeGetRequestAndAssertValue(run, key, value);
+
 		run.remove();
 	}
 

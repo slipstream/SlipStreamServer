@@ -20,24 +20,14 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Query;
-import javax.persistence.Table;
-import javax.persistence.TypedQuery;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -60,8 +50,10 @@ import com.sixsq.slipstream.vm.VmsQueryParameters;
 @NamedQueries({
 		@NamedQuery(name = "byUserAndCloud", query = "SELECT v FROM Vm v WHERE v.user_ = :user AND v.cloud = :cloud"),
 		@NamedQuery(name = "byUser", query = "SELECT v.measurement, v.runUuid, v.runOwner, v.cloud, v.isUsable FROM Vm v WHERE v.user_ = :user"),
-		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run")
+		@NamedQuery(name = "byRun", query = "SELECT v.cloud, v FROM Vm v WHERE v.runUuid = :run"),
+		@NamedQuery(name = "countbyRun", query = "SELECT v.runUuid, count(v.runUuid) FROM Vm v WHERE v.isUsable=TRUE AND v.user_=:user GROUP BY v.runUuid")
 })
+@NamedNativeQuery(name = "countbyRunSuper", query = "SELECT vv.runUuid, count(vv.runUuid) FROM (SELECT v.runUuid FROM Vm v WHERE v.isUsable=TRUE GROUP BY v.cloud, v.instanceId, v.runUuid) vv GROUP BY vv.runUuid")
 
 public class Vm {
 
@@ -240,6 +232,38 @@ public class Vm {
 			usage = usages.get(cloud);
 		}
 		return usage;
+	}
+
+	public static Map<String, Long> countPerRun(User user) {
+		Map<String, Long> vmCountPerRun = new HashMap<>();
+		List<?> results;
+
+		EntityManager em = PersistenceUtil.createEntityManager();
+		try {
+			if (user.isSuper()) {
+				results = em.createNamedQuery("countbyRunSuper").getResultList();
+			} else {
+				results = em.createNamedQuery("countbyRun").setParameter("user", user.getName()).getResultList();
+			}
+		} finally {
+			em.close();
+		}
+
+		for (Object result : results) {
+			String runUuid = (String) ((Object[]) result)[0];
+			Object obj = ((Object[]) result)[1];
+
+			Long count;
+			if (obj instanceof BigInteger) {
+				count = ((BigInteger) obj).longValue();
+			} else {
+				count = (Long) obj;
+			}
+
+			vmCountPerRun.put(runUuid, count);
+		}
+
+		return vmCountPerRun;
 	}
 
 	public static Map<String, CloudUsage> usage(String user) {
