@@ -66,24 +66,6 @@
       (prepareDelete index type docid)
       (get)))
 
-(defn count-no-pagination
-  [^Client client index type options]
-  (println "Same-search-no-pagination")
-  (try
-    (let [query (-> options
-                    ef/compile-cimi-filter
-                    (acl/and-acl options))
-          ^ActionRequestBuilder count-request (.. client
-                                                  (prepareSearch (into-array String [index]))
-                                                  (setTypes (into-array String [(u/de-camelcase type)]))
-                                                  (setSearchType SearchType/QUERY_THEN_FETCH)
-                                                  (setSize 0)
-                                                  (setQuery query))]
-      (-> (.get count-request) str json->edn :hits :total))
-  (catch IndexNotFoundException infe
-    (log/warn (str "Searching no pagination for index '" index "' not yet created, returns empty"))
-    0)))
-
 (defn search
   [^Client client index type options]
   (println "SEARCH index" index)
@@ -95,7 +77,7 @@
                     (acl/and-acl options))
 
           [from size] (pg/from-size options)
-          _ (println from " . " size)
+          ;; _ (println from " . " size) TODO
           ^ActionRequestBuilder request (.. client
                                             (prepareSearch (into-array String [index]))
                                             (setTypes (into-array String [(u/de-camelcase type)]))
@@ -104,7 +86,9 @@
                                             (setFrom from)
                                             (setSize size))
 
-          request-with-sort (od/add-sorters-from-cimi request options)]
+          request-with-sort (od/add-sorters-from-cimi request options)
+          _ (println request-with-sort)
+          ]
       (.get request-with-sort))
     (catch IndexNotFoundException infe
       (log/warn (str "Searching for index '" index "' not yet created, returns empty"))
@@ -114,14 +98,6 @@
 ;;
 ;; Convenience (for tests) functions
 ;;
-
-(defn erase-index
-  [^Client client index]
-  (.. client
-      (admin)
-      (indices)
-      (delete (DeleteIndexRequest. index))
-      (get)))
 
 (defn dump
   [^Client client index type]
@@ -209,3 +185,13 @@
                    (get index)
                    (getStatus))]
     (throw-if-not-green status)))
+
+
+(defn erase-index
+  [^Client client index]
+  (.. client
+      (admin)
+      (indices)
+      (delete (DeleteIndexRequest. index))
+      (get))
+  (create-index client index))

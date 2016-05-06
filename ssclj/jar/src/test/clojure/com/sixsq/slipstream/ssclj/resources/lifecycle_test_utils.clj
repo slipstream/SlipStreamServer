@@ -20,7 +20,7 @@
   (try
     (db/set-impl! esb/get-instance)
     (esu/erase-index esb/client esb/index)
-    (println "flush db fixture DONE")
+    (println "Erased index DONE")
     (catch Exception e
       (println "Ignoring "(.getMessage e))))
   (f))
@@ -112,3 +112,9 @@
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (wrap-logger)))
+
+(defn dump-es
+  [type]
+  (println "DUMP")
+  (clojure.pprint/pprint
+    (esu/dump esb/client esb/index type)))

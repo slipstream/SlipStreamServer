@@ -1,7 +1,7 @@
 {
   "dynamic_templates": [
     {
-      "notanalyzed": {
+      "strings": {
         "match": "*",
         "match_mapping_type": "string",
         "mapping": {

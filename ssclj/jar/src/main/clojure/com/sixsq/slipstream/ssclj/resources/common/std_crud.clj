@@ -69,18 +69,12 @@
   [resource-name collection-acl collection-uri collection-key]
   (fn [request]
     ;; (a/can-view? {:acl collection-acl} request) TODO
-    (let [wrapper-fn          (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)
-          options             (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
-          entries             (db/query resource-name options)
-          wrapped-entries     (wrapper-fn request entries)
-          entries-and-count   (assoc wrapped-entries :count (esb/count-no-pagination resource-name options))]
+    (let [wrapper-fn                          (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)
+          options                             (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+          [count-before-pagination entries]   (db/query resource-name options)
+          wrapped-entries                     (wrapper-fn request entries)
+          entries-and-count                   (assoc wrapped-entries :count count-before-pagination)]
       (u/json-response entries-and-count))))
-
-;(->> (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
-;     (db/query resource-name)
-;     ;; inclusion in skeleton
-;     (wrapper-fn request)
-;     (u/json-response)))))
 
 
 (defn resolve-href

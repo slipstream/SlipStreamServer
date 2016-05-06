@@ -19,14 +19,14 @@
 (defn create-client
   []
   (println "Creating ES client")
-  (let [node (esu/create-test-node)
-        client (esu/node-client node)]
+  (let [node    (esu/create-test-node)
+        client  (esu/node-client node)]
     (esu/wait-for-cluster client)
     (esu/create-index client index)
     (esu/wait-for-index client index)
     client))
 
-(defonce client (create-client))
+(def client (create-client))
 
 (defn- force-admin-role-right-all
   [data]
@@ -115,10 +115,6 @@
         doc->data
         (acl/check-can-do options action))))
 
-(defn count-no-pagination
-  [collection-id options]
-  (esu/count-no-pagination client index collection-id options))
-
 (deftype ESBinding []
   Binding
   (add [_ type data options]
@@ -162,12 +158,14 @@
 
   (query [_ collection-id options]
     (check-identity-present options)
+    (println "query options " options)
     (let [response (esu/search client index collection-id options)
           result (esu/json->edn (str response))
+          count-before-pagination (-> result :hits :total)
           hits (->> (-> result :hits :hits)
                     (map :_source)
                     (map acl/normalize-acl))]
-      hits)))
+      [count-before-pagination hits])))
 
 (defn get-instance
   []

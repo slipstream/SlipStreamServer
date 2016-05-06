@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.es.es-pagination)
 
-(def ^:const max-result-window 5000)
+(def ^:const max-result-window 200000)
 
 (def ^:const max-return-size 10000)
 

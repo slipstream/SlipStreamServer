@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.ssclj.filter.parser :as p]
     [superstring.core :as s])
   (:import
-    [org.elasticsearch.index.query QueryBuilders]
+    [org.elasticsearch.index.query QueryBuilders ConstantScoreQueryBuilder]
     [java.util Date]))
 
 (defn term-query [^String term ^Object value]
@@ -66,23 +66,23 @@
   [:Value (Date. s)])
 
 (defmethod convert :Comp [v]
-           (let [args (rest v)]
-             (if (= 1 (count args))
-               (first args)                                          ;; (a=1 and b=2) case
-               (let [{:keys [Attribute Op Value] :as m} (into {} args)
-                     order (ffirst args)]
-                 (case [Op order]
-                       ["=" :Attribute] (term-query Attribute Value)
-                       [">=" :Attribute] (range-ge-query Attribute Value)
-                       [">" :Attribute] (range-gt-query Attribute Value)
-                       ["<=" :Attribute] (range-le-query Attribute Value)
-                       ["<" :Attribute] (range-lt-query Attribute Value)
-                       ["=" :Value] (term-query Attribute Value)
-                       [">=" :Value] (range-le-query Attribute Value)
-                       [">" :Value] (range-lt-query Attribute Value)
-                       ["<=" :Value] (range-ge-query Attribute Value)
-                       ["<" :Value] (range-gt-query Attribute Value)
-                       m)))))
+  (let [args (rest v)]
+    (if (= 1 (count args))
+      (first args)                                          ;; (a=1 and b=2) case
+      (let [{:keys [Attribute Op Value] :as m} (into {} args)
+            order (ffirst args)]
+        (case [Op order]
+          ["=" :Attribute] (term-query Attribute Value)
+          [">=" :Attribute] (range-ge-query Attribute Value)
+          [">" :Attribute] (range-gt-query Attribute Value)
+          ["<=" :Attribute] (range-le-query Attribute Value)
+          ["<" :Attribute] (range-lt-query Attribute Value)
+          ["=" :Value] (term-query Attribute Value)
+          [">=" :Value] (range-le-query Attribute Value)
+          [">" :Value] (range-lt-query Attribute Value)
+          ["<=" :Value] (range-ge-query Attribute Value)
+          ["<" :Value] (range-gt-query Attribute Value)
+          m)))))
 
 (defmethod convert :PropExpr [[_ Prop Op Value]]
   (let [result [[:Attribute (str "property." (second Prop))] Op Value]]
@@ -95,15 +95,11 @@
       (first args)
       (and-query args))))
 
-(defmethod convert :OrExpr [v]
-  (let [args (rest v)]
-    (or-query args)))
-
 (defmethod convert :Filter [v]
-           (let [arg (second v)]
-             (if (instance? ConstantScoreQueryBuilder arg)
-               arg                                                   ;; don't nest unnecessarily
-               (QueryBuilders/constantScoreQuery arg))))
+  (let [args (rest v)]
+    (if (= 1 (count args))
+      (first args)
+      (or-query args))))
 
 (defmethod convert :Attribute [v]
   [:Attribute (-> v second (s/replace "/" "."))])
@@ -113,11 +109,8 @@
 
 (defn compile-filter [s]
   (let [parsed (p/parse-cimi-filter s)]
-
-    (println "parsed")
     (clojure.pprint/pprint parsed)
-
-    (w/postwalk convert parsed)))
+    (QueryBuilders/constantScoreQuery (w/postwalk convert parsed))))
 
 (defn compile-cimi-filter [cimi-params]
   (if-let [cimi-filter (get-in cimi-params [:cimi-params :filter])]

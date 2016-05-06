@@ -115,12 +115,14 @@
   then an exception is thrown."
   [{:keys [params] :or {:params {}} :as req}]
   (if-let [filter-param (get params "$filter")]
-    (->> filter-param
-         (as-vector)
-         (wrap-join-with-and)
-         (parser/parse-cimi-filter)
-         (throw-illegal-for-invalid-filter)
-         (add-cimi-param req :filter))
+
+    (add-cimi-param req :filter filter-param)
+    ;(->> filter-param
+    ;     (as-vector)
+    ;     (wrap-join-with-and)
+    ;     (parser/parse-cimi-filter)
+    ;     (throw-illegal-for-invalid-filter)
+    ;     (add-cimi-param req :filter))
     req))
 
 (defn comma-split

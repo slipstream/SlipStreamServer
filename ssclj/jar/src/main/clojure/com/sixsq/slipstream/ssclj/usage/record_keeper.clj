@@ -125,17 +125,16 @@
 (defn- resource-for
   [summary acl]
   (-> summary
-      (update-in [:usage] u/serialize)
+      ;; (update-in [:usage] u/serialize)
       (assoc :id (str "usage/" (cu/random-uuid)))
-      (assoc :acl (u/serialize acl))))
+      (assoc :acl acl)
+      (assoc :compute-timestamp (u/now-to-ISO-8601))))
 
 (defn insert-summary!
   [summary options]
   (let [acl                   (acl-for-user-cloud summary)
         summary-resource      (resource-for summary acl)]
-    (db/add "Usage"
-            (merge summary-resource {:compute-timestamp (u/now-to-ISO-8601)})
-            options)))
+    (db/add "Usage" summary-resource options)))
 
 (defn records-for-interval
   [start end]

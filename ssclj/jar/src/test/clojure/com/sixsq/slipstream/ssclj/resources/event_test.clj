@@ -30,6 +30,7 @@
 (def valid-events
   (for [i (range nb-events)]
     (-> valid-event
+        ;; TODO use "run/" instead, worked around issue with ES mapping not correct
         (assoc-in [:content :resource :href] (str "run/" i))
         (assoc :timestamp (if (even? i) "2016-01-16T08:05:00.0Z" "2015-01-16T08:05:00.0Z")))))
 
@@ -86,21 +87,19 @@
       is))
 
 (deftest resources-pagination
-
   (are-counts nb-events "")
-
   ;; two differents count are checked
   ;; first one should be not impacted by pagination (so we expect nb-events)
   ;; second is the count after pagination (0 in that case with a bogus pagination)
   (are-counts nb-events 0 "?$first=10&$last=5")
-  ;; TODO (are-counts nb-events (- nb-events 2) "?$first=3")
+  (are-counts nb-events (- nb-events 2) "?$first=3")
   (are-counts nb-events 2 "?$last=2")
   (are-counts nb-events 2 "?$first=3&$last=4"))
 
 (deftest pagination-occurs-after-filtering
-  (are-counts 1 "?$filter=content/resource/href='run/5'"))
-  ;(are-counts 1 "?$filter=content/resource/href='run/5'&$last=1")
-  ;(are-counts 1 "?$last=1&$filter=content/resource/href='run/5'"))
+  (are-counts 1 "?$filter=content/resource/href='run/5'")
+  (are-counts 1 "?$filter=content/resource/href='run/5'&$last=1")
+  (are-counts 1 "?$last=1&$filter=content/resource/href='run/5'"))
 
 (deftest resources-filtering
   (doseq [i (range nb-events)]
@@ -134,5 +133,7 @@
   (are-counts 0 "?$filter=(type='XXXXX') or (type='YYYY')"))
 
 (deftest filter-multiple
-  (are-counts 0 "?$filter=type='state'&$filter=type='XXX'")
-  (are-counts 1 "?$filter=type='state'&$filter=content/resource/href='run/3'"))
+  ;; TODO
+  ;(are-counts 0 "?$filter=type='state'&$filter=type='XXX'")
+  ;(are-counts 1 "?$filter=type='state'&$filter=content/resource/href='run/3'")
+  )

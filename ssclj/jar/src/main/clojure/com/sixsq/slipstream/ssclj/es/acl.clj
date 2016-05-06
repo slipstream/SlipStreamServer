@@ -26,7 +26,7 @@
 (defn- rules-with-owner
   [acl]
   (let [owner-rule (some-> acl :owner (assoc :right "ALL"))]
-    (->> acl :rules (cons owner-rule))))
+    (->> acl :rules (cons owner-rule) (into #{}) vec)))
 
 (defn- extract-by-type
   [acl type-pred]
