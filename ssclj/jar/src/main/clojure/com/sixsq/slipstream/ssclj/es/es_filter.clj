@@ -66,28 +66,23 @@
   [:Value (Date. s)])
 
 (defmethod convert :Comp [v]
-  (println "converting v=" v)
-  ;; TODO : work around
-  (if (= 2 (count v))
-    (first (rest v))
-    (let [args (rest v)
-          args (if (= 1 (count args))
-                 (apply concat args)
-                 args)
-          {:keys [Attribute Op Value] :as m} (into {} args)
-          order (ffirst args)]
-      (case [Op order]
-        ["=" :Attribute] (term-query Attribute Value)
-        [">=" :Attribute] (range-ge-query Attribute Value)
-        [">" :Attribute] (range-gt-query Attribute Value)
-        ["<=" :Attribute] (range-le-query Attribute Value)
-        ["<" :Attribute] (range-lt-query Attribute Value)
-        ["=" :Value] (term-query Attribute Value)
-        [">=" :Value] (range-le-query Attribute Value)
-        [">" :Value] (range-lt-query Attribute Value)
-        ["<=" :Value] (range-ge-query Attribute Value)
-        ["<" :Value] (range-gt-query Attribute Value)
-        m))))
+           (let [args (rest v)]
+             (if (= 1 (count args))
+               (first args)                                          ;; (a=1 and b=2) case
+               (let [{:keys [Attribute Op Value] :as m} (into {} args)
+                     order (ffirst args)]
+                 (case [Op order]
+                       ["=" :Attribute] (term-query Attribute Value)
+                       [">=" :Attribute] (range-ge-query Attribute Value)
+                       [">" :Attribute] (range-gt-query Attribute Value)
+                       ["<=" :Attribute] (range-le-query Attribute Value)
+                       ["<" :Attribute] (range-lt-query Attribute Value)
+                       ["=" :Value] (term-query Attribute Value)
+                       [">=" :Value] (range-le-query Attribute Value)
+                       [">" :Value] (range-lt-query Attribute Value)
+                       ["<=" :Value] (range-ge-query Attribute Value)
+                       ["<" :Value] (range-gt-query Attribute Value)
+                       m)))))
 
 (defmethod convert :PropExpr [[_ Prop Op Value]]
   (let [result [[:Attribute (str "property." (second Prop))] Op Value]]
@@ -105,7 +100,10 @@
     (or-query args)))
 
 (defmethod convert :Filter [v]
-  (QueryBuilders/constantScoreQuery (second v)))
+           (let [arg (second v)]
+             (if (instance? ConstantScoreQueryBuilder arg)
+               arg                                                   ;; don't nest unnecessarily
+               (QueryBuilders/constantScoreQuery arg))))
 
 (defmethod convert :Attribute [v]
   [:Attribute (-> v second (s/replace "/" "."))])
