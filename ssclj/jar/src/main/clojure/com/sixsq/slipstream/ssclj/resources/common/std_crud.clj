@@ -68,7 +68,7 @@
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
   (fn [request]
-    ;; (a/can-view? {:acl collection-acl} request) TODO
+    (a/can-view? {:acl collection-acl} request)
     (let [wrapper-fn                          (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)
           options                             (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
           [count-before-pagination entries]   (db/query resource-name options)

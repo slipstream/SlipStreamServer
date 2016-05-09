@@ -117,12 +117,7 @@
                         r rules
                         :when (rule-allow-capacity? r c)] true)))
       data
-      (do
-        (println "!!!!!! KO for action" action)
-        (throw
-          (cu/ex-response (str "Unautorized. ACL " (:acl data)
-                             " does not authorize [" (:user-name options) "/"
-                             (s/join "," (:user-roles options)) "] for action " action)
-                        403 (:id data)))))))
-
-
+      (throw (cu/ex-response (str "Unautorized. ACL " (:acl data)
+                                  " does not authorize [" (:user-name options) "/"
+                                  (s/join "," (:user-roles options)) "] for action " action)
+                             403 (:id data))))))

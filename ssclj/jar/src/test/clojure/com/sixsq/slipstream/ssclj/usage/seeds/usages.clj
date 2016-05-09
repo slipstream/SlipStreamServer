@@ -92,10 +92,8 @@
       insert-to-db))
 
 (defn seed-records!
-  [nb username clouds & {:keys [clean]}]
+  [nb username clouds]
   (db/set-impl! (esb/get-instance))
-  ;; TODO ES equivalent (when clean
-    ;;(kc/delete rc/usage_records))
   (let [records (usage-records nb username clouds)]
     (doseq [record records]
       (db/add "UsageRecord" (assoc record :id (str "usage-record/" (cu/random-uuid))) {}))))

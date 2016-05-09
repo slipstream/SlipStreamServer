@@ -68,16 +68,12 @@
 
 (defn search
   [^Client client index type options]
-  ;(println "SEARCH index" index)
-  ;(println "SEARCH OPTIONS" options)
-  ;(println "SEARCH type " type)
   (try
     (let [query (-> options
                     ef/compile-cimi-filter
                     (acl/and-acl options))
 
           [from size] (pg/from-size options)
-          ;; _ (println from " . " size) TODO
           ^ActionRequestBuilder request (.. client
                                             (prepareSearch (into-array String [index]))
                                             (setTypes (into-array String [(u/de-camelcase type)]))
@@ -86,9 +82,7 @@
                                             (setFrom from)
                                             (setSize size))
 
-          request-with-sort (od/add-sorters-from-cimi request options)
-          ;; _ (println request-with-sort)
-          ]
+          request-with-sort (od/add-sorters-from-cimi request options)]
       (.get request-with-sort))
     (catch IndexNotFoundException infe
       (log/warn (str "Searching for index '" index "' not yet created, returns empty"))
@@ -96,7 +90,6 @@
     (catch SearchPhaseExecutionException spee
       (log/warn (str "Searching failed: " (.getMessage spee) ", returns empty"))
       [])))
-
 
 ;;
 ;; Convenience (for tests) functions

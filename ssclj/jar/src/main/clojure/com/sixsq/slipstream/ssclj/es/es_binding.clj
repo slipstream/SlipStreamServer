@@ -36,26 +36,19 @@
   [id]
   (s/split id #"/"))
 
-;; TODO
 (defn- data->doc
   "Prepares data before insertion in index
   That includes
   - add ADMIN role with right ALL
   - denormalize ACLs
   - jsonify "
-  [type data]
-  (let [
-
-        ;uuid  (if (:id data) "1" (cu/random-uuid))
-        ;id    (str (u/de-camelcase type) "/" uuid)
-
-        [id uuid] [(:id data) (second (split-id (:id data)))]
-
-        json  (-> data
-                  force-admin-role-right-all
-                  acl/denormalize-acl
-                  (assoc :id id)
-                  esu/edn->json)]
+  [data]
+  (let [id (:id data)
+        uuid (second (split-id id))
+        json (-> data
+                 force-admin-role-right-all
+                 acl/denormalize-acl
+                 esu/edn->json)]
     [id uuid json]))
 
 (defn doc->data
@@ -71,9 +64,6 @@
       (cu/map-response 201 id)
       (r/header "Location" id)))
 
-;; TODO
-;; 409 if already existing
-;; other code when appropriate
 (defn response-error
   []
   (-> "Resource not created"
@@ -97,14 +87,9 @@
 
 (defn- check-identity-present
   [options]
-  )
-  ;; TODO ??
-  ;; (println "bypassing check-identity-present options"))
-  ;(clojure.pprint/pprint options)
-  ;(when (and (empty? (:user-name options))
-  ;           (every? empty? (:user-roles options)))
-  ;  (throw (IllegalArgumentException. "A non empty user name or user role is mandatory."))))
-
+  (when (and (empty? (:user-name options))
+             (every? empty? (:user-roles options)))
+    (throw (IllegalArgumentException. "A non empty user name or user role is mandatory."))))
 
 (defn find-data
   [client index id options action]
@@ -118,7 +103,7 @@
 (deftype ESBinding []
   Binding
   (add [_ type data options]
-    (let [[id uuid json] (data->doc type data)]
+    (let [[id uuid json] (data->doc data)]
       (try
         (if (esu/create client index (u/de-camelcase type) uuid json)
           (response-created id)
@@ -127,21 +112,16 @@
           (response-conflict id)))))
 
   (retrieve [_ id options]
-    ;; (check-exist id) TODO equivalent
-    (println "ES binding retrieving " id " options" options)
     (find-data client index id options "VIEW"))
 
   (delete [_ {:keys [id]} options]
-    ;; (check-exist id) TODO equivalent
     (find-data client index id options "ALL")
     (let [[type docid] (split-id id)]
       (.isFound (esu/delete client index type docid)))
     (response-deleted id))
 
   (edit [_ {:keys [id] :as data} options]
-
     (try
-      ;; (check-exist id) TODO equivalent
       (find-data client index id options "MODIFY")
 
       (let [[type docid] (split-id id)]
@@ -149,18 +129,16 @@
           (r/response data)
           (response-conflict id)))
       (catch ExceptionInfo ei
-        (println "CAUGHT EI " (ex-data ei))
         (response-exception ei))))
 
   (query [_ collection-id options]
     (check-identity-present options)
-    ;; (println "query options " options)
-    (let [response (esu/search client index collection-id options)
-          result (esu/json->edn (str response))
+    (let [response                (esu/search client index collection-id options)
+          result                  (esu/json->edn (str response))
           count-before-pagination (-> result :hits :total)
-          hits (->> (-> result :hits :hits)
-                    (map :_source)
-                    (map acl/normalize-acl))]
+          hits                    (->> (-> result :hits :hits)
+                                       (map :_source)
+                                       (map acl/normalize-acl))]
       [count-before-pagination hits])))
 
 (defn get-instance

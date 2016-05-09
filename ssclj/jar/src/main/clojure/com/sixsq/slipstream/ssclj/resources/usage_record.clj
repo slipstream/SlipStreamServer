@@ -88,7 +88,6 @@
 (def edit-impl (std-crud/edit-fn resource-name))
 (defmethod crud/edit resource-name
   [request]
-  (println "crud/edit for usage-record")
   (edit-impl request))
 
 ;;
@@ -119,7 +118,6 @@
   [start end]
   (u/check-order [start end])
   (let [filter (str "end-timestamp >= '" start "' and start-timestamp <= '" end "'")]
-    ;(println "filter = " filter)
     (-> (db/query "usage-record" {:cimi-params {:filter filter}
-                                  :user-roles ["ADMIN"]})
+                                  :user-roles  ["ADMIN"]})
         second)))

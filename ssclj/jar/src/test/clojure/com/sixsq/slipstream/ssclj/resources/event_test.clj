@@ -30,7 +30,6 @@
 (def valid-events
   (for [i (range nb-events)]
     (-> valid-event
-        ;; TODO use "run/" instead, worked around issue with ES mapping not correct
         (assoc-in [:content :resource :href] (str "run/" i))
         (assoc :timestamp (if (even? i) "2016-01-16T08:05:00.0Z" "2015-01-16T08:05:00.0Z")))))
 

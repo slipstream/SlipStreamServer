@@ -2,7 +2,6 @@
   com.sixsq.slipstream.ssclj.resources.usage
   (:refer-clojure :exclude [update])
   (:require
-    [korma.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
