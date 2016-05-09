@@ -1,8 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.es.es-filter
   (:require
     [clojure.walk :as w]
+    [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.filter.parser :as p]
-    [superstring.core :as s])
+    [com.sixsq.slipstream.ssclj.usage.utils :as uu]
+    )
   (:import
     [org.elasticsearch.index.query QueryBuilders ConstantScoreQueryBuilder]
     [java.util Date]))
@@ -61,9 +63,7 @@
   [:Value (Boolean/valueOf s)])
 
 (defmethod convert :DateValue [[_ ^String s]]
-  (println "data value to convert " s " / " (Date. s))
-
-  [:Value (Date. s)])
+  [:Value (uu/to-time s)])
 
 (defmethod convert :Comp [v]
   (let [args (rest v)]

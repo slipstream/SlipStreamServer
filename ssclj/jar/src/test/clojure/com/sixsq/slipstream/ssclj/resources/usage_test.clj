@@ -87,10 +87,6 @@
              second
              first
              :id)
-        ;(-> (->> (kc/select dbdb/resources (kc/limit 1)) (filter #(.startsWith (:id %) "usage/")))
-        ;              first
-        ;              :id)
-        ;; TODO replace with ES equivalent
         uuid      (-> full-uuid
                       (superstring.core/split #"/")
                       second)]
@@ -182,43 +178,44 @@
 (deftest filter-with-admin
   (are-counts-for-admin 2 (one-line
                             "?$filter=
-                             start_timestamp='2015-04-16T00:00:00.000Z'
+                             start-timestamp='2015-04-16T00:00:00.000Z'
                              and
-                             end_timestamp='2015-04-17T00:00:00.000Z'"))
+                             end-timestamp='2015-04-17T00:00:00.000Z'"))
 
   (are-counts-for-admin 1 (one-line
                             "?$filter=
                              user='joe'
                              and
-                             start_timestamp='2015-04-16T00:00:00.000Z'
+                             start-timestamp='2015-04-16T00:00:00.000Z'
                              and
-                             end_timestamp='2015-04-17T00:00:00.000Z'"))
+                             end-timestamp='2015-04-17T00:00:00.000Z'"))
 
   (are-counts-for-admin 1 (one-line
                             "?$filter=
                              user='joe'
                              and
-                             start_timestamp='2015-04-17T00:00:00.000Z'
+                             start-timestamp='2015-04-17T00:00:00.000Z'
                              and
-                             end_timestamp='2015-04-18T00:00:00.000Z'"))
+                             end-timestamp='2015-04-18T00:00:00.000Z'"))
 
   (are-counts-for-admin 0 (one-line
                             "?$filter=
                              user='joe'
                              and
-                             start_timestamp='2015-04-18T00:00:00.000Z'
+                             start-timestamp='2015-04-18T00:00:00.000Z'
                              and
-                             end_timestamp='2015-04-19T00:00:00.000Z'"))
+                             end-timestamp='2015-04-19T00:00:00.000Z'"))
 
   (are-counts-for-admin 1 (one-line
                             "?$filter=
                              user='mike'
                              and
-                             start_timestamp='2015-04-18T00:00:00.000Z'
+                             start-timestamp='2015-04-18T00:00:00.000Z'
                              and
-                             end_timestamp='2015-04-19T00:00:00.000Z'")))
+                             end-timestamp='2015-04-19T00:00:00.000Z'")))
 
 (deftest date-comparisons
-  (are-counts-for-admin 1 "?$filter=user='joe' and start_timestamp=2015-04-17 and end_timestamp=2015-04-18")
-  (are-counts-for-admin 1 "?$filter=user='joe' and start_timestamp=2015-04-16 and end_timestamp=2015-04-17")
-  (are-counts-for-admin 2 "?$filter=frequency='daily' and user='joe' and start_timestamp>2015-04-15"))
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and user='joe' and start-timestamp=2015-04-16T00:00:00.000Z")
+  (are-counts-for-admin 1 "?$filter=user='joe' and start-timestamp=2015-04-17T00:00:00.000Z and end-timestamp=2015-04-18T00:00:00.000Z")
+  (are-counts-for-admin 1 "?$filter=user='joe' and start-timestamp=2015-04-16T00:00:00.000Z and end-timestamp=2015-04-17T00:00:00.000Z")
+  (are-counts-for-admin 2 "?$filter=frequency='daily' and user='joe' and start-timestamp>2015-04-15T00:00:00.000Z"))
