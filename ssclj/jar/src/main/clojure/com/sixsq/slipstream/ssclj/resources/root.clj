@@ -78,7 +78,7 @@
                  {:acl         resource-acl
                   :id          resource-url ;; TODO : special case id is given and resource is a "singleton"
                   :resourceURI resource-uri})]
-    (db/add resource-name record {})))
+    (db/add resource-name record {:user-roles ["ANON"]})))
 
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]

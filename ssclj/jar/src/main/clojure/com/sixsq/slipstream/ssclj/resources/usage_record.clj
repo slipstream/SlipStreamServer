@@ -119,7 +119,7 @@
   [start end]
   (u/check-order [start end])
   (let [filter (str "end-timestamp >= '" start "' and start-timestamp <= '" end "'")]
-    (println "filter = " filter)
+    ;(println "filter = " filter)
     (-> (db/query "usage-record" {:cimi-params {:filter filter}
                                   :user-roles ["ADMIN"]})
         second)))

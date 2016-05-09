@@ -190,10 +190,6 @@
     (request state base-uri :request-method :post :body (json/write-str ur1))
     (request state base-uri :request-method :post :body (json/write-str ur2))
 
-    (println "DUMP")
-    (clojure.pprint/pprint
-      (esu/dump esb/client esb/index "usage-record"))
-
     (is (thrown? IllegalArgumentException (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-04-29T00:00:00.000Z")))
     (is (empty? (ur/records-for-interval "2015-04-01T00:00:00.000Z" "2015-04-29T00:00:00.000Z")))
     (is (= 1 (count (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-06-10T00:00:00.000Z"))))

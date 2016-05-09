@@ -68,9 +68,9 @@
 
 (defn search
   [^Client client index type options]
-  (println "SEARCH index" index)
-  (println "SEARCH OPTIONS" options)
-  (println "SEARCH type " type)
+  ;(println "SEARCH index" index)
+  ;(println "SEARCH OPTIONS" options)
+  ;(println "SEARCH type " type)
   (try
     (let [query (-> options
                     ef/compile-cimi-filter
@@ -87,7 +87,7 @@
                                             (setSize size))
 
           request-with-sort (od/add-sorters-from-cimi request options)
-          _ (println request-with-sort)
+          ;; _ (println request-with-sort)
           ]
       (.get request-with-sort))
     (catch IndexNotFoundException infe
@@ -145,7 +145,6 @@
 
 (defn create-index
   [^Client client index-name]
-  (println "CREATING INDEX " index-name)
   (let [settings (.. (Settings/builder)
                      (put "index.max_result_window" pg/max-result-window)
                      (put "index.number_of_shards" 3)

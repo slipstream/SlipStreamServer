@@ -97,8 +97,9 @@
 
 (defn- check-identity-present
   [options]
+  )
   ;; TODO ??
-  (println "bypassing check-identity-present options"))
+  ;; (println "bypassing check-identity-present options"))
   ;(clojure.pprint/pprint options)
   ;(when (and (empty? (:user-name options))
   ;           (every? empty? (:user-roles options)))
@@ -108,7 +109,6 @@
 (defn find-data
   [client index id options action]
   (check-identity-present options)
-  (println "find-data id" id)
   (let [[type docid] (split-id id)]
     (-> (esu/read client index type docid)
         (.getSourceAsString)
@@ -142,10 +142,6 @@
 
     (try
       ;; (check-exist id) TODO equivalent
-
-      (println "ES binding edit , id=" id "data ")
-      (clojure.pprint/pprint data)
-
       (find-data client index id options "MODIFY")
 
       (let [[type docid] (split-id id)]
@@ -158,7 +154,7 @@
 
   (query [_ collection-id options]
     (check-identity-present options)
-    (println "query options " options)
+    ;; (println "query options " options)
     (let [response (esu/search client index collection-id options)
           result (esu/json->edn (str response))
           count-before-pagination (-> result :hits :total)

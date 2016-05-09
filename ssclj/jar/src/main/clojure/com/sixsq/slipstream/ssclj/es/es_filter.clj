@@ -109,7 +109,6 @@
 
 (defn compile-filter [s]
   (let [parsed (p/parse-cimi-filter s)]
-    (clojure.pprint/pprint parsed)
     (QueryBuilders/constantScoreQuery (w/postwalk convert parsed))))
 
 (defn compile-cimi-filter [cimi-params]
