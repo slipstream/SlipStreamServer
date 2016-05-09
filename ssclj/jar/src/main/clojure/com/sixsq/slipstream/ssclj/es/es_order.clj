@@ -18,4 +18,3 @@
   "Adds sorters to request with CIMI :orderby option."
   [^SearchRequestBuilder request cimi-params]
   (reduce add-sorter-from-cimi request (get-in cimi-params [:cimi-params :orderby])))
-

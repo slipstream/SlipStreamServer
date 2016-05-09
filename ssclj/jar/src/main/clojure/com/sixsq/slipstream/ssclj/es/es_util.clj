@@ -19,7 +19,7 @@
     [org.elasticsearch.common.unit TimeValue]
     [org.elasticsearch.cluster.health ClusterHealthStatus]
     [org.elasticsearch.client Client]
-    [org.elasticsearch.action.search SearchType]
+    [org.elasticsearch.action.search SearchType SearchPhaseExecutionException]
     (org.elasticsearch.action.bulk BulkRequestBuilder)      ;; TODO
     (org.elasticsearch.action ActionRequestBuilder)
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
@@ -92,6 +92,9 @@
       (.get request-with-sort))
     (catch IndexNotFoundException infe
       (log/warn (str "Searching for index '" index "' not yet created, returns empty"))
+      [])
+    (catch SearchPhaseExecutionException spee
+      (log/warn (str "Searching failed: " (.getMessage spee) ", returns empty"))
       [])))
 
 
@@ -187,7 +190,7 @@
     (throw-if-not-green status)))
 
 
-(defn erase-index
+(defn recreate-index
   [^Client client index]
   (.. client
       (admin)

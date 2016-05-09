@@ -37,7 +37,7 @@
 (defn insert-some-events
   []
   (db/set-impl! (esb/get-instance))
-  (esu/erase-index esb/client esb/index)
+  (esu/recreate-index esb/client esb/index)
 
   (let [state (-> (session (ring-app))
                   (content-type "application/json")

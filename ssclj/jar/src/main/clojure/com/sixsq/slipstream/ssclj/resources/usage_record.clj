@@ -98,12 +98,8 @@
   (let [filter
         (str "cloud-vm-instanceid='" (:cloud-vm-instanceid usage-record)
              "' and metric-name='" (:metric-name usage-record) "'")]
-    (-> (db/query "usage-record" {
-                                  :cimi-params {:filter  filter
-                                                :orderby [["start-timestamp" :desc]]}
-                                  ;; :user-roles ["ADMIN"]
-                                  :user-name   "joe"        ;; TODO should be done with ADMIN role
-                                  })
+    (-> (db/query "usage-record" {:cimi-params {:filter  filter :orderby [["start-timestamp" :desc]]}
+                                  :user-roles ["ADMIN"]})
         second
         first)))
 
@@ -115,9 +111,7 @@
              "' and metric-name='" (:metric-name usage-record) "'"
              " and end-timestamp='" date-in-future "'")]
     (-> (db/query "usage-record" {:cimi-params {:filter filter}
-                                  ;; :user-roles ["ADMIN"]
-                                  :user-name   "joe"        ;; TODO should be done with ADMIN role
-                                  })
+                                  :user-roles ["ADMIN"]})
         second)))
 
 (defn records-for-interval
@@ -126,8 +120,6 @@
   (u/check-order [start end])
   (let [filter (str "end-timestamp >= '" start "' and start-timestamp <= '" end "'")]
     (println "filter = " filter)
-    (-> (db/query "usage-record" {
-                                  :cimi-params {:filter filter}
-                                  :user-name   "joe"        ;; TODO should be done with ADMIN role
-                                  })
+    (-> (db/query "usage-record" {:cimi-params {:filter filter}
+                                  :user-roles ["ADMIN"]})
         second)))

@@ -4,10 +4,12 @@
     [com.sixsq.slipstream.ssclj.usage.summary :refer :all]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as tu]
     [clojure.test :refer :all]
     [korma.core :refer :all]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]))
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (def past-1 (u/timestamp 2015 04 12))
 (def past-2 (u/timestamp 2015 04 13))
@@ -20,11 +22,7 @@
 (def start-april (u/timestamp 2015 04))
 (def start-may (u/timestamp 2015 05))
 
-(defn delete-all [f]
-  ;; (kc/delete dbdb/resources) TODO re-implement
-  (db/set-impl! (esb/get-instance))
-  (f))
-(use-fixtures :each delete-all)
+(use-fixtures :each tu/flush-db-fixture)
 
 (deftest truncate-filters-outside-records
   (let [urs [{:start-timestamp in-day-1 :end-timestamp in-day-2}]]
@@ -183,13 +181,14 @@
                            {:name  "RAM-GB"
                             :value 8}
                            {:name  "disk-GB"
-                            :value 100.5}]} {})
+                            :value 100.5}]} {:user-roles ["ADMIN"]})
   (rc/insert-usage-event
     {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+     :start-timestamp     in-day-1
      :end-timestamp       in-day-2
      :metrics             [{:name "nb-cpu"}
                            {:name "RAM-GB"}
-                           {:name "disk-GB"}]} {}))
+                           {:name "disk-GB"}]} {:user-roles ["ADMIN"]}))
 
 (deftest test-summarize
   (insert-record)
@@ -210,10 +209,7 @@
 
 (defn- summaries-from-db
   []
-  ;; TODO adapt to ES
-  )
-  ;(->> (select dbdb/resources)
-  ;     (filter #(.startsWith (:id %) "usage/"))))
+  (second (db/query "usage" {:user-roles ["ADMIN"]})))
 
 (deftest test-summarize-and-store-by-user-cloud
   (insert-record)
@@ -223,11 +219,8 @@
                 :RAM-GB  {:unit-minutes 2696.0},
                 :nb-cpu  {:unit-minutes 1348.0}}]
     (is (= 1 (count summaries-from-db)))
-    (let [usage (-> summaries-from-db
-                    first
-                    :data
-                    u/deserialize)]
-      (is (= result (-> usage :usage u/deserialize)))
+    (let [usage (first summaries-from-db)]
+      (is (= result (:usage usage)))
       (is (= "daily" (:frequency usage)))
       (is (= "user,cloud" (:grouping usage))))))
 
@@ -239,11 +232,8 @@
                 :RAM-GB  {:unit-minutes 2696.0},
                 :nb-cpu  {:unit-minutes 1348.0}}]
     (is (= 1 (count summaries-from-db)))
-    (let [usage (-> summaries-from-db
-                    first
-                    :data
-                    u/deserialize)]
-      (is (= result (-> usage :usage u/deserialize)))
+    (let [usage (first summaries-from-db)]
+      (is (= result (:usage usage)))
       (is (= "daily" (:frequency usage)))
       (is (= "cloud" (:grouping usage))))))
 

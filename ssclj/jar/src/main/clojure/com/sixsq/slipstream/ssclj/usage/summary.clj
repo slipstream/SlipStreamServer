@@ -113,6 +113,6 @@
     (log/info "Will persist" (count summaries) "summaries for "
               (u/disp-interval start-time end-time) "except" except-users ", on" grouping-cols)
     (doseq [summary summaries]
-      (rc/insert-summary! summary))))
+      (rc/insert-summary! summary {:user-roles ["ADMIN"]}))))
 
 

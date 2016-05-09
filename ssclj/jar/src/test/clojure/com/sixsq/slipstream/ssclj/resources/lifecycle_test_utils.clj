@@ -18,9 +18,9 @@
 (defn flush-db-fixture
   [f]
   (try
-    (db/set-impl! esb/get-instance)
-    (esu/erase-index esb/client esb/index)
-    (println "Erased index DONE")
+    (db/set-impl! (esb/get-instance))
+    (esu/recreate-index esb/client esb/index)
+    (println "Recreated index DONE")
     (catch Exception e
       (println "Ignoring "(.getMessage e))))
   (f))
