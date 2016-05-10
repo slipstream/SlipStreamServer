@@ -6,7 +6,6 @@
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as tu]
     [clojure.test :refer :all]
-    [korma.core :refer :all]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))

@@ -12,7 +12,8 @@
     [com.sixsq.slipstream.ssclj.es.es-order :as od]
     [com.sixsq.slipstream.ssclj.es.es-filter :as ef]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [clojure.string :as s])
   (:import
     [org.elasticsearch.node NodeBuilder Node]
     [org.elasticsearch.common.settings Settings]
@@ -20,7 +21,7 @@
     [org.elasticsearch.cluster.health ClusterHealthStatus]
     [org.elasticsearch.client Client]
     [org.elasticsearch.action.search SearchType SearchPhaseExecutionException]
-    (org.elasticsearch.action.bulk BulkRequestBuilder)      ;; TODO
+    (org.elasticsearch.action.bulk BulkRequestBuilder)
     (org.elasticsearch.action ActionRequestBuilder)
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
     (org.elasticsearch.index.query QueryBuilders)
@@ -92,8 +93,24 @@
       [])))
 
 ;;
-;; Convenience (for tests) functions
+;; Convenience functions
 ;;
+
+(defn- add-index
+  [client index type ^BulkRequestBuilder bulk-request-builder [uuid json]]
+  (let [new-index (.. client
+                      (prepareIndex index type uuid)
+                      (setCreate true)
+                      (setSource json))]
+    (.add bulk-request-builder new-index)))
+
+(defn bulk-create
+  [^Client client index type uuid-jsons]
+  (let [bulk-request-builder  (.. client
+                                  (prepareBulk)
+                                  (setRefresh true))]
+    (.. (reduce (partial add-index client index type) bulk-request-builder uuid-jsons)
+        (get))))
 
 (defn dump
   [^Client client index type]

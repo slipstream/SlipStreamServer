@@ -203,6 +203,14 @@
       <groupId>puppetlabs</groupId>
       <artifactId>http-client</artifactId>
     </dependency>
+    <dependency>
+      <groupId>me.raynes</groupId>
+      <artifactId>fs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch</artifactId>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -337,6 +345,7 @@
                 <namespace>com.sixsq.slipstream.ssclj.usage.record-keeper</namespace>
                 <namespace>com.sixsq.slipstream.ssclj.usage.summary</namespace>
                 <namespace>com.sixsq.slipstream.ssclj.usage.summarizer</namespace>
+                <namespace>com.sixsq.slipstream.ssclj.migrate.script</namespace>
               </namespaces>
               <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
             </configuration>
