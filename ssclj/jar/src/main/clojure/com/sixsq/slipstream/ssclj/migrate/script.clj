@@ -19,6 +19,9 @@
     [com.sixsq.slipstream.ssclj.es.acl :as acl])
   (:gen-class))
 
+;; Nb of documents stored per batch insert
+(def batch-size 10)
+
 (defn- id->uuid
   [id]
   (second (s/split id #"/")))
@@ -101,19 +104,31 @@
   (into {}
         (map (fn [[k v]] [k (s->edn v)]) (esu/json->edn json))))
 
+(defn- partition-batches
+  [n]
+  (->> batch-size
+       (quot n)
+       inc
+       (* batch-size)
+       range
+       (partition batch-size)
+       (map (juxt first last))))
+
 (defn- migrate
   [resource]
   (println "Migrating " resource ", nb resources =" (select-count resource))
-  (let [jsons (->> (kc/select resources
-                              (kc/where {:id [like (str resource "/%")]})
-                              ; TODO (kc/limit 2)
-                              )
-                   (map :data)
-                   (map nested-json->edn)
-                   (map acl/denormalize-acl)
-                   (map fix-case-map)
-                   (map esu/edn->json))]
-    (bulk-store resource jsons)))
+  (doseq [[start end] (partition-batches (select-count resource))]
+    (println "migrating" start " -> " end)
+    (let [jsons (->> (kc/select resources
+                                (kc/where {:id [like (str resource "/%")]})
+                                (kc/offset start)
+                                (kc/limit end))
+                     (map :data)
+                     (map nested-json->edn)
+                     (map acl/denormalize-acl)
+                     (map fix-case-map)
+                     (map esu/edn->json))]
+      (bulk-store resource jsons))))
 
 (defn -main
   "Main function to migrate resources from DB to Elastic Search"
@@ -124,9 +139,10 @@
   (println "This script will migrate resources from DB to Elastic Search")
   (let [resources ["usage" "usage-record"]]
     (run! migrate resources)
-    ;; TODO 
+    ;; TODO
     (clojure.pprint/pprint (esu/dump esb/client esb/index "usage"))
-    (clojure.pprint/pprint (esu/dump esb/client esb/index "usage-record"))))
+    (clojure.pprint/pprint (esu/dump esb/client esb/index "usage-record"))
+    ))
 
 
 
