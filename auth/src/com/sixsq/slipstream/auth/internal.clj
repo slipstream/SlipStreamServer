@@ -24,7 +24,7 @@
   (assoc
     (uh/response 200)
     :cookies
-    {"com.sixsq.slipstream.cookie" {:value token, :path "/"}}))
+    {"com.sixsq.slipstream.cookie" {:value token, :path "/dashboard"}}))
 
 (defn valid?
   [credentials]
