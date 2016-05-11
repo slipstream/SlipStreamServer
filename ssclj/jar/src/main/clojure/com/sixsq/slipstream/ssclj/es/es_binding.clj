@@ -28,7 +28,7 @@
 
 (def client (create-client))
 
-(defn- force-admin-role-right-all
+(defn force-admin-role-right-all
   [data]
   (update-in data [:acl :rules] #(vec (set (conj % {:type "ROLE" :principal "ADMIN" :right "ALL"})))))
 

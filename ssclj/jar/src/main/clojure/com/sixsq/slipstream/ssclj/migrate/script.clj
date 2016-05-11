@@ -20,7 +20,7 @@
   (:gen-class))
 
 ;; Nb of documents stored per batch insert
-(def batch-size 10)
+(def batch-size 10000)
 
 (defn- id->uuid
   [id]
@@ -68,6 +68,9 @@
   (println (u/map-multi-line db-spec))
   (kdb/defdb korma-api-db db-spec)
   (kc/defentity resources)
+  (kc/defentity usage_records)
+  (kc/defentity usage_summaries)
+
   (println "Korma database created"))
 
 (defn- fix-case
@@ -80,11 +83,25 @@
 
 (defn- fix-case-map
   [m]
-  (let [current-keys (keys m)
-        renamed-keys (map fix-case current-keys)]
-    (set/rename-keys m (zipmap current-keys renamed-keys))))
+  (if (map? m)
+    (let [current-keys (keys m)
+          renamed-keys (map fix-case current-keys)]
+      (set/rename-keys m (zipmap current-keys renamed-keys)))
+    m))
 
-(defn- select-count
+(defn- fix-case-nested-map
+  [m]
+  (clojure.walk/prewalk fix-case-map m))
+
+(defmulti select-count keyword)
+
+(defn count-table
+  [table-name]
+  (->> (kc/select table-name (kc/fields ["count(*)"]))
+       first
+       :C1))
+
+(defmethod select-count :default
   [type]
   (->> (kc/select :resources
                   (kc/where {:id [like (str type "/%")]})
@@ -92,17 +109,27 @@
        first
        :C1))
 
+(defmethod select-count :usage-record
+  [_]
+  (count-table :usage_records))
+
+(defmethod select-count :usage
+  [_]
+  (count-table :usage_summaries))
+
 (defn- s->edn
   [s]
-  (if (and (string? s )
-           (.startsWith s "{"))
+  (if (and (string? s ) (.startsWith s "{"))
     (esu/json->edn s)
     s))
 
 (defn- nested-json->edn
   [json]
-  (into {}
-        (map (fn [[k v]] [k (s->edn v)]) (esu/json->edn json))))
+  (into {} (map (fn [[k v]] [k (s->edn v)]) (esu/json->edn json))))
+
+(defn- nested->edn
+  [m]
+  (into {} (map (fn [[k v]] [k (s->edn v)]) m)))
 
 (defn- partition-batches
   [n]
@@ -114,21 +141,59 @@
        (partition batch-size)
        (map (juxt first last))))
 
+(defmulti data->jsons (comp keyword first))
+
+(defmethod data->jsons :default
+  [[resource start end]]
+  (->> (kc/select :resources
+                  (kc/where {:id [like (str resource "/%")]})
+                  (kc/offset start)
+                  (kc/limit end))
+       (map :data)
+       (map nested-json->edn)
+       (map esb/force-admin-role-right-all)
+       (map acl/denormalize-acl)
+       (map fix-case-nested-map)
+       (map esu/edn->json)))
+
+
+(defmethod data->jsons :usage
+  [[_ start end]]
+  (->> (kc/select "usage_summaries"
+                  (kc/offset start)
+                  (kc/limit end))
+       (map nested->edn)
+       (map esb/force-admin-role-right-all)
+       (map acl/denormalize-acl)
+       (map fix-case-nested-map)
+       (map esu/edn->json)))
+
+(defn assoc-id
+  [type m]
+  (assoc m :id (str type "/" (u/random-uuid))))
+
+(defmethod data->jsons :usage-record
+  [[_ start end]]
+  (->> (kc/select "usage_records"
+                  (kc/offset start)
+                  (kc/limit end))
+       (map nested->edn)
+       (map esb/force-admin-role-right-all)
+       (map (partial assoc-id "usage-record"))
+       (map acl/denormalize-acl)
+       (map fix-case-nested-map)
+       (map esu/edn->json)))
+
 (defn- migrate
   [resource]
-  (println "Migrating " resource ", nb resources =" (select-count resource))
-  (doseq [[start end] (partition-batches (select-count resource))]
-    (println "migrating" start " -> " end)
-    (let [jsons (->> (kc/select resources
-                                (kc/where {:id [like (str resource "/%")]})
-                                (kc/offset start)
-                                (kc/limit end))
-                     (map :data)
-                     (map nested-json->edn)
-                     (map acl/denormalize-acl)
-                     (map fix-case-map)
-                     (map esu/edn->json))]
-      (bulk-store resource jsons))))
+  (let [nb-resources (select-count resource)]
+    (println "Migrating " resource ", nb resources =" nb-resources)
+    (doseq [[start end] (partition-batches nb-resources)]
+      (println "Migrating" resource start " -> " end)
+      (bulk-store resource (data->jsons [resource start end]))))
+
+  (println "First document" resource)
+  (clojure.pprint/pprint (esu/dump esb/client esb/index resource)))
 
 (defn -main
   "Main function to migrate resources from DB to Elastic Search"
@@ -137,12 +202,11 @@
   (esu/recreate-index esb/client esb/index)
   (do-korma-init)
   (println "This script will migrate resources from DB to Elastic Search")
-  (let [resources ["usage" "usage-record"]]
-    (run! migrate resources)
-    ;; TODO
-    (clojure.pprint/pprint (esu/dump esb/client esb/index "usage"))
-    (clojure.pprint/pprint (esu/dump esb/client esb/index "usage-record"))
-    ))
+  (let [resources ["usage"
+                   "usage-record"
+                   "event"]]
+    (run! migrate resources)))
+
 
 
 

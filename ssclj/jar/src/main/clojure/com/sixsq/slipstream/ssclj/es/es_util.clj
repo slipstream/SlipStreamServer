@@ -119,6 +119,7 @@
           (setTypes (into-array String [type]))
           (setSearchType SearchType/DEFAULT)
           (setQuery (QueryBuilders/matchAllQuery))
+          (setSize 1)
           (get))
       str
       json->edn
