@@ -21,7 +21,7 @@
 (def start-april (u/timestamp 2015 04))
 (def start-may (u/timestamp 2015 05))
 
-(use-fixtures :each tu/flush-db-fixture)
+(use-fixtures :each tu/with-test-client-fixture)
 
 (deftest truncate-filters-outside-records
   (let [urs [{:start-timestamp in-day-1 :end-timestamp in-day-2}]]

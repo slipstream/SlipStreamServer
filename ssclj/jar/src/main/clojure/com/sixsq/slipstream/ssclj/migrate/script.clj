@@ -32,7 +32,7 @@
 
 (defn- bulk-store
   [type jsons]
-  (esu/bulk-create esb/client esb/index type (map json->uuid-doc jsons)))
+  (esu/bulk-create esb/*client* esb/index-name type (map json->uuid-doc jsons)))
 
 (defn- find-resource
   [resource-path]
@@ -193,13 +193,14 @@
       (bulk-store resource (data->jsons [resource start end]))))
 
   (println "First document" resource)
-  (clojure.pprint/pprint (esu/dump esb/client esb/index resource)))
+  (clojure.pprint/pprint (esu/dump esb/*client* esb/index-name resource)))
 
 (defn -main
   "Main function to migrate resources from DB to Elastic Search"
   []
   (db/set-impl! (esb/get-instance))
-  (esu/recreate-index esb/client esb/index)
+  (esb/set-client! (esb/create-client))
+  (esu/reset-index esb/*client* esb/index-name)
   (do-korma-init)
   (println "This script will migrate resources from DB to Elastic Search")
   (let [resources ["usage"

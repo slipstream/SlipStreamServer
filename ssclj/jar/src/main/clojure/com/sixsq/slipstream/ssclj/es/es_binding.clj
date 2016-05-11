@@ -14,19 +14,31 @@
            (org.elasticsearch.index.engine DocumentAlreadyExistsException)
            (clojure.lang ExceptionInfo)))
 
-(def ^:const index "resources-index")
+(def ^:const index-name "resources-index")
+
+(defn- wait-client-create-index
+  [client]
+  (esu/wait-for-cluster client)
+  (when-not (esu/index-exists? client index-name)
+    (esu/create-index client index-name)
+    (esu/wait-for-index client index-name))
+  client)
 
 (defn create-client
   []
   (println "Creating ES client")
-  (let [node    (esu/create-test-node)
-        client  (esu/node-client node)]
-    (esu/wait-for-cluster client)
-    (esu/create-index client index)
-    (esu/wait-for-index client index)
-    client))
+  (wait-client-create-index (esu/create-es-client)))
 
-(def client (create-client))
+(defn create-test-client
+  []
+  (println "Creating ES Test client")
+  (wait-client-create-index (esu/create-test-es-client)))
+
+(def ^:dynamic *client*)
+
+(defn set-client!
+  [client]
+  (alter-var-root #'*client* (constantly client)))
 
 (defn force-admin-role-right-all
   [data]
@@ -85,15 +97,8 @@
   [ei]
   (ex-data ei))
 
-(defn- check-identity-present
-  [options]
-  (when (and (empty? (:user-name options))
-             (every? empty? (:user-roles options)))
-    (throw (IllegalArgumentException. "A non empty user name or user role is mandatory."))))
-
 (defn find-data
   [client index id options action]
-  (check-identity-present options)
   (let [[type docid] (split-id id)]
     (-> (esu/read client index type docid)
         (.getSourceAsString)
@@ -105,35 +110,34 @@
   (add [_ type data options]
     (let [[id uuid json] (data->doc data)]
       (try
-        (if (esu/create client index (u/de-camelcase type) uuid json)
+        (if (esu/create *client* index-name (u/de-camelcase type) uuid json)
           (response-created id)
           (response-error))
         (catch DocumentAlreadyExistsException e
           (response-conflict id)))))
 
   (retrieve [_ id options]
-    (find-data client index id options "VIEW"))
+    (find-data *client* index-name id options "VIEW"))
 
   (delete [_ {:keys [id]} options]
-    (find-data client index id options "ALL")
+    (find-data *client* index-name id options "ALL")
     (let [[type docid] (split-id id)]
-      (.isFound (esu/delete client index type docid)))
+      (.isFound (esu/delete *client* index-name type docid)))
     (response-deleted id))
 
   (edit [_ {:keys [id] :as data} options]
     (try
-      (find-data client index id options "MODIFY")
+      (find-data *client* index-name id options "MODIFY")
 
       (let [[type docid] (split-id id)]
-        (if (esu/update client index type docid (esu/edn->json data))
+        (if (esu/update *client* index-name type docid (esu/edn->json data))
           (r/response data)
           (response-conflict id)))
       (catch ExceptionInfo ei
         (response-exception ei))))
 
   (query [_ collection-id options]
-    (check-identity-present options)
-    (let [response                (esu/search client index collection-id options)
+    (let [response                (esu/search *client* index-name collection-id options)
           result                  (esu/json->edn (str response))
           count-before-pagination (-> result :hits :total)
           hits                    (->> (-> result :hits :hits)

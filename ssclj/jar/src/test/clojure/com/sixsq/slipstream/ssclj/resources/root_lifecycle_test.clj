@@ -4,7 +4,7 @@
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.root :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -12,12 +12,12 @@
     [com.sixsq.slipstream.ssclj.es.es-util :as esu]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
-(use-fixtures :each t/flush-db-fixture)
+(use-fixtures :each ltu/with-test-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 (defn ring-app []
-  (t/make-ring-app (t/concat-routes [routes])))
+  (ltu/make-ring-app (ltu/concat-routes [routes])))
 
 (deftest lifecycle
 
@@ -95,6 +95,7 @@
           (request uri
                    :request-method method
                    :body (json/write-str {:dummy "value"}))
-          (t/is-status 405)))))
+          (ltu/is-status 405)))))
+
 
 

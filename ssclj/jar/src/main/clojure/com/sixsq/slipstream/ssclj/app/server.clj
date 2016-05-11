@@ -70,6 +70,9 @@
    (log/info "java vendor: " (System/getProperty "java.vendor"))
    (log/info "java version: " (System/getProperty "java.version"))
    (log/info "java classpath: " (System/getProperty "java.class.path"))
+
+   (esb/set-client! (esb/create-client))
+
    (set-persistence-impl)
    (resources/initialize)
    (let [handler (create-ring-handler)]

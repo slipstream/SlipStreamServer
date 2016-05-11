@@ -7,12 +7,10 @@
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.usage :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [exec-request is-count]]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
-    [com.sixsq.slipstream.ssclj.es.es-util :as esu]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 
@@ -27,20 +25,19 @@
 
 (defn insert-daily-summaries
   [f]
-  (db/set-impl! (esb/get-instance))
-  (esu/recreate-index esb/client esb/index)
-  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit-minutes 100.0}}) {:user-name "joe"})
-  (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit-minutes 200.0}}) {:user-name "joe"})
-  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit-minutes 500.0}}) {:user-name "mike"})
-  (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit-minutes 300.0} }) {:user-name "mike"})
-  (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit-minutes 40.0}}) {:user-name "mike"})
-  (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
-  (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
-  (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
-  (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
-  (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
-  (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
-  (f))
+  (ltu/with-test-client
+    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit-minutes 100.0}}) {:user-name "joe"})
+    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit-minutes 200.0}}) {:user-name "joe"})
+    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit-minutes 500.0}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit-minutes 40.0}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
+    (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
+    (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
+    (f)))
 
 (use-fixtures :once insert-daily-summaries)
 
@@ -65,18 +62,18 @@
 
 (deftest get-should-return-most-recent-first-by-user
   (-> (exec-request base-uri "?$filter=frequency='daily'" "joe")
-      (t/is-key-value :count 2)
+      (ltu/is-key-value :count 2)
       are-desc-dates?
       (are-all-usages? :user "joe"))
 
   (-> (exec-request base-uri "?$filter=frequency='daily'" "mike")
-      (t/is-key-value :count 3)
+      (ltu/is-key-value :count 3)
       are-desc-dates?
       (are-all-usages? :user "mike")))
 
 (deftest acl-filter-cloud-with-role
   (-> (exec-request base-uri "?$filter=frequency='daily'" "XXX exo1 exo")
-      (t/is-key-value :count 3)
+      (ltu/is-key-value :count 3)
       are-desc-dates?
       (are-all-usages? :cloud "exo")))
 
@@ -95,12 +92,12 @@
 (deftest get-uuid-with-correct-authn
   (let [[uuid full-uuid] (last-uuid)]
     (-> (exec-request (str base-uri "/" uuid) "" "john exo")
-        (t/is-key-value :id full-uuid)
-        (t/is-status 200))))
+        (ltu/is-key-value :id full-uuid)
+        (ltu/is-status 200))))
 
 (deftest get-uuid-without-correct-authn
   (let [[uuid _] (last-uuid)]
-    (t/is-status (exec-request (str base-uri "/" uuid) "" "intruder") 403)))
+    (ltu/is-status (exec-request (str base-uri "/" uuid) "" "intruder") 403)))
 
 (def ^:private are-counts
   (partial tu/are-counts :usages base-uri))
@@ -131,7 +128,7 @@
 (defn- expect-pagination
   [code query-strings]
   (doseq [query-string query-strings]
-    (t/is-status (exec-request base-uri query-string "mike") code)))
+    (ltu/is-status (exec-request base-uri query-string "mike") code)))
 
 (deftest pagination-wrong-query-ignores-invalid
   (expect-pagination 200 ["?$first=a&$last=10"])

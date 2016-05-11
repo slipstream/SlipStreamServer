@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.db.impl :as db]))
 
-(use-fixtures :each ltu/flush-db-fixture)
+(use-fixtures :each ltu/with-test-client-fixture)
 
 (def jack-exoscale
   {

@@ -6,11 +6,9 @@
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params :refer [wrap-params]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
-    [com.sixsq.slipstream.ssclj.es.es-util :as esu]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.event :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [ring-app urlencode-params is-count exec-request]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
@@ -35,9 +33,6 @@
 
 (defn insert-some-events
   []
-  (db/set-impl! (esb/get-instance))
-  (esu/recreate-index esb/client esb/index)
-
   (let [state (-> (session (ring-app))
                   (content-type "application/json")
                   (header authn-info-header "joe"))]
@@ -48,8 +43,9 @@
 
 (defn fixture-insert-some-events
   [f]
-  (insert-some-events)
-  (f))
+  (ltu/with-test-client
+    (insert-some-events)
+    (f)))
 
 (use-fixtures :once fixture-insert-some-events)
 

@@ -4,7 +4,7 @@
     [clojure.java.io :as io]
     [clojure.data.json :as json]
     [clojure.tools.logging :as log]
-
+    [environ.core :as env]
     [me.raynes.fs :as fs]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.es.es-pagination :as pg]
@@ -25,7 +25,11 @@
     (org.elasticsearch.action ActionRequestBuilder)
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
     (org.elasticsearch.index.query QueryBuilders)
-    (org.elasticsearch.index IndexNotFoundException)))
+    (org.elasticsearch.index IndexNotFoundException)
+    (org.elasticsearch.client.transport TransportClient)
+    (org.elasticsearch.common.transport InetSocketTransportAddress)
+    (java.net InetAddress)
+    (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)))
 
 (defn json->edn [json]
   (when json (json/read-str json :key-fn keyword)))
@@ -130,7 +134,6 @@
 ;; Util functions
 ;;
 
-
 (defn create-test-node
   "Creates a local elasticsearch node which holds data but
    cannot be accessed through the HTTP protocol."
@@ -154,8 +157,22 @@
       io/resource
       slurp))
 
+(defn index-exists?
+  [^Client client index-name]
+  (let [exists? (.. client
+                  (admin)
+                  (indices)
+                  (exists (IndicesExistsRequest. (into-array String [index-name])))
+                  (get)
+                  (isExists))]
+      (log/info (str "Index "
+                     index-name
+                     (if exists? " already existing." " does not exist.")))
+      exists?))
+
 (defn create-index
   [^Client client index-name]
+  (log/info (str "Creating index " index-name))
   (let [settings (.. (Settings/builder)
                      (put "index.max_result_window" pg/max-result-window)
                      (put "index.number_of_shards" 3)
@@ -168,9 +185,12 @@
         (addMapping "_default_" mapping-not-analyzed)
         (get))))
 
-(defn- throw-if-not-green [status]
-  (or (= ClusterHealthStatus/GREEN status)
-      (throw (ex-info "status is not GREEN" {:status (str status)}))))
+(def ^:private ok-health-statuses #{ClusterHealthStatus/GREEN ClusterHealthStatus/YELLOW})
+
+(defn- throw-if-cluster-not-healthy
+  [status]
+  (when-not (ok-health-statuses status)
+      (throw (ex-info "status is not accepted" {:status (str status)}))))
 
 (defn cluster-health
   [^Client client indexes]
@@ -185,11 +205,27 @@
 (defn node-client [^Node node]
   (when node (.client node)))
 
+(defn create-es-client
+  "Creates a client connecting to an instance of Elastic Search
+  Parameters (host and port) are taken from environment variables."
+  []
+  (let [es-host (env/env :es-host)
+        es-port (env/env :es-port)]
+    (log/info (str "Will create client on " es-host ", port " es-port))
+    (.. (TransportClient/builder)
+        (build)
+        (addTransportAddress (InetSocketTransportAddress. (InetAddress/getByName es-host)
+                                                          (read-string es-port))))))
+
+(defn create-test-es-client
+  []
+  (node-client (create-test-node)))
+
 (defn wait-for-cluster
   [^Client client]
   (let [status (.. (cluster-health client [])
                    (getStatus))]
-    (throw-if-not-green status)))
+    (throw-if-cluster-not-healthy status)))
 
 (defn wait-for-index
   [^Client client index]
@@ -197,14 +233,15 @@
                    (getIndices)
                    (get index)
                    (getStatus))]
-    (throw-if-not-green status)))
+    (throw-if-cluster-not-healthy status)))
 
-
-(defn recreate-index
-  [^Client client index]
-  (.. client
-      (admin)
-      (indices)
-      (delete (DeleteIndexRequest. index))
-      (get))
-  (create-index client index))
+(defn reset-index
+  [^Client client index-name]
+  (when (index-exists? client index-name)
+    (.. client
+        (admin)
+        (indices)
+        (delete (DeleteIndexRequest. index-name))
+        (get)))
+  (create-index client index-name)
+  (println "Index resetted"))

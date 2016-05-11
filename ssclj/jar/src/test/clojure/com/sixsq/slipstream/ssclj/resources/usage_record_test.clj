@@ -12,7 +12,7 @@
     [com.sixsq.slipstream.ssclj.resources.usage-record :refer :all]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
@@ -21,7 +21,7 @@
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.es.es-util :as esu]))
 
-(use-fixtures :each t/flush-db-fixture)
+(use-fixtures :each ltu/with-test-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
@@ -36,7 +36,7 @@
       (wrap-json-response {:pretty true :escape-non-ascii true})))
 
 (defn ring-app []
-  (make-ring-app (t/concat-routes routes/final-routes)))
+  (make-ring-app (ltu/concat-routes routes/final-routes)))
 
 (def valid-usage-record
   {:acl                 {:owner {:type "USER" :principal "joe"}
@@ -71,15 +71,15 @@
   (-> (session (ring-app))
       (content-type "application/json")
       (request base-uri)
-      t/body->json
-      (t/is-status 200)))
+      ltu/body->json
+      (ltu/is-status 200)))
 
 (deftest only-snake-url-succeeds
   (-> (session (ring-app))
       (content-type "application/json")
       (request (str p/service-context resource-name))
-      t/body->json
-      (t/is-status 405)))
+      ltu/body->json
+      (ltu/is-status 405)))
 
 (deftest test-post-when-authenticated
   (-> (session (ring-app))
@@ -88,8 +88,8 @@
       (request base-uri
                :request-method :post
                :body (json/write-str valid-usage-record))
-      t/body->json
-      (t/is-status 201)))
+      ltu/body->json
+      (ltu/is-status 201)))
 
 (deftest test-post-when-NOT-authenticated
   (-> (session (ring-app))
@@ -97,8 +97,8 @@
       (request base-uri
                :request-method :post
                :body (json/write-str valid-usage-record))
-      t/body->json
-      (t/is-status 201)))
+      ltu/body->json
+      (ltu/is-status 201)))
 
 (deftest test-post-invalid-record
   (-> (session (ring-app))
@@ -106,8 +106,8 @@
       (request base-uri
                :request-method :post
                :body (json/write-str invalid-usage-record))
-      t/body->json
-      (t/is-status 400)))
+      ltu/body->json
+      (ltu/is-status 400)))
 
 (deftest test-edit
   (let [id (-> (session (ring-app))
@@ -116,7 +116,7 @@
                (request base-uri
                         :request-method :post
                         :body (json/write-str valid-usage-record))
-               t/body->json
+               ltu/body->json
                (get-in [:response :body :resource-id]))
         uri (str p/service-context id)]
 
@@ -127,16 +127,16 @@
         (request uri
                  :request-method :put
                  :body (json/write-str closed-usage-record))
-        t/body->json
-        (t/is-status 200)))
+        ltu/body->json
+        (ltu/is-status 200)))
 
   ; get modified usage-record
   (let [urs (-> (session (ring-app))
                 (content-type "application/json")
                 (header authn-info-header "joe ADMIN")
                 (request base-uri :request-method :get)
-                t/body->json
-                (t/is-key-value :count 1)
+                ltu/body->json
+                (ltu/is-key-value :count 1)
                 (get-in [:response :body :usage-records]))]
 
     (is (= 1 (count urs)))
@@ -149,8 +149,8 @@
       (request (str p/service-context "wrong-id")
                :request-method :put
                :body (json/write-str closed-usage-record))
-      t/body->json
-      (t/is-status 405)))
+      ltu/body->json
+      (ltu/is-status 405)))
 
 (deftest test-last-record
   (let [state (-> (session (ring-app))

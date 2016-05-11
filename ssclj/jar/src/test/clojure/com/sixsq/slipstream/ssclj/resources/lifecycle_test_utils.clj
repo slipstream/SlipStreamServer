@@ -15,16 +15,6 @@
     [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.es.es-util :as esu]))
 
-(defn flush-db-fixture
-  [f]
-  (try
-    (db/set-impl! (esb/get-instance))
-    (esu/recreate-index esb/client esb/index)
-    (println "Recreated index DONE")
-    (catch Exception e
-      (println "Ignoring "(.getMessage e))))
-  (f))
-
 (defn body->json
   [m]
 
@@ -103,7 +93,6 @@
 
 (defn make-ring-app [resource-routes]
   (db/set-impl! (esb/get-instance))
-
   (-> resource-routes
       (wrap-exceptions)
       (wrap-cimi-params)
@@ -117,4 +106,16 @@
   [type]
   (println "DUMP")
   (clojure.pprint/pprint
-    (esu/dump esb/client esb/index type)))
+    (esu/dump esb/*client* esb/index-name type)))
+
+(defmacro with-test-client
+  [& body]
+  `(binding [esb/*client* (esb/create-test-client)]
+     (db/set-impl! (esb/get-instance))
+     (esu/reset-index esb/*client* esb/index-name)
+     ~@body))
+
+(defn with-test-client-fixture
+  [f]
+  (with-test-client
+    (f)))
