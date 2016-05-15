@@ -249,7 +249,7 @@ public abstract class RunFactory {
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_STATE_KEY, Run.INITIAL_NODE_STATE,
 				RuntimeParameter.GLOBAL_STATE_DESCRIPTION);
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY, "",
-				RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION);
+				RuntimeParameter.GLOBAL_NODE_GROUPS_DESCRIPTION).setIsSet(true);
 
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_URL_SERVICE_KEY, "",
 				RuntimeParameter.GLOBAL_URL_SERVICE_DESCRIPTION);

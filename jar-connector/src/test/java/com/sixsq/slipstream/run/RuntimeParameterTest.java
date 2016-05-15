@@ -52,18 +52,15 @@ public class RuntimeParameterTest {
 	private static User user;
 
 	@BeforeClass
-	public static void setupClass() throws ValidationException,
-			InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException,
-			ClassNotFoundException {
+	public static void setupClass() throws ValidationException, InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 
 		Event.muteForTests();
 		user = CommonTestUtil.createTestUser();
 
 		CommonTestUtil.addSshKeys(user);
 
-		CommonTestUtil
-				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+		CommonTestUtil.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 	}
 
 	@AfterClass
@@ -93,8 +90,7 @@ public class RuntimeParameterTest {
 		DeploymentModule deployment = CommonTestUtil.createDeployment();
 
 		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
-		Metadata parameter = run.assignRuntimeParameter("node.1:dummy", "ok",
-				null);
+		Metadata parameter = run.assignRuntimeParameter("node.1:dummy", "ok", null);
 
 		String serialization = SerializationUtil.toXmlString(parameter);
 
@@ -136,8 +132,7 @@ public class RuntimeParameterTest {
 		for (String name : invalidNames) {
 			try {
 				new RuntimeParameter(null, name, "ok", "ok");
-				fail("invalid RuntimeParameter name did not throw an exception: "
-						+ name);
+				fail("invalid RuntimeParameter name did not throw an exception: " + name);
 			} catch (ValidationException e) {
 				// OK.
 			}
@@ -146,12 +141,10 @@ public class RuntimeParameterTest {
 
 	@Test
 	public void extractParameterParts() {
-		assertThat(RuntimeParameter.extractNodeNamePart("node:param"),
-				is("node"));
+		assertThat(RuntimeParameter.extractNodeNamePart("node:param"), is("node"));
 		assertNull(RuntimeParameter.extractNodeNamePart("something"));
 
-		assertThat(RuntimeParameter.extractParamNamePart("node:param"),
-				is("param"));
+		assertThat(RuntimeParameter.extractParamNamePart("node:param"), is("param"));
 		assertNull(RuntimeParameter.extractParamNamePart("something"));
 	}
 

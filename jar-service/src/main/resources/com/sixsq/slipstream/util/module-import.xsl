@@ -64,6 +64,14 @@
 
 	<xsl:template match="runs" />
 
+	<xsl:template match="inputParametersExpanded" />
+
+	<xsl:template match="packagesExpanded" />
+
+	<xsl:template match="targetsExpanded" />
+
+	<xsl:template match="buildStates" />
+
    	<xsl:template match="node()">
   		<xsl:copy>
 			<xsl:if test="name(.) = 'cloudImageIdentifier'">

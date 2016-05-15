@@ -72,8 +72,11 @@ public class RunView {
 	@Attribute(required=false)
 	private String serviceUrl;
 
-	public RunView(String resourceUrl, String uuid, String moduleResourceUri,
-			String status, Date startTime, String username, RunType type, String cloudServiceNames, String abort) {
+	@Attribute(required=false)
+	private Long activeVm;
+
+	public RunView(String resourceUrl, String uuid, String moduleResourceUri, String status, Date startTime,
+				   String username, RunType type, String cloudServiceNames, String abort, Long activeVm) {
 		this.resourceUri = resourceUrl;
 		this.uuid = uuid;
 		this.moduleResourceUri = moduleResourceUri;
@@ -82,6 +85,7 @@ public class RunView {
 		this.type = type;
 		this.cloudServiceNames = cloudServiceNames;
 		this.abort = abort;
+		this.activeVm = activeVm;
 
         if (startTime != null) {
             this.startTime = (Date) startTime.clone();
@@ -91,8 +95,8 @@ public class RunView {
 	}
 
 	public RunView copy() {
-		RunView copy = new RunView(resourceUri, uuid, moduleResourceUri,
-				status, startTime, username, type, cloudServiceNames, abort);
+		RunView copy = new RunView(resourceUri, uuid, moduleResourceUri, status, startTime, username, type,
+				cloudServiceNames, abort, activeVm);
 		copy.setHostname(hostname);
 		copy.setTags(tags);
 		return copy;
@@ -144,6 +148,10 @@ public class RunView {
 
 	public void setAbort(String abort) {
 		this.abort = abort;
+	}
+
+	public Long getActiveVm() {
+		return activeVm;
 	}
 
 }

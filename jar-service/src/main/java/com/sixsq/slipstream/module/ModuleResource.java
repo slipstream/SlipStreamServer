@@ -456,6 +456,17 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			}
 		}
 
+                // This "noop" disrupts some optimization or bug in the
+                // OpenJDK JVM.  If this isn't present, then unit tests
+                // intermittently fail with complaints that the request
+                // doesn't contain a form entity.  Note that this doesn't
+                // happen with the Oracle JVM.
+                //
+                // If we were sticking with Java in the longterm, this
+                // would probably warrant more investigation, but the
+                // kludge is probably sufficient for now.
+                entity.toString();
+                
 		Form form = extractFormFromEntity(entity);
 		ModuleFormProcessor processor = ModuleFormProcessor
 				.createFormProcessorInstance(getCategory(form), getUser());

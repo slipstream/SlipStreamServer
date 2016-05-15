@@ -21,8 +21,10 @@ package com.sixsq.slipstream.run;
  */
 
 import java.util.List;
+import java.util.Map;
 
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.Vm;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -74,8 +76,10 @@ public class RunViewList {
 		this.limit = queryParameters.limit;
 		this.cloud = queryParameters.cloud;
 
+		Map<String, Long> vmCountPerRun = Vm.countPerRun(queryParameters.user);
+
 		totalCount = Run.viewListCount(queryParameters);
-		runs = Run.viewList(queryParameters);
+		runs = Run.viewList(queryParameters, vmCountPerRun);
 		count = runs.size();
 	}
 
