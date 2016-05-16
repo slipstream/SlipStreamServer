@@ -18,7 +18,7 @@
 (.add db "Thing" data)
 (let [response-delete (.delete db data)]
   ;; When we delete an existing data
-  (expect 204 (:status response-delete)))
+  (expect 200 (:status response-delete)))
 
 (try
   (.retrieve db 123)

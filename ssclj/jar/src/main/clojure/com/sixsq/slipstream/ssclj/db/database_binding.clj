@@ -146,7 +146,7 @@
 
 (defn- response-deleted
   [id]
-  (u/map-response (str id " deleted") 204 id))
+  (u/map-response (str id " deleted") 200 id))
 
 (deftype DatabaseBinding []
   Binding
