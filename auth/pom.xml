@@ -3,7 +3,7 @@
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>auth</artifactId>
   <packaging>jar</packaging>
-  <version>3.4-SNAPSHOT</version>
+  <version>3.4</version>
   <name>auth</name>
   <description>Authentication Service</description>
   <url>http://sixsq.com</url>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.4-SNAPSHOT</version>
+    <version>3.4</version>
   </parent>
 
   <licenses>
