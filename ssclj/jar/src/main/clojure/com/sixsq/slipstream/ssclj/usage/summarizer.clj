@@ -6,7 +6,9 @@
     [clj-time.core :as time]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.usage.summary :as s])
+    [com.sixsq.slipstream.ssclj.usage.summary :as s]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
+    [com.sixsq.slipstream.ssclj.db.impl :as db])
   (:gen-class))
 
 (defn- exception-from-errors
@@ -121,6 +123,8 @@
 (defn -main
   "See tests for examples on how to call from clojure REPL"
   [& args]
+  (when-not esb/*client*
+    (esb/set-client! (esb/create-client)))
   (let [[start frequency except-users grouped-by n] (parse-args args)]
     (doseq [[start end] (backward-periods start n frequency)]
       (println "summarizing " start " -> " end)

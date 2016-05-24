@@ -47,4 +47,4 @@ code=$(curl -X DELETE --write-out "%{http_code}\n" --silent --output /dev/null $
 assert_code 403 $code "specific event resource can *NOT* be deleted by another authenticated user"
 
 code=$(curl -X DELETE --write-out "%{http_code}\n" --silent --output /dev/null $url -uuser1:123456)
-assert_code 204 $code "specific event resource can be deleted by its owner"
+assert_code 200 $code "specific event resource can be deleted by its owner"

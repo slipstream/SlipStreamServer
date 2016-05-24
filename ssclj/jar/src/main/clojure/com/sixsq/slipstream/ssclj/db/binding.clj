@@ -48,7 +48,8 @@
     [this data options]
     "This function removes the given resource in the database.
 
-     On success, the function must return a 204 (no content) ring response.
+     On success, the function must return a 200 ring response with a map
+     containing status, message, and resource ID.
 
      On failure, the function must throw an ex-info containing the error
      ring response.  If the resource does not exist, then a 404 response
