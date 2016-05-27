@@ -46,7 +46,7 @@
            (dissoc created-user :CREATION :PASSWORD)))))
 
 (deftest match-existing-user
-  (th/add-user-for-test! {:user-name "joe" :password "secret" :email "st@sixsq.com" :state "ACTIVE"})
+  (th/add-user-for-test! {:username "joe" :password "secret" :email "st@sixsq.com" :state "ACTIVE"})
   (let [users-before-match (kc/select db/users)]
     (is (= 1 (count users-before-match)))
     (is (nil? (:GITHUBLOGIN (first users-before-match)))))
@@ -56,7 +56,7 @@
     (is (= "st" (:GITHUBLOGIN (first users-after-match))))))
 
 (deftest match-already-mapped
-  (let [user-info {:user-name "joe" :password "secret"
+  (let [user-info {:username "joe" :password "secret"
                    :github-id "st" :email "st@sixsq.com" :state "ACTIVE"}
         _ (th/add-user-for-test! user-info)
         [user] (kc/select db/users)]
@@ -68,7 +68,7 @@
     (is (= [(assoc user :CYCLONELOGIN "st")] (kc/select db/users)))))
 
 (deftest match-existing-deleted-user
-  (th/add-user-for-test! {:user-name "st" :password "secret" :email "st@sixsq.com" :state "DELETED"})
+  (th/add-user-for-test! {:username "st" :password "secret" :email "st@sixsq.com" :state "DELETED"})
   (let [users-before-match (kc/select db/users)]
     (is (= 1 (count users-before-match))))
   (match-external-user! :github "st" "st@sixsq.com")

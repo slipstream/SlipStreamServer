@@ -27,7 +27,7 @@ public class AuthProxy {
     public static final String CYCLONE_AUTHENTICATION = "cyclone";
 
     /**
-     * POST to http://localhost:8201/auth/login with user-name, password and authn-method parameters
+     * POST to http://localhost:8201/auth/login with username, password and authn-method parameters
      *
      * @param username
      * @param password
@@ -49,7 +49,7 @@ public class AuthProxy {
             resource = new ClientResource(createContext(), AUTH_SERVER + "/login");
             resource.setRetryOnError(false);
 
-            resource.addQueryParameter("user-name", username);
+            resource.addQueryParameter("username", username);
             resource.addQueryParameter("password", password);
             resource.addQueryParameter("authn-method", authenticationMethod);
 
