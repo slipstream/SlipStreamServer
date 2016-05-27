@@ -43,7 +43,7 @@
     q))
 
 (defn strip-quotes [s]
-  (s/substring s 1 (- (s/length s) 1)))
+  (s/substring s 1 (dec (s/length s))))
 
 (defmulti convert
           (fn [v]

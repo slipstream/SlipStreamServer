@@ -78,8 +78,7 @@
 
 (defn response-error
   []
-  (-> "Resource not created"
-      (cu/map-response 500 nil)))
+  (cu/map-response "Resource not created" 500 nil))
 
 (defn response-conflict
   [id]

@@ -59,8 +59,7 @@
     (let [skeleton {:acl         collection-acl
                     :resourceURI collection-uri
                     :id          (u/de-camelcase resource-name)}
-          entries-with-operations (->> entries
-                                       (map #(crud/set-operations % request)))]
+          entries-with-operations (map #(crud/set-operations % request) entries)]
       (-> skeleton
           (crud/set-operations request)
           (assoc collection-key entries-with-operations)))))
