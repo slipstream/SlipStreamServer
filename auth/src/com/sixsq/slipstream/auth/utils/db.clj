@@ -129,9 +129,9 @@
 (defn find-roles-for-user-name
   [user-name]
   (init)
-  (let [user-entry (-> (kc/select users
+  (let [user-entry (first
+                    (kc/select users
                                   (kc/fields :ROLES :ISSUPERUSER)
                                   (kc/where {:NAME  user-name
-                                             :STATE [in active-user]}))
-                       first)]
+                                             :STATE [in active-user]})))]
     (format-roles (:ISSUPERUSER user-entry) (:ROLES user-entry))))
