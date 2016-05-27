@@ -32,10 +32,10 @@
 
 (expect (valid? valid-event))
 
-(doseq [valid-severity ["critical" "high" "medium" "low"]]
-  (expect (valid? (assoc valid-event :severity valid-severity))))
+(expect valid? (from-each [valid-severity ["critical" "high" "medium" "low"]]
+                          (assoc valid-event :severity valid-severity)))
 (expect (invalid? (assoc valid-event :severity "unknown-severity")))
 
-(doseq [valid-type ["state" "alarm"]]
-  (expect (valid? (assoc valid-event :type valid-type))))
+(expect valid? (from-each [valid-type ["state" "alarm"]]
+                          (assoc valid-event :type valid-type)))
 (expect (invalid? (assoc valid-event :type "unknown")))

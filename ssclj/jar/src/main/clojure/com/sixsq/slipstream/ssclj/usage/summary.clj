@@ -4,7 +4,8 @@
     [clj-time.core :as t]
     [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]))
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 ;;
 ;; Cuts (truncate start or end timestamp) and aggregates usage records inside an interval.
@@ -16,26 +17,26 @@
   [start-time end-time]
   (fn [usage-record]
     (and
-      (t/before? (u/to-time (:start_timestamp usage-record)) (u/to-time end-time))
+      (t/before? (u/to-time (:start-timestamp usage-record)) (u/to-time end-time))
       (or
-        (nil? (:end_timestamp usage-record))
-        (t/after? (u/to-time (:end_timestamp usage-record)) (u/to-time start-time))))))
+        (nil? (:end-timestamp usage-record))
+        (t/after? (u/to-time (:end-timestamp usage-record)) (u/to-time start-time))))))
 
 (defn- filter-inside-interval
-  [start-time end-time usage_records]
-  (filter (intersect? start-time end-time) usage_records))
+  [start-time end-time usage-records]
+  (filter (intersect? start-time end-time) usage-records))
 
 (defn- shift-start
   [start]
   (fn [record]
-    (let [record-start-time (:start_timestamp record)]
-      (assoc record :start_timestamp (u/max-time start record-start-time)))))
+    (let [record-start-time (:start-timestamp record)]
+      (assoc record :start-timestamp (u/max-time start record-start-time)))))
 
 (defn- shift-end
   [end]
   (fn [record]
-    (let [record-end-time (:end_timestamp record)]
-      (assoc record :end_timestamp (u/min-time end record-end-time)))))
+    (let [record-end-time (:end-timestamp record)]
+      (assoc record :end-timestamp (u/min-time end record-end-time)))))
 
 (defn truncate
   [start-time end-time records]
@@ -51,23 +52,23 @@
 
 (defn contribution
   [record]
-  (let [value      (:metric_value record)
-        nb-minutes (-> (u/to-interval (:start_timestamp record) (:end_timestamp record))
+  (let [value      (:metric-value record)
+        nb-minutes (-> (u/to-interval (:start-timestamp record) (:end-timestamp record))
                        t/in-seconds
                        (/ 60.0))]
     (* value nb-minutes)))
 
 (defn- comsumption
   [record]
-  {:unit_minutes (contribution record)})
+  {:unit-minutes (contribution record)})
 
 (defn- sum-consumptions
   [cons1 cons2]
-  (update-in cons1 [:unit_minutes] #(+ % (:unit_minutes cons2))))
+  (update-in cons1 [:unit-minutes] #(+ % (:unit-minutes cons2))))
 
 (defn- merge-summary-record
   [summary record]
-  (let [record-metric      (:metric_name record)
+  (let [record-metric      (:metric-name record)
         record-comsumption (comsumption record)]
     (if-let [consumption-to-increase (get-in summary [:usage record-metric])]
       (assoc-in summary [:usage record-metric] (sum-consumptions consumption-to-increase record-comsumption))
@@ -79,8 +80,8 @@
       (select-keys grouping-cols)
       (assoc :grouping (s/join "," (map name grouping-cols)))
       (assoc :frequency (name frequency))
-      (assoc :start_timestamp start)
-      (assoc :end_timestamp end)
+      (assoc :start-timestamp start)
+      (assoc :end-timestamp end)
       (assoc :usage {})))
 
 (defn- merge-usages
@@ -112,6 +113,6 @@
     (log/info "Will persist" (count summaries) "summaries for "
               (u/disp-interval start-time end-time) "except" except-users ", on" grouping-cols)
     (doseq [summary summaries]
-      (rc/insert-summary! summary))))
+      (rc/insert-summary! summary {:user-roles ["ADMIN"]}))))
 
 

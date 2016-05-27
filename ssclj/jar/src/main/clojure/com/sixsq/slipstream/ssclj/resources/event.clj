@@ -1,9 +1,7 @@
 (ns
   com.sixsq.slipstream.ssclj.resources.event
   (:require
-    [clojure.tools.logging :as log]
     [schema.core :as s]
-
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
@@ -50,7 +48,6 @@
 ;;
 
 (def validate-fn (u/create-validation-fn Event))
-
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -100,18 +97,7 @@
 ;;
 ;; collection
 ;;
-
-(defn sort-by-timestamps-desc
-  [events]
-  (->> events
-       (sort-by :timestamp)
-       reverse))
-
-(defmethod crud/sort-collection resource-name
-  [request events]
-  (sort-by-timestamps-desc events))
-
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 (defmethod crud/query resource-name
   [request]
-  (query-impl request))
+  (query-impl (update-in request [:cimi-params] #(assoc % :orderby [["timestamp" :desc]]))))

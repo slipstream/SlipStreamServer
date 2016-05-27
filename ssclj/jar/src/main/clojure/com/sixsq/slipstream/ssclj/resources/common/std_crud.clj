@@ -3,17 +3,11 @@
   (:require
     [clojure.walk :as w]
     [clojure.pprint :refer [pprint]]
-    [clojure.tools.logging :as log]
-
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-
-    [com.sixsq.slipstream.ssclj.resources.common.cimi-filter :as cf]
-    [com.sixsq.slipstream.ssclj.resources.common.pagination :as pg]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    ))
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]))
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
@@ -27,14 +21,14 @@
           (assoc :resourceURI resource-uri)
           u/update-timestamps
           (crud/add-acl request)
-          crud/validate))))
+          crud/validate)
+      {})))
 
 (defn retrieve-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
     (-> (str (u/de-camelcase resource-name) "/" uuid)
-        db/retrieve
-        (a/can-view? request)
+        (db/retrieve request)
         (crud/set-operations request)
         (u/json-response))))
 
@@ -42,29 +36,22 @@
   [resource-name]
   (fn [{{uuid :uuid} :params body :body :as request}]
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
-                      (db/retrieve)
-                      (a/can-modify? request))]
-      (->> body
-           (u/strip-service-attrs)
-           (merge current)
-           (u/update-timestamps)
-           (crud/validate)
-           (db/edit)
-           (u/json-response)))))
+                      (db/retrieve request)
+                      (a/can-modify? request))
+          merged (merge current body)]
+      (-> merged
+          (u/update-timestamps)
+          (crud/validate)
+          (db/edit request)
+          (u/json-response)))))
 
 (defn delete-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
     (-> (str (u/de-camelcase resource-name) "/" uuid)
-        (db/retrieve)
+        (db/retrieve {})
         (a/can-modify? request)
-        (db/delete))))
-
-(defn- paginate-post-sql
-  [request entries]
-  (pg/paginate (get-in request [:cimi-params :first])
-               (get-in request [:cimi-params :last])
-               entries))
+        (db/delete {}))))
 
 (defn collection-wrapper-fn
   [resource-name collection-acl collection-uri collection-key]
@@ -72,38 +59,22 @@
     (let [skeleton {:acl         collection-acl
                     :resourceURI collection-uri
                     :id          (u/de-camelcase resource-name)}
-          paginated-entries (->> entries
-                                 (paginate-post-sql request)
-                                 (map #(crud/set-operations % request)))]
+          entries-with-operations (map #(crud/set-operations % request) entries)]
       (-> skeleton
           (crud/set-operations request)
-          (assoc :count (count entries))
-          (assoc collection-key paginated-entries)))))
+          (assoc collection-key entries-with-operations)))))
 
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
-  (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)]
-    (fn [request]
+  (fn [request]
+    (a/can-view? {:acl collection-acl} request)
+    (let [wrapper-fn                          (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)
+          options                             (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+          [count-before-pagination entries]   (db/query resource-name options)
+          wrapped-entries                     (wrapper-fn request entries)
+          entries-and-count                   (assoc wrapped-entries :count count-before-pagination)]
+      (u/json-response entries-and-count))))
 
-      (a/can-view? {:acl collection-acl} request)
-
-      (->> (select-keys request [:identity :query-params :cimi-params])
-
-           (db/query resource-name)
-
-           ;; filtering
-           (cf/cimi-filter-tree (get-in request [:cimi-params :filter]))
-
-           ;; ordering
-           (crud/sort-collection request)
-
-           ;; access controlling
-           (filter #(a/authorized-view? % request))
-
-           ;; pagination and inclusion in skeleton
-           (wrapper-fn request)
-
-           (u/json-response)))))
 
 (defn resolve-href
   "Pulls in the resource identified by the value of the :href key
@@ -113,7 +84,7 @@
    returned unchanged."
   [{:keys [href] :as resource}]
   (if href
-    (-> (db/retrieve href)
+    (-> (db/retrieve href {})
         (u/strip-common-attrs)
         (merge resource)
         (dissoc :href))

@@ -1,28 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.usage.summary-volume-test
   (:refer-clojure :exclude [update])
   (:require
+    [clojure.test :refer :all]
+    [clj-time.core :as t]
     [com.sixsq.slipstream.ssclj.usage.summary :refer :all]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [clojure.test :refer :all]
-    [clojure.tools.logging :as log]
-    [korma.core :refer :all]
-    [clj-time.core :as t]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]))
 
-(defn delete-all [f]
-  (rc/-init)
-  (defentity acl)
-  (defentity usage_records)
-  (defentity usage_summaries)
-  (delete usage_records)
-  (delete usage_summaries)
-  (delete acl)
-  (log/debug "All usage_records deleted")
-  (log/debug "usage records " (select usage_records))
-  (log/debug "usage summaries " (select usage_summaries))
-  (f))
-(use-fixtures :each delete-all)
+(use-fixtures :each ltu/with-test-client-fixture)
 
 (def jack-exoscale
   {
@@ -56,7 +43,7 @@
               :value 510.0}]})
 
 (def event-end-template
-  {:cloud_vm_instanceid "exoscale-ch-gva:abcd"})
+  {:cloud-vm-instanceid "exoscale-ch-gva:abcd"})
 
 (defn fill-joe
   [nb-days]
@@ -70,29 +57,29 @@
           vm-joe-aws-id (str "aws" day)
 
           joe-exo-start (assoc joe-exoscale
-                          :start_timestamp (u/to-ISO-8601 day-9h)
-                          :cloud_vm_instanceid vm-joe-exo-id)
-          joe-exo-end   {:end_timestamp       (u/to-ISO-8601 day-14h)
-                         :cloud_vm_instanceid vm-joe-exo-id
+                          :start-timestamp (u/to-ISO-8601 day-9h)
+                          :cloud-vm-instanceid vm-joe-exo-id)
+          joe-exo-end   {:end-timestamp       (u/to-ISO-8601 day-14h)
+                         :cloud-vm-instanceid vm-joe-exo-id
                          :metrics             [{:name "nb-cpu"}
                                                {:name "RAM-GB"}
                                                {:name "disk-GB"}]}
 
           joe-aws-start (assoc joe-aws
-                          :start_timestamp (u/to-ISO-8601 day-11h)
-                          :cloud_vm_instanceid vm-joe-aws-id)
-          joe-aws-end   {:end_timestamp       (u/to-ISO-8601 day-13h)
-                         :cloud_vm_instanceid vm-joe-aws-id
+                          :start-timestamp (u/to-ISO-8601 day-11h)
+                          :cloud-vm-instanceid vm-joe-aws-id)
+          joe-aws-end   {:end-timestamp       (u/to-ISO-8601 day-13h)
+                         :cloud-vm-instanceid vm-joe-aws-id
                          :metrics             [{:name "nb-cpu"}
                                                {:name "RAM-GB"}
                                                {:name "disk-GB"}]}
 
           ]
-      (rc/-insertStart joe-exo-start)
-      (rc/-insertStart joe-aws-start)
+      (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
+      (rc/insert-usage-event joe-aws-start {:user-roles ["ADMIN"]})
 
-      (rc/-insertEnd joe-exo-end)
-      (rc/-insertEnd joe-aws-end))))
+      (rc/insert-usage-event joe-exo-end {:user-roles ["ADMIN"]})
+      (rc/insert-usage-event joe-aws-end {:user-roles ["ADMIN"]}))))
 
 (defn summarize-joe-weekly
   [nb-weeks]
@@ -101,22 +88,25 @@
           end-week   (t/plus start-week (t/weeks 1))]
       (summarize-and-store! (u/to-ISO-8601 start-week) (u/to-ISO-8601 end-week) :daily [:user :cloud]))))
 
+(defn- summaries-from-db
+  []
+  (second (db/query "usage" {:user-roles ["ADMIN"]})))
+
 (defn check-summaries
   []
-  (doseq [summary (select usage_summaries)]
+  (doseq [summary (summaries-from-db)]
     (if (= "exoscale-ch-gva" (:cloud summary))
       (do
         (is (= "joe" (:user summary)))
-        (is (= {:disk-GB {:unit_minutes 211050.0},
-                :RAM-GB  {:unit_minutes 16800.0},
-                :nb-cpu  {:unit_minutes 4200.0}} (u/deserialize (:usage summary)))))
+        (is (= {:disk-GB {:unit-minutes 211050.0},
+                         :RAM-GB  {:unit-minutes 16800.0},
+                         :nb-cpu  {:unit-minutes 4200.0}} (:usage summary))))
       (do
         (is (= "aws" (:cloud summary)))
         (is (= "joe" (:user summary)))
-        (is (= {:disk-GB {:unit_minutes 428400.0},
-                :RAM-GB  {:unit_minutes 13440.0},
-                :nb-cpu  {:unit_minutes 3360.0}} (u/deserialize (:usage summary)))))
-      )))
+        (is (= {:disk-GB {:unit-minutes 428400.0},
+                         :RAM-GB  {:unit-minutes 13440.0},
+                         :nb-cpu  {:unit-minutes 3360.0}} (:usage summary)))))))
 
 (deftest check-precision-small-interval
   (let [start-day           (t/date-time 2014)
@@ -125,27 +115,22 @@
         fifty-seconds-after (t/plus start-day (t/seconds 50))
 
         joe-exo-start       (assoc joe-exoscale
-                              :start_timestamp (u/to-ISO-8601 start-day)
-                              :cloud_vm_instanceid "vm-joe-exo-id")
-        joe-exo-end         {:end_timestamp       (u/to-ISO-8601 fifty-seconds-after)
-                             :cloud_vm_instanceid "vm-joe-exo-id"
+                              :start-timestamp (u/to-ISO-8601 start-day)
+                              :cloud-vm-instanceid "vm-joe-exo-id")
+        joe-exo-end         {:end-timestamp       (u/to-ISO-8601 fifty-seconds-after)
+                             :cloud-vm-instanceid "vm-joe-exo-id"
                              :metrics             [{:name "nb-cpu"}
                                                    {:name "RAM-GB"}
-                                                   {:name "disk-GB"}]
-                             }]
+                                                   {:name "disk-GB"}]}]
 
-    (rc/-insertStart joe-exo-start)
-    (rc/-insertEnd joe-exo-end)
+    (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
+    (rc/insert-usage-event joe-exo-end   {:user-roles ["ADMIN"]})
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
-    (let [summary (-> (select usage_summaries)
-                      first
-                      :usage
-                      u/deserialize)]
-      (is (= 83.75 (get-in summary [:disk-GB :unit_minutes])))
-      (is (< 6.666 (get-in summary [:RAM-GB :unit_minutes]) 6.667))
-      (is (< 1.666 (get-in summary [:nb-cpu :unit_minutes]) 1.667)))))
-
+    (let [summary (-> (summaries-from-db) first :usage)]
+      (is (= 83.75 (get-in summary [:disk-GB :unit-minutes])))
+      (is (< 6.666 (get-in summary [:RAM-GB :unit-minutes]) 6.667))
+      (is (< 1.666 (get-in summary [:nb-cpu :unit-minutes]) 1.667)))))
 
 (deftest test-with-records-full-year
   (let [nb-weeks 5]
@@ -158,57 +143,58 @@
         end-day        (t/plus start-day (t/days 1))
 
         joe-exo-start  (assoc joe-exoscale
-                         :start_timestamp (u/to-ISO-8601 start-day)
-                         :cloud_vm_instanceid "vm-joe-exo-id")
-        joe-exo-end    {:end_timestamp       (u/to-ISO-8601 end-day)
-                        :cloud_vm_instanceid "vm-joe-exo-id"}
+                         :start-timestamp (u/to-ISO-8601 start-day)
+                         :cloud-vm-instanceid "vm-joe-exo-id")
+        joe-exo-end    {:end-timestamp       (u/to-ISO-8601 end-day)
+                        :cloud-vm-instanceid "vm-joe-exo-id"}
 
         jack-exo-start (assoc jack-exoscale
-                         :start_timestamp (u/to-ISO-8601 start-day)
-                         :cloud_vm_instanceid "vm-jack-exo-id")
-        jack-exo-end   {:end_timestamp       (u/to-ISO-8601 end-day)
-                        :cloud_vm_instanceid "vm-jack-exo-id"}]
+                         :start-timestamp (u/to-ISO-8601 start-day)
+                         :cloud-vm-instanceid "vm-jack-exo-id")
+        jack-exo-end   {:end-timestamp       (u/to-ISO-8601 end-day)
+                        :cloud-vm-instanceid "vm-jack-exo-id"}]
 
-    (rc/-insertStart joe-exo-start)
-    (rc/-insertStart jack-exo-start)
-    (rc/-insertEnd joe-exo-end)
-    (rc/-insertEnd jack-exo-end)
+    (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
+    (rc/insert-usage-event jack-exo-start {:user-roles ["ADMIN"]})
+    (rc/insert-usage-event joe-exo-end {:user-roles ["ADMIN"]})
+    (rc/insert-usage-event jack-exo-end {:user-roles ["ADMIN"]})
 
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
-    (let [summaries (select usage_summaries)]
+    (let [summaries (summaries-from-db)]
       (is (= [
-              {:disk-GB {:unit_minutes 144720.0}, :RAM-GB {:unit_minutes 11520.0}, :nb-cpu {:unit_minutes 2880.0}}]
-             (map (comp u/deserialize :usage) (filter #(= "joe" (:user %)) summaries))))
+              {:disk-GB {:unit-minutes 144720.0}, :RAM-GB {:unit-minutes 11520.0}, :nb-cpu {:unit-minutes 2880.0}}]
+             (map :usage (filter #(= "joe" (:user %)) summaries))))
       (is (= [
-              {:big {:unit_minutes 5760.0}, :small {:unit_minutes 2880.0}}]
-             (map (comp u/deserialize :usage) (filter #(= "jack" (:user %)) summaries)))))))
+              {:big {:unit-minutes 5760.0}, :small {:unit-minutes 2880.0}}]
+             (map :usage (filter #(= "jack" (:user %)) summaries)))))))
 
 (deftest summarize-open-record
   (let [start-day     (t/date-time 2014)
         end-day       (t/plus (t/date-time 2014) (t/days 1))
         joe-exo-start (assoc joe-exoscale
-                        :start_timestamp (u/to-ISO-8601 start-day)
-                        :cloud_vm_instanceid "vm-joe-exo-id")]
+                        :start-timestamp (u/to-ISO-8601 start-day)
+                        :cloud-vm-instanceid "vm-joe-exo-id")]
 
-    (rc/-insertStart joe-exo-start)
+    (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
 
     (summarize-and-store! (u/to-ISO-8601 (t/minus start-day (t/days 1))) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
-    (let [summaries (select usage_summaries)]
-      (is (= [{:disk-GB {:unit_minutes 144720.0}, :RAM-GB {:unit_minutes 11520.0}, :nb-cpu {:unit_minutes 2880.0}}]
-             (map (comp u/deserialize :usage) summaries))))))
+    (let [summaries (summaries-from-db)]
+      (is (= [{:disk-GB {:unit-minutes 144720.0}, :RAM-GB {:unit-minutes 11520.0}, :nb-cpu {:unit-minutes 2880.0}}]
+             (map :usage summaries))))))
 
-(deftest only-one-summary-per-user-cloud-interval
+(deftest multiple-summaries-on-same-per-user-cloud-interval-are-ok
   (let [start-day     (t/date-time 2014)
         end-day       (t/plus start-day (t/days 1))
         joe-exo-start (assoc joe-exoscale
-                        :start_timestamp (u/to-ISO-8601 start-day)
-                        :cloud_vm_instanceid "vm-joe-exo-id")]
+                        :start-timestamp (u/to-ISO-8601 start-day)
+                        :cloud-vm-instanceid "vm-joe-exo-id")]
 
-    (rc/-insertStart joe-exo-start)
+    (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
+
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
-    (is (= 1 (-> usage_summaries select count)))))
+    (is (= 2 (count (summaries-from-db))))))
 
 

@@ -12,17 +12,17 @@
 
    :id                  "UsageRecord/be23a1ba-0161-4a9a-b1e1-b2f4164e9a02"
    :resourceURI         resource-uri
-   :cloud_vm_instanceid "exoscale-ch-gva:9010d739-6933-4652-9db1-7bdafcac01cb"
+   :cloud-vm-instanceid "exoscale-ch-gva:9010d739-6933-4652-9db1-7bdafcac01cb"
    :user                "joe"
    :cloud               "aws"
-   :start_timestamp     "2015-05-04T15:32:22.853Z"
-   :metrics             [{:name  "vm"
-                          :value "1.0"}]})
+   :start-timestamp     "2015-05-04T15:32:22.853Z"
+   :metric-name         "vm"
+   :metric-value        "1.0"})
 
 (def valid-usage-records
   [valid-usage-record
-   (assoc valid-usage-record :end_timestamp "2015-05-04T16:32:22.853Z")
-   (assoc valid-usage-record :end_timestamp "")])
+   (assoc valid-usage-record :end-timestamp "2015-05-04T16:32:22.853Z")
+   (assoc valid-usage-record :end-timestamp "")])
 
 (deftest test-schema
   (tu/are-valid? valid-usage-records UsageRecord))

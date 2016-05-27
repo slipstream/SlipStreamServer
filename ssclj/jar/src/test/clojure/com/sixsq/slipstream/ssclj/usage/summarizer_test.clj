@@ -1,17 +1,21 @@
 (ns com.sixsq.slipstream.ssclj.usage.summarizer-test
   (:require
     [com.sixsq.slipstream.ssclj.usage.summarizer :as us]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [clj-time.core :as time]
     [clojure.test :refer :all]))
 
 (deftest user-summary-without-date
-  (us/-main "-f" "daily")
-  (us/-main "-f" "weekly")
-  (us/-main "-f" "monthly"))
+  (ltu/with-test-client
+    (us/-main "-f" "daily")
+    (us/-main "-f" "weekly")
+    (us/-main "-f" "monthly")))
 
 (deftest user-summary-with-args
-  (us/-main "-d" "2015-01-01" "-f" "daily")
-  (us/-main "--date" "2015-01-01" "--frequency" "daily"))
+  (ltu/with-test-client
+    (us/-main "-d" "2015-01-01" "-f" "daily")
+    (us/-main "--date" "2015-01-01" "--frequency" "daily")))
 
 (deftest user-summary-requires-frequency
   (is (thrown? IllegalArgumentException (us/-main))))
