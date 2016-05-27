@@ -10,14 +10,9 @@
   (:import (java.util Date TimeZone)
            (java.text SimpleDateFormat)))
 
-(defn- xor
-  [a b]
-  (and (not (and a b))
-       (or a b)))
-
 (defn- extract-credentials
   [request]
-  (let [username (->> request :params ((juxt :user-name :username)) (apply xor))]
+  (let [username (->> request :params ((some-fn :username :user-name)))]
     {:username username
      :password (uh/param-value request :password)}))
 
