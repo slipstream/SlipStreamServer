@@ -107,11 +107,8 @@
 (defmethod convert :default [v]
   v)
 
-(defn compile-filter [s]
-  (let [parsed (p/parse-cimi-filter s)]
-    (QueryBuilders/constantScoreQuery (w/postwalk convert parsed))))
-
-(defn compile-cimi-filter [cimi-params]
+(defn es-filter
+  [cimi-params]
   (if-let [cimi-filter (get-in cimi-params [:cimi-params :filter])]
-    (compile-filter cimi-filter)
+    (QueryBuilders/constantScoreQuery (w/postwalk convert cimi-filter))
     (QueryBuilders/matchAllQuery)))
