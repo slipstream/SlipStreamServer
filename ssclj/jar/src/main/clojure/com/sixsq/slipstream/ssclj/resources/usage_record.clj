@@ -8,6 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]))
 
 (def ^:const resource-tag :usage-records)
@@ -97,7 +98,8 @@
   (let [filter
         (str "cloud-vm-instanceid='" (:cloud-vm-instanceid usage-record)
              "' and metric-name='" (:metric-name usage-record) "'")]
-    (-> (db/query "usage-record" {:cimi-params {:filter  filter :orderby [["start-timestamp" :desc]]}
+    (-> (db/query "usage-record" {:cimi-params {:filter  (parser/parse-cimi-filter filter)
+                                                :orderby [["start-timestamp" :desc]]}
                                   :user-roles ["ADMIN"]})
         second
         first)))
@@ -109,7 +111,7 @@
         (str "cloud-vm-instanceid='" (:cloud-vm-instanceid usage-record)
              "' and metric-name='" (:metric-name usage-record) "'"
              " and end-timestamp='" date-in-future "'")]
-    (-> (db/query "usage-record" {:cimi-params {:filter filter}
+    (-> (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
                                   :user-roles ["ADMIN"]})
         second)))
 
@@ -118,6 +120,6 @@
   [start end]
   (u/check-order [start end])
   (let [filter (str "end-timestamp >= '" start "' and start-timestamp <= '" end "'")]
-    (-> (db/query "usage-record" {:cimi-params {:filter filter}
+    (-> (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
                                   :user-roles  ["ADMIN"]})
         second)))

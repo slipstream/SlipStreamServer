@@ -75,7 +75,7 @@
   [^Client client index type options]
   (try
     (let [query (-> options
-                    ef/compile-cimi-filter
+                    ef/es-filter
                     (acl/and-acl options))
 
           [from size] (pg/from-size options)
