@@ -30,7 +30,7 @@
 
 (defn and-query [clauses]
   (let [q (QueryBuilders/boolQuery)]
-    (doall (map #(.must q %) clauses))
+    (dorun (map #(.must q %) clauses))
     q))
 
 (defn or-query
@@ -39,7 +39,7 @@
    least one of the included 'should' queries to pass."
   [clauses]
   (let [q (QueryBuilders/boolQuery)]
-    (doall (map #(.should q %) clauses))
+    (dorun (map #(.should q %) clauses))
     q))
 
 (defn strip-quotes [s]
