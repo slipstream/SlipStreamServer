@@ -7,10 +7,13 @@
     [compojure.core :as cc]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
+    [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]))
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
+    [com.sixsq.slipstream.ssclj.es.es-util :as esu]))
 
 (defn body->json
   [m]
@@ -24,14 +27,18 @@
 
 (defn is-status
   [m status]
-  (is (= status (get-in m [:response :status])))
-  m)
+  (let [actual (get-in m [:response :status])
+        result (= status (get-in m [:response :status]))]
+    (when-not result
+      (println "!!!! Expecting status " status " got " actual))
+    (is result)
+    m))
 
 (defn is-key-value
   ([m f k v]
    (let [actual (-> m :response :body k f)]
      (when-not (= v actual)
-       (println "Expecting " v " got " actual))
+       (println "???? Expecting " v " got " actual " for " k))
      (is (= v actual))
      m))
   ([m k v]
@@ -46,15 +53,17 @@
 (defn is-resource-uri [m type-uri]
   (is-key-value m :resourceURI type-uri))
 
-(defn is-operation-present [m op]
+(defn is-operation-present [m expected-op]
   (let [operations (get-in m [:response :body :operations])
-        op         (some #(.endsWith % op) (map :rel operations))]
+        op         (some #(.endsWith % expected-op) (map :rel operations))]
+    (when-not op (println "???? Missing " expected-op " in " (map :rel operations)))
     (is op))
   m)
 
-(defn is-operation-absent [m op]
+(defn is-operation-absent [m absent-op]
   (let [operations (get-in m [:response :body :operations])
-        op         (some #(.endsWith % op) (map :rel operations))]
+        op         (some #(.endsWith % absent-op) (map :rel operations))]
+    (when op (println "???? Present " absent-op " in " (map :rel operations)))
     (is (nil? op)))
   m)
 
@@ -83,11 +92,30 @@
   (apply cc/routes rs))
 
 (defn make-ring-app [resource-routes]
-  (db/set-impl! (dbdb/get-instance))
-
+  (db/set-impl! (esb/get-instance))
   (-> resource-routes
       (wrap-exceptions)
+      (wrap-cimi-params)
       (wrap-base-uri)
       (wrap-authn-info-header)
       (wrap-json-body {:keywords? true})
-      (wrap-json-response {:pretty true :escape-non-ascii true})))
+      (wrap-json-response {:pretty true :escape-non-ascii true})
+      (wrap-logger)))
+
+(defn dump-es
+  [type]
+  (println "DUMP")
+  (clojure.pprint/pprint
+    (esu/dump esb/*client* esb/index-name type)))
+
+(defmacro with-test-client
+  [& body]
+  `(binding [esb/*client* (esb/create-test-client)]
+     (db/set-impl! (esb/get-instance))
+     (esu/reset-index esb/*client* esb/index-name)
+     ~@body))
+
+(defn with-test-client-fixture
+  [f]
+  (with-test-client
+    (f)))

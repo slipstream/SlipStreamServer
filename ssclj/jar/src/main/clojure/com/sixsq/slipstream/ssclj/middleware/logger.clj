@@ -22,7 +22,7 @@
 
 (defn- display-space-separated
   [& messages]
-  (apply str (str/join " " messages)))
+  (str/join " " messages))
 
 (defn formatted-request
   [request]
@@ -35,7 +35,7 @@
 (defn formatted-response
   [formatted-request response start current-time-millis]
   (display-space-separated
-    (-> response :status)
+    (:status response)
     (display-elapsed-time-millis start current-time-millis)
     formatted-request))
 

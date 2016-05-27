@@ -1,11 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.usage.seeds.usages
   (:require
-    [korma.core :as kc]
-    [com.sixsq.slipstream.ssclj.api.acl :as acl]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-    [clj-time.core :as time]))
+    [clj-time.core :as time]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
 
 (defn days-ago-at-hour
   ([n h]
@@ -19,9 +18,9 @@
    :cloud           cloud
    :frequency       "daily"
    :start_timestamp (days-ago-at-hour day-number)
-   :end_timestamp   (days-ago-at-hour (inc day-number))
+   :end-timestamp   (days-ago-at-hour (inc day-number))
    :usage           (->> metrics-map
-                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (map (fn [[k v]] {k {:unit-minutes v}}))
                          (into {}))})
 
 (defn- daily-records
@@ -30,8 +29,8 @@
     {:user            username
      :cloud           cloud
      :start_timestamp (days-ago-at-hour day-number)
-     :end_timestamp   (days-ago-at-hour day-number 10)
-     :metric_name     k
+     :end-timestamp   (days-ago-at-hour day-number 10)
+     :metric-name     k
      :metric_value    v}))
 
 (defmulti usages-for-freq (comp first list))
@@ -42,9 +41,9 @@
    :cloud           cloud
    :frequency       "monthly"
    :start_timestamp (days-ago-at-hour (* 30 day-number))
-   :end_timestamp   (days-ago-at-hour (* 30 (inc day-number)))
+   :end-timestamp   (days-ago-at-hour (* 30 (inc day-number)))
    :usage           (->> {:ram 97185920 :disk 950.67 :cpu 9250}
-                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (map (fn [[k v]] {k {:unit-minutes v}}))
                          (into {}))})
 
 (defmethod usages-for-freq :weekly
@@ -53,9 +52,9 @@
    :cloud           cloud
    :frequency       "weekly"
    :start_timestamp (days-ago-at-hour (* 7 day-number))
-   :end_timestamp   (days-ago-at-hour (* 7 (inc day-number)))
+   :end-timestamp   (days-ago-at-hour (* 7 (inc day-number)))
    :usage           (->> {:ram 571859200 :disk 5000.67 :cpu 52500}
-                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (map (fn [[k v]] {k {:unit-minutes v}}))
                          (into {}))})
 
 (defmethod usages-for-freq :daily
@@ -64,9 +63,9 @@
    :cloud           cloud
    :frequency       "daily"
    :start_timestamp (days-ago-at-hour day-number)
-   :end_timestamp   (days-ago-at-hour (inc day-number))
+   :end-timestamp   (days-ago-at-hour (inc day-number))
    :usage           (->> {:ram 47185920 :disk 450.67 :cpu 1250}
-                         (map (fn [[k v]] {k {:unit_minutes v}}))
+                         (map (fn [[k v]] {k {:unit-minutes v}}))
                          (into {}))})
 
 (defn usages
@@ -83,26 +82,18 @@
 (defn insert-to-db
   [usages]
   (doseq [usage usages]
-    (rc/insert-summary! usage)))
+    (rc/insert-summary! usage {})))
 
 (defn seed-summaries!
-  [nb username clouds & {:keys [clean]}]
-  (db/set-impl! (dbdb/get-instance))
-  (acl/-init)
-  (rc/-init)
-  (when clean
-    (kc/delete rc/usage_summaries))
+  [nb username clouds]
+  (db/set-impl! (esb/get-instance))
   (-> nb
       (usages username clouds)
       insert-to-db))
 
 (defn seed-records!
-  [nb username clouds & {:keys [clean]}]
-  (db/set-impl! (dbdb/get-instance))
-  (acl/-init)
-  (rc/-init)
-  (when clean
-    (kc/delete rc/usage_records))
+  [nb username clouds]
+  (db/set-impl! (esb/get-instance))
   (let [records (usage-records nb username clouds)]
     (doseq [record records]
-      (kc/insert rc/usage_records (kc/values record)))))
+      (db/add "UsageRecord" (assoc record :id (str "usage-record/" (cu/random-uuid))) {}))))

@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/ssclj "3.3-SNAPSHOT"
+(defproject com.sixsq.slipstream/ssclj "3.5-SNAPSHOT"
   :description    "Clojure REST resources"
   :url            "http://sixsq.com"
   :license {:name "Apache License, Version 2.0"
@@ -29,7 +29,7 @@
                  [org.slf4j/slf4j-log4j12                   "1.7.13"]
                  [instaparse                                "1.4.1"]
                 ; ;; Authentication service
-                 [com.sixsq.slipstream/auth                 "3.3-SNAPSHOT"]
+                 [com.sixsq.slipstream/auth                 "3.5-SNAPSHOT"]
                 ; ;; Environment settings
                  [environ                                   "1.0.1"]
                 ; ;; database
@@ -49,7 +49,10 @@
                  [puppetlabs/http-client                    "0.4.5"
                   :exclusions [[cheshire/cheshire]] ]
                  [aleph                                     "0.4.1-beta4"]
-                 ]
+
+                 ;; Elastic search
+                 [org.elasticsearch/elasticsearch           "2.3.1"]
+                 [me.raynes/fs                              "1.4.6"]]
 
   :plugins      [[lein-ancient                              "0.6.8"]
                  [lein-expectations                         "0.0.7"]
@@ -79,8 +82,7 @@
                   "                 (es/seed! 10 :bob)\n"
                   "Usage Seeding:   (require '[com.sixsq.slipstream.ssclj.usage.seeds.usages :as us])\n"
                   "                 (us/seed-summaries! 10 :bob [\"aws\" \"exo\"])\n"
-                  "\n"
-                  "Or all at once:  (require '[com.sixsq.slipstream.ssclj.api.dev-server :as api])\n"))
+                  ))
                 }
 
  :profiles {
@@ -95,7 +97,7 @@
 
    :dev
      { :env {  :clj-env        "development"
-               :config-path    "config-hsqldb.edn"}
+               :config-path    "config-hsqldb-mem.edn"}
        :jvm-opts ["-Dlogfile.path=development"]
        :dependencies [ [peridot/peridot "0.4.1"]
                        [expectations/expectations "2.1.4"]]}

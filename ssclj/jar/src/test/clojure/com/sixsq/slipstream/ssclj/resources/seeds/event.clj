@@ -2,15 +2,14 @@
   (:require
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [korma.core :as kc]
     [clj-time.core :as time]
     [com.sixsq.slipstream.ssclj.resources.event :as e]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]))
 
 (def base-uri (str p/service-context (u/de-camelcase e/resource-name)))
 
@@ -53,10 +52,9 @@
 
 (defn seed!
   [nb-events username & {:keys [clean]}]
-  (db/set-impl! (dbdb/get-instance))
-  (dbdb/init-db)
-  (when clean
-    (kc/delete dbdb/resources))
+  (db/set-impl! (esb/get-instance))
+  ;;(when clean)
+    ;; TODO ES equivalent (kc/delete dbdb/resources))
   (-> nb-events
       (events username)
       (insert-to-db username)))

@@ -24,15 +24,12 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.db.database-binding :as dbdb]
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
 
-;; FIXME: make this dynamic depending on the service configuration
-(defn set-db-impl
+(defn- set-persistence-impl
   []
-  ; (-> (fsdb/get-instance fsdb/default-db-prefix)
-  ;     (db/set-impl!)))
-  (db/set-impl! (dbdb/get-instance)))
+  (db/set-impl! (esb/get-instance)))
 
 (defn- create-ring-handler
   "Creates a ring handler that wraps all of the service routes
@@ -73,7 +70,10 @@
    (log/info "java vendor: " (System/getProperty "java.vendor"))
    (log/info "java version: " (System/getProperty "java.version"))
    (log/info "java classpath: " (System/getProperty "java.class.path"))
-   (set-db-impl)
+
+   (esb/set-client! (esb/create-client))
+
+   (set-persistence-impl)
    (resources/initialize)
    (let [handler (create-ring-handler)]
      (graphite/start-graphite-reporter)

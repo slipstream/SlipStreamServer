@@ -60,6 +60,7 @@
   (try
     (a/can-modify? resource request)
     (let [ops [{:rel (:edit c/action-uri) :href resource-url}]]
+      (println "ROOT SETTING OPERATIONS ops" ops)
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))
@@ -75,14 +76,14 @@
   []
   (let [record (u/update-timestamps
                  {:acl         resource-acl
-                  :id          resource-url
+                  :id          resource-url ;; TODO : special case id is given and resource is a "singleton"
                   :resourceURI resource-uri})]
-    (db/add resource-name record)))
+    (db/add resource-name record {:user-roles ["ANON"]})))
 
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]
-  (r/response (-> (db/retrieve resource-url)
-                  (a/can-view? request)
+  (r/response (-> (db/retrieve (str resource-url "/1") {})
+                  ;; (a/can-view? request)
                   (assoc :baseURI base-uri)
                   (merge resource-links)
                   (crud/set-operations request))))
@@ -93,7 +94,7 @@
 
 (defn edit-impl
   [{:keys [body] :as request}]
-  (let [current (-> (db/retrieve resource-url)
+  (let [current (-> (db/retrieve (str resource-url "/1") {})
                     (assoc :acl resource-acl)
                     (a/can-modify? request))
         updated (-> body
@@ -104,8 +105,8 @@
                     (merge resource-links)
                     (crud/set-operations request)
                     (crud/validate))]
-    (db/edit (apply dissoc updated stripped-keys))
-    (r/response updated)))
+
+    (db/edit updated request)))
 
 (defmethod crud/edit resource-name
   [request]

@@ -1,23 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.usage.record-keeper
   (:require
-    [superstring.core :refer [join]]
     [clojure.tools.logging :as log]
-    [korma.core :as kc]
     [com.sixsq.slipstream.ssclj.usage.state-machine :as sm]
-    [com.sixsq.slipstream.ssclj.api.acl :as acl]
+    [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.database.korma-helper :as kh]
-    [com.sixsq.slipstream.ssclj.database.ddl :as ddl]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
-  (:gen-class
-    :name com.sixsq.slipstream.usage.Record
-    :methods [
-
-              #^{:static true} [init [] void]
-
-              #^{:static true} [insertStart [java.util.Map] void]
-              #^{:static true} [insertEnd [java.util.Map] void]]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.db.impl :as db]))
 
 ;;
 ;; Inserts in db usage records and retrieves them for a given interval.
@@ -33,65 +22,20 @@
 ;; (i.e records whose [start-end timestamps] intersect with the interval)
 ;;
 
-(defonce ^:private columns-record
-         (ddl/columns
-           "cloud_vm_instanceid" "VARCHAR(100)"
-           "user" "VARCHAR(100)"
-           "cloud" "VARCHAR(100)"
-           "start_timestamp" "VARCHAR(30)"
-           "end_timestamp" "VARCHAR(30)"
-           "metric_name" "VARCHAR(100)"
-           "metric_value" "FLOAT"))
-
-(defonce ^:private columns-summaries
-         (ddl/columns
-           "id" "VARCHAR(100)"
-           "acl" "VARCHAR(1000)"
-           "user" "VARCHAR(100)"
-           "cloud" "VARCHAR(100)"
-           "start_timestamp" "VARCHAR(30)"
-           "end_timestamp" "VARCHAR(30)"
-           "frequency" "VARCHAR(30)"
-           "grouping" "VARCHAR(100)"
-           "compute_timestamp" "VARCHAR(30)"
-           "usage" "VARCHAR(10000)"))
-
-(defonce ^:private unique-summaries
-         (str ", UNIQUE (" (ddl/double-quote-list ["user" "cloud" "start_timestamp" "end_timestamp"]) ")"))
-
-(def init-db
-  (delay
-    (kh/korma-init)
-
-    (acl/-init)
-
-    (ddl/create-table! "usage_records" columns-record)
-    (ddl/create-table! "usage_summaries" columns-summaries unique-summaries)
-
-    (ddl/create-index! "usage_records" "IDX_TIMESTAMPS" "start_timestamp", "end_timestamp")
-    (ddl/create-index! "usage_summaries" "IDX_TIMESTAMPS" "id" "start_timestamp", "end_timestamp")
-
-    (kc/defentity usage_records (kc/database kh/korma-api-db))
-    (kc/defentity usage_summaries (kc/database kh/korma-api-db))
-    (kc/select usage_records (kc/limit 1))
-
-    (log/info "record-keeper: Korma Entities defined")))
-
-(defn -init
-  []
-  @init-db)
+(defn end-in-future?
+  [usage-event]
+  (= ur/date-in-future (:end-timestamp usage-event)))
 
 (defn- project-to-metric
   [usage-event metric]
   (-> usage-event
       (dissoc :metrics)
-      (assoc :metric_name (:name metric))
-      (assoc :metric_value (:value metric))))
+      (assoc :metric-name (:name metric))
+      (assoc :metric-value (:value metric))))
 
 (defn- nil-timestamps-if-absent
   [usage-event]
-  (merge {:end_timestamp nil :start_timestamp nil} usage-event))
-
+  (merge {:end-timestamp nil :start-timestamp nil} usage-event))
 
 (defn- usage-metrics
   [usage-event-json]
@@ -101,27 +45,13 @@
     (for [metric (:metrics usage-event)]
       (project-to-metric usage-event metric))))
 
-(defn last-record
-  [usage-metric]
-  (first
-    (kc/select usage_records
-               (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)
-                          :metric_name         (:metric_name usage-metric)})
-               (kc/order :start_timestamp :DESC)
-               (kc/limit 1))))
-
 (defn- state
   [usage-metric]
-  (let [record (last-record usage-metric)]
+  (let [record (ur/last-record usage-metric)]
     (cond
       (nil? record) :initial
-      (nil? (:end_timestamp record)) :started
+      (end-in-future? record) :started
       :else :stopped)))
-
-(defn- open-instance-type?
-  [metric]
-  (and (.startsWith (:metric_name metric) "instance-type.")
-       (nil? (:end_timestamp metric))))
 
 ;;
 ;; actions
@@ -132,64 +62,56 @@
 
 (defn- metric-summary
   [usage-metric]
-  (str (:start_timestamp usage-metric)
-       " " (:cloud_vm_instanceid usage-metric)
-       " " (:metric_name usage-metric)))
+  (str (:start-timestamp usage-metric)
+       " " (:cloud-vm-instanceid usage-metric)
+       " [" (:metric-name usage-metric) "/" (:metric-value usage-metric) "]"))
 
 (defn- close-record
-  ([usage-metric close-timestamp]
-   (log/info "Close " (:end_timestamp usage-metric) (metric-summary usage-metric))
-   (kc/update
-     usage_records
-     (kc/set-fields {:end_timestamp close-timestamp})
-     (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)
-                :metric_name         (:metric_name usage-metric)
-                :end_timestamp       nil})))
-
-  ([usage-metric]
-   (close-record usage-metric (:end_timestamp usage-metric))))
-
-(defn close-metric-when-instance-type-change
-  [usage-metric]
-  (when (open-instance-type? usage-metric)
-    (let [metrics-same-vm
-          (kc/select usage_records (kc/where {:cloud_vm_instanceid (:cloud_vm_instanceid usage-metric)}))]
-      (doseq [metric metrics-same-vm :when (open-instance-type? metric)]
-        (close-record metric (:start_timestamp usage-metric))))))
+  ([usage-metric close-timestamp options]
+   (log/info "Closing usage-record " close-timestamp (metric-summary usage-metric))
+   (doseq [ur (ur/open-records usage-metric)]
+     (db/edit (assoc ur :end-timestamp close-timestamp) options)))
+  ([usage-metric options]
+   (close-record usage-metric (:end-timestamp usage-metric) options)))
 
 (defn- open-record
-  [usage-metric]
-  (log/info "Open " (metric-summary usage-metric))
-  (close-metric-when-instance-type-change usage-metric)
-  (kc/insert usage_records (kc/values usage-metric)))
+  [usage-metric options]
+  (log/info "Opening usage-record " (metric-summary usage-metric))
+  (db/add "UsageRecord"
+          (-> usage-metric
+              (assoc :id (str "usage-record/" (cu/random-uuid)))
+              (assoc :end-timestamp ur/date-in-future))
+          options))
 
-(defn close-restart-record
-  [usage-metric]
-  (close-record usage-metric (:start_timestamp usage-metric))
-  (open-record usage-metric))
+(defn- close-restart-record
+  [usage-metric options]
+  (close-record usage-metric (:start-timestamp usage-metric) options)
+  (open-record usage-metric options))
 
-;;
-;;
-;;
-
-(defn- process-event
-  [usage-metric trigger]
+(defn- process-metric-event
+  [usage-metric trigger options]
   (let [current-state (state usage-metric)]
     (case (sm/action current-state trigger)
-      :close-restart    (close-restart-record usage-metric)
-      :insert-start     (open-record usage-metric)
+      :close-restart    (close-restart-record usage-metric options)
+      :insert-start     (open-record usage-metric options)
       :wrong-transition (log-wrong-transition current-state trigger)
-      :close-record     (close-record usage-metric))))
+      :close-record     (close-record usage-metric options))))
 
-(defn -insertStart
-  [usage-event-json]
+(defn- insertStart
+  [usage-event-json options]
   (doseq [usage-metric (usage-metrics usage-event-json)]
-    (process-event usage-metric :start)))
+    (process-metric-event usage-metric :start options)))
 
-(defn -insertEnd
-  [usage-event-json]
+(defn- insertEnd
+  [usage-event-json options]
   (doseq [usage-metric (usage-metrics usage-event-json)]
-    (process-event usage-metric :stop)))
+    (process-metric-event usage-metric :stop options)))
+
+(defn insert-usage-event
+  [usage-event options]
+  (if (nil? (:end-timestamp usage-event))
+    (insertStart usage-event options)
+    (insertEnd usage-event options)))
 
 (defn- acl-for-user-cloud
   [summary]
@@ -200,44 +122,21 @@
      :rules [{:type "USER" :principal user :right "ALL"}
              {:type "ROLE" :principal cloud :right "ALL"}]}))
 
-(defn- id-map-for-summary
-  [summary]
-  (let [user  (:user summary)
-        cloud (:cloud summary)]
-    {:identity user
-     :roles    [cloud]}))
-
-(defn resource-for
+(defn- resource-for
   [summary acl]
   (-> summary
-      (update-in [:usage] u/serialize)
+      ;; (update-in [:usage] u/serialize)
       (assoc :id (str "usage/" (cu/random-uuid)))
-      (assoc :acl (u/serialize acl))))
-
-(defn clause-where
-  [row cols]
-  (zipmap cols (map #(% row) cols)))
+      (assoc :acl acl)
+      (assoc :compute-timestamp (u/now-to-ISO-8601))))
 
 (defn insert-summary!
-  [summary]
+  [summary options]
   (let [acl                   (acl-for-user-cloud summary)
-        summary-resource      (resource-for summary acl)
-        previous-computations (kc/select usage_summaries
-                                         (kc/where
-                                           (clause-where
-                                             summary-resource [:user :cloud :start_timestamp :end_timestamp])))
-        _
-                              (doseq [previous-computation previous-computations]
-                                (kc/delete usage_summaries (kc/where {:id (:id previous-computation)}))
-                                (acl/-deleteResource (:id previous-computation) "Usage" (id-map-for-summary previous-computation)))]
-
-    (kc/insert usage_summaries (kc/values (merge summary-resource {:compute_timestamp (u/now-to-ISO-8601)})))
-    (acl/insert-resource (:id summary-resource) "Usage" (acl/types-principals-from-acl acl))))
+        summary-resource      (resource-for summary acl)]
+    (db/add "Usage" summary-resource options)))
 
 (defn records-for-interval
   [start end]
-  (u/check-order [start end])
-  (kc/select usage_records (kc/where
-                             (and
-                               (or (= nil :end_timestamp) (>= :end_timestamp start))
-                               (<= :start_timestamp end)))))
+  (ur/records-for-interval start end))
+

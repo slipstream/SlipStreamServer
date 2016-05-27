@@ -5,13 +5,10 @@ import com.sixsq.slipstream.persistence.Vm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 
 /**
@@ -63,9 +60,9 @@ public class UsageRecorder {
 
 			logger.fine("Inserting usage record START for " + metrics + ", " + describe(instanceId, user, cloud));
 
-			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
+			UsageEvent usageEvent = new UsageEvent(getAcl(user), user, cloud,
 					keyCloudVMInstanceID(cloud, instanceId), new Date(), null, metrics);
-			UsageRecord.post(usageRecord);
+			UsageEvent.post(usageEvent);
 
 			recordedVmInstanceIds.add(keyCloudVMInstanceID(cloud, instanceId));
 
@@ -84,9 +81,9 @@ public class UsageRecorder {
 			
 			logger.fine("Inserting usage record END, metrics" + metrics + ", for " + describe(instanceId, user, cloud));
 
-			UsageRecord usageRecord = new UsageRecord(getAcl(user), user, cloud,
+			UsageEvent usageEvent = new UsageEvent(getAcl(user), user, cloud,
 					keyCloudVMInstanceID(cloud, instanceId), null, new Date(), metrics);
-			UsageRecord.post(usageRecord);
+			UsageEvent.post(usageEvent);
 
 			recordedVmInstanceIds.remove(keyCloudVMInstanceID(cloud, instanceId));
 

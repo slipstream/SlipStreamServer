@@ -38,7 +38,10 @@
 
                  ]
 
-  :plugins [[lein-environ "1.0.0"]]
+  :plugins [
+            [lein-environ                              "1.0.0"]
+            [lein-kibit                                "0.1.2"]
+            [jonase/eastwood                           "0.2.1"]]
 
   :profiles {
              :uberjar  {  :aot [#"com.sixsq.slipstream.auth.*"]

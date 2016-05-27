@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-public class UsageRecordTest {
+public class UsageEventTest {
 
     @Test
     public void testUsageRecordToJson() {
@@ -33,7 +33,7 @@ public class UsageRecordTest {
 
         Date start_timestamp = c.getTime();
 
-        UsageRecord ur = new UsageRecord(acl, "joe", "aws", "aws:123",
+        UsageEvent ur = new UsageEvent(acl, "joe", "aws", "aws:123",
                 start_timestamp, null, metrics);
 
         String expectedJson = "{\n  \"acl\": {\n" +
