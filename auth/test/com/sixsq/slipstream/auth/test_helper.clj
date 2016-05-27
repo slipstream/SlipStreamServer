@@ -61,7 +61,7 @@
 (defn add-user-for-test!
   [user]
   (db/init)
-  (kc/insert db/users (kc/values {:NAME        (:user-name user)
+  (kc/insert db/users (kc/values {:NAME        (:username user)
                                   :PASSWORD    (sg/sha512 (:password user))
                                   :EMAIL       (:email user)
                                   :GITHUBLOGIN (:github-id user)

@@ -95,26 +95,26 @@
 (defn create-user!
   [authn-method authn-login email]
   (init)
-  (let [slipstream-user-name (name-no-collision authn-login (existing-user-names))]
-    (kc/insert users (kc/values {"RESOURCEURI"              (str "user/" slipstream-user-name)
+  (let [slipstream-username (name-no-collision authn-login (existing-user-names))]
+    (kc/insert users (kc/values {"RESOURCEURI"              (str "user/" slipstream-username)
                                  "DELETED"                  false
                                  "JPAVERSION"               0
                                  "ISSUPERUSER"              false
                                  "ROLES"                    "alpha-role, beta-role"
                                  "STATE"                    "ACTIVE"
-                                 "NAME"                     slipstream-user-name
+                                 "NAME"                     slipstream-username
                                  "PASSWORD"                 (random-password)
                                  "EMAIL"                    email
                                  (column-name authn-method) authn-login
                                  "CREATION"                 (Date.)}))
-    slipstream-user-name))
+    slipstream-username))
 
-(defn find-password-for-user-name
-  [user-name]
+(defn find-password-for-username
+  [username]
   (init)
   (-> (kc/select users
                  (kc/fields :PASSWORD)
-                 (kc/where {:NAME  user-name
+                 (kc/where {:NAME  username
                             :STATE [in active-user]}))
       first
       :PASSWORD))
@@ -126,12 +126,12 @@
                    (remove s/blank?))]
     (s/join " " (concat initial-role roles))))
 
-(defn find-roles-for-user-name
-  [user-name]
+(defn find-roles-for-username
+  [username]
   (init)
   (let [user-entry (-> (kc/select users
                                   (kc/fields :ROLES :ISSUPERUSER)
-                                  (kc/where {:NAME  user-name
+                                  (kc/where {:NAME  username
                                              :STATE [in active-user]}))
                        first)]
     (format-roles (:ISSUPERUSER user-entry) (:ROLES user-entry))))

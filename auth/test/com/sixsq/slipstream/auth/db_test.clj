@@ -31,10 +31,10 @@
     (is (-> users-created first :PASSWORD))
     (is (-> users-created first :CREATION))
 
-    (is (= "USER alpha-role beta-role" (db/find-roles-for-user-name "st")))))
+    (is (= "USER alpha-role beta-role" (db/find-roles-for-username "st")))))
 
 (deftest test-user-creation-avoids-user-same-name
-  (th/add-user-for-test! {:user-name "stef" :password "secret"})
+  (th/add-user-for-test! {:username "stef" :password "secret"})
   (is (= "stef_1" (db/create-user! "github" "stef" "st@s.com")))
   (let [users-created (kc/select db/users)]
     (is (= 2 (count users-created)))))

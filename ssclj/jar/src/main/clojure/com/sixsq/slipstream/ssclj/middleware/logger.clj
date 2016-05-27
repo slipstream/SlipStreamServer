@@ -22,7 +22,7 @@
 
 (defn- display-space-separated
   [& messages]
-  (apply str (str/join " " messages)))
+  (str/join " " messages))
 
 (defn formatted-request
   [request]

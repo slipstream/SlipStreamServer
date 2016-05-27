@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.auth.auth :as auth]
     [com.sixsq.slipstream.auth.test-helper :as th]))
 
-(def valid-credentials {:user-name "super" :password "supeRsupeR"})
+(def valid-credentials {:username "super" :password "supeRsupeR"})
 (def valid-request {:params (merge {:authn-method :internal} valid-credentials)})
 
 (defn fixture-delete-all
@@ -14,10 +14,19 @@
 
 (use-fixtures :each fixture-delete-all)
 
+(deftest test-auth-internal-accepts-user-name-and-username
+  (th/add-user-for-test! valid-credentials)
+  (is (= 200 (:status (auth/login valid-request))))
+  (is (= 200 (:status (auth/login {:params {:authn-method :internal :username "super" :password "supeRsupeR"}}))))
+  (is (= 200 (:status (auth/login {:params {:authn-method :internal :user-name "super" :password "supeRsupeR"}}))))
+  (is (= 401 (:status (auth/login {:params {:authn-method :internal
+                                            :user-name "super" :username "super"
+                                            :password "supeRsupeR"}})))))
+
 (deftest test-auth-internal-invalid-credentials
   (th/add-user-for-test! valid-credentials)
   (is (= 401 (:status (auth/login {:params {:authn-method :internal}}))))
-  (is (= 401 (:status (auth/login {:params {:authn-method :internal :user-name "super" :password "wrong"}})))))
+  (is (= 401 (:status (auth/login {:params {:authn-method :internal :username "super" :password "wrong"}})))))
 
 (deftest test-auth-internal-valid-credentials
   (th/add-user-for-test! valid-credentials)

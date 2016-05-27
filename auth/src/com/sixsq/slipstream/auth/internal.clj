@@ -10,13 +10,20 @@
   (:import (java.util Date TimeZone)
            (java.text SimpleDateFormat)))
 
+(defn- xor
+  [a b]
+  (and (not (and a b))
+       (or a b)))
+
 (defn- extract-credentials
   [request]
-  (uh/select-in-params request [:user-name :password]))
+  (let [username (->> request :params ((juxt :user-name :username)) (apply xor))]
+    {:username username
+     :password (uh/param-value request :password)}))
 
 (defn- log-result
   [credentials ok?]
-  (log/info (str "'" (:user-name credentials) "' : "
+  (log/info (str "'" (:username credentials) "' : "
                  (if ok? "login OK" "invalid password"))))
 
 (defn- response-token-ok
@@ -28,20 +35,20 @@
 
 (defn valid?
   [credentials]
-  (let [user-name           (:user-name credentials)
+  (let [username            (:username credentials)
         password-credential (:password credentials)
-        encrypted-in-db     (db/find-password-for-user-name user-name)]
+        encrypted-in-db     (db/find-password-for-username username)]
     (and
       password-credential
       encrypted-in-db
       (= (sg/sha512 password-credential) encrypted-in-db))))
 
 (defn- adapt-credentials
-  [{:keys [user-name] :as credentials}]
+  [{:keys [username] :as credentials}]
   (-> credentials
       (dissoc :password)
-      (rename-keys {:user-name :com.sixsq.identifier})
-      (merge {:com.sixsq.roles (db/find-roles-for-user-name user-name)})
+      (rename-keys {:username :com.sixsq.identifier})
+      (merge {:com.sixsq.roles (db/find-roles-for-username username)})
       (merge {:exp (sg/expiry-timestamp)})))
 
 (defn create-token

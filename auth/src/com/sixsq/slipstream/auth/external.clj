@@ -6,9 +6,9 @@
             [com.sixsq.slipstream.auth.utils.http :as uh]))
 
 (defn- mapped-user
-  [authn-method user-name]
-  (log/info (str "External (" authn-method ") user '" user-name "' already mapped => login ok."))
-  user-name)
+  [authn-method username]
+  (log/info (str "External (" authn-method ") user '" username "' already mapped => login ok."))
+  username)
 
 (defn- map-slipstream-user!
   [authn-method slipstream-username external-login]
@@ -23,20 +23,20 @@
 
 (defn match-external-user!
   [authn-method external-login external-email]
-  (if-let [user-name-mapped (db/find-username-by-authn authn-method external-login)]
-    [(mapped-user authn-method user-name-mapped) "/dashboard"]
-    (let [user-names-same-email (db/find-usernames-by-email external-email)]
-      (if (empty? user-names-same-email)
+  (if-let [username-mapped (db/find-username-by-authn authn-method external-login)]
+    [(mapped-user authn-method username-mapped) "/dashboard"]
+    (let [usernames-same-email (db/find-usernames-by-email external-email)]
+      (if (empty? usernames-same-email)
         (let [name-new-user (create-slipstream-user! authn-method external-login external-email)]
           [name-new-user (format "/user/%s?edit=true" name-new-user)])
-        [(map-slipstream-user! authn-method (first user-names-same-email) external-login) "/dashboard"]))))
+        [(map-slipstream-user! authn-method (first usernames-same-email) external-login) "/dashboard"]))))
 
 (defn redirect-with-matched-user
   [authn-method external-login external-email redirect-server]
   (if (and (not-empty external-login) (not-empty external-email))
     (let [[matched-user redirect-url] (match-external-user! authn-method external-login external-email)
           token (sg/sign-claims {:com.sixsq.identifier matched-user
-                                 :com.sixsq.roles      (db/find-roles-for-user-name matched-user)
+                                 :com.sixsq.roles      (db/find-roles-for-username matched-user)
                                  :exp                  (sg/expiry-timestamp)})]
 
       (assoc

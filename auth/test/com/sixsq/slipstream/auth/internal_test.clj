@@ -16,13 +16,13 @@
 
 (defn- damage [creds key] (assoc creds key "WRONG"))
 
-(def valid-credentials {:user-name "super" :password "supeRsupeR"})
+(def valid-credentials {:username "super" :password "supeRsupeR"})
 (def wrong-password (damage valid-credentials :password))
-(def wrong-user (damage valid-credentials :user-name))
+(def wrong-user (damage valid-credentials :username))
 (def wrong-both (-> valid-credentials
-                    (damage :user-name)
+                    (damage :username)
                     (damage :password)))
-(def missing-user (dissoc valid-credentials :user-name))
+(def missing-user (dissoc valid-credentials :username))
 (def missing-password (dissoc valid-credentials :password))
 (def missing-both {})
 
@@ -92,7 +92,7 @@
     (is (= claims (sg/unsign-claims claim-token)))))
 
 (deftest test-users-by-email-skips-deleted
-  (th/add-user-for-test! {:user-name "jack"
+  (th/add-user-for-test! {:username "jack"
                           :password  "123456"
                           :email     "jack@sixsq.com"
                           :state     "DELETED"})
@@ -101,13 +101,13 @@
   (is (= [] (db/find-usernames-by-email "jack@sixsq.com"))))
 
 (deftest test-users-by-email
-  (th/add-user-for-test! {:user-name "jack"
+  (th/add-user-for-test! {:username "jack"
                           :password  "123456"
                           :email     "jack@sixsq.com"})
-  (th/add-user-for-test! {:user-name "joe"
+  (th/add-user-for-test! {:username "joe"
                           :password  "123456"
                           :email     "joe@sixsq.com"})
-  (th/add-user-for-test! {:user-name "joe-alias"
+  (th/add-user-for-test! {:username "joe-alias"
                           :password  "123456"
                           :email     "joe@sixsq.com"})
 
@@ -116,7 +116,7 @@
   (is (= ["joe" "joe-alias"] (db/find-usernames-by-email "joe@sixsq.com"))))
 
 (deftest test-users-by-authn-skips-deleted
-  (th/add-user-for-test! {:user-name "joe-slipstream"
+  (th/add-user-for-test! {:username "joe-slipstream"
                           :password  "123456"
                           :email     "joe@sixsq.com"
                           :github-id "joe"
@@ -124,17 +124,17 @@
   (is (nil? (db/find-username-by-authn :github "joe"))))
 
 (deftest test-users-by-authn
-  (th/add-user-for-test! {:user-name "joe-slipstream"
+  (th/add-user-for-test! {:username "joe-slipstream"
                           :password  "123456"
                           :email     "joe@sixsq.com"
                           :github-id "joe"})
 
-  (th/add-user-for-test! {:user-name "jack-slipstream"
+  (th/add-user-for-test! {:username "jack-slipstream"
                           :password  "123456"
                           :email     "jack@sixsq.com"
                           :github-id "jack"})
 
-  (th/add-user-for-test! {:user-name "alice-slipstream"
+  (th/add-user-for-test! {:username "alice-slipstream"
                           :password  "123456"
                           :email     "alice@sixsq.com"})
 
@@ -142,7 +142,7 @@
   (is (= "joe-slipstream" (db/find-username-by-authn :github "joe"))))
 
 (deftest test-users-by-authn-detect-inconsistent-data
-  (dotimes [_ 2] (th/add-user-for-test! {:user-name "joe-slipstream"
+  (dotimes [_ 2] (th/add-user-for-test! {:username "joe-slipstream"
                                          :password  "123456"
                                          :email     "joe@sixsq.com"
                                          :github-id "joe"}))
