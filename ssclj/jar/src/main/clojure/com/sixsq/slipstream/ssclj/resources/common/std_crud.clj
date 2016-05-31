@@ -51,7 +51,7 @@
     (-> (str (u/de-camelcase resource-name) "/" uuid)
         (db/retrieve {})
         (a/can-modify? request)
-        (db/delete {}))))
+        (db/delete request))))
 
 (defn collection-wrapper-fn
   [resource-name collection-acl collection-uri collection-key]

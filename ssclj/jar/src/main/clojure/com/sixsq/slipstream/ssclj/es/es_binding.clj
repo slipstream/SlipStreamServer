@@ -82,7 +82,7 @@
 
 (defn response-conflict
   [id]
-  (cu/ex-conflict id))
+  (cu/map-response (str "Conflict for " id) 409 id))
 
 (defn- response-deleted
   [id]
