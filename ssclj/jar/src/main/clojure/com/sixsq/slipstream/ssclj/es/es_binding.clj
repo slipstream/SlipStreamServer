@@ -9,9 +9,9 @@
     [com.sixsq.slipstream.ssclj.es.es-util :as esu]
     [com.sixsq.slipstream.ssclj.es.acl :as acl]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
-  (:import (com.sixsq.slipstream.ssclj.db.binding Binding)
-           (org.elasticsearch.index.engine DocumentAlreadyExistsException)
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]])
+  (:import (org.elasticsearch.index.engine DocumentAlreadyExistsException)
            (clojure.lang ExceptionInfo)))
 
 (def ^:const index-name "resources-index")
