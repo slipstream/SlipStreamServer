@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]))
+    [com.sixsq.slipstream.ssclj.es.es-binding :as esb])
+  (:import (clojure.lang ExceptionInfo)))
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
@@ -27,31 +28,40 @@
 (defn retrieve-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
-    (-> (str (u/de-camelcase resource-name) "/" uuid)
-        (db/retrieve request)
-        (crud/set-operations request)
-        (u/json-response))))
+    (try
+      (-> (str (u/de-camelcase resource-name) "/" uuid)
+          (db/retrieve request)
+          (crud/set-operations request)
+          (u/json-response))
+      (catch ExceptionInfo ei
+        (ex-data ei)))))
 
 (defn edit-fn
   [resource-name]
   (fn [{{uuid :uuid} :params body :body :as request}]
-    (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
-                      (db/retrieve request)
-                      (a/can-modify? request))
-          merged (merge current body)]
-      (-> merged
-          (u/update-timestamps)
-          (crud/validate)
-          (db/edit request)
-          (u/json-response)))))
+    (try
+      (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
+                        (db/retrieve request)
+                        (a/can-modify? request))
+            merged (merge current body)]
+        (-> merged
+            (u/update-timestamps)
+            (crud/validate)
+            (db/edit request)
+            (u/json-response)))
+      (catch ExceptionInfo ei
+        (ex-data ei)))))
 
 (defn delete-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
-    (-> (str (u/de-camelcase resource-name) "/" uuid)
-        (db/retrieve {})
-        (a/can-modify? request)
-        (db/delete request))))
+    (try
+      (-> (str (u/de-camelcase resource-name) "/" uuid)
+          (db/retrieve request)
+          (a/can-modify? request)
+          (db/delete request))
+      (catch ExceptionInfo ei
+        (ex-data ei)))))
 
 (defn collection-wrapper-fn
   [resource-name collection-acl collection-uri collection-key]

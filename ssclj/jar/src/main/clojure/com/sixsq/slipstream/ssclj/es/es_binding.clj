@@ -88,20 +88,27 @@
   [id]
   (cu/map-response (str id " deleted") 204 id))
 
+(defn- response-not-found
+  [id]
+  (cu/map-response (str id " not found") 404 id))
+
 (defn- response-updated
   [id]
   (cu/map-response (str "updated " id) 200 id))
 
-(defn response-exception
-  [ei]
-  (ex-data ei))
+(defn- throw-if-not-found
+  [data id]
+  (if-not data
+    (throw (cu/ex-not-found id))
+    data))
 
-(defn find-data
+(defn- find-data
   [client index id options action]
   (let [[type docid] (split-id id)]
     (-> (esu/read client index type docid)
         (.getSourceAsString)
         doc->data
+        (throw-if-not-found id)
         (acl/check-can-do options action))))
 
 (deftype ESBinding []
@@ -125,15 +132,11 @@
     (response-deleted id))
 
   (edit [_ {:keys [id] :as data} options]
-    (try
-      (find-data *client* index-name id options "MODIFY")
-
-      (let [[type docid] (split-id id)]
-        (if (esu/update *client* index-name type docid (esu/edn->json data))
-          (r/response data)
-          (response-conflict id)))
-      (catch ExceptionInfo ei
-        (response-exception ei))))
+    (find-data *client* index-name id options "MODIFY")
+    (let [[type docid] (split-id id)]
+      (if (esu/update *client* index-name type docid (esu/edn->json data))
+        (r/response data)
+        (response-conflict id))))
 
   (query [_ collection-id options]
     (let [response                (esu/search *client* index-name collection-id options)
