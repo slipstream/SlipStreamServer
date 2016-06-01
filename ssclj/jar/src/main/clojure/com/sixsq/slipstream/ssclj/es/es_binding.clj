@@ -86,7 +86,7 @@
 
 (defn- response-deleted
   [id]
-  (cu/map-response (str id " deleted") 204 id))
+  (cu/map-response (str id " deleted") 200 id))
 
 (defn- response-not-found
   [id]
