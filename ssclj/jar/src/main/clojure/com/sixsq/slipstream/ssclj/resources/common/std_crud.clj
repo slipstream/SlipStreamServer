@@ -34,7 +34,7 @@
           (crud/set-operations request)
           (u/json-response))
       (catch ExceptionInfo ei
-        (.getData ei)))))
+        (ex-data ei)))))
 
 (defn edit-fn
   [resource-name]
@@ -50,7 +50,7 @@
             (db/edit request)
             (u/json-response)))
       (catch ExceptionInfo ei
-        (.getData ei)))))
+        (ex-data ei)))))
 
 (defn delete-fn
   [resource-name]
@@ -61,7 +61,7 @@
           (a/can-modify? request)
           (db/delete request))
       (catch ExceptionInfo ei
-        (.getData ei)))))
+        (ex-data ei)))))
 
 (defn collection-wrapper-fn
   [resource-name collection-acl collection-uri collection-key]
