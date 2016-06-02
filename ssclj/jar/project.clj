@@ -97,7 +97,7 @@
 
    :dev
      { :env {  :clj-env        "development"
-               :config-path    "config-hsqldb-mem.edn"}
+               :config-path    "config-hsqldb.edn"}
        :jvm-opts ["-Dlogfile.path=development"]
        :dependencies [ [peridot/peridot "0.4.1"]
                        [expectations/expectations "2.1.4"]]}
