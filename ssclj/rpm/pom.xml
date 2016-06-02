@@ -24,7 +24,6 @@
       <artifactId>SlipStreamCljResources-jar</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
-      <classifier>jar-with-dependencies</classifier>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -129,7 +128,6 @@
                   <groupId>com.sixsq.slipstream</groupId>
                   <artifactId>SlipStreamCljResources-jar</artifactId>
                   <type>jar</type>
-                  <classifier>jar-with-dependencies</classifier>
                   <destFileName>ssclj.jar</destFileName>
                 </artifactItem>
               </artifactItems>
