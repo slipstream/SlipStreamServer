@@ -31,3 +31,7 @@ sscljdb*
 db.spec
 log4j.properties
 
+# generated files #
+###################
+
+dependency-reduced-pom.xml

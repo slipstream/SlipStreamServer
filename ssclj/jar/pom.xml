@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>3.5-SNAPSHOT</version>
+    <version>3.6-SNAPSHOT</version>
   </parent>
 
   <repositories>
@@ -33,7 +33,7 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>auth</artifactId>
-      <version>3.5-SNAPSHOT</version>
+      <version>3.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
@@ -303,24 +303,27 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifest>
-              <mainClass>com.sixsq.slipstream.ssclj.app.main</mainClass>
-            </manifest>
-          </archive>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-        </configuration>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.4.3</version>
         <executions>
           <execution>
-            <id>make-jar-with-dependencies</id>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>shade</goal>
             </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>com.sixsq.slipstream.ssclj.app.main</Main-Class>
+                  </manifestEntries>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                  <resource>.SF</resource>
+                </transformer>
+              </transformers>
+            </configuration>
           </execution>
         </executions>
       </plugin>
