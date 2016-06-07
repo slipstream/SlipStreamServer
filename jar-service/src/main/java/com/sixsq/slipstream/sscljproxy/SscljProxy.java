@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.restlet.Context;
 import org.restlet.data.Parameter;
 import org.restlet.engine.header.Header;
+import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.util.Series;
 
@@ -52,8 +53,8 @@ public abstract class SscljProxy extends BaseResource {
         return resource().get().getText();
     }
 
-    protected String putSsclj() throws IOException {
-        return resource().put(null).getText();
+    protected String putSsclj(Representation data) throws IOException {
+        return resource().put(data).getText();
     }
 
     protected String getNameRoles() {

@@ -56,7 +56,7 @@ import com.sixsq.slipstream.resource.ServiceCatalogRouter;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
-import com.sixsq.slipstream.ui.UIProxyRouter;
+import com.sixsq.slipstream.ui.UIResourceRouter;
 import com.sixsq.slipstream.usage.UsageRouter;
 import com.sixsq.slipstream.user.UserRouter;
 import com.sixsq.slipstream.util.ConfigurationUtil;
@@ -251,7 +251,7 @@ public class RootApplication extends Application {
 			attachUsage(router);
 			attachCloudUsage(router);
 			attachAppStore(router);
-			attachUIProxy(router);
+			attachUIResource(router);
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
 		} catch (ValidationException e) {
@@ -446,8 +446,8 @@ public class RootApplication extends Application {
 		guardAndAttach(router, new ModuleListRouter(getContext(), AppStoreResource.class), "appstore");
 	}
 
-	private void attachUIProxy(RootRouter router) throws ValidationException {
-		guardAndAttach(router, new UIProxyRouter(getContext()), "ui");
+	private void attachUIResource(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new UIResourceRouter(getContext()), "ui");
 	}
 
 	private void attachModulesChooser(RootRouter router) throws ValidationException {
