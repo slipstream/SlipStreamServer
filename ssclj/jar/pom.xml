@@ -320,8 +320,12 @@
                   </manifestEntries>
                 </transformer>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                  <resource>.SF</resource>
-                  <resource>log4j.properties</resource>
+                  <resources>
+                    <resource>log4j.properties</resource>
+                    <resource>.SF</resource>
+                    <resource>.RSA</resource>
+                    <resource>.DSA</resource>
+                  </resources>
                 </transformer>
               </transformers>
             </configuration>
