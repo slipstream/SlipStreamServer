@@ -64,23 +64,12 @@
     (GET uri-github request (gh/callback-github request (cf/property-value :main-server)))
     (GET uri-cyclone request (cy/callback-cyclone request (cf/property-value :main-server)))))
 
-(def ui-routes
-  (routes
-    (GET (str p/ui-context "placement") req {:status 200 :body req})
-    (PUT (str p/ui-context "placement") req {:status 200 :body {:body (-> req :body str)
-                                                                :clouds ["cloud1" "cloud2"]
-                                                                :clouds-mockup-1 (-> req :body :clouds)
-                                                                :clouds-mockup-2 (-> req :body :clouds first vector)
-                                                                :module (-> req :body :module (or "<missing>"))}
-                                             :content-type "application/json"})))
-
 (def final-routes
   [
    collection-routes
    resource-routes
    action-routes
    auth-routes
-   ui-routes
    (not-found)])
 
 (defn get-main-routes

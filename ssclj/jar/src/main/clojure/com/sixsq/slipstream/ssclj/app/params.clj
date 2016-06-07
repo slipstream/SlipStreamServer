@@ -2,4 +2,3 @@
 
 (def ^:const service-context "/api/")
 (def ^:const auth-context "/auth/")
-(def ^:const ui-context "/ui/")
