@@ -31,7 +31,7 @@
 (defn- read-property-value
   [name & more]
   (let [v (get (config) name (first more))]
-    (log/info "property" name "=" v)
+    (log/debug "property" name "=" v)
     v))
 
 (def property-value (memoize read-property-value))
