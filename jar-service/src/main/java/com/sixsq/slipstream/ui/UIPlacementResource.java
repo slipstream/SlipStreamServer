@@ -36,12 +36,21 @@ public class UIPlacementResource extends BaseResource {
     public Representation putUI(Representation data) {
         try {
 
+            // TODO temporary sleep to show loading screen is displayed when run dialog appears
+            Thread.sleep(2000);
+
             String json = data.getText();
 
-            logger.fine(">>>> PUT data " + json);
+            logger.info(">>>> PUT data " + json);
             Gson gson = new GsonBuilder().create();
-            Object jsonObject = gson.fromJson(json, Object.class);
-            String jsonOutput = gson.toJson(jsonObject);
+
+            PlacementRequest placementRequest = gson.fromJson(json, PlacementRequest.class);
+            placementRequest.loadModuleFromUri();
+
+            logger.info(">>>> PUT placementRequest " + placementRequest);
+            // TODO call PRS-lib with the placementRequest object
+
+            String jsonOutput = gson.toJson(placementRequest);
             // TODO: unnecessary parse and unparse to validate data in input is valid Json
 
             return new StringRepresentation(jsonOutput, MediaType.APPLICATION_JSON);

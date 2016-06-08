@@ -27,10 +27,11 @@ public class UIPlacementResourceTest extends ResourceTestBase {
     @Test
     public void putUiPlacementReturnsValidJson() throws Exception {
 
-        String data ="{\n" +
-                "\"module\": \"/module/examples/service-testing/apache\",\n" +
-                "\"components\": [{ \"module\": \"/module/examples/service-testing/apache\", \"multiplicity\": 2, \"placement_policy\": \"string\"}],\n" +
-                "\"clouds\": [\"cloud-1\", \"cloud-2\"]\n" +
+        String data ="{" +
+                "\"module-uri\": \"/module/examples/service-testing/apache\"," +
+                "\"placement-params\": {}," +
+                "\"prs-endpoint\": \"http://prs/filter-rank\"," +
+                "\"user-connectors\": [\"cloud-1\", \"cloud-2\"]" +
                 "}";
 
         Response response = putUIPlacement(data);
