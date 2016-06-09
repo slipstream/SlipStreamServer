@@ -25,8 +25,8 @@
 
 (defn comp-to-map
   [comp]
-  {:comp-uri        (.getResourceUri comp)
-   :multiplicity    1
+  {:uri              (.getResourceUri comp)
+   :vm-size          ""
    :placement-policy ""})
 
 (defn comps-from-app
@@ -51,7 +51,7 @@
 
 (defn module-to-map
   [module]
-  {:uri (.getResourceUri module)
+  {:uri        (.getResourceUri module)
    :components (components-from-module module)})
 
 (defn process-module
@@ -59,7 +59,9 @@
   (update m :module module-to-map))
 
 (defn -placeAndRank
-  "Input map
+  "Given the plament request as map returns JSON response from PRS service.
+
+  Placement request map
   {
     module: Module, // java object - ImageModule or DeploymentModule
     placement-params: { components: [ ] }, // java map
