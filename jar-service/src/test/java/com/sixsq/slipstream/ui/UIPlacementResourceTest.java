@@ -2,6 +2,7 @@ package com.sixsq.slipstream.ui;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import org.junit.Test;
 import org.restlet.Request;
@@ -44,7 +45,26 @@ public class UIPlacementResourceTest extends ResourceTestBase {
 
     private Response putUIPlacement(String data) throws Exception {
         Request request = createPutRequest(null, new StringRepresentation(data, MediaType.APPLICATION_ALL_JSON), "ui/placement");
-        return executeRequest(request, new UIPlacementResource());
+
+        UIPlacementResource uiPlacementResource = new UIPlacementResource() {
+            private Module buildTestModule() {
+                try {
+                    Module testModule = new com.sixsq.slipstream.persistence.ImageModule("example1");
+                    return testModule;
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            protected PlacementRequest buildPlacementRequest(String json) {
+                PlacementRequest request = PlacementRequest.fromJson(json);
+                request.setModule(buildTestModule());
+                return request;
+            }
+        };
+
+        return executeRequest(request, uiPlacementResource);
     }
 
 }

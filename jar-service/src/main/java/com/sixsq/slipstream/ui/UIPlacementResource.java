@@ -12,6 +12,8 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -36,30 +38,29 @@ public class UIPlacementResource extends BaseResource {
     public Representation putUI(Representation data) {
         try {
 
-            // TODO temporary sleep to show loading screen is displayed when run dialog appears
-            Thread.sleep(2000);
-
             String json = data.getText();
 
             logger.info(">>>> PUT data " + json);
-            Gson gson = new GsonBuilder().create();
 
-            PlacementRequest placementRequest = gson.fromJson(json, PlacementRequest.class);
-            placementRequest.loadModuleFromUri();
-
+            PlacementRequest placementRequest = buildPlacementRequest(json);
             logger.info(">>>> PUT placementRequest " + placementRequest);
-            // TODO call PRS-lib with the placementRequest object
+            logger.info(">>>> PUT placementRequest as Map" + placementRequest.asMap());
 
-            String jsonOutput = gson.toJson(placementRequest);
-            // TODO: unnecessary parse and unparse to validate data in input is valid Json
+            String prsLibRes = sixsq.slipstream.prs.core.JavaWrapper.placeAndRank(placementRequest.asMap());
+            logger.info(">>>> PUT result of call to PRS lib : " + prsLibRes);
 
-            return new StringRepresentation(jsonOutput, MediaType.APPLICATION_JSON);
+            return new StringRepresentation(prsLibRes, MediaType.APPLICATION_JSON);
 
         }catch (JsonSyntaxException jse) {
             throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, jse.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
         }
+    }
+
+    protected PlacementRequest buildPlacementRequest(String json){
+        return PlacementRequest.fromJson(json);
     }
 
 
