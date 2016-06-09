@@ -59,6 +59,7 @@
 (deftask build []
          (comp
            (pom)
+           (aot :all true)
            (jar)))
 
 (deftask mvn-test
