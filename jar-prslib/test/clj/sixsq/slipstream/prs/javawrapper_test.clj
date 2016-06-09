@@ -38,5 +38,6 @@
     (is (contains? m :foo))
     (is (contains? m :module))
     (is (contains? (:module m) :uri))
+    (is (contains? (:module m) :components))
     (is (= "module/component" (-> m :module :uri)))
     ))

@@ -4,12 +4,17 @@
   "
   {:doc/format :markdown}
   (:require
-    [clojure.data.json :as json])
-  (:import [com.sixsq.slipstream.persistence ImageModule])
-  )
+    [clojure.data.json :as json]))
 
 (defn prs-place-and-rank
   "
+  Input request map:
+  {:module uri
+   :components {:module uri
+                }
+   :connectors [c1 c2]
+  }
+
   Output
   {
    :components [
@@ -19,7 +24,7 @@
                 ]
    }
   "
-  [url request]
+  [endpoint request]
   {:components [{:module "module/foo", :connectors [{:name "c1", :price 1, :currency "USD"},
                                                     {:name "c2", :price 2, :currency "USD"}]}
                 {:module "module/bar", :connectors [{:name "c1", :price 1, :currency "USD"}]}]
@@ -29,7 +34,7 @@
   "Given the input map, calls PRS service and retuns the JSON returned by PRS.
    Input map
    {
-     :module {:uri uri
+     :module {:module uri
               :components [ {:comp-uri uri :multiplicity # }, ] }
      :placement-params { components: [ {:comp-uri uri :multiplicity # :policy string }, ] } ; map
      :prs-endpoint url ; str

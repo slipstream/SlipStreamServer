@@ -23,25 +23,36 @@
     (instance? Set data) (into #{} (map #(java->clj %) data))
     :else data))
 
-(defn deployment-module-to-map
-  [app]
-    {:uri        (.getResourceUri app)
-     :components [{:comp-uri "module/foo" :multiplicity 0}]})
-
-(defn image-module-to-map
+(defn comp-to-map
   [comp]
-  (let [uri (.getResourceUri comp)]
-    {:uri        uri
-     :components [{:comp-uri uri :multiplicity 0}]}))
+  {:comp-uri        (.getResourceUri comp)
+   :multiplicity    1
+   :placement-policy ""})
 
-(defn module-to-map
+(defn comps-from-app
+  "Takes app as DeploymentModule and returns a vector of components
+  {:comp-uri uri :multiplicity 0 :placement-policy ''}
+  "
+  [app]
+  (let [comps []]
+    (for [node (.getNodes app)
+          :let [comp (.getImage node)]]
+      (into comps (comp-to-map comp)))
+    comps))
+
+(defn components-from-module
   [module]
   (let [category (.getCategory module)]
     (cond
-      (= ModuleCategory/Image category) (image-module-to-map module)
-      (= ModuleCategory/Deployment category) (deployment-module-to-map module)
+      (= ModuleCategory/Image category) [(comp-to-map module)]
+      (= ModuleCategory/Deployment category) (comps-from-app module)
       :else (Exception. (format "Expected module of category %s or %s."
                                 ModuleCategory/Image ModuleCategory/Deployment)))))
+
+(defn module-to-map
+  [module]
+  {:uri (.getResourceUri module)
+   :components (components-from-module module)})
 
 (defn process-module
   [m]
