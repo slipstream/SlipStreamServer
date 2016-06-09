@@ -32,7 +32,7 @@
   (is (= "module/application" (:uri (module-to-map (DeploymentModule. "application")))))
   )
 
-(deftest test-process-module
+(deftest test-process-module-compenent
   (let [m (process-module {:module (ImageModule. "component")
                            :foo    nil})]
     (is (contains? m :foo))
@@ -41,3 +41,6 @@
     (is (contains? (:module m) :components))
     (is (= "module/component" (-> m :module :uri)))
     ))
+
+(deftest test-process-module-application
+  )
