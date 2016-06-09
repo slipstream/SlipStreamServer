@@ -13,7 +13,6 @@
     [metrics.ring.expose :refer [expose-metrics-as-json]]
     [metrics.jvm.core :refer [instrument-jvm]]
 
-    [com.sixsq.slipstream.ssclj.app.httpkit-container :as httpkit]
     [com.sixsq.slipstream.ssclj.app.aleph-container :as aleph]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
@@ -77,9 +76,7 @@
    (resources/initialize)
    (let [handler (create-ring-handler)]
      (graphite/start-graphite-reporter)
-     (if (= impl "httpkit")
-       (httpkit/start-container handler port)
-       (aleph/start-container handler port)))))
+     (aleph/start-container handler port))))
 
 (defn stop
   "Stops the application server by calling the function that was

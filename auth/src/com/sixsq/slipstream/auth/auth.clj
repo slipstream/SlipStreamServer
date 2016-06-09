@@ -41,9 +41,9 @@
 
 (defn build-token
   [request]
-  (log/info "Will build-token")
   (let [{:keys [claims token]} (extract-claims-token request)
         [ok? token] (ia/create-token claims token)]
+    (log/debug "token creation status: " ok?)
     (if ok?
       (uh/response-with-body 200 (:token token))
       (uh/response-forbidden))))
