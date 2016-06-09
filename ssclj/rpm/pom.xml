@@ -219,6 +219,8 @@
                   <includes>
                     <include>log4j.properties</include>
                     <include>db.spec</include>
+                    <include>auth_privkey.pem</include>
+                    <include>auth_pubkey.pem</include>
                   </includes>
                 </source>
               </sources>

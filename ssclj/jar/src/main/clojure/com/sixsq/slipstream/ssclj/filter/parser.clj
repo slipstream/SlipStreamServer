@@ -7,7 +7,7 @@
 
 ;; NOTE: The URL for instaparse must be a string.
 (def filter-grammar-url
-  (str (io/resource "filter-grammar.txt")))
+  (str (io/resource "com/sixsq/slipstream/ssclj/filter/cimi-filter-grammar.txt")))
 
 (def ^:private cimi-filter-parser
   (insta/parser filter-grammar-url))
