@@ -243,4 +243,5 @@
         (indices)
         (delete (DeleteIndexRequest. index-name))
         (get)))
-  (create-index client index-name))
+  (create-index client index-name)
+  (println "Index resetted"))

@@ -26,10 +26,12 @@
 
 (defn create-client
   []
+  (println "Creating ES client")
   (wait-client-create-index (esu/create-es-client)))
 
 (defn create-test-client
   []
+  (println "Creating ES Test client")
   (wait-client-create-index (esu/create-test-es-client)))
 
 (def ^:dynamic *client*)

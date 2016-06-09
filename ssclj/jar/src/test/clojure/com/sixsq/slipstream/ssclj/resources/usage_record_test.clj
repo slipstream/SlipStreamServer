@@ -167,10 +167,11 @@
     (request state base-uri :request-method :post :body (json/write-str ur2))
     (request state base-uri :request-method :post :body (json/write-str ur31))
 
-    ;(println "DUMP")
+    (println "DUMP")
     ;(clojure.pprint/pprint
     ;  (esu/dump esb/client esb/index "usage-record"))
-    ;(println (apply str (repeat 20 "-")))
+
+    (println (apply str (repeat 20 "-")))
 
     (clojure.pprint/pprint (last-record ur5))
 

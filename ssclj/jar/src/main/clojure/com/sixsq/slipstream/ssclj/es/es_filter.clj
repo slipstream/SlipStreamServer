@@ -85,7 +85,9 @@
           m)))))
 
 (defmethod convert :PropExpr [[_ Prop Op Value]]
-  [[:Attribute (str "property." (second Prop))] Op Value])
+  (let [result [[:Attribute (str "property." (second Prop))] Op Value]]
+    (println result)
+    result))
 
 (defmethod convert :AndExpr [v]
   (let [args (rest v)]
