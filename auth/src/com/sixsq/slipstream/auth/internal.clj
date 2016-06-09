@@ -53,7 +53,7 @@
      [false {:message "Invalid credentials when creating token"}]))
 
   ([claims token]
-   (log/info "Will create token for claims=" claims)
+   (log/debug "Will create token for claims=" claims)
    (try
      (sg/unsign-claims token)
      [true {:token (sg/sign-claims claims)}]
@@ -64,7 +64,7 @@
 (defn login
   [request]
 
-  (log/info "Internal authentication.")
+  (log/debug "Starting internal authentication.")
   (let [credentials (extract-credentials request)
         [ok? token] (create-token credentials)]
     (log-result credentials ok?)
@@ -82,7 +82,7 @@
 
 (defn logout
   []
-  (log/info "Logout Internal authentication")
+  (log/info "Logout internal authentication")
   (assoc
     (uh/response 200)
     :cookies
