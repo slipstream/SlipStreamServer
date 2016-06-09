@@ -35,7 +35,7 @@
   "
   [app]
   (let [comps []]
-    (for [node (.getNodes app)
+    (for [node (vals (.getNodes app))
           :let [comp (.getImage node)]]
       (into comps (comp-to-map comp)))
     comps))
