@@ -17,7 +17,6 @@ import java.util.Map;
  */
 public class PlacementRequest {
 
-    @SerializedName("module-uri")
     private String moduleUri;
 
     protected void setModule(Module module) {
@@ -33,12 +32,10 @@ public class PlacementRequest {
 
     private Module module;
 
-    @SerializedName("placement-params")
     private Map<Object, Object> placementParams;
 
     private String prsEndPoint;
 
-    @SerializedName("user-connectors")
     private List<String> userConnectors;
 
     public Map<String, Object> asMap() {

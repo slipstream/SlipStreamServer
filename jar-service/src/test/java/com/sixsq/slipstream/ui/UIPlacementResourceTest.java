@@ -29,9 +29,9 @@ public class UIPlacementResourceTest extends ResourceTestBase {
     public void putUiPlacementReturnsValidJson() throws Exception {
 
         String data ="{" +
-                "\"module-uri\": \"/module/examples/service-testing/apache\"," +
-                "\"placement-params\": {}," +
-                "\"user-connectors\": [\"cloud-1\", \"cloud-2\"]" +
+                "\"moduleUri\": \"unused\"," +
+                "\"placementParams\": {}," +
+                "\"userConnectors\": [\"cloud-1\", \"cloud-2\"]" +
                 "}";
 
         Response response = putUIPlacement(data);
