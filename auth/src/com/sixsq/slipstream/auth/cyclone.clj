@@ -25,7 +25,7 @@
 
 (defn login
   []
-  (log/info "Cyclone authentication.")
+  (log/debug "Starting CYCLONE authentication.")
   (uh/response-redirect (cyclone-code-url)))
 
 (defn login-name
@@ -52,6 +52,7 @@
                              :access_token)
           claims         (sg/unsign-claims access-token "cyclone_pubkey.pem")]
       (log/debug "Cyclone claims " claims)
+      (log/info "Successful CYCLONE login: " (login-name claims))
       (ex/redirect-with-matched-user :cyclone (login-name claims) (:email claims) redirect-server))
     (catch Exception e
       (log/error "Invalid Cyclone authentication " e)

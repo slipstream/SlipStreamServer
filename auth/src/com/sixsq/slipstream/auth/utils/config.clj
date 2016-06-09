@@ -28,7 +28,7 @@
 (defn- read-property-value
   [name & more]
   (let [v (get (config) name (first more))]
-    (log/info "property" name "=" v)
+    (log/debug "property" name "=" v)
     v))
 
 (defn- read-mandatory-property-value

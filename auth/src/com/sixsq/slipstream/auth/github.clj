@@ -35,6 +35,10 @@
     public-email
     (retrieve-private-email access-token)))
 
+(defn- sanitized-login
+  [user-info]
+  (-> user-info :login ex/sanitize-login-name))
+
 (defn callback-github
   [request redirect-server]
   (try
@@ -55,9 +59,9 @@
           user-info             (parse-github-user user-info-response)]
 
       (log/debug "Github user-info " user-info)
-
+      (log/info "Successful GitHub authentication: " (sanitized-login user-info))
       (ex/redirect-with-matched-user :github
-                                     (-> user-info :login ex/sanitize-login-name)
+                                     (sanitized-login user-info)
                                      (retrieve-email user-info access-token)
                                      redirect-server))
 
@@ -67,7 +71,7 @@
 
 (defn login
   []
-  (log/info "Github authentication.")
+  (log/debug "Starting GitHub authentication.")
   (uh/response-redirect
     (format
       "https://github.com/login/oauth/authorize?client_id=%s&scope=user:email"

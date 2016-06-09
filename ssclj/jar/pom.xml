@@ -68,10 +68,6 @@
       <artifactId>java.classpath</artifactId>
     </dependency>
     <dependency>
-      <groupId>http-kit</groupId>
-      <artifactId>http-kit</artifactId>
-    </dependency>
-    <dependency>
       <groupId>aleph</groupId>
       <artifactId>aleph</artifactId>
     </dependency>
