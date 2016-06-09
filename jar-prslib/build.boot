@@ -27,6 +27,7 @@
     [adzerk/boot-reload "0.4.5" :scope "test"]
     [tolitius/boot-check "0.1.1" :scope "test"]
     [sixsq/boot-deputil "0.2.2" :scope "test"]
+    [com.sixsq.slipstream/SlipStreamPersistence "3.6-SNAPSHOT" :scope "test"]
     [boot-codox "0.9.5" :scope "test"]])
 
 (require
