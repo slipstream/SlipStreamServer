@@ -21,7 +21,6 @@ public class PlacementRequest {
     @SerializedName("placement-params")
     private Map<Object, Object> placementParams;
 
-    @SerializedName("prs-endpoint")
     private String prsEndPoint;
 
     @SerializedName("user-connectors")
@@ -30,6 +29,10 @@ public class PlacementRequest {
     public void loadModuleFromUri(){
         this.module = Module.load(moduleUri);
         System.out.println(moduleUri + " :loaded=" + module);
+    }
+
+    public String toString() {
+        return moduleUri + ", " + prsEndPoint + ", " + userConnectors + ", " + placementParams;
     }
 
 }

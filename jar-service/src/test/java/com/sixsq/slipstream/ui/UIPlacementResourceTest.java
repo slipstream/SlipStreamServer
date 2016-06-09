@@ -30,7 +30,6 @@ public class UIPlacementResourceTest extends ResourceTestBase {
         String data ="{" +
                 "\"module-uri\": \"/module/examples/service-testing/apache\"," +
                 "\"placement-params\": {}," +
-                "\"prs-endpoint\": \"http://prs/filter-rank\"," +
                 "\"user-connectors\": [\"cloud-1\", \"cloud-2\"]" +
                 "}";
 
