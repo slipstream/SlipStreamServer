@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/ssclj "3.5-SNAPSHOT"
+(defproject com.sixsq.slipstream/ssclj "3.6-SNAPSHOT"
   :description    "Clojure REST resources"
   :url            "http://sixsq.com"
   :license {:name "Apache License, Version 2.0"
@@ -96,7 +96,7 @@
 
    :dev
      { :env {  :clj-env        "development"
-               :config-path    "config-hsqldb-mem.edn"}
+               :config-path    "config-hsqldb.edn"}
        :jvm-opts ["-Dlogfile.path=development"]
        :dependencies [ [peridot/peridot "0.4.1"]
                        [expectations/expectations "2.1.4"]]}
