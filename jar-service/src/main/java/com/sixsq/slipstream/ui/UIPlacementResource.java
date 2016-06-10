@@ -40,14 +40,14 @@ public class UIPlacementResource extends BaseResource {
 
             String json = data.getText();
 
-            logger.info(">>>> PUT data " + json);
+            logger.fine("PUT data " + json);
 
             PlacementRequest placementRequest = buildPlacementRequest(json);
-            logger.info(">>>> PUT placementRequest " + placementRequest);
-            logger.info(">>>> PUT placementRequest as Map" + placementRequest.asMap());
+            logger.fine("PUT placementRequest " + placementRequest);
+            logger.fine("PUT placementRequest as Map" + placementRequest.asMap());
 
             String prsLibRes = sixsq.slipstream.prs.core.JavaWrapper.placeAndRank(placementRequest.asMap());
-            logger.info(">>>> PUT result of call to PRS lib : " + prsLibRes);
+            logger.fine("PUT result of call to PRS lib : " + prsLibRes);
 
             return new StringRepresentation(prsLibRes, MediaType.APPLICATION_JSON);
 

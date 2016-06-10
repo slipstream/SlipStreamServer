@@ -2,13 +2,12 @@ package com.sixsq.slipstream.ui;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.persistence.Module;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Java object sent to PRS-lib
@@ -16,6 +15,8 @@ import java.util.Map;
  * @see UIPlacementResource
  */
 public class PlacementRequest {
+
+    private static Logger logger = Logger.getLogger(PlacementRequest.class.getName());
 
     private String moduleUri;
 
@@ -27,6 +28,8 @@ public class PlacementRequest {
         if(module == null) {
             module = Module.load(moduleUri);
         }
+
+        logger.fine("Loaded module " + module);
         return module;
     }
 
@@ -43,9 +46,10 @@ public class PlacementRequest {
         Map<String, Object> result = new HashMap<>();
 
         result.put("module", getModule());
+        result.put("user-connectors", userConnectors);
+
         result.put("placement-params", new HashMap<>());
         result.put("prs-endpoint", "");
-        result.put("user-connectors", userConnectors);
 
         return result;
     }
