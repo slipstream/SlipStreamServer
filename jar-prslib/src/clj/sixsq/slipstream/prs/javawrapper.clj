@@ -4,13 +4,16 @@
   "
   {:doc/format :markdown}
   (:require
+    [clojure.tools.logging :as log]
     [clojure.walk :as walk]
-    [sixsq.slipstream.prs.core :as prs])
+    [sixsq.slipstream.prs.core :as prs]
+    )
   (:import [java.util Map List Set]
            [com.sixsq.slipstream.persistence ImageModule DeploymentModule ModuleCategory NodeParameter ModuleCategory])
   (:gen-class
     :name sixsq.slipstream.prs.core.JavaWrapper
-    :methods [#^{:static true} [placeAndRank [java.util.Map] String]]))
+    :methods [#^{:static true} [placeAndRank      [java.util.Map] String]
+              #^{:static true} [validatePlacement [com.sixsq.slipstream.persistence.Run] Boolean]]))
 
 (defn java->clj
   "Transform java data structures into the equivalent clojure
@@ -68,3 +71,18 @@
       (walk/keywordize-keys)
       (process-module)
       (prs/place-and-rank)))
+
+(defn -validatePlacement
+  [run]
+  (log/info "Calling PRS validater")
+  ;; run
+  ;; -> placementRequest
+  ;; (placeAndRank)
+  ; Output
+  ; {:components [{:module uri
+  ;               :connectors [{:name c1 :price 0 :currency ''},
+  ;                             {:name c2 :price 0 :currency ''}]}]
+  ; }
+  ;; valid means : for each module, in returned components, connectors not empty
+  true)
+
