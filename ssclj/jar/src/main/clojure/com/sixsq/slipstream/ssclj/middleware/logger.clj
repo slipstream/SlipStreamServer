@@ -48,7 +48,7 @@
   (fn [request]
     (let [start             (System/currentTimeMillis)
           formatted-request (formatted-request request)
-          _                 (log/debug formatted-request)
+          _                 (log/info formatted-request)
           response          (handler request)
-          _                 (log/debug (formatted-response formatted-request response start (System/currentTimeMillis)))]
+          _                 (log/info (formatted-response formatted-request response start (System/currentTimeMillis)))]
       response)))
