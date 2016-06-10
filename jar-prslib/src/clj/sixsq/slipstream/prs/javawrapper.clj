@@ -25,7 +25,7 @@
 
 (defn comp-to-map
   [comp]
-  {:uri              (.getResourceUri comp)
+  {:module           (.getResourceUri comp)
    :vm-size          "undefined"
    :placement-policy "undefined"})
 
