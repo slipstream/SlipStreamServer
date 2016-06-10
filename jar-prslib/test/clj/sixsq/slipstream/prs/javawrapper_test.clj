@@ -50,9 +50,9 @@
 
 (deftest test-comps-from-app
   (is (= 3 (count (comps-from-app app))))
-  (is (contains? (first (comps-from-app app)) :uri))
+  (is (contains? (first (comps-from-app app)) :module))
   (is (= "module/image1" (->> (comps-from-app app)
-                              (sort-by :uri)
+                              (sort-by :module)
                               (first)
-                              :uri)))
+                              :module)))
   )
