@@ -9,13 +9,13 @@ public class APICollectionResource extends APIBaseResource {
     }
 
     @Override
-    protected String getPageRepresentation() {
-        return resourceName + "s";
+    protected String uri() {
+        return super.uri() + "/" + this.resourceName + cimiParams();
     }
 
     @Override
-    protected String uri() {
-        return SSCLJ_SERVER + "/" + this.resourceName + cimiParams();
+    protected String getPageRepresentation() {
+        return resourceName + "s";
     }
 
     private String cimiParams() {

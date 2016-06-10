@@ -14,7 +14,7 @@ public class APIResource extends APIBaseResource {
     @Override
     protected String uri() {
         String resourceId = (String) getRequest().getAttributes().get("resource-id");
-        return SSCLJ_SERVER + "/" + this.resourceName + "/" + resourceId;
+        return super.uri() + "/" + this.resourceName + "/" + resourceId;
     }
 
 }
