@@ -1,38 +1,27 @@
 package com.sixsq.slipstream.ui;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.sixsq.slipstream.resource.BaseResource;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
+ * Service called by Javascript.
+ * Json (containing userConnectors and moduleURI) is converted in a Java Map.
+ * to call PRS-lib static function.
+ * Response from PRS-lib is returned as is.
  *
+ * @see PlacementRequest
  */
 public class UIPlacementResource extends BaseResource {
 
     private static Logger logger = Logger.getLogger(UIPlacementResource.class.getName());
-
-    @Get("json")
-    public Representation getUI() {
-        try {
-            logger.fine("GET req " + getRequest());
-            logger.fine("GET response " + getResponse());
-            return new StringRepresentation("{}", MediaType.APPLICATION_JSON);
-        } catch (Exception e) {
-            throw (new ResourceException(Status.SERVER_ERROR_SERVICE_UNAVAILABLE, e.getMessage()));
-        }
-    }
 
     @Put("json")
     public Representation putUI(Representation data) {

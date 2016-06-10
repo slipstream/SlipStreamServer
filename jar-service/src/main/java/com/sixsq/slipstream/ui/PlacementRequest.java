@@ -10,7 +10,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * Java object sent to PRS-lib
+ * Java structure sent to PRS-lib (thanks to asMap method).
+ *
+ * Responsible to load module object from given URI.
  *
  * @see UIPlacementResource
  */
