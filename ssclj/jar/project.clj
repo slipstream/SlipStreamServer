@@ -1,4 +1,4 @@
-(defproject com.sixsq.slipstream/ssclj "3.5-SNAPSHOT"
+(defproject com.sixsq.slipstream/ssclj "3.6-SNAPSHOT"
   :description    "Clojure REST resources"
   :url            "http://sixsq.com"
   :license {:name "Apache License, Version 2.0"
@@ -16,7 +16,6 @@
                  [org.clojure/java.classpath                "0.2.3"]
                  [superstring                               "2.1.0"]
                  [prismatic/schema                          "1.0.3"]
-                 [clojurewerkz/scrypt                       "1.2.0"]
                  [clj-time/clj-time                         "0.11.0"]
                  [clj-stacktrace/clj-stacktrace             "0.2.8"]
                  [metrics-clojure/metrics-clojure           "2.5.1"]
@@ -37,7 +36,6 @@
                  [org.clojure/java.jdbc                     "0.4.2"]
                  [korma                                     "0.4.2"]
                  [org.hsqldb/hsqldb                         "2.3.3"]
-                 [org.xerial/sqlite-jdbc                    "3.8.11.2"]
                 ; ;; http related
                  [javax.servlet/javax.servlet-api           "3.1.0"]
                  [ring/ring-core                            "1.4.0"]
@@ -96,7 +94,7 @@
 
    :dev
      { :env {  :clj-env        "development"
-               :config-path    "config-hsqldb-mem.edn"}
+               :config-path    "config-hsqldb.edn"}
        :jvm-opts ["-Dlogfile.path=development"]
        :dependencies [ [peridot/peridot "0.4.1"]
                        [expectations/expectations "2.1.4"]]}

@@ -1,8 +1,0 @@
-{:db {
-  :classname "org.sqlite.JDBC" 
-  :subprotocol "sqlite"
-  :subname "db/devresources.sqlite"
-  :make-pool? true}}
-
-  ; (def db {:classname "org.sqlite.JDBC" :subprotocol "sqlite" :subname "db/devresources.sqlite"})
-  ; (def db { :classname    "org.hsqldb.jdbc.JDBCDriver"  :subprotocol  "hsqldb"  :subname      "hsql://localhost:9012/devresources"})

@@ -153,7 +153,7 @@
          (node)))))
 
 (def ^:const mapping-not-analyzed
-  (-> "mapping-not-analyzed.json"
+  (-> "com/sixsq/slipstream/ssclj/es/mapping-not-analyzed.json"
       io/resource
       slurp))
 
