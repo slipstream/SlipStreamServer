@@ -56,8 +56,7 @@
 (defn place-and-rank
   "Given the input map, calls PRS service and retuns the JSON returned by PRS.
    Input map
-   {:module {:module uri
-             :components [ {:module uri :vm-size '' }, ] }
+   {:module {:components [ {:module uri :vm-size '' }, ] }
     :placement-params { components: [ {:comp-uri uri :multiplicity # :policy string }, ] } ; map
     :prs-endpoint url ; str
     :user-connectors [c1 c2] ; vector

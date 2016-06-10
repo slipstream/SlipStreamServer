@@ -18,3 +18,14 @@
       (is (= 2 (count components))))
     ))
 
+(def components {:components      [{:module "module/comp1"}
+                                   {:module "module/comp2"}]
+                 :user-connectors ["c1" "c2"]})
+
+(deftest test-call-prs
+  (is (contains? (call-prs "" components) :components))
+  (is (= 2 (count (:components (call-prs "" components)))))
+  (is (contains? (first (:components (call-prs "" components))) :module))
+  (is (= "module/comp1" (:module (first (:components (call-prs "" components))))))
+  (is (= "c1" (:name (first (:connectors (first (:components (call-prs "" components))))))))
+  )
