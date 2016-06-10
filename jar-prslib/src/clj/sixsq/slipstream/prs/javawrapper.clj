@@ -7,7 +7,7 @@
     [clojure.walk :as walk]
     [sixsq.slipstream.prs.core :as prs])
   (:import [java.util Map List Set]
-           [com.sixsq.slipstream.persistence ImageModule DeploymentModule ModuleCategory])
+           [com.sixsq.slipstream.persistence ImageModule DeploymentModule ModuleCategory NodeParameter ModuleCategory])
   (:gen-class
     :name sixsq.slipstream.prs.core.JavaWrapper
     :methods [#^{:static true} [placeAndRank [java.util.Map] String]]))
@@ -26,19 +26,14 @@
 (defn comp-to-map
   [comp]
   {:uri              (.getResourceUri comp)
-   :vm-size          ""
-   :placement-policy ""})
+   :vm-size          "undefined"
+   :placement-policy "undefined"})
 
 (defn comps-from-app
-  "Takes app as DeploymentModule and returns a vector of components
-  {:comp-uri uri :multiplicity 0 :placement-policy ''}
+  "Takes app as DeploymentModule and returns a list of components.
   "
   [app]
-  (let [comps []]
-    (for [node (vals (.getNodes app))
-          :let [comp (.getImage node)]]
-      (into comps (comp-to-map comp)))
-    comps))
+  (map #(comp-to-map (.getImage %)) (vals (.getNodes app))))
 
 (defn components-from-module
   [module]

@@ -3,7 +3,7 @@
     [clojure.test :refer :all]
     [sixsq.slipstream.prs.javawrapper :refer :all])
   (:import [java.util HashMap ArrayList HashSet]
-           [com.sixsq.slipstream.persistence ImageModule DeploymentModule]))
+           [com.sixsq.slipstream.persistence ImageModule DeploymentModule Node]))
 
 (def cm {"a" "1" "b" "2" "c" "3"})
 (def m (HashMap. cm))
@@ -42,5 +42,17 @@
     (is (= "module/component" (-> m :module :uri)))
     ))
 
-(deftest test-process-module-application
+(def app (doto (DeploymentModule. "application")
+           (.setNode (Node. "node1" (ImageModule. "image1")))
+           (.setNode (Node. "node2" (ImageModule. "image2")))
+           (.setNode (Node. "node3" (ImageModule. "image3")))
+           ))
+
+(deftest test-comps-from-app
+  (is (= 3 (count (comps-from-app app))))
+  (is (contains? (first (comps-from-app app)) :uri))
+  (is (= "module/image1" (->> (comps-from-app app)
+                              (sort-by :uri)
+                              (first)
+                              :uri)))
   )
