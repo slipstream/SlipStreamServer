@@ -58,7 +58,7 @@
 ;;
 (defn- log-wrong-transition
   [state action]
-  (log/info "Action" action " is not allowed for state " state))
+  (log/debug "Action" action " is not allowed for state " state))
 
 (defn- metric-summary
   [usage-metric]
@@ -68,7 +68,7 @@
 
 (defn- close-record
   ([usage-metric close-timestamp options]
-   (log/info "Closing usage-record " close-timestamp (metric-summary usage-metric))
+   (log/debug "Closing usage-record " close-timestamp (metric-summary usage-metric))
    (doseq [ur (ur/open-records usage-metric)]
      (db/edit (assoc ur :end-timestamp close-timestamp) options)))
   ([usage-metric options]
@@ -76,7 +76,7 @@
 
 (defn- open-record
   [usage-metric options]
-  (log/info "Opening usage-record " (metric-summary usage-metric))
+  (log/debug "Opening usage-record " (metric-summary usage-metric))
   (db/add "UsageRecord"
           (-> usage-metric
               (assoc :id (str "usage-record/" (cu/random-uuid)))
