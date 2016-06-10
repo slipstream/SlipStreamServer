@@ -6,19 +6,23 @@
   (:require
     [clojure.data.json :as json]))
 
+(defn- price-connector
+       [connector]
+       {:name     connector
+        :price    0
+        :currency "none"})
+
+(defn- price-component
+       [connectors component]
+       {:module     (:module component)
+        :connectors (map price-connector connectors)})
+
 (defn call-prs
-  [endpoint request]
-  (let [components (:components request)
-        connectors (:user-connectors request)]
-    {:components (into []
-                       (for [comp components]
-                         (-> {}
-                             (merge (select-keys comp [:module]))
-                             (merge {:connectors (into [] (for [c connectors]
-                                                            {:name     c
-                                                             :price    0
-                                                             :currency "none"}))}))))
-     }))
+      [endpoint request]
+      (let [components (:components request)
+            connectors (:user-connectors request)]
+           {:components (map (partial price-component connectors) components)}))
+
 
 (defn prs-place-and-rank
   "
