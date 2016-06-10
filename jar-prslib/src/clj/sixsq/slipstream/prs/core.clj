@@ -23,7 +23,6 @@
             connectors (:user-connectors request)]
            {:components (map (partial price-component connectors) components)}))
 
-
 (defn prs-place-and-rank
   "
   Input request map:
