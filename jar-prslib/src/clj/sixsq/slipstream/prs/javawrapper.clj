@@ -46,8 +46,7 @@
 
 (defn module-to-map
   [module]
-  {:uri        (.getResourceUri module)
-   :components (components-from-module module)})
+  {:components (components-from-module module)})
 
 (defn process-module
   [m]
