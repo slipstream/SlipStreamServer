@@ -179,6 +179,8 @@ public class RunListResource extends BaseResource {
 			setKeepRunning(run, form);
 			setTags(run, form);
 
+			PlacementValidator.validate(run);
+
 			if (Configuration.isQuotaEnabled()) {
 				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
 			}
