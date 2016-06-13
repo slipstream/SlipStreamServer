@@ -22,7 +22,8 @@
 
   :dependencies
   '[[org.clojure/clojure "1.8.0" :scope "provided"]
-    [org.clojure/clojurescript "1.8.40" :scope "provided"]
+    [org.clojure/tools.logging "0.3.1" :scope "provided"]
+    [org.clojure/data.json "0.2.6" :scope "provided"]
     [adzerk/boot-test "1.1.0" :scope "test"]
     [adzerk/boot-reload "0.4.5" :scope "test"]
     [tolitius/boot-check "0.1.1" :scope "test"]
