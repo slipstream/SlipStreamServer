@@ -4,24 +4,14 @@
   "
   {:doc/format :markdown}
   (:require
-    [clojure.data.json :as json]))
-
-(defn- price-connector
-       [connector]
-       {:name     connector
-        :price    0
-        :currency "none"})
-
-(defn- price-component
-       [connectors component]
-       {:module     (:module component)
-        :connectors (map price-connector connectors)})
+    [clojure.data.json :as json]
+    [sixsq.slipstream.client.api.utils.http :as http]
+    ))
 
 (defn call-prs
-      [endpoint request]
-      (let [components (:components request)
-            connectors (:user-connectors request)]
-           {:components (map (partial price-component connectors) components)}))
+  [body endpoint & [http-params]]
+  (:body (http/put endpoint (merge {:body body} http-params))))
+
 
 (defn prs-place-and-rank
   "
@@ -40,10 +30,13 @@
   }
   "
   [endpoint prs-request]
-  (if (some empty? (vals prs-request))
+  (if (or (empty? prs-request) (some empty? (vals prs-request)))
     {:components []}
-    (call-prs endpoint prs-request))
-  )
+    (-> (json/write-str prs-request)
+        (call-prs endpoint {:accept "application/json"
+                            :content-type "application/json"})
+        (json/read-str :key-fn keyword))
+    ))
 
 (defn merge-user-choices
   [components placement-params]
