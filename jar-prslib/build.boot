@@ -25,7 +25,7 @@
     [org.clojure/tools.logging "0.3.1" :scope "provided"]
     [org.clojure/data.json "0.2.6" :scope "provided"]
     [com.sixsq.slipstream/SlipStreamPersistence "3.6-SNAPSHOT" :scope "provided"]
-    [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.6-SNAPSHOT" :scope "provided"]
+    [com.sixsq.slipstream/SlipStreamClientAPI-uber "3.6-SNAPSHOT" :scope "test"]
     [adzerk/boot-test "1.1.0" :scope "test"]
     [adzerk/boot-reload "0.4.5" :scope "test"]
     [tolitius/boot-check "0.1.1" :scope "test"]
