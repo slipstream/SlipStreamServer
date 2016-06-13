@@ -133,7 +133,7 @@
     (find-data *client* index-name id options "MODIFY")
     (let [[type docid] (split-id id)]
       (if (esu/update *client* index-name type docid (esu/edn->json data))
-        (r/response data)
+        (u/json-response data)
         (response-conflict id))))
 
   (query [_ collection-id options]
