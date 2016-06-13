@@ -8,7 +8,7 @@
     [sixsq.slipstream.client.api.utils.http :as http]
     ))
 
-(defn- call-prs
+(defn call-prs
   [body endpoint & [http-params]]
   (:body (http/put endpoint (merge {:body body} http-params))))
 
