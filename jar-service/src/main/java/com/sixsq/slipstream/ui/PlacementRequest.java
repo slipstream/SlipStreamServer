@@ -51,7 +51,7 @@ public class PlacementRequest {
         result.put("user-connectors", userConnectors);
 
         result.put("placement-params", new HashMap<>());
-        result.put("prs-endpoint", "");
+        result.put("prs-endpoint", "http://127.0.0.1:8082/filter-rank");
 
         return result;
     }
