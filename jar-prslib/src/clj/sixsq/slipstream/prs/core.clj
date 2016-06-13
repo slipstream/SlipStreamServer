@@ -10,8 +10,6 @@
 
 (defn- call-prs
   [body endpoint & [http-params]]
-  (println "call PRS: " http-params)
-  (println "body: "  body)
   (:body (http/put endpoint (merge {:body body} http-params))))
 
 
