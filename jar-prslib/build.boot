@@ -104,7 +104,9 @@
          []
          (comp
            (mvn-build)
-           (push :repo "sixsq")))
+           (push 
+             :pom "target/META-INF/maven/com.sixsq.slipstream/SlipStreamServerPRSlib-jar/pom.xml"
+             :repo "sixsq")))
 
 (deftask setup-deps
          "setup dependencies for project"
