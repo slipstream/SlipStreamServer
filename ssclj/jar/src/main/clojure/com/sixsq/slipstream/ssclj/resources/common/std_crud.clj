@@ -47,8 +47,7 @@
         (-> merged
             (u/update-timestamps)
             (crud/validate)
-            (db/edit request)
-            (u/json-response)))
+            (db/edit request)))
       (catch ExceptionInfo ei
         (ex-data ei)))))
 

@@ -128,7 +128,8 @@
                  :request-method :put
                  :body (json/write-str closed-usage-record))
         ltu/body->json
-        (ltu/is-status 200)))
+        (ltu/is-status 200)
+        (ltu/is-key-value :end-timestamp "2015-05-04T15:40:15.432Z")))
 
   ; get modified usage-record
   (let [urs (-> (session (ring-app))
