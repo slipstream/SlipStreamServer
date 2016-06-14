@@ -32,20 +32,24 @@ public class UIPlacementResource extends BaseResource {
             logger.info("PUT data " + json);
 
             PlacementRequest placementRequest = buildPlacementRequest(json);
-            logger.info("PUT placementRequest " + placementRequest);
-            logger.info("PUT placementRequest as Map" + placementRequest.asMap());
+            logger.fine("PUT placementRequest " + placementRequest);
+            logger.fine("PUT placementRequest as Map" + placementRequest.asMap());
 
-            String prsLibRes = sixsq.slipstream.prs.core.JavaWrapper.placeAndRank(placementRequest.asMap());
+            String prsLibRes = remotePlaceAndRank(placementRequest);
             logger.info("PUT result of call to PRS lib : " + prsLibRes);
 
             return new StringRepresentation(prsLibRes, MediaType.APPLICATION_JSON);
 
-        }catch (JsonSyntaxException jse) {
+        } catch (JsonSyntaxException jse) {
             throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, jse.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
             throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
         }
+    }
+
+    protected String remotePlaceAndRank(PlacementRequest placementRequest) {
+        return sixsq.slipstream.prs.core.JavaWrapper.placeAndRank(placementRequest.asMap());
     }
 
     protected PlacementRequest buildPlacementRequest(String json){

@@ -57,6 +57,12 @@ public class UIPlacementResourceTest extends ResourceTestBase {
                 return null;
             }
 
+            @Override
+            protected String remotePlaceAndRank(PlacementRequest placementRequest) {
+                return "{}";
+            }
+
+            @Override
             protected PlacementRequest buildPlacementRequest(String json) {
                 PlacementRequest request = PlacementRequest.fromJson(json);
                 request.setModule(buildTestModule());
