@@ -8,6 +8,7 @@
     (str nexus-url repo-type "-" edition "-rhel7")))
 
 (set-env!
+  :jar-name "SlipStreamServerPRSlib-jar"
   :project 'com.sixsq.slipstream/SlipStreamServerPRSlib-jar
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
@@ -21,11 +22,11 @@
   #(reduce conj % [["sixsq" {:url (sixsq-repo (get-env :version) (get-env :edition))}]])
 
   :dependencies
-  '[[org.clojure/clojure "1.8.0" :scope "provided"]
-    [org.clojure/tools.logging "0.3.1" :scope "provided"]
-    [org.clojure/data.json "0.2.6" :scope "provided"]
-    [com.sixsq.slipstream/SlipStreamPersistence "3.6-SNAPSHOT" :scope "provided"]
-    [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.6-SNAPSHOT" :scope "provided"]
+  '[[org.clojure/clojure "1.8.0"]
+    [org.clojure/tools.logging "0.3.1"]
+    [org.clojure/data.json "0.2.6"]
+    [com.sixsq.slipstream/SlipStreamPersistence "3.6-SNAPSHOT"]
+    [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.6-SNAPSHOT"]
     [adzerk/boot-test "1.1.0" :scope "test"]
     [adzerk/boot-reload "0.4.5" :scope "test"]
     [tolitius/boot-check "0.1.1" :scope "test"]
@@ -62,7 +63,8 @@
          (comp
            (pom)
            (aot :all true)
-           (jar)))
+           (uber)
+           (jar :file (str (get-env :jar-name) "-" (get-env :version) ".jar"))))
 
 (deftask mvn-test
          "run all tests of project"
@@ -94,7 +96,7 @@
          []
          (comp
            (build)
-           (install)
+           (install :pom "pom.xml")
            (target)))
 
 (deftask mvn-deploy
