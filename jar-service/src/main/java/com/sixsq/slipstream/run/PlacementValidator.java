@@ -17,14 +17,15 @@ public class PlacementValidator {
 
     private static Logger logger = Logger.getLogger(PlacementValidator.class.getName());
 
+    // fixme : duplication with UIPlacementResource
     private static boolean isPlacementEnabled = false;
     static {
         try {
             isPlacementEnabled = Configuration.isEnabled(UIPlacementResource.PRS_ENABLED_PROPERTY_KEY);
-            logger.info("Placement Server enabled ? " + isPlacementEnabled);
         } catch (ValidationException ve) {
             logger.severe("Unable to access configuration to determine if Placement is enabled. Cause: " + ve.getMessage());
         }
+        logger.info("Placement Server enabled: " + isPlacementEnabled);
     }
 
     public static void validate(Run run) throws SlipStreamClientException {

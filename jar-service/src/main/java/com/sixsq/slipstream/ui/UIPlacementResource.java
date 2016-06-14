@@ -31,10 +31,10 @@ public class UIPlacementResource extends BaseResource {
     static {
         try {
             isPlacementEnabled = Configuration.isEnabled(PRS_ENABLED_PROPERTY_KEY);
-            logger.info("Placement Server enabled ? " + isPlacementEnabled);
         } catch (ValidationException ve) {
             logger.severe("Unable to access configuration to determine if Placement is enabled. Cause: " + ve.getMessage());
         }
+        logger.info("Placement Server enabled : " + isPlacementEnabled);
     }
 
     @Put("json")
