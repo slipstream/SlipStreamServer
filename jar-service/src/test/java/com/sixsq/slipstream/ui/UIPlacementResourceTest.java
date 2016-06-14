@@ -21,8 +21,14 @@ public class UIPlacementResourceTest extends ResourceTestBase {
 
     @Test
     public void putUiPlacementRejectsInvalidJson() throws Exception {
-        Response response = putUIPlacement("XXX wrong JSON");
+        Response response = putUIPlacement("XXX wrong JSON", true);
         assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
+    }
+
+    @Test
+    public void putUIPlacementReturn204WhenNotEnabled() throws Exception {
+        Response response = putUIPlacement("what ever", false);
+        assertThat(response.getStatus(), is(Status.SUCCESS_NO_CONTENT));
     }
 
     @Test
@@ -34,7 +40,7 @@ public class UIPlacementResourceTest extends ResourceTestBase {
                 "\"userConnectors\": [\"cloud-1\", \"cloud-2\"]" +
                 "}";
 
-        Response response = putUIPlacement(data);
+        Response response = putUIPlacement(data, true);
 
         Gson gson = new GsonBuilder().create();
         Object fromJson = gson.fromJson(response.getEntityAsText(), Object.class);
@@ -43,7 +49,7 @@ public class UIPlacementResourceTest extends ResourceTestBase {
         assertThat(response.getStatus(), is(Status.SUCCESS_OK));
     }
 
-    private Response putUIPlacement(String data) throws Exception {
+    private Response putUIPlacement(String data, final boolean isEnabled) throws Exception {
         Request request = createPutRequest(null, new StringRepresentation(data, MediaType.APPLICATION_ALL_JSON), "ui/placement");
 
         UIPlacementResource uiPlacementResource = new UIPlacementResource() {
@@ -57,6 +63,17 @@ public class UIPlacementResourceTest extends ResourceTestBase {
                 return null;
             }
 
+            @Override
+            protected boolean isPlacementEnabled(){
+                return isEnabled;
+            }
+
+            @Override
+            protected String remotePlaceAndRank(PlacementRequest placementRequest) {
+                return "{}";
+            }
+
+            @Override
             protected PlacementRequest buildPlacementRequest(String json) {
                 PlacementRequest request = PlacementRequest.fromJson(json);
                 request.setModule(buildTestModule());

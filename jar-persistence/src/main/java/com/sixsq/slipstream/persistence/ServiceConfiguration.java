@@ -20,22 +20,15 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import com.sixsq.slipstream.exceptions.NotImplementedException;
+import org.simpleframework.xml.ElementMap;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Query;
-
-import org.simpleframework.xml.ElementMap;
-
-import com.sixsq.slipstream.exceptions.NotImplementedException;
+import javax.persistence.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 @Entity
@@ -62,6 +55,14 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_UPDATE_CLIENTURL(
 				"Endpoint of the SlipStream client tarball",
 				ParameterCategory.SlipStream_Advanced),
+
+		SLIPSTREAM_PRS_ENDPOINT(
+				"Endpoint of the Placement and Ranking Service",
+				ParameterCategory.SlipStream_Advanced),
+
+		SLIPSTREAM_PRS_ENABLE(
+				"Placement and Ranking enabled",
+				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
 
 		SLIPSTREAM_UPDATE_CLIENTBOOTSTRAPURL(
 				"Endpoint of the SlipStream client bootstrap script",

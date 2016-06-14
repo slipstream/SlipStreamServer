@@ -22,7 +22,7 @@
 	</parent>
 
 	<dependencies>
-
+		
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamServerPRSlib-jar</artifactId>

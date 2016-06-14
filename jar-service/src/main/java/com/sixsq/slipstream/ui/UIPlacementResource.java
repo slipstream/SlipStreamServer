@@ -1,6 +1,8 @@
 package com.sixsq.slipstream.ui;
 
 import com.google.gson.JsonSyntaxException;
+import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.resource.BaseResource;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -23,29 +25,53 @@ public class UIPlacementResource extends BaseResource {
 
     private static Logger logger = Logger.getLogger(UIPlacementResource.class.getName());
 
+    public static final String PRS_ENABLED_PROPERTY_KEY = "slipstream.prs.enable";
+
+    private static boolean isPlacementEnabled = false;
+    static {
+        try {
+            isPlacementEnabled = Configuration.isEnabled(PRS_ENABLED_PROPERTY_KEY);
+        } catch (ValidationException ve) {
+            logger.severe("Unable to access configuration to determine if Placement is enabled. Cause: " + ve.getMessage());
+        }
+        logger.info("Placement Server enabled : " + isPlacementEnabled);
+    }
+
     @Put("json")
     public Representation putUI(Representation data) {
         try {
 
-            String json = data.getText();
+            if (!isPlacementEnabled()) {
+                setStatus(Status.SUCCESS_NO_CONTENT);
+                return new StringRepresentation("{\"prsEnabled\": \"false\"}", MediaType.APPLICATION_JSON);
+            }
 
-            logger.fine("PUT data " + json);
+            String json = data.getText();
+            logger.info("PUT data " + json);
 
             PlacementRequest placementRequest = buildPlacementRequest(json);
-            logger.fine("PUT placementRequest " + placementRequest);
             logger.fine("PUT placementRequest as Map" + placementRequest.asMap());
 
-            String prsLibRes = sixsq.slipstream.prs.core.JavaWrapper.placeAndRank(placementRequest.asMap());
-            logger.fine("PUT result of call to PRS lib : " + prsLibRes);
+            String prsLibRes = remotePlaceAndRank(placementRequest);
+            logger.info("PUT result of call to PRS lib : " + prsLibRes);
 
+            setStatus(Status.SUCCESS_OK);
             return new StringRepresentation(prsLibRes, MediaType.APPLICATION_JSON);
 
-        }catch (JsonSyntaxException jse) {
+        } catch (JsonSyntaxException jse) {
             throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, jse.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
             throw (new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage()));
         }
+    }
+
+    protected boolean isPlacementEnabled() {
+        return isPlacementEnabled;
+    }
+
+    protected String remotePlaceAndRank(PlacementRequest placementRequest) {
+        return sixsq.slipstream.prs.core.JavaWrapper.placeAndRank(placementRequest.asMap());
     }
 
     protected PlacementRequest buildPlacementRequest(String json){
