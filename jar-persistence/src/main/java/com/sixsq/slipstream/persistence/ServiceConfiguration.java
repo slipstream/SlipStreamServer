@@ -60,6 +60,10 @@ public class ServiceConfiguration extends
 				"Endpoint of the Placement and Ranking Service",
 				ParameterCategory.SlipStream_Advanced),
 
+		SLIPSTREAM_PRS_ENABLE(
+				"Placement and Ranking enabled",
+				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+
 		SLIPSTREAM_UPDATE_CLIENTBOOTSTRAPURL(
 				"Endpoint of the SlipStream client bootstrap script",
 				ParameterCategory.SlipStream_Advanced),

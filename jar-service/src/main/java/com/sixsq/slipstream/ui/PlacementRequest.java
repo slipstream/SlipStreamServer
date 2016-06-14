@@ -24,6 +24,15 @@ public class PlacementRequest {
 
     private static Logger logger = Logger.getLogger(PlacementRequest.class.getName());
 
+    private static Configuration configuration;
+    static {
+        try {
+            configuration = Configuration.getInstance();
+        } catch (ValidationException ve) {
+            logger.severe("Unable to access configuration. Cause: " + ve.getMessage());
+        }
+    }
+
     private String moduleUri;
 
     protected void setModule(Module module) {
@@ -64,12 +73,8 @@ public class PlacementRequest {
         Gson gson = new GsonBuilder().create();
         PlacementRequest placementRequest = gson.fromJson(json, PlacementRequest.class);
 
-        try {
-            placementRequest.prsEndPoint = Configuration.getInstance().getProperty(SLIPSTREAM_PRS_ENDPOINT_PROPERTY_KEY, "");
-            logger.info("PRS endpoint " + placementRequest.prsEndPoint);
-        } catch (ValidationException ve) {
-            logger.severe("Unable to fetch PRS endpoint from configuration. Cause: " + ve.getMessage());
-        }
+        placementRequest.prsEndPoint = configuration.getProperty(SLIPSTREAM_PRS_ENDPOINT_PROPERTY_KEY);
+        logger.info("PRS endpoint " + placementRequest.prsEndPoint);
 
         return placementRequest;
     }
