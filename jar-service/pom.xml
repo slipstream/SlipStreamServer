@@ -22,14 +22,7 @@
 	</parent>
 
 	<dependencies>
-
-		<!-- tmp hack fixme -->
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamClientAPI-uber</artifactId>
-			<version>3.6-SNAPSHOT</version>
-		</dependency>
-
+		
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamServerPRSlib-jar</artifactId>
