@@ -86,6 +86,17 @@ public class RunListResourceTest extends ResourceTestBase {
 
 	}
 
+	private static void listAllRuns(String msg) throws ConfigurationException, ValidationException {
+		System.out.println("::: " + msg);
+		System.out.println("DEBUG: Listing runs.");
+		int n = 0;
+		for (Run r : Run.listAll()) {
+			System.out.println(" - RUN: " + r.getName());
+			n++;
+		}
+		System.out.println(" total: " + n);
+	}
+
 	private static void removeAllRuns() throws ConfigurationException, ValidationException {
 		for (Run r : Run.listAll()) {
 			try {
@@ -142,7 +153,9 @@ public class RunListResourceTest extends ResourceTestBase {
 
 	@Test
 	public void testPagination() throws ValidationException, SAXException, ParserConfigurationException, IOException {
+		listAllRuns("Runs before test.");
 		removeAllRuns();
+		listAllRuns("Runs after explicit cleanup.");
 
 		Set<String> cloudServiceNamesA = new HashSet<String>();
 		cloudServiceNamesA.add("CloudA");
@@ -159,6 +172,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
 		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
 		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
+		listAllRuns("Runs after creation of 5 runs.");
 
 		Response resp = getRunList(null, null, null);
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
