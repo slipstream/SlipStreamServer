@@ -27,23 +27,13 @@ public class UIPlacementResource extends BaseResource {
 
     public static final String PRS_ENABLED_PROPERTY_KEY = "slipstream.prs.enable";
 
-    private static boolean isPlacementEnabled = false;
-    static {
-        try {
-            isPlacementEnabled = Configuration.isEnabled(PRS_ENABLED_PROPERTY_KEY);
-        } catch (ValidationException ve) {
-            logger.severe("Unable to access configuration to determine if Placement is enabled. Cause: " + ve.getMessage());
-        }
-        logger.info("Placement Server enabled : " + isPlacementEnabled);
-    }
-
     @Put("json")
     public Representation putUI(Representation data) {
         try {
 
-            if (!isPlacementEnabled()) {
-                setStatus(Status.SUCCESS_NO_CONTENT);
-                return new StringRepresentation("{\"prsEnabled\": \"false\"}", MediaType.APPLICATION_JSON);
+            if (!doCallPRS()) {
+                setStatus(Status.SUCCESS_OK);
+                return new StringRepresentation(responseNoContent(), MediaType.APPLICATION_JSON);
             }
 
             String json = data.getText();
@@ -66,8 +56,17 @@ public class UIPlacementResource extends BaseResource {
         }
     }
 
-    protected boolean isPlacementEnabled() {
-        return isPlacementEnabled;
+    public static boolean isPlacementEnabled() {
+        try {
+            return Configuration.isEnabled(PRS_ENABLED_PROPERTY_KEY);
+        } catch (ValidationException ve) {
+            logger.severe("Unable to access configuration to determine if Placement is enabled. Cause: " + ve.getMessage());
+            return false;
+        }
+    }
+
+    protected boolean doCallPRS(){
+        return isPlacementEnabled();
     }
 
     protected String remotePlaceAndRank(PlacementRequest placementRequest) {
@@ -81,5 +80,9 @@ public class UIPlacementResource extends BaseResource {
 
     protected String getPageRepresentation() {
         return "";
+    }
+
+    private String responseNoContent() {
+        return "{\"message\" : \"PRS not enabled\"}";
     }
 }

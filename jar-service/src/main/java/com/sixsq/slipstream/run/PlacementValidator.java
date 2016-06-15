@@ -1,8 +1,6 @@
 package com.sixsq.slipstream.run;
 
-import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.ui.UIPlacementResource;
 import sixsq.slipstream.prs.core.JavaWrapper;
@@ -17,28 +15,19 @@ public class PlacementValidator {
 
     private static Logger logger = Logger.getLogger(PlacementValidator.class.getName());
 
-    // fixme : duplication with UIPlacementResource
-    private static boolean isPlacementEnabled = false;
-    static {
-        try {
-            isPlacementEnabled = Configuration.isEnabled(UIPlacementResource.PRS_ENABLED_PROPERTY_KEY);
-        } catch (ValidationException ve) {
-            logger.severe("Unable to access configuration to determine if Placement is enabled. Cause: " + ve.getMessage());
-        }
-        logger.info("Placement Server enabled: " + isPlacementEnabled);
-    }
 
     public static void validate(Run run) throws SlipStreamClientException {
 
-        if(!isPlacementEnabled) {
+        if(!UIPlacementResource.isPlacementEnabled()) {
             logger.info("Bypassing call to PRS-lib, as Placement is not enabled");
             return;
         }
 
-        logger.info("Calling PRS-lib with run : " + run);
+        logger.info("Calling PRS-lib for module : " + run.getModule().getResourceUri());
 
         Boolean valid;
         try {
+            // TODO provide PRS endpoint to PRS lib
             valid = JavaWrapper.validatePlacement(run);
         } catch (Exception e) {
             throw new SlipStreamClientException("Failed to validate placement for module "
