@@ -132,45 +132,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>copy-logging-jars</id>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/dependency/logging</outputDirectory>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.slf4j</groupId>
-                  <artifactId>slf4j-api</artifactId>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.slf4j</groupId>
-                  <artifactId>slf4j-jdk14</artifactId>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>net.kencochrane.raven</groupId>
-                  <artifactId>raven</artifactId>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.guava</groupId>
-                  <artifactId>guava</artifactId>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.fasterxml.jackson.core</groupId>
-                  <artifactId>jackson-databind</artifactId>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.fasterxml.jackson.core</groupId>
-                  <artifactId>jackson-core</artifactId>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.fasterxml.jackson.core</groupId>
-                  <artifactId>jackson-annotations</artifactId>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-          <execution>
             <id>copy-war</id>
             <goals>
               <goal>unpack</goal>
@@ -444,17 +405,6 @@
               <sources>
                 <source>
                   <location>target/dependency/webapps/slipstream.war/static-content/themes/helixnebula/errors</location>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/lib/logging</directory>
-              <filemode>664</filemode>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>target/dependency/logging</location>
                 </source>
               </sources>
             </mapping>
