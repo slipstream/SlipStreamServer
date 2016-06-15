@@ -192,10 +192,6 @@
       <artifactId>honeysql</artifactId>
     </dependency>
     <dependency>
-      <groupId>puppetlabs</groupId>
-      <artifactId>http-client</artifactId>
-    </dependency>
-    <dependency>
       <groupId>me.raynes</groupId>
       <artifactId>fs</artifactId>
     </dependency>
