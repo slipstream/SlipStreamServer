@@ -21,14 +21,15 @@ public class UIPlacementResourceTest extends ResourceTestBase {
 
     @Test
     public void putUiPlacementRejectsInvalidJson() throws Exception {
-        Response response = putUIPlacement("XXX wrong JSON", true);
+        Response response = putUIPlacement("XXX wrong JSON", true, false);
         assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
     }
 
     @Test
-    public void putUIPlacementReturn204WhenNotEnabled() throws Exception {
-        Response response = putUIPlacement("what ever", false);
-        assertThat(response.getStatus(), is(Status.SUCCESS_NO_CONTENT));
+    public void putUIPlacementReturn200WhenNotEnabled() throws Exception {
+        Response response = putUIPlacement("what ever", false, true);
+        assertThat(response.getStatus(), is(Status.SUCCESS_OK));
+        assertThat(response.getEntityAsText(), is("{\"message\" : \"PRS not enabled\"}"));
     }
 
     @Test
@@ -40,7 +41,7 @@ public class UIPlacementResourceTest extends ResourceTestBase {
                 "\"userConnectors\": [\"cloud-1\", \"cloud-2\"]" +
                 "}";
 
-        Response response = putUIPlacement(data, true);
+        Response response = putUIPlacement(data, true, false);
 
         Gson gson = new GsonBuilder().create();
         Object fromJson = gson.fromJson(response.getEntityAsText(), Object.class);
@@ -49,7 +50,7 @@ public class UIPlacementResourceTest extends ResourceTestBase {
         assertThat(response.getStatus(), is(Status.SUCCESS_OK));
     }
 
-    private Response putUIPlacement(String data, final boolean isEnabled) throws Exception {
+    private Response putUIPlacement(String data, final boolean isEnabled, final boolean throwErrorInPRS) throws Exception {
         Request request = createPutRequest(null, new StringRepresentation(data, MediaType.APPLICATION_ALL_JSON), "ui/placement");
 
         UIPlacementResource uiPlacementResource = new UIPlacementResource() {
@@ -64,13 +65,17 @@ public class UIPlacementResourceTest extends ResourceTestBase {
             }
 
             @Override
-            protected boolean isPlacementEnabled(){
+            protected boolean doCallPRS(){
                 return isEnabled;
             }
 
             @Override
             protected String remotePlaceAndRank(PlacementRequest placementRequest) {
-                return "{}";
+                if(throwErrorInPRS) {
+                    throw new Error("Error in PRS");
+                } else {
+                    return "{}";
+                }
             }
 
             @Override
