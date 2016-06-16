@@ -31,7 +31,8 @@ import java.util.logging.Logger;
 @Entity
 @NamedQueries({
 		@NamedQuery(name = "getAll", query = "SELECT m FROM VmRuntimeParameterMapping m"),
-		@NamedQuery(name = "getByCloudAndInstanceId", query = "SELECT m FROM VmRuntimeParameterMapping m WHERE m.instanceId = :instanceid AND m.cloud = :cloud"),
+		@NamedQuery(name = "getByCloudAndInstanceId", query = "SELECT m FROM VmRuntimeParameterMapping m WHERE m.instanceId = :instanceid AND m.cloud = :cloud ORDER BY id DESC"),
+		@NamedQuery(name = "getMappingsByRunAndName", query = "SELECT m FROM VmRuntimeParameterMapping m WHERE m.runUuid = :runuuid and m.name = :name"),
 		@NamedQuery(name = "getMappingsByRun", query = "SELECT m FROM VmRuntimeParameterMapping m WHERE m.runUuid = :runuuid") })
 @Table(indexes = { @Index(name = "instanceId_ix", columnList = "instanceId"),
 		@Index(name = "cloud_ix", columnList = "cloud"), @Index(name = "runUuid_ix", columnList = "runUuid") })
@@ -73,9 +74,22 @@ public class VmRuntimeParameterMapping implements Serializable {
 
 		em.close();
 		if (list.size() > 1) {
-			com.sixsq.slipstream.util.Logger.warning("found more than one cloud/instanceid tuple: " + cloud + " / " + instanceId);
+			com.sixsq.slipstream.util.Logger.warning("Found more than one cloud/instanceid tuple: " + cloud + " / " + instanceId);
 		}
 		return list.isEmpty() ? null : list.get(0);
+	}
+
+	public static List<VmRuntimeParameterMapping> getMappings(String uuid, String name) {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = em.createNamedQuery("getMappingsByRunAndName");
+		q.setParameter("runuuid", uuid);
+		q.setParameter("name", name);
+
+		@SuppressWarnings("unchecked")
+		List<VmRuntimeParameterMapping> list = q.getResultList();
+
+		em.close();
+		return list;
 	}
 
 	public static List<VmRuntimeParameterMapping> getMappings(String uuid) {
@@ -129,14 +143,25 @@ public class VmRuntimeParameterMapping implements Serializable {
 		RuntimeParameter vmstate = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.STATE_VM_KEY);
 		RuntimeParameter hostname = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.HOSTNAME_KEY);
 
-		VmRuntimeParameterMapping m = new VmRuntimeParameterMapping(instanceId, cloud, runOwner, name, nodeName,
-				nodeInstanceid, vmstate, hostname);
-		m.store();
+		List<VmRuntimeParameterMapping> mappings = getMappings(runUuid, name);
+		int mappingsSize = mappings.size();
 
-		logger.info("Created VMRtpMap for instanceId=" + instanceId + ", owner=" + runOwner + ", name=" + name
-				+ " vmstate=" + vmstate + ", m.id=" + m.id);
-		logger.info("VmRuntimeParameterMapping loaded by id = " + VmRuntimeParameterMapping.find(cloud, instanceId));
+		if (mappingsSize > 1) {
+			logger.warning("Found "+ mappingsSize + " mapping(s) for runuuid '" + runUuid + "' and name '" + name
+					+ "'.");
+		}
 
+		if (mappingsSize > 0) {
+			logger.info("Mapping(s) for runuuid '" + runUuid + "' and name '" + name + "' already exist. " +
+					"No need to insert a new one.");
+		} else {
+			VmRuntimeParameterMapping m = new VmRuntimeParameterMapping(instanceId, cloud, runOwner, name, nodeName,
+					nodeInstanceid, vmstate, hostname);
+			m.store();
+
+			logger.info("Created VMRtpMap for instanceId=" + instanceId + ", owner=" + runOwner + ", name=" + name
+					+ " vmstate=" + vmstate + ", m.id=" + m.id);
+		}
 	}
 
 	public VmRuntimeParameterMapping() {
