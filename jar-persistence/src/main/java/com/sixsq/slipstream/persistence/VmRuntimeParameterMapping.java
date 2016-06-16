@@ -144,16 +144,16 @@ public class VmRuntimeParameterMapping implements Serializable {
 		RuntimeParameter hostname = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.HOSTNAME_KEY);
 
 		List<VmRuntimeParameterMapping> mappings = getMappings(runUuid, name);
-		int mappings_size = mappings.size();
+		int mappingsSize = mappings.size();
 
-		if (mappings_size > 1) {
-			logger.warning("Found "+ mappings_size + " mapping(s) for runuuid '" + runUuid + "' and name '" + name
+		if (mappingsSize > 1) {
+			logger.warning("Found "+ mappingsSize + " mapping(s) for runuuid '" + runUuid + "' and name '" + name
 					+ "'.");
 		}
 
-		if (mappings_size > 0) {
-			logger.info("The mapping for runuuid '" + runUuid + "' and name '" + name + "' already exist. " +
-					"Not inserting a new one.");
+		if (mappingsSize > 0) {
+			logger.info("Mapping(s) for runuuid '" + runUuid + "' and name '" + name + "' already exist. " +
+					"No need to insert a new one.");
 		} else {
 			VmRuntimeParameterMapping m = new VmRuntimeParameterMapping(instanceId, cloud, runOwner, name, nodeName,
 					nodeInstanceid, vmstate, hostname);
