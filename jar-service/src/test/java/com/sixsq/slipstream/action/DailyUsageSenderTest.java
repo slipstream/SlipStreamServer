@@ -51,12 +51,12 @@ public class DailyUsageSenderTest {
     public void cimiQueryStringUsage() {
         Set<String> userNames = new HashSet<String>(Arrays.asList("joe"));
         Assert.assertEquals(
-                "%24filter=start_timestamp%3D2015-12-31+and+end_timestamp%3D2016-01-01+and+%28user%3D%27joe%27%29",
+                "%24filter=start-timestamp%3D2015-12-31+and+end-timestamp%3D2016-01-01+and+%28user%3D%27joe%27%29",
                 MailUtils.cimiQueryStringUsage(userNames, "2015-12-31", "2016-01-01"));
 
         userNames = new HashSet<String>(Arrays.asList("joe", "jack"));
         Assert.assertEquals(
-                "%24filter=start_timestamp%3D2015-12-31+and+end_timestamp%3D2016-01-01+and+%28user%3D%27joe%27+or+user%3D%27jack%27%29",
+                "%24filter=start-timestamp%3D2015-12-31+and+end-timestamp%3D2016-01-01+and+%28user%3D%27joe%27+or+user%3D%27jack%27%29",
                 MailUtils.cimiQueryStringUsage(userNames, "2015-12-31", "2016-01-01"));
     }
 

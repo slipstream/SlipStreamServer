@@ -51,8 +51,8 @@ public class UsageEventTest {
                 "  },\n" +
                 "  \"user\": \"joe\",\n" +
                 "  \"cloud\": \"aws\",\n" +
-                "  \"start_timestamp\": \"2015-02-01T07:12:45.123Z\",\n" +
-                "  \"cloud_vm_instanceid\": \"aws:123\",\n" +
+                "  \"start-timestamp\": \"2015-02-01T07:12:45.123Z\",\n" +
+                "  \"cloud-vm-instanceid\": \"aws:123\",\n" +
                 "  \"metrics\": [\n" +
                 "    {\n" +
                 "      \"name\": \"cpu\",\n" +

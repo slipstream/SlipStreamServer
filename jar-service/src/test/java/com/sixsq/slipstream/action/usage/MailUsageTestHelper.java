@@ -9,17 +9,17 @@ public class MailUsageTestHelper {
                         "  \"usages\" : [ {\n" +
                         "    \"usage\" : {\n" +
                         "      \"RAM\" : {\n" +
-                        "        \"unit_minutes\" : 1916151.47\n" +
+                        "        \"unit-minutes\" : 1916151.47\n" +
                         "      },\n" +
                         "      \"instance-type.Medium\" : {\n" +
-                        "        \"unit_minutes\" : 84.20\n" +
+                        "        \"unit-minutes\" : 84.20\n" +
                         "      },\n" +
                         "      \"vm\" : {\n" +
-                        "        \"unit_minutes\" : 1688.23\n" +
+                        "        \"unit-minutes\" : 1688.23\n" +
                         "      }\n" +
                         "    },\n" +
-                        "    \"end_timestamp\" : \"2015-06-16T00:00:00.000Z\",\n" +
-                        "    \"start_timestamp\" : \"2015-06-15T00:00:00.000Z\",\n" +
+                        "    \"end-timestamp\" : \"2015-06-16T00:00:00.000Z\",\n" +
+                        "    \"start-timestamp\" : \"2015-06-15T00:00:00.000Z\",\n" +
                         "    \"cloud\" : \"cloud-0\",\n" +
                         "    \"user\" : \"joe\",\n" +
                         "    \"acl\" : {\n" +
@@ -41,17 +41,17 @@ public class MailUsageTestHelper {
                         "  }, {\n" +
                         "    \"usage\" : {\n" +
                         "      \"ram\" : {\n" +
-                        "        \"unit_minutes\" : 47185920.0\n" +
+                        "        \"unit-minutes\" : 47185920.0\n" +
                         "      },\n" +
                         "      \"instance-type.Huge\" : {\n" +
-                        "        \"unit_minutes\" : 1440.0\n" +
+                        "        \"unit-minutes\" : 1440.0\n" +
                         "      },\n" +
                         "      \"vm\" : {\n" +
-                        "        \"unit_minutes\" : 1440.0\n" +
+                        "        \"unit-minutes\" : 1440.0\n" +
                         "      }\n" +
                         "    },\n" +
-                        "    \"end_timestamp\" : \"2015-06-16T00:00:00.000Z\",\n" +
-                        "    \"start_timestamp\" : \"2015-06-15T00:00:00.000Z\",\n" +
+                        "    \"end-timestamp\" : \"2015-06-16T00:00:00.000Z\",\n" +
+                        "    \"start-timestamp\" : \"2015-06-15T00:00:00.000Z\",\n" +
                         "    \"cloud\" : \"cloud-3\",\n" +
                         "    \"user\" : \"joe\",\n" +
                         "    \"acl\" : {\n" +

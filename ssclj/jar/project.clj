@@ -43,7 +43,6 @@
                  [compojure/compojure                       "1.4.0"]
                  [clj-http                                  "2.0.0"]
 
-                  :exclusions [[cheshire/cheshire]] ]
                  [aleph                                     "0.4.1-beta4"]
 
                  ;; Elastic search
