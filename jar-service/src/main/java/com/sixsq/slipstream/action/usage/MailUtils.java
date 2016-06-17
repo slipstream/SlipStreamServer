@@ -54,7 +54,7 @@ public class MailUtils {
         }
         String conditionUsers = String.join(" or ", clauseUsers);
 
-        String queryString = String.format("$filter=start_timestamp=%s and end_timestamp=%s and (%s)",
+        String queryString = String.format("$filter=start-timestamp=%s and end-timestamp=%s and (%s)",
                 start, end, conditionUsers);
         return encodeQueryParameters(queryString);
     }

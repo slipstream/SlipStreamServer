@@ -1,6 +1,7 @@
 package com.sixsq.slipstream.connector;
 
 import com.google.gson.*;
+import com.google.gson.annotations.SerializedName;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
@@ -37,18 +38,23 @@ public class UsageEvent {
     private String cloud;
 
     @SuppressWarnings("unused")
+    @SerializedName("start-timestamp")
     private Date start_timestamp;
 
     @SuppressWarnings("unused")
+    @SerializedName("end-timestamp")
     private Date end_timestamp;
 
     @SuppressWarnings("unused")
+    @SerializedName("metric-name")
     private String metric_name;
 
     @SuppressWarnings("unused")
+    @SerializedName("metric-value")
     private String metric_value;
 
     @SuppressWarnings("unused")
+    @SerializedName("cloud-vm-instanceid")
     private String cloud_vm_instanceid;
 
     private List<Map<String, String>> metrics;
