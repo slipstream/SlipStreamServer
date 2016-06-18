@@ -30,8 +30,8 @@
   [usage-event metric]
   (-> usage-event
       (dissoc :metrics)
-      (assoc :metric-name (:name metric))
-      (assoc :metric-value (:value metric))))
+      (assoc :metric-name   (:name metric))
+      (assoc :metric-value  (-> metric :value str))))
 
 (defn- nil-timestamps-if-absent
   [usage-event]
@@ -77,11 +77,11 @@
 (defn- open-record
   [usage-metric options]
   (log/debug "Opening usage-record " (metric-summary usage-metric))
-  (db/add "UsageRecord"
-          (-> usage-metric
-              (assoc :id (str "usage-record/" (cu/random-uuid)))
-              (assoc :end-timestamp ur/date-in-future))
-          options))
+  (let [new-record (-> usage-metric
+                       (assoc :resourceURI ur/resource-uri)
+                       (assoc :id (str "usage-record/" (cu/random-uuid)))
+                       (assoc :end-timestamp ur/date-in-future))]
+    (db/add "UsageRecord" (ur/validate-fn new-record) options)))
 
 (defn- close-restart-record
   [usage-metric options]

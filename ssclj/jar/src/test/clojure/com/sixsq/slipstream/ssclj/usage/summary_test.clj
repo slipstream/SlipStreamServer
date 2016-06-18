@@ -54,7 +54,7 @@
    :start-timestamp     in-day-1
    :end-timestamp       in-day-2
    :metric-name         "nb-cpu"
-   :metric-value        4})
+   :metric-value        "4"})
 
 (def record-2
   {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
@@ -63,7 +63,7 @@
    :start-timestamp     start-day
    :end-timestamp       in-day-2
    :metric-name         "nb-cpu"
-   :metric-value        6})
+   :metric-value        "6"})
 
 (def record-3
   {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
@@ -72,7 +72,7 @@
    :start-timestamp     in-day-1
    :end-timestamp       end-day
    :metric-name         "RAM"
-   :metric-value        16})
+   :metric-value        "16"})
 
 (def record-4
   {:cloud-vm-instanceid "aws:445623"
@@ -81,7 +81,7 @@
    :start-timestamp     past-1
    :end-timestamp       future-2
    :metric-name         "Disk"
-   :metric-value        100})
+   :metric-value        "100"})
 
 (def record-5
   {:cloud-vm-instanceid "aws:445623"
@@ -90,7 +90,7 @@
    :start-timestamp     past-1
    :end-timestamp       nil
    :metric-name         "Disk"
-   :metric-value        100})
+   :metric-value        "100"})
 
 (deftest test-summarize-records
   (is (=
@@ -171,7 +171,9 @@
 (defn insert-record
   []
   (rc/insert-usage-event
-    {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+    {:acl                 {:owner {:type "USER" :principal "sixsq_dev"}
+                           :rules [{:type "ROLE" :principal "ANON" :right "ALL"}]}
+     :cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
      :user                "sixsq_dev"
      :cloud               "exoscale-ch-gva"
      :start-timestamp     in-day-1
@@ -182,7 +184,9 @@
                            {:name  "disk-GB"
                             :value 100.5}]} {:user-roles ["ADMIN"]})
   (rc/insert-usage-event
-    {:cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
+    {:acl                 {:owner {:type "USER" :principal "sixsq_dev"}
+                           :rules [{:type "ROLE" :principal "ANON" :right "ALL"}]}
+     :cloud-vm-instanceid "exoscale-ch-gva:7142f7bc-f3b1-4c1c-b0f6-d770779b1592"
      :start-timestamp     in-day-1
      :end-timestamp       in-day-2
      :metrics             [{:name "nb-cpu"}

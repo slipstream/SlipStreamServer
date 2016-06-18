@@ -50,7 +50,7 @@
    :metric-value        "1.0"})
 
 (def invalid-usage-record
-  (dissoc valid-usage-record :user))
+  (assoc valid-usage-record :end_timestamp "2015-05-04T18:07:15.456Z"))
 
 (defn build-usage-record
   [cloud-vm-instance-id start-timestamp metric-name metric-value]

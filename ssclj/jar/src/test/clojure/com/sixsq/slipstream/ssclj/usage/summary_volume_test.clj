@@ -13,6 +13,8 @@
 
 (def jack-exoscale
   {
+   :acl    {:owner {:type "USER" :principal "jack"}
+            :rules [{:type "ROLE" :principal "ANON" :right "ALL"}]}
    :user    "jack"
    :cloud   "exoscale-ch-gva"
    :metrics [{:name  "small"
@@ -22,6 +24,8 @@
 
 (def joe-exoscale
   {
+   :acl    {:owner {:type "USER" :principal "joe"}
+            :rules [{:type "ROLE" :principal "ANON" :right "ALL"}]}
    :user    "joe"
    :cloud   "exoscale-ch-gva"
    :metrics [{:name  "nb-cpu"
@@ -33,6 +37,8 @@
 
 (def joe-aws
   {
+   :acl     {:owner {:type "USER" :principal "joe"}
+             :rules [{:type "ROLE" :principal "ANON" :right "ALL"}]}
    :user    "joe"
    :cloud   "aws"
    :metrics [{:name  "nb-cpu"
