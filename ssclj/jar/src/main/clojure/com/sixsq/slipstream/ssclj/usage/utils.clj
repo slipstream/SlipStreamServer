@@ -34,6 +34,13 @@
   [s]
   (time-fmt/parse (:date-time time-fmt/formatters) s))
 
+(defn to-time-or-date
+  [s]
+  (try
+    (time-fmt/parse (:date-time time-fmt/formatters) s)
+    (catch IllegalArgumentException _
+      (time-fmt/parse (:date time-fmt/formatters) s))))
+
 (defn to-ISO-8601
   [dt]
   (time-fmt/unparse (:date-time time-fmt/formatters) dt))

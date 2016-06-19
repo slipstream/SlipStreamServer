@@ -63,7 +63,7 @@
   [:Value (Boolean/valueOf s)])
 
 (defmethod convert :DateValue [[_ ^String s]]
-  [:Value (uu/to-time s)])
+  [:Value (uu/to-time-or-date s)])
 
 (defmethod convert :Comp [v]
   (let [args (rest v)]
