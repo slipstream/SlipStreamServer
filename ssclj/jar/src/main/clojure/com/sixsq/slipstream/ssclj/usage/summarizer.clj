@@ -120,12 +120,17 @@
        reverse
        (partition 2 1)))
 
-(defn -main
-  "See tests for examples on how to call from clojure REPL"
+(defn do-summarize
   [& args]
-  (when-not esb/*client*
-    (esb/set-client! (esb/create-client)))
   (let [[start frequency except-users grouped-by n] (parse-args args)]
     (doseq [[start end] (backward-periods start n frequency)]
       (println "summarizing " start " -> " end)
       (s/summarize-and-store! start end frequency grouped-by except-users))))
+
+(defn -main
+  "See tests for examples on how to call from clojure REPL"
+  [& args]
+  (db/set-impl! (esb/get-instance))
+  (esb/set-client! (esb/create-client))
+  (apply do-summarize args))
+

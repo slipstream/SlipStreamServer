@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.usage.record-keeper
   (:require
     [clojure.tools.logging :as log]
+    [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.usage.state-machine :as sm]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
@@ -128,10 +129,17 @@
      :rules [{:type "USER" :principal user :right "ALL"}
              {:type "ROLE" :principal cloud :right "ALL"}]}))
 
+(defn- keys-dot->underscore
+  [m]
+  (->> m
+       (into [])
+       (map (fn [[k v]] [(-> k name (s/replace #"\." "_") keyword) v]))
+       (into {})))
+
 (defn- resource-for
   [summary acl]
   (-> summary
-      ;; (update-in [:usage] u/serialize)
+      (update-in [:usage] keys-dot->underscore)
       (assoc :id (str "usage/" (cu/random-uuid)))
       (assoc :acl acl)
       (assoc :compute-timestamp (u/now-to-ISO-8601))))

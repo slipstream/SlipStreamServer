@@ -2,29 +2,30 @@
   (:require
     [com.sixsq.slipstream.ssclj.usage.summarizer :as us]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
     [clj-time.core :as time]
     [clojure.test :refer :all]))
 
+(use-fixtures :each ltu/with-test-client-fixture)
+
 (deftest user-summary-without-date
   (ltu/with-test-client
-    (us/-main "-f" "daily")
-    (us/-main "-f" "weekly")
-    (us/-main "-f" "monthly")))
+    (us/do-summarize "-f" "daily")
+    (us/do-summarize "-f" "weekly")
+    (us/do-summarize "-f" "monthly")))
 
 (deftest user-summary-with-args
   (ltu/with-test-client
-    (us/-main "-d" "2015-01-01" "-f" "daily")
-    (us/-main "--date" "2015-01-01" "--frequency" "daily")))
+    (us/do-summarize "-d" "2015-01-01" "-f" "daily")
+    (us/do-summarize "--date" "2015-01-01" "--frequency" "daily")))
 
 (deftest user-summary-requires-frequency
-  (is (thrown? IllegalArgumentException (us/-main))))
+  (is (thrown? IllegalArgumentException (us/do-summarize))))
 
 (deftest user-summary-checks-args
-  (is (thrown-with-msg? IllegalArgumentException #"Unknown option" (us/-main "-x" "2015-01-01")))
-  (is (thrown-with-msg? IllegalArgumentException #"Failed to validate \"-d" (us/-main "-d" "2015-01")))
-  (is (thrown-with-msg? IllegalArgumentException #"Failed to validate \"-f" (us/-main "-f" "dailyX")))
-  (is (thrown-with-msg? IllegalArgumentException #"Failed to validate \"-f" (us/-main "-f" "dailyX"))))
+  (is (thrown-with-msg? IllegalArgumentException #"Unknown option" (us/do-summarize "-x" "2015-01-01")))
+  (is (thrown-with-msg? IllegalArgumentException #"Failed to validate \"-d" (us/do-summarize "-d" "2015-01")))
+  (is (thrown-with-msg? IllegalArgumentException #"Failed to validate \"-f" (us/do-summarize "-f" "dailyX")))
+  (is (thrown-with-msg? IllegalArgumentException #"Failed to validate \"-f" (us/do-summarize "-f" "dailyX"))))
 
 (deftest user-summary-launcher-parse-args-with-except-users
   (is (= ["2015-04-15T00:00:00.000Z" :daily ["bob" "joe"] [:user :cloud] 1]
