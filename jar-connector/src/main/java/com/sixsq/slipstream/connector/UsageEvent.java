@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
+import org.restlet.engine.header.Header;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
@@ -109,6 +110,13 @@ public class UsageEvent {
 
             resource = new ClientResource(context, SSCLJ_SERVER + "/" + USAGE_EVENT_RESOURCE_NAME);
             resource.setRetryOnError(false);
+
+            Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get("org.restlet.http.headers");
+            if (headers == null) {
+                headers = new Series<Header>(Header.class);
+                resource.getRequestAttributes().put("org.restlet.http.headers", headers);
+            }
+            headers.add("slipstream-authn-info", usageEvent.user);
 
             response = resource.post(stringRep, MediaType.APPLICATION_JSON);
 

@@ -63,13 +63,17 @@
 (defn- metric-summary
   [usage-metric]
   (str (:start-timestamp usage-metric)
+       "-" (:end-timestamp usage-metric)
        " " (:cloud-vm-instanceid usage-metric)
        " [" (:metric-name usage-metric) "/" (:metric-value usage-metric) "]"))
 
 (defn- close-record
   ([usage-metric close-timestamp options]
    (log/debug "Closing usage-record " close-timestamp (metric-summary usage-metric))
+   (log/debug "open urs " (ur/open-records usage-metric))
+   (log/debug "close: options " options)
    (doseq [ur (ur/open-records usage-metric)]
+     (log/debug "editing ur" ur)
      (db/edit (assoc ur :end-timestamp close-timestamp) options)))
   ([usage-metric options]
    (close-record usage-metric (:end-timestamp usage-metric) options)))
@@ -77,6 +81,7 @@
 (defn- open-record
   [usage-metric options]
   (log/debug "Opening usage-record " (metric-summary usage-metric))
+  (log/debug "open: options " options)
   (let [new-record (-> usage-metric
                        (assoc :resourceURI ur/resource-uri)
                        (assoc :id (str "usage-record/" (cu/random-uuid)))
@@ -104,6 +109,7 @@
 
 (defn- insertEnd
   [usage-event-json options]
+  (log/debug "insertEnd usage-event-json " usage-event-json)
   (doseq [usage-metric (usage-metrics usage-event-json)]
     (process-metric-event usage-metric :stop options)))
 
