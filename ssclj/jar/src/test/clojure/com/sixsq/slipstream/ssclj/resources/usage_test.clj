@@ -37,6 +37,9 @@
     (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
     (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
     (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
+
+    ;; metric names can contain dots
+    (rc/insert-summary! (summary "alfred" "moon" :monthly [2015 04 15] {:a.b.v {:unit-minutes 300.0}}) {:user-name "alfred"})
     (f)))
 
 (use-fixtures :once insert-daily-summaries)
@@ -141,16 +144,14 @@
   (expect-pagination 500 ["?$first=1&$last=10001"]))
 
 (deftest admin-sees-everything
-  (are-counts-for-admin 11 "")
+  (are-counts-for-admin 12 "")
   (are-counts-for-admin 5 "?$filter=frequency='daily'")
   (are-counts-for-admin 3 "?$filter=frequency='weekly'")
-  (are-counts-for-admin 3 "?$filter=frequency='monthly'"))
+  (are-counts-for-admin 4 "?$filter=frequency='monthly'"))
 
 (deftest simple-filter-with-admin
-  ;; TODO multiple filter
-  ;;(are-counts-for-admin 2 "?$filter=frequency='daily'&$filter=user='joe'")
-  ;;(are-counts-for-admin 3 "?$filter=frequency='daily'&$filter=user='mike'")
-  )
+  (are-counts-for-admin 2 "?$filter=frequency='daily'&$filter=user='joe'")
+  (are-counts-for-admin 3 "?$filter=frequency='daily'&$filter=user='mike'"))
 
 (deftest filter-int-value-when-no-value
   (are-counts-for-admin 0 "?$filter=xxx<100"))
