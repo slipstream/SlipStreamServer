@@ -26,3 +26,9 @@
 
 (deftest test-schema
   (tu/are-valid? valid-usage-records UsageRecord))
+
+(deftest test-invalid-records
+  (tu/is-invalid? (-> valid-usage-record
+                      (dissoc :cloud-vm-instanceid)
+                      (assoc :cloud_vm_instanceid "123"))
+                  UsageRecord))

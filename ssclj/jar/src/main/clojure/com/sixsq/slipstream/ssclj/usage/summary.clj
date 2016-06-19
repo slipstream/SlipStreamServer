@@ -52,7 +52,7 @@
 
 (defn contribution
   [record]
-  (let [value      (:metric-value record)
+  (let [value      (-> record :metric-value str read-string)
         nb-minutes (-> (u/to-interval (:start-timestamp record) (:end-timestamp record))
                        t/in-seconds
                        (/ 60.0))]

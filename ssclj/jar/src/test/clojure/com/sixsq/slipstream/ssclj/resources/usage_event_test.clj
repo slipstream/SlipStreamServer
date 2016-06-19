@@ -43,7 +43,7 @@
    :cloud               "exo"
    :start-timestamp     "2015-05-04T15:32:22.853Z"
    :metrics             [{:name "vm" :value "1.0"}
-                         {:name "disk" :value "1260.0"}]})
+                         {:name "disk" :value 1260.0}]})
 
 (def close-usage-event (assoc open-usage-event :end-timestamp "2015-05-04T15:45:22.853Z"))
 (def open-usage-event-other-cloud-vm-instance-id (assoc open-usage-event :cloud-vm-instanceid "exoanother"))
@@ -72,11 +72,11 @@
     (is (= (-> open-usage-event
                (dissoc :metrics :acl)
                (assoc :metric-name "disk" :metric-value "1260.0" :end-timestamp ur/date-in-future))
-           (-> ur1 (dissoc :id :acl))))
+           (-> ur1 (dissoc :id :acl :resourceURI :operations))))
     (is (= (-> open-usage-event
                (dissoc :metrics :acl)
                (assoc :metric-name "vm" :metric-value "1.0" :end-timestamp ur/date-in-future))
-           (-> ur2 (dissoc :id :acl))))))
+           (-> ur2 (dissoc :id :acl :resourceURI :operations))))))
 
 (defn all-records
   [state]

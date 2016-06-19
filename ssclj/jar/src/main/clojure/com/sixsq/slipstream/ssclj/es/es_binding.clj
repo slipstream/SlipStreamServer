@@ -43,8 +43,12 @@
   (update-in data [:acl :rules] #(vec (set (conj % {:type "ROLE" :principal "ADMIN" :right "ALL"})))))
 
 (defn- split-id
+  "Split id in [type docid].
+  id is usually in the form type/docid.
+  Exception for cloud-entry-point: in this case id is only type (there is only one cloud-entry-point)"
   [id]
-  (s/split id #"/"))
+  (let [[type docid] (s/split id #"/")]
+    [type (if docid docid type)]))
 
 (defn- data->doc
   "Prepares data before insertion in index
