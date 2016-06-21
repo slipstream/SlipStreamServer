@@ -33,7 +33,6 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>auth</artifactId>
-      <version>3.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
@@ -309,15 +308,15 @@
                 </transformer>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
                   <resources>
-                    <resource>log4j.properties</resource>
+                    <resource>classes/log4j.properties</resource>
                     <resource>.SF</resource>
                     <resource>.RSA</resource>
                     <resource>.DSA</resource>
                     <resource>config-hsqldb-mem.edn</resource>
                     <resource>config-hsqldb.edn</resource>
                     <resource>example-event.json</resource>
-                    <resource>auth_privkey.pem</resource>
-                    <resource>auth_pubkey.pem</resource>
+                    <resource>classes/auth_privkey.pem</resource>
+                    <resource>classes/auth_pubkey.pem</resource>
                   </resources>
                 </transformer>
               </transformers>
