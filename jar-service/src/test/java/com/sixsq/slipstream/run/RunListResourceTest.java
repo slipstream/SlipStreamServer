@@ -154,7 +154,14 @@ public class RunListResourceTest extends ResourceTestBase {
 	@Test
 	public void testPagination() throws ValidationException, SAXException, ParserConfigurationException, IOException {
 		listAllRuns("Runs before test.");
+
 		removeAllRuns();
+
+		Response resp = getRunList(null, null, null);
+		assertEquals(Status.SUCCESS_OK, resp.getStatus());
+		Document runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		assertEquals(0, runs.getDocumentElement().getElementsByTagName("item").getLength());
+
 		listAllRuns("Runs after explicit cleanup.");
 
 		Set<String> cloudServiceNamesA = new HashSet<String>();
@@ -174,9 +181,9 @@ public class RunListResourceTest extends ResourceTestBase {
 		(new Run(deployment, RunType.Orchestration, cloudServiceNamesC, user)).store();
 		listAllRuns("Runs after creation of 5 runs.");
 
-		Response resp = getRunList(null, null, null);
+		resp = getRunList(null, null, null);
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
-		Document runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		runs = XmlUtil.stringToDom(resp.getEntityAsText());
 		assertEquals(5, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("5", runs.getDocumentElement().getAttribute("count"));
 		assertEquals("5", runs.getDocumentElement().getAttribute("totalCount"));
