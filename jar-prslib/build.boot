@@ -23,8 +23,6 @@
 
   :dependencies
   '[[org.clojure/clojure "1.8.0"]
-    [org.clojure/tools.logging "0.3.1"]
-    [org.clojure/data.json "0.2.6"]
     [adzerk/boot-test "1.1.0" :scope "test"]
     [adzerk/boot-reload "0.4.5" :scope "test"]
     [tolitius/boot-check "0.1.1" :scope "test"]
