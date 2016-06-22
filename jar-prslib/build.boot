@@ -5,14 +5,13 @@
         repo-type (if (re-find #"SNAPSHOT" version)
                     "snapshots"
                     "releases")]
-    (str nexus-url repo-type "-" edition "-rhel7")))
+    (str nexus-url repo-type edition "-rhel7")))
 
 (set-env!
   :jar-name "SlipStreamServerPRSlib-jar"
   :project 'com.sixsq.slipstream/SlipStreamServerPRSlib-jar
   :version +version+
-  :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
-  :edition "community")
+  :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"})
 
 (set-env!
   :source-paths #{"resources" "test/clj"}
