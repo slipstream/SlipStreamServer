@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamServerPRSlib-jar</artifactId>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
   <name>SlipStreamServerPRSlib (JAR)</name>
   <description>SlipStream Server PRS lib (JAR)</description>
 
