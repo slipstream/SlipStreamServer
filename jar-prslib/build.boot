@@ -8,7 +8,6 @@
     (str nexus-url repo-type "-" edition "-rhel7")))
 
 (set-env!
-  :jar-name "SlipStreamServerPRSlib-jar"
   :project 'com.sixsq.slipstream/SlipStreamServerPRSlib-jar
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
@@ -60,7 +59,7 @@
            (pom)
            (aot :all true)
            (uber)
-           (jar :file (str (get-env :jar-name) "-" (get-env :version) ".jar"))))
+           (jar)))
 
 (deftask mvn-test
          "run all tests of project"
@@ -91,9 +90,8 @@
          "build full project through maven"
          []
          (comp
-           (build)
-           (install :pom "pom.xml")
-           (target)))
+          (build)
+          (install :pom (str (get-env :project)))))
 
 (deftask mvn-deploy
          "build full project through maven"
@@ -101,7 +99,7 @@
          (comp
            (mvn-build)
            (push 
-             :pom "target/META-INF/maven/com.sixsq.slipstream/SlipStreamServerPRSlib-jar/pom.xml"
+             :pom (str (get-env :project))
              :repo "sixsq")))
 
 (deftask setup-deps
