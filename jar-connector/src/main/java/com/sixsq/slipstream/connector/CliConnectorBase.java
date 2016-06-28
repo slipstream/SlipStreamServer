@@ -316,7 +316,6 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	protected Map<String, String> getGenericUserParams(User user) {
 		Map<String, String> userParams = new HashMap<String, String>();
 		userParams.put(UserParametersFactoryBase.KEY_PARAMETER_NAME, getKey(user));
-		userParams.put(UserParametersFactoryBase.SECRET_PARAMETER_NAME, getSecret(user));
 		return userParams;
 	}
 
@@ -368,6 +367,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		Map<String,String> environment = new HashMap<String,String>();
 
 		environment.put("SLIPSTREAM_CONNECTOR_INSTANCE", getConnectorInstanceName());
+
+		environment.put("__SLIPSTREAM_CLOUD_PASSWORD", getSecret(user));
 
 		return environment;
 	}
