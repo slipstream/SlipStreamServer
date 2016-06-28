@@ -26,34 +26,40 @@
     (instance? Set data) (into #{} (map #(java->clj %) data))
     :else data))
 
-(defn comp-to-map
+(defn- comp->map
   [comp]
   {:module           (.getResourceUri comp)
    :vm-size          "undefined"
    :placement-policy "undefined"})
 
+(defn- node->map
+  [[node comp]]
+  {:module            (-> comp .getImage .getResourceUri)
+   :node              node
+   :vm-size           "undefined"
+   :placement-policy  "undefined"})
+
 (defn comps-from-app
-  "Takes app as DeploymentModule and returns a list of components.
-  "
+  "Takes app as DeploymentModule and returns a list of components."
   [app]
-  (map #(comp-to-map (.getImage %)) (vals (.getNodes app))))
+  (map node->map (.getNodes app)))
 
 (defn components-from-module
   [module]
   (let [category (.getCategory module)]
     (cond
-      (= ModuleCategory/Image category) [(comp-to-map module)]
+      (= ModuleCategory/Image category) [(comp->map module)]
       (= ModuleCategory/Deployment category) (comps-from-app module)
       :else (Exception. (format "Expected module of category %s or %s."
                                 ModuleCategory/Image ModuleCategory/Deployment)))))
 
-(defn module-to-map
+(defn module->map
   [module]
   {:components (components-from-module module)})
 
 (defn process-module
   [m]
-  (update m :module module-to-map))
+  (update m :module module->map))
 
 (defn -placeAndRank
   "Given the plament request as map returns JSON response from PRS service.
