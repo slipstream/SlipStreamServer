@@ -24,45 +24,40 @@
   (is (map? (java->clj nested-map)))
   (is (= cm (get (java->clj nested-map) "map")))
   (is (= cs (get (java->clj nested-map) "set")))
-  (is (= cl (get (java->clj nested-map) "list"))))
+  (is (= cl (get (java->clj nested-map) "list")))
+  )
 
 (def app (doto (DeploymentModule. "application")
            (.setNode (Node. "node1" (ImageModule. "image1")))
            (.setNode (Node. "node2" (ImageModule. "image2")))
-           (.setNode (Node. "node3" (ImageModule. "image3")))))
+           (.setNode (Node. "node3" (ImageModule. "image3")))
+           ))
 
 (deftest test-module-to-map-component
   (is (= 1 (-> (ImageModule. "component")
-               module->map
+               module-to-map
                :components
-               count))))
+               count)))
+  )
 
-(deftest test-module->map-app
+(deftest test-module-to-map-app
   (is (= 3 (-> app
-               module->map
+               module-to-map
                :components
-               count))))
-
-(deftest test-app->map-contains-node
-  (is (= #{"node1" "node2" "node3"}
-         (->> app
-              module->map
-              :components
-              (map :node)
-              set))))
+               count)))
+  )
 
 (deftest test-process-module-compenent
   (let [m (process-module {:module (ImageModule. "component")
                            :foo    nil})]
     (is (contains? m :foo))
     (is (contains? m :module))
-    (is (contains? (:module m) :components))
-    ))
+    (is (contains? (:module m) :components))))
 
 (deftest test-comps-from-app
-  (is (= 3 (count (comps-from-app app))))
-  (is (contains? (first (comps-from-app app)) :module))
-  (is (= "module/image1" (->> (comps-from-app app)
+  (is (= 3 (count (app->map app))))
+  (is (contains? (first (app->map app)) :module))
+  (is (= "module/image1" (->> (app->map app)
                               (sort-by :module)
                               (first)
                               :module))))

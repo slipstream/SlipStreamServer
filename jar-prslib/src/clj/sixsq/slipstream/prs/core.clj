@@ -5,8 +5,7 @@
   {:doc/format :markdown}
   (:require
     [clojure.data.json :as json]
-    [sixsq.slipstream.client.api.utils.http-sync :as http]
-    ))
+    [sixsq.slipstream.client.api.utils.http-sync :as http]))
 
 (defn call-prs
   [body endpoint & [http-params]]
@@ -33,21 +32,14 @@
   (if (or (empty? prs-request) (some empty? (vals prs-request)))
     {:components []}
     (-> (json/write-str prs-request)
-        (call-prs endpoint {:accept "application/json"
+        (call-prs endpoint {:accept       "application/json"
                             :content-type "application/json"})
-        (json/read-str :key-fn keyword))
-    ))
-
-(defn merge-user-choices
-  [components placement-params]
-  components)
+        (json/read-str :key-fn keyword))))
 
 (defn build-prs-input
   [input]
-  (-> {}
-      (into {:components (merge-user-choices (-> input :module :components)
-                                             (:placement-params input))})
-      (into (select-keys input [:user-connectors]))))
+  (-> (select-keys input [:user-connectors])
+      (assoc :components (-> input :module :components))))
 
 (defn place-and-rank
   "Given the input map, calls PRS service and retuns the JSON returned by PRS.
