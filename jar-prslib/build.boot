@@ -1,12 +1,5 @@
 (def +version+ "3.8-SNAPSHOT")
 
-(defn sixsq-repo [version edition]
-  (let [nexus-url "http://nexus.sixsq.com/content/repositories/"
-        repo-type (if (re-find #"SNAPSHOT" version)
-                    "snapshots"
-                    "releases")]
-    (str nexus-url repo-type "-" edition "-rhel7")))
-
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamServerPRSlib-jar
   :version +version+
@@ -14,13 +7,15 @@
   :edition "community"
   
   :dependencies '[[org.clojure/clojure "1.8.0"]
-                  [sixsq/build-utils "0.1.2" :scope "test"]])
+                  [sixsq/build-utils "0.1.3" :scope "test"]])
 
-(require '[sixsq.build-fns :refer [merge-defaults]])
+(require '[sixsq.build-fns :refer [merge-defaults
+                                   sixsq-nexus-url
+                                   lein-generate]])
 
 (set-env!
   :repositories
-  #(reduce conj % [["sixsq" {:url (sixsq-repo (get-env :version) (get-env :edition))}]])
+  #(reduce conj % [["sixsq" {:url (sixsq-nexus-url)}]])
 
   :dependencies
   #(vec (concat %
