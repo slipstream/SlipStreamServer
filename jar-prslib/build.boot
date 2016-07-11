@@ -14,7 +14,7 @@
   :edition "community"
   
   :dependencies '[[org.clojure/clojure "1.8.0"]
-                  [sixsq/build-utils "0.1.1" :scope "test"]])
+                  [sixsq/build-utils "0.1.2" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults]])
 
