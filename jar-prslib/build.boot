@@ -11,34 +11,46 @@
   :project 'com.sixsq.slipstream/SlipStreamServerPRSlib-jar
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
-  :edition "community")
+  :edition "community"
+  
+  :dependencies '[[org.clojure/clojure "1.8.0"]
+                  [sixsq/build-utils "0.1.2" :scope "test"]])
+
+(require '[sixsq.build-fns :refer [merge-defaults]])
 
 (set-env!
-  :source-paths #{"resources" "test/clj"}
-  :resource-paths #{"src/clj"}
-
   :repositories
   #(reduce conj % [["sixsq" {:url (sixsq-repo (get-env :version) (get-env :edition))}]])
 
   :dependencies
-  '[[org.clojure/clojure "1.8.0"]
-    [adzerk/boot-test "1.1.0" :scope "test"]
-    [adzerk/boot-reload "0.4.5" :scope "test"]
-    [tolitius/boot-check "0.1.1" :scope "test"]
-    [sixsq/boot-deputil "0.2.2" :scope "test"]
-    [boot-codox "0.9.5" :scope "test"]])
+  #(vec (concat %
+                (merge-defaults
+                 ['sixsq/default-deps (get-env :version)]
+                 '[[org.clojure/clojure]
+                   
+                   [com.sixsq.slipstream/SlipStreamPersistence]
+                   [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+                   [org.clojure/data.json]
+                   [org.clojure/tools.logging]
+                   
+                   [adzerk/boot-test]
+                   [adzerk/boot-reload]
+                   [tolitius/boot-check]
+                   [boot-codox]]))))
 
 (require
   '[adzerk.boot-test :refer [test]]
   '[adzerk.boot-reload :refer [reload]]
-  '[sixsq.boot-deputil :refer [set-deps!]]
   '[tolitius.boot-check :refer [with-yagni with-eastwood with-kibit with-bikeshed]]
   '[codox.boot :refer [codox]])
+
+(set-env!
+  :source-paths #{"test/clj"}
+  :resource-paths #{"src/clj"})
 
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
-  checkout {:dependencies [['sixsq/default-deps (get-env :version)]]}
   codox {:name         (str (get-env :project))
          :version      (get-env :version)
          :source-paths #{"src/clj"}
@@ -101,10 +113,3 @@
            (push 
              :pom (str (get-env :project))
              :repo "sixsq")))
-
-(deftask setup-deps
-         "setup dependencies for project"
-         []
-         (comp (checkout) (set-deps!)))
-
-(boot (setup-deps))
