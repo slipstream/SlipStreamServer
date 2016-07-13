@@ -6,8 +6,7 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.walk :as walk]
-    [sixsq.slipstream.prs.core :as prs]
-    )
+    [sixsq.slipstream.prs.core :as prs])
   (:import [java.util Map List Set]
            [com.sixsq.slipstream.persistence ImageModule DeploymentModule ModuleCategory NodeParameter ModuleCategory])
   (:gen-class
@@ -29,14 +28,14 @@
 (defn comp->map
   [comp]
   {:module           (.getResourceUri comp)
-   :vm-size          "undefined"
+   :vm-size          "unused"
    :placement-policy "undefined"})
 
 (defn- node->map
-  [[node comp]]
-  {:module            (-> comp .getImage .getResourceUri)
-   :node              node
-   :vm-size           "undefined"
+  [[node-name node]]
+  {:module            (-> node .getImage .getResourceUri)
+   :node              node-name
+   :vm-size           "unused"
    :placement-policy  "undefined"})
 
 (defn app->map
@@ -44,27 +43,63 @@
   [app]
   (map node->map (.getNodes app)))
 
-(defn components-from-module
+(defn- component?
   [module]
-  (let [category (.getCategory module)]
-    (cond
-      (= ModuleCategory/Image category) [(comp->map module)]
-      (= ModuleCategory/Deployment category) (app->map module)
-      :else (Exception. (format "Expected module of category %s or %s."
-                                ModuleCategory/Image ModuleCategory/Deployment)))))
+  (= (.getCategory module) ModuleCategory/Image))
 
-(defn module-to-map
+(defn- app?
   [module]
-  {:components (components-from-module module)})
+  (= (.getCategory module) ModuleCategory/Deployment))
+
+(defn- throw-wrong-category
+  [module]
+  (throw (Exception. (format "Expected module of category %s or %s. Got %s"
+                             ModuleCategory/Image
+                             ModuleCategory/Deployment
+                             (.getCategory module)))))
+
+(defn module->components
+  [module]
+  (cond
+    (component? module) [(comp->map module)]
+    (app? module)       (app->map module)
+    :else               (throw-wrong-category module)))
+
+(defn module->map
+  [module]
+  {:components (module->components module)})
 
 (defn process-module
   [m]
-  (update m :module module-to-map))
+  (update m :module module->map))
+
+(defn- vm-size
+  [user-connector comp]
+  (if-let [parameter (.getParameter comp (str user-connector "." ImageModule/INSTANCE_TYPE_KEY))]
+    [(.getResourceUri comp) (.getValue parameter)]
+    [(.getResourceUri comp) "no mv size"]))
+
+(defn- comp-or-app->components
+  [module]
+    (cond
+      (component? module)  [module]
+      (app? module)        (map (fn [[node-name node]] (.getImage node)) (.getNodes module))
+      :else                (throw-wrong-category module)))
+
+(defn- process-user-connector
+  [m user-connector]
+  (let [components (comp-or-app->components (:module m))]
+    {:user-connector  user-connector
+     :vm-sizes        (into {} (map (partial vm-size user-connector) components))}))
+
+(defn- process-user-connectors
+  [m]
+  (update m :user-connectors #(map (partial process-user-connector m) %)))
 
 (defn -placeAndRank
-  "Given the plament request as map returns JSON response from PRS service.
+  "Input is translated into map, PRS service is called and returns a JSON response.
 
-  Placement request map
+  Input
   {
     module: Module, // java object - ImageModule or DeploymentModule
     placement-params: { components: [ ] }, // java map
@@ -73,10 +108,13 @@
    }
   "
   [input]
-  (-> (java->clj input)
-      (walk/keywordize-keys)
-      (process-module)
-      (prs/place-and-rank)))
+  (log/info "Calling placeAndRank")
+  (-> input
+      java->clj
+      walk/keywordize-keys
+      process-user-connectors
+      process-module
+      prs/place-and-rank))
 
 (defn -validatePlacement
   [run]
