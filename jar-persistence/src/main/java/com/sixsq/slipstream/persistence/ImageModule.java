@@ -84,6 +84,9 @@ public class ImageModule extends TargetContainerModule {
 	@Transient
 	protected Map<String, ModuleParameter> inputParametersExpanded;
 
+	@Transient
+	protected Map<String, ModuleParameter> outputParametersExpanded;
+
 	@Element(required = false, data = true)
 	@Column(length = 65536)
 	private String prerecipe = "";
@@ -269,7 +272,7 @@ public class ImageModule extends TargetContainerModule {
 	public Map<String, ModuleParameter> getInputParametersExpanded() {
 		if (inputParametersExpanded == null) {
 			inputParametersExpanded = new HashMap<>();
-			findAndAddInheritedApplicationParameters(inputParametersExpanded, this);
+			findAndAddInheritedApplicationParameters(inputParametersExpanded, this, ParameterCategory.Input);
 		}
 		return inputParametersExpanded;
 	}
@@ -279,7 +282,22 @@ public class ImageModule extends TargetContainerModule {
 
 	}
 
-	private void findAndAddInheritedApplicationParameters(Map<String, ModuleParameter> params, ImageModule image) {
+	@ElementMap(required = false)
+	public Map<String, ModuleParameter> getOutputParametersExpanded() {
+		if (outputParametersExpanded == null) {
+			outputParametersExpanded = new HashMap<>();
+			findAndAddInheritedApplicationParameters(outputParametersExpanded, this, ParameterCategory.Output);
+		}
+		return outputParametersExpanded;
+	}
+
+	@ElementMap(required = false)
+	public void setOutputParametersExpanded(Map<String, ModuleParameter> parameters) {
+
+	}
+
+	private void findAndAddInheritedApplicationParameters(Map<String, ModuleParameter> params, ImageModule image,
+														  ParameterCategory type) {
 
 		for (Map.Entry<String, ModuleParameter> entry : image.getParameters().entrySet()) {
 			String parameterName = entry.getKey();
@@ -287,14 +305,14 @@ public class ImageModule extends TargetContainerModule {
 
 			String category = parameter.getCategory();
 
-			if (ParameterCategory.Input.toString().equals(category)) {
+			if (type.toString().equals(category)) {
 				params.putIfAbsent(parameterName, parameter);
 			}
 		}
 
 		ImageModule parent = image.getParentModule();
 		if (parent != null) {
-			findAndAddInheritedApplicationParameters(params, parent);
+			findAndAddInheritedApplicationParameters(params, parent, type);
 		}
 	}
 
