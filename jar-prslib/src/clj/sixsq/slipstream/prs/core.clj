@@ -6,7 +6,7 @@
   (:require
     [clojure.data.json :as json]
     [sixsq.slipstream.client.api.utils.http-sync :as http]
-    ))
+    [taoensso.timbre :as log]))
 
 (defn call-prs
   [body endpoint & [http-params]]
@@ -33,21 +33,14 @@
   (if (or (empty? prs-request) (some empty? (vals prs-request)))
     {:components []}
     (-> (json/write-str prs-request)
-        (call-prs endpoint {:accept "application/json"
+        (call-prs endpoint {:accept       "application/json"
                             :content-type "application/json"})
-        (json/read-str :key-fn keyword))
-    ))
-
-(defn merge-user-choices
-  [components placement-params]
-  components)
+        (json/read-str :key-fn keyword))))
 
 (defn build-prs-input
   [input]
-  (-> {}
-      (into {:components (merge-user-choices (-> input :module :components)
-                                             (:placement-params input))})
-      (into (select-keys input [:user-connectors]))))
+  (-> (select-keys input [:user-connectors])
+      (assoc :components (-> input :module :components))))
 
 (defn place-and-rank
   "Given the input map, calls PRS service and retuns the JSON returned by PRS.
@@ -55,7 +48,9 @@
    {:module {:components [ {:module uri :vm-size '' }, ] }
     :placement-params { components: [ {:comp-uri uri :multiplicity # :policy string }, ] } ; map
     :prs-endpoint url ; str
-    :user-connectors [c1 c2] ; vector
+    :user-connectors
+      [{:user-connector: c1, :vm-sizes {:comp1 'tiny' :comp2 'huge'}}
+       {:user-connector: c2, :vm-sizes {:comp1 'big' :comp2 'small'}}]
     }
 
   Output component
@@ -69,9 +64,10 @@
    }
    "
   [input]
+
+  (log/info "place-and-rank, input = " input)
+
   (json/write-str
     (if (empty? input)
       {}
       (prs-place-and-rank (:prs-endpoint input) (build-prs-input input)))))
-
-
