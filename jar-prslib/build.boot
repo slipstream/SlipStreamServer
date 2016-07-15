@@ -1,4 +1,4 @@
-(def +version+ "3.8")
+(def +version+ "3.9-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamServerPRSlib-jar
