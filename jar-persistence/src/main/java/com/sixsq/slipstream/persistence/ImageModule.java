@@ -667,4 +667,10 @@ public class ImageModule extends TargetContainerModule {
 		targetsExpanded.add(new TargetExpanded(this, TargetExpanded.BuildRecipe.RECIPE));
 	}
 
+	@Override
+	protected Map<String, String> placementPoliciesPerComponent() {
+		Map<String, String> result = new HashMap<>();
+		result.put(getResourceUri(), getPlacementPolicy());
+		return result;
+	}
 }

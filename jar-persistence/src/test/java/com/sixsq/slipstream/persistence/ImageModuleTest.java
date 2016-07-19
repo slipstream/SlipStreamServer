@@ -20,6 +20,19 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.module.ModuleView;
+import com.sixsq.slipstream.util.ModuleTestUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
@@ -28,19 +41,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.junit.Test;
-
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.module.ModuleView;
-import com.sixsq.slipstream.util.ModuleTestUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ImageModuleTest {
 
@@ -101,10 +101,13 @@ public class ImageModuleTest {
 		String parameterName = "name";
 		String description = "description";
 		String value = "value";
+		String placementPolicy = "location='de'";
 
 		ModuleParameter parameter = new ModuleParameter(parameterName, value,
 				description);
 		module.setParameter(parameter);
+
+		module.setPlacementPolicy(placementPolicy);
 
 		module.store();
 
@@ -122,9 +125,32 @@ public class ImageModuleTest {
 		assertEquals(description, parameter.getDescription());
 		assertEquals(value, parameter.getValue());
 
+		assertEquals(placementPolicy, moduleRestored.getPlacementPolicy());
+
 		module.remove();
 		moduleRestored = Module.load(resourceUrl);
 		assertNull(moduleRestored);
+	}
+
+	@Test
+	public void placementPoliciesReturnsMapWithURIandPlacementForSingleComponent() throws ValidationException {
+		Module module = new ImageModule("dummy");
+		String resourceUrl = module.getResourceUri();
+		module.store();
+		Module moduleRestored = Module.load(resourceUrl);
+
+		Map<String, String> expected = new HashMap<>();
+		expected.put(moduleRestored.getResourceUri(), null);
+		assertEquals(expected, moduleRestored.placementPoliciesPerComponent());
+
+		String placementPolicy = "location='de'";
+		module.setPlacementPolicy(placementPolicy);
+		module.store();
+		moduleRestored = Module.load(resourceUrl);
+
+		expected = new HashMap<>();
+		expected.put(moduleRestored.getResourceUri(), placementPolicy);
+		assertEquals(expected, moduleRestored.placementPoliciesPerComponent());
 	}
 
 	@Test

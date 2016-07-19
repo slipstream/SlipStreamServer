@@ -20,9 +20,9 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import org.hibernate.annotations.CollectionType;
+import org.simpleframework.xml.ElementMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -30,11 +30,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
-
-import org.hibernate.annotations.CollectionType;
-import org.simpleframework.xml.ElementMap;
-
-import com.sixsq.slipstream.exceptions.ValidationException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Entity
 @SuppressWarnings("serial")
@@ -277,5 +278,18 @@ public class DeploymentModule extends TargetContainerModule {
 		}
 		transaction.commit();
 		em.close();
+	}
+
+	protected Map<String, String> placementPoliciesPerComponent() {
+		Map<String, String> result = new HashMap<>();
+		for (Node node : nodes.values()) {
+			ImageModule image = node.getImage();
+			if(image != null) {
+				String imageUri = image.getResourceUri();
+				String placementPolicy = image.getPlacementPolicy();
+				result.put(imageUri, placementPolicy);
+			}
+		}
+		return result;
 	}
 }

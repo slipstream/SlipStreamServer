@@ -20,6 +20,19 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.module.ModuleView;
+import com.sixsq.slipstream.util.ModuleTestUtil;
+import com.sixsq.slipstream.util.SerializationUtil;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -28,19 +41,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.junit.Test;
-
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.module.ModuleView;
-import com.sixsq.slipstream.util.ModuleTestUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
 
 public class DeploymentModuleTest {
 
@@ -326,6 +326,48 @@ public class DeploymentModuleTest {
 		SerializationUtil.toXmlString(module);
 
 		module.remove();
+	}
+
+
+	private Node storeNode(String nodeName, String placementPolicy) throws ValidationException {
+		ImageModule image = new ImageModule("image" + nodeName);
+		if (placementPolicy != null) {
+			image.setPlacementPolicy(placementPolicy);
+		}
+		Node node = new Node(nodeName, image);
+		image.store();
+		node.store();
+
+		return node;
+	}
+
+	private Node storeNodeNoPolicy(String nodeName) throws ValidationException {
+		return storeNode(nodeName, null);
+	}
+
+	@Test
+	public void placementPoliciesReturnsMapWithURIandPlacementForEachComponent() throws ValidationException {
+		String name = "aModule";
+		DeploymentModule deployment = new DeploymentModule(name);
+		Node nodeA = storeNode("nodeA", "placement1");
+		Node nodeB = storeNode("nodeB", "placement2");
+		Node nodeC = storeNodeNoPolicy("nodeC");
+		deployment.store();
+
+		Module moduleRestored = Module.load(deployment.getResourceUri());
+		assertTrue(moduleRestored.placementPoliciesPerComponent().isEmpty());
+
+		deployment.setNode(nodeA);
+		deployment.setNode(nodeB);
+		deployment.setNode(nodeC);
+		deployment.store();
+		moduleRestored = Module.load(deployment.getResourceUri());
+
+		Map<String, String> expected = new HashMap<>();
+		expected.put(nodeA.getImage().getResourceUri(), "placement1");
+		expected.put(nodeB.getImage().getResourceUri(), "placement2");
+		expected.put(nodeC.getImage().getResourceUri(), null);
+		assertEquals(expected, moduleRestored.placementPoliciesPerComponent());
 	}
 
 }

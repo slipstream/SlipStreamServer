@@ -253,6 +253,9 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	@Attribute(required = false)
 	private String logoLink;
 
+	@Attribute(required = false)
+	private String placementPolicy;
+
 	protected Module() {
 		super();
 	}
@@ -468,6 +471,18 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		this.logoLink = logoLink;
 	}
 
+	public String getPlacementPolicy() {
+		return placementPolicy;
+	}
+
+	public void setPlacementPolicy(String placementPolicy) {
+		this.placementPolicy= placementPolicy;
+	}
+
+	protected Map<String, String> placementPoliciesPerComponent() {
+		throw new RuntimeException("Invalid call. Accessible only in ImageModule and DeploymentModule classes.");
+	}
+
 	public String getNote() {
 		return note;
 	}
@@ -517,6 +532,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		copy.setModuleReference(getModuleReference());
 		copy.setTag(getTag());
 		copy.setLogoLink(getLogoLink());
+		copy.setPlacementPolicy(getPlacementPolicy());
 
 		copy.setAuthz(getAuthz().copy(copy));
 
