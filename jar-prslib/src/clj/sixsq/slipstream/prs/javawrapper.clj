@@ -8,7 +8,7 @@
     [clojure.walk :as walk]
     [sixsq.slipstream.prs.core :as prs])
   (:import [java.util Map List Set]
-           [com.sixsq.slipstream.persistence ImageModule DeploymentModule ModuleCategory NodeParameter ModuleCategory])
+           [com.sixsq.slipstream.persistence Module ImageModule ModuleCategory ModuleCategory])
   (:gen-class
     :name sixsq.slipstream.prs.core.JavaWrapper
     :methods [#^{:static true} [placeAndRank      [java.util.Map] String]
@@ -96,6 +96,21 @@
   [m]
   (update m :user-connectors #(map (partial process-user-connector m) %)))
 
+(defn- copy-policies-from-params
+  [placement-params components]
+  (map (fn [component] (assoc component :placement-policy (get placement-params (-> component :module keyword))))
+       components))
+
+(defn- enrich-policies
+  ":module {:components [{:module module/p1/image1/48, :vm-size unused, :placement-policy undefined}]}"
+  [m]
+  (update-in m [:module :components] (partial copy-policies-from-params (:placement-params m))))
+
+(defn show
+  [x]
+  (println x)
+  x)
+
 (defn -placeAndRank
   "Input is translated into map, PRS service is called and returns a JSON response.
 
@@ -108,12 +123,13 @@
    }
   "
   [input]
-  (log/info "Calling placeAndRank")
+  (log/info "Calling placeAndRank with " input)
   (-> input
       java->clj
       walk/keywordize-keys
       process-user-connectors
       process-module
+      enrich-policies
       prs/place-and-rank))
 
 (defn -validatePlacement

@@ -479,7 +479,7 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 		this.placementPolicy= placementPolicy;
 	}
 
-	protected Map<String, String> placementPoliciesPerComponent() {
+	public Map<String, String> placementPoliciesPerComponent() {
 		throw new RuntimeException("Invalid call. Accessible only in ImageModule and DeploymentModule classes.");
 	}
 

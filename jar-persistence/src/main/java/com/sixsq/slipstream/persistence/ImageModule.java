@@ -667,10 +667,39 @@ public class ImageModule extends TargetContainerModule {
 		targetsExpanded.add(new TargetExpanded(this, TargetExpanded.BuildRecipe.RECIPE));
 	}
 
+	private String andPolicies(String policy1, String policy2) {
+		if (policy1 == null && policy2 == null) {
+			return null;
+		} else if (policy1 == null) {
+			return policy2;
+		} else if (policy2 == null) {
+			return policy1;
+		} else {
+			return "(" + policy1 + ") and (" + policy2 + ")";
+		}
+	}
+
 	@Override
-	protected Map<String, String> placementPoliciesPerComponent() {
+	public Map<String, String> placementPoliciesPerComponent() {
+
 		Map<String, String> result = new HashMap<>();
-		result.put(getResourceUri(), getPlacementPolicy());
+
+		String resultPolicy = null;
+		if (getModuleReference() == null) {
+			resultPolicy = getPlacementPolicy();
+		}
+		if (getParentModule() != null) {
+			String policy = getPlacementPolicy();
+			String parentPolicy = null;
+			Map<String, String> parentPlacementPolicies = getParentModule().placementPoliciesPerComponent();
+			if (parentPlacementPolicies != null && !parentPlacementPolicies.isEmpty()) {
+				parentPolicy = (String) parentPlacementPolicies.values().toArray()[0];
+			}
+
+			resultPolicy = andPolicies(parentPolicy, policy);
+		}
+
+		result.put(getResourceUri(), resultPolicy);
 		return result;
 	}
 }

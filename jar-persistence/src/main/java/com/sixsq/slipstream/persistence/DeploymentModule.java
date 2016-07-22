@@ -280,7 +280,7 @@ public class DeploymentModule extends TargetContainerModule {
 		em.close();
 	}
 
-	protected Map<String, String> placementPoliciesPerComponent() {
+	public Map<String, String> placementPoliciesPerComponent() {
 		Map<String, String> result = new HashMap<>();
 		for (Node node : nodes.values()) {
 			ImageModule image = node.getImage();

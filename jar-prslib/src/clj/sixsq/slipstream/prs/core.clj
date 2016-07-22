@@ -6,7 +6,7 @@
   (:require
     [clojure.data.json :as json]
     [sixsq.slipstream.client.api.utils.http-sync :as http]
-    [taoensso.timbre :as log]))
+    [clojure.tools.logging :as log]))
 
 (defn call-prs
   [body endpoint & [http-params]]
@@ -39,7 +39,7 @@
 
 (defn build-prs-input
   [input]
-  (-> (select-keys input [:user-connectors])
+  (-> (select-keys input [:user-connectors :placement-params])
       (assoc :components (-> input :module :components))))
 
 (defn place-and-rank

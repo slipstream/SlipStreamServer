@@ -154,6 +154,33 @@ public class ImageModuleTest {
 	}
 
 	@Test
+	public void inheritedPlacementPolicies() throws ValidationException {
+		Module parentImage = new ImageModule("parent");
+		String placementPolicy = "location='de'";
+		parentImage.setPlacementPolicy(placementPolicy);
+
+		Module childImage = new ImageModule("child");
+		childImage.setModuleReference(parentImage);
+
+		childImage.store();
+		parentImage.store();
+
+		Module childRestored = Module.load(childImage.getResourceUri());
+
+		Map<String, String> expected = new HashMap<>();
+		expected.put(childRestored.getResourceUri(), "location='de'");
+		assertEquals(expected, childRestored.placementPoliciesPerComponent());
+
+		childImage.setPlacementPolicy("cost<100");
+		childImage.store();
+		childRestored = Module.load(childImage.getResourceUri());
+		expected.clear();
+		expected.put(childRestored.getResourceUri(), "(location='de') and (cost<100)");
+		assertEquals(expected, childRestored.placementPoliciesPerComponent());
+	}
+
+
+	@Test
 	public void verifyModuleViewList() throws ValidationException {
 		// clean-up
 		ModuleTestUtil.cleanupModules();
