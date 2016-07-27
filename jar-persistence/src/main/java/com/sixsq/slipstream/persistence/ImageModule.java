@@ -667,12 +667,16 @@ public class ImageModule extends TargetContainerModule {
 		targetsExpanded.add(new TargetExpanded(this, TargetExpanded.BuildRecipe.RECIPE));
 	}
 
+	private boolean nullOrEmpty(String s) {
+		return s == null || s.isEmpty();
+	}
+
 	private String andPolicies(String policy1, String policy2) {
-		if (policy1 == null && policy2 == null) {
+		if (nullOrEmpty(policy1) && nullOrEmpty(policy2)) {
 			return null;
-		} else if (policy1 == null) {
+		} else if (nullOrEmpty(policy1)) {
 			return policy2;
-		} else if (policy2 == null) {
+		} else if (nullOrEmpty(policy2)) {
 			return policy1;
 		} else {
 			return "(" + policy1 + ") and (" + policy2 + ")";
