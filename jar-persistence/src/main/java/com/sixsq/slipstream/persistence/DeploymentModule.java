@@ -285,9 +285,8 @@ public class DeploymentModule extends TargetContainerModule {
 		for (Node node : nodes.values()) {
 			ImageModule image = node.getImage();
 			if(image != null) {
-				String imageUri = image.getResourceUri();
-				String placementPolicy = image.getPlacementPolicy();
-				result.put(imageUri, placementPolicy);
+				Map<String, String> imagePolicies = image.placementPoliciesPerComponent();
+				result.putAll(imagePolicies);
 			}
 		}
 		return result;
