@@ -29,9 +29,9 @@ import com.sixsq.slipstream.persistence.*;
 
 /**
  * Unit test:
- * 
+ *
  * @see QuotaTest
- * 
+ *
  */
 
 public class Quota {
@@ -51,8 +51,9 @@ public class Quota {
 			}
 
 			if ((currentUsage + nodesRequested) > quota) {
-				throw new QuotaException(
-						"Quota exceeded for number of concurrent VMs");
+				String msg = String.format("Concurrent VM quota exceeded (quota=%d, current=%d, requested=%d)",
+						quota, currentUsage, nodesRequested);
+				throw new QuotaException(msg);
 			}
 		}
 
@@ -70,7 +71,7 @@ public class Quota {
 
 		ServiceConfiguration cfg = Configuration.getInstance().getParameters();
 		parameter = cfg.getParameter(key, cloud);
-		
+
 		if (parameter != null && Parameter.hasValueSet(parameter.getValue())) {
 			return parameter.getValue();
 		}
