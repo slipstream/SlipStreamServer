@@ -368,6 +368,8 @@ public class DeploymentModuleTest {
 		expected.put(nodeB.getImage().getResourceUri(), "placement2");
 		expected.put(nodeC.getImage().getResourceUri(), null);
 		assertEquals(expected, moduleRestored.placementPoliciesPerComponent());
+
+		deployment.remove();
 	}
 
 }

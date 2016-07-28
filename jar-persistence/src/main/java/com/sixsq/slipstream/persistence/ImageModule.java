@@ -619,6 +619,7 @@ public class ImageModule extends TargetContainerModule {
 
 		copy.setPreRecipe(getPreRecipe());
 		copy.setRecipe(getRecipe());
+		copy.setPlacementPolicy(getPlacementPolicy());
 
 		for (Target target : getTargets()) {
 			copy.getTargets().add(target.copy());

@@ -134,7 +134,7 @@ public class ImageModuleTest {
 
 	@Test
 	public void placementPoliciesReturnsMapWithURIandPlacementForSingleComponent() throws ValidationException {
-		Module module = new ImageModule("dummy");
+		Module module = new ImageModule("dummy3");
 		String resourceUrl = module.getResourceUri();
 		module.store();
 		Module moduleRestored = Module.load(resourceUrl);
@@ -145,12 +145,15 @@ public class ImageModuleTest {
 
 		String placementPolicy = "location='de'";
 		module.setPlacementPolicy(placementPolicy);
+		module.remove();
 		module.store();
 		moduleRestored = Module.load(resourceUrl);
 
 		expected = new HashMap<>();
 		expected.put(moduleRestored.getResourceUri(), placementPolicy);
 		assertEquals(expected, moduleRestored.placementPoliciesPerComponent());
+
+		module.remove();
 	}
 
 	@Test
@@ -177,6 +180,9 @@ public class ImageModuleTest {
 		expected.clear();
 		expected.put(childRestored.getResourceUri(), "(location='de') and (cost<100)");
 		assertEquals(expected, childRestored.placementPoliciesPerComponent());
+
+		parentImage.remove();
+		childImage.remove();
 	}
 
 
