@@ -52,7 +52,7 @@ public class Quota {
 
 			if ((currentUsage + nodesRequested) > quota) {
 				String msg = String.format("Concurrent VM quota exceeded (quota=%d, current=%d, requested=%d)",
-						currentUsage, nodesRequested, quota);
+						quota, currentUsage, nodesRequested);
 				throw new QuotaException(msg);
 			}
 		}
