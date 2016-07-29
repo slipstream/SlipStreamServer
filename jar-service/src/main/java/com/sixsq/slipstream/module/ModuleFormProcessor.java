@@ -76,6 +76,7 @@ public abstract class ModuleFormProcessor extends
 		getParametrized().setCommit(parseCommit());
 		getParametrized().setLogoLink(parseLogoLink());
 		getParametrized().setNote(parseNote());
+		getParametrized().setPlacementPolicy(parsePlacementPolicy());
 	}
 
 	private String parseName() throws ValidationException {
@@ -102,6 +103,10 @@ public abstract class ModuleFormProcessor extends
 
 	private String parseLogoLink() throws ValidationException {
 		return getForm().getFirstValue("logoLink");
+	}
+
+	private String parsePlacementPolicy() throws ValidationException {
+		return getForm().getFirstValue("placementpolicy");
 	}
 
 	private void validateName(String name) throws ValidationException {

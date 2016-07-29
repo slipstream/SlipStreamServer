@@ -619,6 +619,7 @@ public class ImageModule extends TargetContainerModule {
 
 		copy.setPreRecipe(getPreRecipe());
 		copy.setRecipe(getRecipe());
+		copy.setPlacementPolicy(getPlacementPolicy());
 
 		for (Target target : getTargets()) {
 			copy.getTargets().add(target.copy());
@@ -667,4 +668,43 @@ public class ImageModule extends TargetContainerModule {
 		targetsExpanded.add(new TargetExpanded(this, TargetExpanded.BuildRecipe.RECIPE));
 	}
 
+	private boolean nullOrEmpty(String s) {
+		return s == null || s.isEmpty();
+	}
+
+	private String andPolicies(String policy1, String policy2) {
+		if (nullOrEmpty(policy1) && nullOrEmpty(policy2)) {
+			return null;
+		} else if (nullOrEmpty(policy1)) {
+			return policy2;
+		} else if (nullOrEmpty(policy2)) {
+			return policy1;
+		} else {
+			return "(" + policy1 + ") and (" + policy2 + ")";
+		}
+	}
+
+	@Override
+	public Map<String, String> placementPoliciesPerComponent() {
+
+		Map<String, String> result = new HashMap<>();
+
+		String resultPolicy = null;
+		if (getModuleReference() == null) {
+			resultPolicy = getPlacementPolicy();
+		}
+		if (getParentModule() != null) {
+			String policy = getPlacementPolicy();
+			String parentPolicy = null;
+			Map<String, String> parentPlacementPolicies = getParentModule().placementPoliciesPerComponent();
+			if (parentPlacementPolicies != null && !parentPlacementPolicies.isEmpty()) {
+				parentPolicy = (String) parentPlacementPolicies.values().toArray()[0];
+			}
+
+			resultPolicy = andPolicies(parentPolicy, policy);
+		}
+
+		result.put(getResourceUri(), resultPolicy);
+		return result;
+	}
 }

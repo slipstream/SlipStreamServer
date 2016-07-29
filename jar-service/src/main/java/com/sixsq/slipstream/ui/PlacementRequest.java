@@ -51,16 +51,22 @@ public class PlacementRequest {
 
         Map<String, Object> result = new HashMap<>();
 
-        result.put("module", getModule());
+        Module module = getModule();
+        result.put("module", module);
         result.put("user-connectors", userConnectors);
 
-        result.put("placement-params", new HashMap<>());
+        result.put("placement-params", module.placementPoliciesPerComponent());
         result.put("prs-endpoint", prsEndPoint);
+
+        logger.info("asMap = " + result);
 
         return result;
     }
 
     public static PlacementRequest fromJson(String json) {
+
+        logger.info("JSON " + json);
+
         Gson gson = new GsonBuilder().create();
         PlacementRequest placementRequest = gson.fromJson(json, PlacementRequest.class);
 
@@ -70,13 +76,15 @@ public class PlacementRequest {
             logger.severe("Unable to determine PRS endpoint. Cause: " + ve.getMessage());
             placementRequest.prsEndPoint = "";
         }
-        logger.info("PRS endpoint " + placementRequest.prsEndPoint);
+        logger.fine("PRS endpoint " + placementRequest.prsEndPoint);
+        logger.info("Placement Request " + placementRequest);
 
         return placementRequest;
     }
 
     public String toString() {
-        return moduleUri + ", " + prsEndPoint + ", " + userConnectors + ", " + placementParams;
+        return "moduleURI=" + moduleUri + ", endPoint=" + prsEndPoint + ", userConnectors="
+                + userConnectors + ", placementParams=" + placementParams;
     }
 
 
