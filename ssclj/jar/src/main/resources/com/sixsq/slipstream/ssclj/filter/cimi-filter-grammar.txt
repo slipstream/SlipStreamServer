@@ -1,5 +1,8 @@
-Filter          ::= AndExpr ( <'or'> Filter )*
-AndExpr         ::= Comp ( <'and'> AndExpr )*
+(* warning: do not use wildcards for 'and'/'or' expressions because
+            they create an ambiguous grammar that causes the parsing
+            time to increase exponentially with the number of terms *)
+Filter          ::= AndExpr | AndExpr <'or'> Filter
+AndExpr         ::= Comp | Comp <'and'> AndExpr
 Comp            ::= Attribute Op Value
                     | Value Op Attribute
                     | PropExpr

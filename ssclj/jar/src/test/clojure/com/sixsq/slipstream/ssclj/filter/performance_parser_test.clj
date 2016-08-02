@@ -4,23 +4,16 @@
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
 
-(defn- cimi-filter
-  [nb-expressions]
-  (str/join " or " (repeat nb-expressions "(a='1')")))
+(defn cimi-filter
+  [n op]
+  (str/join op (repeat n "(a='1')")))
 
+;;
+;; This test ensures that the performance of the CIMI filter
+;; parser is acceptable for large numbers of 'and' or 'or'
+;; expressions.  These tests would normally cause a memory
+;; overflow failure above 30 or so terms.
+;;
 (deftest test-parse-performance
-  ; Shows that performance of parsing decreases very quickly
-  ; some numbers (vary greatly, just an idea)
-  ; looks like it's o(2^n)
-  ; nb  : time (ms)
-  ; 10  : 6
-  ; 11  : 8
-  ; 12  : 15
-  ; 13  : 30
-  ; 14  : 55
-  ; 15  : 100
-  ; 16  : 250
-  ; 17  : 500
-  ; 20  : 6000
-  ; 30  : java.lang.OutOfMemoryError: GC overhead limit exceeded
-  (time (parser/parse-cimi-filter (cimi-filter 2))))
+  (is (parser/parse-cimi-filter (cimi-filter 1000 " or ")))
+  (is (parser/parse-cimi-filter (cimi-filter 1000 " and "))))
