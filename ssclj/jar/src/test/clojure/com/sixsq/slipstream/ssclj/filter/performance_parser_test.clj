@@ -11,8 +11,9 @@
 ;;
 ;; This test ensures that the performance of the CIMI filter
 ;; parser is acceptable for large numbers of 'and' or 'or'
-;; expressions.  These tests would normally cause a memory
-;; overflow failure above 30 or so terms.
+;; expressions.
+;; A grammar that uses wildcards (see cimi-filter-grammar.txt) would
+;; cause a memory overflow failure above 30 or so terms.
 ;;
 (deftest test-parse-performance
   (is (parser/parse-cimi-filter (cimi-filter 1000 " or ")))
