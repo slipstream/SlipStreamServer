@@ -27,13 +27,17 @@
 (def timeout-collect-reader-release (+ timeout-collect (seconds-in-msecs 2)))
 (def timeout-processing-loop        (seconds-in-msecs 60))
 
-(defn get-name
+(defn- get-name
   [user]
   (.getName user))
 
-(defn get-conn-inst-name
+(defn- get-conn-inst-name
   [connector]
   (.getConnectorInstanceName connector))
+
+(defn- tuple-uc
+  [u c]
+  [(get-name u) (get-conn-inst-name c)])
 
 (def busy (atom #{}))
 
@@ -45,16 +49,17 @@
  [current-busy v]
  (disj current-busy v))
 
-(defn- busy? [u c]
-  (@busy [(get-name u) (get-conn-inst-name c)]))
+(defn- busy?
+  [u c]
+  (@busy (tuple-uc u c)))
 
 (defn- busy!
   [u c]
-  (swap! busy mark-busy [(get-name u) (get-conn-inst-name c)]))
+  (swap! busy mark-busy (tuple-uc u c)))
 
 (defn- free!
   [u c]
-  (swap! busy mark-free [(get-name u) (get-conn-inst-name c)]))
+  (swap! busy mark-free (tuple-uc u c)))
 
 (defn full?
   []
@@ -94,7 +99,7 @@
 
 (defn- user-connector
  [user connector]
- (apply str "[" (get-name user) "/" (get-conn-inst-name connector) "] " (System/currentTimeMillis) " "))
+ (apply format "[%s/%s] %s " (conj (tuple-uc user connector) (System/currentTimeMillis))))
 
 (defn- build-msg
   [user connector elapsed & info]
