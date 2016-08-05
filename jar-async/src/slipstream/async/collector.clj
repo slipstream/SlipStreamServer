@@ -1,11 +1,10 @@
 (ns slipstream.async.collector
-  (:require 
+  (:require
     [slipstream.async.log             :as log]
     [slipstream.async.metric-updator  :as updator]
-    [clojure.core.async               :as async :refer [go timeout thread chan sliding-buffer <! >! <!! alts!]])
-  (:import 
+    [clojure.core.async               :refer [go timeout thread chan sliding-buffer <! >! <!! alts!]])
+  (:import
     [com.sixsq.slipstream.connector    Collector]
-    [com.sixsq.slipstream.connector    Connector]
     [com.sixsq.slipstream.connector    ConnectorFactory]
     [com.sixsq.slipstream.persistence  User])
   (:gen-class
@@ -20,7 +19,7 @@
   [msecs]
   (/ msecs 1000))
 
-(def collector-chan-size            512)
+(def collector-chan-size            1024)
 (def number-of-readers              32)
 (def timeout-all-users-loop         (seconds-in-msecs 240))
 (def timeout-online-loop            (seconds-in-msecs 10))
@@ -31,6 +30,10 @@
 (defn get-name
   [user]
   (.getName user))
+
+(defn get-conn-inst-name
+  [connector]
+  (.getConnectorInstanceName connector))
 
 (def busy (atom #{}))
 
@@ -43,21 +46,21 @@
  (disj current-busy v))
 
 (defn- busy? [u c]
-  (@busy [(get-name u) c]))
+  (@busy [(get-name u) (get-conn-inst-name c)]))
 
 (defn- busy!
   [u c]
-  (swap! busy mark-busy [(get-name u) c]))
+  (swap! busy mark-busy [(get-name u) (get-conn-inst-name c)]))
 
 (defn- free!
   [u c]
-  (swap! busy mark-free [(get-name u) c]))
+  (swap! busy mark-free [(get-name u) (get-conn-inst-name c)]))
 
-(defn full?   
+(defn full?
   []
   (>= (count @busy) collector-chan-size))
 
-(defn current-working-usage   
+(defn current-working-usage
   []
   (let [current-working (count @busy)
         ratio           (* 100.0 (/ current-working (float collector-chan-size)))]
@@ -91,7 +94,7 @@
 
 (defn- user-connector
  [user connector]
- (apply str "[" (get-name user) "/" (.getConnectorInstanceName connector) "] " (System/currentTimeMillis) " "))
+ (apply str "[" (get-name user) "/" (get-conn-inst-name connector) "] " (System/currentTimeMillis) " "))
 
 (defn- build-msg
   [user connector elapsed & info]
@@ -129,7 +132,7 @@
     (go
       (let [ [v _]    (alts! [ch (timeout timeout-collect-reader-release)])
              elapsed  (- (System/currentTimeMillis) start-ts) ]
-        (free! user connector)        
+        (free! user connector)
         (cond
           (nil? v)                            (log-timeout user connector elapsed)
           (= v Collector/NO_CREDENTIALS)      (log-no-credentials user connector elapsed)
@@ -149,7 +152,7 @@
     (go
       (while true
         (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
-          (when (not-nil? user)            
+          (when (not-nil? user)
             (try
               (log/log-debug "Will execute collect request for " (user-connector user connector))
               (collect! user connector)
@@ -159,53 +162,77 @@
 (defonce ^:dynamic *all-collect-processor* (collect-readers all-collector-chan))
 
 (defn add-increasing-space
- [ucs space]
- (let [spaces (iterate #(+ space %) 0)]
+ [ucs step]
+ (let [spaces (iterate #(+ step %) 0)]
    (map conj ucs spaces)))
 
-(defn warn-channel-full   
+(defn warn-channel-full
   [context u c]
-  (log/log-error context 
+  (log/log-error context
     ": the processing channel capacity(" collector-chan-size") is currently full, will *not* insert request for "
       (user-connector u c)))
 
-(defn inform-avoiding   
+(defn inform-avoiding
   [context u c]
   (log/log-info context ": avoiding inserting on " (user-connector u c) " being already processed."))
 
-(defn inform-inserted 
+(defn inform-inserted
   [context u c t]
-  (log/log-debug context ": inserted collect request for " (user-connector u c) " after timeout " t))    
+  (log/log-debug context ": inserted collect request for " (user-connector u c) " after timeout " t))
 
-(defn inform-nothing-to-do 
+(defn inform-nothing-to-do
   [context]
   (log/log-debug context ": no users to collect."))
 
-(defn show-current-channel-usage   
+(defn show-current-channel-usage
   [context]
   (let [[current total ratio] (current-working-usage)]
-    (log/log-info context ": " current " / " total " => " ratio " %")))
+    (log/log-info "indirect channel usage before inserting collect requests for " context ": " current " / " total " => " ratio " %")))
+
+(defn log-initial-workspace
+  [nu nc]
+  (log/log-debug "Requested work on #" nu " users and #" nc " connectors. Initial workspace: " (* nu nc)))
+
+(defn log-final-workspace
+  [n]
+  (log/log-debug "After filtering out users w/o connector creds. Final workspace: " n))
+
+(defn log-spread
+  [s t]
+  (log/log-debug "Will spread " s " requests in " (msecs-in-seconds t) " s."))
+
+(defn insert-collection-request-cond-spaced
+  [chan u c t context]
+  (go
+    (<! (timeout t))
+    (if-not (busy? u c)
+      (do
+        (busy! u c)
+        (>! chan [u c])
+        (inform-inserted context u c t))
+      (inform-avoiding context u c))))
+
+(defn compose-uc-pairs
+  [users connectors]
+  (remove nil?
+          (for [u users c connectors]
+            (when (.isCredentialsSet c u) [u c]))))
 
 (defn insert-collection-requests
   [users connectors chan time-to-spread context]
   (show-current-channel-usage context)
   (if (every? (comp pos? count) [connectors users])
-    (let [ucs   (for [u users c connectors] [u c])
-          ucts  (add-increasing-space ucs (int (/ time-to-spread (count ucs))))]
+    (let [_ (log-initial-workspace (count users) (count connectors))
+          ucs (compose-uc-pairs users connectors)
+          _ (log-final-workspace (count ucs))
+          ucts (add-increasing-space ucs (int (/ time-to-spread (count ucs))))
+          _ (log-spread (count ucts) time-to-spread)]
       (doseq [[u c t] ucts]
-        (cond 
-          (full?)     (warn-channel-full context u c)
-          (busy? u c) (inform-avoiding context u c))
-          :else       (go
-                        (<! (timeout t))
-                        (if-not (busy? u c)
-                          (do
-                            (busy! u c)
-                            (>! chan [u c])
-                            (inform-inserted context u c t))
-
-                          (inform-avoiding context u c)))))
-    (inform-nothing-to-do context)))
+        (cond
+          (full?) (warn-channel-full context u c)
+          (busy? u c) (inform-avoiding context u c)
+          :else (insert-collection-request-cond-spaced chan u c t context)))
+      (inform-nothing-to-do context))))
 
 ; Start collector writers
 (defn collect-writers
