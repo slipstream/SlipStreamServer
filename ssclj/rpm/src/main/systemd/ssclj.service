@@ -2,7 +2,6 @@
 Description=SlipStream API
 After=syslog.target
 After=network.target
-After=hsqldb.service
 
 [Service]
 Environment=SSCLJ_PORT=8201
