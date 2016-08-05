@@ -1,9 +1,4 @@
-{:api-db                  {
-                           :classname   "org.hsqldb.jdbc.JDBCDriver"
-                           :subprotocol "hsqldb"
-                           :subname     "hsql://localhost:9001/ssclj"
-                           :make-pool?  true}
- :auth-db                 {
+{:auth-db                 {
                            :classname   "org.hsqldb.jdbc.JDBCDriver"
                            :subprotocol "hsqldb"
                            :subname     "hsql://localhost:9001/slipstream"
