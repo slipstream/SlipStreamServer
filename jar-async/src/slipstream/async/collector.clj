@@ -214,9 +214,7 @@
 
 (defn compose-uc-pairs
   [users connectors]
-  (remove nil?
-          (for [u users c connectors]
-            (when (.isCredentialsSet c u) [u c]))))
+  (for [u users c connectors :when (.isCredentialsSet c u)] [u c]))
 
 (defn insert-collection-requests
   [users connectors chan time-to-spread context]
