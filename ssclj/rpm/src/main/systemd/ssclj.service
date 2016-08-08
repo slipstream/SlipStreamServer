@@ -1,7 +1,6 @@
 [Unit]
 Description=SlipStream API
-After=syslog.target
-After=network.target
+After=syslog.target network.target
 After=hsqldb.service elasticsearch.service
 
 [Service]
