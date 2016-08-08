@@ -1,7 +1,7 @@
 [Unit]
 Description=SlipStream Service
 After=syslog.target network.target
-After=hsqldb.service
+After=hsqldb.service ssclj.service
 
 [Service]
 RemainAfterExit=yes
