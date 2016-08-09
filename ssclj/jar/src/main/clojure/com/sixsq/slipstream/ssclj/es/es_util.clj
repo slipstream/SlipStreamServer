@@ -34,8 +34,26 @@
 (defn json->edn [json]
   (when json (json/read-str json :key-fn keyword)))
 
+(defn- namespaced-keyword
+  [kw]
+  (if-let [ns (namespace kw)]
+    (str ns "/" (name kw))
+    (name kw)))
+
+(defn- write-key-fn
+  "Changes default implementation (from clojure.data.json/default-write-key-fn),
+  so that keyword :a/b/c is written a/b/c
+  Default implementation skips a/ (considered as namespace)
+  "
+  [x]
+  (cond
+    (keyword? x)                      (namespaced-keyword x)
+    (instance? clojure.lang.Named x)  (name x)
+    (nil? x)                          (throw (Exception. "JSON object properties may not be nil"))
+    :else                             (str x)))
+
 (defn edn->json [edn]
-  (json/write-str edn))
+  (json/write-str edn :key-fn write-key-fn))
 
 ;;
 ;; Elastic Search implementations of CRUD actions
@@ -43,6 +61,9 @@
 
 (defn create
   [^Client client index type docid json]
+
+  (log/info "ES create, JSON=" json)
+
   (.. client
       (prepareIndex index type docid)
       (setCreate true)
