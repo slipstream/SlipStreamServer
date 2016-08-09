@@ -227,9 +227,7 @@
   [users connectors chan time-to-spread context]
   (show-current-channel-usage context users)
   (if (every? (comp pos? count) [connectors users])
-    (let [_     (log-initial-workspace (count users) (count connectors))
-          ucs   (for [u users c connectors] [u c])
-          _     (log-final-workspace (count ucs))
+    (let [ucs   (for [u users c connectors] [u c])
           ucts  (add-increasing-space ucs (int (/ time-to-spread (count ucs))))
           _     (log-spread (count ucts) time-to-spread)]
       (doseq [[u c t] ucts]
