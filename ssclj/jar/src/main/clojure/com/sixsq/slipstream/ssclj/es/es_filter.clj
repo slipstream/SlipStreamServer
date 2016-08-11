@@ -99,8 +99,11 @@
       (first args)
       (or-query args))))
 
+(defn- str-coll [coll]
+  (apply str coll))
+
 (defmethod convert :Attribute [v]
-  [:Attribute (-> v second (s/replace "/" "."))])
+  [:Attribute (-> v rest str-coll (s/replace "/" "."))])
 
 (defmethod convert :default [v]
   v)
