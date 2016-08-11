@@ -103,20 +103,30 @@
                        "alpha"
                        "alpha123"
                        "a1"
-                       "_a"
-                       "_1"
                        "a1/b2"
-                       "a1/b2/c3"]]
+                       "a1/b2/c3"
+                       "schema-org:attr1"
+                       "schema-org:attr1/schema-org:attr2"]]
                    s))
 
 ;; invalid attributes
 (expect (fails-fn :Attribute)
         (from-each [s [""
+                       "_"
+                       "-"
+                       "/"
+                       "a-"
                        "1"
                        "1a"
+                       "_a"
+                       "_1"
                        "a1/"
                        "/a1"
-                       "a/1"]]
+                       "a/1"
+                       ":a"
+                       "a:"
+                       "schema-org:a:b"
+                       "schema-org:a/"]]
                    s))
 
 (run-all-tests)

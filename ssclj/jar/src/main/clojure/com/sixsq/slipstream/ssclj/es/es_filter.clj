@@ -100,7 +100,7 @@
       (or-query args))))
 
 (defmethod convert :Attribute [v]
-  [:Attribute (-> v second (s/replace "/" "."))])
+  [:Attribute (s/join "." (rest v))])
 
 (defmethod convert :default [v]
   v)
