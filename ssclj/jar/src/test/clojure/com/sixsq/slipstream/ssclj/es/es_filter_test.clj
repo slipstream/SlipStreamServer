@@ -8,5 +8,3 @@
   (is (= [:Attribute "att"] (esf/convert [:Attribute "att"])))
   (is (= [:Attribute "ns1:att1"] (esf/convert [:Attribute "ns1:att1"])))
   (is (= [:Attribute "ns1:att1.ns2:att2"] (esf/convert [:Attribute "ns1:att1/ns2:att2"]))))
-
-
