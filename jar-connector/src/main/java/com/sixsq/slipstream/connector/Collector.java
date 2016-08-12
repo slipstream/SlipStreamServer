@@ -43,17 +43,28 @@ public class Collector {
 	public static final int NO_CREDENTIALS = -1;
 
 	public static int collect(User user, Connector connector, int timeout) {
-		int res = EXCEPTION_OCCURED;
-		try {
+		return collect(user, connector, timeout, 0);
+	}
 
-			if (connector.isCredentialsSet(user)) {
+	public static int collect(User user, Connector connector, int timeout, int workerId) {
+		int res = EXCEPTION_OCCURED;
+		if (connector.isCredentialsSet(user)) {
+			String uuid = UUID.randomUUID().toString();
+			String logBase = "Worker " + workerId
+					+ ", collect request " + uuid
+					+ " [" + user.getName() + "/" + connector.getConnectorInstanceName() + "]";
+			logger.info(logBase + " - TODO");
+			long startTime = System.currentTimeMillis();
+			try {
 				res = describeInstances(user, connector, timeout);
-			} else {
-				res = NO_CREDENTIALS;
+				logger.info(logBase + " - DONE in " + (System.currentTimeMillis() - startTime));
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.severe(logBase + " - DONE in " + (System.currentTimeMillis() - startTime)
+						+ ". EXCEPTION: " + e.getMessage());
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.severe(e.getMessage());
+		} else {
+			res = NO_CREDENTIALS;
 		}
 		return res;
 	}
