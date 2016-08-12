@@ -132,7 +132,7 @@
     (go (>! ch (updator/update-metric user connector)))))
 
 (defn collect!
-  [user connector]
+  [user connector w-id]
   (let [ch (chan 1) start-ts (System/currentTimeMillis)]
     (go
       (let [ [v _]    (alts! [ch (timeout timeout-collect-reader-release)])
@@ -141,11 +141,11 @@
         (cond
           (nil? v)                            (log-timeout user connector elapsed)
           (= v Collector/NO_CREDENTIALS)      (log-no-credentials user connector elapsed)
-          (= v Collector/EXCEPTION_OCCURED)   (log-failure user connector elapsed)
+          (= v Collector/EXCEPTION_OCCURRED)  (log-failure user connector elapsed)
           :else (do
                   (log-collected user connector elapsed v)
                   (when (updator/metering-enabled?) (update-metric! user connector))))))
-    (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect))))))
+    (go (>! ch (Collector/collect user connector (msecs-in-seconds timeout-collect) w-id)))))
 
 (def not-nil? (complement nil?))
 
@@ -156,11 +156,11 @@
   (doseq [i (range number-of-readers)]
     (go
       (while true
-        (let [[[user connector] ch] (alts! [chan (timeout timeout-processing-loop)])]
+        (let [[[user connector] _] (alts! [chan (timeout timeout-processing-loop)])]
           (when (not-nil? user)
             (try
               (log/log-debug "Will execute collect request for " (user-connector user connector))
-              (collect! user connector)
+              (collect! user connector i)
               (catch Exception e (log/log-warn "caught exception executing collect request: " (.getMessage e))))))))))
 
 (defonce ^:dynamic *online-collect-processor* (collect-readers online-collector-chan))
