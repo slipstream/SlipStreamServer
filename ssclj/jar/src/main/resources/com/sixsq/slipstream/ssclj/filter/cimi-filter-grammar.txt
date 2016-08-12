@@ -9,7 +9,7 @@ Comp            ::= Attribute Op Value
                     | WS <'('> Filter <')'> WS
 Op              ::= '<' | '<=' | '=' | '>=' | '>' | '!='
 
-Attribute       ::= WS NamespaceTerm (<'/'> NamespaceTerm)* WS
+Attribute       ::= WS NamespaceTerm ('/' NamespaceTerm)* WS
 <NamespaceTerm> ::= (Term ':' Term) | Term
 <Term>          ::= #'([a-zA-Z][\w-]*[\w]+)|[a-zA-Z]'
 <Value>         ::= IntValue | DateValue | StringValue | BoolValue
