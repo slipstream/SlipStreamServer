@@ -1,5 +1,4 @@
-{;; specification for ssclj database is still needed for migration script
- :api-db                  {
+{:api-db                  {
                            :classname   "org.hsqldb.jdbc.JDBCDriver"
                            :subprotocol "hsqldb"
                            :subname     "hsql://localhost:9001/ssclj"

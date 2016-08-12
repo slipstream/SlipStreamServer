@@ -190,9 +190,11 @@
   (log/log-debug context ": no users to collect."))
 
 (defn show-current-channel-usage
-  [context]
+  [context users]
   (let [[current total ratio] (current-working-usage)]
-    (log/log-info "indirect channel usage before inserting collect requests for " context ": " current " / " total " => " ratio " %")))
+    (log/log-info (str "Channel usage before inserting collect requests for "
+                       context ": " current " / " total " => " ratio " %, "
+                       "(" (count users) " users)"))))
 
 (defn log-initial-workspace
   [nu nc]
@@ -223,18 +225,16 @@
 
 (defn insert-collection-requests
   [users connectors chan time-to-spread context]
-  (show-current-channel-usage context)
+  (show-current-channel-usage context users)
   (if (every? (comp pos? count) [connectors users])
-    (let [_ (log-initial-workspace (count users) (count connectors))
-          ucs (compose-uc-pairs users connectors)
-          _ (log-final-workspace (count ucs))
-          ucts (add-increasing-space ucs (int (/ time-to-spread (count ucs))))
-          _ (log-spread (count ucts) time-to-spread)]
+    (let [ucs   (for [u users c connectors] [u c])
+          ucts  (add-increasing-space ucs (int (/ time-to-spread (count ucs))))
+          _     (log-spread (count ucts) time-to-spread)]
       (doseq [[u c t] ucts]
         (cond
-          (full?) (warn-channel-full context u c)
+          (full?)     (warn-channel-full context u c)
           (busy? u c) (inform-avoiding context u c)
-          :else (insert-collection-request-cond-spaced chan u c t context)))
+          :else       (insert-collection-request-cond-spaced chan u c t context)))
       (inform-nothing-to-do context))))
 
 ; Start collector writers
