@@ -39,7 +39,7 @@ public class Collector {
 
 	private static Logger logger = Logger.getLogger(Collector.class.getName());
 
-	public static final int EXCEPTION_OCCURED = -2;
+	public static final int EXCEPTION_OCCURRED = -2;
 	public static final int NO_CREDENTIALS = -1;
 
 	public static int collect(User user, Connector connector, int timeout) {
@@ -47,7 +47,7 @@ public class Collector {
 	}
 
 	public static int collect(User user, Connector connector, int timeout, int workerId) {
-		int res = EXCEPTION_OCCURED;
+		int res = EXCEPTION_OCCURRED;
 		if (connector.isCredentialsSet(user)) {
 			String uuid = UUID.randomUUID().toString();
 			String logBase = "Worker " + workerId

@@ -141,7 +141,7 @@
         (cond
           (nil? v)                            (log-timeout user connector elapsed)
           (= v Collector/NO_CREDENTIALS)      (log-no-credentials user connector elapsed)
-          (= v Collector/EXCEPTION_OCCURED)   (log-failure user connector elapsed)
+          (= v Collector/EXCEPTION_OCCURRED)  (log-failure user connector elapsed)
           :else (do
                   (log-collected user connector elapsed v)
                   (when (updator/metering-enabled?) (update-metric! user connector))))))
