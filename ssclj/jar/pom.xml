@@ -116,10 +116,6 @@
       <artifactId>metrics-clojure-graphite</artifactId>
     </dependency>
     <dependency>
-      <groupId>fs</groupId>
-      <artifactId>fs</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
