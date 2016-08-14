@@ -13,9 +13,9 @@
                  [superstring                               "2.1.0"]
 
                  ;; buddy
-                 [buddy/buddy-core                          "0.9.0"]
-                 [buddy/buddy-hashers                       "0.9.0"]
-                 [buddy/buddy-sign                          "0.9.0"]
+                 [buddy/buddy-core                          "0.13.0"]
+                 [buddy/buddy-hashers                       "0.14.0"]
+                 [buddy/buddy-sign                          "1.1.0"]
 
                  ;; HTTP
                  [clj-http                                  "2.0.0"]

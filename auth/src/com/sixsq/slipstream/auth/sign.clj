@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.auth.sign
   (:require [superstring.core :as s]
-            [buddy.sign.jws :as jws]
+            [buddy.sign.jwt :as jwt]
             [buddy.core.keys :as ks]
             [clojure.java.io :as io]
             [com.sixsq.slipstream.auth.utils.config :as cf]
@@ -46,10 +46,10 @@
 
 (defn sign-claims
   [claims]
-  (jws/sign claims (private-key "auth_privkey.pem") signing-algorithm))
+  (jwt/sign claims (private-key "auth_privkey.pem") signing-algorithm))
 
 (defn unsign-claims
   ([token]
    (unsign-claims token "auth_pubkey.pem"))
   ([token pubkey-pem]
-   (jws/unsign token (public-key pubkey-pem) signing-algorithm)))
+   (jwt/unsign token (public-key pubkey-pem) signing-algorithm)))
