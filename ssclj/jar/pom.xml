@@ -79,6 +79,11 @@
       <groupId>ring</groupId>
       <artifactId>ring-core</artifactId>
     </dependency>
+    <!-- newer, explicit version needed by ring-json -->
+    <dependency>
+      <groupId>cheshire</groupId>
+      <artifactId>cheshire</artifactId>
+    </dependency>
     <dependency>
       <groupId>ring</groupId>
       <artifactId>ring-json</artifactId>
