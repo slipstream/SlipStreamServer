@@ -35,4 +35,10 @@
   (-> (parse-port port)
       (or default-port)
       (server/start)
-      (register-shutdown-hook)))
+      (register-shutdown-hook))
+
+  ;; The server (started as a daemon thread) will exit immediately
+  ;; if the main thread is allowed to terminate.  To avoid this,
+  ;; indefinitely block this thread.  Stopping the service can only
+  ;; be done externally through a SIGTERM signal.
+  @(promise))
