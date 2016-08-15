@@ -38,3 +38,5 @@ pom.xml.asc
 *.lein-*
 *.nrepl-port
 .nrepl-history
+
+project.clj
