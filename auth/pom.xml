@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.sixsq.slipstream</groupId>
-  <artifactId>auth</artifactId>
-  <packaging>jar</packaging>
+
+  <artifactId>auth-dep</artifactId>
+  <packaging>pom</packaging>
   <version>3.11-SNAPSHOT</version>
-  <name>auth</name>
+  <name>auth-dep</name>
   <description>Authentication Service</description>
   <url>http://sixsq.com</url>
 
@@ -21,170 +21,99 @@
     </license>
   </licenses>
 
+  <dependencies>
+    <dependency>
+      <groupId>sixsq</groupId>
+      <artifactId>default-deps</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+  
+  <profiles>
+    <profile>
+      <id>run-tests</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>boot-test</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>boot</executable>
+                  <arguments>
+                    <argument>mvn-test</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>resources</directory>
-      </resource>
-    </resources>
-    <testResources>
-      <testResource>
-        <directory>resources</directory>
-      </testResource>
-      <testResource>
-        <directory>test/resources</directory>
-      </testResource>
-    </testResources>
-    <directory>target</directory>
-    <outputDirectory>target/classes</outputDirectory>
     <plugins>
 
       <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
+        <artifactId>maven-install-plugin</artifactId>
         <configuration>
-          <filesets>
-            <fileset>
-              <directory>.</directory>
-              <includes>
-                <include>**/*.lein-env</include>
-              </includes>
-            </fileset>
-          </filesets>
+          <skip>true</skip>
         </configuration>
       </plugin>
-
+      
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
+        <artifactId>maven-deploy-plugin</artifactId>
         <configuration>
-          <excludes>
-            <exclude>**/log4j.properties</exclude>
-          </excludes>
+          <skip>true</skip>
         </configuration>
       </plugin>
-
+      
       <plugin>
-        <groupId>com.theoryinpractise</groupId>
-        <artifactId>clojure-maven-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>compile</id>
-            <phase>compile</phase>
+            <id>boot-build</id>
+            <phase>install</phase>
             <goals>
-              <goal>compile</goal>
+              <goal>exec</goal>
             </goals>
+            <configuration>
+              <executable>boot</executable>
+              <arguments>
+                <argument>mvn-build</argument>
+              </arguments>
+            </configuration>
           </execution>
           <execution>
-            <id>test</id>
-            <phase>test</phase>
+            <id>boot-deploy</id>
+            <phase>deploy</phase>
             <goals>
-              <goal>test</goal>
+              <goal>exec</goal>
             </goals>
+            <configuration>
+              <executable>boot</executable>
+              <arguments>
+                <argument>mvn-deploy</argument>
+              </arguments>
+            </configuration>
           </execution>
         </executions>
-
-        <configuration>
-          <clojureOptions>-Dconfig-path=config-hsqldb-mem.edn -Dpassphrase=sl1pstre8m</clojureOptions>
-          <sourceDirectories>
-            <sourceDirectory>src</sourceDirectory>
-          </sourceDirectories>
-          <testSourceDirectories>
-            <testSourceDirectory>test</testSourceDirectory>
-          </testSourceDirectories>
-        </configuration>
       </plugin>
+
     </plugins>
   </build>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>superstring</groupId>
-      <artifactId>superstring</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>data.json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>buddy</groupId>
-      <artifactId>buddy-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>buddy</groupId>
-      <artifactId>buddy-hashers</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>buddy</groupId>
-      <artifactId>buddy-sign</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>clj-http</groupId>
-      <artifactId>clj-http</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>tools.logging</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.mail</groupId>
-          <artifactId>mail</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.jms</groupId>
-          <artifactId>jms</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jdmk</groupId>
-          <artifactId>jmxtools</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jmx</groupId>
-          <artifactId>jmxri</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>environ</groupId>
-      <artifactId>environ</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>java.jdbc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>korma</groupId>
-      <artifactId>korma</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>reply</groupId>
-      <artifactId>reply</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>peridot</groupId>
-      <artifactId>peridot</artifactId>
-      <version>0.3.0</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
 </project>
-
-<!-- This file was autogenerated by Leiningen.
-  Please do not edit it directly; instead edit project.clj and regenerate it.
-  It should not be considered canonical data. For more information see
-  https://github.com/technomancy/leiningen -->
