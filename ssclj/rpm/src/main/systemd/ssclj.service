@@ -19,5 +19,8 @@ ExecStart=/usr/bin/java \
             com.sixsq.slipstream.ssclj.app.main $SSCLJ_PORT
 ExecStop=/bin/kill -TERM $MAINPID
 
+# When a JVM receives a SIGTERM signal it exits with code 143
+SuccessExitStatus=143
+
 [Install]
 WantedBy=multi-user.target
