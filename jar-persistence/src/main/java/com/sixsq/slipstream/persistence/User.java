@@ -41,6 +41,8 @@ import java.util.Random;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * Unit test:
  *
@@ -75,55 +77,70 @@ public class User extends Parameterized<User, UserParameter> {
 
 	@Attribute(required = false)
 	@Column(length = 1000)
+	@Expose
 	private String authnToken;
 
 	@Attribute(required = false)
+	@Expose
 	private String githubLogin;
 
 	@Attribute(required = false)
+	@Expose
 	private String cycloneLogin;
 
 	@Attribute
 	@Id
+	@Expose
 	private String resourceUri;
 
 	@Attribute
+	@Expose
 	private String name;
 
 	@Attribute(required = false)
+	@Expose
 	private String email;
 
 	@Attribute(required = false)
+	@Expose
 	private String firstName;
 
 	@Attribute(required = false)
+	@Expose
 	private String lastName;
 
 	@Attribute(required = false)
+	@Expose
 	private String organization;
 
 	@Attribute(required = false)
+	@Expose
 	private String roles;
 
 	private String password;
 
 	@Attribute(required = false, name = "issuper")
+	@Expose
 	private boolean isSuperUser = false;
 
 	@Attribute
 	@Enumerated(EnumType.STRING)
+	@Expose
 	private State state;
 
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
+	@Expose
 	private Date lastOnline = null;
 
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
+	@Expose
 	private Date lastExecute = null;
 
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
+	@Expose
 	private Date activeSince = null;
 
 	@SuppressWarnings("unused")

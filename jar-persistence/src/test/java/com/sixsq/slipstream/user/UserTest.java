@@ -36,6 +36,9 @@ import java.util.*;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class UserTest {
 
 	protected static User user;
@@ -309,6 +312,27 @@ public class UserTest {
 
 		user.setLastOnline(new Date(1)); // a long time ago
 		assertThat(user.isOnline(), is(false));
+	}
+
+	@Test
+	public void json() {
+        User user = this.createUser("test");
+		try {
+			user.setParameter(new UserParameter("user.param", "foo", "bar"));
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			fail();
+		}
+		Gson gson = new GsonBuilder()
+				.disableInnerClassSerialization()
+				.excludeFieldsWithoutExposeAnnotation()
+				.setPrettyPrinting()
+				.create();
+		String s = gson.toJson(user);
+		System.out.println(s);
+		User user1 = gson.fromJson(s, User.class);
+		assertEquals(user.getName(), user1.getName());
+		assertEquals(user.getParameter("user.param"), user1.getParameter("user.param"));
 	}
 
 	public static User createUser(String name, String password) {
