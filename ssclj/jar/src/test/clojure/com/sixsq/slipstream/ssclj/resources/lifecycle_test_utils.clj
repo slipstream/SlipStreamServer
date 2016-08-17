@@ -6,14 +6,14 @@
     [clojure.pprint :refer [pprint]]
     [compojure.core :as cc]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]
+    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
-    [com.sixsq.slipstream.ssclj.es.es-util :as esu]))
+    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.es-util :as esu]))
 
 (defn body->json
   [m]

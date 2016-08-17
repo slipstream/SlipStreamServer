@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.db.binding
+(ns com.sixsq.slipstream.db.binding
   (:refer-clojure :exclude [update]))
 
 (defprotocol Binding

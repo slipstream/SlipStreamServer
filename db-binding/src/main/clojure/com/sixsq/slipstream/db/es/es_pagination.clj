@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.es.es-pagination)
+(ns com.sixsq.slipstream.db.es.es-pagination)
 
 (def ^:const max-result-window 200000)
 

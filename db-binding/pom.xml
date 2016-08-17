@@ -2,15 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>SlipStreamCljResources-jar</artifactId>
-  <name>SlipStreamCljResources-jar</name>
-  <description>SlipStream Clojure Resources (JAR)</description>
+  <artifactId>SlipStreamDbBinding-jar</artifactId>
+  <name>SlipStream DB binding (JAR)</name>
+  <description>SlipStream bindingto an underlying DB.</description>
 
   <packaging>jar</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>SlipStreamCljResources</artifactId>
+    <artifactId>SlipStreamServer</artifactId>
     <version>3.11-SNAPSHOT</version>
   </parent>
 
@@ -30,19 +30,6 @@
   </repositories>
 
   <dependencies>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamDbBinding-jar</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>auth-dep</artifactId>
-      <type>pom</type>
-    </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>auth</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
@@ -68,42 +55,13 @@
       <artifactId>schema</artifactId>
     </dependency>
     <dependency>
-      <groupId>instaparse</groupId>
-      <artifactId>instaparse</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>java.classpath</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>aleph</groupId>
-      <artifactId>aleph</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>potemkin</groupId>
-      <artifactId>potemkin</artifactId>
-      <version>0.4.1</version>
-    </dependency>
-    <dependency>
       <groupId>ring</groupId>
       <artifactId>ring-core</artifactId>
     </dependency>
     <!-- newer, explicit version needed by ring-json -->
     <dependency>
-      <groupId>cheshire</groupId>
-      <artifactId>cheshire</artifactId>
-    </dependency>
-    <dependency>
       <groupId>ring</groupId>
       <artifactId>ring-json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>compojure</groupId>
-      <artifactId>compojure</artifactId>
     </dependency>
     <dependency>
       <groupId>clj-time</groupId>
@@ -137,21 +95,6 @@
       <groupId>environ</groupId>
       <artifactId>environ</artifactId>
     </dependency>
-
-    <!-- needed for migration scripts -->
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>java.jdbc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>korma</groupId>
-      <artifactId>korma</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-    </dependency>
-    <!-- end of migration script dependencies -->
 
     <dependency>
       <groupId>org.clojure</groupId>
@@ -203,6 +146,10 @@
     <dependency>
       <groupId>me.raynes</groupId>
       <artifactId>fs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch</artifactId>
     </dependency>
   </dependencies>
 
@@ -287,48 +234,7 @@
             <additionalClasspathElement>${basedir}/src/main/clojure</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/src/test/clojure</additionalClasspathElement>
           </additionalClasspathElements>
-          <systemPropertyVariables>
-            <config-path>config-hsqldb-mem.edn</config-path>
-            <passphrase>sl1pstre8m</passphrase>
-          </systemPropertyVariables>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>2.4.3</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <manifestEntries>
-                    <Main-Class>com.sixsq.slipstream.ssclj.app.main</Main-Class>
-                  </manifestEntries>
-                </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                  <resources>
-                    <resource>classes/log4j.properties</resource>
-                    <resource>.SF</resource>
-                    <resource>.RSA</resource>
-                    <resource>.DSA</resource>
-                    <resource>config-hsqldb-mem.edn</resource>
-                    <resource>config-hsqldb.edn</resource>
-                    <resource>example-event.json</resource>
-                    <resource>classes/auth_privkey.pem</resource>
-                    <resource>classes/auth_pubkey.pem</resource>
-                  </resources>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -345,13 +251,7 @@
             <phase>compile</phase>
             <configuration>
               <namespaces>
-                <namespace>com.sixsq.slipstream.ssclj.app.main</namespace>
-                <namespace>com.sixsq.slipstream.ssclj.api.acl</namespace>
-                <namespace>com.sixsq.slipstream.ssclj.api.korma-helper</namespace>
-                <namespace>com.sixsq.slipstream.ssclj.usage.record-keeper</namespace>
-                <namespace>com.sixsq.slipstream.ssclj.usage.summary</namespace>
-                <namespace>com.sixsq.slipstream.ssclj.usage.summarizer</namespace>
-                <namespace>com.sixsq.slipstream.ssclj.migrate.script</namespace>
+                <namespace>com.sixsq.slipstream.db.es.javawrapper</namespace>
               </namespaces>
               <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
             </configuration>

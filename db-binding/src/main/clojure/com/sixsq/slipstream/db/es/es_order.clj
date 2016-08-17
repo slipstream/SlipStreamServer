@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.es.es-order
+(ns com.sixsq.slipstream.db.es.es-order
   (:import
     (org.elasticsearch.action.search SearchRequestBuilder)
     (org.elasticsearch.search.sort SortOrder)))

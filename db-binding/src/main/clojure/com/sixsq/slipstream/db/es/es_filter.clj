@@ -1,13 +1,11 @@
-(ns com.sixsq.slipstream.ssclj.es.es-filter
+(ns com.sixsq.slipstream.db.es.es-filter
   (:require
     [clojure.walk :as w]
     [superstring.core :as s]
-    [com.sixsq.slipstream.ssclj.filter.parser :as p]
-    [com.sixsq.slipstream.ssclj.usage.utils :as uu]
+    [com.sixsq.slipstream.db.utils.time-utils :as uu]
     )
   (:import
-    [org.elasticsearch.index.query QueryBuilders ConstantScoreQueryBuilder]
-    [java.util Date]))
+    [org.elasticsearch.index.query QueryBuilders]))
 
 (defn term-query [^String term ^Object value]
   (QueryBuilders/termQuery term value))

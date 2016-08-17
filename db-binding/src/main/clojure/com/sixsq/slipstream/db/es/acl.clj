@@ -1,8 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.es.acl
+(ns com.sixsq.slipstream.db.es.acl
   (:require
     [superstring.core :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.es.es-filter :as ef]))
+    [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.db.es.es-filter :as ef]))
 
 (defn- rule-of-type?
   [type rule]

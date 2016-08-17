@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]))
+    [com.sixsq.slipstream.db.impl :as db]))
 
 ;;
 ;; Inserts in db usage records and retrieves them for a given interval.

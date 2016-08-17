@@ -6,8 +6,8 @@
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as tu]
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (def past-1 (u/timestamp 2015 04 12))
