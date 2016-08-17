@@ -96,12 +96,7 @@
            (environ :env {:config-path "config-hsqldb-mem.edn"
                           :passphrase "sl1pstre8m"})
            ;;(aot :all true)
-           (test :exclusions
-                 #{'com.sixsq.slipstream.ssclj.resources.connector
-                   'com.sixsq.slipstream.ssclj.resources.connector-template
-                   'com.sixsq.slipstream.ssclj.resources.connector-schema-test
-                   'com.sixsq.slipstream.ssclj.resources.connector-lifecycle-test}
-                 )
+           (test)
 
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
