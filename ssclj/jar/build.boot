@@ -31,13 +31,12 @@
                    [clj-time] 
                    [environ]
                    [instaparse]
-                   [javax.servlet/javax.servlet-api] ;; CHECK
                    [log4j]
                    [metrics-clojure]
                    [metrics-clojure-ring]
                    [metrics-clojure-jvm]
                    [metrics-clojure-graphite]
-                   [me.raynes/fs] ;; CHECK
+                   [me.raynes/fs]
                    [org.clojure/data.json]
                    [org.clojure/java.classpath]
                    [org.clojure/tools.cli]
@@ -45,13 +44,13 @@
                    [org.clojure/tools.namespace]
                    [org.elasticsearch/elasticsearch] 
                    [org.slf4j/slf4j-log4j12] 
-                   [potemkin "0.4.1"] ;; CHECK 
+                   [potemkin]
                    [prismatic/schema]
                    [ring/ring-core]
                    [ring/ring-json]
                    [superstring]
 
-                   [com.sixsq.slipstream/auth] ;;
+                   [com.sixsq.slipstream/auth]
 
                    ;; needed for migration scripts
                    [korma]
