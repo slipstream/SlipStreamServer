@@ -26,9 +26,9 @@
 
                    [aleph]
                    [cheshire] ;; newer version needed for ring-json
-                   [compojure] 
-                   [clj-stacktrace] 
-                   [clj-time] 
+                   [compojure]
+                   [clj-stacktrace]
+                   [clj-time]
                    [environ]
                    [instaparse]
                    [log4j]
@@ -42,8 +42,8 @@
                    [org.clojure/tools.cli]
                    [org.clojure/tools.logging]
                    [org.clojure/tools.namespace]
-                   [org.elasticsearch/elasticsearch] 
-                   [org.slf4j/slf4j-log4j12] 
+                   [org.elasticsearch/elasticsearch]
+                   [org.slf4j/slf4j-log4j12]
                    [potemkin]
                    [prismatic/schema]
                    [ring/ring-core]
@@ -51,6 +51,7 @@
                    [superstring]
 
                    [com.sixsq.slipstream/auth]
+                   [com.sixsq.slipstream/SlipStreamDbBinding-jar]
 
                    ;; needed for migration scripts
                    [korma]
