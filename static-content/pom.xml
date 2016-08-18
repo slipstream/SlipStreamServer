@@ -15,8 +15,8 @@
   <dependencies>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamUI</artifactId>
-      <type>jar</type>
+      <artifactId>SlipStreamUI-dep</artifactId>
+      <type>pom</type>
     </dependency>
   </dependencies>
 
@@ -31,10 +31,17 @@
           <execution>
             <id>copy-common</id>
             <goals>
-              <goal>unpack-dependencies</goal>
+              <goal>unpack</goal>
             </goals>
             <configuration>
               <outputDirectory>target/results</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.sixsq.slipstream</groupId>
+                  <artifactId>SlipStreamUI</artifactId>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
             </configuration>
           </execution>
         </executions>

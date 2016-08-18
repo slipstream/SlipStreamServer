@@ -27,6 +27,12 @@
       <artifactId>default-deps</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
   </dependencies>
   
   <profiles>

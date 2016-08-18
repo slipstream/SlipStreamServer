@@ -67,9 +67,9 @@
          []
          (comp
            (test)
-           (sift :include #{#".*_test\.clj"}
+           #_(sift :include #{#".*_test\.clj"}
                  :invert true)
-           (aot :all true)))
+           #_(aot :all true)))
 
 (deftask build []
          (comp
@@ -77,9 +77,9 @@
            (sift :include #{#".*_test\.clj"}
                  :invert true)
            (aot :all true)
-           (uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
-                             #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
-                             #".*log4j\.properties" })
+            #_(uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
+                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
+                               #".*log4j\.properties" })
            (jar)))
 
 (deftask mvn-test
