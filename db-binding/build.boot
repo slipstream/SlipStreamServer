@@ -52,7 +52,7 @@
                                 with-bikeshed]])
 
 (set-env!
-  :source-paths #{"test" "test-resources"}
+  :source-paths #{"test"}
   :resource-paths #{"src" "resources"})
 
 (task-options!
