@@ -119,10 +119,11 @@
                             #"log4j.properties"}
                  :invert true)
            (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main})
-           (uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
+           #_(uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
                              #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                              #".*log4j\.properties" })
-           (jar :main 'com.sixsq.slipstream.ssclj.app.main)))
+           (jar ;; :main 'com.sixsq.slipstream.ssclj.app.main
+            )))
 
 (deftask mvn-test
          "run all tests of project"
