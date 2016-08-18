@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>SlipStreamDbBinding-jar</artifactId>
-  <name>SlipStream DB binding (JAR)</name>
-  <description>SlipStream bindingto an underlying DB.</description>
-
-  <packaging>jar</packaging>
+  <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
+  <packaging>pom</packaging>
+  <version>3.11-SNAPSHOT</version>
+  <name>SlipStreamDbBinding-jar-dep</name>
+  <description>SlipStream bindings to database (DEP)</description>
+  <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
@@ -14,149 +14,24 @@
     <version>3.11-SNAPSHOT</version>
   </parent>
 
-  <repositories>
-
-    <repository>
-      <id>maven-restlet</id>
-      <name>Public online Restlet repository</name>
-      <url>http://maven.restlet.org</url>
-    </repository>
-
-    <repository>
-      <id>clojars</id>
-      <url>http://clojars.org/repo/</url>
-    </repository>
-
-  </repositories>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
 
   <dependencies>
     <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>tools.logging</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>tools.namespace</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>data.json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>superstring</groupId>
-      <artifactId>superstring</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>prismatic</groupId>
-      <artifactId>schema</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>ring</groupId>
-      <artifactId>ring-core</artifactId>
-    </dependency>
-    <!-- newer, explicit version needed by ring-json -->
-    <dependency>
-      <groupId>ring</groupId>
-      <artifactId>ring-json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>clj-time</groupId>
-      <artifactId>clj-time</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>clj-stacktrace</groupId>
-      <artifactId>clj-stacktrace</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>metrics-clojure</groupId>
-      <artifactId>metrics-clojure</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>metrics-clojure-ring</groupId>
-      <artifactId>metrics-clojure-ring</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>metrics-clojure-jvm</groupId>
-      <artifactId>metrics-clojure-jvm</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>metrics-clojure-graphite</groupId>
-      <artifactId>metrics-clojure-graphite</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>environ</groupId>
-      <artifactId>environ</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>tools.nrepl</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.clojure</groupId>
-          <artifactId>clojure</artifactId>
-        </exclusion>
-      </exclusions>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>clojure-complete</groupId>
-      <artifactId>clojure-complete</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.clojure</groupId>
-          <artifactId>clojure</artifactId>
-        </exclusion>
-      </exclusions>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>jline</groupId>
-      <artifactId>jline</artifactId>
-      <version>2.12.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>reply</groupId>
-      <artifactId>reply</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>peridot</groupId>
-      <artifactId>peridot</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>expectations</groupId>
-      <artifactId>expectations</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>honeysql</groupId>
-      <artifactId>honeysql</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>me.raynes</groupId>
-      <artifactId>fs</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
+      <groupId>sixsq</groupId>
+      <artifactId>default-deps</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
   <profiles>
-
     <profile>
-      <id>full-compile</id>
+      <id>run-tests</id>
       <activation>
         <property>
           <name>!skipTests</name>
@@ -165,100 +40,63 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>com.theoryinpractise</groupId>
-            <artifactId>clojure-maven-plugin</artifactId>
-
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>syntax-check-source</id>
-                <goals>
-                  <goal>compile</goal>
-                </goals>
-                <phase>compile</phase>
-                <configuration>
-                  <warnOnReflection>true</warnOnReflection>
-                  <temporaryOutputDirectory>true</temporaryOutputDirectory>
-                  <runWithTests>true</runWithTests>
-                  <sourceDirectories>
-                    <sourceDirectory>src/main/clojure</sourceDirectory>
-                  </sourceDirectories>
-                  <testSourceDirectories>
-                    <sourceDirectory>src/test/clojure</sourceDirectory>
-                  </testSourceDirectories>
-                </configuration>
-              </execution>
-
-              <execution>
-                <configuration>
-                  <clojureOptions>-Dconfig-path=config-hsqldb-mem.edn -Dpassphrase=sl1pstre8m</clojureOptions>
-                </configuration>
-                <id>clojure-tests</id>
-                <goals>
-                  <goal>test</goal>
-                </goals>
+                <id>boot-test</id>
                 <phase>test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>boot</executable>
+                  <arguments>
+                    <argument>mvn-test</argument>
+                  </arguments>
+                </configuration>
               </execution>
-
             </executions>
-
-          </plugin>
-
-          <plugin>
-            <artifactId>maven-clean-plugin</artifactId>
-            <configuration>
-              <filesets>
-                <fileset>
-                  <directory>.</directory>
-                  <includes>
-                    <include>**/*.lein-env</include>
-                  </includes>
-                </fileset>
-              </filesets>
-            </configuration>
           </plugin>
         </plugins>
       </build>
     </profile>
-
   </profiles>
 
   <build>
-
     <plugins>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <additionalClasspathElements>
-            <additionalClasspathElement>${basedir}/src/main/clojure</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/src/test/clojure</additionalClasspathElement>
-          </additionalClasspathElements>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>com.theoryinpractise</groupId>
-        <artifactId>clojure-maven-plugin</artifactId>
-
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
         <executions>
-
           <execution>
-            <id>minimal-compile</id>
+            <id>boot-build</id>
+            <phase>install</phase>
             <goals>
-              <goal>compile</goal>
+              <goal>exec</goal>
             </goals>
-            <phase>compile</phase>
             <configuration>
-              <namespaces>
-                <namespace>com.sixsq.slipstream.db.es.javawrapper</namespace>
-              </namespaces>
-              <compileDeclaredNamespaceOnly>true</compileDeclaredNamespaceOnly>
+              <executable>boot</executable>
+              <arguments>
+                <argument>mvn-build</argument>
+              </arguments>
             </configuration>
           </execution>
-
+          <execution>
+            <id>boot-deploy</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>boot</executable>
+              <arguments>
+                <argument>mvn-deploy</argument>
+              </arguments>
+            </configuration>
+          </execution>
         </executions>
-
       </plugin>
 
     </plugins>

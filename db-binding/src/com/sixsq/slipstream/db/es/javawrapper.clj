@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.db.es.es-util :as esu]
     [com.sixsq.slipstream.db.impl :as db])
   (:gen-class
-    :name com.sixsq.slipstream.ssclj.es.JavaWrapper
+    :name com.sixsq.slipstream.db.es.JavaWrapper
     :methods [#^{:static true} [createInmemEsDb [] void]]))
 
 (defn -createInmemEsDb
