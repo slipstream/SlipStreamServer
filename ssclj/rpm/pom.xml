@@ -139,6 +139,20 @@
               </artifactItems>
             </configuration>
           </execution>
+
+          <execution>
+            <id>copy-dependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/dependency/lib/ext</outputDirectory>
+              <stripVersion>true</stripVersion>
+              <stripClassifier>true</stripClassifier>
+              <excludeTypes>pom</excludeTypes>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -211,6 +225,19 @@
               <sources>
                 <source>
                   <location>target/dependency/fatjar</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/lib/ext</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/lib/ext</location>
+                  <excludes>
+                    <exclude>SlipStreamCljResources-jar.jar</exclude>
+                  </excludes>
                 </source>
               </sources>
             </mapping>
