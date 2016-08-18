@@ -111,12 +111,14 @@
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
+                            #".*seeds.*"
                             #".*Test\.java"
                             #".*simu_result.txt"
                             #"config-hsqldb-mem.edn"
                             #"config-hsqldb.edn"
                             #"log4j.properties"}
                  :invert true)
+           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main})
            (uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
                              #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                              #".*log4j\.properties" })
