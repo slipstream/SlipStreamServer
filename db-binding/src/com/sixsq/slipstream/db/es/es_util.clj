@@ -107,9 +107,9 @@
 
 (defn bulk-create
   [^Client client index type uuid-jsons]
-  (let [bulk-request-builder  (.. client
-                                  (prepareBulk)
-                                  (setRefresh true))]
+  (let [bulk-request-builder (.. client
+                                 (prepareBulk)
+                                 (setRefresh true))]
     (.. (reduce (partial add-index client index type) bulk-request-builder uuid-jsons)
         (get))))
 
@@ -138,7 +138,7 @@
    (create-test-node (cu/random-uuid)))
 
   ([^String cluster-name]
-   (let [home     (str (fs/temp-dir "es-data-"))
+   (let [home (str (fs/temp-dir "es-data-"))
          settings (.. (Settings/settingsBuilder)
                       (put "http.enabled" false)
                       (put "node.data" true)
@@ -157,15 +157,15 @@
 (defn index-exists?
   [^Client client index-name]
   (let [exists? (.. client
-                  (admin)
-                  (indices)
-                  (exists (IndicesExistsRequest. (into-array String [index-name])))
-                  (get)
-                  (isExists))]
-      (log/info (str "Index "
-                     index-name
-                     (if exists? " already existing." " does not exist.")))
-      exists?))
+                    (admin)
+                    (indices)
+                    (exists (IndicesExistsRequest. (into-array String [index-name])))
+                    (get)
+                    (isExists))]
+    (log/info (str "Index "
+                   index-name
+                   (if exists? " already existing." " does not exist.")))
+    exists?))
 
 (defn create-index
   [^Client client index-name]
@@ -187,7 +187,7 @@
 (defn- throw-if-cluster-not-healthy
   [status]
   (when-not (ok-health-statuses status)
-      (throw (ex-info "status is not accepted" {:status (str status)}))))
+    (throw (ex-info "status is not accepted" {:status (str status)}))))
 
 (defn cluster-health
   [^Client client indexes]

@@ -1,17 +1,17 @@
 (ns com.sixsq.slipstream.db.utils.common
-    "General utilities for dealing with resources."
-    (:require
-      [clojure.tools.logging :as log]
-      [clojure.edn :as edn]
-      [superstring.core :as s]
-      [clj-time.core :as time]
-      [clj-time.format :as time-fmt]
-      [schema.core :as schema]
-      [ring.util.response :as r]
-      [clojure.data.json :as json])
-    (:import
-      [java.util UUID]
-      [javax.xml.bind DatatypeConverter]))
+  "General utilities for dealing with resources."
+  (:require
+    [clojure.tools.logging :as log]
+    [clojure.edn :as edn]
+    [superstring.core :as s]
+    [clj-time.core :as time]
+    [clj-time.format :as time-fmt]
+    [schema.core :as schema]
+    [ring.util.response :as r]
+    [clojure.data.json :as json])
+  (:import
+    [java.util UUID]
+    [javax.xml.bind DatatypeConverter]))
 
 ;;
 ;; utilities for generating ring responses for standard
@@ -126,7 +126,7 @@
   (let [checker (schema/checker schema)]
     (fn [resource]
       (if-let [msg (checker resource)]
-        (let [msg      (str "resource does not satisfy defined schema: " msg)
+        (let [msg (str "resource does not satisfy defined schema: " msg)
               response (-> {:status 400 :message msg}
                            json-response
                            (r/status 400))]
@@ -162,7 +162,7 @@
 (defn- clojurify
   [exp]
   (cond
-    (instance? java.util.Map exp)  (into {} (map (fn[[k v]] [(keyword k) v]) exp))
+    (instance? java.util.Map exp) (into {} (map (fn [[k v]] [(keyword k) v]) exp))
     (instance? java.util.List exp) (vec exp)
     :else exp))
 

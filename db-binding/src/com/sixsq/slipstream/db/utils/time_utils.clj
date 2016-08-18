@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.db.utils.time-utils
-    (:require
+  (:require
     [clojure.tools.logging :as log]
     [clojure.data.json :as json]
     [clj-time.core :as time]
@@ -13,7 +13,7 @@
 
 (defn period-fn
   [frequency]
-  (frequency {:daily time/days :weekly time/weeks :monthly time/months
+  (frequency {:daily  time/days :weekly time/weeks :monthly time/months
               :hourly time/hours :minutely time/minutes}))
 
 (defn dec-by-frequency
@@ -64,8 +64,8 @@
   separated by given period (see period-fn for possible values)"
   [period & args]
   (map to-ISO-8601
-    (iterate #(inc-by-frequency % period)
-             (apply time/date-time args))))
+       (iterate #(inc-by-frequency % period)
+                (apply time/date-time args))))
 
 (defn to-interval
   [start end]
