@@ -1,8 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.es.es-filter-test
+(ns com.sixsq.slipstream.db.es.es-filter-test
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.es.es-filter :as esf]))
+    [com.sixsq.slipstream.db.es.es-filter :as esf]))
 
 (deftest test-attribute-conversion
   (is (= [:Attribute "att"] (esf/convert [:Attribute "att"])))

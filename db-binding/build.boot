@@ -1,7 +1,7 @@
 (def +version+ "3.11-SNAPSHOT")
 
 (set-env!
-  :project 'com.sixsq.slipstream/SlipStreamCljResources-jar
+  :project 'com.sixsq.slipstream/SlipStreamDbBinding-jar
 
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
@@ -24,44 +24,17 @@
                  ['sixsq/default-deps (get-env :version)]
                  '[[org.clojure/clojure]
 
-                   [aleph]
-                   [cheshire] ;; newer version needed for ring-json
-                   [compojure]
-                   [clj-stacktrace]
-                   [clj-time]
                    [environ]
-                   [instaparse]
-                   [log4j]
-                   [metrics-clojure]
-                   [metrics-clojure-ring]
-                   [metrics-clojure-jvm]
-                   [metrics-clojure-graphite]
+
+                   [clj-time]
                    [me.raynes/fs]
                    [org.clojure/data.json]
-                   [org.clojure/java.classpath]
                    [org.clojure/tools.cli]
                    [org.clojure/tools.logging]
-                   [org.clojure/tools.namespace]
                    [org.elasticsearch/elasticsearch]
-                   [org.slf4j/slf4j-log4j12]
-                   [potemkin]
                    [prismatic/schema]
-                   [ring/ring-core]
                    [ring/ring-json]
                    [superstring]
-
-                   [com.sixsq.slipstream/auth]
-                   [com.sixsq.slipstream/SlipStreamDbBinding-jar]
-
-                   ;; needed for migration scripts
-                   [korma]
-                   [org.hsqldb/hsqldb]
-                   [org.clojure/java.jdbc]
-
-                   ;; test dependencies
-                   [peridot]
-                   [expectations]
-                   [honeysql]
 
                    ;; boot tasks
                    [boot-environ]
@@ -79,7 +52,7 @@
                                 with-bikeshed]])
 
 (set-env!
-  :source-paths #{"test" "test-resources"}
+  :source-paths #{"test"}
   :resource-paths #{"src" "resources"})
 
 (task-options!
@@ -87,42 +60,27 @@
        :version (get-env :version)}
   test {:junit-output-to ""}
   install {:pom (str (get-env :project))}
-  push {:pom (str (get-env :project))}
-  )
+  push {:pom (str (get-env :project))})
 
 (deftask run-tests
          "runs all tests and performs full compilation"
          []
          (comp
-           (environ :env {:config-path "config-hsqldb-mem.edn"
-                          :passphrase "sl1pstre8m"})
-           ;;(aot :all true)
            (test)
-           (sift :include #{#".*_test\.clj"
-                            #".*test_utils\.clj"
-                            #"test_helper\.clj"
-                            #".*seeds.*"}
+           (sift :include #{#".*_test\.clj"}
                  :invert true)
            (aot :all true)))
 
 (deftask build []
          (comp
            (pom)
-           (sift :include #{#".*_test\.clj"
-                            #".*test_utils\.clj"
-                            #"test_helper\.clj"
-                            #".*seeds.*"
-                            #".*Test\.java"
-                            #".*simu_result.txt"
-                            #"config-hsqldb-mem.edn"
-                            #"config-hsqldb.edn"
-                            #"log4j.properties"}
+           (sift :include #{#".*_test\.clj"}
                  :invert true)
-           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main})
+           (aot :all true)
            (uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
                              #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                              #".*log4j\.properties" })
-           (jar :main 'com.sixsq.slipstream.ssclj.app.main)))
+           (jar)))
 
 (deftask mvn-test
          "run all tests of project"

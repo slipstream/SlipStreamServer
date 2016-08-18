@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.es.es-pagination)
+(ns com.sixsq.slipstream.db.es.es-pagination)
 
 (def ^:const max-result-window 200000)
 
@@ -28,9 +28,9 @@
   "Returns [from size] from cimi first and last."
   [cimi-params]
   (let [first (first-value cimi-params)
-        last  (last-value cimi-params)
-        from  (dec first)
-        size  (if last (inc (- last first)) max-return-size)]
+        last (last-value cimi-params)
+        from (dec first)
+        size (if last (inc (- last first)) max-return-size)]
     (throw-if-size-too-big size)
     (if (some neg? [from size])
       [0 0]

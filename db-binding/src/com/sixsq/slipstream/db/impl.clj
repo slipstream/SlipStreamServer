@@ -1,6 +1,6 @@
-(ns com.sixsq.slipstream.ssclj.db.impl
+(ns com.sixsq.slipstream.db.impl
   (:require
-    [com.sixsq.slipstream.ssclj.db.binding :as p]))
+    [com.sixsq.slipstream.db.binding :as p]))
 
 (def ^:dynamic *impl*)
 
