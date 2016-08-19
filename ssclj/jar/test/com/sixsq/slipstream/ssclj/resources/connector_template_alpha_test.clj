@@ -1,7 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.resources.connector-template
+(ns com.sixsq.slipstream.ssclj.resources.connector-template-alpha-test
   (:require
     [clojure.tools.logging :as log]
     [schema.core :as s]
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as p]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -26,13 +27,6 @@
                               :type      "ROLE"
                               :right     "MODIFY"}]})
 ;;
-;; atom to keep track of the list of ConnectorTemplate resources
-;;
-(def connector-templates (atom {}))
-
-
-
-;;
 ;; schemas
 ;;
 
@@ -49,6 +43,17 @@
     (merge ConnectorTemplateAttrs
            {(s/optional-key :href) c/NonBlankString})
     seq 'not-empty?))
+
+;;
+;; initialization: create cloud entry point if necessary
+;;
+(defn initialize
+  []
+  (try
+    (add)
+    (log/info "Created" resource-name "resource")
+    (catch Exception e
+      (log/warn resource-name "resource not created; may already exist; message: " (str e)))))
 
 ;;
 ;; multimethods for validation and operations
