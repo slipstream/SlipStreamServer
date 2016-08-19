@@ -29,12 +29,13 @@
                    [clj-time]
                    [me.raynes/fs]
                    [org.clojure/data.json]
-                   [org.clojure/tools.cli]
                    [org.clojure/tools.logging]
                    [org.elasticsearch/elasticsearch]
                    [prismatic/schema]
                    [ring/ring-json]
                    [superstring]
+
+                   [com.sixsq.slipstream/SlipStreamPersistence]
 
                    ;; boot tasks
                    [boot-environ]

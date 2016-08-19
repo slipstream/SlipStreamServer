@@ -23,6 +23,11 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbBinding-jar</artifactId>
+		</dependency>
+
 		<!-- Needs to be before junit -->
 		<dependency>
 			<groupId>org.hamcrest</groupId>

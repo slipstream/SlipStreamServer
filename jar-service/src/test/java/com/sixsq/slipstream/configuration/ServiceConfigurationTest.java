@@ -26,13 +26,22 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.junit.BeforeClass;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
+import com.sixsq.slipstream.db.es.JavaWrapper;
 
 public class ServiceConfigurationTest {
+
+	@BeforeClass
+	public static void createTestElasticsearchDb(){
+		System.out.println("::::: Starting Elasticsearch....");
+		JavaWrapper.createInmemEsDb();
+		System.out.println("::::: Started Elasticsearch....");
+	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void emptyConfigurationInvalid() {
