@@ -98,6 +98,7 @@
                           :passphrase "sl1pstre8m"})
            ;;(aot :all true)
            (test)
+
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
