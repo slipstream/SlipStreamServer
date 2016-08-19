@@ -1,15 +1,18 @@
 (ns com.sixsq.slipstream.ssclj.app.main
-  (:gen-class)
-  (:require
-    [com.sixsq.slipstream.ssclj.app.server :as server]))
+  (:gen-class))
 
 (def ^:const default-port 8200)
+
+(def ^:const server-ns 'com.sixsq.slipstream.ssclj.app.server)
 
 (defn- hook
   "A JVM shutdown hook is just a Thread that runs a function
    in the 'run' method."
   [stop-fn]
-  (proxy [Thread] [] (run [] (server/stop stop-fn))))
+  (proxy [Thread] [] (run [] (try
+                               (and stop-fn (stop-fn))
+                               (catch Exception e
+                                 (println (str e)))))))
 
 (defn register-shutdown-hook
   "Registers a shutdown hook in the JVM to shutdown the application
@@ -32,10 +35,14 @@
   "Starts the application container using the given port (as a string)
    or the default port."
   [& [port]]
-  (-> (parse-port port)
-      (or default-port)
-      (server/start)
-      (register-shutdown-hook))
+  (require server-ns)
+  (let [start-fn (-> server-ns
+                     find-ns
+                     (ns-resolve 'start-server))]
+    (-> (parse-port port)
+        (or default-port)
+        start-fn
+        register-shutdown-hook))
 
   ;; The server (started as a daemon thread) will exit immediately
   ;; if the main thread is allowed to terminate.  To avoid this,
