@@ -38,7 +38,7 @@
   (require server-ns)
   (let [start-fn (-> server-ns
                      find-ns
-                     (ns-resolve 'start-server))]
+                     (ns-resolve 'start))]
     (-> (parse-port port)
         (or default-port)
         start-fn
