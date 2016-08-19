@@ -1,16 +1,14 @@
 ;;
 ;; Elastic Search implementation of Binding protocol
 ;;
-(ns com.sixsq.slipstream.ssclj.es.es-binding
+(ns com.sixsq.slipstream.db.es.es-binding
   (:require
     [ring.util.response :as r]
     [superstring.core :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.es.es-util :as esu]
-    [com.sixsq.slipstream.ssclj.es.acl :as acl]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.db.binding :refer [Binding]])
+    [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.db.es.es-util :as esu]
+    [com.sixsq.slipstream.db.es.acl :as acl]
+    [com.sixsq.slipstream.db.binding :refer [Binding]])
   (:import (org.elasticsearch.index.engine DocumentAlreadyExistsException)
            (clojure.lang ExceptionInfo)))
 
@@ -118,7 +116,7 @@
   (add [_ type data options]
     (let [[id uuid json] (data->doc data)]
       (try
-        (if (esu/create *client* index-name (u/de-camelcase type) uuid json)
+        (if (esu/create *client* index-name (cu/de-camelcase type) uuid json)
           (response-created id)
           (response-error))
         (catch DocumentAlreadyExistsException e
@@ -137,16 +135,16 @@
     (find-data *client* index-name id options "MODIFY")
     (let [[type docid] (split-id id)]
       (if (esu/update *client* index-name type docid (esu/edn->json data))
-        (u/json-response data)
+        (cu/json-response data)
         (response-conflict id))))
 
   (query [_ collection-id options]
-    (let [response                (esu/search *client* index-name collection-id options)
-          result                  (esu/json->edn (str response))
+    (let [response (esu/search *client* index-name collection-id options)
+          result (esu/json->edn (str response))
           count-before-pagination (-> result :hits :total)
-          hits                    (->> (-> result :hits :hits)
-                                       (map :_source)
-                                       (map acl/normalize-acl))]
+          hits (->> (-> result :hits :hits)
+                    (map :_source)
+                    (map acl/normalize-acl))]
       [count-before-pagination hits])))
 
 (defn get-instance

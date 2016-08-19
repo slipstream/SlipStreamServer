@@ -1,8 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.es.es-pagination-test
+(ns com.sixsq.slipstream.db.es.es-pagination-test
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.es.es-pagination :refer :all]))
+    [com.sixsq.slipstream.db.es.es-pagination :refer :all]))
 
 (defn- first-last->from-size
   [[first last]]

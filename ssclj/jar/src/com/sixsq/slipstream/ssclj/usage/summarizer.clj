@@ -7,8 +7,8 @@
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.usage.summary :as s]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
-    [com.sixsq.slipstream.ssclj.db.impl :as db])
+    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.impl :as db])
   (:gen-class))
 
 (defn- exception-from-errors

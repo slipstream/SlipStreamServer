@@ -11,12 +11,11 @@
     [superstring.core :as s]
     [korma.core :as kc]
     [korma.db :as kdb]
-    [com.sixsq.slipstream.ssclj.es.es-util :as esu]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.es-util :as esu]
+    [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.es.acl :as acl])
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.db.es.acl :as acl])
   (:gen-class))
 
 ;; Nb of documents stored per batch insert

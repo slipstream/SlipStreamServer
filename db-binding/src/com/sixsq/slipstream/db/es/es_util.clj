@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.es.es-util
+(ns com.sixsq.slipstream.db.es.es-util
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.java.io :as io]
@@ -6,14 +6,11 @@
     [clojure.tools.logging :as log]
     [environ.core :as env]
     [me.raynes.fs :as fs]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.es.es-pagination :as pg]
-    [com.sixsq.slipstream.ssclj.es.acl :as acl]
-    [com.sixsq.slipstream.ssclj.es.es-order :as od]
-    [com.sixsq.slipstream.ssclj.es.es-filter :as ef]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [clojure.string :as s])
+    [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.db.es.es-pagination :as pg]
+    [com.sixsq.slipstream.db.es.acl :as acl]
+    [com.sixsq.slipstream.db.es.es-order :as od]
+    [com.sixsq.slipstream.db.es.es-filter :as ef])
   (:import
     [org.elasticsearch.node NodeBuilder Node]
     [org.elasticsearch.common.settings Settings]
@@ -81,7 +78,7 @@
           [from size] (pg/from-size options)
           ^ActionRequestBuilder request (.. client
                                             (prepareSearch (into-array String [index]))
-                                            (setTypes (into-array String [(u/de-camelcase type)]))
+                                            (setTypes (into-array String [(cu/de-camelcase type)]))
                                             (setSearchType SearchType/DEFAULT)
                                             (setQuery query)
                                             (setFrom from)
@@ -110,9 +107,9 @@
 
 (defn bulk-create
   [^Client client index type uuid-jsons]
-  (let [bulk-request-builder  (.. client
-                                  (prepareBulk)
-                                  (setRefresh true))]
+  (let [bulk-request-builder (.. client
+                                 (prepareBulk)
+                                 (setRefresh true))]
     (.. (reduce (partial add-index client index type) bulk-request-builder uuid-jsons)
         (get))))
 
@@ -141,7 +138,7 @@
    (create-test-node (cu/random-uuid)))
 
   ([^String cluster-name]
-   (let [home     (str (fs/temp-dir "es-data-"))
+   (let [home (str (fs/temp-dir "es-data-"))
          settings (.. (Settings/settingsBuilder)
                       (put "http.enabled" false)
                       (put "node.data" true)
@@ -153,22 +150,22 @@
          (node)))))
 
 (def ^:const mapping-not-analyzed
-  (-> "com/sixsq/slipstream/ssclj/es/mapping-not-analyzed.json"
+  (-> "com/sixsq/slipstream/db/es/mapping-not-analyzed.json"
       io/resource
       slurp))
 
 (defn index-exists?
   [^Client client index-name]
   (let [exists? (.. client
-                  (admin)
-                  (indices)
-                  (exists (IndicesExistsRequest. (into-array String [index-name])))
-                  (get)
-                  (isExists))]
-      (log/info (str "Index "
-                     index-name
-                     (if exists? " already existing." " does not exist.")))
-      exists?))
+                    (admin)
+                    (indices)
+                    (exists (IndicesExistsRequest. (into-array String [index-name])))
+                    (get)
+                    (isExists))]
+    (log/info (str "Index "
+                   index-name
+                   (if exists? " already existing." " does not exist.")))
+    exists?))
 
 (defn create-index
   [^Client client index-name]
@@ -190,7 +187,7 @@
 (defn- throw-if-cluster-not-healthy
   [status]
   (when-not (ok-health-statuses status)
-      (throw (ex-info "status is not accepted" {:status (str status)}))))
+    (throw (ex-info "status is not accepted" {:status (str status)}))))
 
 (defn cluster-health
   [^Client client indexes]

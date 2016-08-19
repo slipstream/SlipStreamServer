@@ -22,6 +22,7 @@
     <module>jar-service</module>
     <module>jar-prslib</module>
     <module>ssclj</module>
+    <module>db-binding</module>
     <module>static-content</module>
     <module>war</module>
   </modules>

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>SlipStreamCljResources-jar-dep</artifactId>
+  <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
   <packaging>pom</packaging>
   <version>3.11-SNAPSHOT</version>
-  <name>SlipStreamCljResources-jar-dep</name>
-  <description>SlipStream Clojure Resources (DEP)</description>
+  <name>SlipStreamDbBinding-jar-dep</name>
+  <description>SlipStream bindings to database (DEP)</description>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>SlipStreamCljResources</artifactId>
+    <artifactId>SlipStreamServer</artifactId>
     <version>3.11-SNAPSHOT</version>
   </parent>
 
@@ -27,14 +27,8 @@
       <artifactId>default-deps</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
-    </dependency>
   </dependencies>
-  
+
   <profiles>
     <profile>
       <id>run-tests</id>
