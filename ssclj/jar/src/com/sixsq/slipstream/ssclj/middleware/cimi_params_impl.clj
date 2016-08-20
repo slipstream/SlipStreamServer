@@ -22,7 +22,7 @@
   "Adds the given key and value to the :cimi-params map in the
   ring request, creating the map if necessary."
 
-  [{:keys [cimi-params] :or {:cimi-params {}} :as req} k v]
+  [{:keys [cimi-params] :or {cimi-params {}} :as req} k v]
   (->> v
        (assoc cimi-params k)
        (assoc req :cimi-params)))
@@ -88,7 +88,7 @@
   attributes, although the specification states that only the first value
   (valid or otherwise) should be used."
 
-  [{:keys [params cimi-params] :or {:params {} :cimi-params {}} :as req}]
+  [{:keys [params cimi-params] :or {params {} cimi-params {}} :as req}]
   (->> ["$first" "$last"]
        (map #(get-index params %))
        (zipmap [:first :last])
@@ -113,7 +113,7 @@
   the $filter parameter appears more than once, then the filters are
   combined with a logical AND.  If the resulting filter is invalid,
   then an exception is thrown."
-  [{:keys [params] :or {:params {}} :as req}]
+  [{:keys [params] :or {params {}} :as req}]
   (if-let [filter-param (get params "$filter")]
     (->> filter-param
          (as-vector)
@@ -153,7 +153,7 @@
   Whitespace around separators and around the attribute names are ignored
   and removed from the values."
 
-  [{:keys [params] :or {:params {}} :as req}]
+  [{:keys [params] :or {params {}} :as req}]
   (->> (get params "$expand")
        (as-vector)
        (mapcat comma-split)
@@ -177,7 +177,7 @@
 
   Whitespace surrounding the attribute values is ignored."
 
-  [{:keys [params] :or {:params {}} :as req}]
+  [{:keys [params] :or {params {}} :as req}]
   (let [select (get params "$select")
         v      (when select
                  (->> select
@@ -204,7 +204,7 @@
   values provided in the Accept header.  Consequently, the $format value
   must be checked before generating the output."
 
-  [{:keys [params] :or {:params {}} :as req}]
+  [{:keys [params] :or {params {}} :as req}]
   (->> (get params "$format")
        (as-vector)
        (filter string?)
@@ -236,7 +236,7 @@
   a sequence of attribute name, direction pairs, where the direction is
   either :asc (ascending) or :desc (descending)."
 
-  [{:keys [params] :or {:params {}} :as req}]
+  [{:keys [params] :or {params {}} :as req}]
   (->> (get params "$orderby")
        (as-vector)
        (mapcat comma-split)
