@@ -7,7 +7,7 @@
   :edition "community"
   
   :dependencies '[[org.clojure/clojure "1.8.0"]
-                  [sixsq/build-utils "0.1.3" :scope "test"]])
+                  [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
                                    sixsq-nexus-url
