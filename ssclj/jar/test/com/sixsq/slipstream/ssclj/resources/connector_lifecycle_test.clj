@@ -9,8 +9,6 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.es.es-binding :as esb]
-    [com.sixsq.slipstream.ssclj.es.es-util :as esu]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
@@ -21,7 +19,7 @@
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 (def valid-entry
-  {:serviceName "CloudSoftwareSolution"})
+  {:cloudAPI "CloudSoftwareSolution"})
 
 (def valid-create-entry
   {:connectorTemplate valid-entry})

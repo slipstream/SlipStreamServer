@@ -64,6 +64,12 @@
     (str "invalid method (" (name request-method) ") for " uri)
     405 uri))
 
+(defn ex-bad-action
+  [{:keys [uri request-method] :as request} action]
+  (ex-response
+    (str "undefined action (" (name request-method) ", " action ") for " uri)
+    404 uri))
+
 ;;
 ;; resource ID utilities
 ;;

@@ -9,7 +9,7 @@
 ;; actions
 ;;
 
-(expect (set/union core-actions prefixed-actions) (set (keys action-uri)))
+(expect (set/union core-actions prefixed-actions impl-prefixed-actions) (set (keys action-uri)))
 (expect (set (map name core-actions)) (set (vals (select-keys action-uri core-actions))))
 
 ;;
@@ -171,7 +171,7 @@
 ;; Common CIMI attributes
 ;;
 
-(let [date    "2012-01-01T01:23:45.678Z"
+(let [date "2012-01-01T01:23:45.678Z"
       minimal {:id          "a"
                :resourceURI "http://example.org/data"
                :created     date
@@ -192,6 +192,57 @@
   (expect nil? (s/check CommonAttrs (dissoc maximal :description)))
   (expect nil? (s/check CommonAttrs (dissoc maximal :properties)))
   (expect (s/check CommonAttrs (assoc maximal :bad "BAD"))))
+
+;;
+;; parameter description types
+;;
+(expect nil? (s/check ParameterTypes "string"))
+(expect nil? (s/check ParameterTypes "boolean"))
+(expect nil? (s/check ParameterTypes "int"))
+(expect nil? (s/check ParameterTypes "float"))
+(expect nil? (s/check ParameterTypes "timestamp"))
+(expect nil? (s/check ParameterTypes "enum"))
+(expect nil? (s/check ParameterTypes "map"))
+(expect nil? (s/check ParameterTypes "list"))
+
+(expect (s/check ParameterTypes "unknown"))
+
+;;
+;; parameter descriptions
+;;
+(let [valid-description {:displayName "ID"
+                         :category    "common"
+                         :description "unique resource identifier"
+                         :type        "enum"
+                         :mandatory   true
+                         :readOnly    true
+                         :order       0
+                         :enum        ["a" "b" "c"]}
+      resource-desc {:identifier valid-description
+                     :other      valid-description
+                     :acl        valid-acl}]
+  (expect nil? (s/check ParameterDescription valid-description))
+  (expect nil? (s/check ParameterDescription (dissoc valid-description :category)))
+  (expect nil? (s/check ParameterDescription (dissoc valid-description :description)))
+  (expect nil? (s/check ParameterDescription (dissoc valid-description :mandatory)))
+  (expect nil? (s/check ParameterDescription (dissoc valid-description :readOnly)))
+  (expect nil? (s/check ParameterDescription (dissoc valid-description :order)))
+  (expect nil? (s/check ParameterDescription (dissoc valid-description :enum)))
+
+  (expect (s/check ParameterDescription (assoc valid-description :displayName 1)))
+  (expect (s/check ParameterDescription (assoc valid-description :category 1)))
+  (expect (s/check ParameterDescription (assoc valid-description :description 1)))
+  (expect (s/check ParameterDescription (assoc valid-description :type "unknown")))
+  (expect (s/check ParameterDescription (assoc valid-description :mandatory 1)))
+  (expect (s/check ParameterDescription (assoc valid-description :readOnly 1)))
+  (expect (s/check ParameterDescription (assoc valid-description :readOnly "1")))
+  (expect (s/check ParameterDescription (assoc valid-description :enum "1")))
+  (expect (s/check ParameterDescription (assoc valid-description :enum ["a" 1])))
+
+  (expect nil? (s/check ResourceDescription resource-desc))
+  (expect (s/check ResourceDescription (assoc resource-desc :another 1)))
+
+  (expect nil? (s/check ResourceDescription (assoc CommonParameterDescription :acl valid-acl))))
 
 
 (run-tests [*ns*])

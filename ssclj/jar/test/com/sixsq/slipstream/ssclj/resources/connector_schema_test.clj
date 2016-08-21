@@ -17,12 +17,12 @@
                  :created     timestamp
                  :updated     timestamp
                  :acl         valid-acl
-                 :serviceName "http://cloud.example.org/"}]
+                 :cloudAPI    "http://cloud.example.org/"}]
 
   (expect nil? (s/check Connector root))
   (expect (s/check Connector (dissoc root :created)))
   (expect (s/check Connector (dissoc root :updated)))
-  (expect (s/check Connector (dissoc root :serviceName)))
+  (expect (s/check Connector (dissoc root :cloudAPI)))
   (expect (s/check Connector (dissoc root :acl))))
 
 

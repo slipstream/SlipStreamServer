@@ -12,19 +12,18 @@
                          :right     "VIEW"}]})
 
 (let [timestamp "1964-08-25T10:00:00.0Z"
-      root      {:id          resource-name
-                 :resourceURI p/service-context
-                 :created     timestamp
-                 :updated     timestamp
-                 :acl         valid-acl
-                 :serviceName "http://cloud.example.org/"}]
+      root {:id               resource-name
+            :resourceURI      p/service-context
+            :created          timestamp
+            :updated          timestamp
+            :acl              valid-acl
+            :cloudServiceType "CloudSoftwareSolution"}]
 
-  (expect nil? (s/check Connector root))
-  (expect (s/check Connector (dissoc root :created)))
-  (expect (s/check Connector (dissoc root :updated)))
-  (expect (s/check Connector (dissoc root :serviceName)))
-  (expect (s/check Connector (dissoc root :acl))))
-
+  (expect nil? (s/check ConnectorTemplate root))
+  (expect (s/check ConnectorTemplate (dissoc root :created)))
+  (expect (s/check ConnectorTemplate (dissoc root :updated)))
+  (expect (s/check ConnectorTemplate (dissoc root :acl)))
+  (expect (s/check ConnectorTemplate (dissoc root :cloudServiceType))))
 
 (run-tests [*ns*])
 

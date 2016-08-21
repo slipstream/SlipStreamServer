@@ -16,9 +16,7 @@
 
 (defn resource-name-and-action-dispatch
   [request]
-  (-> request
-      :params
-      (juxt :resource-name :action)))
+  ((juxt :resource-name :action) (:params request)))
 
 ;;
 ;; Primary CRUD multi-methods
@@ -61,7 +59,7 @@
 
 (defmethod do-action :default
   [request]
-  (throw (u/ex-bad-method request)))
+  (throw (u/ex-bad-action request (resource-name-and-action-dispatch request))))
 
 
 (defn resource-name-collection-dispatch
@@ -82,7 +80,7 @@
 
 (defmethod validate :default
   [resource]
-  (throw (ex-info (str "unknown resource type: " (:resourceURI resource)) resource)))
+  (throw (ex-info (str "unknown resource type: " (:resourceURI resource)) (or resource {}))))
 
 ;;
 ;; Provide allowed operations for resources and collections

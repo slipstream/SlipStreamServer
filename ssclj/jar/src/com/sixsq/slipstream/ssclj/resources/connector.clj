@@ -36,7 +36,7 @@
 (def Connector
   (merge c/CommonAttrs
          c/AclAttr
-         {:serviceName c/NonBlankString}))
+         {:cloudServiceType c/NonBlankString}))
 
 (def ConnectorCreate
   (merge c/CreateAttrs
