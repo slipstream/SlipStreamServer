@@ -25,7 +25,7 @@
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
-                     :rules [{:principal "USER"
+                     :rules [{:principal "ADMIN"
                               :type      "ROLE"
                               :right     "MODIFY"}]})
 ;;
@@ -42,19 +42,40 @@
   (merge c/CreateAttrs
          {:connectorTemplate tpl/ConnectorTemplateRef}))
 
+
 ;;
-;; multimethods for validation and operations
+;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-validation-fn Connector))
+(defmulti validate-subtype
+          "Validates the given resource against the specific
+           Connector subtype schema."
+          :cloudServiceType)
+
+(defmethod validate-subtype :default
+  [resource]
+  (throw (ex-info (str "unknown Connector type: " (:cloudServiceType resource)) resource)))
+
 (defmethod crud/validate resource-uri
   [resource]
-  (validate-fn resource))
+  (validate-subtype resource))
 
-(def create-validate-fn (u/create-validation-fn ConnectorCreate))
+(defmulti create-validate-subtype
+          "Validates the create template resource against the specific
+           Connector subtype schema."
+          #(get-in % [:connectorTemplate :cloudServiceType]))
+
+(defmethod create-validate-subtype :default
+  [resource]
+  (throw (ex-info (str "unknown Connector create type: " (:cloudServiceType resource)) resource)))
+
 (defmethod crud/validate create-uri
   [resource]
-  (create-validate-fn resource))
+  (create-validate-subtype resource))
+
+;;
+;; multimethods for operations
+;;
 
 (defmethod crud/add-acl resource-uri
   [resource request]
@@ -64,10 +85,15 @@
 ;; template processing
 ;;
 
-;; FIXME: needs to be multi-function to handle different connectors
-(defn tpl->connector
-  [tpl]
-  (std-crud/resolve-hrefs tpl))
+(defmulti tpl->connector
+          "Transforms the ConnectorTemplate into a Connector resource."
+          :cloudServiceType)
+
+;; default implementation just copies referenced template into connector
+;; can be used if no transformation needs to be done
+(defmethod tpl->connector :default
+  [resource]
+  (std-crud/resolve-hrefs resource))
 
 ;;
 ;; CRUD operations
@@ -75,11 +101,12 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
-;; requires a ConnectorTemplate to create new license
+;; requires a ConnectorTemplate to create new Connector
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [body (-> body
                  (assoc :resourceURI create-uri)
+                 (std-crud/resolve-hrefs)
                  (crud/validate)
                  (:connectorTemplate)
                  (tpl->connector))]

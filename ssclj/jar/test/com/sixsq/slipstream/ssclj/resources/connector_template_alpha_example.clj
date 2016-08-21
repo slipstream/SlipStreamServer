@@ -11,16 +11,17 @@
 ;; schemas
 ;;
 
-(def ConnectorTemplateAttrs
-  {:alphaKey c/PosInt})
+(def ConnectorTemplateAlphaAttrs
+  (merge p/ConnectorTemplateAttrs
+         {:alphaKey c/PosInt}))
 
 (def ConnectorTemplateAlpha
   (merge p/ConnectorTemplate
-         ConnectorTemplateAttrs))
+         ConnectorTemplateAlphaAttrs))
 
 (def ConnectorTemplateAlphaRef
   (s/constrained
-    (merge ConnectorTemplateAttrs
+    (merge ConnectorTemplateAlphaAttrs
            {(s/optional-key :href) c/NonBlankString})
     seq 'not-empty?))
 
