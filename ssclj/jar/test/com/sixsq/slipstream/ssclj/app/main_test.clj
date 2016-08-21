@@ -11,5 +11,3 @@
 (expect nil (parse-port "1.3"))
 (expect 1 (parse-port "1"))
 (expect 65535 (parse-port "65535"))
-
-(run-tests [*ns*])

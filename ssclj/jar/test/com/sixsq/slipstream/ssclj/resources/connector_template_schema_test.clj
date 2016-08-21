@@ -24,6 +24,3 @@
   (expect (s/check ConnectorTemplate (dissoc root :updated)))
   (expect (s/check ConnectorTemplate (dissoc root :acl)))
   (expect (s/check ConnectorTemplate (dissoc root :cloudServiceType))))
-
-(run-tests [*ns*])
-

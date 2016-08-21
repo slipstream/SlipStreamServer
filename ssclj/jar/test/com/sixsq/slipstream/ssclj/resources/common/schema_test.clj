@@ -243,7 +243,3 @@
   (expect (s/check ResourceDescription (assoc resource-desc :another 1)))
 
   (expect nil? (s/check ResourceDescription (assoc CommonParameterDescription :acl valid-acl))))
-
-
-(run-tests [*ns*])
-
