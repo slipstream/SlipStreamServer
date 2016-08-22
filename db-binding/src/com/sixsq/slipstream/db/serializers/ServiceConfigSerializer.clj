@@ -37,25 +37,25 @@
    :connectorOrchPublicSSHKey  "cloud.connector.orchestrator.publicsshkey"
    :connectorLibcloudURL       "cloud.connector.library.libcloud.url"
 
-   :mail-username              "slipstream.mail.username"
-   :mail-password              "slipstream.mail.password"
-   :mail-host                  "slipstream.mail.host"
-   :mail-port                  "slipstream.mail.port"
-   :mail-ssl                   "slipstream.mail.ssl"
-   :mail-debug                 "slipstream.mail.debug"
+   :mailUsername               "slipstream.mail.username"
+   :mailPassword               "slipstream.mail.password"
+   :mailHost                   "slipstream.mail.host"
+   :mailPort                   "slipstream.mail.port"
+   :mailSSL                    "slipstream.mail.ssl"
+   :mailDebug                  "slipstream.mail.debug"
 
-   :quota-enable               "slipstream.quota.enable"
+   :quotaEnable                "slipstream.quota.enable"
 
-   :registration-enable        "slipstream.registration.enable"
-   :registration-email         "slipstream.registration.email"
+   :registrationEnable         "slipstream.registration.enable"
+   :registrationEmail          "slipstream.registration.email"
 
-   :prs-enable                 "slipstream.prs.enable"
-   :prs-endpoint               "slipstream.prs.endpoint"
+   :prsEnable                  "slipstream.prs.enable"
+   :prsEndpoint                "slipstream.prs.endpoint"
 
-   :metering-enable            "slipstream.metering.enable"
-   :metering-endpoint          "slipstream.metering.hostname"
+   :meteringEnable             "slipstream.metering.enable"
+   :meteringEndpoint           "slipstream.metering.hostname"
 
-   :service-catalog-enable     "slipstream.service.catalog.enable"
+   :serviceCatalogEnable       "slipstream.service.catalog.enable"
    })
 
 (def param->rname (set/map-invert rname->param))
@@ -64,17 +64,17 @@
   [s]
   (try
     (read-string s)
-  (catch RuntimeException ex
-    (if-not (s/starts-with? (.getMessage ex) "Invalid token")
-      (throw ex)
-      s))))
+    (catch RuntimeException ex
+      (if-not (s/starts-with? (.getMessage ex) "Invalid token")
+        (throw ex)
+        s))))
 
 (defn param-value
   [p]
   (let [v (.getValue p)]
-      (if (= (type (read-str v)) clojure.lang.Symbol)
-        v
-        (read-str v))))
+    (if (= (type (read-str v)) clojure.lang.Symbol)
+      v
+      (read-str v))))
 
 (defn param-name
   [p]
