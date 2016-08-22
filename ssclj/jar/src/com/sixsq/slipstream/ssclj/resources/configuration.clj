@@ -38,24 +38,25 @@
           :connectorOrchPublicSSHKey  c/NonBlankString      ;; /opt/slipstream/server/.ssh/id_rsa.pub
           :connectorLibcloudURL       c/NonBlankString      ;; https://185.19.28.68/downloads/libcloud.tgz
 
-          :mail-username              c/NonBlankString      ;; mailer@example.com
-          :mail-password              c/NonBlankString      ;; plain-text
-          :mail-host                  c/NonBlankString      ;; smtp.example.com
-          :mail-port                  c/PosInt              ;; 465
-          :mail-ssl                   s/Bool                ;; true
-          :mail-debug                 s/Bool                ;; true
+          :mailUsername               c/NonBlankString      ;; mailer@example.com
+          :mailPassword               c/NonBlankString      ;; plain-text
+          :mailHost                   c/NonBlankString      ;; smtp.example.com
+          :mailPort                   c/PosInt              ;; 465
+          :mailSSL                    s/Bool                ;; true
+          :mailDebug                  s/Bool                ;; true
 
-          :quota-enable               s/Bool                ;; true
+          :quotaEnable                s/Bool                ;; true
 
-          :registration-enable        s/Bool                ;; true
+          :registrationEnable         s/Bool                ;; true
+          :registrationEmail          c/NonBlankString      ;; register@sixsq.com
 
-          :prs-enable                 s/Bool                ;; true
-          :prs-endpoint               c/NonBlankString      ;; http://localhost:8203/filter-rank
+          :prsEnable                  s/Bool                ;; true
+          :prsEndpoint                c/NonBlankString      ;; http://localhost:8203/filter-rank
 
-          :metering-enable            s/Bool                ;; false
-          :metering-endpoint          c/NonBlankString      ;; http://localhost:2005
+          :meteringEnable             s/Bool                ;; false
+          :meteringEndpoint           c/NonBlankString      ;; http://localhost:2005
 
-          :service-catalog-enable     s/Bool                ;; true
+          :serviceCatalogEnable       s/Bool                ;; true
           }))
 
 (def default-configuration {:name                       "SlipStream"
@@ -69,24 +70,25 @@
                             :connectorOrchPublicSSHKey  "/opt/slipstream/server/.ssh/id_rsa.pub"
                             :connectorLibcloudURL       "https://localhost/downloads/libcloud.tgz"
 
-                            :mail-username              "mailer"
-                            :mail-password              "change-me"
-                            :mail-host                  "smtp.example.com"
-                            :mail-port                  465
-                            :mail-ssl                   true
-                            :mail-debug                 true
+                            :mailUsername               "mailer"
+                            :mailPassword               "change-me"
+                            :mailHost                   "smtp.example.com"
+                            :mailPort                   465
+                            :mailSSL                    true
+                            :mailDebug                  true
 
-                            :quota-enable               true
+                            :quotaEnable                true
 
-                            :registration-enable        true
+                            :registrationEnable         true
+                            :registrationEmail          "register@sixsq.com"
 
-                            :prs-enable                 true
-                            :prs-endpoint               "http://localhost:8203/filter-rank"
+                            :prsEnable                  true
+                            :prsEndpoint                "http://localhost:8203/filter-rank"
 
-                            :metering-enable            false
-                            :metering-endpoint          "http://localhost:2005"
+                            :meteringEnable             false
+                            :meteringEndpoint           "http://localhost:2005"
 
-                            :service-catalog-enable     false
+                            :serviceCatalogEnable       false
                             })
 
 ;;
