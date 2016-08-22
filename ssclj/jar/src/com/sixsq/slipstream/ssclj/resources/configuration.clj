@@ -42,7 +42,7 @@
           :mailPassword               c/NonBlankString      ;; plain-text
           :mailHost                   c/NonBlankString      ;; smtp.example.com
           :mailPort                   c/PosInt              ;; 465
-          :mailSsl                    s/Bool                ;; true
+          :mailSSL                    s/Bool                ;; true
           :mailDebug                  s/Bool                ;; true
 
           :quotaEnable                s/Bool                ;; true
@@ -74,7 +74,7 @@
                             :mailPassword               "change-me"
                             :mailHost                   "smtp.example.com"
                             :mailPort                   465
-                            :mailSsl                    true
+                            :mailSSL                    true
                             :mailDebug                  true
 
                             :quotaEnable                true
