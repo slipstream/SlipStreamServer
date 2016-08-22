@@ -12,9 +12,6 @@
     [com.sixsq.slipstream.persistence ServiceConfigurationParameter]
     ))
 
-#_(deftest test-sc-to-resource
-    )
-
 (def sc-from-xml (tu/conf-xml->sc))
 
 (defn- keys-not-in-conf
@@ -22,7 +19,9 @@
   (for [k (keys rname->param) :when (not (contains? conf k))]
     k))
 
-(def valid-acl {:owner {:principal "me" :type "USER"}})
+(defn msg-keys-not-in-cfg
+  [keys]
+  (str "The following keys are not in config " (clojure.string/join ", " keys)))
 
 (def conf-extra
   {:id          (str cr/resource-name "/slipstream")
@@ -31,18 +30,32 @@
    :updated     "1970-01-01T00:00:00.0Z"
    :acl         valid-acl})
 
+(defn sc-get-param-value
+  [sc k]
+  (if-let [p (.getParameter sc k)]
+    (.getValue p)
+    ""))
+
+;; Fixtures
+(use-fixtures :once tu/fixture-start-es-db)
+
+;; Tests
 (deftest test-sc->configuration-resource
-  (is (= {} (sc->configuration-resource (ServiceConfiguration.))))
-  (let [conf (sc->configuration-resource sc-from-xml)
+  (is (= {} (sc->cfg (ServiceConfiguration.))))
+  (let [conf (sc->cfg sc-from-xml)
         not-in-conf (keys-not-in-conf conf)]
-    (is (empty? not-in-conf) (str "The following keys are not in config " (clojure.string/join ", " not-in-conf)))
-    ))
+    (is (empty? not-in-conf) (msg-keys-not-in-cfg not-in-conf))))
 
 (deftest test-check-sc-schema
-  (is (nil? (sch/check cr/Configuration (merge conf-extra (sc->configuration-resource sc-from-xml)))))
-  )
+  (is (nil? (sch/check cr/Configuration (merge conf-extra (sc->cfg sc-from-xml))))))
 
-#_(deftest test-save-load
-    (let [to-es (-store (tu/conf-xml->sc))
-          from-es (-load)]
-      (is (= (.getId to-es) (.getId from-es)))))
+(deftest test-save-load
+    (let [sc-to-es (-store sc-from-xml)
+          sc-from-es (-load)]
+      (is (not (nil? sc-from-es)))
+      (is (= (sc-get-param-value sc-to-es "slipstream.registration.email")
+             (sc-get-param-value sc-from-es "slipstream.registration.email")))
+      (is (= (sc-get-param-value sc-to-es "slipstream.mail.ssl")
+             (sc-get-param-value sc-from-es "slipstream.mail.ssl")))
+      (is (= (sc-get-param-value sc-to-es "slipstream.mail.port")
+             (sc-get-param-value sc-from-es "slipstream.mail.port")))))

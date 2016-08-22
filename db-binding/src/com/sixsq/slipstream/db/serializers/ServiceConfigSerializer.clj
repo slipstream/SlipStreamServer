@@ -1,15 +1,13 @@
 (ns com.sixsq.slipstream.db.serializers.ServiceConfigSerializer
   (:require
-    [clojure.pprint :refer [pprint]]
     [clojure.set :as set]
     [superstring.core :as s]
-    [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
-    [com.sixsq.slipstream.db.es.es-util :as esu]
+    [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [create-identity-map]]
     [com.sixsq.slipstream.db.impl :as db])
   (:import
-    [com.google.gson GsonBuilder]
-    [com.sixsq.slipstream.persistence ServiceConfiguration])
+    [com.sixsq.slipstream.persistence ServiceConfiguration]
+    [com.sixsq.slipstream.persistence ServiceConfigurationParameter])
   (:gen-class
     :methods [#^{:static true} [store [com.sixsq.slipstream.persistence.ServiceConfiguration] com.sixsq.slipstream.persistence.ServiceConfiguration]
               #^{:static true} [load [] com.sixsq.slipstream.persistence.ServiceConfiguration]]))
@@ -19,15 +17,17 @@
            :type      "ROLE"}
    :rules [{:principal "ADMIN"
             :type      "ROLE"
-            :right     "VIEW"}]}
+            :right     "MODIFY"}]}
   )
+
+(def user-roles ["root" ["ADMIN"]])
+
+(def valid-acl {:owner {:principal "me" :type "USER"}})
 
 (def global-categories #{"SlipStream_Advanced" "SlipStream_Support" "SlipStream_Basics"})
 
 (def rname->param
   {
-   ; :name
-   ; :description
    :serviceURL                 "slipstream.base.url"
    :reportsLocation            "slipstream.reports.location"
    :supportEmail               "slipstream.support.email"
@@ -84,32 +84,44 @@
   [p]
   (and (contains? global-categories (.getCategory p)) (param-name p)))
 
-(defn sc->configuration-resource
+(defn sc->cfg
   [sc]
   (into {}
         (for [p (vals (.getParameters sc))]
           (when (param-global-valid? p)
             [(param-name p) (param-value p)]))))
 
+(defn ->request
+  [cfg]
+  {:identity (create-identity-map user-roles)
+   :body     cfg})
+
 (defn -store
   [^ServiceConfiguration sc]
-  (let [id (.getId sc)
-        _ (println "ID .... " id)
-        gson (-> (GsonBuilder.)
-                 (.setPrettyPrinting)
-                 (.enableComplexMapKeySerialization)
-                 (.excludeFieldsWithoutExposeAnnotation)
-                 (.create))
-        doc (.toJson gson sc)
-        data (esb/doc->data doc)]
-    (println doc)
-    (pprint data)
-    (db/add "configuration" (assoc data :id "configuration") acl)
-    (println (esu/dump esb/*client* esb/index-name "configuration"))
-    )
+  (-> sc
+      sc->cfg
+      ->request
+      cr/add-impl)
   sc)
+
+(defn build-sc-param
+  [cfg-pk cfg cfg-desc]
+  (ServiceConfigurationParameter. (rname->param cfg-pk)
+                                  (str (cfg-pk cfg))
+                                  (or (:description (cfg-pk cfg-desc)) "")))
+
+(defn cfg->sc
+  [cfg cfg-desc]
+  (let [sc (ServiceConfiguration.)]
+    (doseq [cfg-pk (keys cfg)]
+      (if (contains? rname->param cfg-pk)
+        (.setParameter sc (build-sc-param cfg-pk cfg cfg-desc))))
+    sc))
 
 (defn -load
   []
-  (pprint (db/retrieve "configuration" {:user-name "konstan" :user-roles ["ADMIN"]}))
-  (ServiceConfiguration.))
+  (let [cfg (db/retrieve "configuration/slipstream" {:user-name "konstan" :user-roles ["ADMIN"]})
+        _ (println "CFG: ")
+        _ (clojure.pprint/pprint cfg)
+        cfg-desc {} #_(:_source (db/retrieve "ConfigurationDescription" {:user-name "konstan" :user-roles ["ADMIN"]}))]
+    (cfg->sc cfg cfg-desc)))

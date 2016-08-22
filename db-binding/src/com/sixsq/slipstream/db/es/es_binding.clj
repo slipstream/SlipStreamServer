@@ -114,16 +114,13 @@
 (deftype ESBinding []
   Binding
   (add [_ type data options]
-    (println "::: ADDING...")
     (let [[id uuid json] (data->doc data)]
-      (println id uuid json)
       (try
         (if (esu/create *client* index-name (cu/de-camelcase type) uuid json)
           (response-created id)
           (response-error))
         (catch DocumentAlreadyExistsException e
           (response-conflict id))))
-    (println "::: ADDED...")
     )
 
   (retrieve [_ id options]
