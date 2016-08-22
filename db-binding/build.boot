@@ -26,6 +26,7 @@
 
                    [environ]
 
+                   [org.clojure/data.xml]
                    [clj-time]
                    [me.raynes/fs]
                    [org.clojure/data.json]
@@ -36,6 +37,7 @@
                    [superstring]
 
                    [com.sixsq.slipstream/SlipStreamPersistence]
+                   [com.sixsq.slipstream/SlipStreamCljResources-jar]
 
                    ;; boot tasks
                    [boot-environ]
@@ -53,7 +55,7 @@
                                 with-bikeshed]])
 
 (set-env!
-  :source-paths #{"test"}
+  :source-paths #{"test" "test-resources"}
   :resource-paths #{"src" "resources"})
 
 (task-options!

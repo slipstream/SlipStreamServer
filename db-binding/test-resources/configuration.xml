@@ -1,0 +1,3114 @@
+<serviceConfiguration deleted="false" creation="2016-08-19 10:47:06.989 UTC">
+   <parameters class="java.util.concurrent.ConcurrentHashMap">
+      <entry>
+         <string>cyclone-fr2.max.iaas.workers</string>
+         <parameter name="cyclone-fr2.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.region</string>
+         <parameter name="ec2-us-west-2.region" description="EC2 region" category="ec2-us-west-2" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>us-east-1</string>
+               <string>us-west-2</string>
+               <string>us-west-1</string>
+               <string>eu-west-1</string>
+               <string>ap-southeast-1</string>
+               <string>ap-southeast-2</string>
+               <string>ap-northeast-1</string>
+               <string>ap-northeast-2</string>
+               <string>sa-east-1</string>
+               <string>eu-central-1</string>
+            </enumValues>
+            <value><![CDATA[us-west-2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.marketplace.endpoint</string>
+         <parameter name="nuvlabox-max-born.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="11" order="11">
+            <instructions><![CDATA[Marketplace endpoint, used to fetch images by id. Optional field]]></instructions>
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.orchestrator.imageid</string>
+         <parameter name="ec2-ap-northeast-1.orchestrator.imageid" description="Image Id of the orchestrator for ec2-ap-northeast-1" category="ec2-ap-northeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ami-a21529cc]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.network.private</string>
+         <parameter name="softlayer-it-mil01.network.private" description="Mapping for Private network" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.quota.vm</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.quota.vm" description="VM quota for nuvlabox-christiane-nusslein-volhard (i.e. maximum number of VMs allowed)" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.service.type</string>
+         <parameter name="open-telekom-de1.service.type" description="Type-name of the service which provides the instances functionality" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="130" order="130">
+            <value><![CDATA[compute]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.max.iaas.workers</string>
+         <parameter name="nuvlabox-carl-cori.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.security.groups</string>
+         <parameter name="cyclone-de1.security.groups" description="Orchestrator security groups (comma separated list)" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="25" order="25">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.version</string>
+         <parameter name="slipstream.version" description="Installed SlipStream version" category="SlipStream_Advanced" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[3.10]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.quota.enable</string>
+         <parameter name="slipstream.quota.enable" description="Quota enforcement enabled" category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[true]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.endpoint</string>
+         <parameter name="nuvlabox-cecil-powell.endpoint" description="Service endpoint for nuvlabox-cecil-powell (e.g. http://example.com:5000)" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://127.0.0.1:11941/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.native-contextualization</string>
+         <parameter name="nuvlabox-cecil-powell.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-cecil-powell" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.native-contextualization</string>
+         <parameter name="nuvlabox-henry-dunant.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-henry-dunant" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.endpoint</string>
+         <parameter name="nuvlabox-albert-einstein.endpoint" description="Service endpoint for nuvlabox-albert-einstein (e.g. http://example.com:5000)" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://127.0.0.1:11361/one-proxy/xmlrpc]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.max.iaas.workers</string>
+         <parameter name="ultimum-cz1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.max.iaas.workers</string>
+         <parameter name="nuvlabox-albert-einstein.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.orchestrator.imageid</string>
+         <parameter name="ec2-us-west-1.orchestrator.imageid" description="Image Id of the orchestrator for ec2-us-west-1" category="ec2-us-west-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ami-06116566]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.native-contextualization</string>
+         <parameter name="cyclone-fr2.native-contextualization" description="Use native cloud contextualisation" category="cyclone-fr2" mandatory="true" type="Enum" readonly="false" order_="10" order="10">
+            <instructions><![CDATA[Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>]]></instructions>
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[linux-only]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.orchestrator.instance.type</string>
+         <parameter name="ec2-ap-northeast-1.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-ap-northeast-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="42">
+               <string>t2.micro</string>
+               <string>t2.small</string>
+               <string>t2.medium</string>
+               <string>m3.medium</string>
+               <string>m3.large</string>
+               <string>m3.xlarge</string>
+               <string>m3.2xlarge</string>
+               <string>c4.large</string>
+               <string>c4.xlarge</string>
+               <string>c4.2xlarge</string>
+               <string>c4.4xlarge</string>
+               <string>c4.8xlarge</string>
+               <string>c3.large</string>
+               <string>c3.xlarge</string>
+               <string>c3.2xlarge</string>
+               <string>c3.4xlarge</string>
+               <string>c3.8xlarge</string>
+               <string>r3.large</string>
+               <string>r3.xlarge</string>
+               <string>r3.2xlarge</string>
+               <string>r3.4xlarge</string>
+               <string>r3.8xlarge</string>
+               <string>i2.xlarge</string>
+               <string>i2.2xlarge</string>
+               <string>i2.4xlarge</string>
+               <string>i2.8xlarge</string>
+               <string>d2.xlarge</string>
+               <string>d2.2xlarge</string>
+               <string>d2.4xlarge</string>
+               <string>d2.8xlarge</string>
+               <string>g2.2xlarge</string>
+               <string>g2.8xlarge</string>
+               <string>t1.micro</string>
+               <string>m1.small</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.medium</string>
+               <string>c1.xlarge</string>
+               <string>m2.xlarge</string>
+               <string>m2.2xlarge</string>
+               <string>m2.4xlarge</string>
+               <string>cc1.4xlarge</string>
+            </enumValues>
+            <value><![CDATA[t2.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.orchestrator.imageid</string>
+         <parameter name="exoscale-ch-gva.orchestrator.imageid" description="Template name to use for the orchestrator on exoscale-ch-gva" category="exoscale-ch-gva" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[Linux Ubuntu 14.04 LTS 64-bit]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.orchestrator.imageid</string>
+         <parameter name="nuvlabox-max-planck.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-max-planck" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.native-contextualization</string>
+         <parameter name="cyfronet-pl1.native-contextualization" description="Use native cloud contextualisation" category="cyfronet-pl1" mandatory="true" type="Enum" readonly="false" order_="10" order="10">
+            <instructions><![CDATA[Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>]]></instructions>
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[linux-only]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.security.groups</string>
+         <parameter name="ec2-us-west-1.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-us-west-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>azure-west-europe.region</string>
+         <parameter name="azure-west-europe.region" description="Azure service region" category="azure-west-europe" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>South Central US</string>
+               <string>West US</string>
+               <string>Central US</string>
+               <string>East US</string>
+               <string>EAST US 2</string>
+               <string>North Europe</string>
+               <string>West Europe</string>
+               <string>Southeast Asia</string>
+               <string>East Asia</string>
+               <string>Japan West</string>
+            </enumValues>
+            <value><![CDATA[West Europe]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.update.clienturl</string>
+         <parameter name="open-telekom-de1.update.clienturl" description="URL pointing to the tarball containing the client for open-telekom-de1" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://185.19.28.68/downloads/openstackclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.network.public</string>
+         <parameter name="nuvlabox-max-planck.network.public" description="Mapping for Public network" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.native-contextualization</string>
+         <parameter name="nuvlabox-carl-cori.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-carl-cori" mandatory="true" type="Enum" readonly="false" order_="920" order="920">
+            <instructions><![CDATA[Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>]]></instructions>
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.pdisk.endpoint</string>
+         <parameter name="nuvlabox-demo.pdisk.endpoint" description="PDisk endpoint" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.orchestrator.ssh.password</string>
+         <parameter name="exoscale-ch-gva.orchestrator.ssh.password" description="Orchestrator password" category="exoscale-ch-gva" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.network.private</string>
+         <parameter name="nuvlabox-max-planck.network.private" description="Mapping for Private network" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.quota.vm</string>
+         <parameter name="cyfronet-pl1.quota.vm" description="VM quota for cyfronet-pl1 (i.e. maximum number of VMs allowed)" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.max.iaas.workers</string>
+         <parameter name="ec2-us-west-2.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ec2-us-west-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.orchestrator.imageid</string>
+         <parameter name="nuvlabox-carl-cori.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-carl-cori" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.marketplace.endpoint</string>
+         <parameter name="nuvlabox-carl-cori.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="11" order="11">
+            <instructions><![CDATA[Marketplace endpoint, used to fetch images by id. Optional field]]></instructions>
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-bertil-ohlin.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="17" order="17">
+            <instructions><![CDATA[Ram size in GB]]></instructions>
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.orchestrator.instance.type</string>
+         <parameter name="ec2-us-east-1.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-us-east-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="42">
+               <string>t2.micro</string>
+               <string>t2.small</string>
+               <string>t2.medium</string>
+               <string>m3.medium</string>
+               <string>m3.large</string>
+               <string>m3.xlarge</string>
+               <string>m3.2xlarge</string>
+               <string>c4.large</string>
+               <string>c4.xlarge</string>
+               <string>c4.2xlarge</string>
+               <string>c4.4xlarge</string>
+               <string>c4.8xlarge</string>
+               <string>c3.large</string>
+               <string>c3.xlarge</string>
+               <string>c3.2xlarge</string>
+               <string>c3.4xlarge</string>
+               <string>c3.8xlarge</string>
+               <string>r3.large</string>
+               <string>r3.xlarge</string>
+               <string>r3.2xlarge</string>
+               <string>r3.4xlarge</string>
+               <string>r3.8xlarge</string>
+               <string>i2.xlarge</string>
+               <string>i2.2xlarge</string>
+               <string>i2.4xlarge</string>
+               <string>i2.8xlarge</string>
+               <string>d2.xlarge</string>
+               <string>d2.2xlarge</string>
+               <string>d2.4xlarge</string>
+               <string>d2.8xlarge</string>
+               <string>g2.2xlarge</string>
+               <string>g2.8xlarge</string>
+               <string>t1.micro</string>
+               <string>m1.small</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.medium</string>
+               <string>c1.xlarge</string>
+               <string>m2.xlarge</string>
+               <string>m2.2xlarge</string>
+               <string>m2.4xlarge</string>
+               <string>cc1.4xlarge</string>
+            </enumValues>
+            <value><![CDATA[t2.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.quota.vm</string>
+         <parameter name="ec2-ap-southeast-2.quota.vm" description="VM quota for ec2-ap-southeast-2 (i.e. maximum number of VMs allowed)" category="ec2-ap-southeast-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.native-contextualization</string>
+         <parameter name="nuvlabox-stanley-cohen.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-stanley-cohen" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.mail.host</string>
+         <parameter name="slipstream.mail.host" description="Host for SMTP server for email notifications." category="SlipStream_Support" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[smtp.gmail.com]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.security.groups</string>
+         <parameter name="ec2-ap-northeast-1.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-ap-northeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.native-contextualization</string>
+         <parameter name="nuvlabox-demo.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-demo" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.service.name</string>
+         <parameter name="ultimum-cz1.service.name" description="Name of the service which provides the instances functionality" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[nova]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.max.iaas.workers</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.orchestrator.imageid</string>
+         <parameter name="open-telekom-de1.orchestrator.imageid" description="Image Id of the orchestrator for open-telekom-de1" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[1a3cc1b6-0e25-48e0-9d75-71691c7b969c]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.max.iaas.workers</string>
+         <parameter name="exoscale-ch-gva.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="exoscale-ch-gva" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.network.private</string>
+         <parameter name="nuvlabox-albert-einstein.network.private" description="Mapping for Private network" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.security.group</string>
+         <parameter name="ec2-sa-east-1.security.group" description="Orchestrator security group" category="ec2-sa-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.orchestrator.ssh.password</string>
+         <parameter name="cyclone-fr2.orchestrator.ssh.password" description="Orchestrator password" category="cyclone-fr2" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.orchestrator.imageid</string>
+         <parameter name="ec2-us-west-2.orchestrator.imageid" description="Image Id of the orchestrator for ec2-us-west-2" category="ec2-us-west-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ami-9abea4fb]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>azure-west-europe.orchestrator.instance.type</string>
+         <parameter name="azure-west-europe.orchestrator.instance.type" description="Orchestrator machine size" category="azure-west-europe" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="25">
+               <string>Basic_A0</string>
+               <string>Basic_A1</string>
+               <string>Basic_A2</string>
+               <string>Basic_A3</string>
+               <string>Basic_A4</string>
+               <string>ExtraSmall</string>
+               <string>Small</string>
+               <string>Medium</string>
+               <string>Large</string>
+               <string>ExtraLarge</string>
+               <string>A5</string>
+               <string>A6</string>
+               <string>A7</string>
+               <string>A8</string>
+               <string>A9</string>
+               <string>A10</string>
+               <string>A11</string>
+               <string>Standard_D1</string>
+               <string>Standard_D2</string>
+               <string>Standard_D3</string>
+               <string>Standard_D4</string>
+               <string>Standard_D11</string>
+               <string>Standard_D12</string>
+               <string>Standard_D13</string>
+               <string>Standard_D14</string>
+            </enumValues>
+            <value><![CDATA[Basic_A0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.update.clienturl</string>
+         <parameter name="slipstream.update.clienturl" description="Endpoint of the SlipStream client tarball" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[https://185.19.28.68/downloads/slipstreamclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.security.groups</string>
+         <parameter name="cyclone-fr2.security.groups" description="Orchestrator security groups (comma separated list)" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.update.clienturl</string>
+         <parameter name="cyclone-fr1.update.clienturl" description="URL pointing to the tarball containing the client for cyclone-fr1" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/stratuslabclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.security.group</string>
+         <parameter name="ec2-ap-northeast-1.security.group" description="Orchestrator security group" category="ec2-ap-northeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.network.private</string>
+         <parameter name="nuvlabox-max-born.network.private" description="Mapping for Private network" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="31" order="31">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.orchestrator.ssh.password</string>
+         <parameter name="cyfronet-pl1.orchestrator.ssh.password" description="Orchestrator password" category="cyfronet-pl1" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.network.public</string>
+         <parameter name="nuvlabox-arthur-harden.network.public" description="Mapping for Public network" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.max.iaas.workers</string>
+         <parameter name="ec2-ap-northeast-1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ec2-ap-northeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.security.groups</string>
+         <parameter name="ec2-ap-southeast-1.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-ap-southeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.max.iaas.workers</string>
+         <parameter name="cyclone-de1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.orchestrator.ssh.username</string>
+         <parameter name="cyclone-de1.orchestrator.ssh.username" description="Orchestrator username" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.mail.username</string>
+         <parameter name="slipstream.mail.username" description="Username for SMTP server." category="SlipStream_Support" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[Username of the mail server account you want to use to send registration emails.]]></instructions>
+            <value><![CDATA[mailer@sixsq.com]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.endpoint</string>
+         <parameter name="exoscale-ch-gva.endpoint" description="Service endpoint for exoscale-ch-gva (e.g. http://example.com:5000)" category="exoscale-ch-gva" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://api.exoscale.ch/compute]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.update.clienturl</string>
+         <parameter name="nuvlabox-max-born.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-max-born" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.identity.version</string>
+         <parameter name="cyclone-fr2.identity.version" description="Identity API version" category="cyclone-fr2" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="2">
+               <string>v2</string>
+               <string>v3</string>
+            </enumValues>
+            <value><![CDATA[v3]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.service.region</string>
+         <parameter name="open-telekom-de1.service.region" description="Region used by this cloud connector" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="120" order="120">
+            <value><![CDATA[eu-de]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.native-contextualization</string>
+         <parameter name="nuvlabox-max-planck.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-max-planck" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cloud.connector.orchestrator.privatesshkey</string>
+         <parameter name="cloud.connector.orchestrator.privatesshkey" description="Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[/opt/slipstream/server/.ssh/id_rsa]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.endpoint</string>
+         <parameter name="cyclone-de1.endpoint" description="Service endpoint for cyclone-de1 (e.g. http://example.com:5000)" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://sso.cloud.synaix.de:8443]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.max.iaas.workers</string>
+         <parameter name="nuvlabox-stanley-cohen.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-max-planck.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.endpoint</string>
+         <parameter name="nuvlabox-bertil-ohlin.endpoint" description="Service endpoint for nuvlabox-bertil-ohlin (e.g. http://example.com:5000)" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://127.0.0.1:20241/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.native-contextualization</string>
+         <parameter name="nuvlabox-arthur-harden.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-arthur-harden" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.network.public</string>
+         <parameter name="nuvlabox-henry-dunant.network.public" description="Mapping for Public network" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.max.iaas.workers</string>
+         <parameter name="ec2-eu-west.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ec2-eu-west" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.update.clienturl</string>
+         <parameter name="ec2-eu-central-1.update.clienturl" description="URL with the cloud client specific connector" category="ec2-eu-central-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/ec2client.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-stanley-cohen.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.orchestrator.instance.type</string>
+         <parameter name="exoscale-ch-gva.orchestrator.instance.type" description="Orchestrator instance type" category="exoscale-ch-gva" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="9">
+               <string>Micro</string>
+               <string>Tiny</string>
+               <string>Small</string>
+               <string>Medium</string>
+               <string>Large</string>
+               <string>Extra-large</string>
+               <string>Huge</string>
+               <string>Mega</string>
+               <string>Titan</string>
+            </enumValues>
+            <value><![CDATA[Micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-carl-cori.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="17" order="17">
+            <instructions><![CDATA[Ram size in GB]]></instructions>
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.quota.vm</string>
+         <parameter name="nuvlabox-cecil-powell.quota.vm" description="VM quota for nuvlabox-cecil-powell (i.e. maximum number of VMs allowed)" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.update.clienturl</string>
+         <parameter name="nuvlabox-arthur-harden.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-arthur-harden" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.orchestrator.instance.type</string>
+         <parameter name="softlayer-it-mil01.orchestrator.instance.type" description="NativeSoftLayer Flavor for the orchestrator. The actual image should support the desired Flavor" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1 CPU, 1GB ram, 25GB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.orchestrator.ssh.username</string>
+         <parameter name="cyfronet-pl1.orchestrator.ssh.username" description="Orchestrator username" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.orchestrator.instance.type</string>
+         <parameter name="exoscale-ch-dk.orchestrator.instance.type" description="Orchestrator instance type" category="exoscale-ch-dk" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="9">
+               <string>Micro</string>
+               <string>Tiny</string>
+               <string>Small</string>
+               <string>Medium</string>
+               <string>Large</string>
+               <string>Extra-large</string>
+               <string>Huge</string>
+               <string>Mega</string>
+               <string>Titan</string>
+            </enumValues>
+            <value><![CDATA[Micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.max.iaas.workers</string>
+         <parameter name="nuvlabox-max-planck.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.quota.vm</string>
+         <parameter name="nuvlabox-max-planck.quota.vm" description="VM quota for nuvlabox-max-planck (i.e. maximum number of VMs allowed)" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.security.group</string>
+         <parameter name="ec2-us-west-2.security.group" description="Orchestrator security group" category="ec2-us-west-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.orchestrator.instance.type</string>
+         <parameter name="ec2-eu-central-1.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-eu-central-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="42">
+               <string>t2.micro</string>
+               <string>t2.small</string>
+               <string>t2.medium</string>
+               <string>m3.medium</string>
+               <string>m3.large</string>
+               <string>m3.xlarge</string>
+               <string>m3.2xlarge</string>
+               <string>c4.large</string>
+               <string>c4.xlarge</string>
+               <string>c4.2xlarge</string>
+               <string>c4.4xlarge</string>
+               <string>c4.8xlarge</string>
+               <string>c3.large</string>
+               <string>c3.xlarge</string>
+               <string>c3.2xlarge</string>
+               <string>c3.4xlarge</string>
+               <string>c3.8xlarge</string>
+               <string>r3.large</string>
+               <string>r3.xlarge</string>
+               <string>r3.2xlarge</string>
+               <string>r3.4xlarge</string>
+               <string>r3.8xlarge</string>
+               <string>i2.xlarge</string>
+               <string>i2.2xlarge</string>
+               <string>i2.4xlarge</string>
+               <string>i2.8xlarge</string>
+               <string>d2.xlarge</string>
+               <string>d2.2xlarge</string>
+               <string>d2.4xlarge</string>
+               <string>d2.8xlarge</string>
+               <string>g2.2xlarge</string>
+               <string>g2.8xlarge</string>
+               <string>t1.micro</string>
+               <string>m1.small</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.medium</string>
+               <string>c1.xlarge</string>
+               <string>m2.xlarge</string>
+               <string>m2.2xlarge</string>
+               <string>m2.4xlarge</string>
+               <string>cc1.4xlarge</string>
+            </enumValues>
+            <value><![CDATA[t2.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.marketplace.endpoint</string>
+         <parameter name="nuvlabox-james-chadwick.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[http://192.168.41.1:8080/marketplace]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.orchestrator.imageid</string>
+         <parameter name="nuvlabox-demo.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-demo" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.quota.vm</string>
+         <parameter name="nuvlabox-albert-einstein.quota.vm" description="VM quota for nuvlabox-albert-einstein (i.e. maximum number of VMs allowed)" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.orchestrator.imageid</string>
+         <parameter name="cyclone-fr2.orchestrator.imageid" description="Image Id of the orchestrator for cyclone-fr2" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[8d2e2006-6319-4136-b2f2-43b052323e72]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.network.public</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.network.public" description="Mapping for Public network" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.orchestrator.instance.type</string>
+         <parameter name="ultimum-cz1.orchestrator.instance.type" description="OpenStack Flavor for the orchestrator. The actual image should support the desired Flavor" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[Basic]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.endpoint</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.endpoint" description="Service endpoint for nuvlabox-christiane-nusslein-volhard (e.g. http://example.com:5000)" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://127.0.0.1:19821/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.security.groups</string>
+         <parameter name="open-telekom-de1.security.groups" description="Orchestrator security groups (comma separated list)" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="25" order="25">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.marketplace.endpoint</string>
+         <parameter name="cyclone-fr1.marketplace.endpoint" description="Marketplace endpoint" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://marketplace.stratuslab.eu/marketplace]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.update.clienturl</string>
+         <parameter name="exoscale-ch-dk.update.clienturl" description="URL pointing to the tarball containing the client for exoscale-ch-dk" category="exoscale-ch-dk" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://185.19.28.68/downloads/exoscaleclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.service.type</string>
+         <parameter name="ultimum-cz1.service.type" description="Type-name of the service which provides the instances functionality" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[compute]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.region</string>
+         <parameter name="ec2-us-east-1.region" description="EC2 region" category="ec2-us-east-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>us-east-1</string>
+               <string>us-west-2</string>
+               <string>us-west-1</string>
+               <string>eu-west-1</string>
+               <string>ap-southeast-1</string>
+               <string>ap-southeast-2</string>
+               <string>ap-northeast-1</string>
+               <string>ap-northeast-2</string>
+               <string>sa-east-1</string>
+               <string>eu-central-1</string>
+            </enumValues>
+            <value><![CDATA[us-east-1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.floating.ips</string>
+         <parameter name="cyclone-de1.floating.ips" description="Use Floating IPs for the Public network" category="cyclone-de1" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <value><![CDATA[true]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.orchestrator.ssh.username</string>
+         <parameter name="ultimum-cz1.orchestrator.ssh.username" description="Orchestrator username" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.endpoint</string>
+         <parameter name="nuvlabox-max-planck.endpoint" description="Service endpoint for nuvlabox-max-planck (e.g. http://example.com:5000)" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://127.0.0.1:11301/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.pdisk.endpoint</string>
+         <parameter name="nuvlabox-albert-einstein.pdisk.endpoint" description="PDisk endpoint" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://172.16.0.1:8445/pdisk]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>azure-west-europe.orchestrator.ssh.username</string>
+         <parameter name="azure-west-europe.orchestrator.ssh.username" description="Orchestrator username" category="azure-west-europe" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.quota.vm</string>
+         <parameter name="open-telekom-de1.quota.vm" description="VM quota for open-telekom-de1 (i.e. maximum number of VMs allowed)" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.support.email</string>
+         <parameter name="slipstream.support.email" description="Email address for SlipStream support requests" category="SlipStream_Support" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[support@sixsq.com]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.orchestrator.imageid</string>
+         <parameter name="nuvlabox-cecil-powell.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-cecil-powell" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.max.iaas.workers</string>
+         <parameter name="cyclone-fr1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.quota.vm</string>
+         <parameter name="nuvlabox-stanley-cohen.quota.vm" description="VM quota for nuvlabox-stanley-cohen (i.e. maximum number of VMs allowed)" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-max-born.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="16" order="16">
+            <instructions><![CDATA[Number of vCPU]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cloud.connector.orchestrator.publicsshkey</string>
+         <parameter name="cloud.connector.orchestrator.publicsshkey" description="Path to the SSH public key to put in the orchestrator" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[/opt/slipstream/server/.ssh/id_rsa.pub]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.network.public</string>
+         <parameter name="nuvlabox-carl-cori.network.public" description="Mapping for Public network" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.update.clienturl</string>
+         <parameter name="nuvlabox-henry-dunant.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-henry-dunant" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://185.19.28.68/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-carl-cori.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="16" order="16">
+            <instructions><![CDATA[Number of vCPU]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.identity.version</string>
+         <parameter name="cyclone-de1.identity.version" description="Identity API version" category="cyclone-de1" mandatory="true" type="Enum" readonly="false" order_="110" order="110">
+            <instructions><![CDATA[If the 'domain' feature is enable, you have to select 'v3'.]]></instructions>
+            <enumValues length="2">
+               <string>v2</string>
+               <string>v3</string>
+            </enumValues>
+            <value><![CDATA[v2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>azure-west-europe.update.clienturl</string>
+         <parameter name="azure-west-europe.update.clienturl" description="URL pointing to the tarball containing the client for azure-west-europe" category="azure-west-europe" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://sixsq.lionel.pro/downloads/azureclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-demo.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.max.iaas.workers</string>
+         <parameter name="nuvlabox-arthur-harden.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.orchestrator.imageid</string>
+         <parameter name="ec2-ap-southeast-2.orchestrator.imageid" description="Image Id of the orchestrator for ec2-ap-southeast-2" category="ec2-ap-southeast-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ami-6c14310f]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.orchestrator.instance.type</string>
+         <parameter name="ec2-sa-east-1.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-sa-east-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="42">
+               <string>t2.micro</string>
+               <string>t2.small</string>
+               <string>t2.medium</string>
+               <string>m3.medium</string>
+               <string>m3.large</string>
+               <string>m3.xlarge</string>
+               <string>m3.2xlarge</string>
+               <string>c4.large</string>
+               <string>c4.xlarge</string>
+               <string>c4.2xlarge</string>
+               <string>c4.4xlarge</string>
+               <string>c4.8xlarge</string>
+               <string>c3.large</string>
+               <string>c3.xlarge</string>
+               <string>c3.2xlarge</string>
+               <string>c3.4xlarge</string>
+               <string>c3.8xlarge</string>
+               <string>r3.large</string>
+               <string>r3.xlarge</string>
+               <string>r3.2xlarge</string>
+               <string>r3.4xlarge</string>
+               <string>r3.8xlarge</string>
+               <string>i2.xlarge</string>
+               <string>i2.2xlarge</string>
+               <string>i2.4xlarge</string>
+               <string>i2.8xlarge</string>
+               <string>d2.xlarge</string>
+               <string>d2.2xlarge</string>
+               <string>d2.4xlarge</string>
+               <string>d2.8xlarge</string>
+               <string>g2.2xlarge</string>
+               <string>g2.8xlarge</string>
+               <string>t1.micro</string>
+               <string>m1.small</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.medium</string>
+               <string>c1.xlarge</string>
+               <string>m2.xlarge</string>
+               <string>m2.2xlarge</string>
+               <string>m2.4xlarge</string>
+               <string>cc1.4xlarge</string>
+            </enumValues>
+            <value><![CDATA[t2.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.network.public</string>
+         <parameter name="nuvlabox-james-chadwick.network.public" description="Mapping for Public network" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>azure-west-europe.native-contextualization</string>
+         <parameter name="azure-west-europe.native-contextualization" description="Use native cloud contextualisation" category="azure-west-europe" mandatory="true" type="Enum" readonly="false" order_="920" order="920">
+            <instructions><![CDATA[Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>]]></instructions>
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-max-planck.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.security.group</string>
+         <parameter name="ec2-us-east-1.security.group" description="Orchestrator security group" category="ec2-us-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>azure-west-europe.quota.vm</string>
+         <parameter name="azure-west-europe.quota.vm" description="VM quota for azure-west-europe (i.e. maximum number of VMs allowed)" category="azure-west-europe" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.network.public</string>
+         <parameter name="nuvlabox-albert-einstein.network.public" description="Mapping for Public network" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.endpoint</string>
+         <parameter name="nuvlabox-arthur-harden.endpoint" description="Service endpoint for nuvlabox-arthur-harden (e.g. http://example.com:5000)" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://127.0.0.1:14501/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.max.iaas.workers</string>
+         <parameter name="softlayer-it-mil01.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.service.name</string>
+         <parameter name="cyfronet-pl1.service.name" description="Name of the service which provides the instances functionality" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[nova]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-stanley-cohen.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-cecil-powell.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="17" order="17">
+            <instructions><![CDATA[Ram size in GB]]></instructions>
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.orchestrator.instance.type</string>
+         <parameter name="ec2-us-west-1.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-us-west-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="42">
+               <string>t2.micro</string>
+               <string>t2.small</string>
+               <string>t2.medium</string>
+               <string>m3.medium</string>
+               <string>m3.large</string>
+               <string>m3.xlarge</string>
+               <string>m3.2xlarge</string>
+               <string>c4.large</string>
+               <string>c4.xlarge</string>
+               <string>c4.2xlarge</string>
+               <string>c4.4xlarge</string>
+               <string>c4.8xlarge</string>
+               <string>c3.large</string>
+               <string>c3.xlarge</string>
+               <string>c3.2xlarge</string>
+               <string>c3.4xlarge</string>
+               <string>c3.8xlarge</string>
+               <string>r3.large</string>
+               <string>r3.xlarge</string>
+               <string>r3.2xlarge</string>
+               <string>r3.4xlarge</string>
+               <string>r3.8xlarge</string>
+               <string>i2.xlarge</string>
+               <string>i2.2xlarge</string>
+               <string>i2.4xlarge</string>
+               <string>i2.8xlarge</string>
+               <string>d2.xlarge</string>
+               <string>d2.2xlarge</string>
+               <string>d2.4xlarge</string>
+               <string>d2.8xlarge</string>
+               <string>g2.2xlarge</string>
+               <string>g2.8xlarge</string>
+               <string>t1.micro</string>
+               <string>m1.small</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.medium</string>
+               <string>c1.xlarge</string>
+               <string>m2.xlarge</string>
+               <string>m2.2xlarge</string>
+               <string>m2.4xlarge</string>
+               <string>cc1.4xlarge</string>
+            </enumValues>
+            <value><![CDATA[t2.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.update.clienturl</string>
+         <parameter name="cyclone-fr2.update.clienturl" description="URL pointing to the tarball containing the client for cyclone-fr2" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/openstackclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.service.region</string>
+         <parameter name="cyclone-fr2.service.region" description="Region used by this cloud connector" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[lal]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.quota.vm</string>
+         <parameter name="ec2-eu-central-1.quota.vm" description="VM quota for ec2-eu-central-1 (i.e. maximum number of VMs allowed)" category="ec2-eu-central-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.update.clientbootstrapurl</string>
+         <parameter name="slipstream.update.clientbootstrapurl" description="Endpoint of the SlipStream client bootstrap script" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[https://185.19.28.68/downloads/slipstream.bootstrap]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.update.clienturl</string>
+         <parameter name="ultimum-cz1.update.clienturl" description="URL pointing to the tarball containing the client for ultimum-cz1" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/openstackclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="16" order="16">
+            <instructions><![CDATA[Number of vCPU]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.quota.vm</string>
+         <parameter name="ec2-us-west-1.quota.vm" description="VM quota for ec2-us-west-1 (i.e. maximum number of VMs allowed)" category="ec2-us-west-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.mail.debug</string>
+         <parameter name="slipstream.mail.debug" description="Debug mail sending." category="SlipStream_Support" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[true]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.update.clienturl</string>
+         <parameter name="ec2-us-east-1.update.clienturl" description="URL with the cloud client specific connector" category="ec2-us-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/ec2client.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.network.private</string>
+         <parameter name="cyclone-fr2.network.private" description="Mapping for Private network" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[private]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.quota.vm</string>
+         <parameter name="nuvlabox-bertil-ohlin.quota.vm" description="VM quota for nuvlabox-bertil-ohlin (i.e. maximum number of VMs allowed)" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-max-born.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="17" order="17">
+            <instructions><![CDATA[Ram size in GB]]></instructions>
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.orchestrator.instance.type</string>
+         <parameter name="ec2-us-west-2.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-us-west-2" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="42">
+               <string>t2.micro</string>
+               <string>t2.small</string>
+               <string>t2.medium</string>
+               <string>m3.medium</string>
+               <string>m3.large</string>
+               <string>m3.xlarge</string>
+               <string>m3.2xlarge</string>
+               <string>c4.large</string>
+               <string>c4.xlarge</string>
+               <string>c4.2xlarge</string>
+               <string>c4.4xlarge</string>
+               <string>c4.8xlarge</string>
+               <string>c3.large</string>
+               <string>c3.xlarge</string>
+               <string>c3.2xlarge</string>
+               <string>c3.4xlarge</string>
+               <string>c3.8xlarge</string>
+               <string>r3.large</string>
+               <string>r3.xlarge</string>
+               <string>r3.2xlarge</string>
+               <string>r3.4xlarge</string>
+               <string>r3.8xlarge</string>
+               <string>i2.xlarge</string>
+               <string>i2.2xlarge</string>
+               <string>i2.4xlarge</string>
+               <string>i2.8xlarge</string>
+               <string>d2.xlarge</string>
+               <string>d2.2xlarge</string>
+               <string>d2.4xlarge</string>
+               <string>d2.8xlarge</string>
+               <string>g2.2xlarge</string>
+               <string>g2.8xlarge</string>
+               <string>t1.micro</string>
+               <string>m1.small</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.medium</string>
+               <string>c1.xlarge</string>
+               <string>m2.xlarge</string>
+               <string>m2.2xlarge</string>
+               <string>m2.4xlarge</string>
+               <string>cc1.4xlarge</string>
+            </enumValues>
+            <value><![CDATA[t2.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-cecil-powell.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="16" order="16">
+            <instructions><![CDATA[Number of vCPU]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.floating.ips</string>
+         <parameter name="open-telekom-de1.floating.ips" description="Use Floating IPs for the Public network" category="open-telekom-de1" mandatory="true" type="Boolean" readonly="false" order_="145" order="145">
+            <instructions><![CDATA[If enabled the parameter 'Mapping for Public network' correspond to the name of the IP pool to use.]]></instructions>
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.quota.vm</string>
+         <parameter name="nuvlabox-demo.quota.vm" description="VM quota for nuvlabox-demo (i.e. maximum number of VMs allowed)" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-arthur-harden.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="16" order="16">
+            <instructions><![CDATA[Number of vCPU]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.update.clienturl</string>
+         <parameter name="softlayer-it-mil01.update.clienturl" description="URL pointing to the tarball containing the client for softlayer-it-mil01" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/nativesoftlayerclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.marketplace.endpoint</string>
+         <parameter name="nuvlabox-max-planck.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.service.type</string>
+         <parameter name="cyclone-fr2.service.type" description="Type-name of the service which provides the instances functionality" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[compute]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.security.groups</string>
+         <parameter name="exoscale-ch-dk.security.groups" description="Orchestrator security groups (comma separated list)" category="exoscale-ch-dk" mandatory="true" type="String" readonly="false" order_="25" order="25">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.floating.ips</string>
+         <parameter name="ultimum-cz1.floating.ips" description="Use Floating IPs for the Public network" category="ultimum-cz1" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.mail.password</string>
+         <parameter name="slipstream.mail.password" description="Password for SMTP server." category="SlipStream_Support" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[xxx]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.orchestrator.disk</string>
+         <parameter name="exoscale-ch-dk.orchestrator.disk" description="Orchestrator root disk size" category="exoscale-ch-dk" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="5">
+               <string>10G</string>
+               <string>50G</string>
+               <string>100G</string>
+               <string>200G</string>
+               <string>400G</string>
+            </enumValues>
+            <value><![CDATA[10G]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.max.iaas.workers</string>
+         <parameter name="ec2-ap-southeast-2.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ec2-ap-southeast-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.network.public</string>
+         <parameter name="ultimum-cz1.network.public" description="Mapping for Public network" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[public]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.orchestrator.imageid</string>
+         <parameter name="nuvlabox-stanley-cohen.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-stanley-cohen" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.service.name</string>
+         <parameter name="open-telekom-de1.service.name" description="Name of the service which provides the instances functionality" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="140" order="140">
+            <instructions><![CDATA[Usually the value is 'nova'. It can be left empty if there is only one service of this type for the specified region.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.native-contextualization</string>
+         <parameter name="exoscale-ch-gva.native-contextualization" description="Use native cloud contextualisation" category="exoscale-ch-gva" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[linux-only]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.metering.hostname</string>
+         <parameter name="slipstream.metering.hostname" description="Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:2005)." category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[http://localhost:2005]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.security.group</string>
+         <parameter name="ec2-eu-west.security.group" description="Orchestrator security group" category="ec2-eu-west" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.orchestrator.imageid</string>
+         <parameter name="ec2-sa-east-1.orchestrator.imageid" description="Image Id of the orchestrator for ec2-sa-east-1" category="ec2-sa-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ami-0fb83963]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.identity.version</string>
+         <parameter name="cyfronet-pl1.identity.version" description="Identity API version" category="cyfronet-pl1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="2">
+               <string>v2</string>
+               <string>v3</string>
+            </enumValues>
+            <value><![CDATA[v2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.quota.vm</string>
+         <parameter name="nuvlabox-james-chadwick.quota.vm" description="VM quota for nuvlabox-james-chadwick (i.e. maximum number of VMs allowed)" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.network.private</string>
+         <parameter name="nuvlabox-cecil-powell.network.private" description="Mapping for Private network" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="31" order="31">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-demo.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.orchestrator.imageid</string>
+         <parameter name="ec2-eu-central-1.orchestrator.imageid" description="Image Id of the orchestrator for ec2-eu-central-1" category="ec2-eu-central-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ami-accff2b1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.security.groups</string>
+         <parameter name="ec2-eu-west.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-eu-west" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.orchestrator.imageid</string>
+         <parameter name="nuvlabox-max-born.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-max-born" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.security.group</string>
+         <parameter name="ec2-us-west-1.security.group" description="Orchestrator security group" category="ec2-us-west-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>azure-west-europe.max.iaas.workers</string>
+         <parameter name="azure-west-europe.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="azure-west-europe" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[3]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.service.type</string>
+         <parameter name="cyclone-de1.service.type" description="Type-name of the service which provides the instances functionality" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="130" order="130">
+            <value><![CDATA[compute]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.update.clienturl</string>
+         <parameter name="exoscale-ch-gva.update.clienturl" description="URL pointing to the tarball containing the client for exoscale-ch-gva" category="exoscale-ch-gva" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/exoscaleclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.quota.vm</string>
+         <parameter name="ec2-us-east-1.quota.vm" description="VM quota for ec2-us-east-1 (i.e. maximum number of VMs allowed)" category="ec2-us-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.endpoint</string>
+         <parameter name="ultimum-cz1.endpoint" description="Service endpoint for ultimum-cz1 (e.g. http://example.com:5000)" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://console.ultimum-cloud.com:5000/v2.0/tokens]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.orchestrator.ssh.password</string>
+         <parameter name="ultimum-cz1.orchestrator.ssh.password" description="Orchestrator password" category="ultimum-cz1" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.max.iaas.workers</string>
+         <parameter name="open-telekom-de1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.network.public</string>
+         <parameter name="nuvlabox-bertil-ohlin.network.public" description="Mapping for Public network" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.marketplace.endpoint</string>
+         <parameter name="nuvlabox-bertil-ohlin.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="11" order="11">
+            <instructions><![CDATA[Marketplace endpoint, used to fetch images by id. Optional field]]></instructions>
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cloud.connector.class</string>
+         <parameter name="cloud.connector.class" description="Cloud connector java class name(s) (comma separated for multi-cloud configuration)" category="SlipStream_Basics" mandatory="true" type="Text" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[exoscale-ch-gva:exoscale,
+exoscale-ch-dk:exoscale,
+ec2-eu-west:ec2,
+ec2-eu-central-1:ec2,
+ec2-us-east-1:ec2,
+ec2-us-west-1:ec2,
+ec2-us-west-2:ec2,
+ec2-ap-northeast-1:ec2,
+ec2-ap-southeast-1:ec2,
+ec2-ap-southeast-2:ec2,
+ec2-sa-east-1:ec2,
+ultimum-cz1:openstack,
+cyclone-fr2:openstack,
+cyclone-de1:openstack,
+cyfronet-pl1:openstack,
+open-telekom-de1:openstack,
+softlayer-it-mil01:nativesoftlayer,
+azure-west-europe:azure,
+nuvlabox-james-chadwick:nuvlabox,
+nuvlabox-albert-einstein:nuvlabox,
+nuvlabox-henry-dunant:nuvlabox,
+nuvlabox-stanley-cohen:nuvlabox, 
+nuvlabox-cecil-powell:nuvlabox, 
+nuvlabox-arthur-harden:nuvlabox, 
+nuvlabox-christiane-nusslein-volhard:nuvlabox, 
+nuvlabox-bertil-ohlin:nuvlabox, 
+nuvlabox-carl-cori:nuvlabox, 
+nuvlabox-max-born:nuvlabox, 
+nuvlabox-max-planck:nuvlabox, 
+nuvlabox-demo:nuvlabox]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>azure-west-europe.orchestrator.ssh.password</string>
+         <parameter name="azure-west-europe.orchestrator.ssh.password" description="Orchestrator password" category="azure-west-europe" mandatory="true" type="Password" readonly="false" order_="31" order="31">
+            <instructions><![CDATA[Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.endpoint</string>
+         <parameter name="open-telekom-de1.endpoint" description="Service endpoint for open-telekom-de1 (e.g. http://example.com:5000)" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://iam.eu-de.otc.t-systems.com]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.region</string>
+         <parameter name="ec2-us-west-1.region" description="EC2 region" category="ec2-us-west-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>us-east-1</string>
+               <string>us-west-2</string>
+               <string>us-west-1</string>
+               <string>eu-west-1</string>
+               <string>ap-southeast-1</string>
+               <string>ap-southeast-2</string>
+               <string>ap-northeast-1</string>
+               <string>ap-northeast-2</string>
+               <string>sa-east-1</string>
+               <string>eu-central-1</string>
+            </enumValues>
+            <value><![CDATA[us-west-1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="17" order="17">
+            <instructions><![CDATA[Ram size in GB]]></instructions>
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.update.clienturl</string>
+         <parameter name="nuvlabox-bertil-ohlin.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-bertil-ohlin" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.network.private</string>
+         <parameter name="open-telekom-de1.network.private" description="Mapping for Private network" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="160" order="160">
+            <value><![CDATA[private]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.orchestrator.instance.type</string>
+         <parameter name="ec2-eu-west.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-eu-west" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="42">
+               <string>t2.micro</string>
+               <string>t2.small</string>
+               <string>t2.medium</string>
+               <string>m3.medium</string>
+               <string>m3.large</string>
+               <string>m3.xlarge</string>
+               <string>m3.2xlarge</string>
+               <string>c4.large</string>
+               <string>c4.xlarge</string>
+               <string>c4.2xlarge</string>
+               <string>c4.4xlarge</string>
+               <string>c4.8xlarge</string>
+               <string>c3.large</string>
+               <string>c3.xlarge</string>
+               <string>c3.2xlarge</string>
+               <string>c3.4xlarge</string>
+               <string>c3.8xlarge</string>
+               <string>r3.large</string>
+               <string>r3.xlarge</string>
+               <string>r3.2xlarge</string>
+               <string>r3.4xlarge</string>
+               <string>r3.8xlarge</string>
+               <string>i2.xlarge</string>
+               <string>i2.2xlarge</string>
+               <string>i2.4xlarge</string>
+               <string>i2.8xlarge</string>
+               <string>d2.xlarge</string>
+               <string>d2.2xlarge</string>
+               <string>d2.4xlarge</string>
+               <string>d2.8xlarge</string>
+               <string>g2.2xlarge</string>
+               <string>g2.8xlarge</string>
+               <string>t1.micro</string>
+               <string>m1.small</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.medium</string>
+               <string>c1.xlarge</string>
+               <string>m2.xlarge</string>
+               <string>m2.2xlarge</string>
+               <string>m2.4xlarge</string>
+               <string>cc1.4xlarge</string>
+            </enumValues>
+            <value><![CDATA[t2.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.endpoint</string>
+         <parameter name="nuvlabox-stanley-cohen.endpoint" description="Service endpoint for nuvlabox-stanley-cohen (e.g. http://example.com:5000)" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://127.0.0.1:19441/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.orchestrator.instance.type</string>
+         <parameter name="cyclone-fr2.orchestrator.instance.type" description="OpenStack Flavor for the orchestrator. The actual image should support the desired Flavor" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[m1.small]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>azure-west-europe.orchestrator.imageid</string>
+         <parameter name="azure-west-europe.orchestrator.imageid" description="Image Id of the orchestrator for azure-west-europe" category="azure-west-europe" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-12_04_5-LTS-amd64-server-20151020-en-us-30GB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.max.iaas.workers</string>
+         <parameter name="nuvlabox-henry-dunant.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.max.iaas.workers</string>
+         <parameter name="nuvlabox-max-born.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.update.clienturl</string>
+         <parameter name="ec2-ap-northeast-1.update.clienturl" description="URL with the cloud client specific connector" category="ec2-ap-northeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/ec2client.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-james-chadwick.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.metering.enable</string>
+         <parameter name="slipstream.metering.enable" description="Metering enabled" category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.orchestrator.instance.type</string>
+         <parameter name="ec2-ap-southeast-1.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-ap-southeast-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="42">
+               <string>t2.micro</string>
+               <string>t2.small</string>
+               <string>t2.medium</string>
+               <string>m3.medium</string>
+               <string>m3.large</string>
+               <string>m3.xlarge</string>
+               <string>m3.2xlarge</string>
+               <string>c4.large</string>
+               <string>c4.xlarge</string>
+               <string>c4.2xlarge</string>
+               <string>c4.4xlarge</string>
+               <string>c4.8xlarge</string>
+               <string>c3.large</string>
+               <string>c3.xlarge</string>
+               <string>c3.2xlarge</string>
+               <string>c3.4xlarge</string>
+               <string>c3.8xlarge</string>
+               <string>r3.large</string>
+               <string>r3.xlarge</string>
+               <string>r3.2xlarge</string>
+               <string>r3.4xlarge</string>
+               <string>r3.8xlarge</string>
+               <string>i2.xlarge</string>
+               <string>i2.2xlarge</string>
+               <string>i2.4xlarge</string>
+               <string>i2.8xlarge</string>
+               <string>d2.xlarge</string>
+               <string>d2.2xlarge</string>
+               <string>d2.4xlarge</string>
+               <string>d2.8xlarge</string>
+               <string>g2.2xlarge</string>
+               <string>g2.8xlarge</string>
+               <string>t1.micro</string>
+               <string>m1.small</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.medium</string>
+               <string>c1.xlarge</string>
+               <string>m2.xlarge</string>
+               <string>m2.2xlarge</string>
+               <string>m2.4xlarge</string>
+               <string>cc1.4xlarge</string>
+            </enumValues>
+            <value><![CDATA[t2.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.update.clienturl</string>
+         <parameter name="nuvlabox-stanley-cohen.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-stanley-cohen" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.quota.vm</string>
+         <parameter name="ultimum-cz1.quota.vm" description="VM quota for ultimum-cz1 (i.e. maximum number of VMs allowed)" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.zone</string>
+         <parameter name="exoscale-ch-gva.zone" description="Zone" category="exoscale-ch-gva" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="2">
+               <string>CH-GVA-2</string>
+               <string>CH-DK-2</string>
+            </enumValues>
+            <value><![CDATA[CH-GVA-2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.floating.ips</string>
+         <parameter name="cyclone-fr2.floating.ips" description="Use Floating IPs for the Public network" category="cyclone-fr2" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.orchestrator.instance.type</string>
+         <parameter name="cyclone-de1.orchestrator.instance.type" description="OpenStack Flavor for the orchestrator. The actual image should support the desired Flavor" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="100" order="100">
+            <value><![CDATA[small]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.security.group</string>
+         <parameter name="ec2-ap-southeast-2.security.group" description="Orchestrator security group" category="ec2-ap-southeast-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.security.group</string>
+         <parameter name="ec2-eu-central-1.security.group" description="Orchestrator security group" category="ec2-eu-central-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.service.name</string>
+         <parameter name="cyclone-fr2.service.name" description="Name of the service which provides the instances functionality" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[nova]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.network.public</string>
+         <parameter name="cyfronet-pl1.network.public" description="Mapping for Public network" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[vxlan-public-net]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.network.private</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.network.private" description="Mapping for Private network" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="31" order="31">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.native-contextualization</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.reports.location</string>
+         <parameter name="slipstream.reports.location" description="Location where the deployments and build reports are saved" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[/var/tmp/slipstream/reports]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.security.groups</string>
+         <parameter name="ec2-ap-southeast-2.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-ap-southeast-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.network.public</string>
+         <parameter name="softlayer-it-mil01.network.public" description="Mapping for Public network" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.marketplace.endpoint</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="11" order="11">
+            <instructions><![CDATA[Marketplace endpoint, used to fetch images by id. Optional field]]></instructions>
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.pdisk.endpoint</string>
+         <parameter name="nuvlabox-max-planck.pdisk.endpoint" description="PDisk endpoint" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.marketplace.endpoint</string>
+         <parameter name="nuvlabox-arthur-harden.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="11" order="11">
+            <instructions><![CDATA[Marketplace endpoint, used to fetch images by id. Optional field]]></instructions>
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.endpoint</string>
+         <parameter name="nuvlabox-carl-cori.endpoint" description="Service endpoint for nuvlabox-carl-cori (e.g. http://example.com:5000)" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://127.0.0.1:17621/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.quota.vm</string>
+         <parameter name="nuvlabox-henry-dunant.quota.vm" description="VM quota for nuvlabox-henry-dunant (i.e. maximum number of VMs allowed)" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.prs.enable</string>
+         <parameter name="slipstream.prs.enable" description="Placement and Ranking enabled" category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.endpoint</string>
+         <parameter name="nuvlabox-james-chadwick.endpoint" description="Service endpoint for nuvlabox-james-chadwick (e.g. http://example.com:5000)" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://127.0.0.1:11661/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.orchestrator.imageid</string>
+         <parameter name="cyclone-de1.orchestrator.imageid" description="Image Id of the orchestrator for cyclone-de1" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[8bce6f55-ece6-4802-8108-4c2d09b1457d]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.quota.vm</string>
+         <parameter name="exoscale-ch-gva.quota.vm" description="VM quota for exoscale-ch-gva (i.e. maximum number of VMs allowed)" category="exoscale-ch-gva" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.max.iaas.workers</string>
+         <parameter name="exoscale-ch-dk.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="exoscale-ch-dk" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.endpoint</string>
+         <parameter name="nuvlabox-demo.endpoint" description="Service endpoint for nuvlabox-demo (e.g. http://example.com:5000)" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://127.0.0.1:10002/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.update.clienturl</string>
+         <parameter name="ec2-eu-west.update.clienturl" description="URL with the cloud client specific connector" category="ec2-eu-west" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/ec2client.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.quota.vm</string>
+         <parameter name="ec2-ap-northeast-1.quota.vm" description="VM quota for ec2-ap-northeast-1 (i.e. maximum number of VMs allowed)" category="ec2-ap-northeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.orchestrator.imageid</string>
+         <parameter name="ec2-eu-west.orchestrator.imageid" description="Image Id of the orchestrator for ec2-eu-west" category="ec2-eu-west" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ami-f95ef58a]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.orchestrator.imageid</string>
+         <parameter name="exoscale-ch-dk.orchestrator.imageid" description="Template name to use for the orchestrator on exoscale-ch-dk" category="exoscale-ch-dk" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[Linux Ubuntu 14.04 LTS 64-bit]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.orchestrator.imageid</string>
+         <parameter name="nuvlabox-arthur-harden.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-arthur-harden" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.security.groups</string>
+         <parameter name="ultimum-cz1.security.groups" description="Orchestrator security groups (comma separated list)" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.service.region</string>
+         <parameter name="cyclone-de1.service.region" description="Region used by this cloud connector" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="120" order="120">
+            <value><![CDATA[RegionTwo]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.update.clienturl</string>
+         <parameter name="ec2-sa-east-1.update.clienturl" description="URL with the cloud client specific connector" category="ec2-sa-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/ec2client.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.pdisk.endpoint</string>
+         <parameter name="nuvlabox-james-chadwick.pdisk.endpoint" description="PDisk endpoint" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.network.public</string>
+         <parameter name="nuvlabox-stanley-cohen.network.public" description="Mapping for Public network" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.orchestrator.imageid</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-christiane-nusslein-volhard" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.native-contextualization</string>
+         <parameter name="nuvlabox-james-chadwick.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-james-chadwick" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.quota.vm</string>
+         <parameter name="cyclone-fr2.quota.vm" description="VM quota for cyclone-fr2 (i.e. maximum number of VMs allowed)" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.native-contextualization</string>
+         <parameter name="ultimum-cz1.native-contextualization" description="Use native cloud contextualisation" category="ultimum-cz1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[linux-only]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-james-chadwick.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.native-contextualization</string>
+         <parameter name="open-telekom-de1.native-contextualization" description="Use native cloud contextualisation" category="open-telekom-de1" mandatory="true" type="Enum" readonly="false" order_="920" order="920">
+            <instructions><![CDATA[Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>]]></instructions>
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[linux-only]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.network.private</string>
+         <parameter name="nuvlabox-henry-dunant.network.private" description="Mapping for Private network" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.update.clienturl</string>
+         <parameter name="nuvlabox-cecil-powell.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-cecil-powell" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.orchestrator.ssh.password</string>
+         <parameter name="cyclone-de1.orchestrator.ssh.password" description="Orchestrator password" category="cyclone-de1" mandatory="true" type="Password" readonly="false" order_="31" order="31">
+            <instructions><![CDATA[Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.endpoint</string>
+         <parameter name="cyclone-fr2.endpoint" description="Service endpoint for cyclone-fr2 (e.g. http://example.com:5000)" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://keystone.lal.in2p3.fr:5000]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.orchestrator.instance.type</string>
+         <parameter name="nuvlabox-demo.orchestrator.instance.type" description="OpenNebula instance type for the orchestrator." category="nuvlabox-demo" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>micro</string>
+               <string>small</string>
+               <string>medium</string>
+               <string>large</string>
+            </enumValues>
+            <value><![CDATA[micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.quota.vm</string>
+         <parameter name="ec2-ap-southeast-1.quota.vm" description="VM quota for ec2-ap-southeast-1 (i.e. maximum number of VMs allowed)" category="ec2-ap-southeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.orchestrator.instance.type</string>
+         <parameter name="nuvlabox-james-chadwick.orchestrator.instance.type" description="OpenNebula instance type for the orchestrator." category="nuvlabox-james-chadwick" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>micro</string>
+               <string>small</string>
+               <string>medium</string>
+               <string>large</string>
+            </enumValues>
+            <value><![CDATA[micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.max.iaas.workers</string>
+         <parameter name="cyfronet-pl1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.quota.vm</string>
+         <parameter name="exoscale-ch-dk.quota.vm" description="VM quota for exoscale-ch-dk (i.e. maximum number of VMs allowed)" category="exoscale-ch-dk" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.orchestrator.instance.type</string>
+         <parameter name="nuvlabox-stanley-cohen.orchestrator.instance.type" description="OpenNebula instance type for the orchestrator." category="nuvlabox-stanley-cohen" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>micro</string>
+               <string>small</string>
+               <string>medium</string>
+               <string>large</string>
+            </enumValues>
+            <value><![CDATA[micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.marketplace.endpoint</string>
+         <parameter name="nuvlabox-albert-einstein.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://127.0.0.1:11364/marketplace]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.network.public</string>
+         <parameter name="nuvlabox-demo.network.public" description="Mapping for Public network" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.mail.port</string>
+         <parameter name="slipstream.mail.port" description="Port on SMTP server (defaults to standard ports)." category="SlipStream_Support" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[465]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.update.clienturl</string>
+         <parameter name="ec2-ap-southeast-2.update.clienturl" description="URL with the cloud client specific connector" category="ec2-ap-southeast-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/ec2client.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.security.groups</string>
+         <parameter name="ec2-us-east-1.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-us-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.service.region</string>
+         <parameter name="softlayer-it-mil01.service.region" description="Region used by this cloud connector" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[fra02]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.service.region</string>
+         <parameter name="cyfronet-pl1.service.region" description="Region used by this cloud connector" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[regionOne]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.update.clienturl</string>
+         <parameter name="nuvlabox-carl-cori.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-carl-cori" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.mail.ssl</string>
+         <parameter name="slipstream.mail.ssl" description="Use SSL for SMTP server." category="SlipStream_Support" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[true]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.marketplace.endpoint</string>
+         <parameter name="nuvlabox-henry-dunant.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.quota.vm</string>
+         <parameter name="nuvlabox-carl-cori.quota.vm" description="VM quota for nuvlabox-carl-cori (i.e. maximum number of VMs allowed)" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.service.region</string>
+         <parameter name="ultimum-cz1.service.region" description="Region used by this cloud connector" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[RegionOne]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.quota.vm</string>
+         <parameter name="nuvlabox-arthur-harden.quota.vm" description="VM quota for nuvlabox-arthur-harden (i.e. maximum number of VMs allowed)" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.quota.vm</string>
+         <parameter name="cyclone-de1.quota.vm" description="VM quota for cyclone-de1 (i.e. maximum number of VMs allowed)" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.orchestrator.instance.type</string>
+         <parameter name="nuvlabox-max-planck.orchestrator.instance.type" description="OpenNebula instance type for the orchestrator." category="nuvlabox-max-planck" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>micro</string>
+               <string>small</string>
+               <string>medium</string>
+               <string>large</string>
+            </enumValues>
+            <value><![CDATA[micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-henry-dunant.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.region</string>
+         <parameter name="ec2-ap-southeast-2.region" description="EC2 region" category="ec2-ap-southeast-2" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>us-east-1</string>
+               <string>us-west-2</string>
+               <string>us-west-1</string>
+               <string>eu-west-1</string>
+               <string>ap-southeast-1</string>
+               <string>ap-southeast-2</string>
+               <string>ap-northeast-1</string>
+               <string>ap-northeast-2</string>
+               <string>sa-east-1</string>
+               <string>eu-central-1</string>
+            </enumValues>
+            <value><![CDATA[ap-southeast-2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.max.iaas.workers</string>
+         <parameter name="nuvlabox-demo.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.floating.ips</string>
+         <parameter name="cyfronet-pl1.floating.ips" description="Use Floating IPs for the Public network" category="cyfronet-pl1" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.quota.vm</string>
+         <parameter name="ec2-sa-east-1.quota.vm" description="VM quota for ec2-sa-east-1 (i.e. maximum number of VMs allowed)" category="ec2-sa-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.orchestrator.ssh.username</string>
+         <parameter name="exoscale-ch-gva.orchestrator.ssh.username" description="Orchestrator username" category="exoscale-ch-gva" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.security.groups</string>
+         <parameter name="exoscale-ch-gva.security.groups" description="Orchestrator security groups (comma separated list)" category="exoscale-ch-gva" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.orchestrator.imageid</string>
+         <parameter name="nuvlabox-albert-einstein.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-albert-einstein" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[F59ocXfsTsKeYpDY2UoaA9oVCEU]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.max.iaas.workers</string>
+         <parameter name="nuvlabox-james-chadwick.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.native-contextualization</string>
+         <parameter name="nuvlabox-albert-einstein.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-albert-einstein" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.orchestrator.ssh.username</string>
+         <parameter name="cyclone-fr2.orchestrator.ssh.username" description="Orchestrator username" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.prs.endpoint</string>
+         <parameter name="slipstream.prs.endpoint" description="Endpoint of the Placement and Ranking Service" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[http://localhost:8203/filter-rank]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cloud.connector.library.libcloud.url</string>
+         <parameter name="cloud.connector.library.libcloud.url" description="URL to fetch libcloud library from" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[URL should point to a valid gzipped tarball.]]></instructions>
+            <value><![CDATA[https://185.19.28.68/downloads/libcloud.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.max.iaas.workers</string>
+         <parameter name="ec2-us-east-1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ec2-us-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.network.public</string>
+         <parameter name="cyclone-de1.network.public" description="Mapping for Public network" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="150" order="150">
+            <value><![CDATA[ext-net]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.update.clienturl</string>
+         <parameter name="ec2-us-west-2.update.clienturl" description="URL with the cloud client specific connector" category="ec2-us-west-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/ec2client.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.security.groups</string>
+         <parameter name="ec2-eu-central-1.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-eu-central-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.orchestrator.imageid</string>
+         <parameter name="nuvlabox-henry-dunant.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-henry-dunant" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.network.private</string>
+         <parameter name="ultimum-cz1.network.private" description="Mapping for Private network" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[private]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.network.private</string>
+         <parameter name="nuvlabox-james-chadwick.network.private" description="Mapping for Private network" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.quota.vm</string>
+         <parameter name="ec2-eu-west.quota.vm" description="VM quota for ec2-eu-west (i.e. maximum number of VMs allowed)" category="ec2-eu-west" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.network.private</string>
+         <parameter name="nuvlabox-demo.network.private" description="Mapping for Private network" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.zone</string>
+         <parameter name="exoscale-ch-dk.zone" description="Zone" category="exoscale-ch-dk" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="2">
+               <string>CH-GVA-2</string>
+               <string>CH-DK-2</string>
+            </enumValues>
+            <value><![CDATA[CH-DK-2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.service.name</string>
+         <parameter name="cyclone-de1.service.name" description="Name of the service which provides the instances functionality" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="140" order="140">
+            <instructions><![CDATA[Usually the value is 'nova'. It can be left empty if there is only one service of this type for the specified region.]]></instructions>
+            <value><![CDATA[nova]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.orchestrator.instance.type</string>
+         <parameter name="nuvlabox-albert-einstein.orchestrator.instance.type" description="OpenNebula instance type for the orchestrator." category="nuvlabox-albert-einstein" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>micro</string>
+               <string>small</string>
+               <string>medium</string>
+               <string>large</string>
+            </enumValues>
+            <value><![CDATA[micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.endpoint</string>
+         <parameter name="cyfronet-pl1.endpoint" description="Service endpoint for cyfronet-pl1 (e.g. http://example.com:5000)" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://control.cloud.cyfronet.pl:5000]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.marketplace.endpoint</string>
+         <parameter name="nuvlabox-cecil-powell.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="11" order="11">
+            <instructions><![CDATA[Marketplace endpoint, used to fetch images by id. Optional field]]></instructions>
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-arthur-harden.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="17" order="17">
+            <instructions><![CDATA[Ram size in GB]]></instructions>
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.security.groups</string>
+         <parameter name="ec2-sa-east-1.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-sa-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.orchestrator.instance.type</string>
+         <parameter name="nuvlabox-henry-dunant.orchestrator.instance.type" description="OpenNebula instance type for the orchestrator." category="nuvlabox-henry-dunant" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="4">
+               <string>micro</string>
+               <string>small</string>
+               <string>medium</string>
+               <string>large</string>
+            </enumValues>
+            <value><![CDATA[micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.quota.vm</string>
+         <parameter name="ec2-us-west-2.quota.vm" description="VM quota for ec2-us-west-2 (i.e. maximum number of VMs allowed)" category="ec2-us-west-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.native-contextualization</string>
+         <parameter name="nuvlabox-max-born.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-max-born" mandatory="true" type="Enum" readonly="false" order_="920" order="920">
+            <instructions><![CDATA[Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>]]></instructions>
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.marketplace.endpoint</string>
+         <parameter name="nuvlabox-stanley-cohen.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.network.private</string>
+         <parameter name="cyclone-de1.network.private" description="Mapping for Private network" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="160" order="160">
+            <value><![CDATA[int]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.update.clienturl</string>
+         <parameter name="nuvlabox-demo.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-demo" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.orchestrator.instance.type</string>
+         <parameter name="open-telekom-de1.orchestrator.instance.type" description="OpenStack Flavor for the orchestrator. The actual image should support the desired Flavor" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="100" order="100">
+            <value><![CDATA[c1.medium]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.native-contextualization</string>
+         <parameter name="softlayer-it-mil01.native-contextualization" description="Use native cloud contextualisation" category="softlayer-it-mil01" mandatory="true" type="Enum" readonly="false" order_="10" order="10">
+            <instructions><![CDATA[Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>]]></instructions>
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[never]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.max.iaas.workers</string>
+         <parameter name="ec2-us-west-1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ec2-us-west-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.orchestrator.instance.type</string>
+         <parameter name="ec2-ap-southeast-2.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-ap-southeast-2" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="42">
+               <string>t2.micro</string>
+               <string>t2.small</string>
+               <string>t2.medium</string>
+               <string>m3.medium</string>
+               <string>m3.large</string>
+               <string>m3.xlarge</string>
+               <string>m3.2xlarge</string>
+               <string>c4.large</string>
+               <string>c4.xlarge</string>
+               <string>c4.2xlarge</string>
+               <string>c4.4xlarge</string>
+               <string>c4.8xlarge</string>
+               <string>c3.large</string>
+               <string>c3.xlarge</string>
+               <string>c3.2xlarge</string>
+               <string>c3.4xlarge</string>
+               <string>c3.8xlarge</string>
+               <string>r3.large</string>
+               <string>r3.xlarge</string>
+               <string>r3.2xlarge</string>
+               <string>r3.4xlarge</string>
+               <string>r3.8xlarge</string>
+               <string>i2.xlarge</string>
+               <string>i2.2xlarge</string>
+               <string>i2.4xlarge</string>
+               <string>i2.8xlarge</string>
+               <string>d2.xlarge</string>
+               <string>d2.2xlarge</string>
+               <string>d2.4xlarge</string>
+               <string>d2.8xlarge</string>
+               <string>g2.2xlarge</string>
+               <string>g2.8xlarge</string>
+               <string>t1.micro</string>
+               <string>m1.small</string>
+               <string>m1.large</string>
+               <string>m1.xlarge</string>
+               <string>c1.medium</string>
+               <string>c1.xlarge</string>
+               <string>m2.xlarge</string>
+               <string>m2.2xlarge</string>
+               <string>m2.4xlarge</string>
+               <string>cc1.4xlarge</string>
+            </enumValues>
+            <value><![CDATA[t2.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.network.private</string>
+         <parameter name="nuvlabox-bertil-ohlin.network.private" description="Mapping for Private network" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="31" order="31">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.orchestrator.imageid</string>
+         <parameter name="cyfronet-pl1.orchestrator.imageid" description="Image Id of the orchestrator for cyfronet-pl1" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[d20e65ee-5f5b-4572-b19e-5d7948a4f544]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.network.private</string>
+         <parameter name="nuvlabox-stanley-cohen.network.private" description="Mapping for Private network" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-bertil-ohlin.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="16" order="16">
+            <instructions><![CDATA[Number of vCPU]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.marketplace.endpoint</string>
+         <parameter name="nuvlabox-demo.marketplace.endpoint" description="Marketplace endpoint" category="nuvlabox-demo" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[http://192.168.41.101:8080/marketplace/]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.update.clienturl</string>
+         <parameter name="nuvlabox-albert-einstein.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-albert-einstein" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-albert-einstein.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.identity.version</string>
+         <parameter name="open-telekom-de1.identity.version" description="Identity API version" category="open-telekom-de1" mandatory="true" type="Enum" readonly="false" order_="110" order="110">
+            <instructions><![CDATA[If the 'domain' feature is enable, you have to select 'v3'.]]></instructions>
+            <enumValues length="2">
+               <string>v2</string>
+               <string>v3</string>
+            </enumValues>
+            <value><![CDATA[v3]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.native-contextualization</string>
+         <parameter name="nuvlabox-bertil-ohlin.native-contextualization" description="Use native cloud contextualisation" category="nuvlabox-bertil-ohlin" mandatory="true" type="Enum" readonly="false" order_="920" order="920">
+            <instructions><![CDATA[Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>]]></instructions>
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[always]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.region</string>
+         <parameter name="ec2-ap-southeast-1.region" description="EC2 region" category="ec2-ap-southeast-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>us-east-1</string>
+               <string>us-west-2</string>
+               <string>us-west-1</string>
+               <string>eu-west-1</string>
+               <string>ap-southeast-1</string>
+               <string>ap-southeast-2</string>
+               <string>ap-northeast-1</string>
+               <string>ap-northeast-2</string>
+               <string>sa-east-1</string>
+               <string>eu-central-1</string>
+            </enumValues>
+            <value><![CDATA[ap-southeast-1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.region</string>
+         <parameter name="ec2-eu-central-1.region" description="EC2 region" category="ec2-eu-central-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>us-east-1</string>
+               <string>us-west-2</string>
+               <string>us-west-1</string>
+               <string>eu-west-1</string>
+               <string>ap-southeast-1</string>
+               <string>ap-southeast-2</string>
+               <string>ap-northeast-1</string>
+               <string>ap-northeast-2</string>
+               <string>sa-east-1</string>
+               <string>eu-central-1</string>
+            </enumValues>
+            <value><![CDATA[eu-central-1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.network.private</string>
+         <parameter name="nuvlabox-carl-cori.network.private" description="Mapping for Private network" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="false" order_="31" order="31">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.registration.email</string>
+         <parameter name="slipstream.registration.email" description="Email address for account approvals, etc." category="SlipStream_Support" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[Email address to use for registration.]]></instructions>
+            <value><![CDATA[register@sixsq.com]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.region</string>
+         <parameter name="ec2-eu-west.region" description="EC2 region" category="ec2-eu-west" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>us-east-1</string>
+               <string>us-west-2</string>
+               <string>us-west-1</string>
+               <string>eu-west-1</string>
+               <string>ap-southeast-1</string>
+               <string>ap-southeast-2</string>
+               <string>ap-northeast-1</string>
+               <string>ap-northeast-2</string>
+               <string>sa-east-1</string>
+               <string>eu-central-1</string>
+            </enumValues>
+            <value><![CDATA[eu-west-1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.orchestrator.instance.type</string>
+         <parameter name="cyfronet-pl1.orchestrator.instance.type" description="OpenStack Flavor for the orchestrator. The actual image should support the desired Flavor" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[CPU-1.RAM-512MB.DISK-10GB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.region</string>
+         <parameter name="ec2-sa-east-1.region" description="EC2 region" category="ec2-sa-east-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>us-east-1</string>
+               <string>us-west-2</string>
+               <string>us-west-1</string>
+               <string>eu-west-1</string>
+               <string>ap-southeast-1</string>
+               <string>ap-southeast-2</string>
+               <string>ap-northeast-1</string>
+               <string>ap-northeast-2</string>
+               <string>sa-east-1</string>
+               <string>eu-central-1</string>
+            </enumValues>
+            <value><![CDATA[sa-east-1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.endpoint</string>
+         <parameter name="nuvlabox-max-born.endpoint" description="Service endpoint for nuvlabox-max-born (e.g. http://example.com:5000)" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://127.0.0.1:12061/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.orchestrator.instance.type</string>
+         <parameter name="cyclone-fr1.orchestrator.instance.type" description="Orchestrator instance type" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[t1.micro]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.network.private</string>
+         <parameter name="cyfronet-pl1.network.private" description="Mapping for Private network" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[private]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.orchestrator.imageid</string>
+         <parameter name="softlayer-it-mil01.orchestrator.imageid" description="Image Id of the orchestrator for softlayer-it-mil01" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[UBUNTU_LATEST_64]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.orchestrator.ssh.username</string>
+         <parameter name="softlayer-it-mil01.orchestrator.ssh.username" description="Orchestrator username" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.max.iaas.workers</string>
+         <parameter name="ec2-ap-southeast-1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ec2-ap-southeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.max.iaas.workers</string>
+         <parameter name="nuvlabox-bertil-ohlin.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.registration.enable</string>
+         <parameter name="slipstream.registration.enable" description="Allow user self registration. If checked, user will be able to create accounts themselves." category="SlipStream_Basics" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[true]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.orchestrator.imageid</string>
+         <parameter name="ultimum-cz1.orchestrator.imageid" description="Image Id of the orchestrator for ultimum-cz1" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[7497cf56-25ee-4873-a0c9-44ef3155c24d]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.update.clienturl</string>
+         <parameter name="ec2-us-west-1.update.clienturl" description="URL with the cloud client specific connector" category="ec2-us-west-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/ec2client.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.orchestrator.ssh.username</string>
+         <parameter name="open-telekom-de1.orchestrator.ssh.username" description="Orchestrator username" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.update.clienturl</string>
+         <parameter name="nuvlabox-james-chadwick.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-james-chadwick" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.security.group</string>
+         <parameter name="ec2-ap-southeast-1.security.group" description="Orchestrator security group" category="ec2-ap-southeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.orchestrator.imageid</string>
+         <parameter name="ec2-ap-southeast-1.orchestrator.imageid" description="Image Id of the orchestrator for ec2-ap-southeast-1" category="ec2-ap-southeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ami-25c00c46]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.quota.vm</string>
+         <parameter name="softlayer-it-mil01.quota.vm" description="VM quota for softlayer-it-mil01 (i.e. maximum number of VMs allowed)" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.identity.version</string>
+         <parameter name="ultimum-cz1.identity.version" description="Identity API version" category="ultimum-cz1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="2">
+               <string>v2</string>
+               <string>v3</string>
+            </enumValues>
+            <value><![CDATA[v2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.network.public</string>
+         <parameter name="nuvlabox-cecil-powell.network.public" description="Mapping for Public network" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.orchestrator.imageid</string>
+         <parameter name="nuvlabox-bertil-ohlin.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-bertil-ohlin" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="false" order_="15" order="15">
+            <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.max.iaas.workers</string>
+         <parameter name="ec2-sa-east-1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ec2-sa-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.security.groups</string>
+         <parameter name="cyfronet-pl1.security.groups" description="Orchestrator security groups (comma separated list)" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.network.public</string>
+         <parameter name="open-telekom-de1.network.public" description="Mapping for Public network" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="150" order="150">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.region</string>
+         <parameter name="ec2-ap-northeast-1.region" description="EC2 region" category="ec2-ap-northeast-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="10">
+               <string>us-east-1</string>
+               <string>us-west-2</string>
+               <string>us-west-1</string>
+               <string>eu-west-1</string>
+               <string>ap-southeast-1</string>
+               <string>ap-southeast-2</string>
+               <string>ap-northeast-1</string>
+               <string>ap-northeast-2</string>
+               <string>sa-east-1</string>
+               <string>eu-central-1</string>
+            </enumValues>
+            <value><![CDATA[ap-northeast-1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.max.iaas.workers</string>
+         <parameter name="ec2-eu-central-1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="ec2-eu-central-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.update.clienturl</string>
+         <parameter name="nuvlabox-max-planck.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-max-planck" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.endpoint</string>
+         <parameter name="nuvlabox-henry-dunant.endpoint" description="Service endpoint for nuvlabox-henry-dunant (e.g. http://example.com:5000)" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[https://127.0.0.1:23761/RPC2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.orchestrator.ssh.password</string>
+         <parameter name="softlayer-it-mil01.orchestrator.ssh.password" description="Orchestrator password" category="softlayer-it-mil01" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.update.clienturl</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.update.clienturl" description="URL pointing to the tarball containing the client for nuvlabox-christiane-nusslein-volhard" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://nuv.la/downloads/nuvlaboxclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.orchestrator.imageid</string>
+         <parameter name="ec2-us-east-1.orchestrator.imageid" description="Image Id of the orchestrator for ec2-us-east-1" category="ec2-us-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ami-fce3c696]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.update.clienturl</string>
+         <parameter name="cyclone-de1.update.clienturl" description="URL pointing to the tarball containing the client for cyclone-de1" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="950" order="950">
+            <value><![CDATA[https://185.19.28.68/downloads/openstackclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.service.catalog.enable</string>
+         <parameter name="slipstream.service.catalog.enable" description="Enable service catalog feature." category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[true]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.orchestrator.cpu.size</string>
+         <parameter name="nuvlabox-henry-dunant.orchestrator.cpu.size" description="Orchestrator CPU size" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.domain</string>
+         <parameter name="softlayer-it-mil01.domain" description="Domain, ex. yourcompanydomain.tld" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[defaultDomain.tld]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.base.url</string>
+         <parameter name="slipstream.base.url" description="Default URL and port for the SlipStream RESTlet" category="SlipStream_Basics" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[https://nuv.la]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.orchestrator.ram.size</string>
+         <parameter name="nuvlabox-albert-einstein.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[0.5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.orchestrator.disk</string>
+         <parameter name="exoscale-ch-gva.orchestrator.disk" description="Orchestrator root disk size" category="exoscale-ch-gva" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
+            <enumValues length="5">
+               <string>10G</string>
+               <string>50G</string>
+               <string>100G</string>
+               <string>200G</string>
+               <string>400G</string>
+            </enumValues>
+            <value><![CDATA[10G]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.orchestrator.imageid</string>
+         <parameter name="nuvlabox-james-chadwick.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-james-chadwick" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[67319c6658e857e3f93227acc2d27f50]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.update.clienturl</string>
+         <parameter name="ec2-ap-southeast-1.update.clienturl" description="URL with the cloud client specific connector" category="ec2-ap-southeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/ec2client.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.orchestrator.imageid</string>
+         <parameter name="cyclone-fr1.orchestrator.imageid" description="Image Id of the orchestrator for cyclone-fr1" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[N-Bu1h1jt3K8ODnCTw4JiyPaH5k]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.service.type</string>
+         <parameter name="cyfronet-pl1.service.type" description="Type-name of the service which provides the instances functionality" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[compute]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.endpoint</string>
+         <parameter name="cyclone-fr1.endpoint" description="Service endpoint for cyclone-fr1 (e.g. http://example.com:5000)" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://cloud.lal.stratuslab.eu/one-proxy/xmlrpc]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.orchestrator.ssh.password</string>
+         <parameter name="open-telekom-de1.orchestrator.ssh.password" description="Orchestrator password" category="open-telekom-de1" mandatory="true" type="Password" readonly="false" order_="31" order="31">
+            <instructions><![CDATA[Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.quota.vm</string>
+         <parameter name="nuvlabox-max-born.quota.vm" description="VM quota for nuvlabox-max-born (i.e. maximum number of VMs allowed)" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="910" order="910">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.quota.vm</string>
+         <parameter name="cyclone-fr1.quota.vm" description="VM quota for cyclone-fr1 (i.e. maximum number of VMs allowed)" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.native-contextualization</string>
+         <parameter name="cyclone-de1.native-contextualization" description="Use native cloud contextualisation" category="cyclone-de1" mandatory="true" type="Enum" readonly="false" order_="920" order="920">
+            <instructions><![CDATA[Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>]]></instructions>
+            <enumValues length="4">
+               <string>never</string>
+               <string>linux-only</string>
+               <string>windows-only</string>
+               <string>always</string>
+            </enumValues>
+            <value><![CDATA[linux-only]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.network.private</string>
+         <parameter name="nuvlabox-arthur-harden.network.private" description="Mapping for Private network" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="false" order_="31" order="31">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.network.public</string>
+         <parameter name="nuvlabox-max-born.network.public" description="Mapping for Public network" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[Numerical id]]></instructions>
+            <value><![CDATA[0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>softlayer-it-mil01.datacenter</string>
+         <parameter name="softlayer-it-mil01.datacenter" description="Region used by this cloud connector" category="softlayer-it-mil01" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[mon01]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.network.public</string>
+         <parameter name="cyclone-fr2.network.public" description="Mapping for Public network" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[public]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.max.iaas.workers</string>
+         <parameter name="nuvlabox-cecil-powell.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="915" order="915">
+            <value><![CDATA[7]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.update.clienturl</string>
+         <parameter name="cyfronet-pl1.update.clienturl" description="URL pointing to the tarball containing the client for cyfronet-pl1" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://185.19.28.68/downloads/openstackclient.tgz]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.security.groups</string>
+         <parameter name="ec2-us-west-2.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-us-west-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[slipstream_managed]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.pdisk.endpoint</string>
+         <parameter name="cyclone-fr1.pdisk.endpoint" description="PDisk endpoint" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[https://pdisk.lal.stratuslab.eu/pdisk]]></value>
+         </parameter>
+      </entry>
+   </parameters>
+</serviceConfiguration>
