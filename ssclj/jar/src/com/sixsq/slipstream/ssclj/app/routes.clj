@@ -36,10 +36,8 @@
 
 (def action-routes
   (let-routes [uri (str p/service-context ":resource-name/:uuid/:action")]
-    (POST uri request
-      (crud/do-action request))
     (ANY uri request
-      (throw (u/ex-bad-method request)))))
+      (crud/do-action request))))
 
 (defn not-found
   "Route always returns a 404 error response as a JSON map."

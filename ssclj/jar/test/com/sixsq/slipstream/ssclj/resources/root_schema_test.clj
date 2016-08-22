@@ -19,7 +19,3 @@
   (expect (s/check Root (dissoc root :updated)))
   (expect (s/check Root (dissoc root :baseURI)))
   (expect (s/check Root (dissoc root :acl))))
-
-
-(run-tests [*ns*])
-

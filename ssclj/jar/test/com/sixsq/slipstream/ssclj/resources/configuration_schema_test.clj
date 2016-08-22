@@ -23,7 +23,3 @@
   (expect (s/check Configuration (dissoc cfg :created)))
   (expect (s/check Configuration (dissoc cfg :updated)))
   (expect (s/check Configuration (dissoc cfg :acl))))
-
-
-(run-tests [*ns*])
-

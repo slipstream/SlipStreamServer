@@ -106,7 +106,3 @@
     (expect Exception (can-do? resource request ::authz/all))
     (expect resource (can-do? resource request ::authz/modify))
     (expect resource (can-do? resource request ::authz/view))))
-
-
-(run-tests [*ns*])
-

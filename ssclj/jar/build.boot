@@ -102,7 +102,8 @@
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
-                            #".*seeds.*"}
+                            #".*seeds.*"
+                            #".*example\.clj"}
                  :invert true)
            (aot :all true)))
 
@@ -113,6 +114,7 @@
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
                             #".*seeds.*"
+                            #".*example\.clj"
                             #".*Test\.java"
                             #".*simu_result.txt"
                             #"config-hsqldb-mem.edn"

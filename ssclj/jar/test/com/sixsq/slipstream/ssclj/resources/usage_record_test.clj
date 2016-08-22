@@ -172,7 +172,7 @@
     ;  (esu/dump esb/client esb/index "usage-record"))
     ;(println (apply str (repeat 20 "-")))
 
-    (clojure.pprint/pprint (last-record ur5))
+    ;(clojure.pprint/pprint (last-record ur5))
 
     (is (tu/submap? (dissoc ur3 :acl) (dissoc (last-record ur5) :acl)))
     (is (nil? (last-record ur4)))
