@@ -77,11 +77,11 @@
   [resource-name collection-acl collection-uri collection-key]
   (fn [request]
     (a/can-view? {:acl collection-acl} request)
-    (let [wrapper-fn                          (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)
-          options                             (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
-          [count-before-pagination entries]   (db/query resource-name options)
-          wrapped-entries                     (wrapper-fn request entries)
-          entries-and-count                   (assoc wrapped-entries :count count-before-pagination)]
+    (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)
+          options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+          [count-before-pagination entries] (db/query resource-name options)
+          wrapped-entries (wrapper-fn request entries)
+          entries-and-count (assoc wrapped-entries :count count-before-pagination)]
       (u/json-response entries-and-count))))
 
 
@@ -90,20 +90,25 @@
    and merges that resource with argument.  Keys specified directly
    in the argument take precedence.  Common attributes in the referenced
    resource are stripped. If :href doesn't exist the argument is
-   returned unchanged."
-  [{:keys [href] :as resource}]
+   returned unchanged.
+
+   If a referenced document doesn't exist or if the user doesn't have
+   read access to the document, then the method will throw."
+  [{:keys [href] :as resource} idmap]
   (if href
-    (-> (crud/retrieve-by-id href)
-        (u/strip-common-attrs)
-        (u/strip-service-attrs)
-        (dissoc :acl)
-        (merge resource)
-        (dissoc :href))
+    (let [refdoc (crud/retrieve-by-id href)]
+      (a/can-view? refdoc idmap)
+      (-> refdoc
+          (u/strip-common-attrs)
+          (u/strip-service-attrs)
+          (dissoc :acl)
+          (merge resource)
+          (dissoc :href)))
     resource))
 
 (defn resolve-hrefs
   "Does a prewalk of the given argument, replacing any map with an :href
    attribute with the result of merging the referenced resource (see the
    resolve-href function)."
-  [resource]
-  (w/prewalk resolve-href resource))
+  [resource idmap]
+  (w/prewalk #(resolve-href % idmap) resource))

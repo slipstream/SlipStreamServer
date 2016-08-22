@@ -103,9 +103,10 @@
 ;; requires a ConnectorTemplate to create new Connector
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
-  (let [body (-> body
+  (let [idmap {:identity (:identity request)}
+        body (-> body
                  (assoc :resourceURI create-uri)
-                 (std-crud/resolve-hrefs)                   ;; FIXME: authz must be taken into account
+                 (std-crud/resolve-hrefs idmap)
                  (crud/validate)
                  (:connectorTemplate)
                  (tpl->connector))]
