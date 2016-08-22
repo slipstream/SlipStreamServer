@@ -19,17 +19,23 @@
   #{:add :edit :delete :insert :remove})
 
 ;; additional resource actions have a URI prefix
-(def ^:const action-prefix "http://schemas.dmtf.org/cimi/2/action/")
+(def ^:const action-prefix (str cimi-schema-uri "action/"))
 (def ^:const prefixed-actions
   #{:start :stop :restart :pause :suspend
     :export :import :capture :snapshot
     :forceSync :swapBackup :restore :enable :disable})
 
+;; implementation-specific resource actions have a prefix
+(def ^:const impl-action-prefix (str slipstream-schema-uri "action/"))
+(def ^:const impl-prefixed-actions
+  #{:describe})
+
 (def ^:const action-uri
   (doall
     (merge
       (into {} (map (juxt identity name) core-actions))
-      (into {} (map (juxt identity #(str action-prefix (name %))) prefixed-actions)))))
+      (into {} (map (juxt identity #(str action-prefix (name %))) prefixed-actions))
+      (into {} (map (juxt identity #(str impl-action-prefix (name %))) impl-prefixed-actions)))))
 
 ;;
 ;; schema definitions for basic types
@@ -141,3 +147,82 @@
 
 (def AclAttr
   {:acl AccessControlList})
+
+;;
+;; parameter descriptions
+;;
+
+(def ParameterTypes (s/enum "string" "boolean" "int" "float" "timestamp" "enum" "map" "list"))
+
+(def ParameterDescription
+  {:displayName                  NonBlankString
+   (s/optional-key :category)    NonBlankString
+   (s/optional-key :description) NonBlankString
+   :type                         ParameterTypes
+   (s/optional-key :mandatory)   s/Bool
+   (s/optional-key :readOnly)    s/Bool
+   (s/optional-key :order)       NonNegInt
+   (s/optional-key :enum)        [NonBlankString]})
+
+(def ResourceDescription
+  (merge AclAttr
+         {s/Keyword ParameterDescription}))
+
+(def CommonParameterDescription
+  {:id          {:displayName "ID"
+                 :category    "common"
+                 :description "unique resource identifier"
+                 :type        "string"
+                 :mandatory   true
+                 :readOnly    true
+                 :order       0}
+   :resourceURI {:displayName "Resource URI"
+                 :category    "common"
+                 :description "type identifier as a URI"
+                 :type        "string"
+                 :mandatory   true
+                 :readOnly    true
+                 :order       1}
+   :name        {:displayName "Name"
+                 :category    "common"
+                 :description "human-readable name"
+                 :type        "string"
+                 :mandatory   false
+                 :readOnly    false
+                 :order       2}
+   :description {:displayName "Description"
+                 :category    "common"
+                 :description "short, human-readable description"
+                 :type        "string"
+                 :mandatory   false
+                 :readOnly    false
+                 :order       3}
+   :created     {:displayName "Created"
+                 :category    "common"
+                 :description "creation timestamp"
+                 :type        "timestamp"
+                 :mandatory   true
+                 :readOnly    true
+                 :order       4}
+   :updated     {:displayName "Updated"
+                 :category    "common"
+                 :description "update timestamp"
+                 :type        "timestamp"
+                 :mandatory   true
+                 :readOnly    true
+                 :order       5}
+   :properties  {:displayName "Properties"
+                 :category    "common"
+                 :description "user-defined properties"
+                 :type        "map"
+                 :mandatory   false
+                 :readOnly    false
+                 :order       6}
+   :operations  {:displayName "Operation"
+                 :category    "common"
+                 :description "allowed actions"
+                 :type        "list"
+                 :mandatory   true
+                 :readOnly    true
+                 :order       7}})
+

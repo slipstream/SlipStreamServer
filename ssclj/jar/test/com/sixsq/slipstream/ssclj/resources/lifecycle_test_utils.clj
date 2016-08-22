@@ -67,6 +67,9 @@
     (is (nil? op)))
   m)
 
+(defn operations->map [m]
+  (into {} (map (juxt :rel :href) (:operations m))))
+
 (defn is-id [m id]
   (is-key-value m :id id))
 
