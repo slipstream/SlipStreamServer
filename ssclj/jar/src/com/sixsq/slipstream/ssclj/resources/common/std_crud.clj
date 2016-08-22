@@ -93,8 +93,10 @@
    returned unchanged."
   [{:keys [href] :as resource}]
   (if href
-    (-> (db/retrieve href {})
+    (-> (crud/retrieve-by-id href)
         (u/strip-common-attrs)
+        (u/strip-service-attrs)
+        (dissoc :acl)
         (merge resource)
         (dissoc :href))
     resource))

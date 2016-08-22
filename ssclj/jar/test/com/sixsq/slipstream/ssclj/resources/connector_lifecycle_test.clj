@@ -12,7 +12,8 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
@@ -138,15 +139,13 @@
           (ltu/is-status 404)))
 
     ;; abbreviated lifecycle using href to template instead of copy
-    ;; FIXME: not working, can't resolve href
-    #_(let [uri (-> (session (ring-app))
+    (let [uri (-> (session (ring-app))
                   (content-type "application/json")
                   (header authn-info-header "root ADMIN")
                   (request base-uri
                            :request-method :post
                            :body (json/write-str href-create))
                   (ltu/body->json)
-                  (du/show)
                   (ltu/is-status 201)
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]

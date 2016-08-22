@@ -2,7 +2,8 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.db.impl :as db]))
 
 ;;
 ;; CRUD dispatch functions
@@ -13,6 +14,10 @@
   (-> request
       (get-in [:params :resource-name])
       u/lisp-to-camelcase))
+
+(defn resource-id-dispatch
+  [resource-id]
+  (first (u/split-resource-id resource-id)))
 
 (defn resource-name-and-action-dispatch
   [request]
@@ -42,6 +47,12 @@
   [request]
   (throw (u/ex-bad-method request)))
 
+(defmulti retrieve-by-id resource-id-dispatch)
+
+(defmethod retrieve-by-id :default
+  [resource-id]
+  (db/retrieve resource-id {}))
+
 (defmulti edit resource-name-dispatch)
 
 (defmethod edit :default
@@ -60,13 +71,6 @@
 (defmethod do-action :default
   [request]
   (throw (u/ex-bad-action request (resource-name-and-action-dispatch request))))
-
-
-(defn resource-name-collection-dispatch
-  [request collection]
-  (-> request
-      (get-in [:params :resource-name])
-      u/lisp-to-camelcase))
 
 ;;
 ;; Resource schema validation.

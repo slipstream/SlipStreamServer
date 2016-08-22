@@ -59,10 +59,10 @@
           href (str id "/describe")
           ops [{:rel (:describe c/action-uri) :href href}]]
       (-> resource
-          (merge {:id id
+          (merge {:id          id
                   :resourceURI resource-uri
-                  :acl resource-acl
-                  :operations ops})
+                  :acl         resource-acl
+                  :operations  ops})
           u/update-timestamps))))
 
 (defn register
@@ -141,6 +141,15 @@
       (-> (get @templates id)
           (a/can-view? request)
           (u/json-response)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+;; must override the default implementation so that the
+;; data can be pulled from the atom rather than the database
+(defmethod crud/retrieve-by-id resource-url
+  [id]
+  (try
+    (get @templates id)
     (catch ExceptionInfo ei
       (ex-data ei))))
 

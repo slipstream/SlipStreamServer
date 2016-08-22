@@ -25,6 +25,11 @@
 ;; initialize must to called to pull in ConnectorTemplate test examples
 (dyn/initialize)
 
+(deftest check-retrieve-by-id
+  (let [id (str resource-url "/" example/cloud-service-type)
+        doc (crud/retrieve-by-id id)]
+    (is (= id (:id doc)))))
+
 (deftest lifecycle
 
   ;; anonymous query is not authorized

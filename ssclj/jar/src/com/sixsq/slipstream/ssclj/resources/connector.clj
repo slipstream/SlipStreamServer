@@ -89,11 +89,10 @@
           "Transforms the ConnectorTemplate into a Connector resource."
           :cloudServiceType)
 
-;; default implementation just copies referenced template into connector
-;; can be used if no transformation needs to be done
+;; default implementation just updates the resourceURI
 (defmethod tpl->connector :default
   [resource]
-  (std-crud/resolve-hrefs resource))
+  (assoc resource :resourceURI resource-uri))
 
 ;;
 ;; CRUD operations
@@ -106,7 +105,7 @@
   [{:keys [body] :as request}]
   (let [body (-> body
                  (assoc :resourceURI create-uri)
-                 (std-crud/resolve-hrefs)
+                 (std-crud/resolve-hrefs)                   ;; FIXME: authz must be taken into account
                  (crud/validate)
                  (:connectorTemplate)
                  (tpl->connector))]

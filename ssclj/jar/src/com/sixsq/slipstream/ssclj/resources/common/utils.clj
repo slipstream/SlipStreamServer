@@ -89,6 +89,14 @@
       (s/split #"/")
       first))
 
+(defn split-resource-id
+  "Provide a tuple of [type docid] for a resource ID.  For IDs
+   that don't have an identifier part (e.g. the CloudEntryPoint),
+   a single element vector will be returned."
+  [id]
+  (let [[type docid] (s/split id #"/")]
+    [type (if docid docid type)]))
+
 ;;
 ;; utilities for handling common attributes
 ;;
@@ -133,7 +141,7 @@
   (let [checker (schema/checker schema)]
     (fn [resource]
       (if-let [msg (checker resource)]
-        (let [msg      (str "resource does not satisfy defined schema: " msg)
+        (let [msg (str "resource does not satisfy defined schema: " msg)
               response (-> {:status 400 :message msg}
                            json-response
                            (r/status 400))]
@@ -169,7 +177,7 @@
 (defn- clojurify
   [exp]
   (cond
-    (instance? java.util.Map exp)  (into {} (map (fn[[k v]] [(keyword k) v]) exp))
+    (instance? java.util.Map exp) (into {} (map (fn [[k v]] [(keyword k) v]) exp))
     (instance? java.util.List exp) (vec exp)
     :else exp))
 
