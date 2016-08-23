@@ -36,8 +36,6 @@ import org.simpleframework.xml.Root;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-import com.google.gson.annotations.Expose;
-
 /**
  * Unit test see
  *
@@ -55,20 +53,16 @@ public abstract class Parameter<T> implements Serializable {
 	private T container;
 
 	@Attribute
-	@Expose
 	private String name;
 
 	@Column(length = 65536)
-	@Expose
 	private String value;
 
 	@Attribute(required = false)
 	@Column(length = 1024)
-	@Expose
 	private String description;
 
 	@Attribute(required = false)
-	@Expose
 	private String category;
 
 	@Attribute(required = false)
@@ -76,25 +70,20 @@ public abstract class Parameter<T> implements Serializable {
 	private transient String inheritedFromUri;
 
 	@Attribute(required = false)
-	@Expose
 	private boolean mandatory = false;
 
 	@Attribute(required = false)
-	@Expose
 	private ParameterType type = ParameterType.String;
 
 	@Attribute(required = false)
-	@Expose
 	private boolean readonly;
 
 	@Element(data = true, required = false)
 	@Column(length = 65536)
-	@Expose
 	private String instructions = null;
 
 	@ElementArray(required = false)
 	@Column(length = 65536)
-	@Expose
 	private String[] enumValues;
 
 	@Attribute(required = false)

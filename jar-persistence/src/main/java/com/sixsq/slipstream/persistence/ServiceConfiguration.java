@@ -32,8 +32,6 @@ import java.util.Map;
 
 import com.sixsq.slipstream.db.serializers.ServiceConfigSerializer;
 
-import com.google.gson.annotations.Expose;
-
 @SuppressWarnings("serial")
 @Entity
 @NamedQueries({ @NamedQuery(name = "latestConfiguration", query = "SELECT c FROM ServiceConfiguration c WHERE c.id = (SELECT MAX(c.id) FROM ServiceConfiguration c)") })
@@ -291,7 +289,6 @@ public class ServiceConfiguration extends
 	}
 
 	@Id
-	@Expose
 	String id;
 
 	public ServiceConfiguration() {

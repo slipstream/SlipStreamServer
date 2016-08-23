@@ -38,8 +38,6 @@ import org.simpleframework.xml.ElementMap;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 
-import com.google.gson.annotations.Expose;
-
 // The mapping between a parameterized class and its associated
 // parameter type must be given here.
 //
@@ -56,7 +54,6 @@ public abstract class Parameterized<S, T extends Parameter<S>> extends Metadata 
 	@MapKey(name = "name")
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
-	@Expose
 	protected Map<String, T> parameters = new ConcurrentHashMap<String, T>();
 
 	
