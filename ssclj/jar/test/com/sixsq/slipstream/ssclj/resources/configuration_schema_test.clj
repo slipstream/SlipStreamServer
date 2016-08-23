@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-schema-test
   (:require
     [com.sixsq.slipstream.ssclj.resources.configuration :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]
     [schema.core :as s]
     [expectations :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]))
@@ -12,7 +13,7 @@
                          :right     "ALL"}]})
 
 (let [timestamp "1964-08-25T10:00:00.0Z"
-      cfg (merge default-configuration
+      cfg (merge tpl/resource
                  {:id          (str resource-name "/slipstream")
                   :resourceURI resource-uri
                   :created     timestamp

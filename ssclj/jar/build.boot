@@ -85,7 +85,9 @@
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
-  test {:junit-output-to ""}
+  test {:junit-output-to ""
+        :namespaces
+        #{'com.sixsq.slipstream.ssclj.resources.configuration-lifecycle-test}}
   install {:pom (str (get-env :project))}
   push {:pom (str (get-env :project))}
   )
