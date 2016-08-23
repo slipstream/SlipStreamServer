@@ -8,8 +8,6 @@
     [com.sixsq.slipstream.db.serializers.ServiceConfigSerializer :refer :all])
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]
-    [com.sixsq.slipstream.persistence ParameterType]
-    [com.sixsq.slipstream.persistence ServiceConfigurationParameter]
     ))
 
 (def sc-from-xml (tu/conf-xml->sc))
@@ -40,7 +38,7 @@
 (use-fixtures :once tu/fixture-start-es-db)
 
 ;; Tests
-(deftest test-sc->configuration-resource
+(deftest test-sc->cfg
   (is (= {} (sc->cfg (ServiceConfiguration.))))
   (let [conf (sc->cfg sc-from-xml)
         not-in-conf (keys-not-in-conf conf)]
@@ -49,8 +47,12 @@
 (deftest test-check-sc-schema
   (is (nil? (sch/check cr/Configuration (merge conf-extra (sc->cfg sc-from-xml))))))
 
+(deftest test-fail-store-if-no-default-in-db
+  (is (thrown? RuntimeException (-store cr/default-configuration))))
+
 (deftest test-save-load
-    (let [sc-to-es (-store sc-from-xml)
+    (let [_ (tu/db-add-default-config)
+          sc-to-es (-store sc-from-xml)
           sc-from-es (-load)]
       (is (not (nil? sc-from-es)))
       (is (= (sc-get-param-value sc-to-es "slipstream.registration.email")

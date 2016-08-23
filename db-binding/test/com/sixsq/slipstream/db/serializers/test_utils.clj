@@ -4,6 +4,7 @@
     [clojure.test :refer :all]
     [clojure.data.xml :as xml]
     [clojure.java.io :as io]
+    [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.serializers.ServiceConfigSerializer :as scs])
@@ -12,37 +13,6 @@
     [com.sixsq.slipstream.persistence ParameterType]
     [com.sixsq.slipstream.persistence ServiceConfigurationParameter]
     ))
-
-(def default-configuration {:name                       "SlipStream"
-                            :description                "SlipStream Service Configuration"
-                            :serviceURL                 "https://localhost"
-                            :reportsLocation            "/var/tmp/slipstream/reports"
-                            :supportEmail               "support@example.com"
-                            :clientBootstrapURL         "https://localhost/downloads/slipstream.bootstrap"
-                            :clientURL                  "https://localhost/downloads/slipstreamclient.tgz"
-                            :connectorOrchPrivateSSHKey "/opt/slipstream/server/.ssh/id_rsa"
-                            :connectorOrchPublicSSHKey  "/opt/slipstream/server/.ssh/id_rsa.pub"
-                            :connectorLibcloudURL       "https://localhost/downloads/libcloud.tgz"
-
-                            :mail-username              "mailer"
-                            :mail-password              "change-me"
-                            :mail-host                  "smtp.example.com"
-                            :mail-port                  465
-                            :mail-ssl                   true
-                            :mail-debug                 true
-
-                            :quota-enable               true
-
-                            :registration-enable        true
-
-                            :prs-enable                 true
-                            :prs-endpoint               "http://localhost:8203/filter-rank"
-
-                            :metering-enable            false
-                            :metering-endpoint          "http://localhost:2005"
-
-                            :service-catalog-enable     false
-                            })
 
 (def xml-conf (.getPath (io/resource "configuration.xml")))
 
@@ -121,6 +91,12 @@
   []
   (db/set-impl! (esb/get-instance))
   (esb/set-client! (esb/create-test-client)))
+
+(defn db-add-default-config
+  []
+  (-> cr/default-configuration
+      scs/as-request
+      cr/add-impl))
 
 ;; Fixtures.
 (defn fixture-start-es-db

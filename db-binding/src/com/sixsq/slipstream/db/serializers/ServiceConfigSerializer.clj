@@ -3,7 +3,7 @@
     [clojure.set :as set]
     [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [create-identity-map]]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
     [com.sixsq.slipstream.db.impl :as db])
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]
@@ -20,7 +20,11 @@
             :right     "MODIFY"}]}
   )
 
-(def user-roles ["root" ["ADMIN"]])
+(def ^:const resource-uuid "slipstream")
+
+(def user-roles-str "me ADMIN")
+
+(def user-roles ((juxt first rest) (s/split user-roles-str #"\s+")))
 
 (def valid-acl {:owner {:principal "me" :type "USER"}})
 
@@ -84,44 +88,71 @@
   [p]
   (and (contains? global-categories (.getCategory p)) (param-name p)))
 
+(defn sc-get-global-params
+  [sc]
+  (for [p (vals (.getParameters sc))]
+    (when (param-global-valid? p)
+      [(param-name p) (param-value p)])))
+
+(defn set-id
+  [cfg]
+  (assoc cfg :id (str cr/resource-url "/slipstream")))
+
 (defn sc->cfg
   [sc]
-  (into {}
-        (for [p (vals (.getParameters sc))]
-          (when (param-global-valid? p)
-            [(param-name p) (param-value p)]))))
+  (into {} (sc-get-global-params sc)))
 
-(defn ->request
+(defn as-request
   [cfg]
-  {:identity (create-identity-map user-roles)
-   :body     cfg})
+  (let [request {:params  {:uuid resource-uuid}
+                 :body    cfg
+                 :headers {aih/authn-info-header user-roles-str}}]
+    ((aih/wrap-authn-info-header identity) request)))
+
+(defn throw-on-resp-error
+  [resp]
+  (if (> (:status resp) 400)
+    (let [msg (-> resp :body :message)]
+      (throw (RuntimeException. msg (ex-info msg (:body resp)))))
+    resp))
+
+(defn display
+  [d & [msg]]
+  (println msg)
+  (clojure.pprint/pprint d)
+  d)
+
+(defn db-dump
+  []
+  (clojure.pprint/pprint (com.sixsq.slipstream.db.es.es-util/dump
+                           com.sixsq.slipstream.db.es.es-binding/*client*
+                           com.sixsq.slipstream.db.es.es-binding/index-name cr/resource-url)))
 
 (defn -store
   [^ServiceConfiguration sc]
   (-> sc
       sc->cfg
-      ->request
-      cr/add-impl)
+      set-id
+      as-request
+      cr/edit-impl
+      throw-on-resp-error)
   sc)
 
 (defn build-sc-param
-  [cfg-pk cfg cfg-desc]
+  [cfg-pk cfg]
   (ServiceConfigurationParameter. (rname->param cfg-pk)
                                   (str (cfg-pk cfg))
-                                  (or (:description (cfg-pk cfg-desc)) "")))
+                                  ""))
 
 (defn cfg->sc
-  [cfg cfg-desc]
+  [cfg]
   (let [sc (ServiceConfiguration.)]
     (doseq [cfg-pk (keys cfg)]
       (if (contains? rname->param cfg-pk)
-        (.setParameter sc (build-sc-param cfg-pk cfg cfg-desc))))
+        (.setParameter sc (build-sc-param cfg-pk cfg))))
     sc))
 
 (defn -load
   []
-  (let [cfg (db/retrieve "configuration/slipstream" {:user-name "konstan" :user-roles ["ADMIN"]})
-        _ (println "CFG: ")
-        _ (clojure.pprint/pprint cfg)
-        cfg-desc {} #_(:_source (db/retrieve "ConfigurationDescription" {:user-name "konstan" :user-roles ["ADMIN"]}))]
-    (cfg->sc cfg cfg-desc)))
+  (let [cfg (db/retrieve "configuration/slipstream" {:user-name "konstan" :user-roles ["ADMIN"]})]
+    (cfg->sc cfg)))
