@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.serializers.ServiceConfigSerializer :as scs])
+    [com.sixsq.slipstream.db.serializers.service-config-serializer :as scs])
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]
     [com.sixsq.slipstream.persistence ParameterType]

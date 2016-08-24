@@ -1,7 +1,7 @@
 (def +version+ "3.11-SNAPSHOT")
 
 (set-env!
-  :project 'com.sixsq.slipstream/SlipStreamDbBinding-jar
+  :project 'com.sixsq.slipstream/SlipStreamDbSerializers-jar
 
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
@@ -26,18 +26,11 @@
 
                    [environ]
 
-                   ; FIXME: needed this one after requiring
+                   ; FIXME: need this one after requiring
                    ; com.sixsq.slipstream.ssclj.middleware.authn-info-header
                    [cheshire]
 
                    [org.clojure/data.xml]
-                   [clj-time]
-                   [me.raynes/fs]
-                   [org.clojure/data.json]
-                   [org.clojure/tools.logging]
-                   [org.elasticsearch/elasticsearch]
-                   [prismatic/schema]
-                   [ring/ring-json]
                    [superstring]
 
                    [com.sixsq.slipstream/SlipStreamPersistence]
@@ -60,7 +53,7 @@
 
 (set-env!
   :source-paths #{"test"}
-  :resource-paths #{"src" "resources"})
+  :resource-paths #{"src" "test-resources"})
 
 (task-options!
   pom {:project (get-env :project)
@@ -83,10 +76,11 @@
            (pom)
            (sift :include #{#".*_test\.clj"}
                  :invert true)
-           (aot :all true)
-            #_(uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
-                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
-                               #".*log4j\.properties" })
+           (aot :namespace #{'com.sixsq.slipstream.db.serializers.service-config-serializer
+                             'com.sixsq.slipstream.db.serializers.utils})
+           (uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
+                             #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
+                             #".*log4j\.properties" })
            (jar)))
 
 (deftask mvn-test
