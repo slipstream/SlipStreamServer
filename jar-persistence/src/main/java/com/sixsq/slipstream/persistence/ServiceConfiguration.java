@@ -30,7 +30,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sixsq.slipstream.db.serializers.ServiceConfigSerializer;
+import clojure.java.api.Clojure;
+import clojure.lang.IFn;
 
 @SuppressWarnings("serial")
 @Entity
@@ -383,17 +384,15 @@ public class ServiceConfiguration extends
 	}
 
 	public static ServiceConfiguration load() {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("latestConfiguration");
-		ServiceConfiguration sc = (ServiceConfiguration) q.getSingleResult();
-		em.close();
-		return sc;
+		IFn load = Clojure.var("com.sixsq.slipstream.db.serializers.service-config-serializer", "load");
+		return (ServiceConfiguration) load.invoke();
 	}
 
 	public ServiceConfiguration store() {
 		validate();
 		setId();
-		return (ServiceConfiguration) ServiceConfigSerializer.store(this);
+		IFn store = Clojure.var("com.sixsq.slipstream.db.serializers.service-config-serializer", "store");
+		return (ServiceConfiguration) store.invoke(this);
 	}
 
 	@Override
