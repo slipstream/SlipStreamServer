@@ -1,7 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector
   (:require
-    [clojure.tools.logging :as log]
-    [schema.core :as s]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -32,7 +30,6 @@
 ;; schemas
 ;;
 
-;; FIXME: Need to dynamically load connector schema definitions
 (def Connector
   (merge c/CommonAttrs
          c/AclAttr
@@ -42,14 +39,11 @@
   (merge c/CreateAttrs
          {:connectorTemplate tpl/ConnectorTemplateRef}))
 
-
 ;;
-;; multimethods for validation
+;; validate subclasses of connectors
 ;;
 
 (defmulti validate-subtype
-          "Validates the given resource against the specific
-           Connector subtype schema."
           :cloudServiceType)
 
 (defmethod validate-subtype :default
@@ -60,21 +54,25 @@
   [resource]
   (validate-subtype resource))
 
-(defmulti create-validate-subtype
-          "Validates the create template resource against the specific
-           Connector subtype schema."
-          #(get-in % [:connectorTemplate :cloudServiceType]))
+;;
+;; validate create requests for subclasses of connectors
+;;
+
+(defn dispatch-on-cloud-service-type [resource]
+  (get-in resource [:connectorTemplate :cloudServiceType]))
+
+(defmulti create-validate-subtype dispatch-on-cloud-service-type)
 
 (defmethod create-validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown Connector create type: " (:cloudServiceType resource)) resource)))
+  (throw (ex-info (str "unknown Connector create type: " (dispatch-on-cloud-service-type resource)) resource)))
 
 (defmethod crud/validate create-uri
   [resource]
   (create-validate-subtype resource))
 
 ;;
-;; multimethods for operations
+;; multimethod for ACLs
 ;;
 
 (defmethod crud/add-acl resource-uri
