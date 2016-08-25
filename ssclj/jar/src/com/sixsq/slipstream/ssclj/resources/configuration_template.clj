@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.connector-template
+(ns com.sixsq.slipstream.ssclj.resources.configuration-template
   (:require
     [clojure.tools.logging :as log]
     [schema.core :as s]
@@ -8,13 +8,13 @@
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a])
   (:import (clojure.lang ExceptionInfo)))
 
-(def ^:const resource-tag :connectorTemplates)
+(def ^:const resource-tag :configurationTemplates)
 
-(def ^:const resource-name "ConnectorTemplate")
+(def ^:const resource-name "ConfigurationTemplate")
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "ConnectorTemplateCollection")
+(def ^:const collection-name "ConfigurationTemplateCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
@@ -33,7 +33,7 @@
                               :right     "VIEW"}]})
 
 ;;
-;; atom to keep track of the loaded ConnectorTemplate resources
+;; atom to keep track of the loaded ConfigurationTemplate resources
 ;;
 (def templates (atom {}))
 (def descriptions (atom {}))
@@ -52,9 +52,9 @@
 (defn complete-resource
   "Completes the given document with server-managed information:
    resourceURI, timestamps, operations, and ACL."
-  [{:keys [cloudServiceType] :as resource}]
-  (when cloudServiceType
-    (let [id (str resource-url "/" cloudServiceType)
+  [{:keys [service] :as resource}]
+  (when service
+    (let [id (str resource-url "/" service)
           href (str id "/describe")
           ops [{:rel (:describe c/action-uri) :href href}]]
       (-> resource
@@ -65,60 +65,60 @@
           u/update-timestamps))))
 
 (defn register
-  "Registers a given ConnectorTemplate resource and its description
+  "Registers a given ConfigurationTemplate resource and its description
    with the server.  The resource document (resource) and the description
    (desc) must be valid.  The key will be used to create the id of
-   the resource as 'connector-template/key'."
+   the resource as 'configuration-template/key'."
   [resource desc]
   (when-let [full-resource (complete-resource resource)]
     (let [id (:id full-resource)]
       (swap! templates assoc id full-resource)
-      (log/info "loaded ConnectorTemplate" id)
+      (log/info "loaded ConfigurationTemplate" id)
       (when desc
         (let [acl (:acl full-resource)
               full-desc (assoc desc :acl acl)]
           (swap! descriptions assoc id full-desc))
-        (log/info "loaded ConnectorTemplate description" id)))))
+        (log/info "loaded ConfigurationTemplate description" id)))))
 
 ;;
 ;; schemas
 ;;
 
-(def ConnectorTemplateAttrs
-  {:cloudServiceType c/NonBlankString})
+(def ConfigurationTemplateAttrs
+  {:service c/NonBlankString})
 
-(def ConnectorTemplate
+(def ConfigurationTemplate
   (merge c/CommonAttrs
          c/AclAttr
-         ConnectorTemplateAttrs))
+         ConfigurationTemplateAttrs))
 
-(def ConnectorTemplateRef
+(def ConfigurationTemplateRef
   (s/constrained
-    (merge ConnectorTemplateAttrs
+    (merge ConfigurationTemplateAttrs
            {(s/optional-key :href) c/NonBlankString})
     seq 'not-empty?))
 
-(def ConnectorTemplateDescription
+(def ConfigurationTemplateDescription
   (merge c/CommonParameterDescription
-         {:cloudServiceType {:displayName "Cloud Service Type"
-                             :category    "general"
-                             :description "type of cloud service targeted by connector"
-                             :type        "string"
-                             :mandatory   true
-                             :readOnly    true
-                             :order       0}}))
+         {:service {:displayName "Service"
+                    :category    "general"
+                    :description "identifies the service to be configured"
+                    :type        "string"
+                    :mandatory   true
+                    :readOnly    true
+                    :order       0}}))
 ;;
 ;; multimethods for validation
 ;;
 
 (defmulti validate-subtype
           "Validates the given resource against the specific
-           ConnectorTemplate subtype schema."
-          :cloudServiceType)
+           ConfigurationTemplate subtype schema."
+          :service)
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown ConnectorTemplate type: " (:cloudServiceType resource)) resource)))
+  (throw (ex-info (str "unknown ConfigurationTemplate type: " (:service resource)) resource)))
 
 (defmethod crud/validate
   resource-uri
