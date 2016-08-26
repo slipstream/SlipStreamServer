@@ -1,12 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-internal
   (:require
+    [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as tpl]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.auth.sign :as sg]))
+    [com.sixsq.slipstream.auth.sign :as sg]
+    [clj-time.format :as time-fmt]))
 
 (def ^:const authn-method "internal")
 
@@ -18,8 +20,7 @@
   tpl/SessionTemplateAttrs)
 
 (def Session
-  (merge p/Session
-         SessionAttrs))
+  p/Session)
 
 (def SessionCreate
   (merge c/CreateAttrs
@@ -51,13 +52,15 @@
 ;; transform template into session resource
 ;;
 (defn create-session [{:keys [username]} headers]
-  (crud/new-identifier
-    {:authnMethod authn-method
-     :username    username
-     :virtualHost (:slipstream-ssl-server-hostname headers)
-     :clientIP    (:x-real-ip headers)
-     :expiry      (sg/expiry-timestamp)}
-    p/resource-name))
+  (let [virtual-host (:slipstream-ssl-server-hostname headers)
+        client-ip (:x-real-ip headers)]
+    (crud/new-identifier
+      (cond-> {:authnMethod authn-method
+               :username    username
+               :expiry      (time-fmt/unparse (:date-time time-fmt/formatters) (sg/expiry-timestamp))}
+              virtual-host (assoc :virtualHost virtual-host)
+              client-ip (assoc :clientIP client-ip))
+      p/resource-name)))
 
 (defn cookie-header [uuid token]
   (let [cookie-name (str "slipstream." uuid)]

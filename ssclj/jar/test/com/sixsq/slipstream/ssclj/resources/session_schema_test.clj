@@ -1,9 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-schema-test
   (:require
     [com.sixsq.slipstream.ssclj.resources.session :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.session-template-internal :as tpl]
     [schema.core :as s]
-    [expectations :refer :all]))
+    [clojure.test :refer [is]]))
 
 (def valid-acl {:owner {:principal "::ADMIN"
                         :type      "ROLE"}
@@ -17,9 +16,13 @@
            :created     timestamp
            :updated     timestamp
            :acl         valid-acl
-           :authnMethod "internal"}]
+           :authnMethod "internal"
+           :username    "ssuser"
+           :virtualHost "nuv.la"
+           :clientIP    "127.0.0.1"
+           :expiry      timestamp}]
 
-  (expect nil? (s/check Session cfg))
-  (expect (s/check Session (dissoc cfg :created)))
-  (expect (s/check Session (dissoc cfg :updated)))
-  (expect (s/check Session (dissoc cfg :acl))))
+  (is (nil? (s/check Session cfg)))
+  (is (s/check Session (dissoc cfg :created)))
+  (is (s/check Session (dissoc cfg :updated)))
+  (is (s/check Session (dissoc cfg :acl))))

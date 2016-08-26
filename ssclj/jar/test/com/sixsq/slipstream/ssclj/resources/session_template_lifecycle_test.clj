@@ -33,23 +33,23 @@
 (deftest lifecycle
 
   ;; anonymous query is not authorized
-  (-> (session (ring-app))
+  #_(-> (session (ring-app))
       (request base-uri)
       (ltu/body->json)
       (ltu/is-status 403))
 
   ;; user query is not authorized
-  (-> (session (ring-app))
+  #_(-> (session (ring-app))
       (header authn-info-header "jane USER")
       (request base-uri)
       (ltu/body->json)
       (ltu/is-status 403))
 
-  ;; query as ADMIN should work correctly
+  ;; all view actions should be available to anonymous users
   (let [session (session (ring-app))
         entries (-> session
                     (content-type "application/json")
-                    (header authn-info-header "root ADMIN")
+                    #_(header authn-info-header "root ADMIN")
                     (request base-uri)
                     (ltu/body->json)
                     (ltu/is-status 200)
@@ -96,22 +96,22 @@
         (is (crud/validate entry-body))
 
         ;; anonymous access not permitted
-        (-> session
+        #_(-> session
             (content-type "application/json")
             (request entry-url)
             (ltu/is-status 403))
-        (-> session
+        #_(-> session
             (content-type "application/json")
             (request describe-url)
             (ltu/is-status 403))
 
         ;; user cannot access
-        (-> session
+        #_(-> session
             (content-type "application/json")
             (header authn-info-header "jane USER")
             (request entry-url)
             (ltu/is-status 403))
-        (-> session
+        #_(-> session
             (content-type "application/json")
             (header authn-info-header "jane USER")
             (request describe-url)

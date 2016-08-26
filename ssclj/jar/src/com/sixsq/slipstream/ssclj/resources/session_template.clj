@@ -22,13 +22,19 @@
 
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
-                   :rules [{:principal "ADMIN"
+                   :rules [{:principal "ANON"
+                            :type      "ROLE"
+                            :right     "VIEW"}
+                           {:principal "USER"
                             :type      "ROLE"
                             :right     "VIEW"}]})
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
-                     :rules [{:principal "ADMIN"
+                     :rules [{:principal "ANON"
+                              :type      "ROLE"
+                              :right     "VIEW"}
+                             {:principal "USER"
                               :type      "ROLE"
                               :right     "VIEW"}]})
 

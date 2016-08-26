@@ -6,7 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
-    [com.sixsq.slipstream.db.impl :as db]))
+    [com.sixsq.slipstream.db.impl :as db]
+    [schema.core :as s]))
 
 (def ^:const resource-tag :sessions)
 
@@ -26,6 +27,12 @@
                              :type      "ROLE"}
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
+                              :right     "MODIFY"}
+                             {:principal "USER"
+                              :type      "ROLE"
+                              :right     "MODIFY"}
+                             {:principal "ANON"
+                              :type      "ROLE"
                               :right     "MODIFY"}]})
 ;;
 ;; schemas
@@ -34,11 +41,11 @@
 (def Session
   (merge c/CommonAttrs
          c/AclAttr
-         {:authnMethod c/NonBlankString
-          :username    c/NonBlankString
-          :virtualHost c/NonBlankString
-          :clientIP    c/NonBlankString
-          :expiry      c/NonBlankString}))
+         {:authnMethod                  c/NonBlankString
+          :username                     c/NonBlankString
+          (s/optional-key :virtualHost) c/NonBlankString
+          (s/optional-key :clientIP)    c/NonBlankString
+          :expiry                       c/Timestamp}))
 
 (def SessionCreate
   (merge c/CreateAttrs
@@ -117,6 +124,7 @@
     {}))
 
 ;; requires a SessionTemplate to create new Session
+;; FIXME: Must return the cookie to the user on success.
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
@@ -151,3 +159,11 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+(defmethod crud/add-acl resource-uri
+  [{:keys [username] :as resource} _]
+  (assoc resource :acl {:owner {:principal username
+                                :type      "USER"}
+                        :rules [{:principal username
+                                 :type      "USER"
+                                 :right     "MODIFY"}]}))
