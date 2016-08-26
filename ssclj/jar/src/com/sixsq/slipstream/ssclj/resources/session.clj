@@ -5,7 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]))
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.db.impl :as db]))
 
 (def ^:const resource-tag :sessions)
 
@@ -33,7 +34,11 @@
 (def Session
   (merge c/CommonAttrs
          c/AclAttr
-         {:authnMethod c/NonBlankString}))
+         {:authnMethod c/NonBlankString
+          :username    c/NonBlankString
+          :virtualHost c/NonBlankString
+          :clientIP    c/NonBlankString
+          :expiry      c/NonBlankString}))
 
 (def SessionCreate
   (merge c/CreateAttrs
@@ -83,32 +88,45 @@
 ;; template processing
 ;;
 
-(defmulti tpl->session
-          "Transforms the SessionTemplate into a Session resource."
-          :authnMethod)
+(defn dispatch-conversion
+  [resource _]
+  (:authnMethod resource))
+
+(defmulti tpl->session dispatch-conversion)
 
 ;; default implementation just updates the resourceURI
 (defmethod tpl->session :default
-  [resource]
-  (assoc resource :resourceURI resource-uri))
+  [resource request]
+  [nil (assoc resource :resourceURI resource-uri)])
 
 ;;
 ;; CRUD operations
 ;;
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+(defn add-impl [{:keys [id body] :as request}]
+  (a/can-modify? {:acl collection-acl} request)
+  (db/add
+    resource-name
+    (-> body
+        u/strip-service-attrs
+        (assoc :id id)
+        (assoc :resourceURI resource-uri)
+        u/update-timestamps
+        (crud/add-acl request)
+        crud/validate)
+    {}))
 
 ;; requires a SessionTemplate to create new Session
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        body (-> body
-                 (assoc :resourceURI create-uri)
-                 (std-crud/resolve-hrefs idmap)
-                 (crud/validate)
-                 (:sessionTemplate)
-                 (tpl->session))]
-    (add-impl (assoc request :body body))))
+        [cookie-header body] (-> body
+                                 (assoc :resourceURI create-uri)
+                                 (std-crud/resolve-hrefs idmap)
+                                 (crud/validate)
+                                 (:sessionTemplate)
+                                 (tpl->session request))]
+    (add-impl (assoc request :id (:id body) :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
