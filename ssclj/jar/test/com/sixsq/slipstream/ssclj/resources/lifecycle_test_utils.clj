@@ -15,31 +15,16 @@
     [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.db.es.es-util :as esu]))
 
-(defn body->json
-  [m]
-
-  (if-let [body (get-in m [:response :body])]
-    (let [updated-body (if (string? body)
-                         (json/read-str body :key-fn keyword :eof-error? false :eof-value {})
-                         (json/read (io/reader body) :key-fn keyword :eof-error? false :eof-value {}))]
-      (update-in m [:response :body] (constantly updated-body)))
-    m))
-
 (defn is-status
   [m status]
-  (let [actual (get-in m [:response :status])
-        result (= status (get-in m [:response :status]))]
-    (when-not result
-      (println "!!!! Expecting status " status " got " actual))
-    (is result)
+  (let [actual (get-in m [:response :status])]
+    (is (= status actual) (str "!!!! Expecting status " status " got " actual))
     m))
 
 (defn is-key-value
   ([m f k v]
    (let [actual (-> m :response :body k f)]
-     (when-not (= v actual)
-       (println "???? Expecting " v " got " actual " for " k))
-     (is (= v actual))
+     (is (= v actual) (str "!!!! Expecting " v " got " actual " for " k))
      m))
   ([m k v]
    (is-key-value m identity k v)))
@@ -54,28 +39,25 @@
   (is-key-value m :resourceURI type-uri))
 
 (defn is-operation-present [m expected-op]
-  (let [operations (get-in m [:response :body :operations])
-        op         (some #(.endsWith % expected-op) (map :rel operations))]
-    (when-not op (println "???? Missing " expected-op " in " (map :rel operations)))
-    (is op))
+  (let [ops (get-in m [:response :body :operations])
+        op (some #(.endsWith % expected-op) (map :rel ops))]
+    (is op (str "!!!! Missing " expected-op " in " (map :rel ops))))
   m)
 
 (defn is-operation-absent [m absent-op]
-  (let [operations (get-in m [:response :body :operations])
-        op         (some #(.endsWith % absent-op) (map :rel operations))]
-    (when op (println "???? Present " absent-op " in " (map :rel operations)))
-    (is (nil? op)))
+  (let [ops (get-in m [:response :body :operations])
+        op (some #(.endsWith % absent-op) (map :rel ops))]
+    (is (nil? op) (str "!!!! Present " absent-op " in " (map :rel ops))))
   m)
-
-(defn operations->map [m]
-  (into {} (map (juxt :rel :href) (:operations m))))
 
 (defn is-id [m id]
   (is-key-value m :id id))
 
 (defn is-count [m f]
   (let [count (get-in m [:response :body :count])]
-    (is (f count))
+    (if (fn? f)
+      (is (f count))
+      (is (= count f)))
     m))
 
 (defn does-body-contain [m v]
@@ -84,8 +66,21 @@
 
 (defn location [m]
   (let [uri (get-in m [:response :headers "Location"])]
-    (is uri)
+    (is uri (str "!!!! Location missing from response"))
     uri))
+
+(defn operations->map [m]
+  (into {} (map (juxt :rel :href) (:operations m))))
+
+(defn body->json
+  [m]
+
+  (if-let [body (get-in m [:response :body])]
+    (let [updated-body (if (string? body)
+                         (json/read-str body :key-fn keyword :eof-error? false :eof-value {})
+                         (json/read (io/reader body) :key-fn keyword :eof-error? false :eof-value {}))]
+      (update-in m [:response :body] (constantly updated-body)))
+    m))
 
 (defn entries [m k]
   (get-in m [:response :body k]))
