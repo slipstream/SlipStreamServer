@@ -5,14 +5,18 @@
     [clojure.data.xml :as xml]
     [clojure.java.io :as io]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
+    [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
+    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as cts]
+    [com.sixsq.slipstream.ssclj.resources.configuration-template :as crtpl]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.serializers.service-config-serializer :as scs])
+    [com.sixsq.slipstream.db.serializers.service-config-serializer :as scs]
+    [com.sixsq.slipstream.db.serializers.utils :as u])
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]
     [com.sixsq.slipstream.persistence ParameterType]
-    [com.sixsq.slipstream.persistence ServiceConfigurationParameter]
-    ))
+    [com.sixsq.slipstream.persistence ServiceConfigurationParameter]))
+
 
 (def xml-conf (.getPath (io/resource "configuration.xml")))
 
@@ -87,6 +91,12 @@
         (.setParameter sc scp)))
     sc))
 
+(defn complete-resource
+  [cfg]
+  (-> cfg
+      (assoc :service crs/service)
+      crtpl/complete-resource))
+
 (defn create-es-client
   []
   (db/set-impl! (esb/get-instance))
@@ -94,9 +104,11 @@
 
 (defn db-add-default-config
   []
-  (-> cr/default-configuration
+  (-> cts/resource
+      complete-resource
       scs/as-request
       cr/add-impl))
+
 
 ;; Fixtures.
 (defn fixture-start-es-db

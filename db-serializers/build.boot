@@ -32,6 +32,7 @@
 
                    [org.clojure/data.xml]
                    [superstring]
+                   ;[net.java.dev.jna/jna]
 
                    [com.sixsq.slipstream/SlipStreamPersistence]
                    [com.sixsq.slipstream/SlipStreamCljResources-jar]

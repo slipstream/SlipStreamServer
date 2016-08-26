@@ -5,7 +5,7 @@
   <packaging>pom</packaging>
   <version>3.11-SNAPSHOT</version>
   <name>SlipStreamDbSerializers (JAR)</name>
-  <description>DB (de)serialiazers of SlipStream entities to/from DB behind ssclj server (DEP)</description>
+  <description>DB (de)serialiazers of SlipStream entities to/from DB behind ssclj server (JAR)</description>
   <url>http://sixsq.com</url>
 
   <parent>

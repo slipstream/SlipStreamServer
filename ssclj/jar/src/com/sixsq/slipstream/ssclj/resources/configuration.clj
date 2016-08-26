@@ -133,3 +133,12 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+;;
+;; use name as the identifier
+;;
+
+(defmethod crud/new-identifier resource-name
+  [resource resource-name]
+  (if-let [new-id (:service resource)]
+    (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))

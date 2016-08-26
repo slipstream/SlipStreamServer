@@ -3,16 +3,16 @@
     [clojure.set :as set]
     [superstring.core :as s]
     [com.sixsq.slipstream.db.serializers.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.db :as udb]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
+    [com.sixsq.slipstream.ssclj.resources.configuration-template :as crtpl]
+    [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih])
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]
-    [com.sixsq.slipstream.persistence ServiceConfigurationParameter])
-#_(:gen-class
-    :methods [#^{:static true} [store [com.sixsq.slipstream.persistence.ServiceConfiguration] com.sixsq.slipstream.persistence.ServiceConfiguration]
-              #^{:static true} [load [] com.sixsq.slipstream.persistence.ServiceConfiguration]]))
+    [com.sixsq.slipstream.persistence ServiceConfigurationParameter]))
 
-(def ^:const resource-uuid "slipstream")
+(def ^:const resource-uuid crs/service)
 
 (def ^:const global-categories #{"SlipStream_Advanced" "SlipStream_Support" "SlipStream_Basics"})
 
@@ -49,8 +49,8 @@
    :meteringEnable             "slipstream.metering.enable"
    :meteringEndpoint           "slipstream.metering.hostname"
 
-   :serviceCatalogEnable       "slipstream.service.catalog.enable"
-   })
+   :serviceCatalogEnable       "slipstream.service.catalog.enable"})
+
 
 (def param->rname (set/map-invert rname->param))
 
@@ -79,10 +79,6 @@
   [sc]
   (into {} (sc-get-global-params sc)))
 
-(defn set-id
-  [cfg]
-  (assoc cfg :id (str cr/resource-url "/" resource-uuid)))
-
 (defn as-request
   [& [body]]
   (let [request {:params  {:uuid resource-uuid}
@@ -101,7 +97,6 @@
   [^ServiceConfiguration sc]
   (-> sc
       sc->cfg
-      set-id
       as-request
       cr/edit-impl
       throw-on-resp-error)
