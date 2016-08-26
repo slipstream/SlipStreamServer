@@ -40,9 +40,6 @@
                    [ring/ring-json]
                    [superstring]
 
-                   [com.sixsq.slipstream/SlipStreamPersistence]
-                   [com.sixsq.slipstream/SlipStreamCljResources-jar]
-
                    ;; boot tasks
                    [boot-environ]
                    [adzerk/boot-test]
