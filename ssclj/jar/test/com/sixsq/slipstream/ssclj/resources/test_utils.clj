@@ -58,7 +58,7 @@
        (header authn-info-header auth-name)
        (request (str uri (urlencode-params query-string))
                 :content-type "application/x-www-form-urlencoded")
-       (t/body->json)))
+       (t/body->edn)))
 
   ([uri query-string auth-name http-verb body]
    (-> (session (ring-app))
@@ -68,7 +68,7 @@
                 :body (json/write-str body)
                 :request-method http-verb
                 :content-type "application/json")
-       (t/body->json))))
+       (t/body->edn))))
 
 (defn exec-post
   [uri auth-name body]

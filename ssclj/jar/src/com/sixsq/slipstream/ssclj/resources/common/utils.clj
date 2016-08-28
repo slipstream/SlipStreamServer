@@ -23,7 +23,9 @@
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.
 (defn de-camelcase [str]
-  (s/join "-" (map s/lower-case (s/split str #"(?=[A-Z])"))))
+  (if str
+    (s/join "-" (map s/lower-case (s/split str #"(?=[A-Z])")))
+    ""))
 
 (defn json-response
   [body]
