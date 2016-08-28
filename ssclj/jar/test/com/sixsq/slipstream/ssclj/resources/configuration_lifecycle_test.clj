@@ -122,6 +122,33 @@
                 (ltu/is-status 200)
                 (ltu/is-id id)))))
 
+      ;; try editing the configuration
+      (let [old-cfg (-> (session (ring-app))
+                        (header authn-info-header "root ADMIN")
+                        (request abs-uri)
+                        (ltu/body->json)
+                        (ltu/is-status 200)
+                        :response
+                        :body)
+            old-flag (:prsEnable old-cfg)
+            new-cfg (assoc old-cfg :prsEnable (not old-flag))
+            _ (-> (session (ring-app))
+                  (content-type "application/json")
+                  (header authn-info-header "root ADMIN")
+                  (request abs-uri
+                           :request-method :put
+                           :body (json/write-str new-cfg))
+                  (ltu/is-status 200))
+            reread-flag (-> (session (ring-app))
+                            (header authn-info-header "root ADMIN")
+                            (request abs-uri)
+                            (ltu/body->json)
+                            (ltu/is-status 200)
+                            :response
+                            :body
+                            :prsEnable)]
+        (is (not= old-flag reread-flag)))
+
       ;; admin delete succeeds
       (-> (session (ring-app))
           (header authn-info-header "root ADMIN")
