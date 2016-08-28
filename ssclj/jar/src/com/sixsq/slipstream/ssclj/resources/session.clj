@@ -7,7 +7,10 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.db.impl :as db]
-    [schema.core :as s]))
+    [schema.core :as s]
+    [superstring.core :as ss])
+  (:import (java.util Date TimeZone)
+           (java.text SimpleDateFormat)))
 
 (def ^:const resource-tag :sessions)
 
@@ -124,7 +127,6 @@
     {}))
 
 ;; requires a SessionTemplate to create new Session
-;; FIXME: Must return the cookie to the user on success.
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
@@ -134,7 +136,9 @@
                                  (crud/validate)
                                  (:sessionTemplate)
                                  (tpl->session request))]
-    (add-impl (assoc request :id (:id body) :body body))))
+    (-> (assoc request :id (:id body) :body body)
+        add-impl
+        (merge cookie-header))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
@@ -150,9 +154,27 @@
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
+(def ^:private sdf
+  (doto (SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss z")
+    (.setTimeZone (TimeZone/getTimeZone "GMT"))))
+
+(defn now-gmt
+  []
+  (.format sdf (Date.)))
+
+(defn cookie-name [{:keys [body]}]
+  (str "slipstream." (ss/replace (:resource-id body) "/" ".")))
+
+(defn delete-cookie [{:keys [status] :as response}]
+  (if (= status 200)
+    {:cookies {(cookie-name response) {:value {:token "INVALID"} :path "/" :max-age 0 :expires (now-gmt)}}}
+    {}))
+
 (defmethod crud/delete resource-name
   [request]
-  (delete-impl request))
+  (let [response (delete-impl request)
+        cookies (delete-cookie response)]
+    (merge response cookies)))
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 

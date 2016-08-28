@@ -62,12 +62,11 @@
               client-ip (assoc :clientIP client-ip))
       p/resource-name)))
 
-(defn cookie-header [uuid token]
-  (let [cookie-name (str "slipstream." uuid)]
-    {:cookies {cookie-name {:value token, :path "/"}}}))
+(defn cookie-header [cookie-name token]
+  {:cookies {cookie-name {:value token, :path "/"}}})
 
-(defn extract-uuid [{:keys [id]}]
-  (second (s/split id #"/")))
+(defn cookie-name [{:keys [id]}]
+  (str "slipstream." (s/replace id "/" ".")))
 
 (defmethod p/tpl->session authn-method
   [resource request]
@@ -77,4 +76,4 @@
         [ok? token] (auth-internal/create-token credentials)]
     (when ok?
       (let [session (create-session credentials headers)]
-        [(cookie-header (extract-uuid session) token) session]))))
+        [(cookie-header (cookie-name session) token) session]))))

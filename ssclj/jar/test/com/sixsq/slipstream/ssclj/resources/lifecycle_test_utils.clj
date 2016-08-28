@@ -25,6 +25,33 @@
       (update-in m [:response :body] (constantly updated-body)))
     m))
 
+(defmacro is-set-cookie
+  [m]
+  `((fn [m#]
+      (let [token# (-> m#
+                       (get-in [:response :cookies])
+                       vals
+                       first
+                       (get-in [:value :token]))
+            ok?# (and token#
+                      (re-matches #".+" token#)
+                      (not (re-matches #".*INVALID.*" token#)))]
+        (is ok?# (str "!!!! Set-Cookie header did not set cookie: " (or token# "nil")))
+        m#)) ~m))
+
+(defmacro is-unset-cookie
+  [m]
+  `((fn [m#]
+      (let [token# (-> m#
+                       (get-in [:response :cookies])
+                       vals
+                       first
+                       (get-in [:value :token]))
+            ok?# (and token#
+                      (re-matches #".*INVALID.*" token#))]
+        (is ok?# (str "!!!! Set-Cookie header did not invalidate cookie: " (or token# "nil")))
+        m#)) ~m))
+
 (defn is-status
   [m status]
   (let [actual (get-in m [:response :status])
@@ -55,14 +82,14 @@
 
 (defn is-operation-present [m expected-op]
   (let [operations (get-in m [:response :body :operations])
-        op         (some #(.endsWith % expected-op) (map :rel operations))]
+        op (some #(.endsWith % expected-op) (map :rel operations))]
     (when-not op (println "???? Missing " expected-op " in " (map :rel operations)))
     (is op))
   m)
 
 (defn is-operation-absent [m absent-op]
   (let [operations (get-in m [:response :body :operations])
-        op         (some #(.endsWith % absent-op) (map :rel operations))]
+        op (some #(.endsWith % absent-op) (map :rel operations))]
     (when op (println "???? Present " absent-op " in " (map :rel operations)))
     (is (nil? op)))
   m)

@@ -82,6 +82,7 @@
                              :body (json/write-str valid-create))
                     (ltu/body->json)
                     (ltu/is-status 201)
+                    (ltu/is-set-cookie)
                     (ltu/location))
             abs-uri (str p/service-context (u/de-camelcase uri))]
 
@@ -90,7 +91,8 @@
             (request abs-uri
                      :request-method :delete)
             (ltu/body->json)
-            (ltu/is-status 200)))
+            (ltu/is-status 200)
+            (ltu/is-unset-cookie)))
 
       ;; admin create must also succeed (although not terribly useful)
       (let [create-req (-> valid-create
@@ -104,6 +106,7 @@
                              :body (json/write-str create-req))
                     (ltu/body->json)
                     (ltu/is-status 201)
+                    (ltu/is-set-cookie)
                     (ltu/location))
             abs-uri (str p/service-context (u/de-camelcase uri))]
 
@@ -112,7 +115,8 @@
             (request abs-uri
                      :request-method :delete)
             (ltu/body->json)
-            (ltu/is-status 200)))
+            (ltu/is-status 200)
+            (ltu/is-unset-cookie)))
 
       ;; admin create with invalid template fails
       (-> (session (ring-app))
@@ -152,7 +156,6 @@
                           (ltu/body->json)
                           (ltu/is-status 200)
                           (ltu/is-resource-uri collection-uri)
-                          (du/show)
                           (ltu/is-count #(= 1 %))
                           (ltu/entries resource-tag))]
           (is ((set (map :id entries)) uri))
