@@ -1,12 +1,16 @@
 (ns slipstream.async.collector-test
   (:require
     [clojure.test :refer :all]
-    [slipstream.async.collector :refer :all])
+    [slipstream.async.collector :refer :all]
+    [com.sixsq.slipstream.db.serializers.utils :as su])
   (:import
     [com.sixsq.slipstream.connector.local LocalConnector]
     [com.sixsq.slipstream.connector.local LocalConnector]
     [com.sixsq.slipstream.persistence User]
     [com.sixsq.slipstream.persistence UserParameter]))
+
+;; NB! We are using Elaticsearch for some Java entities.
+(su/create-test-es-db)
 
 (deftest test-add-increasing-space
   (is (= [["joe" "exo" 0] ["joe" "aws" 10] ["mike" "exo" 20]]

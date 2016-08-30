@@ -23,6 +23,7 @@ package com.sixsq.slipstream.connector;
 
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -40,6 +41,7 @@ public class CollectorTest extends RunTestBase {
 
 	@BeforeClass
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
+		CljElasticsearchHelper.createAndInitDb();
 		UsageRecorder.muteForTests();
 		createUser();
 		for(Run r : Run.listAll()) {

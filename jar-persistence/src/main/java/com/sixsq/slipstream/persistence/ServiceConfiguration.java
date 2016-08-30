@@ -20,6 +20,7 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import org.simpleframework.xml.ElementMap;
 
@@ -30,7 +31,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import clojure.java.api.Clojure;
 import clojure.lang.IFn;
 
 @SuppressWarnings("serial")
@@ -39,7 +39,7 @@ import clojure.lang.IFn;
 public class ServiceConfiguration extends
 		Parameterized<ServiceConfiguration, ServiceConfigurationParameter> {
 
-	public final static String RESOURCE_URI_PREFIX = "configuration/";
+	public final static String RESOURCE_URI = "configuration/slipstream";
     public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY = "cloud.connector.orchestrator.publicsshkey";
     public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY = "cloud.connector.orchestrator.privatesshkey";
 
@@ -359,8 +359,8 @@ public class ServiceConfiguration extends
 		return id;
 	}
 
-	public void setId() {
-		id = RESOURCE_URI_PREFIX + String.valueOf(System.currentTimeMillis());
+	private void setId() {
+		id = RESOURCE_URI;
 	}
 
 	public void setContainer(ServiceConfigurationParameter parameter) {
@@ -383,15 +383,16 @@ public class ServiceConfiguration extends
 
 	}
 
+	private static String CLJ_NS_SERVICE_CONFIG = CljElasticsearchHelper.NS_SERIALIZERS_SERVICE_CONFIG;
+
 	public static ServiceConfiguration load() {
-		IFn load = Clojure.var("com.sixsq.slipstream.db.serializers.service-config-serializer", "load");
+		IFn load = CljElasticsearchHelper.getLoadFn(CLJ_NS_SERVICE_CONFIG);
 		return (ServiceConfiguration) load.invoke();
 	}
 
 	public ServiceConfiguration store() {
 		validate();
-		setId();
-		IFn store = Clojure.var("com.sixsq.slipstream.db.serializers.service-config-serializer", "store");
+		IFn store = CljElasticsearchHelper.getStoreFn(CLJ_NS_SERVICE_CONFIG);
 		return (ServiceConfiguration) store.invoke(this);
 	}
 

@@ -25,11 +25,6 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamDbBinding-jar</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamServerPRSlib-jar</artifactId>
 		</dependency>
 
@@ -73,7 +68,14 @@
 			<artifactId>SlipStreamUI</artifactId>
 		</dependency>
 
-                <!-- required for passing tests on clean build -->
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbSerializers-jar</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- required for passing tests on clean build -->
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
                         <artifactId>SlipStreamServer-ui-static-content</artifactId>
