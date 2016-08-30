@@ -4,13 +4,6 @@
     [clojure.test :refer :all]
     [clojure.data.xml :as xml]
     [clojure.java.io :as io]
-    [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
-    [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as cts]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template :as crtpl]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
-    [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.serializers.service-config-serializer :as scs]
     [com.sixsq.slipstream.db.serializers.utils :as u])
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]
@@ -61,17 +54,6 @@
   (map #(identity [(xml-param-attrs %) (xml-param-value %) (xml-param-instructions %) (xml-param-enum-values %)])
        (xml-params xml)))
 
-(defn xml-param-global?
-  [p]
-  (contains? scs/global-categories (:category p)))
-
-(defn- print-param-parsed-from-xml
-  [attrs value instructions enum-vals]
-  (print "PA ") (pprint attrs)
-  (println "PV " value)
-  (println "PI " instructions)
-  (println "PEV " enum-vals))
-
 (defn conf-xml->sc
   []
   (let [xml-data (-> xml-conf slurp xml/parse-str)
@@ -91,29 +73,10 @@
         (.setParameter sc scp)))
     sc))
 
-(defn complete-resource
-  [cfg]
-  (-> cfg
-      (assoc :service crs/service)
-      crtpl/complete-resource))
-
-(defn create-es-client
-  []
-  (db/set-impl! (esb/get-instance))
-  (esb/set-client! (esb/create-test-client)))
-
-(defn db-add-default-config
-  []
-  (-> cts/resource
-      complete-resource
-      scs/as-request
-      cr/add-impl))
-
 
 ;; Fixtures.
 (defn fixture-start-es-db
   [f]
-  (create-es-client)
+  (u/es-test-db-and-client)
   (f))
-
 

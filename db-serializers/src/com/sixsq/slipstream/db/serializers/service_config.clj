@@ -1,13 +1,13 @@
-(ns com.sixsq.slipstream.db.serializers.service-config-serializer
+(ns com.sixsq.slipstream.db.serializers.service-config
   (:require
     [clojure.set :as set]
     [superstring.core :as s]
     [com.sixsq.slipstream.db.serializers.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.db :as udb]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template :as crtpl]
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih])
+    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as cts]
+    [com.sixsq.slipstream.ssclj.resources.configuration-template :as crtpl]
+    )
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]
     [com.sixsq.slipstream.persistence ServiceConfigurationParameter]))
@@ -75,33 +75,6 @@
     (when (param-global-valid? p)
       [(param-name p) (param-value p)])))
 
-(defn sc->cfg
-  [sc]
-  (into {} (sc-get-global-params sc)))
-
-(defn as-request
-  [& [body]]
-  (let [request {:params  {:uuid resource-uuid}
-                 :body    (or body {})
-                 :headers {aih/authn-info-header user-roles-str}}]
-    ((aih/wrap-authn-info-header identity) request)))
-
-(defn throw-on-resp-error
-  [resp]
-  (if (> (:status resp) 400)
-    (let [msg (-> resp :body :message)]
-      (throw (RuntimeException. msg (ex-info msg (:body resp)))))
-    resp))
-
-(defn store
-  [^ServiceConfiguration sc]
-  (-> sc
-      sc->cfg
-      as-request
-      cr/edit-impl
-      throw-on-resp-error)
-  sc)
-
 (defn build-sc-param
   [cfg-pk cfg]
   (ServiceConfigurationParameter. (rname->param cfg-pk)
@@ -116,7 +89,48 @@
         (.setParameter sc (build-sc-param cfg-pk cfg))))
     sc))
 
-(defn load
+(defn sc->cfg
+  [sc]
+  (into {} (sc-get-global-params sc)))
+
+(defn throw-on-resp-error
+  [resp]
+  (if (> (:status resp) 400)
+    (let [msg (-> resp :body :message)]
+      (throw (RuntimeException. msg (ex-info msg (:body resp)))))
+    resp))
+
+(defn complete-resource
+  [cfg]
+  (-> cfg
+      (assoc :service crs/service)
+      crtpl/complete-resource))
+
+(defn db-add-default-config
+  []
+  (-> cts/resource
+      complete-resource
+      (u/as-request resource-uuid user-roles-str)
+      cr/add-impl))
+
+(defn as-request
+  [& [body]]
+  (u/as-request (or body {}) resource-uuid user-roles-str))
+
+;;
+;; Interface to store and load entity as resource.
+;;
+
+(defn store
+  [^ServiceConfiguration sc]
+  (-> sc
+      sc->cfg
+      as-request
+      cr/edit-impl
+      throw-on-resp-error)
+  sc)
+
+(defn fetch
   []
   (-> (as-request)
       cr/retrieve-impl

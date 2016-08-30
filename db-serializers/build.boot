@@ -1,4 +1,4 @@
-(def +version+ "3.11-SNAPSHOT")
+(def +version+ "3.12-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamDbSerializers-jar
@@ -21,27 +21,29 @@
   :dependencies
   #(vec (concat %
                 (merge-defaults
-                 ['sixsq/default-deps (get-env :version)]
-                 '[[org.clojure/clojure]
+                  ['sixsq/default-deps (get-env :version)]
+                  '[[org.clojure/clojure]
 
-                   [environ]
+                    [environ]
 
-                   ; FIXME: need this one after requiring
-                   ; com.sixsq.slipstream.ssclj.middleware.authn-info-header
-                   [cheshire]
+                    ; FIXME: need this one after requiring
+                    ; com.sixsq.slipstream.ssclj.middleware.authn-info-header
+                    [cheshire]
 
-                   [org.clojure/data.xml]
-                   [superstring]
-                   ;[net.java.dev.jna/jna]
+                    [org.clojure/data.xml]
+                    [superstring]
 
-                   [com.sixsq.slipstream/SlipStreamPersistence]
-                   [com.sixsq.slipstream/SlipStreamCljResources-jar]
+                    ; FIXME: remove with Elasticsearch > v2.3.5
+                    [net.java.dev.jna/jna "4.2.2"]
 
-                   ;; boot tasks
-                   [boot-environ]
-                   [adzerk/boot-test]
-                   [adzerk/boot-reload]
-                   [tolitius/boot-check]]))))
+                    [com.sixsq.slipstream/SlipStreamPersistence]
+                    [com.sixsq.slipstream/SlipStreamCljResources-jar]
+
+                    ;; boot tasks
+                    [boot-environ]
+                    [adzerk/boot-test]
+                    [adzerk/boot-reload]
+                    [tolitius/boot-check]]))))
 
 (require
   '[environ.boot :refer [environ]]
@@ -63,25 +65,28 @@
   install {:pom (str (get-env :project))}
   push {:pom (str (get-env :project))})
 
+(def tests-assets-re #{#".*_test\.clj"
+                       #"test_.*\.clj"
+                       #"configuration.xml"})
+
 (deftask run-tests
          "runs all tests and performs full compilation"
          []
          (comp
            (test)
-           #_(sift :include #{#".*_test\.clj"}
+           (sift :include tests-assets-re
                  :invert true)
-           #_(aot :all true)))
+           (aot :all true)))
 
 (deftask build []
          (comp
            (pom)
-           (sift :include #{#".*_test\.clj"}
+           (sift :include tests-assets-re
                  :invert true)
-           (aot :namespace #{'com.sixsq.slipstream.db.serializers.service-config-serializer
-                             'com.sixsq.slipstream.db.serializers.utils})
-           (uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
-                             #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
-                             #".*log4j\.properties" })
+           (aot :all true)
+           #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
+                              #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
+                              #".*log4j\.properties"})
            (jar)))
 
 (deftask mvn-test

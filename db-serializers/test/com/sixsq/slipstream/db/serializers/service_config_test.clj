@@ -1,11 +1,11 @@
-(ns com.sixsq.slipstream.db.serializers.service-config-serializer-test
+(ns com.sixsq.slipstream.db.serializers.service-config-test
   (:require
     [clojure.pprint :refer [pprint]]
     [clojure.test :refer :all]
     [schema.core :as sch]
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
     [com.sixsq.slipstream.db.serializers.test-utils :as tu]
-    [com.sixsq.slipstream.db.serializers.service-config-serializer :as scs])
+    [com.sixsq.slipstream.db.serializers.service-config :as scs])
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]))
 
@@ -38,15 +38,15 @@
     (is (empty? not-in-conf) (msg-keys-not-in-cfg not-in-conf))))
 
 (deftest test-check-sc-schema
-  (is (nil? (sch/check crs/Configuration (tu/complete-resource (scs/sc->cfg sc-from-xml))))))
+  (is (nil? (sch/check crs/Configuration (scs/complete-resource (scs/sc->cfg sc-from-xml))))))
 
 (deftest test-fail-store-if-no-default-in-db
   (is (thrown? RuntimeException (scs/store (ServiceConfiguration.)))))
 
 (deftest test-save-load
-    (let [_ (tu/db-add-default-config)
+    (let [_ (scs/db-add-default-config)
           sc-to-es (scs/store sc-from-xml)
-          sc-from-es (scs/load)]
+          sc-from-es (scs/fetch)]
       (is (not (nil? sc-from-es)))
       (is (= (sc-get-param-value sc-to-es "slipstream.registration.email")
              (sc-get-param-value sc-from-es "slipstream.registration.email")))

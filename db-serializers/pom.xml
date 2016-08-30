@@ -3,7 +3,7 @@
 
   <artifactId>SlipStreamDbSerializers-jar</artifactId>
   <packaging>pom</packaging>
-  <version>3.11-SNAPSHOT</version>
+  <version>3.12-SNAPSHOT</version>
   <name>SlipStreamDbSerializers (JAR)</name>
   <description>DB (de)serialiazers of SlipStream entities to/from DB behind ssclj server (JAR)</description>
   <url>http://sixsq.com</url>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.11-SNAPSHOT</version>
+    <version>3.12-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -25,6 +25,16 @@
     <dependency>
       <groupId>sixsq</groupId>
       <artifactId>default-deps</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamPersistence</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamCljResources-jar</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
