@@ -33,23 +33,17 @@
         <module>rpm</module>
       </modules>
     </profile>
+    <profile>
+      <id>build-rpm-local</id>
+      <activation>
+        <file>
+          <exists>/usr/local/bin/rpmbuild</exists>
+        </file>
+      </activation>
+      <modules>
+        <module>rpm</module>
+      </modules>
+    </profile>
   </profiles>
-
-<!--
-  <dependencyManagement>
-    <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.7</version>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
-    </dependency>
-    </dependencies>
-  </dependencyManagement>
---> 
 
 </project>
