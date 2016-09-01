@@ -3,6 +3,7 @@
 ;;
 (ns com.sixsq.slipstream.ssclj.util.config
   (:require [environ.core :as environ]
+            [me.raynes.fs :as fs]
             [clojure.edn :as edn]
             [clojure.tools.logging :as log]
             [clojure.java.io :as io]))
@@ -17,11 +18,17 @@
       (log/error msg)
       (throw (IllegalArgumentException. msg)))))
 
-(defn- read-config
-  []
-  (if-let [config-path (environ/env :config-path)]
+(defn find-file
+  [fpath]
+  (if (fs/exists? (fs/expand-home fpath))
+    fpath
+    (find-resource fpath)))
+
+(defn read-config
+  [& [path]]
+  (if-let [config-path (or path (environ/env :config-path))]
     (-> config-path
-        find-resource
+        find-file
         slurp
         edn/read-string)
     (throw (IllegalStateException. "No configuration found."))))
