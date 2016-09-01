@@ -35,14 +35,14 @@
   ;; anonymous query is not authorized
   (-> (session (ring-app))
       (request base-uri)
-      (ltu/body->json)
+      (ltu/body->edn)
       (ltu/is-status 403))
 
   ;; user query is not authorized
   (-> (session (ring-app))
       (header authn-info-header "jane USER")
       (request base-uri)
-      (ltu/body->json)
+      (ltu/body->edn)
       (ltu/is-status 403))
 
   ;; query as ADMIN should work correctly
@@ -51,7 +51,7 @@
                     (content-type "application/json")
                     (header authn-info-header "root ADMIN")
                     (request base-uri)
-                    (ltu/body->json)
+                    (ltu/body->edn)
                     (ltu/is-status 200)
                     (ltu/is-resource-uri collection-uri)
                     (ltu/is-count pos?)
@@ -76,7 +76,7 @@
                            (header authn-info-header "root ADMIN")
                            (request entry-url)
                            (ltu/is-status 200)
-                           (ltu/body->json))
+                           (ltu/body->edn))
 
             entry-body (get-in entry-resp [:response :body])
 
@@ -84,7 +84,7 @@
                      (content-type "application/json")
                      (header authn-info-header "root ADMIN")
                      (request describe-url)
-                     (ltu/body->json)
+                     (ltu/body->edn)
                      (ltu/is-status 200))
             desc-body (get-in desc [:response :body])]
         (is (nil? (get ops (c/action-uri :add))))
