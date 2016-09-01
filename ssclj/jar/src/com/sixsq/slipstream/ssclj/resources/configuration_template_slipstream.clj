@@ -100,7 +100,9 @@
 ;;
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
-         (uc/read-config "configuration-slipstream-desc.edn")))
+         ;; FIXME: write resource files finder/reader only.
+         ;; At the moment read-config was simply overloaded to find/read conf and resource files.
+         (uc/read-config "com/sixsq/slipstream/ssclj/resources/configuration-slipstream-desc.edn")))
 
 ;;
 ;; initialization: register this Configuration template
