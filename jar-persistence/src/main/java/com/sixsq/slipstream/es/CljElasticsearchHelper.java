@@ -27,6 +27,7 @@ public class CljElasticsearchHelper {
 
     public static final String NS_SERIALIZERS_UTILS = "com.sixsq.slipstream.db.serializers.utils";
     public static final String NS_SERIALIZERS_SERVICE_CONFIG = "com.sixsq.slipstream.db.serializers.service-config";
+    public static final String NS_SERIALIZERS_SERVICE_CONFIG_IMPL = "com.sixsq.slipstream.db.serializers.service-config-impl";
 
     private static void createElasticsearchClient() {
         IFn require = Clojure.var("clojure.core", "require");
@@ -46,8 +47,8 @@ public class CljElasticsearchHelper {
 
     private static void addDefaultServiceConfigToDb() {
         createElasticsearchClient();
-        requireNs(NS_SERIALIZERS_SERVICE_CONFIG);
-		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG, "db-add-default-config").invoke();
+        requireNs(NS_SERIALIZERS_SERVICE_CONFIG_IMPL);
+		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-add-default-config").invoke();
     }
 
     public static void createAndInitDb() {
@@ -62,7 +63,7 @@ public class CljElasticsearchHelper {
 
     public static IFn getLoadFn(String ns) {
         createElasticsearchClient();
-        return getFn(ns, "fetch");
+        return getFn(ns, "load");
     }
 
     public static IFn getStoreFn(String ns) {

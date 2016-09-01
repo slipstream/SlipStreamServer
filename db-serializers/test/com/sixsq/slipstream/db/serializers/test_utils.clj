@@ -6,9 +6,7 @@
     [clojure.java.io :as io]
     [com.sixsq.slipstream.db.serializers.utils :as u])
   (:import
-    [com.sixsq.slipstream.persistence ServiceConfiguration]
-    [com.sixsq.slipstream.persistence ParameterType]
-    [com.sixsq.slipstream.persistence ServiceConfigurationParameter]))
+    [com.sixsq.slipstream.persistence ServiceConfiguration]))
 
 
 (def xml-conf (.getPath (io/resource "configuration.xml")))
@@ -59,18 +57,9 @@
   (let [xml-data (-> xml-conf slurp xml/parse-str)
         sc (ServiceConfiguration.)]
     (doseq [[attrs value instructions enum-vals] (xml-params-parse xml-data)]
-
-      ;(print-param-parsed-from-xml attrs value instructions enum-vals)
-
-      (let [scp (ServiceConfigurationParameter. (:name attrs) value (:description attrs))]
-        (.setCategory scp (:category attrs))
-        (.setMandatory scp (read-string (:mandatory attrs)))
-        (.setType scp (ParameterType/valueOf (:type attrs)))
-        (.setReadonly scp (read-string (:readonly attrs)))
-        (.setOrder scp (read-string (:order_ attrs)))
-        (if instructions (.setInstructions scp instructions))
-        (if-not (empty? enum-vals) (.setEnumValues scp enum-vals))
-        (.setParameter sc scp)))
+      (let [desc (merge attrs {:instructions instructions
+                               :enum enum-vals})]
+      (.setParameter sc (u/build-sc-param value desc))))
     sc))
 
 

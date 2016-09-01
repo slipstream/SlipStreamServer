@@ -4,21 +4,38 @@
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.es.es-util :as esu]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]))
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih])
+  (:import
+    [com.sixsq.slipstream.persistence ServiceConfigurationParameter]
+    [com.sixsq.slipstream.persistence ParameterType]
+    ))
+
+
+(defn throw-on-resp-error
+  [resp]
+  (if (> (:status resp) 400)
+    (let [msg (-> resp :body :message)]
+      (throw (RuntimeException. msg (ex-info msg (:body resp)))))
+    resp))
 
 (defn read-str
   [s]
-  (try
-    (read-string s)
-    (catch RuntimeException ex
-      (if-not (s/starts-with? (.getMessage ex) "Invalid token")
-        (throw ex)
-        s))))
+  (if (string? s)
+    (try
+      (read-string s)
+      (catch NumberFormatException _
+        s)
+      (catch RuntimeException ex
+        (if-not (s/starts-with? (.getMessage ex) "Invalid token")
+          (throw ex)
+          s)))
+    s))
 
 (defn display
   [d & [msg]]
-  (println msg)
+  (println "--->>> " (or msg ""))
   (clojure.pprint/pprint d)
+  (println (or msg "") "<<<--- ")
   d)
 
 ;;
@@ -53,6 +70,13 @@
   (println "DB DUMP: " (or msg ""))
   (clojure.pprint/pprint (esu/dump esb/*client* esb/index-name resource)))
 
+(defn as-boolean
+  [maybe-boolean]
+  (if (string? maybe-boolean)
+    (read-string maybe-boolean)
+    maybe-boolean))
+
+
 ;;
 ;; Resource helpers.
 ;;
@@ -64,4 +88,37 @@
                  :headers {aih/authn-info-header user-roles-str}}]
     ((aih/wrap-authn-info-header identity) request)))
 
+
+;;
+;; Parameters
+;;
+
+(defn build-sc-param
+  [value desc]
+  (let [name (get desc :name (:displayName desc))
+        scp (ServiceConfigurationParameter. name
+                                            (str value)
+                                            (:description desc))]
+    (.setCategory scp (:category desc))
+    (.setMandatory scp (as-boolean (:mandatory desc)))
+    (.setType scp (ParameterType/valueOf (s/capitalize (:type desc))))
+    (.setReadonly scp (as-boolean (get desc :readOnly (:readonly desc))))
+    (.setOrder scp (read-str (:order desc)))
+    (if (:instructions desc) (.setInstructions scp (:instructions desc)))
+    (if-not (empty? (:enum desc)) (.setEnumValues scp (:enum desc)))
+    scp))
+
+(defn desc-from-param
+  [p]
+  (let [pd {:displayName (.getName p)
+            :type        (s/lower-case (.getType p))
+            :category    (.getCategory p)
+            :description (.getDescription p)
+            :mandatory   (.isMandatory p)
+            :readOnly    (.isReadonly p)
+            :order       (.getOrder p)
+            }]
+    (cond-> pd
+            (.getEnumValues p) (assoc :enum (.getEnumValues p))
+            (.getInstructions p) (assoc :instructions (.getInstructions p)))))
 

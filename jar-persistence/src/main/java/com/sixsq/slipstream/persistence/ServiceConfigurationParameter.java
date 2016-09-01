@@ -30,8 +30,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.regex.Pattern;
 
-import com.google.gson.annotations.Expose;
-
 @Entity
 @Root(name = "parameter")
 @SuppressWarnings("serial")
@@ -40,7 +38,6 @@ public class ServiceConfigurationParameter extends
 
 	@Id
 	@GeneratedValue
-	@Expose
 	Long id;
 
 	@Attribute(required = false)
