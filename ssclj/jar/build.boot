@@ -24,6 +24,9 @@
                  ['sixsq/default-deps (get-env :version)]
                  '[[org.clojure/clojure]
 
+                   ; FIXME: remove with Elasticsearch > v2.3.5
+                   [net.java.dev.jna/jna]
+
                    [aleph]
                    [cheshire] ;; newer version needed for ring-json
                    [compojure]

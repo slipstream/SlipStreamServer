@@ -34,9 +34,6 @@
                     [superstring]
                     [me.raynes/fs]
 
-                    ; FIXME: remove with Elasticsearch > v2.3.5
-                    [net.java.dev.jna/jna "4.2.2"]
-
                     [com.sixsq.slipstream/SlipStreamPersistence]
                     [com.sixsq.slipstream/SlipStreamCljResources-jar]
 
