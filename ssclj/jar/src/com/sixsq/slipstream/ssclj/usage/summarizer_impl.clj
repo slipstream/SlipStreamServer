@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.usage.summarizer-imp
+(ns com.sixsq.slipstream.ssclj.usage.summarizer-impl
   (:require
     [clojure.set :as set]
     [superstring.core :as string]
