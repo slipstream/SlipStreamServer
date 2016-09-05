@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.usage.summarizer-test
   (:require
-    [com.sixsq.slipstream.ssclj.usage.summarizer :as us]
+    [com.sixsq.slipstream.ssclj.usage.summarizer-impl :as us]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [clj-time.core :as time]
     [clojure.test :refer :all]))
