@@ -74,7 +74,7 @@
         (fwrite vals (format "connector-%s.edn" cname))
         (fwrite desc (format "connector-%s-desc.edn" cname))))))
 
-(def usage "Usage -x <path or URL> [-s <user:pass>] [-c <connector name>]")
+(def usage "Usage: -x <path or URL> [-s <user:pass>] [-c <connector name>]")
 
 (defn error-usage
   [& msg]
