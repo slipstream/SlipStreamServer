@@ -42,14 +42,32 @@
 ;; DB related.
 ;;
 
-(defn set-es-client-uncond
+;; Implementation of CRUD actions over DB.
+
+(defn set-db-crud-impl-uncond
   []
   (db/set-impl! (esb/get-instance)))
 
-(defn set-es-client
+(defn set-db-crud-impl
   []
   (if (instance? clojure.lang.Var$Unbound db/*impl*)
-    (set-es-client-uncond)))
+    (set-db-crud-impl-uncond)))
+
+;; Connection to a remote ES.
+
+(defn create-and-set-es-client
+  "Connection to a remote ES.
+  Requries ES_HOST and ES_PORT env vars."
+  []
+  (esb/set-client! (esb/create-client)))
+
+(defn db-client-and-crud-impl
+  "Sets up connection to a remote DB and sets DB CRUD implementation."
+  []
+  (set-db-crud-impl)
+  (create-and-set-es-client))
+
+;; Local test ES node.
 
 (defn create-test-es-db-uncond
   []
@@ -60,9 +78,9 @@
   (if (instance? clojure.lang.Var$Unbound esb/*client*)
     (create-test-es-db-uncond)))
 
-(defn es-test-db-and-client
+(defn test-db-client-and-crud-impl
   []
-  (set-es-client)
+  (set-db-crud-impl)
   (create-test-es-db))
 
 (defn dump
@@ -121,4 +139,5 @@
     (cond-> pd
             (.getEnumValues p) (assoc :enum (.getEnumValues p))
             (.getInstructions p) (assoc :instructions (.getInstructions p)))))
+
 

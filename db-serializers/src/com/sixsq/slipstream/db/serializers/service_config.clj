@@ -23,7 +23,8 @@
   []
   (let [cfg (-> (sci/as-request)
                 cr/retrieve-impl
-                :body)
+                :body
+                (sci/assoc-extra-params-vals))
         cfg-desc (sci/load-cfg-desc)]
     (sci/cfg->sc cfg cfg-desc)))
 
