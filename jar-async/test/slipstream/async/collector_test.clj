@@ -1,10 +1,10 @@
 (ns slipstream.async.collector-test
   (:require
     [clojure.test :refer :all]
-    [slipstream.async.collector :refer :all]
-    [com.sixsq.slipstream.db.serializers.utils :as su])
+    [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
+    [com.sixsq.slipstream.db.serializers.utils :as su]
+    [slipstream.async.collector :refer :all])
   (:import
-    [com.sixsq.slipstream.connector.local LocalConnector]
     [com.sixsq.slipstream.connector.local LocalConnector]
     [com.sixsq.slipstream.persistence User]
     [com.sixsq.slipstream.persistence UserParameter]))
@@ -12,6 +12,7 @@
 ;; NB! We are using Elaticsearch for some Java entities.
 ;; Start local ES node, create a client of it, and set DB CRUD impl.
 (su/test-db-client-and-crud-impl)
+(sci/db-add-default-config)
 
 (deftest test-add-increasing-space
   (is (= [["joe" "exo" 0] ["joe" "aws" 10] ["mike" "exo" 20]]
