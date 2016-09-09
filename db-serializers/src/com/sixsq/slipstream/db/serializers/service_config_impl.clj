@@ -27,7 +27,7 @@
 
 (defn cloud-connector-class-value
   []
-  "l1:local")
+  "")
 
 (defn slipstream-version-value
   []
