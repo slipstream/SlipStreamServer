@@ -41,7 +41,7 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
+			<artifactId>SlipStreamDbSerializers-jar</artifactId>
             <type>pom</type>
 			<scope>test</scope>
 		</dependency>
