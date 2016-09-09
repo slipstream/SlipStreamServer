@@ -25,19 +25,13 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import java.util.regex.Pattern;
 
-@Entity
 @Root(name = "parameter")
 @SuppressWarnings("serial")
 public class ServiceConfigurationParameter extends
 		Parameter<ServiceConfiguration> {
 
-	@Id
-	@GeneratedValue
 	Long id;
 
 	@Attribute(required = false)

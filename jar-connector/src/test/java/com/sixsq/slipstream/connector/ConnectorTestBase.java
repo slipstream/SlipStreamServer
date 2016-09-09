@@ -31,6 +31,6 @@ public class ConnectorTestBase {
     }
 
     public static void setupElasticseach() {
-        CljElasticsearchHelper.createAndInitDb();
+        CljElasticsearchHelper.createAndInitTestDb();
     }
 }

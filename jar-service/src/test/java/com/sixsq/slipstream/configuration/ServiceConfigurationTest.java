@@ -39,7 +39,7 @@ public class ServiceConfigurationTest {
 
 	@BeforeClass
 	public static void createTestElasticsearchDb(){
-		CljElasticsearchHelper.createAndInitDb();
+		CljElasticsearchHelper.createAndInitTestDb();
 	}
 
 	@Test(expected = IllegalArgumentException.class)

@@ -22,17 +22,61 @@ package com.sixsq.slipstream.es;
 
 import clojure.java.api.Clojure;
 import clojure.lang.IFn;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
+
+import java.util.logging.Logger;
 
 public class CljElasticsearchHelper {
+
+    private static Logger logger = Logger.getLogger(CljElasticsearchHelper.class.getName());
 
     public static final String NS_SERIALIZERS_UTILS = "com.sixsq.slipstream.db.serializers.utils";
     public static final String NS_SERIALIZERS_SERVICE_CONFIG = "com.sixsq.slipstream.db.serializers.service-config";
     public static final String NS_SERIALIZERS_SERVICE_CONFIG_IMPL = "com.sixsq.slipstream.db.serializers.service-config-impl";
 
-    private static void createElasticsearchClient() {
-        IFn require = Clojure.var("clojure.core", "require");
-        require.invoke(Clojure.read(NS_SERIALIZERS_UTILS));
-        Clojure.var(NS_SERIALIZERS_UTILS, "set-es-client").invoke();
+    /**
+     * Connection to a external Elasticsearch defined by ES_HOST and ES_PORT env vars.
+     */
+    public static void init() {
+        logger.info("Creating DB client and setting DB CRUD implementation.");
+        requireNs(NS_SERIALIZERS_UTILS);
+        Clojure.var(NS_SERIALIZERS_UTILS, "db-client-and-crud-impl").invoke();
+    }
+
+    /**
+     * Creates
+     * - local ES node
+     * - resources index
+     * - initial ServiceConfiguration document.
+     */
+    public static void createAndInitTestDb() {
+        requireNs(NS_SERIALIZERS_UTILS);
+        Clojure.var(NS_SERIALIZERS_UTILS, "test-db-client-and-crud-impl").invoke();
+        addDefaultServiceConfigToDb();
+    }
+
+    private static void setDbCrudImpl() {
+        requireNs(NS_SERIALIZERS_UTILS);
+        Clojure.var(NS_SERIALIZERS_UTILS, "set-db-crud-impl").invoke();
+    }
+
+    private static void addDefaultServiceConfigToDb() {
+        setDbCrudImpl();
+        requireNs(NS_SERIALIZERS_SERVICE_CONFIG_IMPL);
+		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-add-default-config").invoke();
+    }
+
+    public static IFn getLoadFn(String ns) {
+        return getFn(ns, "load");
+    }
+
+    public static IFn getStoreFn(String ns) {
+        return getFn(ns, "store");
+    }
+
+    private static IFn getFn(String ns, String funcName) {
+        requireNs(ns);
+        return Clojure.var(ns, funcName);
     }
 
     private static void requireNs(String ns) {
@@ -40,34 +84,10 @@ public class CljElasticsearchHelper {
         require.invoke(Clojure.read(ns));
     }
 
-    private static void createTestDb() {
-        requireNs(NS_SERIALIZERS_UTILS);
-		Clojure.var(NS_SERIALIZERS_UTILS, "create-test-es-db").invoke();
+    public static ServiceConfigurationParameter getParameterDescription(String paramName) {
+        return (ServiceConfigurationParameter)
+                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-sc-param-meta-only").invoke(paramName);
     }
 
-    private static void addDefaultServiceConfigToDb() {
-        createElasticsearchClient();
-        requireNs(NS_SERIALIZERS_SERVICE_CONFIG_IMPL);
-		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-add-default-config").invoke();
-    }
 
-    public static void createAndInitDb() {
-        createTestDb();
-        addDefaultServiceConfigToDb();
-    }
-
-    public static IFn getFn(String ns, String funcName) {
-        requireNs(ns);
-        return Clojure.var(ns, funcName);
-    }
-
-    public static IFn getLoadFn(String ns) {
-        createElasticsearchClient();
-        return getFn(ns, "load");
-    }
-
-    public static IFn getStoreFn(String ns) {
-        createElasticsearchClient();
-        return getFn(ns, "store");
-    }
 }

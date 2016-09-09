@@ -223,3 +223,9 @@
 (defn as-request
   [& [body]]
   (u/as-request (or body {}) resource-uuid user-roles-str))
+
+
+(defn get-sc-param-meta-only
+  [pname]
+  (u/build-sc-param "" ((get param->rname pname) (load-cfg-desc))))
+

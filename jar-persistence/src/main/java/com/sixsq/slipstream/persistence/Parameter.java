@@ -320,4 +320,18 @@ public abstract class Parameter<T> implements Serializable {
 		return value;
 	}
 
+	public String asString() {
+		return "--->>> Parameter of type " + container.getClass().getName() +
+				"\nname: " + name +
+				"\nvalue: " + value +
+				"\ndescription: " + description +
+				"\ncategory: " + category +
+				"\nmandatory: " + mandatory +
+				"\ntype: " + type +
+				"\nreadonly: " + readonly +
+				"\ninstructions: " + instructions +
+				"\nenumValues: " + enumValues +
+				"\norder_: " + order_;
+	}
+
 }

@@ -41,7 +41,7 @@ public class CollectorTest extends RunTestBase {
 
 	@BeforeClass
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
-		CljElasticsearchHelper.createAndInitDb();
+		CljElasticsearchHelper.createAndInitTestDb();
 		UsageRecorder.muteForTests();
 		createUser();
 		for(Run r : Run.listAll()) {

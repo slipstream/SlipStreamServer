@@ -231,29 +231,16 @@ public class Configuration {
 	}
 
 	private void extractAndSetVersion() throws ValidationException {
-		RequiredParameters versionRequiredParameter = RequiredParameters.SLIPSTREAM_VERSION;
-		version = loadDefaultConfigFileProperties().getProperty(versionRequiredParameter.getName());
-
-		if (version == null) {
-			throw (new ConfigurationException("Missing mandatory configuration parameter "
-					+ versionRequiredParameter.getName()));
-		}
+		String versionRequiredParameter = RequiredParameters.SLIPSTREAM_VERSION.getName();
 
 		ServiceConfigurationParameter versionParameter = getParameters().getParameter(
-				versionRequiredParameter.getName());
+				versionRequiredParameter);
 		if (versionParameter == null) {
-			versionParameter = createParameter(version, versionRequiredParameter.getName(),
-					versionRequiredParameter.getDescription(), versionRequiredParameter.getCategory().name());
+			throw (new ConfigurationException("Missing mandatory configuration parameter "
+					+ versionRequiredParameter));
 		}
-		try {
-			versionParameter.setValue(version);
-		} catch (ValidationException e) {
-			throw (new ConfigurationException("Invalid version value: " + e.getMessage()));
-		}
-
+		version = versionParameter.getValue();
 		versionParameter.setReadonly(true);
-
-		// set the version in the UI
 		Representation.setReleaseVersion(version);
 	}
 
@@ -785,7 +772,6 @@ public class Configuration {
 	 */
 	public void reset() throws ConfigurationException, ValidationException {
 		serviceConfiguration = new ServiceConfiguration();
-		loadFromFile();
 		mergeWithParametersFromConnectors();
 		postProcessParameters();
 		validateRequiredParameters();
@@ -802,10 +788,7 @@ public class Configuration {
 	 */
 	public void update(Map<String, ServiceConfigurationParameter> parameters) throws ConfigurationException,
 			ValidationException {
-		loadFromFile();
-		for (ServiceConfigurationParameter p : parameters.values()) {
-			this.serviceConfiguration.setParameter(p);
-		}
+		serviceConfiguration.setParameters(parameters);
 		mergeWithParametersFromConnectors();
 		postProcessParameters();
 		validateRequiredParameters();
