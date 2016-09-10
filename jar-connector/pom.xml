@@ -44,11 +44,6 @@
 			<artifactId>SlipStreamDbSerializers-jar</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamDbSerializers-jar</artifactId>
-                        <scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
