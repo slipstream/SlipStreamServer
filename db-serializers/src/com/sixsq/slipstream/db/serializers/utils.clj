@@ -94,6 +94,9 @@
     (read-string maybe-boolean)
     maybe-boolean))
 
+(defn not-empty-string?
+  [x]
+  (and (string? x) (not (empty? x))))
 
 ;;
 ;; Resource helpers.
@@ -137,7 +140,7 @@
             :order       (.getOrder p)
             }]
     (cond-> pd
-            (.getEnumValues p) (assoc :enum (.getEnumValues p))
-            (.getInstructions p) (assoc :instructions (.getInstructions p)))))
+            (> (count (.getEnumValues p)) 0) (assoc :enum (.getEnumValues p))
+            (not-empty-string? (.getInstructions p)) (assoc :instructions (.getInstructions p)))))
 
 
