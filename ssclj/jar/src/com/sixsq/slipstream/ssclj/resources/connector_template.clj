@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-template
   (:require
     [clojure.tools.logging :as log]
+    [superstring.core :as str]
     [schema.core :as s]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -33,6 +34,18 @@
                               :right     "VIEW"}]})
 
 ;;
+;; Resource defaults
+;;
+
+(def connector-instance-name-default
+  {:instanceName "Provide valid connector instance name."})
+
+(def connector-reference-params-defaults
+  {:orchestratorImageid ""
+   :quotaVm             ""
+   :maxIaasWorkers      20})
+
+;;
 ;; atom to keep track of the loaded ConnectorTemplate resources
 ;;
 (def templates (atom {}))
@@ -54,14 +67,16 @@
    resourceURI, timestamps, operations, and ACL."
   [{:keys [cloudServiceType] :as resource}]
   (when cloudServiceType
-    (let [id (str resource-url "/" cloudServiceType)
+    (let [id   (str resource-url "/" cloudServiceType)
           href (str id "/describe")
-          ops [{:rel (:describe c/action-uri) :href href}]]
+          ops  [{:rel (:describe c/action-uri) :href href}]]
       (-> resource
           (merge {:id          id
                   :resourceURI resource-uri
                   :acl         resource-acl
                   :operations  ops})
+          (merge connector-reference-params-defaults)
+          (merge connector-instance-name-default)
           u/update-timestamps))))
 
 (defn register
@@ -75,7 +90,7 @@
       (swap! templates assoc id full-resource)
       (log/info "loaded ConnectorTemplate" id)
       (when desc
-        (let [acl (:acl full-resource)
+        (let [acl       (:acl full-resource)
               full-desc (assoc desc :acl acl)]
           (swap! descriptions assoc id full-desc))
         (log/info "loaded ConnectorTemplate description" id)))))
@@ -84,8 +99,22 @@
 ;; schemas
 ;;
 
+; Mandatory reference parameters.
+(def ConnectorMandatoryReferenceAttrs
+  {:orchestratorImageid s/Str                               ;; "<uuid>"
+   :quotaVm             s/Str                               ;; ""
+   :maxIaasWorkers      c/PosInt                            ;; 20
+   })
+
+(def ValidConnectorInstanceName
+  (s/constrained s/Str
+                 (fn [x] (and (not (str/blank? x)) (not= x (:instanceName connector-instance-name-default))))
+                 'valid-connector-instance-name?))
+
 (def ConnectorTemplateAttrs
-  {:cloudServiceType c/NonBlankString})
+  (merge {:cloudServiceType c/NonBlankString
+          :instanceName     ValidConnectorInstanceName}
+         ConnectorMandatoryReferenceAttrs))
 
 (def ConnectorTemplate
   (merge c/CommonAttrs
@@ -100,13 +129,38 @@
 
 (def ConnectorTemplateDescription
   (merge c/CommonParameterDescription
-         {:cloudServiceType {:displayName "Cloud Service Type"
-                             :category    "general"
-                             :description "type of cloud service targeted by connector"
-                             :type        "string"
-                             :mandatory   true
-                             :readOnly    true
-                             :order       0}}))
+         {:cloudServiceType    {:displayName "Cloud Service Type"
+                                :category    "general"
+                                :description "type of cloud service targeted by connector"
+                                :type        "string"
+                                :mandatory   true
+                                :readOnly    true
+                                :order       0}
+
+          ; Mandatory reference attributes.
+          :orchestratorImageid {:displayName "orchestrator.imageid"
+                                :type        "string"
+                                :category    ""
+                                :description "Image Id of the orchestrator for the connector"
+                                :mandatory   true
+                                :readOnly    false
+                                :order       15}
+          :quotaVm             {:displayName "quota.vm"
+                                :type        "string"
+                                :category    ""
+                                :description "VM quota for the connector (i.e. maximum number of VMs allowed)"
+                                :mandatory   true
+                                :readOnly    false
+                                :order       910}
+          :maxIaasWorkers      {:displayName "max.iaas.workers"
+                                :type        "string"
+                                :category    ""
+                                :description "Max number of concurrently provisioned VMs by orchestrator"
+                                :mandatory   true
+                                :readOnly    false
+                                :order       915}}))
+
+
 ;;
 ;; multimethods for validation
 ;;
@@ -163,11 +217,11 @@
 (defmethod crud/query resource-name
   [request]
   (a/can-view? {:acl collection-acl} request)
-  (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
+  (let [wrapper-fn        (collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
         ;; FIXME: At least the paging options should be supported.
-        options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+        options           (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
         [count-before-pagination entries] ((juxt count vals) @templates)
-        wrapped-entries (wrapper-fn request entries)
+        wrapped-entries   (wrapper-fn request entries)
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]
     (u/json-response entries-and-count)))
 

@@ -41,9 +41,11 @@
                  (ltu/body->edn)
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
-        valid-create {:connectorTemplate (strip-unwanted-attrs (assoc template :alphaKey 2001))}
+        valid-create {:connectorTemplate (strip-unwanted-attrs (merge template {:alphaKey 2001
+                                                                                :instanceName "alpha-omega"}))}
         href-create {:connectorTemplate {:href     href
-                                         :alphaKey 3001}}
+                                         :alphaKey 3001
+                                         :instanceName "alpha-omega"}}
         invalid-create (assoc-in valid-create [:connectorTemplate :invalid] "BAD")]
 
     ;; anonymous create should fail

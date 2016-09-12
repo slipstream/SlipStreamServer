@@ -30,10 +30,7 @@
 ;; schemas
 ;;
 
-(def Connector
-  (merge c/CommonAttrs
-         c/AclAttr
-         {:cloudServiceType c/NonBlankString}))
+(def Connector tpl/ConnectorTemplate)
 
 (def ConnectorCreate
   (merge c/CreateAttrs
@@ -133,3 +130,12 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+;;
+;; use name as the identifier
+;;
+
+(defmethod crud/new-identifier resource-name
+  [resource resource-name]
+  (if-let [new-id (:instanceName resource)]
+    (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))

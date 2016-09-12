@@ -1,9 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-schema-test
   (:require
-    [com.sixsq.slipstream.ssclj.resources.connector :refer :all]
+    [clojure.test :refer :all]
     [schema.core :as s]
-    [expectations :refer :all]
-    [com.sixsq.slipstream.ssclj.app.params :as p]))
+
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.resources.connector :as c]))
 
 (def valid-acl {:owner {:principal "::ADMIN"
                         :type      "ROLE"}
@@ -11,16 +12,18 @@
                          :type      "ROLE"
                          :right     "VIEW"}]})
 
-(let [timestamp "1964-08-25T10:00:00.0Z"
-      root {:id               resource-name
-            :resourceURI      p/service-context
-            :created          timestamp
-            :updated          timestamp
-            :acl              valid-acl
-            :cloudServiceType "alpha"}]
-
-  (expect nil? (s/check Connector root))
-  (expect (s/check Connector (dissoc root :created)))
-  (expect (s/check Connector (dissoc root :updated)))
-  (expect (s/check Connector (dissoc root :cloudServiceType)))
-  (expect (s/check Connector (dissoc root :acl))))
+(deftest test-schema-check
+  (let [timestamp "1964-08-25T10:00:00.0Z"
+        root      {:id                  c/resource-name
+                   :resourceURI         p/service-context
+                   :created             timestamp
+                   :updated             timestamp
+                   :acl                 valid-acl
+                   :cloudServiceType    "alpha"
+                   :orchestratorImageid "123"
+                   :quotaVm             "0"
+                   :maxIaasWorkers      20
+                   :instanceName        "foo"}]
+    (is (nil? (s/check c/Connector root)))
+    (doseq [k (into #{} (keys (dissoc root :id :resourceURI)))]
+      (is (not (nil? (s/check c/Connector (dissoc root k))))))))
