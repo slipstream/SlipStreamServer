@@ -15,7 +15,7 @@ WorkingDirectory=${installation.dir}
 ExecStart=/usr/bin/java \
             -Dconfig.path=db.spec \
             -Dlogfile.path=production \
-            -cp "resources:lib/ssclj.jar:lib/ext/* \
+            -cp "resources:lib/ssclj.jar:lib/ext/*" \
             com.sixsq.slipstream.ssclj.app.main $SSCLJ_PORT
 ExecStop=/bin/kill -TERM $MAINPID
 
