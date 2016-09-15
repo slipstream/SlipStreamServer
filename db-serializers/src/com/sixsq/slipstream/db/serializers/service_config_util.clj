@@ -52,10 +52,17 @@
   "xml-conf - SlipStream service configuration as XML string."
   [xml-conf]
   (let [xml-data (xml/parse-str xml-conf)
-        sc (ServiceConfiguration.)]
+        sc       (ServiceConfiguration.)]
     (doseq [[attrs value instructions enum-vals] (xml-params-parse xml-data)]
       (let [desc (merge attrs {:instructions instructions
-                               :enum enum-vals})]
+                               :enum         enum-vals})]
         (.setParameter sc (u/build-sc-param value desc))))
     sc))
 
+(defn sc-get-param-value
+  "sc - ServiceConfiguration
+  pname - str (parameter name)"
+  [sc pname]
+  (-> sc
+      (.getParameter pname)
+      (.getValue)))

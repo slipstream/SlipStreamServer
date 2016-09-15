@@ -1,21 +1,30 @@
 (ns com.sixsq.slipstream.db.serializers.utils
   (:require
+
+    [clojure.tools.logging :as log]
+
     [superstring.core :as s]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.es.es-util :as esu]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih])
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn])
   (:import
-    [com.sixsq.slipstream.persistence ServiceConfigurationParameter]
-    [com.sixsq.slipstream.persistence ParameterType]
-    ))
-
+    (com.sixsq.slipstream.persistence ServiceConfigurationParameter)
+    (com.sixsq.slipstream.persistence ParameterType)))
 
 (defn throw-on-resp-error
   [resp]
   (if (> (:status resp) 400)
     (let [msg (-> resp :body :message)]
       (throw (RuntimeException. msg (ex-info msg (:body resp)))))
+    resp))
+
+(defn warn-on-resp-error
+  [resp]
+  (if (> (:status resp) 400)
+    (let [msg (-> resp :body :message)]
+      (log/warn "Failed with: " msg ". " (:body resp)))
     resp))
 
 (defn read-str
@@ -38,6 +47,12 @@
   (println (or msg "") "<<<--- ")
   d)
 
+(defn display->>
+  [msg d]
+  (println "--->>> " (or msg ""))
+  (clojure.pprint/pprint d)
+  (println (or msg "") "<<<--- ")
+  d)
 ;;
 ;; DB related.
 ;;
@@ -114,13 +129,20 @@
 ;; Parameters
 ;;
 
+(defn qualified-pname
+  [desc category]
+  (let [n (get desc :name (:displayName desc))]
+    (if (not (nil? category))
+      (str category "." n)
+      n)))
+
 (defn build-sc-param
-  [value desc]
-  (let [name (get desc :name (:displayName desc))
+  [value desc & [category]]
+  (let [name (qualified-pname desc category)
         scp (ServiceConfigurationParameter. name
                                             (str value)
                                             (:description desc))]
-    (.setCategory scp (:category desc))
+    (.setCategory scp (or category (:category desc)))
     (.setMandatory scp (as-boolean (:mandatory desc)))
     (.setType scp (ParameterType/valueOf (s/capitalize (:type desc))))
     (.setReadonly scp (as-boolean (get desc :readOnly (:readonly desc))))
@@ -144,3 +166,10 @@
             (not-empty-string? (.getInstructions p)) (assoc :instructions (.getInstructions p)))))
 
 
+
+;;
+;; Initializer
+;;
+(defn initialize
+  []
+  (dyn/initialize))

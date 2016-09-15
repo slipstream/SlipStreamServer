@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream
   (:require
+    [clojure.tools.logging :as log]
     [schema.core :as s]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -9,12 +10,19 @@
 
 (def ^:const service "slipstream")
 
+(def slipstream-version (-> "com/sixsq/slipstream/version.txt"
+                            uc/find-file
+                            slurp))
+
 ;;
 ;; schemas
 ;;
 
 (def config-attrs
-  {:serviceURL                 c/NonBlankString             ;; https://nuv.la
+  {
+   :slipstreamVersion          c/NonBlankString             ;; 3.12-SNAPSHOT
+
+   :serviceURL                 c/NonBlankString             ;; https://nuv.la
    :reportsLocation            c/NonBlankString             ;; /var/tmp/slipstream/reports
    :supportEmail               c/NonBlankString             ;; support@example.com
    :clientBootstrapURL         c/NonBlankString             ;; https://185.19.28.68/downloads/slipstream.bootstrap
@@ -42,6 +50,9 @@
    :meteringEndpoint           c/NonBlankString             ;; http://localhost:2005
 
    :serviceCatalogEnable       s/Bool                       ;; true
+
+   ;; FIXME: used only for compatibilty with the Java server. To be removed.
+   :cloudConnectorClass        s/Str                        ;; "name-region-az:connector,"
    })
 
 (def ConfigurationTemplateAttrs
@@ -62,7 +73,8 @@
 ;; resource
 ;;
 (def ^:const resource
-  {:service                    service
+  {
+   :service                    service
    :name                       "SlipStream"
    :description                "SlipStream Service Configuration"
    :serviceURL                 "https://localhost"
@@ -93,6 +105,10 @@
    :meteringEndpoint           "http://localhost:2005"
 
    :serviceCatalogEnable       false
+
+   :slipstreamVersion          slipstream-version
+
+   :cloudConnectorClass        ""
    })
 
 ;;
@@ -109,6 +125,7 @@
 ;;
 (defn initialize
   []
+  (log/info "SlipStream version " (:slipstreamVersion resource))
   (p/register resource desc))
 
 ;;

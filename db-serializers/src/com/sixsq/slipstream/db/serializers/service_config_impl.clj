@@ -1,22 +1,24 @@
 (ns com.sixsq.slipstream.db.serializers.service-config-impl
   (:require
     [clojure.set :as set]
+    [clojure.tools.logging :as log]
+
     [superstring.core :as s]
     [me.raynes.fs :as fs]
+
     [com.sixsq.slipstream.db.serializers.utils :as u]
+    [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as cts]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template :as crtpl])
+    [com.sixsq.slipstream.ssclj.resources.configuration-template :as crtpl]
+    [com.sixsq.slipstream.ssclj.resources.connector :as con]
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont])
   (:import
-    (java.util.logging Logger)
-    (com.sixsq.slipstream.persistence ServiceConfiguration)
-    (com.sixsq.slipstream.persistence ServiceConfigurationParameter)))
+    (com.sixsq.slipstream.persistence ServiceConfiguration)))
 
 
-(def logger (Logger/getLogger "com.sixsq.slipstream.db.serializers"))
-
-(def ^:const resource-uuid crs/service)
+(def ^:const cfg-resource-uuid crs/service)
 
 (def ^:const global-categories #{"SlipStream_Advanced" "SlipStream_Support" "SlipStream_Basics"})
 
@@ -25,45 +27,7 @@
 (def user-roles ((juxt first rest) (s/split user-roles-str #"\s+")))
 
 
-(defn cloud-connector-class-value
-  []
-  "")
-
-(defn slipstream-version-value
-  []
-  "3.10")
-
-(defn assoc-extra-params-vals
-  [m]
-  (-> m
-      (assoc :cloudConnectorClass (cloud-connector-class-value))
-      (assoc :slipstreamVersion (slipstream-version-value))))
-
-(def extra-params-desc
-  {:cloudConnectorClass
-   {:displayName  "cloud.connector.class"
-    :type         "Text"
-    :category     "SlipStream_Basics"
-    :description  "Cloud connector java class name(s) (comma separated for multi-cloud configuration)"
-    :mandatory    true
-    :readOnly     false
-    :instructions ""
-    :order        0}
-   :slipstreamVersion
-   {:displayName  "slipstream.version"
-    :type         "string"
-    :category     "SlipStream_Advanced"
-    :description  "Installed SlipStream version"
-    :mandatory    true
-    :readOnly     true
-    :instructions ""
-    :order        0}})
-
-(def extra-rname->param
-  {:cloudConnectorClass "cloud.connector.class"
-   :slipstreamVersion   "slipstream.version"})
-
-(def base-rname->param
+(def rname->param
   {:serviceURL                 "slipstream.base.url"
    :reportsLocation            "slipstream.reports.location"
    :supportEmail               "slipstream.support.email"
@@ -91,20 +55,49 @@
    :meteringEnable             "slipstream.metering.enable"
    :meteringEndpoint           "slipstream.metering.hostname"
 
-   :serviceCatalogEnable       "slipstream.service.catalog.enable"})
+   :serviceCatalogEnable       "slipstream.service.catalog.enable"
 
-(def rname->param (merge base-rname->param extra-rname->param))
+   :slipstreamVersion          "slipstream.version"
+
+   :cloudConnectorClass        "cloud.connector.class"
+   })
 
 (def param->rname (set/map-invert rname->param))
+
+(def connector-ref-attrs-kw->pname
+  {:orchestratorImageid "orchestrator.imageid"
+   :quotaVm             "quota.vm"
+   :maxIaasWorkers      "max.iaas.workers"})
+
+(def connector-mandatory-atrrs-kw->pname
+  {:endpoint                "endpoint"
+   :nativeContextualization "native-contextualization"
+   :orchestratorSSHUsername "orchestrator.ssh.username"
+   :orchestratorSSHPassword "orchestrator.ssh.password"
+   :securityGroups          "security.groups"
+   :updateClientURL         "update.clienturl"})
+
+(def connector-kw->pname
+  (merge connector-ref-attrs-kw->pname
+         connector-mandatory-atrrs-kw->pname))
+
+(def connector-pname->kw (set/map-invert connector-kw->pname))
+
+(defn process-param-value
+  [v]
+  (cond
+    (nil? v) ""
+    (and (= (type v) java.lang.String) (empty? v)) ""
+    (= (type (u/read-str v)) clojure.lang.Symbol) v
+    :else (u/read-str v)))
 
 (defn param-value
   [p]
   (let [v (.getValue p)]
     (cond
-      (nil? v) ""
-      (and (= (type v) java.lang.String) (empty? v)) ""
-      (= (type (u/read-str v)) clojure.lang.Symbol) v
-      :else (u/read-str v))))
+      (= "boolean" (s/lower-case (.getType p))) (process-param-value v)
+      (integer? (process-param-value v)) (read-string v)
+      :else v)))
 
 (defn global-param-key
   [p]
@@ -132,8 +125,7 @@
 
 (defn param-for-sc->cfg?
   [p]
-  (and (param-global-valid? p)
-       (not (contains? (-> extra-rname->param vals set) (.getName p)))))
+  (param-global-valid? p))
 
 (defn sc->cfg
   [sc]
@@ -160,18 +152,60 @@
         (for [p (vals (.getParameters sc)) :when (not (category-global? p))]
           (.getCategory p))))
 
-(defn sc->connector
-  [sc category]
+(defn grow-coll-1->2
+  [c]
+  (if (= 1 (count c))
+    (conj c (first c))
+    c))
+
+(defn connector-names-map
+  "Input (str): instance1:connector1,connector2,...
+  Output ([cin cn] ..): connector instance name -> connector name map. Keys and values are strings.
+  Cases:
+  1. instance-name:name
+  2. name -> name:name (duplicate name)
+  "
+  [cnames]
   (into {}
-        (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p category)]
-          [(keyword (.getName p)) (param-value p)])))
+        (if (seq cnames)
+          (->> (s/split cnames #",")
+               (map #(s/trim %))
+               (filter #(seq %))
+               (map #(s/split % #":"))
+               (map grow-coll-1->2)))))
+
+(defn sc-connector-names-map
+  [sc]
+  (-> sc
+      (scu/sc-get-param-value "cloud.connector.class")
+      connector-names-map))
+
+(defn connector-param-name-as-kw
+  [p cin->cn]
+  (let [[cin pname] (s/split (.getName p) #"\." 2)
+        cn        (get cin->cn cin)
+        pname->kw (merge connector-pname->kw
+                         (get @cont/name->kw (str cont/resource-url "/" cn)))]
+    (get pname->kw pname)))
+
+(defn sc->connector
+  "Parameter name is a string with removed category, i.e, [cat.]param.name.
+  Mapping to keywords is looked up in local map and in the connector one
+  registerred in connector-template/name->kw atom."
+  [sc category]
+  (let [cin->cn (sc-connector-names-map sc)]
+    (into {}
+          (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p category)]
+            [(connector-param-name-as-kw p cin->cn)
+             (param-value p)]))))
 
 (defn sc->connector-desc
   [sc category]
-  (into {}
-        (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p category)]
-          [(keyword (.getName p))
-           (u/desc-from-param p)])))
+  (let [cin->cn (sc-connector-names-map sc)]
+    (into {}
+          (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p category)]
+            [(connector-param-name-as-kw p cin->cn)
+             (u/desc-from-param p)]))))
 
 (defn sc->connector-with-desc
   [sc category]
@@ -191,6 +225,18 @@
         (for [c (or categories (non-global-categories sc))]
           [(keyword c) (sc->connector-with-desc sc c)])))
 
+(defn sc->connectors-vals-only
+  "Given ServiceConfiguration, returns the following map
+  {:connector-instance-name {:param1 val
+                             :param2 val
+                             ..}
+   ..}
+   "
+  [sc & [categories]]
+  (into {}
+        (for [c (or categories (non-global-categories sc))]
+          [(keyword c) (sc->connector sc c)])))
+
 (defn cs->cfg-desc-and-spit
   [sc fpath]
   (let [f        (fs/expand-home fpath)
@@ -198,9 +244,12 @@
     (with-open [^java.io.Writer w (apply clojure.java.io/writer f {})]
       (clojure.pprint/pprint cfg-desc w))))
 
-(defn load-cfg-desc
+
+(def cfg-desc cts/desc)
+
+(defn connector-template-desc
   []
-  (merge cts/desc extra-params-desc))
+  cont/ConnectorTemplateDescription)
 
 (defn complete-resource
   [cfg]
@@ -210,22 +259,115 @@
 
 (defn db-add-default-config
   [& [fail]]
-  (.info logger "Adding default server configuration to ES DB.")
+  (log/info "Adding default server configuration to ES DB.")
   (let [resp (-> cts/resource
                  complete-resource
-                 (u/as-request resource-uuid user-roles-str)
+                 (u/as-request cfg-resource-uuid user-roles-str)
                  cr/add-impl)]
     (if (and fail (> (:status resp) 400))
       (u/throw-on-resp-error resp)
       (do
-        (.warning logger (str "Failure adding default configuration: " resp))))))
+        (log/warn "Failure adding default configuration: " resp)))))
 
-(defn as-request
+(defn cfg-as-request
   [& [body]]
-  (u/as-request (or body {}) resource-uuid user-roles-str))
+  (u/as-request (or body {}) cfg-resource-uuid user-roles-str))
+
+(defn connector-as-request
+  [cname & [body]]
+  (u/as-request (or body {}) cname user-roles-str))
 
 
 (defn get-sc-param-meta-only
   [pname]
-  (u/build-sc-param "" ((get param->rname pname) (load-cfg-desc))))
+  (u/build-sc-param "" ((get param->rname pname) cfg-desc)))
 
+(defn get-connector-param-from-template
+  [pname]
+  (let [kw    (get connector-pname->kw pname)
+        value (kw cont/connector-reference-params-defaults)]
+    (u/build-sc-param value (kw (connector-template-desc)))))
+
+
+(defn strip-unwanted-attrs [m]
+  (let [unwanted #{:id :resourceURI :acl :operations
+                   :created :updated :name :description
+                   :cloudServiceType
+                   :instanceName}]
+    (into {} (remove #(unwanted (first %)) m))))
+
+(defn get-connector-params-from-template
+  [con-name]
+  (let [resource-name      (str cont/resource-url "/" con-name)
+        connector-template (->> resource-name (get @cont/templates) strip-unwanted-attrs)
+        connector-desc     (get @cont/descriptions resource-name)]
+    (for [[k value] connector-template]
+      (u/build-sc-param value (k connector-desc)))
+    ))
+
+
+;;
+;; Store and load of configuration and connectors.
+;;
+
+(defn store-sc
+  [^ServiceConfiguration sc]
+  (-> sc
+      sc->cfg
+      cfg-as-request
+      cr/edit-impl
+      u/throw-on-resp-error)
+  sc)
+
+(defn store-connectors
+  [^ServiceConfiguration sc]
+  (let [cin-cn          (sc-connector-names-map sc)
+        connectors-vals (sc->connectors-vals-only sc (keys cin-cn))
+        ]
+    (doseq [[cnamekw cvals] connectors-vals]
+      (let [cname       (name cnamekw)
+            req         (connector-as-request cname (merge cvals {:instanceName     cname
+                                                                  :cloudServiceType (get cin-cn cname)}))
+            _           (log/info "Editing connector instance:" cname)
+            edit-resp   (con/edit-impl req)
+            edit-status (:status edit-resp)
+            _           (log/info "Edit response status:" edit-status)]
+        ;; editing may fail because connector instance wasn't instantiated yet.
+        (if (= 404 edit-status)
+          (do
+            (try
+              (log/info "Adding for the first time connector:" cname)
+              ;; adding may fail because connector template wasn't registered yet.
+              (-> req
+                  con/add-impl
+                  u/warn-on-resp-error)
+              (log/info "Successfully added data for connector:" cname)
+              (catch Exception e
+                (log/warn "Failed to edit or add data for connector" cname ". Caught:" (.getMessage e)))))
+          (u/warn-on-resp-error edit-resp)))))
+  sc)
+
+
+(defn load-sc
+  []
+  (let [cfg (-> (cfg-as-request)
+                cr/retrieve-impl
+                :body)]
+    (cfg->sc cfg cfg-desc)))
+
+(defn load-connectors
+  "Loads only the connectors defined in cloud.connector.class.
+  This is done for the compatibility with the current logic of the service."
+  [^ServiceConfiguration sc]
+  (let [cin-cn (sc-connector-names-map sc)]
+    (log/info "Loading connectors" cin-cn)
+    (doseq [[cin cn] cin-cn]
+      (log/info "Loading connector" cin cn)
+      (let [values (strip-unwanted-attrs (:body (con/retrieve-impl (connector-as-request cin))))
+            _      (log/debug "Connector values:" values)
+            descs  (get @cont/descriptions (str cont/resource-url "/" cn))
+            _      (log/info "Connector descriptions #" (count descs))]
+        (doseq [[vk vv] values]
+          (log/debug "::: Setting ServiceConigurationParameter on ServiceConfiguration" vk vv)
+          (.setParameter sc (u/build-sc-param vv (vk descs) cin))))))
+  sc)

@@ -21,8 +21,8 @@
                    :acl                 valid-acl
                    :cloudServiceType    "CloudSoftwareSolution"
                    :orchestratorImageid "123"
-                   :quotaVm             "0"
-                   :maxIaasWorkers      20
+                   :quotaVm             20
+                   :maxIaasWorkers      5
                    :instanceName        "foo"}]
     (is (nil? (s/check ct/ConnectorTemplate root)))
     (doseq [k (into #{} (keys (dissoc root :id :resourceURI)))]

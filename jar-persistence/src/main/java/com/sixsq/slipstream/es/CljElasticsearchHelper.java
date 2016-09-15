@@ -24,6 +24,9 @@ import clojure.java.api.Clojure;
 import clojure.lang.IFn;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class CljElasticsearchHelper {
@@ -41,18 +44,40 @@ public class CljElasticsearchHelper {
         logger.info("Creating DB client and setting DB CRUD implementation.");
         requireNs(NS_SERIALIZERS_UTILS);
         Clojure.var(NS_SERIALIZERS_UTILS, "db-client-and-crud-impl").invoke();
+        initializeConnectorTemplates();
     }
 
     /**
      * Creates
      * - local ES node
      * - resources index
-     * - initial ServiceConfiguration document.
+     * Initializes
+     * - ServiceConfiguration document
+     * - resource templates (including connector templates).
      */
     public static void createAndInitTestDb() {
+        logger.info("Creating test DB node/client and setting DB CRUD implementation.");
         requireNs(NS_SERIALIZERS_UTILS);
         Clojure.var(NS_SERIALIZERS_UTILS, "test-db-client-and-crud-impl").invoke();
         addDefaultServiceConfigToDb();
+        initializeConnectorTemplates();
+    }
+
+    public static void classpath () {
+        logger.info("-->>> Printing classpath.");
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        URL[] urls = ((URLClassLoader)cl).getURLs();
+        logger.info("-->>> # of urls " + urls.length);
+        for(URL url: urls){
+            System.out.println(url.getFile());
+        }
+    }
+
+    public static void initializeConnectorTemplates() {
+        // classpath();
+        requireNs(NS_SERIALIZERS_UTILS);
+        logger.info("Initializing connector templates.");
+        Clojure.var(NS_SERIALIZERS_UTILS, "initialize").invoke();
     }
 
     private static void setDbCrudImpl() {
@@ -61,6 +86,7 @@ public class CljElasticsearchHelper {
     }
 
     private static void addDefaultServiceConfigToDb() {
+        logger.info("Adding default service configuration to DB.");
         setDbCrudImpl();
         requireNs(NS_SERIALIZERS_SERVICE_CONFIG_IMPL);
 		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-add-default-config").invoke();
@@ -89,5 +115,18 @@ public class CljElasticsearchHelper {
                 getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-sc-param-meta-only").invoke(paramName);
     }
 
+    public static ServiceConfigurationParameter getConnectorParameterDescription(String paramName) {
+        return (ServiceConfigurationParameter)
+                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-connector-param-from-template").invoke(paramName);
+    }
+
+    public static List<ServiceConfigurationParameter> getConnectorParameters(String connectorName) {
+        List<ServiceConfigurationParameter> scps = (List<ServiceConfigurationParameter>)
+                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-connector-params-from-template").invoke(connectorName);
+        if (scps.size() == 0) {
+            logger.warning("Loaded 0 connector parameters for connector '" + connectorName + "'");
+        }
+        return scps;
+    }
 
 }

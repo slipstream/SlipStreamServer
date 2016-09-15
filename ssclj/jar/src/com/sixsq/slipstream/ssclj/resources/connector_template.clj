@@ -42,14 +42,15 @@
 
 (def connector-reference-params-defaults
   {:orchestratorImageid ""
-   :quotaVm             ""
-   :maxIaasWorkers      20})
+   :quotaVm             20
+   :maxIaasWorkers      5})
 
 ;;
 ;; atom to keep track of the loaded ConnectorTemplate resources
 ;;
 (def templates (atom {}))
 (def descriptions (atom {}))
+(def name->kw (atom {}))
 
 (defn collection-wrapper-fn
   "Specialized version of this function that removes the adding
@@ -84,7 +85,7 @@
    with the server.  The resource document (resource) and the description
    (desc) must be valid.  The key will be used to create the id of
    the resource as 'connector-template/key'."
-  [resource desc]
+  [resource desc & [name-kw-map]]
   (when-let [full-resource (complete-resource resource)]
     (let [id (:id full-resource)]
       (swap! templates assoc id full-resource)
@@ -93,7 +94,10 @@
         (let [acl       (:acl full-resource)
               full-desc (assoc desc :acl acl)]
           (swap! descriptions assoc id full-desc))
-        (log/info "loaded ConnectorTemplate description" id)))))
+        (log/info "loaded ConnectorTemplate description" id))
+      (when name-kw-map
+        (swap! name->kw assoc id name-kw-map)
+        (log/info "added name->kw mapping from ConnectorTemplate" id)))))
 
 ;;
 ;; schemas
@@ -102,8 +106,8 @@
 ; Mandatory reference parameters.
 (def ConnectorMandatoryReferenceAttrs
   {:orchestratorImageid s/Str                               ;; "<uuid>"
-   :quotaVm             s/Str                               ;; ""
-   :maxIaasWorkers      c/PosInt                            ;; 20
+   :quotaVm             c/PosInt                            ;; 20
+   :maxIaasWorkers      c/PosInt                            ;; 5
    })
 
 (def ValidConnectorInstanceName
@@ -137,7 +141,7 @@
                                 :readOnly    true
                                 :order       0}
 
-          ; Mandatory reference attributes.
+          ; Mandatory reference attributes. Can go into a separate .edn.
           :orchestratorImageid {:displayName "orchestrator.imageid"
                                 :type        "string"
                                 :category    ""

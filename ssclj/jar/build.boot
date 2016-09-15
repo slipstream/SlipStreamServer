@@ -110,9 +110,27 @@
                  :invert true)
            (aot :all true)))
 
+(defn get-file-path
+  [fileset fname]
+  (try
+    (-> (-> fileset
+          (boot.core/tmp-get fname)
+          boot.core/tmp-dir)
+      (clojure.java.io/file fname)
+      .getPath)
+    (catch IllegalArgumentException e)))
+
+(deftask set-version []
+  (fn middleware [next-task]
+    (fn handler [fileset]
+     (let [f (get-file-path fileset "com/sixsq/slipstream/version.txt")]
+       (spit f (get-env :version)))
+      (next-task fileset))))
+
 (deftask build []
          (comp
            (pom)
+           (set-version)
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"

@@ -6,12 +6,21 @@
     [clojure.java.classpath :as cp]
     [clojure.tools.namespace.find :as nsf]))
 
+(defn show
+  [msg o]
+  (println "OBJECT --->>> " msg)
+  (clojure.pprint/pprint o)
+  (println "<<<--- OBJECT")
+  o)
+
 (defn filter-namespaces
   "Returns symbols for all of the namespaces that match the given filter
    function."
   [f]
   (->> (cp/classpath)
+       ;(show "CLASS-PATH")
        (nsf/find-namespaces)
+       ;(show "NAME-SPACES")
        (filter f)))
 
 (defn load-namespace

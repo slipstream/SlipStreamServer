@@ -181,4 +181,25 @@
   :description "Password for SMTP server.",
   :mandatory true,
   :readOnly false,
-  :order 0}}
+  :order 0}
+ :slipstreamVersion
+ {:displayName  "slipstream.version"
+  :type         "string"
+  :category     "SlipStream_Advanced"
+  :description  "Installed SlipStream version"
+  :mandatory    true
+  :readOnly     true
+  :instructions ""
+  :order        0}
+
+ ;; FIXME: used only for compatibilty with the Java server. To be removed.
+ :cloudConnectorClass
+ {:displayName  "cloud.connector.class"
+  :type         "Text"
+  :category     "SlipStream_Basics"
+  :description  "Cloud connector java class name(s) (comma separated for multi-cloud configuration)"
+  :mandatory    true
+  :readOnly     false
+  :instructions ""
+  :order        0}
+ }

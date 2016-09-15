@@ -321,7 +321,7 @@ public abstract class Parameter<T> implements Serializable {
 	}
 
 	public String asString() {
-		return "--->>> Parameter of type " + container.getClass().getName() +
+		return "--->>> Parameter " + ((null != container) ? container.getClass().getName() : "") +
 				"\nname: " + name +
 				"\nvalue: " + value +
 				"\ndescription: " + description +

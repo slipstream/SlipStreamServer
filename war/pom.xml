@@ -32,24 +32,6 @@
       <version>${project.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamConnector-OpenStack-jar</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamConnector-OpenStack-conf-dep</artifactId>
-      <type>pom</type>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamConnector-OpenStack-conf</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
 <!--
   These cannot be added to WAR because it creates a circular dependency
   between the SlipStreamServer module (which contains the connector 

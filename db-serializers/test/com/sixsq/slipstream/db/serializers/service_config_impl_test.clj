@@ -11,3 +11,18 @@
   (let [pd (sci/get-sc-param-meta-only "slipstream.base.url")]
     (is (not-empty-string? (.getDescription pd)))))
 
+
+(deftest test-grow-coll-1->2
+  (is (= [] (sci/grow-coll-1->2 [])))
+  (is (= [:a :b] (sci/grow-coll-1->2 [:a :b])))
+  (is (= [:a :b :c] (sci/grow-coll-1->2 [:a :b :c])))
+  (is (= [:d :d] (sci/grow-coll-1->2 [:d]))))
+
+(deftest test-connector-names-map
+    (is (= {} (sci/connector-names-map "")))
+    (is (= {"foo" "foo"} (sci/connector-names-map "foo")))
+    (is (= {"foo" "bar"} (sci/connector-names-map "foo:bar")))
+    (is (= {"foo" "bar"} (sci/connector-names-map "foo:bar,")))
+    (is (= {"foo" "bar" "baz" "baz"} (sci/connector-names-map "foo:bar,baz")))
+    (is (= {"foo" "bar" "baz" "baz"} (sci/connector-names-map "foo:bar, ,baz")))
+    (is (= {"foo" "bar" "baz" "baz"} (sci/connector-names-map " foo:bar,\n baz\n\t"))))

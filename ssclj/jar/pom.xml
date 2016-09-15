@@ -3,7 +3,6 @@
 
   <artifactId>SlipStreamCljResources-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.12-SNAPSHOT</version>
   <name>SlipStreamCljResources-jar-dep</name>
   <description>SlipStream Clojure Resources (DEP)</description>
   <url>http://sixsq.com</url>
