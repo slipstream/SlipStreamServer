@@ -3,7 +3,7 @@
 ;;
 ;; Boot related scafolding.
 (set-env!
-  :version "3.12-SNAPSHOT"
+  :version "3.13-SNAPSHOT"
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
