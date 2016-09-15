@@ -1,4 +1,4 @@
-(def +version+ "3.12-SNAPSHOT")
+(def +version+ "3.13-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamCljResources-jar
@@ -142,7 +142,7 @@
                             #"config-hsqldb.edn"
                             #"log4j.properties"}
                  :invert true)
-           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main})
+           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main 'com.sixsq.slipstream.ssclj.usage.summarizer})
            #_(uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
                              #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                              #".*log4j\.properties" })

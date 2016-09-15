@@ -103,10 +103,10 @@ public class UsageEvent {
 
             Context context = new Context();
             Series<Parameter> parameters = context.getParameters();
-            parameters.add("socketTimeout", "1000");
-            parameters.add("idleTimeout", "1000");
-            parameters.add("idleCheckInterval", "1000");
-            parameters.add("socketConnectTimeoutMs", "1000");
+            parameters.add("socketTimeout", "60000");
+            parameters.add("idleTimeout", "60000");
+            parameters.add("idleCheckInterval", "0");
+            parameters.add("socketConnectTimeoutMs", "15000");
 
             resource = new ClientResource(context, SSCLJ_SERVER + "/" + USAGE_EVENT_RESOURCE_NAME);
             resource.setRetryOnError(false);

@@ -1,4 +1,4 @@
-(def +version+ "3.12-SNAPSHOT")
+(def +version+ "3.13-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamAsync
