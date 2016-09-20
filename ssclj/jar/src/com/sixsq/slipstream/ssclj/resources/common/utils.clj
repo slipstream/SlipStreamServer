@@ -72,6 +72,11 @@
     (str "undefined action (" (name request-method) ", " action ") for " uri)
     404 uri))
 
+(defn ex-bad-CIMI-filter
+  [filter-param]
+  (-> (str "Wrong CIMI filter : " filter-param)
+      (ex-response 400 nil)))
+
 ;;
 ;; resource ID utilities
 ;;
