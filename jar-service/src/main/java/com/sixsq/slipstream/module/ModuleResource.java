@@ -531,7 +531,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 	private int extractVersion() {
 		String v = (String) getRequest().getAttributes().get("version");
-		return (v == null) ? -1 : Integer.parseInt(v);
+		return (v == null) ? Module.DEFAULT_VERSION : Integer.parseInt(v);
 	}
 
 	@Override
