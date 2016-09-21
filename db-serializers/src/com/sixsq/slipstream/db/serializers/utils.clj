@@ -170,6 +170,12 @@
 ;;
 ;; Initializer
 ;;
+
+(def dyn-init
+  (delay
+    (dyn/initialize)))
+
 (defn initialize
   []
-  (dyn/initialize))
+  @dyn-init)
+

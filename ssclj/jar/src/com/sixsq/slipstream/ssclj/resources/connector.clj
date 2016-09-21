@@ -45,7 +45,11 @@
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown Connector type: " (:cloudServiceType resource)) resource)))
+  (let [err-msg (str "unknown Connector type: " (:cloudServiceType resource))]
+    (throw
+      (ex-info err-msg {:status  400
+                        :message err-msg
+                        :body    resource}))))
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -99,12 +103,12 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        body (-> body
-                 (assoc :resourceURI create-uri)
-                 (std-crud/resolve-hrefs idmap)
-                 (crud/validate)
-                 (:connectorTemplate)
-                 (tpl->connector))]
+        body  (-> body
+                  (assoc :resourceURI create-uri)
+                  (std-crud/resolve-hrefs idmap)
+                  (crud/validate)
+                  (:connectorTemplate)
+                  (tpl->connector))]
     (add-impl (assoc request :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))

@@ -32,6 +32,17 @@
       <type>jar</type>
     </dependency>
     <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamToolsCli-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamToolsCli-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
@@ -111,6 +122,26 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-tools-config-resources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/tools/config</directory>
+                  <includes>
+                    <include>ssclj-tools-cli</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -147,7 +178,22 @@
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/dependency/lib/ext</outputDirectory>
+              <excludeArtifactIds>SlipStreamToolsCli-jar</excludeArtifactIds>
               <stripVersion>true</stripVersion>
+              <stripClassifier>true</stripClassifier>
+              <excludeTypes>pom</excludeTypes>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-ssclj-tools</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/dependency</outputDirectory>
+              <includeArtifactIds>SlipStreamToolsCli-jar</includeArtifactIds>
               <stripClassifier>true</stripClassifier>
               <excludeTypes>pom</excludeTypes>
               <includeScope>runtime</includeScope>
@@ -238,6 +284,45 @@
                   <excludes>
                     <exclude>SlipStreamCljResources-jar.jar</exclude>
                   </excludes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/tools</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/SlipStreamToolsCli-jar-${project.version}.jar</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/default</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>target/ssclj-tools-cli</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/usr/bin</directory>
+              <filemode>755</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/tools/scripts/ss-config.sh</location>
+                  <destination>ss-config</destination>
+                </source>
+                <source>
+                  <location>src/main/tools/scripts/ss-config-dump.sh</location>
+                  <destination>ss-config-dump</destination>
                 </source>
               </sources>
             </mapping>

@@ -288,13 +288,14 @@
         value (kw cont/connector-reference-params-defaults)]
     (u/build-sc-param value (kw (connector-template-desc)))))
 
+(def unwanted-attrs #{:id :resourceURI :acl :operations
+                      :created :updated :name :description
+                      :cloudServiceType
+                      :instanceName})
 
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description
-                   :cloudServiceType
-                   :instanceName}]
-    (into {} (remove #(unwanted (first %)) m))))
+(defn strip-unwanted-attrs
+  [m & [unwanted]]
+  (into {} (remove #((or unwanted unwanted-attrs) (first %)) m)))
 
 (defn get-connector-params-from-template
   [con-name]

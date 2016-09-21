@@ -19,6 +19,7 @@
 
   <modules>
     <module>jar</module>
+    <module>tools</module>
   </modules>
 
   <profiles>
