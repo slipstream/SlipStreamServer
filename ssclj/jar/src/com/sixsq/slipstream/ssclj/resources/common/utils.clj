@@ -34,16 +34,21 @@
       (r/content-type "application/json")))
 
 (defn map-response
-  [msg status id]
-  (-> {:status      status
-       :message     msg
-       :resource-id id}
-      (json-response)
-      (r/status status)))
+  ([msg status id]
+   (let [m {:status  status
+            :message msg}
+         m (if id (assoc m :resource-id id) m)]
+     (-> m
+         json-response
+         (r/status status))))
+  ([msg status]
+   (map-response msg status nil)))
 
 (defn ex-response
-  [msg status id]
-  (ex-info msg (map-response msg status id)))
+  ([msg status id]
+   (ex-info msg (map-response msg status id)))
+  ([msg status]
+   (ex-info msg (map-response msg status))))
 
 (defn ex-not-found
   [id]
@@ -71,6 +76,11 @@
   (ex-response
     (str "undefined action (" (name request-method) ", " action ") for " uri)
     404 uri))
+
+(defn ex-bad-CIMI-filter
+  [parse-failure]
+  (-> (str "Invalid CIMI filter. " (prn-str parse-failure))
+      (ex-response 400)))
 
 ;;
 ;; resource ID utilities

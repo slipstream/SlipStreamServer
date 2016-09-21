@@ -53,6 +53,6 @@
 (defmethod crud/add resource-name
   [request]
   (rk/insert-usage-event (:body request) (select-keys request [:user-name :user-roles :cimi-params]))
-  (u/map-response "Usage records created/updated" 201 nil))
+  (u/map-response "Usage records created/updated" 201))
 
 

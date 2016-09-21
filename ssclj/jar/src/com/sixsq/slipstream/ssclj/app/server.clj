@@ -44,12 +44,12 @@
   (-> (routes/get-main-routes)
 
       ;;handler/site
-      wrap-exceptions
       wrap-cimi-params
       wrap-base-uri
       wrap-keyword-params
       wrap-nested-params
       wrap-params
+      wrap-exceptions
       wrap-authn-info-header
       (expose-metrics-as-json (str p/service-context "metrics") default-registry {:pretty-print? true})
       (wrap-json-body {:keywords? true})
