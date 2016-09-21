@@ -10,8 +10,7 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [ring-app urlencode-params is-count exec-request]]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
@@ -128,7 +127,12 @@
   (are-counts 0 "?$filter=(type='XXXXX') or (type='YYYY')"))
 
 (deftest filter-multiple
-  ;; TODO
-  ;(are-counts 0 "?$filter=type='state'&$filter=type='XXX'")
-  ;(are-counts 1 "?$filter=type='state'&$filter=content/resource/href='run/3'")
-  )
+  (are-counts 0 "?$filter=type='state'&$filter=type='XXX'")
+  (are-counts 1 "?$filter=type='state'&$filter=content/resource/href='run/3'"))
+
+(deftest filter-wrong-param
+  (-> (exec-request base-uri "?$filter=type='missing end quote" "joe")
+      (ltu/is-status 400)
+      (get-in [:response :body :message])
+      (.contains "Wrong CIMI filter [type='missing end quote]")
+      is))

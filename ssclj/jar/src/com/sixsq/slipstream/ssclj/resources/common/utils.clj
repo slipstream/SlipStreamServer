@@ -34,16 +34,21 @@
       (r/content-type "application/json")))
 
 (defn map-response
-  [msg status id]
-  (-> {:status      status
-       :message     msg
-       :resource-id id}
-      (json-response)
-      (r/status status)))
+  ([msg status id]
+   (let [m {:status  status
+            :message msg}
+         m (if id (assoc m :resource-id id) m)]
+     (-> m
+         json-response
+         (r/status status))))
+  ([msg status]
+   (map-response msg status nil)))
 
 (defn ex-response
-  [msg status id]
-  (ex-info msg (map-response msg status id)))
+  ([msg status id]
+   (ex-info msg (map-response msg status id)))
+  ([msg status]
+   (ex-info msg (map-response msg status))))
 
 (defn ex-not-found
   [id]
@@ -74,8 +79,9 @@
 
 (defn ex-bad-CIMI-filter
   [filter-param]
-  (-> (str "Wrong CIMI filter : " filter-param)
-      (ex-response 400 nil)))
+  (-> (str "Wrong CIMI filter [" filter-param "], "
+           "Please consult 4.1.6.1 Filtering Collections of https://www.dmtf.org/sites/default/files/standards/documents/DSP0263_2.0.0.pdf")
+      (ex-response 400)))
 
 ;;
 ;; resource ID utilities
