@@ -103,10 +103,10 @@
   [filters]
   (s/join " and " (map #(str "(" % ")") filters)))
 
-(defn throw-illegal-for-invalid-filter
-  [filter-param parse-result]
+(defn- throw-illegal-for-invalid-filter
+  [parse-result]
   (if (insta/failure? parse-result)
-    (throw (u/ex-bad-CIMI-filter filter-param))
+    (throw (u/ex-bad-CIMI-filter (insta/get-failure parse-result)))
     parse-result))
 
 (defn process-filter
@@ -120,7 +120,7 @@
          (as-vector)
          (wrap-join-with-and)
          (parser/parse-cimi-filter)
-         (throw-illegal-for-invalid-filter filter-param)
+         (throw-illegal-for-invalid-filter)
          (add-cimi-param req :filter))
     req))
 

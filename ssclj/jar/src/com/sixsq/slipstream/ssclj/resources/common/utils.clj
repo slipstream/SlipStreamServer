@@ -78,9 +78,8 @@
     404 uri))
 
 (defn ex-bad-CIMI-filter
-  [filter-param]
-  (-> (str "Wrong CIMI filter [" filter-param "], "
-           "Please consult 4.1.6.1 Filtering Collections of https://www.dmtf.org/sites/default/files/standards/documents/DSP0263_2.0.0.pdf")
+  [parse-failure]
+  (-> (str "Invalid CIMI filter. " (prn-str parse-failure))
       (ex-response 400)))
 
 ;;

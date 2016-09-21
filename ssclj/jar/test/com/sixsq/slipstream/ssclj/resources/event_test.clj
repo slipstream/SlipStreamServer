@@ -134,5 +134,5 @@
   (-> (exec-request base-uri "?$filter=type='missing end quote" "joe")
       (ltu/is-status 400)
       (get-in [:response :body :message])
-      (.contains "Wrong CIMI filter [type='missing end quote]")
+      (.startsWith "Invalid CIMI filter. Parse error at line 1, column 7")
       is))
