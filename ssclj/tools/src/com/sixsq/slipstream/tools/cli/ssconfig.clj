@@ -245,7 +245,7 @@
        (s/join \newline errors)))
 
 (def cli-options
-  [["-t" "--template TEMPLATE" "Prints out registered template (configuration, connector/<name>)."]
+  [["-t" "--template TEMPLATE" "Prints out registered template by name."]
    ["-l" "--list" "List available templates."]
    ["-h" "--help"]])
 

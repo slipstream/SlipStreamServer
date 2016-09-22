@@ -310,6 +310,17 @@
             </mapping>
 
             <mapping>
+              <directory>${installation.dir}/tools/resources</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>src/main/tools/config/log4j.properties</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
               <directory>/usr/bin</directory>
               <filemode>755</filemode>
               <username>root</username>
