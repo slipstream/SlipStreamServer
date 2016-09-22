@@ -56,7 +56,6 @@
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
-  test {:junit-output-to ""}
   install {:pom (str (get-env :project))}
   push {:pom (str (get-env :project))}
   )
@@ -66,6 +65,8 @@
          []
          (comp
            (test)
+           (sift :include #{#".*_test\.clj"}
+                 :invert true)
            (aot :all true)))
 
 (deftask build []

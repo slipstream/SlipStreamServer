@@ -50,7 +50,7 @@
   [c]
   (let [res (if (contains? c :id)
               (:id c)
-              (-> c :body :id))]
+              (-> c :body (get :id "")))]
     (if (re-find #"-template/" res)
       (first (s/split res #"-template/"))
       (first (s/split res #"/")))))
