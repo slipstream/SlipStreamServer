@@ -119,8 +119,8 @@
       first
       :PASSWORD))
 
-(defn format-roles [super? roles-string]
-  (let [initial-role (if super? ["ADMIN"] ["USER"])
+(defn build-roles [super? roles-string]
+  (let [initial-role (if super? ["ADMIN" "USER" "ANON"] ["USER" "ANON"])
         roles (->> (s/split (or roles-string "") #"[\s,]+")
                    (remove nil?)
                    (remove s/blank?))]
@@ -133,5 +133,4 @@
                                      (kc/fields :ROLES :ISSUPERUSER)
                                      (kc/where {:NAME  username
                                                 :STATE [in active-user]})))]
-
-    (format-roles (:ISSUPERUSER user-entry) (:ROLES user-entry))))
+    (build-roles (:ISSUPERUSER user-entry) (:ROLES user-entry))))
