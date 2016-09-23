@@ -85,7 +85,6 @@ public class CliConnectorBaseTest {
         outputsWithException.add(","+ip);
 
         for (String output: outputsWithException) {
-            Logger.info("Output: " + output);
             parseRunInstanceResultExpectException(output);
         }
 
