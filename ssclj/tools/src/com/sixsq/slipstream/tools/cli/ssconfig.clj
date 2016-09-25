@@ -34,9 +34,17 @@
   (println (apply str "ERROR: " msg))
   (System/exit 1))
 
+(defn resp-success?
+  [resp]
+  (< (:status resp) 400))
+
+(defn resp-error?
+  [resp]
+  (complement (resp-success? resp)))
+
 (defn exit-on-resp-error
   [resp]
-  (if (>= (:status resp) 400)
+  (if (resp-error? resp)
     (let [msg (or (-> resp :body :message) (:message resp))]
       (exit-err "Failed with: " msg ".")))
   resp)
@@ -162,7 +170,7 @@
 ;; Connectors.
 ;;
 
-(defn conn-name
+(defn conn-inst-name
   [conn]
   (second (s/split (:id conn) #"/")))
 
@@ -172,7 +180,40 @@
   (let [ctn (str cont/resource-url "/" (:cloudServiceType conn))]
     (-> (get (:connector *templates*) ctn {})
         (merge conn)
-        (assoc :instanceName (conn-name conn)))))
+        (assoc :instanceName (conn-inst-name conn)))))
+
+(defn get-ccc
+  []
+  (:cloudConnectorClass (sci/load-cfg)))
+
+(defn update-ccc
+  [ccc cin cn]
+  (let [new-conn (s/join ":" [cin cn])]
+    (println "Updating :cloudConnectorClass parameter with -" new-conn)
+    (store-cfg {:id                  (str cfg/resource-url "/" cfg-s/service)
+                :cloudConnectorClass (s/join "," [ccc new-conn])})))
+
+(defn add-conn-to-ccc
+  "Adds connector to :cloudConnectorClass attribute."
+  [cin cn]
+  (let [ccc     (get-ccc)
+        cin->cn (sci/connector-names-map ccc)]
+    (if-not (and (contains? cin->cn cin) (= (get cin->cn cin) cn))
+      (update-ccc ccc cin cn)
+      {:status 200
+       :mesage "Connector was already in :cloudConnectorClass."})))
+
+(defn conn-add
+  "Connector `conn` as request. The resource is in :body."
+  [conn]
+  (let [cin      (conn-inst-name (:body conn))
+        cn       (-> conn :body :cloudServiceType)
+        add-resp (-> conn
+                     (assoc :body (complete-connector (:body conn)))
+                     conn/add-impl)]
+    (if (resp-success? add-resp)
+      (add-conn-to-ccc cin cn)
+      add-resp)))
 
 (defn conn-edit-or-add
   "Retruns response of edit or add operation. Tries to add if edit fails with 404."
@@ -182,15 +223,13 @@
     (if (= 404 (:status edit-resp))
       (do
         (println "Adding connector" (-> conn :body :id) "for the first time.")
-        (-> conn
-            (assoc :body (complete-connector (:body conn)))
-            conn/add-impl))
+        (conn-add conn))
       edit-resp)))
 
 (defn store-connector
   [conn]
   (->> conn
-       (sci/connector-as-request (conn-name conn))
+       (sci/connector-as-request (conn-inst-name conn))
        conn-edit-or-add
        exit-on-resp-error))
 

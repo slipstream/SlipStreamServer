@@ -348,13 +348,15 @@
           (u/warn-on-resp-error edit-resp)))))
   sc)
 
+(defn load-cfg
+  []
+  (-> (cfg-as-request)
+      cr/retrieve-impl
+      :body))
 
 (defn load-sc
   []
-  (let [cfg (-> (cfg-as-request)
-                cr/retrieve-impl
-                :body)]
-    (cfg->sc cfg cfg-desc)))
+  (cfg->sc (load-cfg) cfg-desc))
 
 (defn load-connectors
   "Loads only the connectors defined in cloud.connector.class.
