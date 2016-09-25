@@ -333,7 +333,7 @@
                 </source>
                 <source>
                   <location>src/main/tools/scripts/ss-config-dump.sh</location>
-                  <destination>ss-config-dump</destination>
+                  <destination>ss-conf-dump</destination>
                 </source>
               </sources>
             </mapping>
