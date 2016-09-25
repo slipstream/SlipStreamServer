@@ -129,7 +129,7 @@
 
 (defn cfg-tpl-slipstream
   []
-  (get (:configuration *templates*) (str cfgt/resource-name "/" cfg-s/service)))
+  (get (:configuration *templates*) (str cfgt/resource-url "/" cfg-s/service)))
 
 (defn complete-config
   "Add missing keys to satisfy schema."
