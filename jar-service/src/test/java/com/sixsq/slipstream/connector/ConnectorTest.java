@@ -20,6 +20,7 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
@@ -48,6 +49,7 @@ public class ConnectorTest extends ConnectorDummy {
 	@BeforeClass
 	public static void setupClass() {
 		Event.muteForTests();
+		CljElasticsearchHelper.createAndInitTestDb();
 	}
 
 	@Test
