@@ -143,12 +143,15 @@
                                             (str value)
                                             (:description desc))]
     (.setCategory scp (or category (:category desc)))
-    (.setMandatory scp (as-boolean (:mandatory desc)))
+    (when-not (nil? (:mandatory desc))
+      (.setMandatory scp (as-boolean (:mandatory desc))))
     (.setType scp (ParameterType/valueOf (s/capitalize (:type desc))))
     (.setReadonly scp (as-boolean (get desc :readOnly (:readonly desc))))
     (.setOrder scp (read-str (:order desc)))
-    (if (:instructions desc) (.setInstructions scp (:instructions desc)))
-    (if-not (empty? (:enum desc)) (.setEnumValues scp (:enum desc)))
+    (when (:instructions desc)
+      (.setInstructions scp (:instructions desc)))
+    (when-not (empty? (:enum desc))
+      (.setEnumValues scp (:enum desc)))
     scp))
 
 (defn desc-from-param

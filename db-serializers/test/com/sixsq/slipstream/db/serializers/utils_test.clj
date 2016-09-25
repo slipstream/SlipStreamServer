@@ -30,3 +30,11 @@
     (is (contains? pd :instructions))
     (is (= "Dolorem ipsum." (:instructions pd)))
     ))
+
+(deftest test-as-boolean
+  (is (= true (u/as-boolean true)))
+  (is (= false (u/as-boolean false)))
+  (is (= true (u/as-boolean "true")))
+  (is (= false (u/as-boolean "false")))
+  (is (= nil (u/as-boolean nil)))
+  )
