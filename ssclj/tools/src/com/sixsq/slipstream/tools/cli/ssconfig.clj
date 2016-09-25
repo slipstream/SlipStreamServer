@@ -127,7 +127,8 @@
     (assoc m :service cfg-s/service)
     m))
 
-(def cfg-tpl-slipstream
+(defn cfg-tpl-slipstream
+  []
   (get (:configuration *templates*) (str cfgt/resource-name "/" cfg-s/service)))
 
 (defn complete-config
@@ -135,7 +136,7 @@
   [cfg]
   (->> cfg
        cfg-add-service-attr
-       (merge cfg-tpl-slipstream)))
+       (merge (cfg-tpl-slipstream))))
 
 (defn cfg-edit-or-add
   "Retruns response of edit or add operation. Tries to add if edit fails with 404."
