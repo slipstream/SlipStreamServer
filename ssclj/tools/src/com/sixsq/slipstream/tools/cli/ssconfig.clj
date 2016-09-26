@@ -40,7 +40,7 @@
 
 (defn resp-error?
   [resp]
-  (complement (resp-success? resp)))
+  (not (resp-success? resp)))
 
 (defn exit-on-resp-error
   [resp]
@@ -186,12 +186,16 @@
   []
   (:cloudConnectorClass (sci/load-cfg)))
 
+(defn merge-ccc-and-new-conn
+  [ccc new-conn]
+  (s/replace (s/join "," [ccc new-conn]) #"(^[ \t]*,*|,*[ \t]*$)" ""))
+
 (defn update-ccc
   [ccc cin cn]
   (let [new-conn (s/join ":" [cin cn])]
     (println "Updating :cloudConnectorClass parameter with -" new-conn)
     (store-cfg {:id                  (str cfg/resource-url "/" cfg-s/service)
-                :cloudConnectorClass (s/join "," [ccc new-conn])})))
+                :cloudConnectorClass (merge-ccc-and-new-conn ccc new-conn)})))
 
 (defn add-conn-to-ccc
   "Adds connector to :cloudConnectorClass attribute."
@@ -200,8 +204,8 @@
         cin->cn (sci/connector-names-map ccc)]
     (if-not (and (contains? cin->cn cin) (= (get cin->cn cin) cn))
       (update-ccc ccc cin cn)
-      {:status 200
-       :mesage "Connector was already in :cloudConnectorClass."})))
+      {:status  200
+       :message "Connector was already in :cloudConnectorClass."})))
 
 (defn conn-add
   "Connector `conn` as request. The resource is in :body."
