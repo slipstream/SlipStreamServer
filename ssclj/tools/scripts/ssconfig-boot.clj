@@ -8,5 +8,5 @@
 
 (defn -main
   [& args]
-  (d/-main args))
+  (apply d/-main args))
 
