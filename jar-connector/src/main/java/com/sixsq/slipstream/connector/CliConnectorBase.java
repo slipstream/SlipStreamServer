@@ -116,7 +116,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 			throw (new SlipStreamInternalException(e));
 		} catch (ProcessException e) {
 			try {
-				String[] instanceData = parseRunInstanceResult(e.getStdOut());
+				String[] instanceData = parseRunInstanceResult(e.getStdOut(), this.log);
 				updateInstanceIdAndIpOnRun(run, instanceData[0], instanceData[1]);
 			} catch (Exception ex) { }
 			throw e;
@@ -124,7 +124,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 			cleanupAfterLaunch();
 		}
 
-		String[] instanceData = parseRunInstanceResult(result);
+		String[] instanceData = parseRunInstanceResult(result, this.log);
 		String instanceId = instanceData[0];
 		String ipAddress = instanceData[1];
 
@@ -444,18 +444,35 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	public static String[] parseRunInstanceResult(String result)
 			throws SlipStreamClientException {
+		return parseRunInstanceResult(result, Logger.getGlobal());
+	}
+
+	public static String[] parseRunInstanceResult(String result, Logger log)
+			throws SlipStreamClientException {
+		String id = null;
+		String ip = null;
 		String[] lines = result.split("\n");
-		if (lines.length < 1) {
-			throw (new SlipStreamClientException(
-					"Error returned by launch command. Got: " + result));
+
+		for (String line: lines) {
+			String[] parts = line.trim().split(",");
+			if (parts.length >= 1 && ! parts[0].trim().isEmpty()) {
+				id = parts[0];
+			}
+			if (parts.length >= 2 && ! parts[1].trim().isEmpty()) {
+				ip = parts[1];
+			}
 		}
-		String line = lines[lines.length-1];
-		String[] parts = line.trim().split(",");
-		if (parts.length != 2) {
-			throw (new SlipStreamClientException(
-					"Error returned by launch command. Got: " + result));
+
+		if (id == null) {
+			throw (new SlipStreamClientException("Error returned by launch command. Got: " + result));
 		}
-		return parts;
+
+		if (ip == null) {
+			log.warning("No IP were returned by the launch command");
+		}
+
+		String[] id_ip = {id, ip};
+		return id_ip;
 	}
 
 	protected String wrapInSingleQuotesOrNull(String value) {

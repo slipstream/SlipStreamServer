@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.middleware.accepted-mime-types :as mime]
     [superstring.core :as s]
     [instaparse.core :as insta]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 
 (def ^:const default-last
@@ -102,10 +103,10 @@
   [filters]
   (s/join " and " (map #(str "(" % ")") filters)))
 
-(defn throw-illegal-for-invalid-filter
+(defn- throw-illegal-for-invalid-filter
   [parse-result]
   (if (insta/failure? parse-result)
-    (throw (Exception. (str "Invalid filter: " (insta/get-failure parse-result))))
+    (throw (u/ex-bad-CIMI-filter (insta/get-failure parse-result)))
     parse-result))
 
 (defn process-filter
