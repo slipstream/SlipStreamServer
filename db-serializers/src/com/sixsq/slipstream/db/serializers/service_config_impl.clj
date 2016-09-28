@@ -3,8 +3,9 @@
     [clojure.set :as set]
     [clojure.tools.logging :as log]
 
-    [superstring.core :as s]
+    [camel-snake-kebab.core :refer [->camelCase]]
     [me.raynes.fs :as fs]
+    [superstring.core :as s]
 
     [com.sixsq.slipstream.db.serializers.utils :as u]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
@@ -180,13 +181,21 @@
       (scu/sc-get-param-value "cloud.connector.class")
       connector-names-map))
 
+(defn pname-to-kwname
+  [cn pname]
+  (-> (merge connector-pname->kw
+             (get @cont/name->kw (str cont/resource-url "/" cn)))
+      (get pname (->camelCase pname :separator #"\.|-"))))
+
 (defn connector-param-name-as-kw
   [p cin->cn]
   (let [[cin pname] (s/split (.getName p) #"\." 2)
-        cn        (get cin->cn cin)
-        pname->kw (merge connector-pname->kw
-                         (get @cont/name->kw (str cont/resource-url "/" cn)))]
-    (get pname->kw pname)))
+        cn (get cin->cn cin)]
+    (if (s/blank? pname)
+      (throw (Exception. "Parameter name is blank when mapping connector parameters."))
+      (->> pname
+           (pname-to-kwname cn)
+           keyword))))
 
 (defn sc->connector
   "Parameter name is a string with removed category, i.e, [cat.]param.name.
@@ -207,10 +216,24 @@
             [(connector-param-name-as-kw p cin->cn)
              (u/desc-from-param p)]))))
 
+(defn assoc-identity
+  [conn sc cin]
+  (assoc conn :id (str con/resource-url "/" cin)
+              :cloudServiceType (get (sc-connector-names-map sc) cin)))
+
 (defn sc->connector-with-desc
-  [sc category]
-  [(sc->connector sc category)
-   (sc->connector-desc sc category)])
+  [sc cin]
+  [(assoc-identity (sc->connector sc cin) sc cin)
+   (sc->connector-desc sc cin)])
+
+(defn sc->connectors-base
+  [sc cins func]
+  (let [cins (if (seq cins)
+               cins
+               (non-global-categories sc))]
+    (into {}
+          (for [cin cins]
+            [(keyword cin) (func sc cin)]))))
 
 (defn sc->connectors
   "Given ServiceConfiguration, returns the following map
@@ -219,11 +242,11 @@
                              {:param {description map}
                               ..}]
    ..}
+
+   cin - connector instance name.
    "
-  [sc & [categories]]
-  (into {}
-        (for [c (or categories (non-global-categories sc))]
-          [(keyword c) (sc->connector-with-desc sc c)])))
+  [sc & [cins]]
+  (sc->connectors-base sc cins sc->connector-with-desc))
 
 (defn sc->connectors-vals-only
   "Given ServiceConfiguration, returns the following map
@@ -231,11 +254,11 @@
                              :param2 val
                              ..}
    ..}
+
+   cin - connector instance name.
    "
-  [sc & [categories]]
-  (into {}
-        (for [c (or categories (non-global-categories sc))]
-          [(keyword c) (sc->connector sc c)])))
+  [sc & [cins]]
+  (sc->connectors-base sc cins sc->connector))
 
 (defn cs->cfg-desc-and-spit
   [sc fpath]

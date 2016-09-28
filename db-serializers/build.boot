@@ -30,12 +30,13 @@
                     ; com.sixsq.slipstream.ssclj.middleware.authn-info-header
                     [cheshire]
 
+                    [camel-snake-kebab]
+                    [me.raynes/fs]
                     [org.clojure/data.xml]
                     [superstring]
-                    [me.raynes/fs]
 
-                    [com.sixsq.slipstream/SlipStreamPersistence]
                     [com.sixsq.slipstream/SlipStreamCljResources-jar]
+                    [com.sixsq.slipstream/SlipStreamPersistence]
 
                     ;; boot tasks
                     [boot-environ]

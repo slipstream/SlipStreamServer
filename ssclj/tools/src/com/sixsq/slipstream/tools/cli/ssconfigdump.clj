@@ -37,14 +37,19 @@
         :body)
     (slurp path-url)))
 
+(defn save-connector!
+  [cn vals desc]
+  (println "Saving connector:" cn)
+  (fwrite vals (format "connector-%s.edn" cn))
+  (fwrite desc (format "connector-%s-desc.edn" cn)))
+
 (defn run
   []
   (let [sc (-> *cfg-path-url* conf-xml scu/conf-xml->sc)]
-    (doseq [[ckey [vals desc]] (sci/sc->connectors sc *c-names*)]
-      (let [cname (name ckey)]
-        (println "Saving connector:" cname)
-        (fwrite vals (format "connector-%s.edn" cname))
-        (fwrite desc (format "connector-%s-desc.edn" cname))))))
+    (doseq [[cnkey [vals desc]] (sci/sc->connectors sc *c-names*)]
+      (if (and (seq desc) (seq (dissoc vals :id :cloudServiceType)))
+        (save-connector! (name cnkey) vals desc)
+        (println "WARNING: No data obtained for connector:" (name cnkey))))))
 
 ;;
 ;; Command line options processing.
@@ -60,8 +65,16 @@
   (str "The following errors occurred while parsing your command:\n\n"
        (s/join \newline errors)))
 
+(defn cli-parse-connectors
+  [m k v] (assoc m k (if-let [oldval (get m k)]
+                       (merge oldval v)
+                       (hash-set v))))
+
 (def cli-options
-  [["-c" "--connectors CONNECTORS" "Connector instance names (category). If not provided all connectors will be stored."]
+  [["-c" "--connector CONNECTOR" "Connector instance names (category). If not provided all connectors will be stored."
+    :id :connectors
+    :default #{}
+    :assoc-fn cli-parse-connectors]
    ["-x" "--configxml CONFIGXML" "Path to file or URL starting with https (requries -s parameter). Mandatory."]
    ["-s" "--credentials CREDENTIALS" "Credentials as user:pass for -x when URL is provided."]
    ["-h" "--help"]])

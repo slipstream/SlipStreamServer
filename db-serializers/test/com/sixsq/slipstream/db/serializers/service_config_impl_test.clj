@@ -26,3 +26,15 @@
     (is (= {"foo" "bar" "baz" "baz"} (sci/connector-names-map "foo:bar,baz")))
     (is (= {"foo" "bar" "baz" "baz"} (sci/connector-names-map "foo:bar, ,baz")))
     (is (= {"foo" "bar" "baz" "baz"} (sci/connector-names-map " foo:bar,\n baz\n\t"))))
+
+(deftest test-pname-to-kwname
+  (is (= "" (sci/pname-to-kwname "" "")))
+  (is (= "" (sci/pname-to-kwname "foo" "")))
+  (is (= "bar" (sci/pname-to-kwname "foo" "bar")))
+  (is (= "fooBar" (sci/pname-to-kwname "" "foo.bar")))
+  (is (= "fooBar" (sci/pname-to-kwname "" "foo-bar")))
+  (is (= "fooBar" (sci/pname-to-kwname "" "foo.-bar")))
+  (is (= "fooBar" (sci/pname-to-kwname "" "foo-.bar")))
+  (is (= "fooBarBaz" (sci/pname-to-kwname "" "foo.bar.baz")))
+  (is (= "fooBarBazQuix" (sci/pname-to-kwname "" "foo.bar-baz.quix")))
+  (is (= "fooBarBazQuix" (sci/pname-to-kwname "" "foo-bar-baz-quix"))))
