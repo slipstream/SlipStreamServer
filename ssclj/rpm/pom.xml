@@ -335,6 +335,10 @@
                   <location>src/main/tools/scripts/ss-config-dump.sh</location>
                   <destination>ss-conf-dump</destination>
                 </source>
+                <source>
+                  <location>src/main/tools/scripts/ss-config-migrate.sh</location>
+                  <destination>ss-config-migrate</destination>
+                </source>
               </sources>
             </mapping>
 
