@@ -21,7 +21,7 @@
                    :acl                 valid-acl
                    :cloudServiceType    "CloudSoftwareSolution"
                    :orchestratorImageid "123"
-                   :quotaVm             20
+                   :quotaVm             "20"
                    :maxIaasWorkers      5
                    :instanceName        "foo"}]
     (is (nil? (s/check ct/ConnectorTemplate root)))

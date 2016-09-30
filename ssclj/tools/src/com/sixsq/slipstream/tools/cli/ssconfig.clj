@@ -49,6 +49,21 @@
       (exit-err "Failed with: " msg ".")))
   resp)
 
+(defn init-db-client
+  []
+  (u/db-client-and-crud-impl))
+
+(defn init-namespaces
+  []
+  (u/initialize)
+  (alter-var-root #'*templates* (constantly {:connector     @cont/templates
+                                             :configuration @cfgt/templates})))
+
+(defn init
+  []
+  (init-db-client)
+  (init-namespaces))
+
 ;;
 ;; Common functions.
 ;;
@@ -249,7 +264,7 @@
 
 (defn run
   [files]
-  (u/db-client-and-crud-impl)
+  (init-db-client)
   (doseq [f files]
     (-> (edn/read-string (slurp f))
         validate
@@ -318,11 +333,6 @@
         prog-help]
        (s/join \newline)))
 
-(defn init
-  []
-  (u/initialize)
-  (alter-var-root #'*templates* (constantly {:connector     @cont/templates
-                                             :configuration @cfgt/templates})))
 
 (defn -main
   [& args]
@@ -330,7 +340,7 @@
     (cond
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
-    (init)
+    (init-namespaces)
     (when (not (empty? arguments))
       (run arguments))
     (when (:list options)

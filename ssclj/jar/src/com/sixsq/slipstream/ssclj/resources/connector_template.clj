@@ -42,7 +42,7 @@
 
 (def connector-reference-params-defaults
   {:orchestratorImageid ""
-   :quotaVm             20
+   :quotaVm             "20"
    :maxIaasWorkers      5})
 
 ;;
@@ -106,7 +106,7 @@
 ; Mandatory reference parameters.
 (def ConnectorMandatoryReferenceAttrs
   {:orchestratorImageid s/Str                               ;; "<uuid>"
-   :quotaVm             c/PosInt                            ;; 20
+   :quotaVm             s/Str                               ;; "20" or ""
    :maxIaasWorkers      c/PosInt                            ;; 5
    })
 

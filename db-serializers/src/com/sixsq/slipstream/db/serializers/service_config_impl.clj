@@ -84,6 +84,43 @@
 
 (def connector-pname->kw (set/map-invert connector-kw->pname))
 
+(defn global-param-key
+  [p]
+  (get param->rname (.getName p)))
+
+(defn category-global?
+  [p]
+  (contains? global-categories (.getCategory p)))
+
+(defn param-global-valid?
+  [p]
+  (and (category-global? p) (global-param-key p)))
+
+(defn conn-pname-to-kwname
+  [cn pname]
+  (-> (merge connector-pname->kw
+             (get @cont/name->kw (str cont/resource-url "/" cn)))
+      (get pname (->camelCase pname :separator #"\.|-"))))
+
+(defn param-get-cin-and-pname
+  [p]
+  (s/split (.getName p) #"\." 2))
+
+(defn param-get-pname
+  "Get unqualified parameter name by removing its category."
+  [p]
+  (second (param-get-cin-and-pname p)))
+
+(defn connector-param-name-as-kw
+  [p cin->cn]
+  (let [[cin pname] (param-get-cin-and-pname p)
+        cn (get cin->cn cin)]
+    (if (s/blank? pname)
+      (throw (Exception. "Parameter name is blank when mapping connector parameters."))
+      (->> pname
+           (conn-pname-to-kwname cn)
+           keyword))))
+
 (defn process-param-value
   [v]
   (cond
@@ -100,17 +137,21 @@
       (integer? (process-param-value v)) (read-string v)
       :else v)))
 
-(defn global-param-key
-  [p]
-  (get param->rname (.getName p)))
+(defn conn-param-value-type-from-template
+  [p cn]
+  (let [resource-name (str cont/resource-url "/" cn)
+        template      (get @cont/templates resource-name)
+        cnkw          (keyword (conn-pname-to-kwname cn (param-get-pname p)))
+        val           (cnkw template)]
+    (type val)))
 
-(defn category-global?
-  [p]
-  (contains? global-categories (.getCategory p)))
-
-(defn param-global-valid?
-  [p]
-  (and (category-global? p) (global-param-key p)))
+(defn conn-param-value
+  [p cn]
+  (let [v (.getValue p)
+        templ-val-type (conn-param-value-type-from-template p cn)]
+    (if (= java.lang.String templ-val-type)
+      (str v)
+      (param-value p))))
 
 (defn cfg->sc
   ([cfg]
@@ -181,32 +222,29 @@
       (scu/sc-get-param-value "cloud.connector.class")
       connector-names-map))
 
-(defn pname-to-kwname
-  [cn pname]
-  (-> (merge connector-pname->kw
-             (get @cont/name->kw (str cont/resource-url "/" cn)))
-      (get pname (->camelCase pname :separator #"\.|-"))))
-
-(defn connector-param-name-as-kw
+(defn conn-name
+  "Given parameter and connector instance name to name mapping,
+  return the parameter's connetor name."
   [p cin->cn]
-  (let [[cin pname] (s/split (.getName p) #"\." 2)
-        cn (get cin->cn cin)]
-    (if (s/blank? pname)
-      (throw (Exception. "Parameter name is blank when mapping connector parameters."))
-      (->> pname
-           (pname-to-kwname cn)
-           keyword))))
+  (let [cin (first (s/split (.getName p) #"\."))]
+    (get cin->cn cin)))
+
+(defn assoc-identity
+  [conn sc cin]
+  (assoc conn :id (str con/resource-url "/" cin)
+              :cloudServiceType (get (sc-connector-names-map sc) cin)))
 
 (defn sc->connector
   "Parameter name is a string with removed category, i.e, [cat.]param.name.
   Mapping to keywords is looked up in local map and in the connector one
   registerred in connector-template/name->kw atom."
-  [sc category]
+  [sc cin]
   (let [cin->cn (sc-connector-names-map sc)]
-    (into {}
-          (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p category)]
-            [(connector-param-name-as-kw p cin->cn)
-             (param-value p)]))))
+    (-> {}
+        (into (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p cin)]
+                (let [kw (connector-param-name-as-kw p cin->cn)]
+                  [kw (conn-param-value p (conn-name p cin->cn))])))
+        (assoc-identity sc cin))))
 
 (defn sc->connector-desc
   [sc category]
@@ -216,14 +254,9 @@
             [(connector-param-name-as-kw p cin->cn)
              (u/desc-from-param p)]))))
 
-(defn assoc-identity
-  [conn sc cin]
-  (assoc conn :id (str con/resource-url "/" cin)
-              :cloudServiceType (get (sc-connector-names-map sc) cin)))
-
 (defn sc->connector-with-desc
   [sc cin]
-  [(assoc-identity (sc->connector sc cin) sc cin)
+  [(sc->connector sc cin)
    (sc->connector-desc sc cin)])
 
 (defn sc->connectors-base
@@ -326,8 +359,7 @@
         connector-template (->> resource-name (get @cont/templates) strip-unwanted-attrs)
         connector-desc     (get @cont/descriptions resource-name)]
     (for [[k value] connector-template]
-      (u/build-sc-param value (k connector-desc)))
-    ))
+      (u/build-sc-param value (k connector-desc)))))
 
 
 ;;
