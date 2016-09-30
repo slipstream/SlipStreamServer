@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.db.serializers.utils
   (:require
-
     [clojure.tools.logging :as log]
 
     [superstring.core :as s]
-    [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.es.es-util :as esu]
+
     [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.es-util :as esu]
+    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn])
   (:import
@@ -129,6 +129,15 @@
 ;; Parameters
 ;;
 
+(defn param-get-cat-and-name
+  [p]
+  (s/split (.getName p) #"\." 2))
+
+(defn param-get-pname
+  "Get unqualified parameter name by removing its category."
+  [p]
+  (second (param-get-cat-and-name p)))
+
 (defn qualified-pname
   [desc category]
   (let [n (get desc :name (:displayName desc))]
@@ -161,7 +170,7 @@
 
 (defn desc-from-param
   [p]
-  (let [pd {:displayName (.getName p)
+  (let [pd {:displayName (param-get-pname p)
             :type        (s/lower-case (.getType p))
             :category    (.getCategory p)
             :description (.getDescription p)

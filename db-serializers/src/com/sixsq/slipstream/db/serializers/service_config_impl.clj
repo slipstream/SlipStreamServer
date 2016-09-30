@@ -102,18 +102,9 @@
              (get @cont/name->kw (str cont/resource-url "/" cn)))
       (get pname (->camelCase pname :separator #"\.|-"))))
 
-(defn param-get-cin-and-pname
-  [p]
-  (s/split (.getName p) #"\." 2))
-
-(defn param-get-pname
-  "Get unqualified parameter name by removing its category."
-  [p]
-  (second (param-get-cin-and-pname p)))
-
 (defn connector-param-name-as-kw
   [p cin->cn]
-  (let [[cin pname] (param-get-cin-and-pname p)
+  (let [[cin pname] (u/param-get-cat-and-name p)
         cn (get cin->cn cin)]
     (if (s/blank? pname)
       (throw (Exception. "Parameter name is blank when mapping connector parameters."))
@@ -141,7 +132,7 @@
   [p cn]
   (let [resource-name (str cont/resource-url "/" cn)
         template      (get @cont/templates resource-name)
-        cnkw          (keyword (conn-pname-to-kwname cn (param-get-pname p)))
+        cnkw          (keyword (conn-pname-to-kwname cn (u/param-get-pname p)))
         val           (cnkw template)]
     (type val)))
 
