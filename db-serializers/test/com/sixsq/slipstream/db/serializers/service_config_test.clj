@@ -57,7 +57,7 @@
 ;; Test transformation from ServiceConfiguration to
 ;; configuration/slipstream resource document.
 (deftest test-sc->cfg
-  (is (= {} (sci/sc->cfg (ServiceConfiguration.))))
+  (is (= {} (dissoc (sci/sc->cfg (ServiceConfiguration.)) :id)))
   (let [conf        (sci/sc->cfg sc-from-xml)
         not-in-conf (keys-not-in-conf conf)]
     (is (empty? not-in-conf) (msg-keys-not-in-cfg not-in-conf))))

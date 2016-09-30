@@ -147,7 +147,7 @@
 
 (defn conn-param-value
   [p cn]
-  (let [v (.getValue p)
+  (let [v              (.getValue p)
         templ-val-type (conn-param-value-type-from-template p cn)]
     (if (= java.lang.String templ-val-type)
       (str v)
@@ -169,11 +169,16 @@
   [p]
   (param-global-valid? p))
 
+(defn assoc-cfg-identity
+  [cfg]
+  (assoc cfg :id (str cr/resource-url "/" crs/service)))
+
 (defn sc->cfg
   [sc]
-  (into {}
-        (for [p (vals (.getParameters sc)) :when (param-for-sc->cfg? p)]
-          [(global-param-key p) (param-value p)])))
+  (-> {}
+      (into (for [p (vals (.getParameters sc)) :when (param-for-sc->cfg? p)]
+              [(global-param-key p) (param-value p)]))
+      assoc-cfg-identity))
 
 (defn sc->cfg-desc
   [sc]
@@ -229,7 +234,7 @@
   (let [cin (first (s/split (.getName p) #"\."))]
     (get cin->cn cin)))
 
-(defn assoc-identity
+(defn assoc-conn-identity
   [conn sc cin]
   (assoc conn :id (str con/resource-url "/" cin)
               :cloudServiceType (get (sc-connector-names-map sc) cin)))
@@ -244,7 +249,7 @@
         (into (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p cin)]
                 (let [kw (connector-param-name-as-kw p cin->cn)]
                   [kw (conn-param-value p (conn-name p cin->cn))])))
-        (assoc-identity sc cin))))
+        (assoc-conn-identity sc cin))))
 
 (defn sc->connector-desc
   [sc category]

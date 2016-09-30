@@ -15,10 +15,14 @@
 
 ;;
 ;; Dynamic vars.
+;;
 (def ^:dynamic *c-names* #{})
 (def ^:dynamic *cfg-path-url* nil)
 (def ^:dynamic *creds* nil)
 
+;;
+;; Helper functions.
+;;
 (defn fwrite
   [o fpath]
   (let [f (fs/expand-home fpath)]
@@ -40,6 +44,18 @@
         :body)
     (slurp path-url)))
 
+;;
+;; Persistence.
+;;
+
+(defn persist-config!
+  [sc]
+  (println "Peristing global configuration.")
+  (-> sc
+      sci/sc->cfg
+      ssconfig/validate
+      ssconfig/store))
+
 (defn persist-connector!
   [cn vals]
   (println "Persisting connector:" cn)
@@ -47,14 +63,19 @@
       ssconfig/validate
       ssconfig/store))
 
+(defn persist-connectors!
+  [sc]
+  (doseq [[cnkey vals] (sci/sc->connectors-vals-only sc *c-names*)]
+    (if (seq (dissoc vals :id :cloudServiceType))
+      (persist-connector! (name cnkey) vals)
+      (println "WARNING: No data obtained for connector:" (name cnkey)))))
+
 (defn run
   []
   (let [sc (-> *cfg-path-url* conf-xml scu/conf-xml->sc)]
     (ssconfig/init)
-    (doseq [[cnkey vals] (sci/sc->connectors-vals-only sc *c-names*)]
-      (if (seq (dissoc vals :id :cloudServiceType))
-        (persist-connector! (name cnkey) vals)
-        (println "WARNING: No data obtained for connector:" (name cnkey))))))
+    (persist-config! sc)
+    (persist-connectors! sc)))
 
 ;;
 ;; Command line options processing.
