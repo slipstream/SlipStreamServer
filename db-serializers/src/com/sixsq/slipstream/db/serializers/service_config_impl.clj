@@ -337,7 +337,7 @@
 (defn get-connector-param-from-template
   [pname]
   (let [kw    (get connector-pname->kw pname)
-        value (kw cont/connector-reference-params-defaults)]
+        value (kw cont/connector-mandatory-reference-attrs-defaults)]
     (u/build-sc-param value (kw (connector-template-desc)))))
 
 (def unwanted-attrs #{:id :resourceURI :acl :operations

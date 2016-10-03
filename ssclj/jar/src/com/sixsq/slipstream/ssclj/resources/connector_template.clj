@@ -40,10 +40,19 @@
 (def connector-instance-name-default
   {:instanceName "Provide valid connector instance name."})
 
-(def connector-reference-params-defaults
+(def connector-mandatory-reference-attrs-defaults
   {:orchestratorImageid ""
    :quotaVm             "20"
    :maxIaasWorkers      5})
+
+(def connector-reference-attrs-defaults
+  {:endpoint                ""
+   :nativeContextualization "linux-only"
+   :orchestratorSSHUsername ""
+   :orchestratorSSHPassword ""
+   :securityGroups          "slipstream_managed"
+   :updateClientURL         ""
+   })
 
 ;;
 ;; atom to keep track of the loaded ConnectorTemplate resources
@@ -76,7 +85,7 @@
                   :resourceURI resource-uri
                   :acl         resource-acl
                   :operations  ops})
-          (merge connector-reference-params-defaults)
+          (merge connector-mandatory-reference-attrs-defaults)
           (merge connector-instance-name-default)
           u/update-timestamps))))
 
@@ -119,6 +128,15 @@
   (merge {:cloudServiceType c/NonBlankString
           :instanceName     ValidConnectorInstanceName}
          ConnectorMandatoryReferenceAttrs))
+
+(def ConnectorReferenceAttrs
+  {:endpoint                s/Str                           ;; ""
+   :nativeContextualization c/NonBlankString                ;; "linux-only"
+   :orchestratorSSHUsername s/Str                           ;; ""
+   :orchestratorSSHPassword s/Str                           ;; ""
+   :securityGroups          s/Str                           ;; "slipstream_managed"
+   :updateClientURL         s/Str                           ;; "https://nuv.la/downloads/cloudstackclient.tgz"
+   })
 
 (def ConnectorTemplate
   (merge c/CommonAttrs
@@ -164,6 +182,62 @@
                                 :readOnly    false
                                 :order       915}}))
 
+(def connector-reference-attrs-description
+  {:endpoint
+   {:displayName "endpoint"
+    :type        "string"
+    :category    ""
+    :description "Service endpoint for the connector (e.g. http://example.com:5000)"
+    :mandatory   true
+    :readOnly    false
+    :order       10}
+   :nativeContextualization
+   {:displayName  "native-contextualization"
+    :type         "enum"
+    :category     ""
+    :description  "Use native cloud contextualisation"
+    :mandatory    true
+    :readOnly     false
+    :order        920
+    :enum         ["never" "linux-only" "windows-only" "always"]
+    :instructions (str "Here you can define when SlipStream should use the native Cloud "
+                       "contextualization or when it should try other methods like SSH and WinRM. <br/>")}
+   :orchestratorSSHUsername
+   {:displayName  "orchestrator.ssh.username"
+    :type         "string"
+    :category     ""
+    :description  "Orchestrator username"
+    :mandatory    true
+    :readOnly     false
+    :order        30
+    :instructions (str "Username used to contextualize the orchestrator VM. Leave this "
+                       "field empty if you are using a native Cloud contextualization.")}
+   :orchestratorSSHPassword
+   {:displayName  "orchestrator.ssh.password"
+    :type         "password"
+    :category     ""
+    :description  "Orchestrator password"
+    :mandatory    true
+    :readOnly     false
+    :order        31
+    :instructions (str "Password used to contextualize the orchestrator VM. Leave this "
+                       "field empty if you are using a native Cloud contextualization.")}
+   :securityGroups
+   {:displayName "security.groups"
+    :type        "string"
+    :category    ""
+    :description "Orchestrator security groups (comma separated list)"
+    :mandatory   true
+    :readOnly    false
+    :order       25}
+   :updateClientURL
+   {:displayName "update.clienturl"
+    :type        "string"
+    :category    ""
+    :description "URL pointing to the tarball containing the client for the connector"
+    :mandatory   true
+    :readOnly    false
+    :order       950}})
 
 ;;
 ;; multimethods for validation
