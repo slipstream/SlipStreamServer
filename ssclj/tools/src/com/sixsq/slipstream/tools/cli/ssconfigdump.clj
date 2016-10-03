@@ -43,12 +43,17 @@
   (fwrite vals (format "connector-%s.edn" cn))
   (fwrite desc (format "connector-%s-desc.edn" cn)))
 
+(defn blank-category
+  [desc]
+  (for [[k m] desc]
+    [k (assoc m :category "")]))
+
 (defn run
   []
   (let [sc (-> *cfg-path-url* conf-xml scu/conf-xml->sc)]
     (doseq [[cnkey [vals desc]] (sci/sc->connectors sc *c-names*)]
       (if (and (seq desc) (seq (dissoc vals :id :cloudServiceType)))
-        (save-connector! (name cnkey) vals desc)
+        (save-connector! (name cnkey) vals (blank-category desc))
         (println "WARNING: No data obtained for connector:" (name cnkey))))))
 
 ;;
