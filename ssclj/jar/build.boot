@@ -149,6 +149,29 @@
            (jar ;; :main 'com.sixsq.slipstream.ssclj.app.main
             )))
 
+(deftask build-tests-jar
+  "build jar with test runtime dependencies for connectors."
+  []
+  (comp
+    (pom :classifier "tests")
+    (sift
+      :to-resource #{#"lifecycle_test_utils\.clj"
+                     #"connector_test_utils\.clj"
+                     }
+      :include #{#"lifecycle_test_utils\.clj"
+                 #"connector_test_utils\.clj"
+                 #"pom.xml"
+                 #"pom.properties"
+                 })
+    (jar :file (str "SlipStreamCljResources-jar-" (get-env :version) "-tests.jar"))))
+
+(deftask mvn-build-tests-jar
+  []
+   (comp
+     (build-tests-jar)
+     (install)
+     (target)))
+
 (deftask mvn-test
          "run all tests of project"
          []
@@ -163,8 +186,16 @@
            (target)))
 
 (deftask mvn-deploy
-         "build full project through maven"
+         "deploy project"
          []
          (comp
            (mvn-build)
            (push :repo "sixsq")))
+
+(deftask mvn-deploy-tests-jar
+         "deploy project"
+         []
+         (comp
+           (mvn-build-tests-jar)
+           (push :repo "sixsq")))
+
