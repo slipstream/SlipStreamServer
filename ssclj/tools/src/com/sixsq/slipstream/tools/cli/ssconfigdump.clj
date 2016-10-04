@@ -45,8 +45,9 @@
 
 (defn blank-category
   [desc]
-  (for [[k m] desc]
-    [k (assoc m :category "")]))
+  (into {}
+        (for [[k m] desc]
+          [k (assoc m :category "")])))
 
 (defn run
   []

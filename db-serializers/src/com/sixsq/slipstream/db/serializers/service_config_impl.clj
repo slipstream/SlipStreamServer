@@ -243,10 +243,10 @@
         (assoc-conn-identity sc cin))))
 
 (defn sc->connector-desc
-  [sc category]
+  [sc cin]
   (let [cin->cn (sc-connector-names-map sc)]
     (into {}
-          (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p category)]
+          (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p cin)]
             [(connector-param-name-as-kw p cin->cn)
              (u/desc-from-param p)]))))
 
