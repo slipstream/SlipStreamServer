@@ -50,10 +50,8 @@
         template       (get-in resp [:response :body])
         valid-create   {:connectorTemplate (-> template
                                                strip-unwanted-attrs
-                                               (assoc :endpoint "http://example.com")
                                                (assoc :instanceName (new-instance-name cloud-service-type)))}
         href-create    {:connectorTemplate {:href         href
-                                            :endpoint     "http://google.com"
                                             :instanceName (new-instance-name cloud-service-type)}}
         invalid-create (assoc-in valid-create [:connectorTemplate :invalid] "BAD")]
 
