@@ -74,7 +74,6 @@ public class CljElasticsearchHelper {
     }
 
     public static void initializeConnectorTemplates() {
-        // classpath();
         requireNs(NS_SERIALIZERS_UTILS);
         logger.info("Initializing connector templates.");
         Clojure.var(NS_SERIALIZERS_UTILS, "initialize").invoke();
