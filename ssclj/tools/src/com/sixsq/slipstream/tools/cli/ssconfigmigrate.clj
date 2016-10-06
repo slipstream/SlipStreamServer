@@ -19,6 +19,7 @@
 (def ^:dynamic *c-names* #{})
 (def ^:dynamic *cfg-path-url* nil)
 (def ^:dynamic *creds* nil)
+(def ^:dynamic *modifiers* #{})
 
 ;;
 ;; Helper functions.
@@ -43,6 +44,20 @@
   [cin vals]
   (println "WARNING: Skipped connector instance:" cin)
   (println "WARNING: No connector name defined for:" cin "with attrs:" vals))
+
+(defn update-val
+  [v]
+  (let [nvs (for [[m r] *modifiers* :when (and (string? v) (re-find m v))]
+              (s/replace v m r))]
+    (if (seq nvs)
+      (last nvs)
+      v)))
+
+(defn modify-vals
+  [con]
+  (let [res (for [[k v] con]
+              [k (update-val v)])]
+    (into {} res)))
 
 ;;
 ;; Persistence.
@@ -69,6 +84,7 @@
   (-> sc
       sci/sc->cfg
       ssconfig/validate
+      modify-vals
       ssconfig/store))
 
 (defn persist-connector!
@@ -78,6 +94,7 @@
     (-> vals
         remove-attrs
         ssconfig/validate
+        modify-vals
         ssconfig/store)
     (warn-con-skipped cin vals)))
 
@@ -109,10 +126,26 @@
   (str "The following errors occurred while parsing your command:\n\n"
        (s/join \newline errors)))
 
+(defn cli-parse-sets
+  ([m k v]
+   (cli-parse-sets m k v identity))
+  ([m k v fun] (assoc m k (if-let [oldval (get m k)]
+                            (merge oldval (fun v))
+                            (hash-set (fun v))))))
+
 (defn cli-parse-connectors
-  [m k v] (assoc m k (if-let [oldval (get m k)]
-                       (merge oldval v)
-                       (hash-set v))))
+  [m k v]
+  (cli-parse-sets m k v))
+
+(defn ->re-match-replace
+  "'m=r' -> [#'m' 'r']"
+  [mr]
+  (let [m-r (s/split mr #"=")]
+    [(re-pattern (first m-r)) (second m-r)]))
+
+(defn cli-parse-modifiers
+  [m k v]
+  (cli-parse-sets m k v ->re-match-replace))
 
 (def cli-options
   [["-c" "--connector CONNECTOR" "Connector instance names (category). If not provided all connectors will be stored."
@@ -121,6 +154,10 @@
     :assoc-fn cli-parse-connectors]
    ["-x" "--configxml CONFIGXML" "Path to file or URL starting with https (requries -s parameter). Mandatory."]
    ["-s" "--credentials CREDENTIALS" "Credentials as user:pass for -x when URL is provided."]
+   ["-m" "--modify old=new" "Modify in all values. '=' is a separator. Usefull for updating hostname/ip of SlipStream."
+    :id :modifiers
+    :default #{}
+    :assoc-fn cli-parse-modifiers]
    ["-h" "--help"]])
 
 (def prog-help
@@ -150,14 +187,16 @@
       errors (exit 1 (error-msg errors)))
     (let [configxml   (:configxml options)
           credentials (:credentials options)
-          connectors  (:connectors options)]
+          connectors  (:connectors options)
+          modifiers   (:modifiers options)]
       (if (empty? configxml)
         (exit 1 (error-msg "-x parameter must be provided."))
         (alter-var-root #'*cfg-path-url* (fn [_] configxml)))
       (if (and (s/starts-with? configxml "https") (empty? credentials))
         (exit 1 (error-msg "-s must be provided when -x is URL."))
         (alter-var-root #'*creds* (fn [_] credentials)))
-      (alter-var-root #'*c-names* (fn [_] connectors))))
+      (alter-var-root #'*c-names* (fn [_] connectors))
+      (alter-var-root #'*modifiers* (fn [_] modifiers))))
   (run)
   (System/exit 0))
 
