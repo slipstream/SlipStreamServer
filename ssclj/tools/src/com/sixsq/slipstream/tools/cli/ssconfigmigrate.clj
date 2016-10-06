@@ -53,6 +53,7 @@
   [con]
   (cond
     (= "ec2" (:cloudServiceType con)) (dissoc con :securityGroup)
+    (= "nuvlabox" (:cloudServiceType con)) (dissoc con :orchestratorInstanceType :pdiskEndpoint)
     :else con))
 
 (defn persist-config!
