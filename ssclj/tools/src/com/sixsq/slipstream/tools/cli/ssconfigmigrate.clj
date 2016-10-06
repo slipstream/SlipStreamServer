@@ -23,11 +23,6 @@
 ;;
 ;; Helper functions.
 ;;
-(defn fwrite
-  [o fpath]
-  (let [f (fs/expand-home fpath)]
-    (with-open [^java.io.Writer w (apply clojure.java.io/writer f {})]
-      (clojure.pprint/pprint o w))))
 
 (defn ->config-resource
   [url]
@@ -44,12 +39,17 @@
         :body)
     (slurp path-url)))
 
+(defn warn-con-skipped
+  [cin vals]
+  (println "WARNING: Skipped connector instance:" cin)
+  (println "WARNING: No connector name defined for:" cin "with attrs:" vals))
+
 ;;
 ;; Persistence.
 ;;
 
 (def con-attrs-to-remove
-  {"ec2" [:securityGroup]
+  {"ec2"      [:securityGroup]
    "nuvlabox" [:orchestratorInstanceType :pdiskEndpoint]})
 
 (defn remove-attrs
@@ -58,6 +58,10 @@
   (if-let [attrs (get con-attrs-to-remove (:cloudServiceType con))]
     (apply dissoc con attrs)
     con))
+
+(defn con-name-known?
+  [con]
+  (not (s/blank? (:cloudServiceType con))))
 
 (defn persist-config!
   [sc]
@@ -68,19 +72,21 @@
       ssconfig/store))
 
 (defn persist-connector!
-  [cn vals]
-  (println "Persisting connector:" cn)
-  (-> vals
-      remove-attrs
-      ssconfig/validate
-      ssconfig/store))
+  [cin vals]
+  (println "Persisting connector instance:" cin)
+  (if (con-name-known? vals)
+    (-> vals
+        remove-attrs
+        ssconfig/validate
+        ssconfig/store)
+    (warn-con-skipped cin vals)))
 
 (defn persist-connectors!
   [sc]
-  (doseq [[cnkey vals] (sci/sc->connectors-vals-only sc *c-names*)]
+  (doseq [[cinkey vals] (sci/sc->connectors-vals-only sc *c-names*)]
     (if (seq (dissoc vals :id :cloudServiceType))
-      (persist-connector! (name cnkey) vals)
-      (println "WARNING: No data obtained for connector:" (name cnkey)))))
+      (persist-connector! (name cinkey) vals)
+      (println "WARNING: No data obtained for connector instance:" (name cinkey)))))
 
 (defn run
   []
