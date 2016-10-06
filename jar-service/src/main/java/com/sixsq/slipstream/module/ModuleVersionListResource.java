@@ -22,19 +22,20 @@ package com.sixsq.slipstream.module;
 
 import java.util.List;
 
+import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.util.*;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
+import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.module.ModuleVersionView.ModuleVersionViewList;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.ResourceUriUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ModuleVersionListResource extends BaseResource {
 
@@ -59,7 +60,9 @@ public class ModuleVersionListResource extends BaseResource {
 			return;
 		}
 
-		if (m.getAuthz().canGet(getUser())) {
+		if (m == null) {
+			throwClientForbiddenError("Module doesn't exist. It may have been deleted");
+		}else if (m.getAuthz().canGet(getUser())) {
 			return;
 
 		}
@@ -93,6 +96,44 @@ public class ModuleVersionListResource extends BaseResource {
 				HtmlUtil.toHtml(list,
 						getPageRepresentation(), getUser(), getRequest()),
 				MediaType.TEXT_HTML);
+	}
+
+	@Delete
+	public void deleteAllVersions() {
+
+		List<ModuleVersionView> moduleVersions = Module.viewListAllVersions(resourceUri);
+
+		for (ModuleVersionView moduleVersion: moduleVersions) {
+			if(getUser().isSuper() || moduleVersion.getAuthz().canDelete(getUser())) {
+				Module module = Module.load(moduleVersion.resourceUri);
+				module.setDeleted(true);
+				module.store(false);
+			}
+		}
+
+		Module latest = Module.loadLatest(resourceUri);
+		try {
+			if (latest == null) {
+				String redirectUri = ModuleUriUtil.extractParentUriFromResourceUri(resourceUri);
+				redirectTo(ModuleUriUtil.extractParentUriFromResourceUri(redirectUri));
+			} else {
+				redirectTo(latest.getResourceUri());
+			}
+		} catch (ValidationException e) {
+			throwClientConflicError(e.getMessage());
+		}
+
+		postEventDeleted(resourceUri);
+	}
+
+	private void redirectTo(String resourceUri) throws ValidationException {
+		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), "/" + resourceUri);
+		getResponse().setLocationRef(absolutePath);
+		getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
+	}
+
+	private void postEventDeleted(String moduleUri) {
+		Event.postEvent(moduleUri, Event.Severity.high, "All versions deleted by '" + getUser().getName() + "'", getUser().getName(), Event.EventType.action);
 	}
 
 	private String serialized(List<ModuleVersionView> viewList) {

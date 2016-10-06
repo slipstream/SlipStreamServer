@@ -20,21 +20,19 @@ package com.sixsq.slipstream.module;
  * -=================================================================-
  */
 
-import java.util.Date;
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.OneToOne;
-
+import com.sixsq.slipstream.persistence.Authz;
+import com.sixsq.slipstream.persistence.Commit;
+import com.sixsq.slipstream.persistence.ModuleCategory;
+import com.sixsq.slipstream.util.ModuleUriUtil;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
-import com.sixsq.slipstream.persistence.Authz;
-import com.sixsq.slipstream.persistence.Commit;
-import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.util.ModuleUriUtil;
+import javax.persistence.CascadeType;
+import javax.persistence.OneToOne;
+import java.util.Date;
+import java.util.List;
 
 @Root(name = "item")
 public class ModuleVersionView {
@@ -63,15 +61,19 @@ public class ModuleVersionView {
 	@Element(required = false)
 	public final Commit commit;
 
+	@Attribute
+	public final String moduleName;
+
 	public ModuleVersionView(String resourceUri, int version,
 			Date lastModified, Commit commit, Authz authz,
-			ModuleCategory category) {
+			ModuleCategory category, String moduleName) {
 
 		this.resourceUri = resourceUri;
 		this.version = version;
 		this.commit = commit;
 		this.authz = authz;
 		this.category = category;
+		this.moduleName = moduleName;
 
 		if (lastModified != null) {
 			this.lastModified = (Date) lastModified.clone();
@@ -83,11 +85,25 @@ public class ModuleVersionView {
 	@Root(name = "versionList")
 	public static class ModuleVersionViewList {
 
+		@Attribute
+		public final String moduleCategory;
+
+		@Attribute
+		public final String moduleName;
+
 		@ElementList(inline = true, required = false)
-		private final List<ModuleVersionView> list;
+		public final List<ModuleVersionView> list;
 
 		public ModuleVersionViewList(List<ModuleVersionView> list) {
 			this.list = list;
+			if (list.isEmpty()) {
+				this.moduleCategory = "";
+				this.moduleName = "";
+			} else {
+				ModuleVersionView firstVersion = list.get(0);
+				this.moduleCategory = firstVersion.category.name();
+				this.moduleName = firstVersion.moduleName;
+			}
 		}
 	}
 
