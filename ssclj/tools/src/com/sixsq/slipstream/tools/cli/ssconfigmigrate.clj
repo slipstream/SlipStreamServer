@@ -48,6 +48,13 @@
 ;; Persistence.
 ;;
 
+(defn remove-attrs
+  "Cleanup of old attributes during migration."
+  [con]
+  (cond
+    (= "ec2" (:cloudServiceType con)) (dissoc con :securityGroup)
+    :else con))
+
 (defn persist-config!
   [sc]
   (println "Peristing global configuration.")
@@ -60,6 +67,7 @@
   [cn vals]
   (println "Persisting connector:" cn)
   (-> vals
+      remove-attrs
       ssconfig/validate
       ssconfig/store))
 
