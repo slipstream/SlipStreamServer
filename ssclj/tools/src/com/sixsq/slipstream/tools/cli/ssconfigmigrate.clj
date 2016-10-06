@@ -48,13 +48,16 @@
 ;; Persistence.
 ;;
 
+(def con-attrs-to-remove
+  {"ec2" [:securityGroup]
+   "nuvlabox" [:orchestratorInstanceType :pdiskEndpoint]})
+
 (defn remove-attrs
   "Cleanup of old attributes during migration."
   [con]
-  (cond
-    (= "ec2" (:cloudServiceType con)) (dissoc con :securityGroup)
-    (= "nuvlabox" (:cloudServiceType con)) (dissoc con :orchestratorInstanceType :pdiskEndpoint)
-    :else con))
+  (if-let [attrs (get con-attrs-to-remove (:cloudServiceType con))]
+    (apply dissoc con attrs)
+    con))
 
 (defn persist-config!
   [sc]
