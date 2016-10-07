@@ -62,7 +62,7 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 @NamedQueries({
 		@NamedQuery(name = "moduleLastVersion", query = "SELECT m FROM Module m WHERE m.version = (SELECT MAX(n.version) FROM Module n WHERE n.name = :name AND n.deleted != TRUE)"),
 		@NamedQuery(name = "moduleViewLatestChildren", query = "SELECT NEW com.sixsq.slipstream.module.ModuleView(m.resourceUri, m.description, m.category, m.customVersion, m.authz) FROM Module m WHERE m.parentUri = :parent AND m.version = (SELECT MAX(c.version) FROM Module c WHERE c.name = m.name AND c.deleted != TRUE)"),
-		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category) FROM Module m WHERE m.name = :name AND m.deleted != TRUE"),
+		@NamedQuery(name = "moduleViewAllVersions", query = "SELECT NEW com.sixsq.slipstream.module.ModuleVersionView(m.resourceUri, m.version, m.lastModified, m.commit, m.authz, m.category, m.name) FROM Module m WHERE m.name = :name AND m.deleted != TRUE"),
 		@NamedQuery(name = "moduleAll", query = "SELECT m FROM Module m WHERE m.deleted != TRUE"),
 		@NamedQuery(name = "moduleViewPublished", query = "SELECT NEW com.sixsq.slipstream.module.ModuleViewPublished(m.resourceUri, m.description, m.category, m.customVersion, m.authz, m.logoLink) FROM Module m WHERE m.published != null AND m.deleted != TRUE") })
 public abstract class Module extends Parameterized<Module, ModuleParameter> implements Guarded {
