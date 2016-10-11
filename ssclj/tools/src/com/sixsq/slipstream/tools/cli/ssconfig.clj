@@ -310,7 +310,7 @@
 
 (def prog-help
   "
-  Ensure :id key is present in each configuration.
+  Ensure :id key with a corresponding resource name is present in each configuration.
   Connector configuration must contain :cloudServiceType key, which corresponds to
   the connector name.
 
@@ -320,7 +320,7 @@
 (defn usage
   [options-summary]
   (->> [""
-        "Adds or updates configuration info of configuration and connector resources in DB."
+        "Adds or updates different parts of the SlipStream service configuration in DB."
         ""
         "Usage: program-name [options] <list-of-files>"
         ""
@@ -328,7 +328,7 @@
         options-summary
         ""
         "Arguments:"
-        "  <list-of-files>    list of edn files with service or connector configurations."
+        "  <list-of-files>    list of edn files with configurations."
         ""
         prog-help]
        (s/join \newline)))
