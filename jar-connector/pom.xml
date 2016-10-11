@@ -130,8 +130,8 @@
 				<configuration>
 					<systemPropertyVariables>
 						<property>
-							<name>slipstream.config.file</name>
-							<value>${project.build.directory}/configuration/slipstream.conf
+							<name>slipstream.config.dir</name>
+							<value>${project.build.directory}/configuration
 							</value>
 						</property>
 					</systemPropertyVariables>

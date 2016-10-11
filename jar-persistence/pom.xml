@@ -114,9 +114,8 @@
 				<configuration>
 					<systemPropertyVariables>
 						<property>
-							<name>slipstream.config.file</name>
-							<value>${project.build.directory}/configuration/slipstream.conf
-							</value>
+							<name>slipstream.config.dir</name>
+							<value>${project.build.directory}/configuration</value>
 						</property>
 					</systemPropertyVariables>
 					<excludes>

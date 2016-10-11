@@ -239,7 +239,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<systemPropertyVariables>
-						<slipstream.config.file>${project.build.directory}/configuration/slipstream.conf</slipstream.config.file>
+						<slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
 					</systemPropertyVariables>
 					<excludes>
 						<exclude>${slipstream.test.excludes}</exclude>
