@@ -34,7 +34,6 @@
 
                     [com.sixsq.slipstream/SlipStreamPersistence nil :scope "compile"]
                     [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "compile"]
-                    #_[com.sixsq.slipstream/SlipStreamCljResources-jar nil :scope "compile"]
 
                     [superstring]
                     [me.raynes/fs]
