@@ -357,7 +357,8 @@
 (def cli-options
   [["-t" "--template TEMPLATE" "Prints out registered template by name."]
    ["-l" "--list" "List available templates."]
-   ["-g" "--get-resource RESOURCE" "Prints out resource document by name."
+   ["-r" "--resource RESOURCE" "Prints out resource document(s) by name."
+    :id :resources
     :default #{}
     :assoc-fn cli-parse-sets]
    ["-h" "--help"]])
@@ -391,7 +392,6 @@
 (defn -main
   [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
-    (println options)
     (cond
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
@@ -399,8 +399,8 @@
     (when (not (empty? arguments))
       (run arguments)
       (System/exit 0))
-    (when (seq (:get-resource options))
-      (alter-var-root #'*resources* (fn [_] (:get-resource options)))
+    (when (seq (:resources options))
+      (alter-var-root #'*resources* (fn [_] (:resources options)))
       (print-resources)
       (System/exit 0))
     (when (:list options)
