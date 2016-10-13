@@ -116,8 +116,6 @@
 ;;
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
-         ;; FIXME: write resource files finder/reader only.
-         ;; At the moment read-config was simply overloaded to find/read conf and resource files.
          (uc/read-config "com/sixsq/slipstream/ssclj/resources/configuration-slipstream-desc.edn")))
 
 ;;
@@ -125,7 +123,6 @@
 ;;
 (defn initialize
   []
-  (log/info "SlipStream version " (:slipstreamVersion resource))
   (p/register resource desc))
 
 ;;

@@ -11,9 +11,7 @@
 (defn- find-resource
   [resource-path]
   (if-let [config-file (io/resource resource-path)]
-    (do
-      (log/info "Will use " (.getPath config-file) " as config file")
-      config-file)
+    config-file
     (let [msg (str "Resource not found (must be in classpath): '" resource-path "'")]
       (log/error msg)
       (throw (IllegalArgumentException. msg)))))
