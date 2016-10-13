@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.db.serializers.service-config-test
   (:require
     [clojure.java.io :as io]
+    [clojure.set :as cs]
     [clojure.pprint :refer [pprint]]
     [clojure.test :refer :all]
     [me.raynes.fs :as fs]
@@ -25,10 +26,9 @@
 
 (def sc-from-xml-params (.getParameters sc-from-xml))
 
-(defn- keys-not-in-conf
+(defn- keys-outside
   [conf]
-  (for [k (keys sci/rname->param) :when (not (contains? conf k))]
-    k))
+  (cs/difference (set (keys sci/rname->param)) (set (keys conf))))
 
 (defn msg-keys-not-in-cfg
   [keys]
@@ -59,7 +59,7 @@
 (deftest test-sc->cfg
   (is (= {} (dissoc (sci/sc->cfg (ServiceConfiguration.)) :id)))
   (let [conf        (sci/sc->cfg sc-from-xml)
-        not-in-conf (keys-not-in-conf conf)]
+        not-in-conf (keys-outside conf)]
     (is (empty? not-in-conf) (msg-keys-not-in-cfg not-in-conf))))
 
 ;; Test schema compliance after transformation of SC to

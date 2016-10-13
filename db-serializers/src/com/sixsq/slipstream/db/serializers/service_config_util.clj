@@ -7,46 +7,55 @@
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]))
 
-(defn xml-params
+(defn- xml-params
   [xml]
   (-> xml :content first :content))
+
+(defn- xml-param-elems
+  [p]
+  (-> p :content second :content))
+
+(defn- filter-by-tag
+  [tag vals]
+  (filter #(= (:tag %) tag) vals))
+
+(defn xml-param
+  [p tag]
+  (->> p
+       xml-param-elems
+       (filter-by-tag tag)
+       first
+       :content
+       first))
 
 (defn xml-param-attrs
   [p]
   (-> p :content second :attrs))
 
-(defn xml-param-elems
-  [p]
-  (-> p :content second :content))
-
 (defn xml-param-value
   [p]
-  (let [pelems (xml-param-elems p)]
-    (first (for [e pelems :when (= (:tag e) :value)]
-             (-> e :content first)))))
+  (xml-param p :value))
 
 (defn xml-param-instructions
   [p]
-  (let [pelems (xml-param-elems p)]
-    (first (for [e pelems :when (= (:tag e) :instructions)]
-             (-> e :content first)))))
+  (xml-param p :instructions))
 
 (defn xml-param-enums
   [content]
-  (first (for [e content :when (= (:tag e) :enumValues)] e)))
+  (->> content
+       (filter-by-tag :enumValues)
+       first))
 
 (defn xml-param-enum-values
   [p]
   (if-let [enums (-> p xml-param-elems xml-param-enums)]
-    (for [v (-> enums :content)]
-      (-> v :content first))
-    '()))
+    (map #(-> % :content first) (:content enums))
+    []))
 
 (defn xml-params-parse
-  "Returns [[{attributes} \"value\" \"instruction\" '(enumValues)] ..]"
+  "Returns [[{attributes} \"value\" \"instruction\" [enumValues]] ..]"
   [xml]
-  (map #(identity [(xml-param-attrs %) (xml-param-value %) (xml-param-instructions %) (xml-param-enum-values %)])
-       (xml-params xml)))
+  (map (juxt xml-param-attrs xml-param-value xml-param-instructions xml-param-enum-values) (xml-params xml)))
 
 (defn conf-xml->sc
   "xml-conf - SlipStream service configuration as XML string."
