@@ -24,6 +24,7 @@
                      connector-resource     #{:cloudServiceType}})
 
 (def ^:dynamic *templates*)
+(def ^:dynamic *resources*)
 
 ;;
 ;; Helper functions.
@@ -68,21 +69,29 @@
 ;; Common functions.
 ;;
 
+(defn resource-type-from-str
+  [rstr]
+  (if (re-find #"-template/" rstr)
+    (first (s/split rstr #"-template/"))
+    (first (s/split rstr #"/"))))
+
 (defn resource-type
-  "Given resource or request, returns resource type or throws."
+  "Given string, resource or request, returns resource type or throws."
   [c]
-  (let [res (if (contains? c :id)
-              (:id c)
-              (-> c :body (get :id "")))]
-    (if (re-find #"-template/" res)
-      (first (s/split res #"-template/"))
-      (first (s/split res #"/")))))
+  (let [res (if (string? c)
+              c
+              (if (contains? c :id)
+                (:id c)
+                (-> c :body (get :id ""))))]
+    (resource-type-from-str res)))
 
 (defn connector?
+  "c - str or map."
   [c]
   (= (resource-type c) conn/resource-url))
 
 (defn configuration?
+  "c - str or map."
   [c]
   (= (resource-type c) cfg/resource-url))
 
@@ -289,6 +298,41 @@
         (println "WARNING: Template" tname "not found.")
         (list-tempates)))))
 
+(defn resource-uuid
+  [rname]
+  (-> rname (s/split #"/") second))
+
+(defn get-configuration-resource
+  [rname]
+  (sci/get-configuration (resource-uuid rname)))
+
+(defn get-connector-resource
+  [rname]
+  (sci/get-connector (resource-uuid rname)))
+
+(defn get-resource
+  [rname]
+  (cond
+    (configuration? rname) (get-configuration-resource rname)
+    (connector? rname) (get-connector-resource rname)
+    :else (println "WARNING: Don't know how to get resource:" rname)))
+
+(defn print-resource
+  [r]
+  (let [unwanted (into #{} (remove #{:id :cloudServiceType} sci/unwanted-attrs))]
+    (clojure.pprint/pprint (sci/strip-unwanted-attrs r unwanted))))
+
+(defn print-resources
+  []
+  (init-db-client)
+  (doseq [rname *resources*]
+    (println "::: Resource:" rname)
+    (let [r (get-resource rname)]
+      (if (seq r)
+        (print-resource r)
+        (do
+          (println "WARNING: Resource" rname "not found."))))))
+
 ;;
 ;; Command line options processing.
 ;;
@@ -303,9 +347,19 @@
   (str "The following errors occurred while parsing your command:\n\n"
        (s/join \newline errors)))
 
+(defn cli-parse-sets
+  ([m k v]
+   (cli-parse-sets m k v identity))
+  ([m k v fun] (assoc m k (if-let [oldval (get m k)]
+                            (merge oldval (fun v))
+                            (hash-set (fun v))))))
+
 (def cli-options
   [["-t" "--template TEMPLATE" "Prints out registered template by name."]
    ["-l" "--list" "List available templates."]
+   ["-g" "--get-resource RESOURCE" "Prints out resource document by name."
+    :default #{}
+    :assoc-fn cli-parse-sets]
    ["-h" "--help"]])
 
 (def prog-help
@@ -337,12 +391,18 @@
 (defn -main
   [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
+    (println options)
     (cond
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
     (init-namespaces)
     (when (not (empty? arguments))
-      (run arguments))
+      (run arguments)
+      (System/exit 0))
+    (when (seq (:get-resource options))
+      (alter-var-root #'*resources* (fn [_] (:get-resource options)))
+      (print-resources)
+      (System/exit 0))
     (when (:list options)
       (list-tempates)
       (System/exit 0))

@@ -321,13 +321,21 @@
       (do
         (log/warn "Failure adding default configuration: " resp)))))
 
+(defn resource-as-request
+  [name & [body]]
+  (u/as-request (or body {}) name user-roles-str))
+
 (defn cfg-as-request
   [& [body]]
-  (u/as-request (or body {}) cfg-resource-uuid user-roles-str))
+  (resource-as-request cfg-resource-uuid body))
+
+(defn configuration-as-request
+  [name & [body]]
+  (resource-as-request name body))
 
 (defn connector-as-request
-  [cname & [body]]
-  (u/as-request (or body {}) cname user-roles-str))
+  [cin & [body]]
+  (resource-as-request cin body))
 
 
 (defn get-sc-param-meta-only
@@ -356,6 +364,33 @@
         connector-desc     (get @cont/descriptions resource-name)]
     (for [[k value] connector-template]
       (u/build-sc-param value (k connector-desc)))))
+
+
+;;
+;; Configuration and connector resource getters.
+;;
+
+
+(defn resp-success?
+  [resp]
+  (< (:status resp) 400))
+
+(defn get-document
+  [request retrieve-impl]
+  (let [resp (retrieve-impl request)]
+    (if (resp-success? resp)
+      (strip-unwanted-attrs (:body resp))
+      (do
+        (u/warn-on-resp-error resp)
+        nil))))
+
+(defn get-connector
+  [name]
+  (get-document (connector-as-request name) con/retrieve-impl))
+
+(defn get-configuration
+  [name]
+  (get-document (configuration-as-request name) cr/retrieve-impl))
 
 
 ;;
@@ -419,9 +454,8 @@
       (log/info "Loading connector" cin cn)
       (let [values (strip-unwanted-attrs (:body (con/retrieve-impl (connector-as-request cin))))
             _      (log/debug "Connector values:" values)
-            descs  (get @cont/descriptions (str cont/resource-url "/" cn))
-            _      (log/info "Connector descriptions #" (count descs))]
+            descs  (get @cont/descriptions (str cont/resource-url "/" cn))]
         (doseq [[vk vv] values]
-          (log/debug "::: Setting ServiceConigurationParameter on ServiceConfiguration" vk vv)
+          (log/debug "Setting ServiceConigurationParameter on ServiceConfiguration" vk vv)
           (.setParameter sc (u/build-sc-param vv (vk descs) cin))))))
   sc)
