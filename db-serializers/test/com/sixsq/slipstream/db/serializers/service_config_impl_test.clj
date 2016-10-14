@@ -38,3 +38,10 @@
   (is (= "fooBarBaz" (sci/conn-pname-to-kwname "" "foo.bar.baz")))
   (is (= "fooBarBazQuix" (sci/conn-pname-to-kwname "" "foo.bar-baz.quix")))
   (is (= "fooBarBazQuix" (sci/conn-pname-to-kwname "" "foo-bar-baz-quix"))))
+
+(deftest test-strip-unwanted-attrs
+  (is (= {} (sci/strip-unwanted-attrs {})))
+  (is (= {:foo "bar"} (sci/strip-unwanted-attrs {:foo "bar"})))
+  (is (= {:foo "bar"} (sci/strip-unwanted-attrs {:foo "bar" :id 123})))
+  (is (= {:id 123} (sci/strip-unwanted-attrs {:foo "bar" :id 123} #{:foo})))
+  (is (= {} (sci/strip-unwanted-attrs {:foo "bar" :id 123} #{:foo :id}))))

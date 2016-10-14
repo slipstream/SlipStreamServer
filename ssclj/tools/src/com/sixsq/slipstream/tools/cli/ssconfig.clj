@@ -320,14 +320,14 @@
 
 (defn print-resource
   [r]
-  (let [unwanted (into #{} (remove #{:id :cloudServiceType} sci/unwanted-attrs))]
+  (let [unwanted (into #{} (remove #{:id :cloudServiceType :description} sci/unwanted-attrs))]
     (clojure.pprint/pprint (sci/strip-unwanted-attrs r unwanted))))
 
 (defn print-resources
   []
   (init-db-client)
   (doseq [rname *resources*]
-    (println "::: Resource:" rname)
+    (println ";;; Resource:" rname)
     (let [r (get-resource rname)]
       (if (seq r)
         (print-resource r)

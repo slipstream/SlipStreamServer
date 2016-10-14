@@ -379,7 +379,8 @@
   [request retrieve-impl]
   (let [resp (retrieve-impl request)]
     (if (resp-success? resp)
-      (strip-unwanted-attrs (:body resp))
+      (let [unwanted (into #{} (remove #{:id :cloudServiceType :description} unwanted-attrs))]
+        (strip-unwanted-attrs (:body resp) unwanted))
       (do
         (u/warn-on-resp-error resp)
         nil))))
