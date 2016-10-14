@@ -413,7 +413,7 @@
   (->> [""
         "Adds or updates different parts of the SlipStream service configuration in DB."
         ""
-        "Usage: program-name [options] <list-of-files>"
+        "Usage: [options] <list-of-files>"
         ""
         "Options:"
         options-summary
