@@ -120,7 +120,8 @@
           (response-created id)
           (response-error))
         (catch DocumentAlreadyExistsException e
-          (response-conflict id)))))
+          (response-conflict id))))
+    )
 
   (retrieve [_ id options]
     (find-data *client* index-name id options "VIEW"))

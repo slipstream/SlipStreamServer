@@ -22,7 +22,7 @@
 	</parent>
 
 	<dependencies>
-		
+
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamServerPRSlib-jar</artifactId>
@@ -54,7 +54,7 @@
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamConnector</artifactId>
 			<type>test-jar</type>
-                        <scope>test</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -68,7 +68,14 @@
 			<artifactId>SlipStreamUI</artifactId>
 		</dependency>
 
-                <!-- required for passing tests on clean build -->
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbSerializers-jar</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- required for passing tests on clean build -->
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
                         <artifactId>SlipStreamServer-ui-static-content</artifactId>
@@ -232,7 +239,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<systemPropertyVariables>
-						<slipstream.config.file>${project.build.directory}/configuration/slipstream.conf</slipstream.config.file>
+						<slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
 					</systemPropertyVariables>
 					<excludes>
 						<exclude>${slipstream.test.excludes}</exclude>

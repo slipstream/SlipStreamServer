@@ -4,7 +4,7 @@
   <artifactId>SlipStreamServer</artifactId>
   <version>3.15-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>SlipStream Server</name>
+  <name>SlipStream Server (POM)</name>
   <url>http://sixsq.com/</url>
 
   <parent>
@@ -23,6 +23,7 @@
     <module>jar-prslib</module>
     <module>ssclj</module>
     <module>db-binding</module>
+    <module>db-serializers</module>
     <module>static-content</module>
     <module>war</module>
   </modules>

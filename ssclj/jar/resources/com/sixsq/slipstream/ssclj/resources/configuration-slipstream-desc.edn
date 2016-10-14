@@ -1,0 +1,205 @@
+{:reportsLocation
+ {:displayName "slipstream.reports.location",
+  :type "string",
+  :category "SlipStream_Advanced",
+  :description
+  "Location where the deployments and build reports are saved",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :prsEndpoint
+ {:displayName "slipstream.prs.endpoint",
+  :type "string",
+  :category "SlipStream_Advanced",
+  :description "Endpoint of the Placement and Ranking Service",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :connectorOrchPrivateSSHKey
+ {:displayName "cloud.connector.orchestrator.privatesshkey",
+  :type "string",
+  :category "SlipStream_Advanced",
+  :description
+  "Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :clientBootstrapURL
+ {:displayName "slipstream.update.clientbootstrapurl",
+  :type "string",
+  :category "SlipStream_Advanced",
+  :description "Endpoint of the SlipStream client bootstrap script",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :meteringEndpoint
+ {:displayName "slipstream.metering.hostname",
+  :type "string",
+  :category "SlipStream_Advanced",
+  :description
+  "Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:2005).",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :mailHost
+ {:displayName "slipstream.mail.host",
+  :type "string",
+  :category "SlipStream_Support",
+  :description "Host for SMTP server for email notifications.",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :mailPort
+ {:displayName "slipstream.mail.port",
+  :type "string",
+  :category "SlipStream_Support",
+  :description "Port on SMTP server (defaults to standard ports).",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :registrationEnable
+ {:displayName "slipstream.registration.enable",
+  :type "boolean",
+  :category "SlipStream_Basics",
+  :description
+  "Allow user self registration. If checked, user will be able to create accounts themselves.",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :mailSSL
+ {:displayName "slipstream.mail.ssl",
+  :type "boolean",
+  :category "SlipStream_Support",
+  :description "Use SSL for SMTP server.",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :registrationEmail
+ {:displayName "slipstream.registration.email",
+  :type "string",
+  :category "SlipStream_Support",
+  :description "Email address for account approvals, etc.",
+  :mandatory true,
+  :readOnly false,
+  :order 0,
+  :instructions "Email address to use for registration."},
+ :prsEnable
+ {:displayName "slipstream.prs.enable",
+  :type "boolean",
+  :category "SlipStream_Advanced",
+  :description "Placement and Ranking enabled",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :serviceURL
+ {:displayName "slipstream.base.url",
+  :type "string",
+  :category "SlipStream_Basics",
+  :description "Default URL and port for the SlipStream RESTlet",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :meteringEnable
+ {:displayName "slipstream.metering.enable",
+  :type "boolean",
+  :category "SlipStream_Advanced",
+  :description "Metering enabled",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :supportEmail
+ {:displayName "slipstream.support.email",
+  :type "string",
+  :category "SlipStream_Support",
+  :description "Email address for SlipStream support requests",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :clientURL
+ {:displayName "slipstream.update.clienturl",
+  :type "string",
+  :category "SlipStream_Advanced",
+  :description "Endpoint of the SlipStream client tarball",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :connectorLibcloudURL
+ {:displayName "cloud.connector.library.libcloud.url",
+  :type "string",
+  :category "SlipStream_Advanced",
+  :description "URL to fetch libcloud library from",
+  :mandatory true,
+  :readOnly false,
+  :order 0,
+  :instructions "URL should point to a valid gzipped tarball."},
+ :quotaEnable
+ {:displayName "slipstream.quota.enable",
+  :type "boolean",
+  :category "SlipStream_Advanced",
+  :description "Quota enforcement enabled",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :mailDebug
+ {:displayName "slipstream.mail.debug",
+  :type "boolean",
+  :category "SlipStream_Support",
+  :description "Debug mail sending.",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :connectorOrchPublicSSHKey
+ {:displayName "cloud.connector.orchestrator.publicsshkey",
+  :type "string",
+  :category "SlipStream_Advanced",
+  :description "Path to the SSH public key to put in the orchestrator",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :mailUsername
+ {:displayName "slipstream.mail.username",
+  :type "string",
+  :category "SlipStream_Support",
+  :description "Username for SMTP server.",
+  :mandatory true,
+  :readOnly false,
+  :order 0,
+  :instructions
+  "Username of the mail server account you want to use to send registration emails."},
+ :serviceCatalogEnable
+ {:displayName "slipstream.service.catalog.enable",
+  :type "boolean",
+  :category "SlipStream_Advanced",
+  :description "Enable service catalog feature.",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :mailPassword
+ {:displayName "slipstream.mail.password",
+  :type "password",
+  :category "SlipStream_Support",
+  :description "Password for SMTP server.",
+  :mandatory true,
+  :readOnly false,
+  :order 0}
+ :slipstreamVersion
+ {:displayName  "slipstream.version"
+  :type         "string"
+  :category     "SlipStream_Advanced"
+  :description  "Installed SlipStream version"
+  :mandatory    true
+  :readOnly     true
+  :instructions ""
+  :order        0}
+
+ ;; FIXME: used only for compatibilty with the Java server. To be removed.
+ :cloudConnectorClass
+ {:displayName  "cloud.connector.class"
+  :type         "Text"
+  :category     "SlipStream_Basics"
+  :description  "Cloud connector java class name(s) (comma separated for multi-cloud configuration)"
+  :mandatory    true
+  :readOnly     false
+  :instructions ""
+  :order        0}
+ }

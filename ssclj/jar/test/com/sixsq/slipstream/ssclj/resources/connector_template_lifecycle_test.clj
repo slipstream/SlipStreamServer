@@ -93,7 +93,8 @@
         (is (:cloudServiceType desc-body))
         (is (:acl desc-body))
 
-        (is (crud/validate entry-body))
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo #".*resource does not satisfy defined schema.*" (crud/validate entry-body)))
+        (is (crud/validate (assoc entry-body :instanceName "alpha-omega")))
 
         ;; anonymous access not permitted
         (-> session

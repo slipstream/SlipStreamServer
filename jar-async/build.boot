@@ -27,6 +27,8 @@
                    [com.sixsq.slipstream/SlipStreamPersistence]
                    [com.sixsq.slipstream/SlipStreamConnector]
 
+                   [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "test"]
+
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
                    [tolitius/boot-check]

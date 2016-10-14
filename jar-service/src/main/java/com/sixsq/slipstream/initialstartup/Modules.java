@@ -21,24 +21,12 @@ package com.sixsq.slipstream.initialstartup;
  */
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.module.ModuleResource;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.User.State;
-import com.sixsq.slipstream.user.UserResource;
 import com.sixsq.slipstream.util.Logger;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /*
@@ -58,12 +46,11 @@ public class Modules {
 		}
 
 		// load from file
-		File configFile = Configuration.findConfigurationFile();
-		if(configFile == null) {
-			return; // no config file found
+		File configDir = Configuration.findConfigurationDirectory();
+		if(configDir == null) {
+			return;
 		}
 
-		File configDir = new File(configFile.getParent());
 		File usersDir = new File(configDir + File.separator + MODULES_CONFIG_DIR);
 
 		List<File> files = FileLoader.loadConfigurationFiles(usersDir);

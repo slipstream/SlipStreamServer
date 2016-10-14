@@ -58,12 +58,16 @@
          "runs all tests and performs full compilation"
          []
          (comp
-           (aot :all true)
-           (test)))
+           (test)
+           (sift :include #{#".*_test\.clj"}
+                 :invert true)
+           (aot :all true)))
 
 (deftask build []
          (comp
            (pom)
+           (sift :include #{#".*_test\.clj"}
+                 :invert true)
            (aot :all true)
            (uber)
            (jar)))

@@ -40,6 +40,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -77,6 +78,7 @@ public class StateMachinetTest {
 			ValidationException {
 
 		Event.muteForTests();
+		CljElasticsearchHelper.createAndInitTestDb();
 
 		user = CommonTestUtil.createTestUser();
 

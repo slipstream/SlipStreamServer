@@ -24,6 +24,9 @@
                  ['sixsq/default-deps (get-env :version)]
                  '[[org.clojure/clojure]
 
+                   ; FIXME: remove with Elasticsearch > v2.3.5
+                   [net.java.dev.jna/jna]
+
                    [aleph]
                    [cheshire] ;; newer version needed for ring-json
                    [compojure]
@@ -107,9 +110,27 @@
                  :invert true)
            (aot :all true)))
 
+(defn get-file-path
+  [fileset fname]
+  (try
+    (-> (-> fileset
+          (boot.core/tmp-get fname)
+          boot.core/tmp-dir)
+      (clojure.java.io/file fname)
+      .getPath)
+    (catch IllegalArgumentException e)))
+
+(deftask set-version []
+  (fn middleware [next-task]
+    (fn handler [fileset]
+     (let [f (get-file-path fileset "com/sixsq/slipstream/version.txt")]
+       (spit f (get-env :version)))
+      (next-task fileset))))
+
 (deftask build []
          (comp
            (pom)
+           (set-version)
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
@@ -128,6 +149,29 @@
            (jar ;; :main 'com.sixsq.slipstream.ssclj.app.main
             )))
 
+(deftask build-tests-jar
+  "build jar with test runtime dependencies for connectors."
+  []
+  (comp
+    (pom :classifier "tests")
+    (sift
+      :to-resource #{#"lifecycle_test_utils\.clj"
+                     #"connector_test_utils\.clj"
+                     }
+      :include #{#"lifecycle_test_utils\.clj"
+                 #"connector_test_utils\.clj"
+                 #"pom.xml"
+                 #"pom.properties"
+                 })
+    (jar :file (str "SlipStreamCljResources-jar-" (get-env :version) "-tests.jar"))))
+
+(deftask mvn-build-tests-jar
+  []
+   (comp
+     (build-tests-jar)
+     (install)
+     (target)))
+
 (deftask mvn-test
          "run all tests of project"
          []
@@ -142,8 +186,16 @@
            (target)))
 
 (deftask mvn-deploy
-         "build full project through maven"
+         "deploy project"
          []
          (comp
            (mvn-build)
            (push :repo "sixsq")))
+
+(deftask mvn-deploy-tests-jar
+         "deploy project"
+         []
+         (comp
+           (mvn-build-tests-jar)
+           (push :repo "sixsq")))
+

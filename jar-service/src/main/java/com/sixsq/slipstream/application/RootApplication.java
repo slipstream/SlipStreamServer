@@ -33,6 +33,7 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
 import com.sixsq.slipstream.dashboard.DashboardRouter;
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.event.EventRouter;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -123,6 +124,8 @@ public class RootApplication extends Application {
 
 		try {
 			createShutdownHook();
+
+			CljElasticsearchHelper.init();
 
 			createStartupMetadata();
 			loadOptionalConfiguration();
