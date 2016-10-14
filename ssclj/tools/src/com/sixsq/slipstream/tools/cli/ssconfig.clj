@@ -10,7 +10,8 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as cfg-s]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as cfgt]
     [com.sixsq.slipstream.ssclj.resources.connector :as conn]
-    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont])
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
+    [com.sixsq.slipstream.ssclj.resources.connector :as con])
   (:gen-class))
 
 (def connector-resource conn/resource-url)
@@ -333,6 +334,40 @@
         (do
           (println "WARNING: Resource" rname "not found."))))))
 
+(defn get-connector-resources
+  []
+  (let [cs (-> (con/query-impl (sci/connector-as-request configuration-resource))
+               :body
+               :connectors)]
+    (map #(:id %) cs)))
+
+(defn get-configuration-resources
+  []
+  (let [cs (-> (cfg/query-impl (sci/configuration-as-request connector-resource))
+               :body
+               :configurations)]
+    (map #(:id %) cs)))
+
+(defn get-persisted-resources
+  [name]
+  (cond
+    (= name configuration-resource) (get-configuration-resources)
+    (= name connector-resource) (get-connector-resources)
+    :else (do (println "WARNING: Don't know how to get resources for" name))))
+
+(defn list-persisted-resources
+  [name]
+  (doseq [r (get-persisted-resources name)]
+    (println r)))
+
+(defn list-resources
+  []
+  (init-db-client)
+  (println "List of persisted resources.")
+  (doseq [r resource-types]
+    (println (format "- resources for '%s'" r))
+    (list-persisted-resources r)))
+
 ;;
 ;; Command line options processing.
 ;;
@@ -356,8 +391,9 @@
 
 (def cli-options
   [["-t" "--template TEMPLATE" "Prints out registered template by name."]
-   ["-l" "--list" "List available templates."]
-   ["-r" "--resource RESOURCE" "Prints out resource document(s) by name."
+   ["-l" "--list" "Lists available templates."]
+   ["-p" "--persisted" "Lists resources persisted in DB."]
+   ["-r" "--resource RESOURCE" "Prints out peristed resource document(s) by name."
     :id :resources
     :default #{}
     :assoc-fn cli-parse-sets]
@@ -395,8 +431,8 @@
     (cond
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
-    (init-namespaces)
     (when (not (empty? arguments))
+      (init-namespaces)
       (run arguments)
       (System/exit 0))
     (when (seq (:resources options))
@@ -404,7 +440,11 @@
       (print-resources)
       (System/exit 0))
     (when (:list options)
+      (init-namespaces)
       (list-tempates)
       (System/exit 0))
     (when (not (s/blank? (:template options)))
-      (print-template (:template options)))))
+      (init-namespaces)
+      (print-template (:template options)))
+    (when (:persisted options)
+      (list-resources))))
