@@ -263,6 +263,10 @@ public class ServiceConfiguration extends
 
 	public void setParameter(ServiceConfigurationParameter parameter) {
 
+		if (null == parameter) {
+			return;
+		}
+
 		validateParameter(parameter);
 
 		Map<String, ServiceConfigurationParameter> parameters = getParameters();

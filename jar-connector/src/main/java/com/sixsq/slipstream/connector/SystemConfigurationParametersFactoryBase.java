@@ -114,9 +114,11 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 
 	protected void getAndAssignParameter(String paramName) {
 		ServiceConfigurationParameter scp = CljElasticsearchHelper.getConnectorParameterDescription(paramName);
-		scp.setName(super.constructKey(paramName));
-		scp.setCategory(getCategory());
-		assignParameter(scp);
+		if (null != scp) {
+			scp.setName(super.constructKey(paramName));
+			scp.setCategory(getCategory());
+			assignParameter(scp);
+		}
 	}
 
 	protected void putMandatoryOrchestrationImageId() throws ValidationException {
