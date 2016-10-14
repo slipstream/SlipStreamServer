@@ -147,26 +147,27 @@
 
 (defn build-sc-param
   [value desc & [category]]
-  (let [name (qualified-pname desc category)
-        scp  (ServiceConfigurationParameter. name
-                                             (str value)
-                                             (:description desc))]
-    (when desc
-      (when (or category (:category desc))
-        (.setCategory scp (or category (:category desc))))
-      (when-not (nil? (:mandatory desc))
-        (.setMandatory scp (as-boolean (:mandatory desc))))
-      (when (:type desc)
-        (.setType scp (ParameterType/valueOf (s/capitalize (:type desc)))))
-      (when-not (nil? (:readOnly desc))
-        (.setReadonly scp (as-boolean (get desc :readOnly (:readOnly desc)))))
-      (when (:order desc)
-        (.setOrder scp (read-str (:order desc))))
-      (when (:instructions desc)
-        (.setInstructions scp (:instructions desc)))
-      (when-not (empty? (:enum desc))
-        (.setEnumValues scp (:enum desc))))
-    scp))
+  (when-let [name (qualified-pname desc category)]
+    (let
+      [scp (ServiceConfigurationParameter. name
+                                           (str value)
+                                           (or (:description desc) ""))]
+      (when desc
+        (when (or category (:category desc))
+          (.setCategory scp (or category (:category desc))))
+        (when-not (nil? (:mandatory desc))
+          (.setMandatory scp (as-boolean (:mandatory desc))))
+        (when (:type desc)
+          (.setType scp (ParameterType/valueOf (s/capitalize (:type desc)))))
+        (when-not (nil? (:readOnly desc))
+          (.setReadonly scp (as-boolean (get desc :readOnly (:readOnly desc)))))
+        (when (:order desc)
+          (.setOrder scp (read-str (:order desc))))
+        (when (:instructions desc)
+          (.setInstructions scp (:instructions desc)))
+        (when-not (empty? (:enum desc))
+          (.setEnumValues scp (:enum desc))))
+      scp)))
 
 (defn desc-from-param
   [p]
