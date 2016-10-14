@@ -393,7 +393,7 @@
   [["-t" "--template TEMPLATE" "Prints out registered template by name."]
    ["-l" "--list" "Lists available templates."]
    ["-p" "--persisted" "Lists resources persisted in DB."]
-   ["-r" "--resource RESOURCE" "Prints out peristed resource document(s) by name."
+   ["-r" "--resource RESOURCE" "Prints out persisted resource document(s) by name."
     :id :resources
     :default #{}
     :assoc-fn cli-parse-sets]
