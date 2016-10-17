@@ -152,7 +152,7 @@
 (def tests-artef-name "SlipStreamCljResourcesTests-jar")
 (def tests-artef-pom-loc (str "com.sixsq.slipstream/" tests-artef-name))
 (def tests-artef-project-name (symbol tests-artef-pom-loc))
-(def tests-artef-jar-name (str tests-artef-name (get-env :version) "-tests.jar"))
+(def tests-artef-jar-name (str tests-artef-name "-" (get-env :version) "-tests.jar"))
 
 (deftask build-tests-jar
   "build jar with test runtime dependencies for connectors."
