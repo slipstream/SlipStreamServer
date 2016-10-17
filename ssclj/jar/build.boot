@@ -149,11 +149,16 @@
            (jar ;; :main 'com.sixsq.slipstream.ssclj.app.main
             )))
 
+(def tests-artef-name "SlipStreamCljResourcesTests-jar")
+(def tests-artef-pom-loc (str "com.sixsq.slipstream/" tests-artef-name))
+(def tests-artef-project-name (symbol tests-artef-pom-loc))
+(def tests-artef-jar-name (str tests-artef-name (get-env :version) "-tests.jar"))
+
 (deftask build-tests-jar
   "build jar with test runtime dependencies for connectors."
   []
   (comp
-    (pom :classifier "tests")
+    (pom :project tests-artef-project-name :classifier "tests")
     (sift
       :to-resource #{#"lifecycle_test_utils\.clj"
                      #"connector_test_utils\.clj"
@@ -163,13 +168,13 @@
                  #"pom.xml"
                  #"pom.properties"
                  })
-    (jar :file (str "SlipStreamCljResources-jar-" (get-env :version) "-tests.jar"))))
+    (jar :file tests-artef-jar-name)))
 
 (deftask mvn-build-tests-jar
   []
    (comp
      (build-tests-jar)
-     (install)
+     (install :pom tests-artef-pom-loc)
      (target)))
 
 (deftask mvn-test
@@ -197,5 +202,5 @@
          []
          (comp
            (mvn-build-tests-jar)
-           (push :repo "sixsq")))
+           (push :repo "sixsq" :pom tests-artef-pom-loc)))
 
