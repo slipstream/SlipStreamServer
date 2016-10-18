@@ -6,12 +6,13 @@
     [superstring.core :as s]
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
+    [clj-time.coerce :as time-coerse]
     [schema.core :as schema]
     [ring.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [clojure.data.json :as json])
   (:import
-    [java.util UUID]
+    [java.util UUID Date]
     [javax.xml.bind DatatypeConverter]))
 
 ;;
@@ -125,12 +126,23 @@
   [m]
   (dissoc m :id :created :updated :resourceURI :operations))
 
+(defn inst->timestamp
+  "Takes an instant and produces correctly-formatted string for a timestamp.
+   If no instant is provided, then the current time is used."
+  ([]
+    (inst->timestamp (time/now)))
+  ([inst]
+   (let [inst (if (instance? Date inst)
+                (time-coerse/from-date inst)
+                inst)]
+     (time-fmt/unparse (:date-time time-fmt/formatters) inst))))
+
 (defn update-timestamps
   "Sets the updated attribute and optionally the created attribute
    in the request.  The created attribute is only set if the existing value
    is missing or evaluates to false."
   [data]
-  (let [updated (time-fmt/unparse (:date-time time-fmt/formatters) (time/now))
+  (let [updated (inst->timestamp)
         created (or (:created data) updated)]
     (assoc data :created created :updated updated)))
 

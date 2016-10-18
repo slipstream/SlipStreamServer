@@ -62,6 +62,7 @@
                    [peridot]
                    [expectations]
                    [honeysql]
+                   [org.clojure/test.check]
 
                    ;; boot tasks
                    [boot-environ]

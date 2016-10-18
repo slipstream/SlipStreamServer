@@ -2,38 +2,47 @@
   (:require
     [superstring.core :as str]
     [clojure.spec :as s]
+    [clojure.spec.gen :as gen]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+
+;;
+;; creates a closed map definition: only defined keys are permitted
+;; (implementation provided on clojure mailing list by Alistair Roche)
+;;
+(defmacro only-keys
+  [& {:keys [req req-un opt opt-un] :as args}]
+  `(s/merge (s/keys ~@(apply concat (vec args)))
+            (s/map-of ~(set (concat req
+                                    (map (comp keyword name) req-un)
+                                    opt
+                                    (map (comp keyword name) opt-un)))
+                      any?)))
 
 ;;
 ;; schema definitions for basic types
 ;;
 
-(s/def ::positive-int (s/and int? pos?))
-(s/def ::nonnegative-int (s/and int? (complement neg?)))
-(s/def ::port (s/int-in 0 65535))
-(s/def ::blank-str (s/and string? str/blank?))
-(s/def ::nonblank-str (s/and string? (complement str/blank?)))
+(s/def ::nonblank-string (s/and string? (complement str/blank?)))
 
-(s/def ::nonblank-str-list (s/coll-of ::nonblank-str :min-count 1))
+(s/def ::uri-token (s/and string? #(re-matches #"[\w\.\[\]\(\)\*\+\?\',:;/#@!$&=~-]+" %)))
 
-(s/def ::timestamp (s/and ::nonblank-str u/valid-timestamp?))
-
-(s/def ::optional-timestamp (s/and string? (s/or :empty str/blank? :timestamp ::timestamp)))
-
+(s/def ::timestamp (s/with-gen (s/and ::nonblank-string u/valid-timestamp?)
+                               #(gen/fmap u/inst->timestamp (s/gen inst?))))
 
 ;;
 ;; schema definitions for common attributes
 ;;
 
-(s/def ::href ::nonblank-str)
+(s/def ::href ::nonblank-string)
+(s/def ::rel ::nonblank-string)
+(s/def ::kw-or-str (s/or :keyword keyword? :string ::nonblank-string))
+
 (s/def ::resource-link (s/keys :req-un [::href]))
 (s/def ::resource-links (s/coll-of ::resource-link :min-count 1))
 
-(s/def ::rel ::nonblank-str)
-(s/def ::operation (s/merge ::resource-link (s/keys :req-un [::rel])))
+(s/def ::operation (only-keys :req-un [::href ::rel]))
 (s/def ::operations (s/coll-of ::operation :min-count 1))
 
-(s/def ::kw-or-str (s/or :keyword keyword? :string string?))
 (s/def ::properties (s/map-of ::kw-or-str string? :min-count 1))
 
 ;;
@@ -47,14 +56,17 @@
 ;; :operations will be replaced by the service-generated values.
 ;;
 
-(s/def ::id ::nonblank-str)
-(s/def ::resource-uri ::nonblank-str)
+(s/def ::id ::nonblank-string)
+(s/def ::resource-uri ::nonblank-string)
 (s/def ::created ::timestamp)
 (s/def ::updated ::timestamp)
-(s/def ::name ::nonblank-str)
-(s/def ::description ::nonblank-str)
+(s/def ::name ::nonblank-string)
+(s/def ::description ::nonblank-string)
 (s/def ::common-attrs (s/keys :req-un [::id ::resource-uri ::created ::updated]
                               :opt-un [::name ::description ::properties ::operations]))
+
+(def common-attrs {:req-un [::id ::resource-uri ::created ::updated]
+                   :opt-un [::name ::description ::properties ::operations]})
 
 ;;
 ;; These are the common attributes for create resources.
@@ -64,17 +76,20 @@
 (s/def ::create-attrs (s/keys :req-un [::resource-uri]
                               :opt-un [::name ::description ::created ::updated ::properties ::operations]))
 
+(def create-attrs {:req-un [::resource-uri]
+                   :opt-un [::name ::description ::created ::updated ::properties ::operations]})
+
 ;;
 ;; Ownership and access control
 ;;
 ;; These are additions to the standard CIMI schema for the
-;; StratusLab implementation.
+;; SlipStream implementation.
 ;;
 
 (s/def ::type #{"USER" "ROLE"})
 (s/def ::right #{"ALL" "VIEW" "MODIFY"})
 
-(s/def ::principal ::nonblank-str)
+(s/def ::principal ::nonblank-string)
 (s/def ::access-control-id (s/keys :req-un [::principal ::type]))
 
 (s/def ::access-control-rule (s/merge ::access-control-id (s/keys :req-un [::right])))
@@ -91,14 +106,15 @@
 ;;
 
 (s/def :com.sixsq.slipstream.ssclj.resources.common.spec.alt/types #{"string" "boolean" "int" "float" "timestamp" "enum" "map" "list"})
-(s/def ::displayName ::nonblank-str)
-(s/def ::category ::nonblank-str)
+(s/def ::displayName ::nonblank-string)
+(s/def ::category ::nonblank-string)
 (s/def ::mandatory boolean?)
 (s/def ::readOnly boolean?)
-(s/def ::order ::nonnegative-int)
-(s/def ::enum ::nonblank-str-list)
-(s/def ::ParameterDescription (s/keys :req-un [:displayName
+(s/def ::order nat-int?)
+(s/def ::enum (s/coll-of ::nonblank-str :min-count 1))
+(s/def ::ParameterDescription (s/keys :req-un [::displayName
                                                :com.sixsq.slipstream.ssclj.resources.common.spec.alt/types]
-                                      :opt-un [:category :description :mandatory :readOnly :order :enum]))
+                                      :opt-un [::category ::description ::mandatory ::readOnly ::order ::enum]))
 
 (s/def ::resource-description (s/merge ::acl-attr (s/map-of keyword? ::ParameterDescription)))
+
