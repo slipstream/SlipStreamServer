@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.db.serializers.service-config-impl
   (:require
+    [clojure.edn :as edn]
     [clojure.set :as set]
     [clojure.tools.logging :as log]
 
@@ -309,18 +310,6 @@
       (assoc :service crs/service)
       crtpl/complete-resource))
 
-(defn db-add-default-config
-  [& [fail]]
-  (log/info "Adding default server configuration to ES DB.")
-  (let [resp (-> cts/resource
-                 complete-resource
-                 (u/as-request cfg-resource-uuid user-roles-str)
-                 cr/add-impl)]
-    (if (and fail (> (:status resp) 400))
-      (u/throw-on-resp-error resp)
-      (do
-        (log/warn "Failure adding default configuration: " resp)))))
-
 (defn resource-as-request
   [name & [body]]
   (u/as-request (or body {}) name user-roles-str))
@@ -393,6 +382,38 @@
   [name]
   (get-document (configuration-as-request name) cr/retrieve-impl))
 
+
+;;
+;; Utility wrappers around configuration CRUD.
+;;
+
+(defn- check-response
+  "{response}, operation name, fail with exception (false/true)"
+  [resp op fail]
+  (when (> (:status resp) 400)
+    (if fail
+      (u/throw-on-resp-error resp)
+      (log/warn "Failure" op "configuration:" resp))))
+
+(defn db-edit-config-from-file
+  [f & [fail]]
+  (log/info "Editing server configuration in ES DB from file:" f)
+  (let [c    (edn/read-string (slurp f))
+        resp (-> (get-configuration "slipstream")
+                 complete-resource
+                 (merge c)
+                 (u/as-request cfg-resource-uuid user-roles-str)
+                 cr/edit-impl)]
+    (check-response resp "editing" fail)))
+
+(defn db-add-default-config
+  [& [fail]]
+  (log/info "Adding default server configuration to ES DB.")
+  (let [resp (-> cts/resource
+                 complete-resource
+                 (u/as-request cfg-resource-uuid user-roles-str)
+                 cr/add-impl)]
+    (check-response resp "adding" fail)))
 
 ;;
 ;; Store and load of configuration and connectors.

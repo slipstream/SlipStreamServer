@@ -272,13 +272,17 @@
     (configuration? resource) (store-cfg resource)
     (connector? resource) (store-connector resource)))
 
+(defn slurp-and-store
+  [f]
+  (-> (edn/read-string (slurp f))
+        validate
+        store))
+
 (defn run
   [files]
   (init-db-client)
   (doseq [f files]
-    (-> (edn/read-string (slurp f))
-        validate
-        store)))
+    (slurp-and-store f)))
 
 (defn list-tempates
   []
