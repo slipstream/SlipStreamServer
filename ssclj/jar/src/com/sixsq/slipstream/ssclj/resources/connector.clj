@@ -30,10 +30,7 @@
 ;; schemas
 ;;
 
-(def Connector
-  (merge c/CommonAttrs
-         c/AclAttr
-         {:cloudServiceType c/NonBlankString}))
+(def Connector tpl/ConnectorTemplate)
 
 (def ConnectorCreate
   (merge c/CreateAttrs
@@ -48,7 +45,11 @@
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown Connector type: " (:cloudServiceType resource)) resource)))
+  (let [err-msg (str "unknown Connector type: " (:cloudServiceType resource))]
+    (throw
+      (ex-info err-msg {:status  400
+                        :message err-msg
+                        :body    resource}))))
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -102,12 +103,12 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        body (-> body
-                 (assoc :resourceURI create-uri)
-                 (std-crud/resolve-hrefs idmap)
-                 (crud/validate)
-                 (:connectorTemplate)
-                 (tpl->connector))]
+        body  (-> body
+                  (assoc :resourceURI create-uri)
+                  (std-crud/resolve-hrefs idmap)
+                  (crud/validate)
+                  (:connectorTemplate)
+                  (tpl->connector))]
     (add-impl (assoc request :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
@@ -133,3 +134,12 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+;;
+;; use name as the identifier
+;;
+
+(defmethod crud/new-identifier resource-name
+  [resource resource-name]
+  (if-let [new-id (:instanceName resource)]
+    (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))

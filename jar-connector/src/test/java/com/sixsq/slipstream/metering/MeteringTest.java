@@ -22,6 +22,7 @@ package com.sixsq.slipstream.metering;
 
 
 import com.sixsq.slipstream.connector.Collector;
+import com.sixsq.slipstream.connector.ConnectorTestBase;
 import com.sixsq.slipstream.connector.UsageRecorder;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -52,6 +53,7 @@ public class MeteringTest extends RunTestBase {
 	@BeforeClass
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
 		UsageRecorder.muteForTests();
+		ConnectorTestBase.setupElasticseach();
 		createUser();
 		String username = user.getName();
 

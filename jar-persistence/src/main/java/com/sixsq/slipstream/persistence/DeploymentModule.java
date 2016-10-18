@@ -137,8 +137,7 @@ public class DeploymentModule extends TargetContainerModule {
 
 	}
 
-	private void validateOutputParametersExistsInOtherNodes(
-			HashMap<String, ImageModule> imagemap, Node node)
+	private void validateOutputParametersExistsInOtherNodes(HashMap<String, ImageModule> imagemap, Node node)
 			throws ValidationException {
 
 		// Check output params
@@ -148,10 +147,8 @@ public class DeploymentModule extends TargetContainerModule {
 				continue;
 			}
 
-			String nodeName = RuntimeParameter
-					.extractNodeNamePart(nodeParameter.getValue());
-			String paramName = RuntimeParameter
-					.extractParamNamePart(nodeParameter.getValue());
+			String nodeName = RuntimeParameter.extractNodeNamePart(nodeParameter.getValue());
+			String paramName = RuntimeParameter.extractParamNamePart(nodeParameter.getValue());
 
 			// Check that the node referring to by the oparam exists
 			if (!this.getNodes().containsKey(nodeName)) {
@@ -162,8 +159,7 @@ public class DeploymentModule extends TargetContainerModule {
 								+ nodeParameter.getValue()
 								+ " which referes to a node not defined in the deployment"));
 			}
-			if (!this.getNodes().get(nodeName).getImage()
-					.parametersContainKey(paramName)) {
+			if (!this.getNodes().get(nodeName).getImage().getOutputParametersExpanded().containsKey(paramName)) {
 				throw (new ValidationException(
 						"Failed to find output parameter: "
 								+ nodeParameter.getValue()

@@ -21,15 +21,12 @@ package com.sixsq.slipstream.initialstartup;
  */
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.module.ModuleResource;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.util.Logger;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -51,12 +48,11 @@ public class CloudIds {
 		}
 
 		// load from file
-		File configFile = Configuration.findConfigurationFile();
-		if(configFile == null) {
-			return; // no config file found
+		File configDir = Configuration.findConfigurationDirectory();
+		if(configDir == null) {
+			return;
 		}
 
-		File configDir = new File(configFile.getParent());
 		File usersDir = new File(configDir + File.separator + CLOUD_IDS_CONFIG_DIR);
 
 		List<File> files = FileLoader.loadConfigurationFiles(usersDir);

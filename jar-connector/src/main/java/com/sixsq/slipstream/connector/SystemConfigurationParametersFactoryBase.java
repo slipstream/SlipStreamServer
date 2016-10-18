@@ -22,6 +22,7 @@ package com.sixsq.slipstream.connector;
 
 import java.util.*;
 
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ParameterType;
@@ -63,6 +64,15 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 		putMandatoryMaxIaasWorkers();
 	}
 
+	protected void initConnectorParameters(String connectorName) {
+		List<ServiceConfigurationParameter> scps = CljElasticsearchHelper.getConnectorParameters(connectorName);
+		for (ServiceConfigurationParameter scp : scps) {
+			scp.setName(super.constructKey(scp.getName()));
+			scp.setCategory(getCategory());
+			assignParameter(scp);
+		}
+	}
+
 	public Map<String, ServiceConfigurationParameter> getParameters() {
 		return getReferenceParameters();
 	}
@@ -102,78 +112,52 @@ public abstract class SystemConfigurationParametersFactoryBase extends
 		return parameter;
 	}
 
+	protected void getAndAssignParameter(String paramName) {
+		ServiceConfigurationParameter scp = CljElasticsearchHelper.getConnectorParameterDescription(paramName);
+		if (null != scp) {
+			scp.setName(super.constructKey(paramName));
+			scp.setCategory(getCategory());
+			assignParameter(scp);
+		}
+	}
+
 	protected void putMandatoryOrchestrationImageId() throws ValidationException {
-		putMandatoryParameter(
-				super.constructKey(UserParametersFactoryBase.ORCHESTRATOR_IMAGEID_PARAMETER_NAME),
-				"Image Id of the orchestrator for " + getCategory(),
-				15);
-	}
-
-	protected void putMandatoryOrchestratorInstanceType() throws ValidationException {
-		putMandatoryParameter(
-				super.constructKey(UserParametersFactoryBase.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME),
-				"Orchestrator instance type  " + getCategory(),
-				20);
-	}
-
-	protected void putMandatoryOrchestratorSecurityGroups() throws ValidationException {
-		putMandatoryParameter(
-				super.constructKey(SECURITY_GROUPS_PARAMETER_NAME),
-				"Orchestrator security groups (comma separated list)", SECURITY_GROUPS_ALLOW_ALL,
-				25);
-	}
-
-	protected void putMandatoryUpdateUrl() throws ValidationException {
-		putMandatoryParameter(
-				super.constructKey(UserParametersFactoryBase.UPDATE_CLIENTURL_PARAMETER_NAME),
-				"URL pointing to the tarball containing the client for "
-						+ getCategory(),
-				950);
-	}
-
-	protected void putMandatoryEndpoint() throws ValidationException {
-		putMandatoryParameter(
-				super.constructKey(UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME),
-				"Service endpoint for " + getCategory()
-						+ " (e.g. http://example.com:5000)",
-				10);
+		getAndAssignParameter(UserParametersFactoryBase.ORCHESTRATOR_IMAGEID_PARAMETER_NAME);
 	}
 
 	protected void putMandatoryQuotaVm() throws ValidationException {
-		putMandatoryParameter(
-				super.constructKey(QuotaParameter.QUOTA_VM_PARAMETER_NAME),
-				"VM quota for " + getCategory() + " (i.e. maximum number of VMs allowed)",
-				910);
+		getAndAssignParameter(QuotaParameter.QUOTA_VM_PARAMETER_NAME);
 	}
 
 	protected void putMandatoryMaxIaasWorkers() throws ValidationException {
-		putMandatoryParameter(
-				super.constructKey(RuntimeParameter.MAX_JAAS_WORKERS_KEY),
-				RuntimeParameter.MAX_JAAS_WORKERS_DESCRIPTION,
-				RuntimeParameter.MAX_JAAS_WORKERS_DEFAULT,
-				915);
+		getAndAssignParameter(RuntimeParameter.MAX_JAAS_WORKERS_KEY);
+	}
+
+	// to be removed
+
+	protected void putMandatoryOrchestratorInstanceType() throws ValidationException {
+		getAndAssignParameter(UserParametersFactoryBase.ORCHESTRATOR_INSTANCE_TYPE_PARAMETER_NAME);
+	}
+
+	protected void putMandatoryOrchestratorSecurityGroups() throws ValidationException {
+		getAndAssignParameter(SECURITY_GROUPS_PARAMETER_NAME);
+	}
+
+	protected void putMandatoryUpdateUrl() throws ValidationException {
+		getAndAssignParameter(UserParametersFactoryBase.UPDATE_CLIENTURL_PARAMETER_NAME);
+	}
+
+	protected void putMandatoryEndpoint() throws ValidationException {
+		getAndAssignParameter(UserParametersFactoryBase.ENDPOINT_PARAMETER_NAME);
 	}
 
 	protected void putMandatoryContextualizationType() throws ValidationException {
-		putMandatoryEnumParameter(
-				super.constructKey(NATIVE_CONTEXTUALIZATION_KEY),
-				"Use native cloud contextualisation",
-				getNativeContextualizationOptions(),
-				NATIVE_CONTEXTUALIZATION_DEFAULT,
-				"Here you can define when SlipStream should use the native Cloud contextualization or when it should try other methods like SSH and WinRM. <br/>",
-				920);
+		getAndAssignParameter(NATIVE_CONTEXTUALIZATION_KEY);
 	}
 
 	protected void putMandatoryOrchestratorUsernameAndPassword() throws ValidationException {
-		putMandatoryParameter(constructKey(ORCHESTRATOR_USERNAME_KEY),
-				"Orchestrator username", ParameterType.String,
-				"Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.",
-				30);
-
-		putMandatoryPasswordParameter(constructKey(ORCHESTRATOR_PASSWORD_KEY),
-				"Orchestrator password",
-				"Password used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.",
-				31);
+		getAndAssignParameter(ORCHESTRATOR_USERNAME_KEY);
+		getAndAssignParameter(ORCHESTRATOR_PASSWORD_KEY);
 	}
 
 }

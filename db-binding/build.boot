@@ -1,4 +1,4 @@
-(def +version+ "3.14-SNAPSHOT")
+(def +version+ "3.15-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamDbBinding-jar
@@ -26,10 +26,14 @@
 
                    [environ]
 
+                   ; FIXME: needed this one after requiring
+                   ; com.sixsq.slipstream.ssclj.middleware.authn-info-header
+                   [cheshire]
+
+                   [org.clojure/data.xml]
                    [clj-time]
                    [me.raynes/fs]
                    [org.clojure/data.json]
-                   [org.clojure/tools.cli]
                    [org.clojure/tools.logging]
                    [org.elasticsearch/elasticsearch]
                    [prismatic/schema]
@@ -77,9 +81,9 @@
            (sift :include #{#".*_test\.clj"}
                  :invert true)
            (aot :all true)
-           #_(uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
-                             #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
-                             #".*log4j\.properties" })
+            #_(uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
+                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
+                               #".*log4j\.properties" })
            (jar)))
 
 (deftask mvn-test

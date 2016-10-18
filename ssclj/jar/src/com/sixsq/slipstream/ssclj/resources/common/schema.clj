@@ -155,14 +155,16 @@
 (def ParameterTypes (s/enum "string" "boolean" "int" "float" "timestamp" "enum" "map" "list"))
 
 (def ParameterDescription
-  {:displayName                  NonBlankString
-   (s/optional-key :category)    NonBlankString
-   (s/optional-key :description) NonBlankString
-   :type                         ParameterTypes
-   (s/optional-key :mandatory)   s/Bool
-   (s/optional-key :readOnly)    s/Bool
-   (s/optional-key :order)       NonNegInt
-   (s/optional-key :enum)        [NonBlankString]})
+  {:displayName                   NonBlankString
+   (s/optional-key :category)     NonBlankString
+   (s/optional-key :description)  NonBlankString
+   :type                          ParameterTypes
+   (s/optional-key :mandatory)    s/Bool
+   (s/optional-key :readOnly)     s/Bool
+   (s/optional-key :order)        NonNegInt
+   (s/optional-key :enum)         [NonBlankString]
+   (s/optional-key :instructions) NonBlankString
+   })
 
 (def ResourceDescription
   (merge AclAttr

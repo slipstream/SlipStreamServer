@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.14-SNAPSHOT</version>
+    <version>3.15-SNAPSHOT</version>
   </parent>
   
   <dependencies>
@@ -32,7 +32,7 @@
       <version>${project.version}</version>
     </dependency>
 
-<!-- 
+<!--
   These cannot be added to WAR because it creates a circular dependency
   between the SlipStreamServer module (which contains the connector 
   interface) and the SlipStreamConnector module.
@@ -66,7 +66,19 @@
       <artifactId>SlipStreamConnector-StratusLab-jar</artifactId>
       <version>${project.version}</version>
     </dependency>
---> 
+-->
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
+        <type>pom</type>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbSerializers-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
@@ -186,15 +198,6 @@
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-
-        <configuration>
-          <properties>
-            <property>
-              <name>slipstream.config.file</name>
-              <value>${basedir}/slipstream.conf</value>
-            </property>
-          </properties>
-        </configuration>
 
 <!-- 
   Adding these dependencies will cause the connector loading
