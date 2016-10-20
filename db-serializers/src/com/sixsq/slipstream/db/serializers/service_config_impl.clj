@@ -5,7 +5,6 @@
     [clojure.tools.logging :as log]
 
     [camel-snake-kebab.core :refer [->camelCase]]
-    [me.raynes.fs :as fs]
     [superstring.core :as s]
 
     [com.sixsq.slipstream.db.serializers.utils :as u]
@@ -292,11 +291,11 @@
 
 (defn cs->cfg-desc-and-spit
   [sc fpath]
-  (let [f        (fs/expand-home fpath)
-        cfg-desc (sc->cfg-desc sc)]
-    (with-open [^java.io.Writer w (apply clojure.java.io/writer f {})]
-      (clojure.pprint/pprint cfg-desc w))))
+  (scu/spit-pprint (sc->cfg-desc sc) fpath))
 
+(defn cs->cfg-and-spit
+  [sc fpath]
+  (scu/spit-pprint (sc->cfg sc) fpath))
 
 (def cfg-desc cts/desc)
 

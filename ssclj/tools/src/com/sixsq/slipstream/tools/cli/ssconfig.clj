@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as cfgt]
     [com.sixsq.slipstream.ssclj.resources.connector :as conn]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
-    [com.sixsq.slipstream.ssclj.resources.connector :as con])
+    [com.sixsq.slipstream.ssclj.resources.connector :as con]
+    [com.sixsq.slipstream.tools.cli.utils :refer :all])
   (:gen-class))
 
 (def connector-resource conn/resource-url)
@@ -375,23 +376,6 @@
 ;;
 ;; Command line options processing.
 ;;
-
-(defn exit
-  [status msg]
-  (println msg)
-  (System/exit status))
-
-(defn error-msg
-  [errors]
-  (str "The following errors occurred while parsing your command:\n\n"
-       (s/join \newline errors)))
-
-(defn cli-parse-sets
-  ([m k v]
-   (cli-parse-sets m k v identity))
-  ([m k v fun] (assoc m k (if-let [oldval (get m k)]
-                            (merge oldval (fun v))
-                            (hash-set (fun v))))))
 
 (def cli-options
   [["-t" "--template TEMPLATE" "Prints out registered template by name."]

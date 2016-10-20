@@ -1,16 +1,12 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfigmigrate
   (:require
     [clojure.string :as s]
-    [clj-http.client :as http]
     [clojure.tools.cli :refer [parse-opts]]
 
-    [me.raynes.fs :as fs]
-
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
-    [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
 
     [com.sixsq.slipstream.tools.cli.ssconfig :as ssconfig]
-    [com.sixsq.slipstream.db.serializers.utils :as u])
+    [com.sixsq.slipstream.tools.cli.utils :refer :all])
   (:gen-class))
 
 ;;
@@ -25,39 +21,11 @@
 ;; Helper functions.
 ;;
 
-(defn ->config-resource
-  [url]
-  (str url "/configuration"))
-
-(defn conf-xml
-  [path-url]
-  (if (s/starts-with? path-url "https")
-    (-> path-url
-        ->config-resource
-        (http/get {:follow-redirects false
-                   :accept           :xml
-                   :basic-auth       *creds*})
-        :body)
-    (slurp path-url)))
 
 (defn warn-con-skipped
   [cin vals]
   (println "WARNING: Skipped connector instance:" cin)
   (println "WARNING: No connector name defined for:" cin "with attrs:" vals))
-
-(defn update-val
-  [v]
-  (let [nvs (for [[m r] *modifiers* :when (and (string? v) (re-find m v))]
-              (s/replace v m r))]
-    (if (seq nvs)
-      (last nvs)
-      v)))
-
-(defn modify-vals
-  [con]
-  (let [res (for [[k v] con]
-              [k (update-val v)])]
-    (into {} res)))
 
 ;;
 ;; Persistence.
@@ -84,7 +52,7 @@
   (-> sc
       sci/sc->cfg
       ssconfig/validate
-      modify-vals
+      (modify-vals *modifiers*)
       ssconfig/store))
 
 (defn persist-connector!
@@ -94,7 +62,7 @@
     (-> vals
         remove-attrs
         ssconfig/validate
-        modify-vals
+        (modify-vals *modifiers*)
         ssconfig/store)
     (warn-con-skipped cin vals)))
 
@@ -107,7 +75,7 @@
 
 (defn run
   []
-  (let [sc (-> *cfg-path-url* conf-xml scu/conf-xml->sc)]
+  (let [sc (cfg-path-url->sc *cfg-path-url* *creds*)]
     (ssconfig/init)
     (persist-config! sc)
     (persist-connectors! sc)))
@@ -115,37 +83,6 @@
 ;;
 ;; Command line options processing.
 ;;
-
-(defn exit
-  [status msg]
-  (println msg)
-  (System/exit status))
-
-(defn error-msg
-  [& errors]
-  (str "The following errors occurred while parsing your command:\n\n"
-       (s/join \newline errors)))
-
-(defn cli-parse-sets
-  ([m k v]
-   (cli-parse-sets m k v identity))
-  ([m k v fun] (assoc m k (if-let [oldval (get m k)]
-                            (merge oldval (fun v))
-                            (hash-set (fun v))))))
-
-(defn cli-parse-connectors
-  [m k v]
-  (cli-parse-sets m k v))
-
-(defn ->re-match-replace
-  "'m=r' -> [#'m' 'r']"
-  [mr]
-  (let [m-r (s/split mr #"=")]
-    [(re-pattern (first m-r)) (second m-r)]))
-
-(defn cli-parse-modifiers
-  [m k v]
-  (cli-parse-sets m k v ->re-match-replace))
 
 (def cli-options
   [["-c" "--connector CONNECTOR" "Connector instance names (category). If not provided all connectors will be stored."
@@ -163,14 +100,14 @@
 (def prog-help
   "
   Given SlipStream URL or path to file with configuration XML, extracts
-  and stores per connector parameters and their description into
-  connector-<instance-name>.edn and connector-<instance-name>-desc.edn
-  respectively.")
+  and stores the global service and per connector configuration
+  parameters into DB backend identified by ES_HOST and ES_PORT env vars.")
 
 (defn usage
   [options-summary]
   (->> [""
-        "Extracts and stores connector parameters and their description."
+        "Migrates SlipStream service configuration from a running instance or XML file"
+        "to DB backend identified by ES_HOST and ES_PORT env vars."
         ""
         "Usage: -x <path or URL> [-s <user:pass>] [-c <connector name>]"
         ""
