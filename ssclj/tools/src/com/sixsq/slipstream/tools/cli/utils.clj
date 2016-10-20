@@ -3,6 +3,7 @@
     [clojure.string :as s]
     [clojure.edn :as edn]
     [clj-http.client :as http]
+    [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
     ))
 
@@ -19,6 +20,45 @@
   (let [res (for [[k v] con]
               [k (update-val v modifiers)])]
     (into {} res)))
+
+(def con-attrs-to-remove
+  {"ec2"      [:securityGroup]
+   "nuvlabox" [:orchestratorInstanceType :pdiskEndpoint]})
+
+(defn remove-attrs
+  "Cleanup of old attributes."
+  [con]
+  (if-let [attrs (get con-attrs-to-remove (:cloudServiceType con))]
+    (apply dissoc con attrs)
+    con))
+
+(defn can-validate-attr-type?
+  [k]
+  (contains? sci/connector-ref-attrs-defaults k))
+
+(defn- types-differ?
+  "Contains in the attributes list and types differ."
+  [k v]
+  (not= (type v) (type (k sci/connector-ref-attrs-defaults))))
+
+(defn change-connector-val-type
+  [k v]
+  (if (can-validate-attr-type? k)
+    (if (types-differ? k v)
+      (let [attr-type (type (k sci/connector-ref-attrs-defaults))]
+        (cond
+          (= java.lang.String attr-type) [k (str v)]
+          (= java.lang.Long attr-type) [k (read-string v)]
+          (= java.lang.Boolean attr-type) [k (read-string v)]
+          :else [k v]))
+      [k v])
+    (if (= java.lang.Boolean (type v))
+      [k v]
+      [k (str v)])))
+
+(defn change-connector-vals-types
+  [con]
+  (into {} (map #(apply change-connector-val-type %) con)))
 
 (defn ->config-resource
   [url]

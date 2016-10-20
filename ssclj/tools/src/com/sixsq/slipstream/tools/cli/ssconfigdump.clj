@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfigdump
   (:require
+    [clojure.set :refer [difference]]
     [clojure.string :as s]
     [clojure.tools.cli :refer [parse-opts]]
 
@@ -27,8 +28,13 @@
 (defn dump-connector!
   [cn vals desc]
   (println "Saving connector:" cn)
-  (scu/spit-pprint vals (format "connector-%s.edn" cn))
-  (scu/spit-pprint desc (format "connector-%s-desc.edn" cn)))
+  (let [vals-clean   (-> vals
+                         remove-attrs
+                         change-connector-vals-types)
+        removed-keys (difference (set (keys vals)) (set (keys vals-clean)))
+        desc-clean   (apply dissoc desc removed-keys)]
+    (scu/spit-pprint vals-clean (format "connector-%s.edn" cn))
+    (scu/spit-pprint desc-clean (format "connector-%s-desc.edn" cn))))
 
 (defn blank-category
   [desc]

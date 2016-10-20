@@ -31,17 +31,6 @@
 ;; Persistence.
 ;;
 
-(def con-attrs-to-remove
-  {"ec2"      [:securityGroup]
-   "nuvlabox" [:orchestratorInstanceType :pdiskEndpoint]})
-
-(defn remove-attrs
-  "Cleanup of old attributes during migration."
-  [con]
-  (if-let [attrs (get con-attrs-to-remove (:cloudServiceType con))]
-    (apply dissoc con attrs)
-    con))
-
 (defn con-name-known?
   [con]
   (not (s/blank? (:cloudServiceType con))))

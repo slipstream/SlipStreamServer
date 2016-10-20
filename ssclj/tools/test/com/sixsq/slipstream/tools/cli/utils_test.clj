@@ -15,3 +15,17 @@
 
 (deftest test-->config-resource
   (is (= "/configuration" (u/->config-resource ""))))
+
+(deftest test-remove-attrs
+  (is (= {} (u/remove-attrs {})))
+  (is (= {:foo "bar"} (u/remove-attrs {:foo "bar"})))
+  (is (= {:cloudServiceType "foo"} (u/remove-attrs {:cloudServiceType "foo"})))
+  (is (not (contains? (u/remove-attrs {:cloudServiceType "ec2" :securityGroup "secure"}) :securityGroup)))
+  (is (not (contains? (u/remove-attrs {:cloudServiceType "nuvlabox" :pdiskEndpoint "endpoint"}) :pdiskEndpoint))))
+
+(deftest test-->re-match-replace
+  (let [[m r] (u/->re-match-replace "a=b")]
+    (is (= java.util.regex.Pattern (type m)))
+    (is (= "a" (str m)))
+    (is (= "b" r))))
+

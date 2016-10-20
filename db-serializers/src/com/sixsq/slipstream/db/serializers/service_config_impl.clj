@@ -19,6 +19,9 @@
     (com.sixsq.slipstream.persistence ServiceConfiguration)))
 
 
+(def connector-ref-attrs-defaults (merge cont/connector-mandatory-reference-attrs-defaults
+                                         cont/connector-reference-attrs-defaults))
+
 (def ^:const cfg-resource-uuid crs/service)
 
 (def ^:const global-categories #{"SlipStream_Advanced" "SlipStream_Support" "SlipStream_Basics"})
