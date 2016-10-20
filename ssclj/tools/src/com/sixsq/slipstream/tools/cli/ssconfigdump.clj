@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfigdump
   (:require
     [clojure.string :as s]
-    [clj-http.client :as http]
     [clojure.tools.cli :refer [parse-opts]]
 
     [com.sixsq.slipstream.tools.cli.utils :refer :all]
@@ -15,8 +14,9 @@
 (def ^:dynamic *cfg-path-url* nil)
 (def ^:dynamic *creds* nil)
 (def ^:dynamic *modifiers* #{})
+(def ^:dynamic *skip-no-connector-name* false)
 
-(defn save-configuration!
+(defn dump-configuration!
   [sc]
   (println "Saving configuration:" "slipstream")
   (-> sc
@@ -24,7 +24,7 @@
       (modify-vals *modifiers*)
       (scu/spit-pprint (format "configuration-%s.edn" "slipstream"))))
 
-(defn save-connector!
+(defn dump-connector!
   [cn vals desc]
   (println "Saving connector:" cn)
   (scu/spit-pprint vals (format "connector-%s.edn" cn))
@@ -36,14 +36,20 @@
         (for [[k m] desc]
           [k (assoc m :category "")])))
 
+(defn dump-connectors!
+  [sc]
+  (doseq [[cnkey [vals desc]] (sci/sc->connectors sc *c-names*)]
+    (if (and (seq desc) (seq (dissoc vals :id :cloudServiceType)))
+      (if (and (not (:cloudServiceType vals)) *skip-no-connector-name*)
+        (println "WARNING: :cloudServiceType is not defined. Not dumping" (:id vals))
+        (dump-connector! (name cnkey) (modify-vals vals *modifiers*) (blank-category desc)))
+      (println "WARNING: No data obtained for connector:" (name cnkey)))))
+
 (defn run
   []
   (let [sc (cfg-path-url->sc *cfg-path-url* *creds*)]
-    (save-configuration! sc)
-    (doseq [[cnkey [vals desc]] (sci/sc->connectors sc *c-names*)]
-      (if (and (seq desc) (seq (dissoc vals :id :cloudServiceType)))
-        (save-connector! (name cnkey) (modify-vals vals *modifiers*) (blank-category desc))
-        (println "WARNING: No data obtained for connector:" (name cnkey))))))
+    (dump-configuration! sc)
+    (dump-connectors! sc)))
 
 ;;
 ;; Command line options processing.
@@ -60,6 +66,7 @@
     :id :modifiers
     :default #{}
     :assoc-fn cli-parse-modifiers]
+   [nil "--skip-no-connector-name" "Don't dump invalid configurations."]
    ["-h" "--help"]])
 
 (def prog-help
@@ -90,17 +97,16 @@
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
     (let [configxml   (:configxml options)
-          credentials (:credentials options)
-          connectors  (:connectors options)
-          modifiers   (:modifiers options)]
+          credentials (:credentials options)]
       (if (empty? configxml)
         (exit 1 (error-msg "-x parameter must be provided."))
         (alter-var-root #'*cfg-path-url* (fn [_] configxml)))
       (if (and (s/starts-with? configxml "https") (empty? credentials))
         (exit 1 (error-msg "-s must be provided when -x is URL."))
         (alter-var-root #'*creds* (fn [_] credentials)))
-      (alter-var-root #'*c-names* (fn [_] connectors))
-      (alter-var-root #'*modifiers* (fn [_] modifiers))))
+      (alter-var-root #'*c-names* (fn [_] (:connectors options)))
+      (alter-var-root #'*modifiers* (fn [_] (:modifiers options)))
+      (alter-var-root #'*skip-no-connector-name* (fn [_] (:skip-no-connector-name options)))))
   (run)
   (System/exit 0))
 

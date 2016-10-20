@@ -278,7 +278,7 @@
       validate
       store))
 
-(defn run
+(defn store-to-db
   [files]
   (init-db-client)
   (doseq [f files]
@@ -435,7 +435,7 @@
       (cond
         (seq (:edit-kv options)) (edit-file (first arguments) (:edit-kv options))
         :else (do (init-namespaces)
-                  (run arguments)))
+                  (store-to-db arguments)))
       (System/exit 0))
     (when (seq (:resources options))
       (alter-var-root #'*resources* (fn [_] (:resources options)))
