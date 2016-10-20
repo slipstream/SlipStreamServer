@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.tools.cli.utils
   (:require
     [clojure.string :as s]
+    [clojure.edn :as edn]
     [clj-http.client :as http]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
     ))
@@ -40,6 +41,13 @@
       (conf-xml creds)
       scu/conf-xml->sc))
 
+(defn slurp-edn
+  [f]
+  (edn/read-string (slurp f)))
+
+(defn spit-edn
+  [obj f]
+  (scu/spit-pprint obj f))
 ;;
 ;; Command line options processing.
 ;;
@@ -74,3 +82,4 @@
 (defn cli-parse-modifiers
   [m k v]
   (cli-parse-sets m k v ->re-match-replace))
+

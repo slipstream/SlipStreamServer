@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfig
   (:require
     [clojure.string :as s]
-    [clojure.edn :as edn]
     [clojure.tools.cli :refer [parse-opts]]
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
@@ -275,9 +274,9 @@
 
 (defn slurp-and-store
   [f]
-  (-> (edn/read-string (slurp f))
-        validate
-        store))
+  (-> (slurp-edn f)
+      validate
+      store))
 
 (defn run
   [files]
@@ -373,6 +372,14 @@
     (println (format "- resources for '%s'" r))
     (list-persisted-resources r)))
 
+(defn edit-file
+  [f kvs]
+  (let [kvm (into {}
+                  (map
+                    #(vec [(keyword (first %)) (second %)])
+                    (map #(s/split % #"=") kvs)))]
+    (spit-edn (merge (slurp-edn f) kvm) f)))
+
 ;;
 ;; Command line options processing.
 ;;
@@ -383,6 +390,11 @@
    ["-p" "--persisted" "Lists resources persisted in DB."]
    ["-r" "--resource RESOURCE" "Prints out persisted resource document(s) by name."
     :id :resources
+    :default #{}
+    :assoc-fn cli-parse-sets]
+   ["-e" "--edit-kv KEY=VALUE" (str "Updates or adds key=value in first file from "
+                                    "<list-of-files> (other files are ingnored).")
+    :id :edit-kv
     :default #{}
     :assoc-fn cli-parse-sets]
    ["-h" "--help"]])
@@ -420,8 +432,10 @@
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
     (when (not (empty? arguments))
-      (init-namespaces)
-      (run arguments)
+      (cond
+        (seq (:edit-kv options)) (edit-file (first arguments) (:edit-kv options))
+        :else (do (init-namespaces)
+                  (run arguments)))
       (System/exit 0))
     (when (seq (:resources options))
       (alter-var-root #'*resources* (fn [_] (:resources options)))
