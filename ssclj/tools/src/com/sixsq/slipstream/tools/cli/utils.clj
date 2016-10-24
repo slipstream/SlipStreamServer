@@ -23,7 +23,9 @@
 
 (def con-attrs-to-remove
   {"ec2"      [:securityGroup]
-   "nuvlabox" [:orchestratorInstanceType :pdiskEndpoint]})
+   "nuvlabox" [:orchestratorInstanceType :pdiskEndpoint]
+   "stratuslab" [:messagingQueue :messagingType :messagingEndpoint]
+   "stratuslabiter" [:messagingQueue :messagingType :messagingEndpoint]})
 
 (defn remove-attrs
   "Cleanup of old attributes."
