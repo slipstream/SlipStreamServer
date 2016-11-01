@@ -1,0 +1,47 @@
+{
+
+  "sampleTimeCode" : "MIN",
+  "connector" : {
+    "href" : "exoscale-ch-gva"
+  },
+  "priceCurrency" : "USD",
+  "updated" : "2016-07-08T12:26:38.431Z",
+  "name" : "Micro",
+  "associatedCosts" : [ ],
+  "created" : "2016-07-08T12:26:38.431Z",
+  "resourceType" : "vm",
+  "freeQuantity" : 0,
+  "descriptionVector" : {
+    "disk" : 10,
+    "ram" : 0.512,
+    "vcpu" : 1
+  },
+  "unitCode" : "C62",
+  "id" : "service-offer/ab3bdf58-5a0f-4306-969b-ae58155a1a43",
+  "acl" : {
+    "owner" : {
+      "principal" : "ADMIN",
+      "type" : "ROLE"
+    },
+    "rules" : [ {
+      "type" : "ROLE",
+      "principal" : "ADMIN",
+      "right" : "ALL"
+    } ]
+  },
+  "operations" : [ {
+    "rel" : "edit",
+    "href" : "service-offer/ab3bdf58-5a0f-4306-969b-ae58155a1a43"
+  }, {
+    "rel" : "delete",
+    "href" : "service-offer/ab3bdf58-5a0f-4306-969b-ae58155a1a43"
+  } ],
+  "resourceURI" : "http://sixsq.com/slipstream/1/ServiceOffer",
+  "billingTimeCode" : "HUR",
+  "discount" : {
+    "method" : "None",
+    "steps" : [ [ ] ]
+  },
+  "price" : 1.4166666666666668E-4,
+  "resourceURI" : "http://sixsq.com/slipstream/1/ServiceOffer"
+}

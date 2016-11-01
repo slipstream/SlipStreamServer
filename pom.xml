@@ -21,6 +21,9 @@
     <module>jar-async</module>
     <module>jar-service</module>
     <module>jar-prslib</module>
+    <module>jar-pricing-lib</module>
+    <module>jar-placement-lib</module>
+    <module>jar-prs-service</module>
     <module>ssclj</module>
     <module>db-binding</module>
     <module>db-serializers</module>
@@ -38,6 +41,7 @@
       </activation>
       <modules>
         <module>rpm</module>
+        <module>rpm-prs</module>
       </modules>
     </profile>
     <profile>
@@ -49,6 +53,7 @@
       </activation>
       <modules>
         <module>rpm</module>
+        <module>rpm-prs</module>
       </modules>
     </profile>
   </profiles>
