@@ -115,8 +115,7 @@
   (format "schema-org:descriptionVector/schema-org:vcpu>=%sandschema-org:descriptionVector/schema-org:ram>=%sandschema-org:descriptionVector/schema-org:disk>=%s"
           (:cpu.nb component)
           (:ram.GB component)
-          (:disk.GB component)
-          "bob"))
+          (:disk.GB component)))
 
 (defn cimi-filter-policy
   [connectors component]
