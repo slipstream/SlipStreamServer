@@ -25,21 +25,25 @@
     (instance? Set data) (into #{} (map #(java->clj %) data))
     :else data))
 
-(defn comp->map
+(defn- parameter-value
+  [comp param-name]
+  (.. comp (getParameter param-name) (getValue)))
+
+(defn- comp->map
   [comp]
   {:module           (.getResourceUri comp)
-   :vm-size          "unused"
-   :placement-policy "undefined"})
+   :cpu.nb           (parameter-value comp "cpu.nb")
+   :ram.GB           (parameter-value comp "ram.GB")
+   :disk.GB          (parameter-value comp "disk.GB")
+   :placement-policy (.getPlacementPolicy comp)})
 
 (defn- node->map
   [[node-name node]]
-  {:module            (-> node .getImage .getResourceUri)
-   :node              node-name
-   :vm-size           "unused"
-   :placement-policy  "undefined"})
+  (-> (.getImage node)
+      comp->map
+      (assoc :node node-name)))
 
-(defn app->map
-  "Takes app as DeploymentModule and returns a list of components."
+(defn- app->map
   [app]
   (map node->map (.getNodes app)))
 
@@ -58,78 +62,43 @@
                              ModuleCategory/Deployment
                              (.getCategory module)))))
 
-(defn module->components
+(defn- module->components
   [module]
   (cond
     (component? module) [(comp->map module)]
     (app? module)       (app->map module)
     :else               (throw-wrong-category module)))
 
-(defn module->map
-  [module]
-  {:components (module->components module)})
-
-(defn process-module
+(defn- explode-module
   [m]
-  (update m :module module->map))
+  (-> m
+      (assoc :components (module->components (:module m)))
+      (dissoc :module)))
 
-(defn- vm-size
-  [user-connector comp]
-  (if-let [parameter (.getParameter comp (str user-connector "." ImageModule/INSTANCE_TYPE_KEY))]
-    [(.getResourceUri comp) (.getValue parameter)]
-    [(.getResourceUri comp) "no mv size"]))
-
-(defn- comp-or-app->components
-  [module]
-    (cond
-      (component? module)  [module]
-      (app? module)        (map (fn [[node-name node]] (.getImage node)) (.getNodes module))
-      :else                (throw-wrong-category module)))
-
-(defn- process-user-connector
-  [m user-connector]
-  (let [components (comp-or-app->components (:module m))]
-    {:user-connector  user-connector
-     :vm-sizes        (into {} (map (partial vm-size user-connector) components))}))
-
-(defn- process-user-connectors
-  [m]
-  (update m :user-connectors #(map (partial process-user-connector m) %)))
-
-(defn- copy-policies-from-params
-  [placement-params components]
-  (map (fn [component] (assoc component :placement-policy (get placement-params (-> component :module keyword))))
-       components))
-
-(defn- enrich-policies
-  ":module {:components [{:module module/p1/image1/48, :vm-size unused, :placement-policy undefined}]}"
-  [m]
-  (update-in m [:module :components] (partial copy-policies-from-params (:placement-params m))))
-
-(defn show
-  [x]
-  (println x)
-  x)
+(defn placement->map
+  "Converts java-placement (Java Map) to Clojure data structure.
+  The module object is extracted as a list of components."
+  [java-placement]
+  (let [result (-> java-placement
+                   java->clj
+                   walk/keywordize-keys
+                   explode-module)]
+    (log/info "placement->map : " result)
+    result))
 
 (defn -placeAndRank
   "Input is translated into map, PRS service is called and returns a JSON response.
-
   Input
   {
-    module: Module, // java object - ImageModule or DeploymentModule
-    placement-params: { components: [ ] }, // java map
-    prs-endpoint: url, // string
-    user-connectors: ['c1' ] // list of strings
+    :module           Module        // java object - ImageModule or DeploymentModule
+    :prs-endpoint     url           // string
+    :user-connectors  ['c1' 'c2']   // list of strings
    }
   "
   [input]
-  (log/info "Calling placeAndRank with " input)
+  (log/info "javawrapper, input for place-and-rank" input)
   (-> input
-      java->clj
-      walk/keywordize-keys
-      process-user-connectors
-      process-module
-      enrich-policies
+      placement->map
       prs/place-and-rank))
 
 (defn -validatePlacement

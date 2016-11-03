@@ -8,7 +8,7 @@
 
 (def no-price -1)
 
-(def service-offer-name-key     :schema-org:name)
+(def service-offer-name-key :schema-org:name)
 (def service-offer-currency-key :schema-org:priceCurrency)
 
 (defn string-or-nil?
@@ -110,13 +110,22 @@
     (empty? clause2) clause1
     :else (str "(" clause1 ") and (" clause2 ")")))
 
+(defn- clause-cpu-ram-disk
+  [component]
+  (format "schema-org:descriptionVector/schema-org:vcpu>=%sandschema-org:descriptionVector/schema-org:ram>=%sandschema-org:descriptionVector/schema-org:disk>=%s"
+          (:cpu.nb component)
+          (:ram.GB component)
+          (:disk.GB component)
+          "bob"))
+
 (defn cimi-filter-policy
   [connectors component]
   (let [policy (:placement-policy component)
         connector-names (map :user-connector connectors)
         connectors-clauses (mapv #(str "connector/href='" % "'") connector-names)
         connectors-clause (str/join " or " connectors-clauses)
-        cimi-filter (cimi-and policy connectors-clause)]
+        cimi-filter (cimi-and policy connectors-clause)
+        cimi-filter (cimi-and cimi-filter (clause-cpu-ram-disk component))]
     (log/info "the cimi-filter = " cimi-filter)
     cimi-filter))
 
