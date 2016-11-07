@@ -62,6 +62,9 @@ import com.sixsq.slipstream.factory.ParametersFactory;
 import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.run.RunViewList;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 /**
  * Unit test see
  *
@@ -94,6 +97,24 @@ public class ModuleResource extends ParameterizedResource<Module> {
 
 		String result = XmlUtil.normalize(prepared);
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
+	}
+
+	@Get("json")
+	public Representation toJson() {
+		checkCanGet();
+
+		Module prepared = null;
+		try {
+			prepared = prepareForSerialization();
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		} catch (ConfigurationException e) {
+			Util.throwConfigurationException(e);
+		}
+
+		Gson gson = new GsonBuilder().create();
+		String result = gson.toJson(prepared);
+		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
 	}
 
 	@Post("form")
@@ -466,7 +487,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
                 // would probably warrant more investigation, but the
                 // kludge is probably sufficient for now.
                 entity.toString();
-                
+
 		Form form = extractFormFromEntity(entity);
 		ModuleFormProcessor processor = ModuleFormProcessor
 				.createFormProcessorInstance(getCategory(form), getUser());
