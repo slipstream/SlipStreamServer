@@ -27,7 +27,8 @@
 
 (defn- parameter-value
   [comp param-name]
-  (.. comp (getParameter param-name) (getValue)))
+  (if-let [param (.. comp (getParameter param-name))]
+    (.getValue param)))
 
 (defn- comp->map
   [comp]

@@ -32,11 +32,6 @@
     (is (= "connector/href='exoscale' or connector/href='test-cheap'"
            (pc/cimi-filter-policy connectors component-no-placement)))))
 
-(deftest test-filter-user-connectors
-  (let [user-connectors [{:user-connector "exoscale", :vm-sizes {(keyword "module/p1/image1/48") "micro"}}
-                         {:user-connector "test-cheap", :vm-sizes {(keyword "module/p1/image1/48") "Xmicro"}}]]
-    (is (= user-connectors (pc/filter-user-connectors user-connectors {} {:placement-policy ""})))))
-
 (deftest test-equals-ignore-case?
   (is (pc/equals-ignore-case? "a" "a"))
   (is (pc/equals-ignore-case? "a" "A"))
