@@ -23,13 +23,20 @@
   (is (= "(location='de') and (price=1)" (pc/cimi-and "location='de'" "price=1"))))
 
 (deftest test-cimi-clause-connectors-placement
-  (let [connectors [{:user-connector "exoscale", :vm-sizes {(keyword "module/p1/image1/48") "micro"}}
-                    {:user-connector "test-cheap", :vm-sizes {(keyword "module/p1/image1/48") "Xmicro"}}]
-        component {:module "module/p1/image1/48", :vm-size "unused", :placement-policy "location='ch'"}
-        component-no-placement {:module "module/p1/image1/48", :vm-size "unused", :placement-policy ""}]
-    (is (= "(location='ch') and (connector/href='exoscale' or connector/href='test-cheap')"
+  (let [connectors ["exoscale" "test-cheap" "micro"]
+        component {:module "module/p1/image1/48"
+                   :cpu.nb "2"
+                   :ram.GB "16"
+                   :disk.GB "100"
+                   :placement-policy "location='ch'"}
+        component-no-placement {:module "module/p1/image1/48"
+                                :cpu.nb "1"
+                                :ram.GB "4"
+                                :disk.GB "50"
+                                :placement-policy ""}]
+    (is (= "((location='ch') and (connector/href='exoscale' or connector/href='test-cheap' or connector/href='micro')) and (schema-org:descriptionVector/schema-org:vcpu>=2andschema-org:descriptionVector/schema-org:ram>=16andschema-org:descriptionVector/schema-org:disk>=100)"
            (pc/cimi-filter-policy connectors component)))
-    (is (= "connector/href='exoscale' or connector/href='test-cheap'"
+    (is (= "(connector/href='exoscale' or connector/href='test-cheap' or connector/href='micro') and (schema-org:descriptionVector/schema-org:vcpu>=1andschema-org:descriptionVector/schema-org:ram>=4andschema-org:descriptionVector/schema-org:disk>=50)"
            (pc/cimi-filter-policy connectors component-no-placement)))))
 
 (deftest test-equals-ignore-case?
@@ -44,3 +51,17 @@
 
   (is (thrown? AssertionError (pc/equals-ignore-case? "a" 1)))
   (is (thrown? AssertionError (pc/equals-ignore-case? 1 "b"))))
+
+(deftest test-smallest-service-offer
+  (let [so1 {:schema-org:descriptionVector/schema-org:vcpu 1
+             :schema-org:descriptionVector/schema-org:ram  4
+             :schema-org:descriptionVector/schema-org:disk 10}
+        so2 {:schema-org:descriptionVector/schema-org:vcpu 8
+             :schema-org:descriptionVector/schema-org:ram  32
+             :schema-org:descriptionVector/schema-org:disk 500}
+        so3 {:schema-org:descriptionVector/schema-org:vcpu 2
+             :schema-org:descriptionVector/schema-org:ram  8
+             :schema-org:descriptionVector/schema-org:disk 20}]
+    (is nil? (pc/smallest-service-offer []))
+    (is (= so1 (pc/smallest-service-offer [so1 so2 so3])))
+    (is (= so3 (pc/smallest-service-offer [so2 so3])))))

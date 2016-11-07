@@ -6,8 +6,6 @@
     [sixsq.slipstream.pricing.lib.pricing :as pr]
     [sixsq.slipstream.client.api.cimi :as cimi]))
 
-(def no-price -1)
-
 (def service-offer-currency-key :schema-org:priceCurrency)
 
 (defn string-or-nil?
@@ -20,15 +18,20 @@
   (or (every? nil? [s1 s2])
       (and (not-any? nil? [s1 s2]) (.equalsIgnoreCase s1 s2))))
 
+(defn smallest-service-offer
+  [service-offers]
+  (->> service-offers
+       (sort-by (juxt :schema-org:descriptionVector/schema-org:vcpu
+                      :schema-org:descriptionVector/schema-org:ram
+                      :schema-org:descriptionVector/schema-org:disk))
+       first))
+
 (defn- entity-to-price-with
   [filtered-service-offers connector-name]
-  (let [entities (filter #(and (= (service-offer-currency-key %) "EUR")
-                               (= (get-in % [:connector :href]) connector-name))
-                         filtered-service-offers)
-        nb-entities (count entities)]
-    (if (>= 1 nb-entities)
-      (first entities) ;; TODO possibly multiple responses
-      nil)))
+  (let [service-offers (filter #(and (= (service-offer-currency-key %) "EUR")
+                                     (= (get-in % [:connector :href]) connector-name))
+                               filtered-service-offers)]
+    (smallest-service-offer service-offers)))
 
 (defn- fetch-service-offers
   [cimi-filter]
@@ -115,7 +118,7 @@
 
 (defn- place-rank-component
   [user-connectors component]
-  (log/info "component = " component)
+  (log/info "component is: " component)
   (let [filtered-service-offers (service-offers-by-component-policy user-connectors component)]
     (log/info "filtered-service-offers = " (map :id filtered-service-offers))
     (log/info "user-connectors = " user-connectors)
