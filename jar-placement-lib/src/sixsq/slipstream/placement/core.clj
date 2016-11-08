@@ -18,20 +18,24 @@
   (or (every? nil? [s1 s2])
       (and (not-any? nil? [s1 s2]) (.equalsIgnoreCase s1 s2))))
 
+(defn- display-service-offer
+  [service-offer]
+  (str "ServiceOffer " (get-in service-offer [:connector :href]) "/" (:schema-org:name service-offer)))
+
 (defn smallest-service-offer
   [service-offers]
   (->> service-offers
-       (sort-by (juxt :schema-org:descriptionVector/schema-org:vcpu
-                      :schema-org:descriptionVector/schema-org:ram
-                      :schema-org:descriptionVector/schema-org:disk))
+       (sort-by (juxt #(get-in % [:schema-org:descriptionVector :schema-org:vcpu])
+                      #(get-in % [:schema-org:descriptionVector :schema-org:ram])
+                      #(get-in % [:schema-org:descriptionVector :schema-org:disk])))
        first))
 
 (defn- entity-to-price-with
-  [filtered-service-offers connector-name]
-  (let [service-offers (filter #(and (= (service-offer-currency-key %) "EUR")
-                                     (= (get-in % [:connector :href]) connector-name))
-                               filtered-service-offers)]
-    (smallest-service-offer service-offers)))
+  [service-offers connector-name]
+  (->> service-offers
+       (filter #(and (= (service-offer-currency-key %) "EUR")
+                     (= (get-in % [:connector :href]) connector-name)))
+       smallest-service-offer))
 
 (defn- fetch-service-offers
   [cimi-filter]
@@ -60,11 +64,13 @@
                      :values   [1]}]))
 
 (defn- price-connector
-  [filtered-service-offers connector-name]
-  (if-let [entity (entity-to-price-with filtered-service-offers connector-name)]
-    {:name     connector-name
-     :price    (compute-price entity "HUR") ;; TODO hard-coded timecode
-     :currency "EUR"}))                                     ;; TODO hard-coded currency to EUR
+  [service-offers connector-name]
+  (if-let [entity (entity-to-price-with service-offers connector-name)]
+    (do
+      (log/info "Entity to price with " (display-service-offer entity))
+      {:name     connector-name
+       :price    (compute-price entity "HUR")               ;; TODO hard-coded timecode
+       :currency "EUR"})))                                  ;; TODO hard-coded currency to EUR
 
 (defn order-by-price
   "Orders by price ascending, with the exception of no-price values placed at the end"
@@ -78,10 +84,10 @@
   (map-indexed (fn [i e] (assoc e :index i)) coll))
 
 (defn price-component
-  [user-connectors filtered-service-offers component]
+  [user-connectors service-offers component]
   {:node       (:node component)
    :module     (:module component)
-   :connectors (->> (map (partial price-connector filtered-service-offers) user-connectors)
+   :connectors (->> (map (partial price-connector service-offers) user-connectors)
                     (remove nil?)
                     order-by-price
                     add-indexes)})

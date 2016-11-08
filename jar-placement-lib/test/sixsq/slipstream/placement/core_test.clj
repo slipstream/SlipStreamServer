@@ -53,15 +53,21 @@
   (is (thrown? AssertionError (pc/equals-ignore-case? 1 "b"))))
 
 (deftest test-smallest-service-offer
-  (let [so1 {:schema-org:descriptionVector/schema-org:vcpu 1
-             :schema-org:descriptionVector/schema-org:ram  4
-             :schema-org:descriptionVector/schema-org:disk 10}
-        so2 {:schema-org:descriptionVector/schema-org:vcpu 8
-             :schema-org:descriptionVector/schema-org:ram  32
-             :schema-org:descriptionVector/schema-org:disk 500}
-        so3 {:schema-org:descriptionVector/schema-org:vcpu 2
-             :schema-org:descriptionVector/schema-org:ram  8
-             :schema-org:descriptionVector/schema-org:disk 20}]
+  (let [so1 {:schema-org:descriptionVector
+             {:schema-org:vcpu 1
+              :schema-org:ram  4
+              :schema-org:disk 10}}
+        so2 {:schema-org:descriptionVector
+             {:schema-org:vcpu 8
+              :schema-org:ram  32
+              :schema-org:disk 500}}
+        so3 {:schema-org:descriptionVector
+             {:schema-org:vcpu 2
+              :schema-org:ram  8
+              :schema-org:disk 20}}]
     (is nil? (pc/smallest-service-offer []))
     (is (= so1 (pc/smallest-service-offer [so1 so2 so3])))
+    (is (= so1 (pc/smallest-service-offer [so2 so1 so3])))
+    (is (= so1 (pc/smallest-service-offer [so3 so2 so1])))
+    (is (= so1 (pc/smallest-service-offer [so3 so1 so2])))
     (is (= so3 (pc/smallest-service-offer [so2 so3])))))
