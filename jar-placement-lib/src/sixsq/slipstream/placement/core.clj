@@ -7,6 +7,7 @@
     [sixsq.slipstream.client.api.cimi :as cimi]))
 
 (def service-offer-currency-key :schema-org:priceCurrency)
+(def no-price -1)
 
 (defn string-or-nil?
   [s]
@@ -30,10 +31,15 @@
                       #(get-in % [:schema-org:descriptionVector :schema-org:disk])))
        first))
 
-(defn- entity-to-price-with
+(defn- EUR-or-unpriced?
+  [service-offer]
+  (let [price-currency (service-offer-currency-key service-offer)]
+    (or (nil? price-currency) (= "EUR" price-currency))))
+
+(defn- service-offer-for-connector
   [service-offers connector-name]
   (->> service-offers
-       (filter #(and (= (service-offer-currency-key %) "EUR")
+       (filter #(and (EUR-or-unpriced? %)
                      (= (get-in % [:connector :href]) connector-name)))
        smallest-service-offer))
 
@@ -56,20 +62,30 @@
     (into {} (map (fn [[k v]] [(denamespace k) (denamespace-keys v)]) m))
     m))
 
+(defn- priceable?
+  [service-offer]
+  (every? (set (keys service-offer))
+          [:schema-org:billingTimeCode
+           :schema-org:price
+           :schema-org:priceCurrency
+           :schema-org:unitCode]))
+
 (defn- compute-price
-  [entity timecode]
-  (pr/compute-cost (denamespace-keys entity)
-                   [{:timeCode timecode
-                     :sample   1
-                     :values   [1]}]))
+  [service-offer timecode]
+  (if (priceable? service-offer)
+    (pr/compute-cost (denamespace-keys service-offer)
+                     [{:timeCode timecode
+                       :sample   1
+                       :values   [1]}])
+    no-price))
 
 (defn- price-connector
   [service-offers connector-name]
-  (if-let [entity (entity-to-price-with service-offers connector-name)]
+  (if-let [service-offer (service-offer-for-connector service-offers connector-name)]
     (do
-      (log/info "Entity to price with " (display-service-offer entity))
+      (log/info "Entity to price with " (display-service-offer service-offer))
       {:name     connector-name
-       :price    (compute-price entity "HUR")               ;; TODO hard-coded timecode
+       :price    (compute-price service-offer "HUR")               ;; TODO hard-coded timecode
        :currency "EUR"})))                                  ;; TODO hard-coded currency to EUR
 
 (defn order-by-price
@@ -114,12 +130,11 @@
         connectors-clause   (str/join " or " connectors-clauses)
         cimi-filter         (cimi-and policy connectors-clause)
         cimi-filter         (cimi-and cimi-filter (clause-cpu-ram-disk component))]
-    (log/info "the cimi-filter = " cimi-filter)
+    (log/debug "the cimi-filter = " cimi-filter)
     cimi-filter))
 
 (defn- service-offers-by-component-policy
   [user-connectors component]
-  (log/info "Fetching service offers by component policy")
   (fetch-service-offers (cimi-filter-policy user-connectors component)))
 
 (defn- place-rank-component
