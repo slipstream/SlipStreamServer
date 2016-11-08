@@ -4,7 +4,8 @@
     [clojure.string :as str]
     [sixsq.slipstream.placement.cimi-util :as cu]
     [sixsq.slipstream.pricing.lib.pricing :as pr]
-    [sixsq.slipstream.client.api.cimi :as cimi]))
+    [sixsq.slipstream.client.api.cimi :as cimi]
+    [clojure.string :as string]))
 
 (def service-offer-currency-key :schema-org:priceCurrency)
 (def no-price -1)
@@ -118,7 +119,11 @@
 
 (defn- clause-cpu-ram-disk
   [component]
-  (format "schema-org:descriptionVector/schema-org:vcpu>=%sandschema-org:descriptionVector/schema-org:ram>=%sandschema-org:descriptionVector/schema-org:disk>=%s"
+  (format
+    (string/join ["schema-org:flexible='true'or"
+                  "(schema-org:descriptionVector/schema-org:vcpu>=%sand"
+                  "schema-org:descriptionVector/schema-org:ram>=%sand"
+                  "schema-org:descriptionVector/schema-org:disk>=%s)"])
           (:cpu.nb component)
           (:ram.GB component)
           (:disk.GB component)))
