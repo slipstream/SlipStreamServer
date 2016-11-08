@@ -20,16 +20,27 @@
   (or (every? nil? [s1 s2])
       (and (not-any? nil? [s1 s2]) (.equalsIgnoreCase s1 s2))))
 
+(defn- in-description
+  [attribute service-offer]
+  (get-in service-offer [:schema-org:descriptionVector attribute]))
+
+(def cpu  (partial in-description :schema-org:vcpu))
+(def ram  (partial in-description :schema-org:ram))
+(def disk (partial in-description :schema-org:disk))
+(defn- instance-type
+  [service-offer]
+  (:schema-org:name service-offer))
+
 (defn- display-service-offer
   [service-offer]
-  (str "ServiceOffer " (get-in service-offer [:connector :href]) "/" (:schema-org:name service-offer)))
+  (str "ServiceOffer "
+       (get-in service-offer [:connector :href]) "/"
+       (instance-type service-offer)))
 
 (defn smallest-service-offer
   [service-offers]
   (->> service-offers
-       (sort-by (juxt #(get-in % [:schema-org:descriptionVector :schema-org:vcpu])
-                      #(get-in % [:schema-org:descriptionVector :schema-org:ram])
-                      #(get-in % [:schema-org:descriptionVector :schema-org:disk])))
+       (sort-by (juxt cpu ram disk))
        first))
 
 (defn- EUR-or-unpriced?
@@ -80,14 +91,20 @@
                        :values   [1]}])
     no-price))
 
+;; TODO hard-coded currency to EUR
+;; TODO hard-coded timecode
 (defn- price-connector
   [service-offers connector-name]
   (if-let [service-offer (service-offer-for-connector service-offers connector-name)]
     (do
       (log/info "Entity to price with " (display-service-offer service-offer))
-      {:name     connector-name
-       :price    (compute-price service-offer "HUR")               ;; TODO hard-coded timecode
-       :currency "EUR"})))                                  ;; TODO hard-coded currency to EUR
+      {:name          connector-name
+       :price         (compute-price service-offer "HUR")
+       :currency      "EUR"
+       :cpu           (cpu service-offer)
+       :ram           (ram service-offer)
+       :disk          (disk service-offer)
+       :instance_type (instance-type service-offer)})))
 
 (defn order-by-price
   "Orders by price ascending, with the exception of no-price values placed at the end"
@@ -98,7 +115,9 @@
                           :else (< a b))) priced-coll))
 (defn- add-indexes
   [coll]
-  (map-indexed (fn [i e] (assoc e :index i)) coll))
+  (map-indexed (fn [i e]
+                 (log/info "e = " e)
+                 (assoc e :index i)) coll))
 
 (defn price-component
   [user-connectors service-offers component]
