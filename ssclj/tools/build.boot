@@ -74,7 +74,6 @@
            (aot :namespace #{'com.sixsq.slipstream.tools.cli.ssconfig
                              'com.sixsq.slipstream.tools.cli.ssconfigdump
                              'com.sixsq.slipstream.tools.cli.ssconfigmigrate})
-           (uber)
            (jar)))
 
 (deftask mvn-test
