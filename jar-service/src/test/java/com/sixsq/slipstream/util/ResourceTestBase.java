@@ -231,6 +231,13 @@ public class ResourceTestBase extends RunTestBase {
 		return request;
 	}
 
+	protected Request createGetJsonRequest(String module, User user)
+			throws ConfigurationException, ValidationException {
+		Request request = createGetRequest(createModuleAttributes(module));
+		addUserToRequest(user, request);
+		return request;
+	}
+
 	protected Module createAndStoreProject(String projectName)
 			throws ValidationException {
 		Module project = new ProjectModule(projectName);
