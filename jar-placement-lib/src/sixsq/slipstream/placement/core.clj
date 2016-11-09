@@ -7,7 +7,6 @@
     [sixsq.slipstream.client.api.cimi :as cimi]
     [clojure.string :as string]))
 
-(def service-offer-currency-key :schema-org:priceCurrency)
 (def no-price -1)
 
 (defn string-or-nil?
@@ -33,8 +32,7 @@
 
 (defn- display-service-offer
   [service-offer]
-  (str "ServiceOffer "
-       (get-in service-offer [:connector :href]) "/"
+  (str (get-in service-offer [:connector :href]) "/"
        (instance-type service-offer)))
 
 (defn smallest-service-offer
@@ -45,7 +43,7 @@
 
 (defn- EUR-or-unpriced?
   [service-offer]
-  (let [price-currency (service-offer-currency-key service-offer)]
+  (let [price-currency (:schema-org:priceCurrency service-offer)]
     (or (nil? price-currency) (= "EUR" price-currency))))
 
 (defn- service-offer-for-connector
@@ -91,15 +89,14 @@
                        :values   [1]}])
     no-price))
 
-;; TODO hard-coded currency to EUR
-;; TODO hard-coded timecode
+;; TODO hard-coded currency to EUR and timecode to "HUR"
 (defn- price-connector
   [service-offers connector-name]
   (if-let [service-offer (service-offer-for-connector service-offers connector-name)]
-    (do
-      (log/info "Entity to price with " (display-service-offer service-offer))
+    (let [price (compute-price service-offer "HUR")]
+      (log/info "Priced " (display-service-offer service-offer) ":" price "EUR/h")
       {:name          connector-name
-       :price         (compute-price service-offer "HUR")
+       :price         price
        :currency      "EUR"
        :cpu           (cpu service-offer)
        :ram           (ram service-offer)
@@ -115,9 +112,7 @@
                           :else (< a b))) priced-coll))
 (defn- add-indexes
   [coll]
-  (map-indexed (fn [i e]
-                 (log/info "e = " e)
-                 (assoc e :index i)) coll))
+  (map-indexed (fn [i e] (assoc e :index i)) coll))
 
 (defn price-component
   [user-connectors service-offers component]
@@ -154,7 +149,7 @@
         connectors-clause   (str/join " or " connectors-clauses)
         cimi-filter         (cimi-and policy connectors-clause)
         cimi-filter         (cimi-and cimi-filter (clause-cpu-ram-disk component))]
-    (log/debug "the cimi-filter = " cimi-filter)
+    (log/debug "cimi-filter = " cimi-filter)
     cimi-filter))
 
 (defn- service-offers-by-component-policy
@@ -163,15 +158,14 @@
 
 (defn- place-rank-component
   [user-connectors component]
-  (log/info "component is: " component)
+  (log/info "Placing and ranking component " component)
+  (log/info "user-connectors = " user-connectors)
   (let [filtered-service-offers (service-offers-by-component-policy user-connectors component)]
-    (log/info "filtered-service-offers = " (map :id filtered-service-offers))
-    (log/info "user-connectors = " user-connectors)
+    (log/info "filtered-service-offers = " (map display-service-offer filtered-service-offers))
     (price-component user-connectors filtered-service-offers component)))
 
 (defn place-and-rank
   [request]
-  (log/info "Calling place-and-rank")
   (let [components (:components request)
         user-connectors (:user-connectors request)]
     {:components (map (partial place-rank-component user-connectors) components)}))
