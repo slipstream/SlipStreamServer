@@ -166,12 +166,6 @@
 
 (defn- keep-only-exact-instance-type
   [connector-instance-types [connector-name service-offers]]
-
-  (log/info "keep only connector name " connector-name)
-  (log/info "keep only instance types " connector-instance-types)
-  (log/info "keep only service offers " (map display-service-offer service-offers))
-  (log/info "keep only instance-type " (get connector-instance-types (keyword connector-name)))
-
   (if-let [instance-type (get connector-instance-types (keyword connector-name))]
     (filter #(= instance-type (:schema-org:name %)) service-offers)
     service-offers))
