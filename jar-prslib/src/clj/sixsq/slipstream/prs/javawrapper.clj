@@ -30,23 +30,28 @@
   (if-let [param (.. comp (getParameter param-name))]
     (.getValue param)))
 
+(defn- connector-instance-types
+  [comp user-connector]
+  {user-connector (parameter-value comp (str user-connector ".instance.type"))})
+
 (defn- comp->map
-  [comp]
-  {:module           (.getResourceUri comp)
-   :cpu.nb           (parameter-value comp "cpu.nb")
-   :ram.GB           (parameter-value comp "ram.GB")
-   :disk.GB          (parameter-value comp "disk.GB")
-   :placement-policy (.getPlacementPolicy comp)})
+  [comp user-connectors]
+  {:module                    (.getResourceUri comp)
+   :cpu.nb                    (parameter-value comp "cpu.nb")
+   :ram.GB                    (parameter-value comp "ram.GB")
+   :disk.GB                   (parameter-value comp "disk.GB")
+   :placement-policy          (.getPlacementPolicy comp)
+   :connector-instance-types  (apply merge (map (partial connector-instance-types comp) user-connectors))})
 
 (defn- node->map
-  [[node-name node]]
+  [user-connectors [node-name node]]
   (-> (.getImage node)
-      comp->map
+      (comp->map user-connectors)
       (assoc :node node-name)))
 
 (defn- app->map
-  [app]
-  (map node->map (.getNodes app)))
+  [app user-connectors]
+  (map (partial node->map user-connectors) (.getNodes app)))
 
 (defn- component?
   [module]
@@ -64,16 +69,16 @@
                              (.getCategory module)))))
 
 (defn- module->components
-  [module]
+  [module user-connectors]
   (cond
-    (component? module) [(comp->map module)]
-    (app? module)       (app->map module)
+    (component? module) [(comp->map module user-connectors)]
+    (app? module)       (app->map module user-connectors)
     :else               (throw-wrong-category module)))
 
 (defn- explode-module
   [m]
   (-> m
-      (assoc :components (module->components (:module m)))
+      (assoc :components (module->components (:module m) (:user-connectors m)))
       (dissoc :module)))
 
 (defn placement->map

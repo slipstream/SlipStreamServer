@@ -22,22 +22,6 @@
 
   (is (= "(location='de') and (price=1)" (pc/cimi-and "location='de'" "price=1"))))
 
-(deftest test-cimi-clause-connectors-placement
-  (let [connectors ["exoscale" "test-cheap" "micro"]
-        component {:module "module/p1/image1/48"
-                   :cpu.nb "2"
-                   :ram.GB "16"
-                   :disk.GB "100"
-                   :placement-policy "location='ch'"}
-        component-no-placement {:module "module/p1/image1/48"
-                                :cpu.nb "1"
-                                :ram.GB "4"
-                                :disk.GB "50"
-                                :placement-policy ""}]
-    (is (= "((location='ch') and (connector/href='exoscale' or connector/href='test-cheap' or connector/href='micro')) and (schema-org:descriptionVector/schema-org:vcpu>=2andschema-org:descriptionVector/schema-org:ram>=16andschema-org:descriptionVector/schema-org:disk>=100)"
-           (pc/cimi-filter-policy connectors component)))
-    (is (= "(connector/href='exoscale' or connector/href='test-cheap' or connector/href='micro') and (schema-org:descriptionVector/schema-org:vcpu>=1andschema-org:descriptionVector/schema-org:ram>=4andschema-org:descriptionVector/schema-org:disk>=50)"
-           (pc/cimi-filter-policy connectors component-no-placement)))))
 
 (deftest test-equals-ignore-case?
   (is (pc/equals-ignore-case? "a" "a"))

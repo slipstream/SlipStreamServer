@@ -26,14 +26,18 @@
 (def cpu  (partial in-description :schema-org:vcpu))
 (def ram  (partial in-description :schema-org:ram))
 (def disk (partial in-description :schema-org:disk))
+
 (defn- instance-type
   [service-offer]
   (:schema-org:name service-offer))
 
+(defn- connector-href
+  [service-offer]
+  (get-in service-offer [:connector :href]))
+
 (defn- display-service-offer
   [service-offer]
-  (str (get-in service-offer [:connector :href]) "/"
-       (instance-type service-offer)))
+  (str (connector-href service-offer) "/" (instance-type service-offer)))
 
 (defn smallest-service-offer
   [service-offers]
@@ -46,11 +50,10 @@
   (let [price-currency (:schema-org:priceCurrency service-offer)]
     (or (nil? price-currency) (= "EUR" price-currency))))
 
-(defn- service-offer-for-connector
+(defn- smallest-service-offer-EUR
   [service-offers connector-name]
   (->> service-offers
-       (filter #(and (EUR-or-unpriced? %)
-                     (= (get-in % [:connector :href]) connector-name)))
+       (filter #(and (EUR-or-unpriced? %) (= (get-in % [:connector :href]) connector-name)))
        smallest-service-offer))
 
 (defn- fetch-service-offers
@@ -92,7 +95,7 @@
 ;; TODO hard-coded currency to EUR and timecode to "HUR"
 (defn- price-connector
   [service-offers connector-name]
-  (if-let [service-offer (service-offer-for-connector service-offers connector-name)]
+  (if-let [service-offer (smallest-service-offer-EUR service-offers connector-name)]
     (let [price (compute-price service-offer "HUR")]
       (log/info "Priced " (display-service-offer service-offer) ":" price "EUR/h")
       {:name          connector-name
@@ -131,36 +134,64 @@
     (empty? clause2) clause1
     :else (str "(" clause1 ") and (" clause2 ")")))
 
+(defn- connector-same-instance-type
+  [[connector-name instance-type]]
+  (str "(schema-org:name='" instance-type "'andconnector/href='" (name connector-name) "')"))
+
+(defn- clause-connectors-same-instance-type
+  [component]
+  (string/join "or" (map connector-same-instance-type (:connector-instance-types component))))
+
 (defn- clause-cpu-ram-disk
   [component]
   (format
-    (string/join ["schema-org:flexible='true'or"
-                  "(schema-org:descriptionVector/schema-org:vcpu>=%sand"
-                  "schema-org:descriptionVector/schema-org:ram>=%sand"
-                  "schema-org:descriptionVector/schema-org:disk>=%s)"])
-          (:cpu.nb component)
-          (:ram.GB component)
-          (:disk.GB component)))
+    "(schema-org:descriptionVector/schema-org:vcpu>=%sandschema-org:descriptionVector/schema-org:ram>=%sandschema-org:descriptionVector/schema-org:disk>=%s)"
+    (:cpu.nb component)
+    (:ram.GB component)
+    (:disk.GB component)))
 
-(defn cimi-filter-policy
-  [connector-names component]
-  (let [policy              (:placement-policy component)
-        connectors-clauses  (mapv #(str "connector/href='" % "'") connector-names)
-        connectors-clause   (str/join " or " connectors-clauses)
-        cimi-filter         (cimi-and policy connectors-clause)
-        cimi-filter         (cimi-and cimi-filter (clause-cpu-ram-disk component))]
-    (log/debug "cimi-filter = " cimi-filter)
-    cimi-filter))
+(def clause-flexible "schema-org:flexible='true'")
 
-(defn- service-offers-by-component-policy
-  [user-connectors component]
-  (fetch-service-offers (cimi-filter-policy user-connectors component)))
+(defn- clause-component
+  [component]
+  (string/join "or" [clause-flexible
+                     (clause-connectors-same-instance-type component)
+                     (clause-cpu-ram-disk component)]))
+
+(defn- clause-connectors
+  [connector-names]
+  (->> connector-names
+       (mapv #(str "connector/href='" % "'"))
+       (str/join " or ")))
+
+(defn- keep-only-exact-instance-type
+  [connector-instance-types [connector-name service-offers]]
+
+  (log/info "keep only connector name " connector-name)
+  (log/info "keep only instance types " connector-instance-types)
+  (log/info "keep only service offers " (map display-service-offer service-offers))
+  (log/info "keep only instance-type " (get connector-instance-types (keyword connector-name)))
+
+  (if-let [instance-type (get connector-instance-types (keyword connector-name))]
+    (filter #(= instance-type (:schema-org:name %)) service-offers)
+    service-offers))
+
+(defn- service-offers-compatible-with-component
+  [component connector-names]
+  (let [cimi-filter (-> (clause-connectors connector-names)
+                        (cimi-and (:placement-policy component))
+                        (cimi-and (clause-component component)))
+        service-offers (fetch-service-offers cimi-filter)
+        service-offers-by-connector-name (group-by connector-href service-offers)]
+
+    (apply concat (map (partial keep-only-exact-instance-type (:connector-instance-types component))
+                   service-offers-by-connector-name))))
 
 (defn- place-rank-component
   [user-connectors component]
   (log/info "Placing and ranking component " component)
   (log/info "user-connectors = " user-connectors)
-  (let [filtered-service-offers (service-offers-by-component-policy user-connectors component)]
+  (let [filtered-service-offers (service-offers-compatible-with-component component user-connectors)]
     (log/info "filtered-service-offers = " (map display-service-offer filtered-service-offers))
     (price-component user-connectors filtered-service-offers component)))
 

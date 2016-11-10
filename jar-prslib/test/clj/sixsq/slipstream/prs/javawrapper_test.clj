@@ -31,7 +31,9 @@
                  (ImageModule. "component1")
                  (.setParameter (ModuleParameter. "cpu.nb" "2" "" ParameterCategory/Cloud))
                  (.setParameter (ModuleParameter. "ram.GB" "8" "" ParameterCategory/Cloud))
-                 (.setParameter (ModuleParameter. "disk.GB" "50" "" ParameterCategory/Cloud)))
+                 (.setParameter (ModuleParameter. "disk.GB" "50" "" ParameterCategory/Cloud))
+                 (.setParameter (ModuleParameter. "c1.instance.type" "medium" "" ParameterCategory/Cloud))
+                 )
         image2 (doto
                  (ImageModule. "component2")
                  (.setParameter (ModuleParameter. "cpu.nb" "1" "" ParameterCategory/Cloud))
@@ -49,7 +51,9 @@
                                :placement-policy nil
                                :cpu.nb           "2"
                                :ram.GB           "8"
-                               :disk.GB          "50"}]
+                               :disk.GB          "50"
+                               :connector-instance-types {"c1" "medium" "c2" nil}}]
+
             :user-connectors ["c1" "c2"]}
            (placement->map {:prs-endpoint    "http://localhost:8203/filter-rank"
                             :module          image1
@@ -59,7 +63,8 @@
                                :placement-policy "schema-org:location='de'"
                                :cpu.nb           "1"
                                :ram.GB           "4"
-                               :disk.GB          "10"}]
+                               :disk.GB          "10"
+                               :connector-instance-types {"c3" nil}}]
             :user-connectors ["c3"]}
            (placement->map {:module          image2
                             :user-connectors ["c3"]})))
@@ -71,12 +76,14 @@
               :cpu.nb           "1"
               :ram.GB           "4"
               :disk.GB          "10"
-              :placement-policy "schema-org:location='de'"}
+              :placement-policy "schema-org:location='de'"
+              :connector-instance-types {"c5" nil "c6" nil}}
              {:module           "module/component1"
               :node             "node1"
               :cpu.nb           "2"
               :ram.GB           "8"
               :disk.GB          "50"
-              :placement-policy nil}}
+              :placement-policy nil
+              :connector-instance-types {"c5" nil "c6" nil}}}
 
            (set (:components app-map))))))
