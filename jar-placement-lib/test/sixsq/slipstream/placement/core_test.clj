@@ -9,19 +9,31 @@
   (is (= [{:y 2 :price 2} {:z 3 :price 3} {:x 1 :price -1}]
          (pc/order-by-price [{:x 1 :price -1} {:z 3 :price 3} {:y 2 :price 2}]))))
 
-
 (deftest test-cimi-and
-  (is (= "" (pc/cimi-and nil nil)))
-  (is (= "" (pc/cimi-and "" nil)))
-  (is (= "" (pc/cimi-and nil "")))
+  (is (= "" (pc/cimi-and [nil nil])))
+  (is (= "" (pc/cimi-and ["" nil])))
+  (is (= "" (pc/cimi-and [nil ""])))
 
-  (is (= "location='de'" (pc/cimi-and nil "location='de'")))
-  (is (= "location='de'" (pc/cimi-and "location='de'" nil)))
-  (is (= "location='de'" (pc/cimi-and "location='de'" "")))
-  (is (= "location='de'" (pc/cimi-and "" "location='de'")))
+  (is (= "(location='de')" (pc/cimi-and [nil "location='de'"])))
+  (is (= "(location='de')" (pc/cimi-and ["location='de'" nil])))
+  (is (= "(location='de')" (pc/cimi-and ["location='de'" ""])))
+  (is (= "(location='de')" (pc/cimi-and ["" "location='de'"])))
 
-  (is (= "(location='de') and (price=1)" (pc/cimi-and "location='de'" "price=1"))))
+  (is (= "(location='de') and (price=1)" (pc/cimi-and ["location='de'" "price=1"])))
+  (is (= "(location='de') and (price=1) and (a=2)" (pc/cimi-and ["location='de'" "price=1" "a=2"])))
+  (is (= "(location='de') and (price=1) and (a=2)" (pc/cimi-and [nil "location='de'" nil "price=1" "a=2"]))))
 
+(deftest test-cimi-or
+  (is (= "" (pc/cimi-or [nil nil])))
+  (is (= "" (pc/cimi-or ["" nil])))
+  (is (= "" (pc/cimi-or [nil ""])))
+
+  (is (= "(location='de')" (pc/cimi-or [nil "location='de'"])))
+  (is (= "(location='de')" (pc/cimi-or ["location='de'" nil])))
+  (is (= "(location='de')" (pc/cimi-or ["location='de'" ""])))
+  (is (= "(location='de')" (pc/cimi-or ["" "location='de'"])))
+
+  (is (= "(location='de') or (price=1)" (pc/cimi-or ["location='de'" "price=1"]))))
 
 (deftest test-equals-ignore-case?
   (is (pc/equals-ignore-case? "a" "a"))
@@ -55,3 +67,9 @@
     (is (= so1 (pc/smallest-service-offer [so3 so2 so1])))
     (is (= so1 (pc/smallest-service-offer [so3 so1 so2])))
     (is (= so3 (pc/smallest-service-offer [so2 so3])))))
+
+(deftest test-denamespace-keys
+  (is (= {} (pc/denamespace-keys {})))
+  (is (= {:a 1} (pc/denamespace-keys {:a 1})))
+  (is (= {:a 1} (pc/denamespace-keys {:namespace:a 1})))
+  (is (= {:a {:b 1}} (pc/denamespace-keys {:namespace:a {:namespace:b 1}}))))

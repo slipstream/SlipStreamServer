@@ -34,6 +34,7 @@
       (reset! cached-cimi-context {:context   context
                                    :timestamp (System/currentTimeMillis)}))))
 
-(defn context []
+(defn context
+  []
   (update-context-when-obsolete)
   (:context @cached-cimi-context))

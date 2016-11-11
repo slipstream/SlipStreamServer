@@ -1,11 +1,19 @@
 (ns sixsq.slipstream.placement.core
+  "
+  Entry point (by Java code) is place-and-rank.
+  Responsibility is to price given components on all given connectors.
+  Each component explicits its preferred instance type per connector.
+  Strategy to price one component
+    * find the list of 'eligible' service offers. (a service offer that fulfill component contrainsts,
+      or a service offer chosen by instance type).
+    * for each connector the component is priced on the smallest service offer
+  "
   (:require
     [clojure.tools.logging :as log]
     [clojure.string :as str]
     [sixsq.slipstream.placement.cimi-util :as cu]
     [sixsq.slipstream.pricing.lib.pricing :as pr]
-    [sixsq.slipstream.client.api.cimi :as cimi]
-    [clojure.string :as string]))
+    [sixsq.slipstream.client.api.cimi :as cimi]))
 
 (def no-price -1)
 
@@ -23,8 +31,8 @@
   [attribute service-offer]
   (get-in service-offer [:schema-org:descriptionVector attribute]))
 
-(def cpu  (partial in-description :schema-org:vcpu))
-(def ram  (partial in-description :schema-org:ram))
+(def cpu (partial in-description :schema-org:vcpu))
+(def ram (partial in-description :schema-org:ram))
 (def disk (partial in-description :schema-org:disk))
 
 (defn- instance-type
@@ -69,7 +77,7 @@
       (= cnt 1) (keyword (first tokens))
       :else (keyword (apply str (rest tokens))))))
 
-(defn- denamespace-keys
+(defn denamespace-keys
   [m]
   (if (map? m)
     (into {} (map (fn [[k v]] [(denamespace k) (denamespace-keys v)]) m))
@@ -126,43 +134,56 @@
                     order-by-price
                     add-indexes)})
 
-(defn cimi-and
-  [clause1 clause2]
-  (cond
-    (every? empty? [clause1 clause2]) ""
-    (empty? clause1) clause2
-    (empty? clause2) clause1
-    :else (str "(" clause1 ") and (" clause2 ")")))
+(defn- space
+  [s]
+  (str " " s " "))
+
+(defn- paren
+  [s]
+  (str "(" s ")"))
+
+(defn- cimi-op
+  [op clauses]
+  (->> clauses
+       (remove empty?)
+       (map paren)
+       (str/join (space op))))
+
+(def cimi-and (partial cimi-op "and"))
+
+(def cimi-or (partial cimi-op "or"))
 
 (defn- connector-same-instance-type
   [[connector-name instance-type]]
-  (str "(schema-org:name='" instance-type "'andconnector/href='" (name connector-name) "')"))
+  (when instance-type
+    (format "connector/href='%s' and schema-org:name='%s'" (name connector-name) instance-type)))
 
 (defn- clause-connectors-same-instance-type
   [component]
-  (string/join "or" (map connector-same-instance-type (:connector-instance-types component))))
+  (mapv connector-same-instance-type (:connector-instance-types component)))
 
 (defn- clause-cpu-ram-disk
   [component]
-  (format
-    "(schema-org:descriptionVector/schema-org:vcpu>=%sandschema-org:descriptionVector/schema-org:ram>=%sandschema-org:descriptionVector/schema-org:disk>=%s)"
-    (:cpu.nb component)
-    (:ram.GB component)
-    (:disk.GB component)))
+  (when (every? #(not (empty? (% component))) [:cpu.nb :ram.GB :disk.GB])
+    (format
+      "(schema-org:descriptionVector/schema-org:vcpu>=%sandschema-org:descriptionVector/schema-org:ram>=%sandschema-org:descriptionVector/schema-org:disk>=%s)"
+      (:cpu.nb component)
+      (:ram.GB component)
+      (:disk.GB component))))
 
 (def clause-flexible "schema-org:flexible='true'")
 
 (defn- clause-component
   [component]
-  (string/join "or" [clause-flexible
-                     (clause-connectors-same-instance-type component)
-                     (clause-cpu-ram-disk component)]))
+  (cimi-or (concat (clause-connectors-same-instance-type component)
+                   [clause-flexible (clause-cpu-ram-disk component)])))
 
 (defn- clause-connectors
   [connector-names]
   (->> connector-names
+       (remove empty?)
        (mapv #(str "connector/href='" % "'"))
-       (str/join " or ")))
+       cimi-or))
 
 (defn- keep-only-exact-instance-type
   [connector-instance-types [connector-name service-offers]]
@@ -172,18 +193,19 @@
 
 (defn- service-offers-compatible-with-component
   [component connector-names]
-  (let [cimi-filter (-> (clause-connectors connector-names)
-                        (cimi-and (:placement-policy component))
-                        (cimi-and (clause-component component)))
+  (let [cimi-filter (cimi-and [(clause-connectors connector-names)
+                               (:placement-policy component)
+                               (clause-component component)])
+        _ (log/info (str "cimi-filter = '" cimi-filter "'"))
         service-offers (fetch-service-offers cimi-filter)
         service-offers-by-connector-name (group-by connector-href service-offers)]
 
     (apply concat (map (partial keep-only-exact-instance-type (:connector-instance-types component))
-                   service-offers-by-connector-name))))
+                       service-offers-by-connector-name))))
 
 (defn- place-rank-component
   [user-connectors component]
-  (log/info "Placing and ranking component " component)
+  (log/info "placing and ranking component " component)
   (log/info "user-connectors = " user-connectors)
   (let [filtered-service-offers (service-offers-compatible-with-component component user-connectors)]
     (log/info "filtered-service-offers = " (map display-service-offer filtered-service-offers))
