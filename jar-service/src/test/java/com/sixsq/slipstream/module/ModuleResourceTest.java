@@ -23,6 +23,7 @@ package com.sixsq.slipstream.module;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -115,6 +116,7 @@ public class ModuleResourceTest extends ResourceTestBase {
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
 
 		String externalFormatXml = response.getEntityAsText();
+		System.err.println("DEBUG DEBUG DEBUG " + externalFormatXml);
 		String internalFormatXml = XmlUtil.denormalize(externalFormatXml);
 		Module project = (Module) SerializationUtil.fromXml(internalFormatXml,
 				ProjectModule.class);
@@ -132,10 +134,11 @@ public class ModuleResourceTest extends ResourceTestBase {
 		String externalFormatJson = response.getEntityAsText();
 		System.err.println("DEBUG DEBUG DEBUG DEBUG " + externalFormatJson);
 
-		//Gson gson = new Gson();
-		//LinkedTreeMap result = gson.fromJson(externalFormatJson, LinkedTreeMap.class);
+		Gson gson = new Gson();
+		LinkedTreeMap result = gson.fromJson(externalFormatJson, LinkedTreeMap.class);
+		System.err.println("DEBUG DEBUG DEBUG " + result.toString());
 
-		//assertEquals(projectName, result.toString());
+		assertNotNull(result);
 
 		project.remove();
 	}

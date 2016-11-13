@@ -29,6 +29,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.internal.LinkedTreeMap;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.run.RunsQueryParameters;
@@ -103,17 +105,18 @@ public class ModuleResource extends ParameterizedResource<Module> {
 	public Representation toJson() {
 		checkCanGet();
 
-		Module prepared = null;
-		try {
-			prepared = prepareForSerialization();
-		} catch (ValidationException e) {
-			throwClientValidationError(e.getMessage());
-		} catch (ConfigurationException e) {
-			Util.throwConfigurationException(e);
-		}
-
-		Gson gson = new GsonBuilder().create();
-		String result = gson.toJson(prepared);
+		// will return a raw serialization without runs and parameters
+		//Gson gson = new GsonBuilder().create();
+		//String result = gson.toJson(this);
+		String result = "{}";
+		//Gson gson = new Gson();
+		//result = gson.toJson(this);
+		Gson gson = new GsonBuilder()
+				.setPrettyPrinting()
+				.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX")
+				.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+				.create();
+		result = gson.toJson(this);
 		return new StringRepresentation(result, MediaType.APPLICATION_JSON);
 	}
 
