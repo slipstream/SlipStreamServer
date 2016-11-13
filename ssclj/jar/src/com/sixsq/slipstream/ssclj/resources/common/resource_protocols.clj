@@ -93,6 +93,11 @@
   ;; which uses a data representation for routes, may be better for the case
   ;; where the routes are returned by a function rather than pulled from a var.
   ;;
+  ;; The routes provide the concrete mapping between the HTTP request actions and
+  ;; the SCRUD functions.  Generally, the HTTP actions are expected to work as in
+  ;; any standard REST API. See Section 4 of the CIMI specification for detailed
+  ;; information about the expected mapping.
+  ;;
   (routes [_]
     "Provides the list of (compojure) routes for this resource.")
 
@@ -111,10 +116,16 @@
   ;; with a map containing a relevant message, HTTP status code, and the resource
   ;; that was concerned.
   ;;
+  ;; Generally, the functions map to the HTTP actions as expected for REST APIs.
+  ;; See Section 4 of the CIMI specification for the common, expected behavior
+  ;; for all CIMI resources.  Details for a specific resource can be found
+  ;; in the section describing the schema of that resource.
+  ;;
   (query [_ request]
     "Uses the information in the given ring request to return a list of
      resources satisfying the specified criteria. This may be limited with the
-     CIMI range parameters or CIMI filters. Associated with HTTP POST requests.")
+     CIMI range parameters or CIMI filters. Associated with HTTP GET requests
+     on the collection URL.")
   (add [_ request]
     "Takes the information in the given ring request and creates a new
      instance of this resource. If the resource already exists, then this
@@ -127,7 +138,7 @@
     "Retrieves a given resource instance based on the information in the ring
      request. This is a convenience method that will extract the resource ID
      from the request and call the retrieve-by-id function. Associated with
-     HTTP GET requests.")
+     HTTP GET requests on the resource URL.")
   (edit [_ request]
     "Updates a particular resource instance identified through the request
      with the updated information in the request. If the resource does not
@@ -137,7 +148,7 @@
     "Deletes a particular resource instance identified by the request. If the
      resource does not exist, then the function must throw an exception as well
      as when the resource could not be deleted (e.g. because of lack of
-     authorization).")
+     authorization).  Associated with HTTP DELETE requests.")
 
   ;;
   ;; CIMI allows resources to have specialized actions in addition to the standard
