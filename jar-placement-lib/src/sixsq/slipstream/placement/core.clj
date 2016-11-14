@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.placement.core
   "
-  Entry point (by Java code) is place-and-rank.
+  Entry point is place-and-rank.
   Responsibility is to price given components on all given connectors.
   Each component explicits its preferred instance type per connector.
   Strategy to price one component
@@ -67,6 +67,14 @@
 (defn- fetch-service-offers
   [cimi-filter]
   (:serviceOffers (cimi/search (cu/context) "serviceOffers" (when cimi-filter {:$filter cimi-filter}))))
+
+(defn- fetch-service-offers-rescue-reauthenticate
+  [cimi-filter]
+  (if-let [response (fetch-service-offers cimi-filter)]
+    response
+    (do
+      (cu/update-context)
+      (fetch-service-offers cimi-filter))))
 
 (defn- denamespace
   [kw]
@@ -197,7 +205,7 @@
                                (:placement-policy component)
                                (clause-component component)])
         _ (log/info (str "cimi-filter = '" cimi-filter "'"))
-        service-offers (fetch-service-offers cimi-filter)
+        service-offers (fetch-service-offers-rescue-reauthenticate cimi-filter)
         service-offers-by-connector-name (group-by connector-href service-offers)]
 
     (apply concat (map (partial keep-only-exact-instance-type (:connector-instance-types component))
