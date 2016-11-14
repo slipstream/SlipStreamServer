@@ -65,7 +65,7 @@
 
 (defmethod create-validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown Configuration create type: " (dispatch-on-service resource) resource) resource)))
+  (throw (ex-info (format "unknown Configuration create type: %s %s" (dispatch-on-service resource) resource) resource)))
 
 (defmethod crud/validate create-uri
   [resource]

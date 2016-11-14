@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.14-SNAPSHOT</version>
+    <version>3.16-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
@@ -434,23 +434,6 @@
             </mapping>
 
             <mapping>
-              <directory>/etc/slipstream</directory>
-              <filemode>660</filemode>
-              <configuration>true</configuration>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>src/main/slipstream.conf</location>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>/etc/slipstream/connectors</directory>
-              <configuration>true</configuration>
-            </mapping>
-
-            <mapping>
               <directory>/var/tmp/slipstream</directory>
             </mapping>
 
@@ -508,8 +491,6 @@
             <script>
 /usr/bin/systemctl enable slipstream.service
 /bin/chown -R slipstream: ${slipstream.base.dir}
-/bin/chown slipstream: /etc/slipstream/slipstream.conf
-/bin/chmod 0660 /etc/slipstream/slipstream.conf
 /bin/chown -R slipstream: /var/tmp/slipstream
 # Make static content redefinable.
 /bin/find /opt/slipstream/server/webapps/slipstream.war/static-content/ -type f -exec /bin/chmod 664 {} \;

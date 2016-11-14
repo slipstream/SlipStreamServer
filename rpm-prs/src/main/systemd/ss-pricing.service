@@ -1,0 +1,25 @@
+[Unit]
+Description=SlipStream Pricing Service
+After=network.target
+
+[Service]
+User=slipstream
+
+Environment=SS_PORT=8201
+EnvironmentFile=-/etc/default/ss-pricing
+
+WorkingDirectory=/opt/slipstream/ss-pricing
+
+ExecStart=/usr/bin/java \
+            -cp "resources:lib/ss-pricing.jar:lib/ext/*" \
+            sixsq.slipstream.pricing.service.main $SS_PORT
+ExecStop=/bin/kill -TERM $MAINPID
+
+Restart=always
+RestartSec=10
+
+# When a JVM receives a SIGTERM signal it exits with code 143
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

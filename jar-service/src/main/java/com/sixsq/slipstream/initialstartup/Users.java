@@ -24,8 +24,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
@@ -34,13 +32,10 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
-import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.user.UserResource;
 import com.sixsq.slipstream.util.Logger;
-import com.sixsq.slipstream.util.XmlUtil;
 
 /*
 ** Utility class to create initial super user and load users from files
@@ -113,12 +108,11 @@ public class Users {
 		}
 
 		// load from file
-		File configFile = Configuration.findConfigurationFile();
-		if(configFile == null) {
-			return; // no config file found
+		File configDir = Configuration.findConfigurationDirectory();
+		if(configDir == null) {
+			return;
 		}
 
-		File configDir = new File(configFile.getParent());
 		File usersDir = new File(configDir + File.separator + USERS_CONFIG_DIR);
 
 		List<File> files = FileLoader.loadConfigurationFiles(usersDir);
@@ -201,13 +195,13 @@ public class Users {
     }
 
     private static User loadPassword(User user) {
-        File configFile = Configuration.findConfigurationFile();
+        File configDir = Configuration.findConfigurationDirectory();
 
-        if(configFile == null) {
-            return user; // no config file found
+        if(configDir == null) {
+            return user;
         }
 
-        File passwordDir = getPasswordsDir(configFile.getParent());
+        File passwordDir = getPasswordsDir(configDir.getAbsolutePath());
 
         return loadPasswordFile(user, passwordDir);
 

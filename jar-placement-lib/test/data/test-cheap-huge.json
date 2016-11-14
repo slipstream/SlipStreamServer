@@ -1,0 +1,39 @@
+{
+  "resourceType" : "vm",
+  "sampleTimeCode" : "MIN",
+  "billingTimeCode" : "HUR",
+
+  "connector" : {
+    "href" : "test-cheap"
+  },
+  "unitCode" : "C62",
+
+  "priceCurrency" : "USD",
+
+  "name" : "huge",
+  "associatedCosts" : [ ],
+  "freeQuantity" : 0,
+  "descriptionVector" : {
+    "disk" : 10,
+    "ram" : 0.512,
+    "vcpu" : 1
+  },
+  "acl" : {
+    "owner" : {
+      "principal" : "ADMIN",
+      "type" : "ROLE"
+    },
+    "rules" : [ {
+      "type" : "ROLE",
+      "principal" : "ADMIN",
+      "right" : "ALL"
+    } ]
+  },
+  "resourceURI" : "http://sixsq.com/slipstream/1/ServiceOffer",
+  "discount" : {
+    "method" : "None",
+    "steps" : [ [ ] ]
+  },
+
+  "price" : 4.02E-4
+}

@@ -56,30 +56,25 @@ import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
 /**
  * This singleton class is the interface to the service configuration. It
- * handles reading the services configuration files and makes the parameters
+ * handles reading some services configuration files and makes the parameters
  * available via the getProperty() method. The configuration can be reloaded
  * from the UI, which purges the persisted configuration in the db. When the
- * service is started for the first time, the configuration files are loaded and
+ * service is started for the first time, some configuration files are loaded and
  * persisted.
  *
  * The system first reads a set of default values. These may be overridden by a
- * user specified configuration file.
+ * user specified configuration files.
  *
- * After setting the defaults, this class check if the "slipstream.config.file"
- * system property is set. If it is, it will be used as a filename to find the
- * configuration file. Users should probably use an absolute path when setting
- * the system property. A relative name will be resolved via the JVM and may not
- * have the desired effect.
+ * After setting the defaults, this class check if the "slipstream.config.dir"
+ * system property is set. If it is, it will be used as a name to check the
+ * configuration directory exists. Users should probably use an absolute path
+ * when setting the system property. A relative name will be resolved via the
+ * JVM and may not have the desired effect.
  *
- * If the system property is not set, then the file "slipstream.conf" is
- * searched for in the current working directory and then in the user's home
- * area.
+ * If the system property is not set, then the configuration directory is searched
+ * in the user's home area.
  *
- * Extra configuration files can be provided to configure connectors. These must
- * be in a directory called "connectors" in the same directory as the main
- * configurationas file and contain .conf files.
- *
- * If no configuration file is found, then just the default configuration is
+ * If no configuration directory is found, then just the default configuration is
  * used. The default configuration is likely to be incomplete (some critical
  * properties will not have reasonable default values) and will likely to cause
  * the service to fail during initialization elsewhere.
@@ -98,33 +93,16 @@ public class Configuration {
 	private static Configuration instance = null;
 
 	/**
-	 * Name of the resource containing the default configuration parameters.
-	 * This file must be in the same directory as this class.
-	 */
-	private static final String DEFAULT_PROPERTIES_RESOURCE = "default.config.properties";
-
-	/**
 	 * Name of the system property used to set the location/name of the
 	 * configuration file. It is suggested that users specify an absolute path
 	 * name when using this system property.
 	 */
-	private static final String CONFIG_SYSTEM_PROPERTY = "slipstream.config.file";
-
-	/**
-	 * Name of the configuration file for the service.
-	 */
-	private static final String CONFIG_FILENAME = "slipstream.conf";
+	private static final String CONFIG_SYSTEM_PROPERTY = "slipstream.config.dir";
 
 	/**
 	 * Home config directory.
 	 */
 	private static final String HOME_CONFIG_DIRECTORY = ".slipstream";
-
-	/**
-	 * Name of the directory containing connector configuration files. They must
-	 * contain a parameter named
-	 */
-	private static final String CONNECTORS_CONFIG_DIR = "connectors";
 
 	private ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
 
@@ -231,29 +209,16 @@ public class Configuration {
 	}
 
 	private void extractAndSetVersion() throws ValidationException {
-		RequiredParameters versionRequiredParameter = RequiredParameters.SLIPSTREAM_VERSION;
-		version = loadDefaultConfigFileProperties().getProperty(versionRequiredParameter.getName());
-
-		if (version == null) {
-			throw (new ConfigurationException("Missing mandatory configuration parameter "
-					+ versionRequiredParameter.getName()));
-		}
+		String versionRequiredParameter = RequiredParameters.SLIPSTREAM_VERSION.getName();
 
 		ServiceConfigurationParameter versionParameter = getParameters().getParameter(
-				versionRequiredParameter.getName());
+				versionRequiredParameter);
 		if (versionParameter == null) {
-			versionParameter = createParameter(version, versionRequiredParameter.getName(),
-					versionRequiredParameter.getDescription(), versionRequiredParameter.getCategory().name());
+			throw (new ConfigurationException("Missing mandatory configuration parameter "
+					+ versionRequiredParameter));
 		}
-		try {
-			versionParameter.setValue(version);
-		} catch (ValidationException e) {
-			throw (new ConfigurationException("Invalid version value: " + e.getMessage()));
-		}
-
+		version = versionParameter.getValue();
 		versionParameter.setReadonly(true);
-
-		// set the version in the UI
 		Representation.setReleaseVersion(version);
 	}
 
@@ -261,37 +226,6 @@ public class Configuration {
 		for (ServiceConfigurationParameter parameter : serviceConfiguration.getParameterList()) {
 			parameter.setMandatory(true);
 		}
-	}
-
-	private void loadFromFile() throws ConfigurationException, ValidationException {
-
-		Properties properties = loadDefaultConfigFileProperties();
-		serviceConfiguration.setParameters(convertPropertiesToParameters(properties));
-
-	}
-
-	private Properties loadDefaultConfigFileProperties() throws ConfigurationException {
-
-		Properties defaults;
-
-		// Locate the default configuration file (in the same package as this
-		// class) and load the default properties from it. The configuration
-		// will fail unless this file is available.
-		URL url = Configuration.class.getResource(DEFAULT_PROPERTIES_RESOURCE);
-		if (url != null) {
-			try {
-				URI uri = url.toURI();
-				defaults = loadPropertiesFromURL(uri, null);
-			} catch (URISyntaxException e) {
-				throw new ConfigurationException("invalid configuration file name");
-			}
-		} else {
-			throw new ConfigurationException("cannot read default properties");
-		}
-
-		// Now load the user's configuration file.
-		Properties properties = loadConfiguration(defaults);
-		return properties;
 	}
 
 	/**
@@ -387,29 +321,6 @@ public class Configuration {
 	}
 
 	/**
-	 * Utility method to load configuration properties, if found.
-	 *
-	 * @param defaults
-	 *            Properties object containing default values or null
-	 *
-	 * @return Properties object containing configuration parameters
-	 *
-	 * @throws ConfigurationException
-	 *             if any error occurs while reading configuration files
-	 */
-	private static Properties loadConfiguration(Properties defaults) throws ConfigurationException {
-
-		Properties props = defaults;
-		File configFile = findConfigurationFile();
-
-		if(configFile != null) {
-			props = loadConfigurationFiles(configFile.toURI(), defaults);
-		}
-
-		return props;
-	}
-
-	/**
 	 * Utility method to search through possible locations of the configuration
 	 * file and return the most appropriate one.
 	 *
@@ -418,7 +329,7 @@ public class Configuration {
 	 * @throws ConfigurationException
 	 *             if any error occurs while reading configuration files
 	 */
-	public static File findConfigurationFile() throws ConfigurationException {
+	public static File findConfigurationDirectory() throws ConfigurationException {
 
 		// Check first if a system property is set that defines the location of
 		// the configuration information.
@@ -427,130 +338,17 @@ public class Configuration {
 			return new File(name);
 		}
 
-		// Try the current working directory.
-		String cwd = System.getProperty("user.dir");
-		if (cwd != null) {
-			File userdir = new File(cwd);
-			File configFile = new File(userdir, CONFIG_FILENAME);
-			if (configFile.canRead()) {
-				return configFile;
-			}
-		}
-
 		// Try the home area of the user.
 		String home = System.getProperty("user.home");
 		if (home != null) {
 			File ssHomeDir = new File(home + File.separator + HOME_CONFIG_DIRECTORY);
-			File configFile = new File(ssHomeDir, CONFIG_FILENAME);
-			if (configFile.canRead()) {
-				return configFile;
+			if (ssHomeDir.canRead()) {
+				return ssHomeDir;
 			}
 		}
 
 		// Nothing found
 		return null;
-	}
-
-	/**
-	 * Utility method to load configuration files, from a uri. First load the
-	 * main slipstream config file, then look for connector specific config
-	 * files.
-	 *
-	 * Assumes that the configuration file behind uri exists and is a file.
-	 *
-	 * A special treatment occurs for the cloud.connector.class key/value pair
-	 * in connector configuration, where the value is accumulated over each
-	 * connector file and merged with the comma separated value in the main
-	 * configuration file.
-	 *
-	 * @param uri
-	 *            URI of the main configuration file (i.e. slipstream.conf)
-	 * @param defaults
-	 * @return Properties resulting from loading all available files
-	 */
-	private static Properties loadConfigurationFiles(URI uri, Properties defaults) throws ConfigurationException {
-
-		File configFile = new File(uri);
-		File configDir = configFile.getParentFile();
-		Properties props = new Properties(defaults);
-		if (configFile.canRead()) {
-			props.putAll(loadPropertiesFromURL(configFile.toURI(), defaults));
-		}
-
-		String connectorInstancePropName = ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_CLASS.getName();
-		String oldConnectorInstances = props.getProperty(connectorInstancePropName);
-		List<String> newConnectorsInstances = new ArrayList<String>();
-
-		File connectorsDir = new File(configDir + File.separator + CONNECTORS_CONFIG_DIR);
-		if (connectorsDir != null && connectorsDir.exists()) {
-			File[] files = connectorsDir.listFiles();
-			if (files != null) {
-				for (File f : files) {
-					if (f.getName().endsWith(".conf")) {
-						props = loadPropertiesFromURL(f.toURI(), props);
-						String connectorInstance = props.getProperty(connectorInstancePropName);
-						if (Parameter.hasValueSet(connectorInstance)) {
-							newConnectorsInstances.add(connectorInstance);
-						}
-					}
-				}
-			}
-		}
-
-		List<String> oldConnectorInstancesParts = new ArrayList<String>(Arrays.asList(ConnectorFactory
-				.splitConnectorClassNames(oldConnectorInstances)));
-		List<String> augmentedConnectors = oldConnectorInstancesParts;
-		augmentedConnectors.addAll(newConnectorsInstances);
-		String augmentedConnectorsValue = ConnectorFactory.assembleConnectorClassString(augmentedConnectors
-				.toArray(new String[0]));
-		props.put(connectorInstancePropName, augmentedConnectorsValue);
-		return props;
-	}
-
-	/**
-	 * Create a Properties object from the given URI which falls back to the
-	 * given set of default values.
-	 *
-	 * @param uri
-	 *            URI identifying the configuration file
-	 * @param defaults
-	 *            Properties object containing default values or null if there
-	 *            are none
-	 *
-	 * @return Properties object with read configuration parameters
-	 *
-	 * @throws ConfigurationException
-	 *             if there is any error when reading configuration files
-	 */
-	private static Properties loadPropertiesFromURL(URI uri, Properties defaults) throws ConfigurationException {
-
-		Properties properties = new Properties();
-		if (defaults != null) {
-			for (Enumeration<?> propertyNames = defaults.propertyNames(); propertyNames.hasMoreElements();) {
-				String key = (String) propertyNames.nextElement();
-				properties.put(key, defaults.get(key));
-			}
-		}
-
-		// The property was defined, so try to read the configuration from
-		// the named file. If there is an error, abort the processing
-		// without trying to find another configuration file.
-        properties = loadPropertiesFile(uri, properties);
-
-		// Remove read only entries
-		for(Entry<Object, Object> e : properties.entrySet()) {
-			String k = (String) e.getKey();
-			try {
-				RequiredParameters required = RequiredParameters.valueOf(RequiredParameters.getEnum(k));
-				if(required.isReadonly() && defaults != null && defaults.containsKey(k)) {
-					properties.put(k, defaults.get(k));
-				}
-			} catch (IllegalArgumentException ex) {
-				// ok
-			}
-		}
-
-		return properties;
 	}
 
     public static Properties loadPropertiesFile(URI uri, Properties properties) {
@@ -785,7 +583,6 @@ public class Configuration {
 	 */
 	public void reset() throws ConfigurationException, ValidationException {
 		serviceConfiguration = new ServiceConfiguration();
-		loadFromFile();
 		mergeWithParametersFromConnectors();
 		postProcessParameters();
 		validateRequiredParameters();
@@ -802,10 +599,7 @@ public class Configuration {
 	 */
 	public void update(Map<String, ServiceConfigurationParameter> parameters) throws ConfigurationException,
 			ValidationException {
-		loadFromFile();
-		for (ServiceConfigurationParameter p : parameters.values()) {
-			this.serviceConfiguration.setParameter(p);
-		}
+		serviceConfiguration.setParameters(parameters);
 		mergeWithParametersFromConnectors();
 		postProcessParameters();
 		validateRequiredParameters();

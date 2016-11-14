@@ -13,7 +13,8 @@
   [sym]
   (let [ns-name (name sym)]
     (and
-      (re-matches #"^com\.sixsq\.slipstream\.ssclj\.resources\.[\w-]+$" ns-name)
+      (or (re-matches #"^com\.sixsq\.slipstream\.ssclj\.resources\.[\w-]+$" ns-name)
+          (re-matches #"^com\.sixsq\.slipstream\.connector\.[\w-]+$" ns-name))
       (not (.contains ns-name "test"))
       sym)))
 

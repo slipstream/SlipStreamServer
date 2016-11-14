@@ -4,6 +4,7 @@ import com.sixsq.slipstream.action.usage.MailUsage;
 import com.sixsq.slipstream.action.usage.MailUtils;
 import com.sixsq.slipstream.action.usage.MailsBuilder;
 import com.sixsq.slipstream.action.usage.UsageSummaries;
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.Notifier;
@@ -43,6 +44,7 @@ public class DailyUsageSender {
     private static final Logger logger = Logger.getLogger(DailyUsageSender.class.getName());
 
     public static void main(String[] args) {
+        CljElasticsearchHelper.init();
         sendDailyUsageEmails();
         System.exit(0);
     }

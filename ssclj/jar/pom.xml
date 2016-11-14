@@ -3,7 +3,7 @@
 
   <artifactId>SlipStreamCljResources-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.14-SNAPSHOT</version>
+  <version>3.16-SNAPSHOT</version>
   <name>SlipStreamCljResources-jar-dep</name>
   <description>SlipStream Clojure Resources (DEP)</description>
   <url>http://sixsq.com</url>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>3.14-SNAPSHOT</version>
+    <version>3.16-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -32,6 +32,10 @@
       <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbBinding-jar</artifactId>
     </dependency>
   </dependencies>
   
@@ -90,6 +94,19 @@
             </configuration>
           </execution>
           <execution>
+            <id>boot-build-tests-jar</id>
+            <phase>install</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>boot</executable>
+              <arguments>
+                <argument>mvn-build-tests-jar</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
             <id>boot-deploy</id>
             <phase>deploy</phase>
             <goals>
@@ -99,6 +116,19 @@
               <executable>boot</executable>
               <arguments>
                 <argument>mvn-deploy</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>boot-deploy-tests-jar</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>boot</executable>
+              <arguments>
+                <argument>mvn-deploy-tests-jar</argument>
               </arguments>
             </configuration>
           </execution>
