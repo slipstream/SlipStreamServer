@@ -9,33 +9,31 @@
   (is (= [{:y 2 :price 2} {:z 3 :price 3} {:x 1 :price -1}]
          (pc/order-by-price [{:x 1 :price -1} {:z 3 :price 3} {:y 2 :price 2}]))))
 
-
 (deftest test-cimi-and
-  (is (= "" (pc/cimi-and nil nil)))
-  (is (= "" (pc/cimi-and "" nil)))
-  (is (= "" (pc/cimi-and nil "")))
+  (is (= "" (pc/cimi-and [nil nil])))
+  (is (= "" (pc/cimi-and ["" nil])))
+  (is (= "" (pc/cimi-and [nil ""])))
 
-  (is (= "location='de'" (pc/cimi-and nil "location='de'")))
-  (is (= "location='de'" (pc/cimi-and "location='de'" nil)))
-  (is (= "location='de'" (pc/cimi-and "location='de'" "")))
-  (is (= "location='de'" (pc/cimi-and "" "location='de'")))
+  (is (= "(location='de')" (pc/cimi-and [nil "location='de'"])))
+  (is (= "(location='de')" (pc/cimi-and ["location='de'" nil])))
+  (is (= "(location='de')" (pc/cimi-and ["location='de'" ""])))
+  (is (= "(location='de')" (pc/cimi-and ["" "location='de'"])))
 
-  (is (= "(location='de') and (price=1)" (pc/cimi-and "location='de'" "price=1"))))
+  (is (= "(location='de') and (price=1)" (pc/cimi-and ["location='de'" "price=1"])))
+  (is (= "(location='de') and (price=1) and (a=2)" (pc/cimi-and ["location='de'" "price=1" "a=2"])))
+  (is (= "(location='de') and (price=1) and (a=2)" (pc/cimi-and [nil "location='de'" nil "price=1" "a=2"]))))
 
-(deftest test-cimi-clause-connectors-placement
-  (let [connectors [{:user-connector "exoscale", :vm-sizes {(keyword "module/p1/image1/48") "micro"}}
-                    {:user-connector "test-cheap", :vm-sizes {(keyword "module/p1/image1/48") "Xmicro"}}]
-        component {:module "module/p1/image1/48", :vm-size "unused", :placement-policy "location='ch'"}
-        component-no-placement {:module "module/p1/image1/48", :vm-size "unused", :placement-policy ""}]
-    (is (= "(location='ch') and (connector/href='exoscale' or connector/href='test-cheap')"
-           (pc/cimi-filter-policy connectors component)))
-    (is (= "connector/href='exoscale' or connector/href='test-cheap'"
-           (pc/cimi-filter-policy connectors component-no-placement)))))
+(deftest test-cimi-or
+  (is (= "" (pc/cimi-or [nil nil])))
+  (is (= "" (pc/cimi-or ["" nil])))
+  (is (= "" (pc/cimi-or [nil ""])))
 
-(deftest test-filter-user-connectors
-  (let [user-connectors [{:user-connector "exoscale", :vm-sizes {(keyword "module/p1/image1/48") "micro"}}
-                         {:user-connector "test-cheap", :vm-sizes {(keyword "module/p1/image1/48") "Xmicro"}}]]
-    (is (= user-connectors (pc/filter-user-connectors user-connectors {} {:placement-policy ""})))))
+  (is (= "(location='de')" (pc/cimi-or [nil "location='de'"])))
+  (is (= "(location='de')" (pc/cimi-or ["location='de'" nil])))
+  (is (= "(location='de')" (pc/cimi-or ["location='de'" ""])))
+  (is (= "(location='de')" (pc/cimi-or ["" "location='de'"])))
+
+  (is (= "(location='de') or (price=1)" (pc/cimi-or ["location='de'" "price=1"]))))
 
 (deftest test-equals-ignore-case?
   (is (pc/equals-ignore-case? "a" "a"))
@@ -49,3 +47,29 @@
 
   (is (thrown? AssertionError (pc/equals-ignore-case? "a" 1)))
   (is (thrown? AssertionError (pc/equals-ignore-case? 1 "b"))))
+
+(deftest test-smallest-service-offer
+  (let [so1 {:schema-org:descriptionVector
+             {:schema-org:vcpu 1
+              :schema-org:ram  4
+              :schema-org:disk 10}}
+        so2 {:schema-org:descriptionVector
+             {:schema-org:vcpu 8
+              :schema-org:ram  32
+              :schema-org:disk 500}}
+        so3 {:schema-org:descriptionVector
+             {:schema-org:vcpu 2
+              :schema-org:ram  8
+              :schema-org:disk 20}}]
+    (is nil? (pc/smallest-service-offer []))
+    (is (= so1 (pc/smallest-service-offer [so1 so2 so3])))
+    (is (= so1 (pc/smallest-service-offer [so2 so1 so3])))
+    (is (= so1 (pc/smallest-service-offer [so3 so2 so1])))
+    (is (= so1 (pc/smallest-service-offer [so3 so1 so2])))
+    (is (= so3 (pc/smallest-service-offer [so2 so3])))))
+
+(deftest test-denamespace-keys
+  (is (= {} (pc/denamespace-keys {})))
+  (is (= {:a 1} (pc/denamespace-keys {:a 1})))
+  (is (= {:a 1} (pc/denamespace-keys {:namespace:a 1})))
+  (is (= {:a {:b 1}} (pc/denamespace-keys {:namespace:a {:namespace:b 1}}))))

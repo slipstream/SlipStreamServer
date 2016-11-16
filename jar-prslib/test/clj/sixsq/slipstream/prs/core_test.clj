@@ -12,11 +12,17 @@
 
 
 (deftest test-build-prs-input
-  (is (= {:components      [{:node "node1" :comp-uri "http://a", :multiplicity 1, :policy "string"}]
-          :user-connectors []}
-         (build-prs-input {:prs-endpoint "http://prs-server"
-                           :user-connectors []
-                           :module          {:components [{:node         "node1"
-                                                           :comp-uri     "http://a"
-                                                           :multiplicity 1
-                                                           :policy       "string"}]}}))))
+  (is (= {:components      [{:module           "module/component2"
+                             :placement-policy "schema-org:location='de'"
+                             :cpu.nb           "1"
+                             :ram.GB           "4"
+                             :disk.GB          "10"}]
+          :user-connectors ["exo1" "ec1-eu-west"]}
+         (build-prs-input
+           {:prs-endpoint    "http://prs-server"
+            :user-connectors ["exo1" "ec1-eu-west"]
+            :components      [{:module           "module/component2"
+                               :placement-policy "schema-org:location='de'"
+                               :cpu.nb           "1"
+                               :ram.GB           "4"
+                               :disk.GB          "10"}]}))))
