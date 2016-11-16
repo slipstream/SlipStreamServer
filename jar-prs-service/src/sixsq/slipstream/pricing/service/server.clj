@@ -12,8 +12,8 @@
     [clojure.walk :refer [keywordize-keys]]
     [aleph.http :as http]
     [sixsq.slipstream.pricing.lib.pricing :refer :all]
-    [sixsq.slipstream.placement.core :as pc]
-    )
+    [sixsq.slipstream.placement.core :as pc])
+
   (:import (java.util.concurrent Executors TimeUnit)))
 
 ;;UTILS
@@ -22,14 +22,14 @@
 
 (defn get-req
   [url params]
-  (:body @(client/get url params))
-  )
+  (:body @(client/get url params)))
+
 
 (defn parse
   [s]
   (xml/parse
-    (java.io.ByteArrayInputStream. (.getBytes s)))
-  )
+    (java.io.ByteArrayInputStream. (.getBytes s))))
+
 ;;service catalog
 
 (declare servicecatalog)
@@ -37,26 +37,26 @@
   []
   (println "Service catalog updated !")
   (def servicecatalog (json/read-str
-                        (get-req "https://129.194.184.194/api/service-info" baseparams) :key-fn keyword))
-  )
+                        (get-req "https://129.194.184.194/api/service-info" baseparams) :key-fn keyword)))
+
 (defn service-info-for-cloudname
   [cloudname]
-  (first (filter (fn [{{n :href} :connector}] (= n cloudname)) (:service-info servicecatalog)))
-  )
+  (first (filter (fn [{{n :href} :connector}] (= n cloudname)) (:service-info servicecatalog))))
+
 
 (defn get-service-catalog-entity
   [cloudname resourcetype resourcename]
   (let [{{l (keyword resourcetype)} :pricing} (service-info-for-cloudname cloudname)
         [entity] (filter #(= resourcename (:name %)) l)]
-    entity
-    )
-  )
+    entity))
+
+
 
 (defn start-service-catalog-update
   [seconds]
   (.scheduleAtFixedRate (Executors/newScheduledThreadPool 1)
-                        #(get-service-catalog) 0 seconds TimeUnit/SECONDS)
-  )
+                        #(get-service-catalog) 0 seconds TimeUnit/SECONDS))
+
 
 
 ;;RUNPRICE
@@ -76,14 +76,14 @@
 ;;Return a module from a module url
 (defn gm
   [moduleurl]
-  (parse (get-req (str "https://129.194.184.194/" moduleurl) baseparams))
-  )
+  (parse (get-req (str "https://129.194.184.194/" moduleurl) baseparams)))
+
 
 ;;Return the instance type of a module
 (defn getinstancetype
   ([module provider]
-   (getinstancetype module provider "instance.type")
-    )
+   (getinstancetype module provider "instance.type"))
+
   ([module provider type]
    (->> (:content module)
         (filter #(= (:tag %) :parameters))
@@ -98,17 +98,17 @@
         (filter #(= (:tag %) :value))
         first
         :content
-        first
-        )
-    )
-  )
+        first)))
+
+
+
 
 ;;Recursively find the base image of a module
 (defn getvm
   [module provider]
   (def moduleurl (:moduleReferenceUri (:attrs module)))
-  (if moduleurl (getvm (gm moduleurl) provider) (getinstancetype module provider))
-  )
+  (if moduleurl (getvm (gm moduleurl) provider) (getinstancetype module provider)))
+
 
 (defn- put-place-and-rank
   [request]
@@ -168,8 +168,8 @@
 (def app
   (-> app-routes
       (wrap-defaults (assoc site-defaults :security (assoc (:security site-defaults) :anti-forgery false)))
-      (wrap-cross-origin))
-  )
+      (wrap-cross-origin)))
+
 
 (defn start
   [port]
