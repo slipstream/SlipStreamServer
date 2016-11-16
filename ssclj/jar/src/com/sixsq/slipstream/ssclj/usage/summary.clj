@@ -4,8 +4,7 @@
     [clj-time.core :as t]
     [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]))
 
 ;;
 ;; Cuts (truncate start or end timestamp) and aggregates usage records inside an interval.
@@ -70,9 +69,9 @@
   [summary record]
   (let [record-metric      (:metric-name record)
         record-comsumption (comsumption record)]
-    (if-let [consumption-to-increase (get-in summary [:usage record-metric])]
-      (assoc-in summary [:usage record-metric] (sum-consumptions consumption-to-increase record-comsumption))
-      (assoc-in summary [:usage record-metric] record-comsumption))))
+    (if-let [consumption-to-increase (get-in summary [:usage-summary record-metric])]
+      (assoc-in summary [:usage-summary record-metric] (sum-consumptions consumption-to-increase record-comsumption))
+      (assoc-in summary [:usage-summary record-metric] record-comsumption))))
 
 (defn- empty-summary-for-record
   [record start end frequency grouping-cols]
@@ -82,7 +81,7 @@
       (assoc :frequency (name frequency))
       (assoc :start-timestamp start)
       (assoc :end-timestamp end)
-      (assoc :usage {})))
+      (assoc :usage-summary {})))
 
 (defn- merge-usages
   [records start end frequency grouping-cols]

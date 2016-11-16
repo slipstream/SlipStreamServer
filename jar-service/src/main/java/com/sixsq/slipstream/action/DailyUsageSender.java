@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 public class DailyUsageSender {
 
     private static final String SSCLJ_SERVER = "http://localhost:8201/api";
-    private static final String USAGE_RESOURCE_NAME = "usage";
+    private static final String USAGE_RESOURCE_NAME = "usage-summary";
 
     private static final Logger logger = Logger.getLogger(DailyUsageSender.class.getName());
 

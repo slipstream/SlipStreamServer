@@ -140,7 +140,7 @@
   [summary acl]
   (-> summary
       (update-in [:usage] keys-dot->underscore)
-      (assoc :id (str "usage/" (cu/random-uuid)))
+      (assoc :id (str "usage-summary/" (cu/random-uuid)))
       (assoc :acl acl)
       (assoc :compute-timestamp (u/now-to-ISO-8601))))
 
@@ -148,7 +148,7 @@
   [summary options]
   (let [acl                   (acl-for-user-cloud summary)
         summary-resource      (resource-for summary acl)]
-    (db/add "Usage" summary-resource options)))
+    (db/add "UsageSummary" summary-resource options)))
 
 (defn records-for-interval
   [start end]
