@@ -1,5 +1,4 @@
-(ns
-  com.sixsq.slipstream.ssclj.resources.usage
+(ns com.sixsq.slipstream.ssclj.resources.usage-summary
   (:refer-clojure :exclude [update])
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -7,27 +6,25 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
-(def ^:const resource-tag :usages)
-(def ^:const resource-name "Usage")
+(def ^:const resource-tag :usage-summaries)
+(def ^:const resource-name "UsageSummary")
 (def ^:const resource-url (u/de-camelcase resource-name))
-(def ^:const collection-name "UsageCollection")
+(def ^:const collection-name "UsageSummaryCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
-
                      :rules [{:principal "ANON"
                               :type      "ROLE"
                               :right     "VIEW"}]})
-
 
 ;;
 ;; schemas
 ;;
 
-(def Usage
+(def UsageSummary
   (merge
     c/CreateAttrs
     c/AclAttr
@@ -37,12 +34,12 @@
      :cloud           c/NonBlankString
      :start-timestamp c/Timestamp
      :end-timestamp   c/Timestamp
-     :usage           c/NonBlankString
+     :usage-summary   c/NonBlankString
      :grouping        c/NonBlankString
      :frequency       c/NonBlankString
      }))
 
-(def validate-fn (u/create-validation-fn Usage))
+(def validate-fn (u/create-validation-fn UsageSummary))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -74,3 +71,8 @@
 (defmethod crud/delete resource-name
   [request]
   (delete-impl request))
+
+(def edit-impl (std-crud/edit-fn resource-name))
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))
