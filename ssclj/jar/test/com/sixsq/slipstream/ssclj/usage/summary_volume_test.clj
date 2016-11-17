@@ -96,7 +96,7 @@
 
 (defn- summaries-from-db
   []
-  (second (db/query "usage" {:user-roles ["ADMIN"]})))
+  (second (db/query "usageSummary" {:user-roles ["ADMIN"]})))
 
 (defn check-summaries
   []
@@ -106,13 +106,13 @@
         (is (= "joe" (:user summary)))
         (is (= {:disk-GB {:unit-minutes 211050.0},
                          :RAM-GB  {:unit-minutes 16800.0},
-                         :nb-cpu  {:unit-minutes 4200.0}} (:usage summary))))
+                         :nb-cpu  {:unit-minutes 4200.0}} (:usage-summary summary))))
       (do
         (is (= "aws" (:cloud summary)))
         (is (= "joe" (:user summary)))
         (is (= {:disk-GB {:unit-minutes 428400.0},
                          :RAM-GB  {:unit-minutes 13440.0},
-                         :nb-cpu  {:unit-minutes 3360.0}} (:usage summary)))))))
+                         :nb-cpu  {:unit-minutes 3360.0}} (:usage-summary summary)))))))
 
 (deftest check-precision-small-interval
   (let [start-day           (t/date-time 2014)
@@ -133,7 +133,7 @@
     (rc/insert-usage-event joe-exo-end   {:user-roles ["ADMIN"]})
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
-    (let [summary (-> (summaries-from-db) first :usage)]
+    (let [summary (-> (summaries-from-db) first :usage-summary)]
       (is (= 83.75 (get-in summary [:disk-GB :unit-minutes])))
       (is (< 6.666 (get-in summary [:RAM-GB :unit-minutes]) 6.667))
       (is (< 1.666 (get-in summary [:nb-cpu :unit-minutes]) 1.667)))))
@@ -170,10 +170,10 @@
     (let [summaries (summaries-from-db)]
       (is (= [
               {:disk-GB {:unit-minutes 144720.0}, :RAM-GB {:unit-minutes 11520.0}, :nb-cpu {:unit-minutes 2880.0}}]
-             (map :usage (filter #(= "joe" (:user %)) summaries))))
+             (map :usage-summary (filter #(= "joe" (:user %)) summaries))))
       (is (= [
               {:big {:unit-minutes 5760.0}, :small {:unit-minutes 2880.0}}]
-             (map :usage (filter #(= "jack" (:user %)) summaries)))))))
+             (map :usage-summary (filter #(= "jack" (:user %)) summaries)))))))
 
 (deftest summarize-open-record
   (let [start-day     (t/date-time 2014)
@@ -188,7 +188,7 @@
 
     (let [summaries (summaries-from-db)]
       (is (= [{:disk-GB {:unit-minutes 144720.0}, :RAM-GB {:unit-minutes 11520.0}, :nb-cpu {:unit-minutes 2880.0}}]
-             (map :usage summaries))))))
+             (map :usage-summary summaries))))))
 
 (deftest multiple-summaries-on-same-per-user-cloud-interval-are-ok
   (let [start-day     (t/date-time 2014)

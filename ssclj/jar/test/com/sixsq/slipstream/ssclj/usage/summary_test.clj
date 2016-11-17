@@ -101,7 +101,7 @@
           :end-timestamp   end-day
           :frequency       "daily"
           :grouping        "user,cloud"
-          :usage
+          :usage-summary
                            {
                             "nb-cpu"
                             {
@@ -120,7 +120,7 @@
           :end-timestamp   end-day
           :frequency       "daily"
           :grouping        "user,cloud"
-          :usage
+          :usage-summary
                            {
                             "nb-cpu"
                             {
@@ -139,7 +139,7 @@
           :end-timestamp   end-day
           :frequency       "daily"
           :grouping        "user,cloud"
-          :usage
+          :usage-summary
                            {
                             "Disk"
                             {
@@ -157,7 +157,7 @@
           :end-timestamp   end-day
           :frequency       "daily"
           :grouping        "user,cloud"
-          :usage
+          :usage-summary
                            {
                             "Disk"
                             {
@@ -203,7 +203,7 @@
           :end-timestamp   end-day
           :frequency       "daily"
           :grouping        "user,cloud"
-          :usage           {"nb-cpu"  {:unit-minutes (* 4.0 337)}
+          :usage-summary           {"nb-cpu"  {:unit-minutes (* 4.0 337)}
                             "RAM-GB"  {:unit-minutes (* 8.0 337)}
                             "disk-GB" {:unit-minutes (* 100.5 337)}}
           }]
@@ -212,7 +212,7 @@
 
 (defn- summaries-from-db
   []
-  (second (db/query "usage" {:user-roles ["ADMIN"]})))
+  (second (db/query "usageSummary" {:user-roles ["ADMIN"]})))
 
 (deftest test-summarize-and-store-by-user-cloud
   (insert-record)
@@ -223,7 +223,7 @@
                 :nb-cpu  {:unit-minutes 1348.0}}]
     (is (= 1 (count summaries-from-db)))
     (let [usage (first summaries-from-db)]
-      (is (= result (:usage usage)))
+      (is (= result (:usage-summary usage)))
       (is (= "daily" (:frequency usage)))
       (is (= "user,cloud" (:grouping usage))))))
 
@@ -236,7 +236,7 @@
                 :nb-cpu  {:unit-minutes 1348.0}}]
     (is (= 1 (count summaries-from-db)))
     (let [usage (first summaries-from-db)]
-      (is (= result (:usage usage)))
+      (is (= result (:usage-summary usage)))
       (is (= "daily" (:frequency usage)))
       (is (= "cloud" (:grouping usage))))))
 
@@ -247,7 +247,7 @@
            :end-timestamp   start-may
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"nb-cpu" {:unit-minutes 1348.0}
+           :usage-summary          {"nb-cpu" {:unit-minutes 1348.0}
                              "RAM"    {:unit-minutes 13872.0}}
            }
           {:cloud           "aws"
@@ -255,7 +255,7 @@
            :end-timestamp   start-may
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"Disk"   {:unit-minutes 4176000.0}
+           :usage-summary          {"Disk"   {:unit-minutes 4176000.0}
                              "nb-cpu" {:unit-minutes 5460.0}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may :daily [:cloud]))))
 
@@ -268,7 +268,7 @@
            :start-timestamp "2015-04-01T00:00:00.000Z"
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"Disk" {:unit-minutes 4176000.0}}}]
+           :usage-summary          {"Disk" {:unit-minutes 4176000.0}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may :daily
                             [:cloud] ["sixsq_dev"])))
   (is (= [{:cloud           "exoscale-ch-gva"
@@ -276,13 +276,13 @@
            :start-timestamp "2015-04-01T00:00:00.000Z"
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"RAM"    {:unit-minutes 13872.0}
+           :usage-summary          {"RAM"    {:unit-minutes 13872.0}
                              "nb-cpu" {:unit-minutes 1348.0}}}
           {:cloud           "aws"
            :end-timestamp   "2015-05-01T00:00:00.000Z"
            :start-timestamp "2015-04-01T00:00:00.000Z"
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"nb-cpu" {:unit-minutes 5460.0}}}]
+           :usage-summary          {"nb-cpu" {:unit-minutes 5460.0}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may :daily
                             [:cloud] ["joe"]))))

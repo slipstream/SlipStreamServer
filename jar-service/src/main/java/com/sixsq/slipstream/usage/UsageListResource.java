@@ -6,7 +6,7 @@ import com.sixsq.slipstream.util.RequestUtil;
 public class UsageListResource extends APICollectionResource {
 
     public UsageListResource() {
-        super("usage");
+        super("usageSummary");
     }
 
     protected String cimiFilter() {

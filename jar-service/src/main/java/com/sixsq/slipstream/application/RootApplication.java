@@ -438,7 +438,7 @@ public class RootApplication extends Application {
 	}
 
 	private void attachUsage(RootRouter router) throws ValidationException {
-		guardAndAttach(router, new UsageRouter(getContext()), "usage");
+		guardAndAttach(router, new UsageRouter(getContext()), "usageSummary");
 	}
 
 	private void attachCloudUsage(RootRouter router) throws ValidationException {

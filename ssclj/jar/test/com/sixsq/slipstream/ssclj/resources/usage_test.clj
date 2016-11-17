@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.usage :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.usage-summary :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [exec-request is-count]]
@@ -21,7 +21,7 @@
    :frequency       (name frequency)
    :start-timestamp (u/timestamp year month day)
    :end-timestamp   (u/timestamp-next-frequency frequency year month day)
-   :usage           usage})
+   :usage-summary   usage})
 
 (defn insert-daily-summaries
   [f]
@@ -37,9 +37,6 @@
     (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
     (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
     (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
-
-    ;; metric names can contain dots
-    (rc/insert-summary! (summary "alfred" "moon" :monthly [2015 04 15] {:a.b.v {:unit-minutes 300.0}}) {:user-name "alfred"})
     (f)))
 
 (use-fixtures :once insert-daily-summaries)
@@ -48,7 +45,7 @@
 
 (defn are-desc-dates?
   [m]
-  (->> (get-in m [:response :body :usages])
+  (->> (get-in m [:response :body :usage-summaries])
        (map :start-timestamp)
        tu/ordered-desc?
        is)
@@ -56,7 +53,7 @@
 
 (defn are-all-usages?
   [m field expected]
-  (->> (get-in m [:response :body :usages])
+  (->> (get-in m [:response :body :usage-summaries])
        (map field)
        distinct
        (= [expected])
@@ -83,7 +80,7 @@
 (defn last-uuid
   []
   (let [full-uuid
-        (->> (db/query "usage" {:user-name "joe" :cimi-params {:orderby [["start-timestamp" :desc]]}})
+        (->> (db/query "usageSummary" {:user-name "joe" :cimi-params {:orderby [["start-timestamp" :desc]]}})
              second
              first
              :id)
@@ -103,10 +100,10 @@
     (ltu/is-status (exec-request (str base-uri "/" uuid) "" "intruder") 403)))
 
 (def ^:private are-counts
-  (partial tu/are-counts :usages base-uri))
+  (partial tu/are-counts :usage-summaries base-uri))
 
 (def ^:private are-counts-for-admin
-  (partial tu/are-counts :usages base-uri "super ADMIN"))
+  (partial tu/are-counts :usage-summaries base-uri "super ADMIN"))
 
 (deftest pagination-full
   (are-counts "mike" 3 "?$filter=frequency='daily'&$first=1&$last=10")
@@ -144,10 +141,10 @@
   (expect-pagination 500 ["?$first=1&$last=10001"]))
 
 (deftest admin-sees-everything
-  (are-counts-for-admin 12 "")
+  (are-counts-for-admin 11 "")
   (are-counts-for-admin 5 "?$filter=frequency='daily'")
   (are-counts-for-admin 3 "?$filter=frequency='weekly'")
-  (are-counts-for-admin 4 "?$filter=frequency='monthly'"))
+  (are-counts-for-admin 3 "?$filter=frequency='monthly'"))
 
 (deftest simple-filter-with-admin
   (are-counts-for-admin 2 "?$filter=frequency='daily'&$filter=user='joe'")
@@ -157,17 +154,17 @@
   (are-counts-for-admin 0 "?$filter=xxx<100"))
 
 (deftest filter-int-value
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes<100")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes > 400")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes < 50")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes < 50 and usage/ram/unit-minutes > 30")
-  (are-counts-for-admin 2 "?$filter=frequency='daily' and usage/ram/unit-minutes > 100 and usage/ram/unit-minutes < 500")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes<100")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes > 400")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes < 50")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes < 50 and usage-summary/ram/unit-minutes > 30")
+  (are-counts-for-admin 2 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes > 100 and usage-summary/ram/unit-minutes < 500")
 
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 40")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 100")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 200")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 300")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 500"))
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes = 40")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes = 100")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes = 200")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes = 300")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage-summary/ram/unit-minutes = 500"))
 
 (defn- one-line
   [s]
