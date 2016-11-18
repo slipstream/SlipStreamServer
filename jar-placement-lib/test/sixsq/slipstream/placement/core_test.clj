@@ -73,3 +73,13 @@
   (is (= {:a 1} (pc/denamespace-keys {:a 1})))
   (is (= {:a 1} (pc/denamespace-keys {:namespace:a 1})))
   (is (= {:a {:b 1}} (pc/denamespace-keys {:namespace:a {:namespace:b 1}}))))
+
+(deftest test-prefer-exact-instance-type
+  ; small is preffered for exo, it is kept
+  (is (= [{:schema-org:name "small"}]
+         (pc/prefer-exact-instance-type {:exo "small" :ec2 "insanely-huge"}
+                                        ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]])))
+  ; extra is absent, list returned unchanged
+  (is (= [{:schema-org:name "small"} {:schema-org:name "big"}]
+         (pc/prefer-exact-instance-type {:exo "extra" :ec2 "insanely-huge"}
+                                        ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]]))))

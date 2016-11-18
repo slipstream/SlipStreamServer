@@ -193,11 +193,13 @@
        (mapv #(str "connector/href='" % "'"))
        cimi-or))
 
-(defn- keep-only-exact-instance-type
+(defn prefer-exact-instance-type
   [connector-instance-types [connector-name service-offers]]
-  (if-let [instance-type (get connector-instance-types (keyword connector-name))]
-    (filter #(= instance-type (:schema-org:name %)) service-offers)
-    service-offers))
+  (let [favorite (filter #(= (get connector-instance-types (keyword connector-name))
+                             (:schema-org:name %)) service-offers)]
+    (if-not (empty? favorite)
+      favorite
+      service-offers)))
 
 (defn- service-offers-compatible-with-component
   [component connector-names]
@@ -208,7 +210,7 @@
         service-offers (fetch-service-offers-rescue-reauthenticate cimi-filter)
         service-offers-by-connector-name (group-by connector-href service-offers)]
 
-    (apply concat (map (partial keep-only-exact-instance-type (:connector-instance-types component))
+    (apply concat (map (partial prefer-exact-instance-type (:connector-instance-types component))
                        service-offers-by-connector-name))))
 
 (defn- place-rank-component
