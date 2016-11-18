@@ -12,23 +12,7 @@
   [body endpoint & [http-params]]
   (:body (http/put endpoint (merge {:body body} http-params))))
 
-
 (defn prs-place-and-rank
-  "
-  Input request map:
-  {:components [{:module uri
-                 :vm-size ''
-                 :multiplicity #
-                 :placement-policy ''} {}]
-   :user-connectors [c1 c2]
-  }
-
-  Output
-  {:components [{:module uri
-                 :connectors [{:name c1 :price 0 :currency ''},
-                              {:name c2 :price 0 :currency ''}]}]
-  }
-  "
   [endpoint prs-request]
   (if (or (empty? prs-request) (some empty? (vals prs-request)))
     {:components []}
@@ -39,34 +23,12 @@
 
 (defn build-prs-input
   [input]
-  (-> (select-keys input [:user-connectors :placement-params])
-      (assoc :components (-> input :module :components))))
+  (select-keys input [:user-connectors :placement-params :components]))
 
 (defn place-and-rank
-  "Given the input map, calls PRS service and retuns the JSON returned by PRS.
-   Input map
-   {:module {:components [ {:module uri :vm-size '' }, ] }
-    :placement-params { components: [ {:comp-uri uri :multiplicity # :policy string }, ] } ; map
-    :prs-endpoint url ; str
-    :user-connectors
-      [{:user-connector: c1, :vm-sizes {:comp1 'tiny' :comp2 'huge'}}
-       {:user-connector: c2, :vm-sizes {:comp1 'big' :comp2 'small'}}]
-    }
-
-  Output component
-  {:components [{:module module/foo, :connectors [{:name c1, :price 0, :currency none},
-                                                  {:name c2, :price 0, :currency none}]}]
-  }
-  Output app
-  {:components [{:module module/foo, :connectors [{:name c1, :price 0, :currency none},
-                                                  {:name c2, :price 0, :currency none}]}
-                {:module module/bar, :connectors [{:name c1, :price 0, :currency none}]}]
-   }
-   "
+  "Given the input map, calls PRS service and retuns the JSON returned by PRS."
   [input]
-
   (log/info "place-and-rank, input = " input)
-
   (json/write-str
     (if (empty? input)
       {}

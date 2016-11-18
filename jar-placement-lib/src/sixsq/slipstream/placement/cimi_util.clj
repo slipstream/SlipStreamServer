@@ -24,16 +24,21 @@
   [timestamp]
   (> (- (System/currentTimeMillis) timestamp) @token-obsolete-millis))
 
+(defn update-context
+  []
+  (log/info "Fetching cep and token")
+  (let [context (sync/instance @cimi-cloud-entry-point @url-login @url-logout)]
+    (cimi/login context {:username @cimi-username
+                         :password @cimi-password})
+    (reset! cached-cimi-context {:context   context
+                                 :timestamp (System/currentTimeMillis)})))
+
 (defn- update-context-when-obsolete
   []
   (when (timestamp-token-obsolete? (:timestamp @cached-cimi-context))
-    (log/info "Fetching cep and token (detected as obsolete)")
-    (let [context (sync/instance @cimi-cloud-entry-point @url-login @url-logout)]
-      (cimi/login context {:username @cimi-username
-                           :password @cimi-password})
-      (reset! cached-cimi-context {:context   context
-                                   :timestamp (System/currentTimeMillis)}))))
+    (update-context)))
 
-(defn context []
+(defn context
+  []
   (update-context-when-obsolete)
   (:context @cached-cimi-context))
