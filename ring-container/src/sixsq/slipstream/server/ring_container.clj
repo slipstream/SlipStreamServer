@@ -51,15 +51,15 @@
   [^Closeable server finalization-fn]
   (fn [] (try
            (and finalization-fn (finalization-fn))
-           (log/info "successfully finalized webapp")
+           (log/info "successfully finalized ring container")
            (catch Exception e
-             (log/error "failure when finalizing webapp:" (str e)))
+             (log/error "failure when finalizing ring container:" (str e)))
            (finally
              (try
                (and server (.close server))
-               (log/info "successfully shutdown webapp")
+               (log/info "successfully shutdown ring container")
                (catch Exception e
-                 (log/error "failure when shutting down webapp:" (str e))))))))
+                 (log/error "failure when shutting down ring container:" (str e))))))))
 
 (defn- start-container
   "Starts the aleph container with the given ring handler and on the given
@@ -111,29 +111,30 @@
 
 (defn- server-cfg
   "Reads the server configuration from the environment. The variable
-   SLIPSTREAM_WEBAPP_INIT must be defined. It is the namespaced symbol of the
-   server initialization function.
+   SLIPSTREAM_RING_CONTAINER_INIT must be defined. It is the namespaced symbol
+   of the server initialization function.
 
-   If the environmental variable SLIPSTREAM_WEBAPP_PORT is defined, the value
-   will be used for the server port, presuming that it is valid. If the value
-   is invalid, then the default port will be used.
+   If the environmental variable SLIPSTREAM_RING_CONTAINER_PORT is defined,
+   the value will be used for the server port, presuming that it is valid. If
+   the value is invalid, then the default port will be used.
 
    NOTE: This function is only called when starting the server from the main
    function. Starting the server from the REPL will use the values given to the
    start function."
   []
   (let [env (dyn-resolve 'environ.core/env)
-        server-port (env :slipstream-webapp-port)]
-    (if-let [server-init (env :slipstream-webapp-init)]
+        server-port (env :slipstream-ring-container-port)]
+    (if-let [server-init (env :slipstream-ring-container-init)]
       [server-init server-port]
-      (let [msg "SLIPSTREAM_WEBAPP_INIT is not defined"]
+      (let [msg "SLIPSTREAM_RING_CONTAINER_INIT is not defined"]
         (log/error msg)
         (throw (ex-info msg {}))))))
 
 (defn -main
   "Function to start the web application as a daemon. The configuation of the
    server is taken from the environment. The environment must have
-   SLIPSTREAM_WEBAPP_INIT and optionally SLIPSTREAM_WEBAPP_PORT defined."
+   SLIPSTREAM_RING_CONTAINER_INIT and optionally SLIPSTREAM_RING_CONTAINER_PORT
+   defined."
   [& _]
   (let [[server-init server-port] (server-cfg)
         shutdown-fn (start server-init server-port)]
