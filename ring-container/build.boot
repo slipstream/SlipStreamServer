@@ -1,7 +1,7 @@
 (def +version+ "3.16-SNAPSHOT")
 
 (set-env!
-  :project 'com.sixsq.slipstream/SlipStreamWebApp-jar
+  :project 'com.sixsq.slipstream/slipstream-ring-container
 
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
@@ -63,7 +63,7 @@
            (sift :include #{#".*_test\.clj"
                             #"log4j.properties"}
                  :invert true)
-           (aot :namespace #{'sixsq.slipstream.server.webapp})
+           (aot :namespace #{'sixsq.slipstream.server.ring-container})
            (jar)))
 
 (deftask mvn-build

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>SlipStreamWebApp-jar-dep</artifactId>
+  <artifactId>slipstream-ring-container-dep</artifactId>
   <packaging>pom</packaging>
   <version>3.16-SNAPSHOT</version>
-  <name>SlipStreamWebApp-jar-dep</name>
-  <description>SlipStream Web Application Container (DEP)</description>
+  <name>slipstream-ring-container-dep</name>
+  <description>SlipStream Ring Container (DEP)</description>
   <url>http://sixsq.com</url>
 
   <parent>

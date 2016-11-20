@@ -1,7 +1,7 @@
-(ns sixsq.slipstream.server.webapp-test
+(ns sixsq.slipstream.server.ring-container-test
   (:require
    [clojure.test :refer :all]
-   [sixsq.slipstream.server.webapp :as t]))
+   [sixsq.slipstream.server.ring-container :as t]))
 
 (deftest check-dyn-resolve
   (let [dyn-resolve @#'t/dyn-resolve]

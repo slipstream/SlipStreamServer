@@ -27,6 +27,7 @@
     <module>ssclj</module>
     <module>db-binding</module>
     <module>db-serializers</module>
+    <module>ring-container</module>
     <module>static-content</module>
     <module>war</module>
   </modules>
