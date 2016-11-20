@@ -92,7 +92,7 @@
 
             <mapping>
               <directory>${installation.dir}/lib</directory>
-              <directoryIncluded>false</directoryIncluded>
+              <directoryIncluded>true</directoryIncluded>
               <sources>
                 <source>
                   <location>target/dependency/lib</location>
@@ -102,9 +102,6 @@
 
             <mapping>
               <directory>/usr/lib/systemd/system</directory>
-              <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -114,7 +111,7 @@
             </mapping>
 
             <mapping>
-              <directory>/etc/default/ring-example</directory>
+              <directory>/etc/default</directory>
               <directoryIncluded>false</directoryIncluded>
               <configuration>noreplace</configuration>
               <sources>
@@ -124,6 +121,26 @@
               </sources>
             </mapping>
 
+            <mapping>
+              <directory>/opt/slipstream/ring-example/resources</directory>
+              <directoryIncluded>true</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/scripts/log4j.properties</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/opt/slipstream/ring-example/lib</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+            
+            <mapping>
+              <directory>/var/log/slipstream/ring-example</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+            
           </mappings>
 
         </configuration>
