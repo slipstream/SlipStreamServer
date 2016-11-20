@@ -4,7 +4,7 @@
   :project 'com.sixsq.slipstream/SlipStreamPricingService-jar
   :version +version+
   :license {"commercial" "http://sixsq.com"}
-  :edition "enterprise"
+  :edition "community"
 
   :dependencies '[[org.clojure/clojure "1.8.0"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
