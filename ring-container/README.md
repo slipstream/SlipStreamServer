@@ -54,21 +54,38 @@ Starting with systemd
 
 The ring container is packaged in its own RPM package and can be
 reused for many different micro-services.  To use this, the
-micro-service must provide a systemd service file and a defaults file
-to provide the variables:
+micro-service must provide three files:
+
+ * A systemd service file
+ * A defaults file for the environment
+ * A `log4j.properties` file to configure logging
+
+Example of all of these files can be found in the RPM package.
+
+To start the example service, you can do the following once the RPM
+package has been installed: 
 
 ```
-SLIPSTREAM_RING_CONTAINER_INIT=my.example/app
-SLIPSTREAM_RING_CONTAINER_PORT=1234
+systemctl enable ring-example
+systemctl start ring-example
+systemctl status -l ring-example
 ```
 
-See the packaged RPM for examples of these files for the simple
-example micro-service.
+If everything worked correctly, you should be able to see "Ring
+Example Running!" on the URL: http://localhost:5000.  There should
+also be information in the file
+`/var/log/slipstream/ring-example/ring-example.log`. 
 
 Logging
 -------
 
 The service assumes that `clojure.tools.logging` will be used with the
-SLF4J and log4j implementation.  The package does not provide a
-`log4j.properties` file.  This must be provided on the classpath by
-each micro-service.
+SLF4J and log4j implementation.  These are included in the
+dependencies, but the package does not provide a `log4j.properties`
+for the logging configuration. **This must be provided on the
+classpath by each micro-service.**
+
+Note that the `log4j.properties` file in this repository (which is not
+packaged) suppresses all of the logging output to keep the test output
+clean.  If you need the debugging output, change the configuration in
+this file.
