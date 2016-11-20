@@ -33,67 +33,37 @@ then ignored.
 Starting with the REPL
 ----------------------
 
-To start the service via the REPL, use directly the `start` function:
+To start the service via the REPL, directly use the `start` function:
 
 ```
-(start 'my.example/app 1234)
+(require '[sixsq.slipstream.server.ring-container :as rc])
+(def stop (rc/start 'sixsq.slipstream.server.ring-example/init 5000))
+;; service on  http://localhost:5000 should show "Ring Example Running!"
+(stop)
 ```
 
-This will load the namespace "my.example" and execute the
-initialization function "app" from that namespace.  It will then start
-the service asynchronously on the port "1234".  The function returns a
-shutdown function, which must be called to stop the server. The boot
-and shell environment (excepting the classpath) will not affect a
-server started in this way.
+This will load the namespace "sixsq.slipstream.server.ring-example"
+and execute the initialization function "init" from that namespace.
+It will then start the service asynchronously on the port "5000".  The
+function returns a shutdown function, which must be called to stop the
+server. The boot and shell environment (excepting the classpath) will
+not affect a server started in this way.
 
 Starting with systemd
 ---------------------
 
 The ring container is packaged in its own RPM package and can be
 reused for many different micro-services.  To use this, the
-micro-service must provide a systemd service file similar to the
-following:
-
-```
-[Unit]
-Description=SlipStream Micro-Service
-After=syslog.target
-After=network.target
-
-[Service]
-EnvironmentFile=-/etc/default/slipstream/micro-service
-
-User=slipstream
-
-WorkingDirectory=/opt/slipstream/micro-service
-
-ExecStart=/usr/bin/java \
-            -cp "/opt/slipstream/ring-container/slipstream-ring-container.jar:/opt/slipstream/ring-container/lib/*" \
-            sixsq.slipstream.server.ring_container.main
-ExecStop=/bin/kill -TERM $MAINPID
-
-# When a JVM receives a SIGTERM signal it exits with code 143
-SuccessExitStatus=143
-
-[Install]
-WantedBy=multi-user.target
-```
-
-It is important to preserve the classpath to the ring container and
-its dependencies, adding the additional classpath entries for the
-micro-service itself.
-
-The systemd service file must reference an environment file located in
-`/etc/default/slipstream/` that contains at least the following
-variables:
+micro-service must provide a systemd service file and a defaults file
+to provide the variables:
 
 ```
 SLIPSTREAM_RING_CONTAINER_INIT=my.example/app
 SLIPSTREAM_RING_CONTAINER_PORT=1234
 ```
 
-These provide the required information to find the correct
-initialization function and to start the service on the correct port.
+See the packaged RPM for examples of these files for the simple
+example micro-service.
 
 Logging
 -------
