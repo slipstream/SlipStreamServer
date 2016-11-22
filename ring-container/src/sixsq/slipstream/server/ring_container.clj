@@ -97,12 +97,13 @@
    by calling 'close' on the object."
   [handler ^long port]
   (log/info "starting aleph application container on port" port)
-  (let [start-server (dyn-resolve 'aleph.http/start-server)]
+  (let [start-server (dyn-resolve 'aleph.http/start-server)
+        server (->> port
+                    (InetSocketAddress. "127.0.0.1")
+                    (hash-map :socket-address)
+                    (start-server handler))]
     (log/info "started aleph application container on port" port)
-    (->> port
-         (InetSocketAddress. "127.0.0.1")
-         (hash-map :socket-address)
-         (start-server handler))))
+    server))
 
 (defn- parse-port
   "Parses the given value (string or int) as an integer and returns the value
