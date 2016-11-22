@@ -43,7 +43,7 @@
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
-  serve {:handler 'sixsq.slipstream.pricing.service.server/app
+  serve {:handler 'sixsq.slipstream.prs.ring/handler
          :reload true}
   watch {:verbose true})
 
@@ -59,7 +59,7 @@
   []
   (comp
    (pom)
-   (aot :namespace #{'sixsq.slipstream.pricing.service.main})
+   (aot :namespace #{'sixsq.slipstream.prs.main})
    (jar)))
 
 (deftask run

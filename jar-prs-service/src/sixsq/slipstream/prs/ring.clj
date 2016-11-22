@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.pricing.service.server
+(ns sixsq.slipstream.prs.ring
   (:require
     [aleph.http :as http]
     [clojure.data.json :as json]
@@ -25,14 +25,14 @@
 
            (route/not-found {:status 404 :body "Not found"}))
 
-(def app
+(def handler
   (-> app-routes
       (wrap-defaults (assoc site-defaults :security (assoc (:security site-defaults) :anti-forgery false)))))
 
 
 (defn start
   [port]
-  (let [s (http/start-server app {:port port})]
+  (let [s (http/start-server handler {:port port})]
     (fn [] (.close s))))
 
 (defn stop
