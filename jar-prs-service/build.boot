@@ -20,16 +20,10 @@
   #(vec (concat %
                 (merge-defaults
                  ['sixsq/default-deps (get-env :version)]
-                 '[#_[org.clojure/clojurescript]
-
-                   [org.clojure/core.async]
-
-                   #_[com.sixsq.slipstream/SlipStreamPricingLib-jar]
-                   [com.sixsq.slipstream/SlipStreamPlacementLib-jar]
+                 '[[com.sixsq.slipstream/SlipStreamPlacementLib-jar]
 
                    [compojure]
                    [aleph]
-                   #_[environ]
                    [ring/ring-json]
                    [ring/ring-defaults]
 
@@ -49,11 +43,6 @@
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
-  uber {:exclude-scope #{"test"}
-        :exclude       #{#".*/pom.xml"
-                         #"META-INF/.*\.SF"
-                         #"META-INF/.*\.DSA"
-                         #"META-INF/.*\.RSA"}}
   serve {:handler 'sixsq.slipstream.pricing.service.server/app
          :reload true}
   watch {:verbose true})
@@ -70,8 +59,7 @@
   []
   (comp
    (pom)
-   (aot :all true)
-   #_(aot :namespace #{'sixsq.slipstream.pricing.service.main})
+   (aot :namespace #{'sixsq.slipstream.pricing.service.main})
    (jar)))
 
 (deftask run
@@ -80,7 +68,6 @@
   (comp
    (watch)
    (pom)
-   #_(aot :all true)
    (serve)))
 
 (deftask mvn-test
