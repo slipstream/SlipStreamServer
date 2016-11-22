@@ -23,16 +23,15 @@
                  '[#_[org.clojure/clojurescript]
 
                    [org.clojure/core.async]
-                   
-                   [com.sixsq.slipstream/SlipStreamPricingLib-jar]
+
+                   #_[com.sixsq.slipstream/SlipStreamPricingLib-jar]
                    [com.sixsq.slipstream/SlipStreamPlacementLib-jar]
 
                    [compojure]
                    [aleph]
-                   [environ]
+                   #_[environ]
                    [ring/ring-json]
                    [ring/ring-defaults]
-                   [http-kit]
 
                    [adzerk/boot-test]
                    [tolitius/boot-check]
@@ -44,7 +43,7 @@
   '[tolitius.boot-check :refer [with-yagni with-eastwood with-kibit with-bikeshed]])
 
 (set-env!
-  :source-paths #{"dev-resources" "test"}
+  :source-paths #{"dev-resources"}
   :resource-paths #{"src"})
 
 (task-options!
