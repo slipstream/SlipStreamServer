@@ -12,7 +12,7 @@ WorkingDirectory=/opt/slipstream/ss-pricing
 
 ExecStart=/usr/bin/java \
             -cp "resources:lib/ss-pricing.jar:lib/ext/*" \
-            sixsq.slipstream.pricing.service.main $SS_PORT
+            sixsq.slipstream.prs.main $SS_PORT
 ExecStop=/bin/kill -TERM $MAINPID
 
 Restart=always
