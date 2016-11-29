@@ -116,6 +116,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		String name = form.getFirstValue(paramName);
 
 		String value = extractValue(form, genericPart);
+		String descr = extractDescription(form, genericPart);
 
 		if (!shouldProcess(name)) {
 			return;
@@ -123,7 +124,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		boolean exists = (name == null) ? false : existingParameters
 				.containsKey(name);
 		if (exists) {
-			setExistingParameter(name, value);
+			setExistingParameter(name, value, descr);
 		} else {
 			setNewParameter(form, genericPart, name, value);
 		}
@@ -135,7 +136,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 		return true;
 	}
 
-	protected void setExistingParameter(String name, String value)
+	protected void setExistingParameter(String name, String value, String descr)
 			throws ValidationException {
 		T parameter;
 		parameter = existingParameters.get(name);
@@ -143,6 +144,7 @@ public abstract class FormProcessor<S extends Parameterized<S, T>, T extends Par
 
 		if (overwrite) {
 			parameter.setValue(parseValue(value, parameter));
+			parameter.setDescription(descr);
 		}
 		getParametrized().setParameter(parameter);
 	}
