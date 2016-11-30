@@ -51,6 +51,8 @@ public abstract class RunFactory {
 		Map<String, String> cloudServicePerNode = resolveCloudServiceNames(module, user, userChoices);
 		Set<String> cloudServiceNames = new HashSet<String>(cloudServicePerNode.values());
 
+		Map<String, String> instanceTypePerNode = resolveInstanceTypes(module, user, userChoices);
+
 		validateModule(module, cloudServicePerNode);
 
 		Run run = new Run(module, getRunType(), cloudServiceNames, user);
@@ -101,6 +103,9 @@ public abstract class RunFactory {
 
 	protected abstract void init(Module module, Run run, User user) throws ValidationException, NotFoundException;
 
+	protected abstract Map<String, String> resolveInstanceTypes(Module module, User user,
+																	Map<String, List<Parameter<?>>> userChoices);
+
 	protected abstract Map<String, String> resolveCloudServiceNames(Module module, User user,
 			Map<String, List<Parameter<?>>> userChoices);
 
@@ -111,9 +116,13 @@ public abstract class RunFactory {
 
 	private void initCloudServices(Run run, Map<String, String> cloudServicePerNode) throws ValidationException {
 		for (Map.Entry<String, String> entry : cloudServicePerNode.entrySet()) {
-			String key = constructParamName(entry.getKey(), RuntimeParameter.CLOUD_SERVICE_NAME);
-			RunParameter rp = new RunParameter(key, entry.getValue(), RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
-			run.setParameter(rp);
+			String keyCloudService = constructParamName(entry.getKey(), RuntimeParameter.CLOUD_SERVICE_NAME);
+			RunParameter rpCloudService = new RunParameter(keyCloudService, entry.getValue(), RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
+			run.setParameter(rpCloudService);
+
+			String keyInstanceType = constructParamName(entry.getKey(), RuntimeParameter.INSTANCE_TYPE_KEY);
+			RunParameter rpInstanceType = new RunParameter(keyInstanceType, entry.getValue(), RuntimeParameter.INSTANCE_TYPE_DESCRIPTION);
+			run.setParameter(rpInstanceType);
 		}
 	}
 

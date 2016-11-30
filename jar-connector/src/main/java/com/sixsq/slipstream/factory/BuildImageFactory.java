@@ -285,6 +285,27 @@ public class BuildImageFactory extends RunFactory {
 	}
 
 	@Override
+	protected Map<String, String> resolveInstanceTypes(Module module, User user,
+																Map<String, List<Parameter<?>>> userChoices) {
+		Map<String, String> instanceTypesPerNode = new HashMap<>();
+		String instanceType = null;
+
+		if (isProvidedUserChoicesForNodeInstance(userChoices, nodeInstanceName)) {
+			for (Parameter<?> parameter : userChoices.get(nodeInstanceName)) {
+				if (parameter.getName().equals(RuntimeParameter.INSTANCE_TYPE_KEY)) {
+					instanceType = parameter.getValue();
+					break;
+				}
+			}
+		}
+
+		instanceTypesPerNode.put(nodeInstanceName, instanceType);
+
+		return instanceTypesPerNode;
+	}
+
+
+	@Override
 	protected void initExtraRunParameters(Module module, Run run) throws ValidationException {
 	}
 
