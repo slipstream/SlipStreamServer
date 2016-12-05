@@ -23,21 +23,27 @@ package com.sixsq.slipstream.module;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.google.gson.internal.LinkedTreeMap;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
+import org.restlet.data.ClientInfo;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
+import org.restlet.data.Preference;
 import org.restlet.data.Status;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ServerResource;
@@ -55,6 +61,9 @@ import com.sixsq.slipstream.user.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class ModuleResourceTest extends ResourceTestBase {
 
@@ -98,6 +107,8 @@ public class ModuleResourceTest extends ResourceTestBase {
 		String projectName = "getModuleProject";
 		createAndStoreProject(projectName);
 
+		// XML response testing
+
 		Request request = createGetRequest(projectName, user);
 
 		Response response = executeRequest(request);
@@ -105,13 +116,56 @@ public class ModuleResourceTest extends ResourceTestBase {
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
 
 		String externalFormatXml = response.getEntityAsText();
+		System.err.println("DEBUG DEBUG DEBUG " + externalFormatXml);
 		String internalFormatXml = XmlUtil.denormalize(externalFormatXml);
 		Module project = (Module) SerializationUtil.fromXml(internalFormatXml,
 				ProjectModule.class);
 
 		assertEquals(projectName, project.getName());
 
+		// JSON response testing
+
+		request = createGetRequest(projectName, user);
+
+		response = executeJsonRequest(request);
+
+		assertEquals(Status.SUCCESS_OK, response.getStatus());
+
+		String externalFormatJson = response.getEntityAsText();
+		System.err.println("DEBUG DEBUG DEBUG DEBUG " + externalFormatJson);
+
+		Gson gson = new Gson();
+		LinkedTreeMap result = gson.fromJson(externalFormatJson, LinkedTreeMap.class);
+		System.err.println("DEBUG DEBUG DEBUG " + result.toString());
+
+		assertNotNull(result);
+
 		project.remove();
+	}
+
+	@Test
+	@Ignore
+	public void getModuleProjectAsJson() throws ConfigurationException,
+			SlipStreamClientException {
+
+		String projectName = "getModuleProject";
+		createAndStoreProject(projectName);
+
+		Request request = createGetJsonRequest(projectName, user);
+
+		Response response = executeRequest(request);
+
+		assertEquals(Status.SUCCESS_OK, response.getStatus());
+
+		String externalFormatJson = response.getEntityAsText();
+		System.err.println(externalFormatJson);
+
+		Gson gson = new Gson();
+		LinkedTreeMap result = gson.fromJson(externalFormatJson, LinkedTreeMap.class);
+
+		assertEquals(projectName, result.toString());
+
+		//project.remove();
 	}
 
 	@Test
@@ -401,6 +455,25 @@ public class ModuleResourceTest extends ResourceTestBase {
 
 		ServerResource resource = new ModuleResource();
 		Response response = new Response(request);
+
+		resource.init(null, request, response);
+		if (response.getStatus().isSuccess()) {
+			resource.handle();
+		}
+
+		return resource.getResponse();
+	}
+
+	protected Response executeJsonRequest(Request request) {
+
+		ServerResource resource = new ModuleResource();
+		Response response = new Response(request);
+
+		ClientInfo ci = request.getClientInfo();
+		List<Preference<MediaType>> mediaTypes = new ArrayList<>();
+		mediaTypes.add(new Preference<>(MediaType.APPLICATION_JSON));
+		ci.setAcceptedMediaTypes(mediaTypes);
+		request.setClientInfo(ci);
 
 		resource.init(null, request, response);
 		if (response.getStatus().isSuccess()) {
