@@ -53,8 +53,7 @@ public class PlacementRequest {
 
         Module module = getModule();
         result.put("module", module);
-        result.put("user-connectors", userConnectors);
-
+        result.put("user-connectors", this.userConnectors);
         result.put("placement-params", module.placementPoliciesPerComponent());
         result.put("prs-endpoint", prsEndPoint);
 
@@ -63,12 +62,16 @@ public class PlacementRequest {
         return result;
     }
 
-    public static PlacementRequest fromJson(String json) {
+    public static PlacementRequest fromJson(String json, List<String> userConnectors) {
 
         logger.info("JSON " + json);
 
         Gson gson = new GsonBuilder().create();
         PlacementRequest placementRequest = gson.fromJson(json, PlacementRequest.class);
+
+        if (userConnectors != null && (placementRequest.userConnectors == null || placementRequest.userConnectors.isEmpty())) {
+            placementRequest.userConnectors = userConnectors;
+        }
 
         try {
             placementRequest.prsEndPoint = Configuration.getInstance().getProperty(SLIPSTREAM_PRS_ENDPOINT_PROPERTY_KEY);

@@ -80,7 +80,7 @@ public class UIPlacementResourceTest extends ResourceTestBase {
 
             @Override
             protected PlacementRequest buildPlacementRequest(String json) {
-                PlacementRequest request = PlacementRequest.fromJson(json);
+                PlacementRequest request = PlacementRequest.fromJson(json, getUserConnectors());
                 request.setModule(buildTestModule());
                 return request;
             }

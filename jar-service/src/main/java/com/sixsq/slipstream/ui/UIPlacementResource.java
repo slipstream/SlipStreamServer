@@ -2,6 +2,7 @@ package com.sixsq.slipstream.ui;
 
 import com.google.gson.JsonSyntaxException;
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.resource.BaseResource;
 import org.restlet.data.MediaType;
@@ -11,6 +12,8 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -69,12 +72,21 @@ public class UIPlacementResource extends BaseResource {
         return isPlacementEnabled();
     }
 
+    protected List<String> getUserConnectors() {
+        try {
+            List<String> connectors = ConnectorFactory.getCloudServiceNamesList();
+            return getUser().getConfiguredCloudServiceNamesList(connectors);
+        } catch (ValidationException | NullPointerException e) {}
+
+        return null;
+    }
+
     protected String remotePlaceAndRank(PlacementRequest placementRequest) {
         return sixsq.slipstream.prs.core.JavaWrapper.placeAndRank(placementRequest.asMap());
     }
 
     protected PlacementRequest buildPlacementRequest(String json){
-        return PlacementRequest.fromJson(json);
+        return PlacementRequest.fromJson(json, getUserConnectors());
     }
 
 
