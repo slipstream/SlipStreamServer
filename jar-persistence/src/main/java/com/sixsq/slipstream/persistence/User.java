@@ -33,11 +33,7 @@ import javax.mail.internet.InternetAddress;
 import javax.persistence.*;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -586,6 +582,29 @@ public class User extends Parameterized<User, UserParameter> {
 		setAuthnToken(authnToken);
 		store();
 		logger.info("Stored authentication token: " + authnToken);
+	}
+
+	private boolean containsKeyNotEmpty(String cloudServiceName, String key) {
+		Map<String, UserParameter> params = this.getParameters();
+		String fullKey = cloudServiceName + RuntimeParameter.PARAM_WORD_SEPARATOR + key;
+		return params.containsKey(fullKey) && params.get(fullKey).hasValueSet();
+	}
+
+	private boolean isCloudConfigured(String cloudServiceName) {
+		return (containsKeyNotEmpty(cloudServiceName, "username") && containsKeyNotEmpty(cloudServiceName, "password"))
+				|| (containsKeyNotEmpty(cloudServiceName, "access.id") && containsKeyNotEmpty(cloudServiceName, "secret.key"));
+	}
+
+	public List<String> getConfiguredCloudServiceNamesList(List<String> availableCloudServiceNames) {
+		List<String> configuredCloudServiceNames = new ArrayList<>();
+
+		for (String cloudServiceName: availableCloudServiceNames) {
+			if (isCloudConfigured(cloudServiceName)) {
+				configuredCloudServiceNames.add(cloudServiceName);
+			}
+		}
+
+		return configuredCloudServiceNames;
 	}
 
 }
