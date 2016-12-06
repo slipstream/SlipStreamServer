@@ -70,14 +70,14 @@
   (-> (session (ring-app))
       (content-type "application/json")
       (request base-uri)
-      ltu/body->json
+      ltu/body->edn
       (ltu/is-status 200)))
 
 (deftest only-snake-url-succeeds
   (-> (session (ring-app))
       (content-type "application/json")
       (request (str p/service-context resource-name))
-      ltu/body->json
+      ltu/body->edn
       (ltu/is-status 405)))
 
 (deftest test-post-when-authenticated
@@ -87,7 +87,7 @@
       (request base-uri
                :request-method :post
                :body (json/write-str valid-usage-record))
-      ltu/body->json
+      ltu/body->edn
       (ltu/is-status 201)))
 
 (deftest test-post-when-NOT-authenticated
@@ -96,7 +96,7 @@
       (request base-uri
                :request-method :post
                :body (json/write-str valid-usage-record))
-      ltu/body->json
+      ltu/body->edn
       (ltu/is-status 201)))
 
 (deftest test-post-invalid-record
@@ -105,7 +105,7 @@
       (request base-uri
                :request-method :post
                :body (json/write-str invalid-usage-record))
-      ltu/body->json
+      ltu/body->edn
       (ltu/is-status 400)))
 
 (deftest test-edit
@@ -115,7 +115,7 @@
                (request base-uri
                         :request-method :post
                         :body (json/write-str valid-usage-record))
-               ltu/body->json
+               ltu/body->edn
                (get-in [:response :body :resource-id]))
         uri (str p/service-context id)]
 
@@ -126,7 +126,7 @@
         (request uri
                  :request-method :put
                  :body (json/write-str closed-usage-record))
-        ltu/body->json
+        ltu/body->edn
         (ltu/is-status 200)
         (ltu/is-key-value :end-timestamp "2015-05-04T15:40:15.432Z")))
 
@@ -135,7 +135,7 @@
                 (content-type "application/json")
                 (header authn-info-header "joe ADMIN")
                 (request base-uri :request-method :get)
-                ltu/body->json
+                ltu/body->edn
                 (ltu/is-key-value :count 1)
                 (get-in [:response :body :usage-records]))]
 
@@ -149,7 +149,7 @@
       (request (str p/service-context "wrong-id")
                :request-method :put
                :body (json/write-str closed-usage-record))
-      ltu/body->json
+      ltu/body->edn
       (ltu/is-status 405)))
 
 (deftest test-last-record

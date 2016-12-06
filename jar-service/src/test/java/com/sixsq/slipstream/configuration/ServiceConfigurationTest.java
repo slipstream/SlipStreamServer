@@ -26,13 +26,21 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.junit.BeforeClass;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
+
 public class ServiceConfigurationTest {
+
+	@BeforeClass
+	public static void createTestElasticsearchDb(){
+		CljElasticsearchHelper.createAndInitTestDb();
+	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void emptyConfigurationInvalid() {
@@ -41,18 +49,12 @@ public class ServiceConfigurationTest {
 	}
 
 	@Test
-	public void idIncreasesWithTime() throws InterruptedException {
+	public void idIsConstant() throws InterruptedException {
 		ServiceConfiguration first = new ServiceConfiguration();
 		Thread.sleep(1000);
 		ServiceConfiguration second = new ServiceConfiguration();
 
-		String[] parts;
-		parts = first.getId().split("/");
-		Long firstMilli = Long.valueOf(parts[parts.length - 1]);
-		parts = second.getId().split("/");
-		Long secondMilli = Long.valueOf(parts[parts.length - 1]);
-
-		assertTrue(secondMilli > firstMilli);
+		assertTrue(first.getId().equals(second.getId()));
 	}
 
 	@Test

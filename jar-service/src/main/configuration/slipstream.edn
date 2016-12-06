@@ -1,0 +1,4 @@
+{
+ :id "configuration/slipstream"
+ :reportsLocation "${project.build.directory}"
+}

@@ -58,14 +58,14 @@
       (request "/api/usage-event"
                :request-method :post
                :body (json/write-str open-usage-event))
-      t/body->json
+      t/body->edn
       (t/is-status 201))
   (let [[ur1 ur2] (sort-by :metric-name
                            (-> (session (ring-app))
                                (content-type "application/json")
                                (header authn-info-header "joe")
                                (request "/api/usage-record")
-                               t/body->json
+                               t/body->edn
                                (t/is-count #(= 2 %))
                                (get-in [:response :body :usage-records])))]
 
@@ -81,7 +81,7 @@
 (defn all-records
   [state]
   (-> (request state "/api/usage-record")
-      t/body->json
+      t/body->edn
       (get-in [:response :body :usage-records])))
 
 (deftest post-close-usage-event-should-update-records

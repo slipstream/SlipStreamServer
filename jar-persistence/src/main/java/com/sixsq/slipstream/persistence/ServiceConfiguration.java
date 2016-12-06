@@ -20,23 +20,26 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
+import java.util.logging.Logger;
 import org.simpleframework.xml.ElementMap;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.persistence.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import clojure.lang.IFn;
+
 @SuppressWarnings("serial")
-@Entity
-@NamedQueries({ @NamedQuery(name = "latestConfiguration", query = "SELECT c FROM ServiceConfiguration c WHERE c.id = (SELECT MAX(c.id) FROM ServiceConfiguration c)") })
 public class ServiceConfiguration extends
 		Parameterized<ServiceConfiguration, ServiceConfigurationParameter> {
 
-	public final static String RESOURCE_URI_PREFIX = "configuration/";
+	private static Logger logger = Logger.getLogger(CljElasticsearchHelper.class.getName());
+
+	private final static String RESOURCE_URI = "configuration/slipstream";
     public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY = "cloud.connector.orchestrator.publicsshkey";
     public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY = "cloud.connector.orchestrator.privatesshkey";
 
@@ -49,53 +52,41 @@ public class ServiceConfiguration extends
 	 */
 	public enum RequiredParameters {
 
-		SLIPSTREAM_BASE_URL("Default URL and port for the SlipStream RESTlet",
-				ParameterCategory.SlipStream_Basics),
+		SLIPSTREAM_BASE_URL(
+				CljElasticsearchHelper.getParameterDescription("slipstream.base.url")),
 
 		SLIPSTREAM_UPDATE_CLIENTURL(
-				"Endpoint of the SlipStream client tarball",
-				ParameterCategory.SlipStream_Advanced),
+				CljElasticsearchHelper.getParameterDescription("slipstream.update.clienturl")),
 
 		SLIPSTREAM_PRS_ENDPOINT(
-				"Endpoint of the Placement and Ranking Service",
-				ParameterCategory.SlipStream_Advanced),
+				CljElasticsearchHelper.getParameterDescription("slipstream.prs.endpoint")),
 
 		SLIPSTREAM_PRS_ENABLE(
-				"Placement and Ranking enabled",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+				CljElasticsearchHelper.getParameterDescription("slipstream.prs.enable")),
 
 		SLIPSTREAM_UPDATE_CLIENTBOOTSTRAPURL(
-				"Endpoint of the SlipStream client bootstrap script",
-				ParameterCategory.SlipStream_Advanced),
+				CljElasticsearchHelper.getParameterDescription("slipstream.update.clientbootstrapurl")),
 
 		CLOUD_CONNECTOR_CLASS(
-				"Cloud connector java class name(s) (comma separated for multi-cloud configuration)",
-				ParameterCategory.SlipStream_Basics, ParameterType.Text),
+				CljElasticsearchHelper.getParameterDescription("cloud.connector.class")),
 
 		CLOUD_CONNECTOR_LIBRARY_LIBCLOUD_URL(
-				"URL to fetch libcloud library from",
-				ParameterCategory.SlipStream_Advanced,
-				"URL should point to a valid gzipped tarball."),
+				CljElasticsearchHelper.getParameterDescription("cloud.connector.library.libcloud.url")),
 
 		CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY(
-				"Path to the SSH public key to put in the orchestrator",
-				ParameterCategory.SlipStream_Advanced),
+				CljElasticsearchHelper.getParameterDescription("cloud.connector.orchestrator.publicsshkey")),
 
 		CLOUD_CONNECTOR_ORCHESTRATOR_PRIVATESSHKEY(
-				"Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)",
-				ParameterCategory.SlipStream_Advanced),
+				CljElasticsearchHelper.getParameterDescription("cloud.connector.orchestrator.privatesshkey")),
 
-		SLIPSTREAM_VERSION("Installed SlipStream version",
-				ParameterCategory.SlipStream_Advanced, true),
+		SLIPSTREAM_VERSION(
+				CljElasticsearchHelper.getParameterDescription("slipstream.version")),
 
 		SLIPSTREAM_REPORTS_LOCATION(
-				"Location where the deployments and build reports are saved",
-				ParameterCategory.SlipStream_Advanced),
+				CljElasticsearchHelper.getParameterDescription("slipstream.reports.location")),
 
 		SLIPSTREAM_REGISTRATION_EMAIL(
-				"Email address for account approvals, etc.",
-				ParameterCategory.SlipStream_Support,
-				"Email address to use for registration.") {
+				CljElasticsearchHelper.getParameterDescription("slipstream.registration.email")) {
 			@Override
 			public void validate(String value) {
 				super.validate(value);
@@ -103,12 +94,11 @@ public class ServiceConfiguration extends
 			}
 		},
 
-		SLIPSTREAM_MAIL_HOST("Host for SMTP server for email notifications.",
-				ParameterCategory.SlipStream_Support),
+		SLIPSTREAM_MAIL_HOST(
+				CljElasticsearchHelper.getParameterDescription("slipstream.mail.host")),
 
 		SLIPSTREAM_MAIL_PORT(
-				"Port on SMTP server (defaults to standard ports).",
-				ParameterCategory.SlipStream_Support) {
+				CljElasticsearchHelper.getParameterDescription("slipstream.mail.port")) {
 			@Override
 			public void validate(String value) {
 				super.validate(value);
@@ -117,22 +107,19 @@ public class ServiceConfiguration extends
 		},
 
 		SLIPSTREAM_MAIL_USERNAME(
-				"Username for SMTP server.",
-				ParameterCategory.SlipStream_Support,
-				"Username of the mail server account you want to use to send registration emails."),
+				CljElasticsearchHelper.getParameterDescription("slipstream.mail.username")),
 
-		SLIPSTREAM_MAIL_PASSWORD("Password for SMTP server.",
-				ParameterCategory.SlipStream_Support, ParameterType.Password),
+		SLIPSTREAM_MAIL_PASSWORD(
+				CljElasticsearchHelper.getParameterDescription("slipstream.mail.password")),
 
-		SLIPSTREAM_MAIL_SSL("Use SSL for SMTP server.",
-				ParameterCategory.SlipStream_Support, ParameterType.Boolean),
+		SLIPSTREAM_MAIL_SSL(
+				CljElasticsearchHelper.getParameterDescription("slipstream.mail.ssl")),
 
-		SLIPSTREAM_MAIL_DEBUG("Debug mail sending.",
-				ParameterCategory.SlipStream_Support, ParameterType.Boolean),
+		SLIPSTREAM_MAIL_DEBUG(
+				CljElasticsearchHelper.getParameterDescription("slipstream.mail.debug")),
 
 		SLIPSTREAM_SUPPORT_EMAIL(
-				"Email address for SlipStream support requests",
-				ParameterCategory.SlipStream_Support) {
+				CljElasticsearchHelper.getParameterDescription("slipstream.support.email")) {
 			@Override
 			public void validate(String value) {
 				super.validate(value);
@@ -141,22 +128,19 @@ public class ServiceConfiguration extends
 		},
 
 		SLIPSTREAM_REGISTRATION_ENABLE(
-				"Allow user self registration. If checked, user will be able to create accounts themselves.",
-				ParameterCategory.SlipStream_Basics, ParameterType.Boolean),
+				CljElasticsearchHelper.getParameterDescription("slipstream.registration.enable")),
 
 		SLIPSTREAM_SERVICE_CATALOG_ENABLE(
-				"Enable service catalog feature.",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+				CljElasticsearchHelper.getParameterDescription("slipstream.service.catalog.enable")),
 
 		SLIPSTREAM_METERING_HOSTNAME(
-				"Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:2005).",
-				ParameterCategory.SlipStream_Advanced),
+				CljElasticsearchHelper.getParameterDescription("slipstream.metering.hostname")),
 
-		SLIPSTREAM_METERING_ENABLE("Metering enabled",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean),
+		SLIPSTREAM_METERING_ENABLE(
+				CljElasticsearchHelper.getParameterDescription("slipstream.metering.enable")),
 
-		SLIPSTREAM_QUOTA_ENABLE("Quota enforcement enabled",
-				ParameterCategory.SlipStream_Advanced, ParameterType.Boolean);
+		SLIPSTREAM_QUOTA_ENABLE(
+				CljElasticsearchHelper.getParameterDescription("slipstream.quota.enable"));
 
 		private final String description;
 		private final ParameterCategory category;
@@ -168,50 +152,12 @@ public class ServiceConfiguration extends
 			return instructions;
 		}
 
-		private RequiredParameters(String description,
-				ParameterCategory category) {
-			this.description = description;
-			this.category = category;
-			this.instructions = "";
-			this.type = ParameterType.String;
-			this.readonly = false;
-		}
-
-		private RequiredParameters(String description,
-				ParameterCategory category, boolean readonly) {
-			this.description = description;
-			this.category = category;
-			this.instructions = "";
-			this.type = ParameterType.String;
-			this.readonly = readonly;
-		}
-
-		private RequiredParameters(String description,
-				ParameterCategory category, String instructions) {
-			this.description = description;
-			this.category = category;
-			this.instructions = instructions;
-			this.type = ParameterType.String;
-			this.readonly = false;
-		}
-
-		private RequiredParameters(String description,
-				ParameterCategory category, ParameterType type) {
-			this.description = description;
-			this.category = category;
-			this.instructions = "";
-			this.type = type;
-			this.readonly = false;
-		}
-
-		private RequiredParameters(String description,
-				ParameterCategory category, String instructions,
-				ParameterType type) {
-			this.description = description;
-			this.category = category;
-			this.instructions = instructions;
-			this.type = type;
-			this.readonly = false;
+		private RequiredParameters(ServiceConfigurationParameter scp) {
+			this.description = scp.getDescription();
+			this.category = ParameterCategory.valueOf(scp.getCategory());
+			this.instructions = scp.getInstructions();
+			this.type = scp.getType();
+			this.readonly = scp.isReadonly();
 		}
 
 		public String getInstruction() {
@@ -286,7 +232,7 @@ public class ServiceConfiguration extends
 		}
 	}
 
-	@Id
+	//@Id
 	String id;
 
 	public ServiceConfiguration() {
@@ -316,6 +262,10 @@ public class ServiceConfiguration extends
 	}
 
 	public void setParameter(ServiceConfigurationParameter parameter) {
+
+		if (null == parameter) {
+			return;
+		}
 
 		validateParameter(parameter);
 
@@ -356,8 +306,8 @@ public class ServiceConfiguration extends
 		return id;
 	}
 
-	public void setId() {
-		id = RESOURCE_URI_PREFIX + String.valueOf(System.currentTimeMillis());
+	private void setId() {
+		id = RESOURCE_URI;
 	}
 
 	public void setContainer(ServiceConfigurationParameter parameter) {
@@ -380,18 +330,17 @@ public class ServiceConfiguration extends
 
 	}
 
+	private static String CLJ_NS_SERVICE_CONFIG = CljElasticsearchHelper.NS_SERIALIZERS_SERVICE_CONFIG;
+
 	public static ServiceConfiguration load() {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("latestConfiguration");
-		ServiceConfiguration sc = (ServiceConfiguration) q.getSingleResult();
-		em.close();
-		return sc;
+		IFn load = CljElasticsearchHelper.getLoadFn(CLJ_NS_SERVICE_CONFIG);
+		return (ServiceConfiguration) load.invoke();
 	}
 
 	public ServiceConfiguration store() {
 		validate();
-		setId();
-		return (ServiceConfiguration) super.store();
+		IFn store = CljElasticsearchHelper.getStoreFn(CLJ_NS_SERVICE_CONFIG);
+		return (ServiceConfiguration) store.invoke(this);
 	}
 
 	@Override

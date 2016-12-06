@@ -61,6 +61,10 @@ public class ImageModule extends TargetContainerModule {
 	private static final String VOLATILE_DISK_VALUE_REGEX = "^[0-9]*$";
 	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
 
+	private static final String CPU_PARAM = "cpu.nb";
+	private static final String RAM_PARAM = "ram.GB";
+	private static final String DISK_PARAM = "disk.GB";
+
 	private static class BuildState implements Serializable {
 		@Attribute
 		public final String moduleUri;
@@ -337,8 +341,12 @@ public class ImageModule extends TargetContainerModule {
 		addMandatoryParameter(RuntimeParameter.INSTANCE_ID_KEY, RuntimeParameter.INSTANCE_ID_DESCRIPTION,
 				ParameterCategory.Output);
 
-		updateNetwork();
+		updateCPU();
+		updateRAM();
+		updateDisk();
+
 		updateExtraDisks();
+		updateNetwork();
 	}
 
 	private void updateNetwork() throws ValidationException {
@@ -347,6 +355,30 @@ public class ImageModule extends TargetContainerModule {
 
 	private void updateExtraDisks() throws ValidationException, ConfigurationException {
 		addVolatileDiskParameter();
+	}
+
+	private void updateCPU() throws ValidationException {
+        addCPUParameter();
+    }
+
+	private void updateRAM() throws ValidationException {
+		addRAMParameter();
+	}
+
+	private void updateDisk() throws ValidationException {
+		addDiskParameter();
+	}
+
+	private void addCPUParameter() throws ValidationException {
+        addMandatoryParameter(CPU_PARAM, "Number of CPUs", ParameterCategory.Cloud);
+    }
+
+	private void addRAMParameter() throws ValidationException {
+		addMandatoryParameter(RAM_PARAM, "RAM in GB", ParameterCategory.Cloud);
+	}
+
+	private void addDiskParameter() throws ValidationException {
+		addMandatoryParameter(DISK_PARAM, "Disk in GB", ParameterCategory.Cloud);
 	}
 
 	private void addVolatileDiskParameter() throws ValidationException {

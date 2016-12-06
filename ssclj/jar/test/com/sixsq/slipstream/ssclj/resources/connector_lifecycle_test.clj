@@ -38,12 +38,14 @@
                  (content-type "application/json")
                  (header authn-info-header "root ADMIN")
                  (request template-url)
-                 (ltu/body->json)
+                 (ltu/body->edn)
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
-        valid-create {:connectorTemplate (strip-unwanted-attrs (assoc template :alphaKey 2001))}
+        valid-create {:connectorTemplate (strip-unwanted-attrs (merge template {:alphaKey 2001
+                                                                                :instanceName "alpha-omega"}))}
         href-create {:connectorTemplate {:href     href
-                                         :alphaKey 3001}}
+                                         :alphaKey 3001
+                                         :instanceName "alpha-omega"}}
         invalid-create (assoc-in valid-create [:connectorTemplate :invalid] "BAD")]
 
     ;; anonymous create should fail
@@ -52,7 +54,7 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str valid-create))
-        (ltu/body->json)
+        (ltu/body->edn)
         (ltu/is-status 403))
 
     ;; user create should also fail
@@ -62,7 +64,7 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str valid-create))
-        (ltu/body->json)
+        (ltu/body->edn)
         (ltu/is-status 403))
 
     ;; admin create with invalid template fails
@@ -72,7 +74,7 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str invalid-create))
-        (ltu/body->json)
+        (ltu/body->edn)
         (ltu/is-status 400))
 
     ;; full connector lifecycle as administrator should work
@@ -82,7 +84,7 @@
                   (request base-uri
                            :request-method :post
                            :body (json/write-str valid-create))
-                  (ltu/body->json)
+                  (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -91,13 +93,13 @@
       (-> (session (ring-app))
           (header authn-info-header "root ADMIN")
           (request abs-uri)
-          (ltu/body->json)
+          (ltu/body->edn)
           (ltu/is-status 200))
 
       ;; anonymous query fails
       (-> (session (ring-app))
           (request base-uri)
-          (ltu/body->json)
+          (ltu/body->edn)
           (ltu/is-status 403))
 
       ;; admin query succeeds
@@ -105,7 +107,7 @@
                         (content-type "application/json")
                         (header authn-info-header "root ADMIN")
                         (request base-uri)
-                        (ltu/body->json)
+                        (ltu/body->edn)
                         (ltu/is-status 200)
                         (ltu/is-resource-uri collection-uri)
                         (ltu/is-count #(= 1 %))
@@ -119,7 +121,7 @@
             (-> (session (ring-app))
                 (header authn-info-header "root ADMIN")
                 (request entry-uri)
-                (ltu/body->json)
+                (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-id id)))))
 
@@ -128,14 +130,14 @@
           (header authn-info-header "root ADMIN")
           (request abs-uri
                    :request-method :delete)
-          (ltu/body->json)
+          (ltu/body->edn)
           (ltu/is-status 200))
 
       ;; ensure entry is really gone
       (-> (session (ring-app))
           (header authn-info-header "root ADMIN")
           (request abs-uri)
-          (ltu/body->json)
+          (ltu/body->edn)
           (ltu/is-status 404)))
 
     ;; abbreviated lifecycle using href to template instead of copy
@@ -145,7 +147,7 @@
                   (request base-uri
                            :request-method :post
                            :body (json/write-str href-create))
-                  (ltu/body->json)
+                  (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -155,14 +157,14 @@
           (header authn-info-header "root ADMIN")
           (request abs-uri
                    :request-method :delete)
-          (ltu/body->json)
+          (ltu/body->edn)
           (ltu/is-status 200))
 
       ;; ensure entry is really gone
       (-> (session (ring-app))
           (header authn-info-header "root ADMIN")
           (request abs-uri)
-          (ltu/body->json)
+          (ltu/body->edn)
           (ltu/is-status 404)))))
 
 (deftest bad-methods

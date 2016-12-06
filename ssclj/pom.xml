@@ -4,7 +4,7 @@
 
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamCljResources</artifactId>
-  <version>3.12-SNAPSHOT</version>
+  <version>3.17-SNAPSHOT</version>
   <name>SlipStream SSCLJ (POM)</name>
 
   <description>A server with the clojure-based resources.</description>
@@ -14,11 +14,13 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.12-SNAPSHOT</version>
+    <version>3.17-SNAPSHOT</version>
   </parent>
 
   <modules>
     <module>jar</module>
+    <module>tools</module>
+    <module>service-catalog</module>
   </modules>
 
   <profiles>
@@ -31,25 +33,21 @@
       </activation>
       <modules>
         <module>rpm</module>
+        <module>service-catalog-rpm</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>build-rpm-local</id>
+      <activation>
+        <file>
+          <exists>/usr/local/bin/rpmbuild</exists>
+        </file>
+      </activation>
+      <modules>
+        <module>rpm</module>
+        <module>service-catalog-rpm</module>
       </modules>
     </profile>
   </profiles>
-
-<!--
-  <dependencyManagement>
-    <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.7</version>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
-    </dependency>
-    </dependencies>
-  </dependencyManagement>
---> 
 
 </project>

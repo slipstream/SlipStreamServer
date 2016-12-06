@@ -18,7 +18,7 @@
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamServer</artifactId>
-		<version>3.12-SNAPSHOT</version>
+		<version>3.17-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -37,6 +37,18 @@
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamPersistence</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbSerializers-jar</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -118,8 +130,8 @@
 				<configuration>
 					<systemPropertyVariables>
 						<property>
-							<name>slipstream.config.file</name>
-							<value>${project.build.directory}/configuration/slipstream.conf
+							<name>slipstream.config.dir</name>
+							<value>${project.build.directory}/configuration
 							</value>
 						</property>
 					</systemPropertyVariables>

@@ -15,104 +15,100 @@
     [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.db.es.es-util :as esu]))
 
-(defn body->json
-  [m]
+(defmacro is-status
+  [m status]
+  `((fn [m# status#]
+      (let [actual# (get-in m# [:response :status])]
+        (is (= status# actual#) (str "!!!! Expecting status " status# " got " (or actual# "nil")))
+        m#)) ~m ~status))
 
+(defmacro is-key-value
+  ([m f k v]
+   `((fn [m# f# k# v#]
+       (let [actual# (-> m# :response :body k# f#)]
+         (is (= v# actual#) (str "!!!! Expecting " v# " got " (or actual# "nil") " for " k#))
+         m#)) ~m ~f ~k ~v))
+  ([m k v]
+   `(is-key-value ~m identity ~k ~v)))
+
+(defmacro has-key
+  [m k]
+  `((fn [m# k#]
+      (-> m#
+          (get-in [:response :body])
+          (contains? k#)
+          (is (str "!!!! Map did not contain key " k#))))
+     ~m ~k))
+
+(defmacro is-resource-uri
+  [m type-uri]
+  `(is-key-value ~m :resourceURI ~type-uri))
+
+(defn select-op [m op]
+  (let [op-map (get-in m [:response :body :operations])
+        defined-ops (map :rel op-map)]
+    [(some #(.endsWith % op) defined-ops) defined-ops]))
+
+(defmacro is-operation-present [m expected-op]
+  `((fn [m# expected-op#]
+      (let [[op# defined-ops#] (select-op m# expected-op#)]
+        (is op# (str "!!!! Missing " expected-op# " in " defined-ops#))
+        m#))
+     ~m ~expected-op))
+
+(defmacro is-operation-absent [m absent-op]
+  `((fn [m# absent-op#]
+      (let [[op# defined-ops#] (select-op m# absent-op#)]
+        (is (nil? op#) (str "!!!! Unexpected op " absent-op# " in " defined-ops#)))
+      m#)
+     ~m ~absent-op))
+
+(defmacro is-id
+  [m id]
+  `(is-key-value ~m :id ~id))
+
+(defmacro is-count
+  [m f]
+  `((fn [m# f#]
+      (let [count# (get-in m# [:response :body :count])]
+        (if (fn? f#)
+          (is (f# count#) (str "!!!! Function of count did not return truthy value"))
+          (is (= f# count#) (str "!!!! Count wrong, expecting " f# ", got " (or count# "nil"))))
+        m#)) ~m ~f))
+
+(defn does-body-contain
+  [m v]
+  `((fn [m# v#]
+      (let [body# (get-in m# [:response :body])]
+        (is (= (merge body# v#) body#))))
+     ~m ~v))
+
+(defmacro is-location
+  [m]
+  `((fn [m#]
+      (let [uri-header# (get-in m# [:response :headers "Location"])
+            uri-body# (get-in m# [:response :body :resource-id])]
+        (is uri-header# (str "!!!! Location header was not set"))
+        (is uri-body# (str "!!!! Location (resource-id) in body was not set"))
+        (is (= uri-header# uri-body#) (str "!!!! Mismatch in locations, header=" uri-header# ", body=" uri-body#))
+        m#)) ~m))
+
+(defn location [m]
+  (let [uri (get-in m [:response :headers "Location"])]
+    (is uri (str "!!!! Location missing from response"))
+    uri))
+
+(defn operations->map [m]
+  (into {} (map (juxt :rel :href) (:operations m))))
+
+(defn body->edn
+  [m]
   (if-let [body (get-in m [:response :body])]
     (let [updated-body (if (string? body)
                          (json/read-str body :key-fn keyword :eof-error? false :eof-value {})
                          (json/read (io/reader body) :key-fn keyword :eof-error? false :eof-value {}))]
       (update-in m [:response :body] (constantly updated-body)))
     m))
-
-(defmacro is-set-cookie
-  [m]
-  `((fn [m#]
-      (let [token# (-> m#
-                       (get-in [:response :cookies])
-                       vals
-                       first
-                       (get-in [:value :token]))
-            ok?# (and token#
-                      (re-matches #".+" token#)
-                      (not (re-matches #".*INVALID.*" token#)))]
-        (is ok?# (str "!!!! Set-Cookie header did not set cookie: " (or token# "nil")))
-        m#)) ~m))
-
-(defmacro is-unset-cookie
-  [m]
-  `((fn [m#]
-      (let [token# (-> m#
-                       (get-in [:response :cookies])
-                       vals
-                       first
-                       (get-in [:value :token]))
-            ok?# (and token#
-                      (re-matches #".*INVALID.*" token#))]
-        (is ok?# (str "!!!! Set-Cookie header did not invalidate cookie: " (or token# "nil")))
-        m#)) ~m))
-
-(defn is-status
-  [m status]
-  (let [actual (get-in m [:response :status])
-        result (= status (get-in m [:response :status]))]
-    (when-not result
-      (println "!!!! Expecting status " status " got " actual))
-    (is result)
-    m))
-
-(defn is-key-value
-  ([m f k v]
-   (let [actual (-> m :response :body k f)]
-     (when-not (= v actual)
-       (println "???? Expecting " v " got " actual " for " k))
-     (is (= v actual))
-     m))
-  ([m k v]
-   (is-key-value m identity k v)))
-
-(defn has-key [m k]
-  (-> m
-      (get-in [:response :body])
-      (contains? k)
-      is))
-
-(defn is-resource-uri [m type-uri]
-  (is-key-value m :resourceURI type-uri))
-
-(defn is-operation-present [m expected-op]
-  (let [operations (get-in m [:response :body :operations])
-        op (some #(.endsWith % expected-op) (map :rel operations))]
-    (when-not op (println "???? Missing " expected-op " in " (map :rel operations)))
-    (is op))
-  m)
-
-(defn is-operation-absent [m absent-op]
-  (let [operations (get-in m [:response :body :operations])
-        op (some #(.endsWith % absent-op) (map :rel operations))]
-    (when op (println "???? Present " absent-op " in " (map :rel operations)))
-    (is (nil? op)))
-  m)
-
-(defn operations->map [m]
-  (into {} (map (juxt :rel :href) (:operations m))))
-
-(defn is-id [m id]
-  (is-key-value m :id id))
-
-(defn is-count [m f]
-  (let [count (get-in m [:response :body :count])]
-    (is (f count))
-    m))
-
-(defn does-body-contain [m v]
-  (let [body (get-in m [:response :body])]
-    (is (= (merge body v) body))))
-
-(defn location [m]
-  (let [uri (get-in m [:response :headers "Location"])]
-    (is uri)
-    uri))
 
 (defn entries [m k]
   (get-in m [:response :body k]))

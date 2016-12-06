@@ -1,4 +1,4 @@
-(def +version+ "3.12-SNAPSHOT")
+(def +version+ "3.17-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamServerPRSlib-jar
@@ -58,12 +58,16 @@
          "runs all tests and performs full compilation"
          []
          (comp
-           (aot :all true)
-           (test)))
+           (test)
+           (sift :include #{#".*_test\.clj"}
+                 :invert true)
+           (aot :all true)))
 
 (deftask build []
          (comp
            (pom)
+           (sift :include #{#".*_test\.clj"}
+                 :invert true)
            (aot :all true)
            (uber)
            (jar)))

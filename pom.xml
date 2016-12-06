@@ -2,15 +2,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamServer</artifactId>
-  <version>3.12-SNAPSHOT</version>
+  <version>3.17-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>SlipStream Server</name>
+  <name>SlipStream Server (POM)</name>
   <url>http://sixsq.com/</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStream</artifactId>
-    <version>3.12-SNAPSHOT</version>
+    <version>3.17-SNAPSHOT</version>
     <relativePath>../SlipStream</relativePath>
   </parent>
 
@@ -21,8 +21,12 @@
     <module>jar-async</module>
     <module>jar-service</module>
     <module>jar-prslib</module>
+    <module>jar-pricing-lib</module>
+    <module>jar-placement-lib</module>
+    <module>jar-prs-service</module>
     <module>ssclj</module>
     <module>db-binding</module>
+    <module>db-serializers</module>
     <module>static-content</module>
     <module>war</module>
   </modules>
@@ -37,6 +41,19 @@
       </activation>
       <modules>
         <module>rpm</module>
+        <module>rpm-prs</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>build-server-rpm-local</id>
+      <activation>
+        <file>
+          <exists>/usr/local/bin/rpmbuild</exists>
+        </file>
+      </activation>
+      <modules>
+        <module>rpm</module>
+        <module>rpm-prs</module>
       </modules>
     </profile>
   </profiles>

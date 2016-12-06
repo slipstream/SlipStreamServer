@@ -5,3 +5,5 @@ export JETTY_USER=slipstream
 export TMPDIR=/opt/slipstream/server/tmp
 export JAVA=/etc/alternatives/jre_${server.jre.version}/bin/java
 export PASSPHRASE=sl1pstre8m
+export JETTY_ARGS="$JETTY_ARGS -Des.host=localhost -Des.port=9300"
+

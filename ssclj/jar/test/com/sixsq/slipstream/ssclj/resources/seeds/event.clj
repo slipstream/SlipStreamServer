@@ -42,17 +42,21 @@
 
 (defn insert-to-db
   [events username]
-  (let [state (-> (session (tu/ring-app))
+  (let [nb    (count events)
+        state (-> (session (tu/ring-app))
                   (content-type "application/json")
-                  (header aih/authn-info-header username))]
-    (doseq [event events]
+                  (header aih/authn-info-header username))
+        indexed-events (map-indexed (fn [idx itm] [idx itm]) events)]
+    (doseq [[i event] indexed-events]
+      (println i "/" nb)
       (request state base-uri
                :request-method :post
                :body (json/write-str event)))))
 
 (defn seed!
   [nb-events username & {:keys [clean]}]
-  (db/set-impl! (esb/get-instance))
+  (db/set-impl!     (esb/get-instance))
+  (esb/set-client!  (esb/create-client))
   ;;(when clean)
     ;; TODO ES equivalent (kc/delete dbdb/resources))
   (-> nb-events

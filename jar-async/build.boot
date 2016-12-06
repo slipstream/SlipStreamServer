@@ -1,4 +1,4 @@
-(def +version+ "3.12-SNAPSHOT")
+(def +version+ "3.17-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamAsync
@@ -26,6 +26,8 @@
 
                    [com.sixsq.slipstream/SlipStreamPersistence]
                    [com.sixsq.slipstream/SlipStreamConnector]
+
+                   [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "test"]
 
                    [adzerk/boot-test]
                    [adzerk/boot-reload]

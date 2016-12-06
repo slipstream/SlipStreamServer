@@ -31,7 +31,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sixsq.slipstream.event.Event;
 import org.hibernate.LazyInitializationException;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sixsq.slipstream.exceptions.AbortException;
@@ -43,6 +45,11 @@ import com.sixsq.slipstream.statemachine.States;
 public class RunTest {
 
 	private static final Set<String> cloudServiceNames = new HashSet<String>(Arrays.asList("test"));
+
+	@BeforeClass
+	public static void setupClass() {
+		Event.muteForTests();
+	}
 
 	@Test
 	public void loadWithRuntimeParameters() throws ValidationException, NotFoundException, AbortException {

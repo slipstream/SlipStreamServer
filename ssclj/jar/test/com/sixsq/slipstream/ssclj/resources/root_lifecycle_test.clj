@@ -32,7 +32,7 @@
   ; retrieve root resource (anonymously should work)
   (-> (session (ring-app))
       (request base-uri)
-      (ltu/body->json)
+      (ltu/body->edn)
       (ltu/is-status 200)
       (ltu/is-resource-uri resource-uri)
       (ltu/is-operation-absent "edit")
@@ -42,7 +42,7 @@
   (-> (session (ring-app))
       (header authn-info-header "root ADMIN")
       (request base-uri)
-      (ltu/body->json)
+      (ltu/body->edn)
       (ltu/is-status 200)
       (ltu/is-resource-uri resource-uri)
       (ltu/is-operation-present "edit")
@@ -55,7 +55,7 @@
       (request base-uri
                :request-method :put
                :body (json/write-str {:name "dummy"}))
-      (ltu/body->json)
+      (ltu/body->edn)
       (ltu/is-status 403))
 
   ;; update the entry, verify updated doc is returned
@@ -66,7 +66,7 @@
       (request base-uri
                :request-method :put
                :body (json/write-str {:name "dummy"}))
-      (ltu/body->json)
+      (ltu/body->edn)
       (ltu/is-status 200)
       (ltu/is-resource-uri resource-uri)
       (ltu/is-operation-present "edit")
@@ -75,7 +75,7 @@
   ;; verify that subsequent reads find the right data
   (-> (session (ring-app))
       (request base-uri)
-      (ltu/body->json)
+      (ltu/body->edn)
       (ltu/is-status 200)
       (ltu/is-resource-uri resource-uri)
       (ltu/is-operation-absent "edit")

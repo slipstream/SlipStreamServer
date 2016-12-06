@@ -43,10 +43,10 @@ public class Collector {
 	public static final int NO_CREDENTIALS = -1;
 
 	public static int collect(User user, Connector connector, int timeout) {
-		return collect(user, connector, timeout, 0);
+		return collect(user, connector, timeout, "test-worker");
 	}
 
-	public static int collect(User user, Connector connector, int timeout, int workerId) {
+	public static int collect(User user, Connector connector, int timeout, String workerId) {
 		int res = EXCEPTION_OCCURRED;
 		if (connector.isCredentialsSet(user)) {
 			String uuid = UUID.randomUUID().toString();

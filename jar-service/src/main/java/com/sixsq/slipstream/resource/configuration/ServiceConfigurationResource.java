@@ -92,24 +92,6 @@ public class ServiceConfigurationResource extends
 		configuration.store();
 	}
 
-	@Post
-	public void reloadConfigFile(Representation entity)
-			throws ValidationException {
-
-		try {
-			configuration.reset();
-		} catch (ConfigurationException e) {
-			Util.throwConfigurationException(e);
-		}
-		configuration.store();
-		ConnectorFactory.resetConnectors();
-
-		postEventReloaded();
-
-		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), getRequest().getResourceRef().getPath());
-		getResponse().setLocationRef(absolutePath);
-	}
-
 	@Override
 	protected String getPageRepresentation() {
 		return "configuration";

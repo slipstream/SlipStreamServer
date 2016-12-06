@@ -546,6 +546,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 	 * e.g. orchestrator:apache1, orchestrator:testclient1, ... or
 	 * orchestrator-stratuslab:apache1, orchestrator-openstack:testclient1, ...
 	 */
+	@Column(length=65536)
 	private String groups = "";
 
 	@Attribute(name = "user", required = false)
