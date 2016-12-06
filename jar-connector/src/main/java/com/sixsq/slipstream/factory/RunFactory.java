@@ -20,12 +20,6 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
@@ -34,8 +28,26 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.ModuleParameter;
+import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunParameter;
+import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.FileUtil;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class RunFactory {
 
@@ -52,12 +64,12 @@ public abstract class RunFactory {
 		Set<String> cloudServiceNames = new HashSet<String>(cloudServicePerNode.values());
 
 		Map<String, String> instanceTypePerNode = resolveInstanceTypes(module, user, userChoices);
-
 		validateModule(module, cloudServicePerNode);
 
 		Run run = new Run(module, getRunType(), cloudServiceNames, user);
 
 		initCloudServices(run, cloudServicePerNode);
+		initInstanceTypes(run, instanceTypePerNode);
 
 		initDefaultRunParameters(run, user);
 		initExtraRunParameters(module, run);
@@ -119,7 +131,11 @@ public abstract class RunFactory {
 			String keyCloudService = constructParamName(entry.getKey(), RuntimeParameter.CLOUD_SERVICE_NAME);
 			RunParameter rpCloudService = new RunParameter(keyCloudService, entry.getValue(), RuntimeParameter.CLOUD_SERVICE_DESCRIPTION);
 			run.setParameter(rpCloudService);
+		}
+	}
 
+	private void initInstanceTypes(Run run, Map<String, String> instanceTypePerNode) throws ValidationException {
+		for (Map.Entry<String, String> entry : instanceTypePerNode.entrySet()) {
 			String keyInstanceType = constructParamName(entry.getKey(), RuntimeParameter.INSTANCE_TYPE_KEY);
 			RunParameter rpInstanceType = new RunParameter(keyInstanceType, entry.getValue(), RuntimeParameter.INSTANCE_TYPE_DESCRIPTION);
 			run.setParameter(rpInstanceType);
