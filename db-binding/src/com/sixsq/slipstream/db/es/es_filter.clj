@@ -26,6 +26,9 @@
   (.. (QueryBuilders/rangeQuery term)
       (lt value)))
 
+(defn not-equal-query [^String term ^Object value]
+  (.mustNot (QueryBuilders/boolQuery) (term-query term value)))
+
 (defn and-query [clauses]
   (let [q (QueryBuilders/boolQuery)]
     (dorun (map #(.must q %) clauses))
@@ -75,11 +78,15 @@
           [">" :Attribute] (range-gt-query Attribute Value)
           ["<=" :Attribute] (range-le-query Attribute Value)
           ["<" :Attribute] (range-lt-query Attribute Value)
+          ["!=" :Attribute] (not-equal-query Attribute Value)
+
           ["=" :Value] (term-query Attribute Value)
           [">=" :Value] (range-le-query Attribute Value)
           [">" :Value] (range-lt-query Attribute Value)
           ["<=" :Value] (range-ge-query Attribute Value)
           ["<" :Value] (range-gt-query Attribute Value)
+          ["!=" :Value] (not-equal-query Attribute Value)
+
           m)))))
 
 (defmethod convert :PropExpr [[_ Prop Op Value]]
