@@ -76,6 +76,15 @@
                              'com.sixsq.slipstream.tools.cli.ssconfigmigrate})
            (jar)))
 
+(deftask build-uberjar []
+         (comp
+           (pom)
+           (aot :namespace #{'com.sixsq.slipstream.tools.cli.ssconfig
+                             'com.sixsq.slipstream.tools.cli.ssconfigdump
+                             'com.sixsq.slipstream.tools.cli.ssconfigmigrate})
+           (uber)
+           (jar)))
+
 (deftask mvn-test
          "run all tests of project"
          []
