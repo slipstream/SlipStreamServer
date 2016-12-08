@@ -2,31 +2,40 @@
   (:require
     [clojure.walk :as w]
     [superstring.core :as s]
-    [com.sixsq.slipstream.db.utils.time-utils :as uu]
-    )
+    [com.sixsq.slipstream.db.utils.time-utils :as uu])
   (:import
     [org.elasticsearch.index.query QueryBuilders]))
 
-(defn term-query [^String term ^Object value]
+(defn term-query
+  [^String term ^Object value]
   (QueryBuilders/termQuery term value))
 
-(defn range-ge-query [^String term ^Object value]
+(defn- range-ge-query
+  [^String term ^Object value]
   (.. (QueryBuilders/rangeQuery term)
       (gte value)))
 
-(defn range-gt-query [^String term ^Object value]
+(defn- range-gt-query
+  [^String term ^Object value]
   (.. (QueryBuilders/rangeQuery term)
       (gt value)))
 
-(defn range-le-query [^String term ^Object value]
+(defn- range-le-query
+  [^String term ^Object value]
   (.. (QueryBuilders/rangeQuery term)
       (lte value)))
 
-(defn range-lt-query [^String term ^Object value]
+(defn- range-lt-query
+  [^String term ^Object value]
   (.. (QueryBuilders/rangeQuery term)
       (lt value)))
 
-(defn and-query [clauses]
+(defn- not-equal-query
+  [^String term ^Object value]
+  (.mustNot (QueryBuilders/boolQuery) (term-query term value)))
+
+(defn and-query
+  [clauses]
   (let [q (QueryBuilders/boolQuery)]
     (dorun (map #(.must q %) clauses))
     q))
@@ -40,7 +49,8 @@
     (dorun (map #(.should q %) clauses))
     q))
 
-(defn strip-quotes [s]
+(defn- strip-quotes
+  [s]
   (s/substring s 1 (dec (s/length s))))
 
 (defmulti convert
@@ -75,15 +85,19 @@
           [">" :Attribute] (range-gt-query Attribute Value)
           ["<=" :Attribute] (range-le-query Attribute Value)
           ["<" :Attribute] (range-lt-query Attribute Value)
+          ["!=" :Attribute] (not-equal-query Attribute Value)
+
           ["=" :Value] (term-query Attribute Value)
           [">=" :Value] (range-le-query Attribute Value)
           [">" :Value] (range-lt-query Attribute Value)
           ["<=" :Value] (range-ge-query Attribute Value)
           ["<" :Value] (range-gt-query Attribute Value)
+          ["!=" :Value] (not-equal-query Attribute Value)
+
           m)))))
 
 (defmethod convert :PropExpr [[_ Prop Op Value]]
-  [[:Attribute (str "property." (second Prop))] Op Value])
+  [[:Attribute (str "property/" (second Prop))] Op Value])
 
 (defmethod convert :AndExpr [v]
   (let [args (rest v)]
