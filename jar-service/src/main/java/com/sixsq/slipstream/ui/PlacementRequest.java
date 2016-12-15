@@ -47,6 +47,8 @@ public class PlacementRequest {
 
     private List<String> userConnectors;
 
+    private boolean isScalable;
+
     public Map<String, Object> asMap() {
 
         Map<String, Object> result = new HashMap<>();
@@ -54,7 +56,7 @@ public class PlacementRequest {
         Module module = getModule();
         result.put("module", module);
         result.put("user-connectors", userConnectors);
-
+        result.put("isScalable", isScalable);
         result.put("placement-params", module.placementPoliciesPerComponent());
         result.put("prs-endpoint", prsEndPoint);
 
@@ -84,7 +86,8 @@ public class PlacementRequest {
 
     public String toString() {
         return "moduleURI=" + moduleUri + ", endPoint=" + prsEndPoint + ", userConnectors="
-                + userConnectors + ", placementParams=" + placementParams;
+                + userConnectors + ", placementParams=" + placementParams +
+                ", isScalable=" + isScalable;
     }
 
 

@@ -75,10 +75,24 @@
     (app? module)       (app->map module user-connectors)
     :else               (throw-wrong-category module)))
 
+(defn- add-orchestrator-component
+  [m scalable?]
+  (if scalable?
+    (update m :components
+               #(conj % {:module                   "orchestrator"
+                         :node                     "orchestrator"
+                         :placement-policy         nil
+                         :connector-instance-types {}}))
+    m))
+
 (defn- explode-module
   [m]
+
+  (log/info "explode module, scalable ? " (:isScalable m))
+
   (-> m
       (assoc :components (module->components (:module m) (:user-connectors m)))
+      (add-orchestrator-component (:isScalable m))
       (dissoc :module)))
 
 (defn placement->map
