@@ -23,6 +23,8 @@ package com.sixsq.slipstream.run;
 import javax.persistence.EntityManager;
 
 import com.sixsq.slipstream.exceptions.*;
+import org.json.JSONObject;
+import org.json.XML;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -72,8 +74,7 @@ public class RunResource extends RunBaseResource {
 
 	}
 
-	@Get("xml")
-	public Representation toXml() throws NotFoundException,
+	private String toXmlString() throws NotFoundException,
 			ValidationException, ConfigurationException {
 
 		long start = System.currentTimeMillis();
@@ -98,7 +99,24 @@ public class RunResource extends RunBaseResource {
 
 		logTimeDiff("processing get on run", start);
 
+		return xml;
+	}
+
+	@Get("xml")
+	public Representation toXml() throws NotFoundException,
+			ValidationException, ConfigurationException {
+
+		String xml = toXmlString();
 		return new StringRepresentation(xml, MediaType.APPLICATION_XML);
+	}
+
+	@Get("json")
+	public Representation toJson() throws NotFoundException,
+			ValidationException, ConfigurationException {
+
+		String xml = toXmlString();
+		JSONObject obj = XML.toJSONObject(xml);
+		return new StringRepresentation(obj.toString(), MediaType.APPLICATION_JSON);
 	}
 
 	@Get("html")
@@ -148,7 +166,7 @@ public class RunResource extends RunBaseResource {
 	public void terminate() {
 		String errorMessage = "Failed terminating VMs";
 		try {
-			
+
 			this.run.postEventTerminate();
 			Terminator.terminate(this.run.getResourceUri());
 

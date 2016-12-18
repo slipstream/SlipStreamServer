@@ -66,6 +66,7 @@
 ;; valid filters
 (expect (passes-fn :Filter)
         (from-each [s ["alpha=3"
+                       "alpha!=3"
                        "3=alpha"
                        "alpha=3 and beta=4"
                        "3=alpha and 4=beta"

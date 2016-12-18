@@ -1,4 +1,4 @@
-(def +version+ "3.17-SNAPSHOT")
+(def +version+ "3.19-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamToolsCli-jar
@@ -74,6 +74,15 @@
            (aot :namespace #{'com.sixsq.slipstream.tools.cli.ssconfig
                              'com.sixsq.slipstream.tools.cli.ssconfigdump
                              'com.sixsq.slipstream.tools.cli.ssconfigmigrate})
+           (jar)))
+
+(deftask build-uberjar []
+         (comp
+           (pom)
+           (aot :namespace #{'com.sixsq.slipstream.tools.cli.ssconfig
+                             'com.sixsq.slipstream.tools.cli.ssconfigdump
+                             'com.sixsq.slipstream.tools.cli.ssconfigmigrate})
+           (uber)
            (jar)))
 
 (deftask mvn-test
