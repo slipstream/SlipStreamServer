@@ -110,7 +110,7 @@
   (let [[cin pname] (u/param-get-cat-and-name p)
         cn (get cin->cn cin)]
     (if (s/blank? pname)
-      (throw (Exception. "Parameter name is blank when mapping connector parameters."))
+      (log/warn "Parameter name is blank when mapping connector parameter for:" cin)
       (->> pname
            (conn-pname-to-kwname cn)
            keyword))))
@@ -233,6 +233,12 @@
   (assoc conn :id (str con/resource-url "/" cin)
               :cloudServiceType (get (sc-connector-names-map sc) cin)))
 
+(defn param-non-global-and-named?
+  [p cin cin->cn]
+  (if (and (non-gobal-category-match? p cin) (connector-param-name-as-kw p cin->cn))
+    true
+    false))
+
 (defn sc->connector
   "Parameter name is a string with removed category, i.e, [cat.]param.name.
   Mapping to keywords is looked up in local map and in the connector one
@@ -240,7 +246,7 @@
   [sc cin]
   (let [cin->cn (sc-connector-names-map sc)]
     (-> {}
-        (into (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p cin)]
+        (into (for [p (vals (.getParameters sc)) :when (param-non-global-and-named? p cin cin->cn)]
                 (let [kw (connector-param-name-as-kw p cin->cn)]
                   [kw (conn-param-value p (conn-name p cin->cn))])))
         (assoc-conn-identity sc cin))))
@@ -249,7 +255,7 @@
   [sc cin]
   (let [cin->cn (sc-connector-names-map sc)]
     (into {}
-          (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p cin)]
+          (for [p (vals (.getParameters sc)) :when (param-non-global-and-named? p cin cin->cn)]
             [(connector-param-name-as-kw p cin->cn)
              (u/desc-from-param p)]))))
 

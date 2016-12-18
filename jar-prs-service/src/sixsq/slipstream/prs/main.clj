@@ -1,9 +1,9 @@
-(ns sixsq.slipstream.pricing.service.main
+(ns sixsq.slipstream.prs.main
   (:gen-class))
 
 (def ^:const default-port 15000)
 
-(def ^:const server-ns 'sixsq.slipstream.pricing.service.server)
+(def ^:const server-ns 'sixsq.slipstream.prs.ring)
 
 (def ^:const environ-ns 'environ.core)
 

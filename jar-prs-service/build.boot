@@ -1,4 +1,4 @@
-(def +version+ "3.17-SNAPSHOT")
+(def +version+ "3.19-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPricingService-jar
@@ -20,19 +20,12 @@
   #(vec (concat %
                 (merge-defaults
                  ['sixsq/default-deps (get-env :version)]
-                 '[#_[org.clojure/clojurescript]
-
-                   [org.clojure/core.async]
-                   
-                   [com.sixsq.slipstream/SlipStreamPricingLib-jar]
-                   [com.sixsq.slipstream/SlipStreamPlacementLib-jar]
+                 '[[com.sixsq.slipstream/SlipStreamPlacementLib-jar]
 
                    [compojure]
                    [aleph]
-                   [environ]
                    [ring/ring-json]
                    [ring/ring-defaults]
-                   [http-kit]
 
                    [adzerk/boot-test]
                    [tolitius/boot-check]
@@ -44,18 +37,13 @@
   '[tolitius.boot-check :refer [with-yagni with-eastwood with-kibit with-bikeshed]])
 
 (set-env!
-  :source-paths #{"dev-resources" "test"}
+  :source-paths #{"dev-resources"}
   :resource-paths #{"src"})
 
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
-  uber {:exclude-scope #{"test"}
-        :exclude       #{#".*/pom.xml"
-                         #"META-INF/.*\.SF"
-                         #"META-INF/.*\.DSA"
-                         #"META-INF/.*\.RSA"}}
-  serve {:handler 'sixsq.slipstream.pricing.service.server/app
+  serve {:handler 'sixsq.slipstream.prs.ring/handler
          :reload true}
   watch {:verbose true})
 
@@ -71,8 +59,7 @@
   []
   (comp
    (pom)
-   (aot :all true)
-   #_(aot :namespace #{'sixsq.slipstream.pricing.service.main})
+   (aot :namespace #{'sixsq.slipstream.prs.main})
    (jar)))
 
 (deftask run
@@ -81,7 +68,6 @@
   (comp
    (watch)
    (pom)
-   #_(aot :all true)
    (serve)))
 
 (deftask mvn-test

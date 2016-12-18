@@ -1,4 +1,4 @@
-(def +version+ "3.17-SNAPSHOT")
+(def +version+ "3.19-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/ssclj-service-catalog-jar
