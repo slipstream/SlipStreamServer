@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>ring-container-rpm</artifactId>
+  <name>SlipStream Ring Container (RPM)</name>
+
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>com.sixsq.slipstream</groupId>
+    <artifactId>SlipStreamServer</artifactId>
+    <version>3.16-SNAPSHOT</version>
+  </parent>
+
+  <!-- NOTE: This project MUST have same version as proxy module. -->
+  <properties>
+    <installation.dir>/opt/slipstream/ring-container</installation.dir>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>slipstream-ring-container-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>slipstream-ring-container</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+  </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+
+        <executions>
+
+          <execution>
+            <id>copy-dependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/dependency/lib</outputDirectory>
+              <stripVersion>true</stripVersion>
+              <stripClassifier>true</stripClassifier>
+              <excludeTypes>pom</excludeTypes>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rpm-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <classifier>${package.os}</classifier>
+          <release>${BUILD_NUMBER}.${package.os}</release>
+          <summary>SlipStream Ring Container</summary>
+          <name>slipstream-ring-container${slipstream.edition}</name>
+          <group>System</group>
+          <vendor>SlipStream</vendor>
+          <packager>SlipStream</packager>
+          <license>Apache 2.0</license>
+          <url>http://sixsq.com</url>
+          <needarch>noarch</needarch>
+          <description>
+            SlipStream Ring Container
+          </description>
+          <requires>
+            <require>jre-headless &gt;= ${server.jre.version}</require>
+            <require>slipstream-useradd${slipstream.edition}</require>
+          </requires>
+
+          <defaultDirmode>755</defaultDirmode>
+          <defaultFilemode>644</defaultFilemode>
+          <defaultGroupname>slipstream</defaultGroupname>
+          <defaultUsername>slipstream</defaultUsername>
+
+          <mappings>
+
+            <mapping>
+              <directory>${installation.dir}/lib</directory>
+              <directoryIncluded>true</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/lib</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/usr/lib/systemd/system</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/scripts/ring-example.service</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/default</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>src/scripts/ring-example</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/opt/slipstream/ring-example/resources</directory>
+              <directoryIncluded>true</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/scripts/log4j.properties</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/opt/slipstream/ring-example/lib</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+            
+            <mapping>
+              <directory>/var/log/slipstream/ring-example</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+            
+          </mappings>
+
+        </configuration>
+
+        <executions>
+          <execution>
+            <id>attach-rpm</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attached-rpm</goal>
+            </goals>
+          </execution>
+        </executions>
+
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+</project>
