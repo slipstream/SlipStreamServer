@@ -1,4 +1,4 @@
-(def +version+ "3.18-SNAPSHOT")
+(def +version+ "3.19-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamServerPRSlib-jar
@@ -6,7 +6,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
   
-  :dependencies '[[org.clojure/clojure "1.8.0"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
