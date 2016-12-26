@@ -1,5 +1,5 @@
 (def +version+ "3.19-SNAPSHOT")
-
+ 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPlacementLib-jar
   :version +version+
