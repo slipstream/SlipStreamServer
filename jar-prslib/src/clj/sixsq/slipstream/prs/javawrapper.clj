@@ -8,7 +8,9 @@
     [clojure.walk :as walk]
     [sixsq.slipstream.prs.core :as prs])
   (:import [java.util Map List Set]
-           [com.sixsq.slipstream.persistence Module ImageModule ModuleCategory ModuleCategory])
+           [com.sixsq.slipstream.persistence Module ImageModule ModuleCategory ModuleCategory]
+           [com.sixsq.slipstream.configuration Configuration]
+           )
   (:gen-class
     :name sixsq.slipstream.prs.core.JavaWrapper
     :methods [#^{:static true} [placeAndRank      [java.util.Map] String]
@@ -45,12 +47,15 @@
 
 (defn- connector->orchestrator-map
   [connector]
-  {:node                      (str "node-orchestrator-" connector)
-   :module                    (str "module-orchestrator-" connector)
-   :cpu.nb                    "0"
-   :ram.GB                    "0"
-   :disk.GB                   "0"
-   :placement-policy          (format "connector/href='%s'" connector)})
+  (let [orchestrator-instance-type (-> (Configuration/getInstance)
+                                       (.getProperty (format "%s.orchestrator.instance.type" connector)))
+        type-policy (if orchestrator-instance-type (format " and schema-org:name='%s'" orchestrator-instance-type) "")]
+    {:node             (str "node-orchestrator-" connector)
+     :module           (str "module-orchestrator-" connector)
+     :cpu.nb           "0"
+     :ram.GB           "0"
+     :disk.GB          "0"
+     :placement-policy (format "connector/href='%s' %s" connector type-policy)}))
 
 (defn- node->map
   [user-connectors [node-name node]]

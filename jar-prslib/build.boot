@@ -24,6 +24,7 @@
                  '[[org.clojure/clojure]
                    
                    [com.sixsq.slipstream/SlipStreamPersistence]
+                   [com.sixsq.slipstream/SlipStreamConnector]
                    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                    [org.clojure/data.json]
                    [org.clojure/tools.logging]
