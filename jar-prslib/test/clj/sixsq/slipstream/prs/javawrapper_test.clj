@@ -3,7 +3,7 @@
     [clojure.test :refer :all]
     [sixsq.slipstream.prs.javawrapper :refer :all])
   (:import [java.util HashMap ArrayList HashSet]
-           [com.sixsq.slipstream.persistence ImageModule DeploymentModule Node]))
+           [com.sixsq.slipstream.persistence ImageModule DeploymentModule Node ModuleParameter ParameterCategory]))
 
 (def cm {"a" "1" "b" "2" "c" "3"})
 (def m (HashMap. cm))
@@ -26,34 +26,64 @@
   (is (= cs (get (java->clj nested-map) "set")))
   (is (= cl (get (java->clj nested-map) "list"))))
 
-(def app (doto (DeploymentModule. "application")
-           (.setNode (Node. "node1" (ImageModule. "image1")))
-           (.setNode (Node. "node2" (ImageModule. "image2")))
-           (.setNode (Node. "node3" (ImageModule. "image3")))))
+(deftest test-placement->map
+  (let [image1 (doto
+                 (ImageModule. "component1")
+                 (.setParameter (ModuleParameter. "cpu.nb" "2" "" ParameterCategory/Cloud))
+                 (.setParameter (ModuleParameter. "ram.GB" "8" "" ParameterCategory/Cloud))
+                 (.setParameter (ModuleParameter. "disk.GB" "50" "" ParameterCategory/Cloud))
+                 (.setParameter (ModuleParameter. "c1.instance.type" "medium" "" ParameterCategory/Cloud))
+                 )
+        image2 (doto
+                 (ImageModule. "component2")
+                 (.setParameter (ModuleParameter. "cpu.nb" "1" "" ParameterCategory/Cloud))
+                 (.setParameter (ModuleParameter. "ram.GB" "4" "" ParameterCategory/Cloud))
+                 (.setParameter (ModuleParameter. "disk.GB" "10" "" ParameterCategory/Cloud))
+                 (.setPlacementPolicy "schema-org:location='de'"))
+        app (doto (DeploymentModule. "application")
+                  (.setNode (Node. "node1" image1))
+                  (.setNode (Node. "node2" image2)))
+        app-map (placement->map {:module          app
+                                 :user-connectors ["c5" "c6"]})]
 
-(deftest test-module-to-map-component
-  (is (= 1 (-> (ImageModule. "component")
-               module->map
-               :components
-               count))))
+    (is (= {:prs-endpoint    "http://localhost:8203/filter-rank"
+            :components      [{:module           "module/component1"
+                               :placement-policy nil
+                               :cpu.nb           "2"
+                               :ram.GB           "8"
+                               :disk.GB          "50"
+                               :connector-instance-types {"c1" "medium" "c2" nil}}]
 
-(deftest test-module-to-map-app
-  (is (= 3 (-> app
-               module->map
-               :components
-               count))))
+            :user-connectors ["c1" "c2"]}
+           (placement->map {:prs-endpoint    "http://localhost:8203/filter-rank"
+                            :module          image1
+                            :user-connectors ["c1" "c2"]})))
 
-(deftest test-process-module-compenent
-  (let [m (process-module {:module (ImageModule. "component")
-                           :foo    nil})]
-    (is (contains? m :foo))
-    (is (contains? m :module))
-    (is (contains? (:module m) :components))))
+    (is (= {:components      [{:module           "module/component2"
+                               :placement-policy "schema-org:location='de'"
+                               :cpu.nb           "1"
+                               :ram.GB           "4"
+                               :disk.GB          "10"
+                               :connector-instance-types {"c3" nil}}]
+            :user-connectors ["c3"]}
+           (placement->map {:module          image2
+                            :user-connectors ["c3"]})))
 
-(deftest test-comps-from-app
-  (is (= 3 (count (app->map app))))
-  (is (contains? (first (app->map app)) :module))
-  (is (= "module/image1" (->> (app->map app)
-                              (sort-by :module)
-                              (first)
-                              :module))))
+    (is (= ["c5" "c6"] (:user-connectors app-map)))
+
+    (is (= #{{:module           "module/component2"
+              :node             "node2"
+              :cpu.nb           "1"
+              :ram.GB           "4"
+              :disk.GB          "10"
+              :placement-policy "schema-org:location='de'"
+              :connector-instance-types {"c5" nil "c6" nil}}
+             {:module           "module/component1"
+              :node             "node1"
+              :cpu.nb           "2"
+              :ram.GB           "8"
+              :disk.GB          "50"
+              :placement-policy nil
+              :connector-instance-types {"c5" nil "c6" nil}}}
+
+           (set (:components app-map))))))

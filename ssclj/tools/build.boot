@@ -1,4 +1,4 @@
-(def +version+ "3.15-SNAPSHOT")
+(def +version+ "3.19-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamToolsCli-jar
@@ -7,7 +7,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.8.0"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -69,6 +69,14 @@
            (aot :all true)))
 
 (deftask build []
+         (comp
+           (pom)
+           (aot :namespace #{'com.sixsq.slipstream.tools.cli.ssconfig
+                             'com.sixsq.slipstream.tools.cli.ssconfigdump
+                             'com.sixsq.slipstream.tools.cli.ssconfigmigrate})
+           (jar)))
+
+(deftask build-uberjar []
          (comp
            (pom)
            (aot :namespace #{'com.sixsq.slipstream.tools.cli.ssconfig

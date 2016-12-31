@@ -3,6 +3,7 @@
     [clojure.pprint :refer [pprint]]
     [clojure.test :refer :all]
     [clojure.data.xml :as xml]
+    [me.raynes.fs :as fs]
     [com.sixsq.slipstream.db.serializers.utils :as u])
   (:import
     [com.sixsq.slipstream.persistence ServiceConfiguration]))
@@ -75,3 +76,10 @@
   (-> sc
       (.getParameter pname)
       (.getValue)))
+
+(defn spit-pprint
+  [obj fpath]
+  (let [f (fs/expand-home fpath)]
+    (with-open [^java.io.Writer w (apply clojure.java.io/writer f {})]
+      (clojure.pprint/pprint obj w))))
+

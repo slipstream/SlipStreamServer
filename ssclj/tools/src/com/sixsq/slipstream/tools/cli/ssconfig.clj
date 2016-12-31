@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfig
   (:require
     [clojure.string :as s]
-    [clojure.edn :as edn]
     [clojure.tools.cli :refer [parse-opts]]
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
@@ -11,7 +10,8 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as cfgt]
     [com.sixsq.slipstream.ssclj.resources.connector :as conn]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
-    [com.sixsq.slipstream.ssclj.resources.connector :as con])
+    [com.sixsq.slipstream.ssclj.resources.connector :as con]
+    [com.sixsq.slipstream.tools.cli.utils :refer :all])
   (:gen-class))
 
 (def connector-resource conn/resource-url)
@@ -272,13 +272,17 @@
     (configuration? resource) (store-cfg resource)
     (connector? resource) (store-connector resource)))
 
-(defn run
+(defn slurp-and-store
+  [f]
+  (-> (slurp-edn f)
+      validate
+      store))
+
+(defn store-to-db
   [files]
   (init-db-client)
   (doseq [f files]
-    (-> (edn/read-string (slurp f))
-        validate
-        store)))
+    (slurp-and-store f)))
 
 (defn list-tempates
   []
@@ -368,26 +372,17 @@
     (println (format "- resources for '%s'" r))
     (list-persisted-resources r)))
 
+(defn edit-file
+  [f kvs]
+  (let [kvm (into {}
+                  (map
+                    #(vec [(keyword (first %)) (second %)])
+                    (map #(s/split % #"=") kvs)))]
+    (spit-edn (merge (slurp-edn f) kvm) f)))
+
 ;;
 ;; Command line options processing.
 ;;
-
-(defn exit
-  [status msg]
-  (println msg)
-  (System/exit status))
-
-(defn error-msg
-  [errors]
-  (str "The following errors occurred while parsing your command:\n\n"
-       (s/join \newline errors)))
-
-(defn cli-parse-sets
-  ([m k v]
-   (cli-parse-sets m k v identity))
-  ([m k v fun] (assoc m k (if-let [oldval (get m k)]
-                            (merge oldval (fun v))
-                            (hash-set (fun v))))))
 
 (def cli-options
   [["-t" "--template TEMPLATE" "Prints out registered template by name."]
@@ -395,6 +390,11 @@
    ["-p" "--persisted" "Lists resources persisted in DB."]
    ["-r" "--resource RESOURCE" "Prints out persisted resource document(s) by name."
     :id :resources
+    :default #{}
+    :assoc-fn cli-parse-sets]
+   ["-e" "--edit-kv KEY=VALUE" (str "Updates or adds key=value in first file from "
+                                    "<list-of-files> (other files are ingnored).")
+    :id :edit-kv
     :default #{}
     :assoc-fn cli-parse-sets]
    ["-h" "--help"]])
@@ -432,8 +432,10 @@
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
     (when (not (empty? arguments))
-      (init-namespaces)
-      (run arguments)
+      (cond
+        (seq (:edit-kv options)) (edit-file (first arguments) (:edit-kv options))
+        :else (do (init-namespaces)
+                  (store-to-db arguments)))
       (System/exit 0))
     (when (seq (:resources options))
       (alter-var-root #'*resources* (fn [_] (:resources options)))

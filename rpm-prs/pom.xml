@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>SlipStreamPricingService-rpm</artifactId>
+  <packaging>pom</packaging>
+  <name>SlipStreamPricingService - RPM</name>
+  <description>SlipStream Pricing Service (RPM)</description>
+
+  <url>http://sixsq.com</url>
+  <parent>
+    <groupId>com.sixsq.slipstream</groupId>
+    <artifactId>SlipStreamServer</artifactId>
+    <version>3.19-SNAPSHOT</version>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamPricingService-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamPricingService-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <properties>
+    <installation.dir>/opt/slipstream/ss-pricing</installation.dir>
+    <server.jre.version>1.8.0</server.jre.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/scripts/</directory>
+                  <includes>
+                    <include>etc-default-slipstream-ss</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-slipstream.service</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/systemd</directory>
+                  <includes>
+                    <include>ss-pricing.service</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
+                  <directory>${basedir}/src/main/default</directory>
+                  <includes>
+                    <include>ss-pricing</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+
+          <execution>
+            <id>copy-service-jar</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <stripVersion>true</stripVersion>
+              <stripClassifier>true</stripClassifier>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.sixsq.slipstream</groupId>
+                  <artifactId>SlipStreamPricingService-jar</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-dependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/dependency/lib/ext</outputDirectory>
+              <stripVersion>true</stripVersion>
+              <stripClassifier>true</stripClassifier>
+              <excludeTypes>pom</excludeTypes>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rpm-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <classifier>${package.os}</classifier>
+          <release>${BUILD_NUMBER}.${package.os}</release>
+          <summary>SlipStream Pricing Server</summary>
+          <name>slipstream-pricing-server${slipstream.edition}</name>
+          <group>Applications/Engineering</group>
+          <vendor>SixSq</vendor>
+          <packager>SixSq</packager>
+          <license>SixSq Commercial License</license>
+          <url>http://sixsq.com</url>
+          <needarch>noarch</needarch>
+          <description>SlipStream Pricing Server</description>
+          <requires>
+            <require>jre-headless &gt;= ${server.jre.version}</require>
+            <require>slipstream-useradd${slipstream.edition}</require>
+            <require>slipstream-price-parsing${slipstream.edition}</require>
+          </requires>
+
+          <defaultDirmode>755</defaultDirmode>
+          <defaultFilemode>644</defaultFilemode>
+          <defaultGroupname>slipstream</defaultGroupname>
+          <defaultUsername>slipstream</defaultUsername>
+
+          <mappings>
+
+            <mapping>
+              <directory>/var/log/slipstream/ss-pricing</directory>
+              <directoryIncluded>true</directoryIncluded>
+              <filemode>755</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/default</directory>
+              <configuration>noreplace</configuration>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>${project.build.directory}/ss-pricing</location>
+                  <destination>ss-pricing</destination>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/resources</directory>
+              <configuration>noreplace</configuration>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/resources</location>
+                  <includes>
+                    <include>log4j.properties</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/usr/lib/systemd/system</directory>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>${project.build.directory}/ss-pricing.service</location>
+                  <destination>ss-pricing.service</destination>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/lib</directory>
+              <configuration>false</configuration>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>${project.build.directory}/dependency/SlipStreamPricingService-jar.jar</location>
+                  <destination>ss-pricing.jar</destination>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/lib/ext</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+              <sources>
+                <source>
+                  <location>target/dependency/lib/ext</location>
+                  <excludes>
+                    <exclude>SlipStreamPricingService-jar.jar</exclude>
+                  </excludes>
+                </source>
+              </sources>
+            </mapping>
+
+          </mappings>
+
+          <postinstallScriptlet>
+            <script>
+              /usr/bin/systemctl enable ss-pricing.service
+            </script>
+          </postinstallScriptlet>
+
+          <preremoveScriptlet>
+            <script>
+              /usr/bin/systemctl stop ss-pricing.service || true
+              /usr/bin/systemctl disable ss-pricing.service || true
+            </script>
+          </preremoveScriptlet>
+
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-rpm</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attached-rpm</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

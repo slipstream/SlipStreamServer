@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.db.serializers.service-config-impl
   (:require
+    [clojure.edn :as edn]
     [clojure.set :as set]
     [clojure.tools.logging :as log]
 
     [camel-snake-kebab.core :refer [->camelCase]]
-    [me.raynes.fs :as fs]
     [superstring.core :as s]
 
     [com.sixsq.slipstream.db.serializers.utils :as u]
@@ -18,6 +18,9 @@
   (:import
     (com.sixsq.slipstream.persistence ServiceConfiguration)))
 
+
+(def connector-ref-attrs-defaults (merge cont/connector-mandatory-reference-attrs-defaults
+                                         cont/connector-reference-attrs-defaults))
 
 (def ^:const cfg-resource-uuid crs/service)
 
@@ -107,7 +110,7 @@
   (let [[cin pname] (u/param-get-cat-and-name p)
         cn (get cin->cn cin)]
     (if (s/blank? pname)
-      (throw (Exception. "Parameter name is blank when mapping connector parameters."))
+      (log/warn "Parameter name is blank when mapping connector parameter for:" cin)
       (->> pname
            (conn-pname-to-kwname cn)
            keyword))))
@@ -230,6 +233,12 @@
   (assoc conn :id (str con/resource-url "/" cin)
               :cloudServiceType (get (sc-connector-names-map sc) cin)))
 
+(defn param-non-global-and-named?
+  [p cin cin->cn]
+  (if (and (non-gobal-category-match? p cin) (connector-param-name-as-kw p cin->cn))
+    true
+    false))
+
 (defn sc->connector
   "Parameter name is a string with removed category, i.e, [cat.]param.name.
   Mapping to keywords is looked up in local map and in the connector one
@@ -237,7 +246,7 @@
   [sc cin]
   (let [cin->cn (sc-connector-names-map sc)]
     (-> {}
-        (into (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p cin)]
+        (into (for [p (vals (.getParameters sc)) :when (param-non-global-and-named? p cin cin->cn)]
                 (let [kw (connector-param-name-as-kw p cin->cn)]
                   [kw (conn-param-value p (conn-name p cin->cn))])))
         (assoc-conn-identity sc cin))))
@@ -246,7 +255,7 @@
   [sc cin]
   (let [cin->cn (sc-connector-names-map sc)]
     (into {}
-          (for [p (vals (.getParameters sc)) :when (non-gobal-category-match? p cin)]
+          (for [p (vals (.getParameters sc)) :when (param-non-global-and-named? p cin cin->cn)]
             [(connector-param-name-as-kw p cin->cn)
              (u/desc-from-param p)]))))
 
@@ -291,11 +300,11 @@
 
 (defn cs->cfg-desc-and-spit
   [sc fpath]
-  (let [f        (fs/expand-home fpath)
-        cfg-desc (sc->cfg-desc sc)]
-    (with-open [^java.io.Writer w (apply clojure.java.io/writer f {})]
-      (clojure.pprint/pprint cfg-desc w))))
+  (scu/spit-pprint (sc->cfg-desc sc) fpath))
 
+(defn cs->cfg-and-spit
+  [sc fpath]
+  (scu/spit-pprint (sc->cfg sc) fpath))
 
 (def cfg-desc cts/desc)
 
@@ -308,18 +317,6 @@
   (-> cfg
       (assoc :service crs/service)
       crtpl/complete-resource))
-
-(defn db-add-default-config
-  [& [fail]]
-  (log/info "Adding default server configuration to ES DB.")
-  (let [resp (-> cts/resource
-                 complete-resource
-                 (u/as-request cfg-resource-uuid user-roles-str)
-                 cr/add-impl)]
-    (if (and fail (> (:status resp) 400))
-      (u/throw-on-resp-error resp)
-      (do
-        (log/warn "Failure adding default configuration: " resp)))))
 
 (defn resource-as-request
   [name & [body]]
@@ -393,6 +390,38 @@
   [name]
   (get-document (configuration-as-request name) cr/retrieve-impl))
 
+
+;;
+;; Utility wrappers around configuration CRUD.
+;;
+
+(defn- check-response
+  "{response}, operation name, fail with exception (false/true)"
+  [resp op fail]
+  (when (> (:status resp) 400)
+    (if fail
+      (u/throw-on-resp-error resp)
+      (log/warn "Failure" op "configuration:" resp))))
+
+(defn db-edit-config-from-file
+  [f & [fail]]
+  (log/info "Editing server configuration in ES DB from file:" f)
+  (let [c    (edn/read-string (slurp f))
+        resp (-> (get-configuration "slipstream")
+                 complete-resource
+                 (merge c)
+                 (u/as-request cfg-resource-uuid user-roles-str)
+                 cr/edit-impl)]
+    (check-response resp "editing" fail)))
+
+(defn db-add-default-config
+  [& [fail]]
+  (log/info "Adding default server configuration to ES DB.")
+  (let [resp (-> cts/resource
+                 complete-resource
+                 (u/as-request cfg-resource-uuid user-roles-str)
+                 cr/add-impl)]
+    (check-response resp "adding" fail)))
 
 ;;
 ;; Store and load of configuration and connectors.

@@ -22,8 +22,10 @@ package com.sixsq.slipstream.es;
 
 import clojure.java.api.Clojure;
 import clojure.lang.IFn;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
+import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -61,6 +63,7 @@ public class CljElasticsearchHelper {
         Clojure.var(NS_SERIALIZERS_UTILS, "test-db-client-and-crud-impl").invoke();
         addDefaultServiceConfigToDb();
         initializeConnectorTemplates();
+        pushServerConfig();
     }
 
     public static void classpath () {
@@ -89,6 +92,29 @@ public class CljElasticsearchHelper {
         setDbCrudImpl();
         requireNs(NS_SERIALIZERS_SERVICE_CONFIG_IMPL);
 		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-add-default-config").invoke();
+    }
+
+    private static File findConfigurationDirectory() throws ConfigurationException {
+        String name = System.getProperty("slipstream.config.dir");
+        if (name != null) {
+            return new File(name);
+        }
+        return null;
+    }
+    /**
+     * WARNING! Should only be used with tests.
+     */
+    private static void pushServerConfig() {
+        File confDir = findConfigurationDirectory();
+        if (null != confDir && confDir.exists()) {
+            File conf = new File(confDir + File.separator + "slipstream.edn");
+            if (conf.exists()) {
+                logger.warning("You should NOT see this on production! Loading configuration file: " +
+                        conf.getAbsolutePath());
+                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-edit-config-from-file").invoke(conf.getAbsolutePath());
+            }
+        }
+
     }
 
     public static IFn getLoadFn(String ns) {
