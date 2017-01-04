@@ -173,6 +173,16 @@ public class Collector {
 	}
 
 	private static void updateGraphite(VmsClassifier classifier, String user, String cloud, EntityManager em) {
+		try {
+			if (!Configuration.getMeteringEnabled()) {
+				return;
+			}
+		} catch (ValidationException e) {
+			logger.warning("Exception when calling 'Configuration.getMeteringEnabled' in 'Collector.updateGraphite': " + e.getMessage());
+			return;
+		}
+
+
 		int cpu = 0;
 		float ram = 0;
 		float disk = 0;
