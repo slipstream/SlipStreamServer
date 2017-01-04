@@ -56,7 +56,8 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	@Override
 	public void initializeSubResource() throws ResourceException {
-		getMetricsTimer().start();
+		MetricsTimer loadMetric = Metrics.getTimer(this, "runtimeParameter_loadFromDb");
+		loadMetric.start();
 		try {
 			long start = System.currentTimeMillis();
 			long before;
@@ -79,12 +80,12 @@ public class RuntimeParameterResource extends RunBaseResource {
 		} catch(RuntimeException e) {
 			throw e;
 		} finally {
-			getMetricsTimer().stop();
+			loadMetric.stop();
 		}
 	}
 
 	private MetricsTimer getMetricsTimer() {
-		return Metrics.getTimer(this, "runtimeParameter" + getRequest().getMethod().getName());
+		return Metrics.getTimer(this, "runtimeParameter_" + getRequest().getMethod().getName());
 	}
 
 	private void parseRequest() {
@@ -138,7 +139,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 	@Get
 	public String represent() throws ResourceException, NotFoundException,
 			ValidationException {
-		//getMetricsTimer().start();
+		getMetricsTimer().start();
 		try {
 			long start = System.currentTimeMillis();
 
