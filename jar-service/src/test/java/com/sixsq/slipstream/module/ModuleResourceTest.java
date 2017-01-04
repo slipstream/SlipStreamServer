@@ -23,13 +23,16 @@ package com.sixsq.slipstream.module;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -38,6 +41,7 @@ import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
+import org.restlet.data.Preference;
 import org.restlet.data.Status;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ServerResource;
@@ -100,8 +104,8 @@ public class ModuleResourceTest extends ResourceTestBase {
 
 		Request request = createGetRequest(projectName, user);
 
+		// XML
 		Response response = executeRequest(request);
-
 		assertEquals(Status.SUCCESS_OK, response.getStatus());
 
 		String externalFormatXml = response.getEntityAsText();
@@ -110,6 +114,17 @@ public class ModuleResourceTest extends ResourceTestBase {
 				ProjectModule.class);
 
 		assertEquals(projectName, project.getName());
+
+		// JSON
+		response = executeRequest(request, MediaType.APPLICATION_JSON);
+
+		assertEquals(Status.SUCCESS_OK, response.getStatus());
+
+		String externalFormatJson = response.getEntityAsText();
+		JSONObject obj = new JSONObject(externalFormatJson);
+		assertNotNull(obj);
+		assertEquals("Project", obj.getJSONObject("projectModule").getString("category"));
+		assertEquals(projectName, obj.getJSONObject("projectModule").getString("shortName"));
 
 		project.remove();
 	}
@@ -398,6 +413,22 @@ public class ModuleResourceTest extends ResourceTestBase {
 	}
 
 	protected Response executeRequest(Request request) {
+
+		// FIXME: Without an explicit list of accepted representations, restlet
+		// appears to choose from the available types randomly.  There doesn't
+		// seem to be a way of telling it to prefer one representation over
+		// another.  This fixes the unit tests, but may not work in the field
+		// unless all of our clients explicitly request XML.
+		return executeRequest(request, MediaType.APPLICATION_XML);
+	}
+
+	protected Response executeRequest(Request request, MediaType mediaType) {
+
+		List<Preference<MediaType>> accepts = request.getClientInfo().getAcceptedMediaTypes();
+		accepts.clear();
+		if (mediaType != null) {
+			accepts.add(new Preference<>(mediaType));
+		}
 
 		ServerResource resource = new ModuleResource();
 		Response response = new Response(request);
