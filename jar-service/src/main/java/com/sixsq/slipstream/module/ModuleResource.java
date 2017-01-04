@@ -36,6 +36,8 @@ import com.sixsq.slipstream.util.*;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.json.JSONObject;
+import org.json.XML;
 import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -79,8 +81,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
 		return "module";
 	}
 
-	@Get("xml")
-	public Representation toXml() {
+	private String toXmlString() {
 		checkCanGet();
 
 		Module prepared = null;
@@ -92,8 +93,20 @@ public class ModuleResource extends ParameterizedResource<Module> {
 			Util.throwConfigurationException(e);
 		}
 
-		String result = XmlUtil.normalize(prepared);
+		return XmlUtil.normalize(prepared);
+	}
+
+	@Get("xml")
+	public Representation toXml() {
+		String result = toXmlString();
 		return new StringRepresentation(result, MediaType.APPLICATION_XML);
+	}
+
+	@Get("json")
+	public Representation toJson() {
+		String xml = toXmlString();
+		JSONObject obj = XML.toJSONObject(xml);
+		return new StringRepresentation(obj.toString(), MediaType.APPLICATION_JSON);
 	}
 
 	@Post("form")
@@ -466,7 +479,7 @@ public class ModuleResource extends ParameterizedResource<Module> {
                 // would probably warrant more investigation, but the
                 // kludge is probably sufficient for now.
                 entity.toString();
-                
+
 		Form form = extractFormFromEntity(entity);
 		ModuleFormProcessor processor = ModuleFormProcessor
 				.createFormProcessorInstance(getCategory(form), getUser());
