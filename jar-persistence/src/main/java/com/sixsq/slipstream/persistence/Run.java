@@ -59,7 +59,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-<<<<<<< HEAD
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
