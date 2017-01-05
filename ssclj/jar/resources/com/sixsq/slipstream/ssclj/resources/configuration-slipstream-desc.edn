@@ -208,6 +208,7 @@
   :type "boolean",
   :category "SlipStream_Advanced",
   :description "Send internal metrics to the log",
+  :instructions "Please restart SlipStream for this change to be taken into account"
   :mandatory true,
   :readOnly false,
   :order 0},
@@ -216,6 +217,7 @@
   :type "boolean",
   :category "SlipStream_Advanced",
   :description "Send internal metrics to graphite",
+  :instructions "Please restart SlipStream for this change to be taken into account"
   :mandatory true,
   :readOnly false,
   :order 0},
