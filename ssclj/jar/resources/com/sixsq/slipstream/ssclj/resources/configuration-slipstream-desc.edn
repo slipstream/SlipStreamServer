@@ -203,7 +203,7 @@
   :instructions ""
   :order        0}
 
- :metricsLoggerReporter
+ :metricsLoggerEnable
  {:displayName "slipstream.metrics.logger.enable",
   :type "boolean",
   :category "SlipStream_Advanced",
@@ -211,7 +211,7 @@
   :mandatory true,
   :readOnly false,
   :order 0},
- :metricsGraphiteReporter
+ :metricsGraphiteEnable
  {:displayName "slipstream.metrics.graphite.enable",
   :type "boolean",
   :category "SlipStream_Advanced",

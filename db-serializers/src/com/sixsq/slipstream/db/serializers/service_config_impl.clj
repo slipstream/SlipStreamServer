@@ -65,8 +65,8 @@
 
    :cloudConnectorClass        "cloud.connector.class"
 
-   :metricsLoggerReporter      "slipstream.metrics.logger.enable"
-   :metricsGraphiteReporter    "slipstream.metrics.graphite.enable"
+   :metricsLoggerEnable        "slipstream.metrics.logger.enable"
+   :metricsGraphiteEnable      "slipstream.metrics.graphite.enable"
    })
 
 (def param->rname (set/map-invert rname->param))
