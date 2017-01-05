@@ -2,6 +2,7 @@ package com.sixsq.slipstream.metrics;
 
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,15 +11,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import com.codahale.metrics.*;
+import com.codahale.metrics.jvm.BufferPoolMetricSet;
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.CsvReporter;
-import com.codahale.metrics.JmxReporter;
-import com.codahale.metrics.MetricFilter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Reporter;
-import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 import com.codahale.metrics.graphite.GraphiteReporter.Builder;
@@ -122,8 +121,42 @@ public class Metrics {
 		getInstance().createGraphiteReporter(host, port, prefix);
 	}
 
+	public static void addJvmMetrics() {
+		getInstance().registerJvmMetrics();
+	}
+
 	private MetricRegistry getRegistry(){
 		return this.registry;
+	}
+
+	private void registerMetricSetRecursively(String name, MetricSet metricSet) {
+		registerMetricSetRecursively(this, name, metricSet);
+	}
+
+	private void registerMetricSetRecursively(Object instance, String name, MetricSet metricSet) {
+		registerMetricSetRecursively(instance.getClass(), name, metricSet);
+	}
+
+	private void registerMetricSetRecursively(Class<?> klass, String name, MetricSet metricSet) {
+		for (Map.Entry<String, Metric> metricEntry : metricSet.getMetrics().entrySet()) {
+
+			Metric metric = metricEntry.getValue();
+			String metricName = metricEntry.getKey();
+
+			if (metric instanceof MetricSet) {
+				registerMetricSetRecursively(klass, name + "." + metricName, (MetricSet) metric);
+			} else {
+				registry.register(generateName(klass, name, metricName), metric);
+			}
+		}
+	}
+
+	private void registerJvmMetrics() {
+		String prefix = "jvm.";
+		registerMetricSetRecursively(prefix + "gc", new GarbageCollectorMetricSet());
+		registerMetricSetRecursively(prefix + "memory", new MemoryUsageGaugeSet());
+		registerMetricSetRecursively(prefix + "threads", new ThreadStatesGaugeSet());
+		registerMetricSetRecursively(prefix + "buffers", new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
 	}
 
 	private void createJmxReporter() {
@@ -157,7 +190,7 @@ public class Metrics {
 				.convertRatesTo(TimeUnit.SECONDS)
 				.convertDurationsTo(TimeUnit.MILLISECONDS)
 				.build();
-		reporter.start(1, TimeUnit.MINUTES);
+		reporter.start(10, TimeUnit.SECONDS);
 		reporters.add(reporter);
 	}
 
