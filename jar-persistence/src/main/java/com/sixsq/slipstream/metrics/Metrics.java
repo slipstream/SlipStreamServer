@@ -12,10 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import com.codahale.metrics.*;
-import com.codahale.metrics.jvm.BufferPoolMetricSet;
-import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
-import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
+import com.codahale.metrics.jvm.*;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.graphite.Graphite;
@@ -153,10 +150,14 @@ public class Metrics {
 
 	private void registerJvmMetrics() {
 		String prefix = "jvm.";
+
 		registerMetricSetRecursively(prefix + "gc", new GarbageCollectorMetricSet());
 		registerMetricSetRecursively(prefix + "memory", new MemoryUsageGaugeSet());
 		registerMetricSetRecursively(prefix + "threads", new ThreadStatesGaugeSet());
 		registerMetricSetRecursively(prefix + "buffers", new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
+		registerMetricSetRecursively(prefix + "classloader", new ClassLoadingGaugeSet());
+
+		registry.register(generateName(this, prefix, "fd", "used-ratio"), new FileDescriptorRatioGauge());
 	}
 
 	private void createJmxReporter() {
