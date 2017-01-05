@@ -1760,6 +1760,20 @@ nuvlabox-demo:nuvlabox]]></value>
          </parameter>
       </entry>
       <entry>
+         <string>slipstream.metrics.logger.enable</string>
+         <parameter name="slipstream.metrics.logger.enable" description="Send internal metrics to the log" category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.metrics.graphite.enable</string>
+         <parameter name="slipstream.metrics.graphite.enable" description="Send internal metrics to graphite" category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
          <string>ec2-ap-southeast-1.orchestrator.instance.type</string>
          <parameter name="ec2-ap-southeast-1.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-ap-southeast-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
             <enumValues length="42">

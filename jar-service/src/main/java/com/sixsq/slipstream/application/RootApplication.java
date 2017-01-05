@@ -143,7 +143,13 @@ public class RootApplication extends Application {
 			Collector.start();
 			GarbageCollector.start();
 
-			Metrics.addGraphiteReporter();
+			Metrics.addJvmMetrics();
+			if (Configuration.isMetricsGraphiteEnabled()) {
+				Metrics.addGraphiteReporter();
+			}
+			if (Configuration.isMetricsLoggerEnabled()) {
+				Metrics.addSlf4jReporter();
+			}
 
 			logServerStarted();
 

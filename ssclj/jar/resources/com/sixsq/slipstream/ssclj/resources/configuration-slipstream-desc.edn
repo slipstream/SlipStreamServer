@@ -202,4 +202,24 @@
   :readOnly     false
   :instructions ""
   :order        0}
+
+ :metricsLoggerReporter
+ {:displayName "slipstream.metrics.logger.enable",
+  :type "boolean",
+  :category "SlipStream_Advanced",
+  :description "Send internal metrics to the log",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+ :metricsGraphiteReporter
+ {:displayName "slipstream.metrics.graphite.enable",
+  :type "boolean",
+  :category "SlipStream_Advanced",
+  :description "Send internal metrics to graphite",
+  :mandatory true,
+  :readOnly false,
+  :order 0},
+
  }
+
+
