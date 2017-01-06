@@ -8,7 +8,9 @@
     [clojure.walk :as walk]
     [sixsq.slipstream.prs.core :as prs])
   (:import [java.util Map List Set]
-           [com.sixsq.slipstream.persistence Module ImageModule ModuleCategory ModuleCategory])
+           [com.sixsq.slipstream.persistence Module ImageModule ModuleCategory ModuleCategory]
+           [com.sixsq.slipstream.configuration Configuration]
+           )
   (:gen-class
     :name sixsq.slipstream.prs.core.JavaWrapper
     :methods [#^{:static true} [placeAndRank      [java.util.Map] String]
@@ -43,6 +45,18 @@
    :placement-policy          (.getPlacementPolicy comp)
    :connector-instance-types  (apply merge (map (partial connector-instance-types comp) user-connectors))})
 
+(defn- connector->orchestrator-map
+  [connector]
+  (let [orchestrator-instance-type (-> (Configuration/getInstance)
+                                       (.getProperty (format "%s.orchestrator.instance.type" connector)))
+        type-policy (if orchestrator-instance-type (format " and schema-org:name='%s'" orchestrator-instance-type) "")]
+    {:node             (str "node-orchestrator-" connector)
+     :module           (str "module-orchestrator-" connector)
+     :cpu.nb           "0"
+     :ram.GB           "0"
+     :disk.GB          "0"
+     :placement-policy (format "connector/href='%s' %s" connector type-policy)}))
+
 (defn- node->map
   [user-connectors [node-name node]]
   (-> (.getImage node)
@@ -75,10 +89,16 @@
     (app? module)       (app->map module user-connectors)
     :else               (throw-wrong-category module)))
 
+(defn- add-orchestrator-components
+  [m user-connectors]
+  (update m :components #(concat % (map connector->orchestrator-map user-connectors))))
+
 (defn- explode-module
   [m]
   (-> m
       (assoc :components (module->components (:module m) (:user-connectors m)))
+      (add-orchestrator-components (:user-connectors m))
+      (dissoc :orchestratorComponents)
       (dissoc :module)))
 
 (defn placement->map
@@ -89,7 +109,7 @@
                    java->clj
                    walk/keywordize-keys
                    explode-module)]
-    (log/info "placement->map : " result)
+    (log/info "the placement->map : " result)
     result))
 
 (defn -placeAndRank
