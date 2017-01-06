@@ -139,6 +139,12 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_METERING_ENABLE(
 				CljElasticsearchHelper.getParameterDescription("slipstream.metering.enable")),
 
+		SLIPSTREAM_METRICS_LOGGER_ENABLE(
+				CljElasticsearchHelper.getParameterDescription("slipstream.metrics.logger.enable")),
+
+		SLIPSTREAM_METRICS_GRAPHITE_ENABLE(
+				CljElasticsearchHelper.getParameterDescription("slipstream.metrics.graphite.enable")),
+
 		SLIPSTREAM_QUOTA_ENABLE(
 				CljElasticsearchHelper.getParameterDescription("slipstream.quota.enable"));
 

@@ -53,6 +53,9 @@
 
    ;; FIXME: used only for compatibilty with the Java server. To be removed.
    :cloudConnectorClass        s/Str                        ;; "name-region-az:connector,"
+
+   :metricsLoggerEnable        s/Bool                       ;; false
+   :metricsGraphiteEnable      s/Bool                       ;; false
    })
 
 (def ConfigurationTemplateAttrs
@@ -109,6 +112,9 @@
    :slipstreamVersion          slipstream-version
 
    :cloudConnectorClass        ""
+
+   :metricsLoggerEnable        false
+   :metricsGraphiteEnable      false
    })
 
 ;;

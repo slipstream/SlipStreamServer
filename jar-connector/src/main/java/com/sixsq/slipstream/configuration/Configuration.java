@@ -132,6 +132,14 @@ public class Configuration {
 		return isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_QUOTA_ENABLE.getName());
 	}
 
+	public static boolean isMetricsLoggerEnabled() throws ValidationException {
+		return isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_METRICS_LOGGER_ENABLE.getName());
+	}
+
+	public static boolean isMetricsGraphiteEnabled() throws ValidationException {
+		return isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_METRICS_GRAPHITE_ENABLE.getName());
+	}
+
 	public static boolean getMeteringEnabled() throws ConfigurationException, ValidationException {
 		Configuration config = Configuration.getInstance();
 		Boolean enabled = Boolean.parseBoolean(config.getProperty(
