@@ -1,9 +1,22 @@
 (ns sixsq.slipstream.prs.javawrapper-test
   (:require
     [clojure.test :refer :all]
-    [sixsq.slipstream.prs.javawrapper :refer :all])
+    [sixsq.slipstream.prs.javawrapper :refer :all]
+    [com.sixsq.slipstream.db.serializers.utils :as su]
+    [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
+    )
   (:import [java.util HashMap ArrayList HashSet]
            [com.sixsq.slipstream.persistence ImageModule DeploymentModule Node ModuleParameter ParameterCategory]))
+
+;; Fixtures.
+(defn fixture-start-es-db
+  [f]
+  (su/test-db-client-and-crud-impl)
+  ;; initialize resource (including possible connectors on the classpath).
+  (su/initialize)
+  (sci/db-add-default-config)
+  (f))
+(use-fixtures :once fixture-start-es-db)
 
 (def cm {"a" "1" "b" "2" "c" "3"})
 (def m (HashMap. cm))
@@ -52,7 +65,19 @@
                                :cpu.nb           "2"
                                :ram.GB           "8"
                                :disk.GB          "50"
-                               :connector-instance-types {"c1" "medium" "c2" nil}}]
+                               :connector-instance-types {"c1" "medium" "c2" nil}}
+                              {:node             "node-orchestrator-c1"
+                               :module           "module-orchestrator-c1"
+                               :cpu.nb           "0"
+                               :ram.GB           "0"
+                               :disk.GB          "0"
+                               :placement-policy "connector/href='c1'"}
+                              {:node             "node-orchestrator-c2"
+                               :module           "module-orchestrator-c2"
+                               :cpu.nb           "0"
+                               :ram.GB           "0"
+                               :disk.GB          "0"
+                               :placement-policy "connector/href='c2'"}]
 
             :user-connectors ["c1" "c2"]}
            (placement->map {:prs-endpoint    "http://localhost:8203/filter-rank"
@@ -64,7 +89,13 @@
                                :cpu.nb           "1"
                                :ram.GB           "4"
                                :disk.GB          "10"
-                               :connector-instance-types {"c3" nil}}]
+                               :connector-instance-types {"c3" nil}}
+                              {:node             "node-orchestrator-c3"
+                               :module           "module-orchestrator-c3"
+                               :cpu.nb           "0"
+                               :ram.GB           "0"
+                               :disk.GB          "0"
+                               :placement-policy "connector/href='c3'"}]
             :user-connectors ["c3"]}
            (placement->map {:module          image2
                             :user-connectors ["c3"]})))
@@ -84,6 +115,18 @@
               :ram.GB           "8"
               :disk.GB          "50"
               :placement-policy nil
-              :connector-instance-types {"c5" nil "c6" nil}}}
+              :connector-instance-types {"c5" nil "c6" nil}}
+             {:node             "node-orchestrator-c5"
+              :module           "module-orchestrator-c5"
+              :cpu.nb           "0"
+              :ram.GB           "0"
+              :disk.GB          "0"
+              :placement-policy "connector/href='c5'"}
+             {:node             "node-orchestrator-c6"
+              :module           "module-orchestrator-c6"
+              :cpu.nb           "0"
+              :ram.GB           "0"
+              :disk.GB          "0"
+              :placement-policy "connector/href='c6'"}}
 
            (set (:components app-map))))))

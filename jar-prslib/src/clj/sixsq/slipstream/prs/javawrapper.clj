@@ -55,7 +55,7 @@
      :cpu.nb           "0"
      :ram.GB           "0"
      :disk.GB          "0"
-     :placement-policy (format "connector/href='%s' %s" connector type-policy)}))
+     :placement-policy (format "connector/href='%s'%s" connector type-policy)}))
 
 (defn- node->map
   [user-connectors [node-name node]]

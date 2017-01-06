@@ -5,7 +5,7 @@
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
-  
+
   :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
@@ -22,13 +22,14 @@
                 (merge-defaults
                  ['sixsq/default-deps (get-env :version)]
                  '[[org.clojure/clojure]
-                   
+
                    [com.sixsq.slipstream/SlipStreamPersistence]
                    [com.sixsq.slipstream/SlipStreamConnector]
+                   [com.sixsq.slipstream/SlipStreamDbSerializers-jar]
                    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                    [org.clojure/data.json]
                    [org.clojure/tools.logging]
-                   
+
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
                    [tolitius/boot-check]
@@ -110,6 +111,6 @@
          []
          (comp
            (mvn-build)
-           (push 
+           (push
              :pom (str (get-env :project))
              :repo "sixsq")))
