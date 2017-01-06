@@ -73,9 +73,8 @@
   "sc - ServiceConfiguration
   pname - str (parameter name)"
   [sc pname]
-  (-> sc
-      (.getParameter pname)
-      (.getValue)))
+  (if-let [p (.getParameter sc pname)]
+      (.getValue p)))
 
 (defn spit-pprint
   [obj fpath]

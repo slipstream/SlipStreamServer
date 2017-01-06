@@ -39,12 +39,6 @@
   (let [p (.getParameter sc k)]
     (u/desc-from-param p)))
 
-(defn param-value
-  [sc k]
-  (if-let [p (.getParameter sc k)]
-    (.getValue p)
-    ""))
-
 
 ;; Fixtures
 (use-fixtures :once tu/fixture-start-es-db)
@@ -84,8 +78,8 @@
         sc-from-es (sci/load-sc)]
     (is (not (nil? sc-from-es)))
     (doseq [k (keys sci/param->rname)]
-      (is (= (param-value sc-to-es k)
-             (param-value sc-from-es k))))))
+      (is (= (scu/sc-get-param-value sc-to-es k)
+             (scu/sc-get-param-value sc-from-es k))))))
 
 
 (def conf-desc-file (str "test-resources/" (fs/temp-name "conf-desc-" ".edn")))
