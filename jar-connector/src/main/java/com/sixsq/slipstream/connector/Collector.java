@@ -147,6 +147,14 @@ public class Collector {
 		return false;
 	}
 
+	private static Boolean isMeteringEnabled() {
+		try {
+			return Configuration.getMeteringEnabled();
+		} catch (ValidationException | ConfigurationException e) {
+			logger.warning("Exception when calling 'Configuration.getMeteringEnabled' in 'Collector.isMeteringEnabled': " + e.getMessage());
+			return false;
+		}
+	}
 	public static void update(List<Vm> cloudVms, String user, String cloud) {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -157,8 +165,8 @@ public class Collector {
 
 		try {
 			updateUsageRecords(classifier, user, cloud, em);
-			updateGraphite(classifier, user, cloud, em);
 			transaction.begin();
+			updateGraphite(classifier, user, cloud, em);
 			updateDbVmsWithCloudVms(classifier, em);
 			transaction.commit();
 			em.close();
@@ -173,15 +181,7 @@ public class Collector {
 	}
 
 	private static void updateGraphite(VmsClassifier classifier, String user, String cloud, EntityManager em) {
-		try {
-			if (!Configuration.getMeteringEnabled()) {
-				return;
-			}
-		} catch (ValidationException e) {
-			logger.warning("Exception when calling 'Configuration.getMeteringEnabled' in 'Collector.updateGraphite': " + e.getMessage());
-			return;
-		}
-
+		if (!isMeteringEnabled()) { return; }
 
 		int cpu = 0;
 		float ram = 0;
