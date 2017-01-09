@@ -54,7 +54,7 @@ public class LocalConnector extends ConnectorBase {
 	private static Random random = new Random();
 	public static int MAX_VMS = 3;
 
-	static {
+	public static void generateDummyVms() {
 		getLog().info("Generating " + MAX_VMS + " dummy VMs...");
 		String username = "super";
 		String cloud = "local";
