@@ -3,6 +3,7 @@
     [clojure.tools.logging :as log]
     [schema.core :as s]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.configuration-template.spec :as schema]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a])
@@ -108,22 +109,14 @@
                     :readOnly    true
                     :order       0}}))
 ;;
-;; multimethods for validation
+;; validation
 ;;
 
-(defmulti validate-subtype
-          "Validates the given resource against the specific
-           ConfigurationTemplate subtype schema."
-          :service)
-
-(defmethod validate-subtype :default
-  [resource]
-  (throw (ex-info (str "unknown ConfigurationTemplate type: " (:service resource)) resource)))
-
+(def validate-fn (u/create-spec-validation-fn ::schema/configuration-template))
 (defmethod crud/validate
   resource-uri
   [resource]
-  (validate-subtype resource))
+  (validate-fn resource))
 
 ;;
 ;; CRUD operations

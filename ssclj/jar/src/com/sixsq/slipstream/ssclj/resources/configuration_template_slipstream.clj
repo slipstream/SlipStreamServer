@@ -124,12 +124,3 @@
 (defn initialize
   []
   (p/register resource desc))
-
-;;
-;; multimethods for validation
-;;
-
-(def validate-fn (u/create-validation-fn ConfigurationTemplate))
-(defmethod p/validate-subtype service
-  [resource]
-  (validate-fn resource))

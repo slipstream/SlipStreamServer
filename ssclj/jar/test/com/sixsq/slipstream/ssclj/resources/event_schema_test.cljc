@@ -1,9 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.event-schema-test
   (:require
-    [schema.core :as s]
-    [expectations :refer :all]
+    [clojure.test :refer [deftest is]]
+    [clojure.spec :as spec]
     [com.sixsq.slipstream.ssclj.resources.event :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.event.spec :as schema]))
 
 (def event-timestamp "2015-01-16T08:05:00.0Z")
 
@@ -25,17 +26,21 @@
                   :severity    "critical"
                   })
 
-(expect valid-event (crud/validate valid-event))
+(defn valid? [event] (spec/valid? ::schema/event event))
+(def invalid? (complement valid?))
 
-(defn valid? [event] (nil? (s/check Event event)))
-(defn invalid? [event] (complement valid?))
+(deftest valid-event-returned
+         (is (= valid-event (crud/validate valid-event))))
 
-(expect (valid? valid-event))
+(deftest valid-works
+  (is (valid? valid-event)))
 
-(expect valid? (from-each [valid-severity ["critical" "high" "medium" "low"]]
-                          (assoc valid-event :severity valid-severity)))
-(expect (invalid? (assoc valid-event :severity "unknown-severity")))
+(deftest check-severity
+  (doseq [valid-severity ["critical" "high" "medium" "low"]]
+    (is (valid? (assoc valid-event :severity valid-severity))))
+  (is (invalid? (assoc valid-event :severity "unknown-severity"))))
 
-(expect valid? (from-each [valid-type ["state" "alarm"]]
-                          (assoc valid-event :type valid-type)))
-(expect (invalid? (assoc valid-event :type "unknown")))
+(deftest check-type
+  (doseq [valid-type ["state" "alarm" "action" "system"]]
+    (is (valid? (assoc valid-event :type valid-type))))
+  (is (invalid? (assoc valid-event :type "unknown-type"))))

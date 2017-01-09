@@ -1,6 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils
   "General utilities for dealing with resources."
   (:require
+    [clojure.pprint]                                        ;; needed for explain-str??
+    [clojure.spec :as spec]
     [clojure.tools.logging :as log]
     [clojure.edn :as edn]
     [superstring.core :as s]
@@ -160,6 +162,22 @@
           (log/warn msg)
           (throw (ex-info msg response)))
         resource))))
+
+(defn create-spec-validation-fn
+  "Creates a validation function that compares a resource against the
+   given schema.  The generated function raises an exception with the
+   violations of the schema and a 400 ring response. If everything's
+   OK, then the resource itself is returned."
+  [schema]
+  (fn [resource]
+    (if-not (spec/valid? schema resource)
+      (let [msg (str "resource does not satisfy defined schema: " (spec/explain-str schema resource))
+            response (-> {:status 400 :message msg}
+                         json-response
+                         (r/status 400))]
+        (log/warn msg)
+        (throw (ex-info msg response)))
+      resource)))
 
 (defn decrypt
   "This function should eventually decrypt the given value based on

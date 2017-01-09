@@ -3,6 +3,7 @@
     [schema.core :as s]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.usage-event.spec :as spec]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rk]
     ))
@@ -21,25 +22,11 @@
                               :type      "ROLE"
                               :right     "ALL"}]})
 
-(def UsageEvent
-  (merge
-    c/CreateAttrs
-    c/AclAttr
-    {
-     :id                               c/NonBlankString
-     :cloud-vm-instanceid              c/NonBlankString
-     :user                             c/NonBlankString
-     :cloud                            c/NonBlankString
-     :metrics                          [{:name  c/NonBlankString
-                                         :value c/NonBlankString}]
-     (s/optional-key :start-timestamp) c/Timestamp
-     (s/optional-key :end-timestamp)   c/OptionalTimestamp}))
-
 ;;
 ;; "Implementations" of multimethod declared in crud namespace
 ;;
 
-(def validate-fn (u/create-validation-fn UsageEvent))
+(def validate-fn (u/create-spec-validation-fn ::spec/usage-event))
 (defmethod crud/validate
   resource-uri
   [resource]

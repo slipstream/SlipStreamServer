@@ -7,8 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]
-    ))
+    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]))
 
 (def ^:const service "slipstream")
 

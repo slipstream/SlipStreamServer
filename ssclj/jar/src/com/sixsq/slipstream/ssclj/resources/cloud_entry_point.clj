@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.root
+(ns com.sixsq.slipstream.ssclj.resources.cloud-entry-point
   "Root collection for the server providing list of all resource collections."
   (:require
     [clojure.tools.logging :as log]
@@ -7,6 +7,7 @@
     [ring.util.response :as r]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.cloud-entry-point.spec :as spec]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
@@ -29,28 +30,15 @@
                             :type      "ROLE"
                             :right     "VIEW"}]})
 
-;;
-;; Root schema
-;;
-
-(def Root
-  (merge c/CommonAttrs
-         c/AclAttr
-         {:baseURI  c/NonBlankString
-          s/Keyword c/ResourceLink}))
-
 ;; dynamically loads all available resources
 (def resource-links
   (into {} (dyn/get-resource-links)))
-
-(def stripped-keys
-  (concat (keys resource-links) [:baseURI :operations]))
 
 ;;
 ;; define validation function and add to standard multi-method
 ;;
 
-(def validate-fn (u/create-validation-fn Root))
+(def validate-fn (u/create-spec-validation-fn ::spec/cloud-entry-point))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))

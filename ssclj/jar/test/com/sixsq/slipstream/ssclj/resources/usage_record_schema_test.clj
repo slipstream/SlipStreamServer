@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-record-schema-test
   (:require
     [clojure.test :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.usage-record :refer :all]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]))
 
@@ -25,10 +26,12 @@
    (assoc valid-usage-record :end-timestamp "")])
 
 (deftest test-schema
-  (tu/are-valid? valid-usage-records UsageRecord))
+  (doseq [record valid-usage-records]
+    (is (= record (crud/validate record)))))
 
 (deftest test-invalid-records
-  (tu/is-invalid? (-> valid-usage-record
-                      (dissoc :cloud-vm-instanceid)
-                      (assoc :cloud_vm_instanceid "123"))
-                  UsageRecord))
+  (doseq [record (map (fn [r] (-> r
+                                  (dissoc :cloud-vm-instanceid)
+                                  (assoc :cloud_vm_instanceid "123")))
+                      valid-usage-records)]
+    (is (thrown? Exception (crud/validate record)))))

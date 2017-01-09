@@ -99,7 +99,7 @@
          (comp
            (environ :env {:config-path "config-hsqldb-mem.edn"
                           :passphrase "sl1pstre8m"})
-           ;;(aot :all true)
+           (aot :all true)
            (test)
 
            (sift :include #{#".*_test\.clj"

@@ -5,7 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.usage.spec :as schema]))
 
 (def ^:const resource-tag :usages)
 (def ^:const resource-name "Usage")
@@ -22,27 +23,7 @@
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
-
-;;
-;; schemas
-;;
-
-(def Usage
-  (merge
-    c/CreateAttrs
-    c/AclAttr
-    {
-     :id              c/NonBlankString
-     :user            c/NonBlankString
-     :cloud           c/NonBlankString
-     :start-timestamp c/Timestamp
-     :end-timestamp   c/Timestamp
-     :usage           c/NonBlankString
-     :grouping        c/NonBlankString
-     :frequency       c/NonBlankString
-     }))
-
-(def validate-fn (u/create-validation-fn Usage))
+(def validate-fn (u/create-spec-validation-fn ::schema/usage))
 (defmethod crud/validate
   resource-uri
   [resource]
