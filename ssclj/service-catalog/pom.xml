@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>ssclj-service-catalog-jar-dep</artifactId>
-  <version>3.19</version>
+  <version>3.19-SNAPSHOT</version>
   <name>ssclj-service-catalog-jar-dep</name>
   <description>SlipStream Service Catalog Resources (DEP)</description>
 
@@ -12,7 +12,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>3.19</version>
+    <version>3.19-SNAPSHOT</version>
   </parent>
 
   <licenses>
