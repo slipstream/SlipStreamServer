@@ -49,7 +49,7 @@
       (request (str p/service-context san/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 201))
 
   ;; anonymous create should fail
@@ -58,13 +58,13 @@
       (request base-uri
                :request-method :post
                :body (json/write-str valid-entry))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 403))
 
   ;; anonymous query should also fail
   (-> (session (ring-app))
       (request base-uri)
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 403))
 
   ; adding the same attribute twice should fail
@@ -74,7 +74,7 @@
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-entry))
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 201)
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -83,7 +83,7 @@
     (-> (session (ring-app))
         (header authn-info-header "jane")
         (request abs-uri)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200))
 
     (-> (session (ring-app))
@@ -92,13 +92,13 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str valid-entry))
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 409))
 
     (-> (session (ring-app))
         (header authn-info-header "jane")
         (request abs-uri :request-method :delete)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200)))
 
   ;; adding, retrieving and deleting entry as user should succeed
@@ -108,7 +108,7 @@
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-entry))
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 201)
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -116,14 +116,14 @@
     (-> (session (ring-app))
         (header authn-info-header "jane")
         (request abs-uri)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200))
 
     (-> (session (ring-app))
         (header authn-info-header "jane")
         (request abs-uri
                  :request-method :delete)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200)))
 
   ;; adding as user, retrieving and deleting entry as ADMIN should work
@@ -133,7 +133,7 @@
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-entry))
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 201)
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -141,14 +141,14 @@
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
         (request abs-uri)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200))
 
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
         (request abs-uri
                  :request-method :delete)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200))
 
     ;; try adding invalid entry
@@ -158,7 +158,7 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str invalid-entry))
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 400)))
 
   ;; add a new entry
@@ -168,7 +168,7 @@
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-entry))
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 201)
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -179,7 +179,7 @@
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
         (request abs-uri)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200)
         (dissoc :acl)                                       ;; ACL added automatically
         (t/does-body-contain valid-entry))
@@ -189,7 +189,7 @@
                       (content-type "application/json")
                       (header authn-info-header "root ADMIN")
                       (request base-uri)
-                      (t/body->json)
+                      (t/body->edn)
                       (t/is-status 200)
                       (t/is-resource-uri collection-uri)
                       (t/is-count pos?)
@@ -202,14 +202,14 @@
           (header authn-info-header "root ADMIN")
           (request abs-uri
                    :request-method :delete)
-          (t/body->json)
+          (t/body->edn)
           (t/is-status 200))
 
       ;; ensure that it really is gone
       (-> (session (ring-app))
           (header authn-info-header "root ADMIN")
           (request abs-uri)
-          (t/body->json)
+          (t/body->edn)
           (t/is-status 404)))))
 
 (deftest bad-methods

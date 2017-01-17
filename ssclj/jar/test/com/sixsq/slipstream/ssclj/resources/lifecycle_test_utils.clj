@@ -6,7 +6,11 @@
     [clojure.pprint :refer [pprint]]
     [compojure.core :as cc]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+    [ring.middleware.params :refer [wrap-params]]
+    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+    [ring.middleware.nested-params :refer [wrap-nested-params]]
     [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
@@ -122,6 +126,9 @@
   (-> resource-routes
       (wrap-exceptions)
       (wrap-cimi-params)
+      wrap-keyword-params
+      wrap-nested-params
+      wrap-params
       (wrap-base-uri)
       (wrap-authn-info-header)
       (wrap-json-body {:keywords? true})
