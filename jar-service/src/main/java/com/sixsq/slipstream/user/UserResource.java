@@ -21,18 +21,10 @@ package com.sixsq.slipstream.user;
  */
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sixsq.slipstream.event.ACL;
 import com.sixsq.slipstream.event.Event;
-import com.sixsq.slipstream.event.TypePrincipal;
-import com.sixsq.slipstream.event.TypePrincipalRight;
 import org.restlet.data.Cookie;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -65,10 +57,6 @@ import com.sixsq.slipstream.util.FileUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
-
-import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
-import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
-import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
 
 /**
  * @see UserResourceTest
@@ -213,11 +201,21 @@ public class UserResource extends ParameterizedResource<User> {
 	@Override
 	protected void authorize() {
 		boolean isMachine = isMachine();
+		String targetUserOrganization = null;
+		try {
+			targetUserOrganization = getTargetUser().getOrganization();
+		} catch (Exception e) {}
+		String organizationManagedByUser = getUser().getOrganizationManagedForUserCreator();
+		boolean isOrganizationManagedByUser = false;
+		if (isExisting() && targetUserOrganization != null && organizationManagedByUser != null) {
+			isOrganizationManagedByUser = targetUserOrganization.equals(organizationManagedByUser);
+		}
 
 		setCanPut(!newTemplateResource() && !isMachine
-				&& (getUser().isSuper() || !isExisting() || (newInQuery() && !isExisting()) || isItSelf()));
-		setCanDelete((getUser().isSuper() || isItSelf()) && !isMachine);
-		setCanGet(getUser().isSuper() || newTemplateResource() || isItSelf());
+				&& (getUser().isSuper() || !isExisting()
+				|| (newInQuery() && !isExisting()) || isItSelf() || isOrganizationManagedByUser));
+		setCanDelete((getUser().isSuper() || isItSelf() || isOrganizationManagedByUser) && !isMachine);
+		setCanGet(getUser().isSuper() || newTemplateResource() || isItSelf() || isOrganizationManagedByUser);
 	}
 
 	protected boolean newInQuery() {
