@@ -21,10 +21,18 @@ package com.sixsq.slipstream.user;
  */
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sixsq.slipstream.event.ACL;
 import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.event.TypePrincipal;
+import com.sixsq.slipstream.event.TypePrincipalRight;
 import org.restlet.data.Cookie;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -57,6 +65,10 @@ import com.sixsq.slipstream.util.FileUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
+
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
+import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
+import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
 
 /**
  * @see UserResourceTest
@@ -282,6 +294,15 @@ public class UserResource extends ParameterizedResource<User> {
 			throws ResourceException {
 
 		User user = xmlToUser();
+
+		if (!getUser().isSuper()) {
+			if (user.isSuper()) {
+				throwClientForbiddenError("Only super user are authorized to create privileged user!");
+			}
+			if (user.getRoles() != null) {
+				throwClientForbiddenError("Only super user are authorized to set roles!");
+			}
+		}
 
 		try {
 			updateOrCreate(user);
