@@ -297,10 +297,10 @@ public class UserResource extends ParameterizedResource<User> {
 
 		if (!getUser().isSuper()) {
 			if (user.isSuper()) {
-				throwClientForbiddenError("Only super user are authorized to create privileged user!");
+				throwClientForbiddenError("Only super users are authorized to create a privileged user!");
 			}
 			if (user.getRoles() != null) {
-				throwClientForbiddenError("Only super user are authorized to set roles!");
+				throwClientForbiddenError("Only super users are authorized to set roles!");
 			}
 		}
 
