@@ -195,6 +195,21 @@ public class User extends Parameterized<User, UserParameter> {
 		return isSuperUser;
 	}
 
+	public String getOrganizationManagedForUserCreator() {
+		if (this.roles != null) {
+			String[] rolesArray = roles.split(",");
+			for (String r : rolesArray) {
+				if (r.startsWith("USERCREATOR")) {
+					if (r.indexOf("_") > -1)
+						return r.substring(r.indexOf("_") + 1);
+					else
+						return null;
+				}
+			}
+		}
+		return null;
+	}
+
 	public void setSuper(boolean isSuperUser) {
 		this.isSuperUser = isSuperUser;
 	}
