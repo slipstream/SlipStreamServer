@@ -62,7 +62,7 @@
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 201))
 
   ;; anonymous create should fail
@@ -71,13 +71,13 @@
       (request base-uri
                :request-method :post
                :body (json/write-str valid-entry))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 403))
 
   ;; anonymous query should also fail
   (-> (session (ring-app))
       (request base-uri)
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 403))
 
   ;; creation rejected because attribute belongs to unknown namespace
@@ -96,7 +96,7 @@
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-entry))
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 201)
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -104,13 +104,13 @@
     (-> (session (ring-app))
         (header authn-info-header "jane")
         (request abs-uri)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200))
 
     (-> (session (ring-app))
         (header authn-info-header "jane role1 ADMIN")
         (request abs-uri :request-method :delete)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200)))
 
   ;; adding as user, retrieving and deleting entry as ADMIN should work
@@ -120,7 +120,7 @@
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-entry))
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 201)
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -128,14 +128,14 @@
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
         (request abs-uri)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200))
 
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
         (request abs-uri
                  :request-method :delete)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200))
 
     ;; try adding invalid entry
@@ -145,7 +145,7 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str invalid-entry))
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 400)))
 
   ;; add a new entry
@@ -155,7 +155,7 @@
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-entry))
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 201)
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -166,7 +166,7 @@
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
         (request abs-uri)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200)
         (dissoc :acl) ;; ACL added automatically
         (t/does-body-contain valid-entry))
@@ -176,7 +176,7 @@
                       (content-type "application/json")
                       (header authn-info-header "root ADMIN")
                       (request base-uri)
-                      (t/body->json)
+                      (t/body->edn)
                       (t/is-status 200)
                       (t/is-resource-uri collection-uri)
                       (t/is-count pos?)
@@ -188,14 +188,14 @@
       (-> (session (ring-app))
           (header authn-info-header "root ADMIN")
           (request abs-uri :request-method :delete)
-          (t/body->json)
+          (t/body->edn)
           (t/is-status 200))
 
       ;; ensure that it really is gone
       (-> (session (ring-app))
           (header authn-info-header "root ADMIN")
           (request abs-uri)
-          (t/body->json)
+          (t/body->edn)
           (t/is-status 404)))))
 
 (deftest bad-methods
@@ -221,7 +221,7 @@
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 201))
 
   (let [connector-with-namespaced-key
@@ -234,7 +234,7 @@
                           (request base-uri
                                    :request-method :post
                                    :body connector-with-namespaced-key)
-                          (t/body->json)
+                          (t/body->edn)
                           (t/is-status 201)
                           (t/location))
 
@@ -243,7 +243,7 @@
         doc           (-> (session (ring-app))
                           (header authn-info-header "root ADMIN")
                           (request abs-uri)
-                          (t/body->json)
+                          (t/body->edn)
                           (t/is-status 200)
                           (get-in [:response :body]))]
 
@@ -258,7 +258,7 @@
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 201))
 
   (-> (session (ring-app))
@@ -267,7 +267,7 @@
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str namespace-com))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 201))
 
   (let [uri (-> (session (ring-app))
@@ -276,7 +276,7 @@
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-nested-entry))
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 201)
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))
@@ -284,7 +284,7 @@
         doc (-> (session (ring-app))
                 (header authn-info-header "root ADMIN")
                 (request abs-uri)
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 200)
                 (get-in [:response :body]))]
 
@@ -299,7 +299,7 @@
       (request base-uri
                :request-method :post
                :body (json/write-str invalid-nested-entry))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 406)))
 
 
@@ -311,7 +311,7 @@
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 201))
 
   (-> (session (ring-app))
@@ -320,7 +320,7 @@
       (request base-uri
                :request-method :post
                :body (json/write-str valid-entry))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 201)
       (t/location))
 
@@ -334,21 +334,21 @@
         res-all (-> (session (ring-app))
                     (header authn-info-header "root ADMIN")
                     (request (str p/service-context resource-url))
-                    (t/body->json)
+                    (t/body->edn)
                     (t/is-status 200)
                     (get-in [:response :body]))
 
         res-ok (-> (session (ring-app))
                    (header authn-info-header "root ADMIN")
                    (request cimi-url-ok)
-                   (t/body->json)
+                   (t/body->edn)
                    (t/is-status 200)
                    (get-in [:response :body]))
 
         res-empty (-> (session (ring-app))
                       (header authn-info-header "root ADMIN")
                       (request cimi-url-no-result)
-                      (t/body->json)
+                      (t/body->edn)
                       (t/is-status 200)
                       (get-in [:response :body]))]
     
@@ -365,7 +365,7 @@
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 201))
 
   (-> (session (ring-app))
@@ -374,7 +374,7 @@
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str namespace-com))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 201))
 
   (let [_ (-> (session (ring-app))
@@ -383,7 +383,7 @@
               (request base-uri
                        :request-method :post
                        :body (json/write-str valid-nested-2-levels))
-              (t/body->json)
+              (t/body->edn)
               (t/is-status 201)
               (t/location))
         cimi-url-ok (str p/service-context
@@ -395,14 +395,14 @@
         res-ok (-> (session (ring-app))
                    (header authn-info-header "root ADMIN")
                    (request cimi-url-ok)
-                   (t/body->json)
+                   (t/body->edn)
                    (t/is-status 200)
                    (get-in [:response :body]))
 
         no-result (-> (session (ring-app))
                    (header authn-info-header "root ADMIN")
                    (request cimi-url-no-result)
-                   (t/body->json)
+                   (t/body->edn)
                    (t/is-status 200)
                    (get-in [:response :body]))]
     (is (= 1 (:count res-ok)))

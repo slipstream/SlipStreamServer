@@ -224,6 +224,9 @@
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd${slipstream.edition}</require>
           </requires>
+          <obsoletes>
+            <obsolete>slipstream-service-catalog${slipstream.edition}</obsolete>
+          </obsoletes>
 
           <postinstallScriptlet>
             <script>
