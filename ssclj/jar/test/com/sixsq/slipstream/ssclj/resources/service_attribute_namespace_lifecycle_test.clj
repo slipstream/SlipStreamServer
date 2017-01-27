@@ -38,7 +38,7 @@
       (request base-uri
                :request-method :post
                :body (json/write-str valid-namespace))
-      (t/body->json)
+      (t/body->edn)
       (t/is-status 403))
 
   (let [uri (-> (session (ring-app))
@@ -47,14 +47,14 @@
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-namespace))
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 201)
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))
         doc (-> (session (ring-app))
                 (header authn-info-header "slipstream")
                 (request abs-uri)
-                (t/body->json)
+                (t/body->edn)
                 (t/is-status 200)
                 (get-in [:response :body]))]
 
@@ -65,7 +65,7 @@
     (-> (session (ring-app))
         (header authn-info-header "jane")
         (request "/api/service-attribute-namespace")
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200)
         (get-in [:response :body]))
 
@@ -76,7 +76,7 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str namespace-same-prefix))
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 409)
         (get-in [:response :body :message])
         (= (str "Conflict for " uri))
@@ -89,7 +89,7 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str namespace-same-uri))
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 409)
         (get-in [:response :body :message])
         (= (str "Conflict for " uri))
@@ -102,11 +102,11 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str another-valid-namespace))
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 201))
 
     (-> (session (ring-app))
         (header authn-info-header "root ADMIN")
         (request abs-uri :request-method :delete)
-        (t/body->json)
+        (t/body->edn)
         (t/is-status 200))))
