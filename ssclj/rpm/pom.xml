@@ -210,7 +210,7 @@
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream SSCLJ Server</summary>
-          <name>slipstream-ssclj${slipstream.edition}</name>
+          <name>slipstream-ssclj</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
@@ -222,10 +222,12 @@
           </description>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
-            <require>slipstream-useradd${slipstream.edition}</require>
+            <require>slipstream-useradd</require>
           </requires>
           <obsoletes>
-            <obsolete>slipstream-service-catalog${slipstream.edition}</obsolete>
+            <obsolete>slipstream-service-catalog</obsolete>
+            <obsolete>slipstream-ssclj-community</obsolete>
+            <obsolete>slipstream-ssclj-enterprise</obsolete>
           </obsoletes>
 
           <postinstallScriptlet>
