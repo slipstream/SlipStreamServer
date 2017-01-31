@@ -139,7 +139,7 @@
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream Pricing Server</summary>
-          <name>slipstream-pricing-server${slipstream.edition}</name>
+          <name>slipstream-pricing-server</name>
           <group>Applications/Engineering</group>
           <vendor>SixSq</vendor>
           <packager>SixSq</packager>
@@ -147,10 +147,14 @@
           <url>http://sixsq.com</url>
           <needarch>noarch</needarch>
           <description>SlipStream Pricing Server</description>
+          <obsoletes>
+            <obsolete>slipstream-pricing-server-community</obsolete>
+            <obsolete>slipstream-pricing-server-enterprise</obsolete>
+          </obsoletes>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
-            <require>slipstream-useradd${slipstream.edition}</require>
-            <require>slipstream-price-parsing${slipstream.edition}</require>
+            <require>slipstream-useradd</require>
+            <require>slipstream-price-parsing</require>
           </requires>
 
           <defaultDirmode>755</defaultDirmode>

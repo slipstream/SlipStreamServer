@@ -68,7 +68,7 @@
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream Ring Container</summary>
-          <name>slipstream-ring-container${slipstream.edition}</name>
+          <name>slipstream-ring-container</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
@@ -78,9 +78,13 @@
           <description>
             SlipStream Ring Container
           </description>
+          <obsoletes>
+            <obsolete>slipstream-ring-container-community</obsolete>
+            <obsolete>slipstream-ring-container-enterprise</obsolete>
+          </obsoletes>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
-            <require>slipstream-useradd${slipstream.edition}</require>
+            <require>slipstream-useradd</require>
           </requires>
 
           <defaultDirmode>755</defaultDirmode>
