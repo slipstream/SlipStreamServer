@@ -170,40 +170,27 @@
                  })
     (jar :file tests-artef-jar-name)))
 
-(deftask mvn-build-tests-jar
-  []
-   (comp
-     (build-tests-jar)
-     (install :pom tests-artef-pom-loc)
-     #_(target)))
-
 (deftask mvn-test
          "run all tests of project"
          []
          (run-tests))
 
 (deftask mvn-build
-         "build full project through maven"
+         "build project"
          []
          (comp
            (build)
            (install)
-           #_(target)))
-
-(deftask mvn-deploy
-         "deploy project"
-         []
-         (comp
-           (mvn-build)
            (if (= "true" (System/getenv "BOOT_PUSH"))
              (push)
              identity)))
 
-(deftask mvn-deploy-tests-jar
-         "deploy project"
+(deftask mvn-build-tests-jar
+         "build project"
          []
          (comp
-          (mvn-build-tests-jar)
+          (build-tests-jar)
+          (install :pom tests-artef-pom-loc)
           (if (= "true" (System/getenv "BOOT_PUSH"))
             (push :pom tests-artef-pom-loc)
             identity)))

@@ -80,7 +80,6 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
-          <!--
           <execution>
             <id>boot-build</id>
             <phase>install</phase>
@@ -89,6 +88,9 @@
             </goals>
             <configuration>
               <executable>boot</executable>
+              <environmentVariables>
+                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
+              </environmentVariables>
               <arguments>
                 <argument>mvn-build</argument>
               </arguments>
@@ -102,41 +104,11 @@
             </goals>
             <configuration>
               <executable>boot</executable>
+              <environmentVariables>
+                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
+              </environmentVariables>
               <arguments>
                 <argument>mvn-build-tests-jar</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          -->
-          <execution>
-            <id>boot-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>boot</executable>
-              <environmentVariables>
-                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
-              </environmentVariables>
-              <arguments>
-                <argument>mvn-deploy</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>boot-deploy-tests-jar</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>boot</executable>
-              <environmentVariables>
-                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
-              </environmentVariables>
-              <arguments>
-                <argument>mvn-deploy-tests-jar</argument>
               </arguments>
             </configuration>
           </execution>
