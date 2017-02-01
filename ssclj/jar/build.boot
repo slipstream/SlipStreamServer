@@ -16,7 +16,7 @@
 
 (set-env!
   :repositories
-  #(reduce conj % [["sixsq" {:url (sixsq-nexus-url)}]])
+  #(reduce conj % [["sixsq" {:url "file:///Users/loomis/maven-local/snapshots-community-rhel7"}]])
 
   :dependencies
   #(vec (concat %
@@ -90,8 +90,8 @@
        :version (get-env :version)}
   test {:junit-output-to ""}
   install {:pom (str (get-env :project))}
-  push {:pom (str (get-env :project))}
-  )
+  push {:pom (str (get-env :project))
+        :repo "sixsq"})
 
 (deftask run-tests
          "runs all tests and performs full compilation"
@@ -175,7 +175,7 @@
    (comp
      (build-tests-jar)
      (install :pom tests-artef-pom-loc)
-     (target)))
+     #_(target)))
 
 (deftask mvn-test
          "run all tests of project"
@@ -188,19 +188,23 @@
          (comp
            (build)
            (install)
-           (target)))
+           #_(target)))
 
 (deftask mvn-deploy
          "deploy project"
          []
          (comp
            (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))
 
 (deftask mvn-deploy-tests-jar
          "deploy project"
          []
          (comp
-           (mvn-build-tests-jar)
-           (push :repo "sixsq" :pom tests-artef-pom-loc)))
+          (mvn-build-tests-jar)
+          (if (= "true" (System/getenv "BOOT_PUSH"))
+            (push :pom tests-artef-pom-loc)
+            identity)))
 

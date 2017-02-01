@@ -54,7 +54,8 @@
          :source-uri   "https://github.com/slipstream/SlipStreamServer/blob/master/jar-prslib/{filepath}#L{line}"
          :language     :clojure}
   test {:junit-output-to ""}
-  )
+  push {:pom (str (get-env :project))
+        :repo "sixsq"})
 
 (deftask run-tests
          "runs all tests and performs full compilation"
@@ -104,13 +105,7 @@
          []
          (comp
           (build)
-          (install :pom (str (get-env :project)))))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push
-             :pom (str (get-env :project))
-             :repo "sixsq")))
+          (install :pom (str (get-env :project)))
+          (if (= "true" (System/getenv "BOOT_PUSH"))
+            (push)
+            identity)))

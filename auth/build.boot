@@ -60,7 +60,7 @@
   pom {:project (get-env :project)
        :version (get-env :version)}
   test {:junit-output-to ""}
-  )
+  push {:repo "sixsq"})
 
 (deftask run-tests
          "runs all tests and performs full compilation"
@@ -89,11 +89,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))
