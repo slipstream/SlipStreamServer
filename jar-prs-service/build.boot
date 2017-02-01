@@ -45,7 +45,8 @@
        :version (get-env :version)}
   serve {:handler 'sixsq.slipstream.prs.ring/handler
          :reload true}
-  watch {:verbose true})
+  watch {:verbose true}
+  push {:repo "sixsq"})
 
 (deftask run-tests
   "runs all tests and performs full compilation"
@@ -81,11 +82,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))

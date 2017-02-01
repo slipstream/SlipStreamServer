@@ -54,8 +54,8 @@
        :version (get-env :version)}
   test {:junit-output-to ""}
   install {:pom (str (get-env :project))}
-  push {:pom (str (get-env :project))}
-  )
+  push {:pom (str (get-env :project))
+        :repo "sixsq"})
 
 (deftask build []
          (comp
@@ -72,11 +72,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "deploy project"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))

@@ -224,10 +224,16 @@
   [m]
   (str "\n" (clojure.pprint/write m :stream nil :right-margin 50)))
 
+(defn- name-plus-namespace
+  [kw]
+  (if (keyword? kw)
+    (subs (str kw) 1)
+    (name kw)))
+
 (defn serialize
   [resource]
   (with-out-str
-    (json/pprint resource :key-fn name)))
+    (json/pprint resource :key-fn name-plus-namespace)))
 
 (defn deserialize
   [s]

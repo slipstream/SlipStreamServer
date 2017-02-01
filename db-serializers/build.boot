@@ -62,7 +62,8 @@
        :version (get-env :version)}
   test {:junit-output-to ""}
   install {:pom (str (get-env :project))}
-  push {:pom (str (get-env :project))})
+  push {:pom (str (get-env :project))
+        :repo "sixsq"})
 
 (def tests-assets-re #{#".*_test\.clj"
                        #"test_.*\.clj"
@@ -99,11 +100,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))
