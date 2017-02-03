@@ -9,9 +9,9 @@
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>SlipStream</artifactId>
+    <artifactId>SlipStreamCommunity</artifactId>
     <version>3.21-SNAPSHOT</version>
-    <relativePath>../SlipStream</relativePath>
+    <relativePath>../SlipStream/community</relativePath>
   </parent>
 
   <modules>
