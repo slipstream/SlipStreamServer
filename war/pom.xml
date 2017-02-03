@@ -70,8 +70,9 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
-        <type>pom</type>
       <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
