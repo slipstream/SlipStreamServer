@@ -295,6 +295,14 @@ public class UserResource extends ParameterizedResource<User> {
 
 		User user = xmlToUser();
 
+		try {
+			ParametersFactory.addParametersForEditing(user);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		}
+
 		if (!getUser().isSuper()) {
 			if (user.isSuper()) {
 				throwClientForbiddenError("Only super users are authorized to create a privileged user!");
