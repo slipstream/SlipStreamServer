@@ -16,7 +16,7 @@
 
 (set-env!
   :repositories
-  #(reduce conj % [["sixsq" {:url "file:///Users/loomis/maven-local/snapshots-community-rhel7"}]])
+  #(reduce conj % [["sixsq" {:url (sixsq-nexus-url)}]])
 
   :dependencies
   #(vec (concat %
