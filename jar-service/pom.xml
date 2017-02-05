@@ -25,7 +25,44 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamServerPRSlib-jar-dep</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamServerPRSlib-jar</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamUI-dep</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamUI</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbSerializers-jar</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -54,24 +91,6 @@
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamConnector</artifactId>
 			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI-dep</artifactId>
-			<type>pom</type>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamDbSerializers-jar</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 
