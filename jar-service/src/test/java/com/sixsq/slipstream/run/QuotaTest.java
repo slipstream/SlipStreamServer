@@ -20,6 +20,7 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import clojure.lang.IFn;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -37,11 +38,23 @@ import java.util.Map;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import clojure.java.api.Clojure;
+
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
+
 public class QuotaTest {
 
 	@BeforeClass
 	public static void setupClass() {
 		Event.muteForTests();
+		setDbImpl();
+	}
+
+	private static void setDbImpl() {
+		IFn require = Clojure.var("clojure.core", "require");
+		require.invoke(Clojure.read("com.sixsq.slipstream.run.quota-setup"));
+		IFn init_config = Clojure.var("com.sixsq.slipstream.run.quota-setup", "init-config");
+		init_config.invoke();
 	}
 
 	private Run testQuotaCreateRun(User user, String cloud)
