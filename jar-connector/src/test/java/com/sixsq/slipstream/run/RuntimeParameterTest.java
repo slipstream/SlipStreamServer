@@ -35,8 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import clojure.lang.IFn;
-import clojure.java.api.Clojure;
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
@@ -58,7 +57,8 @@ public class RuntimeParameterTest {
 			InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 
 		Event.muteForTests();
-                setDbImpl();
+                CljElasticsearchHelper.createAndInitTestDb();
+
 		user = CommonTestUtil.createTestUser();
 
 		CommonTestUtil.addSshKeys(user);
