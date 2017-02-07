@@ -35,6 +35,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import clojure.lang.IFn;
+import clojure.java.api.Clojure;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
@@ -56,11 +58,19 @@ public class RuntimeParameterTest {
 			InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 
 		Event.muteForTests();
+                setDbImpl();
 		user = CommonTestUtil.createTestUser();
 
 		CommonTestUtil.addSshKeys(user);
 
 		CommonTestUtil.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+	}
+
+	private static void setDbImpl() {
+		IFn require = Clojure.var("clojure.core", "require");
+		require.invoke(Clojure.read("com.sixsq.slipstream.run.quota-setup"));
+		IFn init_config = Clojure.var("com.sixsq.slipstream.run.quota-setup", "init-config");
+		init_config.invoke();
 	}
 
 	@AfterClass
