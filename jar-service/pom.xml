@@ -265,6 +265,9 @@
 					<systemPropertyVariables>
 						<slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
 					</systemPropertyVariables>
+					<includes>
+						<include>${slipstream.test.includes}</include>
+					</includes>
 					<excludes>
 						<exclude>${slipstream.test.excludes}</exclude>
 					</excludes>
