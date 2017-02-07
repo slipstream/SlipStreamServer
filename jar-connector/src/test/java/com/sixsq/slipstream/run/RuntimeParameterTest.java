@@ -58,11 +58,19 @@ public class RuntimeParameterTest {
 
 		Event.muteForTests();
                 CljElasticsearchHelper.createAndInitTestDb();
+
 		user = CommonTestUtil.createTestUser();
 
 		CommonTestUtil.addSshKeys(user);
 
 		CommonTestUtil.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+	}
+
+	private static void setDbImpl() {
+		IFn require = Clojure.var("clojure.core", "require");
+		require.invoke(Clojure.read("com.sixsq.slipstream.run.quota-setup"));
+		IFn init_config = Clojure.var("com.sixsq.slipstream.run.quota-setup", "init-config");
+		init_config.invoke();
 	}
 
 	@AfterClass
