@@ -22,7 +22,7 @@
   #(vec (concat %
                 (merge-defaults
                   ['sixsq/default-deps (get-env :version)]
-                  '[[org.clojure/clojure]
+                  '[[org.clojure/clojure :scope "compile"]
                     [org.clojure/data.xml]
                     [org.clojure/tools.cli]
 
