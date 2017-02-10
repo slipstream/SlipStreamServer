@@ -4,7 +4,7 @@
 
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamCljResources</artifactId>
-  <version>3.21-SNAPSHOT</version>
+  <version>3.21</version>
   <name>SlipStream SSCLJ (POM)</name>
 
   <description>A server with the clojure-based resources.</description>
@@ -14,7 +14,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.21-SNAPSHOT</version>
+    <version>3.21</version>
   </parent>
 
   <modules>
