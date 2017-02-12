@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.auth.config-test
+(ns com.sixsq.slipstream.auth.utils.config-test
   (:require
     [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.utils.config :as cf]))

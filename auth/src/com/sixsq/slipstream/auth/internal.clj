@@ -6,7 +6,10 @@
 
     [com.sixsq.slipstream.auth.sign :as sg]
     [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.auth.utils.http :as uh])
+    [com.sixsq.slipstream.auth.utils.http :as uh]
+    [buddy.core.codecs :as co]
+    [clojure.string :as s]
+    [buddy.core.hash :as ha])
   (:import (java.util Date TimeZone)
            (java.text SimpleDateFormat)))
 
@@ -28,6 +31,13 @@
     :cookies
     {"com.sixsq.slipstream.cookie" {:value token, :path "/"}}))
 
+(defn sha512
+  "Encrypt secret exactly as done in SlipStream Java server."
+  [secret]
+  (-> (ha/sha512 secret)
+      co/bytes->hex
+      s/upper-case))
+
 (defn valid?
   [credentials]
   (let [username            (:username credentials)
@@ -36,7 +46,7 @@
     (and
       password-credential
       encrypted-in-db
-      (= (sg/sha512 password-credential) encrypted-in-db))))
+      (= (sha512 password-credential) encrypted-in-db))))
 
 (defn- adapt-credentials
   [{:keys [username] :as credentials}]

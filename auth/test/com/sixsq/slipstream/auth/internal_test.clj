@@ -1,5 +1,4 @@
 (ns com.sixsq.slipstream.auth.internal-test
-  (:refer-clojure :exclude [update])
   (:require
     [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.test-helper :as th]
@@ -82,7 +81,7 @@
 
 (deftest password-encryption-compatible-with-slipstream
   (is (= "304D73B9607B5DFD48EAC663544F8363B8A03CAAD6ACE21B369771E3A0744AAD0773640402261BD5F5C7427EF34CC76A2626817253C94D3B03C5C41D88C64399"
-         (sg/sha512 "supeRsupeR"))))
+         (ia/sha512 "supeRsupeR"))))
 
 (deftest check-claims-token
   (th/add-user-for-test! valid-credentials)

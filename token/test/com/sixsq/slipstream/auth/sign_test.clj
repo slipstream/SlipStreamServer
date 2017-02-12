@@ -14,5 +14,4 @@
                 :delta true
                 :exp   exp}]
     (is (= (merge claims {:exp timestamp})
-           (-> (t/sign-claims claims)
-               (t/unsign-claims))))))
+           (t/unsign-claims (t/sign-claims claims))))))

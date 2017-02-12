@@ -1,7 +1,7 @@
 (def +version+ "3.22-SNAPSHOT")
 
 (set-env!
-  :project 'com.sixsq.slipstream/auth
+  :project 'com.sixsq.slipstream/token
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
@@ -20,30 +20,22 @@
   :dependencies
   #(vec (concat %
                 (merge-defaults
-                 ['sixsq/default-deps (get-env :version)]
-                 '[[org.clojure/clojure]
-                   
-                   [buddy/buddy-core]
-                   [buddy/buddy-hashers]
-                   [buddy/buddy-sign]
-                   [clj-http]
-                   [environ]
-                   [korma]
-                   [log4j]
-                   [org.clojure/data.json]
-                   [org.clojure/tools.logging]
-                   [org.clojure/java.jdbc]
-                   [org.hsqldb/hsqldb]
-                   [superstring]
+                  ['sixsq/default-deps (get-env :version)]
+                  '[[org.clojure/clojure]
 
-                   [com.sixsq.slipstream/token]
+                    [buddy/buddy-core]
+                    [buddy/buddy-hashers]
+                    [buddy/buddy-sign]
+                    [environ]
+                    [log4j]
+                    [org.clojure/tools.logging]
 
-                   [peridot]
+                    [peridot]
 
-                   [boot-environ]
-                   [adzerk/boot-test]
-                   [adzerk/boot-reload]
-                   [tolitius/boot-check]]))))
+                    [boot-environ]
+                    [adzerk/boot-test]
+                    [adzerk/boot-reload]
+                    [tolitius/boot-check]]))))
 
 (require
   '[environ.boot :refer [environ]]
@@ -79,12 +71,16 @@
          (comp
            (testing)
            (config)
-           (aot :all true)
            (test)))
 
 (deftask build []
          (comp
            (pom)
+           (jar)
+           (sift :include #{ #".*pom.xml" #".*pom.properties"}
+                 :invert true)
+           (pom :project 'com.sixsq.slipstream/token-java)
+           (aot :all true)
            (jar)))
 
 (deftask mvn-test

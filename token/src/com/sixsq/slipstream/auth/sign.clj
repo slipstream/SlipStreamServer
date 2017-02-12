@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.auth.sign
-  (:require [superstring.core :as s]
-            [buddy.sign.jwt :as jwt]
-            [buddy.core.keys :as ks]
-            [clojure.java.io :as io]
-            [com.sixsq.slipstream.auth.utils.config :as cf]
-            [buddy.core.codecs :as co]
-            [buddy.core.hash :as ha]
-            [clj-time.core :as t]))
+  (:require
+    [buddy.core.keys :as ks]
+    [buddy.sign.jwt :as jwt]
+    [clj-time.core :as t]
+    [clojure.java.io :as io]
+    [clojure.string :as s]
+
+    [com.sixsq.slipstream.auth.utils.config :as cf]))
 
 (def default-nb-minutes-expiry (* 7 24 60))
 (def signing-algorithm {:alg :rs256})
@@ -18,17 +18,10 @@
        t/millis
        (t/plus (t/now))))
 
-(defn sha512
-  "Encrypt secret exactly as done in SlipStream Java server."
-  [secret]
-  (-> (ha/sha512 secret)
-      co/bytes->hex
-      s/upper-case))
-
 (defn- read-private-key
   [private-key-pem]
   (let [passphrase (cf/property-value :passphrase)
-        privkey    (io/resource private-key-pem)]
+        privkey (io/resource private-key-pem)]
     (if (and passphrase privkey)
       (ks/private-key privkey passphrase)
       (throw (IllegalStateException. "Passphrase not defined or private key not accessible (must be in the classpath).")))))
