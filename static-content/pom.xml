@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamServer-ui-static-content</artifactId>
-  <name>SlipStream UI Static Content (ZIP)</name>
+  <name>SlipStreamServer/static-content</name>
 
   <packaging>pom</packaging>
 

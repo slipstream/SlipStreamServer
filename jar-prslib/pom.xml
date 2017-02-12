@@ -3,8 +3,7 @@
 
   <artifactId>SlipStreamServerPRSlib-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamServerPRSlib (JAR)</name>
-  <description>SlipStream Server PRS lib (JAR)</description>
+  <name>SlipStreamServer/jar-prslib</name>
 
   <url>http://sixsq.com</url>
   <parent>

@@ -3,8 +3,7 @@
 
   <artifactId>SlipStreamPlacementLib-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamPlacementLibrary - JAR</name>
-  <description>SlipStream Placement Library (JAR)</description>
+  <name>SlipStreamServer/jar-placement-lib</name>
 
   <url>http://sixsq.com</url>
   <parent>

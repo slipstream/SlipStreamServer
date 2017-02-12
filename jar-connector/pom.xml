@@ -4,8 +4,7 @@
 
 	<artifactId>SlipStreamConnector</artifactId>
 	<packaging>jar</packaging>
-	<name>SlipStreamConnector</name>
-	<description>SlipStream Connector (JAR)</description>
+	<name>SlipStreamServer/jar-connector</name>
 
 	<url>http://sixsq.com</url>
 	<licenses>

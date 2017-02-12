@@ -4,8 +4,7 @@
   <artifactId>slipstream-ring-container-dep</artifactId>
   <packaging>pom</packaging>
   <version>3.22-SNAPSHOT</version>
-  <name>slipstream-ring-container-dep</name>
-  <description>SlipStream Ring Container (DEP)</description>
+  <name>SlipStreamServer/ring-container</name>
   <url>http://sixsq.com</url>
 
   <parent>

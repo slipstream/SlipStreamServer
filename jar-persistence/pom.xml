@@ -4,8 +4,7 @@
 
 	<artifactId>SlipStreamPersistence</artifactId>
 	<packaging>jar</packaging>
-	<name>SlipStreamPersistence</name>
-	<description>SlipStream Persistence (JAR)</description>
+	<name>SlipStreamServer/jar-persistence</name>
 
 	<url>http://sixsq.com</url>
 	<licenses>
