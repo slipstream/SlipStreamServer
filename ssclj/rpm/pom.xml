@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>ssclj-server-rpm</artifactId>
-  <name>SlipStream SSCLJ Server (RPM)</name>
+  <name>SlipStreamServer/ssclj/rpm</name>
 
   <packaging>pom</packaging>
 

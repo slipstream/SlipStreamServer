@@ -3,8 +3,7 @@
 
   <artifactId>SlipStreamPricingService-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamPricingService - JAR</name>
-  <description>SlipStream Pricing Service (DEP)</description>
+  <name>SlipStreamServer/jar-prs-service</name>
 
   <url>http://sixsq.com</url>
   <parent>

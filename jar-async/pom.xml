@@ -4,8 +4,7 @@
 
 	<artifactId>SlipStreamAsync</artifactId>
 	<packaging>jar</packaging>
-	<name>SlipStreamAsync</name>
-	<description>SlipStream Asynchronous Operations (JAR)</description>
+	<name>SlipStreamServer/jar-async</name>
 	<url>http://sixsq.com</url>
 	<licenses>
 		<license>

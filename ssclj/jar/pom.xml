@@ -4,8 +4,7 @@
   <artifactId>SlipStreamCljResources-jar-dep</artifactId>
   <packaging>pom</packaging>
   <version>3.22-SNAPSHOT</version>
-  <name>SlipStreamCljResources-jar-dep</name>
-  <description>SlipStream Clojure Resources (DEP)</description>
+  <name>SlipStreamServer/ssclj/jar</name>
   <url>http://sixsq.com</url>
 
   <parent>

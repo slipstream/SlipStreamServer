@@ -3,8 +3,7 @@
 
   <artifactId>SlipStreamToolsCli-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamToolsCli-jar-dep</name>
-  <description>SlipStream Clojure Tools CLI (DEP)</description>
+  <name>SlipStreamServer/ssclj/tools</name>
   <url>http://sixsq.com</url>
 
   <parent>

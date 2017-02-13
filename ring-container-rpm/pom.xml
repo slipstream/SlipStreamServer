@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>ring-container-rpm</artifactId>
-  <name>SlipStream Ring Container (RPM)</name>
+  <name>SlipStreamServer/ring-container-rpm</name>
 
   <packaging>pom</packaging>
 

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamServer-rpm</artifactId>
-  <name>SlipStream Server (RPM)</name>
+  <name>SlipStreamServer/rpm</name>
   <packaging>pom</packaging>
   <parent>
     <groupId>com.sixsq.slipstream</groupId>

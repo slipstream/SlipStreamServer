@@ -4,8 +4,7 @@
 
   <artifactId>SlipStreamPricingService-rpm</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamPricingService - RPM</name>
-  <description>SlipStream Pricing Service (RPM)</description>
+  <name>SlipStreamServer/rpm-prs</name>
 
   <url>http://sixsq.com</url>
   <parent>

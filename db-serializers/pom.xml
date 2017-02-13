@@ -3,8 +3,7 @@
 
   <artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamDbSerializers (POM)</name>
-  <description>DB (de)serialiazers of SlipStream entities to/from DB behind ssclj server (POM)</description>
+  <name>SlipStreamServer/db-serializers</name>
   <url>http://sixsq.com</url>
 
   <parent>
