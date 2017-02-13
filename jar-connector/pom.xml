@@ -30,7 +30,7 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>auth</artifactId>
+			<artifactId>token-java</artifactId>
 		</dependency>
 
 		<dependency>

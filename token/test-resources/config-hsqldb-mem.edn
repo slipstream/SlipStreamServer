@@ -1,0 +1,10 @@
+{:auth-db                 {:classname   "org.hsqldb.jdbc.JDBCDriver"
+                           :subprotocol "hsqldb"
+                           :subname     "mem://localhost:9012/devresources"
+                           :make-pool?  true}
+
+ :token-nb-minutes-expiry 10080
+ :passphrase              "sl1pstre8m"
+
+ :github-client-id        "cd03c88b13517f931f09"
+ :github-client-secret    "6435cde7c22f0d543b07f13e311e0514c33460ad"}
