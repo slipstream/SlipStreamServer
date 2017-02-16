@@ -42,7 +42,7 @@
           (get-in [:response :body])
           (contains? k#)
           (is (str "!!!! Map did not contain key " k#))))
-     ~m ~k))
+    ~m ~k))
 
 (defmacro is-resource-uri
   [m type-uri]
@@ -58,14 +58,14 @@
       (let [[op# defined-ops#] (select-op m# expected-op#)]
         (is op# (str "!!!! Missing " expected-op# " in " defined-ops#))
         m#))
-     ~m ~expected-op))
+    ~m ~expected-op))
 
 (defmacro is-operation-absent [m absent-op]
   `((fn [m# absent-op#]
       (let [[op# defined-ops#] (select-op m# absent-op#)]
         (is (nil? op#) (str "!!!! Unexpected op " absent-op# " in " defined-ops#)))
       m#)
-     ~m ~absent-op))
+    ~m ~absent-op))
 
 (defmacro is-id
   [m id]
@@ -85,7 +85,7 @@
   `((fn [m# v#]
       (let [body# (get-in m# [:response :body])]
         (is (= (merge body# v#) body#))))
-     ~m ~v))
+    ~m ~v))
 
 (defmacro is-location
   [m]

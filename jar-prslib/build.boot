@@ -72,7 +72,9 @@
            (sift :include #{#".*_test\.clj"}
                  :invert true)
            (aot :all true)
-           (uber)
+           (uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
+                             #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
+                             #"elasticsearch" })
            (jar)))
 
 (deftask mvn-test
