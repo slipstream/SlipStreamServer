@@ -47,6 +47,6 @@
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
-  test {:junit-output-to ""}
-  )
+  test {:junit-output-to ""})
+
 

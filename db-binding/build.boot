@@ -36,6 +36,10 @@
                    [org.clojure/data.json]
                    [org.clojure/tools.logging]
                    [org.elasticsearch/elasticsearch]
+                   ; required by elasticsearch
+                   [org.apache.logging.log4j/log4j-core]
+                   [org.apache.logging.log4j/log4j-api]
+                   [org.elasticsearch.client/transport]
                    [prismatic/schema]
                    [ring/ring-json]
                    [superstring]

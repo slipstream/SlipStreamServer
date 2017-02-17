@@ -24,9 +24,6 @@
                  ['sixsq/default-deps (get-env :version)]
                  '[[org.clojure/clojure]
 
-                   ; FIXME: remove with Elasticsearch > v2.3.5
-                   [net.java.dev.jna/jna]
-
                    [aleph]
                    [cheshire] ;; newer version needed for ring-json
                    [compojure]
@@ -45,8 +42,6 @@
                    [org.clojure/tools.cli]
                    [org.clojure/tools.logging]
                    [org.clojure/tools.namespace]
-                   [org.elasticsearch/elasticsearch]
-                   [org.slf4j/slf4j-log4j12]
                    [potemkin]
                    [prismatic/schema]
                    [ring/ring-core]
@@ -55,6 +50,8 @@
 
                    [com.sixsq.slipstream/auth]
                    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
+                   [org.apache.logging.log4j/log4j-core]
+                   [org.apache.logging.log4j/log4j-api]
 
                    ;; needed for migration scripts
                    [korma]
@@ -125,7 +122,7 @@
     (fn handler [fileset]
      (let [f (get-file-path fileset "com/sixsq/slipstream/version.txt")]
        (spit f (get-env :version)))
-      (next-task fileset))))
+     (next-task fileset))))
 
 (deftask build []
          (comp
@@ -161,13 +158,13 @@
     (pom :project tests-artef-project-name :classifier "tests")
     (sift
       :to-resource #{#"lifecycle_test_utils\.clj"
-                     #"connector_test_utils\.clj"
-                     }
+                     #"connector_test_utils\.clj"}
+
       :include #{#"lifecycle_test_utils\.clj"
                  #"connector_test_utils\.clj"
                  #"pom.xml"
-                 #"pom.properties"
-                 })
+                 #"pom.properties"})
+
     (jar :file tests-artef-jar-name)))
 
 (deftask mvn-test

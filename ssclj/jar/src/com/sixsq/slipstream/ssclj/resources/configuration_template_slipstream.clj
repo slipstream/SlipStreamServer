@@ -55,8 +55,8 @@
    :cloudConnectorClass        s/Str                        ;; "name-region-az:connector,"
 
    :metricsLoggerEnable        s/Bool                       ;; false
-   :metricsGraphiteEnable      s/Bool                       ;; false
-   })
+   :metricsGraphiteEnable      s/Bool})                       ;; false
+
 
 (def ConfigurationTemplateAttrs
   (merge p/ConfigurationTemplateAttrs
@@ -114,8 +114,8 @@
    :cloudConnectorClass        ""
 
    :metricsLoggerEnable        false
-   :metricsGraphiteEnable      false
-   })
+   :metricsGraphiteEnable      false})
+
 
 ;;
 ;; description
