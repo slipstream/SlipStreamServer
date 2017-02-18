@@ -17,6 +17,13 @@
       <version>${project.version}</version>
       <type>war</type>
     </dependency>
+    <dependency>
+      <groupId>sixsq.slipstream</groupId>
+      <artifactId>webui-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -118,6 +125,23 @@
                   <artifactId>jetty-distribution</artifactId>
                   <version>${jetty.version}</version>
                   <type>tar.gz</type>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
+            <id>unpack-webui</id>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>target/webui</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>sixsq.slipstream</groupId>
+                  <artifactId>webui</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
                 </artifactItem>
               </artifactItems>
             </configuration>
@@ -406,6 +430,22 @@
               <sources>
                 <source>
                   <location>target/dependency/webapps/slipstream.war/static-content/themes/helixnebula/errors</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/webui</directory>
+              <filemode>664</filemode>
+              <configuration>true</configuration>
+              <directoryIncluded>true</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/webui</location>
+                  <excludes>
+                    <exclude>META-INF</exclude>
+                    <exclude>META-INF/**/*</exclude>
+                  </excludes>
                 </source>
               </sources>
             </mapping>
