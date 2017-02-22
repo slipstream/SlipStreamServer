@@ -436,9 +436,8 @@
 
             <mapping>
               <directory>/opt/slipstream/webui</directory>
-              <filemode>664</filemode>
-              <configuration>true</configuration>
-              <directoryIncluded>true</directoryIncluded>
+              <filemode>644</filemode>
+              <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
                   <location>target/webui</location>
