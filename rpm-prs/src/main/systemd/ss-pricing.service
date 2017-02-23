@@ -1,18 +1,20 @@
 [Unit]
 Description=SlipStream Pricing Service
+After=syslog.target
 After=network.target
 
 [Service]
-User=slipstream
-
-Environment=SS_PORT=8201
+Environment=SLIPSTREAM_RING_CONTAINER_INIT=sixsq.slipstream.prs.ring/init
+Environment=SLIPSTREAM_RING_CONTAINER_PORT=8203
 EnvironmentFile=-/etc/default/ss-pricing
+
+User=slipstream
 
 WorkingDirectory=/opt/slipstream/ss-pricing
 
 ExecStart=/usr/bin/java \
-            -cp "resources:lib/ss-pricing.jar:lib/ext/*" \
-            sixsq.slipstream.prs.main $SS_PORT
+            -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*" \
+            sixsq.slipstream.server.ring_container
 ExecStop=/bin/kill -TERM $MAINPID
 
 Restart=always
