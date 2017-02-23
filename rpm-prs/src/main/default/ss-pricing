@@ -1,7 +1,5 @@
-SLIPSTREAM_RING_CONTAINER_INIT=sixsq.slipstream.prs.ring/init
-SS_PORT=8203
 SS_CIMI_CLOUD_ENTRY_POINT="http://localhost:8201/api/cloud-entry-point"
-SS_CIMI_USERNAME="user"
+SS_CIMI_USERNAME="super"
 SS_CIMI_PASSWORD="secret"
 SS_URL_LOGIN="http://localhost:8201/auth/login"
 SS_URL_LOGOUT="http://localhost:8201/auth/logout"

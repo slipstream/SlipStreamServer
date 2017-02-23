@@ -4,7 +4,8 @@ After=syslog.target
 After=network.target
 
 [Service]
-Environment=SS_PORT=8203
+Environment=SLIPSTREAM_RING_CONTAINER_INIT=sixsq.slipstream.prs.ring/init
+Environment=SLIPSTREAM_RING_CONTAINER_PORT=8203
 EnvironmentFile=-/etc/default/ss-pricing
 
 User=slipstream
