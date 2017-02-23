@@ -29,4 +29,4 @@
       (wrap-defaults (assoc site-defaults :security (assoc (:security site-defaults) :anti-forgery false)))))
 
 (defn init []
-  [(handler) nil])
+  [handler nil])
