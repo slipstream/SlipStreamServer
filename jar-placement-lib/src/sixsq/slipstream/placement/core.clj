@@ -98,7 +98,7 @@
     (cond
       (= cnt 2) (keyword (second tokens))
       (= cnt 1) (keyword (first tokens))
-      :else (keyword (apply str (rest tokens))))))
+      :else (keyword (str/join (rest tokens))))))
 
 (defn denamespace-keys
   [m]
@@ -187,7 +187,7 @@
 
 (defn- clause-cpu-ram-disk
   [component]
-  (when (every? #(not (empty? (% component))) [:cpu.nb :ram.GB :disk.GB])
+  (when (every? #(% component) [:cpu.nb :ram.GB :disk.GB])
     (format
       "(schema-org:descriptionVector/schema-org:vcpu>=%s and schema-org:descriptionVector/schema-org:ram>=%s and schema-org:descriptionVector/schema-org:disk>=%s)"
       (:cpu.nb component)
@@ -227,8 +227,8 @@
         service-offers-by-connector-name (group-by connector-href service-offers)
         _ (log/debug (str "number of matching clouds:" (count service-offers-by-connector-name)))]
 
-    (apply concat (map (partial prefer-exact-instance-type (:connector-instance-types component))
-                       service-offers-by-connector-name))))
+    (mapcat (partial prefer-exact-instance-type (:connector-instance-types component))
+            service-offers-by-connector-name)))
 
 (defn- place-rank-component
   [connectors component]
