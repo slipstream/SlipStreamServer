@@ -235,7 +235,7 @@
   (log/debug "component:" component)
   (log/debug "connectors:" connectors)
   (let [filtered-service-offers (service-offers-compatible-with-component component connectors)]
-    (log/debug "filtered-service-offers = " (map display-service-offer filtered-service-offers))
+    (log/info "filtered offers" (map display-service-offer filtered-service-offers) "for component" (:module component))
     (price-component connectors filtered-service-offers component)))
 
 (defn place-and-rank
@@ -243,8 +243,4 @@
   (let [components (:components request)
         user-connectors (:user-connectors request)
         result (map (partial place-rank-component user-connectors) components)]
-    (log/info "match results:"
-              (count components) "components;"
-              (count user-connectors) "connectors;"
-              (map count result) "offers")
     {:components result}))
