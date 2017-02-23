@@ -1,6 +1,5 @@
 (ns sixsq.slipstream.prs.ring
   (:require
-    [aleph.http :as http]
     [clojure.data.json :as json]
     [clojure.tools.logging :as log]
     [clojure.walk :refer [keywordize-keys]]
@@ -29,16 +28,5 @@
   (-> app-routes
       (wrap-defaults (assoc site-defaults :security (assoc (:security site-defaults) :anti-forgery false)))))
 
-
-(defn start
-  [port]
-  (let [s (http/start-server handler {:port port})]
-    (fn [] (.close s))))
-
-(defn stop
-  "Stops the application server by calling the function that was
-   created when the application server was started."
-  [stop-fn]
-  (try
-    (and stop-fn (stop-fn))
-    (catch Exception e (println "Erm,...,."))))
+(defn init []
+  [handler nil])

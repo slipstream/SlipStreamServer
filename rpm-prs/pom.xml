@@ -96,14 +96,6 @@
         <executions>
 
           <execution>
-            <id>tree</id>
-            <phase>package</phase>
-            <goals>
-              <goal>tree</goal>
-            </goals>
-          </execution>
-
-          <execution>
             <id>copy-service-jar</id>
             <goals>
               <goal>copy</goal>
@@ -128,7 +120,7 @@
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/dependency/lib/ext</outputDirectory>
+              <outputDirectory>${project.build.directory}/dependency/lib</outputDirectory>
               <stripVersion>true</stripVersion>
               <stripClassifier>true</stripClassifier>
               <excludeTypes>pom</excludeTypes>
@@ -163,6 +155,7 @@
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd</require>
             <require>slipstream-price-parsing</require>
+            <require>slipstream-ring-container</require>
           </requires>
 
           <defaultDirmode>755</defaultDirmode>
@@ -221,27 +214,12 @@
 
             <mapping>
               <directory>${installation.dir}/lib</directory>
-              <configuration>false</configuration>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>${project.build.directory}/dependency/SlipStreamPricingService-jar.jar</location>
-                  <destination>ss-pricing.jar</destination>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/lib/ext</directory>
               <directoryIncluded>false</directoryIncluded>
               <username>slipstream</username>
               <groupname>slipstream</groupname>
               <sources>
                 <source>
-                  <location>target/dependency/lib/ext</location>
-                  <excludes>
-                    <exclude>SlipStreamPricingService-jar.jar</exclude>
-                  </excludes>
+                  <location>target/dependency/lib</location>
                 </source>
               </sources>
             </mapping>

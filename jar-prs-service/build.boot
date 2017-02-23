@@ -3,7 +3,7 @@
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPricingService-jar
   :version +version+
-  :license {"commercial" "http://sixsq.com"}
+  :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
   :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
@@ -23,7 +23,6 @@
                  '[[com.sixsq.slipstream/SlipStreamPlacementLib-jar]
 
                    [compojure]
-                   [aleph]
                    [ring/ring-json]
                    [ring/ring-defaults]
 
