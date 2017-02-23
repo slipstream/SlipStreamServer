@@ -26,7 +26,7 @@
 
 (defn update-context
   []
-  (log/info "Fetching cep and token")
+  (log/info "updating cimi server token for user" @cimi-username)
   (let [context (sync/instance @cimi-cloud-entry-point @url-login @url-logout)]
     (cimi/login context {:username @cimi-username
                          :password @cimi-password})

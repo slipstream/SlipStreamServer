@@ -69,7 +69,7 @@
   (let [result (cimi/search (cu/context) "serviceOffers" (when cimi-filter {:$filter cimi-filter}))]
     (if (instance? Exception result)
       (do
-        (log/error "exception when querying service offers:" result)
+        (log/error "exception when querying service offers; status =" (:status (ex-data result)))
         (throw result))
       (do
         (log/debug "selected service offers:" result)
