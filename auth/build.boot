@@ -1,4 +1,4 @@
-(def +version+ "3.19-SNAPSHOT")
+(def +version+ "3.23-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/auth
@@ -6,7 +6,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.8.0"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -36,6 +36,8 @@
                    [org.hsqldb/hsqldb]
                    [superstring]
 
+                   [com.sixsq.slipstream/token]
+
                    [peridot]
 
                    [boot-environ]
@@ -52,30 +54,37 @@
                                 with-kibit
                                 with-bikeshed]])
 
-(set-env!
-  :source-paths #{"test" "test-resources"}
-  :resource-paths #{"src" "resources"})
+(set-env! :resource-paths #{"src"})
 
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
   test {:junit-output-to ""}
-  )
+  push {:repo "sixsq"})
+
+(deftask config
+         []
+         (environ :env {:config-path "config-hsqldb-mem.edn"
+                        :passphrase  "sl1pstre8m"}))
+
+(deftask testing
+         "Profile setup for running tests."
+         []
+         (set-env! :source-paths #(set (concat % #{"test" "test-resources"})))
+         identity)
 
 (deftask run-tests
          "runs all tests and performs full compilation"
          []
          (comp
-           (environ :env {:config-path "config-hsqldb-mem.edn"
-                         :passphrase "sl1pstre8m"})
+           (testing)
+           (config)
+           (aot :all true)
            (test)))
 
 (deftask build []
          (comp
            (pom)
-           (sift :include #{#".*_test\.clj" #"test_helper\.clj"}
-                 :invert true)
-           (aot :all true)
            (jar)))
 
 (deftask mvn-test
@@ -89,11 +98,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))

@@ -33,5 +33,11 @@
 (expect "Abc" (u/lisp-to-camelcase "abc"))
 (expect "AbcDef" (u/lisp-to-camelcase "abc-def"))
 
+(expect "{\"http:\\/\\/example.org\\/a\\/b.json\":\"truc\"}\n"
+        (u/serialize {:http://example.org/a/b.json "truc"}))
+
+(expect "{\"http:\\/\\/example.org\\/a\\/b.json\":\"truc\"}\n"
+        (u/serialize {"http://example.org/a/b.json" "truc"}))
+
 (run-all-tests)
 

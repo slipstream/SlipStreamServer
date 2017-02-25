@@ -4,8 +4,7 @@
 
 	<artifactId>SlipStreamPersistence</artifactId>
 	<packaging>jar</packaging>
-	<name>SlipStreamPersistence</name>
-	<description>SlipStream Persistence (JAR)</description>
+	<name>SlipStreamServer/jar-persistence</name>
 
 	<url>http://sixsq.com</url>
 	<licenses>
@@ -18,7 +17,7 @@
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamServer</artifactId>
-		<version>3.19-SNAPSHOT</version>
+		<version>3.23-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -26,7 +25,7 @@
 		<dependency>
 			<groupId>org.clojure</groupId>
 			<artifactId>clojure</artifactId>
-			<version>1.8.0</version>
+			<version>1.9.0-alpha14</version>
 		</dependency>
 
 		<!-- Needs to be before junit -->
@@ -91,7 +90,22 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-		
+
+		<dependency>		
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-core</artifactId>
+		</dependency>
+
+		<dependency>
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-graphite</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jvm</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>

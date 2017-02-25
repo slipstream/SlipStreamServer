@@ -1,12 +1,12 @@
-(def +version+ "3.19-SNAPSHOT")
+(def +version+ "3.23-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamServerPRSlib-jar
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
-  
-  :dependencies '[[org.clojure/clojure "1.8.0"]
+
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -22,12 +22,14 @@
                 (merge-defaults
                  ['sixsq/default-deps (get-env :version)]
                  '[[org.clojure/clojure]
-                   
+
                    [com.sixsq.slipstream/SlipStreamPersistence]
+                   [com.sixsq.slipstream/SlipStreamConnector]
+                   [com.sixsq.slipstream/SlipStreamDbSerializers-jar]
                    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                    [org.clojure/data.json]
                    [org.clojure/tools.logging]
-                   
+
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
                    [tolitius/boot-check]
@@ -52,7 +54,8 @@
          :source-uri   "https://github.com/slipstream/SlipStreamServer/blob/master/jar-prslib/{filepath}#L{line}"
          :language     :clojure}
   test {:junit-output-to ""}
-  )
+  push {:pom (str (get-env :project))
+        :repo "sixsq"})
 
 (deftask run-tests
          "runs all tests and performs full compilation"
@@ -69,7 +72,9 @@
            (sift :include #{#".*_test\.clj"}
                  :invert true)
            (aot :all true)
-           (uber)
+           (uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
+                             #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
+                             #"elasticsearch" })
            (jar)))
 
 (deftask mvn-test
@@ -102,13 +107,7 @@
          []
          (comp
           (build)
-          (install :pom (str (get-env :project)))))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push 
-             :pom (str (get-env :project))
-             :repo "sixsq")))
+          (install :pom (str (get-env :project)))
+          (if (= "true" (System/getenv "BOOT_PUSH"))
+            (push)
+            identity)))

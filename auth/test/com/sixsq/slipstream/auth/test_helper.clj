@@ -6,7 +6,8 @@
     [superstring.core :refer [join split]]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [korma.core :as kc]
-    [com.sixsq.slipstream.auth.sign :as sg]))
+    [com.sixsq.slipstream.auth.sign :as sg]
+    [com.sixsq.slipstream.auth.internal :as ia]))
 
 (defn- simple-surrounder
   [c]
@@ -62,7 +63,7 @@
   [user]
   (db/init)
   (kc/insert db/users (kc/values {:NAME        (:username user)
-                                  :PASSWORD    (sg/sha512 (:password user))
+                                  :PASSWORD    (ia/sha512 (:password user))
                                   :EMAIL       (:email user)
                                   :GITHUBLOGIN (:github-id user)
                                   :STATE       (or (:state user) "ACTIVE")})))

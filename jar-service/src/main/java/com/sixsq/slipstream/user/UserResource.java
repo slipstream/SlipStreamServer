@@ -213,11 +213,21 @@ public class UserResource extends ParameterizedResource<User> {
 	@Override
 	protected void authorize() {
 		boolean isMachine = isMachine();
+		String targetUserOrganization = null;
+		try {
+			targetUserOrganization = getTargetUser().getOrganization();
+		} catch (Exception e) {}
+		String organizationManagedByUser = getUser().getOrganizationManagedForUserCreator();
+		boolean isOrganizationManagedByUser = false;
+		if (isExisting() && targetUserOrganization != null && organizationManagedByUser != null) {
+			isOrganizationManagedByUser = targetUserOrganization.equals(organizationManagedByUser);
+		}
 
 		setCanPut(!newTemplateResource() && !isMachine
-				&& (getUser().isSuper() || !isExisting() || (newInQuery() && !isExisting()) || isItSelf()));
-		setCanDelete((getUser().isSuper() || isItSelf()) && !isMachine);
-		setCanGet(getUser().isSuper() || newTemplateResource() || isItSelf());
+				&& (getUser().isSuper() || !isExisting()
+				|| (newInQuery() && !isExisting()) || isItSelf() || isOrganizationManagedByUser));
+		setCanDelete((getUser().isSuper() || isItSelf() || isOrganizationManagedByUser) && !isMachine);
+		setCanGet(getUser().isSuper() || newTemplateResource() || isItSelf() || isOrganizationManagedByUser);
 	}
 
 	protected boolean newInQuery() {
@@ -284,6 +294,23 @@ public class UserResource extends ParameterizedResource<User> {
 			throws ResourceException {
 
 		User user = xmlToUser();
+
+		try {
+			ParametersFactory.addParametersForEditing(user);
+		} catch (ValidationException e) {
+			throwClientValidationError(e.getMessage());
+		} catch (ConfigurationException e) {
+			throwConfigurationException(e);
+		}
+
+		if (!getUser().isSuper()) {
+			if (user.isSuper()) {
+				throwClientForbiddenError("Only super users are authorized to create a privileged user!");
+			}
+			if (user.getRoles() != null) {
+				throwClientForbiddenError("Only super users are authorized to set roles!");
+			}
+		}
 
 		try {
 			updateOrCreate(user);

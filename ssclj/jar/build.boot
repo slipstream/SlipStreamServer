@@ -1,4 +1,4 @@
-(def +version+ "3.19-SNAPSHOT")
+(def +version+ "3.23-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamCljResources-jar
@@ -7,7 +7,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.8.0"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -23,9 +23,6 @@
                 (merge-defaults
                  ['sixsq/default-deps (get-env :version)]
                  '[[org.clojure/clojure]
-
-                   ; FIXME: remove with Elasticsearch > v2.3.5
-                   [net.java.dev.jna/jna]
 
                    [aleph]
                    [cheshire] ;; newer version needed for ring-json
@@ -45,8 +42,6 @@
                    [org.clojure/tools.cli]
                    [org.clojure/tools.logging]
                    [org.clojure/tools.namespace]
-                   [org.elasticsearch/elasticsearch]
-                   [org.slf4j/slf4j-log4j12]
                    [potemkin]
                    [prismatic/schema]
                    [ring/ring-core]
@@ -55,6 +50,8 @@
 
                    [com.sixsq.slipstream/auth]
                    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
+                   [org.apache.logging.log4j/log4j-core]
+                   [org.apache.logging.log4j/log4j-api]
 
                    ;; needed for migration scripts
                    [korma]
@@ -90,8 +87,8 @@
        :version (get-env :version)}
   test {:junit-output-to ""}
   install {:pom (str (get-env :project))}
-  push {:pom (str (get-env :project))}
-  )
+  push {:pom (str (get-env :project))
+        :repo "sixsq"})
 
 (deftask run-tests
          "runs all tests and performs full compilation"
@@ -125,7 +122,7 @@
     (fn handler [fileset]
      (let [f (get-file-path fileset "com/sixsq/slipstream/version.txt")]
        (spit f (get-env :version)))
-      (next-task fileset))))
+     (next-task fileset))))
 
 (deftask build []
          (comp
@@ -161,21 +158,14 @@
     (pom :project tests-artef-project-name :classifier "tests")
     (sift
       :to-resource #{#"lifecycle_test_utils\.clj"
-                     #"connector_test_utils\.clj"
-                     }
+                     #"connector_test_utils\.clj"}
+
       :include #{#"lifecycle_test_utils\.clj"
                  #"connector_test_utils\.clj"
                  #"pom.xml"
-                 #"pom.properties"
-                 })
-    (jar :file tests-artef-jar-name)))
+                 #"pom.properties"})
 
-(deftask mvn-build-tests-jar
-  []
-   (comp
-     (build-tests-jar)
-     (install :pom tests-artef-pom-loc)
-     (target)))
+    (jar :file tests-artef-jar-name)))
 
 (deftask mvn-test
          "run all tests of project"
@@ -183,24 +173,22 @@
          (run-tests))
 
 (deftask mvn-build
-         "build full project through maven"
+         "build project"
          []
          (comp
            (build)
            (install)
-           (target)))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))
 
-(deftask mvn-deploy
-         "deploy project"
+(deftask mvn-build-tests-jar
+         "build project"
          []
          (comp
-           (mvn-build)
-           (push :repo "sixsq")))
-
-(deftask mvn-deploy-tests-jar
-         "deploy project"
-         []
-         (comp
-           (mvn-build-tests-jar)
-           (push :repo "sixsq" :pom tests-artef-pom-loc)))
+          (build-tests-jar)
+          (install :pom tests-artef-pom-loc)
+          (if (= "true" (System/getenv "BOOT_PUSH"))
+            (push :pom tests-artef-pom-loc)
+            identity)))
 

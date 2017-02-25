@@ -4,8 +4,7 @@
 
 	<artifactId>SlipStreamConnector</artifactId>
 	<packaging>jar</packaging>
-	<name>SlipStreamConnector</name>
-	<description>SlipStream Connector (JAR)</description>
+	<name>SlipStreamServer/jar-connector</name>
 
 	<url>http://sixsq.com</url>
 	<licenses>
@@ -18,7 +17,7 @@
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamServer</artifactId>
-		<version>3.19-SNAPSHOT</version>
+		<version>3.23-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -31,7 +30,7 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>auth</artifactId>
+			<artifactId>token-java</artifactId>
 		</dependency>
 
 		<dependency>

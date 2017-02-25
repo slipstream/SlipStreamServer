@@ -26,6 +26,8 @@ import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.PersistenceUtil;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
@@ -54,23 +56,36 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	@Override
 	public void initializeSubResource() throws ResourceException {
+		MetricsTimer loadMetric = Metrics.getTimer(this, "runtimeParameter_loadFromDb");
+		loadMetric.start();
+		try {
+			long start = System.currentTimeMillis();
+			long before;
 
-		long start = System.currentTimeMillis();
-		long before;
+			before = System.currentTimeMillis();
+			parseRequest();
+			logTimeDiff("parseRequest", before);
 
-		before = System.currentTimeMillis();
-		parseRequest();
-		logTimeDiff("parseRequest", before);
+			before = System.currentTimeMillis();
+			fetchRepresentation();
+			logTimeDiff("fetchRepresentation", before);
 
-		before = System.currentTimeMillis();
-		fetchRepresentation();
-		logTimeDiff("fetchRepresentation", before);
+			before = System.currentTimeMillis();
+			raiseConflictIfAbortIsSet();
+			logTimeDiff("raiseConflictIfAbortIsSet", before);
 
-		before = System.currentTimeMillis();
-		raiseConflictIfAbortIsSet();
-		logTimeDiff("raiseConflictIfAbortIsSet", before);
+			logTimeDiff("initialize on runtime parameter", start);
+		} catch(ResourceException e) {
+			throw e;
+		} catch(RuntimeException e) {
+			throw e;
+		} finally {
+			loadMetric.stop();
+		}
+	}
 
-		logTimeDiff("initialize on runtime parameter", start);
+	private MetricsTimer getMetricsTimer() {
+		return Metrics.getTimer(this, "runtimeParameter_" + getRequest().getMethod().getName());
 	}
 
 	private void parseRequest() {
@@ -98,7 +113,6 @@ public class RuntimeParameterResource extends RunBaseResource {
 		Run.abortOrReset(abortMessage, nodename, em, getUuid());
 	}
 
-
 	@Delete
 	public void resetRuntimeParameter() throws ResourceException {
 
@@ -125,16 +139,21 @@ public class RuntimeParameterResource extends RunBaseResource {
 	@Get
 	public String represent() throws ResourceException, NotFoundException,
 			ValidationException {
+		getMetricsTimer().start();
+		try {
+			long start = System.currentTimeMillis();
 
-		long start = System.currentTimeMillis();
+			if (!runtimeParameter.isSet()) {
+				throw new ResourceException(
+						Status.CLIENT_ERROR_PRECONDITION_FAILED, "key " + key
+								+ " not yet set");
+			}
 
-		if (!runtimeParameter.isSet()) {
-			throw new ResourceException(
-					Status.CLIENT_ERROR_PRECONDITION_FAILED, "key " + key
-							+ " not yet set");
+			logTimeDiff("processing get on runtime parameter", start);
+		} finally  {
+			getMetricsTimer().stop();
 		}
 
-		logTimeDiff("processing get on runtime parameter", start);
 		return runtimeParameter.getValue();
 	}
 
@@ -274,7 +293,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 	public States completeCurrentNodeState(String nodeName, StateMachine sc) {
 		States state;
-		try {
+		try {	
 			state = sc.updateState(nodeName);
 		} catch (InvalidStateException | SlipStreamClientException e) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, e.getMessage());

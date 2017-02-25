@@ -66,15 +66,30 @@
 
 (defn- fetch-service-offers
   [cimi-filter]
-  (:serviceOffers (cimi/search (cu/context) "serviceOffers" (when cimi-filter {:$filter cimi-filter}))))
+  (let [result (cimi/search (cu/context) "serviceOffers" (when cimi-filter {:$filter cimi-filter}))]
+    (if (instance? Exception result)
+      (do
+        (log/error "exception when querying service offers; status =" (:status (ex-data result)))
+        (throw result))
+      (do
+        (log/debug "selected service offers:" result)
+        (:serviceOffers result)))))
 
 (defn- fetch-service-offers-rescue-reauthenticate
   [cimi-filter]
-  (if-let [response (fetch-service-offers cimi-filter)]
-    response
-    (do
-      (cu/update-context)
-      (fetch-service-offers cimi-filter))))
+  (try
+    (fetch-service-offers cimi-filter)
+    (catch Exception ex
+      (if (#{401 403} (:status (ex-data ex)))
+        (try
+          (log/error "retrying query")
+          (cu/update-context)
+          (let [result (fetch-service-offers cimi-filter)]
+            (log/error "retry succeeded")
+            result)
+          (catch Exception ex
+            (log/error "retry failed; sending nil result")
+            nil))))))
 
 (defn- denamespace
   [kw]
@@ -83,7 +98,7 @@
     (cond
       (= cnt 2) (keyword (second tokens))
       (= cnt 1) (keyword (first tokens))
-      :else (keyword (apply str (rest tokens))))))
+      :else (keyword (str/join (rest tokens))))))
 
 (defn denamespace-keys
   [m]
@@ -113,7 +128,7 @@
   [service-offers connector-name]
   (if-let [service-offer (smallest-service-offer-EUR service-offers connector-name)]
     (let [price (compute-price service-offer "HUR")]
-      (log/info "Priced " (display-service-offer service-offer) ":" price "EUR/h")
+      (log/debug "Priced " (display-service-offer service-offer) ":" price "EUR/h")
       {:name          connector-name
        :price         price
        :currency      "EUR"
@@ -172,9 +187,9 @@
 
 (defn- clause-cpu-ram-disk
   [component]
-  (when (every? #(not (empty? (% component))) [:cpu.nb :ram.GB :disk.GB])
+  (when (every? #(% component) [:cpu.nb :ram.GB :disk.GB])
     (format
-      "(schema-org:descriptionVector/schema-org:vcpu>=%sandschema-org:descriptionVector/schema-org:ram>=%sandschema-org:descriptionVector/schema-org:disk>=%s)"
+      "(schema-org:descriptionVector/schema-org:vcpu>=%s and schema-org:descriptionVector/schema-org:ram>=%s and schema-org:descriptionVector/schema-org:disk>=%s)"
       (:cpu.nb component)
       (:ram.GB component)
       (:disk.GB component))))
@@ -206,23 +221,26 @@
   (let [cimi-filter (cimi-and [(clause-connectors connector-names)
                                (:placement-policy component)
                                (clause-component component)])
-        _ (log/info (str "cimi-filter = '" cimi-filter "'"))
+        _ (log/debug (str "cimi filter: '" cimi-filter "'"))
         service-offers (fetch-service-offers-rescue-reauthenticate cimi-filter)
-        service-offers-by-connector-name (group-by connector-href service-offers)]
+        _ (log/debug (str "number of matching service offers:" (count service-offers)))
+        service-offers-by-connector-name (group-by connector-href service-offers)
+        _ (log/debug (str "number of matching clouds:" (count service-offers-by-connector-name)))]
 
-    (apply concat (map (partial prefer-exact-instance-type (:connector-instance-types component))
-                       service-offers-by-connector-name))))
+    (mapcat (partial prefer-exact-instance-type (:connector-instance-types component))
+            service-offers-by-connector-name)))
 
 (defn- place-rank-component
-  [user-connectors component]
-  (log/info "placing and ranking component " component)
-  (log/info "user-connectors = " user-connectors)
-  (let [filtered-service-offers (service-offers-compatible-with-component component user-connectors)]
-    (log/info "filtered-service-offers = " (map display-service-offer filtered-service-offers))
-    (price-component user-connectors filtered-service-offers component)))
+  [connectors component]
+  (log/debug "component:" component)
+  (log/debug "connectors:" connectors)
+  (let [filtered-service-offers (service-offers-compatible-with-component component connectors)]
+    (log/info "filtered offers" (map display-service-offer filtered-service-offers) "for component" (:module component))
+    (price-component connectors filtered-service-offers component)))
 
 (defn place-and-rank
   [request]
   (let [components (:components request)
-        user-connectors (:user-connectors request)]
-    {:components (map (partial place-rank-component user-connectors) components)}))
+        user-connectors (:user-connectors request)
+        result (map (partial place-rank-component user-connectors) components)]
+    {:components result}))

@@ -1,4 +1,4 @@
-(def +version+ "3.19-SNAPSHOT")
+(def +version+ "3.23-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamDbBinding-jar
@@ -7,7 +7,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.8.0"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -36,6 +36,10 @@
                    [org.clojure/data.json]
                    [org.clojure/tools.logging]
                    [org.elasticsearch/elasticsearch]
+                   ; required by elasticsearch
+                   [org.apache.logging.log4j/log4j-core]
+                   [org.apache.logging.log4j/log4j-api]
+                   [org.elasticsearch.client/transport]
                    [prismatic/schema]
                    [ring/ring-json]
                    [superstring]
@@ -64,7 +68,8 @@
        :version (get-env :version)}
   test {:junit-output-to ""}
   install {:pom (str (get-env :project))}
-  push {:pom (str (get-env :project))})
+  push {:pom (str (get-env :project))
+        :repo "sixsq"})
 
 (deftask run-tests
          "runs all tests and performs full compilation"
@@ -97,11 +102,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))

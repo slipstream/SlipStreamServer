@@ -1,12 +1,12 @@
-(def +version+ "3.19-SNAPSHOT")
+(def +version+ "3.23-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPricingService-jar
   :version +version+
-  :license {"commercial" "http://sixsq.com"}
+  :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.8.0"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -23,7 +23,6 @@
                  '[[com.sixsq.slipstream/SlipStreamPlacementLib-jar]
 
                    [compojure]
-                   [aleph]
                    [ring/ring-json]
                    [ring/ring-defaults]
 
@@ -45,7 +44,8 @@
        :version (get-env :version)}
   serve {:handler 'sixsq.slipstream.prs.ring/handler
          :reload true}
-  watch {:verbose true})
+  watch {:verbose true}
+  push {:repo "sixsq"})
 
 (deftask run-tests
   "runs all tests and performs full compilation"
@@ -81,11 +81,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))

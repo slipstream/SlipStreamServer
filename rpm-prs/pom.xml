@@ -4,14 +4,13 @@
 
   <artifactId>SlipStreamPricingService-rpm</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamPricingService - RPM</name>
-  <description>SlipStream Pricing Service (RPM)</description>
+  <name>SlipStreamServer/rpm-prs</name>
 
   <url>http://sixsq.com</url>
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.19-SNAPSHOT</version>
+    <version>3.23-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -20,6 +19,7 @@
       <artifactId>SlipStreamPricingService-jar-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
@@ -120,7 +120,7 @@
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/dependency/lib/ext</outputDirectory>
+              <outputDirectory>${project.build.directory}/dependency/lib</outputDirectory>
               <stripVersion>true</stripVersion>
               <stripClassifier>true</stripClassifier>
               <excludeTypes>pom</excludeTypes>
@@ -139,7 +139,7 @@
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream Pricing Server</summary>
-          <name>slipstream-pricing-server${slipstream.edition}</name>
+          <name>slipstream-pricing-server</name>
           <group>Applications/Engineering</group>
           <vendor>SixSq</vendor>
           <packager>SixSq</packager>
@@ -147,10 +147,15 @@
           <url>http://sixsq.com</url>
           <needarch>noarch</needarch>
           <description>SlipStream Pricing Server</description>
+          <obsoletes>
+            <obsolete>slipstream-pricing-server-community</obsolete>
+            <obsolete>slipstream-pricing-server-enterprise</obsolete>
+          </obsoletes>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
-            <require>slipstream-useradd${slipstream.edition}</require>
-            <require>slipstream-price-parsing${slipstream.edition}</require>
+            <require>slipstream-useradd</require>
+            <require>slipstream-price-parsing</require>
+            <require>slipstream-ring-container</require>
           </requires>
 
           <defaultDirmode>755</defaultDirmode>
@@ -209,27 +214,12 @@
 
             <mapping>
               <directory>${installation.dir}/lib</directory>
-              <configuration>false</configuration>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>${project.build.directory}/dependency/SlipStreamPricingService-jar.jar</location>
-                  <destination>ss-pricing.jar</destination>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/lib/ext</directory>
               <directoryIncluded>false</directoryIncluded>
               <username>slipstream</username>
               <groupname>slipstream</groupname>
               <sources>
                 <source>
-                  <location>target/dependency/lib/ext</location>
-                  <excludes>
-                    <exclude>SlipStreamPricingService-jar.jar</exclude>
-                  </excludes>
+                  <location>target/dependency/lib</location>
                 </source>
               </sources>
             </mapping>

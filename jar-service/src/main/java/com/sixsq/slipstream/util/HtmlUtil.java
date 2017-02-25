@@ -32,6 +32,8 @@ import slipstream.ui.views.Representation;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.User;
 
 /**
@@ -49,6 +51,8 @@ public class HtmlUtil {
 		return toHtml(metadata, page, user, RequestUtil.constructOptions(request));
 	}
 
+	private static final MetricsTimer toHtmlTimer = Metrics.newTimer(HtmlUtil.class, "toHtml");
+
 	private static String toHtml(Object metadata, String page, User user, Map<String, Object> options) {
 
 		Document doc = SerializationUtil.toXmlDocument(metadata);
@@ -64,9 +68,12 @@ public class HtmlUtil {
 
 		String xml = SerializationUtil.documentToString(doc);
 		try {
+			toHtmlTimer.start();
 			return Representation.toHtml(xml, page, options);
 		} catch (IllegalArgumentException ex) {
 			throw (new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Unknown resource: " + page));
+		} finally {
+			toHtmlTimer.stop();
 		}
 	}
 

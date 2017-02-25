@@ -177,8 +177,8 @@
             :description (.getDescription p)
             :mandatory   (.isMandatory p)
             :readOnly    (.isReadonly p)
-            :order       (.getOrder p)
-            }]
+            :order       (.getOrder p)}]
+
     (cond-> pd
             (> (count (.getEnumValues p)) 0) (assoc :enum (.getEnumValues p))
             (not-empty-string? (.getInstructions p)) (assoc :instructions (.getInstructions p)))))

@@ -3,14 +3,13 @@
 
   <artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamDbSerializers (POM)</name>
-  <description>DB (de)serialiazers of SlipStream entities to/from DB behind ssclj server (POM)</description>
+  <name>SlipStreamServer/db-serializers</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.19-SNAPSHOT</version>
+    <version>3.23-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -25,6 +24,7 @@
       <groupId>sixsq</groupId>
       <artifactId>default-deps</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
@@ -36,11 +36,7 @@
       <artifactId>SlipStreamCljResources-jar-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
-    </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamCljResources-jar</artifactId>
-      <version>${project.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -93,21 +89,11 @@
             </goals>
             <configuration>
               <executable>boot</executable>
+              <environmentVariables>
+                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
+              </environmentVariables>
               <arguments>
                 <argument>mvn-build</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>boot-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>boot</executable>
-              <arguments>
-                <argument>mvn-deploy</argument>
               </arguments>
             </configuration>
           </execution>

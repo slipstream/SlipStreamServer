@@ -34,10 +34,13 @@ import javax.persistence.Query;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 
 public class Collector {
 
 	private static Logger logger = Logger.getLogger(Collector.class.getName());
+	private static MetricsTimer collectTimer = Metrics.newTimer(Collector.class, "collect");
 
 	public static final int EXCEPTION_OCCURRED = -2;
 	public static final int NO_CREDENTIALS = -1;
@@ -55,6 +58,7 @@ public class Collector {
 					+ " [" + user.getName() + "/" + connector.getConnectorInstanceName() + "]";
 			logger.info(logBase + " - TODO");
 			long startTime = System.currentTimeMillis();
+                        collectTimer.start();
 			try {
 				res = describeInstances(user, connector, timeout);
 				logger.info(logBase + " - DONE in " + (System.currentTimeMillis() - startTime));
@@ -62,6 +66,8 @@ public class Collector {
 				e.printStackTrace();
 				logger.severe(logBase + " - DONE in " + (System.currentTimeMillis() - startTime)
 						+ ". EXCEPTION: " + e.getMessage());
+			} finally {
+				collectTimer.stop();
 			}
 		} else {
 			res = NO_CREDENTIALS;
@@ -141,6 +147,14 @@ public class Collector {
 		return false;
 	}
 
+	private static Boolean isMeteringEnabled() {
+		try {
+			return Configuration.getMeteringEnabled();
+		} catch (ValidationException | ConfigurationException e) {
+			logger.warning("Exception when calling 'Configuration.getMeteringEnabled' in 'Collector.isMeteringEnabled': " + e.getMessage());
+			return false;
+		}
+	}
 	public static void update(List<Vm> cloudVms, String user, String cloud) {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -151,8 +165,8 @@ public class Collector {
 
 		try {
 			updateUsageRecords(classifier, user, cloud, em);
-			updateGraphite(classifier, user, cloud, em);
 			transaction.begin();
+			updateGraphite(classifier, user, cloud, em);
 			updateDbVmsWithCloudVms(classifier, em);
 			transaction.commit();
 			em.close();
@@ -167,6 +181,8 @@ public class Collector {
 	}
 
 	private static void updateGraphite(VmsClassifier classifier, String user, String cloud, EntityManager em) {
+		if (!isMeteringEnabled()) { return; }
+
 		int cpu = 0;
 		float ram = 0;
 		float disk = 0;
