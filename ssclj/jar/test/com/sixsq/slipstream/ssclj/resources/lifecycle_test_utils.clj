@@ -39,10 +39,7 @@
 (defmacro has-key
   [m k]
   `((fn [m# k#]
-      (-> m#
-          (get-in [:response :body])
-          (contains? k#)
-          (is (str "Map did not contain key " k#))))
+      (is (get-in m# [:response :body k#]) (str "Map did not contain key " k#)))
     ~m ~k))
 
 (defmacro is-resource-uri
