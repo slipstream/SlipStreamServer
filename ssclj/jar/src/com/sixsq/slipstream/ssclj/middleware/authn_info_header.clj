@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.middleware.authn-info-header
   (:require
-    [superstring.core :as s]
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.sign :as sign]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
@@ -14,10 +14,10 @@
 
 (defn extract-authn-info
   [request]
-  (let [terms (remove s/blank? (-> request
-                                   (get-in [:headers authn-info-header])
-                                   (or "")
-                                   (s/split #"\s+")))]
+  (let [terms (remove str/blank? (-> request
+                                     (get-in [:headers authn-info-header])
+                                     (or "")
+                                     (str/split #"\s+")))]
     (when (seq terms)
       ((juxt first rest) terms))))
 
@@ -25,12 +25,12 @@
   [request]
   (try
     (if-let [token (get-in request [:cookies authn-cookie :value])]
-      (let [claims (sign/unsign-claims (-> token (s/split #"^token=") second))
+      (let [claims (sign/unsign-claims (-> token (str/split #"^token=") second))
             identifier (:com.sixsq.identifier claims)
-            roles (remove s/blank? (-> claims
-                                       :com.sixsq.roles
-                                       (or "")
-                                       (s/split #"\s+")))]
+            roles (remove str/blank? (-> claims
+                                         :com.sixsq.roles
+                                         (or "")
+                                         (str/split #"\s+")))]
         (when identifier
           [identifier roles])))
     (catch Exception ex

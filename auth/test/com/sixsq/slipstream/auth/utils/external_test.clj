@@ -1,9 +1,9 @@
-(ns com.sixsq.slipstream.auth.external-test
+(ns com.sixsq.slipstream.auth.utils.external-test
   (:require
     [clojure.test :refer :all]
     [korma.core :as kc]
     [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.auth.external :refer :all]
+    [com.sixsq.slipstream.auth.utils.external :refer :all]
     [com.sixsq.slipstream.auth.test-helper :as th]))
 
 (defn fixture-delete-all
@@ -82,3 +82,4 @@
   (is (= "st" (sanitize-login-name "st")))
   (is (= "Paul_Newman" (sanitize-login-name "Paul Newman")))
   (is (= "abc_def_123" (sanitize-login-name "abc-def-123"))))
+

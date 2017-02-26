@@ -5,7 +5,7 @@
             [com.sixsq.slipstream.auth.utils.config :as cf]
             [com.sixsq.slipstream.auth.utils.http :as uh]
             [com.sixsq.slipstream.auth.sign :as sg]
-            [com.sixsq.slipstream.auth.external :as ex]))
+            [com.sixsq.slipstream.auth.utils.external :as ex]))
 
 (def ^:private cyclone-base-url
   "https://federation.cyclone-project.eu/auth/realms/master/protocol/openid-connect")

@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-internal
   (:require
-    [superstring.core :as s]
+    [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as tpl]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
@@ -66,7 +66,7 @@
   {:cookies {cookie-name {:value token, :path "/"}}})
 
 (defn cookie-name [{:keys [id]}]
-  (str "slipstream." (s/replace id "/" ".")))
+  (str "slipstream." (str/replace id "/" ".")))
 
 (defmethod p/tpl->session authn-method
   [resource request]

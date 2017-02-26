@@ -5,7 +5,7 @@
     [clj-http.client :as http]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.config :as cf]
-    [com.sixsq.slipstream.auth.external :as ex]))
+    [com.sixsq.slipstream.auth.utils.external :as ex]))
 
 (defn parse-github-user
   [user-info]
