@@ -76,15 +76,14 @@
    (desc) must be valid.  The key will be used to create the id of
    the resource as 'session-template/key'."
   [resource desc]
-  (when-let [full-resource (complete-resource resource)]
-    (let [id (:id full-resource)]
-      (swap! templates assoc id full-resource)
-      (log/info "loaded SessionTemplate" id)
-      (when desc
-        (let [acl (:acl full-resource)
-              full-desc (assoc desc :acl acl)]
-          (swap! descriptions assoc id full-desc))
-        (log/info "loaded SessionTemplate description" id)))))
+  (when-let [{:keys [id] :as full-resource} (complete-resource resource)]
+    (swap! templates assoc id full-resource)
+    (log/info "loaded SessionTemplate" id)
+    (when desc
+      (let [acl (:acl full-resource)
+            full-desc (assoc desc :acl acl)]
+        (swap! descriptions assoc id full-desc))
+      (log/info "loaded SessionTemplate description" id))))
 
 ;;
 ;; schemas
