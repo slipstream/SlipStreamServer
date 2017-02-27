@@ -25,7 +25,7 @@
   [request]
   (try
     (if-let [token (get-in request [:cookies authn-cookie :value])]
-      (let [claims (sign/unsign-claims (-> token (str/split #"^token=") second))
+      (let [claims (sign/unsign-claims token)
             identifier (:com.sixsq.identifier claims)
             roles (remove str/blank? (-> claims
                                          :com.sixsq.roles

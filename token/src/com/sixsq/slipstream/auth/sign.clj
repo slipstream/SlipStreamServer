@@ -14,5 +14,7 @@
   "Unsigns the provided token with the service's public key. This will
    throw an exception if the token has expired or if the token wasn't
    signed by the correct key."
-  [token]
-  (jwt/unsign token @certs/public-key signing-algorithm))
+  ([token]
+   (unsign-claims token @certs/public-key))
+  ([token public-key]
+   (jwt/unsign token public-key signing-algorithm)))

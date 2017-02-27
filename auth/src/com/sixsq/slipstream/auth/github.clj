@@ -59,19 +59,19 @@
           user-info             (parse-github-user user-info-response)]
 
       (log/debug "Github user-info " user-info)
-      (log/info "Successful GitHub authentication: " (sanitized-login user-info))
+      (log/info "successful GitHub login for" (sanitized-login user-info))
       (ex/redirect-with-matched-user :github
                                      (sanitized-login user-info)
                                      (retrieve-email user-info access-token)
                                      redirect-server))
 
     (catch Exception e
-      (log/error "Invalid Github authentication " e)
+      (log/error "FAILED GitHub login with exception" e)
       (uh/response-redirect (str redirect-server "/dashboard")))))
 
 (defn login
   []
-  (log/debug "Starting GitHub authentication.")
+  (log/debug "starting GitHub login")
   (uh/response-redirect
     (format
       "https://github.com/login/oauth/authorize?client_id=%s&scope=user:email"
