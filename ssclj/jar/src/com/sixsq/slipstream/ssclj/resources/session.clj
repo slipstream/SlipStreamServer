@@ -1,5 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.session
   (:require
+    [clojure.string :as str]
+    [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.ssclj.resources.session-template :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -7,10 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.db.impl :as db]
-    [schema.core :as s]
-    [superstring.core :as ss])
-  (:import (java.util Date TimeZone)
-           (java.text SimpleDateFormat)))
+    [schema.core :as s]))
 
 (def ^:const resource-tag :sessions)
 
@@ -154,20 +153,12 @@
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
-(def ^:private sdf
-  (doto (SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss z")
-    (.setTimeZone (TimeZone/getTimeZone "GMT"))))
-
-(defn now-gmt
-  []
-  (.format sdf (Date.)))
-
 (defn cookie-name [{:keys [body]}]
-  (str "slipstream." (ss/replace (:resource-id body) "/" ".")))
+  (str "slipstream." (str/replace (:resource-id body) "/" ".")))
 
 (defn delete-cookie [{:keys [status] :as response}]
   (if (= status 200)
-    {:cookies {(cookie-name response) {:value {:token "INVALID"} :path "/" :max-age 0 :expires (now-gmt)}}}
+    (cookies/revoked-cookie (cookie-name response))
     {}))
 
 (defmethod crud/delete resource-name
