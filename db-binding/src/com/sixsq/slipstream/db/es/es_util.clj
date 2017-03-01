@@ -209,11 +209,8 @@
   "Creates a client connecting to an instance of Elastic Search
   Parameters (host and port) are taken from environment variables."
   []
-  (let [es-host (env/env :es-host)
-        es-port (env/env :es-port)]
-
-    (when (some empty? [es-host es-port])
-      (throw (Exception. "Please configure ES_HOST and ES_PORT properties (Elastic Search)")))
+  (let [es-host (or (env/env :es-host) "localhost")
+        es-port (or (env/env :es-port) "9300")]
 
     (log/info (str "Will create Elastic Search client on " es-host ", port " es-port))
     (.. (new PreBuiltTransportClient ^Settings Settings/EMPTY [])
