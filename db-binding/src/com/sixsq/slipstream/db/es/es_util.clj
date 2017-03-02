@@ -37,7 +37,7 @@
   (json/write-str edn))
 
 ;;
-;; Elastic Search implementations of CRUD actions
+;; Elasticsearch implementations of CRUD actions
 ;;
 
 (defn create
@@ -89,10 +89,10 @@
           request-with-sort             (od/add-sorters-from-cimi request options)]
       (.get request-with-sort))
     (catch IndexNotFoundException infe
-      (log/warn (str "Searching for index '" index "' not yet created, returns empty"))
+      (log/warn "index" index "not found, returning empty search result")
       [])
     (catch SearchPhaseExecutionException spee
-      (log/warn (str "Searching failed: " (.getMessage spee) ", returns empty"))
+      (log/warn "search failed:" (.getMessage spee) ", returning empty search result")
       [])))
 
 ;;
@@ -146,7 +146,7 @@
                       (put "cluster.name" cluster-name)
                       (put "transport.type" "local")
                       (put "path.home" home)
-                      (put "logger.level" "DEBUG")
+                      (put "logger.level" "INFO")
                       (build))]
      (.. (Node. ^Settings settings)
          (start)))))
@@ -158,20 +158,16 @@
 
 (defn index-exists?
   [^Client client index-name]
-  (let [exists? (.. client
-                    (admin)
-                    (indices)
-                    (exists (IndicesExistsRequest. (into-array String [index-name])))
-                    (get)
-                    (isExists))]
-    (log/info (str "Index "
-                   index-name
-                   (if exists? " already existing." " does not exist.")))
-    exists?))
+  (.. client
+      (admin)
+      (indices)
+      (exists (IndicesExistsRequest. (into-array String [index-name])))
+      (get)
+      (isExists)))
 
 (defn create-index
   [^Client client index-name]
-  (log/info (str "Creating index " index-name))
+  (log/info "creating index:" index-name)
   (let [settings (.. (Settings/builder)
                      (put "index.max_result_window" pg/max-result-window)
                      (put "index.number_of_shards" 3)
@@ -206,16 +202,13 @@
   (when node (.client node)))
 
 (defn create-es-client
-  "Creates a client connecting to an instance of Elastic Search
+  "Creates a client connecting to an instance of Elasticsearch
   Parameters (host and port) are taken from environment variables."
   []
-  (let [es-host (env/env :es-host)
-        es-port (env/env :es-port)]
+  (let [es-host (or (env/env :es-host) "localhost")
+        es-port (or (env/env :es-port) "9300")]
 
-    (when (some empty? [es-host es-port])
-      (throw (Exception. "Please configure ES_HOST and ES_PORT properties (Elastic Search)")))
-
-    (log/info (str "Will create Elastic Search client on " es-host ", port " es-port))
+    (log/info "creating elasticsearch client:" es-host es-port)
     (.. (new PreBuiltTransportClient ^Settings Settings/EMPTY [])
         (addTransportAddress (InetSocketTransportAddress. (InetAddress/getByName es-host)
                                                           (read-string es-port))))))
