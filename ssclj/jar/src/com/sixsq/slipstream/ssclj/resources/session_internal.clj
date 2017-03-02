@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.auth.sign :as sg]
-    [clj-time.format :as time-fmt]))
+    [clj-time.format :as time-fmt]
+    [com.sixsq.slipstream.auth.cookies :as cookies]))
 
 (def ^:const authn-method "internal")
 
@@ -62,18 +63,20 @@
               client-ip (assoc :clientIP client-ip))
       p/resource-name)))
 
-(defn cookie-header [cookie-name token]
-  {:cookies {cookie-name {:value token, :path "/"}}})
-
 (defn cookie-name [{:keys [id]}]
   (str "slipstream." (str/replace id "/" ".")))
+
+(defn create-claims [credentials headers]
+  (let [virtual-host (:slipstream-ssl-server-hostname headers)]
+    (cond-> (auth-internal/create-claims credentials)
+            virtual-host (assoc :com.sixsq.vhost virtual-host))))
 
 (defmethod p/tpl->session authn-method
   [resource request]
   (let [headers (:headers request)
         credentials {:username (:username resource)
-                     :password (:password resource)}
-        [ok? token] (auth-internal/create-token credentials)]
-    (when ok?
-      (let [session (create-session credentials headers)]
-        [(cookie-header (cookie-name session) token) session]))))
+                     :password (:password resource)}]
+    (when (auth-internal/valid? credentials)
+      (let [session (create-session credentials headers)
+            claims (create-claims credentials)]
+        [{:cookies (cookies/claims-cookie claims (cookie-name session))} session]))))
