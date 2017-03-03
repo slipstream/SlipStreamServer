@@ -1952,13 +1952,6 @@ nuvlabox-demo:nuvlabox]]></value>
          </parameter>
       </entry>
       <entry>
-         <string>slipstream.prs.enable</string>
-         <parameter name="slipstream.prs.enable" description="Placement and Ranking enabled" category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
-            <instructions><![CDATA[]]></instructions>
-            <value><![CDATA[false]]></value>
-         </parameter>
-      </entry>
-      <entry>
          <string>nuvlabox-james-chadwick.endpoint</string>
          <parameter name="nuvlabox-james-chadwick.endpoint" description="Service endpoint for nuvlabox-james-chadwick (e.g. http://example.com:5000)" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="false" order_="0" order="0">
             <value><![CDATA[https://127.0.0.1:11661/RPC2]]></value>
@@ -2363,13 +2356,6 @@ nuvlabox-demo:nuvlabox]]></value>
          <parameter name="cyclone-fr2.orchestrator.ssh.username" description="Orchestrator username" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
             <instructions><![CDATA[Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
             <value><![CDATA[]]></value>
-         </parameter>
-      </entry>
-      <entry>
-         <string>slipstream.prs.endpoint</string>
-         <parameter name="slipstream.prs.endpoint" description="Endpoint of the Placement and Ranking Service" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <instructions><![CDATA[]]></instructions>
-            <value><![CDATA[http://localhost:8203/filter-rank]]></value>
          </parameter>
       </entry>
       <entry>
