@@ -92,8 +92,7 @@
             n# (count cookies#)
             token# (-> (vals cookies#)
                        first
-                       :value
-                       :token)]
+                       :value)]
         (is (= 1 n#) "incorrect number of cookies")
         (is (not= "INVALID" token#) "expecting valid token but got INVALID")
         (is (not (str/blank? token#)) "got blank token")
@@ -106,8 +105,7 @@
             n# (count cookies#)
             token# (-> (vals cookies#)
                        first
-                       :value
-                       :token)]
+                       :value)]
         (is (= 1 n#) "incorrect number of cookies")
         (is (= "INVALID" token#) "expecting INVALID but got different value")
         (is (not (str/blank? token#)) "got blank token")
@@ -161,10 +159,15 @@
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (wrap-logger)))
 
+(defn dump
+  [response]
+  (pprint response)
+  response)
+
 (defn dump-es
   [type]
   (println "DUMP")
-  (clojure.pprint/pprint
+  (pprint
     (esu/dump esb/*client* esb/index-name type)))
 
 (defmacro with-test-client

@@ -57,7 +57,8 @@
     (POST uri-login request (auth/login request))
     (POST uri-logout request (auth/logout request))
 
-    (POST uri-token request (auth/build-token request))
+    ;; FIXME: What was this resource needed for?  It doesn't appear to be used anywhere.
+    ;; (POST uri-token request (auth/build-token request))
 
     (GET uri-github request (gh/callback-github request (cf/property-value :main-server)))
     (GET uri-cyclone request (cy/callback-cyclone request (cf/property-value :main-server)))))

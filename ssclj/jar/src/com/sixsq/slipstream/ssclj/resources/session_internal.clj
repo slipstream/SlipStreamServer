@@ -52,19 +52,26 @@
 ;;
 ;; transform template into session resource
 ;;
-(defn create-session [{:keys [username]} headers]
+(defn create-session
+  "Creates a new session resource from the users credentials and the request
+   header. The result contains the authentication method, the user's identifier,
+   the client's IP address, and the virtual host being used. NOTE: The expiry
+   is not included and MUST be added afterwards."
+  [{:keys [username]} headers]
   (let [virtual-host (:slipstream-ssl-server-hostname headers)
         client-ip (:x-real-ip headers)]
     (crud/new-identifier
       (cond-> {:authnMethod authn-method
-               :username    username
-               :expiry      (time-fmt/unparse (:date-time time-fmt/formatters) (sg/expiry-timestamp))}
+               :username    username}
               virtual-host (assoc :virtualHost virtual-host)
               client-ip (assoc :clientIP client-ip))
       p/resource-name)))
 
+;; FIXME: Multiple session cookies should be permitted, eventually.
+;; FIXME: For backward compatibility use the standard name of the cookie.
 (defn cookie-name [{:keys [id]}]
-  (str "slipstream." (str/replace id "/" ".")))
+  #_(str "slipstream." (str/replace id "/" "."))
+  "com.sixsq.slipstream.cookie")
 
 (defn create-claims [credentials headers]
   (let [virtual-host (:slipstream-ssl-server-hostname headers)]
@@ -72,11 +79,12 @@
             virtual-host (assoc :com.sixsq.vhost virtual-host))))
 
 (defmethod p/tpl->session authn-method
-  [resource request]
-  (let [headers (:headers request)
-        credentials {:username (:username resource)
-                     :password (:password resource)}]
+  [resource {:keys [headers]}]
+  (let [credentials (select-keys resource #{:username :password})]
     (when (auth-internal/valid? credentials)
       (let [session (create-session credentials headers)
-            claims (create-claims credentials)]
-        [{:cookies (cookies/claims-cookie claims (cookie-name session))} session]))))
+            claims (create-claims credentials headers)
+            cookie (cookies/claims-cookie claims)
+            expires (:expires cookie)
+            session (assoc session :expiry expires)]
+        [{:cookies {(cookie-name session) cookie}} session]))))

@@ -47,7 +47,8 @@
           :username                     c/NonBlankString
           (s/optional-key :virtualHost) c/NonBlankString
           (s/optional-key :clientIP)    c/NonBlankString
-          :expiry                       c/Timestamp}))
+          :expiry                       c/NonBlankString    ;; not usual timestamp format, uses cookie format
+          }))
 
 (def SessionCreate
   (merge c/CreateAttrs
@@ -154,11 +155,13 @@
 (def delete-impl (std-crud/delete-fn resource-name))
 
 (defn cookie-name [{:keys [body]}]
-  (str "slipstream." (str/replace (:resource-id body) "/" ".")))
+  ;; FIXME: The name of the cookie should correspond to the session.
+  ;;(str "slipstream." (str/replace (:resource-id body) "/" "."))
+  "com.sixsq.slipstream.cookie")
 
 (defn delete-cookie [{:keys [status] :as response}]
   (if (= status 200)
-    (cookies/revoked-cookie (cookie-name response))
+    {:cookies (cookies/revoked-cookie (cookie-name response))}
     {}))
 
 (defmethod crud/delete resource-name

@@ -5,7 +5,7 @@
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.session :refer :all]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.session-template-internal :as example]
+    [com.sixsq.slipstream.ssclj.resources.session-template-internal :as internal]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -40,12 +40,12 @@
 
 (defn mock-roles
   "Mocking function to return the roles for a given user.  For
-   'root' the 'ADMIN' role will be added; for all others, the
-   'USER' role will be added."
+   'root' the 'ADMIN', 'USER', and 'ANON' roles will be added. F
+   For all others, the 'USER' and 'ANON' roles will be added."
   [username]
   (case username
-    "root" ["ADMIN"]
-    ["USER"]))
+    "root" ["ADMIN" "USER" "ANON"]
+    ["USER" "ANON"]))
 
 (deftest lifecycle
 
@@ -55,11 +55,11 @@
     ;; check that the mocking is working correctly
     (is (auth-internal/valid? {:username "user" :password "user"}))
     (is (not (auth-internal/valid? {:username "user" :password "BAD"})))
-    (is (= ["ADMIN"] (db/find-roles-for-username "root")))
-    (is (= ["USER"] (db/find-roles-for-username "user")))
+    (is (= ["ADMIN" "USER" "ANON"] (db/find-roles-for-username "root")))
+    (is (= ["USER" "ANON"] (db/find-roles-for-username "user")))
 
-    (let [href (str ct/resource-url "/" example/authn-method)
-          template-url (str p/service-context ct/resource-url "/" example/authn-method)
+    (let [href (str ct/resource-url "/" internal/authn-method)
+          template-url (str p/service-context ct/resource-url "/" internal/authn-method)
           resp (-> (session (ring-app))
                    (content-type "application/json")
                    (header authn-info-header "root ADMIN")

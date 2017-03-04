@@ -32,6 +32,7 @@
                    [environ]
                    [instaparse]
                    [log4j]
+                   [org.apache.logging.log4j/log4j-web]
                    [metrics-clojure]
                    [metrics-clojure-ring]
                    [metrics-clojure-jvm]
@@ -91,12 +92,17 @@
   push {:pom (str (get-env :project))
         :repo "sixsq"})
 
+(deftask config
+         "sets up configuration parameters"
+         []
+         (environ :env {:config-path "config-hsqldb-mem.edn"
+                        :passphrase "sl1pstre8m"}))
+
 (deftask run-tests
          "runs all tests and performs full compilation"
          []
          (comp
-           (environ :env {:config-path "config-hsqldb-mem.edn"
-                          :passphrase "sl1pstre8m"})
+           (config)
            ;;(aot :all true)
            (test)
 
