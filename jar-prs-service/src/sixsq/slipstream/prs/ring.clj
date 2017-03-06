@@ -18,7 +18,7 @@
 (def ^:const authn-cookie
   "com.sixsq.slipstream.cookie")
 
-(defn extract-cookie-info
+(defn- extract-cookie-info
   [request]
   (try
     (if-let [token (get-in request [:cookies authn-cookie :value])]
@@ -35,11 +35,11 @@
       nil)))
 ;; end.
 
-(defn authenticated?
+(defn- authenticated?
   [request]
   (not (nil? (seq (extract-cookie-info request)))))
 
-(defn place-and-rank
+(defn- place-and-rank
   [params]
   (let [prs-req  (clojure.walk/keywordize-keys params)
         _        (log/debug "PRS request: " prs-req)
@@ -48,12 +48,16 @@
     {:status 200
      :body   (json/write-str prs-resp)}))
 
+(defn- status-401
+  [msg]
+  {:status 401
+   :body   (json/write-str {:status 401 :message msg})})
+
 (defn- put-place-and-rank
   [request]
   (if (authenticated? request)
     (place-and-rank (:params request))
-    {:status 401
-     :body   "PRS service requres access with a valid token in the cookie."}))
+    (status-401 "PRS service requres access with a valid token in the cookie.")))
 
 (defroutes app-routes
            (wrap-json-params
