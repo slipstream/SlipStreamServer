@@ -194,6 +194,7 @@
                   <location>src/main/resources</location>
                   <includes>
                     <include>log4j.properties</include>
+                    <include>auth_pubkey.pem</include>
                   </includes>
                 </source>
               </sources>
