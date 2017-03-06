@@ -58,7 +58,7 @@
   ;; create namespace
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "slipstream")
+      (header authn-info-header "super ADMIN")
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
@@ -217,7 +217,7 @@
   ;; create namespace
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "slipstream")
+      (header authn-info-header "super ADMIN")
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
@@ -254,7 +254,7 @@
   ;; create namespaces
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "slipstream")
+      (header authn-info-header "super ADMIN")
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
@@ -263,7 +263,7 @@
 
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "slipstream")
+      (header authn-info-header "super ADMIN")
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str namespace-com))
@@ -307,7 +307,7 @@
   ;; create namespaces
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "slipstream")
+      (header authn-info-header "super ADMIN")
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
@@ -351,7 +351,7 @@
                       (t/body->edn)
                       (t/is-status 200)
                       (get-in [:response :body]))]
-    
+
     (is (= 1 (:count res-all)))
     (is (= 1 (:count res-ok)))
     (is (= 0 (:count res-empty)))))
@@ -361,7 +361,7 @@
   ;; create namespaces
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "slipstream")
+      (header authn-info-header "super ADMIN")
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
@@ -370,7 +370,7 @@
 
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "slipstream")
+      (header authn-info-header "super ADMIN")
       (request (str p/service-context sn/resource-url)
                :request-method :post
                :body (json/write-str namespace-com))
