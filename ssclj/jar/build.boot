@@ -94,7 +94,7 @@
          "runs all tests and performs full compilation"
          []
          (comp
-           (environ :env {:config-path "config-hsqldb-mem.edn"
+           (environ :env {:config-name "config-hsqldb-mem.edn"
                           :passphrase "sl1pstre8m"})
            ;;(aot :all true)
            (test)

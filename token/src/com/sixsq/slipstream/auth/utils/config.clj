@@ -17,8 +17,8 @@
 
 (defn- read-config
   []
-  (if-let [config-path (environ/env :config-path)]
-    (-> config-path
+  (if-let [config-name (environ/env :config-name)]
+    (-> config-name
         find-resource
         slurp
         edn/read-string)

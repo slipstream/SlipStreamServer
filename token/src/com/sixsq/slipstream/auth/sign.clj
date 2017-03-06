@@ -6,6 +6,8 @@
     [clojure.java.io :as io]
     [clojure.string :as s]
 
+    [environ :as env]
+
     [com.sixsq.slipstream.auth.utils.config :as cf]))
 
 (def default-nb-minutes-expiry (* 7 24 60))
@@ -20,11 +22,9 @@
 
 (defn- read-private-key
   [private-key-pem]
-  (let [passphrase (cf/property-value :passphrase)
-        privkey (io/resource private-key-pem)]
-    (if (and passphrase privkey)
-      (ks/private-key privkey passphrase)
-      (throw (IllegalStateException. "Passphrase not defined or private key not accessible (must be in the classpath).")))))
+  (if-let [privkey (io/resource private-key-pem)]
+    (ks/private-key privkey)
+    (throw (IllegalStateException. "Private key not accessible (must be in the classpath)."))))
 
 (defn- read-public-key
   [public-key-pem]
@@ -43,6 +43,6 @@
 
 (defn unsign-claims
   ([token]
-   (unsign-claims token "auth_pubkey.pem"))
+   (unsign-claims token (env/env :authn-public-key)))
   ([token pubkey-pem]
    (jwt/unsign token (public-key pubkey-pem) signing-algorithm)))

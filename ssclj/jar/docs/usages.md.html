@@ -183,7 +183,7 @@ The DailyUsageSender queries the Usage Summary resource with the help of the CIM
 To summarize manually one given month from the command line:
 
 ```
-java -Dconfig.path=config-hsqldb.edn \
+java -Dconfig.name=config-hsqldb.edn \
     -cp /Users/st/projects/ss/SlipStreamServer/ssclj/jar/src/main/resources:/Users/st/.m2/repository/com/sixsq/slipstream/SlipStreamCljResources-jar/2.19.2-SNAPSHOT/SlipStreamCljResources-jar-2.19.2-SNAPSHOT-jar-with-dependencies.jar \
     com.sixsq.slipstream.ssclj.usage.summarizer \
     -f monthly

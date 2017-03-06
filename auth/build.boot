@@ -64,7 +64,7 @@
 
 (deftask config
          []
-         (environ :env {:config-path "config-hsqldb-mem.edn"
+         (environ :env {:config-name "config-hsqldb-mem.edn"
                         :passphrase  "sl1pstre8m"}))
 
 (deftask testing
