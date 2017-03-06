@@ -14,26 +14,38 @@
                          :type      "ROLE"
                          :right     "VIEW"}]})
 (def valid-namespace
-  {:acl       valid-acl
-   :id        sn/resource-name
-   :prefix    "schema-org"
-   :uri       "https://schema.org/schema1"
-   :updated   timestamp
-   :created   timestamp
+  {:acl         valid-acl
+   :id          sn/resource-name
+   :prefix      "schema-org"
+   :uri         "https://schema.org/schema1"
+   :updated     timestamp
+   :created     timestamp
    :resourceURI p/service-context})
 
-(deftest test-service-namespace-schema
-  (is (nil? (sc/check sn/ServiceNamespace valid-namespace)))
-  (is (sc/check sn/ServiceNamespace (dissoc valid-namespace :uri)))
-  (is (sc/check sn/ServiceNamespace (assoc valid-namespace :uri {})))
-  (is (sc/check sn/ServiceNamespace (assoc valid-namespace :uri {:href ""})))
-  (is (sc/check sn/ServiceNamespace (assoc valid-namespace :uri "")))
-  (is (sc/check sn/ServiceNamespace (dissoc valid-namespace :prefix)))
-  (is (sc/check sn/ServiceNamespace (assoc valid-namespace :prefix ""))))
+(deftest check-prefix
+  (are [prefix] (not (nil? (sc/check sn/Prefix prefix)))
+                ""
+                " prefix "
+                "not%allowed"
+                "not.allowed"
+                "not/allowed"
+                "BAD"
+                "-bad"
+                "bad-"
+                "0bad")
+  (are [prefix] (nil? (sc/check sn/Prefix prefix))
+                "a"
+                "a1"
+                "alpha"
+                "alpha-beta"
+                "alpha1"))
 
-(deftest prefix-not-nil-and-no-dot-no-slash
-  (is (nil? (sc/check sn/ServiceNamespace (assoc valid-namespace :prefix "ab"))))
-  (is (sc/check sn/ServiceNamespace (assoc valid-namespace :prefix "")))
-  (is (sc/check sn/ServiceNamespace (dissoc valid-namespace :prefix)))
-  (is (sc/check sn/ServiceNamespace (assoc valid-namespace :prefix "a.b")))
-  (is (sc/check sn/ServiceNamespace (assoc valid-namespace :prefix "a/b"))))
+(deftest check-service-namespace
+  (is (nil? (sc/check sn/ServiceNamespace valid-namespace)))
+  (are [namespace] (not (nil? (sc/check sn/ServiceNamespace namespace)))
+                   (assoc valid-namespace :uri {:href ""})
+                   (dissoc valid-namespace :uri)
+                   (assoc valid-namespace :uri {})
+                   (assoc valid-namespace :uri "")
+                   (dissoc valid-namespace :prefix)
+                   (assoc valid-namespace :prefix "")))

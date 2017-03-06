@@ -44,7 +44,7 @@
 (defn valid-attribute-name?
   [valid-prefixes attr-name]
   (let [[ns _] (str/split (name attr-name) #":")]
-    ((set valid-prefixes) ns)))
+    (valid-prefixes ns)))
 
 (defn- valid-attributes?
   [validator resource]

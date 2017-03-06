@@ -41,9 +41,19 @@
       (t/body->edn)
       (t/is-status 403))
 
+  ;; user create should fail
+  (-> (session (ring-app))
+      (content-type "application/json")
+      (header authn-info-header "jane USER ANON")
+      (request base-uri
+               :request-method :post
+               :body (json/write-str valid-namespace))
+      (t/body->edn)
+      (t/is-status 403))
+
   (let [uri (-> (session (ring-app))
                 (content-type "application/json")
-                (header authn-info-header "slipstream")
+                (header authn-info-header "super ADMIN")
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-namespace))
@@ -52,7 +62,7 @@
                 (t/location))
         abs-uri (str p/service-context (u/de-camelcase uri))
         doc (-> (session (ring-app))
-                (header authn-info-header "slipstream")
+                (header authn-info-header "slipstream USER")
                 (request abs-uri)
                 (t/body->edn)
                 (t/is-status 200)
@@ -72,7 +82,7 @@
     ;; trying to create another namespace with same name is forbidden
     (-> (session (ring-app))
         (content-type "application/json")
-        (header authn-info-header "jane")
+        (header authn-info-header "super ADMIN")
         (request base-uri
                  :request-method :post
                  :body (json/write-str namespace-same-prefix))
@@ -85,7 +95,7 @@
     ;; trying to create another namespace with same uri is forbidden
     (-> (session (ring-app))
         (content-type "application/json")
-        (header authn-info-header "jane")
+        (header authn-info-header "super ADMIN")
         (request base-uri
                  :request-method :post
                  :body (json/write-str namespace-same-uri))
@@ -98,7 +108,7 @@
     ;; trying to create another namespace with other name and URI is ok
     (-> (session (ring-app))
         (content-type "application/json")
-        (header authn-info-header "jane")
+        (header authn-info-header "super ADMIN")
         (request base-uri
                  :request-method :post
                  :body (json/write-str another-valid-namespace))
