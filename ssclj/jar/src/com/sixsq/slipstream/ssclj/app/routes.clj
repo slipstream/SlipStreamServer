@@ -57,7 +57,7 @@
     (POST uri-login request (auth/login request))
     (POST uri-logout request (auth/logout request))
 
-    ;; FIXME: What was this resource needed for?  It doesn't appear to be used anywhere.
+    ;; FIXME: This is still used by the UI.  Needs to be implemented until old authn is removed.
     ;; (POST uri-token request (auth/build-token request))
 
     (GET uri-github request (gh/callback-github request (cf/property-value :main-server)))

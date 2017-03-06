@@ -1,12 +1,13 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-template-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.session-template-internal-lifecycle-test
   (:require
     [clojure.test :refer :all]
+    [clojure.set :as set]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.session-template :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.session-template-internal :as example]
+    [com.sixsq.slipstream.ssclj.resources.session-template-internal :as internal]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
@@ -26,7 +27,7 @@
 (dyn/initialize)
 
 (deftest check-retrieve-by-id
-  (let [id (str resource-url "/" example/authn-method)
+  (let [id (str resource-url "/" internal/authn-method)
         doc (crud/retrieve-by-id id)]
     (is (= id (:id doc)))))
 
@@ -62,8 +63,8 @@
                     (ltu/entries resource-tag))
         ids (set (map :id entries))
         types (set (map :authnMethod entries))]
-    (is (= #{(str resource-url "/" example/authn-method)} ids))
-    (is (= #{example/authn-method} types))
+    (is (set/subset? #{(str resource-url "/" internal/authn-method)} ids))
+    (is (set/subset? #{internal/authn-method} types))
 
     (doseq [entry entries]
       (let [ops (ltu/operations->map entry)
