@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.prs.ring
   (:require
     [clojure.data.json :as json]
-    [clojure.string :as s]
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [clojure.walk :refer [keywordize-keys]]
     [compojure.core :refer [defroutes PUT]]
@@ -22,12 +22,12 @@
   [request]
   (try
     (if-let [token (get-in request [:cookies authn-cookie :value])]
-      (let [claims     (sign/unsign-claims (-> token (s/split #"^token=") second))
+      (let [claims     (sign/unsign-claims (-> token (str/split #"^token=") second))
             identifier (:com.sixsq.identifier claims)
-            roles      (remove s/blank? (-> claims
-                                            :com.sixsq.roles
-                                            (or "")
-                                            (s/split #"\s+")))]
+            roles      (remove str/blank? (-> claims
+                                              :com.sixsq.roles
+                                              (or "")
+                                              (str/split #"\s+")))]
         (when identifier
           [identifier roles])))
     (catch Exception ex
@@ -41,10 +41,10 @@
 
 (defn- place-and-rank
   [params]
+  (log/debug "PRS request: " params)
   (let [prs-req  (clojure.walk/keywordize-keys params)
-        _        (log/debug "PRS request: " prs-req)
-        prs-resp (pc/place-and-rank prs-req)
-        _        (log/debug "PRS response: " prs-resp)]
+        prs-resp (pc/place-and-rank prs-req)]
+    (log/debug "PRS response: " prs-resp)
     {:status 200
      :body   (json/write-str prs-resp)}))
 
