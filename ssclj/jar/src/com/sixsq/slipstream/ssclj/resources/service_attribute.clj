@@ -67,7 +67,7 @@
 
 (defn validate-attribute-namespace
   [resource]
-  (if ((set (san/all-prefixes)) (:prefix resource))
+  (if ((san/all-prefixes) (:prefix resource))
     resource
     (let [code 406
           msg (str "resource attributes do not satisfy defined namespaces, prefix='"

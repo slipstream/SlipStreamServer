@@ -21,29 +21,34 @@
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
+(def resource-acl {:owner {:principal "ADMIN"
+                           :type      "ROLE"}
+                   :rules [{:principal "USER"
+                            :type      "ROLE"
+                            :right     "VIEW"}]})
+
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
                      :rules [{:principal "USER"
                               :type      "ROLE"
-                              :right     "MODIFY"}]})
+                              :right     "VIEW"}]})
 
 ;;
 ;; schemas
 ;;
 
-(defn- blank-or-dot-or-slash?
-  [s]
-  (or (str/blank? s)
-      (some #{\. \/} s)))
-
-(def NoDotNoSlash
-  (s/constrained s/Str (complement blank-or-dot-or-slash?)))
+;; must start with lowercase letter
+;; must end with lowercase letter or digit
+;; may have lowercase letters, digits, or hyphens in the middle
+; "^[a-z]([a-z0-9-]*[a-z0-9])?$"
+(def Prefix
+  (s/constrained s/Str (fn valid-prefix [prefix] (re-matches #"^[a-z]([a-z0-9-]*[a-z0-9])?$" prefix))))
 
 (def ServiceNamespace
   (merge c/CommonAttrs
          c/AclAttr
-         {:prefix  NoDotNoSlash
-          :uri     c/NonBlankString}))
+         {:prefix Prefix
+          :uri    c/NonBlankString}))
 
 ;;
 ;; multimethods for validation and operations
@@ -56,7 +61,7 @@
 
 (defmethod crud/add-acl resource-uri
   [resource request]
-  (a/add-acl resource request))
+  (assoc resource :acl resource-acl))
 
 ;;
 ;; CRUD operations
@@ -68,35 +73,34 @@
   [prefix uri ns]
   (or (= prefix (:prefix ns)) (= uri (:uri ns))))
 
+(def ^:private query-map {:identity       {:current         "slipstream",
+                                           :authentications {"slipstream"
+                                                             {:identity "slipstream"}}}
+                          :params         {:resource-name resource-url}
+                          :user-roles     ["ADMIN"]
+                          :request-method :get})
+
 (defn all-namespaces
   []
-  (-> (crud/query
-        {:identity       {:current         "slipstream",
-                          :authentications {"slipstream"
-                                            {:identity "slipstream"}}}
-         :params         {:resource-name resource-url}
-         :user-roles     ["ADMIN"]
-         :request-method :get})
+  (-> (crud/query query-map)
       (get-in [:body :serviceAttributeNamespaces])))
 
 (defn all-prefixes
   []
-  (map :prefix (all-namespaces)))
+  (set (map :prefix (all-namespaces))))
 
-(defn- colliding-ids
+(defn- colliding-id
   [prefix uri]
   (->> (all-namespaces)
        (filter (partial colliding-namespace? prefix uri))
-       (map :id)))
+       (map :id)
+       first))
 
 (defmethod crud/add resource-name
-  [request]
-  (let [prefix        (get-in request [:body :prefix])
-        uri           (get-in request [:body :uri])
-        forbiding     (colliding-ids prefix uri)]
-    (if-not (empty? forbiding)
-      (esb/response-conflict (first forbiding))
-      (add-impl request))))
+  [{{:keys [prefix uri]} :body :as request}]
+  (if-let [id (colliding-id prefix uri)]
+    (esb/response-conflict id)
+    (add-impl request)))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 

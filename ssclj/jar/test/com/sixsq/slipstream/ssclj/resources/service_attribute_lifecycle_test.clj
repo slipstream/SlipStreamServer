@@ -45,7 +45,7 @@
   ;; create namespace
   (-> (session (ring-app))
       (content-type "application/json")
-      (header authn-info-header "slipstream")
+      (header authn-info-header "super ADMIN")
       (request (str p/service-context san/resource-url)
                :request-method :post
                :body (json/write-str valid-namespace))
