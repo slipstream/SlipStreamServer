@@ -20,7 +20,10 @@
   #(vec (concat %
                 (merge-defaults
                  ['sixsq/default-deps (get-env :version)]
-                 '[[com.sixsq.slipstream/SlipStreamPlacementLib-jar]
+                 '[[org.clojure/tools.nrepl]
+
+                   [com.sixsq.slipstream/SlipStreamPlacementLib-jar]
+                   [com.sixsq.slipstream/token]
 
                    [compojure]
                    [ring/ring-json]
