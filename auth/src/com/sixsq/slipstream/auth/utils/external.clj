@@ -1,13 +1,13 @@
-(ns com.sixsq.slipstream.auth.external
+(ns com.sixsq.slipstream.auth.utils.external
   (:require [clojure.tools.logging :as log]
-            [superstring.core :as s]
+            [clojure.string :as str]
             [com.sixsq.slipstream.auth.utils.db :as db]
-            [com.sixsq.slipstream.auth.sign :as sg]
-            [com.sixsq.slipstream.auth.utils.http :as uh]))
+            [com.sixsq.slipstream.auth.utils.http :as uh]
+            [com.sixsq.slipstream.auth.cookies :as cookies]))
 
 (defn- mapped-user
   [authn-method username]
-  (log/info (str "External (" authn-method ") user '" username "' already mapped => login ok."))
+  (log/info "External (" authn-method ") user '" username "' already mapped => login ok.")
   username)
 
 (defn- map-slipstream-user!
@@ -18,7 +18,7 @@
 
 (defn- create-slipstream-user!
   [authn-method external-login external-email]
-  (log/info (str "Creating new SlipStream user with external (" authn-method ") user '" external-login "'"))
+  (log/info "Creating new SlipStream user with external (" authn-method ") user '" external-login "'")
   (db/create-user! authn-method external-login external-email))
 
 (defn match-external-user!
@@ -35,17 +35,15 @@
   [authn-method external-login external-email redirect-server]
   (if (and (not-empty external-login) (not-empty external-email))
     (let [[matched-user redirect-url] (match-external-user! authn-method external-login external-email)
-          token (sg/sign-claims {:com.sixsq.identifier matched-user
-                                 :com.sixsq.roles      (db/find-roles-for-username matched-user)
-                                 :exp                  (sg/expiry-timestamp)})]
+          claims {:com.sixsq.identifier matched-user
+                  :com.sixsq.roles      (db/find-roles-for-username matched-user)}]
 
       (assoc
         (uh/response-redirect (str redirect-server redirect-url))
-        :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
-                                                 :path  "/"}}))
+        :cookies (cookies/claims-cookie claims "com.sixsq.slipstream.cookie")))
     (uh/response-redirect (str redirect-server "/login?flash-now-warning=auth-failed"))))
 
 (defn sanitize-login-name
   "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
   [s]
-  (when s (s/replace s #"[^a-zA-Z0-9_]" "_")))
+  (when s (str/replace s #"[^a-zA-Z0-9_]" "_")))

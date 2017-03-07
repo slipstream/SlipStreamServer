@@ -2,16 +2,21 @@
   (:refer-clojure :exclude [update])
   (:require
     [clojure.test :refer :all]
-    [buddy.sign.util :as util]
-    [com.sixsq.slipstream.auth.sign :as t]))
+    [clj-time.coerce :as c]
+    [com.sixsq.slipstream.auth.utils.timestamp :as t]
+    [com.sixsq.slipstream.auth.sign :as s])
+  (:import (clojure.lang ExceptionInfo)))
 
 (deftest roundtrip-claims
-  (let [exp (t/expiry-timestamp)
-        timestamp (util/to-timestamp exp)
+  (let [timestamp (t/expiry-later)
         claims {:alpha "alpha"
                 :beta  2
                 :gamma 3.0
                 :delta true
-                :exp   exp}]
-    (is (= (merge claims {:exp timestamp})
-           (t/unsign-claims (t/sign-claims claims))))))
+                :exp   timestamp}
+        claims-expired (assoc claims :exp (t/expiry-now))]
+    (is (= claims
+           (-> claims s/sign-claims s/unsign-claims)))
+    (Thread/sleep 2000)
+    (is (thrown-with-msg? ExceptionInfo #"Token is expired"
+                          (-> claims-expired s/sign-claims s/unsign-claims)))))

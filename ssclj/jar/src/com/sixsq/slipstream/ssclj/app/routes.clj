@@ -57,7 +57,8 @@
     (POST uri-login request (auth/login request))
     (POST uri-logout request (auth/logout request))
 
-    (POST uri-token request (auth/build-token request))
+    ;; FIXME: This is still used by the UI.  Needs to be implemented until old authn is removed.
+    ;; (POST uri-token request (auth/build-token request))
 
     (GET uri-github request (gh/callback-github request (cf/property-value :main-server)))
     (GET uri-cyclone request (cy/callback-cyclone request (cf/property-value :main-server)))))
