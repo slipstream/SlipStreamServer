@@ -46,7 +46,7 @@
   Exception for cloud-entry-point: in this case id is only type (there is only one cloud-entry-point)"
   [id]
   (let [[type docid] (s/split id #"/")]
-    [type (if docid docid type)]))
+    [type (or docid type)]))
 
 (defn- data->doc
   "Prepares data before insertion in index
