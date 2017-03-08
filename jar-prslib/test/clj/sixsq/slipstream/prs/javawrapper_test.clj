@@ -59,8 +59,7 @@
         app-map (placement->map {:module          app
                                  :user-connectors ["c5" "c6"]})]
 
-    (is (= {:prs-endpoint    "http://localhost:8203/filter-rank"
-            :components      [{:module           "module/component1"
+    (is (= {:components      [{:module           "module/component1"
                                :placement-policy nil
                                :cpu.nb           "2"
                                :ram.GB           "8"
@@ -80,8 +79,7 @@
                                :placement-policy "connector/href='c2'"}]
 
             :user-connectors ["c1" "c2"]}
-           (placement->map {:prs-endpoint    "http://localhost:8203/filter-rank"
-                            :module          image1
+           (placement->map {:module          image1
                             :user-connectors ["c1" "c2"]})))
 
     (is (= {:components      [{:module           "module/component2"

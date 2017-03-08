@@ -40,9 +40,10 @@
                  (ltu/body->edn)
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
-        valid-create {:configurationTemplate (strip-unwanted-attrs (assoc template :prsEnable false))}
+        valid-create {:configurationTemplate (strip-unwanted-attrs (assoc
+                                                                     template :registrationEnable false))}
         href-create {:configurationTemplate {:href      href
-                                             :prsEnable false}}
+                                             :registrationEnable false}}
         invalid-create (assoc-in valid-create [:configurationTemplate :invalid] "BAD")]
 
     ;; anonymous create should fail
@@ -131,8 +132,8 @@
                         (ltu/is-status 200)
                         :response
                         :body)
-            old-flag (:prsEnable old-cfg)
-            new-cfg (assoc old-cfg :prsEnable (not old-flag))
+            old-flag (:registrationEnable old-cfg)
+            new-cfg (assoc old-cfg :registrationEnable (not old-flag))
             _ (-> (session (ring-app))
                   (content-type "application/json")
                   (header authn-info-header "root ADMIN")
@@ -146,8 +147,7 @@
                             (ltu/body->edn)
                             (ltu/is-status 200)
                             :response
-                            :body
-                            :prsEnable)]
+                            :body)]
         (is (not= old-flag reread-flag)))
 
       ;; admin delete succeeds
