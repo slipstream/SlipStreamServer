@@ -33,7 +33,6 @@ import java.util.Map.Entry;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
 
-import com.sixsq.slipstream.dashboard.Dashboard;
 import com.sixsq.slipstream.dashboard.DashboardResource;
 import org.hibernate.StaleObjectStateException;
 import org.restlet.data.Form;
@@ -178,8 +177,6 @@ public class RunListResource extends BaseResource {
 			setRunMutability(run, form);
 			setKeepRunning(run, form);
 			setTags(run, form);
-
-			PlacementValidator.validate(run);
 
 			if (Configuration.isQuotaEnabled()) {
 				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
