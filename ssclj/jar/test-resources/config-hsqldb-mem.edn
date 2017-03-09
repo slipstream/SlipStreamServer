@@ -1,15 +1,9 @@
-{:api-db                  {
+{:auth-db                 {
                            :classname   "org.hsqldb.jdbc.JDBCDriver"
                            :subprotocol "hsqldb"
-                           :subname     "mem://localhost:9012/devresources"
-                           :make-pool?  true}
- :auth-db                 {
-                           :classname   "org.hsqldb.jdbc.JDBCDriver"
-                           :subprotocol "hsqldb"
-                           :subname     "mem://localhost:9012/slipstreamdevresources"
+                           :subname     "mem://localhost:9012/slipstream"
                            :make-pool?  true}
 
  :token-nb-minutes-expiry 120
- :passphrase              "sl1pstre8m"
 
  :upstream-server         "http://localhost:8080"}
