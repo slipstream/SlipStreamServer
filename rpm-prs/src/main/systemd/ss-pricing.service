@@ -6,6 +6,7 @@ After=network.target
 [Service]
 Environment=SLIPSTREAM_RING_CONTAINER_INIT=sixsq.slipstream.prs.ring/init
 Environment=SLIPSTREAM_RING_CONTAINER_PORT=8203
+Environment=AUTH_PUBLIC_KEY=/etc/slipstream/auth/auth_pubkey.pem
 EnvironmentFile=-/etc/default/ss-pricing
 
 User=slipstream

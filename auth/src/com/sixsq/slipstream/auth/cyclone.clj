@@ -1,4 +1,12 @@
 (ns com.sixsq.slipstream.auth.cyclone
+  "
+  # Decryption of claims in the cookie.
+
+  The full path to the public key to decrypt the claims in the CYCLONE cookie
+  is expected as one of
+  - system environment variable `AUTHN_PUBLIC_KEY_CYCLONE`
+  - system property `authn-public-key-cyclone`.
+  "
   (:require [clojure.tools.logging :as log]
             [clojure.data.json :as json]
             [clj-http.client :as http]
@@ -50,7 +58,8 @@
                              :body
                              (json/read-str :key-fn keyword)
                              :access_token)
-          claims         (sg/unsign-claims access-token "cyclone_pubkey.pem")]
+          claims         (sg/unsign-claims access-token
+                                           :auth-public-key-cyclone)]
       (log/debug "Cyclone claims " claims)
       (log/info "Successful CYCLONE login: " (login-name claims))
       (ex/redirect-with-matched-user :cyclone (login-name claims) (:email claims) redirect-server))

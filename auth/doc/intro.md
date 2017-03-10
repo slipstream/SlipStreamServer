@@ -2,15 +2,13 @@
 
 ## Create private and public keys
 
-To create new private and public keys:
+To create new private and public keys.  NB! The public key is not protected by
+a password.
 
-    $ cd test/resources
+    $ cd test-resources
     $ rm auth_p*
-    $ openssl genrsa -aes128 -out auth_privkey.pem 2048
+    $ openssl genrsa -out auth_privkey.pem 2048
     $ openssl rsa -pubout -in auth_privkey.pem -out auth_pubkey.pem
-
-Use same passphrase as declared in
-`test/resources/config-hsqldb-mem.edn`!
 
 ## Build and install as a tiny library
 

@@ -20,30 +20,30 @@
   :dependencies
   #(vec (concat %
                 (merge-defaults
-                 ['sixsq/default-deps (get-env :version)]
-                 '[[org.clojure/clojure]
-                   
-                   [buddy/buddy-core]
-                   [buddy/buddy-hashers]
-                   [buddy/buddy-sign]
-                   [clj-http]
-                   [environ]
-                   [korma]
-                   [log4j]
-                   [org.clojure/data.json]
-                   [org.clojure/tools.logging]
-                   [org.clojure/java.jdbc]
-                   [org.hsqldb/hsqldb]
-                   [superstring]
+                  ['sixsq/default-deps (get-env :version)]
+                  '[[org.clojure/clojure]
 
-                   [com.sixsq.slipstream/token]
+                    [buddy/buddy-core]
+                    [buddy/buddy-hashers]
+                    [buddy/buddy-sign]
+                    [clj-http]
+                    [environ]
+                    [korma]
+                    [log4j]
+                    [org.clojure/data.json]
+                    [org.clojure/tools.logging]
+                    [org.clojure/java.jdbc]
+                    [org.hsqldb/hsqldb]
+                    [superstring]
 
-                   [peridot]
+                    [com.sixsq.slipstream/token]
 
-                   [boot-environ]
-                   [adzerk/boot-test]
-                   [adzerk/boot-reload]
-                   [tolitius/boot-check]]))))
+                    [peridot]
+
+                    [boot-environ]
+                    [adzerk/boot-test]
+                    [adzerk/boot-reload]
+                    [tolitius/boot-check]]))))
 
 (require
   '[environ.boot :refer [environ]]
@@ -62,13 +62,13 @@
   test {:junit-output-to ""}
   push {:repo "sixsq"})
 
-(deftask config
+(deftask dev-fixture-env
          []
-         (environ :env {:config-path "config-hsqldb-mem.edn"
-                        :passphrase  "sl1pstre8m"}))
+         (environ :env {:config-name      "config-hsqldb-mem.edn"
+                        :auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
+                        :auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))}))
 
-(deftask testing
-         "Profile setup for running tests."
+(deftask dev-env
          []
          (set-env! :source-paths #(set (concat % #{"test" "test-resources"})))
          identity)
@@ -77,8 +77,8 @@
          "runs all tests and performs full compilation"
          []
          (comp
-           (testing)
-           (config)
+           (dev-env)
+           (dev-fixture-env)
            (aot :all true)
            (test)))
 

@@ -79,7 +79,6 @@
                                 with-bikeshed]])
 
 (set-env!
-  :source-paths #{"test" "test-resources"}
   :resource-paths #{"src" "resources"})
 
 (task-options!
@@ -90,15 +89,24 @@
   push {:pom (str (get-env :project))
         :repo "sixsq"})
 
+(deftask dev-env
+         []
+         (set-env! :source-paths #(set (concat % #{"test" "test-resources"})))
+         identity)
+
+(deftask dev-fixture-env
+         []
+         (environ :env {:config-name      "config-hsqldb-mem.edn"
+                        :auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
+                        :auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))}))
+
 (deftask run-tests
          "runs all tests and performs full compilation"
          []
          (comp
-           (environ :env {:config-path "config-hsqldb-mem.edn"
-                          :passphrase "sl1pstre8m"})
-           ;;(aot :all true)
+           (dev-env)
+           (dev-fixture-env)
            (test)
-
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
@@ -186,9 +194,17 @@
          "build project"
          []
          (comp
+          (dev-env)
           (build-tests-jar)
           (install :pom tests-artef-pom-loc)
           (if (= "true" (System/getenv "BOOT_PUSH"))
             (push :pom tests-artef-pom-loc)
             identity)))
 
+(deftask server-repl
+  "start dev server repl"
+  []
+  (comp
+    (dev-env)
+    (dev-fixture-env)
+    (repl)))

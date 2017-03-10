@@ -1,15 +1,17 @@
 (ns com.sixsq.slipstream.auth.sign
   (:require
+    [clojure.string :as s]
+    [clojure.tools.logging :as log]
     [buddy.core.keys :as ks]
     [buddy.sign.jwt :as jwt]
     [clj-time.core :as t]
-    [clojure.java.io :as io]
-    [clojure.string :as s]
-
+    [environ.core :refer [env]]
     [com.sixsq.slipstream.auth.utils.config :as cf]))
 
 (def default-nb-minutes-expiry (* 7 24 60))
 (def signing-algorithm {:alg :rs256})
+(def default-auth-public-file-loc "/etc/slipstream/auth/auth_pubkey.pem")
+(def default-auth-private-file-loc "/etc/slipstream/auth/auth_privkey.pem")
 
 (defn expiry-timestamp
   []
@@ -18,20 +20,51 @@
        t/millis
        (t/plus (t/now))))
 
-(defn- read-private-key
-  [private-key-pem]
-  (let [passphrase (cf/property-value :passphrase)
-        privkey (io/resource private-key-pem)]
-    (if (and passphrase privkey)
-      (ks/private-key privkey passphrase)
-      (throw (IllegalStateException. "Passphrase not defined or private key not accessible (must be in the classpath).")))))
+(defn get-env
+  [key]
+  (env key))
 
-(defn- read-public-key
-  [public-key-pem]
-  (let [pubkey (io/resource public-key-pem)]
-    (if pubkey
-      (ks/public-key pubkey)
-      (throw (IllegalStateException. "Public key not accessible (must be in the classpath).")))))
+(defn default-auth-file-loc
+  [key-type]
+  (case key-type
+    :private default-auth-private-file-loc
+    :public default-auth-public-file-loc))
+
+(defn key-path-default
+  [key-type key-env-var]
+  (let [auth-file-loc (default-auth-file-loc key-type)]
+    (log/warn (format "No env var %s defined pointing to %s auth key. Using "
+                      "default %s." (name key-env-var) (name key-type)
+                      auth-file-loc))
+    auth-file-loc))
+
+(defn key-path-from-env
+  [key-env-var key-type]
+  (if-let [key-path (get-env key-env-var)]
+    key-path
+    (key-path-default key-type key-env-var)))
+
+(defn do-read-key
+  [key-path key-type]
+  {:pre [(contains? #{:public :private} key-type)]}
+  (case key-type
+    :private (ks/private-key key-path)
+    :public (ks/public-key key-path)))
+
+(defn read-key
+  "key-type - :public or :private"
+  [key-env-var key-type]
+  (-> key-env-var
+      (key-path-from-env key-type)
+      (do-read-key key-type)))
+
+(defn read-private-key
+  [key-env-var]
+  (read-key key-env-var :private))
+
+(defn read-public-key
+  [key-env-var]
+  (read-key key-env-var :public))
 
 (def public-key (memoize read-public-key))
 
@@ -39,10 +72,10 @@
 
 (defn sign-claims
   [claims]
-  (jwt/sign claims (private-key "auth_privkey.pem") signing-algorithm))
+  (jwt/sign claims (private-key :auth-private-key) signing-algorithm))
 
 (defn unsign-claims
   ([token]
-   (unsign-claims token "auth_pubkey.pem"))
-  ([token pubkey-pem]
-   (jwt/unsign token (public-key pubkey-pem) signing-algorithm)))
+   (unsign-claims token :auth-public-key))
+  ([token env-var-pubkey-path]
+   (jwt/unsign token (public-key env-var-pubkey-path) signing-algorithm)))

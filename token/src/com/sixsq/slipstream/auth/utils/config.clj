@@ -6,23 +6,27 @@
     [environ.core :as environ]))
 
 (defn- find-resource
-  [resource-path]
-  (if-let [config-file (io/resource resource-path)]
+  [resource-name]
+  (if-let [config-file (io/resource resource-name)]
     (do
       (log/info "using configuration file: '" (.getPath config-file) "'")
       config-file)
-    (let [msg (str "resource not in classpath: '" resource-path "'")]
+    (let [msg (str "resource not in classpath: '" resource-name "'")]
       (log/error msg)
       (throw (IllegalArgumentException. msg)))))
 
+(def config-name-env-var :config-name)
+
 (defn- read-config
   []
-  (if-let [config-path (environ/env :config-path)]
-    (-> config-path
+  (if-let [config-name (environ/env config-name-env-var)]
+    (-> config-name
         find-resource
         slurp
         edn/read-string)
-    (throw (IllegalStateException. "configuration not found"))))
+    (throw (IllegalStateException.
+             (format "%s parameter is not found in the environment."
+                     (name config-name-env-var))))))
 
 (def ^:private config (memoize read-config))
 

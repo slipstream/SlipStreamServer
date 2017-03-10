@@ -64,7 +64,7 @@ SSCLJ_PORT=8201
 SSCLJ_JAR=$(shell find ../ssclj/jar/target/ -name SlipStreamCljResources-jar-*-jar-with-dependencies.jar | sort | tail -1)
 start-ssclj-server: start-db
 ifneq ("$(SSCLJ_SERVER_PID_FILE_PRESENT)","ok")
-	java -Dconfig.path=config-hsqldb.edn -Dlogfile.path=dev -cp ../ssclj/jar/src/main/resources:$(SSCLJ_JAR) com.sixsq.slipstream.ssclj.app.main $(SSCLJ_PORT) & echo "$$!" > $(SSCLJ_SERVER_PID_FILE)
+	java -Dconfig.name=config-hsqldb.edn -Dlogfile.path=dev -cp ../ssclj/jar/src/main/resources:$(SSCLJ_JAR) com.sixsq.slipstream.ssclj.app.main $(SSCLJ_PORT) & echo "$$!" > $(SSCLJ_SERVER_PID_FILE)
 else
 	$(info SSCLJ server already running with PID $(shell cat $(SSCLJ_SERVER_PID_FILE)) on port $(SSCLJ_PORT))
 endif
