@@ -194,6 +194,7 @@
          "build project"
          []
          (comp
+          (dev-env)
           (build-tests-jar)
           (install :pom tests-artef-pom-loc)
           (if (= "true" (System/getenv "BOOT_PUSH"))
