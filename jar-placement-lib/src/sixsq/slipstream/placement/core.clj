@@ -11,6 +11,7 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.string :as str]
+    [ring.util.codec :as codec]
     [sixsq.slipstream.placement.cimi-util :as cu]
     [sixsq.slipstream.pricing.lib.pricing :as pr]
     [sixsq.slipstream.client.api.cimi :as cimi]))
@@ -66,7 +67,7 @@
 
 (defn- fetch-service-offers
   [cimi-filter]
-  (let [result (cimi/search (cu/context) "serviceOffers" (when cimi-filter {:$filter cimi-filter}))]
+  (let [result (cimi/search (cu/context) "serviceOffers" (when cimi-filter {:$filter (codec/url-encode cimi-filter)}))]
     (if (instance? Exception result)
       (do
         (log/error "exception when querying service offers; status =" (:status (ex-data result)))
