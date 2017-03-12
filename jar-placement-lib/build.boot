@@ -1,5 +1,5 @@
 (def +version+ "3.23-SNAPSHOT")
- 
+
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPlacementLib-jar
   :version +version+
@@ -25,6 +25,7 @@
                    [environ]
                    [com.sixsq.slipstream/SlipStreamPricingLib-jar]
                    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+                   [ring/ring-codec]
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
                    [tolitius/boot-check]]))))
