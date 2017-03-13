@@ -406,6 +406,16 @@
                        (t/is-status 200)
                        (get-in [:response :body]))
 
+        res-ok-put-body (-> (session (ring-app))
+                            (content-type "application/x-www-form-urlencoded")
+                            (header authn-info-header "root ADMIN")
+                            (request cimi-url-ok
+                                     :request-method :put
+                                     :body (rc/form-encode {:$filter "schema-org:att1/schema-org:att2='456'"}))
+                            (t/body->edn)
+                            (t/is-status 200)
+                            (get-in [:response :body]))
+
         no-result (-> (session (ring-app))
                       (header authn-info-header "root ADMIN")
                       (request cimi-url-no-result)
@@ -417,6 +427,16 @@
                           (header authn-info-header "root ADMIN")
                           (request cimi-url-no-result
                                    :request-method :put)
+                          (t/body->edn)
+                          (t/is-status 200)
+                          (get-in [:response :body]))
+
+        no-result-put (-> (session (ring-app))
+                          (content-type "application/x-www-form-urlencoded")
+                          (header authn-info-header "root ADMIN")
+                          (request cimi-url-no-result
+                                   :request-method :put
+                                   :body (rc/form-encode {:$filter "schema-org:att1/schema-org:att2='xxx'"}))
                           (t/body->edn)
                           (t/is-status 200)
                           (get-in [:response :body]))
