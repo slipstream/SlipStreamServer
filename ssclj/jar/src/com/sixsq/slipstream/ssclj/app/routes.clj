@@ -18,6 +18,8 @@
   (let-routes [uri (str p/service-context ":resource-name")]
     (POST uri request
       (crud/add request))
+    (PUT uri request
+      (crud/query request))
     (GET uri request
       (crud/query request))
     (ANY uri request

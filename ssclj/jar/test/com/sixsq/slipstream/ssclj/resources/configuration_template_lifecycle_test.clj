@@ -121,7 +121,6 @@
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
     (doall
       (for [[uri method] [[base-uri :options]
-                          [base-uri :put]
                           [base-uri :post]
                           [base-uri :delete]
                           [resource-uri :options]

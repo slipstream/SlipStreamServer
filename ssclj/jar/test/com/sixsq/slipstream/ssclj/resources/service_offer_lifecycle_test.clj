@@ -20,20 +20,20 @@
   (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-entry
-  {:connector {:href "CloudSoftwareSolution1"}
+  {:connector       {:href "CloudSoftwareSolution1"}
    :schema-org:att1 "123.456"})
 
 (def valid-nested-2-levels
-  {:connector {:href "CloudSoftwareSolution2"}
+  {:connector       {:href "CloudSoftwareSolution2"}
    :schema-org:att1 {:schema-org:att2 "456"}})
 
 (def valid-nested-entry
-  {:connector {:href "CloudSoftwareSolution3"}
+  {:connector       {:href "CloudSoftwareSolution3"}
    :schema-org:att1 "hi"
    :schema-org:attnested
-              {:schema-com:subnested
-               {:schema-com:subsubnested
-                {:schema-org:subsubsubnested "enough of nested"}}}})
+                    {:schema-com:subnested
+                     {:schema-com:subsubnested
+                      {:schema-org:subsubsubnested "enough of nested"}}}})
 
 (def invalid-nested-entry
   (assoc-in valid-nested-entry [:schema-org:attnested
@@ -45,7 +45,7 @@
   {:other "BAD"})
 
 (def entry-wrong-namespace
-  {:connector {:href "CloudSoftwareSolution"}
+  {:connector  {:href "CloudSoftwareSolution"}
    :wrong:att1 "123.456"})
 
 (def valid-namespace {:prefix "schema-org"
@@ -168,7 +168,7 @@
         (request abs-uri)
         (t/body->edn)
         (t/is-status 200)
-        (dissoc :acl) ;; ACL added automatically
+        (dissoc :acl)                                       ;; ACL added automatically
         (t/does-body-contain valid-entry))
 
     ;; query to see that entry is listed
@@ -203,7 +203,6 @@
     (doall
       (for [[uri method] [[base-uri :options]
                           [base-uri :delete]
-                          [base-uri :put]
                           [resource-uri :options]
                           [resource-uri :post]]]
         (do
@@ -225,8 +224,8 @@
       (t/is-status 201))
 
   (let [connector-with-namespaced-key
-        (str  "{\"connector\":{\"href\":\"CloudSoftwareSolution\"},"
-              "\"schema-org:attr-name\":\"123.456\"}")
+        (str "{\"connector\":{\"href\":\"CloudSoftwareSolution\"},"
+             "\"schema-org:attr-name\":\"123.456\"}")
 
         uri-of-posted (-> (session (ring-app))
                           (content-type "application/json")
@@ -238,14 +237,14 @@
                           (t/is-status 201)
                           (t/location))
 
-        abs-uri       (str p/service-context (u/de-camelcase uri-of-posted))
+        abs-uri (str p/service-context (u/de-camelcase uri-of-posted))
 
-        doc           (-> (session (ring-app))
-                          (header authn-info-header "root ADMIN")
-                          (request abs-uri)
-                          (t/body->edn)
-                          (t/is-status 200)
-                          (get-in [:response :body]))]
+        doc (-> (session (ring-app))
+                (header authn-info-header "root ADMIN")
+                (request abs-uri)
+                (t/body->edn)
+                (t/is-status 200)
+                (get-in [:response :body]))]
 
     (is (:schema-org:attr-name doc))
     (is (= "123.456" (:schema-org:attr-name doc)))))
@@ -324,9 +323,9 @@
       (t/is-status 201)
       (t/location))
 
-  (let [cimi-url-ok        (str p/service-context
-                                resource-url
-                                "?$filter=schema-org:att1='123.456'")
+  (let [cimi-url-ok (str p/service-context
+                         resource-url
+                         "?$filter=schema-org:att1='123.456'")
         cimi-url-no-result (str p/service-context
                                 resource-url
                                 "?$filter=schema-org:att1='xxx'")
@@ -399,11 +398,31 @@
                    (t/is-status 200)
                    (get-in [:response :body]))
 
+        res-ok-put (-> (session (ring-app))
+                       (header authn-info-header "root ADMIN")
+                       (request cimi-url-ok
+                                :request-method :put)
+                       (t/body->edn)
+                       (t/is-status 200)
+                       (get-in [:response :body]))
+
         no-result (-> (session (ring-app))
-                   (header authn-info-header "root ADMIN")
-                   (request cimi-url-no-result)
-                   (t/body->edn)
-                   (t/is-status 200)
-                   (get-in [:response :body]))]
+                      (header authn-info-header "root ADMIN")
+                      (request cimi-url-no-result)
+                      (t/body->edn)
+                      (t/is-status 200)
+                      (get-in [:response :body]))
+
+        no-result-put (-> (session (ring-app))
+                          (header authn-info-header "root ADMIN")
+                          (request cimi-url-no-result
+                                   :request-method :put)
+                          (t/body->edn)
+                          (t/is-status 200)
+                          (get-in [:response :body]))
+        ]
     (is (= 1 (:count res-ok)))
-    (is (= 0 (:count no-result)))))
+    (is (= 0 (:count no-result)))
+    (is (= 1 (:count res-ok-put)))
+    (is (= 0 (:count no-result-put)))
+    ))
