@@ -21,6 +21,5 @@
       (log/debug "validated token: " token)
       claims)
     (catch Exception e
-      (do
-        (log/warn "invalid authentication token: " token ", cause" e)
-        {}))))
+      (log/warn "invalid authentication token: " token ", cause" e)
+      {})))
