@@ -10,25 +10,17 @@
 (defn key-path
   [key-env-var default-path]
   (let [path (environ/env key-env-var default-path)]
-    (log/info "Using key path" path "for" (name key-env-var) "env. variable.")
+    (log/info "using key path" path "for" (name key-env-var) "env. variable.")
     path))
 
-(defn read-public-key
-  [key-env-var]
+(defn read-key
+  [read-key-fn default-path key-env-var]
   (try
-    (ks/public-key (key-path key-env-var default-public-key-path))
+    (read-key-fn (key-path key-env-var default-path))
     (catch Exception e
-      (log/error "Error reading public key:" (str e))
+      (log/error "error reading key:" (str e))
       (throw e))))
 
-(defn read-private-key
-  [key-env-var]
-  (try
-    (ks/private-key (key-path key-env-var default-private-key-path))
-    (catch Exception e
-      (log/error "Error reading private key:" (str e))
-      (throw e))))
+(def public-key (memoize (partial read-key ks/public-key default-public-key-path)))
 
-(def public-key (memoize read-public-key))
-
-(def private-key (memoize read-private-key))
+(def private-key (memoize (partial read-key ks/private-key default-private-key-path)))
