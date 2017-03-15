@@ -1,10 +1,9 @@
 (ns com.sixsq.slipstream.auth.internal-test
   (:require
     [clojure.test :refer :all]
+    [com.sixsq.slipstream.auth.internal :as t]
     [com.sixsq.slipstream.auth.test-helper :as th]
-    [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.auth.internal :as ia]
-    [com.sixsq.slipstream.auth.sign :as sg]))
+    [com.sixsq.slipstream.auth.utils.db :as db]))
 
 (defn fixture-delete-all
   [f]
@@ -13,136 +12,72 @@
 
 (use-fixtures :each fixture-delete-all)
 
-(defn- damage [creds key] (assoc creds key "WRONG"))
+(def valid-creds-super {:username "super" :password "supeRsupeR"})
+(def valid-creds-jane {:username "jane" :password "tarzan"})
 
-(def valid-credentials {:username "super" :password "supeRsupeR"})
-(def wrong-password (damage valid-credentials :password))
-(def wrong-user (damage valid-credentials :username))
-(def wrong-both (-> valid-credentials
-                    (damage :username)
-                    (damage :password)))
-(def missing-user (dissoc valid-credentials :username))
-(def missing-password (dissoc valid-credentials :password))
-(def missing-both {})
+(def invalid-creds [{:username "WRONG" :password "supeRsupeR"}
+                    {:username "super" :password "WRONG"}
+                    {:username "WRONG" :password "WRONG"}
+                    {:username "WRONG" :password "supeRsupeR"}
+                    {:username "super"}
+                    {}])
 
-(def wrongs [wrong-user
-             wrong-password
-             wrong-both
-             missing-user
-             missing-password
-             missing-both])
-
-(defn- token-refused?
-  [[ok? result]]
-  (= [false "Invalid credentials when creating token"] [ok? (:message result)]))
-
-(defn- token-created?
-  [[ok? token]]
-  (is ok?)
-  (is (map? token))
-  (is (contains? token :token)))
-
-(defn token-value
-  [[_ token]]
-  (:token token))
-
-(deftest all-rejected-when-no-user-added
-  (doseq [wrong (cons valid-credentials wrongs)]
-    (is (not (ia/valid? wrong))))
-  (is (not (ia/valid? valid-credentials))))
-
-(deftest test-valid-credentials
-  (th/add-user-for-test! valid-credentials)
-
-  (is (ia/valid? valid-credentials))
-  (doseq [wrong wrongs]
-    (is (not (ia/valid? wrong)))))
-
-(deftest test-create-token
-  (th/add-user-for-test! valid-credentials)
-
-  (is (token-created? (ia/create-token valid-credentials)))
-  (doseq [wrong wrongs]
-    (is (token-refused? (ia/create-token wrong)))))
-
-(deftest test-check-token-when-invalid-token
-  (th/add-user-for-test! valid-credentials)
-  (is (thrown? Exception (sg/unsign-claims {:token "invalid token"}))))
-
-(deftest test-check-token-when-valid-token-retrieves-claims
-  (th/add-user-for-test! valid-credentials)
-  (let [valid-token (token-value (ia/create-token valid-credentials))]
-    (is (= "super" (:com.sixsq.identifier (sg/unsign-claims valid-token))))))
-
-(deftest test-create-token-removes_password-from-token
-  (th/add-user-for-test! valid-credentials)
-  (let [valid-token (token-value (ia/create-token valid-credentials))]
-    (is (nil? (:password (sg/unsign-claims valid-token))))))
-
-(deftest password-encryption-compatible-with-slipstream
+(deftest test-password-hashing
+  (is (nil? (t/hash-password nil)))
   (is (= "304D73B9607B5DFD48EAC663544F8363B8A03CAAD6ACE21B369771E3A0744AAD0773640402261BD5F5C7427EF34CC76A2626817253C94D3B03C5C41D88C64399"
-         (ia/sha512 "supeRsupeR"))))
+         (t/hash-password "supeRsupeR"))))
 
-(deftest check-claims-token
-  (th/add-user-for-test! valid-credentials)
-  (let [claims      {:a 1 :b 2}
-        valid-token (token-value (ia/create-token valid-credentials))
-        claim-token (token-value (ia/create-token claims valid-token))]
-    (is (= claims (sg/unsign-claims claim-token)))))
+(deftest check-valid?
+  (th/add-user-for-test! valid-creds-super)
+  (th/add-user-for-test! valid-creds-jane)
 
-(deftest test-users-by-email-skips-deleted
-  (th/add-user-for-test! {:username "jack"
-                          :password  "123456"
-                          :email     "jack@sixsq.com"
-                          :state     "DELETED"})
+  (is (t/valid? valid-creds-super))
+  (is (t/valid? valid-creds-jane))
+  (doseq [wrong invalid-creds]
+    (is (not (t/valid? wrong)))))
 
-  (is (= [] (db/find-usernames-by-email "unknown@xxx.com")))
-  (is (= [] (db/find-usernames-by-email "jack@sixsq.com"))))
+(deftest check-valid?-no-users
+  ;; no users added
 
-(deftest test-users-by-email
-  (th/add-user-for-test! {:username "jack"
-                          :password  "123456"
-                          :email     "jack@sixsq.com"})
-  (th/add-user-for-test! {:username "joe"
-                          :password  "123456"
-                          :email     "joe@sixsq.com"})
-  (th/add-user-for-test! {:username "joe-alias"
-                          :password  "123456"
-                          :email     "joe@sixsq.com"})
+  (is (not (t/valid? valid-creds-super)))
+  (is (not (t/valid? valid-creds-jane)))
+  (doseq [wrong invalid-creds]
+    (is (not (t/valid? wrong)))))
 
-  (is (= [] (db/find-usernames-by-email "unknown@xxx.com")))
-  (is (= ["jack"] (db/find-usernames-by-email "jack@sixsq.com")))
-  (is (= ["joe" "joe-alias"] (db/find-usernames-by-email "joe@sixsq.com"))))
+(deftest check-create-claims
+  (th/add-user-for-test! (merge valid-creds-super {:issuperuser true}))
+  (th/add-user-for-test! (merge valid-creds-jane {:issuperuser false}))
 
-(deftest test-users-by-authn-skips-deleted
-  (th/add-user-for-test! {:username "joe-slipstream"
-                          :password  "123456"
-                          :email     "joe@sixsq.com"
-                          :github-id "joe"
-                          :state     "DELETED"})
-  (is (nil? (db/find-username-by-authn :github "joe"))))
+  (is (= {:com.sixsq.identifier "jane"
+          :com.sixsq.roles      "USER ANON"}
+         (t/create-claims "jane")))
+  (is (= {:com.sixsq.identifier "super"
+          :com.sixsq.roles      "ADMIN USER ANON"}
+         (t/create-claims "super"))))
 
-(deftest test-users-by-authn
-  (th/add-user-for-test! {:username "joe-slipstream"
-                          :password  "123456"
-                          :email     "joe@sixsq.com"
-                          :github-id "joe"})
+(deftest check-login
+  (th/add-user-for-test! (merge valid-creds-super {:issuperuser true}))
+  (th/add-user-for-test! (merge valid-creds-jane {:issuperuser false}))
 
-  (th/add-user-for-test! {:username "jack-slipstream"
-                          :password  "123456"
-                          :email     "jack@sixsq.com"
-                          :github-id "jack"})
+  (let [response (t/login {:params valid-creds-super})]
+    (is (= 200 (:status response)))
+    (is (get-in response [:cookies "com.sixsq.slipstream.cookie" :value])))
 
-  (th/add-user-for-test! {:username "alice-slipstream"
-                          :password  "123456"
-                          :email     "alice@sixsq.com"})
+  ;; FIXME: This should really return 403.
+  (let [response (t/login {:params {:username "super" :password "WRONG"}})]
+    (is (= 401 (:status response)))
+    (is (nil? (get-in response [:cookies "com.sixsq.slipstream.cookie" :value]))))
 
-  (is (nil? (db/find-username-by-authn :github "unknownid")))
-  (is (= "joe-slipstream" (db/find-username-by-authn :github "joe"))))
+  (let [response (t/login {:params valid-creds-jane})]
+    (is (= 200 (:status response)))
+    (is (get-in response [:cookies "com.sixsq.slipstream.cookie" :value])))
 
-(deftest test-users-by-authn-detect-inconsistent-data
-  (dotimes [_ 2] (th/add-user-for-test! {:username "joe-slipstream"
-                                         :password  "123456"
-                                         :email     "joe@sixsq.com"
-                                         :github-id "joe"}))
-  (is (thrown-with-msg? Exception #"one result for joe" (db/find-username-by-authn :github "joe"))))
+  ;; FIXME: This should really return 403.
+  (let [response (t/login {:params {:username "jane" :password "WRONG"}})]
+    (is (= 401 (:status response)))
+    (is (nil? (get-in response [:cookies "com.sixsq.slipstream.cookie" :value])))))
+
+(deftest check-logout
+  (let [response (t/logout)]
+    (is (= 200 (:status response)))
+    (is (= "INVALID" (get-in response [:cookies "com.sixsq.slipstream.cookie" :value])))))

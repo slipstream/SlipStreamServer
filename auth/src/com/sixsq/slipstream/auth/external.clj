@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.auth.external
   (:require [clojure.tools.logging :as log]
-            [superstring.core :as s]
+            [clojure.string :as str]
             [com.sixsq.slipstream.auth.utils.db :as db]
-            [com.sixsq.slipstream.auth.sign :as sg]
+            [com.sixsq.slipstream.auth.cookies :as cookies]
             [com.sixsq.slipstream.auth.utils.http :as uh]))
 
 (defn- mapped-user
@@ -35,17 +35,15 @@
   [authn-method external-login external-email redirect-server]
   (if (and (not-empty external-login) (not-empty external-email))
     (let [[matched-user redirect-url] (match-external-user! authn-method external-login external-email)
-          token (sg/sign-claims {:com.sixsq.identifier matched-user
-                                 :com.sixsq.roles      (db/find-roles-for-username matched-user)
-                                 :exp                  (sg/expiry-timestamp)})]
+          claims {:com.sixsq.identifier matched-user
+                  :com.sixsq.roles      (db/find-roles-for-username matched-user)}]
 
       (assoc
         (uh/response-redirect (str redirect-server redirect-url))
-        :cookies {"com.sixsq.slipstream.cookie" {:value {:token token}
-                                                 :path  "/"}}))
+        :cookies (cookies/claims-cookie claims "com.sixsq.slipstream.cookie")))
     (uh/response-redirect (str redirect-server "/login?flash-now-warning=auth-failed"))))
 
 (defn sanitize-login-name
   "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
   [s]
-  (when s (s/replace s #"[^a-zA-Z0-9_]" "_")))
+  (when s (str/replace s #"[^a-zA-Z0-9_]" "_")))

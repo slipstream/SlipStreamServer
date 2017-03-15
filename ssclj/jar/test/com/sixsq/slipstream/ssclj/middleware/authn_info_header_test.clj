@@ -1,82 +1,88 @@
 (ns com.sixsq.slipstream.ssclj.middleware.authn-info-header-test
   (:require
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer :all]
-    [com.sixsq.slipstream.auth.sign :as sign]
-    [expectations :refer :all]))
+    [com.sixsq.slipstream.auth.cookies :as cookies]))
 
-(defn mk-cookie [token]
-  {authn-cookie {:value (str "token=" token)
-                 :path  "/"}})
+(def cookie-id (cookies/claims-cookie {:com.sixsq.identifier "uname2"}))
+(def cookie-id-roles (cookies/claims-cookie {:com.sixsq.identifier "uname2"
+                                             :com.sixsq.roles      "USER alpha-role"}))
 
-(def cookie-id (mk-cookie (sign/sign-claims {:com.sixsq.identifier "uname2"})))
-(def cookie-id-roles (mk-cookie (sign/sign-claims {:com.sixsq.identifier "uname2"
-                                                   :com.sixsq.roles      "USER alpha-role"})))
+(deftest check-extract-authn-info
+  (are [expected request] (= expected (extract-authn-info request))
+                          nil {}
+                          nil {:headers {"header-1" "value"}}
+                          nil {:headers {authn-info-header nil}}
+                          nil {:headers {authn-info-header ""}}
+                          ["uname" []] {:headers {authn-info-header "uname"}}
+                          ["uname" []] {:headers {authn-info-header "  uname"}}
+                          ["uname" ["r1"]] {:headers {authn-info-header "uname r1"}}
+                          ["uname" ["r1"]] {:headers {authn-info-header "  uname r1"}}
+                          ["uname" ["r1"]] {:headers {authn-info-header "uname r1  "}}
+                          ["uname" ["r1" "r2"]] {:headers {authn-info-header "uname r1 r2"}}))
 
-(expect nil (extract-authn-info {}))
-(expect nil (extract-authn-info {:headers {"header-1" "value"}}))
-(expect nil (extract-authn-info {:headers {authn-info-header nil}}))
-(expect nil (extract-authn-info {:headers {authn-info-header ""}}))
-(expect ["uname" []] (extract-authn-info {:headers {authn-info-header "uname"}}))
-(expect ["uname" []] (extract-authn-info {:headers {authn-info-header "  uname"}}))
-(expect ["uname" ["r1"]] (extract-authn-info {:headers {authn-info-header "uname r1"}}))
-(expect ["uname" ["r1"]] (extract-authn-info {:headers {authn-info-header "  uname r1"}}))
-(expect ["uname" ["r1"]] (extract-authn-info {:headers {authn-info-header "uname r1  "}}))
-(expect ["uname" ["r1" "r2"]] (extract-authn-info {:headers {authn-info-header "uname r1 r2"}}))
+(deftest check-extract-info
+  (are [expected request] (= expected (extract-info request))
+                          nil {}
+                          ["uname" ["r1"]] {:headers {authn-info-header "uname r1"}}
+                          ["uname2" ["USER" "alpha-role"]] {:cookies {authn-cookie cookie-id-roles}}
+                          ["uname" ["r1"]] {:headers {authn-info-header "uname r1"}
+                                            :cookies {authn-cookie cookie-id-roles}}))
 
-(expect nil (extract-cookie-info {}))
-(expect nil (extract-cookie-info {:cookies {}}))
-(expect nil (extract-cookie-info {:cookies {authn-cookie {}}}))
-(expect nil (extract-cookie-info {:cookies {authn-cookie {:value nil}}}))
-(expect ["uname2" []] (extract-cookie-info {:cookies cookie-id}))
-(expect ["uname2" ["USER" "alpha-role"]] (extract-cookie-info {:cookies cookie-id-roles}))
+(deftest check-identity-map
+  (are [expected v] (= expected (create-identity-map v))
+                    {} nil
+                    {} [nil nil]
+                    {} [nil []]
+                    {} [nil ["roles"]]
 
-(expect nil (extract-info {}))
-(expect ["uname" ["r1"]] (extract-info {:headers {authn-info-header "uname r1"}}))
-(expect ["uname2" ["USER" "alpha-role"]] (extract-info {:cookies cookie-id-roles}))
-(expect ["uname" ["r1"]] (extract-info {:headers {authn-info-header "uname r1"}
-                                        :cookies cookie-id-roles}))
+                    {:current         "uname"
+                     :authentications {"uname" {:identity "uname"}}}
+                    ["uname" []]
 
-(expect {} (create-identity-map nil))
-(expect {} (create-identity-map [nil nil]))
-(expect {} (create-identity-map [nil []]))
-(expect {} (create-identity-map [nil ["roles"]]))
-(expect {:current         "uname"
-         :authentications {"uname" {:identity "uname"}}} (create-identity-map ["uname" []]))
-(expect {:current         "uname"
-         :authentications {"uname" {:identity "uname"
-                                    :roles    ["r1"]}}} (create-identity-map ["uname" ["r1"]]))
-(expect {:current         "uname"
-         :authentications {"uname" {:identity "uname"
-                                    :roles    ["r1" "r2"]}}} (create-identity-map ["uname" ["r1" "r2"]]))
+                    {:current         "uname"
+                     :authentications {"uname" {:identity "uname"
+                                                :roles    ["r1"]}}}
+                    ["uname" ["r1"]]
 
-(let [handler (wrap-authn-info-header identity)]
+                    {:current         "uname"
+                     :authentications {"uname" {:identity "uname"
+                                                :roles    ["r1" "r2"]}}}
+                    ["uname" ["r1" "r2"]]))
 
-  (expect {} (:identity (handler {})))
-  (expect {} (:identity (handler {:headers {"header-1" "value"}})))
-  (expect {} (:identity (handler {:headers {authn-info-header nil}})))
-  (expect {} (:identity (handler {:headers {authn-info-header ""}})))
-  (expect {:current         "uname"
-           :authentications {"uname" {:identity "uname"}}}
-          (:identity (handler {:headers {authn-info-header "uname"}})))
-  (expect {:current         "uname"
-           :authentications {"uname" {:identity "uname"
-                                      :roles    ["r1"]}}}
-          (:identity (handler {:headers {authn-info-header "uname r1"}})))
-  (expect {:current         "uname"
-           :authentications {"uname" {:identity "uname"
-                                      :roles    ["r1" "r2"]}}}
-          (:identity (handler {:headers {authn-info-header "uname r1 r2"}})))
-  (expect {:current         "uname2"
-           :authentications {"uname2" {:identity "uname2"}}}
-          (:identity (handler {:cookies cookie-id})))
-  (expect {:current         "uname2"
-           :authentications {"uname2" {:identity "uname2"
-                                       :roles    ["USER" "alpha-role"]}}}
-          (:identity (handler {:cookies cookie-id-roles})))
-  (expect {:current         "uname"
-           :authentications {"uname" {:identity "uname"
-                                      :roles    ["r1" "r2"]}}}
-          (:identity (handler {:headers {authn-info-header "uname r1 r2"}
-                               :cookies cookie-id-roles}))))
+(deftest check-handler
+  (let [handler (wrap-authn-info-header identity)]
+    (are [expected request] (= expected (:identity (handler request)))
+                            {} {}
+                            {} {:headers {"header-1" "value"}}
+                            {} {:headers {authn-info-header nil}}
+                            {} {:headers {authn-info-header ""}}
 
+                            {:current         "uname"
+                             :authentications {"uname" {:identity "uname"}}}
+                            {:headers {authn-info-header "uname"}}
 
+                            {:current         "uname"
+                             :authentications {"uname" {:identity "uname"
+                                                        :roles    ["r1"]}}}
+                            {:headers {authn-info-header "uname r1"}}
+
+                            {:current         "uname"
+                             :authentications {"uname" {:identity "uname"
+                                                        :roles    ["r1" "r2"]}}}
+                            {:headers {authn-info-header "uname r1 r2"}}
+
+                            {:current         "uname2"
+                             :authentications {"uname2" {:identity "uname2"}}}
+                            {:cookies {authn-cookie cookie-id}}
+
+                            {:current         "uname2"
+                             :authentications {"uname2" {:identity "uname2"
+                                                         :roles    ["USER" "alpha-role"]}}}
+                            {:cookies {authn-cookie cookie-id-roles}}
+
+                            {:current         "uname"
+                             :authentications {"uname" {:identity "uname"
+                                                        :roles    ["r1" "r2"]}}}
+                            {:headers {authn-info-header "uname r1 r2"}
+                             :cookies {authn-cookie cookie-id-roles}})))

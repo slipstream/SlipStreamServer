@@ -39,7 +39,7 @@
   '[tolitius.boot-check :refer [with-yagni with-eastwood with-kibit with-bikeshed]])
 
 (set-env!
-  :source-paths #{"test-resources"}
+  :source-paths #{"test" "test-resources"}
   :resource-paths #{"src"})
 
 (task-options!
