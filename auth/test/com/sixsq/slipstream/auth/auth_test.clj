@@ -43,5 +43,3 @@
     (is (= 200 (:status logout-response)))
     (is (= "INVALID" (:value cookies)))
     (is (zero? (:max-age cookies)))))
-
-

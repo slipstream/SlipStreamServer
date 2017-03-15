@@ -2,9 +2,7 @@
   (:refer-clojure :exclude [update])
   (:require
     [clojure.tools.logging :as log]
-    [clojure.set :refer [rename-keys]]
 
-    [com.sixsq.slipstream.auth.sign :as sg]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.http :as uh]
@@ -18,11 +16,11 @@
   {:username (->> request :params ((some-fn :username :user-name)))
    :password (uh/param-value request :password)})
 
-(defn sha512
-  "Hash secret exactly as done in SlipStream Java server."
-  [secret]
-  (when secret
-    (-> (ha/sha512 secret)
+(defn hash-password
+  "Hash password exactly as done in SlipStream Java server."
+  [password]
+  (when password
+    (-> (ha/sha512 password)
         co/bytes->hex
         str/upper-case)))
 
@@ -32,35 +30,12 @@
     (and
       password
       db-password-hash
-      (= (sha512 password) db-password-hash))))
+      (= (hash-password password) db-password-hash))))
 
 (defn create-claims
   [username]
   {:com.sixsq.identifier username
    :com.sixsq.roles      (db/find-roles-for-username username)})
-
-#_(defn- adapt-credentials
-    [{:keys [username] :as credentials}]
-    (-> credentials
-        (dissoc :password)
-        (rename-keys {:username :com.sixsq.identifier})
-        (merge {:com.sixsq.roles (db/find-roles-for-username username)})
-        (merge {:exp (sg/expiry-timestamp)})))
-
-#_(defn create-token
-    ([credentials]
-     (if (valid? credentials)
-       [true {:token (sg/sign-claims (adapt-credentials credentials))}]
-       [false {:message "Invalid credentials when creating token"}]))
-
-    ([claims token]
-     (log/debug "Will create token for claims=" claims)
-     (try
-       (sg/unsign-claims token)
-       [true {:token (sg/sign-claims claims)}]
-       (catch Exception e
-         (log/error "exception in token creation " e)
-         [false {:message (str "Invalid token when creating token: " e)}]))))
 
 (defn login
   [request]

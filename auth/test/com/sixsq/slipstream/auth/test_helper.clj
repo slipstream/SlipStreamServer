@@ -63,7 +63,7 @@
   [user]
   (db/init)
   (kc/insert db/users (kc/values {:NAME        (:username user)
-                                  :PASSWORD    (ia/sha512 (:password user))
+                                  :PASSWORD    (ia/hash-password (:password user))
                                   :EMAIL       (:email user)
                                   :GITHUBLOGIN (:github-id user)
                                   :STATE       (or (:state user) "ACTIVE")
