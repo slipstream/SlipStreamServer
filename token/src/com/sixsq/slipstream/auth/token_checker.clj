@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.auth.token-checker
   (:require
     [clojure.walk :as walk]
-    [com.sixsq.slipstream.auth.utils.sign :as sg]
+    [com.sixsq.slipstream.auth.utils.sign :as sign]
     [clojure.tools.logging :as log])
   (:gen-class
     :name com.sixsq.slipstream.auth.TokenChecker
@@ -16,7 +16,7 @@
   (try
     (log/debug "checking token: " token)
     (let [claims (-> token
-                     sg/unsign-claims
+                     sign/unsign-claims
                      walk/stringify-keys)]
       (log/debug "validated token: " token)
       claims)

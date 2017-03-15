@@ -12,7 +12,7 @@
             [clj-http.client :as http]
             [com.sixsq.slipstream.auth.utils.config :as cf]
             [com.sixsq.slipstream.auth.utils.http :as uh]
-            [com.sixsq.slipstream.auth.utils.sign :as sg]
+            [com.sixsq.slipstream.auth.utils.sign :as sign]
             [com.sixsq.slipstream.auth.external :as ex]))
 
 (def ^:private cyclone-base-url
@@ -47,19 +47,19 @@
 (defn callback-cyclone
   [request redirect-server]
   (try
-    (let [code           (uh/param-value request :code)
+    (let [code (uh/param-value request :code)
           token-response (http/post (cyclone-token-url)
                                     {:headers     {"Accept" "application/json"}
                                      :form-params {:grant_type   "authorization_code"
                                                    :code         code
                                                    :redirect_uri (redirect_uri)
                                                    :client_id    "slipstream"}})
-          access-token   (-> token-response
-                             :body
-                             (json/read-str :key-fn keyword)
-                             :access_token)
-          claims         (sg/unsign-claims access-token
-                                           :auth-public-key-cyclone)]
+          access-token (-> token-response
+                           :body
+                           (json/read-str :key-fn keyword)
+                           :access_token)
+          claims (sign/unsign-claims access-token
+                                     :auth-public-key-cyclone)]
       (log/debug "Cyclone claims " claims)
       (log/info "Successful CYCLONE login: " (login-name claims))
       (ex/redirect-with-matched-user :cyclone (login-name claims) (:email claims) redirect-server))
