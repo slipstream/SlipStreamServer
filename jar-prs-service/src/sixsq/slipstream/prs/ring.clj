@@ -12,8 +12,12 @@
 
 (defn- authenticated?
   [request]
-  (let [cookie (get-in request [:cookies "com.sixsq.slipstream.cookie"])]
-    (cookies/extract-cookie-info cookie)))
+  (-> request
+      (get-in [:cookies "com.sixsq.slipstream.cookie"])
+      cookies/extract-cookie-info
+      seq
+      nil?
+      not))
 
 (defn- place-and-rank
   [params]
