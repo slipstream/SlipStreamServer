@@ -1,7 +1,6 @@
 (ns sixsq.slipstream.prs.ring
   (:require
     [clojure.data.json :as json]
-    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [clojure.walk :refer [keywordize-keys]]
     [compojure.core :refer [defroutes PUT]]
@@ -9,35 +8,12 @@
     [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
     [ring.middleware.json :refer [wrap-json-params]]
     [sixsq.slipstream.placement.core :as pc]
-    [com.sixsq.slipstream.auth.sign :as sign]))
-
-;; Taken from com.sixsq.slipstream.ssclj.middleware.authn-info-header,
-;; which is part of com.sixsq.slipstream/SlipStreamCljResources-jar artefact.
-;; SlipStreamCljResources-jar is too big for adding it as the dependency.
-;; NB! This requires auth_pubkey.pem on the classpath.
-(def ^:const authn-cookie
-  "com.sixsq.slipstream.cookie")
-
-(defn- extract-cookie-info
-  [request]
-  (try
-    (if-let [token (get-in request [:cookies authn-cookie :value])]
-      (let [claims     (sign/unsign-claims (-> token (str/split #"^token=") second))
-            identifier (:com.sixsq.identifier claims)
-            roles      (remove str/blank? (-> claims
-                                              :com.sixsq.roles
-                                              (or "")
-                                              (str/split #"\s+")))]
-        (when identifier
-          [identifier roles])))
-    (catch Exception ex
-      (log/warn (str "Error in extract-cookie-info: " (.getMessage ex)))
-      nil)))
-;; end.
+    [com.sixsq.slipstream.auth.cookies :as cookies]))
 
 (defn- authenticated?
   [request]
-  (not (nil? (seq (extract-cookie-info request)))))
+  (let [cookie (get-in request [:cookies "com.sixsq.slipstream.cookie"])]
+    (cookies/extract-cookie-info cookie)))
 
 (defn- place-and-rank
   [params]

@@ -49,6 +49,7 @@
                    [superstring]
 
                    [com.sixsq.slipstream/auth]
+                   [com.sixsq.slipstream/token]
                    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
                    [org.apache.logging.log4j/log4j-core]
                    [org.apache.logging.log4j/log4j-api]

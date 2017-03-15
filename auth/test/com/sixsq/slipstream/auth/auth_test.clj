@@ -35,7 +35,7 @@
 (deftest test-auth-internal-valid-credentials
   (th/add-user-for-test! valid-credentials)
   (is (= 200 (:status (auth/login valid-request))))
-  (is (get-in (auth/login valid-request) [:cookies "com.sixsq.slipstream.cookie" :value :token])))
+  (is (get-in (auth/login valid-request) [:cookies "com.sixsq.slipstream.cookie" :value])))
 
 (deftest test-auth-logout
   (let [logout-response (auth/logout valid-request)
