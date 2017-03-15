@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.auth.sign-test
+(ns com.sixsq.slipstream.auth.utils.sign-test
   (:refer-clojure :exclude [update])
   (:require
     [clojure.test :refer :all]
@@ -6,7 +6,7 @@
     [environ.core :as environ]
     [com.sixsq.slipstream.auth.env-fixture :as env-fixture]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
-    [com.sixsq.slipstream.auth.sign :as t]))
+    [com.sixsq.slipstream.auth.utils.sign :as t]))
 
 (deftest roundtrip-claims
   (let [claims {:alpha "alpha"

@@ -3,8 +3,7 @@
     [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.internal :as t]
     [com.sixsq.slipstream.auth.test-helper :as th]
-    [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.auth.sign :as sg]))
+    [com.sixsq.slipstream.auth.utils.db :as db]))
 
 (defn fixture-delete-all
   [f]

@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.auth.token-checker
   (:require
     [clojure.walk :as walk]
-    [com.sixsq.slipstream.auth.sign :as sg]
+    [com.sixsq.slipstream.auth.utils.sign :as sg]
     [clojure.tools.logging :as log])
   (:gen-class
     :name com.sixsq.slipstream.auth.TokenChecker

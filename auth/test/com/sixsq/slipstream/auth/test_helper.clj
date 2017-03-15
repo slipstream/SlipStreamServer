@@ -6,7 +6,6 @@
     [superstring.core :refer [join split]]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [korma.core :as kc]
-    [com.sixsq.slipstream.auth.sign :as sg]
     [com.sixsq.slipstream.auth.internal :as ia]))
 
 (defn- simple-surrounder

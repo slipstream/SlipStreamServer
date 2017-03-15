@@ -5,7 +5,7 @@
     [clj-time.coerce :as c]
     [com.sixsq.slipstream.auth.env-fixture :as env-fixture]
     [com.sixsq.slipstream.auth.cookies :as t]
-    [com.sixsq.slipstream.auth.sign :as s]
+    [com.sixsq.slipstream.auth.utils.sign :as s]
     [clojure.string :as str]
     [clojure.java.io :as io]
     [environ.core :as environ]))

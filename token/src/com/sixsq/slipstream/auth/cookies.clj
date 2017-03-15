@@ -2,7 +2,7 @@
   "utilities for embedding and extracting tokens in cookies"
   (:require
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
-    [com.sixsq.slipstream.auth.sign :as sg]
+    [com.sixsq.slipstream.auth.utils.sign :as sg]
     [clojure.string :as str]
     [clojure.tools.logging :as log]))
 

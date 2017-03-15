@@ -12,7 +12,7 @@
             [clj-http.client :as http]
             [com.sixsq.slipstream.auth.utils.config :as cf]
             [com.sixsq.slipstream.auth.utils.http :as uh]
-            [com.sixsq.slipstream.auth.sign :as sg]
+            [com.sixsq.slipstream.auth.utils.sign :as sg]
             [com.sixsq.slipstream.auth.external :as ex]))
 
 (def ^:private cyclone-base-url

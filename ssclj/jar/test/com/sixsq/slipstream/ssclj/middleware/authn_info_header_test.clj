@@ -2,7 +2,6 @@
   (:require
     [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer :all]
-    [com.sixsq.slipstream.auth.sign :as sign]
     [com.sixsq.slipstream.auth.cookies :as cookies]))
 
 (def cookie-id (cookies/claims-cookie {:com.sixsq.identifier "uname2"}))
