@@ -2,7 +2,6 @@
   (:require
     [clojure.string :as str]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.auth.sign :as sign]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 

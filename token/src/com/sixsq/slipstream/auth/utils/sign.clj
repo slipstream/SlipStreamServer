@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.auth.sign
+(ns com.sixsq.slipstream.auth.utils.sign
   (:require
     [buddy.sign.jwt :as jwt]
     [com.sixsq.slipstream.auth.utils.certs :as certs]))

@@ -4,7 +4,6 @@
     [clojure.data.json :as json]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.internal :as ia]
-    [com.sixsq.slipstream.auth.sign :as sg]
     [com.sixsq.slipstream.auth.github :as gh]
     [com.sixsq.slipstream.auth.cyclone :as cy]
     [com.sixsq.slipstream.auth.utils.http :as uh]))
