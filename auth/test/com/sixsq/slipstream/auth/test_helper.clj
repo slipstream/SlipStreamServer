@@ -66,4 +66,5 @@
                                   :PASSWORD    (ia/sha512 (:password user))
                                   :EMAIL       (:email user)
                                   :GITHUBLOGIN (:github-id user)
-                                  :STATE       (or (:state user) "ACTIVE")})))
+                                  :STATE       (or (:state user) "ACTIVE")
+                                  :ISSUPERUSER (boolean (:issuperuser user))})))

@@ -5,96 +5,79 @@
     [clojure.set :refer [rename-keys]]
 
     [com.sixsq.slipstream.auth.sign :as sg]
+    [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [buddy.core.codecs :as co]
-    [clojure.string :as s]
-    [buddy.core.hash :as ha])
-  (:import (java.util Date TimeZone)
-           (java.text SimpleDateFormat)))
+    [clojure.string :as str]
+    [buddy.core.hash :as ha]))
 
 (defn- extract-credentials
   [request]
-  (let [username (->> request :params ((some-fn :username :user-name)))]
-    {:username username
-     :password (uh/param-value request :password)}))
-
-(defn- log-result
-  [credentials ok?]
-  (log/info (str "'" (:username credentials) "' : "
-                 (if ok? "login OK" "invalid password"))))
-
-(defn- response-token-ok
-  [token]
-  (assoc
-    (uh/response 200)
-    :cookies
-    {"com.sixsq.slipstream.cookie" {:value token, :path "/"}}))
+  ;; FIXME: Remove :user-name!
+  {:username (->> request :params ((some-fn :username :user-name)))
+   :password (uh/param-value request :password)})
 
 (defn sha512
-  "Encrypt secret exactly as done in SlipStream Java server."
+  "Hash secret exactly as done in SlipStream Java server."
   [secret]
-  (-> (ha/sha512 secret)
-      co/bytes->hex
-      s/upper-case))
+  (when secret
+    (-> (ha/sha512 secret)
+        co/bytes->hex
+        str/upper-case)))
 
 (defn valid?
-  [credentials]
-  (let [username            (:username credentials)
-        password-credential (:password credentials)
-        encrypted-in-db     (db/find-password-for-username username)]
+  [{:keys [username password]}]
+  (let [db-password-hash (db/find-password-for-username username)]
     (and
-      password-credential
-      encrypted-in-db
-      (= (sha512 password-credential) encrypted-in-db))))
+      password
+      db-password-hash
+      (= (sha512 password) db-password-hash))))
 
-(defn- adapt-credentials
-  [{:keys [username] :as credentials}]
-  (-> credentials
-      (dissoc :password)
-      (rename-keys {:username :com.sixsq.identifier})
-      (merge {:com.sixsq.roles (db/find-roles-for-username username)})
-      (merge {:exp (sg/expiry-timestamp)})))
+(defn create-claims
+  [username]
+  {:com.sixsq.identifier username
+   :com.sixsq.roles      (db/find-roles-for-username username)})
 
-(defn create-token
-  ([credentials]
-   (if (valid? credentials)
-     [true {:token (sg/sign-claims (adapt-credentials credentials))}]
-     [false {:message "Invalid credentials when creating token"}]))
+#_(defn- adapt-credentials
+    [{:keys [username] :as credentials}]
+    (-> credentials
+        (dissoc :password)
+        (rename-keys {:username :com.sixsq.identifier})
+        (merge {:com.sixsq.roles (db/find-roles-for-username username)})
+        (merge {:exp (sg/expiry-timestamp)})))
 
-  ([claims token]
-   (log/debug "Will create token for claims=" claims)
-   (try
-     (sg/unsign-claims token)
-     [true {:token (sg/sign-claims claims)}]
-     (catch Exception e
-       (log/error "exception in token creation " e)
-       [false {:message (str "Invalid token when creating token: " e)}]))))
+#_(defn create-token
+    ([credentials]
+     (if (valid? credentials)
+       [true {:token (sg/sign-claims (adapt-credentials credentials))}]
+       [false {:message "Invalid credentials when creating token"}]))
+
+    ([claims token]
+     (log/debug "Will create token for claims=" claims)
+     (try
+       (sg/unsign-claims token)
+       [true {:token (sg/sign-claims claims)}]
+       (catch Exception e
+         (log/error "exception in token creation " e)
+         [false {:message (str "Invalid token when creating token: " e)}]))))
 
 (defn login
   [request]
-
-  (log/debug "Starting internal authentication.")
-  (let [credentials (extract-credentials request)
-        [ok? token] (create-token credentials)]
-    (log-result credentials ok?)
-    (if ok?
-      (response-token-ok token)
-      (uh/response-forbidden))))
-
-(def ^:private sdf
-  (doto (SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss z")
-    (.setTimeZone (TimeZone/getTimeZone "GMT"))))
-
-(defn now-gmt
-  []
-  (.format sdf (Date.)))
+  (let [{:keys [username] :as credentials} (extract-credentials request)]
+    (if (valid? credentials)
+      (do
+        (log/info "successful login for" username)
+        (assoc
+          (uh/response 200)
+          :cookies (cookies/claims-cookie (create-claims username) "com.sixsq.slipstream.cookie")))
+      (do
+        (log/warn "failed login attempt for" username)
+        (uh/response-forbidden)))))                         ;; FIXME: Returns 401, but should be 403.
 
 (defn logout
   []
-  (log/info "Logout internal authentication")
+  (log/info "sending logout cookie")
   (assoc
     (uh/response 200)
-    :cookies
-    {"com.sixsq.slipstream.cookie"
-     {:value "INVALID", :path "/", :max-age 0, :expires (now-gmt)}}))
+    :cookies (cookies/revoked-cookie "com.sixsq.slipstream.cookie")))
