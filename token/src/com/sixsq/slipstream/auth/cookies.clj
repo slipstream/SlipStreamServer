@@ -45,12 +45,12 @@
 (defn claims->authn-info
   "Returns a tuple with the username (identifier) and list of roles based on the
    provided claims map."
-  [{:keys [com.sixsq.identifier com.sixsq.roles] :as claims}] ;; FIXME: Normalize the keyword names.
-  (when com.sixsq.identifier
-    (let [roles (remove str/blank? (-> com.sixsq.roles
+  [claims] ;; FIXME: Normalize the keyword names.
+  (when-let [identifier (get claims :com.sixsq.identifier)]
+    (let [roles (remove str/blank? (-> (get claims :com.sixsq.roles)
                                        (or "")
                                        (str/split #"\s+")))]
-      [com.sixsq.identifier roles])))
+      [identifier roles])))
 
 (defn extract-cookie-info
   "Extracts authentication information from a cookie. Returns nil if no cookie is
