@@ -2,11 +2,18 @@
   (:require
     [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer :all]
-    [com.sixsq.slipstream.auth.cookies :as cookies]))
+    [com.sixsq.slipstream.auth.cookies :as cookies]
+    [ring.util.codec :as codec))
 
-(def cookie-id (cookies/claims-cookie {:com.sixsq.identifier "uname2"}))
-(def cookie-id-roles (cookies/claims-cookie {:com.sixsq.identifier "uname2"
-                                             :com.sixsq.roles      "USER alpha-role"}))
+(defn serialize-cookie-value
+  "replaces the map cookie value with a serialized string"
+  [{:keys [value] :as cookie}]
+  (assoc cookie :value (codec/form-encode value)))
+
+(def cookie-id (serialize-cookie-value (cookies/claims-cookie {:com.sixsq.identifier "uname2"})))
+(def cookie-id-roles (serialize-cookie-value
+                      (cookies/claims-cookie {:com.sixsq.identifier "uname2"
+                                              :com.sixsq.roles      "USER alpha-role"})))
 
 (deftest check-extract-authn-info
   (are [expected request] (= expected (extract-authn-info request))
