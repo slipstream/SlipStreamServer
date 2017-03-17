@@ -8,7 +8,13 @@
     [com.sixsq.slipstream.auth.utils.sign :as s]
     [clojure.string :as str]
     [clojure.java.io :as io]
-    [environ.core :as environ]))
+    [environ.core :as environ]
+    [ring.util.codec :as codec]))
+
+(defn serialize-cookie-value
+  "replaces the map cookie value with a serialized string"
+  [{:keys [value] :as cookie}]
+  (assoc cookie :value (codec/form-encode value)))
 
 (deftest revoked-cookie-ok
   (let [revoked (t/revoked-cookie)]
@@ -27,21 +33,21 @@
           named-cookie (t/claims-cookie claims k)]
       (is (map? cookie))
       (is (not= "INVALID" (:value cookie)))
-      (is (re-matches #"^token=.*" (:value cookie)))           ;; FIXME: Remove token=.
+      (is (-> cookie :value :token))
       (is (map? named-cookie))
       (is (not= "INVALID" (get-in named-cookie [k :value])))
-      (is (re-matches #"^token=.*" (get-in named-cookie [k :value])))))) ;; FIXME: Remove token=.
+      (is (get-in named-cookie [k :value :token])))))
 
 (deftest check-extract-claims
   (with-redefs [environ/env env-fixture/env-map]
-    (let [claims {:alpha "a", :beta "b", :gamma 3}
-          cookie (t/claims-cookie claims)]
+    (let [claims {:alpha "a", :beta "b", :gamma 3}]
       (is (nil? (t/extract-claims nil)))
       (is (nil? (t/extract-claims {:value nil})))
       (is (thrown? Exception (t/extract-claims {:value "token=INVALID"})))
       (is (thrown? Exception (t/extract-claims {:value "unknown-token"})))
       (is (= claims (-> claims
                         t/claims-cookie
+                        serialize-cookie-value
                         t/extract-claims
                         (dissoc :exp)))))))
 
@@ -60,4 +66,5 @@
 
       (is (= ["user" ["role1" "role2"]] (-> claims
                                             t/claims-cookie
+                                            serialize-cookie-value
                                             t/extract-cookie-info))))))

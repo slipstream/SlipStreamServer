@@ -17,7 +17,7 @@
    {name (revoked-cookie)}))
 
 (defn claims-cookie
-  "Return a cookie (as a map) that has a token generate from the provided
+  "Return a cookie (as a map) that has a token generated from the provided
    claims and the default expiration time. If a name is provided, then a map
    is returned with a single entry with the key being the name and the value
    being the cookie."
@@ -25,7 +25,7 @@
    (let [timestamp (ts/expiry-later)
          claims (assoc claims :exp timestamp)
          token (sg/sign-claims claims)]
-     {:value   (str "token=" token)                         ;; FIXME: Change to using the token directly as :value; i.e. remove :token.
+     {:value   {:token token}                               ;; FIXME: Remove :token, required java-side changes as well.
       :secure  true
       :path    "/"
       :expires (ts/format-timestamp timestamp)}))
@@ -34,7 +34,10 @@
 
 (defn extract-claims
   "Extracts the claims from the value of a cookie. Throws an exception if the
-   claims are not valid or cannot be extracted."
+   claims are not valid or cannot be extracted. NOTE: This can only be used on
+   cookies that have been serialized through the ring wrap-cookies middleware!
+   You cannot roundtrip the claims directly through `claims-cookie` and
+   `extract-claims`."
   [{:keys [value] :as cookie}]
   (when value
     (-> value
@@ -45,7 +48,7 @@
 (defn claims->authn-info
   "Returns a tuple with the username (identifier) and list of roles based on the
    provided claims map."
-  [claims] ;; FIXME: Normalize the keyword names.
+  [claims]                                                  ;; FIXME: Normalize the keyword names.
   (when-let [identifier (get claims :com.sixsq.identifier)]
     (let [roles (remove str/blank? (-> (get claims :com.sixsq.roles)
                                        (or "")
