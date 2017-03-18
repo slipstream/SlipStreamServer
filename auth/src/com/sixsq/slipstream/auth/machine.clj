@@ -10,7 +10,8 @@
 (defn create-token
   [claims]
   (try
-    (sign/sign-claims claims)
+    (when claims
+      (sign/sign-claims claims))
     (catch Exception e
       (log/error "error signing machine token claims:" (str e))
       nil)))
@@ -24,7 +25,7 @@
       (log/error "invalid authn token when creating machine token:" (str e))
       false)))
 
-(defn read-json [s]
+(defn parse-json [s]
   (try
     (json/read-str s :key-fn keyword)
     (catch Exception e
@@ -36,8 +37,8 @@
   [{{:keys [claims token]} :params :as request}]
   (if (valid-token? token)
     (if-let [claims-token (some-> claims
-                                  read-json
+                                  parse-json
                                   create-token)]
-      (uh/response-with-body 200 (:token claims-token))
+      (uh/response-with-body 200 claims-token)
       (uh/response 400))
     (uh/response-forbidden)))
