@@ -1,27 +1,26 @@
 (ns com.sixsq.slipstream.auth.utils.certs
   (:require
     [buddy.core.keys :as ks]
-    [clojure.java.io :as io]
-    [com.sixsq.slipstream.auth.utils.config :as cf]))
+    [clojure.tools.logging :as log]
+    [environ.core :as environ]))
 
-(def ^:const private-key-name "auth_privkey.pem")
-(def ^:const public-key-name "auth_pubkey.pem")
+(def ^:const default-public-key-path "/etc/slipstream/auth/auth_pubkey.pem")
+(def ^:const default-private-key-path "/etc/slipstream/auth/auth_privkey.pem")
 
-(defn read-private-key
-  [private-key-pem]
-  (let [passphrase (cf/property-value :passphrase)
-        privkey (io/resource private-key-pem)]
-    (if (and passphrase privkey)
-      (ks/private-key privkey passphrase)
-      (throw (IllegalStateException. "Passphrase not defined or private key not accessible (must be in the classpath).")))))
+(defn key-path
+  [key-env-var default-path]
+  (let [path (environ/env key-env-var default-path)]
+    (log/info "using key path" path "for" (name key-env-var) "env. variable.")
+    path))
 
-(defn read-public-key
-  [public-key-pem]
-  (let [pubkey (io/resource public-key-pem)]
-    (if pubkey
-      (ks/public-key pubkey)
-      (throw (IllegalStateException. "Public key not accessible (must be in the classpath).")))))
+(defn read-key
+  [read-key-fn default-path key-env-var]
+  (try
+    (read-key-fn (key-path key-env-var default-path))
+    (catch Exception e
+      (log/error "error reading key:" (str e))
+      (throw e))))
 
-(def public-key (delay (read-public-key public-key-name)))
+(def public-key (memoize (partial read-key ks/public-key default-public-key-path)))
 
-(def private-key (delay (read-private-key private-key-name)))
+(def private-key (memoize (partial read-key ks/private-key default-private-key-path)))

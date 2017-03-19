@@ -4,6 +4,7 @@ After=syslog.target network.target
 After=hsqldb.service ssclj.service
 
 [Service]
+Environment=AUTH_PUBLIC_KEY=/etc/slipstream/auth/auth_pubkey.pem
 RemainAfterExit=yes
 Type=oneshot
 ExecStart=${installation.dir}/etc/rc/slipstream start

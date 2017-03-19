@@ -3,10 +3,9 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.java.jdbc :refer :all :as jdbc]
-    [superstring.core :refer [join split]]
+    [clojure.string :as str]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [korma.core :as kc]
-    [com.sixsq.slipstream.auth.sign :as sg]
     [com.sixsq.slipstream.auth.internal :as ia]))
 
 (defn- simple-surrounder
@@ -17,9 +16,9 @@
 (defn- surrounder
   [c]
   (fn [s]
-    (->> (split s #"\.")
+    (->> (str/split s #"\.")
          (map (simple-surrounder c))
-         (join "."))))
+         (str/join "."))))
 
 (def double-quote (surrounder \"))
 
@@ -32,7 +31,7 @@
   (->> name-types
        (partition 2)
        (map column-description)
-       (join ",")))
+       (str/join ",")))
 
 (defonce ^:private columns-users (columns "NAME" "VARCHAR(100)"
                                           "PASSWORD" "VARCHAR(200)"
@@ -63,7 +62,8 @@
   [user]
   (db/init)
   (kc/insert db/users (kc/values {:NAME        (:username user)
-                                  :PASSWORD    (ia/sha512 (:password user))
+                                  :PASSWORD    (ia/hash-password (:password user))
                                   :EMAIL       (:email user)
                                   :GITHUBLOGIN (:github-id user)
-                                  :STATE       (or (:state user) "ACTIVE")})))
+                                  :STATE       (or (:state user) "ACTIVE")
+                                  :ISSUPERUSER (boolean (:issuperuser user))})))

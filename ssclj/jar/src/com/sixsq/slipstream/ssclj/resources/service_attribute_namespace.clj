@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]))
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
 
 (def ^:const resource-name "ServiceAttributeNamespace")
 
@@ -69,32 +70,36 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
-(defn- colliding-namespace?
-  [prefix uri ns]
-  (or (= prefix (:prefix ns)) (= uri (:uri ns))))
+(def ^:private all-query-map {:identity       {:current         "slipstream",
+                                               :authentications {"slipstream"
+                                                                 {:identity "slipstream"}}}
+                              :params         {:resource-name resource-url}
+                              :user-roles     ["ADMIN"]
+                              :request-method :get})
 
-(def ^:private query-map {:identity       {:current         "slipstream",
-                                           :authentications {"slipstream"
-                                                             {:identity "slipstream"}}}
-                          :params         {:resource-name resource-url}
-                          :user-roles     ["ADMIN"]
-                          :request-method :get})
-
-(defn all-namespaces
-  []
-  (-> (crud/query query-map)
-      (get-in [:body :serviceAttributeNamespaces])))
+(defn extract-field-values
+  "returns a set of the values of the field k (as a keyword) from the
+   ServiceAttributeNamespace resources that match the query"
+  [query-map k]
+  (->> query-map
+       crud/query
+       :body
+       :serviceAttributeNamespaces
+       (map k)
+       set))
 
 (defn all-prefixes
   []
-  (set (map :prefix (all-namespaces))))
+  (extract-field-values all-query-map :prefix))
 
-(defn- colliding-id
+(defn colliding-id
+  "returns the first ServiceAttributeNamespace resource that has the same prefix OR uri"
   [prefix uri]
-  (->> (all-namespaces)
-       (filter (partial colliding-namespace? prefix uri))
-       (map :id)
-       first))
+  (let [filter (parser/parse-cimi-filter (format "(prefix='%s') or (uri='%s')" prefix uri))]
+    (-> all-query-map
+        (assoc :cimi-params {:filter filter :first 1 :last 1})
+        (extract-field-values :id)
+        first)))
 
 (defmethod crud/add resource-name
   [{{:keys [prefix uri]} :body :as request}]

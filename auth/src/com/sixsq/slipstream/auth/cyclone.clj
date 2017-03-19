@@ -1,17 +1,22 @@
 (ns com.sixsq.slipstream.auth.cyclone
+  "
+  # Decryption of claims in the cookie.
+
+  The full path to the public key to decrypt the claims in the CYCLONE cookie
+  is expected as one of
+  - system environment variable `AUTHN_PUBLIC_KEY_CYCLONE`
+  - system property `authn-public-key-cyclone`.
+  "
   (:require [clojure.tools.logging :as log]
             [clojure.data.json :as json]
             [clj-http.client :as http]
             [com.sixsq.slipstream.auth.utils.config :as cf]
             [com.sixsq.slipstream.auth.utils.http :as uh]
-            [com.sixsq.slipstream.auth.utils.certs :as certs]
-            [com.sixsq.slipstream.auth.sign :as sg]
+            [com.sixsq.slipstream.auth.utils.sign :as sign]
             [com.sixsq.slipstream.auth.utils.external :as ex]))
 
 (def ^:private cyclone-base-url
   "https://federation.cyclone-project.eu/auth/realms/master/protocol/openid-connect")
-
-(def cyclone-public-key (delay (certs/read-public-key "cyclone_pubkey.pem")))
 
 (defn- redirect_uri
   []
@@ -28,7 +33,7 @@
 
 (defn login
   []
-  (log/debug "starting CYCLONE login")
+  (log/debug "Starting CYCLONE authentication.")
   (uh/response-redirect (cyclone-code-url)))
 
 (defn login-name
@@ -53,10 +58,11 @@
                            :body
                            (json/read-str :key-fn keyword)
                            :access_token)
-          claims (sg/unsign-claims access-token @cyclone-public-key)]
-      (log/debug "CYCLONE claims:" claims)
-      (log/info "successful CYCLONE login for" (login-name claims))
+          claims (sign/unsign-claims access-token
+                                     :auth-public-key-cyclone)]
+      (log/debug "Cyclone claims " claims)
+      (log/info "Successful CYCLONE login: " (login-name claims))
       (ex/redirect-with-matched-user :cyclone (login-name claims) (:email claims) redirect-server))
     (catch Exception e
-      (log/error "FAILED CYCLONE login with exception" e)
+      (log/error "Invalid Cyclone authentication " e)
       (uh/response-redirect (str redirect-server "/dashboard")))))

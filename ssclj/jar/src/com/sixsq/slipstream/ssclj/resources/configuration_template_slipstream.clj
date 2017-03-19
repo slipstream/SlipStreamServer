@@ -43,9 +43,6 @@
    :registrationEnable         s/Bool                       ;; true
    :registrationEmail          c/NonBlankString             ;; register@sixsq.com
 
-   :prsEnable                  s/Bool                       ;; true
-   :prsEndpoint                c/NonBlankString             ;; http://localhost:8203/filter-rank
-
    :meteringEnable             s/Bool                       ;; false
    :meteringEndpoint           c/NonBlankString             ;; http://localhost:2005
 
@@ -100,9 +97,6 @@
 
    :registrationEnable         true
    :registrationEmail          "register@sixsq.com"
-
-   :prsEnable                  true
-   :prsEndpoint                "http://localhost:8203/filter-rank"
 
    :meteringEnable             false
    :meteringEndpoint           "http://localhost:2005"

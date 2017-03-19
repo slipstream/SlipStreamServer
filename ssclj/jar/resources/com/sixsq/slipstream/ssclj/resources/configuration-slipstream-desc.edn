@@ -7,14 +7,6 @@
   :mandatory true,
   :readOnly false,
   :order 0},
- :prsEndpoint
- {:displayName "slipstream.prs.endpoint",
-  :type "string",
-  :category "SlipStream_Advanced",
-  :description "Endpoint of the Placement and Ranking Service",
-  :mandatory true,
-  :readOnly false,
-  :order 0},
  :connectorOrchPrivateSSHKey
  {:displayName "cloud.connector.orchestrator.privatesshkey",
   :type "string",
@@ -83,14 +75,6 @@
   :readOnly false,
   :order 0,
   :instructions "Email address to use for registration."},
- :prsEnable
- {:displayName "slipstream.prs.enable",
-  :type "boolean",
-  :category "SlipStream_Advanced",
-  :description "Placement and Ranking enabled",
-  :mandatory true,
-  :readOnly false,
-  :order 0},
  :serviceURL
  {:displayName "slipstream.base.url",
   :type "string",

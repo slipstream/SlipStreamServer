@@ -58,12 +58,6 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_UPDATE_CLIENTURL(
 				CljElasticsearchHelper.getParameterDescription("slipstream.update.clienturl")),
 
-		SLIPSTREAM_PRS_ENDPOINT(
-				CljElasticsearchHelper.getParameterDescription("slipstream.prs.endpoint")),
-
-		SLIPSTREAM_PRS_ENABLE(
-				CljElasticsearchHelper.getParameterDescription("slipstream.prs.enable")),
-
 		SLIPSTREAM_UPDATE_CLIENTBOOTSTRAPURL(
 				CljElasticsearchHelper.getParameterDescription("slipstream.update.clientbootstrapurl")),
 

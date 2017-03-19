@@ -2,12 +2,12 @@
   "Utilities for creating expiration times for token claims and for formatting
    them correctly for the cookie 'expires' field."
   (:require
-    [com.sixsq.slipstream.auth.utils.config :as cf]
     [clj-time.core :as t]
     [clj-time.coerce :as c]
     [clj-time.format :as f]))
 
-(def default-lifetime-minutes (* 12 60))
+;; FIXME: Reduce this time to a resonable value.
+(def default-lifetime-minutes (* 7 24 60))                  ;; 1 week
 
 (def cookie-date-formatter (f/formatter "EEE, dd MMM yyyy HH:mm:ss z"))
 
@@ -22,8 +22,7 @@
    If n is provided, then the expiry timestamp corresponds to n minutes later.
    If it is not provided, then the default lifetime is used."
   [& [n]]
-  (let [n (or n (expiry-later (cf/property-value :token-nb-minutes-expiry default-lifetime-minutes)))]
-    (-> n t/minutes t/from-now c/to-long (quot 1000))))
+  (-> (or n default-lifetime-minutes) t/minutes t/from-now c/to-long (quot 1000)))
 
 (defn formatted-expiry-later
   [& [n]]

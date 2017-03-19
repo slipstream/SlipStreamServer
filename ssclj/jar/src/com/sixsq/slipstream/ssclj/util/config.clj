@@ -24,8 +24,8 @@
 
 (defn read-config
   [& [path]]
-  (if-let [config-path (or path (environ/env :config-path))]
-    (-> config-path
+  (if-let [config-name (or path (environ/env :config-name))]
+    (-> config-name
         find-file
         slurp
         edn/read-string)

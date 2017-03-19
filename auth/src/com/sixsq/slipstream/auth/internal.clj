@@ -1,65 +1,58 @@
 (ns com.sixsq.slipstream.auth.internal
+  (:refer-clojure :exclude [update])
   (:require
     [clojure.tools.logging :as log]
-    [clojure.string :as str]
+
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [buddy.core.codecs :as co]
+    [clojure.string :as str]
     [buddy.core.hash :as ha]))
 
-(defn extract-credentials
+(defn- extract-credentials
   [request]
-  (let [username (->> request :params ((some-fn :username :user-name)))]
-    {:username username
-     :password (uh/param-value request :password)}))
+  ;; FIXME: Remove :user-name!
+  {:username (->> request :params ((some-fn :username :user-name)))
+   :password (uh/param-value request :password)})
 
-(defn response-ok
-  [cookie]
-  (assoc
-    (uh/response 200)
-    :cookies cookie))
-
-(defn sha512
-  "Encrypt secret exactly as done in SlipStream Java server."
-  [secret]
-  (-> (ha/sha512 secret)
-      co/bytes->hex
-      str/upper-case))
+(defn hash-password
+  "Hash password exactly as done in SlipStream Java server."
+  [password]
+  (when password
+    (-> (ha/sha512 password)
+        co/bytes->hex
+        str/upper-case)))
 
 (defn valid?
-  [{:keys [username password] :as credentials}]
-  (let [hashed-password (db/find-password-for-username username)]
+  [{:keys [username password]}]
+  (let [db-password-hash (db/find-password-for-username username)]
     (and
       password
-      hashed-password
-      (= (sha512 password) hashed-password))))
+      db-password-hash
+      (= (hash-password password) db-password-hash))))
 
 (defn create-claims
-  [{:keys [username]}]
+  [username]
   {:com.sixsq.identifier username
-   :com.sixsq.roles (db/find-roles-for-username username)})
-
-(defn create-cookie
-  [claims]
-  (cookies/claims-cookie claims "com.sixsq.slipstream.cookie"))
+   :com.sixsq.roles      (db/find-roles-for-username username)})
 
 (defn login
   [request]
-  (let [{:keys [username password] :as credentials} (extract-credentials request)
-        claims (create-claims credentials)]
-    (log/debug "starting internal authentication for" username)
+  (let [{:keys [username] :as credentials} (extract-credentials request)]
     (if (valid? credentials)
-      (let [cookie (create-cookie claims)]
-        (log/info "successful internal login for" username)
-        (response-ok cookie))
       (do
-        (log/error "FAILED internal login for" username)
-        (uh/response-forbidden)))))
+        (log/info "successful login for" username)
+        (assoc
+          (uh/response 200)
+          :cookies (cookies/claims-cookie (create-claims username) "com.sixsq.slipstream.cookie")))
+      (do
+        (log/warn "failed login attempt for" username)
+        (uh/response-forbidden)))))                         ;; FIXME: Returns 401, but should be 403.
 
 (defn logout
   []
-  (log/info "successful logout")
+  (log/info "sending logout cookie")
   (assoc
     (uh/response 200)
     :cookies (cookies/revoked-cookie "com.sixsq.slipstream.cookie")))

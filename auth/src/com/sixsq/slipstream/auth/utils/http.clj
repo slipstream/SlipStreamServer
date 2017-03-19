@@ -17,6 +17,7 @@
       response
       (assoc-in [:headers "location"] url)))
 
+;; FIXME: This should be 403 (invalid credentials), not 401 (credentials required)
 (defn response-forbidden
   []
   (response 401))

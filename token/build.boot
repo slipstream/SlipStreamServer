@@ -1,4 +1,4 @@
-(def +version+ "3.23-SNAPSHOT")
+(def +version+ "3.24-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/token
@@ -54,12 +54,11 @@
   test {:junit-output-to ""}
   push {:repo "sixsq"})
 
-(deftask config
+(deftask dev-fixture-env
          []
-         (environ :env {:config-path "config-hsqldb-mem.edn"
-                        :passphrase  "sl1pstre8m"}))
+         (environ :env {:config-name "config-hsqldb-mem.edn"}))
 
-(deftask testing
+(deftask dev-env
          "Profile setup for running tests."
          []
          (set-env! :source-paths #(set (concat % #{"test" "test-resources"})))
@@ -69,8 +68,8 @@
          "runs all tests and performs full compilation"
          []
          (comp
-           (testing)
-           (config)
+           (dev-env)
+           (dev-fixture-env)
            (test)))
 
 (deftask build []
