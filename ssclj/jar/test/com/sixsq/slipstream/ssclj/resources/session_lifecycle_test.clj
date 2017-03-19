@@ -80,6 +80,7 @@
                     (request base-uri
                              :request-method :post
                              :body (json/write-str valid-create))
+                    (ltu/is-set-cookie)
                     (ltu/body->edn)
                     (ltu/is-status 201)
                     (ltu/location))
@@ -217,7 +218,6 @@
     (doall
       (for [[uri method] [[base-uri :options]
                           [base-uri :delete]
-                          [base-uri :put]
                           [resource-uri :options]
                           [resource-uri :post]]]
         (-> (session (ring-app))

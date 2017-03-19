@@ -10,6 +10,7 @@
     [ring.middleware.params :refer [wrap-params]]
     [ring.middleware.keyword-params :refer [wrap-keyword-params]]
     [ring.middleware.nested-params :refer [wrap-nested-params]]
+    [ring.util.codec :as codec]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
@@ -19,6 +20,11 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.db.es.es-util :as esu]))
+
+(defn serialize-cookie-value
+  "replaces the map cookie value with a serialized string"
+  [{:keys [value] :as cookie}]
+  (assoc cookie :value (codec/form-encode value)))
 
 (defmacro is-status
   [m status]
@@ -92,6 +98,7 @@
             n# (count cookies#)
             token# (-> (vals cookies#)
                        first
+                       serialize-cookie-value
                        :value)]
         (is (= 1 n#) "incorrect number of cookies")
         (is (not= "INVALID" token#) "expecting valid token but got INVALID")
@@ -105,6 +112,7 @@
             n# (count cookies#)
             token# (-> (vals cookies#)
                        first
+                       serialize-cookie-value
                        :value)]
         (is (= 1 n#) "incorrect number of cookies")
         (is (= "INVALID" token#) "expecting INVALID but got different value")
@@ -148,16 +156,16 @@
 (defn make-ring-app [resource-routes]
   (db/set-impl! (esb/get-instance))
   (-> resource-routes
-      (wrap-exceptions)
-      (wrap-cimi-params)
+      wrap-exceptions
+      wrap-cimi-params
       wrap-keyword-params
       wrap-nested-params
       wrap-params
-      (wrap-base-uri)
-      (wrap-authn-info-header)
+      wrap-base-uri
+      wrap-authn-info-header
       (wrap-json-body {:keywords? true})
       (wrap-json-response {:pretty true :escape-non-ascii true})
-      (wrap-logger)))
+      wrap-logger))
 
 (defn dump
   [response]
