@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.auth.sign :as sg]
+    [com.sixsq.slipstream.auth.utils.sign :as sg]
     [clj-time.format :as time-fmt]
     [com.sixsq.slipstream.auth.cookies :as cookies]))
 
