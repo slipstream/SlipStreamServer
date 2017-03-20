@@ -29,6 +29,8 @@ import org.restlet.Response;
 import org.restlet.data.Cookie;
 import org.restlet.data.CookieSetting;
 import org.restlet.data.Form;
+import org.restlet.data.Status;
+import org.restlet.resource.ResourceException;
 import org.restlet.security.Verifier;
 import org.restlet.util.Series;
 
@@ -237,9 +239,7 @@ public class CookieUtils {
 
 			properties.put(COOKIE_IDENTIFIER, identifier);
 
-			logger.info("token used to create token for claims " + authnToken);
-			String claimsToken = (new AuthProxy()).createToken(properties, authnToken);
-			logger.info("token for claims = " + claimsToken);
+			String claimsToken = createToken(properties, authnToken);
 			form.add(COOKIE_SIGNATURE, claimsToken);
 		} catch (ValidationException e) {
 			logger.severe("Unable to create cookie value");
@@ -247,6 +247,22 @@ public class CookieUtils {
 
 		String finalQuery = form.getQueryString();
 		return finalQuery;
+	}
+
+	private static String createToken(Properties claims, String authenticationToken)
+			throws ResourceException {
+
+		String signedClaims = com.sixsq.slipstream.auth.TokenChecker.createMachineToken(claims, authenticationToken);
+
+		logger.info(String.format("generated machine token: %s", signedClaims));
+
+		if (signedClaims == null) {
+			String message = "error creating machine token; invalid claims or authentication token";
+			logger.warning(message);
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, message);
+		}
+
+		return signedClaims;
 	}
 
 	/**
