@@ -61,9 +61,9 @@ public class ImageModule extends TargetContainerModule {
 	private static final String VOLATILE_DISK_VALUE_REGEX = "^[0-9]*$";
 	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
 
-	private static final String CPU_PARAM = "cpu.nb";
-	private static final String RAM_PARAM = "ram.GB";
-	private static final String DISK_PARAM = "disk.GB";
+	public static final String CPU_PARAM = "cpu.nb";
+	public static final String RAM_PARAM = "ram.GB";
+	public static final String DISK_PARAM = "disk.GB";
 
 	private static class BuildState implements Serializable {
 		@Attribute
