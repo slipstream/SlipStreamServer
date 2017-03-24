@@ -90,9 +90,20 @@
 ;; multimethod for ACLs
 ;;
 
+(defn create-acl
+  [id]
+  {:owner {:principal id
+           :type      "ROLE"}
+   :rules [{:principal "ADMIN"
+            :type      "ROLE"
+            :right     "VIEW"}]})
+
 (defmethod crud/add-acl resource-uri
-  [resource request]
-  (a/add-acl resource request))
+  [{:keys [id acl] :as resource} request]
+  (assoc
+    resource
+    :acl
+    (or acl (create-acl id))))
 
 ;;
 ;; template processing
@@ -176,10 +187,3 @@
   [request]
   (query-impl request))
 
-(defmethod crud/add-acl resource-uri
-  [{:keys [username] :as resource} _]
-  (assoc resource :acl {:owner {:principal username
-                                :type      "USER"}
-                        :rules [{:principal username
-                                 :type      "USER"
-                                 :right     "MODIFY"}]}))
