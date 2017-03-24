@@ -251,7 +251,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		putLaunchParamPlatform(launchParams, run);
 		putLaunchParamLoginUserAndPassword(launchParams, run);
 		putLaunchParamExtraDiskVolatile(launchParams, run);
-                putLaunchParamRootDiskSize(launchParams, run);
+		putLaunchParamRootDiskSize(launchParams, run);
 		putLaunchParamNativeContextualization(launchParams, run);
 		return launchParams;
 	}
