@@ -283,7 +283,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	private void putLaunchParamRootDiskSize(Map<String, String> launchParams, Run run) throws ValidationException {
 		if (!isInOrchestrationContext(run)) {
 			String rootDiskGb = getRootDisk((ImageModule) run.getModule());
-			if (RootDiskGb != null && !rootDiskGb.isEmpty()) {
+			if (rootDiskGb != null && !rootDiskGb.isEmpty()) {
 				launchParams.put("disk", rootDiskGb);
 			}
 		}
