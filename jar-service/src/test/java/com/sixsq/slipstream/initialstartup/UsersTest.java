@@ -22,6 +22,7 @@ package com.sixsq.slipstream.initialstartup;
 
 import static org.junit.Assert.assertEquals;
 
+import com.sixsq.slipstream.exceptions.InvalidElementException;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -62,5 +63,23 @@ public class UsersTest {
 		assertEquals(
 				"4AAEC1C5E8C60370F95D0935EFCAA3245736439203E91742D4686AA50C3FBA96A567909567BE623F033500591132DC5BDB8DDB27E0587DB97A986EC92245FC80",
 				userSuper.getHashedPassword());
+	}
+
+	@Test(expected = InvalidElementException.class)
+	public void passwordCannotBeEmpty() throws ValidationException, NotFoundException, ConfigurationException,
+			NoSuchAlgorithmException, UnsupportedEncodingException, InvalidElementException {
+		// The create function will not initialize the accounts if they
+		// already exist.  Ensure that all of the standard accounts have
+		// been removed from the database.
+		if (User.loadByName("super") != null) {
+			User.removeNamedUser("super");
+		}
+
+		Users.create();
+
+		User user = User.loadByName("super");
+		user.setPassword(null);
+		user.validate();
+		User.validateMinimumInfo(user);
 	}
 }
