@@ -308,7 +308,7 @@ public class UserResource extends ParameterizedResource<User> {
 				throwClientForbiddenError("Only super users are authorized to create a privileged user!");
 			}
 			if (user.getRoles() != null) {
-				throwClientForbiddenError("Only super users are authorized to set roles!");
+				throwClientForbiddenError("Only super users are authorized to update roles!");
 			}
 		}
 
@@ -360,6 +360,10 @@ public class UserResource extends ParameterizedResource<User> {
 		} catch (ValidationException ex) {
 			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, ex.getMessage());
 		}
+
+		User existingUser = getParameterized();
+		user.setRolesFromUserIfNull(existingUser);
+		user.setPasswordFromUserIfNull(existingUser);
 
 		try {
 			User.validateMinimumInfo(user);

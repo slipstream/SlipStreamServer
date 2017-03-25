@@ -277,7 +277,19 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	public void hashAndSetPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		setHashedPassword(Passwords.hash(password));
+		String hashedPassword = "";
+		if (password != null && !password.isEmpty()) {
+			hashedPassword = Passwords.hash(password);
+		}
+		setHashedPassword(hashedPassword);
+	}
+
+	public boolean setPasswordFromUserIfNull(User user) throws ValidationException {
+		if (password == null && user != null) {
+			setHashedPassword(user.password);
+			return true;
+		}
+		return false;
 	}
 
 	@Attribute(name = "password", required = false)
@@ -554,6 +566,14 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public void setAuthnToken(String authnToken) {
 		this.authnToken = authnToken;
+	}
+
+	public boolean setRolesFromUserIfNull(User user) throws ValidationException {
+		if (roles == null && user != null) {
+			setRoles(user.roles);
+			return true;
+		}
+		return false;
 	}
 
 	public String getRoles() {

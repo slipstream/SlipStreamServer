@@ -171,9 +171,7 @@ public class Users {
         }
         try {
             user.setPassword(password);
-        } catch (NoSuchAlgorithmException e) {
-            Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
-        } catch (UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
         }
 
