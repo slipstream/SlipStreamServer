@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.session-internal-lifecycle-test
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
