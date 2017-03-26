@@ -99,15 +99,13 @@
           :resourceURI)
 
 (defmethod set-operations :default
-  [resource request]
+  [{:keys [id resourceURI] :as resource} request]
   (try
     (a/can-modify? resource request)
-    (let [href        (:id resource)
-          resourceURI (:resourceURI resource)
-          ops         (if (.endsWith resourceURI "Collection")
-                        [{:rel (:add c/action-uri) :href href}]
-                        [{:rel (:edit c/action-uri) :href href}
-                         {:rel (:delete c/action-uri) :href href}])]
+    (let [ops (if (.endsWith resourceURI "Collection")
+                [{:rel (:add c/action-uri) :href id}]
+                [{:rel (:edit c/action-uri) :href id}
+                 {:rel (:delete c/action-uri) :href id}])]
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))

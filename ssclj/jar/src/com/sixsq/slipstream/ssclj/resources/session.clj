@@ -106,6 +106,36 @@
     (or acl (create-acl id))))
 
 ;;
+;; multimethod for adding operations
+;; special implementation because
+;;   * edit is not permitted
+;;   * operations may need to be added for external authn methods
+;;
+
+(def ^:const authn-cookie
+  "com.sixsq.slipstream.cookie")
+
+;; FIXME: Put this utility in a better namespace.  Token?
+(defn extract-session [request]
+  (-> request
+      (get-in [:cookies authn-cookie])
+      cookies/extract-claims
+      :session))
+
+(defmethod crud/set-operations resource-uri
+  [{:keys [id resourceURI] :as resource} request]
+  (try
+    (a/can-modify? resource request)
+    (let [ops (if (.endsWith resourceURI "Collection")
+                [{:rel (:add c/action-uri) :href id}]
+                [{:rel (:delete c/action-uri) :href id}])]
+      (if (seq ops)
+        (assoc resource :operations ops)
+        (dissoc resource :operations)))
+    (catch Exception e
+      (dissoc resource :operations))))
+
+;;
 ;; template processing
 ;;
 
@@ -156,12 +186,6 @@
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
-
-(def edit-impl (std-crud/edit-fn resource-name))
-
-(defmethod crud/edit resource-name
-  [request]
-  (edit-impl request))
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
