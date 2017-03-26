@@ -61,8 +61,11 @@
                          nil nil
                          nil {}
                          ["user" []] {:com.sixsq.identifier "user"}
+                         ["user" ["session"]] {:com.sixsq.identifier "user" :com.sixsq.session "session"}
                          ["user" ["role1"]] {:com.sixsq.identifier "user", :com.sixsq.roles "role1"}
-                         ["user" ["role1" "role2"]] {:com.sixsq.identifier "user", :com.sixsq.roles "role1 role2"}))
+                         ["user" ["role1" "role2"]] {:com.sixsq.identifier "user", :com.sixsq.roles "role1 role2"}
+                         ["user" ["session" "role1"]] {:com.sixsq.identifier "user", :com.sixsq.roles "role1" :com.sixsq.session "session"}
+                         ["user" ["session" "role1" "role2"]] {:com.sixsq.identifier "user", :com.sixsq.roles "role1 role2" :com.sixsq.session "session"}))
 
 (deftest check-extract-cookie-claims
   (with-redefs [environ/env env-fixture/env-map]
@@ -85,14 +88,15 @@
 (deftest check-extract-cookie-info
   (with-redefs [environ/env env-fixture/env-map]
     (let [claims {:com.sixsq.identifier "user"
-                  :com.sixsq.roles      "role1 role2"}]
+                  :com.sixsq.roles      "role1 role2"
+                  :com.sixsq.session    "session"}]
 
       (is (nil? (t/extract-cookie-info nil)))
       (is (nil? (-> claims
                     t/claims-cookie
                     damaged-cookie-value
                     t/extract-cookie-info)))
-      (is (= ["user" ["role1" "role2"]] (-> claims
-                                            t/claims-cookie
-                                            serialize-cookie-value
-                                            t/extract-cookie-info))))))
+      (is (= ["user" ["session" "role1" "role2"]] (-> claims
+                                                      t/claims-cookie
+                                                      serialize-cookie-value
+                                                      t/extract-cookie-info))))))

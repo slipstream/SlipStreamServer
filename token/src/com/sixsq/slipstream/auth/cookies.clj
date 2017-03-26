@@ -50,10 +50,14 @@
    provided claims map."
   [claims]                                                  ;; FIXME: Normalize the keyword names.
   (when-let [identifier (get claims :com.sixsq.identifier)]
-    (let [roles (remove str/blank? (-> (get claims :com.sixsq.roles)
+    (let [session (get claims :com.sixsq.session)
+          roles (remove str/blank? (-> (get claims :com.sixsq.roles)
                                        (or "")
-                                       (str/split #"\s+")))]
-      [identifier roles])))
+                                       (str/split #"\s+")))
+          roles (if session
+                  (conj roles session)
+                  roles)]
+      [identifier roles])))                                 ;; FIXME: Returned roles should really be a set.
 
 (defn extract-cookie-claims
   "Extracts authentication claims from a cookie. Returns nil if no cookie is
