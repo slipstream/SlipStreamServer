@@ -1,23 +1,28 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-test
-    (:require
+  (:require
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.resources.service-attribute :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [expectations :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
-(expect #"[\da-fA-F]+" (uri->id ""))                        ;; allowed here, not in Attribute schema
-(expect #"[\da-fA-F]+" (uri->id "http://example.org/attributes"))
-(expect #"[\da-fA-F]+" (uri->id "http://example.org/attributes_with_accents_ôéå"))
-(expect #"[\da-fA-F]+" (uri->id "http://example.org/attributes#funky?query=/values"))
 
-(expect Exception (crud/new-identifier {:prefix " "} resource-name))
-(expect Exception (crud/new-identifier {:prefix "http://example.org/invalid uri"} resource-name))
+(deftest check-uri->id
+  (are [arg] (re-matches #"^[\da-fA-F]+$" (uri->id arg))
+             ""                                             ;; allowed here, not in Attribute schema
+             "http://example.org/attributes"
+             "http://example.org/attributes_with_accents_ôéå"
+             "http://example.org/attributes#funky?query=/values"))
 
-(let [uri "example-org"
-      name "price"
-      hex (uri->id (str uri ":" name))
-      id (str (u/de-camelcase resource-name) "/" hex)]
-  (expect id (:id (crud/new-identifier {:prefix uri :attr-name name} resource-name))))
+(deftest check-new-identifier
+  (is (thrown? Exception (crud/new-identifier {:prefix " "} resource-name)))
+  (is (thrown? Exception (crud/new-identifier {:prefix "http://example.org/invalid uri"} resource-name))))
 
-(def long-uri (apply str "http://" (repeat 10000 "a")))
-(expect (str (u/de-camelcase resource-name) "/" (uri->id long-uri)))
+(deftest check-valid-new-identifer
+  (let [uri "example-org"
+        name "price"
+        hex (uri->id (str uri ":" name))
+        id (str (u/de-camelcase resource-name) "/" hex)]
+    (is (= id (:id (crud/new-identifier {:prefix uri :attr-name name} resource-name)))))
+
+  (let [long-uri (apply str "http://" (repeat 10000 "a"))]
+    (is (str (u/de-camelcase resource-name) "/" (uri->id long-uri)))))
