@@ -48,11 +48,11 @@
   (th/add-user-for-test! (merge valid-creds-super {:issuperuser true}))
   (th/add-user-for-test! (merge valid-creds-jane {:issuperuser false}))
 
-  (is (= {:com.sixsq.identifier "jane"
-          :com.sixsq.roles      "USER ANON"}
+  (is (= {:username "jane"
+          :roles    "USER ANON"}
          (t/create-claims "jane")))
-  (is (= {:com.sixsq.identifier "super"
-          :com.sixsq.roles      "ADMIN USER ANON"}
+  (is (= {:username "super"
+          :roles    "ADMIN USER ANON"}
          (t/create-claims "super"))))
 
 (deftest check-login

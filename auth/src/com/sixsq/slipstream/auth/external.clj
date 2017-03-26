@@ -35,8 +35,8 @@
   [authn-method external-login external-email redirect-server]
   (if (and (not-empty external-login) (not-empty external-email))
     (let [[matched-user redirect-url] (match-external-user! authn-method external-login external-email)
-          claims {:com.sixsq.identifier matched-user
-                  :com.sixsq.roles      (db/find-roles-for-username matched-user)}]
+          claims {:username matched-user
+                  :roles    (db/find-roles-for-username matched-user)}]
 
       (assoc
         (uh/response-redirect (str redirect-server redirect-url))

@@ -12,19 +12,47 @@
 (def ^:const authn-cookie
   "com.sixsq.slipstream.cookie")
 
+(defn parse-authn-header
+  [request]
+  (seq (remove str/blank? (-> request
+                              (get-in [:headers authn-info-header])
+                              (or "")
+                              (str/split #"\s+")))))
+
 (defn extract-authn-info
   [request]
-  (let [terms (remove str/blank? (-> request
-                                     (get-in [:headers authn-info-header])
-                                     (or "")
-                                     (str/split #"\s+")))]
-    (when (seq terms)
-      ((juxt first rest) terms))))
+  (when-let [terms (parse-authn-header request)]
+    (let [username (first terms)
+          roles (set (rest terms))]
+      [username roles])))
+
+(defn is-session?
+  "returns nil if the value does not look like a session; the session otherwise"
+  [^String s]
+  (if s
+    (re-matches #"^session/.*" s)))
+
+(defn extract-header-claims
+  [request]
+  (when-let [terms (parse-authn-header request)]
+    (let [username (first terms)
+          roles (seq (remove is-session? (rest terms)))
+          session (first (keep is-session? (rest terms)))]
+      (cond-> {}
+              username (assoc :username username)
+              roles (assoc :roles roles)
+              session (assoc :session session)))))
+
+(defn request-cookies [request]
+  (get-in request [:cookies authn-cookie]))
+
+(defn extract-cookie-claims [request]
+  (cookies/extract-cookie-claims (request-cookies request)))
 
 (defn extract-info [request]
   (or
     (extract-authn-info request)
-    (cookies/extract-cookie-info (get-in request [:cookies authn-cookie]))))
+    (cookies/extract-cookie-info (request-cookies request))))
 
 (defn create-identity-map
   [[username roles]]
@@ -37,10 +65,18 @@
 
 (defn add-user-name-roles
   [request]
-  (let [[user-name roles] (extract-info request)]
+  (let [[username roles] (extract-info request)]
     (-> request
-        (assoc :user-name user-name)
+        (assoc :user-name username)
         (assoc :user-roles roles))))
+
+(defn add-claims
+  [request]
+  (if-let [claims (or
+                    (extract-header-claims request)
+                    (extract-cookie-claims request))]
+    (assoc request :sixsq.slipstream.authn/claims claims)
+    request))
 
 (defn wrap-authn-info-header
   "Middleware that adds an identity map to the request based on
@@ -53,4 +89,5 @@
          (create-identity-map)
          (assoc request :identity)
          add-user-name-roles
-         (handler))))
+         add-claims
+         handler)))

@@ -73,17 +73,18 @@
   #_(str "slipstream." (str/replace id "/" "."))
   "com.sixsq.slipstream.cookie")
 
-(defn create-claims [credentials headers]
+(defn create-claims [credentials headers session]
   (let [virtual-host (:slipstream-ssl-server-hostname headers)]
     (cond-> (auth-internal/create-claims credentials)
-            virtual-host (assoc :com.sixsq.vhost virtual-host))))
+            virtual-host (assoc :virtual-host virtual-host)
+            session (assoc :session session))))
 
 (defmethod p/tpl->session authn-method
-  [resource {:keys [headers]}]
+  [resource {:keys [headers] :as request}]
   (let [credentials (select-keys resource #{:username :password})]
     (when (auth-internal/valid? credentials)
       (let [session (create-session credentials headers)
-            claims (create-claims credentials headers)
+            claims (create-claims credentials headers session)
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)
             session (assoc session :expiry expires)]

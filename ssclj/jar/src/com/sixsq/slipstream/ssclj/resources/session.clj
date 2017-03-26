@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.db.impl :as db]
-    [schema.core :as s]))
+    [schema.core :as s]
+    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
 
 (def ^:const resource-tag :sessions)
 
@@ -112,16 +113,6 @@
 ;;   * operations may need to be added for external authn methods
 ;;
 
-(def ^:const authn-cookie
-  "com.sixsq.slipstream.cookie")
-
-;; FIXME: Put this utility in a better namespace.  Token?
-(defn extract-session [request]
-  (-> request
-      (get-in [:cookies authn-cookie])
-      cookies/extract-claims
-      :session))
-
 (defmethod crud/set-operations resource-uri
   [{:keys [id resourceURI] :as resource} request]
   (try
@@ -205,7 +196,19 @@
         cookies (delete-cookie response)]
     (merge response cookies)))
 
-(def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+(defn add-session-filter [{{:keys [session]} :sixsq.slipstream.authn/claims :as request}]
+  (->> (or session "")
+       (format "id='%s'")
+       (parser/parse-cimi-filter)
+       (assoc-in request [:cimi-params :filter])))
+
+(defn query-wrapper
+  "wraps the standard query function to always include a filter based on the session"
+  [query-fn]
+  (fn [request]
+    (query-fn (add-session-filter request))))
+
+(def query-impl (query-wrapper (std-crud/query-fn resource-name collection-acl collection-uri resource-tag)))
 
 (defmethod crud/query resource-name
   [request]

@@ -135,13 +135,13 @@
             (ltu/is-status 200)
             (ltu/is-count zero?))
 
-        ;; admin query should succeed and see two sessions
+        ;; admin query should succeed, but see no sessions without the correct session role
         (-> (session (ring-app))
             (header authn-info-header "root ADMIN")
             (request base-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
-            (ltu/is-count #(= 2 %)))
+            (ltu/is-count 0))
 
         ;; user should be able to see session with session role
         (-> (session (ring-app))
@@ -167,13 +167,13 @@
             (request base-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
-            (ltu/is-count #(= 1 %)))
+            (ltu/is-count 1))
         (-> (session (ring-app))
             (header authn-info-header (str "user USER " id2))
             (request base-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
-            (ltu/is-count #(= 1 %)))
+            (ltu/is-count 1))
 
         ;; user with session role can delete resource
         (-> (session (ring-app))
