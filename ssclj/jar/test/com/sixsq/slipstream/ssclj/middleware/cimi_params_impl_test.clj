@@ -1,186 +1,165 @@
 (ns com.sixsq.slipstream.ssclj.middleware.cimi-params-impl-test
   (:require
+    [clojure.test :refer [deftest is are]]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params-impl :refer :all]
-    [expectations :refer :all]))
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params-impl :as t]))
 
 (defn set-and-extract
   "Sets the $key-name value in the parameters and then extracts
    the value of :key-name from :cimi-params in the result."
   [f key-name v]
-  (let [kw    (keyword key-name)
+  (let [kw (keyword key-name)
         pname (str "$" key-name)]
     (->> {:params {pname v}}
          (f)
          (:cimi-params)
          (kw))))
 
-(expect {:cimi-params {:k "value"}} (add-cimi-param {} :k "value"))
-(expect {:cimi-params {:a 1, :k "value"}} (add-cimi-param {:cimi-params {:a 1}} :k "value"))
+(deftest check-add-cimi-params
+  (are [expect args] (= expect (apply t/add-cimi-param args))
+                     {:cimi-params {:k "value"}} [{} :k "value"]
+                     {:cimi-params {:a 1, :k "value"}} [{:cimi-params {:a 1}} :k "value"]))
 
-(expect [] (as-vector nil))
-(expect [1] (as-vector 1))
-(expect ["a"] (as-vector "a"))
-(expect [1 2] (as-vector '(1 2)))
-(expect [1 2] (as-vector [1 2]))
-(expect [1 "a"] (as-vector '(1 "a")))
+(deftest check-as-vector
+  (are [expect arg] (= expect (t/as-vector arg))
+                    [] nil
+                    [1] 1
+                    ["a"] "a"
+                    [1 2] '(1 2)
+                    [1 2] [1 2]
+                    [1 "a"] '(1 "a")))
 
-(expect nil (as-long [1]))
-(expect nil (as-long {:a 1}))
-(expect nil (as-long #{1}))
-(expect 1 (as-long 1))
-(expect -1 (as-long -1))
-(expect nil (as-long 2.5))
-(expect nil (as-long 10/3))
-(expect 1 (as-long "1"))
-(expect -1 (as-long "-1"))
-(expect nil (as-long "2.5"))
-(expect nil (as-long "10/3"))
+(deftest check-as-long
+  (are [expect arg] (= expect (t/as-long arg))
+                    nil [1]
+                    nil {:a 1}
+                    nil #{1}
+                    1 1
+                    -1 -1
+                    nil 2.5
+                    nil 10/3
+                    1 "1"
+                    -1 "-1"
+                    nil "2.5"
+                    nil "10/3"))
 
-(expect nil (first-valid-long []))
-(expect nil (first-valid-long ["a"]))
-(expect nil (first-valid-long ["a" "b"]))
-(expect 1 (first-valid-long [1]))
-(expect 1 (first-valid-long ["1"]))
-(expect 1 (first-valid-long ["a" 1]))
-(expect 1 (first-valid-long ["a" 1 2]))
-(expect 1 (first-valid-long [1 2]))
-(expect 1 (first-valid-long ["a" 1 "c"]))
-(expect -1 (first-valid-long [-1]))
-(expect -1 (first-valid-long ["a" "-1" "c"]))
-(expect nil (first-valid-long [nil nil]))
-(expect nil (first-valid-long [{:a 1} [2]]))
+(deftest check-first-valid-long
+  (are [expect arg] (= expect (t/first-valid-long arg))
+                    nil []
+                    nil ["a"]
+                    nil ["a" "b"]
+                    1 [1]
+                    1 ["1"]
+                    1 ["a" 1]
+                    1 ["a" 1 2]
+                    1 [1 2]
+                    1 ["a" 1 "c"]
+                    -1 [-1]
+                    -1 ["a" "-1" "c"]
+                    nil [nil nil]
+                    nil [{:a 1} [2]]))
 
-(expect nil (get-index {"k" nil} "k"))
-(expect nil (get-index {} "k"))
-(expect 1 (get-index {"k" "1"} "k"))
-(expect 1 (get-index {"k" 1} "k"))
-(expect 1 (get-index {"k" ["a" 1]} "k"))
-(expect 1 (get-index {"k" ["1" "2"]} "k"))
+(deftest check-get-index
+  (are [expect arg] (= expect (t/get-index arg "k"))
+                    nil {"k" nil}
+                    nil {}
+                    1 {"k" "1"}
+                    1 {"k" 1}
+                    1 {"k" ["a" 1]}
+                    1 {"k" ["1" "2"]}))
 
-;; default value used for :last
-(expect {:cimi-params {:first nil :last default-last} :params {}}
-        (process-first-last {:params {}}))
-(expect {:first nil :last default-last}
-        (:cimi-params (process-first-last {:params {}})))
-(expect {:first nil :last default-last}
-        (:cimi-params (process-first-last {:params {"$first" ["a"], "$last" nil}})))
+(deftest check-process-first-last
+  (let [last-other-than-default (* 2 t/default-last)]
+    (are [expect arg] (= expect (:cimi-params (t/process-first-last arg)))
+                      {:first nil :last t/default-last} {:params {}}
+                      {:first nil :last t/default-last} {:params {}}
+                      {:first nil :last t/default-last} {:params {"$first" ["a"], "$last" nil}}
+                      {:first nil :last last-other-than-default} {:params {"$last" last-other-than-default}} ;; something other than default
+                      {:first 2 :last (inc t/default-last)} {:params {"$first" 2}} ;; adjust last value
+                      {:first 1 :last 2} {:params {"$first" 1, "$last" 2}}
+                      {:first 1 :last 2} {:params {"$first" "1", "$last" "2"}}
+                      {:first 1 :last 2} {:params {"$first" ["a" "1"], "$last" ["b" "2"]}})))
 
-;; given value for :last is kept
-(let [last-other-than-default (* 2 default-last)]
-  (expect {:cimi-params {:first nil :last last-other-than-default} :params {"$last" last-other-than-default}}
-          (process-first-last {:params {"$last" last-other-than-default}})))
+(deftest check-set-and-extract
+  (are [expect arg] (= expect (set-and-extract t/process-format "format" arg))
+                    "application/json" "json"
+                    "application/json" "JSON"
+                    "application/json" " JSON "
+                    "application/xml" "xml"
+                    "application/xml" "XML"
+                    "application/xml" " XML "
+                    "application/edn" "edn"
+                    "application/edn" "EDN"
+                    "application/edn" " EDN "
+                    nil "unknown"
+                    nil nil
+                    "application/json" ["json" "xml"]
+                    "application/json" ["unknown" "json" "xml"]))
 
-;; :last value is adjusted
-(expect {:cimi-params {:first 2 :last (inc default-last)} :params {"$first" 2}}
-        (process-first-last {:params {"$first" 2}}))
+(deftest check-comma-split
+  (are [expect arg] (= expect (t/comma-split arg))
+                    ["a" "b"] "a,b"
+                    ["a" "b"] " a , b "
+                    ["a" "b"] ", a , b ,"
+                    [] ""
+                    [] ","
+                    [] nil))
 
-(expect {:first 1 :last 2} (:cimi-params (process-first-last {:params {"$first" 1, "$last" 2}})))
-(expect {:first 1 :last 2} (:cimi-params (process-first-last {:params {"$first" "1", "$last" "2"}})))
-(expect {:first 1 :last 2} (:cimi-params (process-first-last {:params {"$first" ["a" "1"], "$last" ["b" "2"]}})))
+(deftest check-reduce-select-set
+  (are [expect arg] (= expect (t/reduce-select-set arg))
+                    #{"a" "b"} (set ["a" "b" "a" "b"])
+                    nil (set ["a" "b" "*"])
+                    nil nil))
 
-(expect "application/json" (set-and-extract process-format "format" "json"))
-(expect "application/json" (set-and-extract process-format "format" "JSON"))
-(expect "application/json" (set-and-extract process-format "format" " JSON "))
-(expect "application/xml" (set-and-extract process-format "format" "xml"))
-(expect "application/xml" (set-and-extract process-format "format" "XML"))
-(expect "application/xml" (set-and-extract process-format "format" " XML "))
-(expect "application/edn" (set-and-extract process-format "format" "edn"))
-(expect "application/edn" (set-and-extract process-format "format" "EDN"))
-(expect "application/edn" (set-and-extract process-format "format" " EDN "))
+(deftest check-select-param
+  (are [expect arg] (= expect (set-and-extract t/process-select "select" arg))
+                    nil nil
+                    nil "*"
+                    #{"a" "resourceURI"} "a"
+                    #{"a" "resourceURI"} " a "
+                    #{"a" "resourceURI"} "a,a"
+                    #{"a" "resourceURI"} [" a,a" "a" "a"]
+                    #{"a" "a2" "resourceURI"} " a, a2 "))
 
-(expect nil (set-and-extract process-format "format" "unknown"))
-(expect nil (set-and-extract process-format "format" nil))
+(deftest check-reduce-expand-set
+  (are [expect arg] (= expect (t/reduce-expand-set arg))
+                    :all #{"*"}
+                    :none #{}
+                    :none nil
+                    #{"a" "b"} #{"a" "b"}))
 
-(expect "application/json" (set-and-extract process-format "format" ["json" "xml"]))
-(expect "application/json" (set-and-extract process-format "format" ["unknown" "json" "xml"]))
+(deftest check-reduce-param
+  (are [expect arg] (= expect (set-and-extract t/process-expand "expand" arg))
+                    :none nil
+                    :all "*"
+                    #{"a"} "a"
+                    #{"a" "b"} "a,b"
+                    #{"a" "b"} " a , b "
+                    #{"a" "b"} ["a" "b"]))
 
-(expect ["a" "b"] (comma-split "a,b"))
-(expect ["a" "b"] (comma-split " a , b "))
-(expect ["a" "b"] (comma-split ", a , b ,"))
-(expect [] (comma-split ""))
-(expect [] (comma-split ","))
-(expect [] (comma-split nil))
+(deftest check-orderby-clause
+  (are [expect arg] (= expect (t/orderby-clause arg))
+                    nil ":"
+                    nil ":a:desc"
+                    ["a" :asc] "a"
+                    ["a" :asc] "a:"
+                    ["a" :desc] "a:desc"
+                    ["a" :asc] "a:dummy"))
 
-(expect #{"a" "b"} (reduce-select-set (set ["a" "b" "a" "b"])))
-(expect nil (reduce-select-set (set ["a" "b" "*"])))
-(expect nil (reduce-select-set nil))
+(deftest check-orderby-param
+  (are [expect arg] (= expect (set-and-extract t/process-orderby "orderby" arg))
+                    [] nil
+                    [["a" :asc]] "a:asc"
+                    [["a" :desc]] "a:desc"
+                    [["a" :desc] ["b" :asc]] "a:desc,b"
+                    [["a" :desc] ["b" :desc]] ["a:desc" "b:desc"]
+                    [["a" :desc]] ["a:desc" ":b"]
+                    [["a" :desc] ["b" :desc]] [" a : desc " "b : desc"]))
 
-(expect nil (set-and-extract process-select "select" nil))
-(expect nil (set-and-extract process-select "select" "*"))
-(expect #{"a" "resourceURI"} (set-and-extract process-select "select" "a"))
-(expect #{"a" "resourceURI"} (set-and-extract process-select "select" " a "))
-(expect #{"a" "resourceURI"} (set-and-extract process-select "select" "a,a"))
-(expect #{"a" "resourceURI"} (set-and-extract process-select "select" [" a,a" "a" "a"]))
-(expect #{"a" "a2" "resourceURI"} (set-and-extract process-select "select" " a, a2 "))
-
-(expect :all (reduce-expand-set #{"*"}))
-(expect :none (reduce-expand-set #{}))
-(expect :none (reduce-expand-set nil))
-(expect #{"a" "b"} (reduce-expand-set #{"a" "b"}))
-
-(expect :none (set-and-extract process-expand "expand" nil))
-(expect :all (set-and-extract process-expand "expand" "*"))
-(expect #{"a"} (set-and-extract process-expand "expand" "a"))
-(expect #{"a" "b"} (set-and-extract process-expand "expand" "a,b"))
-(expect #{"a" "b"} (set-and-extract process-expand "expand" " a , b "))
-(expect #{"a" "b"} (set-and-extract process-expand "expand" ["a" "b"]))
-
-(expect nil (orderby-clause ":"))
-(expect nil (orderby-clause ":a:desc"))
-(expect ["a" :asc] (orderby-clause "a"))
-(expect ["a" :asc] (orderby-clause "a:"))
-(expect ["a" :desc] (orderby-clause "a:desc"))
-(expect ["a" :asc] (orderby-clause "a:dummy"))
-
-(expect [] (set-and-extract process-orderby "orderby" nil))
-(expect [["a" :asc]] (set-and-extract process-orderby "orderby" "a:asc"))
-(expect [["a" :desc]] (set-and-extract process-orderby "orderby" "a:desc"))
-(expect [["a" :desc] ["b" :asc]] (set-and-extract process-orderby "orderby" "a:desc,b"))
-(expect [["a" :desc] ["b" :desc]] (set-and-extract process-orderby "orderby" ["a:desc" "b:desc"]))
-(expect [["a" :desc]] (set-and-extract process-orderby "orderby" ["a:desc" ":b"]))
-(expect [["a" :desc] ["b" :desc]] (set-and-extract process-orderby "orderby" [" a : desc " "b : desc"]))
-
-(expect [:Filter
-         [:AndExpr
-          [:Comp
-           [:Filter
-            [:AndExpr
-             [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]]]]]
-        (set-and-extract process-filter "filter" "a=1"))
-
-(expect [:Filter
-         [:AndExpr
-          [:Comp
-           [:Filter
-            [:AndExpr
-             [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]]]]]
-        (set-and-extract process-filter "filter" ["a=1"]))
-
-(expect [:Filter
-         [:AndExpr
-          [:Comp
-           [:Filter
-            [:AndExpr
-             [:Comp [:Attribute "a"] [:Op "="] [:IntValue "1"]]]]]
-          [:AndExpr
-           [:Comp
-            [:Filter
-             [:AndExpr
-              [:Comp [:Attribute "b"] [:Op "="] [:IntValue "2"]]]]]]]]
-        (set-and-extract process-filter "filter" ["a=1" "b=2"]))
-
-(expect (set-and-extract process-filter "filter" "a=1")
-        (set-and-extract process-filter "filter" ["a=1"]))
-
-(expect (parser/parse-cimi-filter "(a=1) and (b=2)")
-        (set-and-extract process-filter "filter" ["a=1" "b=2"]))
-
-(expect (parser/parse-cimi-filter "(a=1) and (b=2) and (c=3)")
-        (set-and-extract process-filter "filter" ["a=1" "b=2" "c=3"]))
-
-(expect (parser/parse-cimi-filter "(a=1 or c=3) and (b=2)")
-        (set-and-extract process-filter "filter" ["a=1 or c=3" "b=2"]))
-
-
-(run-all-tests)
+(deftest check-filter
+  (are [arg1 arg2] (= (parser/parse-cimi-filter arg1) (set-and-extract t/process-filter "filter" arg2))
+                   "(a=1)" "a=1"
+                   "(a=1)" ["a=1"]
+                   "(a=1) and (b=2)" ["a=1" "b=2"]
+                   "(a=1) and (b=2) and (c=3)" ["a=1" "b=2" "c=3"]
+                   "(a=1 or c=3) and (b=2)" ["a=1 or c=3" "b=2"]))
