@@ -55,15 +55,22 @@
                                        (str/split #"\s+")))]
       [identifier roles])))
 
-(defn extract-cookie-info
-  "Extracts authentication information from a cookie. Returns nil if no cookie is
+(defn extract-cookie-claims
+  "Extracts authentication claims from a cookie. Returns nil if no cookie is
    provided or if there is an error when extracting the claims from the cookie."
   [cookie]
   (try
     (-> cookie
-        extract-claims
-        claims->authn-info)
+        extract-claims)
     (catch Exception e
-      (log/warn "Error in extract-cookie-info: " (str e))
+      (log/warn "Error in extract-cookie-claims: " (str e))
       nil)))
+
+(defn extract-cookie-info
+  "Extracts authentication information from a cookie. Returns nil if no cookie is
+   provided or if there is an error when extracting the claims from the cookie."
+  [cookie]
+  (-> cookie
+      extract-cookie-claims
+      claims->authn-info))
 
