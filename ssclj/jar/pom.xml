@@ -3,14 +3,14 @@
 
   <artifactId>SlipStreamCljResources-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.24-SNAPSHOT</version>
+  <version>3.24</version>
   <name>SlipStreamServer/ssclj/jar</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>3.24-SNAPSHOT</version>
+    <version>3.24</version>
   </parent>
 
   <licenses>
