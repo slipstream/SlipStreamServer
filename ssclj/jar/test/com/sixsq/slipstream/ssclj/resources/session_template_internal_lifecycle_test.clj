@@ -48,7 +48,7 @@
                     (ltu/is-operation-absent "describe")
                     (ltu/entries resource-tag))
         ids (set (map :id entries))
-        types (set (map :authnMethod entries))]
+        types (set (map :method entries))]
     (is (set/subset? #{(str resource-url "/" internal/authn-method)} ids))
     (is (set/subset? #{internal/authn-method} types))
 
@@ -77,7 +77,7 @@
         (is (nil? (get ops (c/action-uri :add))))
         (is (nil? (get ops (c/action-uri :edit))))
         (is (nil? (get ops (c/action-uri :delete))))
-        (is (:authnMethod desc-body))
+        (is (:method desc-body))
         (is (:acl desc-body))
 
         (is (crud/validate entry-body))))))

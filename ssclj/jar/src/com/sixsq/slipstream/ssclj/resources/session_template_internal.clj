@@ -31,7 +31,7 @@
 ;; resource
 ;;
 (def ^:const resource
-  {:authnMethod authn-method
+  {:method      authn-method
    :name        "Internal"
    :description "Internal Authentication via Username/Password"
    :username    "username"

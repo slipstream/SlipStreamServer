@@ -58,12 +58,12 @@
    the client's IP address, and the virtual host being used. NOTE: The expiry
    is not included and MUST be added afterwards."
   [{:keys [username]} headers]
-  (let [virtual-host (:slipstream-ssl-server-hostname headers)
+  (let [server (:slipstream-ssl-server-hostname headers)
         client-ip (:x-real-ip headers)]
     (crud/new-identifier
-      (cond-> {:authnMethod authn-method
+      (cond-> {:method authn-method
                :username    username}
-              virtual-host (assoc :virtualHost virtual-host)
+              server (assoc :server server)
               client-ip (assoc :clientIP client-ip))
       p/resource-name)))
 
@@ -74,9 +74,9 @@
   "com.sixsq.slipstream.cookie")
 
 (defn create-claims [credentials headers session]
-  (let [virtual-host (:slipstream-ssl-server-hostname headers)]
+  (let [server (:slipstream-ssl-server-hostname headers)]
     (cond-> (auth-internal/create-claims credentials)
-            virtual-host (assoc :virtual-host virtual-host)
+            server (assoc :server server)
             session (assoc :session session))))
 
 (defmethod p/tpl->session authn-method

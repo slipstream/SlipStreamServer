@@ -44,11 +44,11 @@
 (def Session
   (merge c/CommonAttrs
          c/AclAttr
-         {:authnMethod                  c/NonBlankString
-          :username                     c/NonBlankString
-          (s/optional-key :virtualHost) c/NonBlankString
-          (s/optional-key :clientIP)    c/NonBlankString
-          :expiry                       c/NonBlankString    ;; not usual timestamp format, uses cookie format
+         {:method                    c/NonBlankString
+          :username                  c/NonBlankString
+          (s/optional-key :server)   c/NonBlankString
+          (s/optional-key :clientIP) c/NonBlankString
+          :expiry                    c/NonBlankString       ;; not usual timestamp format, uses cookie format
           }))
 
 (def SessionCreate
@@ -60,11 +60,11 @@
 ;;
 
 (defmulti validate-subtype
-          :authnMethod)
+          :method)
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown Session type: " (:authnMethod resource)) resource)))
+  (throw (ex-info (str "unknown Session type: " (:method resource)) resource)))
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -75,7 +75,7 @@
 ;;
 
 (defn dispatch-on-authn-method [resource]
-  (get-in resource [:sessionTemplate :authnMethod]))
+  (get-in resource [:sessionTemplate :method]))
 
 (defmulti create-validate-subtype dispatch-on-authn-method)
 
@@ -132,7 +132,7 @@
 
 (defn dispatch-conversion
   [resource _]
-  (:authnMethod resource))
+  (:method resource))
 
 (defmulti tpl->session dispatch-conversion)
 

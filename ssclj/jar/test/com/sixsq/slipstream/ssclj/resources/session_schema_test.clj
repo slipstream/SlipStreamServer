@@ -16,9 +16,9 @@
            :created     timestamp
            :updated     timestamp
            :acl         valid-acl
-           :authnMethod "internal"
+           :method      "internal"
            :username    "ssuser"
-           :virtualHost "nuv.la"
+           :server      "nuv.la"
            :clientIP    "127.0.0.1"
            :expiry      timestamp}]
 

@@ -58,9 +58,9 @@
 (defn complete-resource
   "Completes the given document with server-managed information:
    resourceURI, timestamps, operations, and ACL."
-  [{:keys [authnMethod] :as resource}]
-  (when authnMethod
-    (let [id (str resource-url "/" authnMethod)
+  [{:keys [method] :as resource}]
+  (when method
+    (let [id (str resource-url "/" method)
           href (str id "/describe")
           ops [{:rel (:describe c/action-uri) :href href}]]
       (-> resource
@@ -90,7 +90,7 @@
 ;;
 
 (def SessionTemplateAttrs
-  {:authnMethod c/NonBlankString})
+  {:method c/NonBlankString})
 
 (def SessionTemplate
   (merge c/CommonAttrs
@@ -105,13 +105,13 @@
 
 (def SessionTemplateDescription
   (merge c/CommonParameterDescription
-         {:authnMethod {:displayName "Authentication Method"
-                        :category    "general"
-                        :description "method to be used to authenticate user"
-                        :type        "string"
-                        :mandatory   true
-                        :readOnly    true
-                        :order       0}}))
+         {:method {:displayName "Authentication Method"
+                   :category    "general"
+                   :description "method to be used to authenticate user"
+                   :type        "string"
+                   :mandatory   true
+                   :readOnly    true
+                   :order       0}}))
 ;;
 ;; multimethods for validation
 ;;
@@ -119,11 +119,11 @@
 (defmulti validate-subtype
           "Validates the given resource against the specific
            SessionTemplate subtype schema."
-          :authnMethod)
+          :method)
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown SessionTemplate type: " (:authnMethod resource)) resource)))
+  (throw (ex-info (str "unknown SessionTemplate type: " (:method resource)) resource)))
 
 (defmethod crud/validate
   resource-uri
