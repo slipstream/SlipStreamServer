@@ -1,21 +1,25 @@
 (ns com.sixsq.slipstream.ssclj.resources.root-schema-test
   (:require
+    [clojure.test :refer [deftest are is]]
     [com.sixsq.slipstream.ssclj.resources.root :refer :all]
     [schema.core :as s]
-    [expectations :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]))
 
-(let [timestamp "1964-08-25T10:00:00.0Z"
-      root      {:id          resource-name
-                 :resourceURI p/service-context
-                 :created     timestamp
-                 :updated     timestamp
-                 :acl         resource-acl
-                 :baseURI     "http://cloud.example.org/"}]
+(defn valid? [root] (nil? (s/check Root root)))
+(def invalid? (complement valid?))
 
-  (expect nil? (s/check Root root))
-  (expect nil? (s/check Root (assoc root :resources {:href "Resource/uuid"})))
-  (expect (s/check Root (dissoc root :created)))
-  (expect (s/check Root (dissoc root :updated)))
-  (expect (s/check Root (dissoc root :baseURI)))
-  (expect (s/check Root (dissoc root :acl))))
+(deftest check-root-schema
+         (let [timestamp "1964-08-25T10:00:00.0Z"
+               root {:id          resource-name
+                     :resourceURI p/service-context
+                     :created     timestamp
+                     :updated     timestamp
+                     :acl         resource-acl
+                     :baseURI     "http://cloud.example.org/"}]
+
+           (is (valid? root))
+           (is (valid? (assoc root :resources {:href "Resource/uuid"})))
+           (is (invalid? (dissoc root :created)))
+           (is (invalid? (dissoc root :updated)))
+           (is (invalid? (dissoc root :baseURI)))
+           (is (invalid? (dissoc root :acl)))))

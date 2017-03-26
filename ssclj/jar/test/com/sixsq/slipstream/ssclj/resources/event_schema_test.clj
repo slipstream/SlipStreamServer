@@ -26,7 +26,7 @@
                   })
 
 (defn valid? [event] (nil? (s/check Event event)))
-(defn invalid? [event] (complement valid?))
+(def invalid? (complement valid?))
 
 (deftest check-event
   (is (= valid-event (crud/validate valid-event)))
