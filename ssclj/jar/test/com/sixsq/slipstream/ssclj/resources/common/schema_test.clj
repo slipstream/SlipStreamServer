@@ -1,245 +1,213 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.schema-test
   (:require
+    [clojure.test :refer [deftest are is]]
     [com.sixsq.slipstream.ssclj.resources.common.schema :refer :all]
     [schema.core :as s]
-    [expectations :refer :all]
     [clojure.set :as set]))
 
-;;
-;; actions
-;;
+(def non-nil? (complement nil?))
 
-(expect (set/union core-actions prefixed-actions impl-prefixed-actions) (set (keys action-uri)))
-(expect (set (map name core-actions)) (set (vals (select-keys action-uri core-actions))))
+(is (= (set/union core-actions prefixed-actions impl-prefixed-actions) (set (keys action-uri))))
+(is (= (set (map name core-actions)) (set (vals (select-keys action-uri core-actions)))))
 
-;;
-;; PosInt
-;;
+(deftest check-PosInt
+  (are [expect-fn arg] (expect-fn (s/check PosInt arg))
+                       nil? 1
+                       nil? 2
+                       nil? 3
+                       non-nil? 0
+                       non-nil? -1
+                       non-nil? 1.0
+                       non-nil? "bad"))
 
-(expect nil? (s/check PosInt 1))
-(expect nil? (s/check PosInt 2))
-(expect nil? (s/check PosInt 3))
-(expect (s/check PosInt 0))
-(expect (s/check PosInt -1))
-(expect (s/check PosInt 1.0))
-(expect (s/check PosInt "bad"))
+(deftest check-NonNegInt
+  (are [expect-fn arg] (expect-fn (s/check NonNegInt arg))
+                       nil? 0
+                       nil? 1
+                       nil? 2
+                       nil? 3
+                       non-nil? -1
+                       non-nil? 1.0
+                       non-nil? "bad"))
 
-;;
-;; NonNegInt
-;;
+(deftest check-NonBlankString
+  (are [expect-fn arg] (expect-fn (s/check NonBlankString arg))
+                       nil? "ok"
+                       nil? " ok"
+                       nil? "ok "
+                       nil? " ok "
+                       non-nil? ""
+                       non-nil? " "
+                       non-nil? "\t"
+                       non-nil? "\f"
+                       non-nil? "\t\f"))
 
-(expect nil? (s/check NonNegInt 0))
-(expect nil? (s/check NonNegInt 1))
-(expect nil? (s/check NonNegInt 2))
-(expect nil? (s/check NonNegInt 3))
-(expect (s/check NonNegInt -1))
-(expect (s/check NonNegInt 1.0))
-(expect (s/check NonNegInt "bad"))
+(deftest check-NonEmptyStrList
+  (are [expect-fn arg] (expect-fn (s/check NonEmptyStrList arg))
+                       nil? ["ok"]
+                       nil? ["ok" "ok"]
+                       non-nil? []
+                       non-nil? [1]
+                       non-nil? ["ok" 1]))
 
-;;
-;; NonBlankString
-;;
+(deftest check-Timestamp
+  (are [expect-fn arg] (expect-fn (s/check Timestamp arg))
+                       nil? "2012-01-01T01:23:45.678Z"
+                       non-nil? "2012-01-01T01:23:45.678Q"))
 
-(expect nil? (s/check NonBlankString "ok"))
-(expect nil? (s/check NonBlankString " ok"))
-(expect nil? (s/check NonBlankString "ok "))
-(expect nil? (s/check NonBlankString " ok "))
-(expect (s/check NonBlankString ""))
-(expect (s/check NonBlankString " "))
-(expect (s/check NonBlankString "\t"))
-(expect (s/check NonBlankString "\f"))
-(expect (s/check NonBlankString " \t\f"))
+(deftest check-ResourceLink
+  (are [expect-fn arg] (expect-fn (s/check ResourceLink arg))
+                       nil? {:href "uri"}
+                       non-nil? {}
+                       non-nil? {:bad "value"}
+                       non-nil? {:href ""}
+                       non-nil? {:href "uri" :bad "value"}))
 
-;;
-;; NonEmptyStrlist
-;;
+(deftest check-ResourceLinks
+  (are [expect-fn arg] (expect-fn (s/check ResourceLinks arg))
+                       nil? [{:href "uri"}]
+                       nil? [{:href "uri"} {:href "uri"}]
+                       non-nil? []))
 
-(expect nil? (s/check NonEmptyStrList ["ok"]))
-(expect nil? (s/check NonEmptyStrList ["ok" "ok"]))
-(expect (s/check NonEmptyStrList []))
-(expect (s/check NonEmptyStrList [1]))
-(expect (s/check NonEmptyStrList ["ok" 1]))
+(deftest check-Operation
+  (are [expect-fn arg] (expect-fn (s/check Operation arg))
+                       nil? {:href "uri" :rel "add"}
+                       non-nil? {:href "uri"}
+                       non-nil? {:rel "add"}
+                       non-nil? {}))
 
-;;
-;; Timestamp
-;;
+(deftest check-Operations
+  (are [expect-fn arg] (expect-fn (s/check Operations arg))
+                       nil? [{:href "uri" :rel "add"}]
+                       nil? [{:href "uri" :rel "add"} {:href "uri" :rel "delete"}]
+                       non-nil? []))
 
-(expect nil? (s/check Timestamp "2012-01-01T01:23:45.678Z"))
-(expect (s/check Timestamp "2012-01-01T01:23:45.678Q"))
-
-;;
-;; ResourceLink
-;;
-
-(expect nil? (s/check ResourceLink {:href "uri"}))
-(expect (s/check ResourceLink {}))
-(expect (s/check ResourceLink {:bad "value"}))
-(expect (s/check ResourceLink {:href ""}))
-(expect (s/check ResourceLink {:href "uri" :bad "value"}))
-
-;;
-;; ResourceLinks
-;;
-
-(expect nil? (s/check ResourceLinks [{:href "uri"}]))
-(expect nil? (s/check ResourceLinks [{:href "uri"} {:href "uri"}]))
-(expect (s/check ResourceLinks []))
-
-;;
-;; Operation
-;;
-
-(expect nil? (s/check Operation {:href "uri" :rel "add"}))
-(expect (s/check Operation {:href "uri"}))
-(expect (s/check Operation {:rel "add"}))
-(expect (s/check Operation {}))
-
-;;
-;; Operations
-;;
-
-(expect nil? (s/check Operations [{:href "uri" :rel "add"}]))
-(expect nil? (s/check Operations [{:href "uri" :rel "add"} {:href "uri" :rel "delete"}]))
-(expect (s/check Operations []))
-
-;;
-;; Properties
-;;
-
-(expect nil? (s/check Properties {:a "ok"}))
-(expect nil? (s/check Properties {:a "ok" :b "ok"}))
-(expect nil? (s/check Properties {"a" "ok"}))
-(expect nil? (s/check Properties {"a" "ok" "b" "ok"}))
-(expect (s/check Properties {}))
-(expect (s/check Properties {1 "ok"}))
-(expect (s/check Properties {"ok" 1}))
-(expect (s/check Properties [:bad "bad"]))
-
-;;
-;; Access control schemas
-;;
+(deftest check-Properties
+  (are [expect-fn arg] (expect-fn (s/check Properties arg))
+                       nil? {:a "ok"}
+                       nil? {:a "ok" :b "ok"}
+                       nil? {"a" "ok"}
+                       nil? {"a" "ok" "b" "ok"}
+                       non-nil? {}
+                       non-nil? {1 "ok"}
+                       non-nil? {"ok" 1}
+                       non-nil? [:bad "bad"]))
 
 (def valid-acl {:owner {:principal "me" :type "USER"}})
 
-(let [id {:principal "::ADMIN"
-          :type      "ROLE"}]
-  (expect nil? (s/check AccessControlId id))
-  (expect (s/check AccessControlId (assoc id :bad "MODIFY")))
-  (expect (s/check AccessControlId (dissoc id :principal)))
-  (expect (s/check AccessControlId (dissoc id :type)))
-  (expect (s/check AccessControlId (assoc id :type "BAD"))))
+(deftest check-AccessControlId
+  (let [id {:principal "ADMIN", :type "ROLE"}]
+    (are [expect-fn arg] (expect-fn (s/check AccessControlId arg))
+                         nil? id
+                         non-nil? (assoc id :bad "MODIFY")
+                         non-nil? (dissoc id :principal)
+                         non-nil? (dissoc id :type)
+                         non-nil? (assoc id :type "BAD"))))
 
-(let [rule {:principal "::ADMIN"
-            :type      "ROLE"
-            :right     "VIEW"}]
-  (expect nil? (s/check AccessControlRule rule))
-  (expect nil? (s/check AccessControlRule (assoc rule :right "MODIFY")))
-  (expect nil? (s/check AccessControlRule (assoc rule :right "ALL")))
-  (expect (s/check AccessControlRule (assoc rule :right "BAD")))
-  (expect (s/check AccessControlRule (dissoc rule :right))))
+(deftest check-AccessControlRule
+  (let [rule {:principal "ADMIN", :type "ROLE", :right "VIEW"}]
+    (are [expect-fn arg] (expect-fn (s/check AccessControlRule arg))
+                         nil? rule
+                         nil? (assoc rule :right "MODIFY")
+                         nil? (assoc rule :right "ALL")
+                         non-nil? (assoc rule :right "BAD")
+                         non-nil? (dissoc rule :right))))
 
-(let [rules [{:principal "::ADMIN"
-              :type      "ROLE"
-              :right     "VIEW"}
+(deftest check-AccessControlRules
+  (let [rules [{:principal "ADMIN", :type "ROLE", :right "VIEW"}
+               {:principal "ALPHA", :type "USER", :right "ALL"}]]
+    (are [expect-fn arg] (expect-fn (s/check AccessControlRules arg))
+                         nil? rules
+                         nil? (next rules)
+                         non-nil? (nnext rules)
+                         non-nil? (cons 1 rules))))
 
-             {:principal "ALPHA"
-              :type      "USER"
-              :right     "ALL"}]]
-  (expect nil? (s/check AccessControlRules rules))
-  (expect nil? (s/check AccessControlRules (next rules)))
-  (expect (s/check AccessControlRules (nnext rules)))
-  (expect (s/check AccessControlRules (cons 1 rules))))
+(deftest check-AccessControlList
+  (let [acl {:owner {:principal "::ADMIN"
+                     :type      "ROLE"}
+             :rules [{:principal ":group1"
+                      :type      "ROLE"
+                      :right     "VIEW"}
+                     {:principal "group2"
+                      :type      "ROLE"
+                      :right     "MODIFY"}]}]
+    (are [expect-fn arg] (expect-fn (s/check AccessControlList arg))
+                         nil? acl
+                         nil? (dissoc acl :rules)
+                         non-nil? (assoc acl :rules [])
+                         non-nil? (assoc acl :owner "")
+                         non-nil? (assoc acl :bad "BAD"))))
 
-(let [acl {:owner {:principal "::ADMIN"
-                   :type      "ROLE"}
-           :rules [{:principal ":group1"
-                    :type      "ROLE"
-                    :right     "VIEW"}
-                   {:principal "group2"
-                    :type      "ROLE"
-                    :right     "MODIFY"}]}]
-  (expect nil? (s/check AccessControlList acl))
-  (expect nil? (s/check AccessControlList (dissoc acl :rules)))
-  (expect (s/check AccessControlList (assoc acl :rules [])))
-  (expect (s/check AccessControlList (assoc acl :owner "")))
-  (expect (s/check AccessControlList (assoc acl :bad "BAD"))))
+(is (nil? (s/check AclAttr {:acl valid-acl})))
+(is (s/check AclAttr {}))
 
-(expect nil? (s/check AclAttr {:acl valid-acl}))
-(expect (s/check AclAttr {}))
+(deftest check-CommonAttrs
+  (let [date "2012-01-01T01:23:45.678Z"
+        minimal {:id          "a"
+                 :resourceURI "http://example.org/data"
+                 :created     date
+                 :updated     date}
+        maximal (assoc minimal
+                  :name "name"
+                  :description "description"
+                  :properties {"a" "b"}
+                  :operations [{:rel "add" :href "/add"}])]
+    (are [expect-fn arg] (expect-fn (s/check CommonAttrs arg))
+                         nil? minimal
+                         non-nil? (dissoc minimal :id)
+                         non-nil? (dissoc minimal :resourceURI)
+                         non-nil? (dissoc minimal :created)
+                         non-nil? (dissoc minimal :updated)
+                         nil? maximal
+                         nil? (dissoc maximal :name)
+                         nil? (dissoc maximal :description)
+                         nil? (dissoc maximal :properties)
+                         non-nil? (assoc maximal :bad "BAD"))))
 
-;;
-;; Common CIMI attributes
-;;
+(deftest check-ParameterTypes
+  (are [expect-fn arg] (expect-fn (s/check ParameterTypes arg))
+                       nil? "string"
+                       nil? "boolean"
+                       nil? "int"
+                       nil? "float"
+                       nil? "timestamp"
+                       nil? "enum"
+                       nil? "map"
+                       nil? "list"
+                       non-nil? "unknown"))
 
-(let [date "2012-01-01T01:23:45.678Z"
-      minimal {:id          "a"
-               :resourceURI "http://example.org/data"
-               :created     date
-               :updated     date}
-      maximal (assoc minimal
-                :name "name"
-                :description "description"
-                :properties {"a" "b"}
-                :operations [{:rel "add" :href "/add"}])]
-  (expect nil? (s/check CommonAttrs minimal))
-  (expect (s/check CommonAttrs (dissoc minimal :id)))
-  (expect (s/check CommonAttrs (dissoc minimal :resourceURI)))
-  (expect (s/check CommonAttrs (dissoc minimal :created)))
-  (expect (s/check CommonAttrs (dissoc minimal :updated)))
+(deftest check-ParameterDescription-and-ResourceDescription
+  (let [valid-description {:displayName "ID"
+                           :category    "common"
+                           :description "unique resource identifier"
+                           :type        "enum"
+                           :mandatory   true
+                           :readOnly    true
+                           :order       0
+                           :enum        ["a" "b" "c"]}
+        resource-desc {:identifier valid-description
+                       :other      valid-description
+                       :acl        valid-acl}]
 
-  (expect nil? (s/check CommonAttrs maximal))
-  (expect nil? (s/check CommonAttrs (dissoc maximal :name)))
-  (expect nil? (s/check CommonAttrs (dissoc maximal :description)))
-  (expect nil? (s/check CommonAttrs (dissoc maximal :properties)))
-  (expect (s/check CommonAttrs (assoc maximal :bad "BAD"))))
+    (are [expect-fn arg] (expect-fn (s/check ParameterDescription arg))
+                         nil? valid-description
+                         nil? (dissoc valid-description :category)
+                         nil? (dissoc valid-description :description)
+                         nil? (dissoc valid-description :mandatory)
+                         nil? (dissoc valid-description :readOnly)
+                         nil? (dissoc valid-description :order)
+                         nil? (dissoc valid-description :enum)
+                         non-nil? (assoc valid-description :displayName 1)
+                         non-nil? (assoc valid-description :category 1)
+                         non-nil? (assoc valid-description :description 1)
+                         non-nil? (assoc valid-description :type "unknown")
+                         non-nil? (assoc valid-description :mandatory 1)
+                         non-nil? (assoc valid-description :readOnly 1)
+                         non-nil? (assoc valid-description :readOnly "1")
+                         non-nil? (assoc valid-description :enum "1")
+                         non-nil? (assoc valid-description :enum ["a" 1]))
 
-;;
-;; parameter description types
-;;
-(expect nil? (s/check ParameterTypes "string"))
-(expect nil? (s/check ParameterTypes "boolean"))
-(expect nil? (s/check ParameterTypes "int"))
-(expect nil? (s/check ParameterTypes "float"))
-(expect nil? (s/check ParameterTypes "timestamp"))
-(expect nil? (s/check ParameterTypes "enum"))
-(expect nil? (s/check ParameterTypes "map"))
-(expect nil? (s/check ParameterTypes "list"))
-
-(expect (s/check ParameterTypes "unknown"))
-
-;;
-;; parameter descriptions
-;;
-(let [valid-description {:displayName "ID"
-                         :category    "common"
-                         :description "unique resource identifier"
-                         :type        "enum"
-                         :mandatory   true
-                         :readOnly    true
-                         :order       0
-                         :enum        ["a" "b" "c"]}
-      resource-desc {:identifier valid-description
-                     :other      valid-description
-                     :acl        valid-acl}]
-  (expect nil? (s/check ParameterDescription valid-description))
-  (expect nil? (s/check ParameterDescription (dissoc valid-description :category)))
-  (expect nil? (s/check ParameterDescription (dissoc valid-description :description)))
-  (expect nil? (s/check ParameterDescription (dissoc valid-description :mandatory)))
-  (expect nil? (s/check ParameterDescription (dissoc valid-description :readOnly)))
-  (expect nil? (s/check ParameterDescription (dissoc valid-description :order)))
-  (expect nil? (s/check ParameterDescription (dissoc valid-description :enum)))
-
-  (expect (s/check ParameterDescription (assoc valid-description :displayName 1)))
-  (expect (s/check ParameterDescription (assoc valid-description :category 1)))
-  (expect (s/check ParameterDescription (assoc valid-description :description 1)))
-  (expect (s/check ParameterDescription (assoc valid-description :type "unknown")))
-  (expect (s/check ParameterDescription (assoc valid-description :mandatory 1)))
-  (expect (s/check ParameterDescription (assoc valid-description :readOnly 1)))
-  (expect (s/check ParameterDescription (assoc valid-description :readOnly "1")))
-  (expect (s/check ParameterDescription (assoc valid-description :enum "1")))
-  (expect (s/check ParameterDescription (assoc valid-description :enum ["a" 1])))
-
-  (expect nil? (s/check ResourceDescription resource-desc))
-  (expect (s/check ResourceDescription (assoc resource-desc :another 1)))
-
-  (expect nil? (s/check ResourceDescription (assoc CommonParameterDescription :acl valid-acl))))
+    (are [expect-fn arg] (expect-fn (s/check ResourceDescription arg))
+                         nil? resource-desc
+                         non-nil? (assoc resource-desc :another 1)
+                         nil? (assoc CommonParameterDescription :acl valid-acl))))
