@@ -1,9 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-schema-test
-    (:require
+  (:require
+    [clojure.test :refer [deftest are is]]
     [com.sixsq.slipstream.ssclj.resources.service-attribute :refer :all]
     [schema.core :as s]
-    [expectations :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]))
+
+(def non-nil? (complement nil?))
 
 (def valid-acl {:owner {:principal "::ADMIN"
                         :type      "ROLE"}
@@ -11,100 +13,104 @@
                          :type      "ROLE"
                          :right     "VIEW"}]})
 
-(let [entry {:name        "readable name"
-             :description "localized description"
-             :categories  ["a" "b"]}]
+(deftest check-localized-entry
+  (let [entry {:name        "readable name"
+               :description "localized description"
+               :categories  ["a" "b"]}]
 
-  (expect nil? (s/check LocalizedEntry entry))
+    (are [expect-fn arg] (expect-fn (s/check LocalizedEntry arg))
+                         nil? entry
+                         non-nil? (dissoc entry :name)
+                         non-nil? (assoc entry :name 99)
+                         non-nil? (assoc entry :name "")
 
-  (expect (s/check LocalizedEntry (dissoc entry :name)))
-  (expect (s/check LocalizedEntry (assoc entry :name 99)))
-  (expect (s/check LocalizedEntry (assoc entry :name "")))
+                         non-nil? (dissoc entry :description)
+                         non-nil? (assoc entry :description 99)
+                         non-nil? (assoc entry :description "")
 
-  (expect (s/check LocalizedEntry (dissoc entry :description)))
-  (expect (s/check LocalizedEntry (assoc entry :description 99)))
-  (expect (s/check LocalizedEntry (assoc entry :description "")))
+                         nil? (dissoc entry :categories)
+                         non-nil? (assoc entry :categories [])
+                         non-nil? (assoc entry :categories "bad-value")
 
-  (expect nil? (s/check LocalizedEntry (dissoc entry :categories)))
-  (expect (s/check LocalizedEntry (assoc entry :categories [])))
-  (expect (s/check LocalizedEntry (assoc entry :categories "bad-value")))
+                         non-nil? (assoc entry :bad "value"))))
 
-  (expect (s/check LocalizedEntry (assoc entry :bad "value"))))
+(deftest check-localized-entries
+  (let [entries {:en {:name        "keyword"
+                      :description "localized description"
+                      :categories  ["one" "two"]}
+                 :fr {:name        "mot clé"
+                      :description "phrase descriptif localisé"
+                      :categories  ["un" "deux"]}}]
 
-(let [entries {:en {:name        "keyword"
-                    :description "localized description"
-                    :categories  ["one" "two"]}
-               :fr {:name        "mot clé"
-                    :description "phrase descriptif localisé"
-                    :categories  ["un" "deux"]}}]
+    (are [expect-fn arg] (expect-fn (s/check LocalizedEntries arg))
+                         nil? entries
+                         nil? (dissoc entries :en)
+                         nil? (dissoc entries :fr)
 
-  (expect nil? (s/check LocalizedEntries entries))
-
-  (expect nil? (s/check LocalizedEntries (dissoc entries :en)))
-  (expect nil? (s/check LocalizedEntries (dissoc entries :fr)))
-
-  (expect (s/check LocalizedEntries (assoc entries :en "bad-value")))
-  (expect (s/check LocalizedEntries (assoc entries :fr "bad-value")))
-
-  (expect (s/check LocalizedEntries (dissoc entries :en :fr)))
-  (expect (s/check LocalizedEntries {})))
+                         non-nil? (assoc entries :en "bad-value")
+                         non-nil? (assoc entries :fr "bad-value")
+                         non-nil? (dissoc entries :en :fr)
+                         non-nil? {})))
 
 ;; CompositeType checks
-(expect (s/check CompositeType []))
-(expect nil? (s/check CompositeType ["type-one"]))
-(expect nil? (s/check CompositeType ["type-one" "type-two"]))
-(expect (s/check CompositeType [0]))
-(expect (s/check CompositeType "bad-value"))
 
-(let [timestamp "1964-08-25T10:00:00.0Z"
-      attr {:id            resource-name
-            :resourceURI   p/service-context
-            :created       timestamp
-            :updated       timestamp
-            :acl           valid-acl
+(deftest check-composite-type
+  (are [expect-fn arg] (expect-fn (s/check CompositeType arg))
+                       nil? ["type-one"]
+                       nil? ["type-one" "type-two"]
+                       non-nil? []
+                       non-nil? [0]
+                       non-nil? "bad-value"))
 
-            :prefix         "example-org"
-            :attr-name      "test-attribute"
+(deftest check-attribute
+  (let [timestamp "1964-08-25T10:00:00.0Z"
+        attr {:id            resource-name
+              :resourceURI   p/service-context
+              :created       timestamp
+              :updated       timestamp
+              :acl           valid-acl
 
-            :type          "string"
-            :authority     "http://helix-nebula.eu"
-            :major-version 2
-            :minor-version 1
-            :patch-version 0
-            :normative     true
-            :en            {:name        "keyword"
-                            :description "localized description"
-                            :categories  ["one" "two"]}}]
+              :prefix        "example-org"
+              :attr-name     "test-attribute"
 
-  (expect nil? (s/check Attribute attr))
-  (expect (s/check Attribute (dissoc attr :created)))
-  (expect (s/check Attribute (dissoc attr :updated)))
-  (expect (s/check Attribute (dissoc attr :acl)))
+              :type          "string"
+              :authority     "http://helix-nebula.eu"
+              :major-version 2
+              :minor-version 1
+              :patch-version 0
+              :normative     true
+              :en            {:name        "keyword"
+                              :description "localized description"
+                              :categories  ["one" "two"]}}]
 
-  (expect (s/check Attribute (dissoc attr :prefix)))
-  (expect (s/check Attribute (assoc attr  :prefix 0)))
-  (expect (s/check Attribute (assoc attr  :prefix "")))
+    (are [expect-fn arg] (expect-fn (s/check Attribute arg))
+                         nil? attr
+                         non-nil? (dissoc attr :created)
+                         non-nil? (dissoc attr :updated)
+                         non-nil? (dissoc attr :acl)
 
-  (expect (s/check Attribute (dissoc attr :attr-name)))
-  (expect (s/check Attribute (assoc attr  :attr-name 0)))
-  (expect (s/check Attribute (assoc attr  :attr-name "")))
+                         non-nil? (dissoc attr :prefix)
+                         non-nil? (assoc attr :prefix 0)
+                         non-nil? (assoc attr :prefix "")
 
-  (expect (s/check Attribute (dissoc attr :type)))
-  (expect (s/check Attribute (assoc attr :type 0)))
-  (expect nil? (s/check Attribute (assoc attr :type ["ok" "values"])))
+                         non-nil? (dissoc attr :attr-name)
+                         non-nil? (assoc attr :attr-name 0)
+                         non-nil? (assoc attr :attr-name "")
 
-  (expect nil? (s/check Attribute (dissoc attr :authority)))
-  (expect (s/check Attribute (assoc attr :authority 0)))
+                         non-nil? (dissoc attr :type)
+                         non-nil? (assoc attr :type 0)
+                         nil? (assoc attr :type ["ok" "values"])
 
-  (expect (s/check Attribute (dissoc attr :major-version)))
-  (expect (s/check Attribute (assoc attr :major-version "bad-value")))
-  (expect (s/check Attribute (dissoc attr :minor-version)))
-  (expect (s/check Attribute (assoc attr :minor-version "bad-value")))
-  (expect (s/check Attribute (dissoc attr :patch-version)))
-  (expect (s/check Attribute (assoc attr :patch-version "bad-value")))
+                         nil? (dissoc attr :authority)
+                         non-nil? (assoc attr :authority 0)
 
-  (expect (s/check Attribute (dissoc attr :normative)))
+                         non-nil? (dissoc attr :major-version)
+                         non-nil? (assoc attr :major-version "bad-value")
+                         non-nil? (dissoc attr :minor-version)
+                         non-nil? (assoc attr :minor-version "bad-value")
+                         non-nil? (dissoc attr :patch-version)
+                         non-nil? (assoc attr :patch-version "bad-value")
 
-  ;; TODO: This should not be allowed, but can't yet enforce this.
-  ;;(expect (s/check Attribute (dissoc attr :en)))
-  (expect (s/check Attribute (assoc attr :en "bad-value"))))
+                         non-nil? (dissoc attr :normative)
+
+                         non-nil? (assoc attr :en "bad-value"))))
