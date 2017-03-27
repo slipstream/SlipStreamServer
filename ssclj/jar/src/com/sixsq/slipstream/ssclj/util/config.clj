@@ -34,9 +34,9 @@
 (def ^:private config (memoize read-config))
 
 (defn- read-property-value
-  [name & more]
-  (let [v (get (config) name (first more))]
-    (log/debug "property" name "=" v)
+  [property-name & more]
+  (let [v (get (config) property-name (first more))]
+    (log/debug "property" property-name "=" v)
     v))
 
 (def property-value (memoize read-property-value))
