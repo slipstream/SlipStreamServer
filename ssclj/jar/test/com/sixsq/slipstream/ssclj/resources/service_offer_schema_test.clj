@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-offer-schema-test
-    (:require
+  (:require
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.resources.service-offer :refer :all]
     [schema.core :as s]
-    [expectations :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]))
 
 (def valid-acl {:owner {:principal "::ADMIN"
@@ -11,19 +11,22 @@
                          :type      "ROLE"
                          :right     "VIEW"}]})
 
-(let [timestamp "1964-08-25T10:00:00.0Z"
-      root {:id          resource-name
-            :resourceURI p/service-context
-            :created     timestamp
-            :updated     timestamp
-            :acl         valid-acl
-            :connector   {:href "myconnector"}
-            :other       "value"}]
+(def non-nil? (complement nil?))
 
-  (expect nil? (s/check ServiceInfo root))
-  (expect (s/check ServiceInfo (dissoc root :created)))
-  (expect (s/check ServiceInfo (dissoc root :updated)))
-  (expect (s/check ServiceInfo (dissoc root :acl)))
+(deftest check-ServiceInfo
+  (let [timestamp "1964-08-25T10:00:00.0Z"
+        root {:id          resource-name
+              :resourceURI p/service-context
+              :created     timestamp
+              :updated     timestamp
+              :acl         valid-acl
+              :connector   {:href "myconnector"}
+              :other       "value"}]
 
-  (expect (s/check ServiceInfo (dissoc root :connector)))
-  (expect nil? (s/check ServiceInfo (dissoc root :other))))
+    (are [expect-fn arg] (expect-fn (s/check ServiceInfo arg))
+                         nil? root
+                         non-nil? (dissoc root :created)
+                         non-nil? (dissoc root :updated)
+                         non-nil? (dissoc root :acl)
+                         non-nil? (dissoc root :connector)
+                         nil? (dissoc root :other))))

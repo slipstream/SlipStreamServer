@@ -28,9 +28,9 @@
   [request]
   (display-space-separated
     (-> request :request-method name (.toUpperCase))
-    (-> request :uri)
-    (-> request display-authn-info)
-    (-> request display-querystring)))
+    (:uri request)
+    (display-authn-info request )
+    (display-querystring request )))
 
 (defn formatted-response
   [formatted-request response start current-time-millis]
