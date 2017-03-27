@@ -7,8 +7,9 @@
 
 (def non-nil? (complement nil?))
 
-(is (= (set/union core-actions prefixed-actions impl-prefixed-actions) (set (keys action-uri))))
-(is (= (set (map name core-actions)) (set (vals (select-keys action-uri core-actions)))))
+(deftest check-actions
+  (is (= (set/union core-actions prefixed-actions impl-prefixed-actions) (set (keys action-uri))))
+  (is (= (set (map name core-actions)) (set (vals (select-keys action-uri core-actions))))))
 
 (deftest check-PosInt
   (are [expect-fn arg] (expect-fn (s/check PosInt arg))
@@ -138,8 +139,9 @@
                          non-nil? (assoc acl :owner "")
                          non-nil? (assoc acl :bad "BAD"))))
 
-(is (nil? (s/check AclAttr {:acl valid-acl})))
-(is (s/check AclAttr {}))
+(deftest check-acl-attr
+  (is (nil? (s/check AclAttr {:acl valid-acl})))
+  (is (s/check AclAttr {})))
 
 (deftest check-CommonAttrs
   (let [date "2012-01-01T01:23:45.678Z"
