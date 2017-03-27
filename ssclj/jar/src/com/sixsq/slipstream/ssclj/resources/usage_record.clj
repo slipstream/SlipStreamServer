@@ -32,14 +32,14 @@
     c/CreateAttrs
     c/AclAttr
     {
-     :id                                c/NonBlankString
-     :cloud-vm-instanceid               c/NonBlankString
-     :user                              c/NonBlankString
-     :cloud                             c/NonBlankString
-     (s/optional-key :start-timestamp)  c/Timestamp
-     (s/optional-key :end-timestamp)    c/OptionalTimestamp
-     :metric-name                       c/NonBlankString
-     :metric-value                      c/NonBlankString}))
+     :id                               c/NonBlankString
+     :cloud-vm-instanceid              c/NonBlankString
+     :user                             c/NonBlankString
+     :cloud                            c/NonBlankString
+     (s/optional-key :start-timestamp) c/Timestamp
+     (s/optional-key :end-timestamp)   c/OptionalTimestamp
+     :metric-name                      c/NonBlankString
+     :metric-value                     c/NonBlankString}))
 
 ;;
 ;; "Implementations" of multimethod declared in crud namespace
@@ -65,11 +65,11 @@
   [resource request]
   (try
     (a/can-modify? resource request)
-    (let [href                (:id resource)
+    (let [href (:id resource)
           ^String resourceURI (:resourceURI resource)
-          ops                 (if (.endsWith resourceURI "Collection")
-                                [{:rel (:add c/action-uri) :href href}]
-                                [{:rel (:delete c/action-uri) :href href}])]
+          ops (if (.endsWith resourceURI "Collection")
+                [{:rel (:add c/action-uri) :href href}]
+                [{:rel (:delete c/action-uri) :href href}])]
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))
@@ -100,7 +100,7 @@
              "' and metric-name='" (:metric-name usage-record) "'")]
     (-> (db/query "usage-record" {:cimi-params {:filter  (parser/parse-cimi-filter filter)
                                                 :orderby [["start-timestamp" :desc]]}
-                                  :user-roles ["ADMIN"]})
+                                  :user-roles  ["ADMIN"]})
         second
         first)))
 
@@ -111,15 +111,13 @@
         (str "cloud-vm-instanceid='" (:cloud-vm-instanceid usage-record)
              "' and metric-name='" (:metric-name usage-record) "'"
              " and end-timestamp='" date-in-future "'")]
-    (-> (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
-                                  :user-roles ["ADMIN"]})
-        second)))
+    (second (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
+                                      :user-roles  ["ADMIN"]}))))
 
 (defn records-for-interval
   "Retrieves all usage records intersecting with given interval."
   [start end]
   (u/check-order [start end])
   (let [filter (str "end-timestamp >= '" start "' and start-timestamp <= '" end "'")]
-    (-> (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
-                                  :user-roles  ["ADMIN"]})
-        second)))
+    (second (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
+                                      :user-roles  ["ADMIN"]}))))

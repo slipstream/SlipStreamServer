@@ -95,8 +95,8 @@
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defn positive-biginteger
-  [^bytes bytes]
-  (BigInteger. 1 bytes))
+  [^bytes bs]
+  (BigInteger. 1 bs))
 
 (defn uri->id
   [^String uri]
