@@ -31,6 +31,8 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.simpleframework.xml.*;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -79,6 +81,7 @@ public class ImageModule extends TargetContainerModule {
 	}
 
 	@ElementList(required = false)
+	@Fetch(FetchMode.SELECT)
 	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Package> packages = new HashSet<Package>();
 
@@ -106,6 +109,7 @@ public class ImageModule extends TargetContainerModule {
 
 	private String platform = "other";
 
+	@Fetch(FetchMode.SELECT)
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@ElementList(required = false, data = true)
 	private Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();
