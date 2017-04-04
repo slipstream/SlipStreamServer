@@ -120,17 +120,7 @@ public class Users {
 	}
 
 	private static boolean shouldLoad() {
-		List<User> users = User.list();
-
-		if (users.size() != 1) {
-			return false; // by default we should only have one user
-		}
-
-		if(!users.get(0).getName().equals(SUPER_USERNAME)) {
-			return false; // and it should be super
-		}
-
-		return true;
+		return User.isSuperAlone();
 	}
 
 	private static void loadSingleUser(File f) {
