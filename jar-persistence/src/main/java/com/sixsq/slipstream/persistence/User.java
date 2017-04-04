@@ -485,6 +485,16 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
+	public static boolean isSuperAlone() {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = em.createNamedQuery("allUsers");
+		q.setMaxResults(1);
+		List<User> list = q.getResultList();
+		em.close();
+		return list.size() == 1 && list.get(0).getName().equals("super");
+	}
+
+	@SuppressWarnings("unchecked")
 	public static List<User> listActive() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("activeUsers");
