@@ -138,6 +138,16 @@ public abstract class Module extends Parameterized<Module, ModuleParameter> impl
 	}
 
 	@SuppressWarnings("unchecked")
+	public static boolean isEmpty() {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = em.createNamedQuery("moduleAll");
+		q.setMaxResults(1);
+		List<Module> list = q.getResultList();
+		em.close();
+		return list.size() == 0;
+	}
+
+	@SuppressWarnings("unchecked")
 	public static List<ModuleView> viewList(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("moduleViewLatestChildren");

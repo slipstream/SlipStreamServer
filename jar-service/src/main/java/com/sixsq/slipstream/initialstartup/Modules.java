@@ -58,13 +58,7 @@ public class Modules {
 	}
 
 	private static boolean shouldLoad() {
-		List<Module> modules = Module.listAll();
-
-		if (modules.size() > 0) {
-			return false; // there are already modules, we don't load
-		}
-
-		return true;
+		return Module.isEmpty();
 	}
 
 	private static void loadSingleModule(File f) {

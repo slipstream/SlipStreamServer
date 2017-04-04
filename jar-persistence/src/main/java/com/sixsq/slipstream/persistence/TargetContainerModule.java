@@ -21,6 +21,8 @@ package com.sixsq.slipstream.persistence;
  */
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.simpleframework.xml.ElementList;
 
 import javax.persistence.*;
@@ -32,6 +34,7 @@ import java.util.Set;
 public abstract class TargetContainerModule extends Module {
 
     @ElementList(required = false)
+    @Fetch(FetchMode.SELECT)
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     protected Set<Target> targets = new HashSet<>();
 
