@@ -48,7 +48,7 @@ public class BasicAuthenticator extends AuthenticatorBase {
 
 	@Override
 	protected boolean authenticate(Request request, Response response) {
-		
+
 		if (request.getClientInfo().isAuthenticated()) {
 			return true;
 		}
@@ -79,7 +79,6 @@ public class BasicAuthenticator extends AuthenticatorBase {
 				String tokenValue = CookieUtils.tokenInCookie(authnCookie);
 
 				CookieUtils.addAuthnCookieFromAuthnResponse(response, token);
-				user.storeAuthnToken(tokenValue);
 
 				setClientInfo(request, username);
 				setUserInRequest(user, request);

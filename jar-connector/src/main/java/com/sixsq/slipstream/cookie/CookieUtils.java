@@ -86,50 +86,6 @@ public class CookieUtils {
 	}
 
 	/**
-	 * Insert a new authentication cookie into a Response using default id type.
-	 *
-	 * @param response
-	 * @param identifier
-	 */
-	public static void addAuthnCookie(Response response, String identifier) {
-		addAuthnCookie(response, COOKIE_DEFAULT_IDTYPE, identifier);
-	}
-
-	/**
-	 * Insert a new authentication cookie into a Response using the given
-	 * values. None of the arguments can be null.
-	 *
-	 * @param response
-	 * @param idType
-	 * @param identifier
-	 */
-	public static void addAuthnCookie(Response response, String idType,
-									  String identifier) {
-
-		Series<CookieSetting> cookieSettings = response.getCookieSettings();
-		cookieSettings.removeAll(COOKIE_NAME);
-		CookieSetting cookieSetting = createAuthnCookieSetting(idType,
-				identifier);
-		cookieSettings.add(cookieSetting);
-	}
-
-	/**
-	 * Insert a new authentication cookie into a Request using the given values.
-	 * None of the arguments can be null.
-	 *
-	 * @param identifier
-	 * @param response
-	 */
-	public static void addAuthnCookie(Request request, String identifier) {
-
-		request.getCookies().clear();
-		CookieSetting cookieSetting = createAuthnCookieSetting(
-				COOKIE_DEFAULT_IDTYPE, identifier);
-		request.getCookies().add(cookieSetting);
-
-	}
-
-	/**
 	 * Insert a new authentication cookie into a Request using the given values.
 	 * None of the arguments can be null.
 	 *
@@ -151,22 +107,6 @@ public class CookieUtils {
 	 * Creates a new authentication cookie using the provided information. None
 	 * of the arguments may be null.
 	 *
-	 * @param request
-	 * @param idType
-	 * @param identifier
-	 *
-	 * @return new authentication cookie
-	 */
-	private static CookieSetting createAuthnCookieSetting(String idType,
-														  String identifier) {
-
-		return createAuthnCookieSetting(idType, identifier, new Properties());
-	}
-
-	/**
-	 * Creates a new authentication cookie using the provided information. None
-	 * of the arguments may be null.
-	 *
 	 * @param idType
 	 * @param identifier
 	 * @param properties
@@ -174,7 +114,8 @@ public class CookieUtils {
 	 * @return new authentication cookie
 	 */
 	private static CookieSetting createAuthnCookieSetting(String idType,
-														  String identifier, Properties properties) {
+														  String identifier,
+														  Properties properties) {
 
 		String finalQuery = createCookieValue(idType, identifier, properties);
 
@@ -187,10 +128,6 @@ public class CookieUtils {
 		cookieSetting.setMaxAge(COOKIE_DEFAULT_AGE);
 
 		return cookieSetting;
-	}
-
-	public static String createCookie(String username, String cloudServiceName) {
-		return createCookie(username, cloudServiceName, null);
 	}
 
 	public static String createCookie(String username, String cloudServiceName,
@@ -233,26 +170,17 @@ public class CookieUtils {
 			form.add((String) entry.getKey(), (String) entry.getValue());
 		}
 
-		try {
-			User user = User.loadByName(identifier);
-			String authnToken = user.getAuthnToken();
+		properties.put(COOKIE_IDENTIFIER, identifier);
 
-			properties.put(COOKIE_IDENTIFIER, identifier);
+		String claimsToken = createToken(properties);
+		form.add(COOKIE_SIGNATURE, claimsToken);
 
-			String claimsToken = createToken(properties, authnToken);
-			form.add(COOKIE_SIGNATURE, claimsToken);
-		} catch (ValidationException e) {
-			logger.severe("Unable to create cookie value");
-		}
-
-		String finalQuery = form.getQueryString();
-		return finalQuery;
+		return form.getQueryString();
 	}
 
-	private static String createToken(Properties claims, String authenticationToken)
-			throws ResourceException {
+	private static String createToken(Properties claims) throws ResourceException {
 
-		String signedClaims = com.sixsq.slipstream.auth.TokenChecker.createMachineToken(claims, authenticationToken);
+		String signedClaims = com.sixsq.slipstream.auth.TokenChecker.createMachineToken(claims);
 
 		logger.info(String.format("generated machine token: %s", signedClaims));
 

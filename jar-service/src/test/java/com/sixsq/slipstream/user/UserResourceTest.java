@@ -29,6 +29,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.persistence.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
@@ -388,10 +389,10 @@ public class UserResourceTest extends ResourceTestBase {
 
 		String paramName = ExecutionControlUserParametersFactory.CATEGORY + "."
 				+ ExecutionControlUserParametersFactory.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME;
-		
+
 		UserParameter p = new UserParameter(paramName, LocalConnector.CLOUD_SERVICE_NAME, "description");
 		user.setParameter(p);
-		
+
 		Request request = createPutRequest(user, user.getName());
 		Response response = executeRequest(request);
 

@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.user;
+package com.sixsq.slipstream.persistence;
 
 /*
  * +=================================================================+
@@ -21,9 +21,8 @@ package com.sixsq.slipstream.user;
  */
 
 import com.sixsq.slipstream.exceptions.*;
-import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
-import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.user.UserView;
 import com.sixsq.slipstream.util.SerializationUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -334,7 +333,6 @@ public class UserTest {
 		user.setFirstName("Te");
 		user.setLastName("st");
 		user.setEmail("test@example.com");
-		user.setAuthnToken("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXUyJ9.eyJjb20uc2l4c3EuaWRlbnRpZmllciI6InN1cGVyIiwiZXhwIjoxNDQ1MjYyNzE2fQ.UDJJ93hnBCEy2H1_se6rrKvLGoOEbNPXEHF7njmPS9eP7FlNdLvLu4i7FuwlJcAWrNLVU3NrR2JSMucIld_wLdSNukYmsrK_HrKMOpN3jnSvfbfSfHPHlycTELzOXVBAbkAqdpaZpzn3lds0OyayxCu-dC3cvh3fv-15P79-nO6nb56IHeoXPS-hnZ2Cdm3DQA07pLHoFvVjoYsYFpCg1UJxivrweYvAjl3j9gxLRWAFeNW_82ZrtbMCHDB_KEd5dto36raQC9zpDrmXTA5SkzIptuYLCHpcijnTOpWRf1G4bZLyPhqpkiMAbWPxHumqsd1cXzvomh788KLsWRYZwA");
 
 		try {
 			user.setKeepRunning(UserParameter.KEEP_RUNNING_ON_ERROR);
