@@ -70,6 +70,7 @@
           href-create {:sessionTemplate {:href     href
                                          :username "user"
                                          :password "user"}}
+          unauthorized-create (update-in href-create [:sessionTemplate :password] (constantly "BAD"))
           invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
@@ -78,6 +79,16 @@
           (ltu/body->edn)
           (ltu/is-status 200)
           (ltu/is-count zero?))
+
+      ;; unauthorized create must return a 403 response
+      (-> (session (ring-app))
+          (content-type "application/json")
+          (header authn-info-header "unknown ANON")
+          (request base-uri
+                   :request-method :post
+                   :body (json/write-str unauthorized-create))
+          (ltu/body->edn)
+          (ltu/is-status 403))
 
       ;; anonymous create must succeed (normal create and href create)
       (let [resp (-> (session (ring-app))

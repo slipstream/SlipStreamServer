@@ -82,10 +82,11 @@
 (defmethod p/tpl->session authn-method
   [resource {:keys [headers] :as request}]
   (let [credentials (select-keys resource #{:username :password})]
-    (when (auth-internal/valid? credentials)
+    (if (auth-internal/valid? credentials)
       (let [session (create-session credentials headers)
             claims (create-claims credentials headers session)
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)
             session (assoc session :expiry expires)]
-        [{:cookies {(cookie-name session) cookie}} session]))))
+        [{:cookies {(cookie-name session) cookie}} session])
+      (throw (u/ex-unauthorized (:username credentials))))))
