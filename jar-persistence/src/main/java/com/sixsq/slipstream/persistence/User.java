@@ -55,8 +55,6 @@ import java.util.regex.Pattern;
 		@NamedQuery(name = "userViewList", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization, u.roles, u.isSuperUser) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
 
-	private static Logger logger = Logger.getLogger(User.class.getName());
-
 	public static final String REQUEST_KEY = "authenticated_user";
 
 	public static final String RESOURCE_URL_PREFIX = "user/";

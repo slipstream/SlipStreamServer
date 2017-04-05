@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.user;
+package com.sixsq.slipstream.persistence;
 
 /*
  * +=================================================================+
@@ -21,9 +21,8 @@ package com.sixsq.slipstream.user;
  */
 
 import com.sixsq.slipstream.exceptions.*;
-import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
-import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.user.UserView;
 import com.sixsq.slipstream.util.SerializationUtil;
 import org.junit.After;
 import org.junit.Before;
