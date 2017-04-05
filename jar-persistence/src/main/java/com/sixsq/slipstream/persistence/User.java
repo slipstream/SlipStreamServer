@@ -570,14 +570,6 @@ public class User extends Parameterized<User, UserParameter> {
 		return getParameterValue(key, UserParameter.MAIL_USAGE_DEFAULT);
 	}
 
-	public String getAuthnToken() {
-		return authnToken;
-	}
-
-	public void setAuthnToken(String authnToken) {
-		this.authnToken = authnToken;
-	}
-
 	public boolean setRolesFromUserIfNull(User user) throws ValidationException {
 		if (roles == null && user != null) {
 			setRoles(user.roles);
@@ -619,18 +611,6 @@ public class User extends Parameterized<User, UserParameter> {
 		} else {
 			checkNoForbiddenRoles(roles);
 		}
-	}
-
-	public void storeAuthnToken(String authnToken) {
-
-		boolean alreadyStored = authnToken != null && authnToken.equals(this.authnToken);
-		if (alreadyStored) {
-			return;
-		}
-
-		setAuthnToken(authnToken);
-		store();
-		logger.info("Stored authentication token: " + authnToken);
 	}
 
 }

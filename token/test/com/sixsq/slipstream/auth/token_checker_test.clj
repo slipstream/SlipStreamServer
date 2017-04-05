@@ -28,15 +28,12 @@
 
 (deftest check-machine-token
   (with-redefs [environ/env env-fixture/env-map]
-    (let [auth-token (t/create-token {:alpha 1, :beta true, :gamma "OK"})
-          machine-claims (Properties.)
+    (let [machine-claims (Properties.)
           _ (.setProperty machine-claims "com.sixsq.identifier" "machine")
           _ (.setProperty machine-claims "com.sixsq.roles" "USER ANON")
           _ (.setProperty machine-claims "com.sixsq.machine" "true")]
-      (is (nil? (t/-createMachineToken machine-claims "INVALID")))
-      (is (nil? (t/-createMachineToken machine-claims nil)))
-      (is (nil? (t/-createMachineToken nil auth-token)))
-      (is (not (str/blank? (t/-createMachineToken machine-claims auth-token)))))))
+      (is (nil? (t/-createMachineToken nil)))
+      (is (not (str/blank? (t/-createMachineToken machine-claims)))))))
 
 (deftest check-claims-in-token
   (with-redefs [environ/env env-fixture/env-map]

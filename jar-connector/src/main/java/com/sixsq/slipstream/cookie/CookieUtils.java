@@ -233,26 +233,17 @@ public class CookieUtils {
 			form.add((String) entry.getKey(), (String) entry.getValue());
 		}
 
-		try {
-			User user = User.loadByName(identifier);
-			String authnToken = user.getAuthnToken();
+		properties.put(COOKIE_IDENTIFIER, identifier);
 
-			properties.put(COOKIE_IDENTIFIER, identifier);
+		String claimsToken = createToken(properties);
+		form.add(COOKIE_SIGNATURE, claimsToken);
 
-			String claimsToken = createToken(properties, authnToken);
-			form.add(COOKIE_SIGNATURE, claimsToken);
-		} catch (ValidationException e) {
-			logger.severe("Unable to create cookie value");
-		}
-
-		String finalQuery = form.getQueryString();
-		return finalQuery;
+		return form.getQueryString();
 	}
 
-	private static String createToken(Properties claims, String authenticationToken)
-			throws ResourceException {
+	private static String createToken(Properties claims) throws ResourceException {
 
-		String signedClaims = com.sixsq.slipstream.auth.TokenChecker.createMachineToken(claims, authenticationToken);
+		String signedClaims = com.sixsq.slipstream.auth.TokenChecker.createMachineToken(claims);
 
 		logger.info(String.format("generated machine token: %s", signedClaims));
 
