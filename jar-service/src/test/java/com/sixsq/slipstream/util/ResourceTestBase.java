@@ -54,7 +54,7 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.run.RunTestBase;
-import com.sixsq.slipstream.user.UserTest;
+import com.sixsq.slipstream.persistence.UserTest;
 
 public class ResourceTestBase extends RunTestBase {
 

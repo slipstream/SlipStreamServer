@@ -88,11 +88,6 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		setCloudServiceName(request, cookie);
 		setUserInRequest(user, request);
 
-		String tokenInCookie = CookieUtils.tokenInCookie(cookie);
-		if(tokenInCookie != null) {
-			user.storeAuthnToken(tokenInCookie);
-		}
-
 		if (!CookieUtils.isMachine(cookie)) {
 			setLastOnline(cookie);
 		}

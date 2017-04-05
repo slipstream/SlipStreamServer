@@ -6,7 +6,7 @@
   (:import [java.util Map Properties])
   (:gen-class
     :name com.sixsq.slipstream.auth.TokenChecker
-    :methods [^:static [createMachineToken [java.util.Properties String] String]
+    :methods [^:static [createMachineToken [java.util.Properties] String]
               ^:static [claimsInToken [String] java.util.Map]]))
 
 (defn create-token
@@ -33,12 +33,11 @@
   (into {} (map (fn [[k v]] [(keyword k) v]) claims)))
 
 (defn -createMachineToken
-  "signs the claims for a machine token if the given user authentication token is valid"
-  [^Properties claims ^String token]
-  (when (valid-token? token)
-    (some-> claims
-            keywordize-properties
-            create-token)))
+  "signs the claims for a machine token"
+  [^Properties claims]
+  (some-> claims
+          keywordize-properties
+          create-token))
 
 (defn -claimsInToken
   "Validates the given token and returns the embedded claims.  If the token

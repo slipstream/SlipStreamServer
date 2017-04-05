@@ -55,8 +55,6 @@ import java.util.regex.Pattern;
 		@NamedQuery(name = "userViewList", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization, u.roles, u.isSuperUser) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
 
-	private static Logger logger = Logger.getLogger(User.class.getName());
-
 	public static final String REQUEST_KEY = "authenticated_user";
 
 	public static final String RESOURCE_URL_PREFIX = "user/";
@@ -570,14 +568,6 @@ public class User extends Parameterized<User, UserParameter> {
 		return getParameterValue(key, UserParameter.MAIL_USAGE_DEFAULT);
 	}
 
-	public String getAuthnToken() {
-		return authnToken;
-	}
-
-	public void setAuthnToken(String authnToken) {
-		this.authnToken = authnToken;
-	}
-
 	public boolean setRolesFromUserIfNull(User user) throws ValidationException {
 		if (roles == null && user != null) {
 			setRoles(user.roles);
@@ -619,18 +609,6 @@ public class User extends Parameterized<User, UserParameter> {
 		} else {
 			checkNoForbiddenRoles(roles);
 		}
-	}
-
-	public void storeAuthnToken(String authnToken) {
-
-		boolean alreadyStored = authnToken != null && authnToken.equals(this.authnToken);
-		if (alreadyStored) {
-			return;
-		}
-
-		setAuthnToken(authnToken);
-		store();
-		logger.info("Stored authentication token: " + authnToken);
 	}
 
 }
