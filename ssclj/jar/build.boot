@@ -61,7 +61,6 @@
 
                    ;; test dependencies
                    [peridot]
-                   [expectations]
                    [honeysql]
 
                    ;; boot tasks
