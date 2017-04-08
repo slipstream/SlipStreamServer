@@ -4,23 +4,20 @@
 
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamCljResources</artifactId>
-  <version>3.19-SNAPSHOT</version>
-  <name>SlipStream SSCLJ (POM)</name>
-
-  <description>A server with the clojure-based resources.</description>
+  <version>3.26-SNAPSHOT</version>
+  <name>SlipStreamServer/ssclj</name>
 
   <packaging>pom</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.19-SNAPSHOT</version>
+    <version>3.26-SNAPSHOT</version>
   </parent>
 
   <modules>
     <module>jar</module>
     <module>tools</module>
-    <module>service-catalog</module>
   </modules>
 
   <profiles>
@@ -33,7 +30,6 @@
       </activation>
       <modules>
         <module>rpm</module>
-        <module>service-catalog-rpm</module>
       </modules>
     </profile>
     <profile>
@@ -45,7 +41,6 @@
       </activation>
       <modules>
         <module>rpm</module>
-        <module>service-catalog-rpm</module>
       </modules>
     </profile>
   </profiles>

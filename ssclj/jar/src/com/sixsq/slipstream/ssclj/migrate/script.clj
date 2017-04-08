@@ -30,8 +30,8 @@
   [(id->uuid (:id (esu/json->edn json))) json])
 
 (defn- bulk-store
-  [type jsons]
-  (esu/bulk-create esb/*client* esb/index-name type (map json->uuid-doc jsons)))
+  [ty jsons]
+  (esu/bulk-create esb/*client* esb/index-name ty (map json->uuid-doc jsons)))
 
 (defn- find-resource
   [resource-path]
@@ -51,8 +51,8 @@
    :make-pool?  true})
 
 (def db-spec
-  (if-let [config-path (environ/env :config-path)]
-    (-> config-path
+  (if-let [config-name (environ/env :config-name)]
+    (-> config-name
         find-resource
         slurp
         edn/read-string
@@ -168,8 +168,8 @@
        (map esu/edn->json)))
 
 (defn assoc-id
-  [type m]
-  (assoc m :id (str type "/" (u/random-uuid))))
+  [ty m]
+  (assoc m :id (str ty "/" (u/random-uuid))))
 
 (defmethod data->jsons :usage-record
   [[_ start end]]

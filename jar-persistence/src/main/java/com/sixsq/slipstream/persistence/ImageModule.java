@@ -31,6 +31,8 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.simpleframework.xml.*;
 
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -61,9 +63,9 @@ public class ImageModule extends TargetContainerModule {
 	private static final String VOLATILE_DISK_VALUE_REGEX = "^[0-9]*$";
 	private static final String VOLATILE_DISK_VALUE_REGEXERROR = "Integer value expected for volatile extra disk";
 
-	private static final String CPU_PARAM = "cpu.nb";
-	private static final String RAM_PARAM = "ram.GB";
-	private static final String DISK_PARAM = "disk.GB";
+	public static final String CPU_PARAM = "cpu.nb";
+	public static final String RAM_PARAM = "ram.GB";
+	public static final String DISK_PARAM = "disk.GB";
 
 	private static class BuildState implements Serializable {
 		@Attribute
@@ -79,6 +81,7 @@ public class ImageModule extends TargetContainerModule {
 	}
 
 	@ElementList(required = false)
+	@Fetch(FetchMode.SELECT)
 	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Package> packages = new HashSet<Package>();
 
@@ -106,6 +109,7 @@ public class ImageModule extends TargetContainerModule {
 
 	private String platform = "other";
 
+	@Fetch(FetchMode.SELECT)
 	@OneToMany(mappedBy = "container", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@ElementList(required = false, data = true)
 	private Set<CloudImageIdentifier> cloudImageIdentifiers = new HashSet<CloudImageIdentifier>();

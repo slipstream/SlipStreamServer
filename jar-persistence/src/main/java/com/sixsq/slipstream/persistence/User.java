@@ -55,8 +55,6 @@ import java.util.regex.Pattern;
 		@NamedQuery(name = "userViewList", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization, u.roles, u.isSuperUser) FROM User u") })
 public class User extends Parameterized<User, UserParameter> {
 
-	private static Logger logger = Logger.getLogger(User.class.getName());
-
 	public static final String REQUEST_KEY = "authenticated_user";
 
 	public static final String RESOURCE_URL_PREFIX = "user/";
@@ -195,6 +193,21 @@ public class User extends Parameterized<User, UserParameter> {
 		return isSuperUser;
 	}
 
+	public String getOrganizationManagedForUserCreator() {
+		if (this.roles != null) {
+			String[] rolesArray = roles.split(",");
+			for (String r : rolesArray) {
+				if (r.startsWith("USERCREATOR")) {
+					if (r.indexOf("_") > -1)
+						return r.substring(r.indexOf("_") + 1);
+					else
+						return null;
+				}
+			}
+		}
+		return null;
+	}
+
 	public void setSuper(boolean isSuperUser) {
 		this.isSuperUser = isSuperUser;
 	}
@@ -262,7 +275,19 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	public void hashAndSetPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		setHashedPassword(Passwords.hash(password));
+		String hashedPassword = "";
+		if (password != null && !password.isEmpty()) {
+			hashedPassword = Passwords.hash(password);
+		}
+		setHashedPassword(hashedPassword);
+	}
+
+	public boolean setPasswordFromUserIfNull(User user) throws ValidationException {
+		if (password == null && user != null) {
+			setHashedPassword(user.password);
+			return true;
+		}
+		return false;
 	}
 
 	@Attribute(name = "password", required = false)
@@ -458,6 +483,16 @@ public class User extends Parameterized<User, UserParameter> {
 	}
 
 	@SuppressWarnings("unchecked")
+	public static boolean isSuperAlone() {
+		EntityManager em = PersistenceUtil.createEntityManager();
+		Query q = em.createNamedQuery("allUsers");
+		q.setMaxResults(1);
+		List<User> list = q.getResultList();
+		em.close();
+		return list.size() == 1 && list.get(0).getName().equals("super");
+	}
+
+	@SuppressWarnings("unchecked")
 	public static List<User> listActive() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		Query q = em.createNamedQuery("activeUsers");
@@ -533,12 +568,12 @@ public class User extends Parameterized<User, UserParameter> {
 		return getParameterValue(key, UserParameter.MAIL_USAGE_DEFAULT);
 	}
 
-	public String getAuthnToken() {
-		return authnToken;
-	}
-
-	public void setAuthnToken(String authnToken) {
-		this.authnToken = authnToken;
+	public boolean setRolesFromUserIfNull(User user) throws ValidationException {
+		if (roles == null && user != null) {
+			setRoles(user.roles);
+			return true;
+		}
+		return false;
 	}
 
 	public String getRoles() {
@@ -574,18 +609,6 @@ public class User extends Parameterized<User, UserParameter> {
 		} else {
 			checkNoForbiddenRoles(roles);
 		}
-	}
-
-	public void storeAuthnToken(String authnToken) {
-
-		boolean alreadyStored = authnToken != null && authnToken.equals(this.authnToken);
-		if (alreadyStored) {
-			return;
-		}
-
-		setAuthnToken(authnToken);
-		store();
-		logger.info("Stored authentication token: " + authnToken);
 	}
 
 }

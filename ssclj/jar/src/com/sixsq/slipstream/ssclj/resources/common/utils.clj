@@ -3,7 +3,7 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.edn :as edn]
-    [superstring.core :as s]
+    [superstring.core :as str]
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
     [clj-time.coerce :as time-coerse]
@@ -12,7 +12,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [clojure.data.json :as json])
   (:import
-    [java.util UUID Date]
+    [java.util Date List Map UUID]
     [javax.xml.bind DatatypeConverter]))
 
 ;;
@@ -23,9 +23,9 @@
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.
-(defn de-camelcase [str]
-  (if str
-    (s/join "-" (map s/lower-case (s/split str #"(?=[A-Z])")))
+(defn de-camelcase [s]
+  (if s
+    (str/join "-" (map str/lower-case (str/split s #"(?=[A-Z])")))
     ""))
 
 (defn json-response
@@ -80,8 +80,7 @@
 
 (defn ex-bad-CIMI-filter
   [parse-failure]
-  (-> (str "Invalid CIMI filter. " (prn-str parse-failure))
-      (ex-response 400)))
+  (ex-response (str "Invalid CIMI filter. " (prn-str parse-failure)) 400))
 
 ;;
 ;; resource ID utilities
@@ -99,7 +98,7 @@
 (defn resource-name
   [resource-id]
   (-> resource-id
-      (s/split #"/")
+      (str/split #"/")
       first))
 
 (defn split-resource-id
@@ -107,8 +106,8 @@
    that don't have an identifier part (e.g. the CloudEntryPoint),
    a single element vector will be returned."
   [id]
-  (let [[type docid] (s/split id #"/")]
-    [type (if docid docid type)]))
+  (let [[type docid] (str/split id #"/")]
+    [type (or docid type)]))
 
 ;;
 ;; utilities for handling common attributes
@@ -152,10 +151,6 @@
   [data]
   (time-fmt/parse (:date-time time-fmt/formatters) data))
 
-(defn valid-number?
-  [s]
-  (number? (read-string s)))
-
 (defn create-validation-fn
   "Creates a validation function that compares a resource against the
    given schema.  The generated function raises an exception with the
@@ -172,13 +167,6 @@
           (log/warn msg)
           (throw (ex-info msg response)))
         resource))))
-
-(defn decrypt
-  "This function should eventually decrypt the given value based on
-   one or more public keys.  Currently a no-op that just returns the
-   given value."
-  [value]
-  value)
 
 (defn encode-base64
   "Encodes a clojure value or data structure (EDN) into a base64
@@ -201,8 +189,8 @@
 (defn- clojurify
   [exp]
   (cond
-    (instance? java.util.Map exp) (into {} (map (fn [[k v]] [(keyword k) v]) exp))
-    (instance? java.util.List exp) (vec exp)
+    (instance? Map exp) (into {} (map (fn [[k v]] [(keyword k) v]) exp))
+    (instance? List exp) (vec exp)
     :else exp))
 
 (defn walk-clojurify
@@ -230,16 +218,22 @@
     (do
       (log/warn s " is not lisp-cased.")
       "")
-    (s/pascal-case s)))
+    (str/pascal-case s)))
 
 (defn map-multi-line
   [m]
   (str "\n" (clojure.pprint/write m :stream nil :right-margin 50)))
 
+(defn- name-plus-namespace
+  [kw]
+  (if (keyword? kw)
+    (subs (str kw) 1)
+    (name kw)))
+
 (defn serialize
   [resource]
   (with-out-str
-    (json/pprint resource :key-fn name)))
+    (json/pprint resource :key-fn name-plus-namespace)))
 
 (defn deserialize
   [s]

@@ -12,18 +12,20 @@
     [com.sixsq.slipstream.db.es.es-order :as od]
     [com.sixsq.slipstream.db.es.es-filter :as ef])
   (:import
-    [org.elasticsearch.node NodeBuilder Node]
-    [org.elasticsearch.common.settings Settings]
-    [org.elasticsearch.common.unit TimeValue]
-    [org.elasticsearch.cluster.health ClusterHealthStatus]
-    [org.elasticsearch.client Client]
-    [org.elasticsearch.action.search SearchType SearchPhaseExecutionException]
+    (org.elasticsearch.node Node)
+    (org.elasticsearch.common.settings Settings)
+    (org.elasticsearch.common.unit TimeValue)
+    (org.elasticsearch.cluster.health ClusterHealthStatus)
+    (org.elasticsearch.client Client)
+    (org.elasticsearch.action.search SearchType SearchPhaseExecutionException)
+    (org.elasticsearch.action.support WriteRequest$RefreshPolicy WriteRequest)
     (org.elasticsearch.action.bulk BulkRequestBuilder)
     (org.elasticsearch.action ActionRequestBuilder)
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
     (org.elasticsearch.index.query QueryBuilders)
     (org.elasticsearch.index IndexNotFoundException)
-    (org.elasticsearch.client.transport TransportClient)
+    (org.elasticsearch.transport.client PreBuiltTransportClient)
+    (org.elasticsearch.plugins Plugin)
     (org.elasticsearch.common.transport InetSocketTransportAddress)
     (java.net InetAddress)
     (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)))
@@ -35,7 +37,7 @@
   (json/write-str edn))
 
 ;;
-;; Elastic Search implementations of CRUD actions
+;; Elasticsearch implementations of CRUD actions
 ;;
 
 (defn create
@@ -43,10 +45,10 @@
   (.. client
       (prepareIndex index type docid)
       (setCreate true)
-      (setRefresh true)
+      (setRefreshPolicy WriteRequest$RefreshPolicy/IMMEDIATE)
       (setSource json)
       (get)
-      (isCreated)))
+      (status)))
 
 (defn read
   [^Client client index type docid]
@@ -58,7 +60,7 @@
   [^Client client index type docid json]
   (.. client
       (prepareUpdate index type docid)
-      (setRefresh true)
+      (setRefreshPolicy WriteRequest$RefreshPolicy/IMMEDIATE)
       (setDoc json)
       (get)))
 
@@ -71,9 +73,9 @@
 (defn search
   [^Client client index type options]
   (try
-    (let [query (-> options
-                    ef/es-filter
-                    (acl/and-acl options))
+    (let [query                         (-> options
+                                            ef/es-filter
+                                            (acl/and-acl options))
 
           [from size] (pg/from-size options)
           ^ActionRequestBuilder request (.. client
@@ -84,13 +86,13 @@
                                             (setFrom from)
                                             (setSize size))
 
-          request-with-sort (od/add-sorters-from-cimi request options)]
+          request-with-sort             (od/add-sorters-from-cimi request options)]
       (.get request-with-sort))
     (catch IndexNotFoundException infe
-      (log/warn (str "Searching for index '" index "' not yet created, returns empty"))
+      (log/warn "index" index "not found, returning empty search result")
       [])
     (catch SearchPhaseExecutionException spee
-      (log/warn (str "Searching failed: " (.getMessage spee) ", returns empty"))
+      (log/warn "search failed:" (.getMessage spee) ", returning empty search result")
       [])))
 
 ;;
@@ -136,18 +138,18 @@
    cannot be accessed through the HTTP protocol."
   ([]
    (create-test-node (cu/random-uuid)))
-
   ([^String cluster-name]
-   (let [home (str (fs/temp-dir "es-data-"))
-         settings (.. (Settings/settingsBuilder)
+   (let [home     (str (fs/temp-dir "es-data-"))
+         settings (.. (Settings/builder)
                       (put "http.enabled" false)
                       (put "node.data" true)
                       (put "cluster.name" cluster-name)
-                      (put "path.home" home))]
-     (.. (NodeBuilder/nodeBuilder)
-         (settings settings)
-         (local true)
-         (node)))))
+                      (put "transport.type" "local")
+                      (put "path.home" home)
+                      (put "logger.level" "INFO")
+                      (build))]
+     (.. (Node. ^Settings settings)
+         (start)))))
 
 (def ^:const mapping-not-analyzed
   (-> "com/sixsq/slipstream/db/es/mapping-not-analyzed.json"
@@ -156,24 +158,21 @@
 
 (defn index-exists?
   [^Client client index-name]
-  (let [exists? (.. client
-                    (admin)
-                    (indices)
-                    (exists (IndicesExistsRequest. (into-array String [index-name])))
-                    (get)
-                    (isExists))]
-    (log/info (str "Index "
-                   index-name
-                   (if exists? " already existing." " does not exist.")))
-    exists?))
+  (.. client
+      (admin)
+      (indices)
+      (exists (IndicesExistsRequest. (into-array String [index-name])))
+      (get)
+      (isExists)))
 
 (defn create-index
   [^Client client index-name]
-  (log/info (str "Creating index " index-name))
+  (log/info "creating index:" index-name)
   (let [settings (.. (Settings/builder)
                      (put "index.max_result_window" pg/max-result-window)
                      (put "index.number_of_shards" 3)
-                     (put "index.number_of_replicas" 0))]
+                     (put "index.number_of_replicas" 0)
+                     (build))]
     (.. client
         (admin)
         (indices)
@@ -203,18 +202,14 @@
   (when node (.client node)))
 
 (defn create-es-client
-  "Creates a client connecting to an instance of Elastic Search
+  "Creates a client connecting to an instance of Elasticsearch
   Parameters (host and port) are taken from environment variables."
   []
-  (let [es-host (env/env :es-host)
-        es-port (env/env :es-port)]
+  (let [es-host (or (env/env :es-host) "localhost")
+        es-port (or (env/env :es-port) "9300")]
 
-    (when (some empty? [es-host es-port])
-      (throw (Exception. "Please configure ES_HOST and ES_PORT properties (Elastic Search)")))
-
-    (log/info (str "Will create Elastic Search client on " es-host ", port " es-port))
-    (.. (TransportClient/builder)
-        (build)
+    (log/info "creating elasticsearch client:" es-host es-port)
+    (.. (new PreBuiltTransportClient ^Settings Settings/EMPTY [])
         (addTransportAddress (InetSocketTransportAddress. (InetAddress/getByName es-host)
                                                           (read-string es-port))))))
 

@@ -1760,6 +1760,20 @@ nuvlabox-demo:nuvlabox]]></value>
          </parameter>
       </entry>
       <entry>
+         <string>slipstream.metrics.logger.enable</string>
+         <parameter name="slipstream.metrics.logger.enable" description="Send internal metrics to the log" category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.metrics.graphite.enable</string>
+         <parameter name="slipstream.metrics.graphite.enable" description="Send internal metrics to graphite" category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[]]></instructions>
+            <value><![CDATA[false]]></value>
+         </parameter>
+      </entry>
+      <entry>
          <string>ec2-ap-southeast-1.orchestrator.instance.type</string>
          <parameter name="ec2-ap-southeast-1.orchestrator.instance.type" description="Orchestrator instance type" category="ec2-ap-southeast-1" mandatory="true" type="Enum" readonly="false" order_="0" order="0">
             <enumValues length="42">
@@ -1935,13 +1949,6 @@ nuvlabox-demo:nuvlabox]]></value>
          <string>nuvlabox-henry-dunant.quota.vm</string>
          <parameter name="nuvlabox-henry-dunant.quota.vm" description="VM quota for nuvlabox-henry-dunant (i.e. maximum number of VMs allowed)" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="false" order_="910" order="910">
             <value><![CDATA[8]]></value>
-         </parameter>
-      </entry>
-      <entry>
-         <string>slipstream.prs.enable</string>
-         <parameter name="slipstream.prs.enable" description="Placement and Ranking enabled" category="SlipStream_Advanced" mandatory="true" type="Boolean" readonly="false" order_="0" order="0">
-            <instructions><![CDATA[]]></instructions>
-            <value><![CDATA[false]]></value>
          </parameter>
       </entry>
       <entry>
@@ -2349,13 +2356,6 @@ nuvlabox-demo:nuvlabox]]></value>
          <parameter name="cyclone-fr2.orchestrator.ssh.username" description="Orchestrator username" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="0" order="0">
             <instructions><![CDATA[Username used to contextualize the orchestrator VM. Leave this field empty if you are using a native Cloud contextualization.]]></instructions>
             <value><![CDATA[]]></value>
-         </parameter>
-      </entry>
-      <entry>
-         <string>slipstream.prs.endpoint</string>
-         <parameter name="slipstream.prs.endpoint" description="Endpoint of the Placement and Ranking Service" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <instructions><![CDATA[]]></instructions>
-            <value><![CDATA[http://localhost:8203/filter-rank]]></value>
          </parameter>
       </entry>
       <entry>

@@ -53,9 +53,6 @@
    :registrationEnable         "slipstream.registration.enable"
    :registrationEmail          "slipstream.registration.email"
 
-   :prsEnable                  "slipstream.prs.enable"
-   :prsEndpoint                "slipstream.prs.endpoint"
-
    :meteringEnable             "slipstream.metering.enable"
    :meteringEndpoint           "slipstream.metering.hostname"
 
@@ -64,6 +61,9 @@
    :slipstreamVersion          "slipstream.version"
 
    :cloudConnectorClass        "cloud.connector.class"
+
+   :metricsLoggerEnable        "slipstream.metrics.logger.enable"
+   :metricsGraphiteEnable      "slipstream.metrics.graphite.enable"
    })
 
 (def param->rname (set/map-invert rname->param))

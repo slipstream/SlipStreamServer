@@ -22,6 +22,8 @@ package com.sixsq.slipstream.persistence;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
 import org.hibernate.annotations.CollectionType;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.simpleframework.xml.ElementMap;
 
 import javax.persistence.CascadeType;
@@ -42,6 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DeploymentModule extends TargetContainerModule {
 
 	@ElementMap(required = false)
+	@Fetch(FetchMode.SELECT)
 	@OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@CollectionType(type = "com.sixsq.slipstream.persistence.ConcurrentHashMapType")
 	private Map<String, Node> nodes = new ConcurrentHashMap<String, Node>();

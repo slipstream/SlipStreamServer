@@ -21,6 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.QuotaException;
@@ -37,11 +38,14 @@ import java.util.Map;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
+
 public class QuotaTest {
 
 	@BeforeClass
 	public static void setupClass() {
 		Event.muteForTests();
+                CljElasticsearchHelper.createAndInitTestDb();
 	}
 
 	private Run testQuotaCreateRun(User user, String cloud)

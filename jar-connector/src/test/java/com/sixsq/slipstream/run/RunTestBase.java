@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.connector.local.LocalConnector;
@@ -36,7 +35,7 @@ public class RunTestBase {
 	protected static ImageModule imagebase = null;
 	protected static ImageModule imagenoref = null;
 	protected static ImageModule imagebuildme = null;
-	protected static Connector localConnector = new LocalConnector();
+	protected static LocalConnector localConnector = new LocalConnector();
 	protected static final String cloudServiceName = localConnector.getCloudServiceName();
 	protected static final Set<String> cloudServiceNames = new HashSet<String>(Arrays.asList(cloudServiceName));
 

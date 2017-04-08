@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.db.es.es-util :as esu]
     [com.sixsq.slipstream.db.es.acl :as acl]
     [com.sixsq.slipstream.db.binding :refer [Binding]])
-  (:import (org.elasticsearch.index.engine DocumentAlreadyExistsException)
+  (:import (org.elasticsearch.index.engine VersionConflictEngineException)
            (clojure.lang ExceptionInfo)))
 
 (def ^:const index-name "resources-index")
@@ -46,7 +46,7 @@
   Exception for cloud-entry-point: in this case id is only type (there is only one cloud-entry-point)"
   [id]
   (let [[type docid] (s/split id #"/")]
-    [type (if docid docid type)]))
+    [type (or docid type)]))
 
 (defn- data->doc
   "Prepares data before insertion in index
@@ -119,9 +119,9 @@
         (if (esu/create *client* index-name (cu/de-camelcase type) uuid json)
           (response-created id)
           (response-error))
-        (catch DocumentAlreadyExistsException e
-          (response-conflict id))))
-    )
+        (catch VersionConflictEngineException e
+          (response-conflict id)))))
+
 
   (retrieve [_ id options]
     (find-data *client* index-name id options "VIEW"))
@@ -129,7 +129,7 @@
   (delete [_ {:keys [id]} options]
     (find-data *client* index-name id options "ALL")
     (let [[type docid] (split-id id)]
-      (.isFound (esu/delete *client* index-name type docid)))
+      (.status (esu/delete *client* index-name type docid)))
     (response-deleted id))
 
   (edit [_ {:keys [id] :as data} options]

@@ -18,6 +18,8 @@
   (let-routes [uri (str p/service-context ":resource-name")]
     (POST uri request
       (crud/add request))
+    (PUT uri request
+      (crud/query request))
     (GET uri request
       (crud/query request))
     (ANY uri request
@@ -50,14 +52,11 @@
   (let-routes [uri-login   (str p/auth-context "login")
                uri-logout  (str p/auth-context "logout")
 
-               uri-token   (str p/auth-context "token")
                uri-github  (str p/auth-context "callback-github")
                uri-cyclone (str p/auth-context "callback-cyclone")]
 
     (POST uri-login request (auth/login request))
     (POST uri-logout request (auth/logout request))
-
-    (POST uri-token request (auth/build-token request))
 
     (GET uri-github request (gh/callback-github request (cf/property-value :main-server)))
     (GET uri-cyclone request (cy/callback-cyclone request (cf/property-value :main-server)))))

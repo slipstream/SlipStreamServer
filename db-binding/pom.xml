@@ -3,15 +3,14 @@
 
   <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.19-SNAPSHOT</version>
-  <name>SlipStreamDbBinding-jar-dep</name>
-  <description>SlipStream bindings to database (DEP)</description>
+  <version>3.26-SNAPSHOT</version>
+  <name>SlipStreamServer/db-binding</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.19-SNAPSHOT</version>
+    <version>3.26-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -26,6 +25,7 @@
       <groupId>sixsq</groupId>
       <artifactId>default-deps</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -78,21 +78,11 @@
             </goals>
             <configuration>
               <executable>boot</executable>
+              <environmentVariables>
+                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
+              </environmentVariables>
               <arguments>
                 <argument>mvn-build</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>boot-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>boot</executable>
-              <arguments>
-                <argument>mvn-deploy</argument>
               </arguments>
             </configuration>
           </execution>

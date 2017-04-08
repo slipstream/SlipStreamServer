@@ -56,7 +56,6 @@
 (defn complete-resource
   "Completes the given document with server-managed information:
    resourceURI, timestamps, operations, and ACL."
-  [resource]
   [{:keys [service] :as resource}]
   (when service
     (let [href (str resource-url "/describe")

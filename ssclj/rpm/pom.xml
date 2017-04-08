@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>ssclj-server-rpm</artifactId>
-  <name>SlipStream SSCLJ Server (RPM)</name>
+  <name>SlipStreamServer/ssclj/rpm</name>
 
   <packaging>pom</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>3.19-SNAPSHOT</version>
+    <version>3.26-SNAPSHOT</version>
   </parent>
 
   <!-- NOTE: This project MUST have same version as proxy module. -->
@@ -24,6 +24,7 @@
       <artifactId>SlipStreamCljResources-jar-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
@@ -36,6 +37,7 @@
       <artifactId>SlipStreamToolsCli-jar-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
@@ -210,7 +212,7 @@
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream SSCLJ Server</summary>
-          <name>slipstream-ssclj${slipstream.edition}</name>
+          <name>slipstream-ssclj</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
@@ -222,11 +224,17 @@
           </description>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
-            <require>slipstream-useradd${slipstream.edition}</require>
+            <require>slipstream-useradd</require>
           </requires>
+          <obsoletes>
+            <obsolete>slipstream-service-catalog</obsolete>
+            <obsolete>slipstream-ssclj-community</obsolete>
+            <obsolete>slipstream-ssclj-enterprise</obsolete>
+          </obsoletes>
 
           <postinstallScriptlet>
             <script>
+${installation.dir}/bin/generate-auth-keys.sh
 /usr/bin/systemctl enable ssclj.service
             </script>
           </postinstallScriptlet>
@@ -352,8 +360,44 @@
                   <includes>
                     <include>log4j.properties</include>
                     <include>db.spec</include>
-                    <include>auth_privkey.pem</include>
-                    <include>auth_pubkey.pem</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/slipstream/auth</directory>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/slipstream/auth</directory>
+              <configuration>noreplace</configuration>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/resources</location>
+                  <includes>
+                    <include>cyclone_pubkey.pem</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/bin</directory>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/bin</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <filemode>755</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+              <sources>
+                <source>
+                  <location>src/main/scripts</location>
+                  <includes>
+                    <include>generate-auth-keys.sh</include>
                   </includes>
                 </source>
               </sources>

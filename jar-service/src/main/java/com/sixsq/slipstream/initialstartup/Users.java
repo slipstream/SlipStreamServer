@@ -120,17 +120,7 @@ public class Users {
 	}
 
 	private static boolean shouldLoad() {
-		List<User> users = User.list();
-
-		if (users.size() != 1) {
-			return false; // by default we should only have one user
-		}
-
-		if(!users.get(0).getName().equals(SUPER_USERNAME)) {
-			return false; // and it should be super
-		}
-
-		return true;
+		return User.isSuperAlone();
 	}
 
 	private static void loadSingleUser(File f) {
@@ -171,9 +161,7 @@ public class Users {
         }
         try {
             user.setPassword(password);
-        } catch (NoSuchAlgorithmException e) {
-            Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
-        } catch (UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             Logger.warning("Failed setting password for user: " + user.getName() + " with error: " + e.getMessage());
         }
 

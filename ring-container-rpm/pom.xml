@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>ring-container-rpm</artifactId>
-  <name>SlipStream Ring Container (RPM)</name>
+  <name>SlipStreamServer/ring-container-rpm</name>
 
   <packaging>pom</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.19-SNAPSHOT</version>
+    <version>3.26-SNAPSHOT</version>
   </parent>
 
   <!-- NOTE: This project MUST have same version as proxy module. -->
@@ -68,7 +68,7 @@
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream Ring Container</summary>
-          <name>slipstream-ring-container${slipstream.edition}</name>
+          <name>slipstream-ring-container</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
@@ -78,9 +78,13 @@
           <description>
             SlipStream Ring Container
           </description>
+          <obsoletes>
+            <obsolete>slipstream-ring-container-community</obsolete>
+            <obsolete>slipstream-ring-container-enterprise</obsolete>
+          </obsoletes>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
-            <require>slipstream-useradd${slipstream.edition}</require>
+            <require>slipstream-useradd</require>
           </requires>
 
           <defaultDirmode>755</defaultDirmode>

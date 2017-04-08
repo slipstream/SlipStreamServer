@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamServer-rpm</artifactId>
-  <name>SlipStream Server (RPM)</name>
+  <name>SlipStreamServer/rpm</name>
   <packaging>pom</packaging>
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.19-SNAPSHOT</version>
+    <version>3.26-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
@@ -16,6 +16,13 @@
       <artifactId>SlipStreamServer-war</artifactId>
       <version>${project.version}</version>
       <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>sixsq.slipstream</groupId>
+      <artifactId>webui-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <build>
@@ -123,6 +130,23 @@
             </configuration>
           </execution>
           <execution>
+            <id>unpack-webui</id>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>target/webui</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>sixsq.slipstream</groupId>
+                  <artifactId>webui</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
             <id>copy-jars</id>
             <goals>
               <goal>copy-dependencies</goal>
@@ -214,7 +238,7 @@
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
           <summary>SlipStream Server</summary>
-          <name>slipstream-server${slipstream.edition}</name>
+          <name>slipstream-server</name>
           <group>Applications/Engineering</group>
           <vendor>SixSq</vendor>
           <packager>SixSq</packager>
@@ -223,15 +247,16 @@
           <needarch>noarch</needarch>
           <description>SlipStream REST Server, including open source connectors</description>
           <obsoletes>
-            <obsolete>slipstream-server</obsolete>
+            <obsolete>slipstream-server-community</obsolete>
+            <obsolete>slipstream-server-enterprise</obsolete>
           </obsoletes>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
-            <require>slipstream-useradd${slipstream.edition}</require>
-            <require>slipstream-client${slipstream.edition} &gt;= 1.3</require>
-            <require>slipstream-client-clojure${slipstream.edition}</require>
-            <require>slipstream-ssclj${slipstream.edition}</require>
-            <require>libcloud-slipstream-downloads${slipstream.edition}</require>
+            <require>slipstream-useradd</require>
+            <require>slipstream-client &gt;= 1.3</require>
+            <require>slipstream-client-clojure</require>
+            <require>slipstream-ssclj</require>
+            <require>libcloud-slipstream-downloads</require>
           </requires>
 
           <defaultDirmode>755</defaultDirmode>
@@ -405,6 +430,21 @@
               <sources>
                 <source>
                   <location>target/dependency/webapps/slipstream.war/static-content/themes/helixnebula/errors</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/opt/slipstream/webui</directory>
+              <filemode>644</filemode>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/webui</location>
+                  <excludes>
+                    <exclude>META-INF</exclude>
+                    <exclude>META-INF/**/*</exclude>
+                  </excludes>
                 </source>
               </sources>
             </mapping>

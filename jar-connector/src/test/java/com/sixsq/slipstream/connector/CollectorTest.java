@@ -60,6 +60,7 @@ public class CollectorTest extends RunTestBase {
 
 	@Test
 	public void collect() {
+		localConnector.generateDummyVms();
 		int res = Collector.collect(user, localConnector, 0);
 		assertThat(res,  is(LocalConnector.MAX_VMS));
 	}

@@ -59,6 +59,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -74,6 +75,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 
 @SuppressWarnings("serial")
 @Entity(name="Run")
@@ -288,10 +292,18 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return load(resourceUri, em);
 	}
 
+	private static final MetricsTimer loadTimer = Metrics.newTimer(Run.class, "load");
+
 	public static Run load(String resourceUri) {
 		EntityManager em = PersistenceUtil.createEntityManager();
-		Run run = em.find(Run.class, resourceUri);
-		em.close();
+		Run run = null;
+		try {
+			loadTimer.start();
+			run = load(resourceUri, em);
+		} finally {
+			loadTimer.stop();
+			em.close();
+		}
 		return run;
 	}
 
@@ -349,6 +361,8 @@ public class Run extends Parameterized<Run, RunParameter> {
 		return viewList(queryParameters, new HashMap<>());
 	}
 
+	private static final MetricsTimer viewListTimer = Metrics.newTimer(Run.class, "viewList");
+
 	public static List<RunView> viewList(RunsQueryParameters queryParameters, Map<String, Long> vmCountPerRun)
 			throws ConfigurationException, ValidationException
 	{
@@ -369,13 +383,20 @@ public class Run extends Parameterized<Run, RunParameter> {
 				query.setFirstResult(queryParameters.offset);
 			}
 			query.setMaxResults((queryParameters.limit != null) ? queryParameters.limit : DEFAULT_LIMIT);
-			List<Run> runs = query.getResultList();
-			views = convertRunsToRunViews(runs, vmCountPerRun);
+			viewListTimer.start();
+			try {
+				List<Run> runs = query.getResultList();
+				views = convertRunsToRunViews(runs, vmCountPerRun);
+			} finally {
+				viewListTimer.stop();
+                        }
 		} finally {
 			em.close();
 		}
 		return views;
 	}
+
+	private static final MetricsTimer viewListCountTimer = Metrics.newTimer(Run.class, "viewListCount");
 
 	public static int viewListCount(RunsQueryParameters queryParameters)
 			throws ConfigurationException, ValidationException
@@ -392,7 +413,12 @@ public class Run extends Parameterized<Run, RunParameter> {
 				critQuery.where(where);
 			}
 			TypedQuery<Long> query = em.createQuery(critQuery);
-			count = (int)(long) query.getSingleResult();
+			try {
+				viewListCountTimer.start();
+				count = (int)(long) query.getSingleResult();
+			} finally {
+				viewListCountTimer.stop();
+			}
 		} finally {
 			em.close();
 		}

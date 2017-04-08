@@ -1,21 +1,21 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.pagination)
 
 (defn- cut-last
-  [coll first last]
-  (if last
-    (if first
-      (take (inc (- last first)) coll)
-      (take last coll))
+  [coll fst lst]
+  (if lst
+    (if fst
+      (take (inc (- lst fst)) coll)
+      (take lst coll))
     coll))
 
 (defn- cut-first
-  [coll first]
-  (if first
-    (drop (dec first) coll)
+  [coll fst]
+  (if fst
+    (drop (dec fst) coll)
     coll))
 
 (defn paginate
-  [first last coll]
+  [fst lst coll]
   (-> coll
-      (cut-first first)
-      (cut-last first last)))
+      (cut-first fst)
+      (cut-last fst lst)))
