@@ -1,4 +1,4 @@
-(def +version+ "3.19-SNAPSHOT")
+(def +version+ "3.26-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamToolsCli-jar
@@ -7,7 +7,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha15"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -22,7 +22,7 @@
   #(vec (concat %
                 (merge-defaults
                   ['sixsq/default-deps (get-env :version)]
-                  '[[org.clojure/clojure]
+                  '[[org.clojure/clojure :scope "compile"]
                     [org.clojure/data.xml]
                     [org.clojure/tools.cli]
 
@@ -56,8 +56,8 @@
   pom {:project (get-env :project)
        :version (get-env :version)}
   install {:pom (str (get-env :project))}
-  push {:pom (str (get-env :project))}
-  )
+  push {:pom (str (get-env :project))
+        :repo "sixsq"})
 
 (deftask run-tests
          "runs all tests and performs full compilation"
@@ -96,11 +96,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))

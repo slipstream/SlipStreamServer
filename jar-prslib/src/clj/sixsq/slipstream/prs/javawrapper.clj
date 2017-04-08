@@ -6,13 +6,14 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.walk :as walk]
-    [sixsq.slipstream.prs.core :as prs])
+    [clojure.data.json :as json])
   (:import [java.util Map List Set]
-           [com.sixsq.slipstream.persistence Module ImageModule ModuleCategory ModuleCategory])
+           [com.sixsq.slipstream.persistence Module ImageModule ModuleCategory ModuleCategory]
+           [com.sixsq.slipstream.configuration Configuration]
+           )
   (:gen-class
     :name sixsq.slipstream.prs.core.JavaWrapper
-    :methods [#^{:static true} [placeAndRank      [java.util.Map] String]
-              #^{:static true} [validatePlacement [com.sixsq.slipstream.persistence.Run] Boolean]]))
+    :methods [#^{:static true} [generatePrsRequest [java.util.Map] String]]))
 
 (defn java->clj
   "Transform java data structures into the equivalent clojure
@@ -36,12 +37,24 @@
 
 (defn- comp->map
   [comp user-connectors]
-  {:module                    (.getResourceUri comp)
-   :cpu.nb                    (parameter-value comp "cpu.nb")
-   :ram.GB                    (parameter-value comp "ram.GB")
-   :disk.GB                   (parameter-value comp "disk.GB")
-   :placement-policy          (.getPlacementPolicy comp)
-   :connector-instance-types  (apply merge (map (partial connector-instance-types comp) user-connectors))})
+  {:module                   (.getResourceUri comp)
+   :cpu.nb                   (parameter-value comp "cpu.nb")
+   :ram.GB                   (parameter-value comp "ram.GB")
+   :disk.GB                  (parameter-value comp "disk.GB")
+   :placement-policy         (.getPlacementPolicy comp)
+   :connector-instance-types (apply merge (map (partial connector-instance-types comp) user-connectors))})
+
+(defn- connector->orchestrator-map
+  [connector]
+  (let [orchestrator-instance-type (-> (Configuration/getInstance)
+                                       (.getProperty (format "%s.orchestrator.instance.type" connector)))
+        type-policy                (if orchestrator-instance-type (format " and schema-org:name='%s'" orchestrator-instance-type) "")]
+    {:node             (str "node-orchestrator-" connector)
+     :module           (str "module-orchestrator-" connector)
+     :cpu.nb           "0"
+     :ram.GB           "0"
+     :disk.GB          "0"
+     :placement-policy (format "connector/href='%s'%s" connector type-policy)}))
 
 (defn- node->map
   [user-connectors [node-name node]]
@@ -72,52 +85,43 @@
   [module user-connectors]
   (cond
     (component? module) [(comp->map module user-connectors)]
-    (app? module)       (app->map module user-connectors)
-    :else               (throw-wrong-category module)))
+    (app? module) (app->map module user-connectors)
+    :else (throw-wrong-category module)))
+
+(defn- add-orchestrator-components
+  [m user-connectors]
+  (update m :components #(concat % (map connector->orchestrator-map user-connectors))))
 
 (defn- explode-module
   [m]
   (-> m
       (assoc :components (module->components (:module m) (:user-connectors m)))
+      (add-orchestrator-components (:user-connectors m))
+      (dissoc :orchestratorComponents)
       (dissoc :module)))
 
 (defn placement->map
   "Converts java-placement (Java Map) to Clojure data structure.
   The module object is extracted as a list of components."
   [java-placement]
-  (let [result (-> java-placement
-                   java->clj
-                   walk/keywordize-keys
-                   explode-module)]
-    (log/info "placement->map : " result)
-    result))
+  (-> java-placement
+      java->clj
+      walk/keywordize-keys
+      explode-module))
 
-(defn -placeAndRank
-  "Input is translated into map, PRS service is called and returns a JSON response.
+(defn -generatePrsRequest
+  "Generate PRS request based on module and users connector information.
   Input
   {
     :module           Module        // java object - ImageModule or DeploymentModule
-    :prs-endpoint     url           // string
     :user-connectors  ['c1' 'c2']   // list of strings
    }
+  Output: valid JSON to contact PRS service.
   "
   [input]
-  (log/info "javawrapper, input for place-and-rank" input)
+  (log/debug "Generating PRS request for:" input)
   (-> input
       placement->map
-      prs/place-and-rank))
+      json/write-str))
 
-(defn -validatePlacement
-  [run]
-  (log/info "Calling PRS validater")
-  ;; run
-  ;; -> placementRequest
-  ;; (placeAndRank)
-  ; Output
-  ; {:components [{:module uri
-  ;               :connectors [{:name c1 :price 0 :currency ''},
-  ;                             {:name c2 :price 0 :currency ''}]}]
-  ; }
-  ;; valid means : for each module, in returned components, connectors not empty
-  true)
 

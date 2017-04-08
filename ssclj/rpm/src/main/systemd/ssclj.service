@@ -6,6 +6,9 @@ After=hsqldb.service
 
 [Service]
 Environment=SSCLJ_PORT=8201
+Environment=AUTH_PRIVATE_KEY=/etc/slipstream/auth/auth_privkey.pem
+Environment=AUTH_PUBLIC_KEY=/etc/slipstream/auth/auth_pubkey.pem
+Environment=AUTH_PUBLIC_KEY_CYCLONE=/etc/slipstream/auth/cyclone_pubkey.pem
 EnvironmentFile=-/etc/default/ssclj
 
 User=slipstream
@@ -13,7 +16,7 @@ User=slipstream
 WorkingDirectory=${installation.dir}
 
 ExecStart=/usr/bin/java \
-            -Dconfig.path=db.spec \
+            -Dconfig.name=db.spec \
             -Dlogfile.path=production \
             -cp "resources:lib/ssclj.jar:lib/ext/*" \
             com.sixsq.slipstream.ssclj.app.main $SSCLJ_PORT

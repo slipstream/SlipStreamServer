@@ -3,15 +3,14 @@
 
   <artifactId>auth-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.19-SNAPSHOT</version>
-  <name>auth-dep</name>
-  <description>Authentication Service</description>
+  <version>3.26-SNAPSHOT</version>
+  <name>SlipStreamServer/auth</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.19-SNAPSHOT</version>
+    <version>3.26-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -26,6 +25,14 @@
       <groupId>sixsq</groupId>
       <artifactId>default-deps</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>token-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   
@@ -78,21 +85,11 @@
             </goals>
             <configuration>
               <executable>boot</executable>
+              <environmentVariables>
+                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
+              </environmentVariables>
               <arguments>
                 <argument>mvn-build</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>boot-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>boot</executable>
-              <arguments>
-                <argument>mvn-deploy</argument>
               </arguments>
             </configuration>
           </execution>

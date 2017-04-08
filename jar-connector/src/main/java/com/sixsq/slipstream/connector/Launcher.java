@@ -28,6 +28,8 @@ import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
@@ -36,9 +38,10 @@ import com.sixsq.slipstream.persistence.User;
 public class Launcher {
 
 	private static Logger logger = Logger.getLogger(Launcher.class.getName());
+	private static MetricsTimer launchTimer = Metrics.newTimer(Launcher.class, "launch");
 
 	public static Run launch(Run run, User user) throws SlipStreamException {
-
+		launchTimer.start();
 		try {
 			run = storeRunKeepModule(run);
 			SyncLauncher sl = new SyncLauncher(run, user);
@@ -51,6 +54,8 @@ public class Launcher {
 			}
 			run = Run.abort(message, run.getUuid());
 			run = run.store();
+		} finally {
+			launchTimer.stop();
 		}
 		return run;
 	}

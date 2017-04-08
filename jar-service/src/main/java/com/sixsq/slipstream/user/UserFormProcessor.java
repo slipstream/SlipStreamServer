@@ -65,7 +65,6 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 		user.setFirstName(getForm().getFirstValue("firstname"));
 		user.setLastName(getForm().getFirstValue("lastname"));
 		user.setEmail(getForm().getFirstValue("email"));
-		user.setRoles(getForm().getFirstValue("roles"));
 		user.setOrganization(getForm().getFirstValue("organization"));
 		parseState(getForm(), user);
 
@@ -73,7 +72,15 @@ public class UserFormProcessor extends FormProcessor<User, UserParameter> {
 
 		processIsSuper(getForm());
 
+		processRoles(getForm());
+
 		processPassword(getForm(), dbUser);
+	}
+
+	private void processRoles(Form form) throws ValidationException {
+		if (getUser().isSuper()) {
+			getParametrized().setRoles(getForm().getFirstValue("roles"));
+		}
 	}
 
 	private void parseState(Form form, User user) {

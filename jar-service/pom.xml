@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>SlipStreamService</artifactId>
-	<name>SlipStream Service (JAR)</name>
+	<name>SlipStreamServer/jar-service</name>
 
 	<packaging>jar</packaging>
 
@@ -18,14 +18,51 @@
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamServer</artifactId>
-		<version>3.19-SNAPSHOT</version>
+		<version>3.26-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamServerPRSlib-jar-dep</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamServerPRSlib-jar</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamUI-dep</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamUI</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbSerializers-jar</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -43,6 +80,7 @@
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamAsync</artifactId>
+			<type>jar</type>
 		</dependency>
 
 		<dependency>
@@ -54,24 +92,6 @@
 			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamConnector</artifactId>
 			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI-dep</artifactId>
-			<type>pom</type>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamDbSerializers-jar</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -150,6 +170,16 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
 		</dependency>
 
 		<dependency>
@@ -246,6 +276,9 @@
 					<systemPropertyVariables>
 						<slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
 					</systemPropertyVariables>
+					<includes>
+						<include>${slipstream.test.includes}</include>
+					</includes>
 					<excludes>
 						<exclude>${slipstream.test.excludes}</exclude>
 					</excludes>

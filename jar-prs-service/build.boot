@@ -1,12 +1,12 @@
-(def +version+ "3.19-SNAPSHOT")
+(def +version+ "3.26-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPricingService-jar
   :version +version+
-  :license {"commercial" "http://sixsq.com"}
+  :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha15"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -20,10 +20,12 @@
   #(vec (concat %
                 (merge-defaults
                  ['sixsq/default-deps (get-env :version)]
-                 '[[com.sixsq.slipstream/SlipStreamPlacementLib-jar]
+                 '[[org.clojure/tools.nrepl]
+
+                   [com.sixsq.slipstream/SlipStreamPlacementLib-jar]
+                   [com.sixsq.slipstream/token]
 
                    [compojure]
-                   [aleph]
                    [ring/ring-json]
                    [ring/ring-defaults]
 
@@ -37,7 +39,7 @@
   '[tolitius.boot-check :refer [with-yagni with-eastwood with-kibit with-bikeshed]])
 
 (set-env!
-  :source-paths #{"dev-resources"}
+  :source-paths #{"test" "test-resources"}
   :resource-paths #{"src"})
 
 (task-options!
@@ -45,7 +47,8 @@
        :version (get-env :version)}
   serve {:handler 'sixsq.slipstream.prs.ring/handler
          :reload true}
-  watch {:verbose true})
+  watch {:verbose true}
+  push {:repo "sixsq"})
 
 (deftask run-tests
   "runs all tests and performs full compilation"
@@ -81,11 +84,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))

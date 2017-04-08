@@ -9,9 +9,9 @@ package com.sixsq.slipstream.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.user.UserTest;
+import com.sixsq.slipstream.persistence.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class ImageFormProcesorTest {
@@ -65,7 +65,7 @@ public class ImageFormProcesorTest {
 		form.add("name", "new");
 
 		try {
-			processor.processForm(form);			
+			processor.processForm(form);
 			fail("Illegal name not checked");
 		} catch (ValidationException e) {
 		}
@@ -93,10 +93,10 @@ public class ImageFormProcesorTest {
 		form.add("isbase", "on");
 		form.add(ImageFormProcessor.constructFormImageIdName(cloudServiceName), "new_image_id");
 
-		processor.processForm(form);			
+		processor.processForm(form);
 
 		String newImageId = ((ImageModule)processor.getParametrized()).getCloudImageId(cloudServiceName);
-		
+
 		assertThat(newImageId, is("new_image_id"));
 
 		image.remove();
@@ -123,10 +123,10 @@ public class ImageFormProcesorTest {
 		form.add(ImageFormProcessor.constructFormImageIdName(cloudServiceName), "new_image_id");
 		form.add(ImageFormProcessor.PRERECIPE_SCRIPT_NAME, "modified pre-recipe");
 
-		processor.processForm(form);			
+		processor.processForm(form);
 
 		String newImageId = ((ImageModule)processor.getParametrized()).getCloudImageId(cloudServiceName);
-		
+
 		assertThat(newImageId, is(""));
 
 		image.remove();
@@ -153,10 +153,10 @@ public class ImageFormProcesorTest {
 		form.add(ImageFormProcessor.constructFormImageIdName(cloudServiceName), "new_image_id");
 		form.add(ImageFormProcessor.PRERECIPE_SCRIPT_NAME, image.getPreRecipe());
 
-		processor.processForm(form);			
+		processor.processForm(form);
 
 		String newImageId = ((ImageModule)processor.getParametrized()).getCloudImageId(cloudServiceName);
-		
+
 		assertThat(newImageId, is("image_id"));
 
 		image.remove();

@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.event-schema-test
   (:require
-    [clojure.test :refer [deftest is]]
+    [clojure.test :refer [deftest are is]]
     [clojure.spec :as spec]
     [com.sixsq.slipstream.ssclj.resources.event :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]

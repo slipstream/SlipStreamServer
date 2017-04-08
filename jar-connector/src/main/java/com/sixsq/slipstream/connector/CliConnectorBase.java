@@ -251,6 +251,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		putLaunchParamPlatform(launchParams, run);
 		putLaunchParamLoginUserAndPassword(launchParams, run);
 		putLaunchParamExtraDiskVolatile(launchParams, run);
+		putLaunchParamRootDiskSize(launchParams, run);
 		putLaunchParamNativeContextualization(launchParams, run);
 		return launchParams;
 	}
@@ -277,6 +278,15 @@ public abstract class CliConnectorBase extends ConnectorBase {
 			launchParams.put("login-password", loginPassword);
 		}
 
+	}
+
+	private void putLaunchParamRootDiskSize(Map<String, String> launchParams, Run run) throws ValidationException {
+		if (!isInOrchestrationContext(run)) {
+			String rootDiskGb = getRootDisk((ImageModule) run.getModule());
+			if (rootDiskGb != null && !rootDiskGb.isEmpty()) {
+				launchParams.put("disk", rootDiskGb);
+			}
+		}
 	}
 
 	private void putLaunchParamExtraDiskVolatile(Map<String, String> launchParams, Run run) throws ValidationException {

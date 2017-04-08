@@ -6,7 +6,11 @@
     [clojure.pprint :refer [pprint]]
     [compojure.core :as cc]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+    [ring.middleware.params :refer [wrap-params]]
+    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+    [ring.middleware.nested-params :refer [wrap-nested-params]]
     [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
@@ -38,7 +42,7 @@
           (get-in [:response :body])
           (contains? k#)
           (is (str "!!!! Map did not contain key " k#))))
-     ~m ~k))
+    ~m ~k))
 
 (defmacro is-resource-uri
   [m type-uri]
@@ -54,14 +58,14 @@
       (let [[op# defined-ops#] (select-op m# expected-op#)]
         (is op# (str "!!!! Missing " expected-op# " in " defined-ops#))
         m#))
-     ~m ~expected-op))
+    ~m ~expected-op))
 
 (defmacro is-operation-absent [m absent-op]
   `((fn [m# absent-op#]
       (let [[op# defined-ops#] (select-op m# absent-op#)]
         (is (nil? op#) (str "!!!! Unexpected op " absent-op# " in " defined-ops#)))
       m#)
-     ~m ~absent-op))
+    ~m ~absent-op))
 
 (defmacro is-id
   [m id]
@@ -81,7 +85,7 @@
   `((fn [m# v#]
       (let [body# (get-in m# [:response :body])]
         (is (= (merge body# v#) body#))))
-     ~m ~v))
+    ~m ~v))
 
 (defmacro is-location
   [m]
@@ -122,6 +126,9 @@
   (-> resource-routes
       (wrap-exceptions)
       (wrap-cimi-params)
+      wrap-keyword-params
+      wrap-nested-params
+      wrap-params
       (wrap-base-uri)
       (wrap-authn-info-header)
       (wrap-json-body {:keywords? true})

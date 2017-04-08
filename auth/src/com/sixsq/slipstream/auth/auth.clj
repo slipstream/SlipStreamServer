@@ -33,17 +33,4 @@
   [_]
   (ia/logout))
 
-(defn- extract-claims-token
-  [request]
-  (-> request
-      (uh/select-in-params [:claims :token])
-      (update-in [:claims] #(json/read-str % :key-fn keyword))))
 
-(defn build-token
-  [request]
-  (let [{:keys [claims token]} (extract-claims-token request)
-        [ok? token] (ia/create-token claims token)]
-    (log/debug "token creation status: " ok?)
-    (if ok?
-      (uh/response-with-body 200 (:token token))
-      (uh/response-forbidden))))

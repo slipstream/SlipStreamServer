@@ -173,7 +173,7 @@ if [ -n "$SSCLJ_GRAPHITE_HOST" ]; then
 fi
 
 
-RUN_ARGS=(${JAVA_OPTIONS[@]} ${GRAPHITE_OPTION} -Dconfig.path=db.spec -Dlogfile.path=production -cp "$SSCLJ_HOME/resources:$SSCLJ_HOME/lib/*" $SSCLJ_CLASS $SSCLJ_PORT)
+RUN_ARGS=(${JAVA_OPTIONS[@]} ${GRAPHITE_OPTION} -Dconfig.name=db.spec -Dlogfile.path=production -cp "$SSCLJ_HOME/resources:$SSCLJ_HOME/lib/*" $SSCLJ_CLASS $SSCLJ_PORT)
 RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
 
 

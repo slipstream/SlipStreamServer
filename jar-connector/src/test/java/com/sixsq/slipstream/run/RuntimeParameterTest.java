@@ -35,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
@@ -56,6 +57,8 @@ public class RuntimeParameterTest {
 			InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 
 		Event.muteForTests();
+                CljElasticsearchHelper.createAndInitTestDb();
+
 		user = CommonTestUtil.createTestUser();
 
 		CommonTestUtil.addSshKeys(user);

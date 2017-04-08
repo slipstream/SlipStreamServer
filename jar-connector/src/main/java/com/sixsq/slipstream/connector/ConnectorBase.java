@@ -410,6 +410,10 @@ public abstract class ConnectorBase implements Connector {
         return getParameterValue(ImageModule.RAM_KEY, image);
     }
 
+    protected String getRootDisk(ImageModule image) throws ValidationException {
+        return image.getParameterValue(ImageModule.DISK_PARAM, null);
+    }
+
     protected String getExtraDiskVolatile(ImageModule image) throws ValidationException {
         return image.getParameterValue(ImageModule.EXTRADISK_VOLATILE_PARAM, null);
     }

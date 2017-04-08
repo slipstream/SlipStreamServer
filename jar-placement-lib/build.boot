@@ -1,11 +1,11 @@
-(def +version+ "3.19-SNAPSHOT")
+(def +version+ "3.26-SNAPSHOT")
  
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPlacementLib-jar
   :version +version+
   :license {"commercial" "http://sixsq.com"}
   :edition "community"
-  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha15"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -40,7 +40,8 @@
 
 (task-options!
   pom {:project (get-env :project)
-       :version (get-env :version)})
+       :version (get-env :version)}
+  push {:repo "sixsq"})
 
 (deftask run-tests
   "runs all tests and performs full compilation"
@@ -68,12 +69,6 @@
          (comp
            (build)
            (install)
-           (target)))
-
-(deftask mvn-deploy
-         "build full project through maven"
-         []
-         (comp
-           (mvn-build)
-           (push :repo "sixsq")))
-
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))

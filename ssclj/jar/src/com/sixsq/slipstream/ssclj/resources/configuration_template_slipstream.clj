@@ -43,9 +43,6 @@
    :registrationEnable         s/Bool                       ;; true
    :registrationEmail          c/NonBlankString             ;; register@sixsq.com
 
-   :prsEnable                  s/Bool                       ;; true
-   :prsEndpoint                c/NonBlankString             ;; http://localhost:8203/filter-rank
-
    :meteringEnable             s/Bool                       ;; false
    :meteringEndpoint           c/NonBlankString             ;; http://localhost:2005
 
@@ -53,7 +50,10 @@
 
    ;; FIXME: used only for compatibilty with the Java server. To be removed.
    :cloudConnectorClass        s/Str                        ;; "name-region-az:connector,"
-   })
+
+   :metricsLoggerEnable        s/Bool                       ;; false
+   :metricsGraphiteEnable      s/Bool})                       ;; false
+
 
 (def ConfigurationTemplateAttrs
   (merge p/ConfigurationTemplateAttrs
@@ -98,9 +98,6 @@
    :registrationEnable         true
    :registrationEmail          "register@sixsq.com"
 
-   :prsEnable                  true
-   :prsEndpoint                "http://localhost:8203/filter-rank"
-
    :meteringEnable             false
    :meteringEndpoint           "http://localhost:2005"
 
@@ -109,7 +106,10 @@
    :slipstreamVersion          slipstream-version
 
    :cloudConnectorClass        ""
-   })
+
+   :metricsLoggerEnable        false
+   :metricsGraphiteEnable      false})
+
 
 ;;
 ;; description

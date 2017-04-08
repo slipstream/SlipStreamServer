@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-record
   (:require
-    [schema.core :as s]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -52,11 +51,11 @@
   [resource request]
   (try
     (a/can-modify? resource request)
-    (let [href                (:id resource)
+    (let [href (:id resource)
           ^String resourceURI (:resourceURI resource)
-          ops                 (if (.endsWith resourceURI "Collection")
-                                [{:rel (:add c/action-uri) :href href}]
-                                [{:rel (:delete c/action-uri) :href href}])]
+          ops (if (.endsWith resourceURI "Collection")
+                [{:rel (:add c/action-uri) :href href}]
+                [{:rel (:delete c/action-uri) :href href}])]
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))
@@ -87,7 +86,7 @@
              "' and metric-name='" (:metric-name usage-record) "'")]
     (-> (db/query "usage-record" {:cimi-params {:filter  (parser/parse-cimi-filter filter)
                                                 :orderby [["start-timestamp" :desc]]}
-                                  :user-roles ["ADMIN"]})
+                                  :user-roles  ["ADMIN"]})
         second
         first)))
 
@@ -98,15 +97,13 @@
         (str "cloud-vm-instanceid='" (:cloud-vm-instanceid usage-record)
              "' and metric-name='" (:metric-name usage-record) "'"
              " and end-timestamp='" date-in-future "'")]
-    (-> (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
-                                  :user-roles ["ADMIN"]})
-        second)))
+    (second (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
+                                      :user-roles  ["ADMIN"]}))))
 
 (defn records-for-interval
   "Retrieves all usage records intersecting with given interval."
   [start end]
   (u/check-order [start end])
   (let [filter (str "end-timestamp >= '" start "' and start-timestamp <= '" end "'")]
-    (-> (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
-                                  :user-roles  ["ADMIN"]})
-        second)))
+    (second (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
+                                      :user-roles  ["ADMIN"]}))))

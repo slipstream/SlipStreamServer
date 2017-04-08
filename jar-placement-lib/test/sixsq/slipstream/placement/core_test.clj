@@ -61,7 +61,7 @@
              {:schema-org:vcpu 2
               :schema-org:ram  8
               :schema-org:disk 20}}]
-    (is nil? (pc/smallest-service-offer []))
+    (is (nil? (pc/smallest-service-offer [])))
     (is (= so1 (pc/smallest-service-offer [so1 so2 so3])))
     (is (= so1 (pc/smallest-service-offer [so2 so1 so3])))
     (is (= so1 (pc/smallest-service-offer [so3 so2 so1])))

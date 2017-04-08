@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamServer-ui-static-content</artifactId>
-  <name>SlipStream UI Static Content (ZIP)</name>
+  <name>SlipStreamServer/static-content</name>
 
   <packaging>pom</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.19-SNAPSHOT</version>
+    <version>3.26-SNAPSHOT</version>
   </parent>
   
   <dependencies>
