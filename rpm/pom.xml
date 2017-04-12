@@ -528,6 +528,13 @@
                 </source>
               </sources>
             </mapping>
+            <mapping>
+              <directory>${slipstream.logs.dir}</directory>
+              <directoryIncluded>true</directoryIncluded>
+              <filemode>755</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+            </mapping>
           </mappings>
 
           <postinstallScriptlet>
