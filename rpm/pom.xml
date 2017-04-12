@@ -10,6 +10,9 @@
     <artifactId>SlipStreamServer</artifactId>
     <version>3.26-SNAPSHOT</version>
   </parent>
+  <properties>
+    <slipstream.logs.dir>/var/log/slipstream/server</slipstream.logs.dir>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
@@ -524,6 +527,13 @@
                   <location>${project.build.directory}/slipstream.service</location>
                 </source>
               </sources>
+            </mapping>
+            <mapping>
+              <directory>${slipstream.logs.dir}</directory>
+              <directoryIncluded>true</directoryIncluded>
+              <filemode>755</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
             </mapping>
           </mappings>
 
