@@ -57,10 +57,10 @@
   (s/constrained [NonBlankString] seq 'not-empty?))
 
 (def Timestamp
-  (s/constrained NonBlankString u/valid-timestamp? 'valid-timestamp?))
+  (s/constrained NonBlankString u/parse-timestamp 'valid-timestamp?))
 
 (def OptionalTimestamp
-  (s/constrained s/Str (fn [x] (or (str/blank? x) (u/valid-timestamp? x))) 'valid-timestamp-or-blank?))
+  (s/constrained s/Str (fn [x] (or (str/blank? x) (u/parse-timestamp x))) 'valid-timestamp-or-blank?))
 
 (def KeywordOrString
   (s/pred (fn [x] (or (keyword? x) (string? x))) 'keyword-or-string?))

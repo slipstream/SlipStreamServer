@@ -62,6 +62,7 @@
                    ;; test dependencies
                    [peridot]
                    [honeysql]
+                   [org.clojure/test.check]
 
                    ;; boot tasks
                    [boot-environ]

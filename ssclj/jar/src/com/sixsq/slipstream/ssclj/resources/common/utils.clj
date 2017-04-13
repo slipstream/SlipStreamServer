@@ -9,9 +9,10 @@
     [schema.core :as schema]
     [ring.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [clojure.data.json :as json])
+    [clojure.data.json :as json]
+    [clj-time.coerce :as c])
   (:import
-    [java.util List Map UUID]
+    [java.util List Map UUID Date]
     [javax.xml.bind DatatypeConverter]))
 
 ;;
@@ -133,7 +134,12 @@
         created (or (:created data) updated)]
     (assoc data :created created :updated updated)))
 
-(defn valid-timestamp?
+(defn unparse-timestamp
+  "Returns the string representation of the given timestamp."
+  [^Date timestamp]
+  (time-fmt/unparse (:date-time time-fmt/formatters) (c/from-date timestamp)))
+
+(defn parse-timestamp
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
    instance on success and nil on failure."
   [data]
