@@ -7,6 +7,16 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
 
 ;;
+;; merges keys specifications
+;;
+(defn merge-keys-specs
+  "Takes a number of s/keys specifications given as maps, merges
+   the specifications by creating the union of the sets and then
+   produces a keyword sequence of the combined result."
+  [& specs]
+  (apply concat (apply merge-with set/union specs)))
+
+;;
 ;; creates a closed map definition: only defined keys are permitted
 ;; (implementation provided on clojure mailing list by Alistair Roche)
 ;;
@@ -19,15 +29,17 @@
                                     (map (comp keyword name) opt-un)))
                       any?)))
 
-;;
-;; merges keys specifications
-;;
-(defn merge-keys-specs
-  "Takes a number of s/keys specifications given as maps, merges
-   the specifications by creating the union of the sets and then
-   produces a keyword sequence of the combined result."
-  [& specs]
-  (apply concat (apply merge-with set/union specs)))
+#_(defn only-keys-maps
+  [& map-specs]
+  (let [{:keys [req req-un opt opt-un] :as map-spec} (apply merge-with set/union map-specs)
+        args (apply concat map-spec)]
+    `(s/merge (s/keys ~@(apply concat (vec args)))
+              (s/map-of ~(set (concat req
+                                      (map (comp keyword name) req-un)
+                                      opt
+                                      (map (comp keyword name) opt-un)))
+                        any?))))
+
 
 ;;
 ;; schema definitions for basic types
@@ -100,7 +112,7 @@
 (s/def :cimi.common/operations (s/coll-of :cimi.common/operation :min-count 1))
 
 (s/def :cimi.common/kw-or-str (s/or :keyword keyword? :string :cimi.core/nonblank-string))
-(s/def ::properties (s/map-of ::kw-or-str string? :min-count 1))
+(s/def :cimi.common/properties (s/map-of :cimi.common/kw-or-str string? :min-count 1))
 
 ;;
 ;; Common Attributes
@@ -196,8 +208,8 @@
                       :cimi.desc/instructions]))
 
 (s/def :cimi.desc/resource-description
-  (s/keys :req-un [:cimi.acl/acl])
-  (s/map-of keyword? :cimi.desc/parameter-description))
+  (s/every (s/or :acl (s/tuple #{:acl} :cimi.acl/acl)
+                 :desc (s/tuple keyword? :cimi.desc/parameter-description))))
 
 (def CommonParameterDescription
   {:id          {:displayName "ID"

@@ -137,13 +137,19 @@
 (defn unparse-timestamp
   "Returns the string representation of the given timestamp."
   [^Date timestamp]
-  (time-fmt/unparse (:date-time time-fmt/formatters) (c/from-date timestamp)))
+  (try
+    (time-fmt/unparse (:date-time time-fmt/formatters) (c/from-date timestamp))
+    (catch Exception _
+      nil)))
 
 (defn parse-timestamp
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
    instance on success and nil on failure."
   [data]
-  (time-fmt/parse (:date-time time-fmt/formatters) data))
+  (try
+    (time-fmt/parse (:date-time time-fmt/formatters) data)
+    (catch Exception _
+      nil)))
 
 (defn create-validation-fn
   "Creates a validation function that compares a resource against the
