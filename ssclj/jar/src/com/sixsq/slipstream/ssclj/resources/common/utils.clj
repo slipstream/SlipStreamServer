@@ -7,6 +7,7 @@
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
     [schema.core :as schema]
+    [clojure.spec :as s]
     [ring.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [clojure.data.json :as json]
@@ -150,6 +151,24 @@
     (time-fmt/parse (:date-time time-fmt/formatters) data)
     (catch Exception _
       nil)))
+
+(defn create-spec-validation-fn
+  "Creates a validation function that compares a resource against the
+   given schema.  The generated function raises an exception with the
+   violations of the schema and a 400 ring response. If everything's
+   OK, then the resource itself is returned."
+  [spec]
+  (let [ok? (partial s/valid? spec)
+        explain (partial s/explain spec)]
+    (fn [resource]
+      (if-not (ok? resource)
+        (let [msg (str "resource does not satisfy defined schema: " (explain resource))
+              response (-> {:status 400 :message msg}
+                           json-response
+                           (r/status 400))]
+          (log/warn msg)
+          (throw (ex-info msg response)))
+        resource))))
 
 (defn create-validation-fn
   "Creates a validation function that compares a resource against the
