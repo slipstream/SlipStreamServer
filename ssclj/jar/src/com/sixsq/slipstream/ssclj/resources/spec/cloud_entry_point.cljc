@@ -3,10 +3,10 @@
     [clojure.spec :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
-(s/def :cimi.cep/baseURI :cimi.core/nonblank-string)
+(s/def :cimi.cloud-entry-point/baseURI :cimi.core/nonblank-string)
 
 ;; FIXME: Duplication is painful, is there a better way?
-(s/def :cimi.cep/cloud-entry-point
+(s/def :cimi/cloud-entry-point
   (s/merge
     (s/every (s/or :common-attr (s/tuple #{:id
                                            :resourceURI
@@ -26,7 +26,7 @@
                      :cimi.common/updated
                      :cimi.acl/acl
 
-                     :cimi.cep/baseURI]
+                     :cimi.cloud-entry-point/baseURI]
             :opt-un [:cimi.common/name
                      :cimi.common/description
                      :cimi.common/properties

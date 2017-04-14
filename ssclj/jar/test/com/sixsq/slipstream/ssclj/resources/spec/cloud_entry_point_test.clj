@@ -5,7 +5,7 @@
     [clojure.spec :as s]
     [com.sixsq.slipstream.ssclj.app.params :as p]))
 
-(defn valid? [cep] (s/valid? :cimi.cep/cloud-entry-point cep))
+(defn valid? [cep] (s/valid? :cimi/cloud-entry-point cep))
 (def invalid? (complement valid?))
 
 (deftest check-root-schema

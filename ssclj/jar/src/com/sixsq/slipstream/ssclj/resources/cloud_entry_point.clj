@@ -42,7 +42,7 @@
 ;; define validation function and add to standard multi-method
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi.cep/cloud-entry-point))
+(def validate-fn (u/create-spec-validation-fn :cimi/cloud-entry-point))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
