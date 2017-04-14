@@ -23,7 +23,7 @@
                                         (constantly (gen/fmap cu/unparse-timestamp (gen/gen-for-pred inst?)))))
 
 ;; FIXME: Remove this definition when resources treat the timestamp as optional rather than allowing an empty value.
-(s/def :cimi.core/optional-timestamp (s/or :empty #{""} :not-empty ::timestamp))
+(s/def :cimi.core/optional-timestamp (s/or :empty #{""} :not-empty :cimi.core/timestamp))
 
 ;; FIXME: Replace this spec with one that enforces the URI grammar.
 (s/def :cimi.core/uri :cimi.core/nonblank-string)

@@ -2,6 +2,7 @@
   com.sixsq.slipstream.ssclj.resources.usage
   (:refer-clojure :exclude [update])
   (:require
+    [com.sixsq.slipstream.ssclj.resources.spec.usage]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -23,26 +24,7 @@
                               :right     "VIEW"}]})
 
 
-;;
-;; schemas
-;;
-
-(def Usage
-  (merge
-    c/CreateAttrs
-    c/AclAttr
-    {
-     :id              c/NonBlankString
-     :user            c/NonBlankString
-     :cloud           c/NonBlankString
-     :start-timestamp c/Timestamp
-     :end-timestamp   c/Timestamp
-     :usage           c/NonBlankString
-     :grouping        c/NonBlankString
-     :frequency       c/NonBlankString
-     }))
-
-(def validate-fn (u/create-validation-fn Usage))
+(def validate-fn (u/create-spec-validation-fn :cimi/usage))
 (defmethod crud/validate
   resource-uri
   [resource]
