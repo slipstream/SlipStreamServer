@@ -1,14 +1,10 @@
-(ns com.sixsq.slipstream.ssclj.resources.common.spec-test
+(ns com.sixsq.slipstream.ssclj.resources.spec.common-test
   (:require
     [clojure.test :refer [deftest are is]]
     [clojure.spec :as s]
     [clojure.set :as set]
-    [com.sixsq.slipstream.ssclj.resources.common.spec :as t]))
-
-(deftest check-merge-keys-specs
-  (is (= [:req-un #{:a :b} :opt-un #{:c :d}]
-         (t/merge-keys-specs {:req-un #{:a :b} :opt-un #{:c}}
-                             {:opt-un #{:d}}))))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as t]))
 
 (deftest check-nonblank-string
   (are [expect-fn arg] (expect-fn (s/valid? :cimi.core/nonblank-string arg))
@@ -65,9 +61,7 @@
                        false? {"ok" 1}
                        false? [:bad "bad"]))
 
-(def valid-acl {:owner {:principal "me" :type "USER"}})
-
-(deftest check-AccessControlId
+(deftest check-owner
   (let [id {:principal "ADMIN", :type "ROLE"}]
     (are [expect-fn arg] (expect-fn (s/valid? :cimi.acl/owner arg))
                          true? id
@@ -110,9 +104,9 @@
                          false? (assoc acl :owner "")
                          false? (assoc acl :bad "BAD"))))
 
-#_(s/def :cimi.test/common-attrs (t/only-keys-maps t/common-attrs))
+(s/def :cimi.test/common-attrs (su/only-keys-maps t/common-attrs))
 
-#_(deftest check-common-attrs
+(deftest check-common-attrs
   (let [date "2012-01-01T01:23:45.678Z"
         minimal {:id          "a"
                  :resourceURI "http://example.org/data"
@@ -148,7 +142,8 @@
                        false? "unknown"))
 
 (deftest check-parameter-desd-and-resource-desc
-  (let [valid-desc {:displayName "ID"
+  (let [valid-acl {:owner {:principal "me" :type "USER"}}
+        valid-desc {:displayName "ID"
                     :category    "common"
                     :description "unique resource identifier"
                     :type        "enum"
