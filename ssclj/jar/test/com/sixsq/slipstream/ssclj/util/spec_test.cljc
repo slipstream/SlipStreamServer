@@ -30,7 +30,9 @@
 (def keys-spec-req {:req [:ns1/one], :req-un [:ns2/two]})
 (s/def :spec.test/also-closed (t/only-keys-maps keys-spec-req {:opt [:ns3/three], :opt-un [:ns4/four]}))
 
-(deftest check-only-keys
+(s/def :spec.test/open (t/constrained-map keyword? pos-int? keys-spec-req {:opt [:ns3/three], :opt-un [:ns4/four]}))
+
+(deftest check-spec-macros
   (let [valid-map {:ns1/one   true
                    :two       "OK"
                    :ns3/three :ok
@@ -48,4 +50,15 @@
                          false? (dissoc valid-map :two)
                          true? (dissoc valid-map :ns3/three)
                          true? (dissoc valid-map :four)
-                         false? (assoc valid-map :bad "BAD"))))
+                         false? (assoc valid-map :bad "BAD"))
+    (are [expect-fn arg] (expect-fn (s/valid? :spec.test/open arg))
+                         true? valid-map
+                         false? (dissoc valid-map :ns1/one)
+                         false? (dissoc valid-map :two)
+                         true? (dissoc valid-map :ns3/three)
+                         true? (dissoc valid-map :four)
+                         true? (assoc valid-map :other 10)
+                         true? (assoc valid-map :other 1 :another 2)
+                         false? (assoc valid-map :other -1)
+                         false? (assoc valid-map :another "BAD"))))
+

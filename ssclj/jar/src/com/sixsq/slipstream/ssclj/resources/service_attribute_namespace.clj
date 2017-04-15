@@ -1,8 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-namespace
   (:require
-    [schema.core :as s]
+    [clojure.spec :as s]
     [superstring.core :as str]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute-namespace]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -35,27 +36,10 @@
                               :right     "VIEW"}]})
 
 ;;
-;; schemas
-;;
-
-;; must start with lowercase letter
-;; must end with lowercase letter or digit
-;; may have lowercase letters, digits, or hyphens in the middle
-; "^[a-z]([a-z0-9-]*[a-z0-9])?$"
-(def Prefix
-  (s/constrained s/Str (fn valid-prefix [prefix] (re-matches #"^[a-z]([a-z0-9-]*[a-z0-9])?$" prefix))))
-
-(def ServiceNamespace
-  (merge c/CommonAttrs
-         c/AclAttr
-         {:prefix Prefix
-          :uri    c/NonBlankString}))
-
-;;
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-validation-fn ServiceNamespace))
+(def validate-fn (u/create-spec-validation-fn :cimi/service-attribute-namespace))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))

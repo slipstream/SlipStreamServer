@@ -159,7 +159,7 @@
    OK, then the resource itself is returned."
   [spec]
   (let [ok? (partial s/valid? spec)
-        explain (partial s/explain spec)]
+        explain (partial s/explain-str spec)]
     (fn [resource]
       (if-not (ok? resource)
         (let [msg (str "resource does not satisfy defined schema: " (explain resource))

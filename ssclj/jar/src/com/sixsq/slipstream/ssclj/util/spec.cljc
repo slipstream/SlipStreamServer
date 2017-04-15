@@ -40,3 +40,16 @@
                       (apply merge-with set/union))]
     `(s/merge (s/keys ~@(apply concat (vec map-spec)))
               (s/map-of ~(allowed-keys map-spec) any?))))
+
+(defmacro constrained-map
+  "Creates an open map spec using the supplied keys specs with the
+   additional contraint that all unspecified entries must match the
+   given key and value specs. The keys specs will be evaluated."
+  [key-spec value-spec & map-specs]
+  (let [map-spec (->> map-specs
+                      (map eval)
+                      (apply merge-with set/union))]
+    `(s/merge
+       (s/every (s/or :attrs (s/tuple ~(allowed-keys map-spec) any?)
+                      :link (s/tuple ~key-spec ~value-spec)))
+       (s/keys ~@(apply concat (vec map-spec))))))
