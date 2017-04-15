@@ -14,6 +14,5 @@
 
 (s/def :cimi/service-attribute-namespace
   (su/only-keys-maps c/common-attrs
-                     {:req-un [:cimi.acl/acl]}
                      {:req-un [:cimi.service-attribute-namespace/prefix
                                :cimi.core/uri]}))

@@ -4,6 +4,30 @@
     [clojure.spec :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as t]))
 
+(deftest check-regex-chars
+  (is (= 253 (count (@#'t/regex-chars #"."))))                 ;; 3 characters are line terminators and not matched!
+  (is (= #{"A"} (@#'t/regex-chars #"A")))
+  (is (= #{"A" "B" "C" "0" "1" "-"} (@#'t/regex-chars #"[A-C0-1-]"))))
+
+(deftest check-merge-kw-lists
+  (is (= [:ns1/one :ns2/two] (t/merge-kw-lists [:ns2/two :ns1/one] [:ns1/one]))))
+
+(deftest check-merge-keys-specs
+  (let [test-keys-spec-1 {:req    [:ns1/one]
+                          :req-un [:ns2/two]
+                          :opt    [:ns3/three]}
+        test-keys-spec-2 {:req [:ns5/five]}]
+    (is (= {:req [:ns1/one]} (t/merge-keys-specs [{:req #{:ns1/one}} {:req [:ns1/one]}])))
+    (is (= {:req    [:ns1/one :ns5/five]
+            :req-un [:ns2/two]
+            :opt    [:ns3/three]
+            :opt-un [:ns4/four :ns6/six]}
+           (t/merge-keys-specs [test-keys-spec-1
+                                test-keys-spec-2
+                                {:opt    [:ns3/three]
+                                 :opt-un [:ns4/four]}
+                                {:opt-un [:ns6/six]}])))))
+
 (deftest check-unnamespaced-kws
   (is (= #{} (t/unnamespaced-kws nil)))
   (is (= #{} (t/unnamespaced-kws [])))

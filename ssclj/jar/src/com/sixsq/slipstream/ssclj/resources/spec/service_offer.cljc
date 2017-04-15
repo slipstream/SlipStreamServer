@@ -11,5 +11,4 @@
 (s/def :cimi/service-offer
   (su/constrained-map keyword? any?
                       c/common-attrs
-                      {:req-un [:cimi.acl/acl]}
                       {:req-un [:cimi.service-offer/connector]}))

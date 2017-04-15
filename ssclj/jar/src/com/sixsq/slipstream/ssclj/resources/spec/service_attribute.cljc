@@ -18,7 +18,6 @@
 
 (s/def :cimi/service-attribute
   (su/only-keys-maps c/common-attrs
-                     {:req-un [:cimi.acl/acl]}
                      {:req-un [:cimi.common/name            ;; name is required
                                :cimi.common/description     ;; description is required
                                :cimi.service-attribute/prefix

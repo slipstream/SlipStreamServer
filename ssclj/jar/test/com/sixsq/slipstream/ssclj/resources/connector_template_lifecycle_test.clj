@@ -13,7 +13,8 @@
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
+  (:import (clojure.lang ExceptionInfo)))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
@@ -93,7 +94,7 @@
         (is (:cloudServiceType desc-body))
         (is (:acl desc-body))
 
-        (is (thrown-with-msg? clojure.lang.ExceptionInfo #".*resource does not satisfy defined schema.*" (crud/validate entry-body)))
+        (is (thrown-with-msg? ExceptionInfo #".*resource does not satisfy defined schema.*" (crud/validate entry-body)))
         (is (crud/validate (assoc entry-body :instanceName "alpha-omega")))
 
         ;; anonymous access not permitted

@@ -17,7 +17,7 @@
                          :cimi.common/resourceURI
                          :cimi.common/created
                          :cimi.common/updated
-                         :cimi.acl/acl
+                         :cimi.common/acl
 
                          :cimi.usage/user
                          :cimi.usage/cloud

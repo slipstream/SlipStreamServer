@@ -9,5 +9,4 @@
 (s/def :cimi/cloud-entry-point
   (su/constrained-map keyword? :cimi.common/resource-link
                       c/common-attrs
-                      {:req-un [:cimi.acl/acl]}
                       {:req-un [:cimi.cloud-entry-point/baseURI]}))
