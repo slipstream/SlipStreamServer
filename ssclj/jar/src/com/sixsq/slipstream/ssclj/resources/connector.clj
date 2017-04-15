@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector
   (:require
+    [com.sixsq.slipstream.ssclj.resources.spec.connector]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -26,15 +27,6 @@
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
                               :right     "MODIFY"}]})
-;;
-;; schemas
-;;
-
-(def Connector tpl/ConnectorTemplate)
-
-(def ConnectorCreate
-  (merge c/CreateAttrs
-         {:connectorTemplate tpl/ConnectorTemplateRef}))
 
 ;;
 ;; validate subclasses of connectors

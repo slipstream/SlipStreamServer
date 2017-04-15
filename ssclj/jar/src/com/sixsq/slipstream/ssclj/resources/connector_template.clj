@@ -1,8 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-template
   (:require
     [clojure.tools.logging :as log]
-    [superstring.core :as str]
-    [schema.core :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.connector-template]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -107,47 +106,6 @@
       (when name-kw-map
         (swap! name->kw assoc id name-kw-map)
         (log/info "added name->kw mapping from ConnectorTemplate" id)))))
-
-;;
-;; schemas
-;;
-
-; Mandatory reference parameters.
-(def ConnectorMandatoryReferenceAttrs
-  {:orchestratorImageid s/Str                               ;; "<uuid>"
-   :quotaVm             s/Str                               ;; "20" or ""
-   :maxIaasWorkers      c/PosInt                            ;; 5
-   })
-
-(def ValidConnectorInstanceName
-  (s/constrained s/Str
-                 (fn [x] (and (not (str/blank? x)) (not= x (:instanceName connector-instance-name-default))))
-                 'valid-connector-instance-name?))
-
-(def ConnectorTemplateAttrs
-  (merge {:cloudServiceType c/NonBlankString
-          :instanceName     ValidConnectorInstanceName}
-         ConnectorMandatoryReferenceAttrs))
-
-(def ConnectorReferenceAttrs
-  {:endpoint                s/Str                           ;; ""
-   :nativeContextualization c/NonBlankString                ;; "linux-only"
-   :orchestratorSSHUsername s/Str                           ;; ""
-   :orchestratorSSHPassword s/Str                           ;; ""
-   :securityGroups          s/Str                           ;; "slipstream_managed"
-   :updateClientURL         s/Str                           ;; "https://nuv.la/downloads/cloudstackclient.tgz"
-   })
-
-(def ConnectorTemplate
-  (merge c/CommonAttrs
-         c/AclAttr
-         ConnectorTemplateAttrs))
-
-(def ConnectorTemplateRef
-  (s/constrained
-    (merge ConnectorTemplateAttrs
-           {(s/optional-key :href) c/NonBlankString})
-    seq 'not-empty?))
 
 (def ConnectorTemplateDescription
   (merge c/CommonParameterDescription
