@@ -6,27 +6,41 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
+;; Generic type definitions.
+
+(s/def :cimi.connector-template.core/identifier
+  (su/regex-string #"[a-z0-9-]" #"^[a-z0-9]+(-[a-z0-9]+)*$"))
+
+;; Parameter definitions.
+
+(s/def :cimi.connector-template/cloudServiceType :cimi.connector-template.core/identifier)
+(s/def :cimi.connector-template/instanceName :cimi.connector-template.core/identifier)
 (s/def :cimi.connector-template/orchestratorImageid :cimi.core/nonblank-string)
-(s/def :cimi.connector-template/quotaVm :cimi.core/nonblank-string)
+(s/def :cimi.connector-template/quotaVm :cimi.core/nonblank-string) ;; FIXME: Should be nat-int? with 0 indicating no quota.
 (s/def :cimi.connector-template/maxIaasWorkers pos-int?)
 
-(s/def :cimi.connector-template/cloudServiceType :cimi.core/nonblank-string)
+(s/def :cimi.connector-template/href :cimi.core/resource-href) ;; FIXME: Ensure this always references the same resource type.
 
-(s/def :cimi.connector-template/instanceName
-  (su/regex-string #"[a-z0-9-]" #"^[a-z0-9]+(-[a-z0-9-]+)*$"))
+;;
+;; Keys specifications for ConnectorTemplate resources.
+;; As this is a "base class" for ConnectorTemplate resources, there
+;; is no sense in defining map resources for the resource itself.
+;;
 
-(s/def :cimi.connector-template/href :cimi.core/resource-href)
+(def connector-template-keys-spec {:req-un [:cimi.connector-template/cloudServiceType
+                                            :cimi.connector-template/instanceName
+                                            :cimi.connector-template/orchestratorImageid
+                                            :cimi.connector-template/quotaVm
+                                            :cimi.connector-template/maxIaasWorkers]})
 
-(def connector-template-attrs-keys
-  (su/merge-keys-specs [c/common-attrs
-                        {:req-un [:cimi.connector-template/cloudServiceType
-                                  :cimi.connector-template/instanceName
-                                  :cimi.connector-template/orchestratorImageid
-                                  :cimi.connector-template/quotaVm
-                                  :cimi.connector-template/maxIaasWorkers]}]))
+(def resource-keys-spec
+  (su/merge-keys-specs [c/common-attrs connector-template-keys-spec]))
 
-(s/def :cimi/connector-template (su/only-keys-maps c/common-attrs
-                                                   connector-template-attrs-keys))
+(def create-keys-spec
+  (su/merge-keys-specs [c/create-attrs]))
 
-(s/def :cimi/connector-template-ref (su/only-keys-maps connector-template-attrs-keys
-                                                       {:opt-un [:cimi.connector-template/href]}))
+(def template-keys-spec
+  (su/merge-keys-specs [c/template-attrs
+                        connector-template-keys-spec
+                        {:opt-un [:cimi.connector-template/href]}]))
+

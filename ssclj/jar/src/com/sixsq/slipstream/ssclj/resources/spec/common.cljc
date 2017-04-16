@@ -118,7 +118,8 @@
                                       :opt-un [:cimi.acl/rules]))
 
 (def ^:const common-attrs
-  "clojure.spec/keys specification (as a map) for common CIMI attributes"
+  "clojure.spec/keys specification (as a map) for common CIMI attributes
+   for regular resources"
   {:req-un [:cimi.common/id
             :cimi.common/resourceURI
             :cimi.common/created
@@ -131,9 +132,25 @@
 
 (def ^:const create-attrs
   "clojure.spec/keys specification (as a map) for common CIMI attributes
-   for the 'create' resources used when creating resources from a template"
+   for the 'create' resources used when creating resources from a template.
+   This applies to the create wrapper and not the embedded resource
+   template!"
   {:req-un [:cimi.common/resourceURI]
    :opt-un [:cimi.common/name
+            :cimi.common/description
+            :cimi.common/created
+            :cimi.common/updated
+            :cimi.common/properties
+            :cimi.common/operations
+            :cimi.common/acl]})
+
+(def ^:const template-attrs
+  "The clojure.spec/keys specification (as a map) for common CIMI attributes
+   for the resource templates that are embedded in 'create' resources. Although
+   these may be added to the templates (usually by reference), they will have
+   no affect on the created resource."
+  {:opt-un [:cimi.common/resourceURI
+            :cimi.common/name
             :cimi.common/description
             :cimi.common/created
             :cimi.common/updated

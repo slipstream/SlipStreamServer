@@ -3,4 +3,11 @@
     [clojure.spec :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.connector-template]))
 
-(s/def :cimi/connector :cimi/connector-template)
+;;
+;; Note that all of the keys and keys specs are already defined
+;; with the connectorTemplate.  This file exists only to allow a
+;; place to define new keys, if that should become necessary.
+;;
+;; As for the ConnectorTemplate, this is a "base class" so there
+;; is no sense in defining map resources for the resource itself.
+;;

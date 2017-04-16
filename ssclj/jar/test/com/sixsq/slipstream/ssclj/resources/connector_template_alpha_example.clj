@@ -1,4 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example
+  "This is an example ConnectorTemplate resource that shows how a
+   concrete ConnectorTemplate resource would be defined and also to
+   provide a concrete resource for testing."
   (:require
     [clojure.spec :as s]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as p]
@@ -15,15 +18,20 @@
 
 (s/def :cimi.connector-template.alpha/alphaKey pos-int?)
 
-(def keys-spec (su/merge-keys-specs
-                 [ps/connector-template-attrs-keys
-                  {:req-un [:cimi.connector-template.alpha/alphaKey]}]))
+;; Defines the contents of the alpha ConnectorTemplate resource itself.
+(s/def :cimi/connector-template.alpha
+  (su/only-keys-maps ps/resource-keys-spec
+                     {:req-un [:cimi.connector-template.alpha/alphaKey]}))
 
-(s/def :cimi/connector-template-alpha (su/only-keys-maps keys-spec))
+;; Defines the contents of the alpha template used in a create resource.
+;; NOTE: The name must match the key defined by the resource, :connectorTemplate here.
+(s/def :cimi.connector-template.alpha/connectorTemplate
+  (su/only-keys-maps ps/template-keys-spec
+                     {:opt-un [:cimi.connector-template.alpha/alphaKey]}))
 
-(def ref-keys-spec (su/merge-keys-specs
-                     [keys-spec
-                      {:opt-un [:cimi.connector-template/href]}]))
+(s/def :cimi/connector-template.alpha-create
+  (su/only-keys-maps ps/create-keys-spec
+                     {:opt-un [:cimi.connector-template.alpha/connectorTemplate]}))
 
 (def ConnectorTemplateAlphaDescription
   (merge p/ConnectorTemplateDescription
@@ -57,7 +65,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/connector-template-alpha))
+(def validate-fn (u/create-spec-validation-fn :cimi/connector-template.alpha))
 (defmethod p/validate-subtype cloud-service-type
   [resource]
   (validate-fn resource))
