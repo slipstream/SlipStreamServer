@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream
   (:require
     [clojure.tools.logging :as log]
-    [schema.core :as s]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]

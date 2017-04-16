@@ -14,7 +14,6 @@
 
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [peridot.core :refer :all]
-    [schema.core :as sc]
     [clojure.data.json :as json]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [clj-time.core :as time]
@@ -88,25 +87,6 @@
        (t/is-status 200)
        (t/is-key-value :count expected-count)
        (t/is-key-value count key-to-count expected-paginated-count))))
-
-(defn is-valid?
-  "Asserts that schema successfully validates the resource."
-  [resource schema]
-
-  (when-let [schema-error (sc/check schema resource)]
-    (println resource " does NOT respect schema : " schema-error))
-
-  (is (nil? (sc/check schema resource))))
-
-(defn is-invalid?
-  "Asserts that schema rejects given resource."
-  [resource schema]
-  (is (sc/check schema resource)))
-
-(defn are-valid?
-  [resources schema]
-  (doseq [resource resources]
-    (is-valid? resource schema)))
 
 (def not-before? (complement time/before?))
 
