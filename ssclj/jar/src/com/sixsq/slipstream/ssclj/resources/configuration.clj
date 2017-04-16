@@ -26,18 +26,6 @@
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
                               :right     "MODIFY"}]})
-;;
-;; schemas
-;;
-
-(def Configuration
-  (merge c/CommonAttrs
-         c/AclAttr
-         {:service c/NonBlankString}))
-
-(def ConfigurationCreate
-  (merge c/CreateAttrs
-         {:configurationTemplate tpl/ConfigurationTemplateRef}))
 
 ;;
 ;; validate subclasses of configurations
@@ -135,7 +123,7 @@
   (query-impl request))
 
 ;;
-;; use name as the identifier
+;; use service as the identifier
 ;;
 
 (defmethod crud/new-identifier resource-name
