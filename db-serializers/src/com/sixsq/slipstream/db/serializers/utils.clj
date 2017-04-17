@@ -180,7 +180,7 @@
             :order       (.getOrder p)}]
 
     (cond-> pd
-            (> (count (.getEnumValues p)) 0) (assoc :enum (.getEnumValues p))
+            (> (count (.getEnumValues p)) 0) (assoc :enum (vec (.getEnumValues p)))
             (not-empty-string? (.getInstructions p)) (assoc :instructions (.getInstructions p)))))
 
 
