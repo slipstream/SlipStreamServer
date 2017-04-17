@@ -6,7 +6,6 @@
     [superstring.core :as s]
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
-    [schema.core :as schema]
     [ring.util.response :as r]
     [clojure.data.json :as json])
   (:import
@@ -116,23 +115,6 @@
 (defn valid-number?
   [s]
   (number? (read-string s)))
-
-(defn create-validation-fn
-  "Creates a validation function that compares a resource against the
-   given schema.  The generated function raises an exception with the
-   violations of the schema and a 400 ring response. If everything's
-   OK, then the resource itself is returned."
-  [schema]
-  (let [checker (schema/checker schema)]
-    (fn [resource]
-      (if-let [msg (checker resource)]
-        (let [msg (str "resource does not satisfy defined schema: " msg)
-              response (-> {:status 400 :message msg}
-                           json-response
-                           (r/status 400))]
-          (log/warn msg)
-          (throw (ex-info msg response)))
-        resource))))
 
 (defn decrypt
   "This function should eventually decrypt the given value based on
