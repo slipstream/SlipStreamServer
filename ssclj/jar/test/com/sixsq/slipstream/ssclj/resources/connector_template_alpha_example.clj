@@ -47,9 +47,8 @@
 ;; resource
 ;;
 (def ^:const resource
-  (merge ct/connector-reference-attrs-defaults
-         {:cloudServiceType cloud-service-type
-          :alphaKey         1001}))
+  {:cloudServiceType cloud-service-type
+   :alphaKey         1001})
 
 ;;
 ;; description
