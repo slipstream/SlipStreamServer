@@ -15,9 +15,16 @@
 
 (s/def :cimi.connector-template/cloudServiceType :cimi.connector-template.core/identifier)
 (s/def :cimi.connector-template/instanceName :cimi.connector-template.core/identifier)
-(s/def :cimi.connector-template/orchestratorImageid :cimi.core/nonblank-string)
+(s/def :cimi.connector-template/orchestratorImageid string?)
 (s/def :cimi.connector-template/quotaVm :cimi.core/nonblank-string) ;; FIXME: Should be nat-int? with 0 indicating no quota.
 (s/def :cimi.connector-template/maxIaasWorkers pos-int?)
+
+(s/def :cimi.connector-template/endpoint string?)
+(s/def :cimi.connector-template/nativeContextualization :cimi.core/nonblank-string)
+(s/def :cimi.connector-template/orchestratorSSHUsername string?)
+(s/def :cimi.connector-template/orchestratorSSHPassword string?)
+(s/def :cimi.connector-template/securityGroups string?)
+(s/def :cimi.connector-template/updateClientURL string?)
 
 (s/def :cimi.connector-template/href :cimi.core/resource-href) ;; FIXME: Ensure this always references the same resource type.
 
@@ -31,7 +38,14 @@
                                             :cimi.connector-template/instanceName
                                             :cimi.connector-template/orchestratorImageid
                                             :cimi.connector-template/quotaVm
-                                            :cimi.connector-template/maxIaasWorkers]})
+                                            :cimi.connector-template/maxIaasWorkers
+
+                                            :cimi.connector-template/endpoint
+                                            :cimi.connector-template/nativeContextualization
+                                            :cimi.connector-template/orchestratorSSHUsername
+                                            :cimi.connector-template/orchestratorSSHPassword
+                                            :cimi.connector-template/securityGroups
+                                            :cimi.connector-template/updateClientURL]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs connector-template-keys-spec]))

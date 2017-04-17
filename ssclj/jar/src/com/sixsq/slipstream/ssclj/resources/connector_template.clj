@@ -40,7 +40,7 @@
   {:instanceName "Provide valid connector instance name."})
 
 (def connector-mandatory-reference-attrs-defaults
-  {:orchestratorImageid "unknown"                           ;; FIXME: Why is this not set to a real value in tests. This was originally empty.
+  {:orchestratorImageid ""
    :quotaVm             "20"
    :maxIaasWorkers      5})
 

@@ -27,7 +27,13 @@
                    :orchestratorImageid "123"
                    :quotaVm             "20"
                    :maxIaasWorkers      5
-                   :instanceName        "foo"}]
+                   :instanceName        "foo"
+                   :endpoint                "https://cloud.example.com/"
+                   :nativeContextualization "linux-only"
+                   :orchestratorSSHUsername ""
+                   :orchestratorSSHPassword ""
+                   :securityGroups          "slipstream_managed"
+                   :updateClientURL         "https://client.example.com/client.tgz"}]
     (is (s/valid? :cimi.test/connector-template root))
     (doseq [k (into #{} (keys (dissoc root :id :resourceURI)))]
       (is (not (s/valid? :cimi.test/connector-template (dissoc root k)))))))

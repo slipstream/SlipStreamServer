@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.spec.connector-template :as ps]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as ct]))
 
 (def ^:const cloud-service-type "alpha")
 
@@ -46,8 +47,9 @@
 ;; resource
 ;;
 (def ^:const resource
-  {:cloudServiceType cloud-service-type
-   :alphaKey         1001})
+  (merge ct/connector-reference-attrs-defaults
+         {:cloudServiceType cloud-service-type
+          :alphaKey         1001}))
 
 ;;
 ;; description

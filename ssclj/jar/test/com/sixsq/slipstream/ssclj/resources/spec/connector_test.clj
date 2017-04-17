@@ -17,16 +17,22 @@
 
 (deftest test-schema-check
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        root {:id                  (str c/resource-url "/connector-uuid")
-              :resourceURI         c/resource-uri
-              :created             timestamp
-              :updated             timestamp
-              :acl                 valid-acl
-              :cloudServiceType    "alpha"
-              :orchestratorImageid "123"
-              :quotaVm             "20"
-              :maxIaasWorkers      5
-              :instanceName        "foo"}]
+        root {:id                      (str c/resource-url "/connector-uuid")
+              :resourceURI             c/resource-uri
+              :created                 timestamp
+              :updated                 timestamp
+              :acl                     valid-acl
+              :cloudServiceType        "alpha"
+              :orchestratorImageid     "123"
+              :quotaVm                 "20"
+              :maxIaasWorkers          5
+              :instanceName            "foo"
+              :endpoint                "https://cloud.example.com/"
+              :nativeContextualization "linux-only"
+              :orchestratorSSHUsername ""
+              :orchestratorSSHPassword ""
+              :securityGroups          "slipstream_managed"
+              :updateClientURL         "https://client.example.com/client.tgz"}]
     (is (s/valid? :cimi.test/connector root))
     (doseq [k (into #{} (keys (dissoc root :id :resourceURI)))]
       (is (not (s/valid? :cimi.test/connector (dissoc root k)))))))
