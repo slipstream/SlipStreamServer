@@ -3,31 +3,16 @@
     [clojure.tools.logging :as log]
 
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]
-    ))
+    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]))
 
 (def ^:const service "slipstream")
 
 (def ^:const resource-url (str p/resource-url "/" service))
-
-;;
-;; schemas
-;;
-
-(def ConfigurationAttrs
-  tpl/ConfigurationTemplateAttrs)
-
-(def Configuration
-  (merge p/Configuration
-         ConfigurationAttrs))
-
-(def ConfigurationCreate
-  (merge c/CreateAttrs
-         {:configurationTemplate tpl/ConfigurationTemplateRef}))
 
 (def ConfigurationDescription
   tpl/desc)
@@ -41,12 +26,12 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-validation-fn Configuration))
+(def validate-fn (u/create-spec-validation-fn :cimi/configuration-template.slipstream))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-validation-fn ConfigurationCreate))
+(def create-validate-fn (u/create-spec-validation-fn :cimi/configuration-template.slipstream-create))
 (defmethod p/create-validate-subtype service
   [resource]
   (create-validate-fn resource))

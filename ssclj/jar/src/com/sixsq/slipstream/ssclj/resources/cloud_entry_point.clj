@@ -1,12 +1,14 @@
-(ns com.sixsq.slipstream.ssclj.resources.root
-  "Root collection for the server providing list of all resource collections."
+(ns com.sixsq.slipstream.ssclj.resources.cloud-entry-point
+  "The CloudEntryPoint resource provides the root list of all resources
+   on the server."
   (:require
     [clojure.tools.logging :as log]
-    [schema.core :as s]
+    [clojure.spec :as s]
     [compojure.core :refer [defroutes GET POST PUT DELETE ANY]]
     [ring.util.response :as r]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point] ;; ensure schema is loaded
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
@@ -29,16 +31,6 @@
                             :type      "ROLE"
                             :right     "VIEW"}]})
 
-;;
-;; Root schema
-;;
-
-(def Root
-  (merge c/CommonAttrs
-         c/AclAttr
-         {:baseURI  c/NonBlankString
-          s/Keyword c/ResourceLink}))
-
 ;; dynamically loads all available resources
 (def resource-links
   (into {} (dyn/get-resource-links)))
@@ -50,7 +42,7 @@
 ;; define validation function and add to standard multi-method
 ;;
 
-(def validate-fn (u/create-validation-fn Root))
+(def validate-fn (u/create-spec-validation-fn :cimi/cloud-entry-point))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -69,9 +61,9 @@
 ;;
 
 (defn add
-  "The Root resource is only created automatically at server startup
+  "The CloudEntryPoint resource is only created automatically at server startup
    if necessary.  It cannot be added through the API.  This function
-   adds the minimal Root resource to the database."
+   adds the minimal CloudEntryPoint resource to the database."
   []
   (let [record (u/update-timestamps
                  {:acl         resource-acl
@@ -123,7 +115,7 @@
       (log/warn resource-name "resource not created; may already exist; message: " (str e)))))
 
 ;;
-;; Root doesn't follow the usual service-context + '/resource-name/UUID'
+;; CloudEntryPoint doesn't follow the usual service-context + '/resource-name/UUID'
 ;; pattern, so the routes must be defined explicitly.
 ;;
 (defroutes routes

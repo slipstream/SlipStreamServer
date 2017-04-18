@@ -1,7 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute
   (:require
     [superstring.core :as str]
-    [schema.core :as s]
+    [clojure.spec :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -31,35 +32,6 @@
                      :rules [{:principal "USER"
                               :type      "ROLE"
                               :right     "MODIFY"}]})
-;;
-;; schemas
-;;
-
-(def LocalizedEntry
-  {:name                        c/NonBlankString
-   :description                 c/NonBlankString
-   (s/optional-key :categories) c/NonEmptyStrList})
-
-(def LocalizedEntries
-  (s/constrained {s/Keyword LocalizedEntry} seq 'not-empty?))
-
-(def CompositeType
-  (s/constrained [c/NonBlankString] seq 'not-empty?))
-
-;; TODO: Determine how to force schema to have at least one localized entry
-(def Attribute
-  (merge c/CommonAttrs
-         c/AclAttr
-         {:prefix                     c/NonBlankString
-          :attr-name                  c/NonBlankString
-
-          :type                       (s/cond-pre s/Str CompositeType)
-          (s/optional-key :authority) c/NonBlankString
-          :major-version              c/NonNegInt
-          :minor-version              c/NonNegInt
-          :patch-version              c/NonNegInt
-          :normative                  s/Bool
-          s/Keyword                   LocalizedEntry}))
 
 ;;
 ;; multimethods for validation and operations
@@ -77,7 +49,7 @@
                        (r/status code))]
       (throw (ex-info msg response)))))
 
-(def validate-fn (u/create-validation-fn Attribute))
+(def validate-fn (u/create-spec-validation-fn :cimi/service-attribute))
 (defmethod crud/validate resource-uri
   [resource]
   (-> resource
@@ -114,7 +86,7 @@
 
 (defmethod crud/new-identifier resource-name
   [json resource-name]
-  (let [new-id (str resource-url "/" (uri->id (str (:prefix json) ":" (:attr-name json))))]
+  (let [new-id (str resource-url "/" (uri->id (str (:prefix json) ":" (:attributeName json))))]
     (assoc json :id new-id)))
 
 (defmethod crud/add resource-name

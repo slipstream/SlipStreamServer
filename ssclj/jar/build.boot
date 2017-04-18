@@ -43,7 +43,6 @@
                    [org.clojure/tools.logging]
                    [org.clojure/tools.namespace]
                    [potemkin]
-                   [prismatic/schema]
                    [ring/ring-core]
                    [ring/ring-json]
                    [superstring]
@@ -62,6 +61,7 @@
                    ;; test dependencies
                    [peridot]
                    [honeysql]
+                   [org.clojure/test.check]
 
                    ;; boot tasks
                    [boot-environ]

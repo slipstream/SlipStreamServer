@@ -1,7 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-record
   (:require
-    [schema.core :as s]
+    [clojure.spec :as s]
     [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.spec.usage-record]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
@@ -27,25 +28,11 @@
 
 (def date-in-future "2100-01-01T00:00:00.000Z")
 
-(def UsageRecord
-  (merge
-    c/CreateAttrs
-    c/AclAttr
-    {
-     :id                               c/NonBlankString
-     :cloud-vm-instanceid              c/NonBlankString
-     :user                             c/NonBlankString
-     :cloud                            c/NonBlankString
-     (s/optional-key :start-timestamp) c/Timestamp
-     (s/optional-key :end-timestamp)   c/OptionalTimestamp
-     :metric-name                      c/NonBlankString
-     :metric-value                     c/NonBlankString}))
-
 ;;
 ;; "Implementations" of multimethod declared in crud namespace
 ;;
 
-(def validate-fn (cu/create-validation-fn UsageRecord))
+(def validate-fn (cu/create-spec-validation-fn :cimi/usage-record))
 (defmethod crud/validate
   resource-uri
   [resource]

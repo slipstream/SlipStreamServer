@@ -1,7 +1,8 @@
 (ns
   com.sixsq.slipstream.ssclj.resources.event
   (:require
-    [schema.core :as s]
+    [clojure.spec :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.event]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
@@ -21,33 +22,12 @@
                      :rules [{:principal "ANON"
                               :type      "ROLE"
                               :right     "ALL"}]})
-;;
-;; schemas
-;;
-
-(def ^:private severity-levels (s/enum "critical" "high" "medium" "low"))
-(def ^:private event-types (s/enum "state" "alarm" "action" "system"))
-
-(def ^:private EventContent
-  {:resource c/ResourceLink
-   :state    s/Str})
-
-(def Event
-  (merge
-    c/CreateAttrs
-    c/AclAttr
-    {
-     :id        c/NonBlankString
-     :timestamp c/Timestamp
-     :content   EventContent
-     :type      event-types
-     :severity  severity-levels}))
 
 ;;
 ;; "Implementations" of multimethod declared in crud namespace
 ;;
 
-(def validate-fn (u/create-validation-fn Event))
+(def validate-fn (u/create-spec-validation-fn :cimi/event))
 (defmethod crud/validate
   resource-uri
   [resource]

@@ -41,7 +41,6 @@
                    [org.apache.logging.log4j/log4j-api]
                    [org.apache.logging.log4j/log4j-web]
                    [org.elasticsearch.client/transport]
-                   [prismatic/schema]
                    [ring/ring-json]
                    [superstring]
 

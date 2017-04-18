@@ -6,12 +6,13 @@
     [superstring.core :as str]
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
-    [schema.core :as schema]
+    [clojure.spec :as s]
     [ring.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [clojure.data.json :as json])
+    [clojure.data.json :as json]
+    [clj-time.coerce :as c])
   (:import
-    [java.util List Map UUID]
+    [java.util List Map UUID Date]
     [javax.xml.bind DatatypeConverter]))
 
 ;;
@@ -133,22 +134,34 @@
         created (or (:created data) updated)]
     (assoc data :created created :updated updated)))
 
-(defn valid-timestamp?
+(defn unparse-timestamp
+  "Returns the string representation of the given timestamp."
+  [^Date timestamp]
+  (try
+    (time-fmt/unparse (:date-time time-fmt/formatters) (c/from-date timestamp))
+    (catch Exception _
+      nil)))
+
+(defn parse-timestamp
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
    instance on success and nil on failure."
   [data]
-  (time-fmt/parse (:date-time time-fmt/formatters) data))
+  (try
+    (time-fmt/parse (:date-time time-fmt/formatters) data)
+    (catch Exception _
+      nil)))
 
-(defn create-validation-fn
+(defn create-spec-validation-fn
   "Creates a validation function that compares a resource against the
    given schema.  The generated function raises an exception with the
    violations of the schema and a 400 ring response. If everything's
    OK, then the resource itself is returned."
-  [schema]
-  (let [checker (schema/checker schema)]
+  [spec]
+  (let [ok? (partial s/valid? spec)
+        explain (partial s/explain-str spec)]
     (fn [resource]
-      (if-let [msg (checker resource)]
-        (let [msg (str "resource does not satisfy defined schema: " msg)
+      (if-not (ok? resource)
+        (let [msg (str "resource does not satisfy defined schema: " (explain resource))
               response (-> {:status 400 :message msg}
                            json-response
                            (r/status 400))]

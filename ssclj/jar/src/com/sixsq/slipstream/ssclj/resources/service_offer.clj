@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-offer
   (:require
-    [schema.core :as s]
+    [clojure.spec :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-offer]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -27,15 +28,6 @@
                      :rules [{:principal "USER"
                               :type      "ROLE"
                               :right     "MODIFY"}]})
-;;
-;; schemas
-;;
-
-(def ServiceInfo
-  (merge c/CommonAttrs
-         c/AclAttr
-         {:connector c/ResourceLink
-          s/Any s/Any}))
 
 ;;
 ;; multimethods for validation and operations
@@ -72,7 +64,7 @@
       resource
       (throw-wrong-namespace))))
 
-(def validate-fn (u/create-validation-fn ServiceInfo))
+(def validate-fn (u/create-spec-validation-fn :cimi/service-offer))
 (defmethod crud/validate resource-uri
            [resource]
     (-> resource

@@ -38,6 +38,8 @@
                     [com.sixsq.slipstream/SlipStreamCljResources-jar]
                     [com.sixsq.slipstream/SlipStreamPersistence]
 
+                    [org.clojure/test.check]
+
                     ;; boot tasks
                     [boot-environ]
                     [adzerk/boot-test]

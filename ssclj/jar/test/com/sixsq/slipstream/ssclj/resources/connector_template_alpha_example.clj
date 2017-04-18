@@ -1,9 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example
+  "This is an example ConnectorTemplate resource that shows how a
+   concrete ConnectorTemplate resource would be defined and also to
+   provide a concrete resource for testing."
   (:require
-    [schema.core :as s]
+    [clojure.spec :as s]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.spec.connector-template :as ps]
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as ct]))
 
 (def ^:const cloud-service-type "alpha")
 
@@ -11,19 +17,22 @@
 ;; schemas
 ;;
 
-(def ConnectorTemplateAlphaAttrs
-  (merge p/ConnectorTemplateAttrs
-         {:alphaKey c/PosInt}))
+(s/def :cimi.connector-template.alpha/alphaKey pos-int?)
 
-(def ConnectorTemplateAlpha
-  (merge p/ConnectorTemplate
-         ConnectorTemplateAlphaAttrs))
+;; Defines the contents of the alpha ConnectorTemplate resource itself.
+(s/def :cimi/connector-template.alpha
+  (su/only-keys-maps ps/resource-keys-spec
+                     {:req-un [:cimi.connector-template.alpha/alphaKey]}))
 
-(def ConnectorTemplateAlphaRef
-  (s/constrained
-    (merge ConnectorTemplateAlphaAttrs
-           {(s/optional-key :href) c/NonBlankString})
-    seq 'not-empty?))
+;; Defines the contents of the alpha template used in a create resource.
+;; NOTE: The name must match the key defined by the resource, :connectorTemplate here.
+(s/def :cimi.connector-template.alpha/connectorTemplate
+  (su/only-keys-maps ps/template-keys-spec
+                     {:opt-un [:cimi.connector-template.alpha/alphaKey]}))
+
+(s/def :cimi/connector-template.alpha-create
+  (su/only-keys-maps ps/create-keys-spec
+                     {:opt-un [:cimi.connector-template.alpha/connectorTemplate]}))
 
 (def ConnectorTemplateAlphaDescription
   (merge p/ConnectorTemplateDescription
@@ -57,7 +66,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-validation-fn ConnectorTemplateAlpha))
+(def validate-fn (u/create-spec-validation-fn :cimi/connector-template.alpha))
 (defmethod p/validate-subtype cloud-service-type
   [resource]
   (validate-fn resource))
