@@ -1,7 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template
   (:require
     [clojure.tools.logging :as log]
-    [schema.core :as s]
+    [clojure.spec :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -88,20 +89,6 @@
 ;;
 ;; schemas
 ;;
-
-(def SessionTemplateAttrs
-  {:method c/NonBlankString})
-
-(def SessionTemplate
-  (merge c/CommonAttrs
-         c/AclAttr
-         SessionTemplateAttrs))
-
-(def SessionTemplateRef
-  (s/constrained
-    (merge SessionTemplateAttrs
-           {(s/optional-key :href) c/NonBlankString})
-    seq 'not-empty?))
 
 (def SessionTemplateDescription
   (merge c/CommonParameterDescription

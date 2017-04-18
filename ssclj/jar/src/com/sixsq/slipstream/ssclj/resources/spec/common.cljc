@@ -41,6 +41,10 @@
 (s/def :cimi.core/resource-identifier
   (su/regex-string #"[a-zA-Z0-9_-]" #"^[a-zA-Z0-9]+([_-][a-zA-Z0-9]+)*$"))
 
+;; Words consisting of lowercase letters and digits, separated by dashes.
+(s/def :cimi.core/identifier
+  (su/regex-string #"[a-z0-9-]" #"^[a-z0-9]+(-[a-z0-9]+)*$"))
+
 (s/def :cimi.core/resource-type :cimi.core/kebab-identifier)
 
 ;;

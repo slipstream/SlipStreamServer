@@ -1,6 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-internal
   (:require
     [clojure.string :as str]
+    [com.sixsq.slipstream.ssclj.resources.spec.session]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as tpl]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
@@ -8,7 +10,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.auth.utils.sign :as sg]
-    [clj-time.format :as time-fmt]
     [com.sixsq.slipstream.auth.cookies :as cookies]))
 
 (def ^:const authn-method "internal")
@@ -16,16 +17,6 @@
 ;;
 ;; schemas
 ;;
-
-(def SessionAttrs
-  tpl/SessionTemplateAttrs)
-
-(def Session
-  p/Session)
-
-(def SessionCreate
-  (merge c/CreateAttrs
-         {:sessionTemplate tpl/SessionTemplateRef}))
 
 (def SessionDescription
   tpl/desc)
@@ -39,12 +30,12 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-validation-fn Session))
+(def validate-fn (u/create-spec-validation-fn :cimi/session))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-validation-fn SessionCreate))
+(def create-validate-fn (u/create-spec-validation-fn :cimi/session-template.internal-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))

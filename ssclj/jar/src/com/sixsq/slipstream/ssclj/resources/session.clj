@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.db.impl :as db]
-    [schema.core :as s]
+    [clojure.spec :as s]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
 
 (def ^:const resource-tag :sessions)
@@ -37,23 +37,6 @@
                              {:principal "ANON"
                               :type      "ROLE"
                               :right     "MODIFY"}]})
-;;
-;; schemas
-;;
-
-(def Session
-  (merge c/CommonAttrs
-         c/AclAttr
-         {:method                    c/NonBlankString
-          :username                  c/NonBlankString
-          (s/optional-key :server)   c/NonBlankString
-          (s/optional-key :clientIP) c/NonBlankString
-          :expiry                    c/NonBlankString       ;; not usual timestamp format, uses cookie format
-          }))
-
-(def SessionCreate
-  (merge c/CreateAttrs
-         {:sessionTemplate tpl/SessionTemplateRef}))
 
 ;;
 ;; validate subclasses of sessions
