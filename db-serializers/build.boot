@@ -7,7 +7,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha15"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -37,6 +37,8 @@
 
                     [com.sixsq.slipstream/SlipStreamCljResources-jar]
                     [com.sixsq.slipstream/SlipStreamPersistence]
+
+                    [org.clojure/test.check]
 
                     ;; boot tasks
                     [boot-environ]

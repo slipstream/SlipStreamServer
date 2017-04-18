@@ -1,7 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-template
   (:require
     [clojure.tools.logging :as log]
-    [schema.core :as s]
+    [clojure.spec :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -79,24 +80,6 @@
               full-desc (assoc desc :acl acl)]
           (swap! descriptions assoc id full-desc))
         (log/info "loaded ConfigurationTemplate description" id)))))
-
-;;
-;; schemas
-;;
-
-(def ConfigurationTemplateAttrs
-  {:service c/NonBlankString})
-
-(def ConfigurationTemplate
-  (merge c/CommonAttrs
-         c/AclAttr
-         ConfigurationTemplateAttrs))
-
-(def ConfigurationTemplateRef
-  (s/constrained
-    (merge ConfigurationTemplateAttrs
-           {(s/optional-key :href) c/NonBlankString})
-    seq 'not-empty?))
 
 (def ConfigurationTemplateDescription
   (merge c/CommonParameterDescription

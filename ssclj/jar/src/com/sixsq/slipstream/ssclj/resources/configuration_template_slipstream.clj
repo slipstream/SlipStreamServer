@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream
   (:require
     [clojure.tools.logging :as log]
-    [schema.core :as s]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -13,61 +12,6 @@
 (def slipstream-version (-> "com/sixsq/slipstream/version.txt"
                             uc/find-file
                             slurp))
-
-;;
-;; schemas
-;;
-
-(def config-attrs
-  {
-   :slipstreamVersion          c/NonBlankString             ;; 3.12-SNAPSHOT
-
-   :serviceURL                 c/NonBlankString             ;; https://nuv.la
-   :reportsLocation            c/NonBlankString             ;; /var/tmp/slipstream/reports
-   :supportEmail               c/NonBlankString             ;; support@example.com
-   :clientBootstrapURL         c/NonBlankString             ;; https://185.19.28.68/downloads/slipstream.bootstrap
-   :clientURL                  c/NonBlankString             ;; https://185.19.28.68/downloads/slipstreamclient.tgz
-   :connectorOrchPrivateSSHKey c/NonBlankString             ;; /opt/slipstream/server/.ssh/id_rsa
-   :connectorOrchPublicSSHKey  c/NonBlankString             ;; /opt/slipstream/server/.ssh/id_rsa.pub
-   :connectorLibcloudURL       c/NonBlankString             ;; https://185.19.28.68/downloads/libcloud.tgz
-
-   :mailUsername               c/NonBlankString             ;; mailer@example.com
-   :mailPassword               c/NonBlankString             ;; plain-text
-   :mailHost                   c/NonBlankString             ;; smtp.example.com
-   :mailPort                   c/PosInt                     ;; 465
-   :mailSSL                    s/Bool                       ;; true
-   :mailDebug                  s/Bool                       ;; true
-
-   :quotaEnable                s/Bool                       ;; true
-
-   :registrationEnable         s/Bool                       ;; true
-   :registrationEmail          c/NonBlankString             ;; register@sixsq.com
-
-   :meteringEnable             s/Bool                       ;; false
-   :meteringEndpoint           c/NonBlankString             ;; http://localhost:2005
-
-   :serviceCatalogEnable       s/Bool                       ;; true
-
-   ;; FIXME: used only for compatibilty with the Java server. To be removed.
-   :cloudConnectorClass        s/Str                        ;; "name-region-az:connector,"
-
-   :metricsLoggerEnable        s/Bool                       ;; false
-   :metricsGraphiteEnable      s/Bool})                       ;; false
-
-
-(def ConfigurationTemplateAttrs
-  (merge p/ConfigurationTemplateAttrs
-         config-attrs))
-
-(def ConfigurationTemplate
-  (merge p/ConfigurationTemplate
-         ConfigurationTemplateAttrs))
-
-(def ConfigurationTemplateRef
-  (s/constrained
-    (merge ConfigurationTemplateAttrs
-           {(s/optional-key :href) c/NonBlankString})
-    seq 'not-empty?))
 
 ;;
 ;; resource
@@ -129,7 +73,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-validation-fn ConfigurationTemplate))
+(def validate-fn (u/create-spec-validation-fn :cimi/configuration-template.slipstream))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))

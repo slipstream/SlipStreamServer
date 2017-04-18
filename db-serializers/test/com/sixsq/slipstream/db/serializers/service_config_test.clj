@@ -5,15 +5,16 @@
     [clojure.pprint :refer [pprint]]
     [clojure.test :refer :all]
     [me.raynes.fs :as fs]
-    [schema.core :as sch]
+    [clojure.spec :as s]
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
     [com.sixsq.slipstream.db.serializers.test-utils :as tu]
     [com.sixsq.slipstream.db.serializers.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as sd]
+    [com.sixsq.slipstream.ssclj.resources.spec.description]
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream :as crtpls] ;; template and resource have same schema
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as crtpls]
     [com.sixsq.slipstream.ssclj.util.config :as ssclj-cu])
   (:import
     (com.sixsq.slipstream.persistence ServiceConfiguration)))
@@ -52,7 +53,7 @@
 ;; configuration/slipstream resource document.
 (deftest test-sc->cfg
   (is (= {} (dissoc (sci/sc->cfg (ServiceConfiguration.)) :id)))
-  (let [conf        (sci/sc->cfg sc-from-xml)
+  (let [conf (sci/sc->cfg sc-from-xml)
         not-in-conf (keys-outside conf)]
     (is (empty? not-in-conf) (msg-keys-not-in-cfg not-in-conf))))
 
@@ -60,21 +61,21 @@
 ;; configuration/slipstream resource document.
 (deftest test-check-sc-schema
   (let [cfg (sci/complete-resource (sci/sc->cfg sc-from-xml))]
-    (is (nil? (sch/check crs/Configuration cfg)))))
+    (is (s/valid? :cimi/configuration-template.slipstream cfg))))
 
 
 (deftest test-attrs-map-valid
-  (is (= (set (keys sci/rname->param))
-         (set (keys crtpls/config-attrs)))))
-
+  (let [config-attrs (set (map (comp keyword name) (:req-un crtpls/configuration-template-keys-spec-req)))]
+    (is (= (set (keys sci/rname->param))
+           config-attrs))))
 
 (deftest test-fail-store-if-no-default-in-db
   (is (thrown? RuntimeException (sci/store-sc (ServiceConfiguration.)))))
 
 
 (deftest test-save-load-values-ok
-  (let [_          (sci/db-add-default-config)
-        sc-to-es   (sci/store-sc sc-from-xml)
+  (sci/db-add-default-config)
+  (let [sc-to-es (sci/store-sc sc-from-xml)
         sc-from-es (sci/load-sc)]
     (is (not (nil? sc-from-es)))
     (doseq [k (keys sci/param->rname)]
@@ -86,10 +87,10 @@
 
 (deftest test-save-load-desc-ok
   (try
-    (let [_          (sci/db-add-default-config)
-          _          (sci/cs->cfg-desc-and-spit sc-from-xml conf-desc-file)
-          _          (sci/store-sc sc-from-xml)
-          sc-from-es (with-redefs-fn {#'com.sixsq.slipstream.db.serializers.service-config-impl/cfg-desc
+    (sci/db-add-default-config)
+    (sci/cs->cfg-desc-and-spit sc-from-xml conf-desc-file)
+    (sci/store-sc sc-from-xml)
+    (let [sc-from-es (with-redefs-fn {#'com.sixsq.slipstream.db.serializers.service-config-impl/cfg-desc
                                       (ssclj-cu/read-config conf-desc-file)}
                        #(sci/load-sc))]
       (doseq [k (keys sci/param->rname)]
@@ -100,9 +101,7 @@
 
 
 (deftest test-validate-param-desc
-  (let [scp-only-value        (get sc-from-xml-params "exoscale-ch-gva.endpoint")
-        scp-with-enum         (get sc-from-xml-params "exoscale-ch-gva.orchestrator.instance.type")
-        scp-with-instructions (get sc-from-xml-params "slipstream.mail.username")]
-    (is (nil? (sch/check sd/ParameterDescription (u/desc-from-param scp-only-value))))
-    (is (nil? (sch/check sd/ParameterDescription (u/desc-from-param scp-with-instructions))))
-    (is (nil? (sch/check sd/ParameterDescription (u/desc-from-param scp-with-enum))))))
+  (doseq [desc (map (partial get sc-from-xml-params) ["exoscale-ch-gva.endpoint"
+                                                      "exoscale-ch-gva.orchestrator.instance.type"
+                                                      "slipstream.mail.username"])]
+    (is (s/valid? :cimi.desc/parameter-description (u/desc-from-param desc)))))

@@ -1,10 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-alpha-example
   (:require
-    [schema.core :as s]
+    [clojure.spec :as s]
     [com.sixsq.slipstream.ssclj.resources.connector :as p]
     [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (def ^:const cloud-service-type "alpha")
 
@@ -12,16 +13,9 @@
 ;; schemas
 ;;
 
-(def ConnectorAttrs
-  {:alphaKey c/PosInt})
-
-(def ConnectorAlpha
-  (merge p/Connector
-         ConnectorAttrs))
-
-(def ConnectorAlphaCreate
-  (merge c/CreateAttrs
-         {:connectorTemplate tpl/ConnectorTemplateAlphaRef}))
+;; Trivial example has the same schema as the template.  A real
+;; resource may have different schemas for the template and resource.
+(s/def :cimi/connector.alpha :cimi/connector-template.alpha)
 
 (def ConnectorAlphaDescription
   tpl/ConnectorTemplateAlphaDescription)
@@ -35,12 +29,12 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-validation-fn ConnectorAlpha))
+(def validate-fn (u/create-spec-validation-fn :cimi/connector.alpha))
 (defmethod p/validate-subtype cloud-service-type
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-validation-fn ConnectorAlphaCreate))
+(def create-validate-fn (u/create-spec-validation-fn :cimi/connector-template.alpha-create))
 (defmethod p/create-validate-subtype cloud-service-type
   [resource]
   (create-validate-fn resource))

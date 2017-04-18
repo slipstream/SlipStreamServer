@@ -1,8 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.authz-test
   (:require
     [clojure.test :refer [deftest are is]]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as authz :refer :all]
-    [schema.core :as s]))
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as authz :refer :all]))
 
 (deftest check-current-authentication
   (are [expect arg] (= expect (:identity (current-authentication arg)))
