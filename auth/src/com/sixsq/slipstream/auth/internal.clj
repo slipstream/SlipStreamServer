@@ -34,8 +34,8 @@
 
 (defn create-claims
   [username]
-  {:com.sixsq.identifier username
-   :com.sixsq.roles      (db/find-roles-for-username username)})
+  {:username username
+   :roles    (db/find-roles-for-username username)})
 
 (defn login
   [request]

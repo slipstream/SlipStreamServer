@@ -25,7 +25,7 @@
    (let [timestamp (ts/expiry-later)
          claims (assoc claims :exp timestamp)
          token (sg/sign-claims claims)]
-     {:value   {:token token}                               ;; FIXME: Remove :token, required java-side changes as well.
+     {:value   {:token token}                               ;; FIXME: Remove :token, requires java-side changes as well.
       :secure  true
       :path    "/"
       :expires (ts/format-timestamp timestamp)}))
@@ -48,22 +48,30 @@
 (defn claims->authn-info
   "Returns a tuple with the username (identifier) and list of roles based on the
    provided claims map."
-  [claims]                                                  ;; FIXME: Normalize the keyword names.
-  (when-let [identifier (get claims :com.sixsq.identifier)]
-    (let [roles (remove str/blank? (-> (get claims :com.sixsq.roles)
-                                       (or "")
-                                       (str/split #"\s+")))]
-      [identifier roles])))
+  [{:keys [username roles session] :as claims}]
+  (when username
+    (let [roles (set (remove str/blank? (-> roles
+                                            (or "")
+                                            (str/split #"\s+")
+                                            (conj session))))]
+      [username roles])))
+
+(defn extract-cookie-claims
+  "Extracts authentication claims from a cookie. Returns nil if no cookie is
+   provided or if there is an error when extracting the claims from the cookie."
+  [cookie]
+  (try
+    (-> cookie
+        extract-claims)
+    (catch Exception e
+      (log/warn "Error in extract-cookie-claims: " (str e))
+      nil)))
 
 (defn extract-cookie-info
   "Extracts authentication information from a cookie. Returns nil if no cookie is
    provided or if there is an error when extracting the claims from the cookie."
   [cookie]
-  (try
-    (-> cookie
-        extract-claims
-        claims->authn-info)
-    (catch Exception e
-      (log/warn "Error in extract-cookie-info: " (str e))
-      nil)))
+  (-> cookie
+      extract-cookie-claims
+      claims->authn-info))
 

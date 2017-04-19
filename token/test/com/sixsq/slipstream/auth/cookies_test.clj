@@ -16,6 +16,11 @@
   [{:keys [value] :as cookie}]
   (assoc cookie :value (codec/form-encode value)))
 
+(defn damaged-cookie-value
+  "replaces the map cookie value with a serialized string, but modifies it to make it invalid"
+  [{:keys [value] :as cookie}]
+  (assoc cookie :value (str (codec/form-encode value) "-INVALID")))
+
 (deftest revoked-cookie-ok
   (let [revoked (t/revoked-cookie)]
     (is (map? revoked))
@@ -55,16 +60,43 @@
   (are [expected claims] (= expected (t/claims->authn-info claims))
                          nil nil
                          nil {}
-                         ["user" []] {:com.sixsq.identifier "user"}
-                         ["user" ["role1"]] {:com.sixsq.identifier "user", :com.sixsq.roles "role1"}
-                         ["user" ["role1" "role2"]] {:com.sixsq.identifier "user", :com.sixsq.roles "role1 role2"}))
+                         ["user" #{}] {:username "user"}
+                         ["user" #{"session"}] {:username "user" :session "session"}
+                         ["user" #{"role1"}] {:username "user", :roles "role1"}
+                         ["user" #{"role1" "role2"}] {:username "user", :roles "role1 role2"}
+                         ["user" #{"session" "role1"}] {:username "user", :roles "role1" :session "session"}
+                         ["user" #{"session" "role1" "role2"}] {:username "user", :roles "role1 role2" :session "session"}))
+
+(deftest check-extract-cookie-claims
+  (with-redefs [environ/env env-fixture/env-map]
+    (let [claims {:username "user"
+                  :roles    "role1 role2"
+                  :session  "session/81469d29-40dc-438e-b60f-e8748e3c7ee6"}]
+
+      (is (nil? (t/extract-cookie-claims nil)))
+      (is (nil? (-> claims
+                    t/claims-cookie
+                    damaged-cookie-value
+                    t/extract-cookie-claims
+                    (dissoc :exp))))
+      (is (= claims (-> claims
+                        t/claims-cookie
+                        serialize-cookie-value
+                        t/extract-cookie-claims
+                        (dissoc :exp)))))))
 
 (deftest check-extract-cookie-info
   (with-redefs [environ/env env-fixture/env-map]
-    (let [claims {:com.sixsq.identifier "user"
-                  :com.sixsq.roles      "role1 role2"}]
+    (let [claims {:username "user"
+                  :roles    "role1 role2"
+                  :session  "session"}]
 
-      (is (= ["user" ["role1" "role2"]] (-> claims
-                                            t/claims-cookie
-                                            serialize-cookie-value
-                                            t/extract-cookie-info))))))
+      (is (nil? (t/extract-cookie-info nil)))
+      (is (nil? (-> claims
+                    t/claims-cookie
+                    damaged-cookie-value
+                    t/extract-cookie-info)))
+      (is (= ["user" #{"session" "role1" "role2"}] (-> claims
+                                                       t/claims-cookie
+                                                       serialize-cookie-value
+                                                       t/extract-cookie-info))))))
