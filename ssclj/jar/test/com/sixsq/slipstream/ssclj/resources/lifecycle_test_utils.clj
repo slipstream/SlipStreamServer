@@ -2,6 +2,7 @@
   (:require
     [clojure.data.json :as json]
     [clojure.java.io :as io]
+    [clojure.string :as str]
     [clojure.test :refer [is]]
     [clojure.pprint :refer [pprint]]
     [compojure.core :as cc]
@@ -23,14 +24,14 @@
   [m status]
   `((fn [m# status#]
       (let [actual# (get-in m# [:response :status])]
-        (is (= status# actual#) (str "!!!! Expecting status " status# " got " (or actual# "nil")))
+        (is (= status# actual#) (str "Expecting status " status# " got " (or actual# "nil")))
         m#)) ~m ~status))
 
 (defmacro is-key-value
   ([m f k v]
    `((fn [m# f# k# v#]
        (let [actual# (-> m# :response :body k# f#)]
-         (is (= v# actual#) (str "!!!! Expecting " v# " got " (or actual# "nil") " for " k#))
+         (is (= v# actual#) (str "Expecting " v# " got " (or actual# "nil") " for " k#))
          m#)) ~m ~f ~k ~v))
   ([m k v]
    `(is-key-value ~m identity ~k ~v)))
@@ -38,10 +39,7 @@
 (defmacro has-key
   [m k]
   `((fn [m# k#]
-      (-> m#
-          (get-in [:response :body])
-          (contains? k#)
-          (is (str "!!!! Map did not contain key " k#))))
+      (is (get-in m# [:response :body k#]) (str "Map did not contain key " k#)))
     ~m ~k))
 
 (defmacro is-resource-uri
@@ -56,14 +54,14 @@
 (defmacro is-operation-present [m expected-op]
   `((fn [m# expected-op#]
       (let [[op# defined-ops#] (select-op m# expected-op#)]
-        (is op# (str "!!!! Missing " expected-op# " in " defined-ops#))
+        (is op# (str "Missing " expected-op# " in " defined-ops#))
         m#))
     ~m ~expected-op))
 
 (defmacro is-operation-absent [m absent-op]
   `((fn [m# absent-op#]
       (let [[op# defined-ops#] (select-op m# absent-op#)]
-        (is (nil? op#) (str "!!!! Unexpected op " absent-op# " in " defined-ops#)))
+        (is (nil? op#) (str "Unexpected op " absent-op# " in " defined-ops#)))
       m#)
     ~m ~absent-op))
 
@@ -76,8 +74,8 @@
   `((fn [m# f#]
       (let [count# (get-in m# [:response :body :count])]
         (if (fn? f#)
-          (is (f# count#) (str "!!!! Function of count did not return truthy value"))
-          (is (= f# count#) (str "!!!! Count wrong, expecting " f# ", got " (or count# "nil"))))
+          (is (f# count#) "Function of count did not return truthy value")
+          (is (= f# count#) (str "Count wrong, expecting " f# ", got " (or count# "nil"))))
         m#)) ~m ~f))
 
 (defn does-body-contain
@@ -87,19 +85,45 @@
         (is (= (merge body# v#) body#))))
     ~m ~v))
 
+(defmacro is-set-cookie
+  [m]
+  `((fn [m#]
+      (let [cookies# (get-in m# [:response :cookies])
+            n# (count cookies#)
+            token# (-> (vals cookies#)
+                       first
+                       :value)]
+        (is (= 1 n#) "incorrect number of cookies")
+        (is (not= "INVALID" token#) "expecting valid token but got INVALID")
+        (is (not (str/blank? token#)) "got blank token")
+        m#)) ~m))
+
+(defmacro is-unset-cookie
+  [m]
+  `((fn [m#]
+      (let [cookies# (get-in m# [:response :cookies])
+            n# (count cookies#)
+            token# (-> (vals cookies#)
+                       first
+                       :value)]
+        (is (= 1 n#) "incorrect number of cookies")
+        (is (= "INVALID" token#) "expecting INVALID but got different value")
+        (is (not (str/blank? token#)) "got blank token")
+        m#)) ~m))
+
 (defmacro is-location
   [m]
   `((fn [m#]
       (let [uri-header# (get-in m# [:response :headers "Location"])
             uri-body# (get-in m# [:response :body :resource-id])]
-        (is uri-header# (str "!!!! Location header was not set"))
-        (is uri-body# (str "!!!! Location (resource-id) in body was not set"))
+        (is uri-header# "Location header was not set")
+        (is uri-body# "Location (resource-id) in body was not set")
         (is (= uri-header# uri-body#) (str "!!!! Mismatch in locations, header=" uri-header# ", body=" uri-body#))
         m#)) ~m))
 
 (defn location [m]
   (let [uri (get-in m [:response :headers "Location"])]
-    (is uri (str "!!!! Location missing from response"))
+    (is uri "Location header missing from response")
     uri))
 
 (defn operations->map [m]
@@ -135,10 +159,15 @@
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (wrap-logger)))
 
+(defn dump
+  [response]
+  (pprint response)
+  response)
+
 (defn dump-es
   [type]
   (println "DUMP")
-  (clojure.pprint/pprint
+  (pprint
     (esu/dump esb/*client* esb/index-name type)))
 
 (defmacro with-test-client

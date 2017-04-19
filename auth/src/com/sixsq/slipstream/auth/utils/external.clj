@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.auth.external
+(ns com.sixsq.slipstream.auth.utils.external
   (:require [clojure.tools.logging :as log]
             [clojure.string :as str]
             [com.sixsq.slipstream.auth.utils.db :as db]
