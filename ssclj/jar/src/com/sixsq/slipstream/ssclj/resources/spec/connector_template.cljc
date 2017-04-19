@@ -15,7 +15,7 @@
 (s/def :cimi.connector-template/cloudServiceType :cimi.connector-template.core/identifier)
 (s/def :cimi.connector-template/instanceName :cimi.connector-template.core/identifier)
 (s/def :cimi.connector-template/orchestratorImageid string?)
-(s/def :cimi.connector-template/quotaVm :cimi.core/nonblank-string) ;; FIXME: Should be nat-int? with 0 indicating no quota.
+(s/def :cimi.connector-template/quotaVm string?) ;; FIXME: Should be nat-int? with 0 indicating no quota.
 (s/def :cimi.connector-template/maxIaasWorkers pos-int?)
 
 ;; Common parameters, but which are not used by all.
