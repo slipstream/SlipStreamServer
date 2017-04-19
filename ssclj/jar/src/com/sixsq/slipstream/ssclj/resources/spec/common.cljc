@@ -103,9 +103,9 @@
 ;;
 
 ;; A principal consists of words containing letters and digits, separated by
-;; underscores, dashes, or dots.
+;; underscores, dashes, slashes, or dots.
 (s/def :cimi.acl/principal
-  (su/regex-string #"[a-zA-Z0-9\._-]" #"^[a-zA-Z0-9]+([\._-][a-zA-Z0-9]+)*$"))
+  (su/regex-string #"[a-zA-Z0-9/\._-]" #"^[a-zA-Z0-9]+([/\._-][a-zA-Z0-9]+)*$"))
 
 (s/def :cimi.acl/type #{"USER" "ROLE"})
 (s/def :cimi.acl/right #{"ALL" "VIEW" "MODIFY"})
