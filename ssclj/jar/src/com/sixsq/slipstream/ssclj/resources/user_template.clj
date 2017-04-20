@@ -150,7 +150,10 @@
   (throw (u/ex-bad-method request)))
 
 (defn- viewable? [request {:keys [acl] :as entry}]
-  (a/can-view? acl request))
+  (try
+    (a/can-view? {:acl acl} request)
+    (catch Exception _
+      false)))
 
 (defmethod crud/query resource-name
   [request]

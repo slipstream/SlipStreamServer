@@ -45,7 +45,7 @@
                     (ltu/is-status 200)
                     (ltu/is-resource-uri collection-uri)
                     (ltu/is-count pos?)
-                    (ltu/is-operation-present "add")
+                    (ltu/is-operation-present "add")        ;; should really be absent, but admin always has all rights
                     (ltu/is-operation-absent "delete")
                     (ltu/is-operation-absent "edit")
                     (ltu/is-operation-absent "describe")
@@ -87,27 +87,26 @@
 
 ;; checks that only the auto user-template is visible
 (deftest lifecycle-anon
-    (let [session (-> (session (ring-app))
-                      (content-type "application/json")
-                      (header authn-info-header "unknown ANON"))
-          entries (-> session
-                      (request base-uri)
-                      (ltu/body->edn)
-                      (ltu/is-status 200)
-                      (ltu/dump)
-                      (ltu/is-resource-uri collection-uri)
-                      (ltu/is-count pos?)
-                      (ltu/is-operation-present "add")
-                      (ltu/is-operation-absent "delete")
-                      (ltu/is-operation-absent "edit")
-                      (ltu/is-operation-absent "describe")
-                      (ltu/entries resource-tag))
-          ids (set (map :id entries))
-          types (set (map :method entries))]
-      (is (= #{(str resource-url "/" auto/registration-method)}
-             ids))
-      (is (= #{auto/registration-method}
-             types))))
+  (let [session (-> (session (ring-app))
+                    (content-type "application/json")
+                    (header authn-info-header "unknown ANON"))
+        entries (-> session
+                    (request base-uri)
+                    (ltu/body->edn)
+                    (ltu/is-status 200)
+                    (ltu/is-resource-uri collection-uri)
+                    (ltu/is-count pos?)
+                    (ltu/is-operation-absent "add")
+                    (ltu/is-operation-absent "delete")
+                    (ltu/is-operation-absent "edit")
+                    (ltu/is-operation-absent "describe")
+                    (ltu/entries resource-tag))
+        ids (set (map :id entries))
+        types (set (map :method entries))]
+    (is (= #{(str resource-url "/" auto/registration-method)}
+           ids))
+    (is (= #{auto/registration-method}
+           types))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
