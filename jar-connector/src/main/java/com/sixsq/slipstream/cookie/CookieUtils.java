@@ -64,6 +64,7 @@ public class CookieUtils {
 	public static final String COOKIE_EXPIRY_DATE = "com.sixsq.expirydate";
 	private static final String COOKIE_IDTYPE = "com.sixsq.idtype";
 	private static final String COOKIE_IDENTIFIER = "com.sixsq.identifier";
+	private static final String COOKIE_USERNAME = "username";
 	private static final String COOKIE_SIGNATURE = "com.sixsq.signature";
 	private static final String COOKIE_DEFAULT_IDTYPE = "local";
 
@@ -357,7 +358,7 @@ public class CookieUtils {
 			}
 			return username;
 		} else {
-			return claimsInToken(cookie).get(COOKIE_IDENTIFIER);
+			return claimsInToken(cookie).get(COOKIE_USERNAME);
 		}
 	}
 
