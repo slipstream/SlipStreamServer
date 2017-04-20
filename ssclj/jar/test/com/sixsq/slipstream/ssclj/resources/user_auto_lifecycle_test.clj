@@ -1,11 +1,11 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-direct-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.user-auto-lifecycle-test
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
+    [com.sixsq.slipstream.ssclj.resources.user-template-auto :as auto]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -32,8 +32,8 @@
     (into {} (remove #(unwanted (first %)) m))))
 
 (deftest lifecycle
-  (let [href (str ct/resource-url "/" direct/registration-method)
-        template-url (str p/service-context ct/resource-url "/" direct/registration-method)
+  (let [href (str ct/resource-url "/" auto/registration-method)
+        template-url (str p/service-context ct/resource-url "/" auto/registration-method)
         session-admin (-> (session (ring-app))
                           (content-type "application/json")
                           (header authn-info-header "root ADMIN"))
@@ -86,14 +86,6 @@
         (ltu/body->edn)
         (ltu/is-status 400))
 
-    ;; anonymous create must fail
-    (-> session-anon
-        (request base-uri
-                 :request-method :post
-                 :body (json/write-str href-create))
-        (ltu/body->edn)
-        (ltu/is-status 403))
-
     ;; anonymous create without template reference fails
     (-> session-anon
         (request base-uri
@@ -110,11 +102,11 @@
         (ltu/body->edn)
         (ltu/is-status 400))
 
-    ;; create a user via admin
+    ;; create a user anonymously
     (let [create-req {:userTemplate {:href         href
                                      :username     "jane"
                                      :emailAddress "jane@example.org"}}
-          resp (-> session-admin
+          resp (-> session-anon
                    (request base-uri
                             :request-method :post
                             :body (json/write-str create-req))
@@ -126,7 +118,7 @@
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; creating same user a second time should fail
-      (-> session-admin
+      (-> session-anon
           (request base-uri
                    :request-method :post
                    :body (json/write-str create-req))

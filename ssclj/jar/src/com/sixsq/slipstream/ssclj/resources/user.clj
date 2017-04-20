@@ -7,7 +7,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
-    [com.sixsq.slipstream.db.impl :as db]))
+    [com.sixsq.slipstream.db.impl :as db]
+    [ring.util.response :as r]
+    [clojure.tools.logging :as log]))
 
 (def ^:const resource-tag :users)
 
@@ -66,7 +68,7 @@
 
 (defmethod create-validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown User create type: " (dispatch-on-registration-method resource)) resource)))
+  (u/log-and-throw-400 "missing or invalid UserTemplate reference"))
 
 (defmethod crud/validate create-uri
   [resource]
@@ -82,14 +84,24 @@
            :type      "ROLE"}
    :rules [{:principal "ADMIN"
             :type      "ROLE"
-            :right     "ALL"}]})
+            :right     "ALL"}
+           {:principal id
+            :type      "USER"
+            :right     "MODIFY"}]})
 
 (defmethod crud/add-acl resource-uri
-  [{:keys [id acl] :as resource} request]
+  [{:keys [username acl] :as resource} request]
   (assoc
     resource
     :acl
-    (or acl (create-acl id))))
+    (or acl (create-acl username))))
+
+;;
+;; set the resource identifier to "user/username"
+;;
+(defmethod crud/new-identifier :default
+  [{:keys [username] :as json} resource-name]
+  (assoc json :id (str resource-url "/" username)))
 
 ;;
 ;; template processing
@@ -104,24 +116,13 @@
 ;; default implementation throws if the registration method is unknown
 (defmethod tpl->user :default
   [resource request]
-  (throw (ex-info (str "unknown User create type: " (:method resource)) resource)))
+  (u/log-and-throw-400 "missing or invalid UserTemplate reference"))
 
 ;;
 ;; CRUD operations
 ;;
 
-(defn add-impl [{:keys [id body] :as request}]
-  (a/can-modify? {:acl collection-acl} request)
-  (db/add
-    resource-name
-    (-> body
-        u/strip-service-attrs
-        (assoc :id id)
-        (assoc :resourceURI resource-uri)
-        u/update-timestamps
-        (crud/add-acl request)
-        crud/validate)
-    {}))
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name
@@ -129,12 +130,12 @@
   (let [idmap {:identity (:identity request)}
         body (-> body
                  (assoc :resourceURI create-uri)
-                 (dissoc :method)                           ;; forces use of template reference
+                 (update-in [:userTemplate] dissoc :method) ;; forces use of template reference
                  (std-crud/resolve-hrefs idmap)
                  (crud/validate)
                  (:userTemplate)
                  (tpl->user request))]
-    (add-impl (assoc request :id (:id body) :body body))))
+    (add-impl (assoc request :id (:id body) :body body))))  ;; FIXME: WRONG, need to have id=username
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
