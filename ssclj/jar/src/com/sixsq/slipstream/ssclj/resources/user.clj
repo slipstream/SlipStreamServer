@@ -99,7 +99,7 @@
 ;;
 ;; set the resource identifier to "user/username"
 ;;
-(defmethod crud/new-identifier :default
+(defmethod crud/new-identifier resource-name
   [{:keys [username] :as json} resource-name]
   (assoc json :id (str resource-url "/" username)))
 
