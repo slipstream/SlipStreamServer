@@ -26,6 +26,7 @@
 
 (def ^:dynamic *templates*)
 (def ^:dynamic *resources*)
+(def ^:dynamic *delete-resources*)
 
 ;;
 ;; Helper functions.
@@ -172,7 +173,7 @@
        (merge (cfg-tpl-slipstream))))
 
 (defn cfg-edit-or-add
-  "Retruns response of edit or add operation. Tries to add if edit fails with 404."
+  "Returns response of edit or add operation. Tries to add if edit fails with 404."
   [config-req]
   (let [edit-resp (cfg/edit-impl config-req)]
     ;; adding may fail because template hasn't been registered yet.
@@ -380,6 +381,27 @@
                     (map #(s/split % #"=") kvs)))]
     (spit-edn (merge (slurp-edn f) kvm) f)))
 
+(defn delete-resource
+  [r]
+  (cond
+    (configuration? r) (sci/delete-config (resource-uuid r))
+    (connector? r) (sci/delete-connector (resource-uuid r))
+    :else {:status 400
+           :body   {:status  400
+                    :message (str "Don't know how to delete resource: " r)}}))
+
+(defn delete-resources
+  []
+  (init-db-client)
+  (println "Deleting resources from DB:" (s/join ", " *delete-resources*))
+  (doseq [r *delete-resources*]
+    (let [res (delete-resource r)]
+      (if (= 200 (:status res))
+        (println (format "- %s: Deleted." r))
+        (println (format "- %s: Failed deleting: %s" r (-> res
+                                                           :body
+                                                           :message)))))))
+
 ;;
 ;; Command line options processing.
 ;;
@@ -395,6 +417,10 @@
    ["-e" "--edit-kv KEY=VALUE" (str "Updates or adds key=value in first file from "
                                     "<list-of-files> (other files are ingnored).")
     :id :edit-kv
+    :default #{}
+    :assoc-fn cli-parse-sets]
+   ["-d" "--delete RESOURCE" "Deteles resource by name."
+    :id :delete-resources
     :default #{}
     :assoc-fn cli-parse-sets]
    ["-h" "--help"]])
@@ -436,6 +462,10 @@
         (seq (:edit-kv options)) (edit-file (first arguments) (:edit-kv options))
         :else (do (init-namespaces)
                   (store-to-db arguments)))
+      (System/exit 0))
+    (when (seq (:delete-resources options))
+      (alter-var-root #'*delete-resources* (fn [_] (:delete-resources options)))
+      (delete-resources)
       (System/exit 0))
     (when (seq (:resources options))
       (alter-var-root #'*resources* (fn [_] (:resources options)))
