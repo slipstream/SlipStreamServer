@@ -67,6 +67,7 @@
                    [boot-environ]
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
+                   [onetom/boot-lein-generate]
                    [tolitius/boot-check]]))))
 
 (require
