@@ -56,13 +56,6 @@
                  (current-authentication request)
                  (u/walk-clojurify (:acl resource)))
         action (get rights-keywords action)]
-    (println "START DEBUG ....................")
-    (clojure.pprint/pprint (current-authentication request))
-    (clojure.pprint/pprint (u/walk-clojurify (:acl resource)))
-    (clojure.pprint/pprint rights)
-    (clojure.pprint/pprint action)
-    (clojure.pprint/pprint (some #(isa? % action) rights))
-    (println "END DEBUG ....................")
     (some #(isa? % action) rights)))
 
 (defn can-do?
