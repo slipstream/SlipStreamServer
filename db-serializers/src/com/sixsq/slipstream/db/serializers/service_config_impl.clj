@@ -390,6 +390,17 @@
   [name]
   (get-document (configuration-as-request name) cr/retrieve-impl))
 
+;;
+;;  Delete wrappers for configuration and connectors.
+;;
+
+(defn delete-connector
+  [name]
+  (con/delete-impl (connector-as-request name)))
+
+(defn delete-config
+  [name]
+  (cr/delete-impl (configuration-as-request name)))
 
 ;;
 ;; Utility wrappers around configuration CRUD.
