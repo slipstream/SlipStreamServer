@@ -59,7 +59,7 @@ public class CookieAuthenticator extends AuthenticatorBase {
 			isTokenValid = CookieUtils.verifyAuthnCookie(cookie) == Verifier.RESULT_VALID;
 		} else {
 			Map<String, String> claimsInToken = CookieUtils.claimsInToken(cookie);
-			isTokenValid = !claimsInToken.isEmpty();
+			isTokenValid = !claimsInToken.isEmpty() && claimsInToken.containsKey(CookieUtils.COOKIE_USERNAME);
 		}
 
 		if (isTokenValid) {
