@@ -64,9 +64,9 @@
   #_(str "slipstream." (str/replace id "/" "."))
   "com.sixsq.slipstream.cookie")
 
-(defn create-claims [credentials headers session]
+(defn create-claims [{:keys [username] :as credentials} headers session]
   (let [server (:slipstream-ssl-server-hostname headers)]
-    (cond-> (auth-internal/create-claims credentials)
+    (cond-> (auth-internal/create-claims username)
             server (assoc :server server)
             session (assoc :session session))))
 
