@@ -5,7 +5,7 @@
   :version +version+
   :license {"commercial" "http://sixsq.com"}
   :edition "community"
-  :dependencies '[[org.clojure/clojure "1.9.0-alpha15"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha16"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults

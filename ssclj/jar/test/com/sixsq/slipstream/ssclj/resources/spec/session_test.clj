@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.session-test
   (:require
     [clojure.test :refer [deftest is]]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.session :refer :all]
     [com.sixsq.slipstream.ssclj.resources.spec.session]))
 
