@@ -26,6 +26,13 @@
   [{:keys [value] :as cookie}]
   (assoc cookie :value (codec/form-encode value)))
 
+(defmacro message-matches
+  [m re]
+  `((fn [m# re#]
+      (let [message# (get-in m# [:response :body :message])]
+        (is (re-matches re# message#) (str "Message does not match pattern. " message# " " re#))
+        m#)) ~m ~re))
+
 (defmacro is-status
   [m status]
   `((fn [m# status#]

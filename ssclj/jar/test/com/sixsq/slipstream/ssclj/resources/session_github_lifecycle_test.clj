@@ -1,11 +1,11 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-oidc-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.session-github-lifecycle-test
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as oidc]
+    [com.sixsq.slipstream.ssclj.resources.session-template-github :as github]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -37,8 +37,8 @@
                          (header authn-info-header "unknown ANON"))]
 
     ;; get session template so that session resources can be tested
-    (let [href (str ct/resource-url "/" oidc/authn-method)
-          template-url (str p/service-context ct/resource-url "/" oidc/authn-method)
+    (let [href (str ct/resource-url "/" github/authn-method)
+          template-url (str p/service-context ct/resource-url "/" github/authn-method)
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)
@@ -61,12 +61,11 @@
                    :request-method :post
                    :body (json/write-str valid-create))
           (ltu/body->edn)
-          (ltu/message-matches #".*missing OpenID Connect configuration.*")
+          (ltu/message-matches #".*missing client ID.*")
           (ltu/is-status 500))
 
       ;; anonymous create must succeed (normal create and href create)
-      (with-redefs [environ.core/env {:oidc-base-url  "https://example.org/auth/realms/master/protocol/openid-connect"
-                                      :oidc-client-id "FAKE_CLIENT_ID"}]
+      (with-redefs [environ.core/env {:github-client-id "FAKE_CLIENT_ID"}]
 
         (let [resp (-> session-anon
                        (request base-uri

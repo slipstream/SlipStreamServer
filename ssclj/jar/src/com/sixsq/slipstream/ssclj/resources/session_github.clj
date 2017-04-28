@@ -1,10 +1,10 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-oidc
+(ns com.sixsq.slipstream.ssclj.resources.session-github
   (:require
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.spec.session]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
-    [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as tpl]
+    [com.sixsq.slipstream.ssclj.resources.session-template-github :as tpl]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -14,13 +14,11 @@
     [com.sixsq.slipstream.auth.utils.timestamp :as tsutil]
     [environ.core :as environ]))
 
-(def ^:const authn-method "oidc")
+(def ^:const authn-method "github")
 
 (def ^:const login-request-timeout (* 3 60))
 
-(def ^:const oidc-relative-url "/auth?client_id=%s&redirect_uri=%s&response_type=code")
-
-(def ^:const validation-url "https://nuv.la/api/session/uuid/validate")
+(def ^:const github-oath-endpoint "https://github.com/login/oauth/authorize?client_id=%s&scope=user:email")
 
 ;;
 ;; schemas
@@ -43,7 +41,8 @@
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn :cimi/session-template.oidc-create))
+
+(def create-validate-fn (u/create-spec-validation-fn :cimi/session-template.github-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))
@@ -68,12 +67,10 @@
 
 (defmethod p/tpl->session authn-method
   [resource {:keys [headers] :as request}]
-  (let [oidc-url (environ/env :oidc-base-url)
-        oidc-client-id (environ/env :oidc-client-id)]
-    (if (and oidc-url oidc-client-id)
-      (let [session (create-session {:username "_"} headers) ;; FIXME: Remove username from required parameters.
-            session (assoc session :expiry (str (tsutil/expiry-later login-request-timeout)))
-            redirect-url (str oidc-url (format oidc-relative-url oidc-client-id validation-url))] ;; FIXME: URL should point to session.
-        [{:status 307, :headers {"Location" redirect-url}} session])
-      (let [msg "missing OpenID Connect configuration parameters"]
-        (throw (ex-info msg {:status 500, :message msg}))))))
+  (if-let [client-id (environ/env :github-client-id)]
+    (let [redirect-url (format github-oath-endpoint client-id)
+          session (create-session {:username "_"} headers)  ;; FIXME: Remove username from required parameters.
+          session (assoc session :expiry (str (tsutil/expiry-later login-request-timeout)))]
+      [{:status 307, :headers {"Location" redirect-url}} session])
+    (let [msg "missing client ID (:github-client-id) for GitHub authentication"]
+      (throw (ex-info msg {:status 500, :message msg})))))
