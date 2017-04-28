@@ -10,8 +10,7 @@
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
-                                   sixsq-nexus-url
-                                   lein-generate]])
+                                   sixsq-nexus-url]])
 
 (set-env!
   :repositories
@@ -35,7 +34,8 @@
                     [boot-environ]
                     [adzerk/boot-test]
                     [adzerk/boot-reload]
-                    [tolitius/boot-check]]))))
+                    [tolitius/boot-check]
+                    [onetom/boot-lein-generate]]))))
 
 (require
   '[environ.boot :refer [environ]]
@@ -44,7 +44,8 @@
   '[tolitius.boot-check :refer [with-yagni
                                 with-eastwood
                                 with-kibit
-                                with-bikeshed]])
+                                with-bikeshed]]
+  '[boot.lein :refer [generate]])
 
 (set-env! :resource-paths #{"src"})
 
