@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.event-test
   (:require
     [clojure.test :refer [deftest are is]]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.event :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
 

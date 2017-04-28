@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest are is]]
     [com.sixsq.slipstream.ssclj.resources.cloud-entry-point :refer :all]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.app.params :as p]))
 
 (defn valid? [cep] (s/valid? :cimi/cloud-entry-point cep))

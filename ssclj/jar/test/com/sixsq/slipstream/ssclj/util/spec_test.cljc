@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.util.spec-test
   (:require
     [clojure.test :refer [deftest are is]]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as t]))
 
 (deftest check-regex-chars

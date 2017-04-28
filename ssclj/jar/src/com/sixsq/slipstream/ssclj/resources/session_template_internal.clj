@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template-internal
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]

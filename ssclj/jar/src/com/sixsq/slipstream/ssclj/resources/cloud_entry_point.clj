@@ -3,7 +3,7 @@
    on the server."
   (:require
     [clojure.tools.logging :as log]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [compojure.core :refer [defroutes GET POST PUT DELETE ANY]]
     [ring.util.response :as r]
     [com.sixsq.slipstream.db.impl :as db]

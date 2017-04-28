@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.service-attribute-test
   (:require
     [clojure.test :refer [deftest are is]]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.service-attribute :as sa]))
 
 (def valid? (partial s/valid? :cimi/service-attribute))

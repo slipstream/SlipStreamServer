@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute
   (:require
     [superstring.core :as str]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.service-attribute]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
