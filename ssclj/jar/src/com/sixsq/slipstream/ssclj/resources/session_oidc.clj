@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as tpl]
-    [com.sixsq.slipstream.auth.oidc :as auth-oidc]
+    [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -58,26 +58,8 @@
               client-ip (assoc :clientIP client-ip))
       p/resource-name)))
 
-;; FIXME: Multiple session cookies should be permitted, eventually.
-;; FIXME: For backward compatibility use the standard name of the cookie.
-(defn cookie-name [{:keys [id]}]
-  #_(str "slipstream." (str/replace id "/" "."))
-  "com.sixsq.slipstream.cookie")
-
-(defn create-claims [{:keys [username] :as credentials} headers session]
-  (let [server (:slipstream-ssl-server-hostname headers)]
-    (cond-> (auth-oidc/create-claims username)
-            server (assoc :server server)
-            session (assoc :session session))))
-
 (defmethod p/tpl->session authn-method
   [resource {:keys [headers] :as request}]
-  (let [credentials (select-keys resource #{:username :password})]
-    (if (auth-oidc/valid? credentials)
-      (let [session (create-session credentials headers)
-            claims (create-claims credentials headers session)
-            cookie (cookies/claims-cookie claims)
-            expires (:expires cookie)
-            session (assoc session :expiry expires)]
-        [{:cookies {(cookie-name session) cookie}} session])
-      (throw (u/ex-unauthorized (:username credentials))))))
+  (let [session (create-session {:username "_"} headers)  ;; FIXME: Remove username from required parameters.
+        session (assoc session :expiry expires)]
+    [{} session]))
