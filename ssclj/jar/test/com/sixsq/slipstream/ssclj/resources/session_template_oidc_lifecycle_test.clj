@@ -31,7 +31,7 @@
         doc (crud/retrieve-by-id id)]
     (is (= id (:id doc)))))
 
-#_(deftest lifecycle
+(deftest lifecycle
 
   ;; all view actions should be available to anonymous users
   (let [session (session (ring-app))
