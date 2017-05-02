@@ -22,20 +22,20 @@
       (:email primary)
       (:email (first verified)))))
 
-(defn- retrieve-private-email
+(defn retrieve-private-email
   [access-token]
   (let [user-emails-response (http/get "https://api.github.com/user/emails"
                                        {:headers {"Authorization" (str "token " access-token)}})
         user-emails (-> user-emails-response :body (json/read-str :key-fn keyword))]
     (primary-or-verified user-emails)))
 
-(defn- retrieve-email
+(defn retrieve-email
   [user-info access-token]
   (if-let [public-email (:email user-info)]
     public-email
     (retrieve-private-email access-token)))
 
-(defn- sanitized-login
+(defn sanitized-login
   [user-info]
   (-> user-info :login ex/sanitize-login-name))
 
@@ -55,6 +55,10 @@
   (-> (http/get "https://api.github.com/user"
                 {:headers {"Authorization" (str "token " access-token)}})
       (parse-github-user)))
+
+(defn get-github-oauth-code
+  [request]
+  (uh/param-value request :code))
 
 (defn callback-github
   [request redirect-server]
