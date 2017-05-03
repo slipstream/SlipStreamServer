@@ -20,10 +20,7 @@
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.external :as ex]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 (def ^:const authn-method "github")
 
@@ -140,25 +137,6 @@
 (defn extract-session-uuid
   [session-id]
   (second (re-matches #"session/(.+)" session-id)))
-
-(defn edit-fn
-  [resource-name]
-  (fn [{{uuid :uuid} :params body :body :as request}]
-    (try
-      (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
-                        (db/retrieve request)
-                        (a/can-modify? request))
-            merged (merge current body)]
-        (println "DEBUG CURRENT")
-        (clojure.pprint/pprint current)
-        (println "DEBUG MERGED")
-        (clojure.pprint/pprint merged)
-        (-> merged
-            (u/update-timestamps)
-            (crud/validate)
-            (db/edit request)))
-      (catch ExceptionInfo ei
-        (ex-data ei)))))
 
 (def internal-edit (std-crud/edit-fn p/resource-name))
 
