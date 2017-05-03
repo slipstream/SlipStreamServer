@@ -117,7 +117,7 @@
   [{:keys [id resourceURI] :as resource} request]
   (let [href (str id "/validate")
         ops (-> (p/standard-session-operations resource request)
-                (conj [{:rel (:validate c/action-uri) :href href}]))]
+                (conj {:rel (:validate c/action-uri) :href href}))]
     (cond-> (dissoc resource :operations)
             (seq ops) (assoc :operations ops))))
 

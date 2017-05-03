@@ -3,18 +3,20 @@
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
+    [ring.util.codec :as codec]
+
+    [com.sixsq.slipstream.auth.internal :as auth-internal]
+    [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.app.routes :as routes]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.session-template-github :as github]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [ring.util.codec :as codec]))
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
@@ -33,7 +35,13 @@
 
 (deftest lifecycle
 
-  (let [session-anon (-> (session (ring-app))
+  (let [session-admin (-> (session (ring-app))
+                          (content-type "application/json")
+                          (header authn-info-header "admin ADMIN USER ANON"))
+        session-user (-> (session (ring-app))
+                         (content-type "application/json")
+                         (header authn-info-header "user USER ANON"))
+        session-anon (-> (session (ring-app))
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))]
 
@@ -66,7 +74,7 @@
           (ltu/is-status 500))
 
       ;; anonymous create must succeed (normal create and href create)
-      (with-redefs [environ.core/env {:github-client-id "FAKE_CLIENT_ID"
+      (with-redefs [environ.core/env {:github-client-id     "FAKE_CLIENT_ID"
                                       :github-client-secret "FAKE_CLIENT_SECRET"}]
 
         (let [resp (-> session-anon
@@ -78,7 +86,7 @@
               id (get-in resp [:response :body :resource-id])
               uri (-> resp
                       (ltu/location))
-              abs-uri (str p/service-context (u/de-camelcase uri))
+              abs-uri (str p/service-context id)
 
               resp (-> session-anon
                        (request base-uri
@@ -89,7 +97,7 @@
               id2 (get-in resp [:response :body :resource-id])
               uri2 (-> resp
                        (ltu/location))
-              abs-uri2 (str p/service-context (u/de-camelcase uri2))]
+              abs-uri2 (str p/service-context id2)]
 
           ;; redirect URLs in location header should contain the client ID and resource id
           (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri "")))
@@ -97,143 +105,94 @@
           (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri2 "")))
           (is (re-matches (re-pattern (str ".*" (codec/url-encode id2) ".*")) (or uri2 "")))
 
-
           ;; user should not be able to see session without session role
-          #_(-> (session (ring-app))
-                (header authn-info-header "user USER")
-                (request abs-uri)
-                (ltu/body->edn)
-                (ltu/is-status 403))
-          #_(-> (session (ring-app))
-                (header authn-info-header "user USER")
-                (request abs-uri2)
-                (ltu/body->edn)
-                (ltu/is-status 403))
+          (-> session-user
+              (request abs-uri)
+              (ltu/body->edn)
+              (ltu/is-status 403))
+          (-> session-user
+              (request abs-uri2)
+              (ltu/body->edn)
+              (ltu/is-status 403))
 
           ;; anonymous query should succeed but still have no entries
-          #_(-> (session (ring-app))
-                (request base-uri)
-                (ltu/body->edn)
-                (ltu/is-status 200)
-                (ltu/is-count zero?))
+          (-> session-anon
+              (request base-uri)
+              (ltu/body->edn)
+              (ltu/is-status 200)
+              (ltu/is-count zero?))
 
           ;; user query should succeed but have no entries because of missing session role
-          #_(-> (session (ring-app))
-                (header authn-info-header "user USER")
-                (request base-uri)
-                (ltu/body->edn)
-                (ltu/is-status 200)
-                (ltu/is-count zero?))
+          (-> session-user
+              (request base-uri)
+              (ltu/body->edn)
+              (ltu/is-status 200)
+              (ltu/is-count zero?))
 
           ;; admin query should succeed, but see no sessions without the correct session role
-          #_(-> (session (ring-app))
-                (header authn-info-header "root ADMIN")
-                (request base-uri)
-                (ltu/body->edn)
-                (ltu/is-status 200)
-                (ltu/is-count 0))
+          (-> session-admin
+              (request base-uri)
+              (ltu/body->edn)
+              (ltu/is-status 200)
+              (ltu/is-count 0))
 
           ;; user should be able to see session with session role
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id))
-                (request abs-uri)
-                (ltu/body->edn)
-                (ltu/is-status 200)
-                (ltu/is-id id)
-                (ltu/is-operation-present "delete")
-                (ltu/is-operation-absent "edit"))
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id2))
-                (request abs-uri2)
-                (ltu/body->edn)
-                (ltu/is-status 200)
-                (ltu/is-id id2)
-                (ltu/is-operation-present "delete")
-                (ltu/is-operation-absent "edit"))
-
-          ;; user query with session role should succeed but and have one entry
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id))
-                (request base-uri)
-                (ltu/body->edn)
-                (ltu/is-status 200)
-                (ltu/is-count 1))
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id2))
-                (request base-uri)
-                (ltu/body->edn)
-                (ltu/is-status 200)
-                (ltu/is-count 1))
-
-          ;; user with session role can delete resource
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id))
-                (request abs-uri
-                         :request-method :delete)
-                (ltu/is-unset-cookie)
-                (ltu/body->edn)
-                (ltu/is-status 200))
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id2))
-                (request abs-uri2
-                         :request-method :delete)
-                (ltu/is-unset-cookie)
-                (ltu/body->edn)
-                (ltu/is-status 200))
-
-          ;; create with invalid template fails
-          #_(-> (session (ring-app))
-                (content-type "application/json")
-                (request base-uri
-                         :request-method :post
-                         :body (json/write-str invalid-create))
-                (ltu/body->edn)
-                (ltu/is-status 400))))
-
-      ;; admin create must also succeed
-      #_(let [create-req (-> valid-create
-                             (assoc-in [:sessionTemplate :username] "root")
-                             (assoc-in [:sessionTemplate :password] "root"))
-              resp (-> (session (ring-app))
-                       (content-type "application/json")
-                       (request base-uri
-                                :request-method :post
-                                :body (json/write-str create-req))
-                       (ltu/is-set-cookie)
-                       (ltu/body->edn)
-                       (ltu/is-status 201))
-              id (get-in resp [:response :body :resource-id])
-              uri (-> resp
-                      (ltu/location))
-              abs-uri (str p/service-context (u/de-camelcase uri))]
-
-          ;; admin should be able to see and delete session with session role
-          (-> (session (ring-app))
-              (header authn-info-header (str "root ADMIN " id))
+          (-> session-user
+              (header authn-info-header (str "user USER ANON " id))
               (request abs-uri)
               (ltu/body->edn)
               (ltu/is-status 200)
+              (ltu/is-id id)
               (ltu/is-operation-present "delete")
+              (ltu/is-operation-present (:validate c/action-uri))
+              (ltu/is-operation-absent "edit"))
+          (-> session-user
+              (header authn-info-header (str "user USER ANON " id2))
+              (request abs-uri2)
+              (ltu/body->edn)
+              (ltu/is-status 200)
+              (ltu/is-id id2)
+              (ltu/is-operation-present "delete")
+              (ltu/is-operation-present (:validate c/action-uri))
               (ltu/is-operation-absent "edit"))
 
-          ;; admin can delete resource with session role
-          (-> (session (ring-app))
-              (header authn-info-header (str "root ADMIN " id))
+          ;; user query with session role should succeed but and have one entry
+          (-> session-user
+              (header authn-info-header (str "user USER ANON " id))
+              (request base-uri)
+              (ltu/body->edn)
+              (ltu/is-status 200)
+              (ltu/is-count 1))
+          (-> session-user
+              (header authn-info-header (str "user USER ANON " id2))
+              (request base-uri)
+              (ltu/body->edn)
+              (ltu/is-status 200)
+              (ltu/is-count 1))
+
+          ;; user with session role can delete resource
+          (-> session-user
+              (header authn-info-header (str "user USER ANON " id))
               (request abs-uri
                        :request-method :delete)
               (ltu/is-unset-cookie)
               (ltu/body->edn)
-              (ltu/is-status 200)))
+              (ltu/is-status 200))
+          (-> session-user
+              (header authn-info-header (str "user USER ANON " id2))
+              (request abs-uri2
+                       :request-method :delete)
+              (ltu/is-unset-cookie)
+              (ltu/body->edn)
+              (ltu/is-status 200))
 
-      ;; admin create with invalid template fails
-      #_(-> (session (ring-app))
-            (content-type "application/json")
-            (header authn-info-header "root ADMIN")
-            (request base-uri
-                     :request-method :post
-                     :body (json/write-str invalid-create))
-            (ltu/body->edn)
-            (ltu/is-status 400)))))
+          ;; create with invalid template fails
+          (-> session-anon
+              (request base-uri
+                       :request-method :post
+                       :body (json/write-str invalid-create))
+              (ltu/body->edn)
+              (ltu/is-status 400)))))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id session/resource-name))]
