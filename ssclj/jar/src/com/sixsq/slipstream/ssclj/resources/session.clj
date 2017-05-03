@@ -232,7 +232,7 @@
 
 (defmethod validate-callback :default
   [resource request]
-  (log-util/log-and-throw 400 "error executing validation callback: '" (dispatch-conversion resource request) "'"))
+  (log-util/log-and-throw 400 (str "error executing validation callback: '") (dispatch-conversion resource request) "'"))
 
 (defmethod crud/do-action [resource-url "validate"]
   [{{uuid :uuid} :params :as request}]

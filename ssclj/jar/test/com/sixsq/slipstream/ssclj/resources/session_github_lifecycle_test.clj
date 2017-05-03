@@ -13,7 +13,8 @@
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [ring.util.codec :as codec]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
@@ -55,7 +56,7 @@
           (ltu/is-status 200)
           (ltu/is-count zero?))
 
-      ;; configuration must have GitHub client ID, if not should get 500
+      ;; configuration must have GitHub client ID or secret, if not should get 500
       (-> session-anon
           (request base-uri
                    :request-method :post
@@ -65,7 +66,8 @@
           (ltu/is-status 500))
 
       ;; anonymous create must succeed (normal create and href create)
-      (with-redefs [environ.core/env {:github-client-id "FAKE_CLIENT_ID"}]
+      (with-redefs [environ.core/env {:github-client-id "FAKE_CLIENT_ID"
+                                      :github-client-secret "FAKE_CLIENT_SECRET"}]
 
         (let [resp (-> session-anon
                        (request base-uri
@@ -89,9 +91,11 @@
                        (ltu/location))
               abs-uri2 (str p/service-context (u/de-camelcase uri2))]
 
-          ;; redirect URLs in location header should contain the client ID
-          (is (re-matches #".*FAKE_CLIENT_ID.*" uri))
-          (is (re-matches #".*FAKE_CLIENT_ID.*" uri2))
+          ;; redirect URLs in location header should contain the client ID and resource id
+          (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri "")))
+          (is (re-matches (re-pattern (str ".*" (codec/url-encode id) ".*")) (or uri "")))
+          (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri2 "")))
+          (is (re-matches (re-pattern (str ".*" (codec/url-encode id2) ".*")) (or uri2 "")))
 
 
           ;; user should not be able to see session without session role

@@ -1,6 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-github
   (:require
     [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [environ.core :as environ]
+    [ring.util.codec :as codec]
+
     [com.sixsq.slipstream.ssclj.resources.spec.session]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-github]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
@@ -14,16 +18,14 @@
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.timestamp :as tsutil]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
-    [environ.core :as environ]
     [com.sixsq.slipstream.auth.utils.http :as uh]
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.external :as ex]))
 
 (def ^:const authn-method "github")
 
 (def ^:const login-request-timeout (* 3 60))
 
-(def ^:const github-oath-endpoint "https://github.com/login/oauth/authorize?client_id=%s&scope=user:email")
+(def ^:const github-oath-endpoint "https://github.com/login/oauth/authorize?scope=user:email&client_id=%s&redirect_url=%s")
 
 ;;
 ;; schemas
@@ -95,14 +97,18 @@
               client-ip (assoc :clientIP client-ip))
       p/resource-name)))
 
+(defn validate-action-url
+  [base-uri session-id]
+  (codec/url-encode (str base-uri session-id "/validate")))
+
 ;; creates a temporary session and redirects to GitHub to start authentication workflow
 (defmethod p/tpl->session authn-method
-  [resource {:keys [headers] :as request}]
+  [resource {:keys [headers base-uri] :as request}]
   (let [[client-id client-secret] (github-client-info)]
     (if (and client-id client-secret)
-      (let [redirect-url (format github-oath-endpoint client-id)
-            session (create-session {:username "_"} headers) ;; FIXME: Remove username from required parameters.
-            session (assoc session :expiry (str (tsutil/expiry-later login-request-timeout)))]
+      (let [session (create-session {:username "_"} headers) ;; FIXME: Remove username from required parameters.
+            session (assoc session :expiry (str (tsutil/expiry-later login-request-timeout)))
+            redirect-url (format github-oath-endpoint client-id (validate-action-url base-uri (:id session)))]
         [{:status 307, :headers {"Location" redirect-url}} session])
       (throw-bad-client-config))))
 
