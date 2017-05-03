@@ -16,7 +16,10 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.auth.github :as auth-github]
+    [com.sixsq.slipstream.auth.utils.sign :as sign]
+    [com.sixsq.slipstream.auth.external :as ex]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
@@ -74,8 +77,9 @@
           (ltu/is-status 500))
 
       ;; anonymous create must succeed (normal create and href create)
-      (with-redefs [environ.core/env {:github-client-id     "FAKE_CLIENT_ID"
-                                      :github-client-secret "FAKE_CLIENT_SECRET"}]
+      (with-redefs [environ.core/env (merge environ.core/env
+                                            {:github-client-id     "FAKE_CLIENT_ID"
+                                             :github-client-secret "FAKE_CLIENT_SECRET"})]
 
         (let [resp (-> session-anon
                        (request base-uri
@@ -169,6 +173,102 @@
               (ltu/body->edn)
               (ltu/is-status 200)
               (ltu/is-count 1))
+
+          ;;
+          ;; test validation callback
+          ;;
+          (let [validate-url (str abs-uri "/validate")
+                validate-url2 (str abs-uri2 "/validate")]
+
+            ;; try hitting the callback with an invalid server configuration
+            (with-redefs [environ.core/env {}]
+
+              (-> session-anon
+                  (request validate-url
+                           :request-method :get)
+                  (ltu/body->edn)
+                  (ltu/message-matches #".*missing client ID.*")
+                  (ltu/is-status 500))
+
+              (-> session-anon
+                  (request validate-url2
+                           :request-method :get)
+                  (ltu/body->edn)
+                  (ltu/message-matches #".*missing client ID.*")
+                  (ltu/is-status 500)))
+
+            ;; try hitting the callback without the OAuth code parameter
+            (-> session-anon
+                (request validate-url
+                         :request-method :get)
+                (ltu/body->edn)
+                (ltu/message-matches #".*not contain required code.*")
+                (ltu/is-status 400))
+
+            (-> session-anon
+                (request validate-url2
+                         :request-method :get)
+                (ltu/body->edn)
+                (ltu/message-matches #".*not contain required code.*")
+                (ltu/is-status 400))
+
+            ;; try now with a fake code
+            (with-redefs [auth-github/get-github-access-token (fn [client-id client-secret oauth-code]
+                                                                (case oauth-code
+                                                                  "GOOD" "GOOD_ACCESS_CODE"
+                                                                  "BAD" "BAD_ACCESS_CODE"
+                                                                  nil))
+                          auth-github/get-github-user-info (fn [access-code]
+                                                             (when (= access-code "GOOD_ACCESS_CODE")
+                                                               {:login "GITHUB_USER"
+                                                                :email "user@example.com"}))
+
+                          ex/match-external-user! (fn [authn-method external-login external-email]
+                                                    ["MATCHED_USER" "/dashboard"])
+
+                          db/find-roles-for-username (fn [username]
+                                                       "USER ANON alpha")]
+
+              (-> session-anon
+                  (request (str validate-url "?code=NONE")
+                           :request-method :get)
+                  (ltu/body->edn)
+                  (ltu/message-matches #".*unable to retrieve GitHub access code.*")
+                  (ltu/is-status 400))
+
+              (-> session-anon
+                  (request (str validate-url "?code=BAD")
+                           :request-method :get)
+                  (ltu/body->edn)
+                  (ltu/message-matches #".*unable to retrieve GitHub user information.*")
+                  (ltu/is-status 400))
+
+              (let [ring-info (-> session-anon
+                                  (request (str validate-url "?code=GOOD")
+                                           :request-method :get)
+                                  (ltu/body->edn)
+                                  (ltu/is-status 201)
+                                  (ltu/is-set-cookie))
+                    location (ltu/location ring-info)
+                    token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+                    claims (sign/unsign-claims token)]
+                (is (= location id))
+                (is (= "MATCHED_USER" (:username claims)))
+                (is (re-matches (re-pattern (str ".*" id ".*")) (:roles claims))))))
+
+          ;; check that the session has been updated
+          (let [ring-info (-> session-user
+                              (header authn-info-header (str "user USER ANON " id))
+                              (request abs-uri)
+                              (ltu/body->edn)
+                              (ltu/is-status 200)
+                              (ltu/is-id id)
+                              (ltu/is-operation-present "delete")
+                              (ltu/is-operation-absent (:validate c/action-uri))
+                              (ltu/is-operation-absent "edit"))
+                session (get-in ring-info [:response :body])]
+            (is (= "MATCHED_USER" (:username session)))
+            (is (not= (:created session) (:updated session))))
 
           ;; user with session role can delete resource
           (-> session-user

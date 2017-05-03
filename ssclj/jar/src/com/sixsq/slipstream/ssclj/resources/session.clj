@@ -232,13 +232,14 @@
 
 (defmethod validate-callback :default
   [resource request]
-  (log-util/log-and-throw 400 (str "error executing validation callback: '") (dispatch-conversion resource request) "'"))
+  (log-util/log-and-throw 400 (str "error executing validation callback: '" (dispatch-conversion resource request) "'")))
 
 (defmethod crud/do-action [resource-url "validate"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id id)
+      (-> (crud/retrieve-by-id id {:user-name "INTERNAL"
+                                   :user-roles [id]})     ;; Essentially turn off authz by spoofing owner of resource.
           (validate-callback request)))                     ;; FIXME: Ensure that return value is correct.
     (catch ExceptionInfo ei
       (ex-data ei))))

@@ -30,7 +30,7 @@
   [m re]
   `((fn [m# re#]
       (let [message# (get-in m# [:response :body :message])]
-        (is (re-matches re# message#) (str "Message does not match pattern. " message# " " re#))
+        (is (re-matches re# message#) (str "Message does not match pattern. " (or message# "nil") " " re#))
         m#)) ~m ~re))
 
 (defmacro is-status

@@ -19,7 +19,11 @@
     [com.sixsq.slipstream.auth.utils.timestamp :as tsutil]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [com.sixsq.slipstream.auth.utils.http :as uh]
-    [com.sixsq.slipstream.auth.external :as ex]))
+    [com.sixsq.slipstream.auth.external :as ex]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const authn-method "github")
 
@@ -59,7 +63,10 @@
   (log-util/log-and-throw 400 "unable to retrieve GitHub access code"))
 
 (defn throw-no-user-info []
-  (log-util/log-and-throw 400 "unable to retrieve user information from GitHub"))
+  (log-util/log-and-throw 400 "unable to retrieve GitHub user information"))
+
+(defn throw-no-matched-user []
+  (log-util/log-and-throw 403 "no matching account for GitHub user"))
 
 (defn update-session-create-cookie []
   (log/error "REPLACE update-session-create-cookie WITH IMPLEMENTATION!"))
@@ -114,26 +121,83 @@
 
 ;; add a "validate" action (callback) to complete the GitHub authentication workflow
 (defmethod p/set-session-operations authn-method
-  [{:keys [id resourceURI] :as resource} request]
+  [{:keys [id resourceURI username] :as resource} request]
   (let [href (str id "/validate")
-        ops (-> (p/standard-session-operations resource request)
-                (conj {:rel (:validate c/action-uri) :href href}))]
+        ops (cond-> (p/standard-session-operations resource request)
+                    (= "_" username) (conj {:rel (:validate c/action-uri) :href href}))] ;; FIXME: Should just be absent! (nil? username)
     (cond-> (dissoc resource :operations)
             (seq ops) (assoc :operations ops))))
+
+(defn response-created [id cookie]
+  {:status  201
+   :headers {"Location" id}
+   :cookies {"com.sixsq.slipstream.cookie" cookie}})
+
+(defn extract-session-id
+  [uri]
+  (second (re-matches #".*(session/[^/]+)/.*" uri)))
+
+(defn extract-session-uuid
+  [session-id]
+  (second (re-matches #"session/(.+)" session-id)))
+
+(defn edit-fn
+  [resource-name]
+  (fn [{{uuid :uuid} :params body :body :as request}]
+    (try
+      (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
+                        (db/retrieve request)
+                        (a/can-modify? request))
+            merged (merge current body)]
+        (println "DEBUG CURRENT")
+        (clojure.pprint/pprint current)
+        (println "DEBUG MERGED")
+        (clojure.pprint/pprint merged)
+        (-> merged
+            (u/update-timestamps)
+            (crud/validate)
+            (db/edit request)))
+      (catch ExceptionInfo ei
+        (ex-data ei)))))
+
+(def internal-edit (std-crud/edit-fn p/resource-name))
 
 ;; execute the "validate" callback to complete the GitHub authentication workflow
 (defmethod p/validate-callback authn-method
   [resource {:keys [headers] :as request}]
-  (let [[client-id client-secret] (github-client-info)
-        redirect-server "FIXME_NEED_VALUE_FOR_THIS"]
+  (let [[client-id client-secret] (github-client-info)]
     (if (and client-id client-secret)
       (if-let [code (uh/param-value request :code)]
         (if-let [access-token (auth-github/get-github-access-token client-id client-secret code)]
-          (if-let [user-info (auth-github/get-github-user-info access-token)]
-            (ex/redirect-with-matched-user :github
-                                           (auth-github/sanitized-login user-info)
-                                           (auth-github/retrieve-email user-info access-token)
-                                           redirect-server)
+          (if-let [{:keys [user email] :as user-info} (auth-github/get-github-user-info access-token)]
+            (let [external-login (auth-github/sanitized-login user-info)
+                  external-email (auth-github/retrieve-email user-info access-token)
+                  [matched-user _] (ex/match-external-user! :github external-login external-email)]
+              (if matched-user
+                (let [session-id (extract-session-id (:uri request))
+                      {:keys [server clientIP] :as current-session} (crud/retrieve-by-id session-id
+                                                                                         {:user-name  "INTERNAL"
+                                                                                          :user-roles [session-id]})
+                      claims (cond-> (auth-internal/create-claims matched-user)
+                                     session-id (update :roles #(str session-id " " %))
+                                     server (assoc :server server)
+                                     clientIP (assoc :clientIP clientIP))
+                      cookie (cookies/claims-cookie claims)
+                      expires (:expires cookie)
+                      updated-session (assoc current-session
+                                        :username matched-user
+                                        :expiry expires)
+                      {:keys [status] :as resp} (internal-edit {:user-name  "INTERNAL"
+                                                                :user-roles [session-id]
+                                                                :identity   {:current         "INTERNAL"
+                                                                             :authentications {"INTERNAL" {:identity "INTERNAL"
+                                                                                                           :roles    [session-id]}}}
+                                                                :params     {:uuid (extract-session-uuid session-id)}
+                                                                :body       updated-session})]
+                  (if (not= status 200)
+                    resp
+                    (response-created session-id cookie)))
+                (throw-no-matched-user)))
             (throw-no-user-info))
           (throw-no-access-token))
         (throw-missing-oauth-code))

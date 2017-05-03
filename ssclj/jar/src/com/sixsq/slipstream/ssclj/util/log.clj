@@ -7,4 +7,4 @@
    given status code and message."
   [status msg]
   (log/error msg)
-  (throw (ex-info msg {:status status, :message msg})))
+  (throw (ex-info msg {:status status, :body {:status status, :message msg}})))
