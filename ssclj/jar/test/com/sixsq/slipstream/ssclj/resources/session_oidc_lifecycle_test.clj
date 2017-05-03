@@ -3,17 +3,23 @@
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
+    [ring.util.codec :as codec]
+
+    [com.sixsq.slipstream.auth.cyclone :as auth-oidc]
+    [com.sixsq.slipstream.auth.external :as ex]
+    [com.sixsq.slipstream.auth.internal :as auth-internal]
+    [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.auth.utils.sign :as sign]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.app.routes :as routes]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as oidc]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
@@ -32,7 +38,13 @@
 
 (deftest lifecycle
 
-  (let [session-anon (-> (session (ring-app))
+  (let [session-admin (-> (session (ring-app))
+                          (content-type "application/json")
+                          (header authn-info-header "admin ADMIN USER ANON"))
+        session-user (-> (session (ring-app))
+                         (content-type "application/json")
+                         (header authn-info-header "user USER ANON"))
+        session-anon (-> (session (ring-app))
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))]
 
@@ -55,182 +67,233 @@
           (ltu/is-status 200)
           (ltu/is-count zero?))
 
-      ;; configuration must have GitHub client ID, if not should get 500
+      ;; configuration must have OIDC client id and base URL, if not should get 500
       (-> session-anon
           (request base-uri
                    :request-method :post
                    :body (json/write-str valid-create))
           (ltu/body->edn)
-          (ltu/message-matches #".*missing OpenID Connect configuration.*")
+          (ltu/message-matches #".*missing client ID, base URL, or public key.*")
           (ltu/is-status 500))
 
       ;; anonymous create must succeed (normal create and href create)
-      (with-redefs [environ.core/env {:oidc-base-url  "https://example.org/auth/realms/master/protocol/openid-connect"
-                                      :oidc-client-id "FAKE_CLIENT_ID"}]
+      (let [public-key (:auth-public-key environ.core/env)
+            good-claims {:name  "OIDC_USER"
+                         :email "user@oidc.example.com"}
+            good-token (sign/sign-claims good-claims)
+            bad-claims {}
+            bad-token (sign/sign-claims bad-claims)]
+        (with-redefs [environ.core/env (merge environ.core/env
+                                              {:oidc-client-id  "FAKE_CLIENT_ID"
+                                               :oidc-base-url   "https://oidc.example.com"
+                                               :oidc-public-key public-key})]
 
-        (let [resp (-> session-anon
-                       (request base-uri
-                                :request-method :post
-                                :body (json/write-str valid-create))
-                       (ltu/body->edn)
-                       (ltu/is-status 307))
-              id (get-in resp [:response :body :resource-id])
-              uri (-> resp
-                      (ltu/location))
-              abs-uri (str p/service-context (u/de-camelcase uri))
+          (let [resp (-> session-anon
+                         (request base-uri
+                                  :request-method :post
+                                  :body (json/write-str valid-create))
+                         (ltu/body->edn)
+                         (ltu/is-status 307))
+                id (get-in resp [:response :body :resource-id])
+                uri (-> resp
+                        (ltu/location))
+                abs-uri (str p/service-context id)
 
-              resp (-> session-anon
-                       (request base-uri
-                                :request-method :post
-                                :body (json/write-str href-create))
-                       (ltu/body->edn)
-                       (ltu/is-status 307))
-              id2 (get-in resp [:response :body :resource-id])
-              uri2 (-> resp
-                       (ltu/location))
-              abs-uri2 (str p/service-context (u/de-camelcase uri2))]
+                resp (-> session-anon
+                         (request base-uri
+                                  :request-method :post
+                                  :body (json/write-str href-create))
+                         (ltu/body->edn)
+                         (ltu/is-status 307))
+                id2 (get-in resp [:response :body :resource-id])
+                uri2 (-> resp
+                         (ltu/location))
+                abs-uri2 (str p/service-context id2)]
 
-          ;; redirect URLs in location header should contain the client ID
-          (is (re-matches #".*FAKE_CLIENT_ID.*" uri))
-          (is (re-matches #".*FAKE_CLIENT_ID.*" uri2))
+            ;; redirect URLs in location header should contain the client ID and resource id
+            (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri "")))
+            (is (re-matches (re-pattern (str ".*" (codec/url-encode id) ".*")) (or uri "")))
+            (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri2 "")))
+            (is (re-matches (re-pattern (str ".*" (codec/url-encode id2) ".*")) (or uri2 "")))
 
-
-          ;; user should not be able to see session without session role
-          #_(-> (session (ring-app))
-                (header authn-info-header "user USER")
+            ;; user should not be able to see session without session role
+            (-> session-user
                 (request abs-uri)
                 (ltu/body->edn)
                 (ltu/is-status 403))
-          #_(-> (session (ring-app))
-                (header authn-info-header "user USER")
+            (-> session-user
                 (request abs-uri2)
                 (ltu/body->edn)
                 (ltu/is-status 403))
 
-          ;; anonymous query should succeed but still have no entries
-          #_(-> (session (ring-app))
+            ;; anonymous query should succeed but still have no entries
+            (-> session-anon
                 (request base-uri)
                 (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-count zero?))
 
-          ;; user query should succeed but have no entries because of missing session role
-          #_(-> (session (ring-app))
-                (header authn-info-header "user USER")
+            ;; user query should succeed but have no entries because of missing session role
+            (-> session-user
                 (request base-uri)
                 (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-count zero?))
 
-          ;; admin query should succeed, but see no sessions without the correct session role
-          #_(-> (session (ring-app))
-                (header authn-info-header "root ADMIN")
+            ;; admin query should succeed, but see no sessions without the correct session role
+            (-> session-admin
                 (request base-uri)
                 (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-count 0))
 
-          ;; user should be able to see session with session role
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id))
+            ;; user should be able to see session with session role
+            (-> session-user
+                (header authn-info-header (str "user USER ANON " id))
                 (request abs-uri)
                 (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-id id)
                 (ltu/is-operation-present "delete")
+                (ltu/is-operation-present (:validate c/action-uri))
                 (ltu/is-operation-absent "edit"))
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id2))
+            (-> session-user
+                (header authn-info-header (str "user USER ANON " id2))
                 (request abs-uri2)
                 (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-id id2)
                 (ltu/is-operation-present "delete")
+                (ltu/is-operation-present (:validate c/action-uri))
                 (ltu/is-operation-absent "edit"))
 
-          ;; user query with session role should succeed but and have one entry
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id))
+            ;; user query with session role should succeed but and have one entry
+            (-> session-user
+                (header authn-info-header (str "user USER ANON " id))
                 (request base-uri)
                 (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-count 1))
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id2))
+            (-> session-user
+                (header authn-info-header (str "user USER ANON " id2))
                 (request base-uri)
                 (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-count 1))
 
-          ;; user with session role can delete resource
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id))
+            ;;
+            ;; test validation callback
+            ;;
+            (let [validate-url (str abs-uri "/validate")
+                  validate-url2 (str abs-uri2 "/validate")]
+
+              ;; try hitting the callback with an invalid server configuration
+              (with-redefs [environ.core/env {}]
+
+                (-> session-anon
+                    (request validate-url
+                             :request-method :get)
+                    (ltu/body->edn)
+                    (ltu/message-matches #".*missing client ID, base URL, or public key.*")
+                    (ltu/is-status 500))
+
+                (-> session-anon
+                    (request validate-url2
+                             :request-method :get)
+                    (ltu/body->edn)
+                    (ltu/message-matches #".*missing client ID, base URL, or public key.*")
+                    (ltu/is-status 500)))
+
+              ;; try hitting the callback without the OIDC code parameter
+              (-> session-anon
+                  (request validate-url
+                           :request-method :get)
+                  (ltu/body->edn)
+                  (ltu/message-matches #".*not contain required code.*")
+                  (ltu/is-status 400))
+
+              (-> session-anon
+                  (request validate-url2
+                           :request-method :get)
+                  (ltu/body->edn)
+                  (ltu/message-matches #".*not contain required code.*")
+                  (ltu/is-status 400))
+
+              ;; try now with a fake code
+              (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret oauth-code redirect-url]
+                                                              (case oauth-code
+                                                                "GOOD" good-token
+                                                                "BAD" bad-token
+                                                                nil))
+                            ex/match-external-user! (fn [authn-method external-login external-email]
+                                                      ["MATCHED_USER" "/dashboard"])
+                            db/find-roles-for-username (fn [username]
+                                                         "USER ANON alpha")]
+
+                (-> session-anon
+                    (request (str validate-url "?code=NONE")
+                             :request-method :get)
+                    (ltu/body->edn)
+                    (ltu/message-matches #".*unable to retrieve OIDC access token.*")
+                    (ltu/is-status 400))
+
+                (-> session-anon
+                    (request (str validate-url "?code=BAD")
+                             :request-method :get)
+                    (ltu/body->edn)
+                    (ltu/message-matches #".*unable to retrieve or decrypt OIDC user information.*")
+                    (ltu/is-status 400))
+
+                (let [ring-info (-> session-anon
+                                    (request (str validate-url "?code=GOOD")
+                                             :request-method :get)
+                                    (ltu/body->edn)
+                                    (ltu/is-status 201)
+                                    (ltu/is-set-cookie))
+                      location (ltu/location ring-info)
+                      token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+                      claims (sign/unsign-claims token)]
+                  (is (= location id))
+                  (is (= "MATCHED_USER" (:username claims)))
+                  (is (re-matches (re-pattern (str ".*" id ".*")) (:roles claims))))))
+
+            ;; check that the session has been updated
+            (let [ring-info (-> session-user
+                                (header authn-info-header (str "user USER ANON " id))
+                                (request abs-uri)
+                                (ltu/body->edn)
+                                (ltu/is-status 200)
+                                (ltu/is-id id)
+                                (ltu/is-operation-present "delete")
+                                (ltu/is-operation-absent (:validate c/action-uri))
+                                (ltu/is-operation-absent "edit"))
+                  session (get-in ring-info [:response :body])]
+              (is (= "MATCHED_USER" (:username session)))
+              (is (not= (:created session) (:updated session))))
+
+            ;; user with session role can delete resource
+            (-> session-user
+                (header authn-info-header (str "user USER ANON " id))
                 (request abs-uri
                          :request-method :delete)
                 (ltu/is-unset-cookie)
                 (ltu/body->edn)
                 (ltu/is-status 200))
-          #_(-> (session (ring-app))
-                (header authn-info-header (str "user USER " id2))
+            (-> session-user
+                (header authn-info-header (str "user USER ANON " id2))
                 (request abs-uri2
                          :request-method :delete)
                 (ltu/is-unset-cookie)
                 (ltu/body->edn)
                 (ltu/is-status 200))
 
-          ;; create with invalid template fails
-          #_(-> (session (ring-app))
-                (content-type "application/json")
+            ;; create with invalid template fails
+            (-> session-anon
                 (request base-uri
                          :request-method :post
                          :body (json/write-str invalid-create))
                 (ltu/body->edn)
-                (ltu/is-status 400))))
-
-      ;; admin create must also succeed
-      #_(let [create-req (-> valid-create
-                             (assoc-in [:sessionTemplate :username] "root")
-                             (assoc-in [:sessionTemplate :password] "root"))
-              resp (-> (session (ring-app))
-                       (content-type "application/json")
-                       (request base-uri
-                                :request-method :post
-                                :body (json/write-str create-req))
-                       (ltu/is-set-cookie)
-                       (ltu/body->edn)
-                       (ltu/is-status 201))
-              id (get-in resp [:response :body :resource-id])
-              uri (-> resp
-                      (ltu/location))
-              abs-uri (str p/service-context (u/de-camelcase uri))]
-
-          ;; admin should be able to see and delete session with session role
-          (-> (session (ring-app))
-              (header authn-info-header (str "root ADMIN " id))
-              (request abs-uri)
-              (ltu/body->edn)
-              (ltu/is-status 200)
-              (ltu/is-operation-present "delete")
-              (ltu/is-operation-absent "edit"))
-
-          ;; admin can delete resource with session role
-          (-> (session (ring-app))
-              (header authn-info-header (str "root ADMIN " id))
-              (request abs-uri
-                       :request-method :delete)
-              (ltu/is-unset-cookie)
-              (ltu/body->edn)
-              (ltu/is-status 200)))
-
-      ;; admin create with invalid template fails
-      #_(-> (session (ring-app))
-            (content-type "application/json")
-            (header authn-info-header "root ADMIN")
-            (request base-uri
-                     :request-method :post
-                     :body (json/write-str invalid-create))
-            (ltu/body->edn)
-            (ltu/is-status 400)))))
+                (ltu/is-status 400))))))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id session/resource-name))]
