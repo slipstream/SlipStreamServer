@@ -14,7 +14,7 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.spec :as s]))
+    [clojure.spec.alpha :as s]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 

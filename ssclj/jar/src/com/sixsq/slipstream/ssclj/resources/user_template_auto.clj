@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-template-auto
   "This UserTemplate allows a user to register a new account automatically."
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-auto]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]

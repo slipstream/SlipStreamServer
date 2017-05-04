@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-test
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.user :refer :all]
     [com.sixsq.slipstream.ssclj.resources.spec.user]))
