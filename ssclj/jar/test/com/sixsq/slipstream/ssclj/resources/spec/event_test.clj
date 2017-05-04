@@ -19,7 +19,7 @@
 
                   :timestamp   event-timestamp
                   :content     {
-                                :resource {:href "run/45614147-aed1-4a24-889d-6365b0b1f2cd"}
+                                :resource {:href "module/HNSciCloud-RHEA/S3"}
                                 :state    "Started"}
                   :type        "state"
                   :severity    "critical"
@@ -31,6 +31,13 @@
 (deftest check-event
   (is (= valid-event (crud/validate valid-event)))
   (is (valid? valid-event)))
+
+(deftest check-reference
+  (let [updated-event (assoc-in valid-event [:content :resource :href] "another/valid-identifier")]
+    (is (= updated-event (crud/validate updated-event)))
+    (is (valid? updated-event)))
+  (let [updated-event (assoc-in valid-event [:content :resource :href] "/not a valid reference/")]
+    (is (invalid? updated-event))))
 
 (deftest check-severity
   (doseq [valid-severity ["critical" "high" "medium" "low"]]
