@@ -2,6 +2,7 @@ package com.sixsq.slipstream.connector;
 
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
+import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
@@ -22,12 +23,9 @@ import java.util.logging.Logger;
 
 public class UsageEvent {
 
-    private static final String SSCLJ_SERVER = "http://localhost:8201/api";
-    private static final String USAGE_EVENT_RESOURCE_NAME = "usage-event";
+    private static final String USAGE_EVENT_RESOURCE = "api/usage-event";
 
     private static final Logger logger = Logger.getLogger(UsageEvent.class.getName());
-
-    private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     @SuppressWarnings("unused")
     private ACL acl;
@@ -84,83 +82,11 @@ public class UsageEvent {
     }
 
     public String toJson(){
-
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Date.class, new DateTypeAdapter())
-                .setPrettyPrinting()
-                .create();
-
-        return gson.toJson(this);
+        return SscljProxy.toJson(this);
     }
 
     public static void post(UsageEvent usageEvent) {
-        ClientResource resource = null;
-        Representation response = null;
-
-        try {
-            StringRepresentation stringRep = new StringRepresentation(usageEvent.toJson());
-            stringRep.setMediaType(MediaType.APPLICATION_JSON);
-
-            Context context = new Context();
-            Series<Parameter> parameters = context.getParameters();
-            parameters.add("socketTimeout", "60000");
-            parameters.add("idleTimeout", "60000");
-            parameters.add("idleCheckInterval", "0");
-            parameters.add("socketConnectTimeoutMs", "15000");
-
-            resource = new ClientResource(context, SSCLJ_SERVER + "/" + USAGE_EVENT_RESOURCE_NAME);
-            resource.setRetryOnError(false);
-
-            Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get("org.restlet.http.headers");
-            if (headers == null) {
-                headers = new Series<Header>(Header.class);
-                resource.getRequestAttributes().put("org.restlet.http.headers", headers);
-            }
-            headers.add("slipstream-authn-info", usageEvent.user);
-
-            response = resource.post(stringRep, MediaType.APPLICATION_JSON);
-
-        } catch (ResourceException re) {
-            logger.warning("ResourceException :" + re.getMessage());
-        } catch (Exception e) {
-            logger.warning(e.getMessage());
-        } finally {
-            if (response != null) {
-                try {
-                    response.exhaust();
-                } catch (IOException e) {
-                    logger.warning(e.getMessage());
-                }
-                response.release();
-            }
-            if (resource != null) {
-                resource.release();
-            }
-        }
-    }
-
-    // See https://code.google.com/p/google-gson/issues/detail?id=281
-    private static class DateTypeAdapter implements JsonSerializer<Date>, JsonDeserializer<Date> {
-        private final DateFormat dateFormat;
-
-        private DateTypeAdapter() {
-            dateFormat = new SimpleDateFormat(ISO_8601_PATTERN, Locale.US);
-            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        }
-
-        public synchronized JsonElement serialize(Date date, Type type,
-                                                  JsonSerializationContext jsonSerializationContext) {
-            return new JsonPrimitive(dateFormat.format(date));
-        }
-
-        public synchronized Date deserialize(JsonElement jsonElement, Type type,
-                                             JsonDeserializationContext jsonDeserializationContext) {
-            try {
-                return dateFormat.parse(jsonElement.getAsString());
-            } catch (ParseException e) {
-                throw new JsonParseException(e);
-            }
-        }
+        SscljProxy.post(USAGE_EVENT_RESOURCE, usageEvent.user, usageEvent);
     }
 
 }

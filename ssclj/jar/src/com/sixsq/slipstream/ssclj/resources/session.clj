@@ -10,7 +10,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.db.impl :as db]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
+    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
+    [com.sixsq.slipstream.ssclj.util.log :as log-util])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :sessions)
 
@@ -96,26 +98,49 @@
 ;;   * operations may need to be added for external authn methods
 ;;
 
-(defmethod crud/set-operations resource-uri
+(defn dispatch-conversion
+  "Dispatches on the Session authentication method for multimethods
+   that take the resource and request as arguments."
+  [resource _]
+  (:method resource))
+
+(defn standard-session-operations
+  "Provides a list of the standard session operations, depending
+   on the user's authentication and whether this is a Session or
+   a SessionCollection."
   [{:keys [id resourceURI] :as resource} request]
   (try
     (a/can-modify? resource request)
-    (let [ops (if (.endsWith resourceURI "Collection")
-                [{:rel (:add c/action-uri) :href id}]
-                [{:rel (:delete c/action-uri) :href id}])]
-      (if (seq ops)
-        (assoc resource :operations ops)
-        (dissoc resource :operations)))
-    (catch Exception e
-      (dissoc resource :operations))))
+    (if (.endsWith resourceURI "Collection")
+      [{:rel (:add c/action-uri) :href id}]
+      [{:rel (:delete c/action-uri) :href id}])
+    (catch Exception _
+      nil)))
+
+;; Sets the operations for the given resources.  This is a
+;; multi-method because different types of session resources
+;; may require different operations, for example, a 'validation'
+;; callback.
+(defmulti set-session-operations dispatch-conversion)
+
+;; Default implementation adds the standard session operations
+;; by ALWAYS replacing the :operations value.  If there are no
+;; operations, the key is removed from the resource.
+(defmethod set-session-operations :default
+  [resource request]
+  (let [ops (standard-session-operations resource request)]
+    (cond-> (dissoc resource :operations)
+            (seq ops) (assoc :operations ops))))
+
+;; Just triggers the Session-level multimethod for adding operations
+;; to the Session resource.
+(defmethod crud/set-operations resource-uri
+  [resource request]
+  (set-session-operations resource request))
 
 ;;
 ;; template processing
 ;;
-
-(defn dispatch-conversion
-  [resource _]
-  (:method resource))
 
 (defmulti tpl->session dispatch-conversion)
 
@@ -163,14 +188,21 @@
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
-(defn cookie-name [{:keys [body]}]
-  ;; FIXME: The name of the cookie should correspond to the session.
-  ;;(str "slipstream." (str/replace (:resource-id body) "/" "."))
+;; FIXME: Copied to avoid dependency cycle.
+(defn cookie-name
+  "Provides the name of the cookie based on the resource ID in the
+   body of the response.  Currently this provides a fixed name to
+   remain compatible with past implementations.
+
+   FIXME: Update the implementation to use the session ID for the cookie name."
+  [resource-id]
+  ;; FIXME: Update the implementation to use the session ID for the cookie name.
+  ;;(str "slipstream." (str/replace resource-id "/" "."))
   "com.sixsq.slipstream.cookie")
 
 (defn delete-cookie [{:keys [status] :as response}]
   (if (= status 200)
-    {:cookies (cookies/revoked-cookie (cookie-name response))}
+    {:cookies (cookies/revoked-cookie (cookie-name (-> response :body :resource-id)))}
     {}))
 
 (defmethod crud/delete resource-name
@@ -196,4 +228,28 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+;;
+;; actions may be needed by certain authentication methods (notably external
+;; methods like GitHub and OpenID Connect) to validate a given session
+;;
+
+(defmulti validate-callback dispatch-conversion)
+
+(defmethod validate-callback :default
+  [resource request]
+  (log-util/log-and-throw 400 (str "error executing validation callback: '" (dispatch-conversion resource request) "'")))
+
+(defmethod crud/do-action [resource-url "validate"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str resource-url "/" uuid)]
+      (-> (crud/retrieve-by-id id {:user-name "INTERNAL"
+                                   :user-roles [id]})     ;; Essentially turn off authz by spoofing owner of resource.
+          (validate-callback request)))                     ;; FIXME: Ensure that return value is correct.
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+
+
 

@@ -20,15 +20,15 @@
   (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-entry
-  {:connector       {:href "CloudSoftwareSolution1"}
+  {:connector       {:href "cloud-software-solution-1"}
    :schema-org:att1 "123.456"})
 
 (def valid-nested-2-levels
-  {:connector       {:href "CloudSoftwareSolution2"}
+  {:connector       {:href "cloud-software-solution-2"}
    :schema-org:att1 {:schema-org:att2 "456"}})
 
 (def valid-nested-entry
-  {:connector       {:href "CloudSoftwareSolution3"}
+  {:connector       {:href "cloud-software-solution-3"}
    :schema-org:att1 "hi"
    :schema-org:attnested
                     {:schema-com:subnested
@@ -45,7 +45,7 @@
   {:other "BAD"})
 
 (def entry-wrong-namespace
-  {:connector  {:href "CloudSoftwareSolution"}
+  {:connector  {:href "cloud-software-solution"}
    :wrong:att1 "123.456"})
 
 (def valid-namespace {:prefix "schema-org"
@@ -227,7 +227,7 @@
         (t/is-status 201))
 
     (let [connector-with-namespaced-key
-          (str "{\"connector\":{\"href\":\"CloudSoftwareSolution\"},"
+          (str "{\"connector\":{\"href\":\"cloud-software-solution\"},"
                "\"schema-org:attr-name\":\"123.456\"}")
 
           uri-of-posted (-> session-user

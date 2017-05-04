@@ -44,20 +44,25 @@
        first
        ex/sanitize-login-name))
 
+(defn get-oidc-access-token
+  [oidc-client-id oidc-base-url oidc-code redirect-uri]
+  (-> (http/post (str oidc-base-url "/token")
+                 {:headers     {"Accept" "application/json"}
+                  :form-params {:grant_type   "authorization_code"
+                                :code         oidc-code
+                                :redirect_uri redirect-uri
+                                :client_id    oidc-client-id}})
+      :body
+      (json/read-str :key-fn keyword)
+      :access_token))
+
 (defn callback-cyclone
   [request redirect-server]
   (try
     (let [code (uh/param-value request :code)
-          token-response (http/post (cyclone-token-url)
-                                    {:headers     {"Accept" "application/json"}
-                                     :form-params {:grant_type   "authorization_code"
-                                                   :code         code
-                                                   :redirect_uri (redirect_uri)
-                                                   :client_id    "slipstream"}})
-          access-token (-> token-response
-                           :body
-                           (json/read-str :key-fn keyword)
-                           :access_token)
+
+          access-token (get-oidc-access-token "slipstream" cyclone-base-url code (redirect_uri))
+
           claims (sign/unsign-claims access-token
                                      :auth-public-key-cyclone)]
       (log/debug "Cyclone claims " claims)

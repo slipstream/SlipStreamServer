@@ -9,7 +9,7 @@
 
 (s/def :cimi.session-template/method :cimi.core/identifier)
 (s/def :cimi.session/username :cimi.core/nonblank-string)
-(s/def :cimi.session/expiry :cimi.core/nonblank-string)     ;; not usual timestamp format, uses cookie format
+(s/def :cimi.session/expiry :cimi.core/nonblank-string)     ;; uses cookie timestamp format
 
 (s/def :cimi.session/server :cimi.core/nonblank-string)
 (s/def :cimi.session/clientIP :cimi.core/nonblank-string)

@@ -1,6 +1,7 @@
 package com.sixsq.slipstream.event;
 
 import com.google.gson.*;
+import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Parameter;
@@ -26,14 +27,11 @@ public class Event {
 
 	public static boolean isMuted = false;
 
-	private static final String EVENT_SERVER = "http://localhost:8201/api";
-	private static final String EVENT_RESOURCE_NAME = "event";
+	private static final String EVENT_RESOURCE = "api/event";
 
 	private static final Logger logger = Logger.getLogger(Event.class.getName());
 
 	private static final String EVENT_URI = "http://sixsq.com/slipstream/1/Event";
-
-	private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 	@SuppressWarnings("unused")
 	private ACL acl;
@@ -104,80 +102,16 @@ public class Event {
 	}
 
 	public String toJson(){
-
-		Gson gson = new GsonBuilder()
-		   .registerTypeAdapter(Date.class, new DateTypeAdapter())
-		   .setPrettyPrinting()
-		   .create();
-
-		return gson.toJson(this);
+		return SscljProxy.toJson(this);
 	}
 
 	public static void post(Event event) {
 
-			if(isMuted) {
-				return;
-			}
-
-		ClientResource resource = null;
-		Representation response = null;
-
-		try {
-			StringRepresentation stringRep = new StringRepresentation(event.toJson());
-			stringRep.setMediaType(MediaType.APPLICATION_JSON);
-
-			Context context = new Context();
-			Series<Parameter> parameters = context.getParameters();
-			parameters.add("socketTimeout", "1000");
-			parameters.add("idleTimeout", "1000");
-			parameters.add("idleCheckInterval", "1000");
-			parameters.add("socketConnectTimeoutMs", "1000");
-
-			resource = new ClientResource(context, EVENT_SERVER + "/" + EVENT_RESOURCE_NAME);
-			resource.setRetryOnError(false);
-			response = resource.post(stringRep, MediaType.APPLICATION_JSON);
-			
-		} catch (ResourceException re) {
-			logger.warning(re.getMessage());
-		} catch (Exception e) {
-			logger.warning(e.getMessage());
-		} finally {
-			if (response != null) {
-				try {
-					response.exhaust();
-				} catch (IOException e) {
-					logger.warning(e.getMessage());
-				}
-				response.release();
-			}
-			if (resource != null) {
-				resource.release();
-			}
-		}
-	}
-
-	// See https://code.google.com/p/google-gson/issues/detail?id=281
-	private static class DateTypeAdapter implements JsonSerializer<Date>, JsonDeserializer<Date> {
-		private final DateFormat dateFormat;
-
-		private DateTypeAdapter() {
-			dateFormat = new SimpleDateFormat(ISO_8601_PATTERN, Locale.US);
-			dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		if (isMuted) {
+			return;
 		}
 
-		public synchronized JsonElement serialize(Date date, Type type,
-				JsonSerializationContext jsonSerializationContext) {
-			return new JsonPrimitive(dateFormat.format(date));
-		}
-
-		public synchronized Date deserialize(JsonElement jsonElement, Type type,
-				JsonDeserializationContext jsonDeserializationContext) {
-			try {
-				return dateFormat.parse(jsonElement.getAsString());
-			} catch (ParseException e) {
-				throw new JsonParseException(e);
-			}
-		}
+		SscljProxy.post(EVENT_RESOURCE, event);
 	}
 
 }

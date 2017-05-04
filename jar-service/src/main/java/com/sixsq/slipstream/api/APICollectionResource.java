@@ -2,6 +2,7 @@ package com.sixsq.slipstream.api;
 
 import com.sixsq.slipstream.util.RequestUtil;
 
+
 public class APICollectionResource extends APIBaseResource {
 
     public APICollectionResource(String resourceName) {
@@ -9,13 +10,13 @@ public class APICollectionResource extends APIBaseResource {
     }
 
     @Override
-    protected String uri() {
-        return super.uri() + "/" + this.resourceName + cimiParams();
+    protected String getPageRepresentation() {
+        return resourceName + "s";
     }
 
     @Override
-    protected String getPageRepresentation() {
-        return resourceName + "s";
+    protected String resourceUri() {
+        return super.resourceUri() + "/" + this.resourceName + cimiParams();
     }
 
     private String cimiParams() {
