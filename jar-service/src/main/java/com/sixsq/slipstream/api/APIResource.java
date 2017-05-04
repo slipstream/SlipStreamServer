@@ -12,9 +12,9 @@ public class APIResource extends APIBaseResource {
     }
 
     @Override
-    protected String uri() {
+    protected String resourceUri() {
         String resourceId = (String) getRequest().getAttributes().get("resource-id");
-        return super.uri() + "/" + this.resourceName + "/" + resourceId;
+        return super.resourceUri() + "/" + this.resourceName + "/" + resourceId;
     }
 
 }
