@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template-username-password
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-username-password]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
