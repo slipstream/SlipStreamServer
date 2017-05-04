@@ -1,14 +1,15 @@
 package com.sixsq.slipstream.authn;
 
 
+import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Context;
 import org.restlet.Response;
 import org.restlet.data.MediaType;
+import org.restlet.data.Form;
 import org.restlet.data.Parameter;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
-import org.restlet.util.Series;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -20,7 +21,7 @@ public class AuthProxy {
 
     private static final Logger logger = Logger.getLogger(AuthProxy.class.getName());
 
-    private static final String AUTH_SERVER = "http://localhost:8201/auth";
+    private static final String AUTH_RESOURCE = "auth";
 
     public static final String INTERNAL_AUTHENTICATION = "internal";
     public static final String GITHUB_AUTHENTICATION = "github";
@@ -41,51 +42,25 @@ public class AuthProxy {
      */
     public Response authenticate(String username, String password, String authenticationMethod)
             throws ResourceException {
-        ClientResource resource = null;
-        Representation response = null;
+        Response response = null;
 
         try {
+            Form queryParameters = new Form();
+            queryParameters.add(new Parameter("username", username));
+            queryParameters.add(new Parameter("password", password));
+            queryParameters.add(new Parameter("authn-method", authenticationMethod));
 
-            resource = new ClientResource(createContext(), AUTH_SERVER + "/login");
-            resource.setRetryOnError(false);
-
-            resource.addQueryParameter("username", username);
-            resource.addQueryParameter("password", password);
-            resource.addQueryParameter("authn-method", authenticationMethod);
-
-            resource.setEntityBuffering(true);
-
-            response = resource.post("", MediaType.TEXT_PLAIN);
-
-            return resource.getResponse();
+            response = SscljProxy.post(AUTH_RESOURCE + "/login", queryParameters, MediaType.TEXT_PLAIN, true);
 
         } catch (ResourceException re) {
             handleResourceException(re, username);
-            return null;
-        } finally {
-            releaseResources(resource, response);
         }
+
+        return response;
     }
 
     public Response logout() {
-        ClientResource resource = new ClientResource(createContext(), AUTH_SERVER + "/logout");
-        resource.setRetryOnError(false);
-        resource.setEntityBuffering(true);
-
-        resource.post("", MediaType.TEXT_PLAIN);
-
-        return resource.getResponse();
-    }
-
-    private Context createContext() {
-        Context context = new Context();
-        Series<Parameter> parameters = context.getParameters();
-        parameters.add("socketTimeout", "1000");
-        parameters.add("idleTimeout", "1000");
-        parameters.add("idleCheckInterval", "1000");
-        parameters.add("socketConnectTimeoutMs", "1000");
-
-        return context;
+        return SscljProxy.post(AUTH_RESOURCE + "/logout", MediaType.TEXT_PLAIN, true);
     }
 
     private void handleResourceException(ResourceException re, String username) {
@@ -109,20 +84,6 @@ public class AuthProxy {
 
         logger.warning(message);
         throw re;
-    }
-
-    private void releaseResources(ClientResource resource, Representation response) {
-        if (response != null) {
-            try {
-                response.exhaust();
-            } catch (IOException e) {
-                logger.warning(e.getMessage());
-            }
-            response.release();
-        }
-        if (resource != null) {
-            resource.release();
-        }
     }
 
 }
