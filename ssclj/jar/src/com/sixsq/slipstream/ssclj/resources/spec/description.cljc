@@ -3,7 +3,7 @@
    provide information to clients to allow them to understand the contents
    of resources."
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 

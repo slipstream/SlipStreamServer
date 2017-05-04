@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.common-test
   (:require
     [clojure.test :refer [deftest are is]]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as t]))
 

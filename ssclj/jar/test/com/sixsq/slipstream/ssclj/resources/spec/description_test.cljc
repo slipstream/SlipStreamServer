@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.description-test
   (:require
     [clojure.test :refer [deftest are is]]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.description :as t]))
 
 (deftest check-parameter-type

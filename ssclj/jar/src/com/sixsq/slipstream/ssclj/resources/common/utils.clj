@@ -6,7 +6,7 @@
     [superstring.core :as str]
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [ring.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [clojure.data.json :as json]

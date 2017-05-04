@@ -3,11 +3,34 @@
     [clojure.test :refer :all]
     [sixsq.slipstream.placement.core :as pc]))
 
-(deftest test-order-by-price
-  (is (= [{:y 2 :price 2} {:x 1 :price 10}]
-         (pc/order-by-price [{:x 1 :price 10} {:y 2 :price 2}])))
-  (is (= [{:y 2 :price 2} {:z 3 :price 3} {:x 1 :price -1}]
-         (pc/order-by-price [{:x 1 :price -1} {:z 3 :price 3} {:y 2 :price 2}]))))
+(deftest check-number-or-nil
+  (let [nils [nil -1 -1.0 -3/4 "a" true ["some" "values"]]
+        selves [nil 0 0.0 1 1.0 3/4]]
+    (doseq [v nils]
+      (is (nil? (pc/number-or-nil v))))
+    (doseq [v selves]
+      (is (= v (pc/number-or-nil v))))))
+
+(deftest check-price-comparator
+  (is (pc/price-comparator 0 1))
+  (is (not (pc/price-comparator 1 0)))
+  (is (not (pc/price-comparator 0 0)))
+  (is (not (pc/price-comparator nil nil)))
+  (is (pc/price-comparator 0 nil))
+  (is (not (pc/price-comparator nil 0)))
+  (is (pc/price-comparator 0 "a"))
+  (is (not (pc/price-comparator "a" 0))))
+
+(deftest check-order-by-price
+  (let [values [{:order 1 :price 0}
+                {:order 2 :price 4/2}
+                {:order 3 :price 3.0}
+                {:order 4 :price nil}
+                {:order 4 :price -1}
+                {:order 4 :price -1.0}
+                {:order 4 :price "1.0"}]]
+    (doseq [coll (repeatedly 20 (partial shuffle values))]
+      (is (apply <= (map :order (pc/order-by-price coll)))))))
 
 (deftest test-cimi-and
   (is (= "" (pc/cimi-and [nil nil])))

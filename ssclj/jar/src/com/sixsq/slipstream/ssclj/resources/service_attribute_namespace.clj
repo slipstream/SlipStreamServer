@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-namespace
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [superstring.core :as str]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.spec.service-attribute-namespace]

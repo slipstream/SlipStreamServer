@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.connector-test
   (:require
     [clojure.test :refer [deftest are is]]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.connector :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.connector :as cs]
     [com.sixsq.slipstream.ssclj.resources.spec.connector-template :as cts]
