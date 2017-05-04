@@ -9,7 +9,8 @@
 ;; All session resources must have a 'method' attribute.
 (s/def :cimi.session-template/method :cimi.core/identifier)
 
-(s/def :cimi.session-template/href :cimi.core/resource-href) ;; FIXME: Ensure this always references the same resource type.
+(def session-template-regex #"^session-template/[a-z]+(-[a-z]+)*$")
+(s/def :cimi.session-template/href (s/and string? #(re-matches session-template-regex %)))
 
 ;;
 ;; Keys specifications for SessionTemplate resources.

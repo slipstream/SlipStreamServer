@@ -27,7 +27,8 @@
 (s/def :cimi.connector-template/securityGroups string?)
 (s/def :cimi.connector-template/updateClientURL string?)
 
-(s/def :cimi.connector-template/href :cimi.core/resource-href) ;; FIXME: Ensure this always references the same resource type.
+(def connector-template-regex #"^connector-template/[a-z0-9]+(-[a-z0-9]+)*$")
+(s/def :cimi.connector-template/href (s/and string? #(re-matches connector-template-regex %)))
 
 ;;
 ;; Keys specifications for ConnectorTemplate resources.
