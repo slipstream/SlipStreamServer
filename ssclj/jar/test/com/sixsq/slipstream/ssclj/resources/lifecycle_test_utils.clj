@@ -24,7 +24,9 @@
 (defn serialize-cookie-value
   "replaces the map cookie value with a serialized string"
   [{:keys [value] :as cookie}]
-  (assoc cookie :value (codec/form-encode value)))
+  (if value
+    (assoc cookie :value (codec/form-encode value))
+    cookie))
 
 (defmacro message-matches
   [m re]

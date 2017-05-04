@@ -252,10 +252,10 @@
                                     (ltu/is-set-cookie))
                       location (ltu/location ring-info)
                       token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
-                      claims (sign/unsign-claims token)]
+                      claims (if token (sign/unsign-claims token) {})]
                   (is (= location id))
                   (is (= "MATCHED_USER" (:username claims)))
-                  (is (re-matches (re-pattern (str ".*" id ".*")) (:roles claims))))))
+                  (is (re-matches (re-pattern (str ".*" id ".*")) (or (:roles claims) ""))))))
 
             ;; check that the session has been updated
             (let [ring-info (-> session-user

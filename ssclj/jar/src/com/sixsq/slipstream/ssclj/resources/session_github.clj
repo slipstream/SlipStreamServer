@@ -21,7 +21,8 @@
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.external :as ex]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.auth.utils.timestamp :as ts]))
 
 (def ^:const authn-method "github")
 
@@ -93,7 +94,7 @@
   (let [[client-id client-secret] (github-client-info)]
     (if (and client-id client-secret)
       (let [session (sutils/create-session {:username "_"} headers authn-method) ;; FIXME: Remove username from required parameters.
-            session (assoc session :expiry (str (tsutil/expiry-later login-request-timeout)))
+            session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
             redirect-url (format github-oath-endpoint client-id (sutils/validate-action-url base-uri (:id session)))]
         [{:status 307, :headers {"Location" redirect-url}} session])
       (throw-bad-client-config))))
@@ -132,7 +133,7 @@
                     {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
                 (if (not= status 200)
                   resp
-                  (uh/response-created session-id [(sutils/cookie-name session-id) cookie])))
+                  (u/response-created session-id [(sutils/cookie-name session-id) cookie])))
               (throw-no-matched-user)))
           (throw-no-user-info))
         (throw-no-access-token))
