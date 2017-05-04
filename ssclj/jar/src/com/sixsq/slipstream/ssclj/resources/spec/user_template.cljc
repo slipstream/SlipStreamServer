@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-template
   (:require
-    [clojure.spec :as s]
-    [clojure.spec.gen :as gen]
+    [clojure.spec.alpha :as s]
+    [clojure.spec.gen.alpha :as gen]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
@@ -9,7 +9,8 @@
 ;; All user templates must indicate the method used to create the user.
 (s/def :cimi.user-template/method :cimi.core/identifier)
 
-(s/def :cimi.user-template/href :cimi.core/resource-href) ;; FIXME: Ensure this always references the same resource type.
+(def user-template-regex #"^user-template/[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?$")
+(s/def :cimi.user-template/href (s/and string? #(re-matches user-template-regex %)))
 
 ;;
 ;; Keys specifications for UserTemplate resources.

@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user
   (:require
-    [clojure.spec :as s]
-    [clojure.spec.gen :as gen]
+    [clojure.spec.alpha :as s]
+    [clojure.spec.gen.alpha :as gen]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template]
