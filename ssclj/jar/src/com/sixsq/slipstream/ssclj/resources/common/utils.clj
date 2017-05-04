@@ -163,6 +163,16 @@
     (catch Exception _
       nil)))
 
+(defn log-and-throw-400
+  "Logs the given message as a warning and then throws an exception with a
+   400 response."
+  [msg]
+  (let [response (-> {:status 400 :message msg}
+                     json-response
+                     (r/status 400))]
+    (log/warn msg)
+    (throw (ex-info msg response))))
+
 (defn create-spec-validation-fn
   "Creates a validation function that compares a resource against the
    given schema.  The generated function raises an exception with the
@@ -173,12 +183,7 @@
         explain (partial s/explain-str spec)]
     (fn [resource]
       (if-not (ok? resource)
-        (let [msg (str "resource does not satisfy defined schema: " (explain resource))
-              response (-> {:status 400 :message msg}
-                           json-response
-                           (r/status 400))]
-          (log/warn msg)
-          (throw (ex-info msg response)))
+        (log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
         resource))))
 
 (defn encode-base64
