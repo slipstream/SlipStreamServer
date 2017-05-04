@@ -15,11 +15,9 @@
     [java.util List Map UUID Date]
     [javax.xml.bind DatatypeConverter]))
 
-;;
-;; utilities for generating ring responses for standard
-;; conditions and ex-info exceptions with these responses
-;; embedded in them
-;;
+(defn string->int [s]
+  (when (re-matches #"\d+" s)
+    (read-string s)))
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.
@@ -27,6 +25,20 @@
   (if s
     (str/join "-" (map str/lower-case (str/split s #"(?=[A-Z])")))
     ""))
+
+;;
+;; utilities for generating ring responses for standard
+;; conditions and ex-info exceptions with these responses
+;; embedded in them
+;;
+
+(defn response-created
+  "Provides a created response (201) with the Location header given by the
+   identifier and provides the Set-Cookie header with the given cookie, if
+   the cookie value is not nil."
+  [id & [[cookie-name cookie]]]
+  (cond-> {:status 201, :headers {"Location" id}}
+          cookie (assoc :cookies {cookie-name cookie})))
 
 (defn json-response
   [body]

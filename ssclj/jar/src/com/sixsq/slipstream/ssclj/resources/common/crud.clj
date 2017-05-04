@@ -16,7 +16,7 @@
       u/lisp-to-camelcase))
 
 (defn resource-id-dispatch
-  [resource-id]
+  [resource-id & _]
   (first (u/split-resource-id resource-id)))
 
 (defn resource-name-and-action-dispatch
@@ -50,8 +50,8 @@
 (defmulti retrieve-by-id resource-id-dispatch)
 
 (defmethod retrieve-by-id :default
-  [resource-id]
-  (db/retrieve resource-id {}))
+  [resource-id & [options]]
+  (db/retrieve resource-id (or options {})))
 
 (defmulti edit resource-name-dispatch)
 

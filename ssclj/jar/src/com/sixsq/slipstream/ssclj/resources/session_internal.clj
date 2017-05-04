@@ -2,6 +2,7 @@
   (:require
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.spec.session]
+    [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as tpl]
@@ -43,26 +44,6 @@
 ;;
 ;; transform template into session resource
 ;;
-(defn create-session
-  "Creates a new session resource from the users credentials and the request
-   header. The result contains the authentication method, the user's identifier,
-   the client's IP address, and the virtual host being used. NOTE: The expiry
-   is not included and MUST be added afterwards."
-  [{:keys [username]} headers]
-  (let [server (:slipstream-ssl-server-hostname headers)
-        client-ip (:x-real-ip headers)]
-    (crud/new-identifier
-      (cond-> {:method authn-method
-               :username    username}
-              server (assoc :server server)
-              client-ip (assoc :clientIP client-ip))
-      p/resource-name)))
-
-;; FIXME: Multiple session cookies should be permitted, eventually.
-;; FIXME: For backward compatibility use the standard name of the cookie.
-(defn cookie-name [{:keys [id]}]
-  #_(str "slipstream." (str/replace id "/" "."))
-  "com.sixsq.slipstream.cookie")
 
 (defn create-claims [{:keys [username] :as credentials} headers session]
   (let [server (:slipstream-ssl-server-hostname headers)]
@@ -74,10 +55,10 @@
   [resource {:keys [headers] :as request}]
   (let [credentials (select-keys resource #{:username :password})]
     (if (auth-internal/valid? credentials)
-      (let [session (create-session credentials headers)
+      (let [session (sutils/create-session credentials headers authn-method)
             claims (create-claims credentials headers session)
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)
             session (assoc session :expiry expires)]
-        [{:cookies {(cookie-name session) cookie}} session])
+        [{:cookies {(sutils/cookie-name (:id session)) cookie}} session])
       (throw (u/ex-unauthorized (:username credentials))))))
