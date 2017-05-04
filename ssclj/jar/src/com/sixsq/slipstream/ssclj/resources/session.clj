@@ -96,7 +96,6 @@
 ;; special implementation because
 ;;   * edit is not permitted
 ;;   * operations may need to be added for external authn methods
-;;   * different session types may need other operations (e.g. validate)
 ;;
 
 (defn dispatch-conversion
@@ -189,14 +188,21 @@
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
-(defn cookie-name [{:keys [body]}]
-  ;; FIXME: The name of the cookie should correspond to the session.
-  ;;(str "slipstream." (str/replace (:resource-id body) "/" "."))
+;; FIXME: Copied to avoid dependency cycle.
+(defn cookie-name
+  "Provides the name of the cookie based on the resource ID in the
+   body of the response.  Currently this provides a fixed name to
+   remain compatible with past implementations.
+
+   FIXME: Update the implementation to use the session ID for the cookie name."
+  [resource-id]
+  ;; FIXME: Update the implementation to use the session ID for the cookie name.
+  ;;(str "slipstream." (str/replace resource-id "/" "."))
   "com.sixsq.slipstream.cookie")
 
 (defn delete-cookie [{:keys [status] :as response}]
   (if (= status 200)
-    {:cookies (cookies/revoked-cookie (cookie-name response))}
+    {:cookies (cookies/revoked-cookie (cookie-name (-> response :body :resource-id)))}
     {}))
 
 (defmethod crud/delete resource-name

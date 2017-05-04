@@ -17,6 +17,14 @@
       response
       (assoc-in [:headers "location"] url)))
 
+(defn response-created
+  "Provides a created response (201) with the Location header given by the
+   identifier and provides the Set-Cookie header with the given cookie, if
+   the cookie value is not nil."
+  [id & [[cookie-name cookie]]]
+  (cond-> {:status 201, :headers {"Location" id}}
+          cookie (assoc :cookies {cookie-name cookie})))
+
 ;; FIXME: This should be 403 (invalid credentials), not 401 (credentials required)
 (defn response-forbidden
   []
