@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.service-offer-test
   (:require
     [clojure.test :refer :all]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.service-offer :as so]))
 
 (def valid-acl {:owner {:principal "ADMIN"

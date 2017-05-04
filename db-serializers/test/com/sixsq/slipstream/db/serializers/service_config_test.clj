@@ -5,7 +5,7 @@
     [clojure.pprint :refer [pprint]]
     [clojure.test :refer :all]
     [me.raynes.fs :as fs]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu]

@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.usage-record-test
   (:require
     [clojure.test :refer :all]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.usage-record :refer :all]))
 
 (defn valid? [resource] (s/valid? :cimi/usage-record resource))

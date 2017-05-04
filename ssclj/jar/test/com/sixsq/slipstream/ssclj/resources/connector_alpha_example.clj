@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-alpha-example
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.connector :as p]
     [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]

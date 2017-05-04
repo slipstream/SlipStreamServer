@@ -3,8 +3,8 @@
    supported directly by the core spec functions and macros."
   (:require
     [clojure.set :as set]
-    [clojure.spec :as s]
-    [clojure.spec.gen :as gen]
+    [clojure.spec.alpha :as s]
+    [clojure.spec.gen.alpha :as gen]
     [clojure.string :as str]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))

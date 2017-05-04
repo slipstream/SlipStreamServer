@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
