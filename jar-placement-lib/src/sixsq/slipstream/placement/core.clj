@@ -191,19 +191,6 @@
 
 (def cimi-or (partial cimi-op "or"))
 
-(defn- connector-same-instance-type
-  [[connector-name instance-type]]
-  (when instance-type
-        (let [cn (name connector-name)
-              it  (first (str/split cn #"-"))]
-             (format "connector/href='%s' and '%s':instanceType='%s'" cn it instance-type)
-             )
-    ))
-
-(defn- clause-connectors-same-instance-type
-  [component]
-  (mapv connector-same-instance-type (:connector-instance-types component)))
-
 (defn- clause-cpu-ram-disk
   [component]
   (when (every? #(% component) [:cpu.nb :ram.GB :disk.GB])
@@ -217,8 +204,7 @@
 
 (defn- clause-component
   [component]
-  (cimi-or (concat (clause-connectors-same-instance-type component)
-                   [clause-flexible (clause-cpu-ram-disk component)])))
+  (cimi-or (concat [clause-flexible (clause-cpu-ram-disk component)])))
 
 (defn- clause-connectors
   [connector-names]
@@ -239,7 +225,7 @@
   [component connector-names]
   (let [cimi-filter (cimi-and [(clause-connectors connector-names)
                                (:placement-policy component)
-                               (clause-cpu-ram-disk component)])
+                               (clause-component component)])
         _ (log/debug (str "cimi filter: '" cimi-filter "'"))
         service-offers (fetch-service-offers-rescue-reauthenticate cimi-filter)
         _ (log/debug (str "number of matching service offers:" (count service-offers)))

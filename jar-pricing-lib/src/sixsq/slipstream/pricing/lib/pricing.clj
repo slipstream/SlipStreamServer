@@ -63,7 +63,7 @@
 
 ;;DISCOUNT FUNCTIONS
 (defn- elem-price
-  [el {price unitCost}]
+  [el {price :unitCost}]
   (* (- 1 (:p el)) (:q el) price))
 
 (defn- progressive-discount
@@ -101,7 +101,7 @@
 ;;COST COMPUTING FUNCTIONS
 
 (defn- get-cost
-  [{{:keys [method]} :discount :as entity} q]
+  [{{:keys [method], :or {method :None}} :discount :as entity} q]
   (let [costfunc ((keyword method) discount-functions)]
     (costfunc entity q)
     )
