@@ -72,18 +72,15 @@
   (is (thrown? AssertionError (pc/equals-ignore-case? 1 "b"))))
 
 (deftest test-smallest-service-offer
-  (let [so1 {:schema-org:descriptionVector
-             {:schema-org:vcpu 1
-              :schema-org:ram  4
-              :schema-org:disk 10}}
-        so2 {:schema-org:descriptionVector
-             {:schema-org:vcpu 8
-              :schema-org:ram  32
-              :schema-org:disk 500}}
-        so3 {:schema-org:descriptionVector
-             {:schema-org:vcpu 2
-              :schema-org:ram  8
-              :schema-org:disk 20}}]
+  (let [so1 {:resource:vcpu 1
+              :resource:ram  4
+              :resource:disk 10}
+        so2 {:resource:vcpu 8
+              :resource:ram  32
+              :resource:disk 500}
+        so3 {:resource:vcpu 2
+              :resource:ram  8
+              :resource:disk 20}]
     (is (nil? (pc/smallest-service-offer [])))
     (is (= so1 (pc/smallest-service-offer [so1 so2 so3])))
     (is (= so1 (pc/smallest-service-offer [so2 so1 so3])))
@@ -99,10 +96,10 @@
 
 (deftest test-prefer-exact-instance-type
   ; small is preffered for exo, it is kept
-  (is (= [{:schema-org:name "small"}]
+  (is (= [{:exoscale:instanceType "small"}]
          (pc/prefer-exact-instance-type {:exo "small" :ec2 "insanely-huge"}
-                                        ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]])))
+                                        ["exo" [{:exoscale:instanceType "small"} {:exoscale:instanceType "big"}]])))
   ; extra is absent, list returned unchanged
-  (is (= [{:schema-org:name "small"} {:schema-org:name "big"}]
+  (is (= [{:exoscale:instanceType "small"} {:exoscale:instanceType "big"}]
          (pc/prefer-exact-instance-type {:exo "extra" :ec2 "insanely-huge"}
-                                        ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]]))))
+                                        ["exo" [{:exoscale:instanceType "small"} {:exoscale:instanceType "big"}]]))))

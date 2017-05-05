@@ -30,21 +30,21 @@
 
 (defn sample-periods
   [entity quantity]
-  (let [t (convert-time (:sample quantity) (:timeCode quantity) (:sampleTimeCode entity) false)]
+  (let [t (convert-time (:sample quantity) (:timeCode quantity) (:billingUnitCode entity) false)]
     (Math/ceil (* t (count (:values quantity))))))
 
 (defn aggregate-for-billing-period
   [entity samples]
-  (let [n (convert-time 1 (:billingTimeCode entity) (:sampleTimeCode entity) false)
+  (let [n (convert-time 1 (:billingPeriodCode entity) (:billingUnitCode entity) false)
         coll (partition n n [] samples)]
     (map +list coll)))
 
 (defn units-per-sampling-period
   [entity quantity]
-  (if (not (timesampling>? (:sample quantity) (:timeCode quantity) (:sampleTimeCode entity)))
+  (if (not (timesampling>? (:sample quantity) (:timeCode quantity) (:billingUnitCode entity)))
     ;then aggregate
     (do                                                     ;(println "aggregate" (sample-periods entity quantity) (count (:values quantity)))
-      (let [step (convert-time (:sample quantity) (:timeCode quantity) (:sampleTimeCode entity) false)
+      (let [step (convert-time (:sample quantity) (:timeCode quantity) (:billingUnitCode entity) false)
             n (int (/ 1 step))
             coll (partition n n [] (:values quantity))]
         (map +list coll)))
@@ -63,7 +63,7 @@
 
 ;;DISCOUNT FUNCTIONS
 (defn- elem-price
-  [el {price :price}]
+  [el {price unitCost}]
   (* (- 1 (:p el)) (:q el) price))
 
 (defn- progressive-discount
@@ -91,9 +91,9 @@
   )
 
 
-(def discount-functions {:None        (fn [entity q] (* (:price entity) q))
+(def discount-functions {:None        (fn [entity q] (* (:unitCost entity) q))
                          ;NB : Reservation is equal to no discount in a billing context
-                         :Reservation (fn [entity q] (* (:price entity) q))
+                         :Reservation (fn [entity q] (* (:unitCost entity) q))
                          :Progressive progressive-discount}
   )
 
@@ -138,7 +138,7 @@
                    :associatedCosts   []
                    :timeCode          "HUR"
                    :billingTimeCode   "MON"
-                   :sampleTimeCode    "HUR"
+                   :billingUnitCode    "HUR"
                    :unitCode          "C62"
                    :descriptionVector {:vcpu 1.0 :ram 3.75 :disk 0.0}
                    }
