@@ -1,0 +1,490 @@
+{
+  "instances": [
+    {
+      "connector": {
+        "href": "exoscale-ch-gva"
+      },
+      "description": "VM (standard) with 4 vCPU, 16 GB GB RAM,10 GB GB disk [CH] (Extra-large)",
+      "price:currency": "EUR",
+      "resource:vcpu": 4,
+      "price:unitCost": 0.0027616666666666666,
+      "updated": "2017-04-27T08:53:46.155Z",
+      "price:billingPeriodCode": "MIN",
+      "name": "4/16 GB/10 GB [CH] (Extra-large)",
+      "resource:class": "standard",
+      "created": "2017-04-27T08:53:46.155Z",
+      "price:billingUnitCode": "HUR",
+      "price:freeUnits": 0,
+      "price:unitCode": "C62",
+      "resource:diskType": "SSD",
+      "id": "service-offer/2b6a5550-839a-4775-a387-79c7bff8662a",
+      "resource:country": "CH",
+      "resource:platform": "cloudstack",
+      "resource:ram": 16384,
+      "acl": {
+        "owner": {
+          "type": "ROLE",
+          "principal": "ADMIN"
+        },
+        "rules": [
+          {
+            "principal": "USER",
+            "type": "ROLE",
+            "right": "VIEW"
+          },
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "edit",
+          "href": "service-offer/2b6a5550-839a-4775-a387-79c7bff8662a"
+        },
+        {
+          "rel": "delete",
+          "href": "service-offer/2b6a5550-839a-4775-a387-79c7bff8662a"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/ServiceOffer",
+      "resource:disk": 10,
+      "exoscale:instanceType": "Extra-large",
+      "resource:type": "VM"
+    },
+    {
+      "connector": {
+        "href": "exoscale-ch-gva"
+      },
+      "description": "VM (standard) with 1 vCPU, 512 MB GB RAM,10 GB GB disk [CH] (Micro)",
+      "price:currency": "EUR",
+      "resource:vcpu": 1,
+      "price:unitCost": 1.2833333333333333E-4,
+      "updated": "2017-04-27T08:53:46.036Z",
+      "price:billingPeriodCode": "MIN",
+      "name": "1/512 MB/10 GB [CH] (Micro)",
+      "resource:class": "standard",
+      "created": "2017-04-27T08:53:46.036Z",
+      "price:billingUnitCode": "HUR",
+      "price:freeUnits": 0,
+      "price:unitCode": "C62",
+      "resource:diskType": "SSD",
+      "id": "service-offer/8e7310fd-2a2b-43b1-a5be-de331b4d3644",
+      "resource:country": "CH",
+      "resource:platform": "cloudstack",
+      "resource:ram": 512,
+      "acl": {
+        "owner": {
+          "type": "ROLE",
+          "principal": "ADMIN"
+        },
+        "rules": [
+          {
+            "principal": "USER",
+            "type": "ROLE",
+            "right": "VIEW"
+          },
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "edit",
+          "href": "service-offer/8e7310fd-2a2b-43b1-a5be-de331b4d3644"
+        },
+        {
+          "rel": "delete",
+          "href": "service-offer/8e7310fd-2a2b-43b1-a5be-de331b4d3644"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/ServiceOffer",
+      "resource:disk": 10,
+      "exoscale:instanceType": "Micro",
+      "resource:type": "VM"
+    },
+    {
+      "connector": {
+        "href": "exoscale-ch-gva"
+      },
+      "description": "VM (standard) with 8 vCPU, 32 GB GB RAM,10 GB GB disk [CH] (Huge)",
+      "price:currency": "EUR",
+      "resource:vcpu": 8,
+      "price:unitCost": 0.005503333333333333,
+      "updated": "2017-04-27T08:53:46.148Z",
+      "price:billingPeriodCode": "MIN",
+      "name": "8/32 GB/10 GB [CH] (Huge)",
+      "resource:class": "standard",
+      "created": "2017-04-27T08:53:46.148Z",
+      "price:billingUnitCode": "HUR",
+      "price:freeUnits": 0,
+      "price:unitCode": "C62",
+      "resource:diskType": "SSD",
+      "id": "service-offer/4f823169-58b7-46c5-9ab0-e27f012f73ee",
+      "resource:country": "CH",
+      "resource:platform": "cloudstack",
+      "resource:ram": 32768,
+      "acl": {
+        "owner": {
+          "type": "ROLE",
+          "principal": "ADMIN"
+        },
+        "rules": [
+          {
+            "principal": "USER",
+            "type": "ROLE",
+            "right": "VIEW"
+          },
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "edit",
+          "href": "service-offer/4f823169-58b7-46c5-9ab0-e27f012f73ee"
+        },
+        {
+          "rel": "delete",
+          "href": "service-offer/4f823169-58b7-46c5-9ab0-e27f012f73ee"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/ServiceOffer",
+      "resource:disk": 10,
+      "exoscale:instanceType": "Huge",
+      "resource:type": "VM"
+    },
+    {
+      "connector": {
+        "href": "exoscale-ch-gva"
+      },
+      "description": "VM (standard) with 1 vCPU, 1 GB GB RAM,10 GB GB disk [CH] (Tiny)",
+      "price:currency": "EUR",
+      "resource:vcpu": 1,
+      "price:unitCost": 2.35E-4,
+      "updated": "2017-04-27T08:53:46.165Z",
+      "price:billingPeriodCode": "MIN",
+      "name": "1/1 GB/10 GB [CH] (Tiny)",
+      "resource:class": "standard",
+      "created": "2017-04-27T08:53:46.165Z",
+      "price:billingUnitCode": "HUR",
+      "price:freeUnits": 0,
+      "price:unitCode": "C62",
+      "resource:diskType": "SSD",
+      "id": "service-offer/093d3d87-5a92-4927-8c15-6fe32bad12c9",
+      "resource:country": "CH",
+      "resource:platform": "cloudstack",
+      "resource:ram": 1024,
+      "acl": {
+        "owner": {
+          "type": "ROLE",
+          "principal": "ADMIN"
+        },
+        "rules": [
+          {
+            "principal": "USER",
+            "type": "ROLE",
+            "right": "VIEW"
+          },
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "edit",
+          "href": "service-offer/093d3d87-5a92-4927-8c15-6fe32bad12c9"
+        },
+        {
+          "rel": "delete",
+          "href": "service-offer/093d3d87-5a92-4927-8c15-6fe32bad12c9"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/ServiceOffer",
+      "resource:disk": 10,
+      "exoscale:instanceType": "Tiny",
+      "resource:type": "VM"
+    },
+    {
+      "connector": {
+        "href": "exoscale-ch-gva"
+      },
+      "description": "VM (standard) with 2 vCPU, 4 GB GB RAM,10 GB GB disk [CH] (Medium)",
+      "price:currency": "EUR",
+      "resource:vcpu": 2,
+      "price:unitCost": 7.066666666666666E-4,
+      "updated": "2017-04-27T08:53:46.108Z",
+      "price:billingPeriodCode": "MIN",
+      "name": "2/4 GB/10 GB [CH] (Medium)",
+      "resource:class": "standard",
+      "created": "2017-04-27T08:53:46.108Z",
+      "price:billingUnitCode": "HUR",
+      "price:freeUnits": 0,
+      "price:unitCode": "C62",
+      "resource:diskType": "SSD",
+      "id": "service-offer/29c8fb1b-671e-497e-bb6a-f907b7502463",
+      "resource:country": "CH",
+      "resource:platform": "cloudstack",
+      "resource:ram": 4096,
+      "acl": {
+        "owner": {
+          "type": "ROLE",
+          "principal": "ADMIN"
+        },
+        "rules": [
+          {
+            "principal": "USER",
+            "type": "ROLE",
+            "right": "VIEW"
+          },
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "edit",
+          "href": "service-offer/29c8fb1b-671e-497e-bb6a-f907b7502463"
+        },
+        {
+          "rel": "delete",
+          "href": "service-offer/29c8fb1b-671e-497e-bb6a-f907b7502463"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/ServiceOffer",
+      "resource:disk": 10,
+      "exoscale:instanceType": "Medium",
+      "resource:type": "VM"
+    },
+    {
+      "connector": {
+        "href": "exoscale-ch-gva"
+      },
+      "description": "VM (standard) with 4 vCPU, 8 GB GB RAM,10 GB GB disk [CH] (Large)",
+      "price:currency": "EUR",
+      "resource:vcpu": 4,
+      "price:unitCost": 0.0013916666666666667,
+      "updated": "2017-04-27T08:53:46.090Z",
+      "price:billingPeriodCode": "MIN",
+      "name": "4/8 GB/10 GB [CH] (Large)",
+      "resource:class": "standard",
+      "created": "2017-04-27T08:53:46.090Z",
+      "price:billingUnitCode": "HUR",
+      "price:freeUnits": 0,
+      "price:unitCode": "C62",
+      "resource:diskType": "SSD",
+      "id": "service-offer/40175bd4-52bb-4811-9c9c-2e7f90c66d84",
+      "resource:country": "CH",
+      "resource:platform": "cloudstack",
+      "resource:ram": 8192,
+      "acl": {
+        "owner": {
+          "type": "ROLE",
+          "principal": "ADMIN"
+        },
+        "rules": [
+          {
+            "principal": "USER",
+            "type": "ROLE",
+            "right": "VIEW"
+          },
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "edit",
+          "href": "service-offer/40175bd4-52bb-4811-9c9c-2e7f90c66d84"
+        },
+        {
+          "rel": "delete",
+          "href": "service-offer/40175bd4-52bb-4811-9c9c-2e7f90c66d84"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/ServiceOffer",
+      "resource:disk": 10,
+      "exoscale:instanceType": "Large",
+      "resource:type": "VM"
+    },
+    {
+      "connector": {
+        "href": "exoscale-ch-gva"
+      },
+      "description": "VM (standard) with 2 vCPU, 2 GB GB RAM,10 GB GB disk [CH] (Small)",
+      "price:currency": "EUR",
+      "resource:vcpu": 2,
+      "price:unitCost": 3.6333333333333335E-4,
+      "updated": "2017-04-27T08:53:46.116Z",
+      "price:billingPeriodCode": "MIN",
+      "name": "2/2 GB/10 GB [CH] (Small)",
+      "resource:class": "standard",
+      "created": "2017-04-27T08:53:46.116Z",
+      "price:billingUnitCode": "HUR",
+      "price:freeUnits": 0,
+      "price:unitCode": "C62",
+      "resource:diskType": "SSD",
+      "id": "service-offer/52f42e01-098f-44b7-968d-a450a237429a",
+      "resource:country": "CH",
+      "resource:platform": "cloudstack",
+      "resource:ram": 2048,
+      "acl": {
+        "owner": {
+          "type": "ROLE",
+          "principal": "ADMIN"
+        },
+        "rules": [
+          {
+            "principal": "USER",
+            "type": "ROLE",
+            "right": "VIEW"
+          },
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "edit",
+          "href": "service-offer/52f42e01-098f-44b7-968d-a450a237429a"
+        },
+        {
+          "rel": "delete",
+          "href": "service-offer/52f42e01-098f-44b7-968d-a450a237429a"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/ServiceOffer",
+      "resource:disk": 10,
+      "exoscale:instanceType": "Small",
+      "resource:type": "VM"
+    },
+    {
+      "connector": {
+        "href": "exoscale-ch-gva"
+      },
+      "description": "VM (standard) with 8 vCPU, 32 GB GB RAM,10 GB GB disk [CH] (Huge)",
+      "price:currency": "EUR",
+      "resource:vcpu": 8,
+      "price:unitCost": 0.005503333333333333,
+      "updated": "2017-04-27T08:53:46.122Z",
+      "price:billingPeriodCode": "MIN",
+      "name": "8/32 GB/10 GB [CH] (Huge)",
+      "resource:class": "standard",
+      "created": "2017-04-27T08:53:46.122Z",
+      "price:billingUnitCode": "HUR",
+      "price:freeUnits": 0,
+      "price:unitCode": "C62",
+      "resource:diskType": "SSD",
+      "id": "service-offer/d5b73eb7-9eac-4847-b44a-925a968ad3ac",
+      "resource:country": "CH",
+      "resource:platform": "cloudstack",
+      "resource:ram": 32768,
+      "acl": {
+        "owner": {
+          "type": "ROLE",
+          "principal": "ADMIN"
+        },
+        "rules": [
+          {
+            "principal": "USER",
+            "type": "ROLE",
+            "right": "VIEW"
+          },
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "edit",
+          "href": "service-offer/d5b73eb7-9eac-4847-b44a-925a968ad3ac"
+        },
+        {
+          "rel": "delete",
+          "href": "service-offer/d5b73eb7-9eac-4847-b44a-925a968ad3ac"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/ServiceOffer",
+      "resource:disk": 10,
+      "exoscale:instanceType": "Huge",
+      "resource:type": "VM"
+    },
+    {
+      "connector": {
+        "href": "exoscale-ch-gva"
+      },
+      "description": "VM (standard) with 8 vCPU, 32 GB GB RAM,10 GB GB disk [CH] (Huge)",
+      "price:currency": "EUR",
+      "resource:vcpu": 8,
+      "price:unitCost": 0.005503333333333333,
+      "updated": "2017-04-27T08:53:46.070Z",
+      "price:billingPeriodCode": "MIN",
+      "name": "8/32 GB/10 GB [CH] (Huge)",
+      "resource:class": "standard",
+      "created": "2017-04-27T08:53:46.070Z",
+      "price:billingUnitCode": "HUR",
+      "price:freeUnits": 0,
+      "price:unitCode": "C62",
+      "resource:diskType": "SSD",
+      "id": "service-offer/1a7f87c2-25cf-47df-806c-1852a8eadf08",
+      "resource:country": "CH",
+      "resource:platform": "cloudstack",
+      "resource:ram": 32768,
+      "acl": {
+        "owner": {
+          "type": "ROLE",
+          "principal": "ADMIN"
+        },
+        "rules": [
+          {
+            "principal": "USER",
+            "type": "ROLE",
+            "right": "VIEW"
+          },
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "edit",
+          "href": "service-offer/1a7f87c2-25cf-47df-806c-1852a8eadf08"
+        },
+        {
+          "rel": "delete",
+          "href": "service-offer/1a7f87c2-25cf-47df-806c-1852a8eadf08"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/ServiceOffer",
+      "resource:disk": 10,
+      "exoscale:instanceType": "Huge",
+      "resource:type": "VM"
+    }
+  ],
+}

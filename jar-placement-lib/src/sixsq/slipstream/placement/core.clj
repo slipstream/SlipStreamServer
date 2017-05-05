@@ -27,17 +27,29 @@
   (or (every? nil? [s1 s2])
       (and (not-any? nil? [s1 s2]) (.equalsIgnoreCase s1 s2))))
 
-(defn- in-description
-  [attribute service-offer]
-  (get-in service-offer [:schema-org:descriptionVector attribute]))
+(defn- denamespace
+       [kw]
+       (let [tokens (str/split (name kw) #":")
+             cnt (count tokens)]
+            (cond
+              (= cnt 2) (keyword (second tokens))
+              (= cnt 1) (keyword (first tokens))
+              :else (keyword (str/join (rest tokens))))))
 
-(def cpu (partial in-description :schema-org:vcpu))
-(def ram (partial in-description :schema-org:ram))
-(def disk (partial in-description :schema-org:disk))
+(defn denamespace-keys
+      [m]
+      (if (map? m)
+        (into {} (map (fn [[k v]] [(denamespace k) (denamespace-keys v)]) m))
+        m))
+
+(defn cpu [service-offer] (-> service-offer :resource:vcpu))
+(defn ram [service-offer] (-> service-offer :resource:ram))
+(defn disk [service-offer] (-> service-offer :resource:disk))
 
 (defn- instance-type
   [service-offer]
-  (:schema-org:name service-offer))
+       (-> (denamespace-keys service-offer)
+           (:instanceType)))
 
 (defn- connector-href
   [service-offer]
@@ -55,7 +67,7 @@
 
 (defn- EUR-or-unpriced?
   [service-offer]
-  (let [price-currency (:schema-org:priceCurrency service-offer)]
+  (let [price-currency (:price:currency service-offer)]
     (or (nil? price-currency) (= "EUR" price-currency))))
 
 (defn- smallest-service-offer-EUR
@@ -91,28 +103,13 @@
             (log/error "retry failed; sending nil result")
             nil))))))
 
-(defn- denamespace
-  [kw]
-  (let [tokens (str/split (name kw) #":")
-        cnt (count tokens)]
-    (cond
-      (= cnt 2) (keyword (second tokens))
-      (= cnt 1) (keyword (first tokens))
-      :else (keyword (str/join (rest tokens))))))
-
-(defn denamespace-keys
-  [m]
-  (if (map? m)
-    (into {} (map (fn [[k v]] [(denamespace k) (denamespace-keys v)]) m))
-    m))
-
 (defn- priceable?
   [service-offer]
   (every? (set (keys service-offer))
-          [:schema-org:billingTimeCode
-           :schema-org:price
-           :schema-org:priceCurrency
-           :schema-org:unitCode]))
+          [:price:billingUnitCode
+           :price:unitCost
+           :price:currency
+           :price:unitCode]))
 
 (defn- compute-price
   [service-offer timecode]
@@ -197,7 +194,11 @@
 (defn- connector-same-instance-type
   [[connector-name instance-type]]
   (when instance-type
-    (format "connector/href='%s' and schema-org:name='%s'" (name connector-name) instance-type)))
+        (let [cn (name connector-name)
+              it  (first (str/split cn #"-"))]
+             (format "connector/href='%s' and '%s':instanceType='%s'" cn it instance-type)
+             )
+    ))
 
 (defn- clause-connectors-same-instance-type
   [component]
@@ -207,7 +208,7 @@
   [component]
   (when (every? #(% component) [:cpu.nb :ram.GB :disk.GB])
     (format
-      "(schema-org:descriptionVector/schema-org:vcpu>=%s and schema-org:descriptionVector/schema-org:ram>=%s and schema-org:descriptionVector/schema-org:disk>=%s)"
+      "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s)"
       (:cpu.nb component)
       (:ram.GB component)
       (:disk.GB component))))
@@ -229,7 +230,7 @@
 (defn prefer-exact-instance-type
   [connector-instance-types [connector-name service-offers]]
   (let [favorite (filter #(= (get connector-instance-types (keyword connector-name))
-                             (:schema-org:name %)) service-offers)]
+                             (:instanceType (denamespace-keys %))) service-offers)]
     (if-not (empty? favorite)
       favorite
       service-offers)))
@@ -238,7 +239,7 @@
   [component connector-names]
   (let [cimi-filter (cimi-and [(clause-connectors connector-names)
                                (:placement-policy component)
-                               (clause-component component)])
+                               (clause-cpu-ram-disk component)])
         _ (log/debug (str "cimi filter: '" cimi-filter "'"))
         service-offers (fetch-service-offers-rescue-reauthenticate cimi-filter)
         _ (log/debug (str "number of matching service offers:" (count service-offers)))
