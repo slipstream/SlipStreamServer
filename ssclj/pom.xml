@@ -4,7 +4,7 @@
 
   <groupId>com.sixsq.slipstream</groupId>
   <artifactId>SlipStreamCljResources</artifactId>
-  <version>3.27-SNAPSHOT</version>
+  <version>3.27</version>
   <name>SlipStreamServer/ssclj</name>
 
   <packaging>pom</packaging>
@@ -12,7 +12,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.27-SNAPSHOT</version>
+    <version>3.27</version>
   </parent>
 
   <modules>
