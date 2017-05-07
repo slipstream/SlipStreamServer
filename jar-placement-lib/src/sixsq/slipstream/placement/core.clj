@@ -132,7 +132,8 @@
        :cpu           (cpu service-offer)
        :ram           (ram service-offer)
        :disk          (disk service-offer)
-       :instance_type (instance-type service-offer)})))
+       :instance_type (instance-type service-offer)
+       :service-offer service-offer})))
 
 (defn number-or-nil
   "If the value is a non-negative number, then the number is returned.  Otherwise
