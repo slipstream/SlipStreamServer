@@ -2,7 +2,9 @@
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
+    [clojure.string :as str]
     [peridot.core :refer :all]
+    [ring.util.codec :as codec]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
     [com.sixsq.slipstream.ssclj.resources.session-internal :as si]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
@@ -15,10 +17,7 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.auth.utils.sign :as sg]
-    [ring.util.codec :as codec]
-    [clojure.string :as str]
-    [com.sixsq.slipstream.auth.cookies :as cookies]))
+    [com.sixsq.slipstream.auth.utils.sign :as sign]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
@@ -136,7 +135,10 @@
                      (ltu/body->edn)
                      (ltu/is-status 201))
             id (get-in resp [:response :body :resource-id])
-            cookie (serialize-cookie-value (get-in resp [:response :cookies "com.sixsq.slipstream.cookie"]))
+
+            token (get-in resp [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+            claims (if token (sign/unsign-claims token) {})
+
             uri (-> resp
                     (ltu/location))
             abs-uri (str p/service-context (u/de-camelcase uri))
@@ -154,11 +156,10 @@
             abs-uri2 (str p/service-context (u/de-camelcase uri2))]
 
         ;; check claims in cookie
-        (let [claims (cookies/extract-claims cookie)]
-          (is (= "user" (:username claims)))
-          (is (= (str/join " " ["USER" "ANON" uri]) (:roles claims))) ;; uri is also session id
-          (is (= uri (:session claims)))                    ;; uri is also session id
-          (is (not (nil? (:exp claims)))))
+        (is (= "user" (:username claims)))
+        (is (= (str/join " " ["USER" "ANON" uri]) (:roles claims))) ;; uri is also session id
+        (is (= uri (:session claims)))                      ;; uri is also session id
+        (is (not (nil? (:exp claims))))
 
         ;; user should not be able to see session without session role
         (-> session-user
