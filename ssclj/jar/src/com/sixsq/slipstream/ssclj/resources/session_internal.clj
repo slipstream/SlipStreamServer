@@ -45,18 +45,20 @@
 ;; transform template into session resource
 ;;
 
-(defn create-claims [{:keys [username] :as credentials} headers session]
-  (let [server (:slipstream-ssl-server-hostname headers)]
+(defn create-claims [username headers session-id client-ip]
+  (let [server (:slipstream-ssl-server-name headers)]
     (cond-> (auth-internal/create-claims username)
             server (assoc :server server)
-            session (assoc :session session))))
+            session-id (assoc :session session-id)
+            session-id (update :roles #(str % " " session-id))
+            client-ip (assoc :clientIP client-ip))))
 
 (defmethod p/tpl->session authn-method
   [resource {:keys [headers] :as request}]
-  (let [credentials (select-keys resource #{:username :password})]
+  (let [{:keys [username] :as credentials} (select-keys resource #{:username :password})]
     (if (auth-internal/valid? credentials)
       (let [session (sutils/create-session credentials headers authn-method)
-            claims (create-claims credentials headers session)
+            claims (create-claims username headers (:id session) (:clientIP session))
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)
             session (assoc session :expiry expires)]

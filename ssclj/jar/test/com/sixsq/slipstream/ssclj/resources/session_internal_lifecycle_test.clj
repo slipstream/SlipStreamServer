@@ -4,6 +4,7 @@
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
+    [com.sixsq.slipstream.ssclj.resources.session-internal :as si]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as internal]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -13,7 +14,11 @@
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.auth.utils.sign :as sg]
+    [ring.util.codec :as codec]
+    [clojure.string :as str]
+    [com.sixsq.slipstream.auth.cookies :as cookies]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
@@ -30,6 +35,11 @@
                    :created :updated :name :description}]
     (into {} (remove #(unwanted (first %)) m))))
 
+(defn serialize-cookie-value
+  "replaces the map cookie value with a serialized string"
+  [{:keys [value] :as cookie}]
+  (assoc cookie :value (codec/form-encode value)))
+
 (defn mock-login-valid?
   "Will return true if the username and password are identical;
    false otherwise.  Avoids having to start a real database and
@@ -42,9 +52,27 @@
    'root' the 'ADMIN', 'USER', and 'ANON' roles will be added. F
    For all others, the 'USER' and 'ANON' roles will be added."
   [username]
-  (case username
-    "root" ["ADMIN" "USER" "ANON"]
-    ["USER" "ANON"]))
+  (str/join " " (case username
+                  "root" ["ADMIN" "USER" "ANON"]
+                  ["USER" "ANON"])))
+
+(deftest check-create-claims
+  (with-redefs [db/find-roles-for-username mock-roles]
+    (let [username "root"
+          server "nuv.la"
+          headers {:slipstream-ssl-server-name server}
+          session-id "session/72e9f3d8-805a-421b-b3df-86f1af294233"
+          client-ip "127.0.0.1"]
+      (is (= {:username username
+              :session  session-id
+              :roles    (str/join " " ["ADMIN" "USER" "ANON" session-id])
+              :server   server
+              :clientIP client-ip}
+             (si/create-claims username headers session-id client-ip)))
+      (is (= {:username "not-root"
+              :roles    (str/join " " ["USER" "ANON"])
+              :server   server}
+             (si/create-claims "not-root" headers nil nil))))))
 
 (deftest lifecycle
 
@@ -54,14 +82,25 @@
     ;; check that the mocking is working correctly
     (is (auth-internal/valid? {:username "user" :password "user"}))
     (is (not (auth-internal/valid? {:username "user" :password "BAD"})))
-    (is (= ["ADMIN" "USER" "ANON"] (db/find-roles-for-username "root")))
-    (is (= ["USER" "ANON"] (db/find-roles-for-username "user")))
+    (is (= (str/join " " ["ADMIN" "USER" "ANON"]) (db/find-roles-for-username "root")))
+    (is (= (str/join " " ["USER" "ANON"]) (db/find-roles-for-username "user")))
 
     ;; get session template so that session resources can be tested
-    (let [href (str ct/resource-url "/" internal/authn-method)
+    (let [session-anon (-> (session (ring-app))
+                           (content-type "application/json")
+                           (header authn-info-header "unknown ANON"))
+
+          session-user (-> (session (ring-app))
+                           (content-type "application/json")
+                           (header authn-info-header "user USER"))
+
+          session-admin (-> (session (ring-app))
+                            (content-type "application/json")
+                            (header authn-info-header "root ADMIN"))
+
+          href (str ct/resource-url "/" internal/authn-method)
           template-url (str p/service-context ct/resource-url "/" internal/authn-method)
-          resp (-> (session (ring-app))
-                   (content-type "application/json")
+          resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)
                    (ltu/is-status 200))
@@ -74,16 +113,14 @@
           invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
-      (-> (session (ring-app))
+      (-> session-anon
           (request base-uri)
           (ltu/body->edn)
           (ltu/is-status 200)
           (ltu/is-count zero?))
 
       ;; unauthorized create must return a 403 response
-      (-> (session (ring-app))
-          (content-type "application/json")
-          (header authn-info-header "unknown ANON")
+      (-> session-anon
           (request base-uri
                    :request-method :post
                    :body (json/write-str unauthorized-create))
@@ -91,9 +128,7 @@
           (ltu/is-status 403))
 
       ;; anonymous create must succeed (normal create and href create)
-      (let [resp (-> (session (ring-app))
-                     (content-type "application/json")
-                     (header authn-info-header "unknown ANON")
+      (let [resp (-> session-anon
                      (request base-uri
                               :request-method :post
                               :body (json/write-str valid-create))
@@ -101,13 +136,12 @@
                      (ltu/body->edn)
                      (ltu/is-status 201))
             id (get-in resp [:response :body :resource-id])
+            cookie (serialize-cookie-value (get-in resp [:response :cookies "com.sixsq.slipstream.cookie"]))
             uri (-> resp
                     (ltu/location))
             abs-uri (str p/service-context (u/de-camelcase uri))
 
-            resp (-> (session (ring-app))
-                     (content-type "application/json")
-                     (header authn-info-header "unknown ANON")
+            resp (-> session-anon
                      (request base-uri
                               :request-method :post
                               :body (json/write-str href-create))
@@ -119,36 +153,39 @@
                      (ltu/location))
             abs-uri2 (str p/service-context (u/de-camelcase uri2))]
 
+        ;; check claims in cookie
+        (let [claims (cookies/extract-claims cookie)]
+          (is (= "user" (:username claims)))
+          (is (= (str/join " " ["USER" "ANON" uri]) (:roles claims))) ;; uri is also session id
+          (is (= uri (:session claims)))                    ;; uri is also session id
+          (is (not (nil? (:exp claims)))))
+
         ;; user should not be able to see session without session role
-        (-> (session (ring-app))
-            (header authn-info-header "user USER")
+        (-> session-user
             (request abs-uri)
             (ltu/body->edn)
             (ltu/is-status 403))
-        (-> (session (ring-app))
-            (header authn-info-header "user USER")
+        (-> session-user
             (request abs-uri2)
             (ltu/body->edn)
             (ltu/is-status 403))
 
         ;; anonymous query should succeed but still have no entries
-        (-> (session (ring-app))
+        (-> session-anon
             (request base-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-count zero?))
 
         ;; user query should succeed but have no entries because of missing session role
-        (-> (session (ring-app))
-            (header authn-info-header "user USER")
+        (-> session-user
             (request base-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-count zero?))
 
         ;; admin query should succeed, but see no sessions without the correct session role
-        (-> (session (ring-app))
-            (header authn-info-header "root ADMIN")
+        (-> session-admin
             (request base-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
@@ -203,8 +240,7 @@
             (ltu/is-status 200))
 
         ;; create with invalid template fails
-        (-> (session (ring-app))
-            (content-type "application/json")
+        (-> session-anon
             (request base-uri
                      :request-method :post
                      :body (json/write-str invalid-create))
@@ -215,8 +251,7 @@
       (let [create-req (-> valid-create
                            (assoc-in [:sessionTemplate :username] "root")
                            (assoc-in [:sessionTemplate :password] "root"))
-            resp (-> (session (ring-app))
-                     (content-type "application/json")
+            resp (-> session-anon
                      (request base-uri
                               :request-method :post
                               :body (json/write-str create-req))
@@ -247,9 +282,7 @@
             (ltu/is-status 200)))
 
       ;; admin create with invalid template fails
-      (-> (session (ring-app))
-          (content-type "application/json")
-          (header authn-info-header "root ADMIN")
+      (-> session-admin
           (request base-uri
                    :request-method :post
                    :body (json/write-str invalid-create))

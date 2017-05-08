@@ -38,7 +38,7 @@
    the client's IP address, and the virtual host being used. NOTE: The expiry
    is not included and MUST be added afterwards."
   [{:keys [username]} headers authn-method]
-  (let [server (:slipstream-ssl-server-hostname headers)
+  (let [server (:slipstream-ssl-server-name headers)
         client-ip (:x-real-ip headers)]
     (crud/new-identifier
       (cond-> {:method   authn-method
