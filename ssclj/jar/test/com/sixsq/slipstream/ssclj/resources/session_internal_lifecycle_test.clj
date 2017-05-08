@@ -4,7 +4,6 @@
     [clojure.data.json :as json]
     [clojure.string :as str]
     [peridot.core :refer :all]
-    [ring.util.codec :as codec]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
     [com.sixsq.slipstream.ssclj.resources.session-internal :as si]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
@@ -33,11 +32,6 @@
   (let [unwanted #{:id :resourceURI :acl :operations
                    :created :updated :name :description}]
     (into {} (remove #(unwanted (first %)) m))))
-
-(defn serialize-cookie-value
-  "replaces the map cookie value with a serialized string"
-  [{:keys [value] :as cookie}]
-  (assoc cookie :value (codec/form-encode value)))
 
 (defn mock-login-valid?
   "Will return true if the username and password are identical;
