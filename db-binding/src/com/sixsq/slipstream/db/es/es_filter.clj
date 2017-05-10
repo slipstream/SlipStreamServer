@@ -6,6 +6,14 @@
   (:import
     [org.elasticsearch.index.query QueryBuilders]))
 
+(defn must-exist-query
+  [^String term]
+  (QueryBuilders/existsQuery term))
+
+(defn must-not-exist
+  [^String term]
+  (.mustNot (QueryBuilders/boolQuery) (must-exist-query term)))
+
 (defn term-query
   [^String term ^Object value]
   (QueryBuilders/termQuery term value))
@@ -73,31 +81,37 @@
 (defmethod convert :DateValue [[_ ^String s]]
   [:Value (uu/to-time-or-date s)])
 
+(defmethod convert :NullValue [[_ ^String s]]
+  [:Value nil])
+
 (defmethod convert :Comp [v]
   (let [args (rest v)]
     (if (= 1 (count args))
       (first args)                                          ;; (a=1 and b=2) case
-      (let [{:keys [Attribute Op Value] :as m} (into {} args)
+      (let [{:keys [Attribute Op EqOp RelOp Value] :as m} (into {} args)
+            Op (or Op EqOp RelOp)
             order (ffirst args)]
         (case [Op order]
-          ["=" :Attribute] (term-query Attribute Value)
+          ["=" :Attribute] (if (nil? Value) (must-not-exist Attribute) (term-query Attribute Value))
+          ["!=" :Attribute] (if (nil? Value) (must-exist-query Attribute) (not-equal-query Attribute Value))
+
           [">=" :Attribute] (range-ge-query Attribute Value)
           [">" :Attribute] (range-gt-query Attribute Value)
           ["<=" :Attribute] (range-le-query Attribute Value)
           ["<" :Attribute] (range-lt-query Attribute Value)
-          ["!=" :Attribute] (not-equal-query Attribute Value)
 
-          ["=" :Value] (term-query Attribute Value)
+          ["=" :Value] (if (nil? Value) (must-not-exist Attribute) (term-query Attribute Value))
+          ["!=" :Value] (if (nil? Value) (must-exist-query Attribute) (not-equal-query Attribute Value))
+
           [">=" :Value] (range-le-query Attribute Value)
           [">" :Value] (range-lt-query Attribute Value)
           ["<=" :Value] (range-ge-query Attribute Value)
           ["<" :Value] (range-gt-query Attribute Value)
-          ["!=" :Value] (not-equal-query Attribute Value)
 
           m)))))
 
-(defmethod convert :PropExpr [[_ Prop Op Value]]
-  [[:Attribute (str "property/" (second Prop))] Op Value])
+(defmethod convert :PropExpr [[_ Prop EqOp Value]]
+  [[:Attribute (str "property/" (second Prop))] EqOp Value])
 
 (defmethod convert :AndExpr [v]
   (let [args (rest v)]

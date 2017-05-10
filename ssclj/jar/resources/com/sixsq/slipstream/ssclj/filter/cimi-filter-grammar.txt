@@ -3,13 +3,15 @@
             time to increase exponentially with the number of terms *)
 Filter          ::= AndExpr | AndExpr <'or'> Filter
 AndExpr         ::= Comp | Comp <'and'> AndExpr
-Comp            ::= Attribute Op Value
-                    | Value Op Attribute
+Comp            ::= Attribute EqOp Value
+                    | Value EqOp Attribute
+                    | Attribute RelOp OrdinalValue
+                    | OrdinalValue RelOp Attribute
                     | PropExpr
                     | WS <'('> Filter <')'> WS
-<EqOp>          ::= '=' | '!='
-<RelOp>         ::= '<' | '<=' | '>=' | '>'
-Op              ::= EqOp | RelOp
+
+EqOp            ::= '=' | '!='
+RelOp           ::= '<' | '<=' | '>=' | '>'
 
 Attribute       ::= WS NamespaceTerm ('/' NamespaceTerm)* WS
 
@@ -23,7 +25,7 @@ DateValue       ::= WS #'\d+-\d+(-\d+)?(T\d+:\d+:\d+(\.\d+)?(Z|[+-]\d+:\d+))?' W
 <StringValue>   ::= WS (DoubleQuoteString | SingleQuoteString) WS
 BoolValue       ::= WS ('true' | 'false') WS
 NullValue       ::= WS 'null' WS
-PropExpr        ::= WS <'property['> StringValue <']'> WS Op StringValue
+PropExpr        ::= WS <'property['> StringValue <']'> WS EqOp (StringValue | NullValue)
 
 <WS>            ::= <#'\s*'>
 
