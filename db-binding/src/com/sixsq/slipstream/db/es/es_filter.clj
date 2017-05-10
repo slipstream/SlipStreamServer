@@ -6,6 +6,10 @@
   (:import
     [org.elasticsearch.index.query QueryBuilders]))
 
+(defn prefix-query
+  [^String term ^String value]
+  (QueryBuilders/prefixQuery term value))
+
 (defn must-exist-query
   [^String term]
   (QueryBuilders/existsQuery term))
@@ -88,12 +92,14 @@
   (let [args (rest v)]
     (if (= 1 (count args))
       (first args)                                          ;; (a=1 and b=2) case
-      (let [{:keys [Attribute Op EqOp RelOp Value] :as m} (into {} args)
-            Op (or Op EqOp RelOp)
+      (let [{:keys [Attribute EqOp RelOp PrefixOp Value] :as m} (into {} args)
+            Op (or EqOp RelOp PrefixOp)
             order (ffirst args)]
         (case [Op order]
           ["=" :Attribute] (if (nil? Value) (must-not-exist Attribute) (term-query Attribute Value))
           ["!=" :Attribute] (if (nil? Value) (must-exist-query Attribute) (not-equal-query Attribute Value))
+
+          ["^=" :Attribute] (prefix-query Attribute Value)
 
           [">=" :Attribute] (range-ge-query Attribute Value)
           [">" :Attribute] (range-gt-query Attribute Value)
@@ -102,6 +108,8 @@
 
           ["=" :Value] (if (nil? Value) (must-not-exist Attribute) (term-query Attribute Value))
           ["!=" :Value] (if (nil? Value) (must-exist-query Attribute) (not-equal-query Attribute Value))
+
+          ["^=" :Value] (prefix-query Attribute Value)
 
           [">=" :Value] (range-le-query Attribute Value)
           [">" :Value] (range-lt-query Attribute Value)

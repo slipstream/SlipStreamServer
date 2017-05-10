@@ -7,9 +7,12 @@ Comp            ::= Attribute EqOp Value
                     | Value EqOp Attribute
                     | Attribute RelOp OrdinalValue
                     | OrdinalValue RelOp Attribute
+                    | Attribute PrefixOp StringValue
+                    | StringValue PrefixOp Attribute
                     | PropExpr
                     | WS <'('> Filter <')'> WS
 
+PrefixOp        ::= '^='
 EqOp            ::= '=' | '!='
 RelOp           ::= '<' | '<=' | '>=' | '>'
 

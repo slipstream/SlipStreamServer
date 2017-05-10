@@ -89,7 +89,11 @@
              "alpha!=null"
              "null!=alpha"
              "property['beta']=null"
-             "property['beta']!=null"))
+             "property['beta']!=null"
+             "alpha^='abc'"
+             "alpha^=\"abc\""
+             "'abc'^=alpha"
+             "\"abc\"^=alpha"))
 
 ;; invalid filters
 (deftest check-invalid-filters
@@ -104,7 +108,9 @@
              "property[beta]='4'"
              "property['beta']=4"
              "property['beta']<'4'"
-             "4=property['beta']"))
+             "4=property['beta']"
+             "alpha^=3"
+             "alpha^=null"))
 
 ;; valid attributes
 (deftest check-valid-attributes

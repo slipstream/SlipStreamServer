@@ -138,6 +138,12 @@
   (are-counts nb-events "?$filter=(unknown=null)and(type='state')")
   (are-counts nb-events "?$filter=(content/resource/href!=null)and(type='state')"))
 
+(deftest filter-prefix
+  (are-counts nb-events "?$filter=type^='st'")
+  (are-counts nb-events "?$filter=content/resource/href^='run/'")
+  (are-counts 0 "?$filter=type^='stXXX'")
+  (are-counts 0 "?$filter=content/resource/href^='XXX/'"))
+
 (deftest filter-wrong-param
   (-> (exec-request base-uri "?$filter=type='missing end quote" "joe")
       (ltu/is-status 400)
