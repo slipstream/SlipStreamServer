@@ -7,17 +7,22 @@ Comp            ::= Attribute Op Value
                     | Value Op Attribute
                     | PropExpr
                     | WS <'('> Filter <')'> WS
-Op              ::= '<' | '<=' | '=' | '>=' | '>' | '!='
+<EqOp>          ::= '=' | '!='
+<RelOp>         ::= '<' | '<=' | '>=' | '>'
+Op              ::= EqOp | RelOp
 
 Attribute       ::= WS NamespaceTerm ('/' NamespaceTerm)* WS
 
 <NamespaceTerm> ::= (Term ':' Term) | Term
 <Term>          ::= #'([a-zA-Z][\w-]*[\w]+)|[a-zA-Z]'
-<Value>         ::= IntValue | DateValue | StringValue | BoolValue
+<OrdinalValue>  ::= IntValue | DateValue | StringValue
+<NominalValue>  ::= BoolValue | NullValue
+<Value>         ::= OrdinalValue | NominalValue
 IntValue        ::= WS #'\d+' WS
 DateValue       ::= WS #'\d+-\d+(-\d+)?(T\d+:\d+:\d+(\.\d+)?(Z|[+-]\d+:\d+))?' WS
 <StringValue>   ::= WS (DoubleQuoteString | SingleQuoteString) WS
 BoolValue       ::= WS ('true' | 'false') WS
+NullValue       ::= WS 'null' WS
 PropExpr        ::= WS <'property['> StringValue <']'> WS Op StringValue
 
 <WS>            ::= <#'\s*'>
