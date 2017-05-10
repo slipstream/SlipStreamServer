@@ -138,7 +138,7 @@
               <goal>unpack</goal>
             </goals>
             <configuration>
-              <outputDirectory>target/webui</outputDirectory>
+              <outputDirectory>target</outputDirectory>
               <artifactItems>
                 <artifactItem>
                   <groupId>sixsq.slipstream</groupId>
