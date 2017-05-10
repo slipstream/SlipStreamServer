@@ -130,6 +130,14 @@
   (are-counts 0 "?$filter=type='state'&$filter=type='XXX'")
   (are-counts 1 "?$filter=type='state'&$filter=content/resource/href='run/3'"))
 
+(deftest filter-nulls
+  (are-counts nb-events "?$filter=type!=null")
+  (are-counts nb-events "?$filter=null!=type")
+  (are-counts 0 "?$filter=type=null")
+  (are-counts 0 "?$filter=null=type")
+  (are-counts nb-events "?$filter=(unknown=null)and(type='state')")
+  (are-counts nb-events "?$filter=(content/resource/href!=null)and(type='state')"))
+
 (deftest filter-wrong-param
   (-> (exec-request base-uri "?$filter=type='missing end quote" "joe")
       (ltu/is-status 400)
