@@ -75,7 +75,6 @@
              "(3=alpha)"
              "property['beta']='4'"
              "property['beta']!='4'"
-             "property['beta']<'4'"
              "alpha=3 and beta=4"
              "alpha=3 or beta=4"
              "alpha=3 and beta=4 or gamma=5 and delta=6"
@@ -84,7 +83,17 @@
              "b='b-0'"
              "'b0'=b"
              "'b-0'=b"
-             "cloud-vm-instanceid='exo:123-456'"))
+             "cloud-vm-instanceid='exo:123-456'"
+             "alpha=null"
+             "null=alpha"
+             "alpha!=null"
+             "null!=alpha"
+             "property['beta']=null"
+             "property['beta']!=null"
+             "alpha^='abc'"
+             "alpha^=\"abc\""
+             "'abc'^=alpha"
+             "\"abc\"^=alpha"))
 
 ;; invalid filters
 (deftest check-invalid-filters
@@ -94,9 +103,14 @@
              "alpha=beta"
              "alpha=3.2"
              "alpha&&4"
+             "alpha>true"
+             "alpha>null"
              "property[beta]='4'"
              "property['beta']=4"
-             "4=property['beta']"))
+             "property['beta']<'4'"
+             "4=property['beta']"
+             "alpha^=3"
+             "alpha^=null"))
 
 ;; valid attributes
 (deftest check-valid-attributes
