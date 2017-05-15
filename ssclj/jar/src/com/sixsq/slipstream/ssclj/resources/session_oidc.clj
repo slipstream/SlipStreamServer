@@ -46,7 +46,7 @@
 ;;
 
 (defn throw-bad-client-config []
-  (log-util/log-and-throw 500 "missing client ID, base URL, or public key (::oidc-client-id, :oidc-base-url, :oidc-public-key) for OIDC authentication"))
+  (log-util/log-and-throw 500 "missing client ID, base URL, or public key (:oidc-client-id, :oidc-base-url, :oidc-public-key) for OIDC authentication"))
 
 (defn throw-missing-oidc-code []
   (log-util/log-and-throw 400 "OIDC authentication callback request does not contain required code"))
@@ -104,10 +104,10 @@
 
 ;; execute the "validate" callback to complete the GitHub authentication workflow
 (defmethod p/validate-callback authn-method
-  [resource {:keys [headers] :as request}]
+  [resource {:keys [headers base-uri] :as request}]
   (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-oidc/get-oidc-access-token oidc-client-id oidc-base-url code "UNUSED_REDIRECT")]
+      (if-let [access-token (auth-oidc/get-oidc-access-token oidc-client-id oidc-base-url code (sutils/validate-action-url base-uri (or (:id resource) "unknown-id")))]
         (try
           (let [claims (sign/unsign-claims access-token :oidc-public-key)
                 username (auth-oidc/login-name claims)
