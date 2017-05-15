@@ -241,7 +241,7 @@
                     (request (str validate-url "?code=BAD")
                              :request-method :get)
                     (ltu/body->edn)
-                    (ltu/message-matches #".*unable to retrieve or decrypt OIDC user information.*")
+                    (ltu/message-matches #".*OIDC token is missing name/preferred_name.*")
                     (ltu/is-status 400))
 
                 (let [ring-info (-> session-anon
