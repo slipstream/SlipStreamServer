@@ -57,6 +57,15 @@
 (defn throw-no-user-info []
   (log-util/log-and-throw 400 "unable to retrieve or decrypt OIDC user information"))
 
+(defn throw-no-username-or-email [username email]
+  (log-util/log-and-throw 400 (str "OIDC token is missing name/preferred_name (" username ") or email (" email ")")))
+
+(defn throw-no-matched-user [username email]
+  (log-util/log-and-throw 400 (str "Unable to match account to name/preferred_name (" username ") or email (" email ")")))
+
+(defn throw-invalid-access-code [msg]
+  (log-util/log-and-throw 400 (str "error when processing OIDC access token: " msg)))
+
 (defn oidc-client-info
   []
   (let [client-id (environ/env :oidc-client-id)
@@ -107,12 +116,12 @@
   [resource {:keys [headers base-uri] :as request}]
   (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-oidc/get-oidc-access-token oidc-client-id oidc-base-url code (sutils/validate-action-url base-uri (or (:id resource) "unknown-id")))]
+      (if-let [access-token (auth-oidc/get-oidc-access-token oidc-client-id oidc-base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
           (let [claims (sign/unsign-claims access-token :oidc-public-key)
                 username (auth-oidc/login-name claims)
                 email (:email claims)]
-            (if (and username email)
+            (if (or username email)
               (let [[matched-user _] (ex/match-external-user! :cyclone username email)]
                 (if matched-user
                   (let [session-id (sutils/extract-session-id (:uri request))
@@ -129,9 +138,10 @@
                         {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
                     (if (not= status 200)
                       resp
-                      (u/response-created session-id [(sutils/cookie-name session-id) cookie])))))
-              (throw-no-user-info)))
-          (catch Exception _
-            (throw-no-user-info)))
+                      (u/response-created session-id [(sutils/cookie-name session-id) cookie])))
+                  (throw-no-matched-user username email)))
+              (throw-no-username-or-email username email)))
+          (catch Exception e
+            (throw-invalid-access-code (str e))))
         (throw-no-access-token))
       (throw-missing-oidc-code))))
