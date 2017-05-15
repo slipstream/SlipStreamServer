@@ -28,7 +28,7 @@
 
 (def ^:const login-request-timeout (* 3 60))
 
-(def ^:const github-oath-endpoint "https://github.com/login/oauth/authorize?scope=user:email&client_id=%s&redirect_url=%s")
+(def ^:const github-oath-endpoint "https://github.com/login/oauth/authorize?scope=user:email&client_id=%s&redirect_uri=%s")
 
 ;;
 ;; schemas
