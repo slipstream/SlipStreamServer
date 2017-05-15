@@ -16,9 +16,13 @@
   ;;(str "slipstream." (str/replace resource-id "/" "."))
   "com.sixsq.slipstream.cookie")
 
+(defn validate-action-url-unencoded
+  [base-uri session-id]
+  (str base-uri session-id "/validate"))
+
 (defn validate-action-url
   [base-uri session-id]
-  (codec/url-encode (str base-uri session-id "/validate")))
+  (codec/url-encode (validate-action-url-unencoded base-uri session-id)))
 
 (defn extract-session-id
   "Extracts the session identifier from a given URL."
