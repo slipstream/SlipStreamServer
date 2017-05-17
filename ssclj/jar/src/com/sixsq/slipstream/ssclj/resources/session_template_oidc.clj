@@ -25,7 +25,7 @@
                         :category    "general"
                         :description "Redirect URI"
                         :type        "string"
-                        :mandatory   true
+                        :mandatory   false
                         :readOnly    false
                         :order       1}}))
 
