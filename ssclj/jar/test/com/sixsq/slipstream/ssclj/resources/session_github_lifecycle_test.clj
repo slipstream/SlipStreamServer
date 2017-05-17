@@ -56,7 +56,8 @@
                    (ltu/body->edn)
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
-          valid-create {:sessionTemplate (strip-unwanted-attrs template)}
+          valid-create {:sessionTemplate (-> (strip-unwanted-attrs template)
+                                             (assoc :redirectURI "https://example.com/webui"))}
           href-create {:sessionTemplate {:href href}}
           invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
 
