@@ -93,7 +93,7 @@
                                   :request-method :post
                                   :body (json/write-str valid-create))
                          (ltu/body->edn)
-                         (ltu/is-status 307))
+                         (ltu/is-status 303))
                 id (get-in resp [:response :body :resource-id])
                 uri (-> resp
                         (ltu/location))
@@ -104,7 +104,7 @@
                                   :request-method :post
                                   :body (json/write-str href-create))
                          (ltu/body->edn)
-                         (ltu/is-status 307))
+                         (ltu/is-status 303))
                 id2 (get-in resp [:response :body :resource-id])
                 uri2 (-> resp
                          (ltu/location))
