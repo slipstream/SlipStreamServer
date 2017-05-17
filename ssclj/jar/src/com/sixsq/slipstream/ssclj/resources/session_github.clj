@@ -124,6 +124,7 @@
               (let [session-id (sutils/extract-session-id (:uri request))
                     {:keys [server clientIP redirectURI] :as current-session} (sutils/retrieve-session-by-id session-id)
                     claims (cond-> (auth-internal/create-claims matched-user)
+                                   session-id (assoc :session session-id)
                                    session-id (update :roles #(str session-id " " %))
                                    server (assoc :server server)
                                    clientIP (assoc :clientIP clientIP))
