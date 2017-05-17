@@ -40,6 +40,14 @@
   (cond-> {:status 201, :headers {"Location" id}}
           cookie (assoc :cookies {cookie-name cookie})))
 
+(defn response-final-redirect
+  "Provides a created response (303) with the Location header given by the
+   identifier and provides the Set-Cookie header with the given cookie, if
+   the cookie value is not nil."
+  [location & [[cookie-name cookie]]]
+  (cond-> {:status 303, :headers {"Location" location}}
+          cookie (assoc :cookies {cookie-name cookie})))
+
 (defn json-response
   [body]
   (-> body

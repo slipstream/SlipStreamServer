@@ -90,13 +90,15 @@
 
 ;; creates a temporary session and redirects to GitHub to start authentication workflow
 (defmethod p/tpl->session authn-method
-  [resource {:keys [headers base-uri] :as request}]
+  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
   (let [[client-id client-secret] (github-client-info)]
     (if (and client-id client-secret)
-      (let [session (sutils/create-session {:username "_"} headers authn-method) ;; FIXME: Remove username from required parameters.
+      (let [session-init (cond-> {}
+                                 redirectURI (assoc :redirectURI redirectURI))
+            session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
             redirect-url (format github-oath-endpoint client-id (sutils/validate-action-url base-uri (:id session)))]
-        [{:status 307, :headers {"Location" redirect-url}} session])
+        [{:status 303, :headers {"Location" redirect-url}} session])
       (throw-bad-client-config))))
 
 ;; add a "validate" action (callback) to complete the GitHub authentication workflow
@@ -104,7 +106,7 @@
   [{:keys [id resourceURI username] :as resource} request]
   (let [href (str id "/validate")
         ops (cond-> (p/standard-session-operations resource request)
-                    (= "_" username) (conj {:rel (:validate c/action-uri) :href href}))] ;; FIXME: Should just be absent! (nil? username)
+                    (nil? username) (conj {:rel (:validate c/action-uri) :href href}))]
     (cond-> (dissoc resource :operations)
             (seq ops) (assoc :operations ops))))
 
@@ -120,7 +122,7 @@
                 [matched-user _] (ex/match-external-user! :github external-login external-email)]
             (if matched-user
               (let [session-id (sutils/extract-session-id (:uri request))
-                    {:keys [server clientIP] :as current-session} (sutils/retrieve-session-by-id session-id)
+                    {:keys [server clientIP redirectURI] :as current-session} (sutils/retrieve-session-by-id session-id)
                     claims (cond-> (auth-internal/create-claims matched-user)
                                    session-id (update :roles #(str session-id " " %))
                                    server (assoc :server server)
@@ -133,7 +135,10 @@
                     {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
                 (if (not= status 200)
                   resp
-                  (u/response-created session-id [(sutils/cookie-name session-id) cookie])))
+                  (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
+                    (if redirectURI
+                      (u/response-final-redirect redirectURI cookie-tuple)
+                      (u/response-created session-id cookie-tuple)))))
               (throw-no-matched-user)))
           (throw-no-user-info))
         (throw-no-access-token))

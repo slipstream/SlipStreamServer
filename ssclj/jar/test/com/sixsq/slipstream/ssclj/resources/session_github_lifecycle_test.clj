@@ -46,7 +46,8 @@
                          (header authn-info-header "user USER ANON"))
         session-anon (-> (session (ring-app))
                          (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))]
+                         (header authn-info-header "unknown ANON"))
+        redirect-uri "https://example.com/webui"]
 
     ;; get session template so that session resources can be tested
     (let [href (str ct/resource-url "/" github/authn-method)
@@ -57,7 +58,8 @@
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
           valid-create {:sessionTemplate (strip-unwanted-attrs template)}
-          href-create {:sessionTemplate {:href href}}
+          href-create {:sessionTemplate {:href        href
+                                         :redirectURI redirect-uri}}
           invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
@@ -86,7 +88,7 @@
                                 :request-method :post
                                 :body (json/write-str valid-create))
                        (ltu/body->edn)
-                       (ltu/is-status 307))
+                       (ltu/is-status 303))
               id (get-in resp [:response :body :resource-id])
               uri (-> resp
                       (ltu/location))
@@ -97,7 +99,7 @@
                                 :request-method :post
                                 :body (json/write-str href-create))
                        (ltu/body->edn)
-                       (ltu/is-status 307))
+                       (ltu/is-status 303))
               id2 (get-in resp [:response :body :resource-id])
               uri2 (-> resp
                        (ltu/location))
@@ -254,7 +256,20 @@
                     claims (if token (sign/unsign-claims token) {})]
                 (is (= location id))
                 (is (= "MATCHED_USER" (:username claims)))
-                (is (re-matches (re-pattern (str ".*" id ".*")) (or (:roles claims) ""))))))
+                (is (re-matches (re-pattern (str ".*" id ".*")) (or (:roles claims) ""))))
+
+              (let [ring-info (-> session-anon
+                                  (request (str validate-url2 "?code=GOOD")
+                                           :request-method :get)
+                                  (ltu/body->edn)
+                                  (ltu/is-status 303)
+                                  (ltu/is-set-cookie))
+                    location (ltu/location ring-info)
+                    token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+                    claims (if token (sign/unsign-claims token) {})]
+                (is (= location redirect-uri))
+                (is (= "MATCHED_USER" (:username claims)))
+                (is (re-matches (re-pattern (str ".*" id2 ".*")) (or (:roles claims) ""))))))
 
           ;; check that the session has been updated
           (let [ring-info (-> session-user
@@ -263,6 +278,19 @@
                               (ltu/body->edn)
                               (ltu/is-status 200)
                               (ltu/is-id id)
+                              (ltu/is-operation-present "delete")
+                              (ltu/is-operation-absent (:validate c/action-uri))
+                              (ltu/is-operation-absent "edit"))
+                session (get-in ring-info [:response :body])]
+            (is (= "MATCHED_USER" (:username session)))
+            (is (not= (:created session) (:updated session))))
+
+          (let [ring-info (-> session-user
+                              (header authn-info-header (str "user USER ANON " id2))
+                              (request abs-uri2)
+                              (ltu/body->edn)
+                              (ltu/is-status 200)
+                              (ltu/is-id id2)
                               (ltu/is-operation-present "delete")
                               (ltu/is-operation-absent (:validate c/action-uri))
                               (ltu/is-operation-absent "edit"))

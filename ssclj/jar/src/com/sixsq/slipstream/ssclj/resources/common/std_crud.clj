@@ -2,7 +2,6 @@
   "Standard CRUD functions for resources."
   (:require
     [clojure.walk :as w]
-    [clojure.pprint :refer [pprint]]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
