@@ -93,10 +93,12 @@
 ;; transform template into session resource
 ;;
 (defmethod p/tpl->session authn-method
-  [resource {:keys [headers base-uri] :as request}]
-  (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info)]
+  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
+  (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info)
+        session-init (cond-> {}
+                             redirectURI (assoc :redirectURI redirectURI))]
     (if (and oidc-base-url oidc-client-id oidc-public-key)
-      (let [session (sutils/create-session {} headers authn-method) ;; FIXME: Pass in final redirect.
+      (let [session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
             redirect-url (str oidc-base-url (format oidc-relative-url oidc-client-id (sutils/validate-action-url base-uri (:id session))))]
         [{:status 303, :headers {"Location" redirect-url}} session])

@@ -90,10 +90,12 @@
 
 ;; creates a temporary session and redirects to GitHub to start authentication workflow
 (defmethod p/tpl->session authn-method
-  [resource {:keys [headers base-uri] :as request}]
+  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
   (let [[client-id client-secret] (github-client-info)]
     (if (and client-id client-secret)
-      (let [session (sutils/create-session {} headers authn-method) ;; FIXME: Pass in final redirect.
+      (let [session-init (cond-> {}
+                                 redirectURI (assoc :redirectURI redirectURI))
+            session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
             redirect-url (format github-oath-endpoint client-id (sutils/validate-action-url base-uri (:id session)))]
         [{:status 303, :headers {"Location" redirect-url}} session])
