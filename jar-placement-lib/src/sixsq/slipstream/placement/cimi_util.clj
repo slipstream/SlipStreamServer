@@ -17,8 +17,6 @@
 (def cimi-cloud-entry-point (delay (mandatory-env-value :ss-cimi-cloud-entry-point)))
 (def cimi-username (delay (mandatory-env-value :ss-cimi-username)))
 (def cimi-password (delay (mandatory-env-value :ss-cimi-password)))
-(def url-login (delay (mandatory-env-value :ss-url-login)))
-(def url-logout (delay (mandatory-env-value :ss-url-logout)))
 
 (defn- timestamp-token-obsolete?
   [timestamp]
