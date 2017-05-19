@@ -27,7 +27,7 @@
 (defn update-context
   []
   (log/info "updating cimi server token for user" @cimi-username)
-  (let [context (sync/instance @cimi-cloud-entry-point @url-login @url-logout)]
+  (let [context (sync/instance @cimi-cloud-entry-point)]
     (cimi/login context {:username @cimi-username
                          :password @cimi-password})
     (reset! cached-cimi-context {:context   context

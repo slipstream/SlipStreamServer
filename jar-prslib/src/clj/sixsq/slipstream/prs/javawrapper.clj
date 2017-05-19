@@ -96,7 +96,7 @@
   [m]
   (-> m
       (assoc :components (module->components (:module m) (:user-connectors m)))
-      (add-orchestrator-components (:user-connectors m))
+      #_(add-orchestrator-components (:user-connectors m))
       (dissoc :orchestratorComponents)
       (dissoc :module)))
 
