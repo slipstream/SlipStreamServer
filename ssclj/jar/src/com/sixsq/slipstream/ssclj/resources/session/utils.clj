@@ -16,9 +16,13 @@
   ;;(str "slipstream." (str/replace resource-id "/" "."))
   "com.sixsq.slipstream.cookie")
 
+(defn validate-action-url-unencoded
+  [base-uri session-id]
+  (str base-uri session-id "/validate"))
+
 (defn validate-action-url
   [base-uri session-id]
-  (codec/url-encode (str base-uri session-id "/validate")))
+  (codec/url-encode (validate-action-url-unencoded base-uri session-id)))
 
 (defn extract-session-id
   "Extracts the session identifier from a given URL."
@@ -37,14 +41,15 @@
    header. The result contains the authentication method, the user's identifier,
    the client's IP address, and the virtual host being used. NOTE: The expiry
    is not included and MUST be added afterwards."
-  [{:keys [username]} headers authn-method]
-  (let [server (:slipstream-ssl-server-hostname headers)
+  [{:keys [username redirectURI]} headers authn-method]
+  (let [server (:slipstream-ssl-server-name headers)
         client-ip (:x-real-ip headers)]
     (crud/new-identifier
-      (cond-> {:method   authn-method
-               :username username}
+      (cond-> {:method authn-method}
+              username (assoc :username username)
               server (assoc :server server)
-              client-ip (assoc :clientIP client-ip))
+              client-ip (assoc :clientIP client-ip)
+              redirectURI (assoc :redirectURI redirectURI))
       p/resource-name)))
 
 (defn retrieve-session-by-id

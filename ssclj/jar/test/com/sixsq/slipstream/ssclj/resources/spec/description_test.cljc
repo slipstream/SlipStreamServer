@@ -2,7 +2,8 @@
   (:require
     [clojure.test :refer [deftest are is]]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.description :as t]))
+    [com.sixsq.slipstream.ssclj.resources.spec.description :as t]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as desc]))
 
 (deftest check-parameter-type
   (are [expect-fn arg] (expect-fn (s/valid? :cimi.desc/type arg))
@@ -51,4 +52,4 @@
     (are [expect-fn arg] (expect-fn (s/valid? :cimi.desc/resource-description arg))
                          true? resource-desc
                          false? (assoc resource-desc :another 1)
-                         true? (assoc t/CommonParameterDescription :acl valid-acl))))
+                         true? (assoc desc/CommonParameterDescription :acl valid-acl))))

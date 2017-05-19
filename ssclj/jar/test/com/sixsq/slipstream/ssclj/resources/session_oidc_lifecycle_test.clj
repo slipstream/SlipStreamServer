@@ -46,7 +46,12 @@
                          (header authn-info-header "user USER ANON"))
         session-anon (-> (session (ring-app))
                          (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))]
+                         (header authn-info-header "unknown ANON"))
+        session-anon-form (-> (session (ring-app))
+                              (content-type session/form-urlencoded)
+                              (header "content-type" session/form-urlencoded)
+                              (header authn-info-header "unknown ANON"))
+        redirect-uri "https://example.com/webui"]
 
     ;; get session template so that session resources can be tested
     (let [href (str ct/resource-url "/" oidc/authn-method)
@@ -57,7 +62,8 @@
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
           valid-create {:sessionTemplate (strip-unwanted-attrs template)}
-          href-create {:sessionTemplate {:href href}}
+          href-create {:sessionTemplate {:href        href
+                                         :redirectURI redirect-uri}}
           invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
@@ -93,7 +99,7 @@
                                   :request-method :post
                                   :body (json/write-str valid-create))
                          (ltu/body->edn)
-                         (ltu/is-status 307))
+                         (ltu/is-status 303))
                 id (get-in resp [:response :body :resource-id])
                 uri (-> resp
                         (ltu/location))
@@ -104,17 +110,31 @@
                                   :request-method :post
                                   :body (json/write-str href-create))
                          (ltu/body->edn)
-                         (ltu/is-status 307))
+                         (ltu/is-status 303))
                 id2 (get-in resp [:response :body :resource-id])
                 uri2 (-> resp
                          (ltu/location))
-                abs-uri2 (str p/service-context id2)]
+                abs-uri2 (str p/service-context id2)
+
+                resp (-> session-anon-form
+                         (request base-uri
+                                  :request-method :post
+                                  :body (codec/form-encode {:href        href
+                                                            :redirectURI redirect-uri}))
+                         (ltu/body->edn)
+                         (ltu/is-status 303))
+                id3 (get-in resp [:response :body :resource-id])
+                uri3 (-> resp
+                         (ltu/location))
+                abs-uri3 (str p/service-context id3)]
 
             ;; redirect URLs in location header should contain the client ID and resource id
             (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri "")))
             (is (re-matches (re-pattern (str ".*" (codec/url-encode id) ".*")) (or uri "")))
             (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri2 "")))
             (is (re-matches (re-pattern (str ".*" (codec/url-encode id2) ".*")) (or uri2 "")))
+            (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri3 "")))
+            (is (re-matches (re-pattern (str ".*" (codec/url-encode id3) ".*")) (or uri3 "")))
 
             ;; user should not be able to see session without session role
             (-> session-user
@@ -123,6 +143,10 @@
                 (ltu/is-status 403))
             (-> session-user
                 (request abs-uri2)
+                (ltu/body->edn)
+                (ltu/is-status 403))
+            (-> session-user
+                (request abs-uri3)
                 (ltu/body->edn)
                 (ltu/is-status 403))
 
@@ -166,6 +190,15 @@
                 (ltu/is-operation-present "delete")
                 (ltu/is-operation-present (:validate c/action-uri))
                 (ltu/is-operation-absent "edit"))
+            (-> session-user
+                (header authn-info-header (str "user USER ANON " id3))
+                (request abs-uri3)
+                (ltu/body->edn)
+                (ltu/is-status 200)
+                (ltu/is-id id3)
+                (ltu/is-operation-present "delete")
+                (ltu/is-operation-present (:validate c/action-uri))
+                (ltu/is-operation-absent "edit"))
 
             ;; user query with session role should succeed but and have one entry
             (-> session-user
@@ -180,12 +213,19 @@
                 (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-count 1))
+            (-> session-user
+                (header authn-info-header (str "user USER ANON " id3))
+                (request base-uri)
+                (ltu/body->edn)
+                (ltu/is-status 200)
+                (ltu/is-count 1))
 
             ;;
             ;; test validation callback
             ;;
             (let [validate-url (str abs-uri "/validate")
-                  validate-url2 (str abs-uri2 "/validate")]
+                  validate-url2 (str abs-uri2 "/validate")
+                  validate-url3 (str abs-uri3 "/validate")]
 
               ;; try hitting the callback with an invalid server configuration
               (with-redefs [environ.core/env {}]
@@ -202,6 +242,13 @@
                              :request-method :get)
                     (ltu/body->edn)
                     (ltu/message-matches #".*missing client ID, base URL, or public key.*")
+                    (ltu/is-status 500))
+
+                (-> session-anon
+                    (request validate-url3
+                             :request-method :get)
+                    (ltu/body->edn)
+                    (ltu/message-matches #".*missing client ID, base URL, or public key.*")
                     (ltu/is-status 500)))
 
               ;; try hitting the callback without the OIDC code parameter
@@ -214,6 +261,13 @@
 
               (-> session-anon
                   (request validate-url2
+                           :request-method :get)
+                  (ltu/body->edn)
+                  (ltu/message-matches #".*not contain required code.*")
+                  (ltu/is-status 400))
+
+              (-> session-anon
+                  (request validate-url3
                            :request-method :get)
                   (ltu/body->edn)
                   (ltu/message-matches #".*not contain required code.*")
@@ -241,7 +295,7 @@
                     (request (str validate-url "?code=BAD")
                              :request-method :get)
                     (ltu/body->edn)
-                    (ltu/message-matches #".*unable to retrieve or decrypt OIDC user information.*")
+                    (ltu/message-matches #".*OIDC token is missing name/preferred_name.*")
                     (ltu/is-status 400))
 
                 (let [ring-info (-> session-anon
@@ -255,7 +309,33 @@
                       claims (if token (sign/unsign-claims token) {})]
                   (is (= location id))
                   (is (= "MATCHED_USER" (:username claims)))
-                  (is (re-matches (re-pattern (str ".*" id ".*")) (or (:roles claims) ""))))))
+                  (is (re-matches (re-pattern (str ".*" id ".*")) (or (:roles claims) ""))))
+
+                (let [ring-info (-> session-anon
+                                    (request (str validate-url2 "?code=GOOD")
+                                             :request-method :get)
+                                    (ltu/body->edn)
+                                    (ltu/is-status 303)
+                                    (ltu/is-set-cookie))
+                      location (ltu/location ring-info)
+                      token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+                      claims (if token (sign/unsign-claims token) {})]
+                  (is (= location redirect-uri))
+                  (is (= "MATCHED_USER" (:username claims)))
+                  (is (re-matches (re-pattern (str ".*" id2 ".*")) (or (:roles claims) ""))))
+
+                (let [ring-info (-> session-anon
+                                    (request (str validate-url3 "?code=GOOD")
+                                             :request-method :get)
+                                    (ltu/body->edn)
+                                    (ltu/is-status 303)
+                                    (ltu/is-set-cookie))
+                      location (ltu/location ring-info)
+                      token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+                      claims (if token (sign/unsign-claims token) {})]
+                  (is (= location redirect-uri))
+                  (is (= "MATCHED_USER" (:username claims)))
+                  (is (re-matches (re-pattern (str ".*" id3 ".*")) (or (:roles claims) ""))))))
 
             ;; check that the session has been updated
             (let [ring-info (-> session-user
@@ -264,6 +344,32 @@
                                 (ltu/body->edn)
                                 (ltu/is-status 200)
                                 (ltu/is-id id)
+                                (ltu/is-operation-present "delete")
+                                (ltu/is-operation-absent (:validate c/action-uri))
+                                (ltu/is-operation-absent "edit"))
+                  session (get-in ring-info [:response :body])]
+              (is (= "MATCHED_USER" (:username session)))
+              (is (not= (:created session) (:updated session))))
+
+            (let [ring-info (-> session-user
+                                (header authn-info-header (str "user USER ANON " id2))
+                                (request abs-uri2)
+                                (ltu/body->edn)
+                                (ltu/is-status 200)
+                                (ltu/is-id id2)
+                                (ltu/is-operation-present "delete")
+                                (ltu/is-operation-absent (:validate c/action-uri))
+                                (ltu/is-operation-absent "edit"))
+                  session (get-in ring-info [:response :body])]
+              (is (= "MATCHED_USER" (:username session)))
+              (is (not= (:created session) (:updated session))))
+
+            (let [ring-info (-> session-user
+                                (header authn-info-header (str "user USER ANON " id3))
+                                (request abs-uri3)
+                                (ltu/body->edn)
+                                (ltu/is-status 200)
+                                (ltu/is-id id3)
                                 (ltu/is-operation-present "delete")
                                 (ltu/is-operation-absent (:validate c/action-uri))
                                 (ltu/is-operation-absent "edit"))
@@ -282,6 +388,13 @@
             (-> session-user
                 (header authn-info-header (str "user USER ANON " id2))
                 (request abs-uri2
+                         :request-method :delete)
+                (ltu/is-unset-cookie)
+                (ltu/body->edn)
+                (ltu/is-status 200))
+            (-> session-user
+                (header authn-info-header (str "user USER ANON " id3))
+                (request abs-uri3
                          :request-method :delete)
                 (ltu/is-unset-cookie)
                 (ltu/body->edn)

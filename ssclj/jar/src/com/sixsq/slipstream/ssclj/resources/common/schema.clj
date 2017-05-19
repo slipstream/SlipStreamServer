@@ -86,7 +86,7 @@
                  :category    "common"
                  :description "allowed actions"
                  :type        "list"
-                 :mandatory   true
+                 :mandatory   false
                  :readOnly    true
                  :order       7}})
 
