@@ -3,7 +3,7 @@
     [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.resources.session :as t]))
 
-(deftest check-is-conent-type?
+(deftest check-is-content-type?
   (are [expected-fn input] (expected-fn (t/is-content-type? input))
                            true? :content-type
                            true? "content-type"
