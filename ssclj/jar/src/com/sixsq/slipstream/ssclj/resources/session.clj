@@ -11,8 +11,11 @@
     [com.sixsq.slipstream.db.impl :as db]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util])
+    [com.sixsq.slipstream.ssclj.util.log :as log-util]
+    [clojure.walk :as walk])
   (:import (clojure.lang ExceptionInfo)))
+
+(def ^:const form-urlencoded "application/x-www-form-urlencoded")
 
 (def ^:const resource-tag :sessions)
 
@@ -166,10 +169,38 @@
         crud/validate)
     {}))
 
+(defn convert-form
+  "Allow form encoded data to be supplied for a session. This is required to
+   support external authentication methods triggered via a 'submit' button in
+   an HTML form. This takes the flat list of form parameters, keywordizes the
+   keys, and adds the parent :sessionTemplate key."
+  [form-data]
+  {:sessionTemplate (walk/keywordize-keys form-data)})
+
+(defn is-content-type?
+  "Checks if the given header name is 'content-type' in various forms."
+  [k]
+  (try
+    (= :content-type (-> k name str/lower-case keyword))
+    (catch Exception _
+      false)))
+
+(defn is-form?
+  "Checks the headers to see if the content type is
+   application/x-www-form-urlencoded. Converts the header names to lowercase
+   and keywordizes the result to collect the various header name variants."
+  [headers]
+  (->> headers
+       (filter #(is-content-type? (first %)))
+       first
+       second
+       (= form-urlencoded)))
+
 ;; requires a SessionTemplate to create new Session
 (defmethod crud/add resource-name
-  [{:keys [body] :as request}]
+  [{:keys [body form-params headers] :as request}]
   (let [idmap {:identity (:identity request)}
+        body (if (is-form? headers) (convert-form form-params) body)
         [cookie-header body] (-> body
                                  (assoc :resourceURI create-uri)
                                  (std-crud/resolve-hrefs idmap)
@@ -244,8 +275,8 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id id {:user-name "INTERNAL"
-                                   :user-roles [id]})     ;; Essentially turn off authz by spoofing owner of resource.
+      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
+                                   :user-roles [id]})       ;; Essentially turn off authz by spoofing owner of resource.
           (validate-callback request)))                     ;; FIXME: Ensure that return value is correct.
     (catch ExceptionInfo ei
       (ex-data ei))))
