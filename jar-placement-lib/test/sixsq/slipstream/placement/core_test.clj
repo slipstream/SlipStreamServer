@@ -32,6 +32,20 @@
     (doseq [coll (repeatedly 20 (partial shuffle values))]
       (is (apply <= (map :order (pc/order-by-price coll)))))))
 
+(deftest clause-cpu-ram-disk
+  (let [component-empty {}
+        component-nil {:cpu.nb nil :ram.GB nil :disk.GB nil}
+        component-without-disk {:cpu.nb 1 :ram.GB 2}
+        component-full {:cpu.nb 1 :ram.GB 2 :disk.GB 3}]
+    (is (= "(resource:vcpu>=0 and resource:ram>=0 and resource:disk>=0)"
+           (pc/clause-cpu-ram-disk component-empty)))
+    (is (= "(resource:vcpu>=0 and resource:ram>=0 and resource:disk>=0)"
+           (pc/clause-cpu-ram-disk component-nil)))
+    (is (= "(resource:vcpu>=1 and resource:ram>=2 and resource:disk>=0)"
+           (pc/clause-cpu-ram-disk component-without-disk)))
+    (is (= "(resource:vcpu>=1 and resource:ram>=2 and resource:disk>=3)"
+           (pc/clause-cpu-ram-disk component-full)))))
+
 (deftest test-cimi-and
   (is (= "" (pc/cimi-and [nil nil])))
   (is (= "" (pc/cimi-and ["" nil])))

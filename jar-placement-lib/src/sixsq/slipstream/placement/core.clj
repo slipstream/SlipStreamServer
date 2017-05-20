@@ -48,8 +48,7 @@
 
 (defn- instance-type
   [service-offer]
-       (-> (denamespace-keys service-offer)
-           (:instanceType)))
+  (:schema-org:name service-offer))
 
 (defn- connector-href
   [service-offer]
@@ -192,20 +191,27 @@
 
 (def cimi-or (partial cimi-op "or"))
 
-(defn- clause-cpu-ram-disk
-  [component]
-  (when (every? #(% component) [:cpu.nb :ram.GB :disk.GB])
-    (format
-      "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s)"
-      (:cpu.nb component)
-      (:ram.GB component)
-      (:disk.GB component))))
+(defn clause-cpu-ram-disk
+  [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB}]
+  (format
+    "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s)"
+    (or cpu 0) (or ram 0) (or disk 0)))
 
 (def clause-flexible "schema-org:flexible='true'")
 
+(defn- connector-same-instance-type
+  [[connector-name instance-type]]
+  (when instance-type
+    (format "connector/href='%s' and schema-org:name='%s'" (name connector-name) instance-type)))
+
+(defn- clause-connectors-same-instance-type
+  [component]
+  (mapv connector-same-instance-type (:connector-instance-types component)))
+
 (defn- clause-component
   [component]
-  (cimi-or (concat [clause-flexible (clause-cpu-ram-disk component)])))
+  (cimi-or (concat (clause-connectors-same-instance-type component)
+                   [clause-flexible (clause-cpu-ram-disk component)])))
 
 (defn- clause-connectors
   [connector-names]
@@ -217,7 +223,7 @@
 (defn prefer-exact-instance-type
   [connector-instance-types [connector-name service-offers]]
   (let [favorite (filter #(= (get connector-instance-types (keyword connector-name))
-                             (:instanceType (denamespace-keys %))) service-offers)]
+                             (:schema-org:name %)) service-offers)]
     (if-not (empty? favorite)
       favorite
       service-offers)))
