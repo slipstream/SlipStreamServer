@@ -30,12 +30,12 @@
    given rule if it applies.  If the rule does not apply, then nil is
    returned."
   [{:keys [identity roles] :as id-map} {:keys [type principal right] :as rules}]
-  (let [right (get rights-keywords right)]
+  (let [roles (set roles)
+        right (get rights-keywords right)]
     (cond
-      (contains? (set roles) "ADMIN") ::all
+      (roles "ADMIN") ::all
       (and (= type "USER") (= principal identity)) right
-      (and (= type "ROLE") (contains? (set roles) principal)) right
-      (and (= type "ROLE") (= principal "USER") identity) right
+      (and (= type "ROLE") (roles principal)) right
       (and (= type "ROLE") (= principal "ANON")) right
       :else nil)))
 

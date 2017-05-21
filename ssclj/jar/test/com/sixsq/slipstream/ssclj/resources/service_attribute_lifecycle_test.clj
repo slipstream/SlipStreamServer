@@ -34,64 +34,64 @@
 
 (deftest lifecycle
 
-  ;; create namespace
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "super ADMIN")
-      (request (str p/service-context san/resource-url)
-               :request-method :post
-               :body (json/write-str valid-namespace))
-      (t/body->edn)
-      (t/is-status 201))
+  (let [session-admin (-> (session (ring-app))
+                          (content-type "application/json")
+                          (header authn-info-header "super ADMIN USER ANON"))
+        session-user (-> (session (ring-app))
+                         (content-type "application/json")
+                         (header authn-info-header "jane USER ANON"))
+        session-anon (-> (session (ring-app))
+                         (content-type "application/json"))]
 
-  ;; anonymous create should fail
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (request base-uri
-               :request-method :post
-               :body (json/write-str valid-entry))
-      (t/body->edn)
-      (t/is-status 403))
-
-  ;; anonymous query should also fail
-  (-> (session (ring-app))
-      (request base-uri)
-      (t/body->edn)
-      (t/is-status 403))
-
-  ; adding the same attribute twice should fail
-  (let [uri (-> (session (ring-app))
-                (content-type "application/json")
-                (header authn-info-header "jane")
-                (request base-uri
-                         :request-method :post
-                         :body (json/write-str valid-entry))
-                (t/body->edn)
-                (t/is-status 201)
-                (t/location))
-        abs-uri (str p/service-context (u/de-camelcase uri))]
-
-
-    (-> (session (ring-app))
-        (header authn-info-header "jane")
-        (request abs-uri)
+    ;; create namespace
+    (-> session-admin
+        (request (str p/service-context san/resource-url)
+                 :request-method :post
+                 :body (json/write-str valid-namespace))
         (t/body->edn)
-        (t/is-status 200))
+        (t/is-status 201))
 
-    (-> (session (ring-app))
-        (content-type "application/json")
-        (header authn-info-header "jane")
+    ;; anonymous create should fail
+    (-> session-anon
         (request base-uri
                  :request-method :post
                  :body (json/write-str valid-entry))
         (t/body->edn)
-        (t/is-status 409))
+        (t/is-status 403))
 
-    (-> (session (ring-app))
-        (header authn-info-header "jane")
-        (request abs-uri :request-method :delete)
+    ;; anonymous query should also fail
+    (-> session-anon
+        (request base-uri)
         (t/body->edn)
-        (t/is-status 200)))
+        (t/is-status 403))
+
+    ; adding the same attribute twice should fail
+    (let [uri (-> session-user
+                  (request base-uri
+                           :request-method :post
+                           :body (json/write-str valid-entry))
+                  (t/body->edn)
+                  (t/is-status 201)
+                  (t/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
+
+
+      (-> session-user
+          (request abs-uri)
+          (t/body->edn)
+          (t/is-status 200))
+
+      (-> session-user
+          (request base-uri
+                   :request-method :post
+                   :body (json/write-str valid-entry))
+          (t/body->edn)
+          (t/is-status 409))
+
+      (-> session-user
+          (request abs-uri :request-method :delete)
+          (t/body->edn)
+          (t/is-status 200))))
 
   ;; adding, retrieving and deleting entry as user should succeed
   #_(let [uri (-> (session (ring-app))

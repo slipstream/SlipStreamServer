@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template
   (:require
     [clojure.tools.logging :as log]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]

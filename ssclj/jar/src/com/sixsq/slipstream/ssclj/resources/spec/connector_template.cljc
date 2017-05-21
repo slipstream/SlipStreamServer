@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.connector-template
   (:require
-    [clojure.spec :as s]
-    [clojure.spec.gen :as gen]
+    [clojure.spec.alpha :as s]
+    [clojure.spec.gen.alpha :as gen]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
@@ -27,7 +27,8 @@
 (s/def :cimi.connector-template/securityGroups string?)
 (s/def :cimi.connector-template/updateClientURL string?)
 
-(s/def :cimi.connector-template/href :cimi.core/resource-href) ;; FIXME: Ensure this always references the same resource type.
+(def connector-template-regex #"^connector-template/[a-z0-9]+(-[a-z0-9]+)*$")
+(s/def :cimi.connector-template/href (s/and string? #(re-matches connector-template-regex %)))
 
 ;;
 ;; Keys specifications for ConnectorTemplate resources.

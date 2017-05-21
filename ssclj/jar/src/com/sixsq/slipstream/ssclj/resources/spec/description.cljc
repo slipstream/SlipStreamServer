@@ -3,7 +3,7 @@
    provide information to clients to allow them to understand the contents
    of resources."
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
@@ -37,60 +37,3 @@
   (s/every (s/or :acl (s/tuple #{:acl} :cimi.common/acl)
                  :desc (s/tuple keyword? :cimi.desc/parameter-description))))
 
-(def CommonParameterDescription
-  {:id          {:displayName "ID"
-                 :category    "common"
-                 :description "unique resource identifier"
-                 :type        "string"
-                 :mandatory   true
-                 :readOnly    true
-                 :order       0}
-   :resourceURI {:displayName "Resource URI"
-                 :category    "common"
-                 :description "type identifier as a URI"
-                 :type        "string"
-                 :mandatory   true
-                 :readOnly    true
-                 :order       1}
-   :name        {:displayName "Name"
-                 :category    "common"
-                 :description "human-readable name"
-                 :type        "string"
-                 :mandatory   false
-                 :readOnly    false
-                 :order       2}
-   :description {:displayName "Description"
-                 :category    "common"
-                 :description "short, human-readable description"
-                 :type        "string"
-                 :mandatory   false
-                 :readOnly    false
-                 :order       3}
-   :created     {:displayName "Created"
-                 :category    "common"
-                 :description "creation timestamp"
-                 :type        "timestamp"
-                 :mandatory   true
-                 :readOnly    true
-                 :order       4}
-   :updated     {:displayName "Updated"
-                 :category    "common"
-                 :description "update timestamp"
-                 :type        "timestamp"
-                 :mandatory   true
-                 :readOnly    true
-                 :order       5}
-   :properties  {:displayName "Properties"
-                 :category    "common"
-                 :description "user-defined properties"
-                 :type        "map"
-                 :mandatory   false
-                 :readOnly    false
-                 :order       6}
-   :operations  {:displayName "Operation"
-                 :category    "common"
-                 :description "allowed actions"
-                 :type        "list"
-                 :mandatory   true
-                 :readOnly    true
-                 :order       7}})

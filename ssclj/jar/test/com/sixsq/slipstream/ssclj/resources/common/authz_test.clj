@@ -21,6 +21,9 @@
   (is (= ::authz/view (extract-right nil {:type "ROLE" :principal "ANON" :right "VIEW"})))
   (is (= ::authz/view (extract-right {} {:type "ROLE" :principal "ANON" :right "VIEW"})))
 
+  (is (nil? (extract-right {:identity "unknown" :roles ["ANON"]}
+                           {:principal "USER" :type "ROLE" :right "MODIFY"})))
+
   (let [id-map {:identity "USER1" :roles ["R1" "R3"]}]
 
     (are [expect arg] (= expect (extract-right id-map arg))

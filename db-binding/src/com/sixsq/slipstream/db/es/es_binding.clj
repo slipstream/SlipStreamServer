@@ -127,7 +127,7 @@
     (find-data *client* index-name id options "VIEW"))
 
   (delete [_ {:keys [id]} options]
-    (find-data *client* index-name id options "ALL")
+    (find-data *client* index-name id options "MODIFY")
     (let [[type docid] (split-id id)]
       (.status (esu/delete *client* index-name type docid)))
     (response-deleted id))

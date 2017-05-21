@@ -22,41 +22,54 @@
       (:email primary)
       (:email (first verified)))))
 
-(defn- retrieve-private-email
+(defn retrieve-private-email
   [access-token]
   (let [user-emails-response (http/get "https://api.github.com/user/emails"
                                        {:headers {"Authorization" (str "token " access-token)}})
-        user-emails          (-> user-emails-response :body (json/read-str :key-fn keyword))]
+        user-emails (-> user-emails-response :body (json/read-str :key-fn keyword))]
     (primary-or-verified user-emails)))
 
-(defn- retrieve-email
+(defn retrieve-email
   [user-info access-token]
   (if-let [public-email (:email user-info)]
     public-email
     (retrieve-private-email access-token)))
 
-(defn- sanitized-login
+(defn sanitized-login
   [user-info]
   (-> user-info :login ex/sanitize-login-name))
+
+(defn get-github-access-token
+  [client-id client-secret oauth-code]
+  (-> (http/post "https://github.com/login/oauth/access_token"
+                 {:headers     {"Accept" "application/json"}
+                  :form-params {:client_id     client-id
+                                :client_secret client-secret
+                                :code          oauth-code}})
+      :body
+      (json/read-str :key-fn keyword)
+      :access_token))
+
+(defn get-github-user-info
+  [access-token]
+  (-> (http/get "https://api.github.com/user"
+                {:headers {"Authorization" (str "token " access-token)}})
+      (parse-github-user)))
+
+(defn get-github-oauth-code
+  [request]
+  (uh/param-value request :code))
 
 (defn callback-github
   [request redirect-server]
   (try
-    (let [oauth-code            (uh/param-value request :code)
-          access-token-response (http/post "https://github.com/login/oauth/access_token"
-                                           {:headers     {"Accept" "application/json"}
-                                            :form-params {:client_id     (cf/mandatory-property-value :github-client-id)
-                                                          :client_secret (cf/mandatory-property-value :github-client-secret)
-                                                          :code          oauth-code}})
-          access-token          (-> access-token-response
-                                    :body
-                                    (json/read-str :key-fn keyword)
-                                    :access_token)
+    (let [oauth-code (uh/param-value request :code)
 
-          user-info-response    (http/get "https://api.github.com/user"
-                                          {:headers {"Authorization" (str "token " access-token)}})
+          access-token (get-github-access-token (cf/mandatory-property-value :github-client-id)
+                                                (cf/mandatory-property-value :github-client-secret)
+                                                oauth-code)
 
-          user-info             (parse-github-user user-info-response)]
+          user-info (get-github-user-info access-token)]
 
       (log/debug "Github user-info " user-info)
       (log/info "Successful GitHub authentication: " (sanitized-login user-info))

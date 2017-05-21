@@ -17,8 +17,6 @@
 (def cimi-cloud-entry-point (delay (mandatory-env-value :ss-cimi-cloud-entry-point)))
 (def cimi-username (delay (mandatory-env-value :ss-cimi-username)))
 (def cimi-password (delay (mandatory-env-value :ss-cimi-password)))
-(def url-login (delay (mandatory-env-value :ss-url-login)))
-(def url-logout (delay (mandatory-env-value :ss-url-logout)))
 
 (defn- timestamp-token-obsolete?
   [timestamp]
@@ -27,8 +25,9 @@
 (defn update-context
   []
   (log/info "updating cimi server token for user" @cimi-username)
-  (let [context (sync/instance @cimi-cloud-entry-point @url-login @url-logout)]
-    (cimi/login context {:username @cimi-username
+  (let [context (sync/instance @cimi-cloud-entry-point)]
+    (cimi/login context {:href "session-template/internal"
+                         :username @cimi-username
                          :password @cimi-password})
     (reset! cached-cimi-context {:context   context
                                  :timestamp (System/currentTimeMillis)})))

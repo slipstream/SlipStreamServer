@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-namespace
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [superstring.core :as str]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.spec.service-attribute-namespace]
@@ -54,11 +54,13 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
+;; FIXME: Roles are needed in two locations!  Should be unique way to specify authentication information.
 (def ^:private all-query-map {:identity       {:current         "slipstream",
                                                :authentications {"slipstream"
-                                                                 {:identity "slipstream"}}}
+                                                                 {:identity "slipstream"
+                                                                  :roles    ["ADMIN" "USER" "ANON"]}}}
                               :params         {:resource-name resource-url}
-                              :user-roles     ["ADMIN"]
+                              :user-roles     ["ADMIN" "USER" "ANON"]
                               :request-method :get})
 
 (defn extract-field-values

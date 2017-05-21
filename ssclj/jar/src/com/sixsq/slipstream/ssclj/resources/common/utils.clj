@@ -6,7 +6,7 @@
     [superstring.core :as str]
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [ring.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [clojure.data.json :as json]
@@ -15,11 +15,9 @@
     [java.util List Map UUID Date]
     [javax.xml.bind DatatypeConverter]))
 
-;;
-;; utilities for generating ring responses for standard
-;; conditions and ex-info exceptions with these responses
-;; embedded in them
-;;
+(defn string->int [s]
+  (when (re-matches #"\d+" s)
+    (read-string s)))
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.
@@ -27,6 +25,28 @@
   (if s
     (str/join "-" (map str/lower-case (str/split s #"(?=[A-Z])")))
     ""))
+
+;;
+;; utilities for generating ring responses for standard
+;; conditions and ex-info exceptions with these responses
+;; embedded in them
+;;
+
+(defn response-created
+  "Provides a created response (201) with the Location header given by the
+   identifier and provides the Set-Cookie header with the given cookie, if
+   the cookie value is not nil."
+  [id & [[cookie-name cookie]]]
+  (cond-> {:status 201, :headers {"Location" id}}
+          cookie (assoc :cookies {cookie-name cookie})))
+
+(defn response-final-redirect
+  "Provides a created response (303) with the Location header given by the
+   identifier and provides the Set-Cookie header with the given cookie, if
+   the cookie value is not nil."
+  [location & [[cookie-name cookie]]]
+  (cond-> {:status 303, :headers {"Location" location}}
+          cookie (assoc :cookies {cookie-name cookie})))
 
 (defn json-response
   [body]
@@ -151,6 +171,16 @@
     (catch Exception _
       nil)))
 
+(defn log-and-throw-400
+  "Logs the given message as a warning and then throws an exception with a
+   400 response."
+  [msg]
+  (let [response (-> {:status 400 :message msg}
+                     json-response
+                     (r/status 400))]
+    (log/warn msg)
+    (throw (ex-info msg response))))
+
 (defn create-spec-validation-fn
   "Creates a validation function that compares a resource against the
    given schema.  The generated function raises an exception with the
@@ -161,12 +191,7 @@
         explain (partial s/explain-str spec)]
     (fn [resource]
       (if-not (ok? resource)
-        (let [msg (str "resource does not satisfy defined schema: " (explain resource))
-              response (-> {:status 400 :message msg}
-                           json-response
-                           (r/status 400))]
-          (log/warn msg)
-          (throw (ex-info msg response)))
+        (log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
         resource))))
 
 (defn encode-base64

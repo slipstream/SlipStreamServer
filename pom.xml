@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamServer</artifactId>
-  <version>3.26-SNAPSHOT</version>
+  <version>3.29-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SlipStreamServer</name>
   <url>http://sixsq.com/</url>
@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCommunity</artifactId>
-    <version>3.26-SNAPSHOT</version>
+    <version>3.29-SNAPSHOT</version>
     <relativePath>../SlipStream/community</relativePath>
   </parent>
 
@@ -29,7 +29,6 @@
     <module>db-binding</module>
     <module>db-serializers</module>
     <module>ring-container</module>
-    <module>ring-container-rpm</module>
     <module>static-content</module>
     <module>war</module>
   </modules>
@@ -57,6 +56,7 @@
       <modules>
         <module>rpm</module>
         <module>rpm-prs</module>
+        <module>ring-container-rpm</module>
       </modules>
     </profile>
   </profiles>

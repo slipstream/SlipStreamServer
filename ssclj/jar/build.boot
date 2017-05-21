@@ -1,4 +1,4 @@
-(def +version+ "3.26-SNAPSHOT")
+(def +version+ "3.29-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamCljResources-jar
@@ -7,12 +7,11 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.9.0-alpha15"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha16"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
-                                   sixsq-nexus-url
-                                   lein-generate]])
+                                   sixsq-nexus-url]])
 
 (set-env!
   :repositories
@@ -67,6 +66,7 @@
                    [boot-environ]
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
+                   [onetom/boot-lein-generate]
                    [tolitius/boot-check]]))))
 
 (require
@@ -76,7 +76,8 @@
   '[tolitius.boot-check :refer [with-yagni
                                 with-eastwood
                                 with-kibit
-                                with-bikeshed]])
+                                with-bikeshed]]
+  '[boot.lein :refer [generate]])
 
 (set-env!
   :resource-paths #{"src" "resources"})

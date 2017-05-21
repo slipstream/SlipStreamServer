@@ -137,13 +137,31 @@
        :disk          (disk service-offer)
        :instance_type (instance-type service-offer)})))
 
+(defn number-or-nil
+  "If the value is a non-negative number, then the number is returned.  Otherwise
+   nil is returned.  This is a utility function for the price-comparator function."
+  [a]
+  (when (and (number? a) (not (neg? a))) a))
+
+(defn price-comparator
+  "Sorts prices from lowest to highest prices. Any value that isn't a non-negative
+   number (sentinel values for 'no price') will compare higer than any value.
+   This implements a two-value comparator as described in the clojure
+   documentation: https://clojure.org/guides/comparators."
+  [a b]
+  (let [a (number-or-nil a)
+        b (number-or-nil b)]
+    (cond
+      (= a b) false
+      (nil? a) false
+      (nil? b) true
+      :else (< a b))))
+
 (defn order-by-price
   "Orders by price ascending, with the exception of no-price values placed at the end"
   [priced-coll]
-  (sort-by :price (fn [a b]
-                    (cond (= a -1) 1
-                          (= b -1) -1
-                          :else (< a b))) priced-coll))
+  (sort-by :price price-comparator priced-coll))
+
 (defn- add-indexes
   [coll]
   (map-indexed (fn [i e] (assoc e :index i)) coll))

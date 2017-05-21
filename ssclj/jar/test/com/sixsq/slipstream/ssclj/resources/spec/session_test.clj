@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.session-test
   (:require
     [clojure.test :refer [deftest is]]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.session :refer :all]
     [com.sixsq.slipstream.ssclj.resources.spec.session]))
 
@@ -22,10 +22,11 @@
              :username    "ssuser"
              :expiry      timestamp
              :server      "nuv.la"
-             :clientIP    "127.0.0.1"}]
+             :clientIP    "127.0.0.1"
+             :redirectURI "https://nuv.la/webui/profile"}]
 
     (is (s/valid? :cimi/session cfg))
-    (doseq [attr #{:id :resourceURI :created :updated :acl :method :username :expiry}]
+    (doseq [attr #{:id :resourceURI :created :updated :acl :method :expiry}]
       (is (not (s/valid? :cimi/session (dissoc cfg attr)))))
-    (doseq [attr #{:server :clientIP}]
+    (doseq [attr #{:username :server :clientIP}]
       (is (s/valid? :cimi/session (dissoc cfg attr))))))

@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.service-attribute-namespace-test
   (:require
     [clojure.test :refer :all]
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]))
 
 (def timestamp "1970-04-16T08:40:00.0Z")

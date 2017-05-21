@@ -23,7 +23,7 @@
 ;; implementation-specific resource actions have a prefix
 (def ^:const impl-action-prefix (str slipstream-schema-uri "action/"))
 (def ^:const impl-prefixed-actions
-  #{:describe})
+  #{:describe :validate})
 
 (def ^:const action-uri
   (doall
@@ -86,7 +86,7 @@
                  :category    "common"
                  :description "allowed actions"
                  :type        "list"
-                 :mandatory   true
+                 :mandatory   false
                  :readOnly    true
                  :order       7}})
 

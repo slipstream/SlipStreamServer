@@ -29,10 +29,11 @@
 (defn find-usernames-by-email
   [email]
   (init)
-  (map :NAME (kc/select users
-                        (kc/fields [:NAME])
-                        (kc/where {:EMAIL email
-                                   :STATE [in active-user]}))))
+  (when email
+    (map :NAME (kc/select users
+                          (kc/fields [:NAME])
+                          (kc/where {:EMAIL email
+                                     :STATE [in active-user]})))))
 
 (defn- column-name
   [authn-method]
@@ -49,14 +50,15 @@
 (defn find-username-by-authn
   [authn-method authn-id]
   (init)
-  (let [matched-users
-        (kc/select users
-                   (kc/fields [:NAME])
-                   (kc/where {(column-keyword authn-method) authn-id
-                              :STATE                        [in active-user]}))]
-    (if (> (count matched-users) 1)
-      (throw (Exception. (str "There should be only one result for " authn-id)))
-      (:NAME (first matched-users)))))
+  (when (and authn-method authn-id)
+    (let [matched-users
+          (kc/select users
+                     (kc/fields [:NAME])
+                     (kc/where {(column-keyword authn-method) authn-id
+                                :STATE                        [in active-user]}))]
+      (if (> (count matched-users) 1)
+        (throw (Exception. (str "There should be only one result for " authn-id)))
+        (:NAME (first matched-users))))))
 
 (defn update-user-authn-info
   [authn-method slipstream-username authn-id]

@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-record
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.spec.usage-record]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]

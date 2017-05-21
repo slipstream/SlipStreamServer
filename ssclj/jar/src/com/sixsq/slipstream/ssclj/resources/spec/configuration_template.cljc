@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.configuration-template
   (:require
-    [clojure.spec :as s]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
@@ -9,7 +9,8 @@
 (s/def :cimi.configuration-template/service
   (su/regex-string #"[a-z0-9-]" #"^[a-z0-9]+(-[a-z0-9]+)*$"))
 
-(s/def :cimi.configuration-template/href :cimi.core/resource-href) ;; FIXME: Ensure this always references the same resource type.
+(def configuration-template-regex #"^configuration-template/[a-z0-9]+(-[a-z0-9]+)*$")
+(s/def :cimi.configuration-template/href (s/and string? #(re-matches configuration-template-regex %)))
 
 ;;
 ;; Keys specifications for configuration-template resources.
