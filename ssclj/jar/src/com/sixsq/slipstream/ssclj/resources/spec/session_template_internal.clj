@@ -25,4 +25,4 @@
 
 (s/def :cimi/session-template.internal-create
   (su/only-keys-maps ps/create-keys-spec
-                     {:opt-un [:cimi.session-template.internal/sessionTemplate]}))
+                     {:req-un [:cimi.session-template.internal/sessionTemplate]}))
