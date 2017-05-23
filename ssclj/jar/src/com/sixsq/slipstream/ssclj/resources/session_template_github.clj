@@ -24,7 +24,7 @@
          {:redirectURI {:displayName "Redirect URI"
                         :category    "general"
                         :description "Redirect URI"
-                        :type        "string"
+                        :type        "hidden"
                         :mandatory   false
                         :readOnly    false
                         :order       1}}))

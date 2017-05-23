@@ -34,7 +34,7 @@
           :password {:displayName "Password"
                      :category    "general"
                      :description "password"
-                     :type        "string"
+                     :type        "password"
                      :mandatory   true
                      :readOnly    false
                      :order       2}}))

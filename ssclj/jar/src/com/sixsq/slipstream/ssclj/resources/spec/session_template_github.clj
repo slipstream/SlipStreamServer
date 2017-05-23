@@ -9,23 +9,15 @@
 ;; the moment.  This will have to change to allow multiple OIDC servers to
 ;; be supported.
 
-(s/def :cimi.session-template.github/redirectURI :cimi.core/nonblank-string)
-
-;; all parameters must be specified in both the template and the create resource
-(def session-template-keys-spec-opt
-  {:opt-un [:cimi.session-template.github/redirectURI]})
-
 ;; Defines the contents of the github SessionTemplate resource itself.
 (s/def :cimi/session-template.github
-  (su/only-keys-maps ps/resource-keys-spec
-                     session-template-keys-spec-opt))
+  (su/only-keys-maps ps/resource-keys-spec))
 
 ;; Defines the contents of the github template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :sessionTemplate here.
 (s/def :cimi.session-template.github/sessionTemplate
-  (su/only-keys-maps ps/template-keys-spec
-                     session-template-keys-spec-opt))
+  (su/only-keys-maps ps/template-keys-spec))
 
 (s/def :cimi/session-template.github-create
   (su/only-keys-maps ps/create-keys-spec
-                     {:opt-un [:cimi.session-template.github/sessionTemplate]}))
+                     {:req-un [:cimi.session-template.github/sessionTemplate]}))
