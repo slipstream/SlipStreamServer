@@ -92,13 +92,20 @@
 
 (def SessionTemplateDescription
   (merge c/CommonParameterDescription
-         {:method {:displayName "Authentication Method"
-                   :category    "general"
-                   :description "method to be used to authenticate user"
-                   :type        "string"
-                   :mandatory   true
-                   :readOnly    true
-                   :order       0}}))
+         {:method      {:displayName "Authentication Method"
+                        :category    "general"
+                        :description "method to be used to authenticate user"
+                        :type        "string"
+                        :mandatory   true
+                        :readOnly    true
+                        :order       0}
+          :redirectURI {:displayName "Redirect URI"
+                        :category    "general"
+                        :description "optional redirect URI to be used on success"
+                        :type        "hidden"
+                        :mandatory   false
+                        :readOnly    false
+                        :order       1}}))
 ;;
 ;; multimethods for validation
 ;;

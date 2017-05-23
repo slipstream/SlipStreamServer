@@ -9,6 +9,10 @@
 ;; All session resources must have a 'method' attribute.
 (s/def :cimi.session-template/method :cimi.core/identifier)
 
+;; Sessions may provide a redirect URI to be used on successful authentication.
+(s/def :cimi.session-template/redirectURI :cimi.core/nonblank-string)
+
+;; Restrict the href used to create sessions.
 (def session-template-regex #"^session-template/[a-z]+(-[a-z]+)*$")
 (s/def :cimi.session-template/href (s/and string? #(re-matches session-template-regex %)))
 
@@ -18,7 +22,8 @@
 ;; is no sense in defining map resources for the resource itself.
 ;;
 
-(def session-template-keys-spec {:req-un [:cimi.session-template/method]})
+(def session-template-keys-spec {:req-un [:cimi.session-template/method]
+                                 :opt-un [:cimi.session-template/redirectURI]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs session-template-keys-spec]))
