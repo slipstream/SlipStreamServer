@@ -20,14 +20,7 @@
 ;; description
 ;;
 (def ^:const desc
-  (merge p/SessionTemplateDescription
-         {:redirectURI {:displayName "Redirect URI"
-                        :category    "general"
-                        :description "Redirect URI"
-                        :type        "hidden"
-                        :mandatory   false
-                        :readOnly    false
-                        :order       1}}))
+  (merge p/SessionTemplateDescription))
 
 ;;
 ;; initialization: register this Session template
