@@ -235,14 +235,14 @@
                            :request-method :get)
                   (ltu/body->edn)
                   (ltu/message-matches #".*missing client ID.*")
-                  (ltu/is-status 500))
+                  (ltu/is-status 303))                      ;; always expect redirect when redirectURI is provided
 
               (-> session-anon
                   (request validate-url3
                            :request-method :get)
                   (ltu/body->edn)
                   (ltu/message-matches #".*missing client ID.*")
-                  (ltu/is-status 500)))
+                  (ltu/is-status 303)))                     ;; always expect redirect when redirectURI is provided
 
             ;; try hitting the callback without the OAuth code parameter
             (-> session-anon
@@ -257,14 +257,14 @@
                          :request-method :get)
                 (ltu/body->edn)
                 (ltu/message-matches #".*not contain required code.*")
-                (ltu/is-status 400))
+                (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             (-> session-anon
                 (request validate-url3
                          :request-method :get)
                 (ltu/body->edn)
                 (ltu/message-matches #".*not contain required code.*")
-                (ltu/is-status 400))
+                (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; try now with a fake code
             (with-redefs [auth-github/get-github-access-token (fn [client-id client-secret oauth-code]

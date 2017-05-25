@@ -3,7 +3,10 @@
             [com.sixsq.slipstream.ssclj.resources.session :as p]
             [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
             [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-            [com.sixsq.slipstream.auth.utils.http :as uh]))
+            [com.sixsq.slipstream.auth.utils.http :as uh]
+            [clojure.tools.logging :as log]
+            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+            [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 (defn cookie-name
   "Provides the name of the cookie based on the resource ID in the

@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.db.impl :as db]
     [ring.util.response :as r]
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
 (def ^:const resource-tag :credentials)
 
@@ -50,7 +51,7 @@
 
 (defmethod validate-subtype :default
   [resource]
-  (u/log-and-throw-400 (str "unknown Credential type: '" (:type resource) "'")))
+  (logu/log-and-throw-400 (str "unknown Credential type: '" (:type resource) "'")))
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -67,7 +68,7 @@
 
 (defmethod create-validate-subtype :default
   [resource]
-  (u/log-and-throw-400 "missing or invalid CredentialTemplate reference"))
+  (logu/log-and-throw-400 "missing or invalid CredentialTemplate reference"))
 
 (defmethod crud/validate create-uri
   [resource]
@@ -105,7 +106,7 @@
 ;; default implementation throws if the credential type is unknown
 (defmethod tpl->credential :default
   [resource request]
-  (u/log-and-throw-400 "missing or invalid CredentialTemplate reference"))
+  (logu/log-and-throw-400 "missing or invalid CredentialTemplate reference"))
 
 ;;
 ;; CRUD operations

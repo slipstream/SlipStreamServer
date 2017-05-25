@@ -6,7 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a])
+    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.ssclj.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :credentialTemplates)
@@ -120,7 +121,7 @@
 
 (defmethod crud/add resource-name
   [request]
-  (throw (u/ex-bad-method request)))
+  (throw (r/ex-bad-method request)))
 
 (defmethod crud/retrieve resource-name
   [{{uuid :uuid} :params :as request}]
@@ -128,7 +129,7 @@
     (let [id (str resource-url "/" uuid)]
       (-> (get @templates id)
           (a/can-view? request)
-          (u/json-response)))
+          (r/json-response)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
@@ -143,11 +144,11 @@
 
 (defmethod crud/edit resource-name
   [request]
-  (throw (u/ex-bad-method request)))
+  (throw (r/ex-bad-method request)))
 
 (defmethod crud/delete resource-name
   [request]
-  (throw (u/ex-bad-method request)))
+  (throw (r/ex-bad-method request)))
 
 (defn- viewable? [request {:keys [acl] :as entry}]
   (try
@@ -165,7 +166,7 @@
         count-before-pagination (count entries)
         wrapped-entries (wrapper-fn request entries)
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]
-    (u/json-response entries-and-count)))
+    (r/json-response entries-and-count)))
 
 ;;
 ;; actions
@@ -176,7 +177,7 @@
     (let [id (str resource-url "/" uuid)]
       (-> (get @descriptions id)
           (a/can-view? request)
-          (u/json-response)))
+          (r/json-response)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 

@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.auth.utils.sign :as sg]
-    [com.sixsq.slipstream.auth.cookies :as cookies]))
+    [com.sixsq.slipstream.auth.cookies :as cookies]
+    [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 (def ^:const authn-method "internal")
 
@@ -54,7 +55,7 @@
             client-ip (assoc :clientIP client-ip))))
 
 (defmethod p/tpl->session authn-method
-  [resource {:keys [headers] :as request}]
+  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
   (let [{:keys [username] :as credentials} (select-keys resource #{:username :password})]
     (if (auth-internal/valid? credentials)
       (let [session (sutils/create-session credentials headers authn-method)
@@ -62,5 +63,10 @@
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)
             session (assoc session :expiry expires)]
-        [{:cookies {(sutils/cookie-name (:id session)) cookie}} session])
-      (throw (u/ex-unauthorized (:username credentials))))))
+        (if redirectURI
+          [{:status 303, :headers {"Location" redirectURI}} session]
+          [{:cookies {(sutils/cookie-name (:id session)) cookie}} session]))
+      (if redirectURI
+        (throw (r/ex-redirect (str "invalid credentials for '" username "'") nil redirectURI))
+        (throw (r/ex-unauthorized username))))))
+

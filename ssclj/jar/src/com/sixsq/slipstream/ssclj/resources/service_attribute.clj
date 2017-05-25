@@ -2,6 +2,7 @@
   (:require
     [superstring.core :as str]
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.util.response :as sr]
     [com.sixsq.slipstream.ssclj.resources.spec.service-attribute]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -45,7 +46,7 @@
           msg (str "resource attributes do not satisfy defined namespaces, prefix='"
                    (:prefix resource) "'")
           response (-> {:status code :message msg}
-                       u/json-response
+                       sr/json-response
                        (r/status code))]
       (throw (ex-info msg response)))))
 
