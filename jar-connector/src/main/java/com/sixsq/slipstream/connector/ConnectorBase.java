@@ -398,29 +398,36 @@ public abstract class ConnectorBase implements Connector {
         return null;
     }
 
-    protected String getInstanceType(ImageModule image) throws ValidationException {
-        return getParameterValue(ImageModule.INSTANCE_TYPE_KEY, image);
+    protected String getInstanceType(Run run) throws ValidationException {
+        return getParameterValue(ImageModule.INSTANCE_TYPE_KEY, run);
     }
 
-    protected String getCpu(ImageModule image) throws ValidationException {
-        return getParameterValue(ImageModule.CPU_KEY, image);
+    protected String getCpu(Run run) throws ValidationException {
+        return getParameterValue(ImageModule.CPU_KEY, run);
     }
 
-    protected String getRam(ImageModule image) throws ValidationException {
-        return getParameterValue(ImageModule.RAM_KEY, image);
+    protected String getRam(Run run) throws ValidationException {
+        return getParameterValue(ImageModule.RAM_KEY, run);
     }
 
-    protected String getRootDisk(ImageModule image) throws ValidationException {
-        return image.getParameterValue(ImageModule.DISK_PARAM, null);
+    protected String getRootDisk(Run run) throws ValidationException {
+        return getParameterValue(ImageModule.DISK_PARAM, run);
     }
 
-    protected String getExtraDiskVolatile(ImageModule image) throws ValidationException {
-        return image.getParameterValue(ImageModule.EXTRADISK_VOLATILE_PARAM, null);
+    protected String getExtraDiskVolatile(Run run) throws ValidationException {
+        return getParameterValue(ImageModule.EXTRADISK_VOLATILE_PARAM, run);
     }
 
-    protected String getParameterValue(String parameterName, ImageModule image) throws ValidationException {
-        ModuleParameter parameter = image.getParameter(constructKey(parameterName));
-        return parameter == null ? null : parameter.getValue();
+    protected String getParameterValue(String parameterName, Run run) throws ValidationException {
+        ImageModule image = ImageModule.load(run.getModuleResourceUrl());
+        String parameter= null;
+        try {
+            parameter = run.getRuntimeParameterValue(
+                    RuntimeParameter.constructParamName(Run.MACHINE_NAME, parameterName));
+        } catch (Exception e) {
+            parameter = image.getParameterValue(constructKey(parameterName), null);
+        }
+        return parameter;
     }
 
     protected String getKey(User user) {
