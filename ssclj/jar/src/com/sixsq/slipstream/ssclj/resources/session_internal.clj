@@ -54,7 +54,7 @@
             client-ip (assoc :clientIP client-ip))))
 
 (defmethod p/tpl->session authn-method
-  [resource {:keys [headers] :as request}]
+  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
   (let [{:keys [username] :as credentials} (select-keys resource #{:username :password})]
     (if (auth-internal/valid? credentials)
       (let [session (sutils/create-session credentials headers authn-method)
@@ -62,5 +62,10 @@
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)
             session (assoc session :expiry expires)]
-        [{:cookies {(sutils/cookie-name (:id session)) cookie}} session])
-      (throw (u/ex-unauthorized (:username credentials))))))
+        (if redirectURI
+          [{:status 303, :headers {"Location" redirectURI}} session]
+          [{:cookies {(sutils/cookie-name (:id session)) cookie}} session]))
+      (if redirectURI
+        (throw (u/ex-redirect (str "invalid credentials for '" username "'") nil redirectURI))
+        (throw (u/ex-unauthorized username))))))
+

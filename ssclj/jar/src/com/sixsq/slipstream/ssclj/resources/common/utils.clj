@@ -10,7 +10,9 @@
     [ring.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [clojure.data.json :as json]
-    [clj-time.coerce :as c])
+    [clj-time.coerce :as c]
+    [ring.util.codec :as codec]
+    [com.sixsq.slipstream.ssclj.util.log :as log-util])
   (:import
     [java.util List Map UUID Date]
     [javax.xml.bind DatatypeConverter]))
@@ -55,21 +57,26 @@
       (r/content-type "application/json")))
 
 (defn map-response
-  ([msg status id]
-   (let [m {:status  status
-            :message msg}
-         m (if id (assoc m :resource-id id) m)]
-     (-> m
-         json-response
-         (r/status status))))
   ([msg status]
-   (map-response msg status nil)))
+   (map-response msg status nil nil))
+  ([msg status id]
+   (map-response msg status id nil))
+  ([msg status id location]
+   (let [resp (-> (cond-> {:status status, :message msg}
+                          id (assoc :resource-id id))
+                  json-response
+                  (r/status status))]
+     (if location
+       (update-in resp [:headers "Location"] (constantly location))
+       resp))))
 
 (defn ex-response
+  ([msg status]
+   (ex-info msg (map-response msg status)))
   ([msg status id]
    (ex-info msg (map-response msg status id)))
-  ([msg status]
-   (ex-info msg (map-response msg status))))
+  ([msg status id location]
+   (ex-info msg (map-response msg status id location))))
 
 (defn ex-not-found
   [id]
@@ -83,7 +90,7 @@
 
 (defn ex-unauthorized
   [id]
-  (let [msg (str "not authorized for '" id "'")]
+  (let [msg (str "invalid credentials for '" id "'")]
     (ex-response msg 403 id)))
 
 (defn ex-bad-method
@@ -101,6 +108,14 @@
 (defn ex-bad-CIMI-filter
   [parse-failure]
   (ex-response (str "Invalid CIMI filter. " (prn-str parse-failure)) 400))
+
+(defn ex-redirect
+  "Provides an exception that will redirect (303) to the given redirectURI, by
+   setting the Location header. The message is added as an 'error' query
+   parameter to the redirectURI."
+  [msg id redirectURI]
+  (let [query (str "?error=" (codec/url-encode msg))]
+    (ex-response msg 303 id (str redirectURI query))))
 
 ;;
 ;; resource ID utilities
@@ -191,7 +206,7 @@
         explain (partial s/explain-str spec)]
     (fn [resource]
       (if-not (ok? resource)
-        (log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
+        (log-util/log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
         resource))))
 
 (defn encode-base64

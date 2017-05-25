@@ -3,7 +3,9 @@
             [com.sixsq.slipstream.ssclj.resources.session :as p]
             [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
             [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-            [com.sixsq.slipstream.auth.utils.http :as uh]))
+            [com.sixsq.slipstream.auth.utils.http :as uh]
+            [clojure.tools.logging :as log]
+            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (defn cookie-name
   "Provides the name of the cookie based on the resource ID in the
@@ -72,3 +74,15 @@
                                                              :roles    [session-id]}}}
                   :params     {:uuid (extract-session-uuid session-id)}
                   :body       updated-session}))
+
+(defn log-and-throw
+  "Logs the given message and returns an error response. The error response
+   will contain the status code and message if the redirectURI is not provided.
+   If the redirectURI is provided, then an error response with a redirect to
+   the given URL will be provided. The error message is appended as the 'error'
+   query parameter."
+  [status msg redirectURI]
+  (log/error status "-" msg)
+  (if redirectURI
+    (throw (u/ex-redirect msg nil redirectURI))
+    (throw (u/ex-response msg status))))
