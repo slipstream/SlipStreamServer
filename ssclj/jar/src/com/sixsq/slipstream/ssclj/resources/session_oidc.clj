@@ -22,7 +22,8 @@
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.auth.external :as ex]
-    [com.sixsq.slipstream.auth.utils.timestamp :as ts]))
+    [com.sixsq.slipstream.auth.utils.timestamp :as ts]
+    [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 (def ^:const authn-method "oidc")
 
@@ -63,8 +64,6 @@
 
 (defn throw-invalid-access-code [msg redirectURI]
   (su/log-and-throw 400 (str "error when processing OIDC access token: " msg) redirectURI))
-
-(log-util/log-and-throw)
 
 (defn oidc-client-info
   [redirectURI]
@@ -143,8 +142,8 @@
                       resp
                       (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
                         (if redirectURI
-                          (u/response-final-redirect redirectURI cookie-tuple)
-                          (u/response-created session-id cookie-tuple)))))
+                          (r/response-final-redirect redirectURI cookie-tuple)
+                          (r/response-created session-id cookie-tuple)))))
                   (throw-no-matched-user username email redirectURI)))
               (throw-no-username-or-email username email redirectURI)))
           (catch Exception e

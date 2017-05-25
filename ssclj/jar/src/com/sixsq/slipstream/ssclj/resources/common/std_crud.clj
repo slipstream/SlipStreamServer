@@ -6,7 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.es.es-binding :as esb])
+    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.ssclj.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn add-fn
@@ -31,7 +32,7 @@
       (-> (str (u/de-camelcase resource-name) "/" uuid)
           (db/retrieve request)
           (crud/set-operations request)
-          (u/json-response))
+          (r/json-response))
       (catch ExceptionInfo ei
         (ex-data ei)))))
 
@@ -81,7 +82,7 @@
           [count-before-pagination entries] (db/query resource-name options)
           wrapped-entries (wrapper-fn request entries)
           entries-and-count (assoc wrapped-entries :count count-before-pagination)]
-      (u/json-response entries-and-count))))
+      (r/json-response entries-and-count))))
 
 
 (defn resolve-href

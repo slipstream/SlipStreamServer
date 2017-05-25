@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.auth.utils.sign :as sg]
-    [com.sixsq.slipstream.auth.cookies :as cookies]))
+    [com.sixsq.slipstream.auth.cookies :as cookies]
+    [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 (def ^:const authn-method "internal")
 
@@ -66,6 +67,6 @@
           [{:status 303, :headers {"Location" redirectURI}} session]
           [{:cookies {(sutils/cookie-name (:id session)) cookie}} session]))
       (if redirectURI
-        (throw (u/ex-redirect (str "invalid credentials for '" username "'") nil redirectURI))
-        (throw (u/ex-unauthorized username))))))
+        (throw (r/ex-redirect (str "invalid credentials for '" username "'") nil redirectURI))
+        (throw (r/ex-unauthorized username))))))
 

@@ -12,7 +12,8 @@
 
     [com.sixsq.slipstream.auth.auth :as auth]
     [com.sixsq.slipstream.auth.github :as gh]
-    [com.sixsq.slipstream.auth.cyclone :as cy]))
+    [com.sixsq.slipstream.auth.cyclone :as cy]
+    [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 (def collection-routes
   (let-routes [uri (str p/service-context ":resource-name")]
@@ -23,7 +24,7 @@
     (GET uri request
       (crud/query request))
     (ANY uri request
-      (throw (u/ex-bad-method request)))))
+      (throw (r/ex-bad-method request)))))
 
 (def resource-routes
   (let-routes [uri (str p/service-context ":resource-name/:uuid")]
@@ -34,7 +35,7 @@
     (DELETE uri request
       (crud/delete request))
     (ANY uri request
-      (throw (u/ex-bad-method request)))))
+      (throw (r/ex-bad-method request)))))
 
 (def action-routes
   (let-routes [uri (str p/service-context ":resource-name/:uuid/:action")]
@@ -46,7 +47,7 @@
   []
   (wrap-head
     (fn [{:keys [uri]}]
-      (u/map-response "unknown resource" 404 uri))))
+      (r/map-response "unknown resource" 404 uri))))
 
 (def auth-routes
   (let-routes [uri-login   (str p/auth-context "login")

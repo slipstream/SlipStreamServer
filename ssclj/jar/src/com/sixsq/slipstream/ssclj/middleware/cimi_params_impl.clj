@@ -10,7 +10,8 @@
     [superstring.core :as s]
     [instaparse.core :as insta]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 
 (def ^:const default-last
@@ -106,7 +107,7 @@
 (defn- throw-illegal-for-invalid-filter
   [parse-result]
   (if (insta/failure? parse-result)
-    (throw (u/ex-bad-CIMI-filter (insta/get-failure parse-result)))
+    (throw (r/ex-bad-CIMI-filter (insta/get-failure parse-result)))
     parse-result))
 
 (defn process-filter

@@ -5,7 +5,8 @@
             [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
             [com.sixsq.slipstream.auth.utils.http :as uh]
             [clojure.tools.logging :as log]
-            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+            [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 (defn cookie-name
   "Provides the name of the cookie based on the resource ID in the
@@ -84,5 +85,5 @@
   [status msg redirectURI]
   (log/error status "-" msg)
   (if redirectURI
-    (throw (u/ex-redirect msg nil redirectURI))
-    (throw (u/ex-response msg status))))
+    (throw (r/ex-redirect msg nil redirectURI))
+    (throw (r/ex-response msg status))))

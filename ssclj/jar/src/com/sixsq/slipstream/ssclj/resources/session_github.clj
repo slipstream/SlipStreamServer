@@ -14,7 +14,8 @@
     [com.sixsq.slipstream.auth.github :as auth-github]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.response :as r]
     [com.sixsq.slipstream.auth.utils.sign :as sg]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.timestamp :as tsutil]
@@ -139,8 +140,8 @@
                   resp
                   (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
                     (if redirectURI
-                      (u/response-final-redirect redirectURI cookie-tuple)
-                      (u/response-created session-id cookie-tuple)))))
+                      (r/response-final-redirect redirectURI cookie-tuple)
+                      (r/response-created session-id cookie-tuple)))))
               (throw-no-matched-user redirectURI)))
           (throw-no-user-info redirectURI))
         (throw-no-access-token redirectURI))

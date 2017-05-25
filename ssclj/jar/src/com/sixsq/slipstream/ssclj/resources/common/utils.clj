@@ -12,7 +12,8 @@
     [clojure.data.json :as json]
     [clj-time.coerce :as c]
     [ring.util.codec :as codec]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util])
+    [com.sixsq.slipstream.ssclj.util.log :as log-util]
+    [com.sixsq.slipstream.ssclj.util.response :as sr])
   (:import
     [java.util List Map UUID Date]
     [javax.xml.bind DatatypeConverter]))
@@ -27,95 +28,6 @@
   (if s
     (str/join "-" (map str/lower-case (str/split s #"(?=[A-Z])")))
     ""))
-
-;;
-;; utilities for generating ring responses for standard
-;; conditions and ex-info exceptions with these responses
-;; embedded in them
-;;
-
-(defn response-created
-  "Provides a created response (201) with the Location header given by the
-   identifier and provides the Set-Cookie header with the given cookie, if
-   the cookie value is not nil."
-  [id & [[cookie-name cookie]]]
-  (cond-> {:status 201, :headers {"Location" id}}
-          cookie (assoc :cookies {cookie-name cookie})))
-
-(defn response-final-redirect
-  "Provides a created response (303) with the Location header given by the
-   identifier and provides the Set-Cookie header with the given cookie, if
-   the cookie value is not nil."
-  [location & [[cookie-name cookie]]]
-  (cond-> {:status 303, :headers {"Location" location}}
-          cookie (assoc :cookies {cookie-name cookie})))
-
-(defn json-response
-  [body]
-  (-> body
-      (r/response)
-      (r/content-type "application/json")))
-
-(defn map-response
-  ([msg status]
-   (map-response msg status nil nil))
-  ([msg status id]
-   (map-response msg status id nil))
-  ([msg status id location]
-   (let [resp (-> (cond-> {:status status, :message msg}
-                          id (assoc :resource-id id))
-                  json-response
-                  (r/status status))]
-     (if location
-       (update-in resp [:headers "Location"] (constantly location))
-       resp))))
-
-(defn ex-response
-  ([msg status]
-   (ex-info msg (map-response msg status)))
-  ([msg status id]
-   (ex-info msg (map-response msg status id)))
-  ([msg status id location]
-   (ex-info msg (map-response msg status id location))))
-
-(defn ex-not-found
-  [id]
-  (let [msg (str id " not found")]
-    (ex-response msg 404 id)))
-
-(defn ex-conflict
-  [id]
-  (let [msg (str "conflict with " id)]
-    (ex-response msg 409 id)))
-
-(defn ex-unauthorized
-  [id]
-  (let [msg (str "invalid credentials for '" id "'")]
-    (ex-response msg 403 id)))
-
-(defn ex-bad-method
-  [{:keys [uri request-method] :as request}]
-  (ex-response
-    (str "invalid method (" (name request-method) ") for " uri)
-    405 uri))
-
-(defn ex-bad-action
-  [{:keys [uri request-method] :as request} action]
-  (ex-response
-    (str "undefined action (" (name request-method) ", " action ") for " uri)
-    404 uri))
-
-(defn ex-bad-CIMI-filter
-  [parse-failure]
-  (ex-response (str "Invalid CIMI filter. " (prn-str parse-failure)) 400))
-
-(defn ex-redirect
-  "Provides an exception that will redirect (303) to the given redirectURI, by
-   setting the Location header. The message is added as an 'error' query
-   parameter to the redirectURI."
-  [msg id redirectURI]
-  (let [query (str "?error=" (codec/url-encode msg))]
-    (ex-response msg 303 id (str redirectURI query))))
 
 ;;
 ;; resource ID utilities
@@ -191,7 +103,7 @@
    400 response."
   [msg]
   (let [response (-> {:status 400 :message msg}
-                     json-response
+                     sr/json-response
                      (r/status 400))]
     (log/warn msg)
     (throw (ex-info msg response))))
@@ -206,7 +118,7 @@
         explain (partial s/explain-str spec)]
     (fn [resource]
       (if-not (ok? resource)
-        (log-util/log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
+        (log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
         resource))))
 
 (defn encode-base64

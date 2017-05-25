@@ -1,7 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.authz
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 (derive ::modify ::view)
 (derive ::all ::modify)
@@ -66,7 +67,7 @@
   [resource request action]
   (if (authorized-do? resource request action)
     resource
-    (throw (u/ex-unauthorized (:resource-id resource)))))
+    (throw (r/ex-unauthorized (:resource-id resource)))))
 
 (defn can-modify?
   "Determines if the resource can be modified by the user in the request.
