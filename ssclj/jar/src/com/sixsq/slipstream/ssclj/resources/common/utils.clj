@@ -6,7 +6,6 @@
     [clj-time.format :as time-fmt]
     [clojure.spec.alpha :as s]
     [clj-time.coerce :as c]
-    [clj-time.coerce :as c]
     [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import
     [java.util List Map UUID Date]))
