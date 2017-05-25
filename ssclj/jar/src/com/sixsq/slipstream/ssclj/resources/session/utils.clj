@@ -75,15 +75,3 @@
                                                              :roles    [session-id]}}}
                   :params     {:uuid (extract-session-uuid session-id)}
                   :body       updated-session}))
-
-(defn log-and-throw
-  "Logs the given message and returns an error response. The error response
-   will contain the status code and message if the redirectURI is not provided.
-   If the redirectURI is provided, then an error response with a redirect to
-   the given URL will be provided. The error message is appended as the 'error'
-   query parameter."
-  [status msg redirectURI]
-  (log/error status "-" msg)
-  (if redirectURI
-    (throw (r/ex-redirect msg nil redirectURI))
-    (throw (r/ex-response msg status))))

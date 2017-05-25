@@ -19,12 +19,11 @@
     [com.sixsq.slipstream.auth.utils.sign :as sg]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.timestamp :as tsutil]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
-    [com.sixsq.slipstream.ssclj.resources.session.utils :as su]))
+    [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
 (def ^:const authn-method "github")
 
@@ -49,19 +48,19 @@
 ;;
 
 (defn throw-bad-client-config [redirectURI]
-  (su/log-and-throw 500 "missing client ID and/or secret (:github-client-id, :github-client-secret) for GitHub authentication" redirectURI))
+  (logu/log-error-and-throw-with-redirect 500 "missing client ID and/or secret (:github-client-id, :github-client-secret) for GitHub authentication" redirectURI))
 
 (defn throw-missing-oauth-code [redirectURI]
-  (su/log-and-throw 400 "GitHub authentication callback request does not contain required code" redirectURI))
+  (logu/log-error-and-throw-with-redirect 400 "GitHub authentication callback request does not contain required code" redirectURI))
 
 (defn throw-no-access-token [redirectURI]
-  (su/log-and-throw 400 "unable to retrieve GitHub access code" redirectURI))
+  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve GitHub access code" redirectURI))
 
 (defn throw-no-user-info [redirectURI]
-  (su/log-and-throw 400 "unable to retrieve GitHub user information" redirectURI))
+  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve GitHub user information" redirectURI))
 
 (defn throw-no-matched-user [redirectURI]
-  (su/log-and-throw 403 "no matching account for GitHub user" redirectURI))
+  (logu/log-error-and-throw-with-redirect 403 "no matching account for GitHub user" redirectURI))
 
 (defn github-client-info
   [redirectURI]

@@ -1,26 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils
   "General utilities for dealing with resources."
   (:require
-    [clojure.tools.logging :as log]
-    [clojure.edn :as edn]
     [superstring.core :as str]
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
     [clojure.spec.alpha :as s]
-    [ring.util.response :as r]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [clojure.data.json :as json]
     [clj-time.coerce :as c]
-    [ring.util.codec :as codec]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util]
-    [com.sixsq.slipstream.ssclj.util.response :as sr])
+    [clj-time.coerce :as c]
+    [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import
-    [java.util List Map UUID Date]
-    [javax.xml.bind DatatypeConverter]))
-
-(defn string->int [s]
-  (when (re-matches #"\d+" s)
-    (read-string s)))
+    [java.util List Map UUID Date]))
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.
@@ -98,16 +87,6 @@
     (catch Exception _
       nil)))
 
-(defn log-and-throw-400
-  "Logs the given message as a warning and then throws an exception with a
-   400 response."
-  [msg]
-  (let [response (-> {:status 400 :message msg}
-                     sr/json-response
-                     (r/status 400))]
-    (log/warn msg)
-    (throw (ex-info msg response))))
-
 (defn create-spec-validation-fn
   "Creates a validation function that compares a resource against the
    given schema.  The generated function raises an exception with the
@@ -118,26 +97,8 @@
         explain (partial s/explain-str spec)]
     (fn [resource]
       (if-not (ok? resource)
-        (log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
+        (logu/log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
         resource))))
-
-(defn encode-base64
-  "Encodes a clojure value or data structure (EDN) into a base64
-   string representation."
-  [m]
-  (-> m
-      (pr-str)
-      (.getBytes)
-      (DatatypeConverter/printBase64Binary)))
-
-(defn decode-base64
-  "Decodes a base64 string representation of a clojure value or
-   data structure (EDN) into a clojure value."
-  [b64]
-  (-> b64
-      (DatatypeConverter/parseBase64Binary)
-      (String.)
-      (edn/read-string)))
 
 (defn- clojurify
   [exp]
@@ -164,31 +125,13 @@
   (re-matches #"[a-z]+(-[a-z]+)*" s))
 
 (defn lisp-to-camelcase
-  "Converts s to CamelCase format.
-  s must be lisp-cased, if not empty string is returned."
+  "Converts s to CamelCase format. If the argument is not lisp-cased, an empty
+  string is returned."
   [s]
-  (if-not (lisp-cased? s)
-    (do
-      (log/warn s " is not lisp-cased.")
-      "")
-    (str/pascal-case s)))
+  (if (lisp-cased? s)
+    (str/pascal-case s)
+    ""))
 
 (defn map-multi-line
   [m]
   (str "\n" (clojure.pprint/write m :stream nil :right-margin 50)))
-
-(defn- name-plus-namespace
-  [kw]
-  (if (keyword? kw)
-    (subs (str kw) 1)
-    (name kw)))
-
-(defn serialize
-  [resource]
-  (with-out-str
-    (json/pprint resource :key-fn name-plus-namespace)))
-
-(defn deserialize
-  [s]
-  (json/read-str s :key-fn keyword))
-

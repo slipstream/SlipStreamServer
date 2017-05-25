@@ -1,18 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils-test
   (:require
     [clojure.test :refer [deftest are is]]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
-
-(deftest check-encoding
-  (let [round-trip (comp r/decode-base64 r/encode-base64)
-        values ["alpha"
-                2
-                true
-                3.14
-                {:alpha "alpha"}]]
-
-    (doseq [v values]
-      (is (= v (round-trip v))))))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as r]))
 
 (deftest check-de-camelcase
   (are [expect arg] (= expect (r/de-camelcase arg))
@@ -21,7 +10,7 @@
                     "abc-def" "AbcDef"))
 
 ;; given string must be lisp-cased, if not empty string returned
-(deftest check-list-to-camelcase
+(deftest check-lisp-to-camelcase
   (are [expect arg] (= expect (r/lisp-to-camelcase arg))
                     "" "Abc"
                     "" "-"
@@ -31,25 +20,3 @@
                     "" ""
                     "Abc" "abc"
                     "AbcDef" "abc-def"))
-
-(deftest check-serialize
-  (is (= "{\"http:\\/\\/example.org\\/a\\/b.json\":\"truc\"}\n"
-         (r/serialize {:http://example.org/a/b.json "truc"})))
-  (is (= "{\"http:\\/\\/example.org\\/a\\/b.json\":\"truc\"}\n"
-         (r/serialize {"http://example.org/a/b.json" "truc"}))))
-
-(deftest check-response-created
-  []
-  (let [id "RESOURCE_ID"
-        r (r/response-created id)]
-    (is (= 201 (:status r)))
-    (is (= id (get-in r [:headers "Location"])))
-    (is (nil? (:cookies r))))
-
-  (let [id "RESOURCE_ID"
-        cookie-name "MY_COOKIE"
-        cookie-value "MY_COOKIE_VALUE"
-        r (r/response-created id [cookie-name cookie-value])]
-    (is (= 201 (:status r)))
-    (is (= id (get-in r [:headers "Location"])))
-    (is (= cookie-value (get-in r [:cookies cookie-name])))))
