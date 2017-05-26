@@ -9,17 +9,6 @@
 (def ^:const authn-method "internal")
 
 ;;
-;; resource
-;;
-(def ^:const resource
-  {:method      authn-method
-   :name        "Internal"
-   :description "Internal Authentication via Username/Password"
-   :username    "username"
-   :password    "password"
-   })
-
-;;
 ;; description
 ;;
 (def ^:const desc
@@ -30,21 +19,21 @@
                      :type        "string"
                      :mandatory   true
                      :readOnly    false
-                     :order       1}
+                     :order       3}
           :password {:displayName "Password"
                      :category    "general"
                      :description "password"
                      :type        "password"
                      :mandatory   true
                      :readOnly    false
-                     :order       2}}))
+                     :order       4}}))
 
 ;;
 ;; initialization: register this Session template
 ;;
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register authn-method desc))
 
 ;;
 ;; multimethods for validation

@@ -12,6 +12,10 @@
 ;; Sessions may provide a redirect URI to be used on successful authentication.
 (s/def :cimi.session-template/redirectURI :cimi.core/nonblank-string)
 
+;; Session templates must provide a method identifier, which is used for the
+;; unique identifier.
+(s/def :cimi.session-template/methodKey :cimi.core/identifier)
+
 ;; Restrict the href used to create sessions.
 (def session-template-regex #"^session-template/[a-z]+(-[a-z]+)*$")
 (s/def :cimi.session-template/href (s/and string? #(re-matches session-template-regex %)))
@@ -22,7 +26,8 @@
 ;; is no sense in defining map resources for the resource itself.
 ;;
 
-(def session-template-keys-spec {:req-un [:cimi.session-template/method]
+(def session-template-keys-spec {:req-un [:cimi.session-template/method
+                                          :cimi.session-template/methodKey]
                                  :opt-un [:cimi.session-template/redirectURI]})
 
 (def resource-keys-spec

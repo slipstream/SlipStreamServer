@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
-    [com.sixsq.slipstream.ssclj.util.response :as r])
+    [com.sixsq.slipstream.ssclj.util.response :as r]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :sessionTemplates)
@@ -24,12 +25,21 @@
 
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
-                   :rules [{:principal "ANON"
+                   :rules [{:principal "ADMIN"
+                            :type      "ROLE"
+                            :right     "ALL"}
+                           {:principal "ANON"
                             :type      "ROLE"
                             :right     "VIEW"}
                            {:principal "USER"
                             :type      "ROLE"
                             :right     "VIEW"}]})
+
+(def desc-acl {:owner {:principal "ADMIN"
+                       :type      "ROLE"}
+               :rules [{:principal "ANON"
+                        :type      "ROLE"
+                        :right     "VIEW"}]})
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
@@ -41,51 +51,19 @@
                               :right     "VIEW"}]})
 
 ;;
-;; atom to keep track of the loaded SessionTemplate resources
+;; atom to keep track of the SessionTemplate descriptions
 ;;
-(def templates (atom {}))
 (def descriptions (atom {}))
 
-(defn collection-wrapper-fn
-  "Specialized version of this function that removes the adding
-   of operations to the collection and entries.  These are already
-   part of the stored resources."
-  [resource-name collection-acl collection-uri collection-key]
-  (fn [_ entries]
-    (let [skeleton {:acl         collection-acl
-                    :resourceURI collection-uri
-                    :id          (u/de-camelcase resource-name)}]
-      (assoc skeleton collection-key entries))))
-
-(defn complete-resource
-  "Completes the given document with server-managed information:
-   resourceURI, timestamps, operations, and ACL."
-  [{:keys [method] :as resource}]
-  (when method
-    (let [id (str resource-url "/" method)
-          href (str id "/describe")
-          ops [{:rel (:describe c/action-uri) :href href}]]
-      (-> resource
-          (merge {:id          id
-                  :resourceURI resource-uri
-                  :acl         resource-acl
-                  :operations  ops})
-          u/update-timestamps))))
-
 (defn register
-  "Registers a given SessionTemplate resource and its description
-   with the server.  The resource document (resource) and the description
-   (desc) must be valid.  The key will be used to create the id of
-   the resource as 'session-template/key'."
-  [resource desc]
-  (when-let [{:keys [id] :as full-resource} (complete-resource resource)]
-    (swap! templates assoc id full-resource)
-    (log/info "loaded SessionTemplate" id)
-    (when desc
-      (let [acl (:acl full-resource)
-            full-desc (assoc desc :acl acl)]
-        (swap! descriptions assoc id full-desc))
-      (log/info "loaded SessionTemplate description" id))))
+  "Registers a given SessionTemplate description with the server. The
+   description (desc) must be valid. The authentication method must be used as
+   the id. The description can be looked up via the id, e.g. 'internal'."
+  [id desc]
+  (when (and id desc)
+    (let [full-desc (assoc desc :acl desc-acl)]
+      (swap! descriptions assoc id full-desc))
+    (log/info "loaded SessionTemplate description" id)))
 
 ;;
 ;; schemas
@@ -100,13 +78,20 @@
                         :mandatory   true
                         :readOnly    true
                         :order       0}
+          :methodKey   {:displayName "Authentication Method Key (Name)"
+                        :category    "general"
+                        :description "key used to identify this authentication source"
+                        :type        "string"
+                        :mandatory   true
+                        :readOnly    false
+                        :order       1}
           :redirectURI {:displayName "Redirect URI"
                         :category    "general"
                         :description "optional redirect URI to be used on success"
                         :type        "hidden"
                         :mandatory   false
                         :readOnly    false
-                        :order       1}}))
+                        :order       2}}))
 ;;
 ;; multimethods for validation
 ;;
@@ -129,47 +114,57 @@
 ;; CRUD operations
 ;;
 
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
 (defmethod crud/add resource-name
-  [request]
-  (throw (r/ex-bad-method request)))
+  [{{:keys [method]} :body :as request}]
+  (if (get @descriptions method)
+    (add-impl request)
+    (throw (r/ex-bad-request (str "invalid authentication method '" method "'")))))
+
+(def retrieve-impl (std-crud/retrieve-fn resource-name))
 
 (defmethod crud/retrieve resource-name
-  [{{uuid :uuid} :params :as request}]
-  (try
-    (let [id (str resource-url "/" uuid)]
-      (-> (get @templates id)
-          (a/can-view? request)
-          (r/json-response)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+  [request]
+  (retrieve-impl request))
 
-;; must override the default implementation so that the
-;; data can be pulled from the atom rather than the database
-(defmethod crud/retrieve-by-id resource-url
-  [id]
-  (try
-    (get @templates id)
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+(def edit-impl (std-crud/edit-fn resource-name))
 
 (defmethod crud/edit resource-name
   [request]
-  (throw (r/ex-bad-method request)))
+  (edit-impl request))
+
+(def delete-impl (std-crud/delete-fn resource-name))
 
 (defmethod crud/delete resource-name
   [request]
-  (throw (r/ex-bad-method request)))
+  (delete-impl request))
+
+(def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
 (defmethod crud/query resource-name
   [request]
-  (a/can-view? {:acl collection-acl} request)
-  (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
-        ;; FIXME: At least the paging options should be supported.
-        options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
-        [count-before-pagination entries] ((juxt count vals) @templates)
-        wrapped-entries (wrapper-fn request entries)
-        entries-and-count (assoc wrapped-entries :count count-before-pagination)]
-    (r/json-response entries-and-count)))
+  (query-impl request))
+
+;;
+;; override the operations method to add describe action
+;;
+
+(defmethod crud/set-operations resource-uri
+  [{:keys [id resourceURI] :as resource} request]
+  (let [href (str id "/describe")]
+    (try
+      (a/can-modify? resource request)
+      (let [ops (if (.endsWith resourceURI "Collection")
+                  [{:rel (:add c/action-uri) :href id}]
+                  [{:rel (:edit c/action-uri) :href id}
+                   {:rel (:delete c/action-uri) :href id}
+                   {:rel (:describe c/action-uri) :href href}])]
+        (assoc resource :operations ops))
+      (catch Exception e
+        (if (.endsWith resourceURI "Collection")
+          (dissoc resource :operations)
+          (assoc resource :operations [{:rel (:describe c/action-uri) :href href}]))))))
 
 ;;
 ;; actions
@@ -178,9 +173,12 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (get @descriptions id)
-          (a/can-view? request)
-          (r/json-response)))
+      (if-let [{:keys [method] :as resource} (crud/retrieve-by-id id {:user-name "INTERNAL" :user-roles ["ADMIN"]})]
+        (if (a/can-view? resource request)
+          (if-let [desc (get @descriptions method)]
+            (r/json-response desc)
+            (r/ex-not-found id)))
+        (r/ex-not-found id)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
