@@ -111,6 +111,15 @@
   (validate-subtype resource))
 
 ;;
+;; identifiers for these resources are the same as the :methodKey value
+;;
+(defmethod crud/new-identifier resource-name
+  [{:keys [methodKey] :as resource} resource-name]
+  (->> methodKey
+       (str resource-url "/")
+       (assoc resource :id)))
+
+;;
 ;; CRUD operations
 ;;
 

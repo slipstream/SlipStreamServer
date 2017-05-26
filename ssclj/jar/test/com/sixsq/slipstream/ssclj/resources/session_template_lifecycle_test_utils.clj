@@ -109,6 +109,14 @@
             (ltu/body->edn)
             (ltu/is-status 200)))
 
+      ;; verify that the id corresponds to the value in the methodKey parameter
+      (let [{:keys [id methodKey]} (-> session-anon
+                                       (request abs-uri)
+                                       (ltu/body->edn)
+                                       :response
+                                       :body)]
+        (is (= id (str resource-url "/" methodKey))))
+
       ;; verify that editing/updating the template works
       (let [orig-template (-> session-anon
                               (request abs-uri)
