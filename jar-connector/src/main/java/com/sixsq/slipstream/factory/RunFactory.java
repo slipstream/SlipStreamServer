@@ -20,16 +20,10 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.connector.ConnectorBase;
-import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
-import com.sixsq.slipstream.connector.UserParametersFactoryBase;
+import com.sixsq.slipstream.connector.*;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
@@ -39,7 +33,8 @@ import com.sixsq.slipstream.util.FileUtil;
 
 public abstract class RunFactory {
 
-	public final Run createRun(Module module, User user) throws SlipStreamClientException {
+	public final Run
+	createRun(Module module, User user) throws SlipStreamClientException {
 		return createRun(module, user, null);
 	}
 
@@ -376,6 +371,29 @@ public abstract class RunFactory {
 		if (parent != null) {
 			findAndAddImagesApplicationParameters(parameters, parent);
 		}
+	}
+
+	protected static Map<String, ModuleParameter> getConnectorParameters(String cloudServiceName) {
+		Connector connector = null;
+		Map<String, ModuleParameter> parameters = new HashMap<>();
+		try {
+			connector = ConnectorFactory.getConnector(cloudServiceName);
+			parameters = connector.getImageParametersTemplate();
+		} catch (ValidationException ignored) {}
+		return parameters;
+	}
+
+	protected static String removePrefixParameter(String parameter, String prefix) {
+		return parameter.replaceFirst("^" + prefix + RuntimeParameter.PARAM_WORD_SEPARATOR, "");
+	}
+
+	protected static List<String> getConnectorParametersAsKeysList(Map<String, ModuleParameter> parameters,
+																 String cloudServiceName) {
+		List<String> cloudParameters = new ArrayList<String>();
+		for (String cp : parameters.keySet()) {
+			cloudParameters.add(removePrefixParameter(cp, cloudServiceName));
+		}
+		return cloudParameters;
 	}
 
 }

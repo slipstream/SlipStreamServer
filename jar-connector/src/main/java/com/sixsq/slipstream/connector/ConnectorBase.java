@@ -268,8 +268,8 @@ public abstract class ConnectorBase implements Connector {
     }
 
     private String getUserPublicSshKey(User user) throws ValidationException, IOException {
-        return user.getParameter(
-                ExecutionControlUserParametersFactory.CATEGORY + "." + UserParametersFactoryBase.SSHKEY_PARAMETER_NAME)
+        return user.getParameter(Parameter.constructKey(
+                ExecutionControlUserParametersFactory.CATEGORY, UserParametersFactoryBase.SSHKEY_PARAMETER_NAME))
                 .getValue();
     }
 
@@ -419,12 +419,13 @@ public abstract class ConnectorBase implements Connector {
     }
 
     protected String getParameterValue(String parameterName, Run run) throws ValidationException {
-        ImageModule image = ImageModule.load(run.getModuleResourceUrl());
         String parameter= null;
         try {
             parameter = run.getRuntimeParameterValue(
-                    RuntimeParameter.constructParamName(Run.MACHINE_NAME, parameterName));
+                    RuntimeParameter.constructParamName(Run.MACHINE_NAME,
+                            Parameter.constructKey(this.getConnectorInstanceName(), parameterName)));
         } catch (Exception e) {
+            ImageModule image = ImageModule.load(run.getModuleResourceUrl());
             parameter = image.getParameterValue(constructKey(parameterName), null);
         }
         return parameter;

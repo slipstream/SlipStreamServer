@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.sixsq.slipstream.connector.CloudService;
-import com.sixsq.slipstream.connector.Connector;
-import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -152,12 +150,19 @@ public class BuildImageFactory extends RunFactory {
 		String cloudServiceName = run.getCloudServiceNameForNode(nodeInstanceName);
 		filter.add(cloudServiceName);
 
-		Connector connector = null;
-		Map<String, ModuleParameter> parameters = new HashMap<>();
-		try {
-			connector = ConnectorFactory.getConnector(cloudServiceName);
-			parameters = connector.getImageParametersTemplate();
-		} catch (ValidationException e) {
+		Map<String, ModuleParameter> parameters = getConnectorParameters(cloudServiceName);
+
+		List<String> cloudParameters = getConnectorParametersAsKeysList(parameters, cloudServiceName);
+
+		for(RunParameter p : run.getParameterList()) {
+			String paramWithoutPrefix = removePrefixParameter(p.getName(), nodeInstanceName);
+			if (cloudParameters.contains(paramWithoutPrefix)) {
+				RunParameter rp = run.getParameters().get(p.getName());
+				rp.setCategory(cloudServiceName);
+				rp.setName(constructParamName(nodeInstanceName,
+						Parameter.constructKey(cloudServiceName, paramWithoutPrefix)));
+				run.setParameter(rp);
+			}
 		}
 
 		parameters.putAll(image.getParameters());
@@ -225,7 +230,7 @@ public class BuildImageFactory extends RunFactory {
 		List<Parameter<?>> userChoicesForMachine = userChoices.get(nodeInstanceName);
 
 		for (Parameter<?> parameter : userChoicesForMachine) {
-			checkParameterIsValid(image, parameter);
+			checkParameterIsValid(image, parameter, run.getCloudServiceNameForNode(nodeInstanceName));
 
 			String key = constructParamName(nodeInstanceName, parameter.getName());
 			RunParameter rp = new RunParameter(key, parameter.getValue(), "");
@@ -246,10 +251,13 @@ public class BuildImageFactory extends RunFactory {
 		return true;
 	}
 
-	private void checkParameterIsValid(ImageModule image, Parameter<?> parameter) throws ValidationException {
+	private static void checkParameterIsValid(ImageModule image, Parameter<?> parameter, String cloudServiceName)
+			throws ValidationException {
 		List<String> paramsToFilter = new ArrayList<String>();
 		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		paramsToFilter.add(RuntimeParameter.CLOUD_SERVICE_NAME);
+		paramsToFilter.addAll(
+				getConnectorParametersAsKeysList(getConnectorParameters(cloudServiceName), cloudServiceName));
 
 		String paramName = parameter.getName();
 		if (!image.getParameters().containsKey(paramName)

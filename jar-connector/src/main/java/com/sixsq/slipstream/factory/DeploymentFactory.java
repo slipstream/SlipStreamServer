@@ -209,13 +209,19 @@ public class DeploymentFactory extends RunFactory {
 
 		String cloudService = run.getCloudServiceNameForNode(node.getName());
 		ImageModule image = node.getImage();
-		Map<String, ModuleParameter> parameters = new HashMap<>();
-		Connector connector = null;
+		Map<String, ModuleParameter> parameters = getConnectorParameters(cloudService);
 
-		try {
-			connector = ConnectorFactory.getConnector(cloudService);
-			parameters = connector.getImageParametersTemplate();
-		} catch (ValidationException e) {
+		List<String> cloudParameters = getConnectorParametersAsKeysList(parameters, cloudService);
+
+		for(RunParameter p : run.getParameterList()) {
+			String paramWithoutPrefix = removePrefixParameter(p.getName(), node.getName());
+			if (cloudParameters.contains(paramWithoutPrefix)) {
+				RunParameter rp = run.getParameters().get(p.getName());
+				rp.setCategory(cloudService);
+				rp.setName(constructParamName(node.getName(),
+						Parameter.constructKey(cloudService, paramWithoutPrefix)));
+				run.setParameter(rp);
+			}
 		}
 
 		parameters.putAll(image.getParameters());
@@ -373,7 +379,7 @@ public class DeploymentFactory extends RunFactory {
 			Node node = deployment.getNodes().get(nodeName);
 
 			for (Parameter<?> parameter : entry.getValue()) {
-				checkParameterIsValid(node, parameter);
+				checkParameterIsValid(node, parameter, run.getCloudServiceNameForNode(nodeName));
 
 				String value = extractNodeParameterValue((NodeParameter)parameter);
 				insertNewRunParameterForNode(run, node, parameter.getName(), value, "", ignoreList);
@@ -383,11 +389,15 @@ public class DeploymentFactory extends RunFactory {
 
 
 
-	private void checkParameterIsValid(Node node, Parameter<?> parameter) throws ValidationException {
+	private void checkParameterIsValid(Node node, Parameter<?> parameter, String cloudServiceName) throws ValidationException {
 		List<String> paramsToFilter = new ArrayList<String>();
 		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		paramsToFilter.add(RuntimeParameter.CLOUD_SERVICE_NAME);
 		paramsToFilter.add(RuntimeParameter.MAX_PROVISIONING_FAILURES);
+
+		paramsToFilter.addAll(getConnectorParametersAsKeysList(
+				getConnectorParameters(cloudServiceName), cloudServiceName));
+
 
 		String paramName = parameter.getName();
 		if (!node.getParameters().containsKey(paramName) &&
