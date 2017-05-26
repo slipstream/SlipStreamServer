@@ -16,17 +16,28 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.auth.utils.sign :as sign]))
+    [com.sixsq.slipstream.auth.utils.sign :as sign]
+    [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
+
+(def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
+
+(def session-template-internal {:method      internal/authn-method
+                                :methodKey   internal/authn-method
+                                :name        "Internal"
+                                :description "Internal Authentication via Username/Password"
+                                :username    "username"
+                                :password    "password"
+                                :acl         st/resource-acl})
 
 (defn strip-unwanted-attrs [m]
   (let [unwanted #{:id :resourceURI :acl :operations
@@ -91,8 +102,21 @@
                             (content-type "application/json")
                             (header authn-info-header "root ADMIN"))
 
-          href (str ct/resource-url "/" internal/authn-method)
-          template-url (str p/service-context ct/resource-url "/" internal/authn-method)
+          ;;
+          ;; create the session template to use for these tests
+          ;;
+          href (-> session-admin
+                   (request session-template-base-uri
+                            :request-method :post
+                            :body (json/write-str session-template-internal))
+                   (ltu/body->edn)
+                   (ltu/is-status 201)
+                   (ltu/location))
+
+          template-url (str p/service-context href)
+
+          ;;href (str ct/resource-url "/" internal/authn-method)
+          ;;template-url (str p/service-context ct/resource-url "/" internal/authn-method)
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)

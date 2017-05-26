@@ -19,17 +19,26 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
+
+(def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
+
+(def session-template-internal {:method      oidc/authn-method
+                                :methodKey   oidc/authn-method
+                                :name        "OpenID Connect"
+                                :description "External Authentication via OpenID Connect Protocol"
+                                :acl         st/resource-acl})
 
 (defn strip-unwanted-attrs [m]
   (let [unwanted #{:id :resourceURI :acl :operations
@@ -54,8 +63,22 @@
         redirect-uri "https://example.com/webui"]
 
     ;; get session template so that session resources can be tested
-    (let [href (str ct/resource-url "/" oidc/authn-method)
-          template-url (str p/service-context ct/resource-url "/" oidc/authn-method)
+    (let [
+          ;;
+          ;; create the session template to use for these tests
+          ;;
+          href (-> session-admin
+                   (request session-template-base-uri
+                            :request-method :post
+                            :body (json/write-str session-template-internal))
+                   (ltu/body->edn)
+                   (ltu/is-status 201)
+                   (ltu/location))
+
+          template-url (str p/service-context href)
+
+          ;;href (str ct/resource-url "/" oidc/authn-method)
+          ;;template-url (str p/service-context ct/resource-url "/" oidc/authn-method)
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)
