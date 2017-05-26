@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-template-lifecycle-utils
+(ns com.sixsq.slipstream.ssclj.resources.session-template-lifecycle-test-utils
   (:require
     [clojure.test :refer :all]
     [clojure.set :as set]

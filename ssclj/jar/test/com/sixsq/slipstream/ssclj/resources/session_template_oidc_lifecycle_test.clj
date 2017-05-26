@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.session-template-lifecycle-utils :as stu]))
+    [com.sixsq.slipstream.ssclj.resources.session-template-lifecycle-test-utils :as stu]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
