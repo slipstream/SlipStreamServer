@@ -55,10 +55,10 @@
             client-ip (assoc :clientIP client-ip))))
 
 (defmethod p/tpl->session authn-method
-  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
+  [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
   (let [{:keys [username] :as credentials} (select-keys resource #{:username :password})]
     (if (auth-internal/valid? credentials)
-      (let [session (sutils/create-session credentials headers authn-method)
+      (let [session (sutils/create-session (merge credentials {:href href}) headers authn-method)
             claims (create-claims username headers (:id session) (:clientIP session))
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)

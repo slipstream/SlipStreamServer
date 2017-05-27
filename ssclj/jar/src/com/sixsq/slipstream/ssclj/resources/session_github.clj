@@ -63,9 +63,9 @@
   (logu/log-error-and-throw-with-redirect 403 "no matching account for GitHub user" redirectURI))
 
 (defn github-client-info
-  [redirectURI]
-  (let [client-id (environ/env :github-client-id)
-        client-secret (environ/env :github-client-secret)]
+  [redirectURI methodKey]
+  (let [client-id (environ/env (keyword (str "github-client-id-" methodKey)))
+        client-secret (environ/env (keyword (str "github-client-secret-" methodKey)))]
     (if (and client-id client-secret)
       [client-id client-secret]
       (throw-bad-client-config redirectURI))))
@@ -91,10 +91,10 @@
 
 ;; creates a temporary session and redirects to GitHub to start authentication workflow
 (defmethod p/tpl->session authn-method
-  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id client-secret] (github-client-info redirectURI)]
+  [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
+  (let [[client-id client-secret] (github-client-info redirectURI (u/document-id href))]
     (if (and client-id client-secret)
-      (let [session-init (cond-> {}
+      (let [session-init (cond-> {:href href}
                                  redirectURI (assoc :redirectURI redirectURI))
             session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
@@ -115,8 +115,8 @@
 (defmethod p/validate-callback authn-method
   [resource {:keys [headers uri redirectURI] :as request}]
   (let [session-id (sutils/extract-session-id uri)
-        {:keys [server clientIP redirectURI] :as current-session} (sutils/retrieve-session-by-id session-id)
-        [client-id client-secret] (github-client-info redirectURI)]
+        {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
+        [client-id client-secret] (github-client-info redirectURI (u/document-id href))]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-github/get-github-access-token client-id client-secret code)]
         (if-let [{:keys [user email] :as user-info} (auth-github/get-github-user-info access-token)]

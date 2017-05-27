@@ -52,7 +52,7 @@
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown Session type: " (:method resource)) resource)))
+  (throw (ex-info (str "unknown Session type: '" (:method resource) "'") resource)))
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -205,7 +205,7 @@
         body (if (is-form? headers) (convert-form form-params) body)
         [cookie-header body] (-> body
                                  (assoc :resourceURI create-uri)
-                                 (std-crud/resolve-hrefs idmap)
+                                 (std-crud/resolve-hrefs idmap true)
                                  (crud/validate)
                                  (:sessionTemplate)
                                  (tpl->session request))]

@@ -19,17 +19,27 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.auth.github :as auth-github]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
-    [com.sixsq.slipstream.auth.external :as ex]))
+    [com.sixsq.slipstream.auth.external :as ex]
+    [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
+
+(def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
+
+(def methodKey "test-github")
+(def session-template-github {:method      github/authn-method
+                              :methodKey   methodKey
+                              :name        "GitHub"
+                              :description "External Authentication with GitHub Credentials"
+                              :acl         st/resource-acl})
 
 (defn strip-unwanted-attrs [m]
   (let [unwanted #{:id :resourceURI :acl :operations
@@ -38,33 +48,46 @@
 
 (deftest lifecycle
 
-  (let [session-admin (-> (session (ring-app))
+  (let [app (ring-app)
+        session-admin (-> (session app)
                           (content-type "application/json")
                           (header authn-info-header "admin ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
+        session-user (-> (session app)
                          (content-type "application/json")
                          (header authn-info-header "user USER ANON"))
-        session-anon (-> (session (ring-app))
+        session-anon (-> (session app)
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
-        session-anon-form (-> (session (ring-app))
+        session-anon-form (-> (session app)
                               (content-type session/form-urlencoded)
                               (header "content-type" session/form-urlencoded)
                               (header authn-info-header "unknown ANON"))
         redirect-uri "https://example.com/webui"]
 
     ;; get session template so that session resources can be tested
-    (let [href (str ct/resource-url "/" github/authn-method)
-          template-url (str p/service-context ct/resource-url "/" github/authn-method)
+    (let [
+          ;;
+          ;; create the session template to use for these tests
+          ;;
+          href (-> session-admin
+                   (request session-template-base-uri
+                            :request-method :post
+                            :body (json/write-str session-template-github))
+                   (ltu/body->edn)
+                   (ltu/is-status 201)
+                   (ltu/location))
+
+          template-url (str p/service-context href)
+
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
-          valid-create {:sessionTemplate (strip-unwanted-attrs template)}
-          href-create {:sessionTemplate {:href        href
-                                         :redirectURI redirect-uri}}
-          invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
+          href-create {:sessionTemplate {:href href}}
+          href-create-redirect {:sessionTemplate {:href        href
+                                                  :redirectURI redirect-uri}}
+          invalid-create (assoc-in href-create-redirect [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
       (-> session-anon
@@ -77,20 +100,20 @@
       (-> session-anon
           (request base-uri
                    :request-method :post
-                   :body (json/write-str valid-create))
+                   :body (json/write-str href-create))
           (ltu/body->edn)
           (ltu/message-matches #".*missing client ID.*")
           (ltu/is-status 500))
 
       ;; anonymous create must succeed (normal create and href create)
       (with-redefs [environ.core/env (merge environ.core/env
-                                            {:github-client-id     "FAKE_CLIENT_ID"
-                                             :github-client-secret "FAKE_CLIENT_SECRET"})]
+                                            {(keyword (str "github-client-id-" methodKey))     "FAKE_CLIENT_ID"
+                                             (keyword (str "github-client-secret-" methodKey)) "FAKE_CLIENT_SECRET"})]
 
         (let [resp (-> session-anon
                        (request base-uri
                                 :request-method :post
-                                :body (json/write-str valid-create))
+                                :body (json/write-str href-create))
                        (ltu/body->edn)
                        (ltu/is-status 303))
               id (get-in resp [:response :body :resource-id])
@@ -101,7 +124,7 @@
               resp (-> session-anon
                        (request base-uri
                                 :request-method :post
-                                :body (json/write-str href-create))
+                                :body (json/write-str href-create-redirect))
                        (ltu/body->edn)
                        (ltu/is-status 303))
               id2 (get-in resp [:response :body :resource-id])

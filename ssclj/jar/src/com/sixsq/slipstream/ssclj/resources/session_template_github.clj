@@ -9,14 +9,6 @@
 (def ^:const authn-method "github")
 
 ;;
-;; resource
-;;
-(def ^:const resource
-  {:method      authn-method
-   :name        "GitHub"
-   :description "External Authentication with GitHub Credentials"})
-
-;;
 ;; description
 ;;
 (def ^:const desc
@@ -27,7 +19,7 @@
 ;;
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register authn-method desc))
 
 ;;
 ;; multimethods for validation

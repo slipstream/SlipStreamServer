@@ -52,6 +52,13 @@
   ([msg status id location]
    (ex-info msg (map-response msg status id location))))
 
+(defn ex-bad-request
+  "Provides an ExceptionInfo exception when the input is not valid. This is a
+   400 status response. If the message is not provided, a generic one is used."
+  [& [msg]]
+  (let [msg (or msg "invalid request")]
+    (ex-response msg 400)))
+
 (defn ex-not-found
   "Provides an ExceptionInfo exception when a resource is not found. This is a
    404 status response and the provided id should be the resource identifier."

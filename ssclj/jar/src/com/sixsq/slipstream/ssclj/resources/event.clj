@@ -33,10 +33,6 @@
   [resource]
   (validate-fn resource))
 
-;;
-;; Create
-;;
-
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
@@ -45,9 +41,6 @@
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
-;;
-;; single
-;;
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
