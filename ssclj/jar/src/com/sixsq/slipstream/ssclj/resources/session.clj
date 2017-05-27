@@ -205,7 +205,7 @@
         body (if (is-form? headers) (convert-form form-params) body)
         [cookie-header body] (-> body
                                  (assoc :resourceURI create-uri)
-                                 (std-crud/resolve-hrefs-keep idmap)
+                                 (std-crud/resolve-hrefs idmap true)
                                  (crud/validate)
                                  (:sessionTemplate)
                                  (tpl->session request))]

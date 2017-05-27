@@ -84,8 +84,7 @@
           entries-and-count (assoc wrapped-entries :count count-before-pagination)]
       (r/json-response entries-and-count))))
 
-
-(defn resolve-href
+(defn resolve-href-keep
   "Pulls in the resource identified by the value of the :href key and merges
    that resource with argument. Keys specified directly in the argument take
    precedence. Common attributes in the referenced resource are stripped. If
@@ -95,21 +94,7 @@
 
    If a referenced document doesn't exist or if the user doesn't have read
    access to the document, then the method will throw."
-  [{:keys [href] :as resource} idmap]
-  (if href
-    (let [refdoc (crud/retrieve-by-id href)]
-      (a/can-view? refdoc idmap)
-      (-> refdoc
-          (u/strip-common-attrs)
-          (u/strip-service-attrs)
-          (dissoc :acl)
-          (merge resource)
-          (dissoc :href)))
-    resource))
-
-(defn resolve-href-keep
-  "Like resolve-href except the :href attributes are kept."
-  [{:keys [href] :as resource} idmap]
+  [idmap {:keys [href] :as resource} ]
   (if href
     (let [refdoc (crud/retrieve-by-id href)]
       (a/can-view? refdoc idmap)
@@ -120,16 +105,19 @@
           (merge resource)))
     resource))
 
+(defn resolve-href
+  "Like resolve-href-keep, except that the :href attributes are removed."
+  [idmap {:keys [href] :as resource}]
+  (if href
+    (-> resource
+        (resolve-href-keep idmap)
+        (dissoc :href))
+    resource))
+
 (defn resolve-hrefs
   "Does a prewalk of the given argument, replacing any map with an :href
    attribute with the result of merging the referenced resource (see the
    resolve-href function)."
-  [resource idmap]
-  (w/prewalk #(resolve-href % idmap) resource))
-
-(defn resolve-hrefs-keep
-  "Does a prewalk of the given argument, replacing any map with an :href
-   attribute with the result of merging the referenced resource (see the
-   resolve-href function)."
-  [resource idmap]
-  (w/prewalk #(resolve-href-keep % idmap) resource))
+  [resource idmap & [keep?]]
+  (let [f (if keep? resolve-href-keep resolve-href)]
+    (w/prewalk (partial f idmap) resource)))
