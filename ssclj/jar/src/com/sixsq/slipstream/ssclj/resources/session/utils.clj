@@ -44,11 +44,12 @@
    header. The result contains the authentication method, the user's identifier,
    the client's IP address, and the virtual host being used. NOTE: The expiry
    is not included and MUST be added afterwards."
-  [{:keys [username redirectURI]} headers authn-method]
+  [{:keys [href username redirectURI]} headers authn-method]
   (let [server (:slipstream-ssl-server-name headers)
         client-ip (:x-real-ip headers)]
     (crud/new-identifier
-      (cond-> {:method authn-method}
+      (cond-> {:method authn-method
+               :sessionTemplate {:href href}}
               username (assoc :username username)
               server (assoc :server server)
               client-ip (assoc :clientIP client-ip)

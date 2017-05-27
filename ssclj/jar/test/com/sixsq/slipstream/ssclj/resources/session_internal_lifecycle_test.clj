@@ -90,17 +90,11 @@
     (is (= (str/join " " ["USER" "ANON"]) (db/find-roles-for-username "user")))
 
     ;; get session template so that session resources can be tested
-    (let [session-anon (-> (session (ring-app))
-                           (content-type "application/json")
-                           (header authn-info-header "unknown ANON"))
-
-          session-user (-> (session (ring-app))
-                           (content-type "application/json")
-                           (header authn-info-header "user USER"))
-
-          session-admin (-> (session (ring-app))
-                            (content-type "application/json")
-                            (header authn-info-header "root ADMIN"))
+    (let [app (ring-app)
+          session-json (content-type (session app) "application/json")
+          session-anon (header session-json authn-info-header "unknown ANON")
+          session-user (header session-json authn-info-header "user USER")
+          session-admin (header session-json authn-info-header "root ADMIN")
 
           ;;
           ;; create the session template to use for these tests
@@ -122,12 +116,12 @@
                    (ltu/body->edn)
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
-          valid-create {:sessionTemplate (strip-unwanted-attrs (assoc template :username "user" :password "user"))}
+          ;;valid-create {:sessionTemplate (strip-unwanted-attrs (assoc template :username "user" :password "user"))}
           href-create {:sessionTemplate {:href     href
                                          :username "user"
                                          :password "user"}}
           unauthorized-create (update-in href-create [:sessionTemplate :password] (constantly "BAD"))
-          invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
+          invalid-create (assoc-in href-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
       (-> session-anon
@@ -148,9 +142,9 @@
       (let [resp (-> session-anon
                      (request base-uri
                               :request-method :post
-                              :body (json/write-str valid-create))
-                     (ltu/is-set-cookie)
+                              :body (json/write-str href-create))
                      (ltu/body->edn)
+                     (ltu/is-set-cookie)
                      (ltu/is-status 201))
             id (get-in resp [:response :body :resource-id])
 
@@ -159,19 +153,7 @@
 
             uri (-> resp
                     (ltu/location))
-            abs-uri (str p/service-context (u/de-camelcase uri))
-
-            resp (-> session-anon
-                     (request base-uri
-                              :request-method :post
-                              :body (json/write-str href-create))
-                     (ltu/is-set-cookie)
-                     (ltu/body->edn)
-                     (ltu/is-status 201))
-            id2 (get-in resp [:response :body :resource-id])
-            uri2 (-> resp
-                     (ltu/location))
-            abs-uri2 (str p/service-context (u/de-camelcase uri2))]
+            abs-uri (str p/service-context (u/de-camelcase uri))]
 
         ;; check claims in cookie
         (is (= "user" (:username claims)))
@@ -182,10 +164,6 @@
         ;; user should not be able to see session without session role
         (-> session-user
             (request abs-uri)
-            (ltu/body->edn)
-            (ltu/is-status 403))
-        (-> session-user
-            (request abs-uri2)
             (ltu/body->edn)
             (ltu/is-status 403))
 
@@ -211,7 +189,7 @@
             (ltu/is-count 0))
 
         ;; user should be able to see session with session role
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "user USER " id))
             (request abs-uri)
             (ltu/body->edn)
@@ -219,40 +197,19 @@
             (ltu/is-id id)
             (ltu/is-operation-present "delete")
             (ltu/is-operation-absent "edit"))
-        (-> (session (ring-app))
-            (header authn-info-header (str "user USER " id2))
-            (request abs-uri2)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-id id2)
-            (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit"))
 
         ;; user query with session role should succeed but and have one entry
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "user USER " id))
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count 1))
-        (-> (session (ring-app))
-            (header authn-info-header (str "user USER " id2))
             (request base-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-count 1))
 
         ;; user with session role can delete resource
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "user USER " id))
             (request abs-uri
-                     :request-method :delete)
-            (ltu/is-unset-cookie)
-            (ltu/body->edn)
-            (ltu/is-status 200))
-        (-> (session (ring-app))
-            (header authn-info-header (str "user USER " id2))
-            (request abs-uri2
                      :request-method :delete)
             (ltu/is-unset-cookie)
             (ltu/body->edn)
@@ -267,7 +224,7 @@
             (ltu/is-status 400)))
 
       ;; admin create must also succeed
-      (let [create-req (-> valid-create
+      (let [create-req (-> href-create
                            (assoc-in [:sessionTemplate :username] "root")
                            (assoc-in [:sessionTemplate :password] "root"))
             resp (-> session-anon
@@ -283,7 +240,7 @@
             abs-uri (str p/service-context (u/de-camelcase uri))]
 
         ;; admin should be able to see and delete session with session role
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "root ADMIN " id))
             (request abs-uri)
             (ltu/body->edn)
@@ -292,7 +249,7 @@
             (ltu/is-operation-absent "edit"))
 
         ;; admin can delete resource with session role
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "root ADMIN " id))
             (request abs-uri
                      :request-method :delete)

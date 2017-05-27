@@ -4,10 +4,8 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template :as ps]))
 
-;; Parameters for the OpenID Connect endpoint, credentials, etc. are picked
-;; up from the environment.  Consequently, no parameters are necessary at
-;; the moment.  This will have to change to allow multiple OIDC servers to
-;; be supported.
+;; Parameters for the GitHub configuration parameters are picked
+;; up from the environment.
 
 ;; Defines the contents of the github SessionTemplate resource itself.
 (s/def :cimi/session-template.github

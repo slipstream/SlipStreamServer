@@ -30,19 +30,21 @@
   [resource-name]
   (str resource-name "/" (random-uuid)))
 
-(defn resource-name
-  [resource-id]
-  (-> resource-id
-      (str/split #"/")
-      first))
 
 (defn split-resource-id
-  "Provide a tuple of [type docid] for a resource ID.  For IDs
-   that don't have an identifier part (e.g. the CloudEntryPoint),
-   a single element vector will be returned."
+  "Provide a tuple of [type docid] for a resource ID. For IDs that don't have
+   an identifier part (e.g. the CloudEntryPoint), the document ID will be nil."
   [id]
   (let [[type docid] (str/split id #"/")]
-    [type (or docid type)]))
+    [type docid]))
+
+(defn resource-name
+  [resource-id]
+  (first (split-resource-id resource-id)))
+
+(defn document-id
+  [resource-id]
+  (second (split-resource-id resource-id)))
 
 ;;
 ;; utilities for handling common attributes

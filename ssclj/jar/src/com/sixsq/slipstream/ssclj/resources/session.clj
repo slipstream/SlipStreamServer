@@ -52,7 +52,7 @@
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown Session type: " (:method resource)) resource)))
+  (throw (ex-info (str "unknown Session type: '" (:method resource) "'") resource)))
 
 (defmethod crud/validate resource-uri
   [resource]

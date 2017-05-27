@@ -84,10 +84,11 @@
                    (ltu/body->edn)
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
-          valid-create {:sessionTemplate (strip-unwanted-attrs template)}
-          href-create {:sessionTemplate {:href        href
-                                         :redirectURI redirect-uri}}
-          invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
+          ;;valid-create {:sessionTemplate (strip-unwanted-attrs template)}
+          href-create {:sessionTemplate {:href href}}
+          href-create-redirect {:sessionTemplate {:href        href
+                                                  :redirectURI redirect-uri}}
+          invalid-create (assoc-in href-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
       (-> session-anon
@@ -100,7 +101,7 @@
       (-> session-anon
           (request base-uri
                    :request-method :post
-                   :body (json/write-str valid-create))
+                   :body (json/write-str href-create))
           (ltu/body->edn)
           (ltu/message-matches #".*missing client ID, base URL, or public key.*")
           (ltu/is-status 500))
@@ -120,7 +121,7 @@
           (let [resp (-> session-anon
                          (request base-uri
                                   :request-method :post
-                                  :body (json/write-str valid-create))
+                                  :body (json/write-str href-create))
                          (ltu/body->edn)
                          (ltu/is-status 303))
                 id (get-in resp [:response :body :resource-id])
@@ -131,7 +132,7 @@
                 resp (-> session-anon
                          (request base-uri
                                   :request-method :post
-                                  :body (json/write-str href-create))
+                                  :body (json/write-str href-create-redirect))
                          (ltu/body->edn)
                          (ltu/is-status 303))
                 id2 (get-in resp [:response :body :resource-id])

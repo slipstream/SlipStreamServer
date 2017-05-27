@@ -86,14 +86,14 @@
 
 
 (defn resolve-href
-  "Pulls in the resource identified by the value of the :href key
-   and merges that resource with argument.  Keys specified directly
-   in the argument take precedence.  Common attributes in the referenced
-   resource are stripped. If :href doesn't exist the argument is
-   returned unchanged.
+  "Pulls in the resource identified by the value of the :href key and merges
+   that resource with argument. Keys specified directly in the argument take
+   precedence. Common attributes in the referenced resource are stripped. If
+   :href doesn't exist the argument is returned unchanged. The :href attributes
+   remain in the document.
 
-   If a referenced document doesn't exist or if the user doesn't have
-   read access to the document, then the method will throw."
+   If a referenced document doesn't exist or if the user doesn't have read
+   access to the document, then the method will throw."
   [{:keys [href] :as resource} idmap]
   (if href
     (let [refdoc (crud/retrieve-by-id href)]
@@ -102,8 +102,7 @@
           (u/strip-common-attrs)
           (u/strip-service-attrs)
           (dissoc :acl)
-          (merge resource)
-          (dissoc :href)))
+          (merge resource)))
     resource))
 
 (defn resolve-hrefs
