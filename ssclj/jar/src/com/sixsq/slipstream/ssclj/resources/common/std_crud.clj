@@ -94,7 +94,7 @@
 
    If a referenced document doesn't exist or if the user doesn't have read
    access to the document, then the method will throw."
-  [idmap {:keys [href] :as resource} ]
+  [{:keys [href] :as resource} idmap]
   (if href
     (let [refdoc (crud/retrieve-by-id href)]
       (a/can-view? refdoc idmap)
@@ -107,7 +107,7 @@
 
 (defn resolve-href
   "Like resolve-href-keep, except that the :href attributes are removed."
-  [idmap {:keys [href] :as resource}]
+  [{:keys [href] :as resource} idmap]
   (if href
     (-> resource
         (resolve-href-keep idmap)
@@ -120,4 +120,4 @@
    resolve-href function)."
   [resource idmap & [keep?]]
   (let [f (if keep? resolve-href-keep resolve-href)]
-    (w/prewalk (partial f idmap) resource)))
+    (w/prewalk #(f % idmap) resource)))
