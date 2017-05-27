@@ -425,7 +425,7 @@ public abstract class ConnectorBase implements Connector {
                     RuntimeParameter.constructParamName(Run.MACHINE_NAME,
                             Parameter.constructKey(this.getConnectorInstanceName(), parameterName)));
         } catch (Exception e) {
-            ImageModule image = ImageModule.load(run.getModuleResourceUrl());
+            ImageModule image = (ImageModule) run.getModule();
             parameter = image.getParameterValue(constructKey(parameterName), null);
         }
         return parameter;
