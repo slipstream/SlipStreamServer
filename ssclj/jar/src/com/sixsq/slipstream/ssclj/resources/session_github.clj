@@ -63,9 +63,9 @@
   (logu/log-error-and-throw-with-redirect 403 "no matching account for GitHub user" redirectURI))
 
 (defn github-client-info
-  [redirectURI]
-  (let [client-id (environ/env :github-client-id)
-        client-secret (environ/env :github-client-secret)]
+  [redirectURI methodKey]
+  (let [client-id (environ/env (keyword (str "github-client-id-" methodKey)))
+        client-secret (environ/env (keyword (str "github-client-secret-" methodKey)))]
     (if (and client-id client-secret)
       [client-id client-secret]
       (throw-bad-client-config redirectURI))))
@@ -91,8 +91,8 @@
 
 ;; creates a temporary session and redirects to GitHub to start authentication workflow
 (defmethod p/tpl->session authn-method
-  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id client-secret] (github-client-info redirectURI)]
+  [{:keys [redirectURI methodKey] :as resource} {:keys [headers base-uri] :as request}]
+  (let [[client-id client-secret] (github-client-info redirectURI methodKey)]
     (if (and client-id client-secret)
       (let [session-init (cond-> {}
                                  redirectURI (assoc :redirectURI redirectURI))

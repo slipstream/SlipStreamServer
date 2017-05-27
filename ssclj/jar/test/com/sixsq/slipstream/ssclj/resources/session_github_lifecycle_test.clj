@@ -34,11 +34,12 @@
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
 
-(def session-template-internal {:method      github/authn-method
-                                :methodKey   github/authn-method
-                                :name        "GitHub"
-                                :description "External Authentication with GitHub Credentials"
-                                :acl         st/resource-acl})
+(def methodKey "test-github")
+(def session-template-github {:method      github/authn-method
+                              :methodKey   methodKey
+                              :name        "GitHub"
+                              :description "External Authentication with GitHub Credentials"
+                              :acl         st/resource-acl})
 
 (defn strip-unwanted-attrs [m]
   (let [unwanted #{:id :resourceURI :acl :operations
@@ -47,16 +48,17 @@
 
 (deftest lifecycle
 
-  (let [session-admin (-> (session (ring-app))
+  (let [app (ring-app)
+        session-admin (-> (session app)
                           (content-type "application/json")
                           (header authn-info-header "admin ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
+        session-user (-> (session app)
                          (content-type "application/json")
                          (header authn-info-header "user USER ANON"))
-        session-anon (-> (session (ring-app))
+        session-anon (-> (session app)
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
-        session-anon-form (-> (session (ring-app))
+        session-anon-form (-> (session app)
                               (content-type session/form-urlencoded)
                               (header "content-type" session/form-urlencoded)
                               (header authn-info-header "unknown ANON"))
@@ -70,15 +72,13 @@
           href (-> session-admin
                    (request session-template-base-uri
                             :request-method :post
-                            :body (json/write-str session-template-internal))
+                            :body (json/write-str session-template-github))
                    (ltu/body->edn)
                    (ltu/is-status 201)
                    (ltu/location))
 
           template-url (str p/service-context href)
 
-          ;;href (str ct/resource-url "/" github/authn-method)
-          ;;template-url (str p/service-context ct/resource-url "/" github/authn-method)
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)
@@ -107,8 +107,8 @@
 
       ;; anonymous create must succeed (normal create and href create)
       (with-redefs [environ.core/env (merge environ.core/env
-                                            {:github-client-id     "FAKE_CLIENT_ID"
-                                             :github-client-secret "FAKE_CLIENT_SECRET"})]
+                                            {(keyword (str "github-client-id-" methodKey))     "FAKE_CLIENT_ID"
+                                             (keyword (str "github-client-secret-" methodKey)) "FAKE_CLIENT_SECRET"})]
 
         (let [resp (-> session-anon
                        (request base-uri

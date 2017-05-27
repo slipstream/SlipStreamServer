@@ -34,11 +34,12 @@
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
 
-(def session-template-internal {:method      oidc/authn-method
-                                :methodKey   oidc/authn-method
-                                :name        "OpenID Connect"
-                                :description "External Authentication via OpenID Connect Protocol"
-                                :acl         st/resource-acl})
+(def methodKey "test-oidc")
+(def session-template-oidc {:method      oidc/authn-method
+                            :methodKey   methodKey
+                            :name        "OpenID Connect"
+                            :description "External Authentication via OpenID Connect Protocol"
+                            :acl         st/resource-acl})
 
 (defn strip-unwanted-attrs [m]
   (let [unwanted #{:id :resourceURI :acl :operations
@@ -47,16 +48,17 @@
 
 (deftest lifecycle
 
-  (let [session-admin (-> (session (ring-app))
+  (let [app (ring-app)
+        session-admin (-> (session app)
                           (content-type "application/json")
                           (header authn-info-header "admin ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
+        session-user (-> (session app)
                          (content-type "application/json")
                          (header authn-info-header "user USER ANON"))
-        session-anon (-> (session (ring-app))
+        session-anon (-> (session app)
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
-        session-anon-form (-> (session (ring-app))
+        session-anon-form (-> (session app)
                               (content-type session/form-urlencoded)
                               (header "content-type" session/form-urlencoded)
                               (header authn-info-header "unknown ANON"))
@@ -70,15 +72,13 @@
           href (-> session-admin
                    (request session-template-base-uri
                             :request-method :post
-                            :body (json/write-str session-template-internal))
+                            :body (json/write-str session-template-oidc))
                    (ltu/body->edn)
                    (ltu/is-status 201)
                    (ltu/location))
 
           template-url (str p/service-context href)
 
-          ;;href (str ct/resource-url "/" oidc/authn-method)
-          ;;template-url (str p/service-context ct/resource-url "/" oidc/authn-method)
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)
@@ -113,9 +113,9 @@
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
         (with-redefs [environ.core/env (merge environ.core/env
-                                              {:oidc-client-id  "FAKE_CLIENT_ID"
-                                               :oidc-base-url   "https://oidc.example.com"
-                                               :oidc-public-key public-key})]
+                                              {(keyword (str "oidc-client-id-" methodKey))  "FAKE_CLIENT_ID"
+                                               (keyword (str "oidc-base-url-" methodKey))   "https://oidc.example.com"
+                                               (keyword (str "oidc-public-key-" methodKey)) public-key})]
 
           (let [resp (-> session-anon
                          (request base-uri

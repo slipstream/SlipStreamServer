@@ -66,10 +66,10 @@
   (logu/log-error-and-throw-with-redirect 400 (str "error when processing OIDC access token: " msg) redirectURI))
 
 (defn oidc-client-info
-  [redirectURI]
-  (let [client-id (environ/env :oidc-client-id)
-        base-url (environ/env :oidc-base-url)
-        public-key (environ/env :oidc-public-key)]
+  [redirectURI methodKey]
+  (let [client-id (environ/env (keyword (str "oidc-client-id-" methodKey)))
+        base-url (environ/env (keyword (str "oidc-base-url-" methodKey)))
+        public-key (environ/env (keyword (str "oidc-public-key-" methodKey)))]
     (if (and client-id base-url public-key)
       [client-id base-url public-key]
       (throw-bad-client-config redirectURI))))
@@ -92,8 +92,8 @@
 ;; transform template into session resource
 ;;
 (defmethod p/tpl->session authn-method
-  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info redirectURI)
+  [{:keys [redirectURI methodKey] :as resource} {:keys [headers base-uri] :as request}]
+  (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info redirectURI methodKey)
         session-init (cond-> {}
                              redirectURI (assoc :redirectURI redirectURI))]
     (if (and oidc-base-url oidc-client-id oidc-public-key)
