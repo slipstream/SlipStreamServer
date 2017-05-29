@@ -419,6 +419,10 @@ public abstract class ConnectorBase implements Connector {
     }
 
     protected String getParameterValue(String parameterName, Run run) throws ValidationException {
+        if (run.getCategory() != ModuleCategory.Image) {
+            throw new RuntimeException("getParameterValue method can only be used with a " +
+                    "ModuleCategory.Image (component). Please contact your SlipStream administrator");
+        }
         String parameter= null;
         try {
             parameter = run.getRuntimeParameterValue(
