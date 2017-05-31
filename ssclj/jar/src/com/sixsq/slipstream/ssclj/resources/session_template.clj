@@ -83,7 +83,7 @@
                         :description "key used to identify this authentication source"
                         :type        "string"
                         :mandatory   true
-                        :readOnly    false
+                        :readOnly    true
                         :order       1}
           :redirectURI {:displayName "Redirect URI"
                         :category    "general"
