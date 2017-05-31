@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template-internal
   (:require
     [clojure.spec.alpha :as s]
+    [clojure.stacktrace :as st]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -46,10 +47,18 @@
   []
   (p/register authn-method desc)
   (try
-    (db/add p/resource-name default-template {:user-name "INTERNAL", :user-roles ["ADMIN"]})
-    (log/info "Created session-template/internal resource.")
+    (let [request {:params {:resource-name p/resource-url}
+                   :identity {:current "INTERNAL"
+                              :authentications {"INTERNAL" {:identity "INTERNAL", :roles ["ADMIN" "USER" "ANON"]}}}
+                   :body   default-template}
+          {:keys [status]} (crud/add request)]
+      (case status
+        201 (log/info "created session-template/internal resource")
+        409 (log/info "session-template/internal resource already exists; new resource not created.")
+        (log/info "unexpected status code when creating session-template/internal resource:" status)))
     (catch Exception e
-      (log/warn "session-template/internal resource not created; may already exist; message: " (str e)))))
+      (log/warn "error when creating session-template/internal resource: " (str e) "\n"
+                (with-out-str (st/print-cause-trace e))))))
 
 ;;
 ;; multimethods for validation

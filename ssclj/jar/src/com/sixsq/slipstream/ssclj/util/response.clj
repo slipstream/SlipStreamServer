@@ -87,7 +87,7 @@
    provide a reasonable message."
   [{:keys [uri request-method] :as request}]
   (ex-response
-    (str "invalid method (" (name request-method) ") for " uri)
+    (str "invalid method (" (name (or request-method "UNKNOWN")) ") for " (or uri "UNKNOWN"))
     405 uri))
 
 (defn ex-bad-action
@@ -96,7 +96,7 @@
    are used to provide a reasonable message."
   [{:keys [uri request-method] :as request} action]
   (ex-response
-    (str "undefined action (" (name request-method) ", " action ") for " uri)
+    (str "undefined action (" (name (or request-method "UNKNOWN")) ", " action ") for " (or uri "UNKNOWN"))
     404 uri))
 
 (defn ex-bad-CIMI-filter
