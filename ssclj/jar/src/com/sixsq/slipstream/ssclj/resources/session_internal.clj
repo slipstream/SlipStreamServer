@@ -63,9 +63,10 @@
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)
             session (assoc session :expiry expires)]
-        (if redirectURI
-          [{:status 303, :headers {"Location" redirectURI}} session]
-          [{:cookies {(sutils/cookie-name (:id session)) cookie}} session]))
+        (let [cookies {(sutils/cookie-name (:id session)) cookie}]
+          (if redirectURI
+            [{:status 303, :headers {"Location" redirectURI}, :cookies cookies} session]
+            [{:cookies cookies} session])))
       (if redirectURI
         (throw (r/ex-redirect (str "invalid credentials for '" username "'") nil redirectURI))
         (throw (r/ex-unauthorized username))))))

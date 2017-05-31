@@ -116,12 +116,12 @@
                    (ltu/body->edn)
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
-          ;;valid-create {:sessionTemplate (strip-unwanted-attrs (assoc template :username "user" :password "user"))}
-          href-create {:sessionTemplate {:href     href
-                                         :username "user"
-                                         :password "user"}}
-          unauthorized-create (update-in href-create [:sessionTemplate :password] (constantly "BAD"))
-          invalid-create (assoc-in href-create [:sessionTemplate :invalid] "BAD")]
+          valid-create {:sessionTemplate {:href     href
+                                          :username "user"
+                                          :password "user"}}
+          valid-create-redirect (assoc-in valid-create [:sessionTemplate :redirectURI] "http://redirect.example.org")
+          unauthorized-create (update-in valid-create [:sessionTemplate :password] (constantly "BAD"))
+          invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
       (-> session-anon
@@ -138,11 +138,11 @@
           (ltu/body->edn)
           (ltu/is-status 403))
 
-      ;; anonymous create must succeed (normal create and href create)
+      ;; anonymous create must succeed; also with redirect
       (let [resp (-> session-anon
                      (request base-uri
                               :request-method :post
-                              :body (json/write-str href-create))
+                              :body (json/write-str valid-create))
                      (ltu/body->edn)
                      (ltu/is-set-cookie)
                      (ltu/is-status 201))
@@ -153,13 +153,36 @@
 
             uri (-> resp
                     (ltu/location))
-            abs-uri (str p/service-context (u/de-camelcase uri))]
+            abs-uri (str p/service-context (u/de-camelcase uri))
+
+            resp2 (-> session-anon
+                      (request base-uri
+                               :request-method :post
+                               :body (json/write-str valid-create-redirect))
+                      (ltu/body->edn)
+                      (ltu/is-set-cookie)
+                      (ltu/is-status 303))
+            id2 (get-in resp2 [:response :body :resource-id])
+
+            token2 (get-in resp2 [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+            claims2 (if token2 (sign/unsign-claims token2) {})
+
+            uri2 (-> resp2
+                     (ltu/location))
+            abs-uri2 (str p/service-context (u/de-camelcase uri2))]
 
         ;; check claims in cookie
         (is (= "user" (:username claims)))
         (is (= (str/join " " ["USER" "ANON" uri]) (:roles claims))) ;; uri is also session id
         (is (= uri (:session claims)))                      ;; uri is also session id
         (is (not (nil? (:exp claims))))
+
+        ;; check claims in cookie for redirect
+        (is (= "user" (:username claims2)))
+        (is (= (str/join " " ["USER" "ANON" id2]) (:roles claims2))) ;; uri is also session id
+        (is (= id2 (:session claims2)))                     ;; uri is also session id
+        (is (not (nil? (:exp claims2))))
+        (is (= "http://redirect.example.org" uri2))
 
         ;; user should not be able to see session without session role
         (-> session-user
@@ -224,7 +247,7 @@
             (ltu/is-status 400)))
 
       ;; admin create must also succeed
-      (let [create-req (-> href-create
+      (let [create-req (-> valid-create
                            (assoc-in [:sessionTemplate :username] "root")
                            (assoc-in [:sessionTemplate :password] "root"))
             resp (-> session-anon
