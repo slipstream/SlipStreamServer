@@ -24,7 +24,7 @@
   "Extracts the current authentication (identity map) from the ring
    request.  Returns nil if there is no current identity."
   [{{:keys [current authentications]} :identity}]
-  (get authentications current))
+  (or (get authentications current) {:identifier nil, :roles ["ANON"]}))
 
 (defn extract-right
   "Given the identity map, this extracts the associated right from the
