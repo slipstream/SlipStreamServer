@@ -399,6 +399,22 @@ public class DeploymentFactory extends RunFactory {
 	}
 
 	@Override
+	protected Map<String, String> resolveInstanceTypes(Module module, User user,
+														   Map<String, List<Parameter<?>>> userChoices) {
+		Map<String, String> instanceTypesPerNode = new HashMap<>();
+		DeploymentModule deployment = castToRequiredModuleType(module);
+
+		for (Node node: deployment.getNodes().values()) {
+			String nodeName = node.getName();
+			List<Parameter<?>> userChoicesForNode = userChoices.get(nodeName);
+			String instanceType = resolveInstanceTypeForNode(userChoicesForNode);
+			instanceTypesPerNode.put(nodeName, instanceType);
+		}
+
+		return instanceTypesPerNode;
+	}
+
+	@Override
 	protected Map<String, String> resolveCloudServiceNames(Module module, User user,
 			Map<String, List<Parameter<?>>> userChoices) {
 		Map<String, String> cloudServiceNamesPerNode = new HashMap<String, String>();
@@ -440,6 +456,21 @@ public class DeploymentFactory extends RunFactory {
 		}
 
 		return cloudService;
+	}
+
+	private String resolveInstanceTypeForNode(List<Parameter<?>> userChoicesForNode) {
+		String instanceType = null;
+
+		if (userChoicesForNode != null) {
+			for (Parameter<?> parameter : userChoicesForNode) {
+				if (parameter.getName().equals(RuntimeParameter.INSTANCE_TYPE_KEY)) {
+					instanceType = extractNodeParameterValue((NodeParameter) parameter);
+					break;
+				}
+			}
+		}
+
+		return instanceType;
 	}
 
 	@Override

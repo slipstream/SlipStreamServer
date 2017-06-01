@@ -134,6 +134,9 @@ public class RuntimeParameter extends Metadata {
 	public static final String CLOUD_SERVICE_NAME = "cloudservice";
 	public static final String CLOUD_SERVICE_DESCRIPTION = "Cloud Service where the node resides";
 
+	public static final String INSTANCE_TYPE_KEY = "instance.type";
+	public static final String INSTANCE_TYPE_DESCRIPTION = "Instance type (flavor)";
+
 	public static final String URL_SSH_KEY = "url.ssh";
 	public static final String URL_SSH_DESCRIPTION = "SSH URL to connect to virtual machine";
 

@@ -20,11 +20,6 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.sixsq.slipstream.connector.CloudService;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
@@ -44,6 +39,11 @@ import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BuildImageFactory extends RunFactory {
 
@@ -250,6 +250,7 @@ public class BuildImageFactory extends RunFactory {
 		List<String> paramsToFilter = new ArrayList<String>();
 		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		paramsToFilter.add(RuntimeParameter.CLOUD_SERVICE_NAME);
+		paramsToFilter.add(RuntimeParameter.INSTANCE_TYPE_KEY);
 
 		String paramName = parameter.getName();
 		if (!image.getParameters().containsKey(paramName)
@@ -282,6 +283,25 @@ public class BuildImageFactory extends RunFactory {
 		cloudServiceNamesPerNode.put(nodeInstanceName, cloudService);
 
 		return cloudServiceNamesPerNode;
+	}
+
+	@Override
+	protected Map<String, String> resolveInstanceTypes(Module module, User user,
+																Map<String, List<Parameter<?>>> userChoices) {
+		Map<String, String> instanceTypesPerNode = new HashMap<>();
+		String instanceType = null;
+
+		if (isProvidedUserChoicesForNodeInstance(userChoices, nodeInstanceName)) {
+			for (Parameter<?> parameter : userChoices.get(nodeInstanceName)) {
+				if (parameter.getName().equals(RuntimeParameter.INSTANCE_TYPE_KEY)) {
+					instanceType = parameter.getValue();
+					break;
+				}
+			}
+		}
+		instanceTypesPerNode.put(nodeInstanceName, instanceType);
+
+		return instanceTypesPerNode;
 	}
 
 	@Override
