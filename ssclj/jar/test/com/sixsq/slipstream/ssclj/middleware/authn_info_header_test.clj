@@ -51,64 +51,74 @@
                          nil nil
                          nil ""
                          {:username "uname"} "uname"
-                         {:username "uname", :roles ["r1"]} "uname r1"
-                         {:username "uname", :roles ["r1" "r2"]} "uname r1 r2"
-                         {:username "uname", :roles ["r1" "r2"], :session session} (str "uname r1 r2 " session)))
+                         {:username "uname", :roles #{"r1"}} "uname r1"
+                         {:username "uname", :roles #{"r1" "r2"}} "uname r1 r2"
+                         {:username "uname", :roles #{"r1" "r2"}, :session session} (str "uname r1 r2 " session)))
 
 (deftest check-identity-map
-  (are [expected v] (= expected (create-identity-map v))
-                    {} nil
-                    {} [nil nil]
-                    {} [nil []]
-                    {} [nil ["roles"]]
+  (let [anon-map {:current         "ANON"
+                  :authentications {"ANON" {:roles #{"ANON"}}}}]
+    (are [expected v] (= expected (create-identity-map v))
+                      anon-map nil
+                      anon-map [nil nil]
+                      anon-map [nil []]
 
-                    {:current         "uname"
-                     :authentications {"uname" {:identity "uname"}}}
-                    ["uname" []]
+                      {:current         "ANON"
+                       :authentications {"ANON" {:roles #{"roles" "ANON"}}}}
+                      [nil ["roles"]]
 
-                    {:current         "uname"
-                     :authentications {"uname" {:identity "uname"
-                                                :roles    ["r1"]}}}
-                    ["uname" ["r1"]]
+                      {:current         "uname"
+                       :authentications {"uname" {:identity "uname"
+                                                  :roles    #{"ANON"}}}}
+                      ["uname" []]
 
-                    {:current         "uname"
-                     :authentications {"uname" {:identity "uname"
-                                                :roles    ["r1" "r2"]}}}
-                    ["uname" ["r1" "r2"]]))
+                      {:current         "uname"
+                       :authentications {"uname" {:identity "uname"
+                                                  :roles    #{"r1" "ANON"}}}}
+                      ["uname" ["r1"]]
+
+                      {:current         "uname"
+                       :authentications {"uname" {:identity "uname"
+                                                  :roles    #{"r1" "r2" "ANON"}}}}
+                      ["uname" ["r1" "r2"]])))
 
 (deftest check-handler
-  (let [handler (wrap-authn-info-header identity)]
+  (let [handler (wrap-authn-info-header identity)
+        anon-map {:current         "ANON"
+                  :authentications {"ANON" {:roles #{"ANON"}}}}]
     (are [expected request] (= expected (:identity (handler request)))
-                            {} {}
-                            {} {:headers {"header-1" "value"}}
-                            {} {:headers {authn-info-header nil}}
-                            {} {:headers {authn-info-header ""}}
+                            anon-map {}
+                            anon-map {:headers {"header-1" "value"}}
+                            anon-map {:headers {authn-info-header nil}}
+                            anon-map {:headers {authn-info-header ""}}
 
                             {:current         "uname"
-                             :authentications {"uname" {:identity "uname"}}}
+                             :authentications {"uname" {:identity "uname"
+                                                        :roles    #{"ANON"}}}}
                             {:headers {authn-info-header "uname"}}
 
                             {:current         "uname"
                              :authentications {"uname" {:identity "uname"
-                                                        :roles    #{"r1"}}}}
+                                                        :roles    #{"r1" "ANON"}}}}
                             {:headers {authn-info-header "uname r1"}}
 
                             {:current         "uname"
                              :authentications {"uname" {:identity "uname"
-                                                        :roles    #{"r1" "r2"}}}}
+                                                        :roles    #{"r1" "r2" "ANON"}}}}
                             {:headers {authn-info-header "uname r1 r2"}}
 
                             {:current         "uname2"
-                             :authentications {"uname2" {:identity "uname2"}}}
+                             :authentications {"uname2" {:identity "uname2"
+                                                         :roles    #{"ANON"}}}}
                             {:cookies {authn-cookie cookie-id}}
 
                             {:current         "uname2"
                              :authentications {"uname2" {:identity "uname2"
-                                                         :roles    #{"USER" "alpha-role" session-a}}}}
+                                                         :roles    #{"USER" "alpha-role" session-a "ANON"}}}}
                             {:cookies {authn-cookie cookie-id-roles}}
 
                             {:current         "uname"
                              :authentications {"uname" {:identity "uname"
-                                                        :roles    #{"r1" "r2"}}}}
+                                                        :roles    #{"r1" "r2" "ANON"}}}}
                             {:headers {authn-info-header "uname r1 r2"}
                              :cookies {authn-cookie cookie-id-roles}})))
