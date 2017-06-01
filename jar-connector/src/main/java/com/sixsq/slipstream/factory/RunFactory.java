@@ -33,8 +33,7 @@ import com.sixsq.slipstream.util.FileUtil;
 
 public abstract class RunFactory {
 
-	public final Run
-	createRun(Module module, User user) throws SlipStreamClientException {
+	public final Run createRun(Module module, User user) throws SlipStreamClientException {
 		return createRun(module, user, null);
 	}
 
