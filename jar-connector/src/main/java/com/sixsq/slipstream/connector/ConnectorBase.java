@@ -402,42 +402,78 @@ public abstract class ConnectorBase implements Connector {
         return getParameterValue(ImageModule.INSTANCE_TYPE_KEY, run);
     }
 
+    protected String getInstanceType(ImageModule image) throws ValidationException {
+        return getParameterValue(ImageModule.INSTANCE_TYPE_KEY, image);
+    }
+
     protected String getCpu(Run run) throws ValidationException {
         return getParameterValue(ImageModule.CPU_KEY, run);
+    }
+
+    protected String getCpu(ImageModule image) throws ValidationException {
+        return getParameterValue(ImageModule.CPU_KEY, image);
     }
 
     protected String getRam(Run run) throws ValidationException {
         return getParameterValue(ImageModule.RAM_KEY, run);
     }
 
+    protected String getRam(ImageModule image) throws ValidationException {
+        return getParameterValue(ImageModule.RAM_KEY, image);
+    }
+
     protected String getRootDisk(Run run) throws ValidationException {
         return getParameterValue(ImageModule.DISK_PARAM, run);
+    }
+
+    protected String getRootDisk(ImageModule image) throws ValidationException {
+        return getParameterValue(ImageModule.DISK_PARAM, image);
     }
 
     protected String getExtraDiskVolatile(Run run) throws ValidationException {
         return getParameterValue(ImageModule.EXTRADISK_VOLATILE_PARAM, run);
     }
 
+    protected String getExtraDiskVolatile(ImageModule image) throws ValidationException {
+        return getParameterValue(ImageModule.EXTRADISK_VOLATILE_PARAM, image);
+    }
+
     protected String getParameterValue(String parameterName, Run run) throws ValidationException {
-        if (run.getCategory() != ModuleCategory.Image) {
-            throw new RuntimeException("getParameterValue method can only be used with a " +
-                    "ModuleCategory.Image (component). Please contact your SlipStream administrator");
-        }
-        String parameter= null;
-        try {
-            parameter = run.getRuntimeParameterValue(
-                    RuntimeParameter.constructParamName(Run.MACHINE_NAME,
-                            Parameter.constructKey(this.getConnectorInstanceName(), parameterName)));
-        } catch (Exception e1) {
+        return getParameterValue(parameterName, run, null);
+    }
+
+    protected String getParameterValue(String parameterName, ImageModule image) throws ValidationException {
+        return getParameterValue(parameterName, null, image);
+    }
+
+    protected String getParameterValue(String parameterName, Run run, ImageModule image) throws ValidationException {
+        if (run != null) {
+            if (run.getCategory() != ModuleCategory.Image) {
+                throw new RuntimeException("getParameterValue method can only be used with a " +
+                        "ModuleCategory.Image (component). Please contact your SlipStream administrator");
+            }
+
             try {
-                parameter = run.getRuntimeParameterValue(
-                        RuntimeParameter.constructParamName(Run.MACHINE_NAME, parameterName));
-            } catch (Exception e2) {
-                ImageModule image = (ImageModule) run.getModule();
-                parameter = image.getParameterValue(constructKey(parameterName), null);
+                String baseName = Parameter.constructKey(this.getConnectorInstanceName(), parameterName);
+                String fullName = RuntimeParameter.constructParamName(Run.MACHINE_NAME, baseName);
+                return run.getRuntimeParameterValue(fullName);
+            } catch (Exception e1) {}
+
+            try {
+                String fullName = RuntimeParameter.constructParamName(Run.MACHINE_NAME, parameterName);
+                return run.getRuntimeParameterValue(fullName);
+            } catch (Exception e2) {}
+
+            if (image == null) {
+                image = (ImageModule) run.getModule();
             }
         }
-        return parameter;
+
+        if (image != null) {
+            return image.getParameterValue(constructKey(parameterName), null);
+        }
+
+        return null;
     }
 
     protected String getKey(User user) {
