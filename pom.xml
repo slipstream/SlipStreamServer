@@ -44,6 +44,7 @@
       <modules>
         <module>rpm</module>
         <module>rpm-prs</module>
+        <module>ring-container-rpm</module>
       </modules>
     </profile>
     <profile>
