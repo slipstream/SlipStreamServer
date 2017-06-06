@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
     [superstring.core :as str]
-    [ring.util.response :as r]))
+    [ring.util.response :as r]
+    [com.sixsq.slipstream.ssclj.util.response :as sr]))
 
 (def ^:const resource-name "ServiceOffer")
 
@@ -50,7 +51,7 @@
   (let [code 406
         msg "resource attributes do not satisfy defined namespaces"
         response (-> {:status code :message msg}
-                     u/json-response
+                     sr/json-response
                      (r/status code))]
     (throw (ex-info msg response))))
 

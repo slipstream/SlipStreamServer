@@ -1,11 +1,11 @@
-(def +version+ "3.28-SNAPSHOT")
+(def +version+ "3.30-SNAPSHOT")
  
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPlacementLib-jar
   :version +version+
   :license {"commercial" "http://sixsq.com"}
   :edition "community"
-  :dependencies '[[org.clojure/clojure "1.9.0-alpha16"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha17"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults

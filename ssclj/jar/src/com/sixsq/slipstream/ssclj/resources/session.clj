@@ -52,7 +52,7 @@
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown Session type: " (:method resource)) resource)))
+  (throw (ex-info (str "unknown Session type: '" (:method resource) "'") resource)))
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -93,13 +93,6 @@
     resource
     :acl
     (or acl (create-acl id))))
-
-;;
-;; multimethod for adding operations
-;; special implementation because
-;;   * edit is not permitted
-;;   * operations may need to be added for external authn methods
-;;
 
 (defn dispatch-conversion
   "Dispatches on the Session authentication method for multimethods
@@ -144,13 +137,22 @@
 ;;
 ;; template processing
 ;;
+;; The concrete implementation of this method MUST return a two-element
+;; tuple containing a response fragment and the created session resource.
+;; The response fragment will be merged with the 'add-impl' function
+;; response and should be used to override the return status (e.g. to
+;; instead provide a redirect) and to set a cookie header.
+;;
 
 (defmulti tpl->session dispatch-conversion)
 
-;; default implementation just updates the resourceURI
+;; All concrete session types MUST provide an implementation of this
+;; multimethod. The default implementation will throw an 'internal
+;; server error' exception.
+;;
 (defmethod tpl->session :default
   [resource request]
-  [nil (assoc resource :resourceURI resource-uri)])
+  [{:status 500, :message "invalid session resource implementation"} nil])
 
 ;;
 ;; CRUD operations
@@ -203,7 +205,7 @@
         body (if (is-form? headers) (convert-form form-params) body)
         [cookie-header body] (-> body
                                  (assoc :resourceURI create-uri)
-                                 (std-crud/resolve-hrefs idmap)
+                                 (std-crud/resolve-hrefs idmap true)
                                  (crud/validate)
                                  (:sessionTemplate)
                                  (tpl->session request))]

@@ -40,7 +40,7 @@
           session (first (keep is-session? (rest terms)))]
       (cond-> {}
               username (assoc :username username)
-              roles (assoc :roles roles)
+              roles (assoc :roles (set roles))
               session (assoc :session session)))))
 
 (defn request-cookies [request]
@@ -54,21 +54,23 @@
     (extract-authn-info request)
     (cookies/extract-cookie-info (request-cookies request))))
 
+(defn add-anon-role [roles]
+  (conj (set roles) "ANON"))
+
 (defn create-identity-map
   [[username roles]]
-  (if username
-    (let [id-map (if (seq roles) {:roles roles} {})
-          id-map (assoc id-map :identity username)]
-      {:current         username
-       :authentications {username id-map}})
-    {}))
+  (let [current (or username "ANON")
+        authn-roles (add-anon-role roles)
+        id-map (cond-> {:roles authn-roles}
+                       username (assoc :identity username))]
+    {:current         current
+     :authentications {current id-map}}))
 
 (defn add-user-name-roles
   [request]
   (let [[username roles] (extract-info request)]
-    (-> request
-        (assoc :user-name username)
-        (assoc :user-roles roles))))
+    (cond-> (assoc request :user-roles (add-anon-role roles))
+            username (assoc :user-name username))))
 
 (defn add-claims
   [request]

@@ -32,15 +32,15 @@
   (merge p/CredentialTemplateDescription
          {:username {:displayName "Username"
                      :category    "general"
-                     :description "username"
+                     :description "username of your account"
                      :type        "string"
                      :mandatory   true
                      :readOnly    false
                      :order       1}
           :password {:displayName "Password"
                      :category    "general"
-                     :description "password"
-                     :type        "string"
+                     :description "password for your account"
+                     :type        "password"
                      :mandatory   true
                      :readOnly    false
                      :order       2}}))

@@ -10,6 +10,7 @@
     [com.sixsq.slipstream.auth.cyclone :as auth-oidc]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.auth.utils.sign :as sg]
     [com.sixsq.slipstream.auth.cookies :as cookies]
@@ -21,7 +22,8 @@
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.auth.external :as ex]
-    [com.sixsq.slipstream.auth.utils.timestamp :as ts]))
+    [com.sixsq.slipstream.auth.utils.timestamp :as ts]
+    [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 (def ^:const authn-method "oidc")
 
@@ -45,35 +47,32 @@
 ;; utils
 ;;
 
-(defn throw-bad-client-config []
-  (log-util/log-and-throw 500 "missing client ID, base URL, or public key (:oidc-client-id, :oidc-base-url, :oidc-public-key) for OIDC authentication"))
+(defn throw-bad-client-config [redirectURI]
+  (logu/log-error-and-throw-with-redirect 500 "missing client ID, base URL, or public key (:oidc-client-id, :oidc-base-url, :oidc-public-key) for OIDC authentication" redirectURI))
 
-(defn throw-missing-oidc-code []
-  (log-util/log-and-throw 400 "OIDC authentication callback request does not contain required code"))
+(defn throw-missing-oidc-code [redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 "OIDC authentication callback request does not contain required code" redirectURI))
 
-(defn throw-no-access-token []
-  (log-util/log-and-throw 400 "unable to retrieve OIDC access token"))
+(defn throw-no-access-token [redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve OIDC access token" redirectURI))
 
-(defn throw-no-user-info []
-  (log-util/log-and-throw 400 "unable to retrieve or decrypt OIDC user information"))
+(defn throw-no-username-or-email [username email redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 (str "OIDC token is missing name/preferred_name (" username ") or email (" email ")") redirectURI))
 
-(defn throw-no-username-or-email [username email]
-  (log-util/log-and-throw 400 (str "OIDC token is missing name/preferred_name (" username ") or email (" email ")")))
+(defn throw-no-matched-user [username email redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 (str "Unable to match account to name/preferred_name (" username ") or email (" email ")") redirectURI))
 
-(defn throw-no-matched-user [username email]
-  (log-util/log-and-throw 400 (str "Unable to match account to name/preferred_name (" username ") or email (" email ")")))
-
-(defn throw-invalid-access-code [msg]
-  (log-util/log-and-throw 400 (str "error when processing OIDC access token: " msg)))
+(defn throw-invalid-access-code [msg redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 (str "error when processing OIDC access token: " msg) redirectURI))
 
 (defn oidc-client-info
-  []
-  (let [client-id (environ/env :oidc-client-id)
-        base-url (environ/env :oidc-base-url)
-        public-key (environ/env :oidc-public-key)]
+  [redirectURI methodKey]
+  (let [client-id (environ/env (keyword (str "oidc-client-id-" methodKey)))
+        base-url (environ/env (keyword (str "oidc-base-url-" methodKey)))
+        public-key (environ/env (keyword (str "oidc-public-key-" methodKey)))]
     (if (and client-id base-url public-key)
       [client-id base-url public-key]
-      (throw-bad-client-config))))
+      (throw-bad-client-config redirectURI))))
 
 ;;
 ;; multimethods for validation
@@ -93,16 +92,16 @@
 ;; transform template into session resource
 ;;
 (defmethod p/tpl->session authn-method
-  [{:keys [redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info)
-        session-init (cond-> {}
-                             redirectURI (assoc :redirectURI redirectURI))]
+  [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
+  (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info redirectURI (u/document-id href))]
     (if (and oidc-base-url oidc-client-id oidc-public-key)
-      (let [session (sutils/create-session session-init headers authn-method)
+      (let [session-init (cond-> {:href href}
+                                 redirectURI (assoc :redirectURI redirectURI))
+            session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
             redirect-url (str oidc-base-url (format oidc-relative-url oidc-client-id (sutils/validate-action-url base-uri (:id session))))]
         [{:status 303, :headers {"Location" redirect-url}} session])
-      (throw-bad-client-config))))
+      (throw-bad-client-config redirectURI))))
 
 ;; add a "validate" action (callback) to complete the GitHub authentication workflow
 (defmethod p/set-session-operations authn-method
@@ -115,20 +114,21 @@
 
 ;; execute the "validate" callback to complete the GitHub authentication workflow
 (defmethod p/validate-callback authn-method
-  [resource {:keys [headers base-uri] :as request}]
-  (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info)]
+  [resource {:keys [headers base-uri uri] :as request}]
+  (let [session-id (sutils/extract-session-id uri)
+        {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
+        methodKey (u/document-id href)
+        [oidc-client-id oidc-base-url oidc-public-key] (oidc-client-info redirectURI methodKey)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-oidc-access-token oidc-client-id oidc-base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
-          (let [claims (sign/unsign-claims access-token :oidc-public-key)
+          (let [claims (sign/unsign-claims access-token (keyword (str "oidc-public-key-" methodKey)))
                 username (auth-oidc/login-name claims)
                 email (:email claims)]
             (if (or username email)
               (let [[matched-user _] (ex/match-external-user! :cyclone username email)]
                 (if matched-user
-                  (let [session-id (sutils/extract-session-id (:uri request))
-                        {:keys [server clientIP redirectURI] :as current-session} (sutils/retrieve-session-by-id session-id)
-                        claims (cond-> (auth-internal/create-claims matched-user)
+                  (let [claims (cond-> (auth-internal/create-claims matched-user)
                                        session-id (assoc :session session-id)
                                        session-id (update :roles #(str session-id " " %))
                                        server (assoc :server server)
@@ -143,11 +143,11 @@
                       resp
                       (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
                         (if redirectURI
-                          (u/response-final-redirect redirectURI cookie-tuple)
-                          (u/response-created session-id cookie-tuple)))))
-                  (throw-no-matched-user username email)))
-              (throw-no-username-or-email username email)))
+                          (r/response-final-redirect redirectURI cookie-tuple)
+                          (r/response-created session-id cookie-tuple)))))
+                  (throw-no-matched-user username email redirectURI)))
+              (throw-no-username-or-email username email redirectURI)))
           (catch Exception e
-            (throw-invalid-access-code (str e))))
-        (throw-no-access-token))
-      (throw-missing-oidc-code))))
+            (throw-invalid-access-code (str e) redirectURI)))
+        (throw-no-access-token redirectURI))
+      (throw-missing-oidc-code redirectURI))))
