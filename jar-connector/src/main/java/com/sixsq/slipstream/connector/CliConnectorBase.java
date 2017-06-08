@@ -282,7 +282,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	private void putLaunchParamRootDiskSize(Map<String, String> launchParams, Run run) throws ValidationException {
 		if (!isInOrchestrationContext(run)) {
-			String rootDiskGb = getRootDisk((ImageModule) run.getModule());
+			String rootDiskGb = getRootDisk(run);
 			if (rootDiskGb != null && !rootDiskGb.isEmpty()) {
 				launchParams.put("disk", rootDiskGb);
 			}
@@ -291,7 +291,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	private void putLaunchParamExtraDiskVolatile(Map<String, String> launchParams, Run run) throws ValidationException {
 		if (!isInOrchestrationContext(run)) {
-			String extraDiskGb = getExtraDiskVolatile((ImageModule) run.getModule());
+			String extraDiskGb = getExtraDiskVolatile(run);
 			if (extraDiskGb != null && !extraDiskGb.isEmpty()) {
 				launchParams.put("extra-disk-volatile", extraDiskGb);
 			}
@@ -411,8 +411,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	}
 
 	protected String getImageSecurityGroups(Run run) throws ValidationException {
-		ImageModule machine = ImageModule.load(run.getModuleResourceUrl());
-		return getParameterValue(ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME, machine);
+		return getParameterValue(ModuleParametersFactoryBase.SECURITY_GROUPS_PARAMETER_NAME, run);
 	}
 
 	private static void addToPropertiesIfExistAndNotEmpty(Properties properties, String[] parts, int column, String key) {

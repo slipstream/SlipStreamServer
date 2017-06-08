@@ -3,7 +3,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.impl :as db]))
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.util.response :as r]))
 
 ;;
 ;; CRUD dispatch functions
@@ -31,21 +32,21 @@
 
 (defmethod add :default
   [request]
-  (throw (u/ex-bad-method request)))
+  (throw (r/ex-bad-method request)))
 
 
 (defmulti query resource-name-dispatch)
 
 (defmethod query :default
   [request]
-  (throw (u/ex-bad-method request)))
+  (throw (r/ex-bad-method request)))
 
 
 (defmulti retrieve resource-name-dispatch)
 
 (defmethod retrieve :default
   [request]
-  (throw (u/ex-bad-method request)))
+  (throw (r/ex-bad-method request)))
 
 (defmulti retrieve-by-id resource-id-dispatch)
 
@@ -57,20 +58,20 @@
 
 (defmethod edit :default
   [request]
-  (throw (u/ex-bad-method request)))
+  (throw (r/ex-bad-method request)))
 
 
 (defmulti delete resource-name-dispatch)
 
 (defmethod delete :default
   [request]
-  (throw (u/ex-bad-method request)))
+  (throw (r/ex-bad-method request)))
 
 (defmulti do-action resource-name-and-action-dispatch)
 
 (defmethod do-action :default
   [request]
-  (throw (u/ex-bad-action request (resource-name-and-action-dispatch request))))
+  (throw (r/ex-bad-action request (resource-name-and-action-dispatch request))))
 
 ;;
 ;; Resource schema validation.

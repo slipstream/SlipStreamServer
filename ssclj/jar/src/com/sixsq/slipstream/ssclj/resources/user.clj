@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
     [com.sixsq.slipstream.db.impl :as db]
     [ring.util.response :as r]
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
 (def ^:const resource-tag :users)
 
@@ -68,7 +69,7 @@
 
 (defmethod create-validate-subtype :default
   [resource]
-  (u/log-and-throw-400 "missing or invalid UserTemplate reference"))
+  (logu/log-and-throw-400 "missing or invalid UserTemplate reference"))
 
 (defmethod crud/validate create-uri
   [resource]
@@ -116,7 +117,7 @@
 ;; default implementation throws if the registration method is unknown
 (defmethod tpl->user :default
   [resource request]
-  (u/log-and-throw-400 "missing or invalid UserTemplate reference"))
+  (logu/log-and-throw-400 "missing or invalid UserTemplate reference"))
 
 ;;
 ;; CRUD operations

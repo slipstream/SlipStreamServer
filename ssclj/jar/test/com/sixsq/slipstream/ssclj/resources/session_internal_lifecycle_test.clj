@@ -16,17 +16,28 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.auth.utils.sign :as sign]))
+    [com.sixsq.slipstream.auth.utils.sign :as sign]
+    [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
+
+(def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
+
+(def session-template-internal {:method      internal/authn-method
+                                :methodKey   internal/authn-method
+                                :name        "Internal"
+                                :description "Internal Authentication via Username/Password"
+                                :username    "username"
+                                :password    "password"
+                                :acl         st/resource-acl})
 
 (defn strip-unwanted-attrs [m]
   (let [unwanted #{:id :resourceURI :acl :operations
@@ -79,30 +90,37 @@
     (is (= (str/join " " ["USER" "ANON"]) (db/find-roles-for-username "user")))
 
     ;; get session template so that session resources can be tested
-    (let [session-anon (-> (session (ring-app))
-                           (content-type "application/json")
-                           (header authn-info-header "unknown ANON"))
+    (let [app (ring-app)
+          session-json (content-type (session app) "application/json")
+          session-anon (header session-json authn-info-header "unknown ANON")
+          session-user (header session-json authn-info-header "user USER")
+          session-admin (header session-json authn-info-header "root ADMIN")
 
-          session-user (-> (session (ring-app))
-                           (content-type "application/json")
-                           (header authn-info-header "user USER"))
+          ;;
+          ;; create the session template to use for these tests
+          ;;
+          href (-> session-admin
+                   (request session-template-base-uri
+                            :request-method :post
+                            :body (json/write-str session-template-internal))
+                   (ltu/body->edn)
+                   (ltu/is-status 201)
+                   (ltu/location))
 
-          session-admin (-> (session (ring-app))
-                            (content-type "application/json")
-                            (header authn-info-header "root ADMIN"))
+          template-url (str p/service-context href)
 
-          href (str ct/resource-url "/" internal/authn-method)
-          template-url (str p/service-context ct/resource-url "/" internal/authn-method)
+          ;;href (str ct/resource-url "/" internal/authn-method)
+          ;;template-url (str p/service-context ct/resource-url "/" internal/authn-method)
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
-          valid-create {:sessionTemplate (strip-unwanted-attrs (assoc template :username "user" :password "user"))}
-          href-create {:sessionTemplate {:href     href
-                                         :username "user"
-                                         :password "user"}}
-          unauthorized-create (update-in href-create [:sessionTemplate :password] (constantly "BAD"))
+          valid-create {:sessionTemplate {:href     href
+                                          :username "user"
+                                          :password "user"}}
+          valid-create-redirect (assoc-in valid-create [:sessionTemplate :redirectURI] "http://redirect.example.org")
+          unauthorized-create (update-in valid-create [:sessionTemplate :password] (constantly "BAD"))
           invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
@@ -120,13 +138,13 @@
           (ltu/body->edn)
           (ltu/is-status 403))
 
-      ;; anonymous create must succeed (normal create and href create)
+      ;; anonymous create must succeed; also with redirect
       (let [resp (-> session-anon
                      (request base-uri
                               :request-method :post
                               :body (json/write-str valid-create))
-                     (ltu/is-set-cookie)
                      (ltu/body->edn)
+                     (ltu/is-set-cookie)
                      (ltu/is-status 201))
             id (get-in resp [:response :body :resource-id])
 
@@ -137,15 +155,19 @@
                     (ltu/location))
             abs-uri (str p/service-context (u/de-camelcase uri))
 
-            resp (-> session-anon
-                     (request base-uri
-                              :request-method :post
-                              :body (json/write-str href-create))
-                     (ltu/is-set-cookie)
-                     (ltu/body->edn)
-                     (ltu/is-status 201))
-            id2 (get-in resp [:response :body :resource-id])
-            uri2 (-> resp
+            resp2 (-> session-anon
+                      (request base-uri
+                               :request-method :post
+                               :body (json/write-str valid-create-redirect))
+                      (ltu/body->edn)
+                      (ltu/is-set-cookie)
+                      (ltu/is-status 303))
+            id2 (get-in resp2 [:response :body :resource-id])
+
+            token2 (get-in resp2 [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+            claims2 (if token2 (sign/unsign-claims token2) {})
+
+            uri2 (-> resp2
                      (ltu/location))
             abs-uri2 (str p/service-context (u/de-camelcase uri2))]
 
@@ -155,13 +177,16 @@
         (is (= uri (:session claims)))                      ;; uri is also session id
         (is (not (nil? (:exp claims))))
 
+        ;; check claims in cookie for redirect
+        (is (= "user" (:username claims2)))
+        (is (= (str/join " " ["USER" "ANON" id2]) (:roles claims2))) ;; uri is also session id
+        (is (= id2 (:session claims2)))                     ;; uri is also session id
+        (is (not (nil? (:exp claims2))))
+        (is (= "http://redirect.example.org" uri2))
+
         ;; user should not be able to see session without session role
         (-> session-user
             (request abs-uri)
-            (ltu/body->edn)
-            (ltu/is-status 403))
-        (-> session-user
-            (request abs-uri2)
             (ltu/body->edn)
             (ltu/is-status 403))
 
@@ -187,7 +212,7 @@
             (ltu/is-count 0))
 
         ;; user should be able to see session with session role
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "user USER " id))
             (request abs-uri)
             (ltu/body->edn)
@@ -195,40 +220,19 @@
             (ltu/is-id id)
             (ltu/is-operation-present "delete")
             (ltu/is-operation-absent "edit"))
-        (-> (session (ring-app))
-            (header authn-info-header (str "user USER " id2))
-            (request abs-uri2)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-id id2)
-            (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit"))
 
         ;; user query with session role should succeed but and have one entry
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "user USER " id))
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count 1))
-        (-> (session (ring-app))
-            (header authn-info-header (str "user USER " id2))
             (request base-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-count 1))
 
         ;; user with session role can delete resource
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "user USER " id))
             (request abs-uri
-                     :request-method :delete)
-            (ltu/is-unset-cookie)
-            (ltu/body->edn)
-            (ltu/is-status 200))
-        (-> (session (ring-app))
-            (header authn-info-header (str "user USER " id2))
-            (request abs-uri2
                      :request-method :delete)
             (ltu/is-unset-cookie)
             (ltu/body->edn)
@@ -259,7 +263,7 @@
             abs-uri (str p/service-context (u/de-camelcase uri))]
 
         ;; admin should be able to see and delete session with session role
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "root ADMIN " id))
             (request abs-uri)
             (ltu/body->edn)
@@ -268,7 +272,7 @@
             (ltu/is-operation-absent "edit"))
 
         ;; admin can delete resource with session role
-        (-> (session (ring-app))
+        (-> (session app)
             (header authn-info-header (str "root ADMIN " id))
             (request abs-uri
                      :request-method :delete)

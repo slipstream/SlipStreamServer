@@ -9,32 +9,17 @@
 (def ^:const authn-method "github")
 
 ;;
-;; resource
-;;
-(def ^:const resource
-  {:method      authn-method
-   :name        "GitHub"
-   :description "External Authentication with GitHub Credentials"})
-
-;;
 ;; description
 ;;
 (def ^:const desc
-  (merge p/SessionTemplateDescription
-         {:redirectURI {:displayName "Redirect URI"
-                        :category    "general"
-                        :description "Redirect URI"
-                        :type        "string"
-                        :mandatory   false
-                        :readOnly    false
-                        :order       1}}))
+  (merge p/SessionTemplateDescription))
 
 ;;
 ;; initialization: register this Session template
 ;;
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register authn-method desc))
 
 ;;
 ;; multimethods for validation

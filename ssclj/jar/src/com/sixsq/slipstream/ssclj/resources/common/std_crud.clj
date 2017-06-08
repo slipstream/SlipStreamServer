@@ -6,7 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.es.es-binding :as esb])
+    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.ssclj.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn add-fn
@@ -31,7 +32,7 @@
       (-> (str (u/de-camelcase resource-name) "/" uuid)
           (db/retrieve request)
           (crud/set-operations request)
-          (u/json-response))
+          (r/json-response))
       (catch ExceptionInfo ei
         (ex-data ei)))))
 
@@ -81,18 +82,18 @@
           [count-before-pagination entries] (db/query resource-name options)
           wrapped-entries (wrapper-fn request entries)
           entries-and-count (assoc wrapped-entries :count count-before-pagination)]
-      (u/json-response entries-and-count))))
+      (r/json-response entries-and-count))))
 
+(defn resolve-href-keep
+  "Pulls in the resource identified by the value of the :href key and merges
+   that resource with argument. Keys specified directly in the argument take
+   precedence. Common attributes in the referenced resource are stripped. If
+   :href doesn't exist the argument is returned unchanged.
 
-(defn resolve-href
-  "Pulls in the resource identified by the value of the :href key
-   and merges that resource with argument.  Keys specified directly
-   in the argument take precedence.  Common attributes in the referenced
-   resource are stripped. If :href doesn't exist the argument is
-   returned unchanged.
+   The :href attributes are removed from the result.
 
-   If a referenced document doesn't exist or if the user doesn't have
-   read access to the document, then the method will throw."
+   If a referenced document doesn't exist or if the user doesn't have read
+   access to the document, then the method will throw."
   [{:keys [href] :as resource} idmap]
   (if href
     (let [refdoc (crud/retrieve-by-id href)]
@@ -101,13 +102,22 @@
           (u/strip-common-attrs)
           (u/strip-service-attrs)
           (dissoc :acl)
-          (merge resource)
-          (dissoc :href)))
+          (merge resource)))
+    resource))
+
+(defn resolve-href
+  "Like resolve-href-keep, except that the :href attributes are removed."
+  [{:keys [href] :as resource} idmap]
+  (if href
+    (-> resource
+        (resolve-href-keep idmap)
+        (dissoc :href))
     resource))
 
 (defn resolve-hrefs
   "Does a prewalk of the given argument, replacing any map with an :href
    attribute with the result of merging the referenced resource (see the
    resolve-href function)."
-  [resource idmap]
-  (w/prewalk #(resolve-href % idmap) resource))
+  [resource idmap & [keep?]]
+  (let [f (if keep? resolve-href-keep resolve-href)]
+    (w/prewalk #(f % idmap) resource)))

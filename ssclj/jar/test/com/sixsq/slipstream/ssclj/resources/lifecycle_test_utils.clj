@@ -55,15 +55,22 @@
   [m k]
   `((fn [m# k#]
       (is (get-in m# [:response :body k#]) (str "Map did not contain key " k#)))
-    ~m ~k))
+     ~m ~k))
 
 (defmacro is-resource-uri
   [m type-uri]
   `(is-key-value ~m :resourceURI ~type-uri))
 
+(defn get-op [m op]
+  (->> (get-in m [:response :body :operations])
+       (map (juxt :rel :href))
+       (filter (fn [[rel href]] (.endsWith rel op)))
+       first
+       second))
+
 (defn select-op [m op]
-  (let [op-map (get-in m [:response :body :operations])
-        defined-ops (map :rel op-map)]
+  (let [op-list (get-in m [:response :body :operations])
+        defined-ops (map :rel op-list)]
     [(some #(.endsWith % op) defined-ops) defined-ops]))
 
 (defmacro is-operation-present [m expected-op]
@@ -71,14 +78,14 @@
       (let [[op# defined-ops#] (select-op m# expected-op#)]
         (is op# (str "Missing " expected-op# " in " defined-ops#))
         m#))
-    ~m ~expected-op))
+     ~m ~expected-op))
 
 (defmacro is-operation-absent [m absent-op]
   `((fn [m# absent-op#]
       (let [[op# defined-ops#] (select-op m# absent-op#)]
         (is (nil? op#) (str "Unexpected op " absent-op# " in " defined-ops#)))
       m#)
-    ~m ~absent-op))
+     ~m ~absent-op))
 
 (defmacro is-id
   [m id]
@@ -98,7 +105,7 @@
   `((fn [m# v#]
       (let [body# (get-in m# [:response :body])]
         (is (= (merge body# v#) body#))))
-    ~m ~v))
+     ~m ~v))
 
 (defmacro is-set-cookie
   [m]

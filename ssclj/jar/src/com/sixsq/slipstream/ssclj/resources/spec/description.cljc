@@ -15,7 +15,7 @@
 (s/def :cimi.desc/displayName :cimi.core/nonblank-string)
 (s/def :cimi.desc/category :cimi.core/nonblank-string)
 (s/def :cimi.desc/description :cimi.core/nonblank-string)
-(s/def :cimi.desc/type #{"string" "boolean" "int" "float" "timestamp" "enum" "map" "list"})
+(s/def :cimi.desc/type #{"string" "boolean" "int" "float" "timestamp" "enum" "password" "hidden" "map" "list"})
 (s/def :cimi.desc/mandatory boolean?)
 (s/def :cimi.desc/readOnly boolean?)
 (s/def :cimi.desc/order nat-int?)
