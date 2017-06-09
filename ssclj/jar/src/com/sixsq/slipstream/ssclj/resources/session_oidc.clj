@@ -23,7 +23,8 @@
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
-    [com.sixsq.slipstream.ssclj.util.response :as r]))
+    [com.sixsq.slipstream.ssclj.util.response :as r]
+    [clojure.tools.logging :as log]))
 
 (def ^:const authn-method "oidc")
 
@@ -125,6 +126,7 @@
           (let [claims (sign/unsign-claims access-token (keyword (str "oidc-public-key-" methodKey)))
                 username (auth-oidc/login-name claims)
                 email (:email claims)]
+            (log/debug "oidc access token claims for" methodKey ":" claims)
             (if (or username email)
               (let [[matched-user _] (ex/match-external-user! :cyclone username email)]
                 (if matched-user
@@ -139,6 +141,7 @@
                                           :username matched-user
                                           :expiry expires)
                         {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
+                    (log/debug "oidc cookie token claims for" methodKey ":" claims)
                     (if (not= status 200)
                       resp
                       (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]

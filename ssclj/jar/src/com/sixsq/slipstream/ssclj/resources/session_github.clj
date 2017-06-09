@@ -116,32 +116,36 @@
   [resource {:keys [headers uri redirectURI] :as request}]
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
-        [client-id client-secret] (github-client-info redirectURI (u/document-id href))]
+        methodKey (u/document-id href)
+        [client-id client-secret] (github-client-info redirectURI methodKey)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-github/get-github-access-token client-id client-secret code)]
         (if-let [{:keys [user email] :as user-info} (auth-github/get-github-user-info access-token)]
-          (let [external-login (auth-github/sanitized-login user-info)
-                external-email (auth-github/retrieve-email user-info access-token)
-                [matched-user _] (ex/match-external-user! :github external-login external-email)]
-            (if matched-user
-              (let [claims (cond-> (auth-internal/create-claims matched-user)
-                                   session-id (assoc :session session-id)
-                                   session-id (update :roles #(str session-id " " %))
-                                   server (assoc :server server)
-                                   clientIP (assoc :clientIP clientIP))
-                    cookie (cookies/claims-cookie claims)
-                    expires (:expires cookie)
-                    updated-session (assoc current-session
-                                      :username matched-user
-                                      :expiry expires)
-                    {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
-                (if (not= status 200)
-                  resp
-                  (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
-                    (if redirectURI
-                      (r/response-final-redirect redirectURI cookie-tuple)
-                      (r/response-created session-id cookie-tuple)))))
-              (throw-no-matched-user redirectURI)))
+          (do
+            (log/debug "github user info for" methodKey ":" user-info)
+            (let [external-login (auth-github/sanitized-login user-info)
+                  external-email (auth-github/retrieve-email user-info access-token)
+                  [matched-user _] (ex/match-external-user! :github external-login external-email)]
+              (if matched-user
+                (let [claims (cond-> (auth-internal/create-claims matched-user)
+                                     session-id (assoc :session session-id)
+                                     session-id (update :roles #(str session-id " " %))
+                                     server (assoc :server server)
+                                     clientIP (assoc :clientIP clientIP))
+                      cookie (cookies/claims-cookie claims)
+                      expires (:expires cookie)
+                      updated-session (assoc current-session
+                                        :username matched-user
+                                        :expiry expires)
+                      {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
+                  (log/debug "github cookie token claims for" methodKey ":" claims)
+                  (if (not= status 200)
+                    resp
+                    (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
+                      (if redirectURI
+                        (r/response-final-redirect redirectURI cookie-tuple)
+                        (r/response-created session-id cookie-tuple)))))
+                (throw-no-matched-user redirectURI))))
           (throw-no-user-info redirectURI))
         (throw-no-access-token redirectURI))
       (throw-missing-oauth-code redirectURI))))
