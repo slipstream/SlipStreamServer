@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.google.gson.JsonObject;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -142,5 +143,7 @@ public interface Connector {
 	boolean isCredentialsSet(User user);
 
 	boolean isVmUsable(String vmState);
+
+	void applyServiceOffer(Run run, String nodeInstanceName, JsonObject serviceOffer);
 
 }
