@@ -36,10 +36,10 @@
 
 (def methodKey "test-cyclone")
 (def session-template-cyclone {:method      cyclone/authn-method
-                            :methodKey   methodKey
-                            :name        "OpenID Connect"
-                            :description "External Authentication via OpenID Connect Protocol"
-                            :acl         st/resource-acl})
+                               :methodKey   methodKey
+                               :name        "OpenID Connect"
+                               :description "External Authentication via OpenID Connect Protocol"
+                               :acl         st/resource-acl})
 
 (defn strip-unwanted-attrs [m]
   (let [unwanted #{:id :resourceURI :acl :operations
@@ -299,10 +299,10 @@
 
               ;; try now with a fake code
               (with-redefs [auth-cyclone/get-oidc-access-token (fn [client-id client-secret oauth-code redirect-url]
-                                                              (case oauth-code
-                                                                "GOOD" good-token
-                                                                "BAD" bad-token
-                                                                nil))
+                                                                 (case oauth-code
+                                                                   "GOOD" good-token
+                                                                   "BAD" bad-token
+                                                                   nil))
                             ex/match-external-user! (fn [authn-method external-login external-email]
                                                       ["MATCHED_USER" "/dashboard"])
                             db/find-roles-for-username (fn [username]

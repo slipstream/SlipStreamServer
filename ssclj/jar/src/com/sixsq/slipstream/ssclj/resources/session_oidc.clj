@@ -3,6 +3,7 @@
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.spec.session]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as tpl]
@@ -57,11 +58,8 @@
 (defn throw-no-access-token [redirectURI]
   (logu/log-error-and-throw-with-redirect 400 "unable to retrieve OIDC access token" redirectURI))
 
-(defn throw-no-username-or-email [username email redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "OIDC token is missing name/preferred_name (" username ") or email (" email ")") redirectURI))
-
-(defn throw-no-matched-user [username email redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "Unable to match account to name/preferred_name (" username ") or email (" email ")") redirectURI))
+(defn throw-no-subject [redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 (str "OIDC token is missing subject (sub) attribute") redirectURI))
 
 (defn throw-invalid-access-code [msg redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "error when processing OIDC access token: " msg) redirectURI))
@@ -124,32 +122,33 @@
       (if-let [access-token (auth-oidc/get-oidc-access-token oidc-client-id oidc-base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
           (let [claims (sign/unsign-claims access-token (keyword (str "oidc-public-key-" methodKey)))
-                username (auth-oidc/login-name claims)
-                email (:email claims)]
+                subject (:sub claims)
+                email (:email claims)
+                roles (concat (oidc-utils/extract-roles claims)
+                              (oidc-utils/extract-groups claims))]
             (log/debug "oidc access token claims for" methodKey ":" claims)
-            (if (or username email)
-              (let [[matched-user _] (ex/match-external-user! :cyclone username email)]
-                (if matched-user
-                  (let [claims (cond-> (auth-internal/create-claims matched-user)
-                                       session-id (assoc :session session-id)
-                                       session-id (update :roles #(str session-id " " %))
-                                       server (assoc :server server)
-                                       clientIP (assoc :clientIP clientIP))
-                        cookie (cookies/claims-cookie claims)
-                        expires (:expires cookie)
-                        updated-session (assoc current-session
-                                          :username matched-user
-                                          :expiry expires)
-                        {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
-                    (log/debug "oidc cookie token claims for" methodKey ":" claims)
-                    (if (not= status 200)
-                      resp
-                      (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
-                        (if redirectURI
-                          (r/response-final-redirect redirectURI cookie-tuple)
-                          (r/response-created session-id cookie-tuple)))))
-                  (throw-no-matched-user username email redirectURI)))
-              (throw-no-username-or-email username email redirectURI)))
+            (if subject
+              (let [matched-user (ex/create-user-when-missing! subject email)]
+                (let [claims (cond-> (auth-internal/create-claims matched-user)
+                                     session-id (assoc :session session-id)
+                                     session-id (update :roles #(str session-id " " %))
+                                     roles (update :roles #(str % " " (str/join " " roles)))
+                                     server (assoc :server server)
+                                     clientIP (assoc :clientIP clientIP))
+                      cookie (cookies/claims-cookie claims)
+                      expires (:expires cookie)
+                      updated-session (assoc current-session
+                                        :username matched-user
+                                        :expiry expires)
+                      {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
+                  (log/debug "oidc cookie token claims for" methodKey ":" claims)
+                  (if (not= status 200)
+                    resp
+                    (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
+                      (if redirectURI
+                        (r/response-final-redirect redirectURI cookie-tuple)
+                        (r/response-created session-id cookie-tuple))))))
+              (throw-no-subject redirectURI)))
           (catch Exception e
             (throw-invalid-access-code (str e) redirectURI)))
         (throw-no-access-token redirectURI))

@@ -108,7 +108,7 @@
 
       ;; anonymous create must succeed (normal create and href create)
       (let [public-key (:auth-public-key environ.core/env)
-            good-claims {:name  "OIDC_USER"
+            good-claims {:sub "OIDC_USER"
                          :email "user@oidc.example.com"}
             good-token (sign/sign-claims good-claims)
             bad-claims {}
@@ -303,10 +303,9 @@
                                                                 "GOOD" good-token
                                                                 "BAD" bad-token
                                                                 nil))
-                            ex/match-external-user! (fn [authn-method external-login external-email]
-                                                      ["MATCHED_USER" "/dashboard"])
                             db/find-roles-for-username (fn [username]
-                                                         "USER ANON alpha")]
+                                                         "USER ANON alpha")
+                            db/user-exists? (constantly true)]
 
                 (-> session-anon
                     (request (str validate-url "?code=NONE")
@@ -319,7 +318,7 @@
                     (request (str validate-url "?code=BAD")
                              :request-method :get)
                     (ltu/body->edn)
-                    (ltu/message-matches #".*OIDC token is missing name/preferred_name.*")
+                    (ltu/message-matches #".*OIDC token is missing subject.*")
                     (ltu/is-status 400))
 
                 (let [ring-info (-> session-anon
@@ -332,7 +331,7 @@
                       token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
                       claims (if token (sign/unsign-claims token) {})]
                   (is (= location id))
-                  (is (= "MATCHED_USER" (:username claims)))
+                  (is (= "OIDC_USER" (:username claims)))
                   (is (re-matches (re-pattern (str ".*" id ".*")) (or (:roles claims) ""))))
 
                 (let [ring-info (-> session-anon
@@ -345,7 +344,7 @@
                       token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
                       claims (if token (sign/unsign-claims token) {})]
                   (is (= location redirect-uri))
-                  (is (= "MATCHED_USER" (:username claims)))
+                  (is (= "OIDC_USER" (:username claims)))
                   (is (re-matches (re-pattern (str ".*" id2 ".*")) (or (:roles claims) ""))))
 
                 (let [ring-info (-> session-anon
@@ -358,7 +357,7 @@
                       token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
                       claims (if token (sign/unsign-claims token) {})]
                   (is (= location redirect-uri))
-                  (is (= "MATCHED_USER" (:username claims)))
+                  (is (= "OIDC_USER" (:username claims)))
                   (is (re-matches (re-pattern (str ".*" id3 ".*")) (or (:roles claims) ""))))))
 
             ;; check that the session has been updated
@@ -372,7 +371,7 @@
                                 (ltu/is-operation-absent (:validate c/action-uri))
                                 (ltu/is-operation-absent "edit"))
                   session (get-in ring-info [:response :body])]
-              (is (= "MATCHED_USER" (:username session)))
+              (is (= "OIDC_USER" (:username session)))
               (is (not= (:created session) (:updated session))))
 
             (let [ring-info (-> session-user
@@ -385,7 +384,7 @@
                                 (ltu/is-operation-absent (:validate c/action-uri))
                                 (ltu/is-operation-absent "edit"))
                   session (get-in ring-info [:response :body])]
-              (is (= "MATCHED_USER" (:username session)))
+              (is (= "OIDC_USER" (:username session)))
               (is (not= (:created session) (:updated session))))
 
             (let [ring-info (-> session-user
@@ -398,7 +397,7 @@
                                 (ltu/is-operation-absent (:validate c/action-uri))
                                 (ltu/is-operation-absent "edit"))
                   session (get-in ring-info [:response :body])]
-              (is (= "MATCHED_USER" (:username session)))
+              (is (= "OIDC_USER" (:username session)))
               (is (not= (:created session) (:updated session))))
 
             ;; user with session role can delete resource

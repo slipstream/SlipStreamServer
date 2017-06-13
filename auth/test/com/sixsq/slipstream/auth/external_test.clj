@@ -78,6 +78,19 @@
     (is (= "st" (:GITHUBLOGIN new-user)))
     (is (= "st_1" (:NAME new-user)))))
 
+(deftest check-create-user-when-missing!
+  (let [users (kc/select db/users)]
+    (is (zero? (count users))))
+  (th/add-user-for-test! {:username "not-missing" :password "secret" :email "not-missing@example.com" :state "ACTIVE"})
+  (let [users (kc/select db/users)]
+    (is (= 1 (count users))))
+  (is (= "not-missing" (create-user-when-missing! "not-missing" "bad-address@example.com")))
+  (let [users (kc/select db/users)]
+    (is (= 1 (count users))))
+  (is (= "missing" (create-user-when-missing! "missing" "ok@example.com")))
+  (let [users (kc/select db/users)]
+    (is (= 2 (count users)))))
+
 (deftest test-sanitize-login-name
   (is (= "st" (sanitize-login-name "st")))
   (is (= "Paul_Newman" (sanitize-login-name "Paul Newman")))
