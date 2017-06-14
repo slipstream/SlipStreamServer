@@ -69,7 +69,19 @@
   (th/add-user-for-test! {:username "stef" :password "secret"})
   (is (= "stef_1" (db/create-user! "github" "stef" "st@s.com")))
   (let [users-created (kc/select db/users)]
-    (is (= 2 (count users-created)))))
+    (is (= 2 (count users-created))))
+  (is (nil? (db/create-user! {:authn-login "stef"
+                              :password "secret"
+                              :email "st@s.com"
+                              :fail-on-existing? true})))
+  (let [users-created (kc/select db/users)]
+    (is (= 2 (count users-created))))
+  (is (= "stef_2" (db/create-user! {:authn-login "stef"
+                                    :password "secret"
+                                    :email "st@s.com"
+                                    :fail-on-existing? false})))
+  (let [users-created (kc/select db/users)]
+    (is (= 3 (count users-created)))))
 
 (deftest test-name-no-collision
   (is (= "_" (db/name-no-collision "_" [])))

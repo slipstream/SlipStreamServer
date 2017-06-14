@@ -98,11 +98,11 @@
                               (oidc-utils/extract-groups claims))]
             (log/debug "oidc access token claims for" methodKey ":" (pr-str claims))
             (if sub
-              (let [matched-user (ex/create-user-when-missing! {:authn-login  sub
-                                                                :email        email
-                                                                :firstname    givenName
-                                                                :lastname     surname
-                                                                :organization realm})]
+              (if-let [matched-user (ex/create-user-when-missing! {:authn-login  sub
+                                                                   :email        email
+                                                                   :firstname    givenName
+                                                                   :lastname     surname
+                                                                   :organization realm})]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))
@@ -121,7 +121,8 @@
                     (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
                       (if redirectURI
                         (r/response-final-redirect redirectURI cookie-tuple)
-                        (r/response-created session-id cookie-tuple))))))
+                        (r/response-created session-id cookie-tuple)))))
+                (oidc-utils/throw-inactive-user sub redirectURI))
               (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e
             (oidc-utils/throw-invalid-access-code (str e) redirectURI)))
