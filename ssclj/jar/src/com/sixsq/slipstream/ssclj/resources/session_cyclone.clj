@@ -3,6 +3,7 @@
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.spec.session]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-cyclone]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-cyclone :as tpl]
@@ -45,37 +46,6 @@
 (def ^:const desc SessionDescription)
 
 ;;
-;; utils
-;;
-
-(defn throw-bad-client-config [redirectURI]
-  (logu/log-error-and-throw-with-redirect 500 "missing client ID, base URL, or public key (:cyclone-client-id, :cyclone-base-url, :cyclone-public-key) for OIDC authentication" redirectURI))
-
-(defn throw-missing-cyclone-code [redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 "OIDC authentication callback request does not contain required code" redirectURI))
-
-(defn throw-no-access-token [redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve OIDC access token" redirectURI))
-
-(defn throw-no-username-or-email [username email redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "OIDC token is missing name/preferred_name (" username ") or email (" email ")") redirectURI))
-
-(defn throw-no-matched-user [username email redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "Unable to match account to name/preferred_name (" username ") or email (" email ")") redirectURI))
-
-(defn throw-invalid-access-code [msg redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "error when processing OIDC access token: " msg) redirectURI))
-
-(defn cyclone-client-info
-  [redirectURI methodKey]
-  (let [client-id (environ/env (keyword (str "cyclone-client-id-" methodKey)))
-        base-url (environ/env (keyword (str "cyclone-base-url-" methodKey)))
-        public-key (environ/env (keyword (str "cyclone-public-key-" methodKey)))]
-    (if (and client-id base-url public-key)
-      [client-id base-url public-key]
-      (throw-bad-client-config redirectURI))))
-
-;;
 ;; multimethods for validation
 ;;
 
@@ -94,7 +64,7 @@
 ;;
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[cyclone-client-id cyclone-base-url cyclone-public-key] (cyclone-client-info redirectURI (u/document-id href))]
+  (let [[cyclone-client-id cyclone-base-url cyclone-public-key] (oidc-utils/cyclone-client-info redirectURI (u/document-id href))]
     (if (and cyclone-base-url cyclone-client-id cyclone-public-key)
       (let [session-init (cond-> {:href href}
                                  redirectURI (assoc :redirectURI redirectURI))
@@ -102,7 +72,7 @@
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
             redirect-url (str cyclone-base-url (format cyclone-relative-url cyclone-client-id (sutils/validate-action-url base-uri (:id session))))]
         [{:status 303, :headers {"Location" redirect-url}} session])
-      (throw-bad-client-config redirectURI))))
+      (oidc-utils/throw-bad-client-config redirectURI))))
 
 ;; add a "validate" action (callback) to complete the GitHub authentication workflow
 (defmethod p/set-session-operations authn-method
@@ -119,7 +89,7 @@
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         methodKey (u/document-id href)
-        [cyclone-client-id cyclone-base-url cyclone-public-key] (cyclone-client-info redirectURI methodKey)]
+        [cyclone-client-id cyclone-base-url cyclone-public-key] (oidc-utils/cyclone-client-info redirectURI methodKey)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-cyclone/get-oidc-access-token cyclone-client-id cyclone-base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
@@ -148,9 +118,9 @@
                         (if redirectURI
                           (r/response-final-redirect redirectURI cookie-tuple)
                           (r/response-created session-id cookie-tuple)))))
-                  (throw-no-matched-user username email redirectURI)))
-              (throw-no-username-or-email username email redirectURI)))
+                  (oidc-utils/throw-no-matched-user username email redirectURI)))
+              (oidc-utils/throw-no-username-or-email username email redirectURI)))
           (catch Exception e
-            (throw-invalid-access-code (str e) redirectURI)))
-        (throw-no-access-token redirectURI))
-      (throw-missing-cyclone-code redirectURI))))
+            (oidc-utils/throw-invalid-access-code (str e) redirectURI)))
+        (oidc-utils/throw-no-access-token redirectURI))
+      (oidc-utils/throw-missing-oidc-code redirectURI))))
