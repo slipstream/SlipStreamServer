@@ -1,14 +1,14 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-oidc
+(ns com.sixsq.slipstream.ssclj.resources.session-cyclone
   (:require
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.spec.session]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-cyclone]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
-    [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as tpl]
+    [com.sixsq.slipstream.ssclj.resources.session-template-cyclone :as tpl]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.cyclone :as auth-oidc]
+    [com.sixsq.slipstream.auth.cyclone :as auth-cyclone]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
@@ -27,11 +27,11 @@
     [com.sixsq.slipstream.ssclj.util.response :as r]
     [clojure.tools.logging :as log]))
 
-(def ^:const authn-method "oidc")
+(def ^:const authn-method "cyclone")
 
 (def ^:const login-request-timeout (* 3 60))
 
-(def ^:const oidc-relative-url "/auth?response_type=code&client_id=%s&redirect_uri=%s")
+(def ^:const cyclone-relative-url "/auth?response_type=code&client_id=%s&redirect_uri=%s")
 
 ;;
 ;; schemas
@@ -54,7 +54,7 @@
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn :cimi/session-template.oidc-create))
+(def create-validate-fn (u/create-spec-validation-fn :cimi/session-template.cyclone-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))
@@ -64,13 +64,13 @@
 ;;
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-utils/oidc-client-info redirectURI (u/document-id href))]
-    (if (and oidc-base-url oidc-client-id oidc-public-key)
+  (let [[cyclone-client-id cyclone-base-url cyclone-public-key] (oidc-utils/cyclone-client-info redirectURI (u/document-id href))]
+    (if (and cyclone-base-url cyclone-client-id cyclone-public-key)
       (let [session-init (cond-> {:href href}
                                  redirectURI (assoc :redirectURI redirectURI))
             session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
-            redirect-url (str oidc-base-url (format oidc-relative-url oidc-client-id (sutils/validate-action-url base-uri (:id session))))]
+            redirect-url (str cyclone-base-url (format cyclone-relative-url cyclone-client-id (sutils/validate-action-url base-uri (:id session))))]
         [{:status 303, :headers {"Location" redirect-url}} session])
       (oidc-utils/throw-bad-client-config redirectURI))))
 
@@ -89,38 +89,37 @@
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         methodKey (u/document-id href)
-        [oidc-client-id oidc-base-url oidc-public-key] (oidc-utils/oidc-client-info redirectURI methodKey)]
+        [cyclone-client-id cyclone-base-url cyclone-public-key] (oidc-utils/cyclone-client-info redirectURI methodKey)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-oidc/get-oidc-access-token oidc-client-id oidc-base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
+      (if-let [access-token (auth-cyclone/get-oidc-access-token cyclone-client-id cyclone-base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
-          (let [claims (sign/unsign-claims access-token (keyword (str "oidc-public-key-" methodKey)))
-                subject (:sub claims)
-                email (:email claims)
-                roles (concat (oidc-utils/extract-roles claims)
-                              (oidc-utils/extract-groups claims))]
-            (log/debug "oidc access token claims for" methodKey ":" claims)
-            (if subject
-              (let [matched-user (ex/create-user-when-missing! subject email)]
-                (let [claims (cond-> (auth-internal/create-claims matched-user)
-                                     session-id (assoc :session session-id)
-                                     session-id (update :roles #(str session-id " " %))
-                                     roles (update :roles #(str % " " (str/join " " roles)))
-                                     server (assoc :server server)
-                                     clientIP (assoc :clientIP clientIP))
-                      cookie (cookies/claims-cookie claims)
-                      expires (:expires cookie)
-                      updated-session (assoc current-session
-                                        :username matched-user
-                                        :expiry expires)
-                      {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
-                  (log/debug "oidc cookie token claims for" methodKey ":" claims)
-                  (if (not= status 200)
-                    resp
-                    (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
-                      (if redirectURI
-                        (r/response-final-redirect redirectURI cookie-tuple)
-                        (r/response-created session-id cookie-tuple))))))
-              (oidc-utils/throw-no-subject redirectURI)))
+          (let [claims (sign/unsign-claims access-token (keyword (str "cyclone-public-key-" methodKey)))
+                username (auth-cyclone/login-name claims)
+                email (:email claims)]
+            (log/debug "cyclone access token claims for" methodKey ":" claims)
+            (if (or username email)
+              (let [[matched-user _] (ex/match-external-user! :cyclone username email)]
+                (if matched-user
+                  (let [claims (cond-> (auth-internal/create-claims matched-user)
+                                       session-id (assoc :session session-id)
+                                       session-id (update :roles #(str session-id " " %))
+                                       server (assoc :server server)
+                                       clientIP (assoc :clientIP clientIP))
+                        cookie (cookies/claims-cookie claims)
+                        expires (:expires cookie)
+                        updated-session (assoc current-session
+                                          :username matched-user
+                                          :expiry expires)
+                        {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
+                    (log/debug "cyclone cookie token claims for" methodKey ":" claims)
+                    (if (not= status 200)
+                      resp
+                      (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
+                        (if redirectURI
+                          (r/response-final-redirect redirectURI cookie-tuple)
+                          (r/response-created session-id cookie-tuple)))))
+                  (oidc-utils/throw-no-matched-user username email redirectURI)))
+              (oidc-utils/throw-no-username-or-email username email redirectURI)))
           (catch Exception e
             (oidc-utils/throw-invalid-access-code (str e) redirectURI)))
         (oidc-utils/throw-no-access-token redirectURI))

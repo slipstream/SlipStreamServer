@@ -123,3 +123,14 @@
                                            :email     "joe@sixsq.com"
                                            :github-id "joe"}))
     (is (thrown-with-msg? Exception #"one result for joe" (db/find-username-by-authn :github "joe"))))
+
+(deftest check-user-exists?
+  (let [test-username "some-long-random-user-name-that-does-not-exist"
+        test-username-deleted (str test-username "-deleted")]
+    (is (false? (db/user-exists? test-username)))
+    (is (false? (db/user-exists? test-username-deleted)))
+    (th/add-user-for-test! {:username test-username :password "secret" :email "user@example.com" :state "ACTIVE"})
+    (th/add-user-for-test! {:username test-username-deleted :password "secret" :email "user@example.com" :state "DELETED"})
+    (is (true? (db/user-exists? test-username)))
+    (is (false? (db/user-exists? test-username-deleted)))))
+

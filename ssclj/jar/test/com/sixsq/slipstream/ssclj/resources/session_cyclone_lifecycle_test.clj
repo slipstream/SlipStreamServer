@@ -1,11 +1,11 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-oidc-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.session-cyclone-lifecycle-test
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]
 
-    [com.sixsq.slipstream.auth.cyclone :as auth-oidc]
+    [com.sixsq.slipstream.auth.cyclone :as auth-cyclone]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
@@ -15,7 +15,7 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as oidc]
+    [com.sixsq.slipstream.ssclj.resources.session-template-cyclone :as cyclone]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -34,12 +34,12 @@
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
 
-(def methodKey "test-oidc")
-(def session-template-oidc {:method      oidc/authn-method
-                            :methodKey   methodKey
-                            :name        "OpenID Connect"
-                            :description "External Authentication via OpenID Connect Protocol"
-                            :acl         st/resource-acl})
+(def methodKey "test-cyclone")
+(def session-template-cyclone {:method      cyclone/authn-method
+                               :methodKey   methodKey
+                               :name        "OpenID Connect"
+                               :description "External Authentication via OpenID Connect Protocol"
+                               :acl         st/resource-acl})
 
 (defn strip-unwanted-attrs [m]
   (let [unwanted #{:id :resourceURI :acl :operations
@@ -72,7 +72,7 @@
           href (-> session-admin
                    (request session-template-base-uri
                             :request-method :post
-                            :body (json/write-str session-template-oidc))
+                            :body (json/write-str session-template-cyclone))
                    (ltu/body->edn)
                    (ltu/is-status 201)
                    (ltu/location))
@@ -108,15 +108,15 @@
 
       ;; anonymous create must succeed (normal create and href create)
       (let [public-key (:auth-public-key environ.core/env)
-            good-claims {:sub "OIDC_USER"
-                         :email "user@oidc.example.com"}
+            good-claims {:name  "OIDC_USER"
+                         :email "user@cyclone.example.com"}
             good-token (sign/sign-claims good-claims)
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
         (with-redefs [environ.core/env (merge environ.core/env
-                                              {(keyword (str "oidc-client-id-" methodKey))  "FAKE_CLIENT_ID"
-                                               (keyword (str "oidc-base-url-" methodKey))   "https://oidc.example.com"
-                                               (keyword (str "oidc-public-key-" methodKey)) public-key})]
+                                              {(keyword (str "cyclone-client-id-" methodKey))  "FAKE_CLIENT_ID"
+                                               (keyword (str "cyclone-base-url-" methodKey))   "https://cyclone.example.com"
+                                               (keyword (str "cyclone-public-key-" methodKey)) public-key})]
 
           (let [resp (-> session-anon
                          (request base-uri
@@ -298,14 +298,15 @@
                   (ltu/is-status 303))                      ;; always expect redirect when redirectURI is provided
 
               ;; try now with a fake code
-              (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret oauth-code redirect-url]
-                                                              (case oauth-code
-                                                                "GOOD" good-token
-                                                                "BAD" bad-token
-                                                                nil))
+              (with-redefs [auth-cyclone/get-oidc-access-token (fn [client-id client-secret oauth-code redirect-url]
+                                                                 (case oauth-code
+                                                                   "GOOD" good-token
+                                                                   "BAD" bad-token
+                                                                   nil))
+                            ex/match-external-user! (fn [authn-method external-login external-email]
+                                                      ["MATCHED_USER" "/dashboard"])
                             db/find-roles-for-username (fn [username]
-                                                         "USER ANON alpha")
-                            db/user-exists? (constantly true)]
+                                                         "USER ANON alpha")]
 
                 (-> session-anon
                     (request (str validate-url "?code=NONE")
@@ -318,7 +319,7 @@
                     (request (str validate-url "?code=BAD")
                              :request-method :get)
                     (ltu/body->edn)
-                    (ltu/message-matches #".*OIDC token is missing subject.*")
+                    (ltu/message-matches #".*OIDC token is missing name/preferred_name.*")
                     (ltu/is-status 400))
 
                 (let [ring-info (-> session-anon
@@ -331,7 +332,7 @@
                       token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
                       claims (if token (sign/unsign-claims token) {})]
                   (is (= location id))
-                  (is (= "OIDC_USER" (:username claims)))
+                  (is (= "MATCHED_USER" (:username claims)))
                   (is (re-matches (re-pattern (str ".*" id ".*")) (or (:roles claims) ""))))
 
                 (let [ring-info (-> session-anon
@@ -344,7 +345,7 @@
                       token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
                       claims (if token (sign/unsign-claims token) {})]
                   (is (= location redirect-uri))
-                  (is (= "OIDC_USER" (:username claims)))
+                  (is (= "MATCHED_USER" (:username claims)))
                   (is (re-matches (re-pattern (str ".*" id2 ".*")) (or (:roles claims) ""))))
 
                 (let [ring-info (-> session-anon
@@ -357,7 +358,7 @@
                       token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
                       claims (if token (sign/unsign-claims token) {})]
                   (is (= location redirect-uri))
-                  (is (= "OIDC_USER" (:username claims)))
+                  (is (= "MATCHED_USER" (:username claims)))
                   (is (re-matches (re-pattern (str ".*" id3 ".*")) (or (:roles claims) ""))))))
 
             ;; check that the session has been updated
@@ -371,7 +372,7 @@
                                 (ltu/is-operation-absent (:validate c/action-uri))
                                 (ltu/is-operation-absent "edit"))
                   session (get-in ring-info [:response :body])]
-              (is (= "OIDC_USER" (:username session)))
+              (is (= "MATCHED_USER" (:username session)))
               (is (not= (:created session) (:updated session))))
 
             (let [ring-info (-> session-user
@@ -384,7 +385,7 @@
                                 (ltu/is-operation-absent (:validate c/action-uri))
                                 (ltu/is-operation-absent "edit"))
                   session (get-in ring-info [:response :body])]
-              (is (= "OIDC_USER" (:username session)))
+              (is (= "MATCHED_USER" (:username session)))
               (is (not= (:created session) (:updated session))))
 
             (let [ring-info (-> session-user
@@ -397,7 +398,7 @@
                                 (ltu/is-operation-absent (:validate c/action-uri))
                                 (ltu/is-operation-absent "edit"))
                   session (get-in ring-info [:response :body])]
-              (is (= "OIDC_USER" (:username session)))
+              (is (= "MATCHED_USER" (:username session)))
               (is (not= (:created session) (:updated session))))
 
             ;; user with session role can delete resource

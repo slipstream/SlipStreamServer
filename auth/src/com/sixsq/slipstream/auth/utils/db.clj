@@ -60,6 +60,18 @@
         (throw (Exception. (str "There should be only one result for " authn-id)))
         (:NAME (first matched-users))))))
 
+(defn user-exists?
+  "Verifies that a user with the given username exists in the database and
+   that the account is active."
+  [username]
+  (init)
+  (when username
+    (let [matched-users (kc/select users
+                                   (kc/fields [:NAME])
+                                   (kc/where {:NAME  username
+                                              :STATE [in active-user]}))]
+      (pos? (count matched-users)))))
+
 (defn update-user-authn-info
   [authn-method slipstream-username authn-id]
   (init)
@@ -95,21 +107,24 @@
   (str (UUID/randomUUID)))
 
 (defn create-user!
-  [authn-method authn-login email]
-  (init)
-  (let [slipstream-username (name-no-collision authn-login (existing-user-names))]
-    (kc/insert users (kc/values {"RESOURCEURI"              (str "user/" slipstream-username)
-                                 "DELETED"                  false
-                                 "JPAVERSION"               0
-                                 "ISSUPERUSER"              false
-                                 "ROLES"                    "alpha-role, beta-role"
-                                 "STATE"                    "ACTIVE"
-                                 "NAME"                     slipstream-username
-                                 "PASSWORD"                 (random-password)
-                                 "EMAIL"                    email
-                                 (column-name authn-method) authn-login
-                                 "CREATION"                 (Date.)}))
-    slipstream-username))
+  ([authn-method authn-login email]
+   (init)
+   (let [slipstream-username (name-no-collision authn-login (existing-user-names))
+         user-record (cond-> {"RESOURCEURI"              (str "user/" slipstream-username)
+                              "DELETED"                  false
+                              "JPAVERSION"               0
+                              "ISSUPERUSER"              false
+                              "ROLES"                    "alpha-role, beta-role"
+                              "STATE"                    "ACTIVE"
+                              "NAME"                     slipstream-username
+                              "PASSWORD"                 (random-password)
+                              "EMAIL"                    email
+                              "CREATION"                 (Date.)}
+                             authn-method (assoc (column-name authn-method) authn-login))]
+     (kc/insert users (kc/values user-record))
+     slipstream-username))
+  ([authn-login email]
+    (create-user! nil authn-login email)))
 
 (defn find-password-for-username
   [username]
