@@ -127,6 +127,7 @@
 ;;
 
 (defmethod crud/new-identifier resource-name
-  [resource resource-name]
-  (if-let [new-id (:service resource)]
+  [{:keys [service instance] :as resource} resource-name]
+  (if-let [new-id (cond-> service
+                          instance (str "-" instance))]
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
