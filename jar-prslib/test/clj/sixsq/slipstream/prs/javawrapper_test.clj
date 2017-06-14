@@ -42,16 +42,20 @@
 (deftest test-placement->map
   (let [image1 (doto
                  (ImageModule. "component1")
+                 (.setIsBase true)
                  (.setParameter (ModuleParameter. "cpu.nb" "2" "" ParameterCategory/Cloud))
                  (.setParameter (ModuleParameter. "ram.GB" "8" "" ParameterCategory/Cloud))
                  (.setParameter (ModuleParameter. "disk.GB" "50" "" ParameterCategory/Cloud))
                  (.setParameter (ModuleParameter. "c1.instance.type" "medium" "" ParameterCategory/Cloud))
+                 (.setPlatform "centos")
                  )
         image2 (doto
                  (ImageModule. "component2")
+                 (.setIsBase true)
                  (.setParameter (ModuleParameter. "cpu.nb" "1" "" ParameterCategory/Cloud))
                  (.setParameter (ModuleParameter. "ram.GB" "4" "" ParameterCategory/Cloud))
                  (.setParameter (ModuleParameter. "disk.GB" "10" "" ParameterCategory/Cloud))
+                 (.setPlatform "windows")
                  (.setPlacementPolicy "schema-org:location='de'"))
         app (doto (DeploymentModule. "application")
                   (.setNode (Node. "node1" image1))
@@ -64,18 +68,21 @@
                                :cpu.nb           "2"
                                :ram.GB           "8"
                                :disk.GB          "50"
+                               :operating-system "linux"
                                :connector-instance-types {"c1" "medium" "c2" nil}}
                               {:node             "node-orchestrator-c1"
                                :module           "module-orchestrator-c1"
                                :cpu.nb           "0"
                                :ram.GB           "0"
                                :disk.GB          "0"
+                               :operating-system "linux"
                                :placement-policy "connector/href='c1'"}
                               {:node             "node-orchestrator-c2"
                                :module           "module-orchestrator-c2"
                                :cpu.nb           "0"
                                :ram.GB           "0"
                                :disk.GB          "0"
+                               :operating-system "linux"
                                :placement-policy "connector/href='c2'"}]
 
             :user-connectors ["c1" "c2"]}
@@ -87,12 +94,14 @@
                                :cpu.nb           "1"
                                :ram.GB           "4"
                                :disk.GB          "10"
+                               :operating-system "windows"
                                :connector-instance-types {"c3" nil}}
                               {:node             "node-orchestrator-c3"
                                :module           "module-orchestrator-c3"
                                :cpu.nb           "0"
                                :ram.GB           "0"
                                :disk.GB          "0"
+                               :operating-system "linux"
                                :placement-policy "connector/href='c3'"}]
             :user-connectors ["c3"]}
            (placement->map {:module          image2
@@ -105,6 +114,7 @@
               :cpu.nb           "1"
               :ram.GB           "4"
               :disk.GB          "10"
+              :operating-system "windows"
               :placement-policy "schema-org:location='de'"
               :connector-instance-types {"c5" nil "c6" nil}}
              {:module           "module/component1"
@@ -112,6 +122,7 @@
               :cpu.nb           "2"
               :ram.GB           "8"
               :disk.GB          "50"
+              :operating-system "linux"
               :placement-policy nil
               :connector-instance-types {"c5" nil "c6" nil}}
              {:node             "node-orchestrator-c5"
@@ -119,12 +130,14 @@
               :cpu.nb           "0"
               :ram.GB           "0"
               :disk.GB          "0"
+              :operating-system "linux"
               :placement-policy "connector/href='c5'"}
              {:node             "node-orchestrator-c6"
               :module           "module-orchestrator-c6"
               :cpu.nb           "0"
               :ram.GB           "0"
               :disk.GB          "0"
+              :operating-system "linux"
               :placement-policy "connector/href='c6'"}}
 
            (set (:components app-map))))))

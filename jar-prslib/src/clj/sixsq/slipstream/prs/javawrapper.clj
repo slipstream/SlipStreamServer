@@ -41,6 +41,7 @@
    :cpu.nb                   (parameter-value comp "cpu.nb")
    :ram.GB                   (parameter-value comp "ram.GB")
    :disk.GB                  (parameter-value comp "disk.GB")
+   :operating-system         (if (= "windows" (.getPlatform comp)) "windows" "linux")
    :placement-policy         (.getPlacementPolicy comp)
    :connector-instance-types (apply merge (map (partial connector-instance-types comp) user-connectors))})
 
@@ -54,6 +55,7 @@
      :cpu.nb           "0"
      :ram.GB           "0"
      :disk.GB          "0"
+     :operating-system "linux"
      :placement-policy (format "connector/href='%s'%s" connector type-policy)}))
 
 (defn- node->map
