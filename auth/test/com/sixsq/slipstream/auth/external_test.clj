@@ -95,7 +95,13 @@
     (is (= 1 (count users))))
   (is (= "missing" (create-user-when-missing! {:authn-login "missing", :email "ok@example.com"})))
   (let [users (kc/select db/users)]
-    (is (= 2 (count users)))))
+    (is (= 2 (count users))))
+  (is (= "deleted" (create-user-when-missing! {:authn-login "deleted", :email "ok@example.com", :state "DELETED"})))
+  (let [users (kc/select db/users)]
+    (is (= 3 (count users))))
+  (is (nil? (create-user-when-missing! {:authn-login "deleted", :email "ok@example.com", :fail-on-existing? true})))
+  (let [users (kc/select db/users)]
+    (is (= 3 (count users)))))
 
 (deftest test-sanitize-login-name
   (is (= "st" (sanitize-login-name "st")))

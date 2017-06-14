@@ -111,14 +111,14 @@
    must be provided. NOTE: The 'authn-login' value may be modified to avoid
    collisions with existing users. The value used to create the account is
    returned."
-  ([{:keys [authn-login email authn-method firstname lastname roles organization]}]
+  ([{:keys [authn-login email authn-method firstname lastname roles organization state fail-on-existing?]}]
    (init)
    (let [slipstream-username (name-no-collision authn-login (existing-user-names))
          user-record (cond-> {"RESOURCEURI" (str "user/" slipstream-username)
                               "DELETED"     false
                               "JPAVERSION"  0
                               "ISSUPERUSER" false
-                              "STATE"       "ACTIVE"
+                              "STATE"       (or state "ACTIVE")
                               "NAME"        slipstream-username
                               "PASSWORD"    (random-password)
                               "CREATION"    (Date.)}
@@ -128,8 +128,9 @@
                              roles (assoc "ROLES" roles)
                              organization (assoc "ORGANIZATION" organization)
                              authn-method (assoc (column-name authn-method) authn-login))]
-     (kc/insert users (kc/values user-record))
-     slipstream-username))
+     (when (or (not fail-on-existing?) (= authn-login slipstream-username))
+       (kc/insert users (kc/values user-record))
+       slipstream-username)))
   ([authn-method authn-login email]
    (create-user! {:authn-login  authn-login
                   :authn-method authn-method
