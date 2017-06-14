@@ -16,6 +16,9 @@
 
 (s/def :cimi.core/nonblank-string (s/and string? (complement str/blank?)))
 
+(defn token? [s] (re-matches #"^\S+$" s))
+(s/def :cimi.core/token (s/and string? token?))
+
 (s/def :cimi.core/port (s/int-in 1 65536))
 
 ;; FIXME: Provide an implementation that works with ClojureScript.
