@@ -98,7 +98,7 @@
                 email (:email claims)
                 roles (concat (oidc-utils/extract-roles claims)
                               (oidc-utils/extract-groups claims))]
-            (log/debug "oidc access token claims for" methodKey ":" claims)
+            (log/debug "oidc access token claims for" methodKey ":" (pr-str claims))
             (if subject
               (let [matched-user (ex/create-user-when-missing! subject email)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
@@ -113,7 +113,7 @@
                                         :username matched-user
                                         :expiry expires)
                       {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
-                  (log/debug "oidc cookie token claims for" methodKey ":" claims)
+                  (log/debug "oidc cookie token claims for" methodKey ":" (pr-str claims))
                   (if (not= status 200)
                     resp
                     (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
