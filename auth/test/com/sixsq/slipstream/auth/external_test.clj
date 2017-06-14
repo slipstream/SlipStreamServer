@@ -22,11 +22,14 @@
             :CYCLONELOGIN nil
             :GITHUBLOGIN  "st"
             :ISSUPERUSER  false
-            :ROLES        "alpha-role, beta-role"
+            :ROLES        nil
             :JPAVERSION   0
             :NAME         "st"
             :RESOURCEURI  "user/st"
-            :STATE        "ACTIVE"}
+            :STATE        "ACTIVE"
+            :FIRSTNAME    nil
+            :LASTNAME     nil
+            :ORGANIZATION nil}
            (dissoc created-user :CREATION :PASSWORD)))))
 
 (deftest match-new-cyclone-user-github
@@ -38,11 +41,14 @@
             :CYCLONELOGIN "st"
             :GITHUBLOGIN  nil
             :ISSUPERUSER  false
-            :ROLES        "alpha-role, beta-role"
+            :ROLES        nil
             :JPAVERSION   0
             :NAME         "st"
             :RESOURCEURI  "user/st"
-            :STATE        "ACTIVE"}
+            :STATE        "ACTIVE"
+            :FIRSTNAME    nil
+            :LASTNAME     nil
+            :ORGANIZATION nil}
            (dissoc created-user :CREATION :PASSWORD)))))
 
 (deftest match-existing-user
@@ -56,7 +62,7 @@
     (is (= "st" (:GITHUBLOGIN (first users-after-match))))))
 
 (deftest match-already-mapped
-  (let [user-info {:username "joe" :password "secret"
+  (let [user-info {:username  "joe" :password "secret"
                    :github-id "st" :email "st@sixsq.com" :state "ACTIVE"}
         _ (th/add-user-for-test! user-info)
         [user] (kc/select db/users)]
@@ -84,10 +90,10 @@
   (th/add-user-for-test! {:username "not-missing" :password "secret" :email "not-missing@example.com" :state "ACTIVE"})
   (let [users (kc/select db/users)]
     (is (= 1 (count users))))
-  (is (= "not-missing" (create-user-when-missing! "not-missing" "bad-address@example.com")))
+  (is (= "not-missing" (create-user-when-missing! {:authn-login "not-missing", :email "bad-address@example.com"})))
   (let [users (kc/select db/users)]
     (is (= 1 (count users))))
-  (is (= "missing" (create-user-when-missing! "missing" "ok@example.com")))
+  (is (= "missing" (create-user-when-missing! {:authn-login "missing", :email "ok@example.com"})))
   (let [users (kc/select db/users)]
     (is (= 2 (count users)))))
 
