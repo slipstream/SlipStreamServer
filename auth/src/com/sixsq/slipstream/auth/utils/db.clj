@@ -107,24 +107,36 @@
   (str (UUID/randomUUID)))
 
 (defn create-user!
-  ([authn-method authn-login email]
+  "Create a new user in the database. Values for 'email' and 'authn-login'
+   must be provided. NOTE: The 'authn-login' value may be modified to avoid
+   collisions with existing users. The value used to create the account is
+   returned."
+  ([{:keys [authn-login email authn-method firstname lastname roles organization]}]
    (init)
    (let [slipstream-username (name-no-collision authn-login (existing-user-names))
-         user-record (cond-> {"RESOURCEURI"              (str "user/" slipstream-username)
-                              "DELETED"                  false
-                              "JPAVERSION"               0
-                              "ISSUPERUSER"              false
-                              "ROLES"                    "alpha-role, beta-role"
-                              "STATE"                    "ACTIVE"
-                              "NAME"                     slipstream-username
-                              "PASSWORD"                 (random-password)
-                              "EMAIL"                    email
-                              "CREATION"                 (Date.)}
+         user-record (cond-> {"RESOURCEURI" (str "user/" slipstream-username)
+                              "DELETED"     false
+                              "JPAVERSION"  0
+                              "ISSUPERUSER" false
+                              "STATE"       "ACTIVE"
+                              "NAME"        slipstream-username
+                              "PASSWORD"    (random-password)
+                              "CREATION"    (Date.)}
+                             firstname (assoc "FIRSTNAME" firstname)
+                             lastname (assoc "LASTNAME" lastname)
+                             email (assoc "EMAIL" email)
+                             roles (assoc "ROLES" roles)
+                             organization (assoc "ORGANIZATION" organization)
                              authn-method (assoc (column-name authn-method) authn-login))]
      (kc/insert users (kc/values user-record))
      slipstream-username))
+  ([authn-method authn-login email]
+   (create-user! {:authn-login  authn-login
+                  :authn-method authn-method
+                  :email        email}))
   ([authn-login email]
-    (create-user! nil authn-login email)))
+   (create-user! {:authn-login authn-login
+                  :email       email})))
 
 (defn find-password-for-username
   [username]

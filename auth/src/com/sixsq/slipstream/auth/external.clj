@@ -20,9 +20,9 @@
   ([authn-method external-login external-email]
    (log/info (str "Creating new SlipStream user with external (" authn-method ") user '" external-login "'"))
    (db/create-user! authn-method external-login external-email))
-  ([external-login external-email]
-   (log/info (str "Creating new SlipStream user '" external-login "'"))
-   (db/create-user! external-login external-email)))
+  ([{:keys [authn-login] :as user-record}]
+   (log/info (str "Creating new SlipStream user '" authn-login "'"))
+   (db/create-user! user-record)))
 
 (defn match-external-user!
   [authn-method external-login external-email]
@@ -35,10 +35,10 @@
         [(map-slipstream-user! authn-method (first usernames-same-email) external-login) "/dashboard"]))))
 
 (defn create-user-when-missing!
-  [username external-email]
-  (if-not (db/user-exists? username)
-    (create-slipstream-user! username external-email)
-    username))
+  [{:keys [authn-login] :as user-record}]
+  (if-not (db/user-exists? authn-login)
+    (create-slipstream-user! user-record)
+    authn-login))
 
 (defn redirect-with-matched-user
   [authn-method external-login external-email redirect-server]

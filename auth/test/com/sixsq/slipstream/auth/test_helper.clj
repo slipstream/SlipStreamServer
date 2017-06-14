@@ -45,6 +45,9 @@
                                           "RESOURCEURI" "VARCHAR(200)"
                                           "JPAVERSION" "INTEGER"
                                           "STATE" "VARCHAR(200)"
+                                          "FIRSTNAME" "VARCHAR(200)"
+                                          "LASTNAME" "VARCHAR(200)"
+                                          "ORGANIZATION" "VARCHAR(200)"
                                           ))
 
 (defn- create-table!

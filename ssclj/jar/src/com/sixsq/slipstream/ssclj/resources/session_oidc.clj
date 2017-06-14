@@ -93,14 +93,16 @@
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-oidc-access-token oidc-client-id oidc-base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
-          (let [claims (sign/unsign-claims access-token (keyword (str "oidc-public-key-" methodKey)))
-                subject (:sub claims)
-                email (:email claims)
+          (let [{:keys [sub email givenName surname realm] :as claims} (sign/unsign-claims access-token (keyword (str "oidc-public-key-" methodKey)))
                 roles (concat (oidc-utils/extract-roles claims)
                               (oidc-utils/extract-groups claims))]
             (log/debug "oidc access token claims for" methodKey ":" (pr-str claims))
-            (if subject
-              (let [matched-user (ex/create-user-when-missing! subject email)]
+            (if sub
+              (let [matched-user (ex/create-user-when-missing! {:authn-login  sub
+                                                                :email        email
+                                                                :firstname    givenName
+                                                                :lastname     surname
+                                                                :organization realm})]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))
