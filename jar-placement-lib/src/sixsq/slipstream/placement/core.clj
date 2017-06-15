@@ -191,11 +191,11 @@
 
 (def cimi-or (partial cimi-op "or"))
 
-(defn clause-cpu-ram-disk
-  [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB}]
+(defn clause-cpu-ram-disk-os
+  [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system}]
   (format
-    "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s)"
-    (or cpu 0) (or ram 0) (or disk 0)))
+    "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s and resource:operatingSystem='%s')"
+    (or cpu 0) (or ram 0) (or disk 0) os))
 
 (def clause-flexible "schema-org:flexible='true'")
 
@@ -210,8 +210,8 @@
 
 (defn- clause-component
   [component]
-  (cimi-or (concat (clause-connectors-same-instance-type component)
-                   [clause-flexible (clause-cpu-ram-disk component)])))
+  (cimi-or (concat #_(clause-connectors-same-instance-type component)
+                   [clause-flexible (clause-cpu-ram-disk-os component)])))
 
 (defn- clause-connectors
   [connector-names]
@@ -238,8 +238,9 @@
         _ (log/debug (str "number of matching service offers:" (count service-offers)))
         service-offers-by-connector-name (group-by connector-href service-offers)
         _ (log/debug (str "number of matching clouds:" (count service-offers-by-connector-name)))]
+       service-offers
 
-    (mapcat (partial prefer-exact-instance-type (:connector-instance-types component))
+    #_(mapcat (partial prefer-exact-instance-type (:connector-instance-types component))
             service-offers-by-connector-name)))
 
 (defn- place-rank-component
