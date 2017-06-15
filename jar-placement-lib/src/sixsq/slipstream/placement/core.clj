@@ -238,9 +238,8 @@
         _ (log/debug (str "number of matching service offers:" (count service-offers)))
         service-offers-by-connector-name (group-by connector-href service-offers)
         _ (log/debug (str "number of matching clouds:" (count service-offers-by-connector-name)))]
-       service-offers
 
-    #_(mapcat (partial prefer-exact-instance-type (:connector-instance-types component))
+    (mapcat (partial prefer-exact-instance-type (:connector-instance-types component))
             service-offers-by-connector-name)))
 
 (defn- place-rank-component
