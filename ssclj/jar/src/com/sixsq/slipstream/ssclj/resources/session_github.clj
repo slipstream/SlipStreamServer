@@ -23,7 +23,8 @@
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
 
 (def ^:const authn-method "github")
 
@@ -47,8 +48,8 @@
 ;; utils
 ;;
 
-(defn throw-bad-client-config [redirectURI]
-  (logu/log-error-and-throw-with-redirect 500 "missing client ID and/or secret (:github-client-id, :github-client-secret) for GitHub authentication" redirectURI))
+(defn throw-bad-client-config [cfg-id redirectURI]
+  (logu/log-error-and-throw-with-redirect 500 (str "missing or incorrect configuration (" cfg-id ") for GitHub authentication") redirectURI))
 
 (defn throw-missing-oauth-code [redirectURI]
   (logu/log-error-and-throw-with-redirect 400 "GitHub authentication callback request does not contain required code" redirectURI))
@@ -69,6 +70,18 @@
     (if (and client-id client-secret)
       [client-id client-secret]
       (throw-bad-client-config redirectURI))))
+
+(defn config-params
+  [redirectURI methodKey]
+  (let [cfg-id (str "configuration/session-github-" methodKey)
+        opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
+    (try
+      (let [{:keys [clientID clientSecret]} (crud/retrieve-by-id cfg-id opts)]
+        (if (and clientID clientSecret)
+          [clientID clientSecret]
+          (throw-bad-client-config cfg-id redirectURI)))
+      (catch Exception _
+        (throw-bad-client-config cfg-id redirectURI)))))
 
 ;;
 ;; multimethods for validation
@@ -92,7 +105,7 @@
 ;; creates a temporary session and redirects to GitHub to start authentication workflow
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id client-secret] (github-client-info redirectURI (u/document-id href))]
+  (let [[client-id client-secret] (config-params redirectURI (u/document-id href))]
     (if (and client-id client-secret)
       (let [session-init (cond-> {:href href}
                                  redirectURI (assoc :redirectURI redirectURI))
@@ -100,7 +113,7 @@
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
             redirect-url (format github-oath-endpoint client-id (sutils/validate-action-url base-uri (:id session)))]
         [{:status 303, :headers {"Location" redirect-url}} session])
-      (throw-bad-client-config redirectURI))))
+      (throw-bad-client-config authn-method redirectURI))))
 
 ;; add a "validate" action (callback) to complete the GitHub authentication workflow
 (defmethod p/set-session-operations authn-method
@@ -117,7 +130,7 @@
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         methodKey (u/document-id href)
-        [client-id client-secret] (github-client-info redirectURI methodKey)]
+        [client-id client-secret] (config-params redirectURI methodKey)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-github/get-github-access-token client-id client-secret code)]
         (if-let [{:keys [user email] :as user-info} (auth-github/get-github-user-info access-token)]

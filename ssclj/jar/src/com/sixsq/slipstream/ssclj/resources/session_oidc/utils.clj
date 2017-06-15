@@ -82,5 +82,3 @@
           (throw-bad-client-config cfg-id redirectURI)))
       (catch Exception _
         (throw-bad-client-config cfg-id redirectURI)))))
-
-(def cyclone-client-info config-params)
