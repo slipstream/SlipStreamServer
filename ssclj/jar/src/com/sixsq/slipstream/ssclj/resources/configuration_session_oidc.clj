@@ -1,13 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-session-oidc
   (:require
-    [clojure.tools.logging :as log]
-
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
     [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-oidc]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-session-oidc :as tpl]))
 
 (def ^:const service "session-oidc")
