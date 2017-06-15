@@ -22,7 +22,7 @@
 (dyn/initialize)
 
 (def valid-template {:method      oidc/authn-method
-                     :instance   oidc/authn-method
+                     :instance    oidc/authn-method
                      :name        "OpenID Connect"
                      :description "External Authentication via OpenID Connect Protocol"
                      :acl         st/resource-acl})

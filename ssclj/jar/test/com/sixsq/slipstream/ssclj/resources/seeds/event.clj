@@ -42,7 +42,7 @@
 
 (defn insert-to-db
   [events username]
-  (let [nb    (count events)
+  (let [nb (count events)
         state (-> (session (tu/ring-app))
                   (content-type "application/json")
                   (header aih/authn-info-header username))
@@ -55,10 +55,10 @@
 
 (defn seed!
   [nb-events username & {:keys [clean]}]
-  (db/set-impl!     (esb/get-instance))
-  (esb/set-client!  (esb/create-client))
+  (db/set-impl! (esb/get-instance))
+  (esb/set-client! (esb/create-client))
   ;;(when clean)
-    ;; TODO ES equivalent (kc/delete dbdb/resources))
+  ;; TODO ES equivalent (kc/delete dbdb/resources))
   (-> nb-events
       (events username)
       (insert-to-db username)))

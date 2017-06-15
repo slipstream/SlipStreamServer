@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.ssclj.util.spec :as t]))
 
 (deftest check-regex-chars
-  (is (= 253 (count (@#'t/regex-chars #"."))))                 ;; 3 characters are line terminators and not matched!
+  (is (= 253 (count (@#'t/regex-chars #"."))))              ;; 3 characters are line terminators and not matched!
   (is (= #{"A"} (@#'t/regex-chars #"A")))
   (is (= #{"A" "B" "C" "0" "1" "-"} (@#'t/regex-chars #"[A-C0-1-]"))))
 

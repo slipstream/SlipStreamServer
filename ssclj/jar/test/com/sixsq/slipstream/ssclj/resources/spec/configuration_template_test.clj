@@ -17,12 +17,12 @@
 
 (deftest test-configuration-template-schema-check
   (let [timestamp "1964-08-25T10:00:00.0Z"
-      root {:id          (str ct/resource-url "/test")
-            :resourceURI p/service-context
-            :created     timestamp
-            :updated     timestamp
-            :acl         valid-acl
-            :service     "cloud-software-solution"}]
+        root {:id          (str ct/resource-url "/test")
+              :resourceURI p/service-context
+              :created     timestamp
+              :updated     timestamp
+              :acl         valid-acl
+              :service     "cloud-software-solution"}]
     (is (s/valid? :cimi.test/configuration-template root))
     (doseq [k (into #{} (keys (dissoc root :id :resourceURI)))]
       (is (not (s/valid? :cimi.test/configuration-template (dissoc root k)))))))

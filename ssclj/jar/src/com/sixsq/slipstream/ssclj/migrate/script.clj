@@ -118,7 +118,7 @@
 
 (defn- s->edn
   [s]
-  (if (and (string? s ) (.startsWith s "{"))
+  (if (and (string? s) (.startsWith s "{"))
     (esu/json->edn s)
     s))
 

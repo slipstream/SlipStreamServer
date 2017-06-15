@@ -27,7 +27,7 @@
   [expected & {:keys [:start :end :status] :as response-params}]
   (is (= expected (formatted-response
                     (formatted-request (req response-params))
-                     {:status status} start end))))
+                    {:status status} start end))))
 
 (deftest log-does-not-display-password
   (is-request-formatted "GET auth/login [super/ADMIN] ?a=1&b=2"

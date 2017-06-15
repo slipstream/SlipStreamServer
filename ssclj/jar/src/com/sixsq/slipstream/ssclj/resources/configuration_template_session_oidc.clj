@@ -24,13 +24,13 @@
 ;;
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
-         {:clientID {:displayName "Client ID"
+         {:clientID  {:displayName "Client ID"
                       :type        "string"
                       :description "client identifier assigned by the OIDC server"
                       :mandatory   true
                       :readOnly    false
                       :order       1}
-          :baseURL {:displayName "Base URL"
+          :baseURL   {:displayName "Base URL"
                       :type        "string"
                       :description "server's endpoint URL for the OIDC protocol"
                       :mandatory   true

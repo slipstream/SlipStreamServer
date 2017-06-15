@@ -50,10 +50,10 @@
       (r/map-response "unknown resource" 404 uri))))
 
 (def auth-routes
-  (let-routes [uri-login   (str p/auth-context "login")
-               uri-logout  (str p/auth-context "logout")
+  (let-routes [uri-login (str p/auth-context "login")
+               uri-logout (str p/auth-context "logout")
 
-               uri-github  (str p/auth-context "callback-github")
+               uri-github (str p/auth-context "callback-github")
                uri-cyclone (str p/auth-context "callback-cyclone")]
 
     (POST uri-login request (auth/login request))

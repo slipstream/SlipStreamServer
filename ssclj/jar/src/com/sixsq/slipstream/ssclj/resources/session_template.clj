@@ -78,7 +78,7 @@
                         :mandatory   true
                         :readOnly    true
                         :order       0}
-          :instance   {:displayName "Authentication Method Key (Name)"
+          :instance    {:displayName "Authentication Method Key (Name)"
                         :category    "general"
                         :description "key used to identify this authentication source"
                         :type        "string"

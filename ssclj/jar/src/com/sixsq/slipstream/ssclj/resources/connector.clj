@@ -95,12 +95,12 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        body  (-> body
-                  (assoc :resourceURI create-uri)
-                  (std-crud/resolve-hrefs idmap)
-                  (crud/validate)
-                  (:connectorTemplate)
-                  (tpl->connector))]
+        body (-> body
+                 (assoc :resourceURI create-uri)
+                 (std-crud/resolve-hrefs idmap)
+                 (crud/validate)
+                 (:connectorTemplate)
+                 (tpl->connector))]
     (add-impl (assoc request :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))

@@ -64,7 +64,7 @@
   (assoc (build-usage-record cloud-vm-instance-id start-timestamp metric-name metric-value) :end-timestamp end-timestamp))
 
 (def closed-usage-record
-  (assoc valid-usage-record :end-timestamp  "2015-05-04T15:40:15.432Z"))
+  (assoc valid-usage-record :end-timestamp "2015-05-04T15:40:15.432Z"))
 
 (deftest get-without-authn-succeeds
   (-> (session (ring-app))
@@ -156,12 +156,12 @@
   (let [state (-> (session (ring-app))
                   (content-type "application/json")
                   (header authn-info-header "joe"))
-        ur1   (build-usage-record "cloud1" "2015-05-01T00:00:00.000Z" "disk" "1150.0")
-        ur2   (build-usage-record "cloud1" "2015-05-02T00:00:00.000Z" "vm" "1.0")
-        ur3   (build-usage-record "cloud1" "2015-05-03T00:00:00.000Z" "vm" "2.0")
-        ur31  (build-usage-record "cloud1" "2015-05-10T00:00:00.000Z" "disk" "2.0")
-        ur4   (build-usage-record "cloud2" "2015-05-04T00:00:00.000Z" "vm" "3.0")
-        ur5   (build-usage-record "cloud1" "2015-05-05T00:00:00.000Z" "vm" "4.0")]
+        ur1 (build-usage-record "cloud1" "2015-05-01T00:00:00.000Z" "disk" "1150.0")
+        ur2 (build-usage-record "cloud1" "2015-05-02T00:00:00.000Z" "vm" "1.0")
+        ur3 (build-usage-record "cloud1" "2015-05-03T00:00:00.000Z" "vm" "2.0")
+        ur31 (build-usage-record "cloud1" "2015-05-10T00:00:00.000Z" "disk" "2.0")
+        ur4 (build-usage-record "cloud2" "2015-05-04T00:00:00.000Z" "vm" "3.0")
+        ur5 (build-usage-record "cloud1" "2015-05-05T00:00:00.000Z" "vm" "4.0")]
     (request state base-uri :request-method :post :body (json/write-str ur1))
     (request state base-uri :request-method :post :body (json/write-str ur3))
     (request state base-uri :request-method :post :body (json/write-str ur2))
@@ -195,8 +195,8 @@
     (is (rc/end-in-future? (first (ur/records-for-interval "2015-06-01T00:00:00.000Z" "2015-06-10T00:00:00.000Z"))))
     (is (= 2 (count (ur/records-for-interval "2015-04-01T00:00:00.000Z" "2015-06-01T00:00:00.000Z"))))
     (is (= 2 (count (ur/records-for-interval "2015-04-01T00:00:00.000Z" "2015-05-01T02:00:00.000Z"))))
-    (is (= 2 (count (ur/records-for-interval "2015-05-01T02:00:00.000Z" "2015-05-01T03:00:00.000Z" ))))
-    (is (= 2 (count (ur/records-for-interval "2015-05-01T02:00:00.000Z" "2015-06-01T00:00:00.000Z" ))))))
+    (is (= 2 (count (ur/records-for-interval "2015-05-01T02:00:00.000Z" "2015-05-01T03:00:00.000Z"))))
+    (is (= 2 (count (ur/records-for-interval "2015-05-01T02:00:00.000Z" "2015-06-01T00:00:00.000Z"))))))
 
 (deftest last-usage-record-when-none
   (is (empty? (ur/last-record valid-usage-record))))
