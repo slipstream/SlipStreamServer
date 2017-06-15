@@ -35,13 +35,3 @@
 (defmethod p/create-validate-subtype service
   [resource]
   (create-validate-fn resource))
-
-;;
-;; transform template into configuration resource
-;;
-
-(defmethod p/tpl->configuration service
-  [resource]
-  (-> resource
-      (dissoc :href)
-      (assoc :resourceURI p/resource-uri)))
