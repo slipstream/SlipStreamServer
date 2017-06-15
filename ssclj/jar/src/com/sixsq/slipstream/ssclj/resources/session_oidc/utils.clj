@@ -51,8 +51,8 @@
 
 ;; general exceptions
 
-(defn throw-bad-client-config [redirectURI]
-  (logu/log-error-and-throw-with-redirect 500 "missing client ID, base URL, or public key (:oidc-client-id, :oidc-base-url, :oidc-public-key) for OIDC authentication" redirectURI))
+(defn throw-bad-client-config [cfg-id redirectURI]
+  (logu/log-error-and-throw-with-redirect 500 (str "missing or incorrect configuration (" cfg-id ") for OIDC authentication") redirectURI))
 
 (defn throw-missing-oidc-code [redirectURI]
   (logu/log-error-and-throw-with-redirect 400 "OIDC authentication callback request does not contain required code" redirectURI))
@@ -72,14 +72,15 @@
 ;; retrieval of configuration parameters
 
 (defn config-params
-  [prefix redirectURI methodKey]
-  (let [client-id (environ/env (keyword (str prefix "-client-id-" methodKey)))
-        base-url (environ/env (keyword (str prefix "-base-url-" methodKey)))
-        public-key (environ/env (keyword (str prefix "-public-key-" methodKey)))]
-    (if (and client-id base-url public-key)
-      [client-id base-url public-key]
-      (throw-bad-client-config redirectURI))))
+  [redirectURI methodKey]
+  (let [cfg-id (str "configuration/session-oidc-" methodKey)
+        opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
+    (try
+      (let [{:keys [clientID baseURL publicKey]} (crud/retrieve-by-id cfg-id opts)]
+        (if (and clientID baseURL publicKey)
+          [clientID baseURL publicKey]
+          (throw-bad-client-config cfg-id redirectURI)))
+      (catch Exception _
+        (throw-bad-client-config cfg-id redirectURI)))))
 
-(def oidc-client-info (partial config-params "oidc"))
-
-(def cyclone-client-info (partial config-params "cyclone"))
+(def cyclone-client-info config-params)

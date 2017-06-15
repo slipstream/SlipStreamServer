@@ -64,15 +64,15 @@
 ;;
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[oidc-client-id oidc-base-url oidc-public-key] (oidc-utils/oidc-client-info redirectURI (u/document-id href))]
-    (if (and oidc-base-url oidc-client-id oidc-public-key)
+  (let [[client-id base-url public-key] (oidc-utils/config-params redirectURI (u/document-id href))]
+    (if (and base-url client-id public-key)
       (let [session-init (cond-> {:href href}
                                  redirectURI (assoc :redirectURI redirectURI))
             session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
-            redirect-url (str oidc-base-url (format oidc-relative-url oidc-client-id (sutils/validate-action-url base-uri (:id session))))]
+            redirect-url (str base-url (format oidc-relative-url client-id (sutils/validate-action-url base-uri (:id session))))]
         [{:status 303, :headers {"Location" redirect-url}} session])
-      (oidc-utils/throw-bad-client-config redirectURI))))
+      (oidc-utils/throw-bad-client-config authn-method redirectURI))))
 
 ;; add a "validate" action (callback) to complete the GitHub authentication workflow
 (defmethod p/set-session-operations authn-method
@@ -89,11 +89,11 @@
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         methodKey (u/document-id href)
-        [oidc-client-id oidc-base-url oidc-public-key] (oidc-utils/oidc-client-info redirectURI methodKey)]
+        [client-id base-url public-key] (oidc-utils/config-params redirectURI methodKey)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-oidc/get-oidc-access-token oidc-client-id oidc-base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
+      (if-let [access-token (auth-oidc/get-oidc-access-token client-id base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
-          (let [{:keys [sub email givenName surname realm] :as claims} (sign/unsign-claims access-token (keyword (str "oidc-public-key-" methodKey)))
+          (let [{:keys [sub email givenName surname realm] :as claims} (sign/unsign-claims access-token public-key)
                 roles (concat (oidc-utils/extract-roles claims)
                               (oidc-utils/extract-groups claims))]
             (log/debug "oidc access token claims for" methodKey ":" (pr-str claims))
