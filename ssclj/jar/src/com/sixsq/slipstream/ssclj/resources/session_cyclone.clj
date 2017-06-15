@@ -64,15 +64,15 @@
 ;;
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[cyclone-client-id cyclone-base-url cyclone-public-key] (oidc-utils/cyclone-client-info redirectURI (u/document-id href))]
-    (if (and cyclone-base-url cyclone-client-id cyclone-public-key)
+  (let [[client-id base-url public-key] (oidc-utils/config-params redirectURI (u/document-id href))]
+    (if (and base-url client-id public-key)
       (let [session-init (cond-> {:href href}
                                  redirectURI (assoc :redirectURI redirectURI))
             session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
-            redirect-url (str cyclone-base-url (format cyclone-relative-url cyclone-client-id (sutils/validate-action-url base-uri (:id session))))]
+            redirect-url (str base-url (format cyclone-relative-url client-id (sutils/validate-action-url base-uri (:id session))))]
         [{:status 303, :headers {"Location" redirect-url}} session])
-      (oidc-utils/throw-bad-client-config redirectURI))))
+      (oidc-utils/throw-bad-client-config authn-method redirectURI))))
 
 ;; add a "validate" action (callback) to complete the GitHub authentication workflow
 (defmethod p/set-session-operations authn-method
@@ -88,15 +88,15 @@
   [resource {:keys [headers base-uri uri] :as request}]
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
-        methodKey (u/document-id href)
-        [cyclone-client-id cyclone-base-url cyclone-public-key] (oidc-utils/cyclone-client-info redirectURI methodKey)]
+        instance (u/document-id href)
+        [client-id base-url public-key] (oidc-utils/config-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-cyclone/get-oidc-access-token cyclone-client-id cyclone-base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
+      (if-let [access-token (auth-cyclone/get-oidc-access-token client-id base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
-          (let [claims (sign/unsign-claims access-token (keyword (str "cyclone-public-key-" methodKey)))
+          (let [claims (sign/unsign-claims access-token public-key)
                 username (auth-cyclone/login-name claims)
                 email (:email claims)]
-            (log/debug "cyclone access token claims for" methodKey ":" claims)
+            (log/debug "cyclone access token claims for" instance ":" claims)
             (if (or username email)
               (let [[matched-user _] (ex/match-external-user! :cyclone username email)]
                 (if matched-user
@@ -111,7 +111,7 @@
                                           :username matched-user
                                           :expiry expires)
                         {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
-                    (log/debug "cyclone cookie token claims for" methodKey ":" claims)
+                    (log/debug "cyclone cookie token claims for" instance ":" claims)
                     (if (not= status 200)
                       resp
                       (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]

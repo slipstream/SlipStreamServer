@@ -78,7 +78,7 @@
                         :mandatory   true
                         :readOnly    true
                         :order       0}
-          :methodKey   {:displayName "Authentication Method Key (Name)"
+          :instance   {:displayName "Authentication Method Key (Name)"
                         :category    "general"
                         :description "key used to identify this authentication source"
                         :type        "string"
@@ -111,11 +111,11 @@
   (validate-subtype resource))
 
 ;;
-;; identifiers for these resources are the same as the :methodKey value
+;; identifiers for these resources are the same as the :instance value
 ;;
 (defmethod crud/new-identifier resource-name
-  [{:keys [methodKey] :as resource} resource-name]
-  (->> methodKey
+  [{:keys [instance] :as resource} resource-name]
+  (->> instance
        (str resource-url "/")
        (assoc resource :id)))
 
