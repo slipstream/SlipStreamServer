@@ -60,11 +60,20 @@
 (defn- connector->orchestrator-map
   [connector]
   (let [orchestrator-instance-type (get-orch-param connector "instance.type")
-        type-policy                (if orchestrator-instance-type
-                                     (format " and schema-org:name='%s'" orchestrator-instance-type) "")
-        orchestrator-cpu  (or (get-orch-param connector "cpu.size") (get-orch-param connector "cpu"))
-        orchestrator-ram  (or (get-orch-param connector "ram.size") (get-orch-param connector "ram"))
-        orchestrator-disk (or (get-orch-param connector "disk.size") (get-orch-param connector "disk"))]
+        type-policy (if orchestrator-instance-type
+                      (format " and schema-org:name='%s'" orchestrator-instance-type) "")
+        orchestrator-cpu (try-extract-digit
+                           (or
+                             (get-orch-param connector "cpu.size")
+                             (get-orch-param connector "cpu")))
+        orchestrator-ram (try-extract-digit
+                           (or
+                             (get-orch-param connector "ram.size")
+                             (get-orch-param connector "ram")))
+        orchestrator-disk (try-extract-digit
+                            (or
+                              (get-orch-param connector "disk.size")
+                              (get-orch-param connector "disk")))]
     {:node             (str "node-orchestrator-" connector)
      :module           (str "module-orchestrator-" connector)
      :cpu.nb           (or orchestrator-cpu "0")
