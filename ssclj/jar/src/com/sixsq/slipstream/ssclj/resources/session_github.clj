@@ -64,16 +64,16 @@
   (logu/log-error-and-throw-with-redirect 403 "no matching account for GitHub user" redirectURI))
 
 (defn github-client-info
-  [redirectURI methodKey]
-  (let [client-id (environ/env (keyword (str "github-client-id-" methodKey)))
-        client-secret (environ/env (keyword (str "github-client-secret-" methodKey)))]
+  [redirectURI instance]
+  (let [client-id (environ/env (keyword (str "github-client-id-" instance)))
+        client-secret (environ/env (keyword (str "github-client-secret-" instance)))]
     (if (and client-id client-secret)
       [client-id client-secret]
       (throw-bad-client-config redirectURI))))
 
 (defn config-params
-  [redirectURI methodKey]
-  (let [cfg-id (str "configuration/session-github-" methodKey)
+  [redirectURI instance]
+  (let [cfg-id (str "configuration/session-github-" instance)
         opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
     (try
       (let [{:keys [clientID clientSecret]} (crud/retrieve-by-id cfg-id opts)]
@@ -129,13 +129,13 @@
   [resource {:keys [headers uri redirectURI] :as request}]
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
-        methodKey (u/document-id href)
-        [client-id client-secret] (config-params redirectURI methodKey)]
+        instance (u/document-id href)
+        [client-id client-secret] (config-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-github/get-github-access-token client-id client-secret code)]
         (if-let [{:keys [user email] :as user-info} (auth-github/get-github-user-info access-token)]
           (do
-            (log/debug "github user info for" methodKey ":" user-info)
+            (log/debug "github user info for" instance ":" user-info)
             (let [external-login (auth-github/sanitized-login user-info)
                   external-email (auth-github/retrieve-email user-info access-token)
                   [matched-user _] (ex/match-external-user! :github external-login external-email)]
@@ -151,7 +151,7 @@
                                         :username matched-user
                                         :expiry expires)
                       {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
-                  (log/debug "github cookie token claims for" methodKey ":" claims)
+                  (log/debug "github cookie token claims for" instance ":" claims)
                   (if (not= status 200)
                     resp
                     (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]

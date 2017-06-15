@@ -88,15 +88,15 @@
   [resource {:keys [headers base-uri uri] :as request}]
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
-        methodKey (u/document-id href)
-        [client-id base-url public-key] (oidc-utils/config-params redirectURI methodKey)]
+        instance (u/document-id href)
+        [client-id base-url public-key] (oidc-utils/config-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-oidc-access-token client-id base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
           (let [{:keys [sub email givenName surname realm] :as claims} (sign/unsign-claims access-token public-key)
                 roles (concat (oidc-utils/extract-roles claims)
                               (oidc-utils/extract-groups claims))]
-            (log/debug "oidc access token claims for" methodKey ":" (pr-str claims))
+            (log/debug "oidc access token claims for" instance ":" (pr-str claims))
             (if sub
               (if-let [matched-user (ex/create-user-when-missing! {:authn-login  sub
                                                                    :email        email
@@ -115,7 +115,7 @@
                                         :username matched-user
                                         :expiry expires)
                       {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
-                  (log/debug "oidc cookie token claims for" methodKey ":" (pr-str claims))
+                  (log/debug "oidc cookie token claims for" instance ":" (pr-str claims))
                   (if (not= status 200)
                     resp
                     (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]

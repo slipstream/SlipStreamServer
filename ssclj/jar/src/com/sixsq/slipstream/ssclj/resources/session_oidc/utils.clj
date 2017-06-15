@@ -72,8 +72,8 @@
 ;; retrieval of configuration parameters
 
 (defn config-params
-  [redirectURI methodKey]
-  (let [cfg-id (str "configuration/session-oidc-" methodKey)
+  [redirectURI instance]
+  (let [cfg-id (str "configuration/session-oidc-" instance)
         opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
     (try
       (let [{:keys [clientID baseURL publicKey]} (crud/retrieve-by-id cfg-id opts)]

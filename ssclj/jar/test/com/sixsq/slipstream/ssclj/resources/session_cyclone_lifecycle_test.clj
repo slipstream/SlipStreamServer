@@ -37,9 +37,9 @@
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
 
-(def methodKey "test-cyclone")
+(def instance "test-cyclone")
 (def session-template-cyclone {:method      cyclone/authn-method
-                               :methodKey   methodKey
+                               :instance   instance
                                :name        "OpenID Connect"
                                :description "External Authentication via OpenID Connect Protocol"
                                :acl         st/resource-acl})
@@ -55,7 +55,7 @@
     "3wIDAQAB"))
 
 (def configuration-session-oidc {:configurationTemplate {:service   "session-oidc"
-                                                         :instance  methodKey
+                                                         :instance  instance
                                                          :clientID  "FAKE_CLIENT_ID"
                                                          :baseURL   "https://oidc.example.com"
                                                          :publicKey auth-pubkey}})
@@ -145,7 +145,7 @@
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
 
-        (is (= cfg-href (str "configuration/session-oidc-" methodKey)))
+        (is (= cfg-href (str "configuration/session-oidc-" instance)))
 
         (let [resp (-> session-anon
                        (request base-uri

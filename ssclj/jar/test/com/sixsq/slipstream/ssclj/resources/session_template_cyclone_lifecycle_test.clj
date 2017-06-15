@@ -22,7 +22,7 @@
 (dyn/initialize)
 
 (def valid-template {:method      cyclone/authn-method
-                     :methodKey   cyclone/authn-method
+                     :instance   cyclone/authn-method
                      :name        "CYCLONE"
                      :description "External Authentication via CYCLONE Keycloak"
                      :acl         st/resource-acl})

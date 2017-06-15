@@ -88,15 +88,15 @@
   [resource {:keys [headers base-uri uri] :as request}]
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
-        methodKey (u/document-id href)
-        [client-id base-url public-key] (oidc-utils/config-params redirectURI methodKey)]
+        instance (u/document-id href)
+        [client-id base-url public-key] (oidc-utils/config-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-cyclone/get-oidc-access-token client-id base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
         (try
           (let [claims (sign/unsign-claims access-token public-key)
                 username (auth-cyclone/login-name claims)
                 email (:email claims)]
-            (log/debug "cyclone access token claims for" methodKey ":" claims)
+            (log/debug "cyclone access token claims for" instance ":" claims)
             (if (or username email)
               (let [[matched-user _] (ex/match-external-user! :cyclone username email)]
                 (if matched-user
@@ -111,7 +111,7 @@
                                           :username matched-user
                                           :expiry expires)
                         {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
-                    (log/debug "cyclone cookie token claims for" methodKey ":" claims)
+                    (log/debug "cyclone cookie token claims for" instance ":" claims)
                     (if (not= status 200)
                       resp
                       (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]

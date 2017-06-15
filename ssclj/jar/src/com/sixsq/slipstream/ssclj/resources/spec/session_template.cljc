@@ -7,9 +7,9 @@
 ;; All session resources must have a 'method' attribute.
 (s/def :cimi.session-template/method :cimi.core/identifier)
 
-;; All session resources must have a 'methodKey' attribute that is used in
+;; All session resources must have a 'instance' attribute that is used in
 ;; the template identifier.
-(s/def :cimi.session-template/methodKey :cimi.core/identifier)
+(s/def :cimi.session-template/instance :cimi.core/identifier)
 
 ;; Sessions may provide a redirect URI to be used on successful authentication.
 (s/def :cimi.session-template/redirectURI :cimi.core/nonblank-string)
@@ -25,7 +25,7 @@
 ;;
 
 (def session-template-keys-spec {:req-un [:cimi.session-template/method
-                                          :cimi.session-template/methodKey]
+                                          :cimi.session-template/instance]
                                  :opt-un [:cimi.session-template/redirectURI]})
 
 (def resource-keys-spec

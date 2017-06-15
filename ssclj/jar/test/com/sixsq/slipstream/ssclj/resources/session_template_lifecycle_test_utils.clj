@@ -109,13 +109,13 @@
             (ltu/body->edn)
             (ltu/is-status 200)))
 
-      ;; verify that the id corresponds to the value in the methodKey parameter
-      (let [{:keys [id methodKey]} (-> session-anon
+      ;; verify that the id corresponds to the value in the instance parameter
+      (let [{:keys [id instance]} (-> session-anon
                                        (request abs-uri)
                                        (ltu/body->edn)
                                        :response
                                        :body)]
-        (is (= id (str resource-url "/" methodKey))))
+        (is (= id (str resource-url "/" instance))))
 
       ;; verify that editing/updating the template works
       (let [orig-template (-> session-anon

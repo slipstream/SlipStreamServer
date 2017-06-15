@@ -37,15 +37,15 @@
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
 
-(def methodKey "test-github")
+(def instance "test-github")
 (def session-template-github {:method      github/authn-method
-                              :methodKey   methodKey
+                              :instance   instance
                               :name        "GitHub"
                               :description "External Authentication with GitHub Credentials"
                               :acl         st/resource-acl})
 
 (def configuration-session-github {:configurationTemplate {:service      "session-github"
-                                                           :instance     methodKey
+                                                           :instance     instance
                                                            :clientID     "FAKE_CLIENT_ID"
                                                            :clientSecret "ABCDEF..."}})
 
@@ -126,7 +126,7 @@
                          (ltu/is-status 201)
                          (ltu/location))
 
-            _ (is (= cfg-href (str "configuration/session-github-" methodKey)))
+            _ (is (= cfg-href (str "configuration/session-github-" instance)))
 
             resp (-> session-anon
                      (request base-uri
