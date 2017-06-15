@@ -75,10 +75,12 @@
           "Transforms the ConfigurationTemplate into a Configuration resource."
           :service)
 
-;; default implementation just updates the resourceURI
+;; default implementation just removes href and updates the resourceURI
 (defmethod tpl->configuration :default
   [resource]
-  (assoc resource :resourceURI resource-uri))
+  (-> resource
+      (dissoc :href)
+      (assoc :resourceURI resource-uri)))
 
 ;;
 ;; CRUD operations
