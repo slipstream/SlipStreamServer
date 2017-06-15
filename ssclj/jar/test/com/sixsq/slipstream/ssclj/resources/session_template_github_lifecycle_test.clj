@@ -22,7 +22,7 @@
 (dyn/initialize)
 
 (def valid-template {:method      github/authn-method
-                     :instance   github/authn-method
+                     :instance    github/authn-method
                      :name        "GitHub"
                      :description "External Authentication with GitHub Credentials"
                      :acl         st/resource-acl})

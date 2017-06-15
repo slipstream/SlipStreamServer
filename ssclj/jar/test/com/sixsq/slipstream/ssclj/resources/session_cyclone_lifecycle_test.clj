@@ -39,7 +39,7 @@
 
 (def instance "test-cyclone")
 (def session-template-cyclone {:method      cyclone/authn-method
-                               :instance   instance
+                               :instance    instance
                                :name        "OpenID Connect"
                                :description "External Authentication via OpenID Connect Protocol"
                                :acl         st/resource-acl})

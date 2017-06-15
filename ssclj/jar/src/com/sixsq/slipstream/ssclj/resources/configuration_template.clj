@@ -84,20 +84,20 @@
 
 (def ConfigurationTemplateDescription
   (merge c/CommonParameterDescription
-         {:service {:displayName "Service"
-                    :category    "general"
-                    :description "identifies the service to be configured"
-                    :type        "string"
-                    :mandatory   true
-                    :readOnly    true
-                    :order       0}
+         {:service  {:displayName "Service"
+                     :category    "general"
+                     :description "identifies the service to be configured"
+                     :type        "string"
+                     :mandatory   true
+                     :readOnly    true
+                     :order       0}
           :instance {:displayName "Instance"
-                    :category    "general"
-                    :description "identifies the service instance to be configured"
-                    :type        "string"
-                    :mandatory   false
-                    :readOnly    false
-                    :order       1}}))
+                     :category    "general"
+                     :description "identifies the service instance to be configured"
+                     :type        "string"
+                     :mandatory   false
+                     :readOnly    false
+                     :order       1}}))
 ;;
 ;; multimethods for validation
 ;;

@@ -39,7 +39,7 @@
 
 (def instance "test-oidc")
 (def session-template-oidc {:method      oidc/authn-method
-                            :instance   instance
+                            :instance    instance
                             :name        "OpenID Connect"
                             :description "External Authentication via OpenID Connect Protocol"
                             :acl         st/resource-acl})

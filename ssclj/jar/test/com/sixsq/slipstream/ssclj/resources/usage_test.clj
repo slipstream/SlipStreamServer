@@ -87,9 +87,9 @@
              second
              first
              :id)
-        uuid      (-> full-uuid
-                      (superstring.core/split #"/")
-                      second)]
+        uuid (-> full-uuid
+                 (superstring.core/split #"/")
+                 second)]
     [uuid full-uuid]))
 
 (deftest get-uuid-with-correct-authn

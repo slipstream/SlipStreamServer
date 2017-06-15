@@ -181,13 +181,13 @@
 
   [{:keys [params] :or {params {}} :as req}]
   (let [select (get params "$select")
-        v      (when select
-                 (->> select
-                      (as-vector)
-                      (mapcat comma-split)
-                      (cons "resourceURI")
-                      (set)
-                      (reduce-select-set)))]
+        v (when select
+            (->> select
+                 (as-vector)
+                 (mapcat comma-split)
+                 (cons "resourceURI")
+                 (set)
+                 (reduce-select-set)))]
     (add-cimi-param req :select v)))
 
 (defn process-format

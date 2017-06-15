@@ -32,7 +32,7 @@
 (dyn/initialize)
 
 (def session-template-internal {:method      internal/authn-method
-                                :instance   internal/authn-method
+                                :instance    internal/authn-method
                                 :name        "Internal"
                                 :description "Internal Authentication via Username/Password"
                                 :username    "username"

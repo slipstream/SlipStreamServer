@@ -29,57 +29,57 @@
                                   (get "Location"))))
     (is (:body response))
 
-  ; retrieve root resource (anonymously should work)
-  (-> (session (ring-app))
-      (request base-uri)
-      (ltu/body->edn)
-      (ltu/is-status 200)
-      (ltu/is-resource-uri resource-uri)
-      (ltu/is-operation-absent "edit")
-      (ltu/is-operation-absent "delete"))
+    ; retrieve root resource (anonymously should work)
+    (-> (session (ring-app))
+        (request base-uri)
+        (ltu/body->edn)
+        (ltu/is-status 200)
+        (ltu/is-resource-uri resource-uri)
+        (ltu/is-operation-absent "edit")
+        (ltu/is-operation-absent "delete"))
 
-  ;; retrieve root resource (root should have edit rights)
-  (-> (session (ring-app))
-      (header authn-info-header "root ADMIN")
-      (request base-uri)
-      (ltu/body->edn)
-      (ltu/is-status 200)
-      (ltu/is-resource-uri resource-uri)
-      (ltu/is-operation-present "edit")
-      (ltu/is-operation-absent "delete"))
+    ;; retrieve root resource (root should have edit rights)
+    (-> (session (ring-app))
+        (header authn-info-header "root ADMIN")
+        (request base-uri)
+        (ltu/body->edn)
+        (ltu/is-status 200)
+        (ltu/is-resource-uri resource-uri)
+        (ltu/is-operation-present "edit")
+        (ltu/is-operation-absent "delete"))
 
-  ;; updating root resource as user should fail
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "jane-updater")
-      (request base-uri
-               :request-method :put
-               :body (json/write-str {:name "dummy"}))
-      (ltu/body->edn)
-      (ltu/is-status 403))
+    ;; updating root resource as user should fail
+    (-> (session (ring-app))
+        (content-type "application/json")
+        (header authn-info-header "jane-updater")
+        (request base-uri
+                 :request-method :put
+                 :body (json/write-str {:name "dummy"}))
+        (ltu/body->edn)
+        (ltu/is-status 403))
 
-  ;; update the entry, verify updated doc is returned
-  ;; must be done as administrator
-  (-> (session (ring-app))
-      (content-type "application/json")
-      (header authn-info-header "root ADMIN")
-      (request base-uri
-               :request-method :put
-               :body (json/write-str {:name "dummy"}))
-      (ltu/body->edn)
-      (ltu/is-status 200)
-      (ltu/is-resource-uri resource-uri)
-      (ltu/is-operation-present "edit")
-      (ltu/is-key-value :name "dummy"))
+    ;; update the entry, verify updated doc is returned
+    ;; must be done as administrator
+    (-> (session (ring-app))
+        (content-type "application/json")
+        (header authn-info-header "root ADMIN")
+        (request base-uri
+                 :request-method :put
+                 :body (json/write-str {:name "dummy"}))
+        (ltu/body->edn)
+        (ltu/is-status 200)
+        (ltu/is-resource-uri resource-uri)
+        (ltu/is-operation-present "edit")
+        (ltu/is-key-value :name "dummy"))
 
-  ;; verify that subsequent reads find the right data
-  (-> (session (ring-app))
-      (request base-uri)
-      (ltu/body->edn)
-      (ltu/is-status 200)
-      (ltu/is-resource-uri resource-uri)
-      (ltu/is-operation-absent "edit")
-      (ltu/is-key-value :name "dummy"))))
+    ;; verify that subsequent reads find the right data
+    (-> (session (ring-app))
+        (request base-uri)
+        (ltu/body->edn)
+        (ltu/is-status 200)
+        (ltu/is-resource-uri resource-uri)
+        (ltu/is-operation-absent "edit")
+        (ltu/is-key-value :name "dummy"))))
 
 (deftest bad-methods
   (doall

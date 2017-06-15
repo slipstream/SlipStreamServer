@@ -75,10 +75,10 @@
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]
   (r/response (-> (db/retrieve resource-url {})
-                   ;; (a/can-view? request)
-                   (assoc :baseURI base-uri)
-                   (merge resource-links)
-                   (crud/set-operations request))))
+                  ;; (a/can-view? request)
+                  (assoc :baseURI base-uri)
+                  (merge resource-links)
+                  (crud/set-operations request))))
 
 (defmethod crud/retrieve resource-name
   [request]

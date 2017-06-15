@@ -39,7 +39,7 @@
 
 (def instance "test-github")
 (def session-template-github {:method      github/authn-method
-                              :instance   instance
+                              :instance    instance
                               :name        "GitHub"
                               :description "External Authentication with GitHub Credentials"
                               :acl         st/resource-acl})

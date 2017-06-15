@@ -24,7 +24,7 @@
 
 (defn record-ts
   [msg x]
-  (let [now     (System/currentTimeMillis)
+  (let [now (System/currentTimeMillis)
         elapsed (- now @last-timestamp)]
     (if (pos? @last-timestamp)
       (println msg "elapsed :" elapsed "ms")
