@@ -191,11 +191,14 @@
 
 (def cimi-or (partial cimi-op "or"))
 
+(defn to-MB-from-GB [input]
+  (when input (* input 1024)))
+
 (defn clause-cpu-ram-disk-os
   [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system}]
   (format
     "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s and resource:operatingSystem='%s')"
-    (or cpu 0) (or ram 0) (or disk 0) os))
+    (or cpu 0) (or (to-MB-from-GB ram) 0) (or disk 0) os))
 
 (def clause-flexible "schema-org:flexible='true'")
 
@@ -220,13 +223,30 @@
        (mapv #(str "connector/href='" % "'"))
        cimi-or))
 
+(defn parse-int [s]
+      (Integer. (re-find  #"\d+" (str s))))
+
+(defn extract-same-instance-type [service-offers {instance-type :instance.type}]
+      (filter #(= instance-type (:schema-org:name %)) service-offers))
+
+(defn extract-same-cpu-ram-disk [service-offers {cpu :cpu ram :ram disk :disk}]
+      (cond->> service-offers
+               cpu (filter #(= (parse-int cpu) (:resource:vcpu %)))
+               ram (filter #(= (to-MB-from-GB (parse-int ram)) (:resource:ram %)))
+               disk (filter #(= (parse-int disk) (:resource:disk %)))))
+
 (defn prefer-exact-instance-type
   [connector-instance-types [connector-name service-offers]]
-  (let [favorite (filter #(= (get connector-instance-types (keyword connector-name))
-                             (:schema-org:name %)) service-offers)]
-    (if-not (empty? favorite)
-      favorite
-      service-offers)))
+  (if-let [connector-params (get connector-instance-types(keyword connector-name))]
+    (let [favorite (extract-same-instance-type service-offers connector-params)
+          favorite (if (empty? favorite)
+                     (extract-same-cpu-ram-disk service-offers connector-params)
+                     favorite)
+          ]
+      (if-not (empty? favorite)
+             favorite
+             service-offers))
+    service-offers))
 
 (defn- service-offers-compatible-with-component
   [component connector-names]

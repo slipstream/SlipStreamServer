@@ -41,9 +41,9 @@
            (pc/clause-cpu-ram-disk-os component-empty)))
     (is (= "(resource:vcpu>=0 and resource:ram>=0 and resource:disk>=0 and resource:operatingSystem='linux')"
            (pc/clause-cpu-ram-disk-os component-nil)))
-    (is (= "(resource:vcpu>=1 and resource:ram>=2 and resource:disk>=0 and resource:operatingSystem='linux')"
+    (is (= "(resource:vcpu>=1 and resource:ram>=2048 and resource:disk>=0 and resource:operatingSystem='linux')"
            (pc/clause-cpu-ram-disk-os component-without-disk)))
-    (is (= "(resource:vcpu>=1 and resource:ram>=2 and resource:disk>=3 and resource:operatingSystem='linux')"
+    (is (= "(resource:vcpu>=1 and resource:ram>=2048 and resource:disk>=3 and resource:operatingSystem='linux')"
            (pc/clause-cpu-ram-disk-os component-full)))))
 
 (deftest test-cimi-and
@@ -108,12 +108,69 @@
   (is (= {:a 1} (pc/denamespace-keys {:namespace:a 1})))
   (is (= {:a {:b 1}} (pc/denamespace-keys {:namespace:a {:namespace:b 1}}))))
 
+(deftest test-extract-same-instance-type
+   ; small is preffered for exo, it is kept
+  (is (= [{:schema-org:name "small"}]
+    (pc/extract-same-instance-type [{:schema-org:name "small"} {:schema-org:name "big"}]
+    {:instance.type "small"}
+    )))
+  ; extra is absent, list returned unchanged
+  (is (empty?
+    (pc/extract-same-instance-type
+      [{:schema-org:name "small"} {:schema-org:name "big"}]
+      {:instance.type "extra"}))))
+
+
+(deftest test-extract-same-cpu-ram-disk
+         ; small is preffered for exo, it is kept
+         (is (= [{:resource:vcpu 2}]
+                (pc/extract-same-cpu-ram-disk [{:resource:vcpu 2} {:resource:vcpu 4}]
+                                               {:cpu "2"}
+                                               )))
+         (is (= [{:resource:vcpu 2 :resource:disk 10}]
+                (pc/extract-same-cpu-ram-disk
+                  [{:resource:vcpu 2 :resource:disk 10} {:resource:vcpu 4}]
+                  {:cpu "2" :disk "10"})))
+         (is (= [{:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
+                (pc/extract-same-cpu-ram-disk [{:resource:vcpu 4}
+                                               {:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
+                                              {:cpu "2" :disk "10" :ram "4"})))
+         (is (= [{:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
+                (pc/extract-same-cpu-ram-disk [{:resource:vcpu 2 :resource:disk 10}
+                                               {:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
+                                              {:cpu "2" :disk "10" :ram "4"})))
+         (is (= [{:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
+                (pc/extract-same-cpu-ram-disk [{:resource:vcpu 2 :resource:disk 10}
+                                               {:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
+                                              {:cpu "2" :disk nil :ram 4}))))
+
 (deftest test-prefer-exact-instance-type
   ; small is preffered for exo, it is kept
   (is (= [{:schema-org:name "small"}]
-         (pc/prefer-exact-instance-type {:exo "small" :ec2 "insanely-huge"}
+         (pc/prefer-exact-instance-type {:exo {:instance.type "small"} :ec2 {:instance.type "insanely-huge"}}
                                         ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]])))
   ; extra is absent, list returned unchanged
   (is (= [{:schema-org:name "small"} {:schema-org:name "big"}]
-         (pc/prefer-exact-instance-type {:exo "extra" :ec2 "insanely-huge"}
-                                        ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]]))))
+         (pc/prefer-exact-instance-type {:exo {:instance.type "extra"} :ec2 {:instance.type "insanely-huge"}}
+                                        ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]])))
+  ; preference to instance type
+  (is (= [{:instance.type "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}]
+         (pc/prefer-exact-instance-type {:exo {:schema-org:name "extra" :cpu 10 :ram nil :disk 10}
+                                         :ec2 {:instance.type "insanely-huge"
+                                               :resource:vcpu 24 :resource:ram 20480 :resource:disk 1000}}
+                                        ["exo" [{:instance.type "extra" :resource:vcpu 2
+                                                 :resource:ram 2048 :resource:disk 10}
+                                                {:schema-org:name "big" :resource:vcpu 10
+                                                 :resource:ram nil :resource:disk 10}]])))
+  (is (= [{:instance.type "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}
+          {:instance.type "extra2" :resource:vcpu 2 :resource:disk 10}]
+         (pc/prefer-exact-instance-type {:exo {:cpu 10 :ram nil :disk 10}
+                                         :ec2 {:instance.type "insanely-huge"
+                                               :resource:vcpu 24 :resource:ram 20480 :resource:disk 1000}}
+                                        ["exo" [{:instance.type "extra" :resource:vcpu 2
+                                                 :resource:ram 2048 :resource:disk 10}
+                                                {:instance.type "extra2" :resource:vcpu 2
+                                                 :resource:disk 10}
+                                                {:schema-org:name "big" :resource:vcpu 10
+                                                 :resource:ram nil :resource:disk 10}]])))
+  )
