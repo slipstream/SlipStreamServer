@@ -172,5 +172,13 @@
                                                 {:instance.type "extra2" :resource:vcpu 2
                                                  :resource:disk 10}
                                                 {:schema-org:name "big" :resource:vcpu 10
-                                                 :resource:ram nil :resource:disk 10}]])))
+                                                 :resource:ram nil :resource:disk 10}]]))))
+
+(deftest test-parse-number
+  (is (= nil (pc/parse-number nil)))
+  (is (= nil (pc/parse-number "")))
+  (is (= 10 (pc/parse-number "10G")))
+  (is (= 10 (pc/parse-number 10)))
+  (is (= 10 (pc/parse-number "10")))
+  (is (= 0.5 (pc/parse-number "0.5")))
   )

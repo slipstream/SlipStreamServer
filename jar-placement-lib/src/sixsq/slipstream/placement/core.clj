@@ -46,8 +46,10 @@
 (defn ram [service-offer] (-> service-offer :resource:ram))
 (defn disk [service-offer] (-> service-offer :resource:disk))
 
-(defn parse-int [s]
-  (or (Integer. (re-find #"\d+" (str s))) nil))
+(defn parse-number [s]
+  (let [digit (re-find #"[\d.]+" (str s))]
+    (when (not-empty digit)
+      (read-string digit))))
 
 (defn- instance-type
   [service-offer]
@@ -201,7 +203,7 @@
   [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system}]
   (format
     "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s and resource:operatingSystem='%s')"
-    (or cpu 0) (or (to-MB-from-GB (parse-int ram)) 0) (or disk 0) os))
+    (or cpu 0) (or (to-MB-from-GB (parse-number ram)) 0) (or disk 0) os))
 
 (def clause-flexible "schema-org:flexible='true'")
 
@@ -231,9 +233,9 @@
 
 (defn extract-same-cpu-ram-disk [service-offers {cpu :cpu ram :ram disk :disk}]
       (cond->> service-offers
-               cpu (filter #(= (parse-int cpu) (:resource:vcpu %)))
-               ram (filter #(= (to-MB-from-GB (parse-int ram)) (:resource:ram %)))
-               disk (filter #(= (parse-int disk) (:resource:disk %)))))
+               cpu (filter #(= (parse-number cpu) (:resource:vcpu %)))
+               ram (filter #(= (to-MB-from-GB (parse-number ram)) (:resource:ram %)))
+               disk (filter #(= (parse-number disk) (:resource:disk %)))))
 
 (defn prefer-exact-instance-type
   [connector-instance-types [connector-name service-offers]]
