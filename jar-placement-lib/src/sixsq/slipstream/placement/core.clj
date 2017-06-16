@@ -46,6 +46,9 @@
 (defn ram [service-offer] (-> service-offer :resource:ram))
 (defn disk [service-offer] (-> service-offer :resource:disk))
 
+(defn parse-int [s]
+      (Integer. (re-find  #"\d+" (str s))))
+
 (defn- instance-type
   [service-offer]
   (:schema-org:name service-offer))
@@ -198,7 +201,7 @@
   [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system}]
   (format
     "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s and resource:operatingSystem='%s')"
-    (or cpu 0) (or (to-MB-from-GB ram) 0) (or disk 0) os))
+    (or cpu 0) (or (to-MB-from-GB (parse-int ram)) 0) (or disk 0) os))
 
 (def clause-flexible "schema-org:flexible='true'")
 
@@ -222,9 +225,6 @@
        (remove empty?)
        (mapv #(str "connector/href='" % "'"))
        cimi-or))
-
-(defn parse-int [s]
-      (Integer. (re-find  #"\d+" (str s))))
 
 (defn extract-same-instance-type [service-offers {instance-type :instance.type}]
       (filter #(= instance-type (:schema-org:name %)) service-offers))
