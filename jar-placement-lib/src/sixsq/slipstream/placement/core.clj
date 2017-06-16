@@ -228,26 +228,21 @@
        (mapv #(str "connector/href='" % "'"))
        cimi-or))
 
-(defn extract-same-instance-type [service-offers {instance-type :instance.type}]
-      (filter #(= instance-type (:schema-org:name %)) service-offers))
-
-(defn extract-same-cpu-ram-disk [service-offers {cpu :cpu ram :ram disk :disk}]
-      (cond->> service-offers
-               cpu (filter #(= (parse-number cpu) (:resource:vcpu %)))
-               ram (filter #(= (to-MB-from-GB (parse-number ram)) (:resource:ram %)))
-               disk (filter #(= (parse-number disk) (:resource:disk %)))))
+(defn extract-favorite-offers [service-offers {instance-type :instance.type cpu :cpu ram :ram disk :disk}]
+  (cond->>
+    service-offers
+    instance-type (filter #(= instance-type (:schema-org:name %)))
+    disk (filter #(= (parse-number disk) (:resource:disk %)))
+    (and cpu (not instance-type)) (filter #(= (parse-number cpu) (:resource:vcpu %)))
+    (and ram (not instance-type)) (filter #(= (to-MB-from-GB (parse-number ram)) (:resource:ram %)))))
 
 (defn prefer-exact-instance-type
   [connector-instance-types [connector-name service-offers]]
   (if-let [connector-params (get connector-instance-types(keyword connector-name))]
-    (let [favorite (extract-same-instance-type service-offers connector-params)
-          favorite (if (empty? favorite)
-                     (extract-same-cpu-ram-disk service-offers connector-params)
-                     favorite)
-          ]
-      (if-not (empty? favorite)
-             favorite
-             service-offers))
+    (let [favorite (extract-favorite-offers service-offers connector-params)]
+      (if (empty? favorite)
+             service-offers
+             favorite))
     service-offers))
 
 (defn- service-offers-compatible-with-component

@@ -108,39 +108,39 @@
   (is (= {:a 1} (pc/denamespace-keys {:namespace:a 1})))
   (is (= {:a {:b 1}} (pc/denamespace-keys {:namespace:a {:namespace:b 1}}))))
 
-(deftest test-extract-same-instance-type
+(deftest test-extract-favorite-offers
    ; small is preffered for exo, it is kept
   (is (= [{:schema-org:name "small"}]
-    (pc/extract-same-instance-type [{:schema-org:name "small"} {:schema-org:name "big"}]
+    (pc/extract-favorite-offers [{:schema-org:name "small"} {:schema-org:name "big"}]
     {:instance.type "small"}
     )))
   ; extra is absent, list returned unchanged
   (is (empty?
-    (pc/extract-same-instance-type
+    (pc/extract-favorite-offers
       [{:schema-org:name "small"} {:schema-org:name "big"}]
       {:instance.type "extra"}))))
 
 
-(deftest test-extract-same-cpu-ram-disk
+(deftest test-extract-favorite-offers
          ; small is preffered for exo, it is kept
          (is (= [{:resource:vcpu 2}]
-                (pc/extract-same-cpu-ram-disk [{:resource:vcpu 2} {:resource:vcpu 4}]
+                (pc/extract-favorite-offers [{:resource:vcpu 2} {:resource:vcpu 4}]
                                                {:cpu "2"}
                                                )))
          (is (= [{:resource:vcpu 2 :resource:disk 10}]
-                (pc/extract-same-cpu-ram-disk
+                (pc/extract-favorite-offers
                   [{:resource:vcpu 2 :resource:disk 10} {:resource:vcpu 4}]
                   {:cpu "2" :disk "10"})))
          (is (= [{:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
-                (pc/extract-same-cpu-ram-disk [{:resource:vcpu 4}
+                (pc/extract-favorite-offers [{:resource:vcpu 4}
                                                {:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
                                               {:cpu "2" :disk "10" :ram "4"})))
          (is (= [{:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
-                (pc/extract-same-cpu-ram-disk [{:resource:vcpu 2 :resource:disk 10}
+                (pc/extract-favorite-offers [{:resource:vcpu 2 :resource:disk 10}
                                                {:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
                                               {:cpu "2" :disk "10" :ram "4"})))
          (is (= [{:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
-                (pc/extract-same-cpu-ram-disk [{:resource:vcpu 2 :resource:disk 10}
+                (pc/extract-favorite-offers [{:resource:vcpu 2 :resource:disk 10}
                                                {:resource:vcpu 2 :resource:disk 10 :resource:ram 4096}]
                                               {:cpu "2" :disk nil :ram 4}))))
 
@@ -154,22 +154,36 @@
          (pc/prefer-exact-instance-type {:exo {:instance.type "extra"} :ec2 {:instance.type "insanely-huge"}}
                                         ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]])))
   ; preference to instance type
-  (is (= [{:instance.type "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}]
-         (pc/prefer-exact-instance-type {:exo {:schema-org:name "extra" :cpu 10 :ram nil :disk 10}
+  (is (= [{:schema-org:name "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}]
+         (pc/prefer-exact-instance-type {:exo {:instance.type "extra" :cpu 10 :ram nil :disk 10}
                                          :ec2 {:instance.type "insanely-huge"
                                                :resource:vcpu 24 :resource:ram 20480 :resource:disk 1000}}
-                                        ["exo" [{:instance.type "extra" :resource:vcpu 2
+                                        ["exo" [{:schema-org:name "extra" :resource:vcpu 2
                                                  :resource:ram 2048 :resource:disk 10}
                                                 {:schema-org:name "big" :resource:vcpu 10
                                                  :resource:ram nil :resource:disk 10}]])))
-  (is (= [{:instance.type "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}
-          {:instance.type "extra2" :resource:vcpu 2 :resource:disk 10}]
-         (pc/prefer-exact-instance-type {:exo {:cpu 10 :ram nil :disk 10}
+
+  (is (= [{:schema-org:name "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}
+          {:schema-org:name "extra2" :resource:vcpu 2 :resource:disk 10}]
+         (pc/prefer-exact-instance-type {:exo {:cpu 2 :ram nil :disk 10}
                                          :ec2 {:instance.type "insanely-huge"
                                                :resource:vcpu 24 :resource:ram 20480 :resource:disk 1000}}
-                                        ["exo" [{:instance.type "extra" :resource:vcpu 2
+                                        ["exo" [{:schema-org:name "extra" :resource:vcpu 2
                                                  :resource:ram 2048 :resource:disk 10}
-                                                {:instance.type "extra2" :resource:vcpu 2
+                                                {:schema-org:name "extra2" :resource:vcpu 2
+                                                 :resource:disk 10}
+                                                {:schema-org:name "big" :resource:vcpu 10
+                                                 :resource:ram nil :resource:disk 10}]])))
+  (is (= [{:schema-org:name "extra" :resource:vcpu 2
+           :resource:ram 2048 :resource:disk 10}
+          {:schema-org:name "extra2" :resource:vcpu 2
+           :resource:disk 10}
+          {:schema-org:name "big" :resource:vcpu 10
+           :resource:ram nil :resource:disk 10}]
+         (pc/prefer-exact-instance-type nil
+                                        ["exo" [{:schema-org:name "extra" :resource:vcpu 2
+                                                 :resource:ram 2048 :resource:disk 10}
+                                                {:schema-org:name "extra2" :resource:vcpu 2
                                                  :resource:disk 10}
                                                 {:schema-org:name "big" :resource:vcpu 10
                                                  :resource:ram nil :resource:disk 10}]]))))
