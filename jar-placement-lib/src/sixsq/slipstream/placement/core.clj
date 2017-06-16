@@ -47,7 +47,7 @@
 (defn disk [service-offer] (-> service-offer :resource:disk))
 
 (defn parse-int [s]
-      (Integer. (re-find  #"\d+" (str s))))
+  (or (Integer. (re-find #"\d+" (str s))) nil))
 
 (defn- instance-type
   [service-offer]
