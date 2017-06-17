@@ -207,19 +207,13 @@
 
 (def clause-flexible "schema-org:flexible='true'")
 
-(defn- connector-same-instance-type
-  [[connector-name instance-type]]
-  (when instance-type
-    (format "connector/href='%s' and schema-org:name='%s'" (name connector-name) instance-type)))
-
 (defn- clause-connectors-same-instance-type
   [component]
   (mapv connector-same-instance-type (:connector-instance-types component)))
 
 (defn- clause-component
   [component]
-  (cimi-or (concat #_(clause-connectors-same-instance-type component)
-                   [clause-flexible (clause-cpu-ram-disk-os component)])))
+  (cimi-or (concat [clause-flexible (clause-cpu-ram-disk-os component)])))
 
 (defn- clause-connectors
   [connector-names]
