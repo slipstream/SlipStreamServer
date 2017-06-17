@@ -73,7 +73,8 @@
 
 (defn config-params
   [redirectURI instance]
-  (let [cfg-id (str "configuration/session-github-" instance)]
+  (let [cfg-id (str "configuration/session-github-" instance)
+        opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
     (try
       (let [{:keys [clientID clientSecret]} (crud/retrieve-by-id cfg-id opts)]
         (if (and clientID clientSecret)
@@ -127,7 +128,7 @@
 (defmethod p/validate-callback authn-method
   [resource {:keys [headers uri redirectURI] :as request}]
   (let [session-id (sutils/extract-session-id uri)
-        {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (crud/retrieve-by-id session-id)
+        {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         instance (u/document-id href)
         [client-id client-secret] (config-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
