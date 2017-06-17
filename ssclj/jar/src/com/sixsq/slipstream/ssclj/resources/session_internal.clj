@@ -12,7 +12,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.auth.utils.sign :as sg]
     [com.sixsq.slipstream.auth.cookies :as cookies]
-    [com.sixsq.slipstream.ssclj.util.response :as r]))
+    [com.sixsq.slipstream.ssclj.util.response :as r]
+    [clojure.tools.logging :as log]))
 
 (def ^:const authn-method "internal")
 
@@ -63,6 +64,7 @@
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)
             session (assoc session :expiry expires)]
+        (log/debug "internal cookie token claims for" (u/document-id href) ":" claims)
         (let [cookies {(sutils/cookie-name (:id session)) cookie}]
           (if redirectURI
             [{:status 303, :headers {"Location" redirectURI}, :cookies cookies} session]

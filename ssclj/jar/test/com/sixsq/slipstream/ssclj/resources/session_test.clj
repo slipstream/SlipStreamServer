@@ -15,10 +15,10 @@
 
 (deftest check-is-form?
   (are [expected-fn input] (expected-fn (t/is-form? input))
-                        true? {:content-type t/form-urlencoded}
-                        true? {"content-type" t/form-urlencoded}
-                        false? {:content-type "application/json"}
-                        false? {"content-type" "application/json"}))
+                           true? {:content-type t/form-urlencoded}
+                           true? {"content-type" t/form-urlencoded}
+                           false? {:content-type "application/json"}
+                           false? {"content-type" "application/json"}))
 
 (deftest check-convert-form
   (is (= {:sessionTemplate {:alpha "alpha", :beta "beta"}}

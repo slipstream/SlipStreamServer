@@ -1,34 +1,34 @@
 (ns com.sixsq.slipstream.ssclj.filter.parser-test
-    (:require
-      [clojure.test :refer :all]
-      [com.sixsq.slipstream.ssclj.filter.parser :refer :all]
-      [instaparse.core :as insta]))
+  (:require
+    [clojure.test :refer :all]
+    [com.sixsq.slipstream.ssclj.filter.parser :refer :all]
+    [instaparse.core :as insta]))
 
 (defn fails-fn
-      "Provides a function that will parse a string from the given point
-      in the grammar and returns a truthy value if the parsing failed."
-      [start]
-      (let [parser (insta/parser filter-grammar-url :start start)]
-           (fn [s]
-               (insta/failure? (parser s)))))
+  "Provides a function that will parse a string from the given point
+  in the grammar and returns a truthy value if the parsing failed."
+  [start]
+  (let [parser (insta/parser filter-grammar-url :start start)]
+    (fn [s]
+      (insta/failure? (parser s)))))
 
 (defn passes-fn
-      [start]
-      (let [fails (fails-fn start)]
-           (fn [s]
-               (not (fails s)))))
+  [start]
+  (let [fails (fails-fn start)]
+    (fn [s]
+      (not (fails s)))))
 
 ;; valid double quoted strings
 (deftest check-double-quoted-strings
-         (are [arg] ((passes-fn :DoubleQuoteString) arg)
-              "\"\""
-              "\"a\""
-              "\"a1\""
-              "\"\\\"a\""
-              "\"a\\\"\""
-              "\"a\\\"a\""
-              "\"b0\""
-              "\"b-0\""))
+  (are [arg] ((passes-fn :DoubleQuoteString) arg)
+             "\"\""
+             "\"a\""
+             "\"a1\""
+             "\"\\\"a\""
+             "\"a\\\"\""
+             "\"a\\\"a\""
+             "\"b0\""
+             "\"b-0\""))
 
 ;; valid single quoted strings
 (deftest check-single-quotes-string

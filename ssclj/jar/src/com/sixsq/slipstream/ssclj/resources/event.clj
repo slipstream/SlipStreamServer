@@ -58,11 +58,11 @@
   [resource request]
   (try
     (a/can-modify? resource request)
-    (let [href                (:id resource)
+    (let [href (:id resource)
           ^String resourceURI (:resourceURI resource)
-          ops                 (if (.endsWith resourceURI "Collection")
-                                [{:rel (:add c/action-uri) :href href}]
-                                [{:rel (:delete c/action-uri) :href href}])]
+          ops (if (.endsWith resourceURI "Collection")
+                [{:rel (:add c/action-uri) :href href}]
+                [{:rel (:delete c/action-uri) :href href}])]
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))

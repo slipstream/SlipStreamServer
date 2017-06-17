@@ -13,7 +13,7 @@
 (def ^:const resource-url (u/de-camelcase resource-name))
 (def ^:const collection-name "UsageEventCollection")
 
-(def ^:const resource-uri   (str c/slipstream-schema-uri resource-name))
+(def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
 (def collection-acl {:owner {:principal "ADMIN"

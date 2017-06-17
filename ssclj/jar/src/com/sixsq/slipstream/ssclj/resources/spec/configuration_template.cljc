@@ -6,8 +6,8 @@
 
 ;; Parameter definitions.
 
-(s/def :cimi.configuration-template/service
-  (su/regex-string #"[a-z0-9-]" #"^[a-z0-9]+(-[a-z0-9]+)*$"))
+(s/def :cimi.configuration-template/service :cimi.core/identifier)
+(s/def :cimi.configuration-template/instance :cimi.core/identifier)
 
 (def configuration-template-regex #"^configuration-template/[a-z0-9]+(-[a-z0-9]+)*$")
 (s/def :cimi.configuration-template/href (s/and string? #(re-matches configuration-template-regex %)))
@@ -18,7 +18,8 @@
 ;; is no sense in defining map resources for the resource itself.
 ;;
 
-(def configuration-template-keys-spec {:req-un [:cimi.configuration-template/service]})
+(def configuration-template-keys-spec {:req-un [:cimi.configuration-template/service]
+                                       :opt-un [:cimi.configuration-template/instance]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs configuration-template-keys-spec]))

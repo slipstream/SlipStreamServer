@@ -21,7 +21,7 @@
 (dyn/initialize)
 
 (def valid-template {:method      internal/authn-method
-                     :methodKey   internal/authn-method
+                     :instance    internal/authn-method
                      :name        "Internal"
                      :description "Internal Authentication via Username/Password"
                      :username    "username"

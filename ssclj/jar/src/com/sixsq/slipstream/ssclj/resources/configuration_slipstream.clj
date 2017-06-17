@@ -44,7 +44,7 @@
   [{:keys [service] :as resource}]
   (when service
     (let [href (str resource-url "/describe")
-          ops  [{:rel (:describe c/action-uri) :href href}]]
+          ops [{:rel (:describe c/action-uri) :href href}]]
       (-> resource
           (merge {:id          resource-url
                   :resourceURI ct/resource-uri

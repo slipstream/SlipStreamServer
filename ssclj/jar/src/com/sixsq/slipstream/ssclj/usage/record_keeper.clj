@@ -31,8 +31,8 @@
   [usage-event metric]
   (-> usage-event
       (dissoc :metrics)
-      (assoc :metric-name   (:name metric))
-      (assoc :metric-value  (-> metric :value str))))
+      (assoc :metric-name (:name metric))
+      (assoc :metric-value (-> metric :value str))))
 
 (defn- nil-timestamps-if-absent
   [usage-event]
@@ -98,10 +98,10 @@
   [usage-metric trigger options]
   (let [current-state (state usage-metric)]
     (case (sm/action current-state trigger)
-      :close-restart    (close-restart-record usage-metric options)
-      :insert-start     (open-record usage-metric options)
+      :close-restart (close-restart-record usage-metric options)
+      :insert-start (open-record usage-metric options)
       :wrong-transition (log-wrong-transition current-state trigger)
-      :close-record     (close-record usage-metric options))))
+      :close-record (close-record usage-metric options))))
 
 (defn- insertStart
   [usage-event-json options]
@@ -122,7 +122,7 @@
 
 (defn- acl-for-user-cloud
   [summary]
-  (let [user  (:user summary)
+  (let [user (:user summary)
         cloud (:cloud summary)]
 
     {:owner {:type "USER" :principal user}
@@ -146,8 +146,8 @@
 
 (defn insert-summary!
   [summary options]
-  (let [acl                   (acl-for-user-cloud summary)
-        summary-resource      (resource-for summary acl)]
+  (let [acl (acl-for-user-cloud summary)
+        summary-resource (resource-for summary acl)]
     (db/add "Usage" summary-resource options)))
 
 (defn records-for-interval
