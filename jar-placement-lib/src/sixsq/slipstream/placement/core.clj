@@ -207,10 +207,6 @@
 
 (def clause-flexible "schema-org:flexible='true'")
 
-(defn- clause-connectors-same-instance-type
-  [component]
-  (mapv connector-same-instance-type (:connector-instance-types component)))
-
 (defn- clause-component
   [component]
   (cimi-or (concat [clause-flexible (clause-cpu-ram-disk-os component)])))
