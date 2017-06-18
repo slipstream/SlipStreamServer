@@ -2,13 +2,13 @@
   (:require
     [superstring.core :as str]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.response :as sr]
+    [com.sixsq.slipstream.util.response :as sr]
     [com.sixsq.slipstream.ssclj.resources.spec.service-attribute]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as san]
     [ring.util.response :as r])
   (:import

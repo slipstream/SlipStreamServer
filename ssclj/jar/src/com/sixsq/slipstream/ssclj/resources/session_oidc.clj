@@ -24,7 +24,7 @@
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
-    [com.sixsq.slipstream.ssclj.util.response :as r]
+    [com.sixsq.slipstream.util.response :as r]
     [clojure.tools.logging :as log]))
 
 (def ^:const authn-method "oidc")

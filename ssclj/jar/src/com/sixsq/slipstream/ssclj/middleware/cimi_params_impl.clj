@@ -11,7 +11,7 @@
     [instaparse.core :as insta]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 
 (def ^:const default-last

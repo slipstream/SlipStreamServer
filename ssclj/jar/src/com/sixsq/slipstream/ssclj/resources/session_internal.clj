@@ -12,7 +12,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.auth.utils.sign :as sg]
     [com.sixsq.slipstream.auth.cookies :as cookies]
-    [com.sixsq.slipstream.ssclj.util.response :as r]
+    [com.sixsq.slipstream.util.response :as r]
     [clojure.tools.logging :as log]))
 
 (def ^:const authn-method "internal")

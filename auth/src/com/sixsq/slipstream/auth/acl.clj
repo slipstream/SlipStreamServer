@@ -1,8 +1,9 @@
-(ns com.sixsq.slipstream.ssclj.resources.common.authz
+;; old namespace: com.sixsq.slipstream.ssclj.resources.common.authz
+(ns com.sixsq.slipstream.auth.acl
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.util.response :as r]))
+   [ring.util.response :as r]
+   [com.sixsq.slipstream.util.response :as ru]
+   [com.sixsq.slipstream.util.convert :as cu]))
 
 (derive ::modify ::view)
 (derive ::all ::modify)
@@ -55,7 +56,7 @@
   [resource request action]
   (let [rights (extract-rights
                  (current-authentication request)
-                 (u/walk-clojurify (:acl resource)))
+                 (cu/walk-clojurify (:acl resource)))
         action (get rights-keywords action)]
     (some #(isa? % action) rights)))
 
@@ -67,7 +68,7 @@
   [resource request action]
   (if (authorized-do? resource request action)
     resource
-    (throw (r/ex-unauthorized (:resource-id resource)))))
+    (throw (ru/ex-unauthorized (:resource-id resource)))))
 
 (defn can-modify?
   "Determines if the resource can be modified by the user in the request.

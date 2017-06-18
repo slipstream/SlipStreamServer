@@ -8,7 +8,7 @@
     [clj-time.coerce :as c]
     [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import
-    [java.util List Map UUID Date]))
+    [java.util UUID Date]))
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.
@@ -100,17 +100,6 @@
       (if-not (ok? resource)
         (logu/log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
         resource))))
-
-(defn- clojurify
-  [exp]
-  (cond
-    (instance? Map exp) (into {} (map (fn [[k v]] [(keyword k) v]) exp))
-    (instance? List exp) (vec exp)
-    :else exp))
-
-(defn walk-clojurify
-  [java-map]
-  (clojure.walk/prewalk clojurify java-map))
 
 (defn into-vec-without-nil
   [op xs]

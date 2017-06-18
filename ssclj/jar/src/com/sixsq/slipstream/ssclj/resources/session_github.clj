@@ -15,7 +15,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.response :as r]
+    [com.sixsq.slipstream.util.response :as r]
     [com.sixsq.slipstream.auth.utils.sign :as sg]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.timestamp :as tsutil]

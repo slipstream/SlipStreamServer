@@ -1,7 +1,7 @@
 (def +version+ "3.30-SNAPSHOT")
 
 (set-env!
-  :project 'com.sixsq.slipstream/auth
+  :project 'com.sixsq.slipstream/utils
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
@@ -22,33 +22,18 @@
                   ['sixsq/default-deps (get-env :version)]
                   '[[org.clojure/clojure]
 
-                    [buddy/buddy-core]
-                    [buddy/buddy-hashers]
-                    [buddy/buddy-sign]
-                    [clj-http]
-                    [environ]
-                    [korma]
                     [log4j]
                     [org.clojure/data.json]
                     [org.clojure/tools.logging]
                     [org.clojure/java.jdbc]
-                    [org.hsqldb/hsqldb]
                     [ring/ring-core]
-                    [superstring]
 
-                    [com.sixsq.slipstream/token]
-                    [com.sixsq.slipstream/utils]
-
-                    [peridot]
-
-                    [boot-environ]
                     [adzerk/boot-test]
                     [adzerk/boot-reload]
                     [tolitius/boot-check]
                     [onetom/boot-lein-generate]]))))
 
 (require
-  '[environ.boot :refer [environ]]
   '[adzerk.boot-test :refer [test]]
   '[adzerk.boot-reload :refer [reload]]
   '[tolitius.boot-check :refer [with-yagni
@@ -65,15 +50,9 @@
   test {:junit-output-to ""}
   push {:repo "sixsq"})
 
-(deftask dev-fixture-env
-         []
-         (environ :env {:config-name      "config-hsqldb-mem.edn"
-                        :auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
-                        :auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))}))
-
 (deftask dev-env
          []
-         (set-env! :source-paths #(set (concat % #{"test" "test-resources"})))
+         (set-env! :source-paths #(set (concat % #{"test"})))
          identity)
 
 (deftask run-tests
@@ -81,7 +60,6 @@
          []
          (comp
            (dev-env)
-           (dev-fixture-env)
            (aot :all true)
            (test)))
 

@@ -1,10 +1,9 @@
-(ns com.sixsq.slipstream.ssclj.resources.common.utils-test
+(ns com.sixsq.slipstream.util.response-test
   (:require
     [clojure.test :refer [deftest are is]]
-    [com.sixsq.slipstream.ssclj.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (deftest check-response-created
-  []
   (let [id "RESOURCE_ID"
         r (r/response-created id)]
     (is (= 201 (:status r)))
