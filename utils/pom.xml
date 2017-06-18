@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>auth-dep</artifactId>
+  <artifactId>utils-dep</artifactId>
   <packaging>pom</packaging>
   <version>3.30-SNAPSHOT</version>
-  <name>SlipStreamServer/auth</name>
+  <name>SlipStreamServer/utils</name>
   <url>http://sixsq.com</url>
 
   <parent>
@@ -25,20 +25,6 @@
       <groupId>sixsq</groupId>
       <artifactId>default-deps</artifactId>
       <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>token-dep</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>utils-dep</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
       <scope>provided</scope>
     </dependency>
   </dependencies>

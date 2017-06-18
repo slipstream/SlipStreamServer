@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.ssclj.usage.state-machine :as sm]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
+    [com.sixsq.slipstream.util.convert :as convert-utils]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.db.impl :as db]))
@@ -41,7 +42,7 @@
 (defn- usage-metrics
   [usage-event-json]
   (let [usage-event (-> usage-event-json
-                        cu/walk-clojurify
+                        convert-utils/walk-clojurify
                         nil-timestamps-if-absent)]
     (for [metric (:metrics usage-event)]
       (project-to-metric usage-event metric))))

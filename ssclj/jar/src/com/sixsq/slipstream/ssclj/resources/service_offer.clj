@@ -6,11 +6,11 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
     [superstring.core :as str]
     [ring.util.response :as r]
-    [com.sixsq.slipstream.ssclj.util.response :as sr]))
+    [com.sixsq.slipstream.util.response :as sr]))
 
 (def ^:const resource-name "ServiceOffer")
 

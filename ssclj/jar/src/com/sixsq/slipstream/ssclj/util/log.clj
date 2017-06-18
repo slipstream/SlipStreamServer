@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.util.log
   (:require [clojure.tools.logging :as log]
             [clojure.string :as str]
-            [com.sixsq.slipstream.ssclj.util.response :as r]
+            [com.sixsq.slipstream.util.response :as r]
             [ring.util.response :as ring-resp]))
 
 (defn log-and-throw

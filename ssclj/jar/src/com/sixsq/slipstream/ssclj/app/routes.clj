@@ -13,7 +13,7 @@
     [com.sixsq.slipstream.auth.auth :as auth]
     [com.sixsq.slipstream.auth.github :as gh]
     [com.sixsq.slipstream.auth.cyclone :as cy]
-    [com.sixsq.slipstream.ssclj.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def collection-routes
   (let-routes [uri (str p/service-context ":resource-name")]

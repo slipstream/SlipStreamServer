@@ -1,4 +1,5 @@
-(ns com.sixsq.slipstream.ssclj.util.response
+;; old namespace:  com.sixsq.slipstream.ssclj.util.response
+(ns com.sixsq.slipstream.util.response
   "Utilities for creating ring responses and exceptions with embedded ring
    responses."
   (:require

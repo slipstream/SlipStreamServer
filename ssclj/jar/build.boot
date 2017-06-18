@@ -46,6 +46,7 @@
                    [ring/ring-json]
                    [superstring]
 
+                   [com.sixsq.slipstream/utils]
                    [com.sixsq.slipstream/auth]
                    [com.sixsq.slipstream/token]
                    [com.sixsq.slipstream/SlipStreamDbBinding-jar]

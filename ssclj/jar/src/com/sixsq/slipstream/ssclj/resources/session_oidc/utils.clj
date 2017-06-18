@@ -6,7 +6,7 @@
             [com.sixsq.slipstream.auth.utils.http :as uh]
             [clojure.tools.logging :as log]
             [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-            [com.sixsq.slipstream.ssclj.util.response :as r]
+            [com.sixsq.slipstream.util.response :as r]
             [clojure.string :as str]
             [com.sixsq.slipstream.ssclj.util.log :as logu]
             [environ.core :as environ]))
