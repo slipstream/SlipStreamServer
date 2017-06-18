@@ -31,6 +31,7 @@
     (try
       (-> (str (u/de-camelcase resource-name) "/" uuid)
           (db/retrieve request)
+          (a/can-view? request)
           (crud/set-operations request)
           (r/json-response))
       (catch ExceptionInfo ei
