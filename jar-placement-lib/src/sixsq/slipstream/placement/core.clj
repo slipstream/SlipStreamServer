@@ -27,13 +27,29 @@
   (or (every? nil? [s1 s2])
       (and (not-any? nil? [s1 s2]) (.equalsIgnoreCase s1 s2))))
 
-(defn- in-description
-  [attribute service-offer]
-  (get-in service-offer [:schema-org:descriptionVector attribute]))
+(defn- denamespace
+       [kw]
+       (let [tokens (str/split (name kw) #":")
+             cnt (count tokens)]
+            (cond
+              (= cnt 2) (keyword (second tokens))
+              (= cnt 1) (keyword (first tokens))
+              :else (keyword (str/join (rest tokens))))))
 
-(def cpu (partial in-description :schema-org:vcpu))
-(def ram (partial in-description :schema-org:ram))
-(def disk (partial in-description :schema-org:disk))
+(defn denamespace-keys
+      [m]
+      (if (map? m)
+        (into {} (map (fn [[k v]] [(denamespace k) (denamespace-keys v)]) m))
+        m))
+
+(defn cpu [service-offer] (-> service-offer :resource:vcpu))
+(defn ram [service-offer] (-> service-offer :resource:ram))
+(defn disk [service-offer] (-> service-offer :resource:disk))
+
+(defn parse-number [s]
+  (let [digit (re-find #"[\d.]+" (str s))]
+    (when (not-empty digit)
+      (read-string digit))))
 
 (defn- instance-type
   [service-offer]
@@ -55,7 +71,7 @@
 
 (defn- EUR-or-unpriced?
   [service-offer]
-  (let [price-currency (:schema-org:priceCurrency service-offer)]
+  (let [price-currency (:price:currency service-offer)]
     (or (nil? price-currency) (= "EUR" price-currency))))
 
 (defn- smallest-service-offer-EUR
@@ -91,28 +107,13 @@
             (log/error "retry failed; sending nil result")
             nil))))))
 
-(defn- denamespace
-  [kw]
-  (let [tokens (str/split (name kw) #":")
-        cnt (count tokens)]
-    (cond
-      (= cnt 2) (keyword (second tokens))
-      (= cnt 1) (keyword (first tokens))
-      :else (keyword (str/join (rest tokens))))))
-
-(defn denamespace-keys
-  [m]
-  (if (map? m)
-    (into {} (map (fn [[k v]] [(denamespace k) (denamespace-keys v)]) m))
-    m))
-
 (defn- priceable?
   [service-offer]
   (every? (set (keys service-offer))
-          [:schema-org:billingTimeCode
-           :schema-org:price
-           :schema-org:priceCurrency
-           :schema-org:unitCode]))
+          [:price:billingUnitCode
+           :price:unitCost
+           :price:currency
+           :price:unitCode]))
 
 (defn- compute-price
   [service-offer timecode]
@@ -135,7 +136,8 @@
        :cpu           (cpu service-offer)
        :ram           (ram service-offer)
        :disk          (disk service-offer)
-       :instance_type (instance-type service-offer)})))
+       :instance_type (instance-type service-offer)
+       :service-offer service-offer})))
 
 (defn number-or-nil
   "If the value is a non-negative number, then the number is returned.  Otherwise
@@ -194,30 +196,20 @@
 
 (def cimi-or (partial cimi-op "or"))
 
-(defn- connector-same-instance-type
-  [[connector-name instance-type]]
-  (when instance-type
-    (format "connector/href='%s' and schema-org:name='%s'" (name connector-name) instance-type)))
+(defn to-MB-from-GB [input]
+  (when input (* input 1024)))
 
-(defn- clause-connectors-same-instance-type
-  [component]
-  (mapv connector-same-instance-type (:connector-instance-types component)))
-
-(defn- clause-cpu-ram-disk
-  [component]
-  (when (every? #(% component) [:cpu.nb :ram.GB :disk.GB])
-    (format
-      "(schema-org:descriptionVector/schema-org:vcpu>=%s and schema-org:descriptionVector/schema-org:ram>=%s and schema-org:descriptionVector/schema-org:disk>=%s)"
-      (:cpu.nb component)
-      (:ram.GB component)
-      (:disk.GB component))))
+(defn clause-cpu-ram-disk-os
+  [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system}]
+  (format
+    "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s and resource:operatingSystem='%s')"
+    (or cpu 0) (or (to-MB-from-GB (parse-number ram)) 0) (or disk 0) os))
 
 (def clause-flexible "schema-org:flexible='true'")
 
 (defn- clause-component
   [component]
-  (cimi-or (concat (clause-connectors-same-instance-type component)
-                   [clause-flexible (clause-cpu-ram-disk component)])))
+  (cimi-or (concat [clause-flexible (clause-cpu-ram-disk-os component)])))
 
 (defn- clause-connectors
   [connector-names]
@@ -226,13 +218,22 @@
        (mapv #(str "connector/href='" % "'"))
        cimi-or))
 
+(defn extract-favorite-offers [service-offers {instance-type :instance.type cpu :cpu ram :ram disk :disk}]
+  (cond->>
+    service-offers
+    instance-type (filter #(= instance-type (:schema-org:name %)))
+    disk (filter #(= (parse-number disk) (:resource:disk %)))
+    (and cpu (not instance-type)) (filter #(= (parse-number cpu) (:resource:vcpu %)))
+    (and ram (not instance-type)) (filter #(= (to-MB-from-GB (parse-number ram)) (:resource:ram %)))))
+
 (defn prefer-exact-instance-type
   [connector-instance-types [connector-name service-offers]]
-  (let [favorite (filter #(= (get connector-instance-types (keyword connector-name))
-                             (:schema-org:name %)) service-offers)]
-    (if-not (empty? favorite)
-      favorite
-      service-offers)))
+  (if-let [connector-params (get connector-instance-types(keyword connector-name))]
+    (let [favorite (extract-favorite-offers service-offers connector-params)]
+      (if (empty? favorite)
+             service-offers
+             favorite))
+    service-offers))
 
 (defn- service-offers-compatible-with-component
   [component connector-names]
