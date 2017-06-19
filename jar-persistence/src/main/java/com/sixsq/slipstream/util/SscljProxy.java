@@ -54,6 +54,9 @@ public class SscljProxy {
         POST;
     }
 
+    public static final String BASE_RESOURCE = "api/";
+    public static final String SERVICE_OFFER_RESOURCE = BASE_RESOURCE + "service-offer";
+
     private static final String SSCLJ_SERVER = "http://localhost:8201";
     private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 

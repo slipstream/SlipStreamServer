@@ -20,6 +20,7 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.google.gson.JsonObject;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.credentials.Credentials;
@@ -563,6 +564,24 @@ public abstract class ConnectorBase implements Connector {
         return "running".equalsIgnoreCase(vmState)
                 || "active".equalsIgnoreCase(vmState)
                 || "on".equalsIgnoreCase(vmState);
+    }
+
+    protected String constructRuntimeParameterName(String nodeInstanceName, String parameterName) {
+        return RuntimeParameter.constructParamName(nodeInstanceName,
+                Parameter.constructKey(getConnectorInstanceName(), parameterName));
+    }
+
+    protected void setRuntimeParameterValueFromServiceOffer(Run run, JsonObject serviceOffer, String nodeInstanceName,
+                                                            String parameterName, String serviceOfferAttributeName) {
+        String serviceOfferAttributeValue = serviceOffer.get(serviceOfferAttributeName).getAsString();
+        String runtimeParameterName = constructRuntimeParameterName(nodeInstanceName, parameterName);
+
+        run.getRuntimeParameters().get(runtimeParameterName).setValue(serviceOfferAttributeValue);
+    }
+
+    @Override
+    public void applyServiceOffer(Run run, String nodeInstanceName, JsonObject serviceOffer){
+
     }
 
 }

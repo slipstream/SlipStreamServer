@@ -147,6 +147,9 @@ public class RuntimeParameter extends Metadata {
 	public static final String MAX_JAAS_WORKERS_DESCRIPTION = "Max number of concurrently provisioned VMs by orchestrator";
 	public static final String MAX_JAAS_WORKERS_DEFAULT = "20";
 
+	public static final String SERVICE_OFFER = "service-offer";
+	public static final String SERVICE_OFFER_DESCRIPTION = "Service Offer Id";
+
 	public final static int MULTIPLICITY_NODE_START_INDEX = 1;
 
 	private final static Pattern KEY_PATTERN = Pattern.compile("^(.*?):(.*)$");

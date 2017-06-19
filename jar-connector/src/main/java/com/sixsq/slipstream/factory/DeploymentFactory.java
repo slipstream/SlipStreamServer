@@ -186,7 +186,17 @@ public class DeploymentFactory extends RunFactory {
 				RuntimeParameter.IMAGE_PLATFORM_PARAMETER_NAME, imagePlatform,
 				RuntimeParameter.IMAGE_PLATFORM_PARAMETER_DESCRIPTION);
 
+		String serviceOfferId = run.getParameterValue(constructNodeParamName(node, RuntimeParameter.SERVICE_OFFER), "");
+		run.createRuntimeParameter(node, nodeInstanceId,
+				RuntimeParameter.SERVICE_OFFER, serviceOfferId,
+				RuntimeParameter.SERVICE_OFFER_DESCRIPTION);
+
 		run = initNodeInstanceRuntimeParametersFromImageParameters(run, node, nodeInstanceId);
+
+		if (serviceOfferId != null && !serviceOfferId.isEmpty()) {
+			String nodeInstanceName = Run.composeNodeInstanceName(node, nodeInstanceId);
+			applyServiceOffer(run, nodeInstanceName, cloudServiceName, serviceOfferId);
+		}
 
 		run.addNodeInstanceName(node, nodeInstanceId);
 
@@ -394,6 +404,7 @@ public class DeploymentFactory extends RunFactory {
 		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		paramsToFilter.add(RuntimeParameter.CLOUD_SERVICE_NAME);
 		paramsToFilter.add(RuntimeParameter.MAX_PROVISIONING_FAILURES);
+		paramsToFilter.add(RuntimeParameter.SERVICE_OFFER);
 
 		paramsToFilter.addAll(getConnectorParametersAsKeysList(
 				getConnectorParameters(cloudServiceName), cloudServiceName));
@@ -478,6 +489,7 @@ public class DeploymentFactory extends RunFactory {
 			insertNewRunParameterForNode(run, node,
 					RunParameter.NODE_RUN_BUILD_RECIPES_KEY, String.valueOf(runBuildRecipes),
 					RunParameter.NODE_RUN_BUILD_RECIPES_DESCRIPTION);
+
 		}
 	}
 
