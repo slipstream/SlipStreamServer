@@ -12,7 +12,7 @@
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]))
 
-(def ^:const resource-tag :usage-records)
+(def ^:const resource-tag :usageRecords)
 (def ^:const resource-name "UsageRecord")
 (def ^:const resource-url (cu/de-camelcase resource-name))
 (def ^:const collection-name "UsageRecordCollection")

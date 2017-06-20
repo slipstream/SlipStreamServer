@@ -137,7 +137,7 @@
                 (request base-uri :request-method :get)
                 ltu/body->edn
                 (ltu/is-key-value :count 1)
-                (get-in [:response :body :usage-records]))]
+                (get-in [:response :body :usageRecords]))]
 
     (is (= 1 (count urs)))
     (is (tu/submap? closed-usage-record (first urs))))
