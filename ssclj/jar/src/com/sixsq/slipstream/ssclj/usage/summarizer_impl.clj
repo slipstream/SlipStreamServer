@@ -102,13 +102,13 @@
 (defn parse-args
   [args]
   (let [{:keys [options errors]} (cli/parse-opts args cli-options)
-        _            (throw-when-errors errors)
-        _            (check-required #{:frequency} options)
-        frequency    (:frequency options)
-        start        (date-or-previous options frequency)
+        _ (throw-when-errors errors)
+        _ (check-required #{:frequency} options)
+        frequency (:frequency options)
+        start (date-or-previous options frequency)
         except-users (:except options)
-        grouped-by   (:grouped-by options)
-        n            (:number options)]
+        grouped-by (:grouped-by options)
+        n (:number options)]
     [start frequency except-users grouped-by n]))
 
 (defn backward-periods

@@ -2,12 +2,12 @@
   "Standard CRUD functions for resources."
   (:require
     [clojure.walk :as w]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
-    [com.sixsq.slipstream.ssclj.util.response :as r])
+    [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn add-fn
@@ -31,6 +31,7 @@
     (try
       (-> (str (u/de-camelcase resource-name) "/" uuid)
           (db/retrieve request)
+          (a/can-view? request)
           (crud/set-operations request)
           (r/json-response))
       (catch ExceptionInfo ei

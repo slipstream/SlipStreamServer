@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]))
+    [com.sixsq.slipstream.auth.acl :as a]))
 
 (def ^:const resource-tag :connectors)
 
@@ -95,12 +95,12 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        body  (-> body
-                  (assoc :resourceURI create-uri)
-                  (std-crud/resolve-hrefs idmap)
-                  (crud/validate)
-                  (:connectorTemplate)
-                  (tpl->connector))]
+        body (-> body
+                 (assoc :resourceURI create-uri)
+                 (std-crud/resolve-hrefs idmap)
+                 (crud/validate)
+                 (:connectorTemplate)
+                 (tpl->connector))]
     (add-impl (assoc request :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))

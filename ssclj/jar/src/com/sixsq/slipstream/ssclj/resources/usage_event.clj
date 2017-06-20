@@ -6,14 +6,14 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rk]
-    [com.sixsq.slipstream.ssclj.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :usage-events)
 (def ^:const resource-name "UsageEvent")
 (def ^:const resource-url (u/de-camelcase resource-name))
 (def ^:const collection-name "UsageEventCollection")
 
-(def ^:const resource-uri   (str c/slipstream-schema-uri resource-name))
+(def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
 (def collection-acl {:owner {:principal "ADMIN"

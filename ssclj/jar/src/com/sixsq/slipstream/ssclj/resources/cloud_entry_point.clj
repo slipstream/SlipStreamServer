@@ -10,9 +10,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point] ;; ensure schema is loaded
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.util.response :as sr]
+    [com.sixsq.slipstream.util.response :as sr]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
 
@@ -75,10 +75,10 @@
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]
   (r/response (-> (db/retrieve resource-url {})
-                   ;; (a/can-view? request)
-                   (assoc :baseURI base-uri)
-                   (merge resource-links)
-                   (crud/set-operations request))))
+                  ;; (a/can-view? request)
+                  (assoc :baseURI base-uri)
+                  (merge resource-links)
+                  (crud/set-operations request))))
 
 (defmethod crud/retrieve resource-name
   [request]

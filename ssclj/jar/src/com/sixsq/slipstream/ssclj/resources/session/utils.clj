@@ -6,7 +6,7 @@
             [com.sixsq.slipstream.auth.utils.http :as uh]
             [clojure.tools.logging :as log]
             [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-            [com.sixsq.slipstream.ssclj.util.response :as r]))
+            [com.sixsq.slipstream.util.response :as r]))
 
 (defn cookie-name
   "Provides the name of the cookie based on the resource ID in the
@@ -48,7 +48,7 @@
   (let [server (:slipstream-ssl-server-name headers)
         client-ip (:x-real-ip headers)]
     (crud/new-identifier
-      (cond-> {:method authn-method
+      (cond-> {:method          authn-method
                :sessionTemplate {:href href}}
               username (assoc :username username)
               server (assoc :server server)

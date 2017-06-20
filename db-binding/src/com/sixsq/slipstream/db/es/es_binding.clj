@@ -108,8 +108,7 @@
     (-> (esu/read client index type docid)
         (.getSourceAsString)
         doc->data
-        (throw-if-not-found id)
-        (acl/check-can-do options action))))
+        (throw-if-not-found id))))
 
 (deftype ESBinding []
   Binding

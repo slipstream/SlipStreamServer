@@ -21,6 +21,19 @@
       (log/error "error reading key:" (str e))
       (throw e))))
 
+(defn wrap-public-key [public-key]
+  (str "-----BEGIN PUBLIC KEY-----\n" public-key "\n-----END PUBLIC KEY-----\n"))
+
+(defn parse-key-string
+  [rsa-public-key]
+  (try
+    (ks/str->public-key (wrap-public-key rsa-public-key))
+    (catch Exception e
+      (log/error "error reading key:" (str e))
+      (throw e))))
+
 (def public-key (memoize (partial read-key ks/public-key default-public-key-path)))
 
 (def private-key (memoize (partial read-key ks/private-key default-private-key-path)))
+
+(def str->public-key (memoize parse-key-string))

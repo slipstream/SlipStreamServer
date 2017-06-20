@@ -22,6 +22,8 @@ package com.sixsq.slipstream.factory;
 
 import java.util.*;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.*;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -30,6 +32,8 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.FileUtil;
+import com.sixsq.slipstream.util.SscljProxy;
+import org.restlet.Response;
 
 public abstract class RunFactory {
 
@@ -372,11 +376,15 @@ public abstract class RunFactory {
 		}
 	}
 
+	protected static Connector getConnector(String cloudServiceName) throws ValidationException {
+		return ConnectorFactory.getConnector(cloudServiceName);
+	}
+
 	protected static Map<String, ModuleParameter> getConnectorParameters(String cloudServiceName) {
 		Connector connector = null;
 		Map<String, ModuleParameter> parameters = new HashMap<>();
 		try {
-			connector = ConnectorFactory.getConnector(cloudServiceName);
+			connector = getConnector(cloudServiceName);
 			parameters = connector.getImageParametersTemplate();
 		} catch (ValidationException ignored) {}
 		return parameters;
@@ -393,6 +401,18 @@ public abstract class RunFactory {
 			cloudParameters.add(removePrefixParameter(cp, cloudServiceName));
 		}
 		return cloudParameters;
+	}
+
+	protected static JsonObject getServiceOffer(String serviceOfferId) {
+		Response response = SscljProxy.get(SscljProxy.BASE_RESOURCE + serviceOfferId, "super ADMIN", true);
+		return new JsonParser().parse(response.getEntityAsText()).getAsJsonObject();
+	}
+
+	protected static void applyServiceOffer(Run run, String nodeInstanceName, String cloudServiceName,
+											String serviceOfferId) throws ValidationException {
+		JsonObject serviceOffer = getServiceOffer(serviceOfferId);
+		Connector connector = getConnector(cloudServiceName);
+		connector.applyServiceOffer(run, nodeInstanceName, serviceOffer);
 	}
 
 }

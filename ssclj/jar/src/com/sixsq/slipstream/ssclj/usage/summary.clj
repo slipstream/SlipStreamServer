@@ -52,7 +52,7 @@
 
 (defn contribution
   [record]
-  (let [value      (-> record :metric-value str read-string)
+  (let [value (-> record :metric-value str read-string)
         nb-minutes (-> (u/to-interval (:start-timestamp record) (:end-timestamp record))
                        t/in-seconds
                        (/ 60.0))]
@@ -68,7 +68,7 @@
 
 (defn- merge-summary-record
   [summary record]
-  (let [record-metric      (:metric-name record)
+  (let [record-metric (:metric-name record)
         record-comsumption (comsumption record)]
     (if-let [consumption-to-increase (get-in summary [:usage record-metric])]
       (assoc-in summary [:usage record-metric] (sum-consumptions consumption-to-increase record-comsumption))

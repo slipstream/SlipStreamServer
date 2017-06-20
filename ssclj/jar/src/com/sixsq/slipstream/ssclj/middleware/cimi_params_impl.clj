@@ -11,7 +11,7 @@
     [instaparse.core :as insta]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 
 (def ^:const default-last
@@ -181,13 +181,13 @@
 
   [{:keys [params] :or {params {}} :as req}]
   (let [select (get params "$select")
-        v      (when select
-                 (->> select
-                      (as-vector)
-                      (mapcat comma-split)
-                      (cons "resourceURI")
-                      (set)
-                      (reduce-select-set)))]
+        v (when select
+            (->> select
+                 (as-vector)
+                 (mapcat comma-split)
+                 (cons "resourceURI")
+                 (set)
+                 (reduce-select-set)))]
     (add-cimi-param req :select v)))
 
 (defn process-format

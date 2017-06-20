@@ -192,6 +192,14 @@ public class BuildImageFactory extends RunFactory {
 		run.assignRuntimeParameter(constructParamName(nodeInstanceName, RuntimeParameter.IMAGE_PLATFORM_PARAMETER_NAME),
 				imagePlatform, RuntimeParameter.IMAGE_PLATFORM_PARAMETER_DESCRIPTION, ParameterType.String);
 
+		String serviceOfferId = run.getParameterValue(
+				constructParamName(nodeInstanceName, RuntimeParameter.SERVICE_OFFER), "");
+		run.assignRuntimeParameter(constructParamName(nodeInstanceName, RuntimeParameter.SERVICE_OFFER),
+				serviceOfferId, RuntimeParameter.SERVICE_OFFER_DESCRIPTION, ParameterType.String);
+
+		if (serviceOfferId != null && !serviceOfferId.isEmpty()) {
+			applyServiceOffer(run, nodeInstanceName, cloudServiceName, serviceOfferId);
+		}
 	}
 
 	private static String extractInitialValue(ModuleParameter parameter, ImageModule image, Run run,
@@ -256,6 +264,7 @@ public class BuildImageFactory extends RunFactory {
 		List<String> paramsToFilter = new ArrayList<String>();
 		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 		paramsToFilter.add(RuntimeParameter.CLOUD_SERVICE_NAME);
+		paramsToFilter.add(RuntimeParameter.SERVICE_OFFER);
 		paramsToFilter.addAll(
 				getConnectorParametersAsKeysList(getConnectorParameters(cloudServiceName), cloudServiceName));
 

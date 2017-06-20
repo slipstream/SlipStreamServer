@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.crud
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 ;;
 ;; CRUD dispatch functions

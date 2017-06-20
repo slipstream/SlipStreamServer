@@ -13,7 +13,7 @@
 (def ^:const authn-method "internal")
 
 (def default-template {:method      authn-method
-                       :methodKey   authn-method
+                       :instance    authn-method
                        :name        "Internal"
                        :description "Internal Authentication via Username/Password"
                        :username    "username"
@@ -47,10 +47,10 @@
   []
   (p/register authn-method desc)
   (try
-    (let [request {:params {:resource-name p/resource-url}
-                   :identity {:current "INTERNAL"
+    (let [request {:params   {:resource-name p/resource-url}
+                   :identity {:current         "INTERNAL"
                               :authentications {"INTERNAL" {:identity "INTERNAL", :roles ["ADMIN" "USER" "ANON"]}}}
-                   :body   default-template}
+                   :body     default-template}
           {:keys [status]} (crud/add request)]
       (case status
         201 (log/info "created session-template/internal resource")

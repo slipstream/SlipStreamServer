@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]))
+    [com.sixsq.slipstream.auth.acl :as a]))
 
 (def ^:const resource-tag :configurations)
 
@@ -75,10 +75,12 @@
           "Transforms the ConfigurationTemplate into a Configuration resource."
           :service)
 
-;; default implementation just updates the resourceURI
+;; default implementation just removes href and updates the resourceURI
 (defmethod tpl->configuration :default
   [resource]
-  (assoc resource :resourceURI resource-uri))
+  (-> resource
+      (dissoc :href)
+      (assoc :resourceURI resource-uri)))
 
 ;;
 ;; CRUD operations
@@ -127,6 +129,7 @@
 ;;
 
 (defmethod crud/new-identifier resource-name
-  [resource resource-name]
-  (if-let [new-id (:service resource)]
+  [{:keys [service instance] :as resource} resource-name]
+  (if-let [new-id (cond-> service
+                          instance (str "-" instance))]
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))

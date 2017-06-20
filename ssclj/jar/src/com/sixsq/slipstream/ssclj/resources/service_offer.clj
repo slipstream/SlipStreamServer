@@ -6,11 +6,11 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
+    [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
     [superstring.core :as str]
     [ring.util.response :as r]
-    [com.sixsq.slipstream.ssclj.util.response :as sr]))
+    [com.sixsq.slipstream.util.response :as sr]))
 
 (def ^:const resource-name "ServiceOffer")
 
@@ -57,23 +57,23 @@
 
 (defn- validate-attributes
   [resource]
-  (let [valid-prefixes    (sn/all-prefixes)
-        resource-payload  (dissoc resource :acl :id :resourceURI :name :description
+  (let [valid-prefixes (sn/all-prefixes)
+        resource-payload (dissoc resource :acl :id :resourceURI :name :description
                                  :created :updated :properties :operations :connector)
-        validator         (partial valid-attribute-name? valid-prefixes)]
+        validator (partial valid-attribute-name? valid-prefixes)]
     (if (valid-attributes? validator resource-payload)
       resource
       (throw-wrong-namespace))))
 
 (def validate-fn (u/create-spec-validation-fn :cimi/service-offer))
 (defmethod crud/validate resource-uri
-           [resource]
-    (-> resource
-        validate-fn
-        validate-attributes))
+  [resource]
+  (-> resource
+      validate-fn
+      validate-attributes))
 
 (defmethod crud/add-acl resource-uri
-           [resource request]
+  [resource request]
   (a/add-acl resource request))
 
 ;;
@@ -89,23 +89,23 @@
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
 (defmethod crud/retrieve resource-name
-           [request]
+  [request]
   (retrieve-impl request))
 
 (def edit-impl (std-crud/edit-fn resource-name))
 
 (defmethod crud/edit resource-name
-           [request]
+  [request]
   (edit-impl request))
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
 (defmethod crud/delete resource-name
-           [request]
+  [request]
   (delete-impl request))
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
 (defmethod crud/query resource-name
-           [request]
+  [request]
   (query-impl request))

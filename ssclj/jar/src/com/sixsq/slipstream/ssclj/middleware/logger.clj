@@ -29,8 +29,8 @@
   (display-space-separated
     (-> request :request-method name (.toUpperCase))
     (:uri request)
-    (display-authn-info request )
-    (display-querystring request )))
+    (display-authn-info request)
+    (display-querystring request)))
 
 (defn formatted-response
   [formatted-request response start current-time-millis]
@@ -46,9 +46,9 @@
   "
   [handler]
   (fn [request]
-    (let [start             (System/currentTimeMillis)
+    (let [start (System/currentTimeMillis)
           formatted-request (formatted-request request)
-          _                 (log/info formatted-request)
-          response          (handler request)
-          _                 (log/info (formatted-response formatted-request response start (System/currentTimeMillis)))]
+          _ (log/info formatted-request)
+          response (handler request)
+          _ (log/info (formatted-response formatted-request response start (System/currentTimeMillis)))]
       response)))

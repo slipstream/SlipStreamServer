@@ -6,8 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.authz :as a]
-    [com.sixsq.slipstream.ssclj.util.response :as r]
+    [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud])
   (:import (clojure.lang ExceptionInfo)))
 
@@ -78,7 +78,7 @@
                         :mandatory   true
                         :readOnly    true
                         :order       0}
-          :methodKey   {:displayName "Authentication Method Key (Name)"
+          :instance    {:displayName "Authentication Method Key (Name)"
                         :category    "general"
                         :description "key used to identify this authentication source"
                         :type        "string"
@@ -111,11 +111,11 @@
   (validate-subtype resource))
 
 ;;
-;; identifiers for these resources are the same as the :methodKey value
+;; identifiers for these resources are the same as the :instance value
 ;;
 (defmethod crud/new-identifier resource-name
-  [{:keys [methodKey] :as resource} resource-name]
-  (->> methodKey
+  [{:keys [instance] :as resource} resource-name]
+  (->> instance
        (str resource-url "/")
        (assoc resource :id)))
 
