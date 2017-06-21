@@ -8,4 +8,8 @@ public class UsageResource extends APIResource {
         super("usage-summary");
     }
 
+    protected String getPageRepresentation() {
+        return "usage";
+    }
+
 }

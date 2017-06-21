@@ -9,6 +9,10 @@ public class UsageListResource extends APICollectionResource {
         super("usage-summary");
     }
 
+    protected String getPageRepresentation() {
+        return "usages";
+    }
+
     protected String cimiFilter() {
         String cimiFilter = String.format("&$filter=user='%s'", getUser().getName());
 
