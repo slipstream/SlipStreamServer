@@ -1,17 +1,16 @@
-(ns
-  com.sixsq.slipstream.ssclj.resources.usage
+(ns com.sixsq.slipstream.ssclj.resources.usage-summary
   (:refer-clojure :exclude [update])
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.usage]
+    [com.sixsq.slipstream.ssclj.resources.spec.usage-summary]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
-(def ^:const resource-tag :usages)
-(def ^:const resource-name "Usage")
+(def ^:const resource-tag :usageSummaries)
+(def ^:const resource-name "UsageSummary")
 (def ^:const resource-url (u/de-camelcase resource-name))
-(def ^:const collection-name "UsageCollection")
+(def ^:const collection-name "UsageSummaryCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
@@ -24,7 +23,7 @@
                               :right     "VIEW"}]})
 
 
-(def validate-fn (u/create-spec-validation-fn :cimi/usage))
+(def validate-fn (u/create-spec-validation-fn :cimi/usage-summary))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -52,3 +51,12 @@
   [request]
   (retrieve-impl request))
 
+(def delete-impl (std-crud/delete-fn resource-name))
+(defmethod crud/delete resource-name
+  [request]
+  (delete-impl request))
+
+(def edit-impl (std-crud/edit-fn resource-name))
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))

@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rk]
     [com.sixsq.slipstream.util.response :as r]))
 
-(def ^:const resource-tag :usage-events)
+(def ^:const resource-tag :usageEvents)
 (def ^:const resource-name "UsageEvent")
 (def ^:const resource-url (u/de-camelcase resource-name))
 (def ^:const collection-name "UsageEventCollection")
@@ -35,7 +35,6 @@
 ;;
 ;; Create
 ;;
-
 
 (defmethod crud/add resource-name
   [request]

@@ -67,7 +67,7 @@
                                (request "/api/usage-record")
                                t/body->edn
                                (t/is-count #(= 2 %))
-                               (get-in [:response :body :usage-records])))]
+                               (get-in [:response :body :usageRecords])))]
 
     (is (= (-> open-usage-event
                (dissoc :metrics :acl)
@@ -82,7 +82,7 @@
   [state]
   (-> (request state "/api/usage-record")
       t/body->edn
-      (get-in [:response :body :usage-records])))
+      (get-in [:response :body :usageRecords])))
 
 (deftest post-close-usage-event-should-update-records
   (let [state (-> (session (ring-app))

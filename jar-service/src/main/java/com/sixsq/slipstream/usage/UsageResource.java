@@ -5,7 +5,11 @@ import com.sixsq.slipstream.api.APIResource;
 public class UsageResource extends APIResource {
 
     public UsageResource() {
-        super("usage");
+        super("usage-summary");
+    }
+
+    protected String getPageRepresentation() {
+        return "usage";
     }
 
 }
