@@ -85,9 +85,9 @@
   (let [filter
         (str "cloud-vm-instanceid='" (:cloud-vm-instanceid usage-record)
              "' and metric-name='" (:metric-name usage-record) "'")]
-    (-> (db/query "usage-record" {:cimi-params {:filter  (parser/parse-cimi-filter filter)
-                                                :orderby [["start-timestamp" :desc]]}
-                                  :user-roles  ["ADMIN"]})
+    (-> (db/query "UsageRecord" {:cimi-params {:filter  (parser/parse-cimi-filter filter)
+                                               :orderby [["start-timestamp" :desc]]}
+                                 :user-roles  ["ADMIN"]})
         second
         first)))
 
@@ -98,13 +98,13 @@
         (str "cloud-vm-instanceid='" (:cloud-vm-instanceid usage-record)
              "' and metric-name='" (:metric-name usage-record) "'"
              " and end-timestamp='" date-in-future "'")]
-    (second (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
-                                      :user-roles  ["ADMIN"]}))))
+    (second (db/query "UsageRecord" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
+                                     :user-roles  ["ADMIN"]}))))
 
 (defn records-for-interval
   "Retrieves all usage records intersecting with given interval."
   [start end]
   (u/check-order [start end])
   (let [filter (str "end-timestamp >= '" start "' and start-timestamp <= '" end "'")]
-    (second (db/query "usage-record" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
-                                      :user-roles  ["ADMIN"]}))))
+    (second (db/query "UsageRecord" {:cimi-params {:filter (parser/parse-cimi-filter filter)}
+                                     :user-roles  ["ADMIN"]}))))
