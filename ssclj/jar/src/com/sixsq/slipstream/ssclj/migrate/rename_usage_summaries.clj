@@ -43,8 +43,8 @@
   [usage]
   (let [uuid (id->uuid (:id usage))
         usage-summary-json (-> usage
-                               (set/rename-keys {:usage :usage-summary})
                                (assoc :id (str "usage-summary/" uuid))
+                               (assoc :resourceURI "http://sixsq.com/slipstream/1/UsageSummary")
                                edn->json)]
     [uuid usage-summary-json]))
 
