@@ -457,7 +457,7 @@ public class RootApplication extends Application {
 	}
 
 	private void attachUsage(RootRouter router) throws ValidationException {
-		guardAndAttach(router, new UsageRouter(getContext()), "usageSummary");
+		guardAndAttach(router, new UsageRouter(getContext()), "usage");
 	}
 
 	private void attachServiceInfo(RootRouter router) throws ValidationException {

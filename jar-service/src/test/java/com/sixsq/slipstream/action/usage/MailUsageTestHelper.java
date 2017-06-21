@@ -7,7 +7,7 @@ public class MailUsageTestHelper {
         return
                 "{\n" +
                         "  \"usages\" : [ {\n" +
-                        "    \"usageSummary\" : {\n" +
+                        "    \"usage\" : {\n" +
                         "      \"RAM\" : {\n" +
                         "        \"unit-minutes\" : 1916151.47\n" +
                         "      },\n" +
@@ -39,7 +39,7 @@ public class MailUsageTestHelper {
                         "    },\n" +
                         "    \"id\" : \"Usage/0954a8f0-7ccb-4386-9797-308defa76ad7\"\n" +
                         "  }, {\n" +
-                        "    \"usageSummary\" : {\n" +
+                        "    \"usage\" : {\n" +
                         "      \"ram\" : {\n" +
                         "        \"unit-minutes\" : 47185920.0\n" +
                         "      },\n" +
