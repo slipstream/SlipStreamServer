@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  */
 public class DailyUsageSender {
 
-    private static final String USAGE_RESOURCE = "api/usage";
+    private static final String USAGE_RESOURCE = "api/usage-summary";
 
     private static final Logger logger = Logger.getLogger(DailyUsageSender.class.getName());
 

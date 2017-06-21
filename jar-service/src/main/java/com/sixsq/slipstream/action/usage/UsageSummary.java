@@ -16,6 +16,8 @@ public class UsageSummary {
 
     protected String cloud;
     protected String user;
+
+    @SerializedName("usageSummary")
     protected JsonElement usage;
 
     protected Map<String, Double> getMetrics() {

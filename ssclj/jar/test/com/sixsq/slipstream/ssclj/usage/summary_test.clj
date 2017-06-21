@@ -212,7 +212,7 @@
 
 (defn- summaries-from-db
   []
-  (second (db/query "usage" {:user-roles ["ADMIN"]})))
+  (second (db/query "UsageSummary" {:user-roles ["ADMIN"]})))
 
 (deftest test-summarize-and-store-by-user-cloud
   (insert-record)
