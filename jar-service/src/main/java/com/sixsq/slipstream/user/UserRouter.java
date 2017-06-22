@@ -9,9 +9,9 @@ package com.sixsq.slipstream.user;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,22 +27,24 @@ import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
 import org.restlet.security.Role;
 import org.restlet.security.RoleAuthorizer;
+import org.restlet.routing.Variable;
+import java.util.Map;
 
 import com.sixsq.slipstream.authz.SuperEnroler;
 
 /**
  * User application to view and edit user data.
- * 
+ *
  * The URL layout of this router is the following:
- * 
+ *
  * <ul>
  * <li>/{user}?edit={edit}</li>
  * <li>/{user}</li>
  * <li>/</li>
  * </ul>
- * 
+ *
  * @author Marc-Elian Begin
- * 
+ *
  */
 public class UserRouter extends Router {
 
@@ -83,5 +85,12 @@ public class UserRouter extends Router {
 			route = attach(path, resourceClass);
 		}
 		route.setMatchingMode(Template.MODE_STARTS_WITH);
+
+		// Allow the user variable to match any valid path characters.
+		// Needed because usernames from external sources may contain slashes.
+		Template template = route.getTemplate();
+		Map<String, Variable> variables = template.getVariables();
+		variables.put(UserResource.USERNAME_URI_ATTRIBUTE, new Variable(Variable.TYPE_URI_PATH));
+		template.setVariables(variables);
 	}
 }
