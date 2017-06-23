@@ -427,8 +427,15 @@ public abstract class RunFactory {
 					"' was asked for the node instance '" + nodeInstanceName + "'");
 		}
 
-		Connector connector = getConnector(cloudServiceName);
-		connector.applyServiceOffer(run, nodeInstanceName, serviceOffer);
+		boolean isFlexible = false;
+		try {
+			isFlexible = "true".equals(serviceOffer.get("schema-org:flexible").getAsString().trim());
+		} catch (Exception ignore) {}
+
+		if (!isFlexible) {
+			Connector connector = getConnector(cloudServiceName);
+			connector.applyServiceOffer(run, nodeInstanceName, serviceOffer);
+		}
 	}
 
 }
