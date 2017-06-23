@@ -108,12 +108,12 @@
             nil))))))
 
 (defn- priceable?
-  [service-offer]
-  (every? (set (keys service-offer))
-          [:price:billingUnitCode
-           :price:unitCost
-           :price:currency
-           :price:unitCode]))
+       [service-offer]
+       (every? #(get service-offer %)
+               [:price:billingUnitCode
+                :price:unitCost
+                :price:currency
+                :price:unitCode]))
 
 (defn- compute-price
   [service-offer timecode]
