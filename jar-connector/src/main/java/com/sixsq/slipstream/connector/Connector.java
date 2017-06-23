@@ -144,6 +144,6 @@ public interface Connector {
 
 	boolean isVmUsable(String vmState);
 
-	void applyServiceOffer(Run run, String nodeInstanceName, JsonObject serviceOffer);
+	void applyServiceOffer(Run run, String nodeInstanceName, JsonObject serviceOffer) throws ValidationException;
 
 }

@@ -409,8 +409,24 @@ public abstract class RunFactory {
 	}
 
 	protected static void applyServiceOffer(Run run, String nodeInstanceName, String cloudServiceName,
-											String serviceOfferId) throws ValidationException {
+											String serviceOfferId) throws ValidationException
+	{
 		JsonObject serviceOffer = getServiceOffer(serviceOfferId);
+		if (serviceOffer == null) {
+			throw new ValidationException("Failed to find the service offer '" + serviceOfferId +
+					"' for the node instance '" + nodeInstanceName + "'");
+		}
+
+		String connectorHref = null;
+		try {
+			connectorHref = serviceOffer.get("connector").getAsJsonObject().get("href").getAsString();
+		} catch (Exception ignore) {}
+		if (connectorHref != null && !connectorHref.equals(cloudServiceName)) {
+			throw new ValidationException("The service offer is for '" + connectorHref +
+					"' but the Cloud service '" + cloudServiceName +
+					"' was asked for the node instance '" + nodeInstanceName + "'");
+		}
+
 		Connector connector = getConnector(cloudServiceName);
 		connector.applyServiceOffer(run, nodeInstanceName, serviceOffer);
 	}
