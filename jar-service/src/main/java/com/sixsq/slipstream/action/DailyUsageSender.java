@@ -9,11 +9,6 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.Notifier;
 import com.sixsq.slipstream.util.SscljProxy;
-import org.restlet.Context;
-import org.restlet.data.Parameter;
-import org.restlet.engine.header.Header;
-import org.restlet.resource.ClientResource;
-import org.restlet.util.Series;
 
 import java.util.*;
 import java.util.logging.Logger;

@@ -145,9 +145,8 @@ public class RunListResource extends BaseResource {
 	 * defined at all levels.
 	 */
 	@Post("form|txt")
-	public void createRun(Representation entity) throws ResourceException,
-			FileNotFoundException, IOException, SQLException,
-			ClassNotFoundException, SlipStreamException {
+	public void createRun(Representation entity)
+			throws ResourceException, IOException, SQLException, ClassNotFoundException, SlipStreamException {
 
 		Form form = new Form(entity);
 		setReference(form);

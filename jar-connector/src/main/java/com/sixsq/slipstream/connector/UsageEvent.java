@@ -1,23 +1,8 @@
 package com.sixsq.slipstream.connector;
 
-import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.util.SscljProxy;
-import org.restlet.Context;
-import org.restlet.data.MediaType;
-import org.restlet.data.Parameter;
-import org.restlet.engine.header.Header;
-import org.restlet.representation.Representation;
-import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.ClientResource;
-import org.restlet.resource.ResourceException;
-import org.restlet.util.Series;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 

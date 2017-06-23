@@ -2,16 +2,12 @@ package com.sixsq.slipstream.authn;
 
 
 import com.sixsq.slipstream.util.SscljProxy;
-import org.restlet.Context;
 import org.restlet.Response;
 import org.restlet.data.MediaType;
 import org.restlet.data.Form;
 import org.restlet.data.Parameter;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
