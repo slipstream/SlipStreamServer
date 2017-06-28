@@ -571,9 +571,8 @@ public abstract class ConnectorBase implements Connector {
         return Parameter.constructKey(getConnectorInstanceName(), parameterName);
     }
 
-    protected void setRuntimeParameterValueFromServiceOffer(Run run, JsonObject serviceOffer, String nodeInstanceName,
-                                                            String parameterName, String serviceOfferAttributeName)
-            throws ValidationException
+    protected String getAttributeValueFromServiceOffer(JsonObject serviceOffer, String serviceOfferAttributeName,
+                                                     String nodeInstanceName) throws ValidationException
     {
         JsonElement serviceOfferAttribute = serviceOffer.get(serviceOfferAttributeName);
         if (serviceOfferAttribute == null) {
@@ -585,14 +584,27 @@ public abstract class ConnectorBase implements Connector {
                     "' in the service offer '" + serviceOfferId +
                     "' for the node instance '" + nodeInstanceName + "'");
         }
-        String serviceOfferAttributeValue = serviceOfferAttribute.getAsString();
 
+        return serviceOfferAttribute.getAsString();
+    }
+
+    protected void setRuntimeParameterValueWithCheck(Run run, String parameterName, String nodeInstanceName,
+                                                     String value) throws ValidationException{
         String runtimeParameterName = RuntimeParameter.constructParamName(nodeInstanceName, parameterName);
         RuntimeParameter runtimeParameter = run.getRuntimeParameters().get(runtimeParameterName);
         if (runtimeParameter == null) {
             throw new ValidationException("Failed to find the runtime parameter '" + runtimeParameterName + "' ");
         }
-        runtimeParameter.setValue(serviceOfferAttributeValue);
+        runtimeParameter.setValue(value);
+    }
+
+    protected void setRuntimeParameterValueFromServiceOffer(Run run, JsonObject serviceOffer, String nodeInstanceName,
+                                                            String parameterName, String serviceOfferAttributeName)
+            throws ValidationException
+    {
+        String serviceOfferAttributeValue = this.getAttributeValueFromServiceOffer(serviceOffer,
+                serviceOfferAttributeName, nodeInstanceName);
+        this.setRuntimeParameterValueWithCheck(run, parameterName, nodeInstanceName, serviceOfferAttributeValue);
     }
 
     @Override
