@@ -105,7 +105,8 @@
             result)
           (catch Exception ex
             (log/error "retry failed; sending nil result")
-            nil))))))
+            nil))
+        (log/error "got an HTTP error while querying service offers: " (ex-data ex))))))
 
 (defn- priceable?
        [service-offer]
@@ -197,7 +198,7 @@
 (def cimi-or (partial cimi-op "or"))
 
 (defn to-MB-from-GB [input]
-  (when input (* input 1024)))
+  (when input (int (* input 1024))))
 
 (defn clause-cpu-ram-disk-os
   [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system}]
