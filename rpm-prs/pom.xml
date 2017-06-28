@@ -154,7 +154,6 @@
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd</require>
-            <require>slipstream-price-parsing</require>
             <require>slipstream-ring-container</require>
           </requires>
 
