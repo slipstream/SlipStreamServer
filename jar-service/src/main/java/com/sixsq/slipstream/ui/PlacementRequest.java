@@ -54,8 +54,6 @@ public class PlacementRequest {
 
     private Map<Object, Object> placementParams;
 
-    private List<Map<String, String>> orchestratorComponents;
-
     private List<String> userConnectors;
 
     private boolean isScalable;
@@ -66,7 +64,6 @@ public class PlacementRequest {
 
         Module module = getModule();
         result.put("module", module);
-        result.put("orchestratorComponents", orchestratorComponents);
         result.put("user-connectors", userConnectors);
         result.put("isScalable", isScalable);
         result.put("placement-params", module.placementPoliciesPerComponent());
