@@ -76,20 +76,17 @@
                                :disk.GB          "50"
                                :operating-system "linux"
                                :connector-instance-types {"c1" {:instance.type "medium"} "c2" {}}}
-                              {:node             "node-orchestrator-c1"
-                               :module           "module-orchestrator-c1"
-                               :cpu.nb           "0"
-                               :ram.GB           "0"
-                               :disk.GB          "0"
+                              {:node             "node-orchestrator"
+                               :module           "module-orchestrator"
+                               :cpu.nb           nil
+                               :ram.GB           nil
+                               :disk.GB          nil
                                :operating-system "linux"
-                               :placement-policy "connector/href='c1'"}
-                              {:node             "node-orchestrator-c2"
-                               :module           "module-orchestrator-c2"
-                               :cpu.nb           "0"
-                               :ram.GB           "0"
-                               :disk.GB          "0"
-                               :operating-system "linux"
-                               :placement-policy "connector/href='c2'"}]
+                               :placement-policy nil
+                               :connector-instance-types
+                                                 {"c1" {:instance.type nil, :cpu 0, :ram 0, :disk 0},
+                                                  "c2" {:instance.type nil, :cpu 0, :ram 0, :disk 0}}
+                               }]
 
             :user-connectors ["c1" "c2"]}
            (placement->map {:module          image1
@@ -102,13 +99,16 @@
                                   :disk.GB          nil
                                   :operating-system "linux"
                                   :connector-instance-types {"c1" {:instance.type "large" :disk "50"}}}
-                                 {:node             "node-orchestrator-c1"
-                                  :module           "module-orchestrator-c1"
-                                  :cpu.nb           "0"
-                                  :ram.GB           "0"
-                                  :disk.GB          "0"
+                                 {:node             "node-orchestrator"
+                                  :module           "module-orchestrator"
+                                  :cpu.nb           nil
+                                  :ram.GB           nil
+                                  :disk.GB          nil
                                   :operating-system "linux"
-                                  :placement-policy "connector/href='c1'"}]
+                                  :placement-policy nil
+                                  :connector-instance-types
+                                                    {"c1" {:instance.type nil, :cpu 0, :ram 0, :disk 0}}
+                                  }]
 
                :user-connectors ["c1"]}
               (placement->map {:module          image3
@@ -121,13 +121,17 @@
                                :disk.GB          "10"
                                :operating-system "windows"
                                :connector-instance-types {"c3" {}}}
-                              {:node             "node-orchestrator-c3"
-                               :module           "module-orchestrator-c3"
-                               :cpu.nb           "0"
-                               :ram.GB           "0"
-                               :disk.GB          "0"
+                              {:node             "node-orchestrator"
+                               :module           "module-orchestrator"
+                               :cpu.nb           nil
+                               :ram.GB           nil
+                               :disk.GB          nil
                                :operating-system "linux"
-                               :placement-policy "connector/href='c3'"}]
+                               :placement-policy nil
+                               :connector-instance-types
+                                                 {"c3" {:instance.type nil, :cpu 0, :ram 0, :disk 0}}
+                               }]
+
             :user-connectors ["c3"]}
            (placement->map {:module          image2
                             :user-connectors ["c3"]})))
@@ -150,20 +154,17 @@
               :operating-system "linux"
               :placement-policy nil
               :connector-instance-types {"c5" {} "c6" {}}}
-             {:node             "node-orchestrator-c5"
-              :module           "module-orchestrator-c5"
-              :cpu.nb           "0"
-              :ram.GB           "0"
-              :disk.GB          "0"
+             {:node             "node-orchestrator"
+              :module           "module-orchestrator"
+              :cpu.nb           nil
+              :ram.GB           nil
+              :disk.GB          nil
               :operating-system "linux"
-              :placement-policy "connector/href='c5'"}
-             {:node             "node-orchestrator-c6"
-              :module           "module-orchestrator-c6"
-              :cpu.nb           "0"
-              :ram.GB           "0"
-              :disk.GB          "0"
-              :operating-system "linux"
-              :placement-policy "connector/href='c6'"}}
+              :placement-policy nil
+              :connector-instance-types
+                                {"c5" {:instance.type nil, :cpu 0, :ram 0, :disk 0}
+                                 "c6" {:instance.type nil, :cpu 0, :ram 0, :disk 0}}
+              }}
 
            (set (:components app-map))))))
 

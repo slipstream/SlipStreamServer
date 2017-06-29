@@ -40,12 +40,29 @@
 
 (defn- connector-instance-types
   [comp user-connector]
-    (let [connector-params {:instance.type (parameter-value comp (str user-connector ".instance.type"))
-                            :cpu           (try-extract-digit (parameter-value comp (str user-connector ".cpu")))
-                            :ram           (try-extract-digit (parameter-value comp (str user-connector ".ram")))
-                            :disk          (try-extract-digit (parameter-value comp (str user-connector ".disk")))}
-          connector-params (into {} (filter val connector-params))]
-      {user-connector connector-params}))
+  (let [connector-params {:instance.type (parameter-value comp (str user-connector ".instance.type"))
+                          :cpu           (try-extract-digit (parameter-value comp (str user-connector ".cpu")))
+                          :ram           (try-extract-digit (parameter-value comp (str user-connector ".ram")))
+                          :disk          (try-extract-digit (parameter-value comp (str user-connector ".disk")))}
+        connector-params (into {} (filter val connector-params))]
+    {user-connector connector-params}))
+
+(defn- orchestrator-instance-types
+  [user-connector]
+  (let [connector-params {:instance.type (get-orch-param user-connector "instance.type")
+                          :cpu           (or (try-extract-digit
+                                               (or
+                                                 (get-orch-param user-connector "cpu.size")
+                                                 (get-orch-param user-connector "cpu"))) 0)
+                          :ram           (or (try-extract-digit
+                                               (or
+                                                 (get-orch-param user-connector "ram.size")
+                                                 (get-orch-param user-connector "ram"))) 0)
+                          :disk          (or (try-extract-digit
+                                               (or
+                                                 (get-orch-param user-connector "disk.size")
+                                                 (get-orch-param user-connector "disk"))) 0)}]
+    {user-connector connector-params}))
 
 (defn- comp->map
   [comp user-connectors]
@@ -57,30 +74,16 @@
    :placement-policy         (.getPlacementPolicy comp)
    :connector-instance-types (apply merge (map (partial connector-instance-types comp) user-connectors))})
 
-(defn- connector->orchestrator-map
-  [connector]
-  (let [orchestrator-instance-type (get-orch-param connector "instance.type")
-        type-policy (if orchestrator-instance-type
-                      (format " and schema-org:name='%s'" orchestrator-instance-type) "")
-        orchestrator-cpu (try-extract-digit
-                           (or
-                             (get-orch-param connector "cpu.size")
-                             (get-orch-param connector "cpu")))
-        orchestrator-ram (try-extract-digit
-                           (or
-                             (get-orch-param connector "ram.size")
-                             (get-orch-param connector "ram")))
-        orchestrator-disk (try-extract-digit
-                            (or
-                              (get-orch-param connector "disk.size")
-                              (get-orch-param connector "disk")))]
-    {:node             (str "node-orchestrator-" connector)
-     :module           (str "module-orchestrator-" connector)
-     :cpu.nb           (or orchestrator-cpu "0")
-     :ram.GB           (or orchestrator-ram "0")
-     :disk.GB          (or orchestrator-disk "0")
-     :operating-system "linux"
-     :placement-policy (format "connector/href='%s'%s" connector type-policy)}))
+(defn- orch-node->map
+  [user-connectors]
+  {:module                   "module-orchestrator"
+   :node                     "node-orchestrator"
+   :cpu.nb                   nil
+   :ram.GB                   nil
+   :disk.GB                  nil
+   :operating-system         "linux"
+   :placement-policy         nil
+   :connector-instance-types (apply merge (map orchestrator-instance-types user-connectors))})
 
 (defn- node->map
   [user-connectors [node-name node]]
@@ -114,16 +117,15 @@
     (app? module) (app->map module user-connectors)
     :else (throw-wrong-category module)))
 
-(defn- add-orchestrator-components
+(defn- add-orchestrator-component
   [m user-connectors]
-  (update m :components #(concat % (map connector->orchestrator-map user-connectors))))
+  (update m :components #(conj % (orch-node->map user-connectors))))
 
 (defn- explode-module
   [m]
   (-> m
       (assoc :components (module->components (:module m) (:user-connectors m)))
-      (add-orchestrator-components (:user-connectors m))
-      (dissoc :orchestratorComponents)
+      (add-orchestrator-component (:user-connectors m))
       (dissoc :module)))
 
 (defn placement->map
