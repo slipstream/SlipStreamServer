@@ -37,13 +37,17 @@
         component-nil {:cpu.nb nil :ram.GB nil :disk.GB nil :operating-system "linux"}
         component-without-disk {:cpu.nb 1 :ram.GB 2 :operating-system "linux"}
         component-full {:cpu.nb 1 :ram.GB 2 :disk.GB 3 :operating-system "linux"}]
-    (is (= "(resource:vcpu>=0 and resource:ram>=0 and resource:disk>=0 and resource:operatingSystem='linux')"
+    (is (= (str "(resource:operatingSystem='linux') and (resource:vcpu>=0) and (resource:ram>=0) and (resource:disk>=0)"
+                " and (resource:vcpu<=1) and (resource:ram<=1024) and (resource:disk<=100)")
            (pc/clause-cpu-ram-disk-os component-empty)))
-    (is (= "(resource:vcpu>=0 and resource:ram>=0 and resource:disk>=0 and resource:operatingSystem='linux')"
+    (is (= (str "(resource:operatingSystem='linux') and (resource:vcpu>=0) and (resource:ram>=0) and (resource:disk>=0)"
+                " and (resource:vcpu<=1) and (resource:ram<=1024) and (resource:disk<=100)")
            (pc/clause-cpu-ram-disk-os component-nil)))
-    (is (= "(resource:vcpu>=1 and resource:ram>=2048 and resource:disk>=0 and resource:operatingSystem='linux')"
+    (is (= (str "(resource:operatingSystem='linux') and (resource:vcpu>=1) and (resource:ram>=2048)"
+                " and (resource:disk>=0) and (resource:vcpu<=4) and (resource:ram<=8192) and (resource:disk<=100)")
            (pc/clause-cpu-ram-disk-os component-without-disk)))
-    (is (= "(resource:vcpu>=1 and resource:ram>=2048 and resource:disk>=3 and resource:operatingSystem='linux')"
+    (is (= (str "(resource:operatingSystem='linux') and (resource:vcpu>=1) and (resource:ram>=2048)"
+                " and (resource:disk>=3) and (resource:vcpu<=4) and (resource:ram<=8192) and (resource:disk<=12)")
            (pc/clause-cpu-ram-disk-os component-full)))))
 
 (deftest test-cimi-and
