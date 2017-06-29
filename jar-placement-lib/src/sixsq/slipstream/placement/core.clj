@@ -138,7 +138,7 @@
        :ram           (ram service-offer)
        :disk          (disk service-offer)
        :instance_type (instance-type service-offer)
-       :service-offer service-offer})))
+       :service-offer (:id service-offer)})))
 
 (defn number-or-nil
   "If the value is a non-negative number, then the number is returned.  Otherwise
@@ -202,9 +202,20 @@
 
 (defn clause-cpu-ram-disk-os
   [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system}]
-  (format
-    "(resource:vcpu>=%s and resource:ram>=%s and resource:disk>=%s and resource:operatingSystem='%s')"
-    (or cpu 0) (or (to-MB-from-GB (parse-number ram)) 0) (or disk 0) os))
+  (let [cpu (or (parse-number cpu) 0)
+        ram (or (to-MB-from-GB (parse-number ram)) 0)
+        disk (or (parse-number disk) 0)
+        times-bigger 4
+        cpu-limit (if (> cpu 0) (* times-bigger cpu) 1)
+        ram-limit (if (> ram 0) (* times-bigger ram) 1024)
+        disk-limit (if (> disk 0) (* times-bigger disk) 100)]
+    (cimi-and [(str "resource:operatingSystem='" os "'")
+               (str "resource:vcpu>=" cpu)
+               (str "resource:ram>="  ram)
+               (str "resource:disk>=" disk)
+               (str "resource:vcpu<=" cpu-limit)
+               (str "resource:ram<="  ram-limit)
+               (str "resource:disk<=" disk-limit)])))
 
 (def clause-flexible "schema-org:flexible='true'")
 
