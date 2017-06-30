@@ -12,23 +12,25 @@
       (is (= v (pc/number-or-nil v))))))
 
 (deftest check-price-comparator
-  (is (pc/price-comparator 0 1))
-  (is (not (pc/price-comparator 1 0)))
-  (is (not (pc/price-comparator 0 0)))
-  (is (not (pc/price-comparator nil nil)))
-  (is (pc/price-comparator 0 nil))
-  (is (not (pc/price-comparator nil 0)))
-  (is (pc/price-comparator 0 "a"))
-  (is (not (pc/price-comparator "a" 0))))
+  (is (pc/price-comparator [0] [1]))
+  (is (not (pc/price-comparator [1] [0])))
+  (is (not (pc/price-comparator [0 "b"] [0 "a"])))
+  (is (not (pc/price-comparator [nil "z"] [nil "aaaaa"])))
+  (is (pc/price-comparator [nil "Z"] [nil "aaaaa"]))
+  (is (pc/price-comparator [0] [nil]))
+  (is (not (pc/price-comparator [nil] [0])))
+  (is (pc/price-comparator [0] ["a"]))
+  (is (not (pc/price-comparator ["a"] [0]))))
 
 (deftest check-order-by-price
-  (let [values [{:order 1 :price 0}
-                {:order 2 :price 4/2}
-                {:order 3 :price 3.0}
-                {:order 4 :price nil}
-                {:order 4 :price -1}
-                {:order 4 :price -1.0}
-                {:order 4 :price "1.0"}]]
+  (let [values [{:order 1 :price 0 :connector "a"}
+                {:order 2 :price 4/2 :connector "a"}
+                {:order 3 :price 3.0 :connector "a"}
+                {:order 4 :price nil :connector "a"}
+                {:order 4 :price -1 :connector "a"}
+                {:order 5 :price -1 :connector "b"}
+                {:order 4 :price -1.0 :connector "a"}
+                {:order 4 :price "1.0" :connector "a"}]]
     (doseq [coll (repeatedly 20 (partial shuffle values))]
       (is (apply <= (map :order (pc/order-by-price coll)))))))
 
@@ -113,24 +115,19 @@
   (is (= {:a {:b 1}} (pc/denamespace-keys {:namespace:a {:namespace:b 1}}))))
 
 (deftest test-extract-favorite-offers
-   ; small is preffered for exo, it is kept
-  (is (= [{:schema-org:name "small"}]
-    (pc/extract-favorite-offers [{:schema-org:name "small"} {:schema-org:name "big"}]
-    {:instance.type "small"}
-    )))
-  ; extra is absent, list returned unchanged
-  (is (empty?
-    (pc/extract-favorite-offers
-      [{:schema-org:name "small"} {:schema-org:name "big"}]
-      {:instance.type "extra"}))))
-
-
-(deftest test-extract-favorite-offers
-         ; small is preffered for exo, it is kept
+         ; small is preferred for exo, it is kept
+         (is (= [{:resource:instanceType "small"}]
+                (pc/extract-favorite-offers [{:resource:instanceType "small"} {:resource:instanceType "big"}]
+                                            {:instance.type "small"}
+                                            )))
+         ; extra is absent, list returned unchanged
+         (is (empty?
+               (pc/extract-favorite-offers
+                 [{:resource:instanceType "small"} {:resource:instanceType "big"}]
+                 {:instance.type "extra"})))
          (is (= [{:resource:vcpu 2}]
                 (pc/extract-favorite-offers [{:resource:vcpu 2} {:resource:vcpu 4}]
-                                               {:cpu "2"}
-                                               )))
+                                               {:cpu "2"})))
          (is (= [{:resource:vcpu 2 :resource:disk 10}]
                 (pc/extract-favorite-offers
                   [{:resource:vcpu 2 :resource:disk 10} {:resource:vcpu 4}]
@@ -149,47 +146,47 @@
                                               {:cpu "2" :disk nil :ram 4}))))
 
 (deftest test-prefer-exact-instance-type
-  ; small is preffered for exo, it is kept
-  (is (= [{:schema-org:name "small"}]
+  ; small is preferred for exo, it is kept
+  (is (= [{:resource:instanceType "small"}]
          (pc/prefer-exact-instance-type {:exo {:instance.type "small"} :ec2 {:instance.type "insanely-huge"}}
-                                        ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]])))
+                                        ["exo" [{:resource:instanceType "small"} {:resource:instanceType "big"}]])))
   ; extra is absent, list returned unchanged
-  (is (= [{:schema-org:name "small"} {:schema-org:name "big"}]
+  (is (= [{:resource:instanceType "small"} {:resource:instanceType "big"}]
          (pc/prefer-exact-instance-type {:exo {:instance.type "extra"} :ec2 {:instance.type "insanely-huge"}}
-                                        ["exo" [{:schema-org:name "small"} {:schema-org:name "big"}]])))
+                                        ["exo" [{:resource:instanceType "small"} {:resource:instanceType "big"}]])))
   ; preference to instance type
-  (is (= [{:schema-org:name "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}]
+  (is (= [{:resource:instanceType "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}]
          (pc/prefer-exact-instance-type {:exo {:instance.type "extra" :cpu 10 :ram nil :disk 10}
                                          :ec2 {:instance.type "insanely-huge"
                                                :resource:vcpu 24 :resource:ram 20480 :resource:disk 1000}}
-                                        ["exo" [{:schema-org:name "extra" :resource:vcpu 2
+                                        ["exo" [{:resource:instanceType "extra" :resource:vcpu 2
                                                  :resource:ram 2048 :resource:disk 10}
-                                                {:schema-org:name "big" :resource:vcpu 10
+                                                {:resource:instanceType "big" :resource:vcpu 10
                                                  :resource:ram nil :resource:disk 10}]])))
 
-  (is (= [{:schema-org:name "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}
-          {:schema-org:name "extra2" :resource:vcpu 2 :resource:disk 10}]
+  (is (= [{:resource:instanceType "extra" :resource:vcpu 2 :resource:ram 2048 :resource:disk 10}
+          {:resource:instanceType "extra2" :resource:vcpu 2 :resource:disk 10}]
          (pc/prefer-exact-instance-type {:exo {:cpu 2 :ram nil :disk 10}
                                          :ec2 {:instance.type "insanely-huge"
                                                :resource:vcpu 24 :resource:ram 20480 :resource:disk 1000}}
-                                        ["exo" [{:schema-org:name "extra" :resource:vcpu 2
+                                        ["exo" [{:resource:instanceType "extra" :resource:vcpu 2
                                                  :resource:ram 2048 :resource:disk 10}
-                                                {:schema-org:name "extra2" :resource:vcpu 2
+                                                {:resource:instanceType "extra2" :resource:vcpu 2
                                                  :resource:disk 10}
-                                                {:schema-org:name "big" :resource:vcpu 10
+                                                {:resource:instanceType "big" :resource:vcpu 10
                                                  :resource:ram nil :resource:disk 10}]])))
-  (is (= [{:schema-org:name "extra" :resource:vcpu 2
+  (is (= [{:resource:instanceType "extra" :resource:vcpu 2
            :resource:ram 2048 :resource:disk 10}
-          {:schema-org:name "extra2" :resource:vcpu 2
+          {:resource:instanceType "extra2" :resource:vcpu 2
            :resource:disk 10}
-          {:schema-org:name "big" :resource:vcpu 10
+          {:resource:instanceType "big" :resource:vcpu 10
            :resource:ram nil :resource:disk 10}]
          (pc/prefer-exact-instance-type nil
-                                        ["exo" [{:schema-org:name "extra" :resource:vcpu 2
+                                        ["exo" [{:resource:instanceType "extra" :resource:vcpu 2
                                                  :resource:ram 2048 :resource:disk 10}
-                                                {:schema-org:name "extra2" :resource:vcpu 2
+                                                {:resource:instanceType "extra2" :resource:vcpu 2
                                                  :resource:disk 10}
-                                                {:schema-org:name "big" :resource:vcpu 10
+                                                {:resource:instanceType "big" :resource:vcpu 10
                                                  :resource:ram nil :resource:disk 10}]]))))
 
 (deftest test-parse-number
