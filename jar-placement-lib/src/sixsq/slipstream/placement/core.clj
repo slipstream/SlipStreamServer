@@ -51,9 +51,9 @@
     (when (not-empty digit)
       (read-string digit))))
 
-(defn- instance-type
+(defn- service-offer-name
   [service-offer]
-  (:schema-org:name service-offer))
+  (:name service-offer))
 
 (defn- connector-href
   [service-offer]
@@ -61,7 +61,7 @@
 
 (defn- display-service-offer
   [service-offer]
-  (str (connector-href service-offer) "/" (instance-type service-offer)))
+  (str (connector-href service-offer) "/" (service-offer-name service-offer)))
 
 (defn smallest-service-offer
   [service-offers]
@@ -131,14 +131,11 @@
   (if-let [service-offer (smallest-service-offer-EUR service-offers connector-name)]
     (let [price (compute-price service-offer "HUR")]
       (log/debug "Priced " (display-service-offer service-offer) ":" price "EUR/h")
-      {:name          connector-name
-       :price         price
-       :currency      "EUR"
-       :cpu           (cpu service-offer)
-       :ram           (ram service-offer)
-       :disk          (disk service-offer)
-       :instance_type (instance-type service-offer)
-       :service-offer (:id service-offer)})))
+      {:connector connector-name
+       :price     price
+       :currency  "EUR"
+       :name      (service-offer-name service-offer)
+       :id        (:id service-offer)})))
 
 (defn number-or-nil
   "If the value is a non-negative number, then the number is returned.  Otherwise
@@ -152,18 +149,20 @@
    This implements a two-value comparator as described in the clojure
    documentation: https://clojure.org/guides/comparators."
   [a b]
-  (let [a (number-or-nil a)
-        b (number-or-nil b)]
+  (let [a-price (number-or-nil (first a))
+        b-price (number-or-nil (first b))
+        a-connector-name (second a)
+        b-connector-name (second b)]
     (cond
-      (= a b) false
-      (nil? a) false
-      (nil? b) true
-      :else (< a b))))
+      (= a-price b-price) (= (first (sort [a-connector-name b-connector-name])) a-connector-name)
+      (nil? a-price) false
+      (nil? b-price) true
+      :else (< a-price b-price))))
 
 (defn order-by-price
   "Orders by price ascending, with the exception of no-price values placed at the end"
   [priced-coll]
-  (sort-by :price price-comparator priced-coll))
+  (sort-by (juxt :price :connector) price-comparator priced-coll))
 
 (defn- add-indexes
   [coll]
@@ -233,7 +232,7 @@
 (defn extract-favorite-offers [service-offers {instance-type :instance.type cpu :cpu ram :ram disk :disk}]
   (cond->>
     service-offers
-    instance-type (filter #(= instance-type (:schema-org:name %)))
+    instance-type (filter #(= instance-type (:resource:instanceType %)))
     disk (filter #(= (parse-number disk) (:resource:disk %)))
     (and cpu (not instance-type)) (filter #(= (parse-number cpu) (:resource:vcpu %)))
     (and ram (not instance-type)) (filter #(= (to-MB-from-GB (parse-number ram)) (:resource:ram %)))))
