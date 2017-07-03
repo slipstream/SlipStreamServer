@@ -16,6 +16,6 @@
    :opt-un [:cimi.accounting-record-vm/disk]})
 
 (s/def :cimi/accounting-record.vm
-  (su/only-keys-maps acc/account-keys-specs
+  (su/only-keys-maps acc/accounting-record-keys-spec
                      accounting-keys-vm-specs))
 
