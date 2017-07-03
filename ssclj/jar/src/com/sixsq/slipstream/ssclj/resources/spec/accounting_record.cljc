@@ -15,6 +15,7 @@
 (s/def :cimi.accounting-record/module :cimi.core/nonblank-string)
 (s/def :cimi.accounting-record/serviceOffer :cimi.common/resource-link)
 
+
 (s/def :cimi.accounting-record/type :cimi.core/identifier)
 
 (def account-keys-specs {:req-un [:cimi.accounting-record/identifier
