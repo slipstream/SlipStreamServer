@@ -17,23 +17,18 @@
 
 (s/def :cimi.accounting-record/type :cimi.core/identifier)
 
-(def account-keys-specs {:req-un [
-                                  :cimi.accounting-record/identifier
+(def account-keys-specs {:req-un [:cimi.accounting-record/identifier
                                   :cimi.accounting-record/start
                                   :cimi.accounting-record/user
                                   :cimi.accounting-record/cloud
-
                                   :cimi.accounting-record/serviceOffer
+                                  :cimi.account-record/type]
 
-                                  :cimi.account-record/type
-                                  ]
                          :opt-un [:cimi.accounting-record/stop
                                   :cimi.accounting-record/roles
                                   :cimi.accounting-record/groups
                                   :cimi.accounting-record/realm
-                                  :cimi.accounting-record/module
-
-                                  ]})
+                                  :cimi.accounting-record/module]})
 
 (def accounting-record-keys-spec (su/merge-keys-specs [c/common-attrs
                                                        account-keys-specs]))
