@@ -30,7 +30,10 @@
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
                               :right     "MODIFY"}
-                            ]})
+                             {:principal "USER"
+                              :type      "ROLE"
+                              :right     "VIEW"}
+                             ]})
 
 ;;
 ;; validate the created credential resource
@@ -56,7 +59,7 @@
            :type      "ROLE"}
    :rules [{:principal id
             :type      "USER"
-            :right     "MODIFY"}]})
+            :right     "VIEW"}]})
 
 (defmethod crud/add-acl resource-uri
   [{:keys [acl] :as resource} request]
@@ -74,6 +77,11 @@
 (defmethod crud/add resource-name
   [request]
   (add-impl request))
+
+(def edit-impl (std-crud/edit-fn resource-name))
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name

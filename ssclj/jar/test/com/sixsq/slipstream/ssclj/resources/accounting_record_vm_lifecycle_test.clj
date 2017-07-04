@@ -3,7 +3,7 @@
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.accounting_record :as accounting]
+    [com.sixsq.slipstream.ssclj.resources.accounting_record :as acc]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
@@ -15,7 +15,7 @@
 
 (use-fixtures :each ltu/with-test-client-fixture)
 
-(def base-uri (str p/service-context (u/de-camelcase accounting/resource-url)))
+(def base-uri (str p/service-context (u/de-camelcase acc/resource-url)))
 
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
@@ -66,67 +66,143 @@
         (ltu/body->edn)
         (ltu/is-status 403))
 
-    ;; create a new credential as administrator; fail without reference
-    #_(-> session-admin
-          (request base-uri
-                   :request-method :post
-                   :body (json/write-str no-href-create))
-          (ltu/body->edn)
-          (ltu/is-status 400))
 
-    ;; anonymous create without template reference fails
-    #_(-> session-anon
-          (request base-uri
-                   :request-method :post
-                   :body (json/write-str no-href-create))
-          (ltu/body->edn)
-          (ltu/is-status 400))
+    (def valid-acl {:owner {:principal "ADMIN"
+                            :type      "ROLE"}
+                    :rules [{:principal "ANON"
+                             :type      "ROLE"
+                             :right     "VIEW"}]})
 
-    ;; admin create with invalid template fails
-    #_(-> session-admin
-          (request base-uri
-                   :request-method :post
-                   :body (json/write-str invalid-create))
-          (ltu/body->edn)
-          (ltu/is-status 400))
+
 
     ;; create a credential as a normal user
-    #_(let [create-req {:credentialTemplate {:href         href
-                                             :sshPublicKey "some-key-value"}}
-            resp (-> session-user
-                     (request base-uri
-                              :request-method :post
-                              :body (json/write-str create-req))
-                     (ltu/body->edn)
-                     (ltu/is-status 201))
-            id (get-in resp [:response :body :resource-id])
-            uri (-> resp
-                    (ltu/location))
-            abs-uri (str p/service-context (u/de-camelcase uri))]
+    (let [timestamp "1964-08-25T10:00:00.0Z"
+          create-req {:id           (str acc/resource-url "/uuid")
+                      :resourceURI  acc/resource-uri
+                      :created      timestamp
+                      :updated      timestamp
+                      :acl          valid-acl
 
-        ;; admin should be able to see, edit, and delete credential
-        (-> session-admin
-            (request abs-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-operation-present "delete")
-            (ltu/is-operation-present "edit"))
+                      ;; common accounting record attributes
+                      :type         "vm"
+                      :identifier   "my-cloud-vm-47"
+                      :start        timestamp
+                      :stop         timestamp
+                      :user         "some-complicated-user-id"
+                      :cloud        "my-cloud"
+                      :roles        ["a" "b" "c"]
+                      :groups       ["g1" "g2" "g3"]
+                      :realm        "my-organization"
+                      :module       "module/example/images/centos-7"
+                      :serviceOffer {:href "service-offer/my-uuid"}
 
-        (-> session-user
-            (request abs-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-operation-present "delete")
-            (ltu/is-operation-present "edit"))
+                      ;; vm subtype
+                      :cpu          1
+                      :ram          1024
+                      :disk         10}
+          resp (-> session-admin
+                   (request base-uri
+                            :request-method :post
+                            :body (json/write-str create-req))
+                   (ltu/body->edn)
+                   (ltu/is-status 201))
+          id (get-in resp [:response :body :resource-id])
+          uri (-> resp
+                  (ltu/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
 
-        (-> session-user
-            (request abs-uri
-                     :request-method :delete)
-            (ltu/body->edn)
-            (ltu/is-status 200)))))
+      ;; admin should be able to see, edit, and delete credential
+      (-> session-admin
+          (request abs-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/is-operation-present "delete")
+          (ltu/is-operation-present "edit"))
+
+      (-> session-user
+          (request abs-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/is-operation-absent "delete")
+          (ltu/is-operation-absent "edit"))
+
+
+      ;;edit
+      (-> session-admin
+          (request base-uri
+                   :request-method :put
+                   :body (json/write-str create-req))
+          (ltu/body->edn)
+          (ltu/is-status 200))
+
+      (-> session-admin
+          (request abs-uri
+                   :request-method :put
+                   :body (json/write-str (assoc create-req :id id) ))
+          (ltu/body->edn)
+          (ltu/dump)
+          (ltu/is-status 200))
+
+      (-> session-user
+          (request abs-uri
+                   :request-method :put
+                   :body (json/write-str (assoc create-req :id id) ))
+          (ltu/body->edn)
+          (ltu/dump)
+          (ltu/is-status 403))
+
+      (-> session-user
+          (request base-uri
+                   :request-method :put
+                   :body (json/write-str create-req))
+          (ltu/body->edn)
+          (ltu/is-status 200))
+
+      (-> session-user
+          (request abs-uri
+                   :request-method :put
+                   :body (json/write-str create-req))
+          (ltu/body->edn)
+          (ltu/is-status 403))
+
+      (-> session-anon
+          (request base-uri
+                   :request-method :put
+                   :body (json/write-str create-req))
+          (ltu/body->edn)
+          (ltu/is-status 403))
+
+      ;;delete
+      (-> session-user
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 403))
+
+      (-> session-admin
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 200))
+
+
+      ;;should be deleted
+      (-> session-admin
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 404))
+
+
+      )
+    )
+
+  )
+
+
 
 (deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id accounting/resource-name))]
+  (let [resource-uri (str p/service-context (u/new-resource-id acc/resource-name))]
     (doall
       (for [[uri method] [[base-uri :options]
                           [base-uri :delete]
