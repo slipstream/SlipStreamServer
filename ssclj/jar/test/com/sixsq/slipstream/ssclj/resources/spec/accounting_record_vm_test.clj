@@ -43,8 +43,18 @@
               :ram          1024
               :disk         10}]
     (is (s/valid? :cimi/accounting-record.vm root))
-    (is (not (s/valid? :cimi/accounting-record.vm (dissoc root :type))))
     (doseq [k #{:cpu :ram}]
       (is (not (s/valid? :cimi/accounting-record.vm (dissoc root k)))))
     (doseq [k #{:disk}]
-      (is (s/valid? :cimi/accounting-record.vm (dissoc root k))))))
+      (is (s/valid? :cimi/accounting-record.vm (dissoc root k))))
+    ;;parent mandatory keywords
+    (doseq [k #{:identifier :start :user :type :serviceOffer :cloud}]
+      (is (not (s/valid? :cimi/accounting-record.vm (dissoc root k)))))
+    ;;parent optional keywords
+    (doseq [k #{:stop :roles :groups :realm :module}]
+      (is (s/valid? :cimi/accounting-record.vm (dissoc root k)))
+      ))
+  )
+
+
+
