@@ -139,12 +139,12 @@
 
 (deftest check-orderby-clause
   (are [expect arg] (= expect (t/orderby-clause arg))
-                    nil ":"
-                    nil ":a:desc"
+                    [":" :asc] ":"
+                    [":a" :desc] ":a:desc"
                     ["a" :asc] "a"
-                    ["a" :asc] "a:"
+                    ["a:" :asc] "a:"
                     ["a" :desc] "a:desc"
-                    ["a" :asc] "a:dummy"))
+                    ["a:dummy" :asc] "a:dummy"))
 
 (deftest check-orderby-param
   (are [expect arg] (= expect (set-and-extract t/process-orderby "orderby" arg))
@@ -153,8 +153,8 @@
                     [["a" :desc]] "a:desc"
                     [["a" :desc] ["b" :asc]] "a:desc,b"
                     [["a" :desc] ["b" :desc]] ["a:desc" "b:desc"]
-                    [["a" :desc]] ["a:desc" ":b"]
-                    [["a" :desc] ["b" :desc]] [" a : desc " "b : desc"]))
+                    [["a" :desc] [":b" :asc]] ["a:desc" ":b"]
+                    [["a" :desc] ["b" :desc]] [" a :desc " "b :desc"]))
 
 (deftest check-filter
   (are [arg1 arg2] (= (parser/parse-cimi-filter arg1) (set-and-extract t/process-filter "filter" arg2))
