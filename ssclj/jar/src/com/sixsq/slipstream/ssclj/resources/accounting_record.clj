@@ -30,7 +30,6 @@
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
                               :right     "MODIFY"}
-
                              {:principal "USER"
                               :type      "ROLE"
                               :right     "VIEW"}
@@ -78,7 +77,6 @@
 (defmethod crud/add resource-name
   [request]
   (add-impl request))
-
 
 (def edit-impl (std-crud/edit-fn resource-name))
 (defmethod crud/edit resource-name
