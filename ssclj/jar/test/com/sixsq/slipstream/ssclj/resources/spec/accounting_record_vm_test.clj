@@ -8,11 +8,8 @@
     ;; FIXME: Reference real resource rather than connector template.
     [com.sixsq.slipstream.ssclj.resources.connector-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.spec.connector-template :as cts]
-
-
-
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.accounting_record :as acc]))
+    [com.sixsq.slipstream.ssclj.resources.accounting-record :as acc]))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
