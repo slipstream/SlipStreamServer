@@ -385,8 +385,12 @@ public class User extends Parameterized<User, UserParameter> {
 			throw new InvalidElementException("Missing username");
 		}
 
+		// Only check for a valid username if the account is new.  Existing accounts
+		// from external authentication may have usernames that do not follow this
+		// pattern.
+		State state = user.getState();
 		String username = user.getName();
-		if (!Pattern.matches("\\w[\\w\\d.]+", username)) {
+		if (state == State.NEW && !Pattern.matches("\\w[\\w\\d.]+", username)) {
 			throw new InvalidElementException(
 					"Username must start with a letter and contain only letters and digits.");
 		}

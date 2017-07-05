@@ -223,8 +223,10 @@
   If the attribute value is blank or the value is not valid, then
   nil will be returned."
   [s]
-  (let [[attr order] (->> (s/split s #"\s*:\s*")
-                          (take 2)
+  (let [[attr order] (->> s
+                          (re-seq #"^(.+?)(?::(asc|desc))?$")
+                          first
+                          (drop 1)
                           (remove nil?)
                           (map s/trim))
         order (if (.equalsIgnoreCase "desc" order) :desc :asc)]
