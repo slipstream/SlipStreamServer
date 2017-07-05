@@ -50,23 +50,23 @@
            (validate-subtype resource))
 
 
+
 (def ^:const view-accounting-role "view_accounting")
 ;;
 ;; multimethod for ACLs
 ;;
-;;FIXME
-(defn create-acl
 
-  [id realm]
-  {:owner {:principal "ADMIN"
-           :type      "ROLE"}
-   :rules [{:principal id
-            :type      "USER"
-            :right     "VIEW"}
-           {:principal (str realm ":" view-accounting-role )
-            :type      "ROLE"
-            :right     "VIEW"}
-           ]})
+(defn create-acl
+      [id realm]
+      {:owner {:principal "ADMIN"
+               :type      "ROLE"}
+       :rules [{:principal id
+                :type      "USER"
+                :right     "VIEW"}
+               {:principal (str realm ":" view-accounting-role)
+                :type      "ROLE"
+                :right     "VIEW"}
+               ]})
 
 (defmethod crud/add-acl resource-uri
            [{:keys [user realm] :as resource} request]

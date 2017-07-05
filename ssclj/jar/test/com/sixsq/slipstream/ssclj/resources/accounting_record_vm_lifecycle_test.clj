@@ -321,6 +321,7 @@
 
 
 (deftest bad-methods
+
          (let [resource-uri (str p/service-context (u/new-resource-id acc/resource-name))]
               (doall
                 (for [[uri method] [[base-uri :options]
