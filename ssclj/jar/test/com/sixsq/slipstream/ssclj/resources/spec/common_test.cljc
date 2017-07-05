@@ -60,6 +60,25 @@
                        false? {"ok" 1}
                        false? [:bad "bad"]))
 
+(deftest check-principal
+  (are [expect-fn arg] (expect-fn (s/valid? :cimi.acl/principal arg))
+                       true? "A"
+                       true? "A.B-C/D_E:F"
+                       true? "A.B-C/D_E:F"
+                       true? "0..1--2//3__4::5"
+                       true? "http://example.org/group"
+                       true? "1."
+                       true? "2-"
+                       true? "3/"
+                       true? "4_"
+                       true? "5:"
+                       false? ".1"
+                       false? "-2"
+                       false? "/3"
+                       false? "_4"
+                       false? ":5"
+                       false? "NO WHITESPACE"))
+
 (deftest check-owner
   (let [id {:principal "ADMIN", :type "ROLE"}]
     (are [expect-fn arg] (expect-fn (s/valid? :cimi.acl/owner arg))
