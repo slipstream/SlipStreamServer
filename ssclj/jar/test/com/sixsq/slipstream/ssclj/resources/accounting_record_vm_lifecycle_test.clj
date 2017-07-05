@@ -3,7 +3,7 @@
       [clojure.test :refer :all]
       [clojure.data.json :as json]
       [peridot.core :refer :all]
-      [com.sixsq.slipstream.ssclj.resources.accounting_record :as acc]
+      [com.sixsq.slipstream.ssclj.resources.accounting-record :as acc]
       [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
       [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
       [com.sixsq.slipstream.auth.internal :as auth-internal]

@@ -2,7 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.spec.accounting-record-vm]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.accounting_record :as p]
+    [com.sixsq.slipstream.ssclj.resources.accounting-record :as p]
     ))
 
 
