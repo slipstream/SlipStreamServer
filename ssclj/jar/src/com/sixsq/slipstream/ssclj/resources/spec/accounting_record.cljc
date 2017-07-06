@@ -21,10 +21,10 @@
                                   :cimi.accounting-record/start
                                   :cimi.accounting-record/user
                                   :cimi.accounting-record/cloud
-                                  :cimi.accounting-record/serviceOffer
                                   :cimi.account-record/type]
 
-                         :opt-un [:cimi.accounting-record/stop
+                         :opt-un [:cimi.accounting-record/serviceOffer
+                                  :cimi.accounting-record/stop
                                   :cimi.accounting-record/roles
                                   :cimi.accounting-record/groups
                                   :cimi.accounting-record/realm
