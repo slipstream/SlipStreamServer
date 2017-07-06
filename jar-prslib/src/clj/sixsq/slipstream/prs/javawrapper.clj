@@ -19,10 +19,9 @@
 (defn keyword-name
   "Function that converts a keyword to a string taking into account the keyword namespace."
   [k]
-  (if (instance? clojure.lang.Keyword k)
+  (if (keyword? k)
     (str/join "/" (remove nil? ((juxt namespace name) k)))
-    (str k)
-    ))
+    (str k)))
 
 (defn java->clj
   "Transform java data structures into the equivalent clojure
