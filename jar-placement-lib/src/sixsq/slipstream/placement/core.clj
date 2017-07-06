@@ -11,6 +11,7 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.string :as str]
+    [clojure.core.async :as async]
     [sixsq.slipstream.placement.cimi-util :as cu]
     [sixsq.slipstream.pricing.lib.pricing :as pr]
     [sixsq.slipstream.client.api.cimi :as cimi]))
@@ -35,6 +36,16 @@
               (= cnt 2) (keyword (second tokens))
               (= cnt 1) (keyword (first tokens))
               :else (keyword (str/join (rest tokens))))))
+
+(defn map-async-multithreaded
+  [number-thread blocking-function input-coll]
+  (let [output-chan (async/chan)]
+    (async/pipeline-blocking number-thread
+                             output-chan
+                             (map blocking-function)
+                             (async/to-chan input-coll))
+    (async/<!! (async/into [] output-chan))
+    ))
 
 (defn denamespace-keys
       [m]
@@ -81,8 +92,13 @@
        smallest-service-offer))
 
 (defn- fetch-service-offers
-  [cimi-filter]
-  (let [result (cimi/search (cu/context) "serviceOffers" (when cimi-filter {:$filter cimi-filter}))]
+  [cimi-filter cimi-orderby cimi-first cimi-last]
+  (let [request-parameter (cond-> {}
+                                  cimi-filter  (assoc :$filter cimi-filter)
+                                  cimi-orderby (assoc :$orderby cimi-orderby)
+                                  cimi-first   (assoc :$first cimi-first)
+                                  cimi-last    (assoc :$last cimi-last))
+        result (cimi/search (cu/context) "serviceOffers" request-parameter)]
     (if (instance? Exception result)
       (do
         (log/error "exception when querying service offers; status =" (:status (ex-data result)))
@@ -92,15 +108,15 @@
         (:serviceOffers result)))))
 
 (defn- fetch-service-offers-rescue-reauthenticate
-  [cimi-filter]
+  [cimi-filter cimi-orderby cimi-first cimi-last]
   (try
-    (fetch-service-offers cimi-filter)
+    (fetch-service-offers cimi-filter cimi-orderby cimi-first cimi-last)
     (catch Exception ex
       (if (#{401 403} (:status (ex-data ex)))
         (try
           (log/error "retrying query")
           (cu/update-context)
-          (let [result (fetch-service-offers cimi-filter)]
+          (let [result (fetch-service-offers cimi-filter cimi-orderby cimi-first cimi-last)]
             (log/error "retry succeeded")
             result)
           (catch Exception ex
@@ -199,78 +215,81 @@
 (defn to-MB-from-GB [input]
   (when input (int (* input 1024))))
 
-(defn clause-cpu-ram-disk-os
-  [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system}]
+(defn clause-cpu-ram-disk
+  [{cpu :cpu.nb, ram :ram.GB, disk :disk.GB}]
   (let [cpu (or (parse-number cpu) 0)
         ram (or (to-MB-from-GB (parse-number ram)) 0)
-        disk (or (parse-number disk) 0)
-        times-bigger 4
-        cpu-limit (if (> cpu 0) (* times-bigger cpu) 1)
-        ram-limit (if (> ram 0) (* times-bigger ram) 1024)
-        disk-limit (if (> disk 0) (* times-bigger disk) 100)]
-    (cimi-and [(str "resource:operatingSystem='" os "'")
-               (str "resource:vcpu>=" cpu)
+        disk (or (parse-number disk) 0)]
+    (cimi-and [(str "resource:vcpu>=" cpu)
                (str "resource:ram>="  ram)
-               (str "resource:disk>=" disk)
-               (str "resource:vcpu<=" cpu-limit)
-               (str "resource:ram<="  ram-limit)
-               (str "resource:disk<=" disk-limit)])))
+               (str "resource:disk>=" disk)])))
 
-(def clause-flexible "schema-org:flexible='true'")
+(defn- clause-connector-specific
+  [specific-connector-options]
+  (let [instance-type (:instance.type specific-connector-options)
+        cpu (:cpu specific-connector-options)
+        ram (:ram specific-connector-options)
+        disk (:disk specific-connector-options)]
+    (cimi-and
+      (cond-> []
+              instance-type (conj (format "resource:instanceType='%s'" instance-type))
+              cpu (conj (format "resource:vcpu>=%s" (parse-number cpu)))
+              ram (conj (format "resource:ram>=%s" (to-MB-from-GB (parse-number ram))))
+              disk (conj (format "resource:disk>=%s" (parse-number disk)))))))
 
-(defn- clause-component
-  [component]
-  (cimi-or (concat [clause-flexible (clause-cpu-ram-disk-os component)])))
+(defn- fetch-service-offer-compatible-connector
+  [clause-placement
+   {cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system,
+    connector-instance-types :connector-instance-types :as component}
+   connector]
+  (let [clause-flexible   "schema-org:flexible='true'"
+        clause-os         (format "resource:operatingSystem='%s'" os)
+        clause-size       (if (or cpu ram disk)
+                            (clause-cpu-ram-disk component)
+                            (clause-connector-specific ((keyword connector) connector-instance-types)))
+        clause-connector  (format "connector/href='%s'" connector)
+        clause-request    (->> (cimi-and [clause-os clause-size])
+                               (conj [clause-flexible])
+                               cimi-or
+                               (conj [clause-connector clause-placement])
+                               cimi-and)
+        orderby           "price:unitCost:asc,resource:vcpu:asc,resource:ram:asc,resource:disk:asc"
+        last              1]
+    (log/debug "Module name: " (:module component) " Clause request: " clause-request)
+    (fetch-service-offers-rescue-reauthenticate clause-request orderby nil first)))
 
-(defn- clause-connectors
-  [connector-names]
-  (->> connector-names
-       (remove empty?)
-       (mapv #(str "connector/href='" % "'"))
-       cimi-or))
-
-(defn extract-favorite-offers [service-offers {instance-type :instance.type cpu :cpu ram :ram disk :disk}]
-  (cond->>
-    service-offers
-    instance-type (filter #(= instance-type (:resource:instanceType %)))
-    disk (filter #(= (parse-number disk) (:resource:disk %)))
-    (and cpu (not instance-type)) (filter #(= (parse-number cpu) (:resource:vcpu %)))
-    (and ram (not instance-type)) (filter #(= (to-MB-from-GB (parse-number ram)) (:resource:ram %)))))
-
-(defn prefer-exact-instance-type
-  [connector-instance-types [connector-name service-offers]]
-  (if-let [connector-params (get connector-instance-types(keyword connector-name))]
-    (let [favorite (extract-favorite-offers service-offers connector-params)]
-      (if (empty? favorite)
-             service-offers
-             favorite))
-    service-offers))
-
-(defn- service-offers-compatible-with-component
-  [component connector-names]
-  (let [cimi-filter (cimi-and [(clause-connectors connector-names)
-                               (:placement-policy component)
-                               (clause-component component)])
-        _ (log/debug (str "cimi filter: '" cimi-filter "'"))
-        service-offers (fetch-service-offers-rescue-reauthenticate cimi-filter)
-        _ (log/debug (str "number of matching service offers:" (count service-offers)))
-        service-offers-by-connector-name (group-by connector-href service-offers)
-        _ (log/debug (str "number of matching clouds:" (count service-offers-by-connector-name)))]
-
-    (mapcat (partial prefer-exact-instance-type (:connector-instance-types component))
-            service-offers-by-connector-name)))
+(defn- compute-service-offers
+  [number-threads clause-placement connectors component]
+  (let [result (map-async-multithreaded number-threads
+                                        (partial fetch-service-offer-compatible-connector clause-placement component)
+                                        connectors)]
+    (->> result (apply concat))))
 
 (defn- place-rank-component
-  [connectors component]
+  [number-threads placement-params connectors component]
   (log/debug "component:" component)
   (log/debug "connectors:" connectors)
-  (let [filtered-service-offers (service-offers-compatible-with-component component connectors)]
-    (log/info "filtered offers" (map display-service-offer filtered-service-offers) "for component" (:module component))
+  (let [module (:module component)
+        clause-placement ((keyword module) placement-params)
+        filtered-service-offers (compute-service-offers number-threads clause-placement connectors component)]
+    (log/debug "filtered offers"
+               (map display-service-offer filtered-service-offers) "for component" (:module component))
     (price-component connectors filtered-service-offers component)))
 
 (defn place-and-rank
   [request]
-  (let [components (:components request)
-        user-connectors (:user-connectors request)
-        result (map (partial place-rank-component user-connectors) components)]
+  (cu/context)
+  (let [components       (:components request)
+        connectors       (:user-connectors request)
+        placement-params (:placement-params request)
+        max-thread                 30
+        number-threads-connectors (max 1 (min max-thread (count connectors)))
+        number-threads-components (max 1 (min (int (/ max-thread number-threads-connectors)) (count components)))
+        result (map-async-multithreaded number-threads-components
+                                        (partial place-rank-component number-threads-connectors
+                                                 placement-params connectors)
+                                        components)]
+    (log/info "Number of threads: "
+              (str number-threads-components " * " number-threads-connectors " = "
+                   (* number-threads-connectors number-threads-components)))
     {:components result}))
