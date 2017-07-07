@@ -29,6 +29,16 @@
 
 (def nested-map (HashMap. {"map" m "set" s "list" l}))
 
+(deftest test-keyword-name
+  (are [x y] (= x y)
+             "a/b/c/1" (keyword-name (keyword "a/b/c/1"))
+             "a" (keyword-name (keyword "a"))
+             "a#$?!~" (keyword-name (keyword "a#$?!~"))
+             "a" (keyword-name "a")
+             "" (keyword-name nil)
+             "3" (keyword-name 3)
+  ))
+
 (deftest test-java-to-clj
   (is (= cm (java->clj m)))
   (is (= cs (java->clj s)))
@@ -169,10 +179,11 @@
            (set (:components app-map))))))
 
 (deftest test-try-extract-digit
-  (is (= "1" (try-extract-digit "1")))
-  (is (= "10" (try-extract-digit "10G")))                       ; exoscale disk value format
-  (is (= "0.5" (try-extract-digit "0.5")))
-  (is (= "0.5" (try-extract-digit 0.5)))
-  (is (= nil (try-extract-digit nil)))
-  (is (= nil (try-extract-digit "ABC")))
-  (is (= nil (try-extract-digit ""))))
+  (are [x y] (= x y)
+             "1" (try-extract-digit "1")
+             "10" (try-extract-digit "10G")  ;exoscale disk value format
+             "0.5" (try-extract-digit "0.5")
+             "0.5" (try-extract-digit 0.5)
+             nil (try-extract-digit nil)
+             nil (try-extract-digit "ABC")
+             nil (try-extract-digit "")))

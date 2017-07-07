@@ -6,7 +6,8 @@
   (:require
     [clojure.tools.logging :as log]
     [clojure.walk :as walk]
-    [clojure.data.json :as json])
+    [clojure.data.json :as json]
+    [clojure.string :as str])
   (:import [java.util Map List Set]
            [com.sixsq.slipstream.persistence Module ImageModule ModuleCategory ModuleCategory]
            [com.sixsq.slipstream.configuration Configuration]
@@ -14,6 +15,13 @@
   (:gen-class
     :name sixsq.slipstream.prs.core.JavaWrapper
     :methods [#^{:static true} [generatePrsRequest [java.util.Map] String]]))
+
+(defn keyword-name
+  "Function that converts a keyword to a string taking into account the keyword namespace."
+  [k]
+  (if (keyword? k)
+    (str/join "/" (remove nil? ((juxt namespace name) k)))
+    (str k)))
 
 (defn java->clj
   "Transform java data structures into the equivalent clojure
@@ -150,6 +158,4 @@
   (log/debug "Generating PRS request for:" input)
   (-> input
       placement->map
-      json/write-str))
-
-
+      (json/write-str :key-fn keyword-name)))
