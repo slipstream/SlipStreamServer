@@ -105,4 +105,33 @@ public class RunTest {
 		done.remove();
 		aborting.remove();
 	}
+
+	@Test
+	public void setProvisioningState() throws ValidationException {
+
+		Module image = new ImageModule();
+		image.setName("myImage");
+
+		User user = new User("user");
+		user.setParameter(new UserParameter(UserParameter.KEY_TIMEOUT, "60", ""));
+		user.store();
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.MINUTE, -10);
+		Date tenMinAgo = calendar.getTime();
+
+		int nbRunBefore = Run.listAll().size();
+
+		Run provisioning = new Run(image, RunType.Run, cloudServiceNames, new User("user"));
+		provisioning.setStart(tenMinAgo);
+		provisioning.setState(States.Provisioning);
+		provisioning.store();
+
+		int nbRunAfter = Run.listAll().size();
+		assertThat(nbRunAfter, is(nbRunBefore + 1));
+
+		provisioning.remove();
+
+
+	}
 }

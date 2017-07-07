@@ -21,7 +21,7 @@ package com.sixsq.slipstream.persistence;
  */
 
 public enum RunType {
-	Orchestration, // Deployment
-	Machine, // Build
-	Run // Simple run
+	Orchestration, // Deployment of an Application
+	Machine, // Build of a Component
+	Run // Deployment of a Component
 }

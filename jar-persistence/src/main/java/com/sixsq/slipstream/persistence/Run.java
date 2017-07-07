@@ -122,12 +122,11 @@ public class Run extends Parameterized<Run, RunParameter> {
     public final static String GARBAGE_COLLECTED_PARAMETER_DESCRIPTION = "true if the Run was already garbage collected";
 
 
-    private static final States[] START_VALUES = new States[] { States.Provisioning };
+    private static final States[] START_VALUES = new States[]{States.Provisioning};
     private static final Set<States> START_ACCOUNTING_STATES = new HashSet<States>(Arrays.asList(START_VALUES));
 
-    private static final States[] STOP_VALUES = new States[] { States.Done, States.Cancelled, States.Aborted };
+    private static final States[] STOP_VALUES = new States[]{States.Done, States.Cancelled, States.Aborted};
     private static final Set<States> STOP_ACCOUNTING_STATES = new HashSet<States>(Arrays.asList(STOP_VALUES));
-
 
 
     public static Run abortOrReset(String abortMessage, String nodename,
@@ -1054,30 +1053,27 @@ public class Run extends Parameterized<Run, RunParameter> {
         boolean shouldPost = forcePost || stateWillChange;
         if (shouldPost) {
             postEventRun(Event.Severity.medium, newState.toString(), EventType.state);
+            //send new state to the account record processing
             postAccountingEvent(newState);
         }
     }
 
     private void postAccountingEvent(States state) {
 
-        String username=getUser();
-        AccountingRecord.AccountingRecordType type = AccountingRecord.AccountingRecordType.VM;
-        String identifier ="TODO";
-        String cloud = "TODO";
-        List<String> roles = new ArrayList<String>();
-        List<String> groups = new ArrayList<String>();
-        String realm = "TODO";
-        String module = "TODO";
-        String serviceOfferRef = "TODO";
 
-        if (START_ACCOUNTING_STATES.contains(state)){
 
-            AccountingRecord.postStartAccountingRecord(username, type, identifier, cloud, roles, groups, realm, module, serviceOfferRef);
-        }
 
-        if (STOP_ACCOUNTING_STATES.contains(state)){
-            AccountingRecord.postStopAccountingRecord(username, type, identifier, cloud, roles, groups, realm, module, serviceOfferRef);
-        }
+                if (START_ACCOUNTING_STATES.contains(state)) {
+
+                    AccountingRecord.postStartAccountingRecord(this);
+                }
+
+                if (STOP_ACCOUNTING_STATES.contains(state)) {
+                    AccountingRecord.postStopAccountingRecord(this);
+                }
+
+
+
     }
 
 
