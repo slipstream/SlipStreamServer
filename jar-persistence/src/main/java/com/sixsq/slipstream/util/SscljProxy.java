@@ -67,6 +67,14 @@ public class SscljProxy {
         return request(Method.GET, resource, null, username, null, null, null);
     }
 
+    public static Response get(String resource, String username, Form queryParameters) {
+        return request(Method.GET, resource, null, username, queryParameters, null, null);
+    }
+
+    public static Response get(String resource, String username, Form queryParameters, Boolean throwException) {
+        return request(Method.GET, resource, null, username, queryParameters, null,  throwException);
+    }
+
     public static Response get(String resource, String username, Boolean throwException) {
         return request(Method.GET, resource, null, username, null, null, throwException);
     }

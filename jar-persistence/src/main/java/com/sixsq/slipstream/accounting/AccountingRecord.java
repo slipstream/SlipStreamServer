@@ -1,27 +1,31 @@
 package com.sixsq.slipstream.accounting;
 
 import com.sixsq.slipstream.event.ACL;
-import com.sixsq.slipstream.event.Event;
+
 import com.sixsq.slipstream.event.TypePrincipal;
 import com.sixsq.slipstream.event.TypePrincipalRight;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.util.SscljProxy;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.logging.Logger;
 
 import org.restlet.Response;
 
+
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
 import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
+
 
 public class AccountingRecord {
 
 
     private static final String ACCOUNTING_RECORD_RESOURCE = "api/accounting-record";
 
-    private static final Logger logger = Logger.getLogger(Event.class.getName());
+    private static final Logger logger = Logger.getLogger(AccountingRecord.class.getName());
 
     private static final String ACCOUNTING_RECORD_URI = "http://sixsq.com/slipstream/1/AccountingRecord";
 
@@ -43,11 +47,24 @@ public class AccountingRecord {
     @SuppressWarnings("unused")
     private String identifier;
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
     @SuppressWarnings("unused")
     private Date start;
 
+    public Date getStart() {
+        return start;
+    }
+
+
     @SuppressWarnings("unused")
     private Date stop;
+
+    public Date getStop() {
+        return stop;
+    }
 
     @SuppressWarnings("unused")
     private String user;
@@ -82,6 +99,9 @@ public class AccountingRecord {
     @SuppressWarnings("unused")
     long disk;
 
+    public long getDisk() {
+        return disk;
+    }
 
     public void setStop(Date stop) {
         this.stop = stop;
@@ -152,17 +172,22 @@ public class AccountingRecord {
 
     public static void postStopAccountingRecord(Run run) {
 
-        ACL acl = AccountingRecord.getACL(run);
+
         String username = run.getUser();
         String identifier = AccountingRecord.getIdentifier(run);
-        //FIXME
-        AccountingRecord accountingRecord = new AccountingRecord(acl, null, identifier, null, new Date(),  username, null, null, null, null,
-                null, null, 0, 0, 0);
 
-
-        //Appending ' ADMIN' to get proper permissions
         String user = username + " ADMIN";
-         AccountingRecord.post(accountingRecord, user);
+        AccountingRecord ar = AccountingRecord.getByIdentifier(identifier, user);
+
+
+        //FIXME
+
+        if (ar == null) return;
+
+
+        ar.setStop(new Date());
+        AccountingRecord.put(ar, user);
+
     }
 
     private static ACL getACL(Run run) {
@@ -219,16 +244,75 @@ public class AccountingRecord {
     }
 
 
+    public static AccountingRecord getByIdentifier(String identifier, String username) {
+        //FIXME
+        String cimiQuery = "$filter=accountingRecords/identifier='" + identifier + "'";
+
+        String resource = null;
+        try {
+            resource = ACCOUNTING_RECORD_RESOURCE + "?" + URLEncoder.encode(cimiQuery, "UTF-8");
+            Response res = SscljProxy.get(resource, username);
+
+            AccountingRecords records = AccountingRecords.fromJson(res.getEntityAsText());
+
+            int nbRecords = records.getAccountingRecords().size();
+
+            switch (nbRecords) {
+                case 0: // FIXME :  no corresponding record was started , can't stop it
+                    break;
+
+                case 1: //happy case : a corresponding record was found in ES
+                    AccountingRecord ar = records.getAccountingRecords().get(0);
+                    if (ar.isValidStartRecord()) {
+                        // The record was properly started, and has not yet been closed
+                        return ar;
+
+                    } else {
+                        //FIXME : the record we found is invalid
+                    }
+
+                    break;
+
+
+                default: //FIXME : more than one record found, need to deal with that
+
+
+            }
+
+
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+
+        return null;
+    }
+
+
     public String toJson() {
         return SscljProxy.toJson(this);
     }
 
     public static void post(AccountingRecord accountingRecord, String username) {
-         SscljProxy.post(ACCOUNTING_RECORD_RESOURCE, username, accountingRecord);
+        SscljProxy.post(ACCOUNTING_RECORD_RESOURCE, username, accountingRecord);
     }
 
     public static void put(AccountingRecord accountingRecord, String username) {
-         SscljProxy.put(ACCOUNTING_RECORD_RESOURCE, username, accountingRecord);
+        SscljProxy.put(ACCOUNTING_RECORD_RESOURCE, username, accountingRecord);
+    }
+
+    public boolean isValidStartRecord() {
+        boolean isValid = false;
+
+        Date start = this.getStart();
+        Date stop = this.getStop();
+
+        //Start date must exist and be in the past
+        //Stop date must not be set yet
+
+
+        return (start != null) && (start.before(new Date()) && (stop == null));
     }
 
 
