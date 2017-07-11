@@ -11,6 +11,11 @@
 ;; the template identifier.
 (s/def :cimi.session-template/instance :cimi.core/identifier)
 
+;; Session template resources may have a 'group' attribute that is used to group
+;; authentication methods together.  Primarily geared towards visualization of
+;; the authentication methods.
+(s/def :cimi.session-template/group :cimi.core/nonblank-string)
+
 ;; Sessions may provide a redirect URI to be used on successful authentication.
 (s/def :cimi.session-template/redirectURI :cimi.core/nonblank-string)
 
@@ -26,7 +31,8 @@
 
 (def session-template-keys-spec {:req-un [:cimi.session-template/method
                                           :cimi.session-template/instance]
-                                 :opt-un [:cimi.session-template/redirectURI]})
+                                 :opt-un [:cimi.session-template/group
+                                          :cimi.session-template/redirectURI]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs
