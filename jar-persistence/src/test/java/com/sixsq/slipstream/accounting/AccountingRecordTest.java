@@ -26,12 +26,55 @@ public class AccountingRecordTest {
 
 
 
+    @Test
+    public void simpleStart()  throws ValidationException, NotFoundException, AbortException{
+        {
+
+            AccountingRecordHelper.unMuteForSomeTests();
+            Event.muteForTests();
+            ImageModule image = new ImageModule("test");
+            image.setName("myImage");
+
+
+
+            User user = new User("user");
+
+            user.store();
+
+
+            int nbRunBefore = Run.listAll().size();
+
+
+            String expectedCloudName = "testcloudname";
+            Set<String> cloudServiceNames = new HashSet<String>(Arrays.asList(expectedCloudName));
+
+            Run provisioning = new Run(image, RunType.Run, cloudServiceNames, new User("user"));
+
+
+
+
+
+            provisioning.setState(States.Provisioning);
+            provisioning.store();
+
+            int nbRunAfter = Run.listAll().size();
+            assertThat(nbRunAfter, is(nbRunBefore + 1));
+
+
+
+            provisioning.remove();
+
+
+        }
+    }
+
 
 
     @Test
     public void startAccountRecord() throws ValidationException, NotFoundException, AbortException {
 
         AccountingRecordHelper.unMuteForSomeTests();
+        Event.muteForTests();
         ImageModule image = new ImageModule("test");
         image.setName("myImage");
 
