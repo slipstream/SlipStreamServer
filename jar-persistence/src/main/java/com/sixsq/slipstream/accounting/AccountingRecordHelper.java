@@ -4,10 +4,10 @@ import com.sixsq.slipstream.event.ACL;
 import com.sixsq.slipstream.event.TypePrincipal;
 import com.sixsq.slipstream.event.TypePrincipalRight;
 
-import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Response;
 
@@ -16,7 +16,6 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
@@ -48,7 +47,7 @@ public class AccountingRecordHelper {
     private static final Logger logger = Logger.getLogger(AccountingRecordHelper.class.getName());
 
 
-    private ACL getACL() {
+    public ACL getACL() {
         String username = run.getUser();
 
         TypePrincipal owner = new TypePrincipal(USER, username);
@@ -59,61 +58,55 @@ public class AccountingRecordHelper {
 
     }
 
-    private String getIdentifier() {
-        //FIXME : should be a concatenation like cloudname-vmInstanceId-number
-        return "mycloud-myvm-20170710";
-
+    public String getIdentifier() {
+        return run.getUuid() + "/" + nodeInstanceName;
     }
 
 
-    protected String getCloudName()  {
+    public String getCloudName() {
+        String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME);
+        return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
+    }
+
+    public String getUser()  {
+        return run.getUser();
+
+    }
+
+    public String getModuleName() {
+        return ModuleUriUtil.extractModuleNameFromResourceUri(run.getModuleResourceUrl());
+    }
+
+
+    public String getServiceOffer() {
+        String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.SERVICE_OFFER);
+        return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
+    }
+
+    public AccountingRecordVM getVmData() {
         //FIXME
-
-        return "mycloudname";
-
+        return new AccountingRecordVM(1, 64, 1024);
     }
 
-    protected String getUser()  {
-        //FIXME
-
-        return getRun().getUser();
-
-    }
-
-    private String getModule() {
-        //FIXME
-        return "my-module";
-    }
-
-    private String getRealm() {
+    public String getRealm() {
         //FIXME
         return "my-realm";
     }
 
-    private String getServiceOffer() {
+    public List<String> getGroups() {
         //FIXME
         return null;
     }
 
-    private List<String> getGroups() {
+    public List<String> getRoles() {
         //FIXME
         return null;
-    }
-
-    private List<String> getRoles() {
-        //FIXME
-        return null;
-    }
-
-    private AccountingRecordVM getVmData() {
-        //FIXME
-        return new AccountingRecordVM(1, 64, 1024);
     }
 
 
     private static AccountingRecord getByIdentifier(String identifier, String username) {
         //FIXME
-        String cimiQuery = "$filter=accountingRecords/identifier='" + identifier + "'";
+        String cimiQuery = "$filter=identifier='" + identifier + "'";
 
         String resource = null;
         try {
@@ -172,7 +165,7 @@ public class AccountingRecordHelper {
         List<String> roles = helper.getRoles();
         List<String> groups = helper.getGroups();
         String realm = helper.getRealm();
-        String module = helper.getModule();
+        String module = helper.getModuleName();
         String serviceOfferRef = helper.getServiceOffer();
         AccountingRecordVM vmData = helper.getVmData();
 

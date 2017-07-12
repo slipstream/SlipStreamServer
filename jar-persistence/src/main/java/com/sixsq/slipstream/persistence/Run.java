@@ -725,7 +725,6 @@ public class Run extends Parameterized<Run, RunParameter> {
      *
      * @param key
      * @return new value
-     * @throws AbortException
      * @throws NotFoundException
      */
     public String getRuntimeParameterValueIgnoreAbort(String key)
@@ -733,6 +732,14 @@ public class Run extends Parameterized<Run, RunParameter> {
 
         RuntimeParameter parameter = extractRuntimeParameter(key);
         return parameter.getValue();
+    }
+
+    public String getRuntimeParameterValueOrDefaultIgnoreAbort(String key, String defaultValue) {
+        try {
+            return getRuntimeParameterValueIgnoreAbort(key);
+        } catch (NotFoundException e) {
+            return defaultValue;
+        }
     }
 
     private RuntimeParameter extractRuntimeParameter(String key)
@@ -1062,13 +1069,6 @@ public class Run extends Parameterized<Run, RunParameter> {
     private void postAccountingEvent(States state) {
 
         List<String> nodeInstanceNames = this.getNodeInstanceNamesList();
-
-                if (START_ACCOUNTING_STATES.contains(state)) {
-
-                    for(String nodeInstanceName : nodeInstanceNames) {
-                        AccountingRecordHelper.postStartAccountingRecord(this, nodeInstanceName);
-                    }
-                }
 
                 if (STOP_ACCOUNTING_STATES.contains(state)) {
                     for(String nodeInstanceName : nodeInstanceNames) {

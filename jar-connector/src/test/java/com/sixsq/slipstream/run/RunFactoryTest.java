@@ -20,15 +20,20 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.accounting.AccountingRecordHelper;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
+import static com.sixsq.slipstream.util.CommonTestUtil.assertStringEquals;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.*;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
@@ -168,14 +173,36 @@ public class RunFactoryTest extends RunTest {
 
 	}
 
-	private Run getBuildImageRun(ImageModule image)
-			throws SlipStreamClientException {
+	private Run getBuildImageRun(ImageModule image) throws SlipStreamClientException {
 		return RunFactory.getRun(image, RunType.Machine, user);
 	}
 
-	private Run getDeploymentRun(DeploymentModule deployment)
-			throws SlipStreamClientException {
-		return RunFactory.getRun(deployment, RunType.Orchestration, user);
+	private Run getImageRun(ImageModule image) throws SlipStreamClientException {
+		HashMap<String, List<Parameter<?>>> userChoices = new HashMap<>();
+
+		// String paramName = RuntimeParameter.constructParamName(Run.MACHINE_NAME, RuntimeParameter.CLOUD_SERVICE_NAME);
+		Parameter<?> parameter = new ModuleParameter(RuntimeParameter.CLOUD_SERVICE_NAME);
+		parameter.setValue(cloudServiceName);
+
+		userChoices.put(Run.MACHINE_NAME, new ArrayList<>());
+		userChoices.get(Run.MACHINE_NAME).add(parameter);
+
+		return RunFactory.getRun(image, RunType.Run, user, userChoices);
+	}
+
+	private Run getDeploymentRun(DeploymentModule deployment) throws SlipStreamClientException {
+		HashMap<String, List<Parameter<?>>> userChoices = new HashMap<>();
+
+		for (String nodeName: deployment.getNodes().keySet()) {
+			// String paramName = RuntimeParameter.constructParamName(nodeName, RuntimeParameter.CLOUD_SERVICE_NAME);
+			Parameter<?> parameter = new NodeParameter(RuntimeParameter.CLOUD_SERVICE_NAME);
+			parameter.setValue("'" + cloudServiceName + "'");
+
+			userChoices.put(nodeName, new ArrayList<>());
+			userChoices.get(nodeName).add(parameter);
+		}
+
+		return RunFactory.getRun(deployment, RunType.Orchestration, user, userChoices);
 	}
 
 	@Test(expected = ValidationException.class)
@@ -449,4 +476,56 @@ public class RunFactoryTest extends RunTest {
 		assertThat(DeploymentFactory.insertMultiplicityIndexInParameterName(
 				"node:param", 1), is("node.1:param"));
 	}
+
+
+
+
+
+
+
+
+
+
+	@Test
+	public void accountingRecordFromDeploymentRun() throws SlipStreamClientException {
+		AccountingRecordHelper.unMuteForSomeTests();
+		Event.muteForTests();
+
+		Run run = getDeploymentRun(deployment);
+
+		for (String nodeInstanceName: run.getNodeInstanceNamesList()) {
+			AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
+			String identifier = run.getUuid() + "/" + nodeInstanceName;
+
+			assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
+			assertStringEquals(cloudServiceName, arh.getCloudName());
+			assertStringEquals(identifier, arh.getIdentifier());
+			assertStringEquals("test/deployment", arh.getModuleName());
+			assertStringEquals("RunTestBaseUser", arh.getUser());
+		}
+
+		run.remove();
+	}
+
+	@Test
+	public void accountingRecordFromImageRun() throws SlipStreamClientException, AbortException {
+
+		AccountingRecordHelper.unMuteForSomeTests();
+		Event.muteForTests();
+
+		Run run = getImageRun(image);
+		String nodeInstanceName = Run.MACHINE_NAME;
+
+		AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
+		String identifier = run.getUuid() + "/" + nodeInstanceName;
+
+		assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
+		assertStringEquals(cloudServiceName, arh.getCloudName());
+		assertStringEquals(identifier, arh.getIdentifier());
+		assertStringEquals("test/image", arh.getModuleName());
+		assertStringEquals("RunTestBaseUser", arh.getUser());
+
+		run.remove();
+	}
+
 }
