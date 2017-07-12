@@ -1061,15 +1061,19 @@ public class Run extends Parameterized<Run, RunParameter> {
 
     private void postAccountingEvent(States state) {
 
-        
+        List<String> nodeInstanceNames = this.getNodeInstanceNamesList();
 
                 if (START_ACCOUNTING_STATES.contains(state)) {
 
-                    AccountingRecordHelper.postStartAccountingRecord(this);
+                    for(String nodeInstanceName : nodeInstanceNames) {
+                        AccountingRecordHelper.postStartAccountingRecord(this, nodeInstanceName);
+                    }
                 }
 
                 if (STOP_ACCOUNTING_STATES.contains(state)) {
-                    AccountingRecordHelper.postStopAccountingRecord(this);
+                    for(String nodeInstanceName : nodeInstanceNames) {
+                        AccountingRecordHelper.postStopAccountingRecord(this, nodeInstanceName);
+                    }
                 }
 
     }

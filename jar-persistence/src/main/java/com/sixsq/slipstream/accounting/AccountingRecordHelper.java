@@ -27,14 +27,28 @@ import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
  * Created by elegoff on 10.07.17.
  */
 public class AccountingRecordHelper {
-    private static Run run;
+    private Run run;
+    private String nodeInstanceName;
+
+    public AccountingRecordHelper(Run run, String nodeInstanceName) {
+        this.run = run;
+        this.nodeInstanceName = nodeInstanceName;
+    }
+
+    public Run getRun() {
+        return run;
+    }
+
+    public String getNodeInstanceName() {
+        return nodeInstanceName;
+    }
 
     public static boolean isMuted = false;
 
     private static final Logger logger = Logger.getLogger(AccountingRecordHelper.class.getName());
 
 
-    private static ACL getACL() {
+    private ACL getACL() {
         String username = run.getUser();
 
         TypePrincipal owner = new TypePrincipal(USER, username);
@@ -45,59 +59,53 @@ public class AccountingRecordHelper {
 
     }
 
-    private static String getIdentifier() {
+    private String getIdentifier() {
         //FIXME : should be a concatenation like cloudname-vmInstanceId-number
         return "mycloud-myvm-20170710";
 
     }
 
 
-    private static String getNodeName() {
-        List<String> nodeNames = run.getNodeNamesList();
-
-
-        //FIXME : take first ? check if empty
-        String nodeName = nodeNames.get(0);
-
-        return nodeName;
-
-    }
-
-
-    protected static String getCloudName() throws NotFoundException, AbortException {
+    protected String getCloudName()  {
         //FIXME
 
         return "mycloudname";
 
     }
 
+    protected String getUser()  {
+        //FIXME
 
-    private static String getModule() {
+        return getRun().getUser();
+
+    }
+
+    private String getModule() {
         //FIXME
         return "my-module";
     }
 
-    private static String getRealm() {
+    private String getRealm() {
         //FIXME
         return "my-realm";
     }
 
-    private static String getServiceOffer() {
+    private String getServiceOffer() {
         //FIXME
         return null;
     }
 
-    private static List<String> getGroups() {
+    private List<String> getGroups() {
         //FIXME
         return null;
     }
 
-    private static List<String> getRoles() {
+    private List<String> getRoles() {
         //FIXME
         return null;
     }
 
-    private static AccountingRecordVM getVmData() {
+    private AccountingRecordVM getVmData() {
         //FIXME
         return new AccountingRecordVM(1, 64, 1024);
     }
@@ -143,37 +151,30 @@ public class AccountingRecordHelper {
         return null;
     }
 
-    public static void postStartAccountingRecord(Run run) {
+    public static void postStartAccountingRecord(Run run, String nodeInstanceName) {
 
         if (isMuted) {
             return;
         }
 
-        AccountingRecordHelper.run = run;
+        AccountingRecordHelper helper = new AccountingRecordHelper(run, nodeInstanceName);
 
-        ACL acl = AccountingRecordHelper.getACL();
+        ACL acl = helper.getACL();
 
         //FIXME : how would the Accounting record type be different from vm ?
         AccountingRecord.AccountingRecordType type = AccountingRecord.AccountingRecordType.vm;
 
-        String identifier = AccountingRecordHelper.getIdentifier();
-        String username = AccountingRecordHelper.run.getUser();
-        String cloud = "";
-        try {
-            cloud = AccountingRecordHelper.getCloudName();
-        } catch (NotFoundException e) {
-            logger.log(Level.WARNING, e.getMessage());
-            cloud = "NOTFOUND";
-        } catch (AbortException e) {
-            cloud = "ERROR";
-            logger.log(Level.WARNING, e.getMessage());
-        }
-        List<String> roles = AccountingRecordHelper.getRoles();
-        List<String> groups = AccountingRecordHelper.getGroups();
-        String realm = AccountingRecordHelper.getRealm();
-        String module = AccountingRecordHelper.getModule();
-        String serviceOfferRef = AccountingRecordHelper.getServiceOffer();
-        AccountingRecordVM vmData = AccountingRecordHelper.getVmData();
+        String identifier = helper.getIdentifier();
+        String username = helper.getUser();
+
+        String cloud = helper.getCloudName();
+
+        List<String> roles = helper.getRoles();
+        List<String> groups = helper.getGroups();
+        String realm = helper.getRealm();
+        String module = helper.getModule();
+        String serviceOfferRef = helper.getServiceOffer();
+        AccountingRecordVM vmData = helper.getVmData();
 
         AccountingRecord accountingRecord = new AccountingRecord(acl, type, identifier, new Date(), null, username, cloud, roles, groups, realm,
                 module, serviceOfferRef, vmData.getCpu(), vmData.getRam(), vmData.getDisk());
@@ -185,15 +186,15 @@ public class AccountingRecordHelper {
 
     }
 
-    public static void postStopAccountingRecord(Run run) {
+    public static void postStopAccountingRecord(Run run, String nodeInstanceName) {
 
         if (isMuted) {
             return;
         }
 
-        AccountingRecordHelper.run = run;
-        String username = AccountingRecordHelper.run.getUser();
-        String identifier = AccountingRecordHelper.getIdentifier();
+        AccountingRecordHelper helper = new AccountingRecordHelper(run, nodeInstanceName);
+        String username = helper.getUser();
+        String identifier = helper.getIdentifier();
 
         String user = username + " ADMIN";
         AccountingRecord ar = AccountingRecordHelper.getByIdentifier(identifier, user);
@@ -201,7 +202,10 @@ public class AccountingRecordHelper {
 
         //FIXME
 
-        if (ar == null) return;
+        if (ar == null) {
+            logger.warning("Could not find accounting record identified by " + identifier);
+            return;
+        }
 
 
         ar.setStop(new Date());
