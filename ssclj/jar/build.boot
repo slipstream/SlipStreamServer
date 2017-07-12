@@ -45,6 +45,7 @@
                    [ring/ring-core]
                    [ring/ring-json]
                    [superstring]
+                   [ring-sse/ring-sse]
 
                    [com.sixsq.slipstream/utils]
                    [com.sixsq.slipstream/auth]
