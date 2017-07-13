@@ -1067,7 +1067,6 @@ public class Run extends Parameterized<Run, RunParameter> {
     }
 
     private void postAccountingEvent(States state) {
-
         List<String> nodeInstanceNames = this.getNodeInstanceNamesList();
 
                 if (STOP_ACCOUNTING_STATES.contains(state)) {
@@ -1075,7 +1074,6 @@ public class Run extends Parameterized<Run, RunParameter> {
                         AccountingRecordHelper.postStopAccountingRecord(this, nodeInstanceName);
                     }
                 }
-
     }
 
 

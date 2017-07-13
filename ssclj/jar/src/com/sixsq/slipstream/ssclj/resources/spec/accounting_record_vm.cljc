@@ -9,10 +9,13 @@
 (s/def :cimi.accounting-record-vm/cpu pos-int?)
 (s/def :cimi.accounting-record-vm/ram pos-int?)
 (s/def :cimi.accounting-record-vm/disk pos-int?)
+(s/def :cimi.accounting-record-vm/instanceType :cimi.core/nonblank-string)
 
 (def accounting-keys-vm-specs
   {:req-un [:cimi.accounting-record-vm/cpu
-            :cimi.accounting-record-vm/ram]
+            :cimi.accounting-record-vm/ram
+            :cimi.accounting-record-vm/instanceType
+            ]
    :opt-un [:cimi.accounting-record-vm/disk]})
 
 (s/def :cimi/accounting-record.vm

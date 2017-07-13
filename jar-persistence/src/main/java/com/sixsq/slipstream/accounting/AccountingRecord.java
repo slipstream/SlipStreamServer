@@ -1,26 +1,12 @@
 package com.sixsq.slipstream.accounting;
 
 import com.sixsq.slipstream.event.ACL;
-
-
-import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.util.SscljProxy;
-
-
 import java.util.*;
-import java.util.logging.Logger;
-
-
-
 
 public class AccountingRecord {
 
-
-
     protected static final String ACCOUNTING_RECORD_RESOURCE = "api/accounting-record";
-
-
-
     protected static final String ACCOUNTING_RECORD_URI = "http://sixsq.com/slipstream/1/AccountingRecord";
 
     @SuppressWarnings("unused")
@@ -132,13 +118,6 @@ public class AccountingRecord {
         obj;
     }
 
-
-
-
-
-
-
-
     public String toJson() {
         return SscljProxy.toJson(this);
     }
@@ -177,9 +156,5 @@ public class AccountingRecord {
         //Stop date must not be set yet
         return (start != null)  && (stop != null) && (start.before(stop));
     }
-
-
-
-
 
 }
