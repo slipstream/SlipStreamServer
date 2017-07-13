@@ -242,13 +242,14 @@
    {cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system,
     connector-instance-types :connector-instance-types :as component}
    connector]
-  (let [clause-flexible   "schema-org:flexible='true'"
+  (let [clause-vm         "resource:type='VM'"
+        clause-flexible   "schema-org:flexible='true'"
         clause-os         (format "resource:operatingSystem='%s'" os)
         clause-size       (if (or cpu ram disk)
                             (clause-cpu-ram-disk component)
                             (clause-connector-specific ((keyword connector) connector-instance-types)))
         clause-connector  (format "connector/href='%s'" connector)
-        clause-request    (->> (cimi-and [clause-os clause-size])
+        clause-request    (->> (cimi-and [clause-vm clause-os clause-size])
                                (conj [clause-flexible])
                                cimi-or
                                (conj [clause-connector clause-placement])
