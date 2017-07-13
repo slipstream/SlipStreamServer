@@ -89,7 +89,7 @@ public class AccountingRecordsTest {
         ACL acl = new ACL(owner, rules);
 
         AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "12313/nodename", new Date(), new Date(), "user", "cloudname",
-                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", "serviceOffer", 1, 64, 1024);
+                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", "serviceOffer", 1L, 64L, 1024L, "instanceType");
 
         Assert.assertNotNull(ar.toJson());
     }
@@ -102,7 +102,7 @@ public class AccountingRecordsTest {
         ACL acl = new ACL(owner, rules);
 
         AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "12313/nodename", startDate, stopDate, "user", "cloudname",
-                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", "serviceOffer", 1, 64, 1024);
+                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", "serviceOffer", 1L, 64L, 1024L, "instanceType");
 
         return ar;
     }

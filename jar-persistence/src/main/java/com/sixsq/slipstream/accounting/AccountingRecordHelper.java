@@ -99,7 +99,7 @@ public class AccountingRecordHelper {
 
     public AccountingRecordVM getVmData() {
         //FIXME
-        return new AccountingRecordVM(1, 64, 1024);
+        return new AccountingRecordVM(1L, 64L, 1024L, "myInstanceType");
     }
 
     public String getRealm() {
@@ -184,7 +184,7 @@ public class AccountingRecordHelper {
         AccountingRecordVM vmData = helper.getVmData();
 
         AccountingRecord accountingRecord = new AccountingRecord(acl, type, identifier, new Date(), null, username, cloud, roles, groups, realm,
-                module, serviceOfferRef, vmData.getCpu(), vmData.getRam(), vmData.getDisk());
+                module, serviceOfferRef, vmData.getCpu(), vmData.getRam(), vmData.getDisk(), vmData.getInstanceType());
 
 
         //Appending ' ADMIN' to get proper permissions

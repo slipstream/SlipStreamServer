@@ -69,15 +69,18 @@ public class AccountingRecord {
 
     //Record Type VM
     @SuppressWarnings("unused")
-    long cpu;
+    Long cpu;
 
     //Record Type VM
     @SuppressWarnings("unused")
-    long ram;
+    Long ram;
 
     //Record Type VM
     @SuppressWarnings("unused")
-    long disk;
+    Long disk;
+
+    @SuppressWarnings("unused")
+    String instanceType;
 
     public long getDisk() {
         return disk;
@@ -89,7 +92,7 @@ public class AccountingRecord {
 
 
     public AccountingRecord(ACL acl, AccountingRecordType type, String identifier, Date start, Date stop, String user, String cloud, List<String> roles, List<String> groups,
-                            String realm, String module, String serviceOfferRef, long cpu, long ram, long disk) {
+                            String realm, String module, String serviceOfferRef, Long cpu, Long ram, Long disk, String instanceType) {
         this.acl = acl;
         this.resourceURI = ACCOUNTING_RECORD_URI;
         this.created = start;
@@ -108,6 +111,7 @@ public class AccountingRecord {
         this.cpu = cpu;
         this.ram = ram;
         this.disk = disk;
+        this.instanceType = instanceType;
 
     }
 
