@@ -151,18 +151,33 @@ public class AccountingRecord {
         SscljProxy.put(ACCOUNTING_RECORD_RESOURCE, username, accountingRecord);
     }
 
-    public boolean isValidStartRecord() {
-        boolean isValid = false;
-
+    /**
+     * An open accounting record has a start timestamp but no stop timestamp yet
+     * @return true if it is open and valid
+     */
+    public boolean isOpenAndValidAccountingRecord() {
         Date start = this.getStart();
         Date stop = this.getStop();
 
         //Start date must exist and be in the past
         //Stop date must not be set yet
-
-
-        return (start != null) && (start.before(new Date()) && (stop == null));
+        return (start != null) && (stop == null);
     }
+
+
+    /**
+     * A closed accounting record has both a start and stop timestamp (stop has to be after start)
+     * @return true if is closed and valid
+     */
+    public boolean isClosedAndValidAccountingRecord() {
+        Date start = this.getStart();
+        Date stop = this.getStop();
+
+        //Start date must exist and be in the past
+        //Stop date must not be set yet
+        return (start != null)  && (stop != null) && (start.before(stop));
+    }
+
 
 
 

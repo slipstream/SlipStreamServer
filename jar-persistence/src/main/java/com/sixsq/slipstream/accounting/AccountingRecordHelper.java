@@ -125,7 +125,7 @@ public class AccountingRecordHelper {
 
                 case 1: //happy case : a corresponding record was found in ES
                     AccountingRecord ar = records.getAccountingRecords().get(0);
-                    if (ar.isValidStartRecord()) {
+                    if (ar.isOpenAndValidAccountingRecord()) {
                         // The record was properly started, and has not yet been closed
                         return ar;
 

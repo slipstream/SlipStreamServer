@@ -1,7 +1,15 @@
 package com.sixsq.slipstream.accounting;
 
-import junit.framework.Assert;
+import com.sixsq.slipstream.event.ACL;
+import com.sixsq.slipstream.event.TypePrincipal;
+import com.sixsq.slipstream.event.TypePrincipalRight;
+
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by elegoff on 07.07.17.
@@ -60,8 +68,69 @@ public class AccountingRecordsTest {
         Assert.assertEquals(1024, ar.getDisk());
 
 
-
     }
+
+    @Test
+    public void AccountingRecordCanBeCreatedAndJsonified() {
+
+        TypePrincipal owner = new TypePrincipal(TypePrincipal.PrincipalType.USER, "joe");
+        List<TypePrincipalRight> rules = Arrays.asList(new TypePrincipalRight(
+                TypePrincipal.PrincipalType.ROLE, "ANON", TypePrincipalRight.Right.ALL));
+        ACL acl = new ACL(owner, rules);
+
+        AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "12313/nodename", new Date(), new Date(), "user", "cloudname",
+                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", "serviceOffer", 1, 64, 1024);
+
+        Assert.assertNotNull(ar.toJson());
+    }
+
+
+    private AccountingRecord createAccoutingRecord(Date startDate, Date stopDate) {
+        TypePrincipal owner = new TypePrincipal(TypePrincipal.PrincipalType.USER, "joe");
+        List<TypePrincipalRight> rules = Arrays.asList(new TypePrincipalRight(
+                TypePrincipal.PrincipalType.ROLE, "ANON", TypePrincipalRight.Right.ALL));
+        ACL acl = new ACL(owner, rules);
+
+        AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "12313/nodename", startDate, stopDate, "user", "cloudname",
+                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", "serviceOffer", 1, 64, 1024);
+
+        return ar;
+    }
+
+
+    @Test
+    public void validateAccountingRecord() {
+        Date dateInFuture = new Date(Long.MAX_VALUE);
+        Date today = new Date();
+
+        Assert.assertTrue(dateInFuture.after(today));
+
+
+        AccountingRecord validOpen = createAccoutingRecord(today, null);
+        AccountingRecord openInFuture = createAccoutingRecord(dateInFuture, null);
+        AccountingRecord nullDate = createAccoutingRecord(null, null);
+        AccountingRecord bothToday = createAccoutingRecord(today, today);
+        AccountingRecord validClosed = createAccoutingRecord(today, dateInFuture);
+        AccountingRecord closedButWrongDateOrder = createAccoutingRecord(dateInFuture, today);
+        AccountingRecord onlyStop = createAccoutingRecord(null, today);
+
+
+        Assert.assertTrue(validOpen.isOpenAndValidAccountingRecord());
+        Assert.assertFalse(validOpen.isClosedAndValidAccountingRecord());
+        Assert.assertTrue(openInFuture.isOpenAndValidAccountingRecord());
+        Assert.assertTrue(!openInFuture.isClosedAndValidAccountingRecord());
+        Assert.assertFalse(nullDate.isOpenAndValidAccountingRecord());
+        Assert.assertFalse(nullDate.isClosedAndValidAccountingRecord());
+        Assert.assertFalse(bothToday.isOpenAndValidAccountingRecord());
+        Assert.assertFalse(bothToday.isClosedAndValidAccountingRecord());
+        Assert.assertFalse(validClosed.isOpenAndValidAccountingRecord());
+        Assert.assertTrue(validClosed.isClosedAndValidAccountingRecord());
+        Assert.assertFalse(closedButWrongDateOrder.isOpenAndValidAccountingRecord());
+        Assert.assertFalse(closedButWrongDateOrder.isClosedAndValidAccountingRecord());
+        Assert.assertFalse(onlyStop.isOpenAndValidAccountingRecord());
+        Assert.assertFalse(onlyStop.isClosedAndValidAccountingRecord());
+    }
+
 
     public static String jsonAccountingRecords() {
         return "{\n" +
