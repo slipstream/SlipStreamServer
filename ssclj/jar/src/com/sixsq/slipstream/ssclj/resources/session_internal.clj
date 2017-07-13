@@ -63,7 +63,9 @@
             claims (create-claims username headers (:id session) (:clientIP session))
             cookie (cookies/claims-cookie claims)
             expires (:expires cookie)
-            session (assoc session :expiry expires)]
+            claims-roles (:roles claims)
+            session (cond-> (assoc session :expiry expires)
+                            claims-roles (assoc :roles claims-roles))]
         (log/debug "internal cookie token claims for" (u/document-id href) ":" claims)
         (let [cookies {(sutils/cookie-name (:id session)) cookie}]
           (if redirectURI
