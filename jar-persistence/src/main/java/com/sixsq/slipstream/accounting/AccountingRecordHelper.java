@@ -208,11 +208,8 @@ public class AccountingRecordHelper {
 
     public static void muteForTests() {
         isMuted = true;
-        logger.severe("You should NOT see this message in production: events won't be posted");
+        logger.severe("You should NOT see this message in production: accounting records won't be posted");
     }
 
-    public static void unMuteForSomeTests() {
-        isMuted = false;
-        logger.info("Accounting Records will be posted");
-    }
+
 }

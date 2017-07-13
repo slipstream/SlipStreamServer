@@ -26,7 +26,6 @@ import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.*;
-import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import static com.sixsq.slipstream.util.CommonTestUtil.assertStringEquals;
 import org.junit.AfterClass;
@@ -488,7 +487,6 @@ public class RunFactoryTest extends RunTest {
 
 	@Test
 	public void accountingRecordFromDeploymentRun() throws SlipStreamClientException {
-		AccountingRecordHelper.unMuteForSomeTests();
 		Event.muteForTests();
 
 		Run run = getDeploymentRun(deployment);
@@ -510,7 +508,6 @@ public class RunFactoryTest extends RunTest {
 	@Test
 	public void accountingRecordFromImageRun() throws SlipStreamClientException, AbortException {
 
-		AccountingRecordHelper.unMuteForSomeTests();
 		Event.muteForTests();
 
 		Run run = getImageRun(image);
