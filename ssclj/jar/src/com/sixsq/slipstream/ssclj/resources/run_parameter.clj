@@ -10,8 +10,12 @@
     [superstring.core :as str]
     [ring.util.response :as r]
     [com.sixsq.slipstream.util.response :as sr]
-    [ring.sse :as sse]
-    ))
+    [com.sixsq.slipstream.db.impl :as db]
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.util.sse :as sse]
+    [clojure.core.async :as async]
+    )
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name "RunParameter")
 
@@ -52,38 +56,35 @@
   [request]
   (add-impl request))
 
-;(def handler
-;  (sse/event-channel-handler
-;    (fn [request response raise event-ch]
-;      (async/go
-;        (dotimes [i 20]
-;          (let [event {:id   (java.util.UUID/randomUUID)
-;                       :name "foo"
-;                       :data (json/generate-string {:foo "bar"})}]
-;            (async/>! event-ch event)
-;            (async/<! (async/timeout 1000))))
-;        (async/close! event-ch)))
-;    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
+(def handler
+  (sse/event-channel-handler
+    (fn [request response raise event-ch]
+      (async/go
+        (dotimes [i 20]
+          (let [event {:id   (java.util.UUID/randomUUID)
+                       :name "foo"
+                       :data "bar"}]
+            (async/>! event-ch event)
+            (async/<! (async/timeout 1000))))
+        (async/close! event-ch)))
+    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
 
-;(defn retrieve-fn
-;  [resource-name]
-;  (fn [{{uuid :uuid} :params :as request}]
-;    (try
-;      (-> (str (u/de-camelcase resource-name) "/" uuid)
-;          (db/retrieve request)
-;          (a/can-view? request)
-;          (crud/set-operations request)
-;          (r/json-response))
-;      (catch ExceptionInfo ei
-;        (ex-data ei)))))
+(defn retrieve-fn
+  [resource-name]
+  (fn [{{uuid :uuid} :params :as request}]
+    (try
+      (-> (str (u/de-camelcase resource-name) "/" uuid)
+          (db/retrieve request)
+          (a/can-view? request)
+          (crud/set-operations request))
+      (catch ExceptionInfo ei
+        (ex-data ei)))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
 (defmethod crud/retrieve resource-name
   [request]
-  ;(handler request (partial retrieve-fn resource-name) (fn[e] (log/error e)))
-  (std-crud/retrieve-fn resource-name)
-  )
+  (handler request))
 
 (def edit-impl (std-crud/edit-fn resource-name))
 

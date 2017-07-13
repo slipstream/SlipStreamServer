@@ -36,6 +36,7 @@
                    [metrics-clojure-jvm]
                    [metrics-clojure-graphite]
                    [me.raynes/fs]
+                   [org.clojure/core.async :exclusions []]
                    [org.clojure/data.json]
                    [org.clojure/java.classpath]
                    [org.clojure/tools.cli]
@@ -45,7 +46,6 @@
                    [ring/ring-core]
                    [ring/ring-json]
                    [superstring]
-                   [ring-sse/ring-sse]
 
                    [com.sixsq.slipstream/utils]
                    [com.sixsq.slipstream/auth]
