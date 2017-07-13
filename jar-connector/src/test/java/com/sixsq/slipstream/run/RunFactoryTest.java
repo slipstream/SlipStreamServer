@@ -20,7 +20,9 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import com.google.gson.JsonObject;
 import com.sixsq.slipstream.accounting.AccountingRecordHelper;
+import com.sixsq.slipstream.accounting.AccountingRecordVM;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.factory.DeploymentFactory;
@@ -28,6 +30,8 @@ import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import static com.sixsq.slipstream.util.CommonTestUtil.assertStringEquals;
+
+import com.sixsq.slipstream.util.ServiceOffersUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,6 +52,9 @@ public class RunFactoryTest extends RunTest {
 
 	protected static ImageModule baseImage = null;
 	protected static ImageModule customImage = null;
+
+	private static String serviceOfferId = "service-offer/963f4e61-5017-4a00-be05-7dd275e5029e";
+	private static JsonObject serviceOffer = null;
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
@@ -76,6 +83,8 @@ public class RunFactoryTest extends RunTest {
 			e.printStackTrace();
 			fail();
 		}
+
+		serviceOffer = ServiceOffersUtil.parseJson(serviceOfferJson);
 	}
 
 	private static void create2ElementCircularDependentImages()
@@ -179,12 +188,15 @@ public class RunFactoryTest extends RunTest {
 	private Run getImageRun(ImageModule image) throws SlipStreamClientException {
 		HashMap<String, List<Parameter<?>>> userChoices = new HashMap<>();
 
-		// String paramName = RuntimeParameter.constructParamName(Run.MACHINE_NAME, RuntimeParameter.CLOUD_SERVICE_NAME);
-		Parameter<?> parameter = new ModuleParameter(RuntimeParameter.CLOUD_SERVICE_NAME);
-		parameter.setValue(cloudServiceName);
+		Parameter<?> cloudService = new ModuleParameter(RuntimeParameter.CLOUD_SERVICE_NAME);
+		cloudService.setValue(cloudServiceName);
+
+		Parameter<?> serviceOffer = new ModuleParameter(RuntimeParameter.SERVICE_OFFER);
+		serviceOffer.setValue(serviceOfferId);
 
 		userChoices.put(Run.MACHINE_NAME, new ArrayList<>());
-		userChoices.get(Run.MACHINE_NAME).add(parameter);
+		userChoices.get(Run.MACHINE_NAME).add(cloudService);
+		// userChoices.get(Run.MACHINE_NAME).add(serviceOffer);
 
 		return RunFactory.getRun(image, RunType.Run, user, userChoices);
 	}
@@ -193,12 +205,15 @@ public class RunFactoryTest extends RunTest {
 		HashMap<String, List<Parameter<?>>> userChoices = new HashMap<>();
 
 		for (String nodeName: deployment.getNodes().keySet()) {
-			// String paramName = RuntimeParameter.constructParamName(nodeName, RuntimeParameter.CLOUD_SERVICE_NAME);
-			Parameter<?> parameter = new NodeParameter(RuntimeParameter.CLOUD_SERVICE_NAME);
-			parameter.setValue("'" + cloudServiceName + "'");
+			Parameter<?> cloudService = new NodeParameter(RuntimeParameter.CLOUD_SERVICE_NAME);
+			cloudService.setValue("'" + cloudServiceName + "'");
+
+			Parameter<?> serviceOffer = new NodeParameter(RuntimeParameter.SERVICE_OFFER);
+			serviceOffer.setValue("'" + serviceOfferId + "'");
 
 			userChoices.put(nodeName, new ArrayList<>());
-			userChoices.get(nodeName).add(parameter);
+			userChoices.get(nodeName).add(cloudService);
+			// userChoices.get(nodeName).add(serviceOffer);
 		}
 
 		return RunFactory.getRun(deployment, RunType.Orchestration, user, userChoices);
@@ -476,15 +491,6 @@ public class RunFactoryTest extends RunTest {
 				"node:param", 1), is("node.1:param"));
 	}
 
-
-
-
-
-
-
-
-
-
 	@Test
 	public void accountingRecordFromDeploymentRun() throws SlipStreamClientException {
 		Event.muteForTests();
@@ -493,6 +499,8 @@ public class RunFactoryTest extends RunTest {
 
 		for (String nodeInstanceName: run.getNodeInstanceNamesList()) {
 			AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
+			arh.setServiceOffer(serviceOffer);
+
 			String identifier = run.getUuid() + "/" + nodeInstanceName;
 
 			assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
@@ -500,6 +508,12 @@ public class RunFactoryTest extends RunTest {
 			assertStringEquals(identifier, arh.getIdentifier());
 			assertStringEquals("test/deployment", arh.getModuleName());
 			assertStringEquals("RunTestBaseUser", arh.getUser());
+
+			AccountingRecordVM vmData = arh.getVmData();
+			assertEquals(2, vmData.getCpu().intValue());
+			assertEquals(4096F, vmData.getRam(), 0);
+			assertEquals(200, vmData.getDisk().intValue());
+			assertStringEquals("Medium", vmData.getInstanceType());
 		}
 
 		run.remove();
@@ -514,6 +528,8 @@ public class RunFactoryTest extends RunTest {
 		String nodeInstanceName = Run.MACHINE_NAME;
 
 		AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
+		arh.setServiceOffer(serviceOffer);
+
 		String identifier = run.getUuid() + "/" + nodeInstanceName;
 
 		assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
@@ -522,7 +538,59 @@ public class RunFactoryTest extends RunTest {
 		assertStringEquals("test/image", arh.getModuleName());
 		assertStringEquals("RunTestBaseUser", arh.getUser());
 
+		AccountingRecordVM vmData = arh.getVmData();
+		assertEquals(2, vmData.getCpu().intValue());
+		assertEquals(4096F, vmData.getRam(), 0);
+		assertEquals(200, vmData.getDisk().intValue());
+		assertStringEquals("Medium", vmData.getInstanceType());
+
 		run.remove();
 	}
+
+	public static String serviceOfferJson = "" +
+			"  {\n" +
+			"    \"connector\" : {\n" +
+			"      \"href\" : \"exoscale-ch-gva\"\n" +
+			"    },\n" +
+			"    \"description\" : \"VM (standard) with 2 vCPU, 4096 MiB RAM, 200 GiB root disk, windows [CH] (Medium)\",\n" +
+			"    \"price:currency\" : \"EUR\",\n" +
+			"    \"resource:vcpu\" : 2,\n" +
+			"    \"price:unitCost\" : 0.07597275199999999,\n" +
+			"    \"resource:operatingSystem\" : \"windows\",\n" +
+			"    \"updated\" : \"2017-07-13T03:00:12.031Z\",\n" +
+			"    \"price:billingPeriodCode\" : \"MIN\",\n" +
+			"    \"name\" : \"(2/4096/200 Medium windows) [CH]\",\n" +
+			"    \"resource:class\" : \"standard\",\n" +
+			"    \"created\" : \"2017-06-26T10:09:28.607Z\",\n" +
+			"    \"price:billingUnitCode\" : \"HUR\",\n" +
+			"    \"price:freeUnits\" : 0,\n" +
+			"    \"price:unitCode\" : \"C62\",\n" +
+			"    \"resource:instanceType\" : \"Medium\",\n" +
+			"    \"exoscale:zone\" : \"ch-gva-2\",\n" +
+			"    \"resource:diskType\" : \"SSD\",\n" +
+			"    \"id\" : \"service-offer/35219a83-ee7f-41ac-b006-291d35504931\",\n" +
+			"    \"schema-org:name\" : \"Medium\",\n" +
+			"    \"resource:country\" : \"CH\",\n" +
+			"    \"resource:platform\" : \"cloudstack\",\n" +
+			"    \"resource:ram\" : 4096,\n" +
+			"    \"acl\" : {\n" +
+			"      \"owner\" : {\n" +
+			"        \"type\" : \"ROLE\",\n" +
+			"        \"principal\" : \"ADMIN\"\n" +
+			"      },\n" +
+			"      \"rules\" : [ {\n" +
+			"        \"principal\" : \"USER\",\n" +
+			"        \"right\" : \"VIEW\",\n" +
+			"        \"type\" : \"ROLE\"\n" +
+			"      }, {\n" +
+			"        \"principal\" : \"ADMIN\",\n" +
+			"        \"right\" : \"ALL\",\n" +
+			"        \"type\" : \"ROLE\"\n" +
+			"      } ]\n" +
+			"    },\n" +
+			"    \"resourceURI\" : \"http://sixsq.com/slipstream/1/ServiceOffer\",\n" +
+			"    \"resource:disk\" : 200,\n" +
+			"    \"resource:type\" : \"VM\"\n" +
+			"  }";
 
 }

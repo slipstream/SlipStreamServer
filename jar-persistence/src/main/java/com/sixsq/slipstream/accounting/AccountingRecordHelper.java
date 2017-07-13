@@ -1,11 +1,13 @@
 package com.sixsq.slipstream.accounting;
 
+import com.google.gson.JsonObject;
 import com.sixsq.slipstream.event.ACL;
 import com.sixsq.slipstream.event.TypePrincipal;
 import com.sixsq.slipstream.event.TypePrincipalRight;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.util.ModuleUriUtil;
+import com.sixsq.slipstream.util.ServiceOffersUtil;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Response;
 
@@ -19,6 +21,8 @@ import java.util.logging.Logger;
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
 import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
+
+import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttributeOrNull;
 
 /*
  * +=================================================================+
@@ -42,10 +46,12 @@ import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
 public class AccountingRecordHelper {
     private Run run;
     private String nodeInstanceName;
+    private JsonObject serviceOffer;
 
     public AccountingRecordHelper(Run run, String nodeInstanceName) {
         this.run = run;
         this.nodeInstanceName = nodeInstanceName;
+        this.serviceOffer = null;
     }
 
     public Run getRun() {
@@ -97,14 +103,43 @@ public class AccountingRecordHelper {
         return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
     }
 
+    /**
+     * This method should not be used except by unit tests.
+     */
+    public void setServiceOffer(JsonObject serviceOffer) {
+        this.serviceOffer = serviceOffer;
+    }
+
     public AccountingRecordVM getVmData() {
-        //FIXME
-        return new AccountingRecordVM(1L, 64L, 1024L, "myInstanceType");
+        String serviceOfferId = getServiceOffer();
+
+        if (serviceOfferId != null && !serviceOfferId.isEmpty() && serviceOffer == null) {
+            serviceOffer = ServiceOffersUtil.getServiceOffer(getServiceOffer());
+        }
+
+        if (serviceOffer == null) {
+            return null;
+        }
+
+        Integer cpu = parseInt(getServiceOfferAttributeOrNull(serviceOffer, ServiceOffersUtil.cpuAttributeName));
+        Float ram = parseFloat(getServiceOfferAttributeOrNull(serviceOffer, ServiceOffersUtil.ramAttributeName));
+        Integer disk = parseInt(getServiceOfferAttributeOrNull(serviceOffer, ServiceOffersUtil.diskAttributeName));
+        String instanceType = getServiceOfferAttributeOrNull(serviceOffer, ServiceOffersUtil.instanceTypeAttributeName);
+
+        return new AccountingRecordVM(cpu, ram, disk, instanceType);
+    }
+
+    private Integer parseInt(String number) {
+        return (number == null) ? null : Integer.parseInt(number);
+    }
+
+    private Float parseFloat(String number) {
+        return (number == null) ? null : Float.parseFloat(number);
     }
 
     public String getRealm() {
         //FIXME
-        return "my-realm";
+        return null;
     }
 
     public List<String> getGroups() {
