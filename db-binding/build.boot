@@ -43,6 +43,14 @@
                    [ring/ring-json]
                    [superstring]
 
+                   ;;
+                   ;; This dependency is included explicitly to avoid having
+                   ;; ring/ring-json pull in an old version of ring-core that
+                   ;; conflicts with the more recent one.
+                   ;; 
+                   [ring/ring-core]
+
+
                    ;; boot tasks
                    [boot-environ]
                    [adzerk/boot-test]
