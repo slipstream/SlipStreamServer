@@ -22,7 +22,7 @@ import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
 import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
 
-import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttributeOrNull;
+import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttributeAsStringOrNull;
 
 /*
  * +=================================================================+
@@ -121,10 +121,10 @@ public class AccountingRecordHelper {
             return null;
         }
 
-        Integer cpu = parseInt(getServiceOfferAttributeOrNull(serviceOffer, ServiceOffersUtil.cpuAttributeName));
-        Float ram = parseFloat(getServiceOfferAttributeOrNull(serviceOffer, ServiceOffersUtil.ramAttributeName));
-        Integer disk = parseInt(getServiceOfferAttributeOrNull(serviceOffer, ServiceOffersUtil.diskAttributeName));
-        String instanceType = getServiceOfferAttributeOrNull(serviceOffer, ServiceOffersUtil.instanceTypeAttributeName);
+        Integer cpu = parseInt(getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.cpuAttributeName));
+        Float ram = parseFloat(getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.ramAttributeName));
+        Integer disk = parseInt(getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.diskAttributeName));
+        String instanceType = getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.instanceTypeAttributeName);
 
         return new AccountingRecordVM(cpu, ram, disk, instanceType);
     }
