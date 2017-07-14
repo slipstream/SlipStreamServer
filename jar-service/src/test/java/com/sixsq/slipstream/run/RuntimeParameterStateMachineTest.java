@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +52,8 @@ public class RuntimeParameterStateMachineTest extends
 
 		createUser();
 		CommonTestUtil.addSshKeys(user);
+
+		SscljProxy.muteForTests();
 	}
 
 	@After
@@ -59,8 +62,7 @@ public class RuntimeParameterStateMachineTest extends
 	}
 
 	@Test
-	public void completeCurrentState() throws FileNotFoundException,
-			IOException, SlipStreamException {
+	public void completeCurrentState() throws IOException, SlipStreamException {
 		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);
 		run = run.store();
 

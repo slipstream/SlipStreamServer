@@ -62,6 +62,7 @@ public class SscljProxy {
 
     private static final Logger logger = Logger.getLogger(SscljProxy.class.getName());
 
+    private static boolean isMuted = false;
 
     public static Response get(String resource, String username) {
         return request(Method.GET, resource, null, username, null, null, null);
@@ -102,6 +103,10 @@ public class SscljProxy {
     private static Response request(Method method, String resource, Object obj, String username,
                                           Iterable<Parameter> queryParameters, MediaType mediaType,
                                           Boolean throwExceptions) {
+        if (isMuted) {
+            return null;
+        }
+
         ClientResource client = null;
         Response response = null;
         Representation responseEntity = null;
@@ -254,6 +259,11 @@ public class SscljProxy {
                 throw new JsonParseException(e);
             }
         }
+    }
+
+    public static void muteForTests() {
+        isMuted = true;
+        logger.severe("You should NOT see this message in production: request to SSCLJ won't be made");
     }
 
 }

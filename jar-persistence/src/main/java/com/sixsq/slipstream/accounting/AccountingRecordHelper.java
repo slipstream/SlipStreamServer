@@ -97,7 +97,10 @@ public class AccountingRecordHelper {
         return ModuleUriUtil.extractModuleNameFromResourceUri(run.getModuleResourceUrl());
     }
 
-
+    /**
+     *
+     * @return the service offer id , e.g service-offer/35219a83-ee7f-41ac-b006-291d35504931
+     */
     public String getServiceOffer() {
         String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.SERVICE_OFFER);
         return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
@@ -118,7 +121,7 @@ public class AccountingRecordHelper {
         }
 
         if (serviceOffer == null) {
-            return null;
+            return new AccountingRecordVM(null,  null, null, null);
         }
 
         Integer cpu = parseInt(getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.cpuAttributeName));
@@ -162,6 +165,8 @@ public class AccountingRecordHelper {
             resource = AccountingRecord.ACCOUNTING_RECORD_RESOURCE + "?" + URLEncoder.encode(cimiQuery, "UTF-8");
             Response res = SscljProxy.get(resource, username);
 
+            if (res == null) return null;
+
             AccountingRecords records = AccountingRecords.fromJson(res.getEntityAsText());
 
             if (records == null) return null;
@@ -203,7 +208,7 @@ public class AccountingRecordHelper {
 
         ACL acl = helper.getACL();
 
-        //FIXME : how would the Accounting record type be different from vm ?
+        //FIXME : get type from service offer (resource:type) , only VM at the moment
         AccountingRecord.AccountingRecordType type = AccountingRecord.AccountingRecordType.vm;
 
         String identifier = helper.getIdentifier();
