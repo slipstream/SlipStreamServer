@@ -112,7 +112,12 @@
   (su/regex-string #"[a-zA-Z0-9/\.:_-]" #"^[a-zA-Z0-9]+[a-zA-Z0-9/\.:_-]*$"))
 
 (s/def :cimi.acl/type #{"USER" "ROLE"})
-(s/def :cimi.acl/right #{"ALL" "VIEW" "MODIFY"})
+(s/def :cimi.acl/right #{"VIEW" "MODIFY"                    ;; LEGACY RIGHTS
+                         "ALL"
+                         "VIEW_ACL" "VIEW_DATA" "VIEW_META"
+                         "EDIT_ACL" "EDIT_DATA" "EDIT_META"
+                         "DELETE"
+                         "MANAGE"})
 
 (s/def :cimi.acl/owner (su/only-keys :req-un [:cimi.acl/principal
                                               :cimi.acl/type]))
