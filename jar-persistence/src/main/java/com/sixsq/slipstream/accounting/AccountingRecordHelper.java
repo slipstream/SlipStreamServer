@@ -48,6 +48,7 @@ public class AccountingRecordHelper {
     private String nodeInstanceName;
     private JsonObject serviceOffer;
 
+
     public AccountingRecordHelper(Run run, String nodeInstanceName) {
         this.run = run;
         this.nodeInstanceName = nodeInstanceName;
@@ -101,9 +102,13 @@ public class AccountingRecordHelper {
      *
      * @return the service offer id , e.g service-offer/35219a83-ee7f-41ac-b006-291d35504931
      */
-    public String getServiceOffer() {
+    private String getServiceOffer() {
         String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.SERVICE_OFFER);
         return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
+    }
+
+    public ServiceOfferRef getServiceOfferRef(){
+        return new ServiceOfferRef(getServiceOffer());
     }
 
     /**
@@ -220,7 +225,7 @@ public class AccountingRecordHelper {
         List<String> groups = helper.getGroups();
         String realm = helper.getRealm();
         String module = helper.getModuleName();
-        String serviceOfferRef = helper.getServiceOffer();
+        ServiceOfferRef serviceOfferRef = helper.getServiceOfferRef();
         AccountingRecordVM vmData = helper.getVmData();
 
         AccountingRecord accountingRecord = new AccountingRecord(acl, type, identifier, new Date(), null, username, cloud, roles, groups, realm,

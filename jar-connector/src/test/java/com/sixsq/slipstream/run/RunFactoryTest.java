@@ -588,7 +588,7 @@ public class RunFactoryTest extends RunTest {
 			"        \"type\" : \"ROLE\"\n" +
 			"      } ]\n" +
 			"    },\n" +
-			"    \"resourceURI\" : \"http://sixsq.com/slipstream/1/ServiceOffer\",\n" +
+			"    \"resourceURI\" : \"http://sixsq.com/slipstream/1/ServiceOfferRef\",\n" +
 			"    \"resource:disk\" : 200,\n" +
 			"    \"resource:type\" : \"VM\"\n" +
 			"  }";

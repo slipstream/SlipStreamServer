@@ -21,6 +21,15 @@ public class AccountingRecord {
     @SuppressWarnings("unused")
     private Date updated;
 
+
+    /**
+     * to be Used only in unit tests
+     * @param d
+     */
+    public void setUpdated(Date d){
+        updated = d;
+    }
+
     @SuppressWarnings("unused")
     private AccountingRecordType type;
 
@@ -65,7 +74,7 @@ public class AccountingRecord {
     private String module;
 
     @SuppressWarnings("unused")
-    private String serviceOfferRef;
+    private ServiceOfferRef serviceOffer;
 
     //Record Type VM
     @SuppressWarnings("unused")
@@ -92,7 +101,7 @@ public class AccountingRecord {
 
 
     public AccountingRecord(ACL acl, AccountingRecordType type, String identifier, Date start, Date stop, String user, String cloud, List<String> roles, List<String> groups,
-                            String realm, String module, String serviceOfferRef, Integer cpu, Float ram, Integer disk, String instanceType) {
+                            String realm, String module, ServiceOfferRef serviceOfferRef, Integer cpu, Float ram, Integer disk, String instanceType) {
         this.acl = acl;
         this.resourceURI = ACCOUNTING_RECORD_URI;
         this.created = start;
@@ -107,7 +116,7 @@ public class AccountingRecord {
         this.groups = groups;
         this.realm = realm;
         this.module = module;
-        this.serviceOfferRef = serviceOfferRef;
+        this.serviceOffer = serviceOfferRef;
         this.cpu = cpu;
         this.ram = ram;
         this.disk = disk;

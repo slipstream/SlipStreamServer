@@ -4,12 +4,18 @@ import com.sixsq.slipstream.event.ACL;
 import com.sixsq.slipstream.event.TypePrincipal;
 import com.sixsq.slipstream.event.TypePrincipalRight;
 
+import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+
+import static org.junit.Assert.fail;
 
 /*
  * +=================================================================+
@@ -89,7 +95,7 @@ public class AccountingRecordsTest {
         ACL acl = new ACL(owner, rules);
 
         AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "12313/nodename", new Date(), new Date(), "user", "cloudname",
-                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", "serviceOffer", 1, 64F, 1024, "instanceType");
+                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", new ServiceOfferRef("serviceOffer"), 1, 64F, 1024, "instanceType");
 
         Assert.assertNotNull(ar.toJson());
     }
@@ -102,9 +108,118 @@ public class AccountingRecordsTest {
         ACL acl = new ACL(owner, rules);
 
         AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "12313/nodename", startDate, stopDate, "user", "cloudname",
-                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", "serviceOffer", 1, 64F, 1024, "instanceType");
+                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", new ServiceOfferRef("serviceOffer/638768-768876-878668778"), 1, 64F, 1024, "instanceType");
 
         return ar;
+    }
+
+    @Test
+    public void validJsonServiceOfferRef(){
+
+        Date today = new Date();
+        SimpleDateFormat jsonDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        jsonDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String sToday = jsonDateFormat.format(today);
+        AccountingRecord ar = createAccoutingRecord(today, null);
+
+        //trick to get a fixed timestamp
+        ar.setUpdated(today);
+
+        String json  = ar.toJson();
+
+        String jsonWithoutServiceOffer = "{\n" +
+                "  \"acl\": {\n" +
+                "    \"owner\": {\n" +
+                "      \"type\": \"USER\",\n" +
+                "      \"principal\": \"joe\"\n" +
+                "    },\n" +
+                "    \"rules\": [\n" +
+                "      {\n" +
+                "        \"right\": \"ALL\",\n" +
+                "        \"type\": \"ROLE\",\n" +
+                "        \"principal\": \"ANON\"\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  \"resourceURI\": \"http://sixsq.com/slipstream/1/AccountingRecord\",\n" +
+                "  \"created\": \""+ sToday +"\",\n" +
+                "  \"updated\": \""+ sToday +"\",\n" +
+                "  \"type\": \"vm\",\n" +
+                "  \"identifier\": \"12313/nodename\",\n" +
+                "  \"start\": \""+ sToday +"\",\n" +
+                "  \"user\": \"user\",\n" +
+                "  \"cloud\": \"cloudname\",\n" +
+                "  \"roles\": [\n" +
+                "    \"role1\",\n" +
+                "    \"role2\"\n" +
+                "  ],\n" +
+                "  \"groups\": [\n" +
+                "    \"group1\",\n" +
+                "    \"group2\"\n" +
+                "  ],\n" +
+                "  \"realm\": \"realm\",\n" +
+                "  \"module\": \"module\",\n" +
+                /* This JSON is explicitly wrong be it doesn't contain serviceOffer info */
+
+                //"  \"serviceOffer\": {\n" +
+                //"    \"href\": \"serviceOffer/638768-768876-878668778\"\n" +
+                //"  },\n" +
+                "  \"cpu\": 1,\n" +
+                "  \"ram\": 64.0,\n" +
+                "  \"disk\": 1024,\n" +
+                "  \"instanceType\": \"instanceType\"\n" +
+                "}";
+
+        String expectedJSONString = "{\n" +
+                "  \"acl\": {\n" +
+                "    \"owner\": {\n" +
+                "      \"type\": \"USER\",\n" +
+                "      \"principal\": \"joe\"\n" +
+                "    },\n" +
+                "    \"rules\": [\n" +
+                "      {\n" +
+                "        \"right\": \"ALL\",\n" +
+                "        \"type\": \"ROLE\",\n" +
+                "        \"principal\": \"ANON\"\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  \"resourceURI\": \"http://sixsq.com/slipstream/1/AccountingRecord\",\n" +
+                "  \"created\": \""+ sToday +"\",\n" +
+                "  \"updated\": \""+ sToday +"\",\n" +
+                "  \"type\": \"vm\",\n" +
+                "  \"identifier\": \"12313/nodename\",\n" +
+                "  \"start\": \""+ sToday +"\",\n" +
+                "  \"user\": \"user\",\n" +
+                "  \"cloud\": \"cloudname\",\n" +
+                "  \"roles\": [\n" +
+                "    \"role1\",\n" +
+                "    \"role2\"\n" +
+                "  ],\n" +
+                "  \"groups\": [\n" +
+                "    \"group1\",\n" +
+                "    \"group2\"\n" +
+                "  ],\n" +
+                "  \"realm\": \"realm\",\n" +
+                "  \"module\": \"module\",\n" +
+                "  \"serviceOffer\": {\n" +
+                "    \"href\": \"serviceOffer/638768-768876-878668778\"\n" +
+                "  },\n" +
+                "  \"cpu\": 1,\n" +
+                "  \"ram\": 64.0,\n" +
+                "  \"disk\": 1024,\n" +
+                "  \"instanceType\": \"instanceType\"\n" +
+                "}";
+
+
+
+        try {
+            JSONAssert.assertEquals(expectedJSONString, json, true);
+            JSONAssert.assertNotEquals(jsonWithoutServiceOffer, json, true);
+
+        } catch (JSONException e) {
+            fail();
+        }
     }
 
 
@@ -216,7 +331,8 @@ public class AccountingRecordsTest {
                 "            ],\n" +
                 "            \"resourceURI\": \"http://sixsq.com/slipstream/1/AccountingRecord\",\n" +
                 "            \"user\": \"user\",\n" +
-                "            \"cpu\": 1\n" +
+                "            \"cpu\": 1,\n" +
+                "            \"serviceOffer\": {\"href\" : \"service-offer/35219a83-ee7f-41ac-b006-291d35504931\" } \n" +
                 "        }\n" +
                 "    ],\n" +
                 "    \"count\": 1\n" +
