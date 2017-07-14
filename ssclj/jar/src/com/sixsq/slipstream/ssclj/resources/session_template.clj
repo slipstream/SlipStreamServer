@@ -85,13 +85,20 @@
                         :mandatory   true
                         :readOnly    true
                         :order       1}
+          :group       {:displayName "Authentication Group"
+                        :category    "general"
+                        :description "optional label to group authentication methods"
+                        :type        "string"
+                        :mandatory   false
+                        :readOnly    false
+                        :order       2}
           :redirectURI {:displayName "Redirect URI"
                         :category    "general"
                         :description "optional redirect URI to be used on success"
                         :type        "hidden"
                         :mandatory   false
                         :readOnly    false
-                        :order       2}}))
+                        :order       3}}))
 ;;
 ;; multimethods for validation
 ;;
