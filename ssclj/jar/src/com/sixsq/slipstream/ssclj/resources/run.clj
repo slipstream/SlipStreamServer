@@ -1,7 +1,7 @@
-(ns com.sixsq.slipstream.ssclj.resources.run-parameter
+(ns com.sixsq.slipstream.ssclj.resources.run
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.run-parameter]
+    [com.sixsq.slipstream.ssclj.resources.spec.run]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -18,13 +18,13 @@
     )
   (:import (clojure.lang ExceptionInfo)))
 
-(def ^:const resource-name "RunParameter")
+(def ^:const resource-name "Run")
 
 (def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "RunParameterCollection")
+(def ^:const collection-name "RunCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
