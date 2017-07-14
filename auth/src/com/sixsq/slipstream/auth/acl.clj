@@ -1,20 +1,43 @@
 ;; old namespace: com.sixsq.slipstream.ssclj.resources.common.authz
 (ns com.sixsq.slipstream.auth.acl
   (:require
-   [ring.util.response :as r]
-   [com.sixsq.slipstream.util.response :as ru]
-   [com.sixsq.slipstream.util.convert :as cu]))
+    [ring.util.response :as r]
+    [com.sixsq.slipstream.util.response :as ru]
+    [com.sixsq.slipstream.util.convert :as cu]
+    [clojure.string :as str]))
 
-(derive ::modify ::view)
-(derive ::all ::modify)
+(def rights-hierarchy (-> (make-hierarchy)
+                          (derive ::all ::manage)
+                          (derive ::all ::delete)
+                          (derive ::all ::edit-acl)
+                          (derive ::all ::view-acl)
+
+                          (derive ::edit-acl ::edit-data)
+                          (derive ::edit-acl ::view-acl)
+
+                          (derive ::edit-data ::edit-meta)
+                          (derive ::edit-data ::view-data)
+
+                          (derive ::edit-meta ::view-meta)
+
+                          (derive ::view-acl ::view-data)
+                          (derive ::view-data ::view-meta)
+
+                          ;; compatibility with old rights names
+                          (derive ::all ::modify)
+                          (derive ::modify ::view)
+                          (derive ::modify ::delete)
+                          (derive ::modify ::edit-acl)
+                          (derive ::view ::view-acl)))
+
+(defn- add-rights-entry
+  [m kw]
+  (-> m
+      (assoc kw kw)
+      (assoc (-> kw name str/upper-case (str/replace "-" "_")) kw)))
 
 (def rights-keywords
-  {"VIEW"   ::view
-   "MODIFY" ::modify
-   "ALL"    ::all
-   ::view   ::view
-   ::modify ::modify
-   ::all    ::all})
+  (reduce add-rights-entry {} (cons ::all (ancestors rights-hierarchy ::all))))
 
 (def admin-rule
   {:principal "ADMIN"
@@ -58,7 +81,7 @@
                  (current-authentication request)
                  (cu/walk-clojurify (:acl resource)))
         action (get rights-keywords action)]
-    (some #(isa? % action) rights)))
+    (some #(isa? rights-hierarchy % action) rights)))
 
 (defn can-do?
   "Determines if the ACL associated with the given resource permits the
