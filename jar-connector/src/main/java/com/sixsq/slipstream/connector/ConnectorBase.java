@@ -20,7 +20,6 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.cookie.CookieUtils;
@@ -29,6 +28,7 @@ import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.run.RuntimeParameterMediator;
 import com.sixsq.slipstream.util.FileUtil;
+import com.sixsq.slipstream.util.ServiceOffersUtil;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -571,21 +571,14 @@ public abstract class ConnectorBase implements Connector {
         return Parameter.constructKey(getConnectorInstanceName(), parameterName);
     }
 
-    protected String getAttributeValueFromServiceOffer(JsonObject serviceOffer, String serviceOfferAttributeName,
+    protected static String getAttributeValueFromServiceOffer(JsonObject serviceOffer, String serviceOfferAttributeName,
                                                      String nodeInstanceName) throws ValidationException
     {
-        JsonElement serviceOfferAttribute = serviceOffer.get(serviceOfferAttributeName);
-        if (serviceOfferAttribute == null) {
-            String serviceOfferId = "Unknown";
-            try {
-                serviceOfferId = serviceOffer.get("id").getAsString();
-            } catch (Exception ignored) {}
-            throw new ValidationException("Failed to find the attribute '" + serviceOfferAttributeName +
-                    "' in the service offer '" + serviceOfferId +
-                    "' for the node instance '" + nodeInstanceName + "'");
+        try {
+            return ServiceOffersUtil.getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName);
+        } catch (ValidationException e) {
+            throw new ValidationException(e.getMessage() + " for the node instance '" + nodeInstanceName + "'");
         }
-
-        return serviceOfferAttribute.getAsString();
     }
 
     protected void setRuntimeParameterValueWithCheck(Run run, String parameterName, String nodeInstanceName,
@@ -602,9 +595,9 @@ public abstract class ConnectorBase implements Connector {
                                                             String parameterName, String serviceOfferAttributeName)
             throws ValidationException
     {
-        String serviceOfferAttributeValue = this.getAttributeValueFromServiceOffer(serviceOffer,
+        String serviceOfferAttributeValue = getAttributeValueFromServiceOffer(serviceOffer,
                 serviceOfferAttributeName, nodeInstanceName);
-        this.setRuntimeParameterValueWithCheck(run, parameterName, nodeInstanceName, serviceOfferAttributeValue);
+        setRuntimeParameterValueWithCheck(run, parameterName, nodeInstanceName, serviceOfferAttributeValue);
     }
 
     @Override
