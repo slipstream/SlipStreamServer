@@ -94,8 +94,11 @@ public class AccountingRecordsTest {
                 TypePrincipal.PrincipalType.ROLE, "ANON", TypePrincipalRight.Right.ALL));
         ACL acl = new ACL(owner, rules);
 
-        AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "12313/nodename", new Date(), new Date(), "user", "cloudname",
-                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", new ServiceOfferRef("serviceOffer"), 1, 64F, 1024, "instanceType");
+        AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "62573654-48736487-846746", new Date(), new Date(), "user", "cloudname",
+                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module",
+                new ServiceOfferRef("serviceOffer"),
+                new AccountingRecordContext("c9ae95f1-caee-4b5e-a3f9-727d11355146", "mynode", "60117142-7a77-4e72-9de3-93ee5f547006"),
+                1, 64F, 1024, "instanceType");
 
         Assert.assertNotNull(ar.toJson());
     }
@@ -107,14 +110,16 @@ public class AccountingRecordsTest {
                 TypePrincipal.PrincipalType.ROLE, "ANON", TypePrincipalRight.Right.ALL));
         ACL acl = new ACL(owner, rules);
 
-        AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "12313/nodename", startDate, stopDate, "user", "cloudname",
-                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module", new ServiceOfferRef("serviceOffer/638768-768876-878668778"), 1, 64F, 1024, "instanceType");
+        AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "847598349-394765-745", startDate, stopDate, "user", "cloudname",
+                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module",
+                new ServiceOfferRef("serviceOffer/638768-768876-878668778"),
+                new AccountingRecordContext("c9ae95f1-caee-4b5e-a3f9-727d11355146", "mynode", "60117142-7a77-4e72-9de3-93ee5f547006"), 1, 64F, 1024, "instanceType");
 
         return ar;
     }
 
     @Test
-    public void validJsonServiceOfferRef(){
+    public void validJsonServiceOfferRef() {
 
         Date today = new Date();
         SimpleDateFormat jsonDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -125,7 +130,7 @@ public class AccountingRecordsTest {
         //trick to get a fixed timestamp
         ar.setUpdated(today);
 
-        String json  = ar.toJson();
+        String json = ar.toJson();
 
         String jsonWithoutServiceOffer = "{\n" +
                 "  \"acl\": {\n" +
@@ -142,11 +147,11 @@ public class AccountingRecordsTest {
                 "    ]\n" +
                 "  },\n" +
                 "  \"resourceURI\": \"http://sixsq.com/slipstream/1/AccountingRecord\",\n" +
-                "  \"created\": \""+ sToday +"\",\n" +
-                "  \"updated\": \""+ sToday +"\",\n" +
+                "  \"created\": \"" + sToday + "\",\n" +
+                "  \"updated\": \"" + sToday + "\",\n" +
                 "  \"type\": \"vm\",\n" +
                 "  \"identifier\": \"12313/nodename\",\n" +
-                "  \"start\": \""+ sToday +"\",\n" +
+                "  \"start\": \"" + sToday + "\",\n" +
                 "  \"user\": \"user\",\n" +
                 "  \"cloud\": \"cloudname\",\n" +
                 "  \"roles\": [\n" +
@@ -185,11 +190,11 @@ public class AccountingRecordsTest {
                 "    ]\n" +
                 "  },\n" +
                 "  \"resourceURI\": \"http://sixsq.com/slipstream/1/AccountingRecord\",\n" +
-                "  \"created\": \""+ sToday +"\",\n" +
-                "  \"updated\": \""+ sToday +"\",\n" +
+                "  \"created\": \"" + sToday + "\",\n" +
+                "  \"updated\": \"" + sToday + "\",\n" +
                 "  \"type\": \"vm\",\n" +
-                "  \"identifier\": \"12313/nodename\",\n" +
-                "  \"start\": \""+ sToday +"\",\n" +
+                "  \"identifier\": \"847598349-394765-745\",\n" +
+                "  \"start\": \"" + sToday + "\",\n" +
                 "  \"user\": \"user\",\n" +
                 "  \"cloud\": \"cloudname\",\n" +
                 "  \"roles\": [\n" +
@@ -205,12 +210,16 @@ public class AccountingRecordsTest {
                 "  \"serviceOffer\": {\n" +
                 "    \"href\": \"serviceOffer/638768-768876-878668778\"\n" +
                 "  },\n" +
+                "  \"context\": {\n" +
+                "    \"instanceId\": \"c9ae95f1-caee-4b5e-a3f9-727d11355146\",\n" +
+                "    \"nodeName\": \"mynode\",\n" +
+                "    \"runId\": \"60117142-7a77-4e72-9de3-93ee5f547006\"\n" +
+                "  },\n" +
                 "  \"cpu\": 1,\n" +
                 "  \"ram\": 64.0,\n" +
                 "  \"disk\": 1024,\n" +
                 "  \"instanceType\": \"instanceType\"\n" +
                 "}";
-
 
 
         try {

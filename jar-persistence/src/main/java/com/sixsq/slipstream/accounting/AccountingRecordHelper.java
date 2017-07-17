@@ -107,6 +107,11 @@ public class AccountingRecordHelper {
         return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
     }
 
+    private String getInstanceId() {
+        String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.INSTANCE_ID_KEY);
+        return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
+    }
+
     public ServiceOfferRef getServiceOfferRef(){
         return new ServiceOfferRef(getServiceOffer());
     }
@@ -135,6 +140,14 @@ public class AccountingRecordHelper {
         String instanceType = getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.instanceTypeAttributeName);
 
         return new AccountingRecordVM(cpu, ram, disk, instanceType);
+    }
+
+    public AccountingRecordContext getContext() {
+        String instanceId = this.getInstanceId();
+        String nodeName = RuntimeParameter.extractNodeNamePart(this.getNodeInstanceName());
+        String runId = this.getRun().getUuid();
+
+        return new AccountingRecordContext(instanceId, nodeName, runId);
     }
 
     private Integer parseInt(String number) {
@@ -226,10 +239,11 @@ public class AccountingRecordHelper {
         String realm = helper.getRealm();
         String module = helper.getModuleName();
         ServiceOfferRef serviceOfferRef = helper.getServiceOfferRef();
+        AccountingRecordContext context = helper.getContext();
         AccountingRecordVM vmData = helper.getVmData();
 
         AccountingRecord accountingRecord = new AccountingRecord(acl, type, identifier, new Date(), null, username, cloud, roles, groups, realm,
-                module, serviceOfferRef, vmData.getCpu(), vmData.getRam(), vmData.getDisk(), vmData.getInstanceType());
+                module, serviceOfferRef, context, vmData.getCpu(), vmData.getRam(), vmData.getDisk(), vmData.getInstanceType());
 
 
         //Appending ' ADMIN' to get proper permissions
@@ -237,6 +251,8 @@ public class AccountingRecordHelper {
         AccountingRecord.add(accountingRecord, user);
 
     }
+
+
 
     public static void postStopAccountingRecord(Run run, String nodeInstanceName) {
 

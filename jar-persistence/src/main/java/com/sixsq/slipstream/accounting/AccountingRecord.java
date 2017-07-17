@@ -76,6 +76,9 @@ public class AccountingRecord {
     @SuppressWarnings("unused")
     private ServiceOfferRef serviceOffer;
 
+    @SuppressWarnings("unused")
+    private AccountingRecordContext context;
+
     //Record Type VM
     @SuppressWarnings("unused")
     Integer cpu;
@@ -101,7 +104,7 @@ public class AccountingRecord {
 
 
     public AccountingRecord(ACL acl, AccountingRecordType type, String identifier, Date start, Date stop, String user, String cloud, List<String> roles, List<String> groups,
-                            String realm, String module, ServiceOfferRef serviceOfferRef, Integer cpu, Float ram, Integer disk, String instanceType) {
+                            String realm, String module, ServiceOfferRef serviceOfferRef,  AccountingRecordContext context, Integer cpu, Float ram, Integer disk, String instanceType) {
         this.acl = acl;
         this.resourceURI = ACCOUNTING_RECORD_URI;
         this.created = start;
@@ -117,6 +120,7 @@ public class AccountingRecord {
         this.realm = realm;
         this.module = module;
         this.serviceOffer = serviceOfferRef;
+        this.context = context;
         this.cpu = cpu;
         this.ram = ram;
         this.disk = disk;
