@@ -67,11 +67,6 @@
         (ltu/is-status 403))
 
 
-    (def valid-acl {:owner {:principal "ADMIN"
-                            :type      "ROLE"}
-                    :rules [{:principal "ANON"
-                             :type      "ROLE"
-                             :right     "VIEW"}]})
 
 
 
@@ -81,14 +76,14 @@
                       :resourceURI  acc/resource-uri
                       :created      timestamp
                       :updated      timestamp
-                      :acl          valid-acl
+
 
                       ;; common accounting record attributes
                       :type         "obj"
                       :identifier   "my-cloud-vm-47"
                       :start        timestamp
                       :stop         timestamp
-                      :user         "some-complicated-user-id"
+                      :user         "jane"
                       :cloud        "my-cloud"
                       :roles        ["a" "b" "c"]
                       :groups       ["g1" "g2" "g3"]
@@ -121,6 +116,7 @@
       (-> session-user
           (request abs-uri)
           (ltu/body->edn)
+          (ltu/dump)
           (ltu/is-status 200)
           (ltu/is-operation-absent "delete")
           (ltu/is-operation-absent "edit"))
@@ -139,7 +135,6 @@
                    :request-method :put
                    :body (json/write-str (assoc create-req :id id) ))
           (ltu/body->edn)
-          (ltu/dump)
           (ltu/is-status 200))
 
       (-> session-user
@@ -147,7 +142,6 @@
                    :request-method :put
                    :body (json/write-str (assoc create-req :id id) ))
           (ltu/body->edn)
-          (ltu/dump)
           (ltu/is-status 403))
 
       (-> session-user

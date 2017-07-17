@@ -15,6 +15,13 @@
 (s/def :cimi.accounting-record/module :cimi.core/nonblank-string)
 (s/def :cimi.accounting-record/serviceOffer :cimi.common/resource-link)
 
+(s/def :cimi.accounting-record/instanceId :cimi.core/identifier)
+(s/def :cimi.accounting-record/nodeName :cimi.core/nonblank-string)
+(s/def :cimi.accounting-record/runId :cimi.core/identifier)
+
+
+(s/def :cimi.accounting-record/context (su/constrained-map keyword? :cimi.core/nonblank-string))
+
 (s/def :cimi.accounting-record/type :cimi.core/identifier)
 
 (def account-keys-specs {:req-un [:cimi.accounting-record/identifier
@@ -28,6 +35,7 @@
                                   :cimi.accounting-record/roles
                                   :cimi.accounting-record/groups
                                   :cimi.accounting-record/realm
+                                  :cimi.accounting-record/context
                                   :cimi.accounting-record/module]})
 
 (def accounting-record-keys-spec (su/merge-keys-specs [c/common-attrs

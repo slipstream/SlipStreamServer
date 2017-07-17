@@ -93,7 +93,7 @@
 
                                 ;; common accounting record attributes
                                 :type         "vm"
-                                :identifier   "my-cloud-vm-47"
+                                :identifier   "768868-7678-8787"
                                 :start        timestamp
                                 :stop         timestamp
                                 :user         "jane"
@@ -103,11 +103,16 @@
                                 :realm        "my-organization"
                                 :module       "module/example/images/centos-7"
                                 :serviceOffer {:href "service-offer/my-uuid"}
+                                :context {:runId "374376-8674876-764764"
+                                          :instanceId "2876346-386376-387"
+                                          :nodeName "machine"}
 
                                 ;; vm subtype
                                 :cpu          1
                                 :ram          1024
-                                :disk         10}
+                                :disk         10
+                                :instanceType "Medium"
+                                }
                     create-priv-req (assoc create-req :user "janet")
                     create-other-req (assoc create-req :user "karen" :realm "a-different-organization")
                     resp (-> session-admin
