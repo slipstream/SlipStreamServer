@@ -12,11 +12,12 @@
 (s/def :cimi.accounting-record-vm/instanceType :cimi.core/nonblank-string)
 
 (def accounting-keys-vm-specs
-  {:req-un [:cimi.accounting-record-vm/cpu
+  {:opt-un [:cimi.accounting-record-vm/cpu
             :cimi.accounting-record-vm/ram
+            :cimi.accounting-record-vm/disk
             :cimi.accounting-record-vm/instanceType
             ]
-   :opt-un [:cimi.accounting-record-vm/disk]})
+   })
 
 (s/def :cimi/accounting-record.vm
   (su/only-keys-maps acc/accounting-record-keys-spec

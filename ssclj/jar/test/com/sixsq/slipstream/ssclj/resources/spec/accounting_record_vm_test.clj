@@ -46,7 +46,7 @@
                          false? (assoc accounting-record :context {:abc 2})
                          false? (assoc accounting-record :context {:def {}})
                          )
-    (doseq [k #{:cpu :ram :instanceType}]
+    #_(doseq [k #{}]
       (is (not (s/valid? :cimi/accounting-record.vm (dissoc accounting-record k)))))
     (doseq [k #{:disk}]
       (is (s/valid? :cimi/accounting-record.vm (dissoc accounting-record k))))
