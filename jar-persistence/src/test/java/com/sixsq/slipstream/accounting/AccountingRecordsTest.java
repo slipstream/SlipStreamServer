@@ -83,7 +83,7 @@ public class AccountingRecordsTest {
 
         AccountingRecord ar = ars.getAccountingRecords().get(0);
 
-        Assert.assertEquals("mycloud-myvm-42", ar.getIdentifier());
+        Assert.assertEquals("mynode", ar.getContext().getNodeName());
         Assert.assertEquals(1024, ar.getDisk());
     }
 
@@ -94,12 +94,7 @@ public class AccountingRecordsTest {
                 TypePrincipal.PrincipalType.ROLE, "ANON", TypePrincipalRight.Right.ALL));
         ACL acl = new ACL(owner, rules);
 
-        AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "62573654-48736487-846746", new Date(), new Date(), "user", "cloudname",
-                Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module",
-                new ServiceOfferRef("serviceOffer"),
-                new AccountingRecordContext("c9ae95f1-caee-4b5e-a3f9-727d11355146", "mynode", "60117142-7a77-4e72-9de3-93ee5f547006"),
-                1, 64F, 1024, "instanceType");
-
+        AccountingRecord ar = createAccoutingRecord(new Date(), new Date());
         Assert.assertNotNull(ar.toJson());
     }
 
@@ -110,7 +105,7 @@ public class AccountingRecordsTest {
                 TypePrincipal.PrincipalType.ROLE, "ANON", TypePrincipalRight.Right.ALL));
         ACL acl = new ACL(owner, rules);
 
-        AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm, "847598349-394765-745", startDate, stopDate, "user", "cloudname",
+        AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm,  startDate, stopDate, "user", "cloudname",
                 Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module",
                 new ServiceOfferRef("serviceOffer/638768-768876-878668778"),
                 new AccountingRecordContext("c9ae95f1-caee-4b5e-a3f9-727d11355146", "mynode", "60117142-7a77-4e72-9de3-93ee5f547006"), 1, 64F, 1024, "instanceType");
@@ -150,7 +145,6 @@ public class AccountingRecordsTest {
                 "  \"created\": \"" + sToday + "\",\n" +
                 "  \"updated\": \"" + sToday + "\",\n" +
                 "  \"type\": \"vm\",\n" +
-                "  \"identifier\": \"12313/nodename\",\n" +
                 "  \"start\": \"" + sToday + "\",\n" +
                 "  \"user\": \"user\",\n" +
                 "  \"cloud\": \"cloudname\",\n" +
@@ -193,7 +187,6 @@ public class AccountingRecordsTest {
                 "  \"created\": \"" + sToday + "\",\n" +
                 "  \"updated\": \"" + sToday + "\",\n" +
                 "  \"type\": \"vm\",\n" +
-                "  \"identifier\": \"847598349-394765-745\",\n" +
                 "  \"start\": \"" + sToday + "\",\n" +
                 "  \"user\": \"user\",\n" +
                 "  \"cloud\": \"cloudname\",\n" +
@@ -304,7 +297,6 @@ public class AccountingRecordsTest {
                 "            \"ram\": 64,\n" +
                 "            \"module\": \"FIXME\",\n" +
                 "            \"id\": \"accounting-record/85c68ea2-1569-4112-b881-88a5f0cfe801\",\n" +
-                "            \"identifier\": \"mycloud-myvm-42\",\n" +
                 "            \"acl\": {\n" +
                 "                \"owner\": {\n" +
                 "                    \"principal\": \"ADMIN\",\n" +
@@ -341,7 +333,12 @@ public class AccountingRecordsTest {
                 "            \"resourceURI\": \"http://sixsq.com/slipstream/1/AccountingRecord\",\n" +
                 "            \"user\": \"user\",\n" +
                 "            \"cpu\": 1,\n" +
-                "            \"serviceOffer\": {\"href\" : \"service-offer/35219a83-ee7f-41ac-b006-291d35504931\" } \n" +
+                "            \"serviceOffer\": {\"href\" : \"service-offer/35219a83-ee7f-41ac-b006-291d35504931\" },\n" +
+                "             \"context\": {\n" +
+                "                               \"instanceId\": \"c9ae95f1-caee-4b5e-a3f9-727d11355146\",\n" +
+                "                               \"nodeName\": \"mynode\",\n" +
+                "                               \"runId\": \"60117142-7a77-4e72-9de3-93ee5f547006\"\n" +
+                "                          }\n" +
                 "        }\n" +
                 "    ],\n" +
                 "    \"count\": 1\n" +

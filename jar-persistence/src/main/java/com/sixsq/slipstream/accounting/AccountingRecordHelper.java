@@ -16,6 +16,7 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
@@ -79,17 +80,13 @@ public class AccountingRecordHelper {
 
     }
 
-    public String getIdentifier() {
-        return run.getUuid() + "/" + nodeInstanceName;
-    }
-
 
     public String getCloudName() {
         String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME);
         return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
     }
 
-    public String getUser()  {
+    public String getUser() {
         return run.getUser();
 
     }
@@ -99,7 +96,6 @@ public class AccountingRecordHelper {
     }
 
     /**
-     *
      * @return the service offer id , e.g service-offer/35219a83-ee7f-41ac-b006-291d35504931
      */
     private String getServiceOffer() {
@@ -112,8 +108,13 @@ public class AccountingRecordHelper {
         return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
     }
 
-    public ServiceOfferRef getServiceOfferRef(){
-        return new ServiceOfferRef(getServiceOffer());
+    public ServiceOfferRef getServiceOfferRef() {
+        if (getServiceOffer() != null) {
+            return new ServiceOfferRef(getServiceOffer());
+        }
+
+        //No service offer
+        return null;
     }
 
     /**
@@ -131,7 +132,7 @@ public class AccountingRecordHelper {
         }
 
         if (serviceOffer == null) {
-            return new AccountingRecordVM(null,  null, null, null);
+            return new AccountingRecordVM(null, null, null, null);
         }
 
         Integer cpu = parseInt(getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.cpuAttributeName));
@@ -174,9 +175,25 @@ public class AccountingRecordHelper {
     }
 
 
-    private static AccountingRecord getByIdentifier(String identifier, String username) {
-        //FIXME
-        String cimiQuery = "$filter=identifier='" + identifier + "'";
+    private static AccountingRecord load(AccountingRecordHelper helper) {
+
+        String username = helper.getUser();
+
+        AccountingRecordContext context = helper.getContext();
+        String instanceId = context.getInstanceId();
+        String nodeName = context.getNodeName();
+        String runId = context.getRunId();
+
+        StringBuffer sb = new StringBuffer("$filter=context/instanceId='").append(instanceId).append("'");
+        if (nodeName != null) {
+            sb.append("&context/nodeName='").append(nodeName).append("'");
+        }
+
+        if (runId != null) {
+            sb.append("&context/runId='").append(runId).append("'");
+        }
+
+        String cimiQuery = sb.toString();
 
         String resource = null;
         try {
@@ -213,6 +230,7 @@ public class AccountingRecordHelper {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
@@ -229,7 +247,7 @@ public class AccountingRecordHelper {
         //FIXME : get type from service offer (resource:type) , only VM at the moment
         AccountingRecord.AccountingRecordType type = AccountingRecord.AccountingRecordType.vm;
 
-        String identifier = helper.getIdentifier();
+
         String username = helper.getUser();
 
         String cloud = helper.getCloudName();
@@ -242,7 +260,7 @@ public class AccountingRecordHelper {
         AccountingRecordContext context = helper.getContext();
         AccountingRecordVM vmData = helper.getVmData();
 
-        AccountingRecord accountingRecord = new AccountingRecord(acl, type, identifier, new Date(), null, username, cloud, roles, groups, realm,
+        AccountingRecord accountingRecord = new AccountingRecord(acl, type, new Date(), null, username, cloud, roles, groups, realm,
                 module, serviceOfferRef, context, vmData.getCpu(), vmData.getRam(), vmData.getDisk(), vmData.getInstanceType());
 
 
@@ -253,7 +271,6 @@ public class AccountingRecordHelper {
     }
 
 
-
     public static void postStopAccountingRecord(Run run, String nodeInstanceName) {
 
         if (isMuted) {
@@ -261,21 +278,12 @@ public class AccountingRecordHelper {
         }
 
         AccountingRecordHelper helper = new AccountingRecordHelper(run, nodeInstanceName);
-        String username = helper.getUser();
-        String identifier = helper.getIdentifier();
 
-        String user = username + " ADMIN";
-        AccountingRecord ar = AccountingRecordHelper.getByIdentifier(identifier, user);
+        AccountingRecord ar = helper.load(helper);
 
-        //FIXME
-
-        if (ar == null) {
-            logger.warning("Could not find accounting record identified by " + identifier);
-            return;
-        }
 
         ar.setStop(new Date());
-        AccountingRecord.edit(ar, user);
+        AccountingRecord.edit(ar, helper.getUser() + " ADMIN");
 
     }
 

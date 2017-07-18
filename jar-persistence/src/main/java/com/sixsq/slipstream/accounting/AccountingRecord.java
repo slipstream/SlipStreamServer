@@ -33,12 +33,6 @@ public class AccountingRecord {
     @SuppressWarnings("unused")
     private AccountingRecordType type;
 
-    @SuppressWarnings("unused")
-    private String identifier;
-
-    public String getIdentifier() {
-        return identifier;
-    }
 
     @SuppressWarnings("unused")
     private Date start;
@@ -79,6 +73,10 @@ public class AccountingRecord {
     @SuppressWarnings("unused")
     private AccountingRecordContext context;
 
+    public AccountingRecordContext getContext() {
+        return context;
+    }
+
     //Record Type VM
     @SuppressWarnings("unused")
     Integer cpu;
@@ -103,14 +101,13 @@ public class AccountingRecord {
     }
 
 
-    public AccountingRecord(ACL acl, AccountingRecordType type, String identifier, Date start, Date stop, String user, String cloud, List<String> roles, List<String> groups,
+    public AccountingRecord(ACL acl, AccountingRecordType type,  Date start, Date stop, String user, String cloud, List<String> roles, List<String> groups,
                             String realm, String module, ServiceOfferRef serviceOfferRef,  AccountingRecordContext context, Integer cpu, Float ram, Integer disk, String instanceType) {
         this.acl = acl;
         this.resourceURI = ACCOUNTING_RECORD_URI;
         this.created = start;
         this.updated = new Date();
         this.type = type;
-        this.identifier = identifier;
         this.start = start;
         this.stop = stop;
         this.user = user;
