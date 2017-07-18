@@ -12,10 +12,8 @@
     [com.sixsq.slipstream.util.response :as sr]
     [com.sixsq.slipstream.db.impl :as db]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.util.sse :as sse]
     [clojure.core.async :as async]
-    [zookeeper :as zk]
-    )
+    [clj-time.core :as time])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name "Run")
@@ -35,19 +33,12 @@
                      :rules [{:principal "USER"
                               :type      "ROLE"
                               :right     "MODIFY"}]})
-(def port 2181)
 
-(defn connect
-  ([] (connect port))
-  ([port]
-   (zk/connect (str "127.0.0.1:" port))))
-
-(def client (connect))
 ;;
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/run-parameter))
+(def validate-fn (u/create-spec-validation-fn :cimi/run))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -65,43 +56,11 @@
   [request]
   (add-impl request))
 
-(def node "/hello")
-
-(defn get-data
-  "Get data, as string, from the znode"
-  [client path]
-  (String. (:data (zk/data client path))))
-
-(defn watch-fn [event-ch {:keys [event-type path :as zk-event]}]
-  (when (= event-type :NodeDataChanged)
-    (let [event {:id   (java.util.UUID/randomUUID)
-                 :name "foo"
-                 :data (get-data client path)}]
-      (async/>!! event-ch event)))
-  (zk/data client node :watcher (partial watch-fn event-ch)))
-
-(def handler
-  (sse/event-channel-handler
-    (fn [request response raise event-ch]
-      (zk/data client node :watcher (partial watch-fn event-ch)))
-    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
-
-(defn retrieve-fn
-  [resource-name]
-  (fn [{{uuid :uuid} :params :as request}]
-    (try
-      (-> (str (u/de-camelcase resource-name) "/" uuid)
-          (db/retrieve request)
-          (a/can-view? request)
-          (crud/set-operations request))
-      (catch ExceptionInfo ei
-        (ex-data ei)))))
-
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
 (defmethod crud/retrieve resource-name
   [request]
-  (handler request))
+  (retrieve-impl request))
 
 (def edit-impl (std-crud/edit-fn resource-name))
 
@@ -120,3 +79,41 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+;;
+;; override the operations method to add describe action
+;;
+
+(defmethod crud/set-operations resource-uri
+  [{:keys [id resourceURI] :as resource} request]
+  (let [href (str id "/start")]
+    (try
+      (a/can-modify? resource request)
+      (let [ops (if (.endsWith resourceURI "Collection")
+                  [{:rel (:add c/action-uri) :href id}]
+                  [{:rel (:edit c/action-uri) :href id}
+                   {:rel (:delete c/action-uri) :href id}
+                   {:rel (:start c/action-uri) :href href}])]
+        (assoc resource :operations ops))
+      (catch Exception e
+        (if (.endsWith resourceURI "Collection")
+          (dissoc resource :operations)
+          (assoc resource :operations [{:rel (:start c/action-uri) :href href}]))))))
+
+;;
+;; actions
+;;
+
+(defmethod crud/do-action [resource-url "start"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
+                      (db/retrieve request)
+                      (a/can-modify? request))
+          updated-run (assoc current :start-time (u/time-now))]
+      (-> updated-run
+          (u/update-timestamps)
+          (crud/validate)
+          (db/edit request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))

@@ -1,5 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.util.zookeeper-utils
-  (:require [zookeeper :as zk]))
+  (:require
+    [environ.core :as env]
+    [clojure.tools.logging :as log]
+    [zookeeper :as zk]))
 
 (def ^:dynamic *client*)
 
@@ -7,7 +10,7 @@
   [client]
   (alter-var-root #'*client* (constantly client)))
 
-(defn create-zk-client
+(defn create-client
   "Creates a client connecting to an instance of Zookeeper
   Parameters (host and port) are taken from environment variables."
   []
