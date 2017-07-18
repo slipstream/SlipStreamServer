@@ -147,9 +147,9 @@
                                      clientIP (assoc :clientIP clientIP))
                       cookie (cookies/claims-cookie claims)
                       expires (:expires cookie)
-                      updated-session (assoc current-session
-                                        :username matched-user
-                                        :expiry expires)
+                      claims-roles (:roles claims)
+                      updated-session (cond-> (assoc current-session :username matched-user :expiry expires)
+                                              claims-roles (assoc :roles claims-roles))
                       {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
                   (log/debug "github cookie token claims for" instance ":" claims)
                   (if (not= status 200)

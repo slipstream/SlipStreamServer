@@ -1,4 +1,4 @@
-(def +version+ "3.32-SNAPSHOT")
+(def +version+ "3.33-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/slipstream-ring-container
@@ -34,6 +34,7 @@
                    [boot-environ]
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
+                   [onetom/boot-lein-generate]
                    [tolitius/boot-check]]))))
 
 (require
@@ -43,7 +44,8 @@
   '[tolitius.boot-check :refer [with-yagni
                                 with-eastwood
                                 with-kibit
-                                with-bikeshed]])
+                                with-bikeshed]]
+  '[boot.lein :refer [generate]])
 
 (set-env!
   :source-paths #{"test" "test-resources"}

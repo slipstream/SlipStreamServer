@@ -21,6 +21,9 @@
 ;; that usually require creation of stub session for later validation
 (s/def :cimi.session/username :cimi.core/nonblank-string)
 
+;; space-separated string of user's roles
+(s/def :cimi.session/roles :cimi.core/nonblank-string)
+
 (s/def :cimi.session/server :cimi.core/nonblank-string)
 (s/def :cimi.session/clientIP :cimi.core/nonblank-string)
 
@@ -34,6 +37,7 @@
                                :cimi.session/sessionTemplate
                                :cimi.session/expiry]
                       :opt-un [:cimi.session/username
+                               :cimi.session/roles
                                :cimi.session/server
                                :cimi.session/clientIP
                                :cimi.session/redirectURI]}))

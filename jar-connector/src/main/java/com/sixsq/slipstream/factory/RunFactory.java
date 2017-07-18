@@ -32,6 +32,7 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.FileUtil;
+import com.sixsq.slipstream.util.ServiceOffersUtil;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Response;
 
@@ -403,15 +404,10 @@ public abstract class RunFactory {
 		return cloudParameters;
 	}
 
-	protected static JsonObject getServiceOffer(String serviceOfferId) {
-		Response response = SscljProxy.get(SscljProxy.BASE_RESOURCE + serviceOfferId, "super ADMIN", true);
-		return new JsonParser().parse(response.getEntityAsText()).getAsJsonObject();
-	}
-
 	protected static void applyServiceOffer(Run run, String nodeInstanceName, String cloudServiceName,
 											String serviceOfferId) throws ValidationException
 	{
-		JsonObject serviceOffer = getServiceOffer(serviceOfferId);
+		JsonObject serviceOffer = ServiceOffersUtil.getServiceOffer(serviceOfferId);
 		if (serviceOffer == null) {
 			throw new ValidationException("Failed to find the service offer '" + serviceOfferId +
 					"' for the node instance '" + nodeInstanceName + "'");

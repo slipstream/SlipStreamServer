@@ -60,14 +60,51 @@
                       #{::acl/view ::acl/modify} {:identity "USER2" :roles ["ROLE1"]})))
 
 (deftest check-hierarchy
-  (are [parent child] (isa? parent child)
+
+  ;; tests for legacy rights (ALL, MODIFY, VIEW)
+  (are [parent child] (isa? acl/rights-hierarchy parent child)
                       ::acl/all ::acl/view
                       ::acl/modify ::acl/view
                       ::acl/modify ::acl/view)
-  (are [parent child] (not (isa? parent child))
+  (are [parent child] (not (isa? acl/rights-hierarchy parent child))
                       ::acl/view ::acl/all
                       ::acl/view ::acl/modify
-                      ::acl/modify ::acl/all))
+                      ::acl/modify ::acl/all)
+
+  ;; test relationships with 'new' rights
+  (are [parent child] (and (isa? acl/rights-hierarchy parent child) (not (isa? acl/rights-hierarchy child parent)))
+                      ::acl/view-acl ::acl/view-data
+                      ::acl/view-acl ::acl/view-meta
+                      ::acl/view-data ::acl/view-meta
+
+                      ::acl/edit-acl ::acl/edit-data
+                      ::acl/edit-acl ::acl/edit-meta
+                      ::acl/edit-data ::acl/edit-meta
+
+                      ::acl/edit-acl ::acl/view-acl
+                      ::acl/edit-acl ::acl/view-data
+                      ::acl/edit-acl ::acl/view-meta
+
+                      ::acl/edit-data ::acl/view-data
+                      ::acl/edit-data ::acl/view-meta
+
+                      ::acl/edit-meta ::acl/view-meta)
+
+  (let [independent-rights #{::acl/manage ::acl/delete ::acl/view-acl}]
+    (doseq [right1 independent-rights
+            right2 independent-rights]
+      (if (= right1 right2)
+        (is (isa? acl/rights-hierarchy right1 right2))
+        (is (not (isa? acl/rights-hierarchy right1 right2))))))
+
+  (let [all-rights (set (vals acl/rights-keywords))]
+    ;; everything is an instance of itself
+    (doseq [right all-rights]
+      (is (isa? acl/rights-hierarchy right right)))
+    ;; ::all covers everything, nothing covers ::all
+    (doseq [right (disj all-rights ::acl/all)]
+      (is (isa? acl/rights-hierarchy ::acl/all right))
+      (is (not (isa? acl/rights-hierarchy right ::acl/all))))))
 
 (deftest check-can-do?
   (let [acl {:owner {:principal "USER1"
