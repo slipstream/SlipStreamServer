@@ -29,7 +29,6 @@
 
               ;; common accounting record attributes
               :type         "vm"
-              :identifier   "my-cloud-vm-47"
               :start        timestamp
               :stop         timestamp
               :user         "some-complicated-user-id"

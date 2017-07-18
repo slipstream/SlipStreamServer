@@ -1,10 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.accounting-record
-  (:require
-    [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
+    (:require
+      [clojure.spec.alpha :as s]
+      [com.sixsq.slipstream.ssclj.util.spec :as su]
+      [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
-(s/def :cimi.accounting-record/identifier :cimi.core/identifier)
 (s/def :cimi.accounting-record/start :cimi.core/timestamp)
 (s/def :cimi.accounting-record/stop :cimi.core/timestamp)
 (s/def :cimi.accounting-record/user :cimi.core/nonblank-string)
@@ -24,8 +23,7 @@
 
 (s/def :cimi.accounting-record/type :cimi.core/identifier)
 
-(def account-keys-specs {:req-un [:cimi.accounting-record/identifier
-                                  :cimi.accounting-record/start
+(def account-keys-specs {:req-un [:cimi.accounting-record/start
                                   :cimi.accounting-record/user
                                   :cimi.accounting-record/cloud
                                   :cimi.account-record/type]

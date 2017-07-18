@@ -23,7 +23,6 @@
 
                            ;; common accounting record attributes
                            :type         "vm"
-                           :identifier   "my-cloud-vm-47"
                            :start        timestamp
                            :stop         timestamp
                            :user         "some-complicated-user-id"
@@ -52,7 +51,7 @@
     (doseq [k #{:disk}]
       (is (s/valid? :cimi/accounting-record.vm (dissoc accounting-record k))))
     ;;parent mandatory keywords
-    (doseq [k #{:identifier :start :user :type :cloud}]
+    (doseq [k #{ :start :user :type :cloud}]
       (is (not (s/valid? :cimi/accounting-record.vm (dissoc accounting-record k)))))
     ;;parent optional keywords
     (doseq [k #{:stop :roles :groups :realm :module :serviceOffer}]

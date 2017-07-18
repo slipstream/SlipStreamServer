@@ -80,7 +80,6 @@
 
                       ;; common accounting record attributes
                       :type         "obj"
-                      :identifier   "my-cloud-vm-47"
                       :start        timestamp
                       :stop         timestamp
                       :user         "jane"
@@ -116,7 +115,6 @@
       (-> session-user
           (request abs-uri)
           (ltu/body->edn)
-          (ltu/dump)
           (ltu/is-status 200)
           (ltu/is-operation-absent "delete")
           (ltu/is-operation-absent "edit"))

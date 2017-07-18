@@ -93,7 +93,6 @@
 
                                 ;; common accounting record attributes
                                 :type         "vm"
-                                :identifier   "768868-7678-8787"
                                 :start        timestamp
                                 :stop         timestamp
                                 :user         "jane"
