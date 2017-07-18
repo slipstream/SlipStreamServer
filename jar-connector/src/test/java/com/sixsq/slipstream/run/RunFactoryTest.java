@@ -501,11 +501,11 @@ public class RunFactoryTest extends RunTest {
 			AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
 			arh.setServiceOffer(serviceOffer);
 
-			String identifier = run.getUuid() + "/" + nodeInstanceName;
+
 
 			assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
 			assertStringEquals(cloudServiceName, arh.getCloudName());
-			assertStringEquals(identifier, arh.getIdentifier());
+			assertStringEquals(run.getUuid(), arh.getContext().getRunId());
 			assertStringEquals("test/deployment", arh.getModuleName());
 			assertStringEquals("RunTestBaseUser", arh.getUser());
 
@@ -530,11 +530,11 @@ public class RunFactoryTest extends RunTest {
 		AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
 		arh.setServiceOffer(serviceOffer);
 
-		String identifier = run.getUuid() + "/" + nodeInstanceName;
+
 
 		assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
 		assertStringEquals(cloudServiceName, arh.getCloudName());
-		assertStringEquals(identifier, arh.getIdentifier());
+		assertStringEquals(run.getUuid(), arh.getContext().getRunId());
 		assertStringEquals("test/image", arh.getModuleName());
 		assertStringEquals("RunTestBaseUser", arh.getUser());
 
