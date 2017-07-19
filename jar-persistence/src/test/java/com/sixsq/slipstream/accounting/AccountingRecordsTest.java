@@ -64,7 +64,7 @@ public class AccountingRecordsTest {
                         "    \"id\": \"accounting-record\",\n" +
                         "    \"operations\": [\n" +
                         "        {\n" +
-                        "            \"rel\": \"add\",\n" +
+                        "            \"rel\": \"open\",\n" +
                         "            \"href\": \"accounting-record\"\n" +
                         "        }\n" +
                         "    ],\n" +
@@ -109,7 +109,7 @@ public class AccountingRecordsTest {
                 Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module",
                 new ServiceOfferRef("serviceOffer/638768-768876-878668778"),
                 new AccountingRecordContext("c9ae95f1-caee-4b5e-a3f9-727d11355146", "mynode", "60117142-7a77-4e72-9de3-93ee5f547006"), 1, 64F, 1024, "instanceType");
-
+        ar.setId("accounting-record/6dd4dbc8-a85a-4abc-82b4-7b032b8cc07b");
         return ar;
     }
 
@@ -183,6 +183,7 @@ public class AccountingRecordsTest {
                 "      }\n" +
                 "    ]\n" +
                 "  },\n" +
+                "  \"id\": \"accounting-record/6dd4dbc8-a85a-4abc-82b4-7b032b8cc07b\",\n" +
                 "  \"resourceURI\": \"http://sixsq.com/slipstream/1/AccountingRecord\",\n" +
                 "  \"created\": \"" + sToday + "\",\n" +
                 "  \"updated\": \"" + sToday + "\",\n" +
@@ -281,7 +282,7 @@ public class AccountingRecordsTest {
                 "    \"id\": \"accounting-record\",\n" +
                 "    \"operations\": [\n" +
                 "        {\n" +
-                "            \"rel\": \"add\",\n" +
+                "            \"rel\": \"open\",\n" +
                 "            \"href\": \"accounting-record\"\n" +
                 "        }\n" +
                 "    ],\n" +
@@ -322,7 +323,7 @@ public class AccountingRecordsTest {
                 "            },\n" +
                 "            \"operations\": [\n" +
                 "                {\n" +
-                "                    \"rel\": \"edit\",\n" +
+                "                    \"rel\": \"close\",\n" +
                 "                    \"href\": \"accounting-record/85c68ea2-1569-4112-b881-88a5f0cfe801\"\n" +
                 "                },\n" +
                 "                {\n" +

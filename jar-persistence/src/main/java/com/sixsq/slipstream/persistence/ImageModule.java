@@ -257,7 +257,7 @@ public class ImageModule extends TargetContainerModule {
 	}
 
 	/**
-	 * Override the method in {@link Parameterized} to add recursivity.
+	 * Override the method in {@link Parameterized} to open recursivity.
 	 * This method will look into the parent image if the parameter doesn't exist, not if it's empty.
 	 * @return the value of the parameter or null if it doesn't exist in the image hierarchy.
 	 */

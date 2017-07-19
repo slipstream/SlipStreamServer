@@ -198,7 +198,7 @@ public class AuthzTest {
 		// group can view but user not in parent group
 		assertThat(moduleAuthz.canGet(user), is(false));
 
-		// add to parent group
+		// open to parent group
 		parent.getAuthz().addGroupMember("user");
 		parent.store();
 		

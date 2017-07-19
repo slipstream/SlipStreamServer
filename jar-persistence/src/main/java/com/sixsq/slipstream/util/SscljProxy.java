@@ -148,9 +148,11 @@ public class SscljProxy {
                     break;
                 case PUT:
                     responseEntity = client.put(content, mediaType);
+                    logger.fine("PUT content : " + content.getText());
                     break;
                 case POST:
                     responseEntity = client.post(content, mediaType);
+                    logger.fine("POST content : " + content.getText());
                     break;
                 default:
                     throw new UnsupportedOperationException("Method " + method.toString() + "not supported");

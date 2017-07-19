@@ -16,7 +16,6 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
@@ -48,6 +47,7 @@ public class AccountingRecordHelper {
     private Run run;
     private String nodeInstanceName;
     private JsonObject serviceOffer;
+
 
 
     public AccountingRecordHelper(Run run, String nodeInstanceName) {
@@ -109,10 +109,14 @@ public class AccountingRecordHelper {
     }
 
     public ServiceOfferRef getServiceOfferRef() {
-        if (getServiceOffer() != null) {
+
+        String serviceOffer = getServiceOffer();
+        if ((serviceOffer != null) && (!serviceOffer.isEmpty())) {
+            logger.info(" Service offer found : " + serviceOffer);
             return new ServiceOfferRef(getServiceOffer());
         }
 
+        logger.info("No service offer found");
         //No service offer
         return null;
     }
@@ -132,6 +136,7 @@ public class AccountingRecordHelper {
         }
 
         if (serviceOffer == null) {
+            logger.info("VM data can not be inferred form null service offer");
             return new AccountingRecordVM(null, null, null, null);
         }
 
@@ -184,21 +189,22 @@ public class AccountingRecordHelper {
         String nodeName = context.getNodeName();
         String runId = context.getRunId();
 
-        StringBuffer sb = new StringBuffer("$filter=context/instanceId='").append(instanceId).append("'");
+        StringBuffer sb = new StringBuffer("context/instanceId='").append(instanceId).append("'");
         if (nodeName != null) {
-            sb.append("&context/nodeName='").append(nodeName).append("'");
+            sb.append(" and context/nodeName='").append(nodeName).append("'");
         }
 
         if (runId != null) {
-            sb.append("&context/runId='").append(runId).append("'");
+            sb.append(" and context/runId='").append(runId).append("'");
         }
 
         String cimiQuery = sb.toString();
 
         String resource = null;
         try {
-            resource = AccountingRecord.ACCOUNTING_RECORD_RESOURCE + "?" + URLEncoder.encode(cimiQuery, "UTF-8");
-            Response res = SscljProxy.get(resource, username);
+            //URLEncoder class performs application/x-www-form-urlencoded-type encoding rather than percent encoding, therefore replacing spaces with +
+            resource = AccountingRecord.ACCOUNTING_RECORD_RESOURCE + "?$filter=" + URLEncoder.encode(cimiQuery, "UTF-8").replace("+", "%20");
+            Response res = SscljProxy.get(resource, username + " ADMIN");
 
             if (res == null) return null;
 
@@ -210,21 +216,26 @@ public class AccountingRecordHelper {
 
             switch (nbRecords) {
                 case 0: // FIXME :  no corresponding record was started , can't stop it
+                    logger.warning("Loading ressource with Query " + resource + " did not return any accounting record" );
                     break;
 
                 case 1: //happy case : a corresponding record was found in ES
                     AccountingRecord ar = records.getAccountingRecords().get(0);
+                    logger.info("Found accounting record" + SscljProxy.toJson(ar));
                     if (ar.isOpenAndValidAccountingRecord()) {
                         // The record was properly started, and has not yet been closed
+                        logger.info("Accounting record to be closed is valid");
                         return ar;
 
                     } else {
                         //FIXME : the record we found is invalid
+                        logger.warning("Accounting record to be closed is invalid");
                     }
                     break;
 
-                default: //FIXME : more than one record found, need to deal with that
-
+                default:
+                    //FIXME : more than one record found, need to deal with that
+                    logger.warning("Loading ressource with Query " + resource + " did  return too many ("+ nbRecords +") accounting records" );
             }
 
         } catch (UnsupportedEncodingException e) {
@@ -240,6 +251,8 @@ public class AccountingRecordHelper {
             return;
         }
 
+
+        logger.info("Opening accounting record for run " + run.getUuid());
         AccountingRecordHelper helper = new AccountingRecordHelper(run, nodeInstanceName);
 
         ACL acl = helper.getACL();
@@ -266,7 +279,7 @@ public class AccountingRecordHelper {
 
         //Appending ' ADMIN' to get proper permissions
         String user = username + " ADMIN";
-        AccountingRecord.add(accountingRecord, user);
+        AccountingRecord.open(accountingRecord, user);
 
     }
 
@@ -277,13 +290,21 @@ public class AccountingRecordHelper {
             return;
         }
 
+
+        logger.info("Closing an accounting record for run " + run.getUuid());
         AccountingRecordHelper helper = new AccountingRecordHelper(run, nodeInstanceName);
 
         AccountingRecord ar = helper.load(helper);
 
 
-        ar.setStop(new Date());
-        AccountingRecord.edit(ar, helper.getUser() + " ADMIN");
+
+        if (ar != null) {
+            ar.setStop(new Date());
+            logger.info("Request to SSCLJ for updating Accounting Record " + SscljProxy.toJson(ar));
+            AccountingRecord.close(ar, helper.getUser() + " ADMIN");
+        } else{
+            logger.warning("No AccountingRecord found");
+        }
 
     }
 
