@@ -21,13 +21,20 @@
              :category            "Deployment"
              :type                "Orchestration"
              :mutable             false
-             :parameters          {:a "b"}
-             :user-choices        {}}]
-
-    (is (= true (s/valid? :cimi/run run)))
+             :nodes               {:node1 {:parameters         {:cloudservice {:description       "p1 description"
+                                                                               :default-value     "abc"
+                                                                               :user-choice-value "ABC"}
+                                                                :multiplicity {:default-value "1"}}
+                                           :runtime-parameters {:p1 {:description       "p1 description"
+                                                                     :default-value     "abc"
+                                                                     :user-choice-value "ABC"
+                                                                     :mapped-to         "a"}}}
+                                   :node2 {:parameters {:cloudservice {:description   "param1 description"
+                                                                       :default-value "abc"}}}}}]
 
     (are [expect-fn arg] (expect-fn (s/valid? :cimi/run arg))
                          true? run
+                         ;false? (dissoc run :id)  ;TODO uncomment
                          false? (dissoc run :created)
                          false? (dissoc run :updated)
                          false? (dissoc run :acl)
@@ -37,7 +44,5 @@
                          false? (update run :category (constantly "bonjour"))
                          false? (dissoc run :mutable)
                          false? (assoc run :other "abc")
-                         true?  (assoc run :user-choices {:a "a" :b "b"})
-                         false? (assoc run :user-choices {:a []})
-                         false? (dissoc run :parameters)
-                         true?  (assoc run :start-time timestamp))))
+                         false? (dissoc run :nodes)
+                         true? (assoc run :start-time timestamp))))

@@ -15,6 +15,7 @@
     [com.sixsq.slipstream.ssclj.util.sse :as sse]
     [clojure.core.async :as async]
     [zookeeper :as zk]
+    [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     )
   (:import (clojure.lang ExceptionInfo)))
 
@@ -35,14 +36,7 @@
                      :rules [{:principal "USER"
                               :type      "ROLE"
                               :right     "MODIFY"}]})
-(def port 2181)
 
-(defn connect
-  ([] (connect port))
-  ([port]
-   (zk/connect (str "127.0.0.1:" port))))
-
-(def client (connect))
 ;;
 ;; multimethods for validation and operations
 ;;
@@ -55,11 +49,33 @@
 (defmethod crud/add-acl resource-uri
   [resource request]
   (a/add-acl resource request))
+
 ;;
 ;; CRUD operations
 ;;
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+(defn add-impl [{:keys [body] :as request}]
+  (a/can-modify? {:acl collection-acl} request)
+  (let [rp (-> body
+               u/strip-service-attrs
+               (crud/new-identifier resource-name)
+               (assoc :resourceURI resource-uri)
+               u/update-timestamps
+               (crud/add-acl request)
+               crud/validate)
+        run-id (:run-id body)
+        node-name (:node-name body)
+        node-index (:node-index body)
+        name (:name body)
+        value (:value body)
+        node-path (cond
+                    (and run-id node-name node-index) (str "/runs/" run-id "/" node-name "/" node-index "/" name)
+                    (and run-id node-name) (str "/runs/" run-id "/" node-name "/" name)
+                    (and run-id) (str "/runs/" run-id "/" name))
+        ]
+    (uzk/create-all node-path :persistent? true)
+    (uzk/set-data node-path value)
+    ))
 
 (defmethod crud/add resource-name
   [request]

@@ -1,11 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.resources.run
   (:require
+    [clojure.stacktrace :as st]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.run]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as zru]
+    [com.sixsq.slipstream.ssclj.resources.run-parameter :as rp]
+    [com.sixsq.slipstream.ssclj.resources.run.state-machine :as rsm]
     [com.sixsq.slipstream.auth.acl :as a]
     [superstring.core :as str]
     [ring.util.response :as r]
@@ -50,7 +54,49 @@
 ;; CRUD operations
 ;;
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
+(defmethod crud/new-identifier resource-name
+  [json _]
+  #_json                                                    ;TODO uncomment
+  (assoc json :id (u/random-uuid))                          ;TODO REMOVE
+  )                                                         ; keep id of java run
+
+(defn create-parameter [run-parameter]
+  (try
+    (let [
+          request {:params   {:resource-name rp/resource-url}
+                   :body     run-parameter}
+          {:keys [status]} (crud/add request)]
+      (case status
+        201 (log/info "created run-parameter:" run-parameter)
+        (log/info "unexpected status code when creating run-parameter:" status)))
+    (catch Exception e
+      (log/warn "error when creating session-template/internal resource: " (str e) "\n"
+                (with-out-str (st/print-cause-trace e)))))
+  )
+
+(defn create-parameters [{nodes :nodes run-id :id state :state}]
+  (create-parameter {:run-id run-id :name "state" :value state})
+  (doseq [n nodes]
+    ()
+    (let [node-name (name (key n))
+          multiplicity (get-in (val n) [:parameters :multiplicity :default-value])]
+      (doseq [i (range 1 (inc multiplicity))]
+        (create-parameter {:run-id run-id :node-name node-name :node-index i :name "vmstate" :value "init"})
+        ))))
+
+(defn add-impl [{body :body :as request}]
+  (a/can-modify? {:acl collection-acl} request)
+  (let [new-run (-> body
+                    u/strip-service-attrs
+                    (crud/new-identifier resource-name)
+                    (assoc :resourceURI resource-uri)
+                    u/update-timestamps
+                    (crud/add-acl request)
+                    (assoc :state rsm/initial-state))]
+    (db/add resource-name (crud/validate new-run) {})
+    (create-parameters new-run)
+    ))
 
 (defmethod crud/add resource-name
   [request]
@@ -104,16 +150,24 @@
 ;; actions
 ;;
 
+(defn add-start-time [run]
+  (let [now (u/time-now)]
+    (assoc run :start-time now)))
+
 (defmethod crud/do-action [resource-url "start"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                       (db/retrieve request)
                       (a/can-modify? request))
-          updated-run (assoc current :start-time (u/time-now))]
-      (-> updated-run
-          (u/update-timestamps)
-          (crud/validate)
-          (db/edit request)))
+          response (-> current
+                       (add-start-time)
+                       (u/update-timestamps)
+                       (crud/validate)
+                       (db/edit request))]
+      ;(zru/create-zk-run current)
+      response
+      )
     (catch ExceptionInfo ei
-      (ex-data ei))))
+      (ex-data ei)))
+  )

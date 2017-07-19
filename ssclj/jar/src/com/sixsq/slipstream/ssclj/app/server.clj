@@ -25,7 +25,7 @@
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
-    [com.sixsq.slipstream.ssclj.util.zookeeper-utils :as zku]))
+    [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]))
 
 (defn- set-persistence-impl
   []

@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.util.zookeeper-utils
+(ns com.sixsq.slipstream.ssclj.util.zookeeper
   (:require
     [environ.core :as env]
     [clojure.tools.logging :as log]
@@ -18,3 +18,12 @@
 
     (log/info "creating zookeeper client:" zk-endpoints)
     (zk/connect zk-endpoints)))
+
+(def create-all (partial zk/create-all *client*))
+
+(def create (partial zk/create *client*))
+
+(def set-data (partial zk/set-data *client*))
+
+(def get-data (partial zk/data *client*))
+
