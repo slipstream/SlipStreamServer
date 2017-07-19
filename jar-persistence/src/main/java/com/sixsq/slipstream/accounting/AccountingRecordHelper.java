@@ -148,9 +148,14 @@ public class AccountingRecordHelper {
         return new AccountingRecordVM(cpu, ram, disk, instanceType);
     }
 
+    public String getNodeName(){
+        String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.NODE_NAME_KEY);
+        return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
+    }
+
     public AccountingRecordContext getContext() {
         String instanceId = this.getInstanceId();
-        String nodeName = RuntimeParameter.extractNodeNamePart(this.getNodeInstanceName());
+        String nodeName = this.getNodeName();
         String runId = this.getRun().getUuid();
 
         return new AccountingRecordContext(instanceId, nodeName, runId);
@@ -252,7 +257,7 @@ public class AccountingRecordHelper {
         }
 
 
-        logger.info("Opening accounting record for run " + run.getUuid());
+        logger.info("Opening accounting record for run :" + run.getUuid() + "on node instance  : " +  nodeInstanceName);
         AccountingRecordHelper helper = new AccountingRecordHelper(run, nodeInstanceName);
 
         ACL acl = helper.getACL();
@@ -291,7 +296,7 @@ public class AccountingRecordHelper {
         }
 
 
-        logger.info("Closing an accounting record for run " + run.getUuid());
+        logger.info("Closing an accounting record for run " + run.getUuid() + "on node instance " +  nodeInstanceName);
         AccountingRecordHelper helper = new AccountingRecordHelper(run, nodeInstanceName);
 
         AccountingRecord ar = helper.load(helper);
