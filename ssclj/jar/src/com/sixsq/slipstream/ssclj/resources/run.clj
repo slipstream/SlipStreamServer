@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as zru]
     [com.sixsq.slipstream.ssclj.resources.run-parameter :as rp]
-    [com.sixsq.slipstream.ssclj.resources.run.state-machine :as rsm]
+    [com.sixsq.slipstream.ssclj.resources.zk.run.state-machine :as rsm]
     [com.sixsq.slipstream.auth.acl :as a]
     [superstring.core :as str]
     [ring.util.response :as r]
@@ -61,31 +61,32 @@
   (assoc json :id (u/random-uuid))                          ;TODO REMOVE
   )                                                         ; keep id of java run
 
-(defn create-parameter [run-parameter]
+(defn create-parameter [identity run-parameter]
   (try
     (let [
           request {:params   {:resource-name rp/resource-url}
+                   :identity identity
                    :body     run-parameter}
-          {:keys [status]} (crud/add request)]
+          {:keys [status body]} (crud/add request)]
       (case status
-        201 (log/info "created run-parameter:" run-parameter)
-        (log/info "unexpected status code when creating run-parameter:" status)))
+        201 (log/info "created run-parameter: " body)
+        (log/info "unexpected status code when creating run-parameter resource:" status)))
     (catch Exception e
-      (log/warn "error when creating session-template/internal resource: " (str e) "\n"
+      (log/warn "error when creating run-parameter resource: " (str e) "\n"
                 (with-out-str (st/print-cause-trace e)))))
   )
 
-(defn create-parameters [{nodes :nodes run-id :id state :state}]
-  (create-parameter {:run-id run-id :name "state" :value state})
+(defn create-parameters [identity {nodes :nodes run-id :id state :state}]
+  (create-parameter identity {:run-id run-id :name "state" :value state})
   (doseq [n nodes]
     ()
     (let [node-name (name (key n))
-          multiplicity (get-in (val n) [:parameters :multiplicity :default-value])]
+          multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value]))]
       (doseq [i (range 1 (inc multiplicity))]
-        (create-parameter {:run-id run-id :node-name node-name :node-index i :name "vmstate" :value "init"})
+        (create-parameter identity {:run-id run-id :node-name node-name :node-index i :name "vmstate" :value "init"})
         ))))
 
-(defn add-impl [{body :body :as request}]
+(defn add-impl [{body :body identity :identity :as request}]
   (a/can-modify? {:acl collection-acl} request)
   (let [new-run (-> body
                     u/strip-service-attrs
@@ -93,10 +94,10 @@
                     (assoc :resourceURI resource-uri)
                     u/update-timestamps
                     (crud/add-acl request)
-                    (assoc :state rsm/initial-state))]
-    (db/add resource-name (crud/validate new-run) {})
-    (create-parameters new-run)
-    ))
+                    (assoc :state rsm/initial-state))
+        response (db/add resource-name (crud/validate new-run) {})]
+    (create-parameters identity new-run)
+    response))
 
 (defmethod crud/add resource-name
   [request]

@@ -17,13 +17,25 @@
   (let [zk-endpoints (or (env/env :zk-endpoints) "localhost:2181")]
 
     (log/info "creating zookeeper client:" zk-endpoints)
-    (zk/connect zk-endpoints)))
+    (zk/connect zk-endpoints :timeout-msec 60000)))
 
-(def create-all (partial zk/create-all *client*))
+(defn create-all [path & options]
+  (apply zk/create-all *client* path options))
 
-(def create (partial zk/create *client*))
+(defn create [path & options]
+  (apply zk/create *client* path options))
 
-(def set-data (partial zk/set-data *client*))
+(defn get-data [path & options]
+  (let [result (apply zk/data *client* path options)
+        data (:data result)
+        value (when (-> data nil? not) (String. data))]
+    (assoc result :data value)))
 
-(def get-data (partial zk/data *client*))
+(defn get-version
+  [path]
+  (-> (get-data path) :stat :version))
 
+(defn set-data [path value & options]
+  (let [version (get-version path)
+        data (.getBytes (str value) "UTF-8")]
+    (apply zk/set-data *client* path data version options)))

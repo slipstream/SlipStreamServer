@@ -63,6 +63,7 @@
                u/update-timestamps
                (crud/add-acl request)
                crud/validate)
+        response (db/add resource-name rp {})
         run-id (:run-id body)
         node-name (:node-name body)
         node-index (:node-index body)
@@ -75,32 +76,33 @@
         ]
     (uzk/create-all node-path :persistent? true)
     (uzk/set-data node-path value)
+    response
     ))
 
 (defmethod crud/add resource-name
   [request]
   (add-impl request))
-
-(def node "/hello")
-
-(defn get-data
-  "Get data, as string, from the znode"
-  [client path]
-  (String. (:data (zk/data client path))))
-
-(defn watch-fn [event-ch {:keys [event-type path :as zk-event]}]
-  (when (= event-type :NodeDataChanged)
-    (let [event {:id   (java.util.UUID/randomUUID)
-                 :name "foo"
-                 :data (get-data client path)}]
-      (async/>!! event-ch event)))
-  (zk/data client node :watcher (partial watch-fn event-ch)))
-
-(def handler
-  (sse/event-channel-handler
-    (fn [request response raise event-ch]
-      (zk/data client node :watcher (partial watch-fn event-ch)))
-    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
+;
+;(def node "/hello")
+;
+;(defn get-data
+;  "Get data, as string, from the znode"
+;  [client path]
+;  (String. (:data (zk/data client path))))
+;
+;(defn watch-fn [event-ch {:keys [event-type path :as zk-event]}]
+;  (when (= event-type :NodeDataChanged)
+;    (let [event {:id   (java.util.UUID/randomUUID)
+;                 :name "foo"
+;                 :data (get-data client path)}]
+;      (async/>!! event-ch event)))
+;  (zk/data client node :watcher (partial watch-fn event-ch)))
+;
+;(def handler
+;  (sse/event-channel-handler
+;    (fn [request response raise event-ch]
+;      (zk/data client node :watcher (partial watch-fn event-ch)))
+;    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
 
 (defn retrieve-fn
   [resource-name]
@@ -117,7 +119,9 @@
 
 (defmethod crud/retrieve resource-name
   [request]
-  (handler request))
+  #_(handler request)
+  (retrieve-impl request)
+  )
 
 (def edit-impl (std-crud/edit-fn resource-name))
 

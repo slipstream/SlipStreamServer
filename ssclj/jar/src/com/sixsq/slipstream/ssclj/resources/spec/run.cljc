@@ -6,6 +6,7 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
+(s/def :cimi.run/id :cimi.core/nonblank-string) ;TODO enhance
 (s/def :cimi.run/module-resource-uri :cimi.core/uri)
 (s/def :cimi.run/type #{"Run" "Orchestration" "Machine"})
 (s/def :cimi.run/category #{"Image" "Deployment"})
@@ -61,7 +62,8 @@
                          :cimi.run/category
                          :cimi.run/mutable
                          :cimi.run/nodes]
-                :opt-un [:cimi.run/start-time
+                :opt-un [:cimi.run/id
+                         :cimi.run/start-time
                          :cimi.run/end-time
                          :cimi.run/last-state-change-time
                          :cimi.run/state]})
