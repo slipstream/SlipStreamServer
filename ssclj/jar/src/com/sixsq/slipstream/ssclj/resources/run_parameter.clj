@@ -8,14 +8,14 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
     [superstring.core :as str]
-    [ring.util.response :as r]
-    [com.sixsq.slipstream.util.response :as sr]
+    [com.sixsq.slipstream.util.response :as r]
     [com.sixsq.slipstream.db.impl :as db]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.sse :as sse]
     [clojure.core.async :as async]
     [zookeeper :as zk]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
+    [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as zkru]
     )
   (:import (clojure.lang ExceptionInfo)))
 
@@ -56,24 +56,21 @@
 
 (defn add-impl [{:keys [body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (let [rp (-> body
-               u/strip-service-attrs
-               (crud/new-identifier resource-name)
-               (assoc :resourceURI resource-uri)
-               u/update-timestamps
-               (crud/add-acl request)
-               crud/validate)
-        response (db/add resource-name rp {})
+  (let [run-parameter (-> body
+                          u/strip-service-attrs
+                          (dissoc :value)
+                          (crud/new-identifier resource-name)
+                          (assoc :resourceURI resource-uri)
+                          u/update-timestamps
+                          (crud/add-acl request)
+                          crud/validate)
+        response (db/add resource-name run-parameter {})
         run-id (:run-id body)
         node-name (:node-name body)
         node-index (:node-index body)
         name (:name body)
         value (:value body)
-        node-path (cond
-                    (and run-id node-name node-index) (str "/runs/" run-id "/" node-name "/" node-index "/" name)
-                    (and run-id node-name) (str "/runs/" run-id "/" node-name "/" name)
-                    (and run-id) (str "/runs/" run-id "/" name))
-        ]
+        node-path (zkru/parameter-znode-path run-id node-name node-index name)]
     (uzk/create-all node-path :persistent? true)
     (uzk/set-data node-path value)
     response
@@ -104,24 +101,28 @@
 ;      (zk/data client node :watcher (partial watch-fn event-ch)))
 ;    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
 
-(defn retrieve-fn
-  [resource-name]
-  (fn [{{uuid :uuid} :params :as request}]
-    (try
-      (-> (str (u/de-camelcase resource-name) "/" uuid)
-          (db/retrieve request)
-          (a/can-view? request)
-          (crud/set-operations request))
-      (catch ExceptionInfo ei
-        (ex-data ei)))))
-
-(def retrieve-impl (std-crud/retrieve-fn resource-name))
+(defn retrieve-impl
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [run-parameter (-> (str (u/de-camelcase resource-name) "/" uuid)
+                            (db/retrieve request)
+                            (a/can-view? request)
+                            (crud/set-operations request))
+          run-id (:run-id run-parameter)
+          node-name (:node-name run-parameter)
+          node-index (:node-index run-parameter)
+          name (:name run-parameter)
+          value (:data (uzk/get-data (zkru/parameter-znode-path run-id node-name node-index name))) ;TODO what if data not found
+          response (assoc run-parameter :value value)
+          ]
+      (r/json-response response))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
 
 (defmethod crud/retrieve resource-name
   [request]
   #_(handler request)
-  (retrieve-impl request)
-  )
+  (retrieve-impl request))
 
 (def edit-impl (std-crud/edit-fn resource-name))
 

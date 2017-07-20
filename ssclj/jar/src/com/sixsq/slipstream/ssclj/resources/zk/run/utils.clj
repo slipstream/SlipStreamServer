@@ -1,25 +1,38 @@
 (ns com.sixsq.slipstream.ssclj.resources.zk.run.utils
   (:require [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-            [zookeeper :as zk]))
+            [zookeeper :as zk]
+            [clojure.string :as string]))
+
+(def znode-separator "/")
+
+(def runs-path (str znode-separator "runs"))
+
+(def nodes-txt "nodes")
+
+(defn parameter-znode-path [run-id node-name node-index name]
+  (cond
+    (and run-id node-name node-index) (string/join znode-separator [runs-path run-id nodes-txt node-name node-index name])
+    (and run-id node-name) (string/join znode-separator [runs-path run-id nodes-txt node-name name])
+    run-id (string/join znode-separator [runs-path run-id name])))
+
+;(defn run-id-path [run-id])
+
+;  (str runs-path "/" run-id))
+;
+;(defn nodes-path [run-id]
+;  (str (run-id-path run-id) "/nodes"))
+;
+;(defn node-path
+;  [run-id node-name]
+;  (str (nodes-path run-id) "/" node-name))
+;
+;(defn indexed-node-path [run-id node-name node-index]
+;  (str (node-path run-id node-name) "/" node-index))
+;
+;(defn create-run [run-id]
+;  (uzk/create (run-id-path run-id) :persistent? true))
 
 
-(def runs-path "/runs")
-
-(defn run-id-path [run-id]
-  (str runs-path "/" run-id))
-
-(defn nodes-path [run-id]
-  (str (run-id-path run-id) "/nodes"))
-
-(defn node-path
-  [run-id node-name]
-  (str (nodes-path run-id) "/" node-name))
-
-(defn indexed-node-path [run-id node-name node-index]
-  (str (node-path run-id node-name) "/" node-index))
-
-(defn create-run [run-id]
-  (uzk/create (run-id-path run-id) :persistent? true))
 
 #_(defn create-zk-run [{run-id :id nodes :nodes :as run}]
   (doseq [n nodes]

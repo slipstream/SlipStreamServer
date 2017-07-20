@@ -16,8 +16,8 @@
 (s/def :cimi/run-parameter
   (su/only-keys-maps c/common-attrs
                      {:req-un [:cimi.run-parameter/run-id
-                               :cimi.run-parameter/name
-                               :cimi.run-parameter/value]
+                               :cimi.run-parameter/name]
                       :opt-un [:cimi.run-parameter/node-name
                                :cimi.run-parameter/node-index
-                               :cimi.run-parameter/description]}))
+                               :cimi.run-parameter/description
+                               :cimi.run-parameter/value]}))
