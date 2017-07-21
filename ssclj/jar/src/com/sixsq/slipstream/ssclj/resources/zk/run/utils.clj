@@ -15,6 +15,10 @@
     (and run-id node-name) (string/join znode-separator [runs-path run-id nodes-txt node-name name])
     run-id (string/join znode-separator [runs-path run-id name])))
 
+(defn run-parameter-znode-path
+  [{run-id :run-id node-name :node-name node-index :node-index name :name :as run-parameter}]
+  (parameter-znode-path run-id node-name node-index name))
+
 ;(defn run-id-path [run-id])
 
 ;  (str runs-path "/" run-id))

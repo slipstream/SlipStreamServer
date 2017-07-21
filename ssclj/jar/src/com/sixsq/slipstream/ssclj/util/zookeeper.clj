@@ -25,11 +25,19 @@
 (defn create [path & options]
   (apply zk/create *client* path options))
 
-(defn get-data [path & options]
+(defn get-znode [path & options]
   (let [result (apply zk/data *client* path options)
         data (:data result)
         value (when (-> data nil? not) (String. data))]
     (assoc result :data value)))
+
+(defn get-data [path & options]
+  (-> (apply get-znode path options)
+      :data))
+
+(defn get-stat [path & options]
+  (-> (apply get-znode path options)
+      :stat))
 
 (defn get-version
   [path]

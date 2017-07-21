@@ -79,50 +79,43 @@
 (defmethod crud/add resource-name
   [request]
   (add-impl request))
-;
-;(def node "/hello")
-;
-;(defn get-data
-;  "Get data, as string, from the znode"
-;  [client path]
-;  (String. (:data (zk/data client path))))
-;
-;(defn watch-fn [event-ch {:keys [event-type path :as zk-event]}]
-;  (when (= event-type :NodeDataChanged)
-;    (let [event {:id   (java.util.UUID/randomUUID)
-;                 :name "foo"
-;                 :data (get-data client path)}]
-;      (async/>!! event-ch event)))
-;  (zk/data client node :watcher (partial watch-fn event-ch)))
-;
-;(def handler
-;  (sse/event-channel-handler
-;    (fn [request response raise event-ch]
-;      (zk/data client node :watcher (partial watch-fn event-ch)))
-;    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
 
-(defn retrieve-impl
-  [{{uuid :uuid} :params :as request}]
+(defn watch-fn [event-ch id name {:keys [event-type path :as zk-event]}]
+  (when (= event-type :NodeDataChanged)
+    (let [event {:id   id
+                 :name name
+                 :data (uzk/get-data path :watcher (partial watch-fn event-ch id name))}]
+      (async/>!! event-ch event))))
+
+
+(defn retrieve-run-parameter [{{uuid :uuid} :params :as request}]
   (try
     (let [run-parameter (-> (str (u/de-camelcase resource-name) "/" uuid)
                             (db/retrieve request)
                             (a/can-view? request)
                             (crud/set-operations request))
-          run-id (:run-id run-parameter)
-          node-name (:node-name run-parameter)
-          node-index (:node-index run-parameter)
-          name (:name run-parameter)
-          value (:data (uzk/get-data (zkru/parameter-znode-path run-id node-name node-index name))) ;TODO what if data not found
-          response (assoc run-parameter :value value)
-          ]
-      (r/json-response response))
+          value (uzk/get-data (zkru/run-parameter-znode-path run-parameter))];TODO what if data not found
+      (assoc run-parameter :value value))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+(def retrieve-sse-impl
+  (sse/event-channel-handler
+    (fn [request response raise event-ch]
+      (let [{id :id name :name :as run-parameter} (retrieve-run-parameter request)
+            node-path (zkru/run-parameter-znode-path run-parameter)]
+        (uzk/get-data node-path :watcher (partial watch-fn event-ch id name))
+        ))
+    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
+
+(defn retrieve-json-impl [request]
+  (r/json-response (retrieve-run-parameter request)))
+
 (defmethod crud/retrieve resource-name
-  [request]
-  #_(handler request)
-  (retrieve-impl request))
+  [{{accept :accept} :headers :as request}]
+  (case accept
+    "text/event-stream" (retrieve-sse-impl request)
+    (retrieve-json-impl request)))
 
 (def edit-impl (std-crud/edit-fn resource-name))
 
