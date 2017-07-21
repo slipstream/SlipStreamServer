@@ -153,12 +153,20 @@ public class AccountingRecordHelper {
         return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
     }
 
+    public Integer getNodeId(){
+        String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.NODE_ID_KEY);
+        String sNodeId = run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
+        if (sNodeId == null || sNodeId.isEmpty()) return null;
+        return Integer.parseInt(sNodeId);
+    }
+
     public AccountingRecordContext getContext() {
         String instanceId = this.getInstanceId();
         String nodeName = this.getNodeName();
         String runId = this.getRun().getUuid();
+        Integer nodeId = this.getNodeId();
 
-        return new AccountingRecordContext(instanceId, nodeName, runId);
+        return new AccountingRecordContext(runId, instanceId, nodeName, nodeId);
     }
 
     private Integer parseInt(String number) {
@@ -193,10 +201,15 @@ public class AccountingRecordHelper {
         String instanceId = context.getInstanceId();
         String nodeName = context.getNodeName();
         String runId = context.getRunId();
+        Integer nodeId = context.getNodeId();
 
         StringBuffer sb = new StringBuffer("context/instanceId='").append(instanceId).append("'");
         if (nodeName != null) {
             sb.append(" and context/nodeName='").append(nodeName).append("'");
+        }
+
+        if (nodeId != null) {
+            sb.append(" and context/nodeId='").append(nodeName).append("'");
         }
 
         if (runId != null) {

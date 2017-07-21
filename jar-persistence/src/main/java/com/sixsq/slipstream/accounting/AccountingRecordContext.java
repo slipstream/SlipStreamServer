@@ -9,12 +9,15 @@ public class AccountingRecordContext {
 
     private String nodeName;
 
+    private Integer nodeId;
+
     private String runId;
 
-    public AccountingRecordContext(String instanceId, String nodeName, String runId) {
+    public AccountingRecordContext(String runId, String instanceId, String nodeName, Integer nodeId ) {
         this.instanceId = instanceId;
         this.nodeName = nodeName;
         this.runId = runId;
+        this.nodeId = nodeId;
     }
 
     public String getInstanceId() {
@@ -23,6 +26,10 @@ public class AccountingRecordContext {
 
     public String getNodeName() {
         return nodeName;
+    }
+
+    public Integer getNodeId() {
+        return nodeId;
     }
 
     public String getRunId() {

@@ -91,7 +91,7 @@ public class CljElasticsearchHelper {
         logger.info("Adding default service configuration to DB.");
         setDbCrudImpl();
         requireNs(NS_SERIALIZERS_SERVICE_CONFIG_IMPL);
-		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-open-default-config").invoke();
+		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-add-default-config").invoke();
     }
 
     private static File findConfigurationDirectory() throws ConfigurationException {
@@ -111,7 +111,7 @@ public class CljElasticsearchHelper {
             if (conf.exists()) {
                 logger.warning("You should NOT see this on production! Loading configuration file: " +
                         conf.getAbsolutePath());
-                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-close-config-from-file").invoke(conf.getAbsolutePath());
+                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-edit-config-from-file").invoke(conf.getAbsolutePath());
             }
         }
 

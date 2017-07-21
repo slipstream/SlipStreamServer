@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import com.sixsq.slipstream.accounting.AccountingRecordHelper;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.After;
 import org.junit.Before;
@@ -38,6 +39,8 @@ public class RuntimeParameterStateMachineTest extends
 	public void setupClass() throws ValidationException, NotFoundException {
 		setupDeployments();
 
+
+		AccountingRecordHelper.muteForTests();
 		orchestratorCompleteKey = RuntimeParameter.constructParamName(
 				Run.constructOrchestratorName(cloudServiceName),
 				RuntimeParameter.COMPLETE_KEY);

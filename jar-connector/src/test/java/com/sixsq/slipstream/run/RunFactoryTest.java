@@ -21,6 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import com.google.gson.JsonObject;
+import com.sixsq.slipstream.accounting.AccountingRecordContext;
 import com.sixsq.slipstream.accounting.AccountingRecordHelper;
 import com.sixsq.slipstream.accounting.AccountingRecordVM;
 import com.sixsq.slipstream.event.Event;
@@ -534,7 +535,8 @@ public class RunFactoryTest extends RunTest {
 
 		assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
 		assertStringEquals(cloudServiceName, arh.getCloudName());
-		assertStringEquals(run.getUuid(), arh.getContext().getRunId());
+		AccountingRecordContext ctx = arh.getContext();
+		assertStringEquals(run.getUuid(), ctx.getRunId());
 		assertStringEquals("test/image", arh.getModuleName());
 		assertStringEquals("RunTestBaseUser", arh.getUser());
 

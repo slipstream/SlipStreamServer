@@ -64,7 +64,7 @@ public class AccountingRecordsTest {
                         "    \"id\": \"accounting-record\",\n" +
                         "    \"operations\": [\n" +
                         "        {\n" +
-                        "            \"rel\": \"open\",\n" +
+                        "            \"rel\": \"add\",\n" +
                         "            \"href\": \"accounting-record\"\n" +
                         "        }\n" +
                         "    ],\n" +
@@ -108,7 +108,7 @@ public class AccountingRecordsTest {
         AccountingRecord ar = new AccountingRecord(acl, AccountingRecord.AccountingRecordType.vm,  startDate, stopDate, "user", "cloudname",
                 Arrays.asList("role1", "role2"), Arrays.asList("group1", "group2"), "realm", "module",
                 new ServiceOfferRef("serviceOffer/638768-768876-878668778"),
-                new AccountingRecordContext("c9ae95f1-caee-4b5e-a3f9-727d11355146", "mynode", "60117142-7a77-4e72-9de3-93ee5f547006"), 1, 64F, 1024, "instanceType");
+                new AccountingRecordContext("c9ae95f1-caee-4b5e-a3f9-727d11355146", "60117142-7a77-4e72-9de3-93ee5f547006", "my-node-name", 42), 1, 64F, 1024, "instanceType");
         ar.setId("accounting-record/6dd4dbc8-a85a-4abc-82b4-7b032b8cc07b");
         return ar;
     }
@@ -205,9 +205,10 @@ public class AccountingRecordsTest {
                 "    \"href\": \"serviceOffer/638768-768876-878668778\"\n" +
                 "  },\n" +
                 "  \"context\": {\n" +
-                "    \"instanceId\": \"c9ae95f1-caee-4b5e-a3f9-727d11355146\",\n" +
-                "    \"nodeName\": \"mynode\",\n" +
-                "    \"runId\": \"60117142-7a77-4e72-9de3-93ee5f547006\"\n" +
+                "    \"instanceId\": \"60117142-7a77-4e72-9de3-93ee5f547006\",\n" +
+                "    \"nodeName\": \"my-node-name\",\n" +
+                "    \"nodeId\": 42,\n" +
+                "    \"runId\": \"c9ae95f1-caee-4b5e-a3f9-727d11355146\"\n" +
                 "  },\n" +
                 "  \"cpu\": 1,\n" +
                 "  \"ram\": 64.0,\n" +
@@ -282,7 +283,7 @@ public class AccountingRecordsTest {
                 "    \"id\": \"accounting-record\",\n" +
                 "    \"operations\": [\n" +
                 "        {\n" +
-                "            \"rel\": \"open\",\n" +
+                "            \"rel\": \"add\",\n" +
                 "            \"href\": \"accounting-record\"\n" +
                 "        }\n" +
                 "    ],\n" +
@@ -323,7 +324,7 @@ public class AccountingRecordsTest {
                 "            },\n" +
                 "            \"operations\": [\n" +
                 "                {\n" +
-                "                    \"rel\": \"close\",\n" +
+                "                    \"rel\": \"edit\",\n" +
                 "                    \"href\": \"accounting-record/85c68ea2-1569-4112-b881-88a5f0cfe801\"\n" +
                 "                },\n" +
                 "                {\n" +

@@ -19,7 +19,23 @@
 (s/def :cimi.accounting-record/runId :cimi.core/identifier)
 
 
-(s/def :cimi.accounting-record/context (su/constrained-map keyword? :cimi.core/nonblank-string))
+
+(s/def :cimi.accounting-record/runId :cimi.core/identifier)
+(s/def :cimi.accounting-record/nodeName :cimi.core/nonblank-string)
+(s/def :cimi.accounting-record/instanceId :cimi.core/identifier)
+(s/def :cimi.accounting-record/nodeId pos-int?)
+
+
+(def accounting-context-specs
+  {:opt-un [:cimi.accounting-record/runId
+            :cimi.accounting-record/instanceId
+            :cimi.accounting-record/nodeName
+            :cimi.accounting-record/nodeId
+            ]
+   })
+
+
+(s/def :cimi.accounting-record/context (su/only-keys-maps accounting-context-specs) )
 
 (s/def :cimi.accounting-record/type :cimi.core/identifier)
 

@@ -42,8 +42,17 @@
     (are [expect-fn arg] (expect-fn (s/valid? :cimi/accounting-record.vm arg))
                          true? accounting-record
                          true? (assoc accounting-record :context {})
-                         true? (assoc accounting-record :context {:abc "abc"})
-                         false? (assoc accounting-record :context {:abc 2})
+                         false? (assoc accounting-record :context {:abc "abc"})
+                         true? (assoc accounting-record :context {:nodeName "abc"})
+                         true? (assoc accounting-record :context {:nodeId 1})
+                         false? (assoc accounting-record :context {:nodeId "1"})
+                         true? (assoc accounting-record :context {:runId "abc"})
+                         true? (assoc accounting-record :context {:instanceId "abc"})
+                         true? (assoc accounting-record :context {:nodeName "abc"
+                                                                  :nodeId 2
+                                                                  :instanceId "def"
+                                                                  :runId "ghi"})
+                         false? (assoc accounting-record :context {:nodeName 2})
                          false? (assoc accounting-record :context {:def {}})
                          )
     #_(doseq [k #{}]
