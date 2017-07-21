@@ -209,7 +209,7 @@ public class AccountingRecordHelper {
         }
 
         if (nodeId != null) {
-            sb.append(" and context/nodeId='").append(nodeName).append("'");
+            sb.append(" and context/nodeId='").append(nodeId).append("'");
         }
 
         if (runId != null) {
