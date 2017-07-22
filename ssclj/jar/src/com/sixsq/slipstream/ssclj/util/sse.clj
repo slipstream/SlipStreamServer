@@ -52,7 +52,7 @@
   [{:keys [event-channel response-channel heartbeat-delay on-client-disconnect raise] :as opts}]
   (async/go
     (loop []
-      (let [hb-timeout   (async/timeout (* 1000 heartbeat-delay))
+      (let [hb-timeout (async/timeout (* 1000 heartbeat-delay))
             [event port] (async/alts! [event-channel hb-timeout])]
         (cond
           (= port hb-timeout)
@@ -84,16 +84,17 @@
   SSE's core.async buffer can either be a fixed buffer (n) or a
   0-arity function that returns a buffer."
   [{:keys [stream-ready-fn request respond raise heartbeat-delay bufferfn-or-n on-client-disconnect]}]
-  (let [heartbeat-delay  (or heartbeat-delay 10)
-        bufferfn-or-n    (or bufferfn-or-n 10)
+  (let [heartbeat-delay (or heartbeat-delay 10)
+        bufferfn-or-n (or bufferfn-or-n 10)
         response-channel (async/chan (if (fn? bufferfn-or-n) (bufferfn-or-n) bufferfn-or-n))
-        response         (-> (ring-response/response (s/->source response-channel))
-                             (ring-response/content-type "text/event-stream") ;; TODO: content negotiation? "text/event-stream+json"?
-                             (ring-response/charset "UTF-8")
-                             (ring-response/header "Connection" "close")
-                             (ring-response/header "Cache-Control" "no-cache"))
+        response (-> (ring-response/response (s/->source response-channel))
+                     (ring-response/content-type "text/event-stream") ;; TODO: content negotiation? "text/event-stream+json"?
+                     (ring-response/charset "UTF-8")
+                     (ring-response/header "Connection" "close")
+                     (ring-response/header "Cache-Control" "no-cache")
+                     (ring-response/header "X-Accel-Buffering" "no")) ; X-Accel-Buffering needed to disable nginx buffering
         ;; TODO: re-create CORS support as per original: (update-in [:headers] merge (:cors-headers context))
-        event-channel    (async/chan (if (fn? bufferfn-or-n) (bufferfn-or-n) bufferfn-or-n))]
+        event-channel (async/chan (if (fn? bufferfn-or-n) (bufferfn-or-n) bufferfn-or-n))]
     (respond response)
     (async/thread
       (stream-ready-fn request response raise event-channel)

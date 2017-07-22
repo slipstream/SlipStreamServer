@@ -94,7 +94,7 @@
                             (db/retrieve request)
                             (a/can-view? request)
                             (crud/set-operations request))
-          value (uzk/get-data (zkru/run-parameter-znode-path run-parameter))];TODO what if data not found
+          value (uzk/get-data (zkru/run-parameter-znode-path run-parameter))] ;TODO what if data not found
       (assoc run-parameter :value value))
     (catch ExceptionInfo ei
       (ex-data ei))))
@@ -103,9 +103,11 @@
   (sse/event-channel-handler
     (fn [request response raise event-ch]
       (let [{id :id name :name :as run-parameter} (retrieve-run-parameter request)
-            node-path (zkru/run-parameter-znode-path run-parameter)]
-        (uzk/get-data node-path :watcher (partial watch-fn event-ch id name))
-        ))
+            node-path (zkru/run-parameter-znode-path run-parameter)
+            event {:id   id
+                   :name name
+                   :data (uzk/get-data node-path :watcher (partial watch-fn event-ch id name))}]
+        (async/>!! event-ch event)))
     {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
 
 (defn retrieve-json-impl [request]
@@ -114,8 +116,8 @@
 (defmethod crud/retrieve resource-name
   [{{accept :accept} :headers :as request}]
   (case accept
-    "text/event-stream" (retrieve-sse-impl request)
-    (retrieve-json-impl request)))
+    "text/event-stream" retrieve-sse-impl
+    retrieve-json-impl))
 
 (def edit-impl (std-crud/edit-fn resource-name))
 
