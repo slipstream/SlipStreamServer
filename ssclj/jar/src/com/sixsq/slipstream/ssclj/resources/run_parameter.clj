@@ -119,7 +119,24 @@
     "text/event-stream" retrieve-sse-impl
     retrieve-json-impl))
 
-(def edit-impl (std-crud/edit-fn resource-name))
+(defn edit-impl
+  [{{uuid :uuid} :params body :body :as request}]
+  (try
+    (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
+                      (db/retrieve request)
+                      (a/can-modify? request))
+          merged (merge current body)
+          value (:value merged)]
+      (-> merged
+          (u/update-timestamps)
+          (crud/validate)
+          (dissoc :value)
+          (db/edit request))
+      (when value
+        (uzk/set-data (zkru/run-parameter-znode-path merged) value)) ;TODO what if znode not found
+      )
+    (catch ExceptionInfo ei
+      (ex-data ei))))
 
 (defmethod crud/edit resource-name
   [request]

@@ -41,7 +41,7 @@
 
 (defn get-version
   [path]
-  (-> (get-data path) :stat :version))
+  (-> (get-znode path) :stat :version))
 
 (defn set-data [path value & options]
   (let [version (get-version path)
