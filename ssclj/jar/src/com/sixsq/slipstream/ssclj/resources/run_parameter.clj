@@ -99,15 +99,21 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+(defn send-param-value-and-set-watcher [event-ch {id :id name :name :as run-parameter}]
+  (try ; if znode not found do nothing for the moment
+    (let [node-path (zkru/run-parameter-znode-path run-parameter)
+          event {:id   id
+                 :name name
+                 :data (uzk/get-data node-path :watcher (partial watch-fn event-ch id name))}]
+      (async/>!! event-ch event))
+    (catch Exception e
+      )))
+
 (def retrieve-sse-impl
   (sse/event-channel-handler
     (fn [request response raise event-ch]
-      (let [{id :id name :name :as run-parameter} (retrieve-run-parameter request)
-            node-path (zkru/run-parameter-znode-path run-parameter)
-            event {:id   id
-                   :name name
-                   :data (uzk/get-data node-path :watcher (partial watch-fn event-ch id name))}]
-        (async/>!! event-ch event)))
+      (let [{id :id name :name :as run-parameter} (retrieve-run-parameter request)]
+        (send-param-value-and-set-watcher event-ch run-parameter)))
     {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
 
 (defn retrieve-json-impl [request]
@@ -148,8 +154,19 @@
   [request]
   (delete-impl request))
 
-(def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+(def query-sse-impl
+  (sse/event-channel-handler
+    (fn [request response raise event-ch]
+      (a/can-view? {:acl collection-acl} request)
+      (let [options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+            [count-before-pagination entries] (db/query resource-name options)]
+        (doall (map (partial send-param-value-and-set-watcher event-ch) entries))))
+    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
+
+(def query-json-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
 (defmethod crud/query resource-name
-  [request]
-  (query-impl request))
+  [{{accept :accept} :headers :as request}]
+  (case accept
+    "text/event-stream" query-sse-impl
+    query-json-impl))
