@@ -24,6 +24,7 @@
                  '[[org.clojure/clojure]
 
                    [aleph]
+                   [manifold]
                    [cheshire] ;; newer version needed for ring-json
                    [compojure]
                    [clj-stacktrace]
@@ -46,6 +47,7 @@
                    [ring/ring-core]
                    [ring/ring-json]
                    [superstring]
+                   [zookeeper-clj]
 
                    [com.sixsq.slipstream/utils]
                    [com.sixsq.slipstream/auth]

@@ -107,6 +107,7 @@
                  :data (uzk/get-data node-path :watcher (partial watch-fn event-ch id name))}]
       (async/>!! event-ch event))
     (catch Exception e
+      (log/warn (ex-data e))
       )))
 
 (def retrieve-sse-impl
