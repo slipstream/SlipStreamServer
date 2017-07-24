@@ -575,7 +575,7 @@ public abstract class ConnectorBase implements Connector {
                                                      String nodeInstanceName) throws ValidationException
     {
         try {
-            return ServiceOffersUtil.getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName);
+            return ServiceOffersUtil.getServiceOfferAttributeAsString(serviceOffer, serviceOfferAttributeName);
         } catch (ValidationException e) {
             throw new ValidationException(e.getMessage() + " for the node instance '" + nodeInstanceName + "'");
         }

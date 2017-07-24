@@ -73,7 +73,7 @@
 
 (defmacro constrained-map
   "Creates an open map spec using the supplied keys specs with the
-   additional contraint that all unspecified entries must match the
+   additional constraint that all unspecified entries must match the
    given key and value specs. The keys specs will be evaluated."
   [key-spec value-spec & map-specs]
   (let [map-spec (merge-keys-specs map-specs)]
