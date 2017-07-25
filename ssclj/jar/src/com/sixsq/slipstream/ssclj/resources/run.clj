@@ -81,7 +81,7 @@
   (doseq [n nodes]
     ()
     (let [node-name (name (key n))
-          multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value]))]
+          multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
       (doseq [i (range 1 (inc multiplicity))]
         (create-parameter identity {:run-id run-id :node-name node-name :node-index i :name "vmstate" :value "init"})
         ))))

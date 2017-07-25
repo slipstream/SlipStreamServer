@@ -19,6 +19,9 @@
     (log/info "creating zookeeper client:" zk-endpoints)
     (zk/connect zk-endpoints :timeout-msec 60000)))
 
+(defn close-client []
+  (zk/close *client*))
+
 (defn create-all [path & options]
   (apply zk/create-all *client* path options))
 
