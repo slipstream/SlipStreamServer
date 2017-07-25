@@ -156,3 +156,14 @@
                          true? (dissoc maximal :description)
                          true? (dissoc maximal :properties)
                          false? (assoc maximal :bad "BAD"))))
+
+(deftest check-zero-or-pos-int
+  (are [expect-fn arg] (expect-fn (s/valid? :cimi.core/zero-or-pos-int arg))
+                       true? 0
+                       true? 1
+                       true? 1000
+                       false? -1
+                       false? -1000
+                       false? 1.2
+                       false? ""
+                       false? {}))

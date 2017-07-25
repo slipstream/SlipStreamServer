@@ -24,7 +24,8 @@
     [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.es.es-binding :as esb]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
+    [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]))
 
 (defn- set-persistence-impl
   []
@@ -71,6 +72,8 @@
    (log/info "java classpath: " (System/getProperty "java.class.path"))
 
    (esb/set-client! (esb/create-client))
+
+   (zku/set-client! (zku/create-client))
 
    (set-persistence-impl)
    (resources/initialize)
