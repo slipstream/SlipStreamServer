@@ -24,7 +24,7 @@
   (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-entry
-  {:id                  (str resource-url "/run-uuid")
+  {:id                  (str resource-url "run/dfd34916-6ede-47f7-aaeb-a30ddecbba5b")
    :resourceURI         resource-uri
    :module-resource-uri "module/examples/tutorials/service-testing/system/1940"
    :category            "Deployment"
@@ -41,7 +41,7 @@
                          :node2 {:parameters {:cloudservice {:description   "param1 description"
                                                              :default-value "abc"}}}}})
 
-(deftest lifecycle
+(deftest create-run
 
   (let [session-admin-json (-> (session (ring-app))
                                (content-type "application/json")
@@ -56,20 +56,34 @@
                          (content-type "application/json"))]
 
     ;; adding, retrieving and  deleting entry as user should succeed
-    (let [uri (-> session-user
-                  (request base-uri
-                           :request-method :post
-                           :body (json/write-str valid-entry))
-                  (t/body->edn)
-                  (t/is-status 201)
-                  (t/location))
-          abs-uri (str p/service-context resource-url "/" (u/de-camelcase uri))]
+    (let [run-id (-> session-user
+                     (request base-uri
+                              :request-method :post
+                              :body (json/write-str valid-entry))
+                     (t/body->edn)
+                     (t/is-status 201)
+                     (t/location))
+          abs-uri (str p/service-context (u/de-camelcase run-id))
+          created-run (-> session-user
+                          (request abs-uri)
+                          (t/body->edn)
+                          (t/is-status 200))]
 
-      (-> session-user
-          (request abs-uri)
-          (t/body->edn)
-          (t/is-status 200))
 
-      (are [expected value] (= expected value)
-                            "init" (uzk/get-data (str ru/runs-path "/" uri "/state"))
-                            "init" (uzk/get-data (str ru/runs-path "/" uri "/" ru/nodes-txt "/node2/1/" "vmstate"))))))
+      (is (not (uzk/exists (str ru/znode-separator run-id))))
+
+      (let [start-uri (str p/service-context (t/get-op created-run "http://schemas.dmtf.org/cimi/2/action/start"))
+            started-run (-> session-user
+                            (request start-uri)
+                            (t/body->edn)
+                            (t/is-status 200))]
+
+        (is (not (get-in created-run [:body :start-time])))
+        (is (get-in started-run [:response :body :start-time]))
+
+        (are [expected value] (= expected value)
+                              "init" (uzk/get-data (str ru/znode-separator run-id "/state"))
+                              "init" (uzk/get-data
+                                       (str ru/znode-separator run-id "/" ru/nodes-txt "/node2/1/" "vmstate")))
+        ))))
+

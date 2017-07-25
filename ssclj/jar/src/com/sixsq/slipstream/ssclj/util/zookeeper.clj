@@ -50,3 +50,6 @@
   (let [version (get-version path)
         data (.getBytes (str value) "UTF-8")]
     (apply zk/set-data *client* path data version options)))
+
+(defn exists [path & options]
+  (apply zk/exists *client* path options))

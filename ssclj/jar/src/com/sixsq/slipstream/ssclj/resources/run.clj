@@ -57,9 +57,9 @@
 
 (defmethod crud/new-identifier resource-name
   [json _]
-  #_json                                                    ;TODO uncomment
-  (assoc json :id (u/random-uuid))                          ;TODO REMOVE
-  )                                                         ; keep id of java run
+  #_json                                                    ;TODO uncomment because the run-id should be consistent with SlipStream java server
+  (assoc json :id (str resource-url "/" (u/random-uuid)))   ;TODO REMOVE this line
+  )
 
 (defn create-parameter [identity run-parameter]
   (try
@@ -86,7 +86,7 @@
         (create-parameter identity {:run-id run-id :node-name node-name :node-index i :name "vmstate" :value "init"})
         ))))
 
-(defn add-impl [{body :body identity :identity :as request}]
+(defn add-impl [{body :body :as request}]
   (a/can-modify? {:acl collection-acl} request)
   (let [new-run (-> body
                     u/strip-service-attrs
@@ -96,7 +96,6 @@
                     (crud/add-acl request)
                     (assoc :state rsm/initial-state))
         response (db/add resource-name (crud/validate new-run) {})]
-    (create-parameters identity new-run)
     response))
 
 (defmethod crud/add resource-name
@@ -156,19 +155,17 @@
     (assoc run :start-time now)))
 
 (defmethod crud/do-action [resource-url "start"]
-  [{{uuid :uuid} :params :as request}]
+  [{{uuid :uuid} :params identity :identity :as request}]
   (try
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                       (db/retrieve request)
                       (a/can-modify? request))
-          response (-> current
-                       (add-start-time)
-                       (u/update-timestamps)
-                       (crud/validate)
-                       (db/edit request))]
-      ;(zru/create-zk-run current)
-      response
-      )
+          run (-> current
+                  (add-start-time)
+                  (u/update-timestamps)
+                  (crud/validate)
+                  (db/edit request))]
+      (create-parameters identity current)
+      run)
     (catch ExceptionInfo ei
-      (ex-data ei)))
-  )
+      (ex-data ei))))

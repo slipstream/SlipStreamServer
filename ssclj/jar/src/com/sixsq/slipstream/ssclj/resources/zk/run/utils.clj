@@ -5,15 +5,14 @@
 
 (def znode-separator "/")
 
-(def runs-path (str znode-separator "runs"))
-
 (def nodes-txt "nodes")
 
 (defn parameter-znode-path [run-id node-name node-index name]
-  (cond
-    (and run-id node-name node-index) (string/join znode-separator [runs-path run-id nodes-txt node-name node-index name])
-    (and run-id node-name) (string/join znode-separator [runs-path run-id nodes-txt node-name name])
-    run-id (string/join znode-separator [runs-path run-id name])))
+  (->> (cond
+         (and run-id node-name node-index) (string/join znode-separator [run-id nodes-txt node-name node-index name])
+         (and run-id node-name) (string/join znode-separator [run-id nodes-txt node-name name])
+         run-id (string/join znode-separator [run-id name]))
+       (str znode-separator)))
 
 (defn run-parameter-znode-path
   [{run-id :run-id node-name :node-name node-index :node-index name :name :as run-parameter}]
