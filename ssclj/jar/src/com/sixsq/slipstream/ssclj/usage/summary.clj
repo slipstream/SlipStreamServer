@@ -60,11 +60,12 @@
 
 (defn- comsumption
   [record]
-  {:unit-minutes (contribution record)})
+  {:value (contribution record)
+   :aggregation "minutes"})
 
 (defn- sum-consumptions
   [cons1 cons2]
-  (update-in cons1 [:unit-minutes] #(+ % (:unit-minutes cons2))))
+  (update-in cons1 [:value] #(+ % (:value cons2))))
 
 (defn- merge-summary-record
   [summary record]

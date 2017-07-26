@@ -26,20 +26,32 @@
 (defn insert-daily-summaries
   [f]
   (ltu/with-test-client
-    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit-minutes 100.0}}) {:user-name "joe"})
-    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit-minutes 200.0}}) {:user-name "joe"})
-    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit-minutes 500.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit-minutes 40.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
-    (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
-    (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:value 100.0
+                                                                        :aggregation "minutes"}}) {:user-name "joe"})
+    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:value 200.0}
+                                                                  :aggregation "minutes"}) {:user-name "joe"})
+    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:value 500.0}
+                                                                   :aggregation "minutes"}) {:user-name "mike"})
+    (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:value 300.0
+                                                                         :aggregation "minutes"}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:value 40.0
+                                                                         :aggregation "minutes"}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:value 300.0
+                                                                         :aggregation "minutes"}}) {:user-name "joe"})
+    (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:value 540.0
+                                                                          :aggregation "minutes"}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:value 300.0
+                                                                          :aggregation "minutes"}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:value 300.0
+                                                                          :aggregation "minutes"}}) {:user-name "joe"})
+    (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:value 540.0
+                                                                           :aggregation "minutes"}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:value 300.0
+                                                                           :aggregation "minutes"}}) {:user-name "mike"})
 
     ;; metric names can contain dots
-    (rc/insert-summary! (summary "alfred" "moon" :monthly [2015 04 15] {:a.b.v {:unit-minutes 300.0}}) {:user-name "alfred"})
+    (rc/insert-summary! (summary "alfred" "moon" :monthly [2015 04 15] {:a.b.v {:value 300.0
+                                                                                :aggregation "minutes"}}) {:user-name "alfred"})
     (f)))
 
 (use-fixtures :once insert-daily-summaries)
@@ -157,17 +169,17 @@
   (are-counts-for-admin 0 "?$filter=xxx<100"))
 
 (deftest filter-int-value
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes<100")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes > 400")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes < 50")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes < 50 and usage/ram/unit-minutes > 30")
-  (are-counts-for-admin 2 "?$filter=frequency='daily' and usage/ram/unit-minutes > 100 and usage/ram/unit-minutes < 500")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/value < 100")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/value > 400")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/value < 50")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/value < 50 and usage/ram/value > 30")
+  (are-counts-for-admin 2 "?$filter=frequency='daily' and usage/ram/value > 100 and usage/ram/value < 500")
 
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 40")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 100")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 200")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 300")
-  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/unit-minutes = 500"))
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/value = 40")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/value = 100")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/value = 200")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/value = 300")
+  (are-counts-for-admin 1 "?$filter=frequency='daily' and usage/ram/value = 500"))
 
 (defn- one-line
   [s]

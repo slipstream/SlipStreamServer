@@ -20,7 +20,7 @@
    :start_timestamp (days-ago-at-hour day-number)
    :end-timestamp   (days-ago-at-hour (inc day-number))
    :usage           (->> metrics-map
-                         (map (fn [[k v]] {k {:unit-minutes v}}))
+                         (map (fn [[k v]] {k {:value v}}))
                          (into {}))})
 
 (defn- daily-records
@@ -43,7 +43,7 @@
    :start_timestamp (days-ago-at-hour (* 30 day-number))
    :end-timestamp   (days-ago-at-hour (* 30 (inc day-number)))
    :usage           (->> {:ram 97185920 :disk 950.67 :cpu 9250}
-                         (map (fn [[k v]] {k {:unit-minutes v}}))
+                         (map (fn [[k v]] {k {:value v :aggregation "minutes"}}))
                          (into {}))})
 
 (defmethod usages-for-freq :weekly
@@ -54,7 +54,7 @@
    :start_timestamp (days-ago-at-hour (* 7 day-number))
    :end-timestamp   (days-ago-at-hour (* 7 (inc day-number)))
    :usage           (->> {:ram 571859200 :disk 5000.67 :cpu 52500}
-                         (map (fn [[k v]] {k {:unit-minutes v}}))
+                         (map (fn [[k v]] {k {:value v :aggregation "minutes"}}))
                          (into {}))})
 
 (defmethod usages-for-freq :daily
@@ -65,7 +65,7 @@
    :start_timestamp (days-ago-at-hour day-number)
    :end-timestamp   (days-ago-at-hour (inc day-number))
    :usage           (->> {:ram 47185920 :disk 450.67 :cpu 1250}
-                         (map (fn [[k v]] {k {:unit-minutes v}}))
+                         (map (fn [[k v]] {k {:value v :aggregation "minutes"}}))
                          (into {}))})
 
 (defn usages

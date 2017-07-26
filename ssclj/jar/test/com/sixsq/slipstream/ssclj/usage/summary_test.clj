@@ -105,11 +105,13 @@
                            {
                             "nb-cpu"
                             {
-                             :unit-minutes 1348.0
+                             :value 1348.0
+                             :aggregation "minutes"
                              }
                             "RAM"
                             {
-                             :unit-minutes 13872.0
+                             :value 13872.0
+                             :aggregation "minutes"
                              }
                             }
           }
@@ -124,7 +126,8 @@
                            {
                             "nb-cpu"
                             {
-                             :unit-minutes 5460.0
+                             :value 5460.0
+                             :aggregation "minutes"
                              }
                             }
           }
@@ -143,7 +146,8 @@
                            {
                             "Disk"
                             {
-                             :unit-minutes 144000.0
+                             :value 144000.0
+                             :aggregation "minutes"
                              }
                             }
           }]
@@ -161,7 +165,8 @@
                            {
                             "Disk"
                             {
-                             :unit-minutes 144000.0
+                             :value 144000.0
+                             :aggregation "minutes"
                              }
                             }
           }]
@@ -203,9 +208,13 @@
           :end-timestamp   end-day
           :frequency       "daily"
           :grouping        "user,cloud"
-          :usage           {"nb-cpu"  {:unit-minutes (* 4.0 337)}
-                            "RAM-GB"  {:unit-minutes (* 8.0 337)}
-                            "disk-GB" {:unit-minutes (* 100.5 337)}}
+          :usage           {"nb-cpu"  {:value (* 4.0 337)
+                                       :aggregation "minutes"}
+                            "RAM-GB"  {:value (* 8.0 337)
+                                       :aggregation "minutes"}
+                            "disk-GB" {:value (* 100.5 337
+                                                        )
+                                       :aggregation "minutes"}}
           }]
         (summarize start-day end-day :daily [:user :cloud]))))
 
@@ -218,9 +227,12 @@
   (insert-record)
   (summarize-and-store! start-day end-day :daily [:user :cloud])
   (let [summaries-from-db (summaries-from-db)
-        result {:disk-GB {:unit-minutes 33868.5},
-                :RAM-GB  {:unit-minutes 2696.0},
-                :nb-cpu  {:unit-minutes 1348.0}}]
+        result {:disk-GB {:value 33868.5
+                          :aggregation "minutes"},
+                :RAM-GB  {:value 2696.0
+                          :aggregation "minutes"},
+                :nb-cpu  {:value 1348.0
+                          :aggregation "minutes"}}]
     (is (= 1 (count summaries-from-db)))
     (let [usage (first summaries-from-db)]
       (is (= result (:usage usage)))
@@ -231,9 +243,12 @@
   (insert-record)
   (summarize-and-store! start-day end-day :daily [:cloud])
   (let [summaries-from-db (summaries-from-db)
-        result {:disk-GB {:unit-minutes 33868.5},
-                :RAM-GB  {:unit-minutes 2696.0},
-                :nb-cpu  {:unit-minutes 1348.0}}]
+        result {:disk-GB {:value 33868.5
+                          :aggregation "minutes"},
+                :RAM-GB  {:value 2696.0
+                          :aggregation "minutes"},
+                :nb-cpu  {:value 1348.0
+                          :aggregation "minutes"}}]
     (is (= 1 (count summaries-from-db)))
     (let [usage (first summaries-from-db)]
       (is (= result (:usage usage)))
@@ -247,16 +262,20 @@
            :end-timestamp   start-may
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"nb-cpu" {:unit-minutes 1348.0}
-                             "RAM"    {:unit-minutes 13872.0}}
+           :usage           {"nb-cpu" {:value 1348.0
+                                       :aggregation "minutes"}
+                             "RAM"    {:value 13872.0
+                                       :aggregation "minutes"}}
            }
           {:cloud           "aws"
            :start-timestamp start-april
            :end-timestamp   start-may
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"Disk"   {:unit-minutes 4176000.0}
-                             "nb-cpu" {:unit-minutes 5460.0}}}]
+           :usage           {"Disk"   {:value 4176000.0
+                                       :aggregation "minutes"}
+                             "nb-cpu" {:value 5460.0
+                                       :aggregation "minutes"}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may :daily [:cloud]))))
 
 (deftest summarize-records-by-cloud-except-users
@@ -268,7 +287,8 @@
            :start-timestamp "2015-04-01T00:00:00.000Z"
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"Disk" {:unit-minutes 4176000.0}}}]
+           :usage           {"Disk" {:value 4176000.0
+                                     :aggregation "minutes"}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may :daily
                             [:cloud] ["sixsq_dev"])))
   (is (= [{:cloud           "exoscale-ch-gva"
@@ -276,13 +296,16 @@
            :start-timestamp "2015-04-01T00:00:00.000Z"
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"RAM"    {:unit-minutes 13872.0}
-                             "nb-cpu" {:unit-minutes 1348.0}}}
+           :usage           {"RAM"    {:value 13872.0
+                                       :aggregation "minutes"}
+                             "nb-cpu" {:value 1348.0
+                                       :aggregation "minutes"}}}
           {:cloud           "aws"
            :end-timestamp   "2015-05-01T00:00:00.000Z"
            :start-timestamp "2015-04-01T00:00:00.000Z"
            :frequency       "daily"
            :grouping        "cloud"
-           :usage           {"nb-cpu" {:unit-minutes 5460.0}}}]
+           :usage           {"nb-cpu" {:value 5460.0
+                                       :aggregation "minutes"}}}]
          (summarize-records [record-1 record-2 record-3 record-4 record-5] start-april start-may :daily
                             [:cloud] ["joe"]))))
