@@ -24,7 +24,7 @@
   (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-entry
-  {:id                  (str resource-url "run/dfd34916-6ede-47f7-aaeb-a30ddecbba5b")
+  {:id                  (str resource-url "/dfd34916-6ede-47f7-aaeb-a30ddecbba5b")
    :resourceURI         resource-uri
    :module-resource-uri "module/examples/tutorials/service-testing/system/1940"
    :category            "Deployment"
@@ -68,7 +68,6 @@
                           (request abs-uri)
                           (t/body->edn)
                           (t/is-status 200))]
-
 
       (is (not (uzk/exists (str ru/znode-separator run-id))))
 

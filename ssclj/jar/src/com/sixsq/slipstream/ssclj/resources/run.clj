@@ -57,9 +57,7 @@
 
 (defmethod crud/new-identifier resource-name
   [json _]
-  #_json                                                    ;TODO uncomment because the run-id should be consistent with SlipStream java server
-  (assoc json :id (str resource-url "/" (u/random-uuid)))   ;TODO REMOVE this line
-  )
+  json)
 
 (defn create-parameter [identity run-parameter]
   (try
@@ -89,7 +87,7 @@
 (defn add-impl [{body :body :as request}]
   (a/can-modify? {:acl collection-acl} request)
   (let [new-run (-> body
-                    u/strip-service-attrs
+                    (dissoc :created :updated :resourceURI :operations)
                     (crud/new-identifier resource-name)
                     (assoc :resourceURI resource-uri)
                     u/update-timestamps

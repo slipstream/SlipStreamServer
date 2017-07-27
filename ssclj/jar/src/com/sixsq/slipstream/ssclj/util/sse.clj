@@ -5,8 +5,7 @@
             [ring.core.protocols :as ring]
             [ring.util.response :as ring-response]
             [manifold.stream :as s]
-            [manifold.deferred :as d])
-  )
+            [manifold.deferred :as d]))
 
 (def CRLF "\r\n")
 (def EVENT_FIELD "event: ")
@@ -36,7 +35,13 @@
      (.append sb CRLF)
      (str sb))))
 
-(defn send-event
+(defn send-event [id name data event-ch]
+  (let [event {:id   id
+               :name name
+               :data data}]
+    (async/>!! event-ch event)))
+
+(defn- send-event-on-response-ch
   [channel name data id put-fn raise]
   (try
     (put-fn channel (mk-data name data id))
@@ -66,7 +71,7 @@
                 (if (map? event)
                   (reduce (fn [agg [k v]] (assoc agg k (str v))) {} event)
                   {:data (str event)})]
-            (when (send-event response-channel event-name event-data event-id async/put! raise)
+            (when (send-event-on-response-ch response-channel event-name event-data event-id async/put! raise)
               (recur))))))
     (async/close! event-channel)
     (async/close! response-channel)

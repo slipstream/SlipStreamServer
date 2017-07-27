@@ -56,7 +56,7 @@
 
 (s/def :cimi.run/nodes (su/constrained-map keyword? :cimi.run/node))
 
-(def run-attrs {:req-un [#_:cimi.common/id                  ;TODO uncomment
+(def run-attrs {:req-un [:cimi.common/id
                          :cimi.run/module-resource-uri
                          :cimi.run/type
                          :cimi.run/category

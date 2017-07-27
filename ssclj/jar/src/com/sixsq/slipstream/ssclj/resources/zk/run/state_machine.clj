@@ -21,6 +21,7 @@
 
 ;; State machine states
 (def initial-state "init")
+
 (def valid-transitions
   {initial-state ["provisioning"]
    "provisioning" ["executing"]
