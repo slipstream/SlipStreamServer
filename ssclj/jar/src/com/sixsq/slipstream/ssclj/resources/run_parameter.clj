@@ -140,7 +140,7 @@
         (db/edit request))
     (when value
       (let [name (:name merged)]
-        (if (contains? #{"state" "vmstate"} name)
+        (if (contains? #{"state"} name)
           (logu/log-and-throw-400 (str "run parameter " name " cannot be set"))
           (uzk/set-data (zkru/run-parameter-znode-path merged) value)))))) ;TODO what if znode not found
 

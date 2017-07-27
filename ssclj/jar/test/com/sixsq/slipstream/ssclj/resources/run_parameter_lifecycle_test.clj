@@ -56,21 +56,22 @@
 
 (deftest create-run-parameter-state
   (let [run-id "run/def34916-6ede-47f7-aaeb-a30ddecbba5b"
-        valid-entry {:run-id run-id :name "state" :value "init"}
+        run-parameter {:run-id run-id :name "state" :value "init"}
         run-parameter-id (-> session-user
                              (request base-uri
                                       :request-method :post
-                                      :body (json/write-str valid-entry))
+                                      :body (json/write-str run-parameter))
                              (t/body->edn)
                              (t/is-status 201)
                              (t/location))
+        znode-path (zkru/run-parameter-znode-path run-parameter)
         abs-uri (str p/service-context (u/de-camelcase run-parameter-id))
         created-run-parameter (-> session-user
                                   (request abs-uri)
                                   (t/body->edn)
                                   (t/is-status 200))]
 
-    (is (= "init" (uzk/get-data (str ru/znode-separator run-id "/state"))) "znode state is created")
+    (is (= "init" (uzk/get-data znode-path)) "znode state is created")
 
     (-> session-user
         (request abs-uri :request-method :put
@@ -78,4 +79,4 @@
         (t/body->edn)
         (t/is-status 400))
 
-    (is (= "init" (uzk/get-data (str ru/znode-separator run-id "/state"))) "run parameter state can't be updated")))
+    (is (= "init" (uzk/get-data znode-path)) "run parameter state can't be updated")))
