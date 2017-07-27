@@ -107,11 +107,7 @@
 ;; these definitions are the 'cimi.acl' namespace
 ;;
 
-;; A principal is a sequence of characters starting with a letter or digit and
-;; containing any number of letters, digits, slashes, dots, colons, underscores,
-;; or dashes.
-(s/def :cimi.acl/principal
-  (su/regex-string #"[a-zA-Z0-9/\.:_-]" #"^[a-zA-Z0-9]+[a-zA-Z0-9/\.:_-]*$"))
+(s/def :cimi.acl/principal :cimi.core/nonblank-string)
 
 (s/def :cimi.acl/type #{"USER" "ROLE"})
 (s/def :cimi.acl/right #{"VIEW" "MODIFY"                    ;; LEGACY RIGHTS
