@@ -1,4 +1,4 @@
-(def +version+ "3.33-SNAPSHOT")
+(def +version+ "3.34-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/auth
