@@ -76,10 +76,6 @@
     (uzk/set-data node-path value)
     response))
 
-(defmethod crud/add resource-name
-  [request]
-  (add-impl request))
-
 (defn transiant-watch-fn [event-ch id name {:keys [event-type path :as zk-event]}]
   (when (= event-type :NodeDataChanged)
     (let [data (uzk/get-data path)]

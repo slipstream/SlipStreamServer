@@ -84,5 +84,10 @@
                               "init" (uzk/get-data (str ru/znode-separator run-id "/state"))
                               "init" (uzk/get-data
                                        (str ru/znode-separator run-id "/" ru/nodes-txt "/node2/1/" "vmstate")))
-        ))))
+        )
 
+      run-parameter-state-id (-> session-user
+                                 :request-method :get
+
+                                 )
+      )))

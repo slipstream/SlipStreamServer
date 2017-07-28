@@ -9,6 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as zru]
     [com.sixsq.slipstream.ssclj.resources.run-parameter :as rp]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [create-identity-map]]
     [com.sixsq.slipstream.ssclj.resources.zk.run.state-machine :as rsm]
     [com.sixsq.slipstream.auth.acl :as a]
     [superstring.core :as str]
@@ -59,30 +60,37 @@
   [json _]
   json)
 
-(defn create-parameter [identity run-parameter]
+(defn create-parameter [run-parameter]
   (try
-    (let [
-          request {:params   {:resource-name rp/resource-url}
-                   :identity identity
+    (let [request {:params   {:resource-name rp/resource-url}
+                   :identity (create-identity-map ["super" #{"ADMIN"}])
                    :body     run-parameter}
-          {:keys [status body]} (crud/add request)]
+          {:keys [status body]} (rp/add-impl request)]
       (case status
         201 (log/info "created run-parameter: " body)
         (log/info "unexpected status code when creating run-parameter resource:" status)))
     (catch Exception e
       (log/warn "error when creating run-parameter resource: " (str e) "\n"
-                (with-out-str (st/print-cause-trace e)))))
-  )
+                (with-out-str (st/print-cause-trace e))))))
 
-(defn create-parameters [identity {nodes :nodes run-id :id state :state}]
-  (create-parameter identity {:run-id run-id :name "state" :value state})
-  (doseq [n nodes]
-    ()
-    (let [node-name (name (key n))
-          multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
-      (doseq [i (range 1 (inc multiplicity))]
-        (create-parameter identity {:run-id run-id :node-name node-name :node-index i :name "vmstate" :value "init"})
-        ))))
+(defn create-parameters [identity {nodes :nodes run-id :id state :state}] ; run parameter state should not
+  (let [user (:current identity)]
+    (create-parameter {:run-id run-id :name "state" :value state :acl {:owner {:principal "ADMIN"
+                                                                               :type      "ROLE"}
+                                                                       :rules [{:principal user
+                                                                                :type      "USER"
+                                                                                :right     "VIEW"}]}})
+    (doseq [n nodes]
+      ()
+      (let [node-name (name (key n))
+            multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
+        (doseq [i (range 1 (inc multiplicity))]
+          (create-parameter {:run-id run-id :node-name node-name :node-index i
+                             :name   "vmstate" :value "init" :acl {:owner {:principal "ADMIN"
+                                                                           :type      "ROLE"}
+                                                                   :rules [{:principal user
+                                                                            :type      "USER"
+                                                                            :right     "MODIFY"}]}}))))))
 
 (defn add-impl [{body :body :as request}]
   (a/can-modify? {:acl collection-acl} request)
