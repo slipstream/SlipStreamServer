@@ -66,12 +66,12 @@
                           (crud/add-acl request)
                           crud/validate)
         response (db/add resource-name run-parameter {})
-        run-id (:run-id body)
+        run-href (:run-href body)
         node-name (:node-name body)
         node-index (:node-index body)
         name (:name body)
         value (:value body)
-        node-path (zkru/parameter-znode-path run-id node-name node-index name)]
+        node-path (zkru/parameter-znode-path run-href node-name node-index name)]
     (uzk/create-all node-path :persistent? true)
     (uzk/set-data node-path value)
     response))

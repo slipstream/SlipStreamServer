@@ -40,8 +40,9 @@
                                  :right     "MODIFY"}]})
 
 (deftest create-run-parameter-xyz
-  (let [run-id "run/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
-        valid-entry {:run-id run-id :node-name "machine" :node-index 1 :name "xyz" :value "XYZ" :acl resource-acl-jane}
+  (let [run-href "run/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
+        valid-entry {:run-href run-href :node-name "machine" :node-index 1
+                     :name     "xyz" :value "XYZ" :acl resource-acl-jane}
         znode-path (zkru/run-parameter-znode-path valid-entry)
         run-parameter-id (->
                            (->> {:params   {:resource-name resource-url}

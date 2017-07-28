@@ -7,16 +7,16 @@
 
 (def nodes-txt "nodes")
 
-(defn parameter-znode-path [run-id node-name node-index name]
+(defn parameter-znode-path [run-href node-name node-index name]
   (->> (cond
-         (and run-id node-name node-index) (string/join znode-separator [run-id nodes-txt node-name node-index name])
-         (and run-id node-name) (string/join znode-separator [run-id nodes-txt node-name name])
-         run-id (string/join znode-separator [run-id name]))
+         (and run-href node-name node-index) (string/join znode-separator [run-href nodes-txt node-name node-index name])
+         (and run-href node-name) (string/join znode-separator [run-href nodes-txt node-name name])
+         run-href (string/join znode-separator [run-href name]))
        (str znode-separator)))
 
 (defn run-parameter-znode-path
-  [{run-id :run-id node-name :node-name node-index :node-index name :name :as run-parameter}]
-  (parameter-znode-path run-id node-name node-index name))
+  [{run-href :run-href node-name :node-name node-index :node-index name :name :as run-parameter}]
+  (parameter-znode-path run-href node-name node-index name))
 
 ;(defn run-id-path [run-id])
 
@@ -38,17 +38,17 @@
 
 
 #_(defn create-zk-run [{run-id :id nodes :nodes :as run}]
-  (doseq [n nodes]
-    (zk/create-all uzk/*client* (node-path run-id (key n)) :persistent? true)
-    (let [{:keys [params multiplicity mapping]} (val n)]
-      (doseq [i (range 1 (inc multiplicity))]
-        (zk/create-all client (rzu/params-znode-path run-id (key n) i) :persistent? true)
-        (doseq [p params]
-          (if-let [default (-> p val :default)]
-            (zk/create client (rzu/param-znode-path run-id (key n) i (key p))
-                       :data (zdata/to-bytes default)
-                       :persistent? true)
-            (zk/create client (rzu/param-znode-path run-id (key n) i (key p))
-                       :persistent? true))))))
-  (rsm/create client run-id module params)
-  )
+    (doseq [n nodes]
+      (zk/create-all uzk/*client* (node-path run-id (key n)) :persistent? true)
+      (let [{:keys [params multiplicity mapping]} (val n)]
+        (doseq [i (range 1 (inc multiplicity))]
+          (zk/create-all client (rzu/params-znode-path run-id (key n) i) :persistent? true)
+          (doseq [p params]
+            (if-let [default (-> p val :default)]
+              (zk/create client (rzu/param-znode-path run-id (key n) i (key p))
+                         :data (zdata/to-bytes default)
+                         :persistent? true)
+              (zk/create client (rzu/param-znode-path run-id (key n) i (key p))
+                         :persistent? true))))))
+    (rsm/create client run-id module params)
+    )

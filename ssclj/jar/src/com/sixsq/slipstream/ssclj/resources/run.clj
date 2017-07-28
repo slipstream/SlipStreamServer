@@ -73,24 +73,24 @@
       (log/warn "error when creating run-parameter resource: " (str e) "\n"
                 (with-out-str (st/print-cause-trace e))))))
 
-(defn create-parameters [identity {nodes :nodes run-id :id state :state}] ; run parameter state should not
+(defn create-parameters [identity {nodes :nodes run-href :id state :state}] ; run parameter state should not
   (let [user (:current identity)]
-    (create-parameter {:run-id run-id :name "state" :value state :acl {:owner {:principal "ADMIN"
-                                                                               :type      "ROLE"}
-                                                                       :rules [{:principal user
-                                                                                :type      "USER"
-                                                                                :right     "VIEW"}]}})
+    (create-parameter {:run-href run-href :name "state" :value state :acl {:owner {:principal "ADMIN"
+                                                                                   :type      "ROLE"}
+                                                                           :rules [{:principal user
+                                                                                    :type      "USER"
+                                                                                    :right     "VIEW"}]}})
     (doseq [n nodes]
       ()
       (let [node-name (name (key n))
             multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
         (doseq [i (range 1 (inc multiplicity))]
-          (create-parameter {:run-id run-id :node-name node-name :node-index i
-                             :name   "vmstate" :value "init" :acl {:owner {:principal "ADMIN"
-                                                                           :type      "ROLE"}
-                                                                   :rules [{:principal user
-                                                                            :type      "USER"
-                                                                            :right     "MODIFY"}]}}))))))
+          (create-parameter {:run-href run-href :node-name node-name :node-index i
+                             :name     "vmstate" :value "init" :acl {:owner {:principal "ADMIN"
+                                                                             :type      "ROLE"}
+                                                                     :rules [{:principal user
+                                                                              :type      "USER"
+                                                                              :right     "MODIFY"}]}}))))))
 
 (defn add-impl [{body :body :as request}]
   (a/can-modify? {:acl collection-acl} request)

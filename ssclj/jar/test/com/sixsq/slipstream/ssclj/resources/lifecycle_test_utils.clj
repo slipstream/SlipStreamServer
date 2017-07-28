@@ -217,4 +217,5 @@
     (try
       (uzk/close-client) ; in case server already closed ignore exceptions
       (catch Exception e))
-    (.close server)))
+    (.close server)
+    ))

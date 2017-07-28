@@ -56,20 +56,20 @@
                          (content-type "application/json"))]
 
     ;; adding, retrieving and  deleting entry as user should succeed
-    (let [run-id (-> session-user
-                     (request base-uri
-                              :request-method :post
-                              :body (json/write-str valid-entry))
-                     (t/body->edn)
-                     (t/is-status 201)
-                     (t/location))
-          abs-uri (str p/service-context (u/de-camelcase run-id))
+    (let [run-href (-> session-user
+                       (request base-uri
+                                :request-method :post
+                                :body (json/write-str valid-entry))
+                       (t/body->edn)
+                       (t/is-status 201)
+                       (t/location))
+          abs-uri (str p/service-context (u/de-camelcase run-href))
           created-run (-> session-user
                           (request abs-uri)
                           (t/body->edn)
                           (t/is-status 200))]
 
-      (is (not (uzk/exists (str ru/znode-separator run-id))))
+      (is (not (uzk/exists (str ru/znode-separator run-href))))
 
       (let [start-uri (str p/service-context (t/get-op created-run "http://schemas.dmtf.org/cimi/2/action/start"))
             started-run (-> session-user
@@ -81,13 +81,10 @@
         (is (get-in started-run [:response :body :start-time]))
 
         (are [expected value] (= expected value)
-                              "init" (uzk/get-data (str ru/znode-separator run-id "/state"))
+                              "init" (uzk/get-data (str ru/znode-separator run-href "/state"))
                               "init" (uzk/get-data
-                                       (str ru/znode-separator run-id "/" ru/nodes-txt "/node2/1/" "vmstate")))
+                                       (str ru/znode-separator run-href "/" ru/nodes-txt "/node2/1/" "vmstate")))
         )
 
-      run-parameter-state-id (-> session-user
-                                 :request-method :get
-
-                                 )
       )))
+
