@@ -34,7 +34,7 @@
 
     (are [expect-fn arg] (expect-fn (s/valid? :cimi/run arg))
                          true? run
-                         ;false? (dissoc run :id)  ;TODO uncomment
+                         false? (dissoc run :id)
                          false? (dissoc run :created)
                          false? (dissoc run :updated)
                          false? (dissoc run :acl)

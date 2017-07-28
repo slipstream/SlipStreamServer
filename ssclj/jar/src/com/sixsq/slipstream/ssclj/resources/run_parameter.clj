@@ -78,20 +78,25 @@
 
 (defn transiant-watch-fn [event-ch id name {:keys [event-type path :as zk-event]}]
   (when (= event-type :NodeDataChanged)
-    (let [data (uzk/get-data path)]
-      (sse/send-event id name data event-ch)
+    (let [run-parameter (db/retrieve id {})
+          value (uzk/get-data path)
+          run-parameter (assoc run-parameter :value value)]
+      (sse/send-event id name run-parameter event-ch)
       (async/close! event-ch))))
 
 (defn persistent-watch-fn [event-ch id name {:keys [event-type path :as zk-event]}]
   (when (= event-type :NodeDataChanged)
-    (let [data (uzk/get-data path :watcher (partial persistent-watch-fn event-ch id name))]
-      (sse/send-event id name data event-ch))))
+    (let [run-parameter (db/retrieve id {})
+          value (uzk/get-data path :watcher (partial persistent-watch-fn event-ch id name))
+          run-parameter (assoc run-parameter :value value)]
+      (sse/send-event id name run-parameter event-ch))))
 
 (defn send-event-and-set-watcher
   [event-ch watch-fn {id :id name :name :as run-parameter}]
   (let [node-path (zkru/run-parameter-znode-path run-parameter)
-        value (uzk/get-data node-path :watcher (partial watch-fn event-ch id name))]
-    (sse/send-event id name value event-ch)))
+        value (uzk/get-data node-path :watcher (partial watch-fn event-ch id name))
+        run-parameter (assoc run-parameter :value value)]
+    (sse/send-event id name run-parameter event-ch)))
 
 (defn retrieve-run-parameter [{{uuid :uuid} :params :as request}]
   (try
@@ -108,8 +113,7 @@
   (sse/event-channel-handler
     (fn [request response raise event-ch]
       (let [{id :id name :name :as run-parameter} (retrieve-run-parameter request)
-            node-path (zkru/run-parameter-znode-path run-parameter)
-            value (uzk/get-data node-path)]
+            node-path (zkru/run-parameter-znode-path run-parameter)]
         (send-event-and-set-watcher event-ch transiant-watch-fn run-parameter)))
     {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
 
@@ -135,10 +139,7 @@
         (dissoc :value)
         (db/edit request))
     (when value
-      (let [name (:name merged)]
-        (if (contains? #{"state"} name)
-          (logu/log-and-throw-400 (str "run parameter " name " cannot be set"))
-          (uzk/set-data (zkru/run-parameter-znode-path merged) value)))))) ;TODO what if znode not found
+      (uzk/set-data (zkru/run-parameter-znode-path merged) value)))) ;TODO what if znode not found
 
 (defmethod crud/edit resource-name
   [request]
@@ -157,7 +158,7 @@
       (let [options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
             [count-before-pagination entries] (db/query resource-name options)]
         (doall (map (partial send-event-and-set-watcher event-ch persistent-watch-fn) entries))))
-    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
+    {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %) :heartbeat-delay 10}))
 
 (def query-json-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 

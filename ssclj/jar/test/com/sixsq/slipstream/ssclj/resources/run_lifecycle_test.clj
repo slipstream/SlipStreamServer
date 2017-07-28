@@ -83,8 +83,5 @@
         (are [expected value] (= expected value)
                               "init" (uzk/get-data (str ru/znode-separator run-href "/state"))
                               "init" (uzk/get-data
-                                       (str ru/znode-separator run-href "/" ru/nodes-txt "/node2/1/" "vmstate")))
-        )
-
-      )))
+                                       (str ru/znode-separator run-href "/" ru/nodes-txt "/node2/1/" "vmstate")))))))
 

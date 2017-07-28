@@ -56,14 +56,13 @@
 
 (s/def :cimi.run/nodes (su/constrained-map keyword? :cimi.run/node))
 
-(def run-attrs {:req-un [:cimi.common/id
+(def run-attrs {:req-un [:cimi.run/id
                          :cimi.run/module-resource-uri
                          :cimi.run/type
                          :cimi.run/category
                          :cimi.run/mutable
                          :cimi.run/nodes]
-                :opt-un [:cimi.run/id
-                         :cimi.run/start-time
+                :opt-un [:cimi.run/start-time
                          :cimi.run/end-time
                          :cimi.run/last-state-change-time
                          :cimi.run/state]})
