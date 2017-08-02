@@ -82,18 +82,12 @@ public class ServiceOffersUtil {
         if (serviceOfferAttribute == null) {
             String serviceOfferId = "Unknown";
             try {
-
                 JsonElement jsonElement = serviceOffer.get("id");
-
-                if (jsonElement == null)
-                    throw new ValidationException("[1127] The Json for service offer did not contain any Id attribute while looking for attribute " + serviceOfferAttributeName);
-
                 serviceOfferId = jsonElement.getAsString();
 
             } catch (Exception ignored) {
-                logger.warning("[1127] exception thrown in getServiceOfferAttribute " + ignored);
+                logger.warning("ServiceOffer exception: " + ignored);
 
-                logger.warning("[1127] Looking for service attribute named " + serviceOfferAttributeName + " was failing for serviceOfferId " + serviceOfferId);
                 throw new ValidationException("Failed to find the attribute '" + serviceOfferAttributeName +
                         "' in the service offer '" + serviceOfferId + "'");
             }
