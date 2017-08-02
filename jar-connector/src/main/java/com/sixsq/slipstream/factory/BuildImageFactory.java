@@ -296,11 +296,14 @@ public class BuildImageFactory extends RunFactory {
 		if (isProvidedUserChoicesForNodeInstance(userChoices, nodeInstanceName)) {
     		for (Parameter<?> parameter : userChoices.get(nodeInstanceName)) {
     			if (parameter.getName().equals(RuntimeParameter.SERVICE_OFFER)) {
-					String cs = getCloudServiceFromServiceOffer(parameter.getValue());
-					if (cloudService != null) {
-						checkServiceOfferCloudService(cs, cloudService);
+    				String value = parameter.getValue();
+					if (value != null && !value.isEmpty()) {
+						String cs = getCloudServiceFromServiceOffer(value);
+						if (cloudService != null) {
+							checkServiceOfferCloudService(cs, cloudService);
+						}
+						cloudService = cs;
 					}
-					cloudService = cs;
     			} else if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
 					String cs = parameter.getValue();
 					if (cloudService != null) {
