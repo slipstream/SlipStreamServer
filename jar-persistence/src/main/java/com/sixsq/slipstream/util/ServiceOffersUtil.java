@@ -62,6 +62,9 @@ public class ServiceOffersUtil {
                 }
                 throw e;
             }
+            if (response == null) {
+                return null;
+            }
             res = parseJson(response.getEntityAsText());
         }
         return res;
