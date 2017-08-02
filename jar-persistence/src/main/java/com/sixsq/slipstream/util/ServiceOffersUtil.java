@@ -27,6 +27,9 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import org.restlet.Response;
 import org.restlet.resource.ResourceException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class ServiceOffersUtil {
 
     public static String cpuAttributeName = "resource:vcpu";
@@ -34,8 +37,12 @@ public class ServiceOffersUtil {
     public static String diskAttributeName = "resource:disk";
     public static String instanceTypeAttributeName = "resource:instanceType";
 
+    private static java.util.logging.Logger logger = Logger.getLogger(ServiceOffersUtil.class.getName());
+
 
     public static JsonObject parseJson(String json) {
+        if (json == null) return new JsonObject();
+
         return new JsonParser().parse(json).getAsJsonObject();
     }
 
@@ -44,50 +51,64 @@ public class ServiceOffersUtil {
     }
 
     public static JsonObject getServiceOffer(String serviceOfferId, boolean throwIfNotFound) {
-        Response response = null;
-        try {
-            response = SscljProxy.get(SscljProxy.BASE_RESOURCE + serviceOfferId, "super ADMIN", true);
-        } catch (ResourceException e) {
-            if (!throwIfNotFound && e.getStatus().getCode() == 404) {
-                return null;
+        Response response;
+        JsonObject res = new JsonObject();
+        if (serviceOfferId != null) {
+            try {
+                response = SscljProxy.get(SscljProxy.BASE_RESOURCE + serviceOfferId, "super ADMIN", true);
+            } catch (ResourceException e) {
+                if (!throwIfNotFound && e.getStatus().getCode() == 404) {
+                    return null;
+                }
+                throw e;
             }
-            throw e;
+            res = parseJson(response.getEntityAsText());
         }
-        return parseJson(response.getEntityAsText());
+        return res;
     }
 
-    public static JsonElement getServiceOfferAttributeOrNull(JsonObject serviceOffer, String serviceOfferAttributeName)
-    {
+    public static JsonElement getServiceOfferAttributeOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
+        if (serviceOffer == null) return null;
         return serviceOffer.get(serviceOfferAttributeName);
     }
 
     public static JsonElement getServiceOfferAttribute(JsonObject serviceOffer, String serviceOfferAttributeName)
-            throws ValidationException
-    {
+            throws ValidationException {
         JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
 
         if (serviceOfferAttribute == null) {
             String serviceOfferId = "Unknown";
             try {
-                serviceOfferId = serviceOffer.get("id").getAsString();
-            } catch (Exception ignored) {}
-            throw new ValidationException("Failed to find the attribute '" + serviceOfferAttributeName +
-                    "' in the service offer '" + serviceOfferId + "'");
+
+                JsonElement jsonElement = serviceOffer.get("id");
+
+                if (jsonElement == null)
+                    throw new ValidationException("[1127] The Json for service offer did not contain any Id attribute while looking for attribute " + serviceOfferAttributeName);
+
+                serviceOfferId = jsonElement.getAsString();
+
+            } catch (Exception ignored) {
+                logger.warning("[1127] exception thrown in getServiceOfferAttribute " + ignored);
+
+                logger.warning("[1127] Looking for service attribute named " + serviceOfferAttributeName + " was failing for serviceOfferId " + serviceOfferId);
+                throw new ValidationException("Failed to find the attribute '" + serviceOfferAttributeName +
+                        "' in the service offer '" + serviceOfferId + "'");
+            }
+
         }
 
         return serviceOfferAttribute;
     }
 
     public static String getServiceOfferAttributeAsString(JsonObject serviceOffer, String serviceOfferAttributeName)
-            throws ValidationException
-    {
+            throws ValidationException {
         return getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName).getAsString();
     }
 
     public static String getServiceOfferAttributeAsStringOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
         try {
             return getServiceOfferAttributeAsString(serviceOffer, serviceOfferAttributeName);
-        } catch (ValidationException ignored){
+        } catch (ValidationException ignored) {
             return null;
         }
     }

@@ -43,10 +43,7 @@ import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.ServiceOffersUtil;
 
-import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttribute;
-import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttributeAsString;
 
 public class BuildImageFactory extends RunFactory {
 

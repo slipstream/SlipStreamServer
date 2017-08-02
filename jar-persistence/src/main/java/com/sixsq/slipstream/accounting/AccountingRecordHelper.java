@@ -37,7 +37,7 @@ import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttribu
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,conn
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -135,8 +135,9 @@ public class AccountingRecordHelper {
             serviceOffer = ServiceOffersUtil.getServiceOffer(getServiceOffer());
         }
 
-        if (serviceOffer == null) {
-            logger.info("VM data can not be inferred form null service offer");
+        if (serviceOffer == null || serviceOffer.entrySet().size() == 0) {
+                       logger.info("VM data can not be inferred form empty service offer");
+
             return new AccountingRecordVM(null, null, null, null);
         }
 
@@ -218,7 +219,7 @@ public class AccountingRecordHelper {
 
         String cimiQuery = sb.toString();
 
-        String resource = null;
+        String resource ;
         try {
             //URLEncoder class performs application/x-www-form-urlencoded-type encoding rather than percent encoding, therefore replacing spaces with +
             resource = AccountingRecord.ACCOUNTING_RECORD_RESOURCE + "?$filter=" + URLEncoder.encode(cimiQuery, "UTF-8").replace("+", "%20");

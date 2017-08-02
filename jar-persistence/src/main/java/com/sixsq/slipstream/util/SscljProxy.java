@@ -104,7 +104,7 @@ public class SscljProxy {
                                           Iterable<Parameter> queryParameters, MediaType mediaType,
                                           Boolean throwExceptions) {
         if (isMuted) {
-            return null;
+            return new Response(new org.restlet.Request());
         }
 
         ClientResource client = null;
