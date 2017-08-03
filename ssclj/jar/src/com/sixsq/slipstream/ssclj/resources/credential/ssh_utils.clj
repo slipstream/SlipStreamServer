@@ -41,8 +41,8 @@
                fingerprint (.getFingerPrint kp)]
            {:type        type
             :fingerprint fingerprint
-            :public-key  (get-public-key kp)
-            :private-key (get-private-key kp)})
+            :publicKey  (get-public-key kp)
+            :privateKey (get-private-key kp)})
          (catch Exception e
            (throw (ex-info (str e) {}))))
        (throw (ex-info (str "invalid key type: " type-key) {}))))))
@@ -59,7 +59,7 @@
         (if-let [type-name (key-index-to-name key-type)]
           {:type        type-name
            :fingerprint (.getFingerPrint kp)
-           :public-key  (get-public-key kp)}
+           :publicKey  (get-public-key kp)}
           (throw (ex-info (str "unsupported public key type: " key-type) {}))))
       (catch Exception e
         (throw (ex-info "invalid public key" {}))))))

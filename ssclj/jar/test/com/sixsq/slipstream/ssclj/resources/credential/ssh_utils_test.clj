@@ -11,8 +11,8 @@
     (let [kp (t/generate type size)]
       (is (= type (:type kp)))
       (is (re-matches #"^[0-9a-f]{2}(:[0-9a-f]{2}){15}$" (:fingerprint kp)))
-      (is (:public-key kp))
-      (is (:private-key kp)))))
+      (is (:publicKey kp))
+      (is (:privateKey kp)))))
 
 (deftest check-generate-failures
   (is (thrown-with-msg? ExceptionInfo #"invalid key type: unknown" (t/generate :unknown 1024)))
@@ -22,8 +22,8 @@
   (doseq [type #{"rsa" "dsa"}
           size #{1024 2048}]
     (let [kp (t/generate type size)
-          loaded-kp (t/load (:public-key kp))]
-      (is (= loaded-kp (dissoc kp :private-key))))))
+          loaded-kp (t/load (:publicKey kp))]
+      (is (= loaded-kp (dissoc kp :privateKey))))))
 
 (deftest check-load-failures
   (is (thrown-with-msg? ExceptionInfo #"invalid public key" (t/load "invalid-ssh-key"))))
