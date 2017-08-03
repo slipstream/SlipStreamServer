@@ -36,6 +36,9 @@ import com.sixsq.slipstream.util.ServiceOffersUtil;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Response;
 
+import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttribute;
+import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttributeAsString;
+
 public abstract class RunFactory {
 
 	public final Run createRun(Module module, User user) throws SlipStreamClientException {
@@ -101,7 +104,7 @@ public abstract class RunFactory {
 	protected abstract void init(Module module, Run run, User user) throws ValidationException, NotFoundException;
 
 	protected abstract Map<String, String> resolveCloudServiceNames(Module module, User user,
-			Map<String, List<Parameter<?>>> userChoices);
+			Map<String, List<Parameter<?>>> userChoices) throws ValidationException;
 
 	protected abstract void addUserFormParametersAsRunParameters(Module module, Run run,
 			Map<String, List<Parameter<?>>> userChoices) throws ValidationException;
@@ -404,14 +407,46 @@ public abstract class RunFactory {
 		return cloudParameters;
 	}
 
-	protected static void applyServiceOffer(Run run, String nodeInstanceName, String cloudServiceName,
-											String serviceOfferId) throws ValidationException
+	protected static JsonObject getServiceOffer(String serviceOfferId) throws ValidationException {
+		return getServiceOffer(serviceOfferId, null);
+	}
+
+	protected static JsonObject getServiceOffer(String serviceOfferId, String nodeInstanceName)
+			throws ValidationException
 	{
 		JsonObject serviceOffer = ServiceOffersUtil.getServiceOffer(serviceOfferId);
 		if (serviceOffer == null) {
-			throw new ValidationException("Failed to find the service offer '" + serviceOfferId +
-					"' for the node instance '" + nodeInstanceName + "'");
+			String message = "Failed to find the service offer '" + serviceOfferId + "'";
+			if (nodeInstanceName != null && !nodeInstanceName.isEmpty()) {
+				message += " for the node instance '" + nodeInstanceName + "'";
+			}
+			throw new ValidationException(message);
 		}
+		return serviceOffer;
+	}
+
+	protected static String getCloudServiceFromServiceOffer(JsonObject serviceOffer) throws ValidationException {
+		return getCloudServiceFromServiceOffer(serviceOffer, null);
+	}
+
+	protected static String getCloudServiceFromServiceOffer(String serviceOfferId) throws ValidationException {
+		return getCloudServiceFromServiceOffer(null, serviceOfferId);
+	}
+
+	private static String getCloudServiceFromServiceOffer(JsonObject serviceOffer, String serviceOfferId)
+			throws ValidationException
+	{
+		if (serviceOffer == null) {
+			serviceOffer = getServiceOffer(serviceOfferId);
+		}
+		JsonObject connector = getServiceOfferAttribute(serviceOffer, "connector").getAsJsonObject();
+		return getServiceOfferAttributeAsString(connector, "href");
+	}
+
+	protected static void applyServiceOffer(Run run, String nodeInstanceName, String cloudServiceName,
+											String serviceOfferId) throws ValidationException
+	{
+		JsonObject serviceOffer = getServiceOffer(serviceOfferId, nodeInstanceName);
 
 		String connectorHref = null;
 		try {

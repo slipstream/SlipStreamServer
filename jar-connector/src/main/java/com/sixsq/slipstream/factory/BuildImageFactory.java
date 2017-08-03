@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.JsonObject;
 import com.sixsq.slipstream.connector.CloudService;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidMetadataException;
@@ -42,6 +43,10 @@ import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.util.ServiceOffersUtil;
+
+import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttribute;
+import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttributeAsString;
 
 public class BuildImageFactory extends RunFactory {
 
@@ -277,18 +282,36 @@ public class BuildImageFactory extends RunFactory {
 		}
 	}
 
+	protected static void checkServiceOfferCloudService(String connectorHref, String cloudService) throws ValidationException {
+		if (cloudService != null && !cloudService.equals(connectorHref)) {
+			throw new ValidationException("The service offer is for '" + connectorHref +
+					"' but the Cloud service '" + cloudService + "' was asked. " +
+					"You don't need to specify a Cloud service if you specify a service offer.");
+		}
+	}
+
 	@Override
 	protected Map<String, String> resolveCloudServiceNames(Module module, User user,
-			Map<String, List<Parameter<?>>> userChoices) {
+			Map<String, List<Parameter<?>>> userChoices) throws ValidationException {
 		Map<String, String> cloudServiceNamesPerNode = new HashMap<String, String>();
 		String cloudService = null;
 
 		if (isProvidedUserChoicesForNodeInstance(userChoices, nodeInstanceName)) {
     		for (Parameter<?> parameter : userChoices.get(nodeInstanceName)) {
-    			if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
-    				cloudService = parameter.getValue();
-    				break;
-    			}
+    			if (parameter.getName().equals(RuntimeParameter.SERVICE_OFFER)) {
+					String cs = getCloudServiceFromServiceOffer(parameter.getValue());
+					if (cloudService != null) {
+						checkServiceOfferCloudService(cs, cloudService);
+					}
+					cloudService = cs;
+    			} else if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
+					String cs = parameter.getValue();
+					if (cloudService != null) {
+						checkServiceOfferCloudService(cloudService, cs);
+					} else {
+						cloudService = cs;
+					}
+				}
     		}
 		}
 
