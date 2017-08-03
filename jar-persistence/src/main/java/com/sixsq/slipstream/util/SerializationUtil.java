@@ -23,6 +23,8 @@ package com.sixsq.slipstream.util;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,6 +49,8 @@ import com.sixsq.slipstream.persistence.Metadata;
 import com.sixsq.slipstream.persistence.Run;
 
 public class SerializationUtil {
+
+	private static Logger logger = Logger.getLogger(SerializationUtil.class.getName());
 
 	public static Metadata fromXml(String contents,
 			Class<? extends Metadata> resultClass)
@@ -73,8 +77,9 @@ public class SerializationUtil {
 			return writer.toString();
 
 		} catch (Exception e) {
-			throw new SlipStreamInternalException(
-					"cannot serialize object to string, with detail: " + e.getMessage(), e);
+			String message = "cannot serialize object to string, with detail: ";
+			logger.log(Level.SEVERE, message, e);
+			throw new SlipStreamInternalException(message + e.getMessage(), e);
 		} finally {
 			toXmlStringTimer.stop();
 			writer.close();
