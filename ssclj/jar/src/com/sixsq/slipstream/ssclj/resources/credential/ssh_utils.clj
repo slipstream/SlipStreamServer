@@ -1,4 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential.ssh-utils
+  (:refer-clojure :exclude [load])
   (:require
     [clojure.string :as str])
   (:import (com.jcraft.jsch JSch KeyPair)
@@ -6,7 +7,7 @@
 
 (def ^:const default-key-size 1024)
 
-(def ^:const default-key-type :rsa)
+(def ^:const default-algorithm :rsa)
 
 (defn- get-public-key [^KeyPair kp]
   (with-open [baos (ByteArrayOutputStream.)]
@@ -26,26 +27,26 @@
                         KeyPair/DSA "dsa"})
 
 (defn generate
-  "Generates a new SSH key pair with the given type and length. The type can
-   either be 'rsa' (default) or 'dsa'. The key size will default to 1024 bits.
-   Note that not all cloud providers support DSA keys."
+  "Generates a new SSH key pair with the given algorithm and length. The
+   algorithm can either be 'rsa' (default) or 'dsa'. The key size will default
+   to 1024 bits. Note that not all cloud providers support DSA keys."
   ([]
-   (generate :rsa default-key-size))
-  ([type]
-   (generate type default-key-size))
-  ([type size]
-   (let [type-key (-> type name str/lower-case)]
-     (if-let [type-const (key-name-to-index type-key)]
+   (generate default-algorithm default-key-size))
+  ([algorithm]
+   (generate algorithm default-key-size))
+  ([algorithm size]
+   (let [algorithm-key (-> algorithm name str/lower-case)]
+     (if-let [algorithm-const (key-name-to-index algorithm-key)]
        (try
-         (let [kp (KeyPair/genKeyPair (JSch.) type-const size)
+         (let [kp (KeyPair/genKeyPair (JSch.) algorithm-const size)
                fingerprint (.getFingerPrint kp)]
-           {:type        type
+           {:algorithm   algorithm
             :fingerprint fingerprint
-            :publicKey  (get-public-key kp)
-            :privateKey (get-private-key kp)})
+            :publicKey   (get-public-key kp)
+            :privateKey  (get-private-key kp)})
          (catch Exception e
            (throw (ex-info (str e) {}))))
-       (throw (ex-info (str "invalid key type: " type-key) {}))))))
+       (throw (ex-info (str "invalid key algorithm: " algorithm-key) {}))))))
 
 (defn load
   "Loads a public key (validating it in the process) and then returns a map
@@ -55,11 +56,11 @@
   (let [^bytes bytes (.getBytes public-key "UTF-8")]
     (try
       (let [kp (KeyPair/load (JSch.) nil bytes)
-            key-type (.getKeyType kp)]
-        (if-let [type-name (key-index-to-name key-type)]
-          {:type        type-name
+            key-algorithm (.getKeyType kp)]
+        (if-let [algorithm-name (key-index-to-name key-algorithm)]
+          {:algorithm   algorithm-name
            :fingerprint (.getFingerPrint kp)
-           :publicKey  (get-public-key kp)}
-          (throw (ex-info (str "unsupported public key type: " key-type) {}))))
+           :publicKey   (get-public-key kp)}
+          (throw (ex-info (str "unsupported public key algorithm: " key-algorithm) {}))))
       (catch Exception e
         (throw (ex-info "invalid public key" {}))))))

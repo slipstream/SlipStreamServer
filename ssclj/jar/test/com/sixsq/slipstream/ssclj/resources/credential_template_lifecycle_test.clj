@@ -8,6 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.credential-template-username-password :as upc]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as spk]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
@@ -27,7 +28,8 @@
 
 (deftest check-retrieve-by-id
   (doseq [registration-method [upc/credential-type
-                               spk/credential-type]]
+                               spk/credential-type
+                               skp/credential-type]]
     (let [id (str ct/resource-url "/" registration-method)
           doc (crud/retrieve-by-id id)]
       (is (= id (:id doc))))))
@@ -51,10 +53,12 @@
         ids (set (map :id entries))
         types (set (map :type entries))]
     (is (= #{(str ct/resource-url "/" upc/credential-type)
-             (str ct/resource-url "/" spk/credential-type)}
+             (str ct/resource-url "/" spk/credential-type)
+             (str ct/resource-url "/" skp/credential-type)}
            ids))
     (is (= #{upc/credential-type
-             spk/credential-type}
+             spk/credential-type
+             skp/credential-type}
            types))
 
     (doseq [entry entries]

@@ -51,7 +51,7 @@
 
 (defmethod validate-subtype :default
   [resource]
-  (logu/log-and-throw-400 (str "unknown Credential type: '" (:type resource) "'")))
+  (logu/log-and-throw-400 (str "unknown Credential type: '" resource (:type resource) "'")))
 
 (defmethod crud/validate resource-uri
   [resource]
