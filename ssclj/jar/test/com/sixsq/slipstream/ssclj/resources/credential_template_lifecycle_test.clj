@@ -6,7 +6,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-username-password :as upc]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as spk]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -27,9 +26,7 @@
 (dyn/initialize)
 
 (deftest check-retrieve-by-id
-  (doseq [registration-method [upc/credential-type
-                               spk/credential-type
-                               skp/credential-type]]
+  (doseq [registration-method [spk/method skp/method]]
     (let [id (str ct/resource-url "/" registration-method)
           doc (crud/retrieve-by-id id)]
       (is (= id (:id doc))))))
@@ -51,15 +48,13 @@
                     (ltu/is-operation-absent "describe")
                     (ltu/entries ct/resource-tag))
         ids (set (map :id entries))
+        methods (set (map :method entries))
         types (set (map :type entries))]
-    (is (= #{(str ct/resource-url "/" upc/credential-type)
-             (str ct/resource-url "/" spk/credential-type)
-             (str ct/resource-url "/" skp/credential-type)}
+    (is (= #{(str ct/resource-url "/" spk/method)
+             (str ct/resource-url "/" skp/method)}
            ids))
-    (is (= #{upc/credential-type
-             spk/credential-type
-             skp/credential-type}
-           types))
+    (is (= #{spk/method skp/method} methods))
+    (is (= #{spk/credential-type} types))
 
     (doseq [entry entries]
       (let [ops (ltu/operations->map entry)
