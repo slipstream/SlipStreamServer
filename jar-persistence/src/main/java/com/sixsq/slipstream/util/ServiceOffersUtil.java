@@ -56,18 +56,16 @@ public class ServiceOffersUtil {
         return parseJson(response.getEntityAsText());
     }
 
-    public static String getServiceOfferAttributeOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
-        try {
-            return getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName);
-        } catch (ValidationException ignored){
-            return null;
-        }
+    public static JsonElement getServiceOfferAttributeOrNull(JsonObject serviceOffer, String serviceOfferAttributeName)
+    {
+        return serviceOffer.get(serviceOfferAttributeName);
     }
 
-    public static String getServiceOfferAttribute(JsonObject serviceOffer, String serviceOfferAttributeName)
+    public static JsonElement getServiceOfferAttribute(JsonObject serviceOffer, String serviceOfferAttributeName)
             throws ValidationException
     {
-        JsonElement serviceOfferAttribute = serviceOffer.get(serviceOfferAttributeName);
+        JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
+
         if (serviceOfferAttribute == null) {
             String serviceOfferId = "Unknown";
             try {
@@ -77,7 +75,21 @@ public class ServiceOffersUtil {
                     "' in the service offer '" + serviceOfferId + "'");
         }
 
-        return serviceOfferAttribute.getAsString();
+        return serviceOfferAttribute;
+    }
+
+    public static String getServiceOfferAttributeAsString(JsonObject serviceOffer, String serviceOfferAttributeName)
+            throws ValidationException
+    {
+        return getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName).getAsString();
+    }
+
+    public static String getServiceOfferAttributeAsStringOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
+        try {
+            return getServiceOfferAttributeAsString(serviceOffer, serviceOfferAttributeName);
+        } catch (ValidationException ignored){
+            return null;
+        }
     }
 
 }

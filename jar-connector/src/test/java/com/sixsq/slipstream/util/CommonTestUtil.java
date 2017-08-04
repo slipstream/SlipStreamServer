@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public abstract class CommonTestUtil {
@@ -249,6 +250,13 @@ public abstract class CommonTestUtil {
 		}
 		sc.store();
 		ConnectorFactory.resetConnectors();
+	}
+
+	public static void assertStringEquals(String expected, String actual) {
+		String message = "Expected '" + expected + "' got '" + actual + "' !";
+		boolean condition = expected != null && expected.equals(actual);
+
+		assertTrue(message, condition);
 	}
 
 	// Only static methods. Ensure no instances are created.

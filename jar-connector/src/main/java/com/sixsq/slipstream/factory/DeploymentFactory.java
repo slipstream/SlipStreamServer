@@ -397,8 +397,6 @@ public class DeploymentFactory extends RunFactory {
 		}
 	}
 
-
-
 	private void checkParameterIsValid(Node node, Parameter<?> parameter, String cloudServiceName) throws ValidationException {
 		List<String> paramsToFilter = new ArrayList<String>();
 		paramsToFilter.add(RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
@@ -421,7 +419,8 @@ public class DeploymentFactory extends RunFactory {
 
 	@Override
 	protected Map<String, String> resolveCloudServiceNames(Module module, User user,
-			Map<String, List<Parameter<?>>> userChoices) {
+			Map<String, List<Parameter<?>>> userChoices) throws ValidationException
+	{
 		Map<String, String> cloudServiceNamesPerNode = new HashMap<String, String>();
 		DeploymentModule deployment = castToRequiredModuleType(module);
 
@@ -440,14 +439,36 @@ public class DeploymentFactory extends RunFactory {
 		return (DeploymentModule) module;
 	}
 
-	private String resolveCloudServiceNameForNode(User user, List<Parameter<?>> userChoicesForNode, Node node) {
+	protected static void checkServiceOfferCloudService(String connectorHref, String cloudService, String nodeInstanceName)
+			throws ValidationException
+	{
+		if (cloudService != null && !cloudService.equals(connectorHref)) {
+			throw new ValidationException("The service offer is for '" + connectorHref + "' but the Cloud service '" +
+					cloudService + "' was asked for the node instance '" + nodeInstanceName + "'. " +
+					"You don't need to specify a Cloud service if you specify a service offer.");
+		}
+	}
+
+	private String resolveCloudServiceNameForNode(User user, List<Parameter<?>> userChoicesForNode, Node node)
+			throws ValidationException
+	{
 		String cloudService = null;
 
 		if (userChoicesForNode != null) {
 			for (Parameter<?> parameter : userChoicesForNode) {
-				if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
-					cloudService = extractNodeParameterValue((NodeParameter) parameter);
-					break;
+				if (parameter.getName().equals(RuntimeParameter.SERVICE_OFFER)) {
+					String cs = getCloudServiceFromServiceOffer(extractNodeParameterValue((NodeParameter) parameter));
+					if (cloudService != null) {
+						checkServiceOfferCloudService(cs, cloudService, node.getName());
+					}
+					cloudService = cs;
+				} else if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
+					String cs = extractNodeParameterValue((NodeParameter) parameter);
+					if (cloudService != null) {
+						checkServiceOfferCloudService(cloudService, cs, node.getName());
+					} else {
+						cloudService = cs;
+					}
 				}
 			}
 		}
