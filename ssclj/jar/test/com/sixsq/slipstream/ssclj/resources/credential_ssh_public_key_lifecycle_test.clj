@@ -170,12 +170,16 @@
                    (ltu/body->edn)
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
+          private-key (get-in resp [:response :privateKey])
           uri (-> resp
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; resource id and the uri (location) should be the same
       (is (= id uri))
+
+      ;; the private key must be returned as part of the 201 response
+      (is private-key)
 
       ;; admin/user should be able to see, edit, and delete credential
       (doseq [session [session-admin session-user]]

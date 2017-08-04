@@ -6,18 +6,26 @@
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]))
 
+(defn import-key [common-info publicKey]
+  [nil (-> (ssh-utils/load publicKey)
+           (merge common-info))])
+
+(defn generate-key [common-info algorithm size]
+  (let [ssh-key (merge (ssh-utils/generate algorithm size) common-info)]
+    [(select-keys ssh-key #{:privateKey}) (dissoc ssh-key :privateKey)]))
+
 ;;
 ;; convert template to credential: loads and validates the given SSH public key
 ;; provides attributes about the key.
 ;;
 (defmethod p/tpl->credential tpl/credential-type
   [{:keys [type method publicKey algorithm size]} request]
-  (let [cred {:resourceURI p/resource-uri
-              :type        type
-              :method      method}]
+  (let [common-info {:resourceURI p/resource-uri
+                     :type        type
+                     :method      method}]
     (if publicKey
-      (merge (ssh-utils/load publicKey) cred)
-      (dissoc (merge (ssh-utils/generate algorithm size) cred) :privateKey)))) ;; FIXME: privateKey must end up in 201 response!
+      (import-key common-info publicKey)
+      (generate-key common-info algorithm size))))
 
 ;;
 ;; multimethods for validation
