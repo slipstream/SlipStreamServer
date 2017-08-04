@@ -4,8 +4,10 @@ import com.google.gson.JsonObject;
 import com.sixsq.slipstream.event.ACL;
 import com.sixsq.slipstream.event.TypePrincipal;
 import com.sixsq.slipstream.event.TypePrincipalRight;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.ServiceOffersUtil;
 import com.sixsq.slipstream.util.SscljProxy;
@@ -47,13 +49,22 @@ public class AccountingRecordHelper {
     private Run run;
     private String nodeInstanceName;
     private JsonObject serviceOffer;
-
+    private User user;
 
 
     public AccountingRecordHelper(Run run, String nodeInstanceName) {
         this.run = run;
         this.nodeInstanceName = nodeInstanceName;
         this.serviceOffer = null;
+
+        //load user from username
+        String username = run.getUser();
+        try {
+            user = User.loadByName(username);
+        } catch (ValidationException e) {
+            logger.warning("Could not find user " + username + " : " + e.getMessage());
+        }
+
     }
 
     public Run getRun() {
@@ -149,12 +160,12 @@ public class AccountingRecordHelper {
         return new AccountingRecordVM(cpu, ram, disk, instanceType);
     }
 
-    public String getNodeName(){
+    public String getNodeName() {
         String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.NODE_NAME_KEY);
         return run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
     }
 
-    public Integer getNodeId(){
+    public Integer getNodeId() {
         String paramName = RuntimeParameter.constructParamName(nodeInstanceName, RuntimeParameter.NODE_ID_KEY);
         String sNodeId = run.getRuntimeParameterValueOrDefaultIgnoreAbort(paramName, null);
         if (sNodeId == null || sNodeId.isEmpty()) return null;
@@ -179,8 +190,8 @@ public class AccountingRecordHelper {
     }
 
     public String getRealm() {
-        //FIXME
-        return null;
+        // realm <=> organization
+        return user.getOrganization();
     }
 
     public List<String> getGroups() {
@@ -235,7 +246,7 @@ public class AccountingRecordHelper {
 
             switch (nbRecords) {
                 case 0: // FIXME :  no corresponding record was started , can't stop it
-                    logger.warning("Loading ressource with Query " + resource + " did not return any accounting record" );
+                    logger.warning("Loading ressource with Query " + resource + " did not return any accounting record");
                     break;
 
                 case 1: //happy case : a corresponding record was found in ES
@@ -254,7 +265,7 @@ public class AccountingRecordHelper {
 
                 default:
                     //FIXME : more than one record found, need to deal with that
-                    logger.warning("Loading ressource with Query " + resource + " did  return too many ("+ nbRecords +") accounting records" );
+                    logger.warning("Loading ressource with Query " + resource + " did  return too many (" + nbRecords + ") accounting records");
             }
 
         } catch (UnsupportedEncodingException e) {
@@ -271,7 +282,7 @@ public class AccountingRecordHelper {
         }
 
 
-        logger.info("Opening accounting record for run :" + run.getUuid() + "on node instance  : " +  nodeInstanceName);
+        logger.info("Opening accounting record for run :" + run.getUuid() + "on node instance  : " + nodeInstanceName);
         AccountingRecordHelper helper = new AccountingRecordHelper(run, nodeInstanceName);
 
         ACL acl = helper.getACL();
@@ -310,18 +321,17 @@ public class AccountingRecordHelper {
         }
 
 
-        logger.info("Closing an accounting record for run " + run.getUuid() + "on node instance " +  nodeInstanceName);
+        logger.info("Closing an accounting record for run " + run.getUuid() + "on node instance " + nodeInstanceName);
         AccountingRecordHelper helper = new AccountingRecordHelper(run, nodeInstanceName);
 
         AccountingRecord ar = helper.load(helper);
-
 
 
         if (ar != null) {
             ar.setStop(new Date());
             logger.info("Request to SSCLJ for updating Accounting Record " + SscljProxy.toJson(ar));
             AccountingRecord.close(ar, helper.getUser() + " ADMIN");
-        } else{
+        } else {
             logger.warning("No AccountingRecord found");
         }
 
