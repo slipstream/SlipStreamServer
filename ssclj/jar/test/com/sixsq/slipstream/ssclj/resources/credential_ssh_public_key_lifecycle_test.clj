@@ -208,16 +208,3 @@
           (ltu/body->edn)
           (ltu/is-status 200)))))
 
-(deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id credential/resource-name))]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :delete]
-                          [resource-uri :options]
-                          [resource-uri :put]
-                          [resource-uri :post]]]
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))
