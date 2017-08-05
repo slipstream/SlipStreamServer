@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]))
 
-(s/def :cimi.credential-template.api-key/ttl pos-int?)
+(s/def :cimi.credential-template.api-key/ttl nat-int?)
 
 (def credential-template-keys-spec
   {:opt-un [:cimi.credential-template.api-key/ttl]})

@@ -1,14 +1,18 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-api-key
   (:require
+    [com.sixsq.slipstream.auth.acl :as acl]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-api-key]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential :as p]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
 
-(defn expiry-for-ttl
-  [ttl]
-  "20170131T10:32:00.000Z")
+(defn extract-claims [request]
+  (let [{:keys [identity roles]} (acl/current-authentication request)]
+    (cond-> {:identity identity}
+            (seq roles) (assoc :roles (vec roles)))))
+
+(def valid-ttl? (every-pred int? pos?))
 
 ;;
 ;; convert template to credential: loads and validates the given SSH public key
@@ -17,12 +21,13 @@
 (defmethod p/tpl->credential tpl/credential-type
   [{:keys [type method ttl]} request]
   (let [[secret-key digest] (key-utils/generate)
-        common-info (cond-> {:resourceURI p/resource-uri
-                             :type        type
-                             :method      method
-                             :digest      digest}
-                            ttl (assoc :expiry (expiry-for-ttl ttl)))]
-    [{:secretKey secret-key} common-info]))
+        resource (cond-> {:resourceURI p/resource-uri
+                          :type        type
+                          :method      method
+                          :digest      digest
+                          :claims      (extract-claims request)}
+                         (valid-ttl? ttl) (assoc :expiry (u/ttl->timestamp ttl)))]
+    [{:secretKey secret-key} resource]))
 
 ;;
 ;; multimethods for validation

@@ -119,7 +119,7 @@
                                (tpl->credential request))]
     (-> (assoc request :id (:id body) :body body)
         add-impl
-        (merge create-resp))))
+        (update-in [:body] merge create-resp))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name

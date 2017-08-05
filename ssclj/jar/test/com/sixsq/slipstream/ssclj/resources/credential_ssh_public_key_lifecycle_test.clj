@@ -170,7 +170,7 @@
                    (ltu/body->edn)
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
-          private-key (get-in resp [:response :privateKey])
+          private-key (get-in resp [:response :body :privateKey])
           uri (-> resp
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]

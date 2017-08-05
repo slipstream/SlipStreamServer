@@ -6,12 +6,23 @@
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]))
 
-(s/def :cimi.credential.api-key/expiry string?)
+(s/def :cimi.credential.api-key/expiry :cimi.core/timestamp)
 
 (s/def :cimi.credential.api-key/digest :cimi.core/nonblank-string)
 
+(s/def :cimi.credential.api-key/identity :cimi.core/nonblank-string)
+
+(s/def :cimi.credential.api-key/roles (s/coll-of :cimi.core/nonblank-string
+                                                 :kind vector?
+                                                 :into []
+                                                 :min-count 1))
+
+(s/def :cimi.credential.api-key/claims (su/only-keys :req-un [:cimi.credential.api-key/identity]
+                                                     :opt-un [:cimi.credential.api-key/roles]))
+
 (def credential-keys-spec
-  {:req-un [:cimi.credential.api-key/digest]
+  {:req-un [:cimi.credential.api-key/digest
+            :cimi.credential.api-key/claims]
    :opt-un [:cimi.credential.api-key/expiry]})
 
 (s/def :cimi/credential.api-key

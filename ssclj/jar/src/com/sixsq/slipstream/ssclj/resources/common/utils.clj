@@ -8,7 +8,8 @@
     [clj-time.coerce :as c]
     [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import
-    [java.util UUID Date]))
+    (java.util UUID Date)
+    (org.joda.time DateTime)))
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.
@@ -62,20 +63,19 @@
   [m]
   (dissoc m :id :created :updated :resourceURI :operations))
 
-(defn update-timestamps
-  "Sets the updated attribute and optionally the created attribute
-   in the request.  The created attribute is only set if the existing value
-   is missing or evaluates to false."
-  [data]
-  (let [updated (time-fmt/unparse (:date-time time-fmt/formatters) (time/now))
-        created (or (:created data) updated)]
-    (assoc data :created created :updated updated)))
+(defn unparse-timestamp-datetime
+  "Returns the string representation of the given timestamp."
+  [^DateTime timestamp]
+  (try
+    (time-fmt/unparse (:date-time time-fmt/formatters) timestamp)
+    (catch Exception _
+      nil)))
 
-(defn unparse-timestamp
+(defn unparse-timestamp-date
   "Returns the string representation of the given timestamp."
   [^Date timestamp]
   (try
-    (time-fmt/unparse (:date-time time-fmt/formatters) (c/from-date timestamp))
+    (unparse-timestamp-datetime (c/from-date timestamp))
     (catch Exception _
       nil)))
 
@@ -87,6 +87,21 @@
     (time-fmt/parse (:date-time time-fmt/formatters) data)
     (catch Exception _
       nil)))
+
+(defn update-timestamps
+  "Sets the updated attribute and optionally the created attribute
+   in the request.  The created attribute is only set if the existing value
+   is missing or evaluates to false."
+  [data]
+  (let [updated (unparse-timestamp-datetime (time/now))
+        created (or (:created data) updated)]
+    (assoc data :created created :updated updated)))
+
+(defn ttl->timestamp
+  "Converts a Time to Live (TTL) value in seconds to timestamp string. The
+   argument must be an integer value."
+  [ttl]
+  (unparse-timestamp-datetime (time/from-now (time/seconds ttl))))
 
 (defn create-spec-validation-fn
   "Creates a validation function that compares a resource against the

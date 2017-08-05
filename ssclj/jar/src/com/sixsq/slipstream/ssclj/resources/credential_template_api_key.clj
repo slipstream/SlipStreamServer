@@ -24,6 +24,7 @@
    :method      method
    :name        "Generate API Key"
    :description "generates an API key and stores hash"
+   :ttl         0
    :acl         resource-acl})
 
 ;;
@@ -31,13 +32,13 @@
 ;;
 (def ^:const desc
   (merge p/CredentialTemplateDescription
-         {:expiry {:displayName "Time to Live (TTL)"
-                   :category    "general"
-                   :description "number of seconds before the API key expires"
-                   :type        "int"
-                   :mandatory   false
-                   :readOnly    false
-                   :order       1}}))
+         {:ttl {:displayName "Time to Live (TTL)"
+                :category    "general"
+                :description "number of seconds before the API key expires (0 = forever)"
+                :type        "int"
+                :mandatory   false
+                :readOnly    false
+                :order       1}}))
 
 ;;
 ;; initialization: register this Credential template

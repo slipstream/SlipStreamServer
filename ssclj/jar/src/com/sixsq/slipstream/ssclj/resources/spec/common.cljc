@@ -23,7 +23,7 @@
 
 ;; FIXME: Provide an implementation that works with ClojureScript.
 (s/def :cimi.core/timestamp (s/with-gen (s/and string? cu/parse-timestamp)
-                                        (constantly (gen/fmap cu/unparse-timestamp (gen/gen-for-pred inst?)))))
+                                        (constantly (gen/fmap cu/unparse-timestamp-date (gen/gen-for-pred inst?)))))
 
 ;; FIXME: Remove this definition when resources treat the timestamp as optional rather than allowing an empty value.
 (s/def :cimi.core/optional-timestamp (s/or :empty #{""} :not-empty :cimi.core/timestamp))

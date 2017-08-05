@@ -54,6 +54,11 @@
         create-import-href {:credentialTemplate {:href href
                                                  :ttl  1000}}
 
+        create-import-href-zero-ttl {:credentialTemplate {:href href
+                                                          :ttl  0}}
+
+        create-import-href-no-ttl {:credentialTemplate {:href href}}
+
         invalid-create-href (assoc-in create-import-href [:credentialTemplate :href] "credential-template/unknown-template")]
 
     ;; admin/user query should succeed but be empty (no credentials created yet)
@@ -98,8 +103,7 @@
                    (ltu/body->edn)
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
-          secret-key (get-in resp [:response :secretKey])
-          digest (get-in resp [:response :body :digest])
+          secret-key (get-in resp [:response :body :secretKey])
           uri (-> resp
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -120,14 +124,110 @@
             (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
-      (let [{:keys [digest] :as resource} (-> session-user
-                                              (request abs-uri)
-                                              (ltu/body->edn)
-                                              (ltu/is-status 200)
-                                              :response
-                                              :body)]
+      (let [{:keys [digest expiry claims]} (-> session-user
+                                               (request abs-uri)
+                                               (ltu/body->edn)
+                                               (ltu/is-status 200)
+                                               :response
+                                               :body)]
         (is digest)
-        (is (key-utils/valid? secret-key digest)))
+        (is (key-utils/valid? secret-key digest))
+        (is expiry)
+        (is claims))
+
+      ;; delete the credential
+      (-> session-user
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 200)))
+
+    ;; execute the same tests but now create an API key without an expiry date
+    (let [resp (-> session-user
+                   (request base-uri
+                            :request-method :post
+                            :body (json/write-str create-import-href-no-ttl))
+                   (ltu/body->edn)
+                   (ltu/is-status 201))
+          id (get-in resp [:response :body :resource-id])
+          secret-key (get-in resp [:response :body :secretKey])
+          uri (-> resp
+                  (ltu/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
+
+      ;; resource id and the uri (location) should be the same
+      (is (= id uri))
+
+      ;; the secret key must be returned as part of the 201 response
+      (is secret-key)
+
+      ;; admin/user should be able to see, edit, and delete credential
+      (doseq [session [session-admin session-user]]
+        (-> session
+            (request abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-operation-present "delete")
+            (ltu/is-operation-present "edit")))
+
+      ;; ensure credential contains correct information
+      (let [{:keys [digest expiry claims]} (-> session-user
+                                               (request abs-uri)
+                                               (ltu/body->edn)
+                                               (ltu/is-status 200)
+                                               :response
+                                               :body)]
+        (is digest)
+        (is (key-utils/valid? secret-key digest))
+        (is (nil? expiry))
+        (is claims))
+
+      ;; delete the credential
+      (-> session-user
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 200)))
+
+    ;; and again, with a zero TTL (should be same as if TTL was not given)
+    (let [resp (-> session-user
+                   (request base-uri
+                            :request-method :post
+                            :body (json/write-str create-import-href-zero-ttl))
+                   (ltu/body->edn)
+                   (ltu/is-status 201))
+          id (get-in resp [:response :body :resource-id])
+          secret-key (get-in resp [:response :body :secretKey])
+          uri (-> resp
+                  (ltu/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
+
+      ;; resource id and the uri (location) should be the same
+      (is (= id uri))
+
+      ;; the secret key must be returned as part of the 201 response
+      (is secret-key)
+
+      ;; admin/user should be able to see, edit, and delete credential
+      (doseq [session [session-admin session-user]]
+        (-> session
+            (request abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-operation-present "delete")
+            (ltu/is-operation-present "edit")))
+
+      ;; ensure credential contains correct information
+      (let [{:keys [digest expiry claims]} (-> session-user
+                                               (request abs-uri)
+                                               (ltu/body->edn)
+                                               (ltu/is-status 200)
+                                               :response
+                                               :body)]
+        (is digest)
+        (is (key-utils/valid? secret-key digest))
+        (is (nil? expiry))
+        (is claims))
 
       ;; delete the credential
       (-> session-user
