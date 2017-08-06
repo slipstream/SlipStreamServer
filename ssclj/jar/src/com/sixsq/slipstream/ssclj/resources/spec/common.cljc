@@ -22,7 +22,7 @@
 (s/def :cimi.core/port (s/int-in 1 65536))
 
 ;; FIXME: Provide an implementation that works with ClojureScript.
-(s/def :cimi.core/timestamp (s/with-gen (s/and string? cu/parse-timestamp)
+(s/def :cimi.core/timestamp (s/with-gen (s/and string? cu/as-datetime)
                                         (constantly (gen/fmap cu/unparse-timestamp-date (gen/gen-for-pred inst?)))))
 
 ;; FIXME: Remove this definition when resources treat the timestamp as optional rather than allowing an empty value.

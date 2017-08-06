@@ -31,7 +31,6 @@
   [resource-name]
   (str resource-name "/" (random-uuid)))
 
-
 (defn split-resource-id
   "Provide a tuple of [type docid] for a resource ID. For IDs that don't have
    an identifier part (e.g. the CloudEntryPoint), the document ID will be nil."
@@ -79,7 +78,7 @@
     (catch Exception _
       nil)))
 
-(defn parse-timestamp
+(defn as-datetime
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
    instance on success and nil on failure."
   [data]
@@ -102,6 +101,16 @@
    argument must be an integer value."
   [ttl]
   (unparse-timestamp-datetime (time/from-now (time/seconds ttl))))
+
+(defn expired?
+  "This will return true if the given date (as a string) represents a moment
+   of time in the past.  Returns false otherwise."
+  [expiry]
+  (if expiry
+    (time/before? (as-datetime expiry) (time/now))
+    false))
+
+(def not-expired? (complement expired?))
 
 (defn create-spec-validation-fn
   "Creates a validation function that compares a resource against the

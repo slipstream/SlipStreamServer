@@ -58,7 +58,7 @@
 (def cli-options
   [["-d" "--date DATE" "Date to summarize, yyyy-mm-dd, e.g 2015-04-16"
     :parse-fn #(str % "T00:00:00.000Z")
-    :validate [cu/parse-timestamp "Must be a valid date, e.g 2015-01-15"]]
+    :validate [cu/as-datetime "Must be a valid date, e.g 2015-01-15"]]
    ["-f" "--frequency FREQUENCY" "Frequency can be daily, weekly or monthly"
     :parse-fn keyword
     :validate [valid-frequency? "Must be daily, weekly or monthly"]]
