@@ -81,11 +81,11 @@
                                              {:name "disk-GB"}]}
 
           ]
-      (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
-      (rc/insert-usage-event joe-aws-start {:user-roles ["ADMIN"]})
+      (rc/insert-usage-event joe-exo-start {})
+      (rc/insert-usage-event joe-aws-start {})
 
-      (rc/insert-usage-event joe-exo-end {:user-roles ["ADMIN"]})
-      (rc/insert-usage-event joe-aws-end {:user-roles ["ADMIN"]}))))
+      (rc/insert-usage-event joe-exo-end {})
+      (rc/insert-usage-event joe-aws-end {}))))
 
 (defn summarize-joe-weekly
   [nb-weeks]
@@ -96,7 +96,7 @@
 
 (defn- summaries-from-db
   []
-  (second (db/query "usage" {:user-roles ["ADMIN"]})))
+  (second (db/query "usage" {})))
 
 (defn check-summaries
   []
@@ -129,8 +129,8 @@
                                            {:name "RAM-GB"}
                                            {:name "disk-GB"}]}]
 
-    (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
-    (rc/insert-usage-event joe-exo-end {:user-roles ["ADMIN"]})
+    (rc/insert-usage-event joe-exo-start {})
+    (rc/insert-usage-event joe-exo-end {})
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
     (let [summary (-> (summaries-from-db) first :usage)]
@@ -160,10 +160,10 @@
         jack-exo-end {:end-timestamp       (u/to-ISO-8601 end-day)
                       :cloud-vm-instanceid "vm-jack-exo-id"}]
 
-    (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
-    (rc/insert-usage-event jack-exo-start {:user-roles ["ADMIN"]})
-    (rc/insert-usage-event joe-exo-end {:user-roles ["ADMIN"]})
-    (rc/insert-usage-event jack-exo-end {:user-roles ["ADMIN"]})
+    (rc/insert-usage-event joe-exo-start {})
+    (rc/insert-usage-event jack-exo-start {})
+    (rc/insert-usage-event joe-exo-end {})
+    (rc/insert-usage-event jack-exo-end {})
 
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
@@ -182,7 +182,7 @@
                         :start-timestamp (u/to-ISO-8601 start-day)
                         :cloud-vm-instanceid "vm-joe-exo-id")]
 
-    (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
+    (rc/insert-usage-event joe-exo-start {})
 
     (summarize-and-store! (u/to-ISO-8601 (t/minus start-day (t/days 1))) (u/to-ISO-8601 end-day) :daily [:user :cloud])
 
@@ -197,7 +197,7 @@
                         :start-timestamp (u/to-ISO-8601 start-day)
                         :cloud-vm-instanceid "vm-joe-exo-id")]
 
-    (rc/insert-usage-event joe-exo-start {:user-roles ["ADMIN"]})
+    (rc/insert-usage-event joe-exo-start {})
 
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])
     (summarize-and-store! (u/to-ISO-8601 start-day) (u/to-ISO-8601 end-day) :daily [:user :cloud])

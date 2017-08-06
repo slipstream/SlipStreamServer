@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.usage-test
   (:require
+    [clojure.string :as str]
     [clojure.test :refer :all]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -13,7 +14,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
-
 (defn- summary
   [user cloud frequency [year month day] usage]
   {:user            user
@@ -26,20 +26,20 @@
 (defn insert-daily-summaries
   [f]
   (ltu/with-test-client
-    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit-minutes 100.0}}) {:user-name "joe"})
-    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit-minutes 200.0}}) {:user-name "joe"})
-    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit-minutes 500.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit-minutes 40.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
-    (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "joe"})
-    (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}) {:user-name "mike"})
-    (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {:user-name "mike"})
+    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 16] {:ram {:unit-minutes 100.0}}) {})
+    (rc/insert-summary! (summary "joe" "exo" :daily [2015 04 17] {:ram {:unit-minutes 200.0}}) {})
+    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 18] {:ram {:unit-minutes 500.0}}) {})
+    (rc/insert-summary! (summary "mike" "exo" :daily [2015 04 16] {:ram {:unit-minutes 300.0}}) {})
+    (rc/insert-summary! (summary "mike" "aws" :daily [2015 04 17] {:ram {:unit-minutes 40.0}}) {})
+    (rc/insert-summary! (summary "joe" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {})
+    (rc/insert-summary! (summary "mike" "aws" :weekly [2015 04 15] {:ram {:unit-minutes 540.0}}) {})
+    (rc/insert-summary! (summary "mike" "exo" :weekly [2015 04 15] {:ram {:unit-minutes 300.0}}) {})
+    (rc/insert-summary! (summary "joe" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {})
+    (rc/insert-summary! (summary "mike" "aws" :monthly [2015 04 15] {:ram {:unit-minutes 540.0}}) {})
+    (rc/insert-summary! (summary "mike" "exo" :monthly [2015 04 15] {:ram {:unit-minutes 300.0}}) {})
 
     ;; metric names can contain dots
-    (rc/insert-summary! (summary "alfred" "moon" :monthly [2015 04 15] {:a.b.v {:unit-minutes 300.0}}) {:user-name "alfred"})
+    (rc/insert-summary! (summary "alfred" "moon" :monthly [2015 04 15] {:a.b.v {:unit-minutes 300.0}}) {})
     (f)))
 
 (use-fixtures :once insert-daily-summaries)
@@ -83,12 +83,12 @@
 (defn last-uuid
   []
   (let [full-uuid
-        (->> (db/query "usage" {:user-name "joe" :cimi-params {:orderby [["start-timestamp" :desc]]}})
+        (->> (db/query "usage" {:cimi-params {:orderby [["start-timestamp" :desc]]}})
              second
              first
              :id)
         uuid (-> full-uuid
-                 (superstring.core/split #"/")
+                 (str/split #"/")
                  second)]
     [uuid full-uuid]))
 
@@ -171,7 +171,7 @@
 
 (defn- one-line
   [s]
-  (superstring.core/replace s #"\n" ""))
+  (str/replace s #"\n" ""))
 
 (deftest filter-with-admin
   (are-counts-for-admin 2 (one-line

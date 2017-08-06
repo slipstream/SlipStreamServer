@@ -56,22 +56,12 @@
               redirectURI (assoc :redirectURI redirectURI))
       p/resource-name)))
 
-(defn retrieve-session-by-id
-  "Retrieves a Session based on its identifier. Bypasses the authentication
-   controls in the database CRUD layer by spoofing the session role."
-  [session-id]
-  (crud/retrieve-by-id session-id
-                       {:user-name  "INTERNAL"
-                        :user-roles [session-id]}))
-
 (defn update-session
-  "Updates the Session identified by the given identifier  Bypassess the
+  "Updates the Session identified by the given identifier  Bypasses the
    authentication controls in the database CRUD layer by spoofing the
    session role."
   [session-id updated-session]
-  (internal-edit {:user-name  "INTERNAL"
-                  :user-roles [session-id]
-                  :identity   {:current         "INTERNAL"
+  (internal-edit {:identity   {:current         "INTERNAL"
                                :authentications {"INTERNAL" {:identity "INTERNAL"
                                                              :roles    [session-id]}}}
                   :params     {:uuid (extract-session-uuid session-id)}

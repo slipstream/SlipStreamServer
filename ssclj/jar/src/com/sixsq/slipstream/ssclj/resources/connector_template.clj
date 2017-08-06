@@ -256,7 +256,7 @@
   (a/can-view? {:acl collection-acl} request)
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
         ;; FIXME: At least the paging options should be supported.
-        options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+        options (select-keys request [:identity :query-params :cimi-params])
         [count-before-pagination entries] ((juxt count vals) @templates)
         wrapped-entries (wrapper-fn request entries)
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]

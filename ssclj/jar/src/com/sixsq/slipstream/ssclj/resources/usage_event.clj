@@ -39,7 +39,7 @@
 
 (defmethod crud/add resource-name
   [request]
-  (rk/insert-usage-event (:body request) (select-keys request [:user-name :user-roles :cimi-params]))
+  (rk/insert-usage-event (:body request) (select-keys request [:cimi-params]))
   (r/map-response "Usage records created/updated" 201))
 
 

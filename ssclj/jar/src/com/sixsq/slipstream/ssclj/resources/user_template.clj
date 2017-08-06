@@ -162,7 +162,7 @@
   (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
         entries (or (filter (partial viewable? request) (vals @templates)) [])
         ;; FIXME: At least the paging options should be supported.
-        options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+        options (select-keys request [:identity :query-params :cimi-params])
         count-before-pagination (count entries)
         wrapped-entries (wrapper-fn request entries)
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]

@@ -54,13 +54,11 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
-;; FIXME: Roles are needed in two locations!  Should be unique way to specify authentication information.
 (def ^:private all-query-map {:identity       {:current         "slipstream",
                                                :authentications {"slipstream"
                                                                  {:identity "slipstream"
                                                                   :roles    ["ADMIN" "USER" "ANON"]}}}
                               :params         {:resource-name resource-url}
-                              :user-roles     ["ADMIN" "USER" "ANON"]
                               :request-method :get})
 
 (defn extract-field-values

@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.usage.summary
   (:require
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [clj-time.core :as t]
-    [superstring.core :as s]
     [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
@@ -58,7 +58,7 @@
                        (/ 60.0))]
     (* value nb-minutes)))
 
-(defn- comsumption
+(defn- consumption
   [record]
   {:unit-minutes (contribution record)})
 
@@ -69,16 +69,16 @@
 (defn- merge-summary-record
   [summary record]
   (let [record-metric (:metric-name record)
-        record-comsumption (comsumption record)]
+        record-consumption (consumption record)]
     (if-let [consumption-to-increase (get-in summary [:usage record-metric])]
-      (assoc-in summary [:usage record-metric] (sum-consumptions consumption-to-increase record-comsumption))
-      (assoc-in summary [:usage record-metric] record-comsumption))))
+      (assoc-in summary [:usage record-metric] (sum-consumptions consumption-to-increase record-consumption))
+      (assoc-in summary [:usage record-metric] record-consumption))))
 
 (defn- empty-summary-for-record
   [record start end frequency grouping-cols]
   (-> record
       (select-keys grouping-cols)
-      (assoc :grouping (s/join "," (map name grouping-cols)))
+      (assoc :grouping (str/join "," (map name grouping-cols)))
       (assoc :frequency (name frequency))
       (assoc :start-timestamp start)
       (assoc :end-timestamp end)
@@ -113,6 +113,6 @@
     (log/info "Will persist" (count summaries) "summaries for "
               (u/disp-interval start-time end-time) "except" except-users ", on" grouping-cols)
     (doseq [summary summaries]
-      (rc/insert-summary! summary {:user-roles ["ADMIN"]}))))
+      (rc/insert-summary! summary {}))))
 
 

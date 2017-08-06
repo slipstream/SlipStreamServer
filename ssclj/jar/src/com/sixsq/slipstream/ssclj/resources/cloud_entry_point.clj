@@ -70,7 +70,7 @@
                  {:acl         resource-acl
                   :id          resource-url
                   :resourceURI resource-uri})]
-    (db/add resource-name record {:user-roles ["ANON"]})))
+    (db/add resource-name record {})))
 
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]

@@ -17,15 +17,10 @@
 (deftest test-auth-internal-accepts-username-and-fallbacks-to-user-name
   (th/add-user-for-test! valid-credentials)
   (is (= 200 (:status (auth/login valid-request))))
-  (is (= 200 (:status (auth/login {:params {:authn-method :internal :username "super" :password "supeRsupeR"}}))))
-  (is (= 200 (:status (auth/login {:params {:authn-method :internal :user-name "super" :password "supeRsupeR"}}))))
+  (is (= 200 (:status (auth/login {:params {:authn-method :internal, :username "super", :password "supeRsupeR"}}))))
 
-  (is (= 401 (:status (auth/login {:params {:authn-method :internal
-                                            :username "wrong" :user-name "super"
-                                            :password "supeRsupeR"}}))))
-  (is (= 200 (:status (auth/login {:params {:authn-method :internal
-                                            :username "super" :user-name "wrong"
-                                            :password "supeRsupeR"}})))))
+  (is (= 401 (:status (auth/login {:params {:authn-method :internal, :username "wrong", :password "supeRsupeR"}}))))
+  (is (= 401 (:status (auth/login {:params {:authn-method :internal, :username "super", :password "bad-password"}})))))
 
 (deftest test-auth-internal-invalid-credentials
   (th/add-user-for-test! valid-credentials)

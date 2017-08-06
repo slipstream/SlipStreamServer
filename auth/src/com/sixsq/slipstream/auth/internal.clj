@@ -11,10 +11,8 @@
     [buddy.core.hash :as ha]))
 
 (defn- extract-credentials
-  [request]
-  ;; FIXME: Remove :user-name!
-  {:username (->> request :params ((some-fn :username :user-name)))
-   :password (uh/param-value request :password)})
+  [{:keys [params] :as request}]
+  (select-keys params [:username :password]))
 
 (defn hash-password
   "Hash password exactly as done in SlipStream Java server."

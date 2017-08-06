@@ -189,7 +189,7 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (if-let [{:keys [method] :as resource} (crud/retrieve-by-id id {:user-name "INTERNAL" :user-roles ["ADMIN"]})]
+      (if-let [{:keys [method] :as resource} (crud/retrieve-by-id id)]
         (if (a/can-view? resource request)
           (if-let [desc (get @descriptions method)]
             (r/json-response desc)

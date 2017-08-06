@@ -73,10 +73,9 @@
 
 (defn config-params
   [redirectURI instance]
-  (let [cfg-id (str "configuration/session-oidc-" instance)
-        opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
+  (let [cfg-id (str "configuration/session-oidc-" instance)]
     (try
-      (let [{:keys [clientID baseURL publicKey]} (crud/retrieve-by-id cfg-id opts)]
+      (let [{:keys [clientID baseURL publicKey]} (crud/retrieve-by-id cfg-id)]
         (if (and clientID baseURL publicKey)
           [clientID baseURL publicKey]
           (throw-bad-client-config cfg-id redirectURI)))

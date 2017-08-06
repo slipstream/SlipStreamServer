@@ -182,7 +182,7 @@
                            {:name  "RAM-GB"
                             :value 8}
                            {:name  "disk-GB"
-                            :value 100.5}]} {:user-roles ["ADMIN"]})
+                            :value 100.5}]} {})
   (rc/insert-usage-event
     {:acl                 {:owner {:type "USER" :principal "sixsq_dev"}
                            :rules [{:type "ROLE" :principal "ANON" :right "ALL"}]}
@@ -191,7 +191,7 @@
      :end-timestamp       in-day-2
      :metrics             [{:name "nb-cpu"}
                            {:name "RAM-GB"}
-                           {:name "disk-GB"}]} {:user-roles ["ADMIN"]}))
+                           {:name "disk-GB"}]} {}))
 
 (deftest test-summarize
   (insert-record)
@@ -212,7 +212,7 @@
 
 (defn- summaries-from-db
   []
-  (second (db/query "usage" {:user-roles ["ADMIN"]})))
+  (second (db/query "usage" {})))
 
 (deftest test-summarize-and-store-by-user-cloud
   (insert-record)

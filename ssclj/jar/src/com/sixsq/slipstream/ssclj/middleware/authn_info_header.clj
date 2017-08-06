@@ -66,12 +66,6 @@
     {:current         current
      :authentications {current id-map}}))
 
-(defn add-user-name-roles
-  [request]
-  (let [[username roles] (extract-info request)]
-    (cond-> (assoc request :user-roles (add-anon-role roles))
-            username (assoc :user-name username))))
-
 (defn add-claims
   [request]
   (if-let [claims (or
@@ -90,6 +84,5 @@
          (extract-info)
          (create-identity-map)
          (assoc request :identity)
-         add-user-name-roles
          add-claims
          handler)))
