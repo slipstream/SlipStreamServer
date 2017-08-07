@@ -9,10 +9,12 @@
     [com.sixsq.slipstream.persistence User]
     [com.sixsq.slipstream.persistence UserParameter]))
 
-;; NB! We are using Elaticsearch for some Java entities.
+;; Fixtures
+;; NB! We are using Elasticsearch for some Java entities.
 ;; Start local ES node, create a client of it, and set DB CRUD impl.
-(su/test-db-client-and-crud-impl)
-(sci/db-add-default-config)
+(use-fixtures :once su/test-fixture-es-client-and-db-impl)
+
+(use-fixtures :each (fn [f] (sci/db-add-default-config) (f)))
 
 (deftest test-add-increasing-space
   (is (= [["joe" "exo" 0] ["joe" "aws" 10] ["mike" "exo" 20]]

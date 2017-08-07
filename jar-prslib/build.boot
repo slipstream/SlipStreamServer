@@ -33,13 +33,15 @@
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
                    [tolitius/boot-check]
+                   [onetom/boot-lein-generate]
                    [boot-codox]]))))
 
 (require
   '[adzerk.boot-test :refer [test]]
   '[adzerk.boot-reload :refer [reload]]
   '[tolitius.boot-check :refer [with-yagni with-eastwood with-kibit with-bikeshed]]
-  '[codox.boot :refer [codox]])
+  '[codox.boot :refer [codox]]
+  '[boot.lein :refer [generate]])
 
 (set-env!
   :source-paths #{"test/clj"}
