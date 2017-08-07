@@ -42,7 +42,7 @@
 
 (defn fixture-insert-some-events
   [f]
-  (ltu/with-test-client
+  (ltu/with-test-es-client
     (insert-some-events)
     (f)))
 

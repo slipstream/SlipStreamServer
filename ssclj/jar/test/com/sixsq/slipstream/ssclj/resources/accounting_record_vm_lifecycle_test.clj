@@ -13,7 +13,7 @@
       [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
       [clojure.spec.alpha :as s]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase acc/resource-url)))
 

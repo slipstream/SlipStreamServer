@@ -18,7 +18,7 @@
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rk]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]))
 
-(use-fixtures :each t/with-test-client-fixture)
+(use-fixtures :each t/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
