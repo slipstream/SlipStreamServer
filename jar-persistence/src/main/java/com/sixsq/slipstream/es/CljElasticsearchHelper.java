@@ -60,7 +60,7 @@ public class CljElasticsearchHelper {
     public static void createAndInitTestDb() {
         logger.info("Creating test DB node/client and setting DB CRUD implementation.");
         requireNs(NS_SERIALIZERS_UTILS);
-        Clojure.var(NS_SERIALIZERS_UTILS, "test-db-client-and-crud-impl").invoke();
+        Clojure.var(NS_SERIALIZERS_UTILS, "init-test-es-client-and-db-impl").invoke();
         addDefaultServiceConfigToDb();
         initializeConnectorTemplates();
         pushServerConfig();

@@ -8,15 +8,13 @@
   (:import [java.util HashMap ArrayList HashSet]
            [com.sixsq.slipstream.persistence ImageModule DeploymentModule Node ModuleParameter ParameterCategory]))
 
-;; Fixtures.
-(defn fixture-start-es-db
-  [f]
-  (su/test-db-client-and-crud-impl)
-  ;; initialize resource (including possible connectors on the classpath).
-  (su/initialize)
-  (sci/db-add-default-config)
-  (f))
-(use-fixtures :once fixture-start-es-db)
+;; Fixtures
+(use-fixtures :once su/test-fixture-es-client-and-db-impl)
+
+(use-fixtures :each (fn [f]
+                      (su/initialize)
+                      (sci/db-add-default-config)
+                      (f)))
 
 (def cm {"a" "1" "b" "2" "c" "3"})
 (def m (HashMap. cm))

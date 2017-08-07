@@ -57,6 +57,19 @@
 ;; DB related.
 ;;
 
+(defn init-test-es-client-and-db-impl
+  "STRONGLY DEPRECATED. Use `with-test-es-client-and-db-impl` instead. Will
+   initialize an Elasticsearch test client and set the database implementation.
+   Because `.close` will never be called on the generated node and client, THIS
+   FUNCTION WILL LEAK MEMORY."
+  []
+  (let [node (esu/create-test-node)
+        client (-> node
+                   esu/node-client
+                   esb/wait-client-create-index)]
+    (set! esb/*client* client)
+    (db/set-impl! (esb/get-instance))))
+
 (defmacro with-test-es-client-and-db-impl
   "Creates an Elasticsearch test client, executes the body with the created
    client bound to the Elasticsearch client binding, and then clean up the
@@ -70,6 +83,11 @@
        (db/set-impl! (esb/get-instance))
        (esu/reset-index esb/*client* esb/index-name)
        ~@body)))
+
+(defn test-fixture-es-client-and-db-impl
+  [f]
+  (with-test-es-client-and-db-impl
+    (f)))
 
 (defn dump
   [resource & [msg]]
