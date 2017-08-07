@@ -1,14 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template-internal
   (:require
-    [clojure.spec.alpha :as s]
+    [clojure.tools.logging :as log]
     [clojure.stacktrace :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]
-    [com.sixsq.slipstream.ssclj.resources.session-template :as p]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.db.impl :as db]))
+    [com.sixsq.slipstream.ssclj.resources.session-template :as p]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]))
 
 (def ^:const authn-method "internal")
 

@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key
-  "This CredentialTemplate allows creating a Credential containing an SSH public key."
+  "This CredentialTemplate allows creating a Credential containing an existing
+   SSH public key, either in RSA or DSA format."
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-public-key]
@@ -8,6 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def ^:const credential-type "ssh-public-key")
+(def ^:const method "import-ssh-public-key")
 
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
@@ -19,24 +21,25 @@
 ;; resource
 ;;
 (def ^:const resource
-  {:type         credential-type
-   :name         "SSH Public Key"
-   :description  "public key of an SSH key pair"
-   :sshPublicKey "ssh-public-key"
-   :acl          resource-acl})
+  {:type        credential-type
+   :method      method
+   :name        "Import SSH Public Key"
+   :description "import public key of an existing SSH key pair"
+   :publicKey   "ssh-public-key"
+   :acl         resource-acl})
 
 ;;
 ;; description
 ;;
 (def ^:const desc
   (merge p/CredentialTemplateDescription
-         {:sshPublicKey {:displayName "SSH Public Key"
-                         :category    "general"
-                         :description "public key of an SSH key pair"
-                         :type        "string"
-                         :mandatory   true
-                         :readOnly    false
-                         :order       1}}))
+         {:publicKey {:displayName "SSH Public Key"
+                      :category    "general"
+                      :description "public RSA or DSA key of an SSH key pair"
+                      :type        "string"
+                      :mandatory   true
+                      :readOnly    false
+                      :order       1}}))
 
 ;;
 ;; initialization: register this Credential template
@@ -50,6 +53,6 @@
 ;;
 
 (def validate-fn (u/create-spec-validation-fn :cimi/credential-template.ssh-public-key))
-(defmethod p/validate-subtype credential-type
+(defmethod p/validate-subtype method
   [resource]
   (validate-fn resource))

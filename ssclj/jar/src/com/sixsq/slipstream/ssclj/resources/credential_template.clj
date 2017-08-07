@@ -55,12 +55,12 @@
           (assoc collection-key entries)))))
 
 (defn complete-resource
-  "Completes the given document with server-managed information:
-   resourceURI, timestamps, and operations.  NOTE: The subtype
-   MUST provide an ACL for the template."
-  [{:keys [type] :as resource}]
-  (when type
-    (let [id (str resource-url "/" type)
+  "Completes the given document with server-managed information: resourceURI,
+   timestamps, and operations. NOTE: The subtype MUST provide an ACL for the
+   template."
+  [{:keys [method] :as resource}]
+  (when method
+    (let [id (str resource-url "/" method)
           href (str id "/describe")
           ops [{:rel (:describe c/action-uri) :href href}]]
       (-> resource
@@ -70,10 +70,10 @@
           u/update-timestamps))))
 
 (defn register
-  "Registers a given CredentialTemplate resource and its description
-   with the server.  The resource document (resource) and the description
-   (desc) must be valid.  The key will be used to create the id of
-   the resource as 'credential-template/key'."
+  "Registers a given CredentialTemplate resource and its description with the
+   server. The resource document (resource) and the description (desc) must be
+   valid. The template-id key must be provided; it will be used to generate the
+   id of the form 'credential-template/template-id'."
   [resource desc]
   (when-let [{:keys [id] :as full-resource} (complete-resource resource)]
     (swap! templates assoc id full-resource)
@@ -90,25 +90,32 @@
 
 (def CredentialTemplateDescription
   (merge c/CommonParameterDescription
-         {:type {:displayName "Credential Type"
-                 :category    "general"
-                 :description "type of credential"
-                 :type        "string"
-                 :mandatory   true
-                 :readOnly    true
-                 :order       0}}))
+         {:type   {:displayName "Credential Type"
+                   :category    "general"
+                   :description "type of credential"
+                   :type        "string"
+                   :mandatory   true
+                   :readOnly    true
+                   :order       0}
+          :method {:displayName "Credential Creation Method"
+                   :category    "general"
+                   :description "method for creating credential"
+                   :type        "string"
+                   :mandatory   true
+                   :readOnly    true
+                   :order       1}}))
 ;;
 ;; multimethods for validation
 ;;
 
 (defmulti validate-subtype
           "Validates the given resource against the specific
-           CredentialTemplate subtype schema."
-          :type)
+           CredentialTemplate method."
+          :method)
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown CredentialTemplate type: " (:type resource)) resource)))
+  (throw (ex-info (str "unknown CredentialTemplate method: " (:method resource)) resource)))
 
 (defmethod crud/validate
   resource-uri
