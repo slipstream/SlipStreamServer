@@ -5,16 +5,16 @@
     [clj-time.core :as time]
     [clojure.test :refer :all]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (deftest user-summary-without-date
-  (ltu/with-test-client
+  (ltu/with-test-es-client
     (us/do-summarize "-f" "daily")
     (us/do-summarize "-f" "weekly")
     (us/do-summarize "-f" "monthly")))
 
 (deftest user-summary-with-args
-  (ltu/with-test-client
+  (ltu/with-test-es-client
     (us/do-summarize "-d" "2015-01-01" "-f" "daily")
     (us/do-summarize "--date" "2015-01-01" "--frequency" "daily")))
 

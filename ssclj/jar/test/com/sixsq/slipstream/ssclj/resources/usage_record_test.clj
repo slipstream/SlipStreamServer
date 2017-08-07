@@ -20,7 +20,7 @@
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
     [com.sixsq.slipstream.db.es.es-util :as esu]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 

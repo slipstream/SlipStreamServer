@@ -19,7 +19,7 @@
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 

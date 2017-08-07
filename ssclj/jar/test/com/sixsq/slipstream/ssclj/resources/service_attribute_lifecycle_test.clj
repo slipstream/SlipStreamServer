@@ -11,7 +11,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as san]))
 
-(use-fixtures :each t/with-test-client-fixture)
+(use-fixtures :each t/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
