@@ -81,6 +81,7 @@ public class CloudIds {
             Module module = Module.loadLatest(Module.RESOURCE_URI_PREFIX + imageUri);
             if(module == null) {
                 Logger.warning("Error processing file: " + f.getPath() + ". Module: " + imageUri + " does not exist.");
+                continue;
             }
             if(module.getCategory() != ModuleCategory.Image) {
                 Logger.warning("Error processing file: " + f.getPath() + ". Module: " + imageUri + " is not an image.");
