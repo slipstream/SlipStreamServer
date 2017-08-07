@@ -24,7 +24,7 @@
     [clj-time.core :as time]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 

@@ -16,7 +16,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
   (:import (clojure.lang ExceptionInfo)))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 

@@ -18,7 +18,7 @@
     [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 

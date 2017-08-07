@@ -12,6 +12,7 @@
     [ring.middleware.nested-params :refer [wrap-nested-params]]
     [ring.util.codec :as codec]
     [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.db.es.es-util :as esu]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
@@ -194,14 +195,21 @@
   (pprint
     (esu/dump esb/*client* esb/index-name type)))
 
-(defmacro with-test-client
+(defmacro with-test-es-client
+  "Creates an Elasticsearch test client, executes the body with the created
+   client bound to the Elasticsearch client binding, and then clean up the
+   allocated resources by closing both the client and the node."
   [& body]
-  `(binding [esb/*client* (esb/create-test-client)]
-     (db/set-impl! (esb/get-instance))
-     (esu/reset-index esb/*client* esb/index-name)
-     ~@body))
+  `(with-open [node# (esu/create-test-node)
+               client# (-> node#
+                           esu/node-client
+                           esb/wait-client-create-index)]
+     (binding [esb/*client* client#]
+       (db/set-impl! (esb/get-instance))
+       (esu/reset-index esb/*client* esb/index-name)
+       ~@body)))
 
-(defn with-test-client-fixture
+(defn with-test-es-client-fixture
   [f]
-  (with-test-client
+  (with-test-es-client
     (f)))

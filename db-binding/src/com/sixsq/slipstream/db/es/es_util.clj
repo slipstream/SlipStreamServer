@@ -215,7 +215,9 @@
 
 (defn create-test-es-client
   []
-  (node-client (create-test-node)))
+  (let [node (create-test-node)
+        client (node-client node)]
+    [client node]))
 
 (defn wait-for-cluster
   [^Client client]
