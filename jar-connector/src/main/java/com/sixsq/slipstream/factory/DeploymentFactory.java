@@ -457,11 +457,14 @@ public class DeploymentFactory extends RunFactory {
 		if (userChoicesForNode != null) {
 			for (Parameter<?> parameter : userChoicesForNode) {
 				if (parameter.getName().equals(RuntimeParameter.SERVICE_OFFER)) {
-					String cs = getCloudServiceFromServiceOffer(extractNodeParameterValue((NodeParameter) parameter));
-					if (cloudService != null) {
-						checkServiceOfferCloudService(cs, cloudService, node.getName());
+					String value = extractNodeParameterValue((NodeParameter) parameter);
+					if (value != null && !value.isEmpty()) {
+						String cs = getCloudServiceFromServiceOffer(value);
+						if (cloudService != null) {
+							checkServiceOfferCloudService(cs, cloudService, node.getName());
+						}
+						cloudService = cs;
 					}
-					cloudService = cs;
 				} else if (parameter.getName().equals(RuntimeParameter.CLOUD_SERVICE_NAME)) {
 					String cs = extractNodeParameterValue((NodeParameter) parameter);
 					if (cloudService != null) {

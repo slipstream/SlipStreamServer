@@ -135,8 +135,9 @@ public class AccountingRecordHelper {
             serviceOffer = ServiceOffersUtil.getServiceOffer(getServiceOffer());
         }
 
-        if (serviceOffer == null) {
-            logger.info("VM data can not be inferred form null service offer");
+        if (serviceOffer == null || serviceOffer.entrySet().size() == 0) {
+                       logger.info("VM data can not be inferred form empty service offer");
+
             return new AccountingRecordVM(null, null, null, null);
         }
 
@@ -218,7 +219,7 @@ public class AccountingRecordHelper {
 
         String cimiQuery = sb.toString();
 
-        String resource = null;
+        String resource ;
         try {
             //URLEncoder class performs application/x-www-form-urlencoded-type encoding rather than percent encoding, therefore replacing spaces with +
             resource = AccountingRecord.ACCOUNTING_RECORD_RESOURCE + "?$filter=" + URLEncoder.encode(cimiQuery, "UTF-8").replace("+", "%20");
