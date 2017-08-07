@@ -26,6 +26,7 @@
                    [aleph]
                    [cheshire] ;; newer version needed for ring-json
                    [compojure]
+                   [com.jcraft/jsch]
                    [clj-stacktrace]
                    [clj-time]
                    [environ]

@@ -1,22 +1,18 @@
-(ns com.sixsq.slipstream.ssclj.resources.credential-ssh-public-key-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.credential-api-key-lifecycle-test
   (:require
-    [clojure.test :refer :all]
-    [clojure.data.json :as json]
+    [clojure.test :refer [deftest is are use-fixtures]]
     [peridot.core :refer :all]
+    [clojure.data.json :as json]
     [com.sixsq.slipstream.ssclj.resources.credential :as credential]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as spk]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as akey]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]))
+    [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
@@ -33,7 +29,7 @@
                    :created :updated :name :description}]
     (into {} (remove #(unwanted (first %)) m))))
 
-(deftest lifecycle-import
+(deftest lifecycle
   (let [session-admin (-> (session (ring-app))
                           (content-type "application/json")
                           (header authn-info-header "root ADMIN USER ANON"))
@@ -44,8 +40,8 @@
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
 
-        href (str ct/resource-url "/" spk/method)
-        template-url (str p/service-context ct/resource-url "/" spk/method)
+        href (str ct/resource-url "/" akey/method)
+        template-url (str p/service-context ct/resource-url "/" akey/method)
 
         template (-> session-admin
                      (request template-url)
@@ -53,16 +49,17 @@
                      (ltu/is-status 200)
                      (get-in [:response :body]))
 
-        imported-ssh-key-info (ssh-utils/generate)
+        create-import-no-href {:credentialTemplate (strip-unwanted-attrs template)}
 
-        create-import-no-href {:credentialTemplate (strip-unwanted-attrs
-                                                     (assoc template
-                                                       :publicKey (:publicKey imported-ssh-key-info)))}
+        create-import-href {:credentialTemplate {:href href
+                                                 :ttl  1000}}
 
-        create-import-href {:credentialTemplate {:href      href
-                                                 :publicKey (:publicKey imported-ssh-key-info)}}
+        create-import-href-zero-ttl {:credentialTemplate {:href href
+                                                          :ttl  0}}
 
-        invalid-create-href (assoc-in create-import-href [:credentialTemplate :href] "user-template/unknown-template")]
+        create-import-href-no-ttl {:credentialTemplate {:href href}}
+
+        invalid-create-href (assoc-in create-import-href [:credentialTemplate :href] "credential-template/unknown-template")]
 
     ;; admin/user query should succeed but be empty (no credentials created yet)
     (doseq [session [session-admin session-user]]
@@ -106,12 +103,16 @@
                    (ltu/body->edn)
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
+          secret-key (get-in resp [:response :body :secretKey])
           uri (-> resp
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; resource id and the uri (location) should be the same
       (is (= id uri))
+
+      ;; the secret key must be returned as part of the 201 response
+      (is secret-key)
 
       ;; admin/user should be able to see, edit, and delete credential
       (doseq [session [session-admin session-user]]
@@ -123,54 +124,33 @@
             (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
-      (let [resource (-> session-user
-                         (request abs-uri)
-                         (ltu/body->edn)
-                         (ltu/is-status 200)
-                         :response
-                         :body)]
-        (is (= "rsa" (:algorithm resource)))
-        (is (= (:fingerprint resource) (:fingerprint imported-ssh-key-info)))
-        (is (= (:publicKey resource) (:publicKey imported-ssh-key-info))))
+      (let [{:keys [digest expiry claims]} (-> session-user
+                                               (request abs-uri)
+                                               (ltu/body->edn)
+                                               (ltu/is-status 200)
+                                               :response
+                                               :body)]
+        (is digest)
+        (is (key-utils/valid? secret-key digest))
+        (is expiry)
+        (is claims))
 
       ;; delete the credential
       (-> session-user
           (request abs-uri
                    :request-method :delete)
           (ltu/body->edn)
-          (ltu/is-status 200)))))
+          (ltu/is-status 200)))
 
-(deftest lifecycle-generate
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
-
-        href (str ct/resource-url "/" skp/method)
-        template-url (str p/service-context ct/resource-url "/" skp/method)
-
-        template (-> session-admin
-                     (request template-url)
-                     (ltu/body->edn)
-                     (ltu/is-status 200)
-                     (get-in [:response :body]))
-
-        create-import-href {:credentialTemplate {:href href}}]
-
-    ;; create a credential as a normal user
+    ;; execute the same tests but now create an API key without an expiry date
     (let [resp (-> session-user
                    (request base-uri
                             :request-method :post
-                            :body (json/write-str create-import-href))
+                            :body (json/write-str create-import-href-no-ttl))
                    (ltu/body->edn)
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
-          private-key (get-in resp [:response :body :privateKey])
+          secret-key (get-in resp [:response :body :secretKey])
           uri (-> resp
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
@@ -178,8 +158,8 @@
       ;; resource id and the uri (location) should be the same
       (is (= id uri))
 
-      ;; the private key must be returned as part of the 201 response
-      (is private-key)
+      ;; the secret key must be returned as part of the 201 response
+      (is secret-key)
 
       ;; admin/user should be able to see, edit, and delete credential
       (doseq [session [session-admin session-user]]
@@ -191,15 +171,63 @@
             (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
-      (let [resource (-> session-user
-                         (request abs-uri)
-                         (ltu/body->edn)
-                         (ltu/is-status 200)
-                         :response
-                         :body)]
-        (is (= "rsa" (:algorithm resource)))
-        (is (:fingerprint resource))
-        (is (:publicKey resource)))
+      (let [{:keys [digest expiry claims]} (-> session-user
+                                               (request abs-uri)
+                                               (ltu/body->edn)
+                                               (ltu/is-status 200)
+                                               :response
+                                               :body)]
+        (is digest)
+        (is (key-utils/valid? secret-key digest))
+        (is (nil? expiry))
+        (is claims))
+
+      ;; delete the credential
+      (-> session-user
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 200)))
+
+    ;; and again, with a zero TTL (should be same as if TTL was not given)
+    (let [resp (-> session-user
+                   (request base-uri
+                            :request-method :post
+                            :body (json/write-str create-import-href-zero-ttl))
+                   (ltu/body->edn)
+                   (ltu/is-status 201))
+          id (get-in resp [:response :body :resource-id])
+          secret-key (get-in resp [:response :body :secretKey])
+          uri (-> resp
+                  (ltu/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
+
+      ;; resource id and the uri (location) should be the same
+      (is (= id uri))
+
+      ;; the secret key must be returned as part of the 201 response
+      (is secret-key)
+
+      ;; admin/user should be able to see, edit, and delete credential
+      (doseq [session [session-admin session-user]]
+        (-> session
+            (request abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-operation-present "delete")
+            (ltu/is-operation-present "edit")))
+
+      ;; ensure credential contains correct information
+      (let [{:keys [digest expiry claims]} (-> session-user
+                                               (request abs-uri)
+                                               (ltu/body->edn)
+                                               (ltu/is-status 200)
+                                               :response
+                                               :body)]
+        (is digest)
+        (is (key-utils/valid? secret-key digest))
+        (is (nil? expiry))
+        (is claims))
 
       ;; delete the credential
       (-> session-user
@@ -207,4 +235,5 @@
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200)))))
+
 

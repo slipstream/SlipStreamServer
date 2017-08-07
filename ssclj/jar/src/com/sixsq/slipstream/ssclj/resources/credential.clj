@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-username-password :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -37,13 +36,6 @@
                               :right     "MODIFY"}]})
 
 ;;
-;; description
-;; FIXME: Must be visible as an action on credential resources.
-;;
-(def CredentialDescription tpl/desc)
-(def ^:const desc CredentialDescription)
-
-;;
 ;; validate the created credential resource
 ;; must dispatch on the type because each credential has a different schema
 ;;
@@ -51,7 +43,7 @@
 
 (defmethod validate-subtype :default
   [resource]
-  (logu/log-and-throw-400 (str "unknown Credential type: '" (:type resource) "'")))
+  (logu/log-and-throw-400 (str "unknown Credential type: '" resource (:type resource) "'")))
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -118,14 +110,16 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        body (-> body
-                 (assoc :resourceURI create-uri)
-                 (update-in [:credentialTemplate] dissoc :type) ;; forces use of template reference
-                 (std-crud/resolve-hrefs idmap)
-                 (crud/validate)
-                 (:credentialTemplate)
-                 (tpl->credential request))]
-    (add-impl (assoc request :id (:id body) :body body))))
+        [create-resp body] (-> body
+                               (assoc :resourceURI create-uri)
+                               (update-in [:credentialTemplate] dissoc :type) ;; forces use of template reference
+                               (std-crud/resolve-hrefs idmap)
+                               (crud/validate)
+                               (:credentialTemplate)
+                               (tpl->credential request))]
+    (-> (assoc request :id (:id body) :body body)
+        add-impl
+        (update-in [:body] merge create-resp))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name

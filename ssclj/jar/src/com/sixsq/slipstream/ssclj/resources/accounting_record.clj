@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.accounting-record
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-username-password :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
