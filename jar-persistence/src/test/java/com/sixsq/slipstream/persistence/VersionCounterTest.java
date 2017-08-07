@@ -44,8 +44,8 @@ public class VersionCounterTest {
 	public void testParallelIncrement() throws InterruptedException {
 		List<Thread> threads = new ArrayList<>();
 
-		int initialVersion = VersionCounter.getNextVersion();
-		int finalVersion = initialVersion + numberOfThreads + 1;
+		final int initialVersion = VersionCounter.getNextVersion();
+		final int finalVersion = initialVersion + numberOfThreads + 1;
 
 		for (int i = 1; i <= numberOfThreads; i++) {
 			Thread thread = new Thread(new IncrementVersionRunnable());
