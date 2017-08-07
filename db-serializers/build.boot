@@ -44,6 +44,7 @@
                     [boot-environ]
                     [adzerk/boot-test]
                     [adzerk/boot-reload]
+                    [onetom/boot-lein-generate]
                     [tolitius/boot-check]]))))
 
 (require
@@ -53,7 +54,8 @@
   '[tolitius.boot-check :refer [with-yagni
                                 with-eastwood
                                 with-kibit
-                                with-bikeshed]])
+                                with-bikeshed]]
+  '[boot.lein :refer [generate]])
 
 (set-env!
   :source-paths #{"test"}
