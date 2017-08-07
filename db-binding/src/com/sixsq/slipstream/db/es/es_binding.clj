@@ -14,7 +14,7 @@
 
 (def ^:const index-name "resources-index")
 
-(defn- wait-client-create-index
+(defn wait-client-create-index
   [client]
   (esu/wait-for-cluster client)
   (when-not (esu/index-exists? client index-name)
@@ -25,10 +25,6 @@
 (defn create-client
   []
   (wait-client-create-index (esu/create-es-client)))
-
-(defn create-test-client
-  []
-  (wait-client-create-index (esu/create-test-es-client)))
 
 (def ^:dynamic *client*)
 
