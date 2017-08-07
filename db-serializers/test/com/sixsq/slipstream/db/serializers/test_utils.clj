@@ -5,6 +5,6 @@
 ;; Fixtures.
 (defn fixture-start-es-db
   [f]
-  (u/test-db-client-and-crud-impl)
-  (f))
+  (u/with-test-es-client-and-db-impl
+    (f)))
 

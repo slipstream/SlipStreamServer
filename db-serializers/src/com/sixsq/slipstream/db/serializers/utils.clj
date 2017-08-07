@@ -57,46 +57,19 @@
 ;; DB related.
 ;;
 
-;; Implementation of CRUD actions over DB.
-
-(defn set-db-crud-impl-uncond
-  []
-  (db/set-impl! (esb/get-instance)))
-
-(defn set-db-crud-impl
-  []
-  (if (instance? clojure.lang.Var$Unbound db/*impl*)
-    (set-db-crud-impl-uncond)))
-
-;; Connection to a remote ES.
-
-(defn create-and-set-es-client
-  "Connection to a remote ES.
-  Requries ES_HOST and ES_PORT env vars."
-  []
-  (esb/set-client! (esb/create-client)))
-
-(defn db-client-and-crud-impl
-  "Sets up connection to a remote DB and sets DB CRUD implementation."
-  []
-  (set-db-crud-impl)
-  (create-and-set-es-client))
-
-;; Local test ES node.
-
-(defn create-test-es-db-uncond
-  []
-  (esb/set-client! (esb/create-test-client)))
-
-(defn create-test-es-db
-  []
-  (if (instance? clojure.lang.Var$Unbound esb/*client*)
-    (create-test-es-db-uncond)))
-
-(defn test-db-client-and-crud-impl
-  []
-  (set-db-crud-impl)
-  (create-test-es-db))
+(defmacro with-test-es-client-and-db-impl
+  "Creates an Elasticsearch test client, executes the body with the created
+   client bound to the Elasticsearch client binding, and then clean up the
+   allocated resources by closing both the client and the node."
+  [& body]
+  `(with-open [node# (esu/create-test-node)
+               client# (-> node#
+                           esu/node-client
+                           esb/wait-client-create-index)]
+     (binding [esb/*client* client#]
+       (db/set-impl! (esb/get-instance))
+       (esu/reset-index esb/*client* esb/index-name)
+       ~@body)))
 
 (defn dump
   [resource & [msg]]
