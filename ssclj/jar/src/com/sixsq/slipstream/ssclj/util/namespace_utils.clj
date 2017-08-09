@@ -22,8 +22,8 @@
     (require ns-sym)
     (log/info "loaded namespace:" ns-sym)
     (find-ns ns-sym)
-    (catch Exception _
-      (log/error "could not load namespace:" ns-sym)
+    (catch Exception e
+      (log/error "could not load namespace:" ns-sym " ===>>> " (.getMessage e))
       nil)))
 
 (defn load-filtered-namespaces
