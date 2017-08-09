@@ -19,20 +19,20 @@
 ;;
 (def ^:const desc
   (merge p/SessionTemplateDescription
-         {:username {:displayName "Key"
-                     :category    "general"
-                     :description "API key"
-                     :type        "string"
-                     :mandatory   true
-                     :readOnly    false
-                     :order       3}
-          :password {:displayName "Secret"
-                     :category    "general"
-                     :description "secret associated with API key"
-                     :type        "password"
-                     :mandatory   true
-                     :readOnly    false
-                     :order       4}}))
+         {:key    {:displayName "Key"
+                   :category    "general"
+                   :description "API key"
+                   :type        "string"
+                   :mandatory   true
+                   :readOnly    false
+                   :order       3}
+          :secret {:displayName "Secret"
+                   :category    "general"
+                   :description "secret associated with API key"
+                   :type        "password"
+                   :mandatory   true
+                   :readOnly    false
+                   :order       4}}))
 
 ;;
 ;; initialization: register this Session template
