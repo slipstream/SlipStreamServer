@@ -7,8 +7,13 @@
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
 
+(defn strip-session-role
+  [roles]
+  (vec (remove #(re-matches #"^session/.*" %) roles)))
+
 (defn extract-claims [request]
-  (let [{:keys [identity roles]} (acl/current-authentication request)]
+  (let [{:keys [identity roles]} (acl/current-authentication request)
+        roles (strip-session-role roles)]
     (cond-> {:identity identity}
             (seq roles) (assoc :roles (vec roles)))))
 

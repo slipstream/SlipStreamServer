@@ -5,6 +5,7 @@
     [clojure.data.json :as json]
     [com.sixsq.slipstream.ssclj.resources.credential :as credential]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
+    [com.sixsq.slipstream.ssclj.resources.credential-api-key :as t]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as akey]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
@@ -23,6 +24,10 @@
 
 ;; initialize must to called to pull in CredentialTemplate resources
 (dyn/initialize)
+
+(deftest check-strip-session-role
+  (is (= ["alpha" "beta"] (t/strip-session-role ["alpha" "session/2d273461-2778-4a66-9017-668f6fed43ae" "beta"])))
+  (is (= [] (t/strip-session-role ["session/2d273461-2778-4a66-9017-668f6fed43ae"]))))
 
 (defn strip-unwanted-attrs [m]
   (let [unwanted #{:id :resourceURI :acl :operations
