@@ -60,7 +60,7 @@
 
 (defmethod create-validate-subtype :default
   [resource]
-  (logu/log-and-throw-400 "missing or invalid CredentialTemplate reference"))
+  (logu/log-and-throw-400 (str "cannot validate CredentialTemplate create document with type: '" (dispatch-on-registration-method resource) "'")))
 
 (defmethod crud/validate create-uri
   [resource]
@@ -98,7 +98,7 @@
 ;; default implementation throws if the credential type is unknown
 (defmethod tpl->credential :default
   [resource request]
-  (logu/log-and-throw-400 "missing or invalid CredentialTemplate reference"))
+  (logu/log-and-throw-400 (str "cannot transform CredentialTemplate document to template for type: '" (:type resource) "'")))
 
 ;;
 ;; CRUD operations

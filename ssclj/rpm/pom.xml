@@ -187,7 +187,7 @@
             <configuration>
               <outputDirectory>${project.build.directory}/dependency/lib/ext</outputDirectory>
               <excludeArtifactIds>SlipStreamToolsCli-jar</excludeArtifactIds>
-              <stripVersion>true</stripVersion>
+              <stripVersion>false</stripVersion>
               <stripClassifier>true</stripClassifier>
               <excludeTypes>pom</excludeTypes>
               <includeScope>runtime</includeScope>
