@@ -46,6 +46,6 @@ import static org.junit.Assert.fail;
 public class AccountingRecordTest extends RunFactoryTest {
 
 
-    // See RunFatoryTest
+    // See RunFactoryTest
 
 }

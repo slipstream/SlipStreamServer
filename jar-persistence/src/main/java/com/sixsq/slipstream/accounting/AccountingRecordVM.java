@@ -22,11 +22,11 @@ package com.sixsq.slipstream.accounting;
 public class AccountingRecordVM {
 
     private Integer cpu;
-    private Float ram;
+    private Integer ram;
     private Integer disk;
     private String instanceType;
 
-    public AccountingRecordVM(Integer cpu, Float ram, Integer disk, String instanceType) {
+    public AccountingRecordVM(Integer cpu, Integer ram, Integer disk, String instanceType) {
         this.cpu = cpu;
         this.ram = ram;
         this.disk = disk;
@@ -37,7 +37,7 @@ public class AccountingRecordVM {
         return cpu;
     }
 
-    public Float getRam() {
+    public Integer getRam() {
         return ram;
     }
 
