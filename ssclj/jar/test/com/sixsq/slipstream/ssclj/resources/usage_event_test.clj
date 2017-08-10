@@ -143,7 +143,7 @@
       (request state "/api/usage-event" :request-method :post :body (json/write-str close-usage-event))
       (is (= urs (all-records state))))))
 
-(deftest post-open-usage-event-when-already-open-should-close-restart
+(deftest post-open-usage-event-when-already-open-should-do-nothing
   (let [state
         (-> (session (ring-app))
             (content-type "application/json")
@@ -152,9 +152,8 @@
     (is (= 2 (count (all-records state))))
     (request state "/api/usage-event" :request-method :post :body (json/write-str reopen-usage-event-new-value))
     (let [urs (all-records state)]
-      (is (= 3 (count urs)))
-      (is (= [["2015-05-04T15:32:22.853Z" "2015-05-04T16:07:22.853Z"]
-              ["2015-05-04T16:07:22.853Z" ur/date-in-future]]
+      (is (= 2 (count urs)))
+      (is (= [["2015-05-04T15:32:22.853Z" ur/date-in-future]]
              (->> urs
                   (filter #(= "vm" (:metric-name %)))
                   (sort-by :start-timestamp)
