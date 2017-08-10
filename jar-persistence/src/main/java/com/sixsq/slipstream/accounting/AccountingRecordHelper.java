@@ -153,7 +153,13 @@ public class AccountingRecordHelper {
         }
 
         Integer cpu = parseInt(getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.cpuAttributeName));
-        Float ram = parseFloat(getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.ramAttributeName));
+        Integer ram = 0;
+        try {
+             ram = parseInt(getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.ramAttributeName));
+        }
+        catch (NumberFormatException e){
+            logger.warning("RAM value " + getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.ramAttributeName) + " could not be converted to integer");
+        }
         Integer disk = parseInt(getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.diskAttributeName));
         String instanceType = getServiceOfferAttributeAsStringOrNull(serviceOffer, ServiceOffersUtil.instanceTypeAttributeName);
 
