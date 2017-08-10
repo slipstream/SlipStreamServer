@@ -10,7 +10,7 @@
   {:initial {:start :insert-start
              :stop  :wrong-transition}
 
-   :started {:start :close-restart
+   :started {:start :do-nothing
              :stop  :close-record}
 
    :stopped {:start :insert-start
