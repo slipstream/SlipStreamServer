@@ -523,6 +523,7 @@
 
             <mapping>
               <directory>/etc/default</directory>
+              <configuration>true</configuration>
               <sources>
                 <softlinkSource>
                   <destination>slipstream</destination>
