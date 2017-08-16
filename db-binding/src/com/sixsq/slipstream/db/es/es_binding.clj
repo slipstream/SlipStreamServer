@@ -4,7 +4,7 @@
 (ns com.sixsq.slipstream.db.es.es-binding
   (:require
     [ring.util.response :as r]
-    [superstring.core :as s]
+    [clojure.string :as str]
     [com.sixsq.slipstream.db.utils.common :as cu]
     [com.sixsq.slipstream.db.es.es-util :as esu]
     [com.sixsq.slipstream.db.es.acl :as acl]
@@ -41,7 +41,7 @@
   id is usually in the form type/docid.
   Exception for cloud-entry-point: in this case id is only type (there is only one cloud-entry-point)"
   [id]
-  (let [[type docid] (s/split id #"/")]
+  (let [[type docid] (str/split id #"/")]
     [type (or docid type)]))
 
 (defn- data->doc
