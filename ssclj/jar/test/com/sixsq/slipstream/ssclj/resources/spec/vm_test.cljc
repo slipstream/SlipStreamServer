@@ -13,32 +13,38 @@
                          :type      "ROLE"
                          :right     "VIEW"}]})
 
+(def timestamp "1964-08-25T10:00:00.0Z")
+(def vm-sample {:id           (str vm/resource-url "/uuid")
+                :resourceURI  vm/resource-uri
+                :created      timestamp
+                :updated      timestamp
+                :acl          valid-acl
+
+
+                :user         {:href "user/test"}
+                :connector    {:href "connector/scissor-fr1"}
+                :serviceOffer {:href "service-offer/my-uuid"
+                               :resource:vcpu 1
+                               :resource:ram 4096
+                               :resource:disk 10
+                               :resource:instanceType "Large"
+                               }
+                :instanceId "aaa-ddd-bbb-42"
+                :state "Running"
+                })
+
 (deftest test-schema-check
-  (let [timestamp "1964-08-25T10:00:00.0Z"
-        vm-sample {:id           (str vm/resource-url "/uuid")
-                           :resourceURI  vm/resource-uri
-                           :created      timestamp
-                           :updated      timestamp
-                           :acl          valid-acl
 
-
-                           :user         "some-complicated-user-id"
-                           :cloud        "my-cloud"
-
-                           :cpu          1
-                           :ram          1024
-                           :disk         10
-                           :instanceId   "aaa-bbb-111"
-                           :instanceType "Large"
-                           :state "Running"
-                           }]
 
     (s/explain-data :cimi/vm vm-sample)
 
     (are [expect-fn arg] (expect-fn (s/valid? :cimi/vm arg))
                          true? vm-sample
                          true? (assoc vm-sample :ip "126.98.56.5")
-                         ;TODO false? (assoc vm-sample :run {})
+                         false? (assoc vm-sample :user {})
+                         false? (assoc vm-sample :user "test")
+                         false? (assoc vm-sample :connector {})
+                         false? (assoc vm-sample :connector "scissor-fr1")
                          true? (assoc vm-sample :run {:href "run/fff-42"})
                          true? (assoc vm-sample :nodeName "node name")
                          true? (assoc vm-sample :name "name")
@@ -48,14 +54,14 @@
 
 
     ;;mandatory keywords
-    (doseq [k #{ :cloud :user :state :instanceId :instanceType  :cpu :ram :disk}]
+    (doseq [k #{ :connector :user :state :instanceId }]
       (is (not (s/valid? :cimi/vm (dissoc vm-sample k)))))
 
     ;; optional keywords
-    (doseq [k #{:run  :ip :nodeName :name :nodeInstanceId :usable}]
+    (doseq [k #{:run  :serviceOffer :ip :nodeName :name :nodeInstanceId :usable}]
       (is (s/valid? :cimi/vm (dissoc vm-sample k)))
       )
-    )
+
   )
 
 
