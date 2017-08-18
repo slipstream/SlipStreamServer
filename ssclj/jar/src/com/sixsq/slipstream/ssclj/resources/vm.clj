@@ -33,7 +33,8 @@
                               :right     "MODIFY"}
                              {:principal "USER"
                               :type      "ROLE"
-                              :right     "MODIFY"}]})
+                              :right     "VIEW"}
+                             ]})
 
 
 ;;
@@ -46,15 +47,15 @@
            :type      "ROLE"}
    :rules [{:principal id
             :type      "USER"
-            :right     "MODIFY"}]})
+            :right     "VIEW"}]})
 
 
 
-(defmulti validate-subtype
-          :method)
-(defmethod crud/validate resource-uri
+(def validate-fn (u/create-spec-validation-fn :cimi/vm))
+(defmethod crud/validate
+  resource-uri
   [resource]
-  (validate-subtype resource))
+  (validate-fn resource))
 
 
 (defmethod crud/add-acl resource-uri
@@ -72,6 +73,11 @@
 (defmethod crud/add resource-name
   [request]
   (add-impl request))
+
+(def edit-impl (std-crud/edit-fn resource-name))
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))
 
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
