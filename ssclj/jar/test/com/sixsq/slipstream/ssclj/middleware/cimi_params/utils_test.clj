@@ -42,15 +42,6 @@
                     nil [nil nil]
                     nil [{:a 1} [2]]))
 
-(deftest check-get-index
-  (are [expect arg] (= expect (t/get-index arg "k"))
-                    nil {"k" nil}
-                    nil {}
-                    1 {"k" "1"}
-                    1 {"k" 1}
-                    1 {"k" ["a" 1]}
-                    1 {"k" ["1" "2"]}))
-
 (deftest check-comma-split
   (are [expect arg] (= expect (t/comma-split arg))
                     ["a" "b"] "a,b"
@@ -75,6 +66,10 @@
 
 (deftest check-orderby-clause
   (are [expect arg] (= expect (t/orderby-clause arg))
+                    nil ":asc"
+                    nil ":desc"
+                    [":asc" :asc] ":asc:asc"
+                    [":desc" :desc] ":desc:desc"
                     [":" :asc] ":"
                     [":a" :desc] ":a:desc"
                     ["a" :asc] "a"

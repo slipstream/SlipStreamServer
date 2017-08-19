@@ -45,9 +45,9 @@
                   ':algo' suffix names the algorithm and is required.
                   Examples are ':sum', ':min', and ':max'.
 
-  Middleware that processes CIMI parameters from the :params map in the
-  request. Because this uses the :params map, the wrap-params middleware
-  **must** be run prior to this wrapper in the ring processing chain."
+  This handler processes CIMI parameters from the :params map in the request.
+  Because this uses the :params map, the wrap-params middleware **must** be run
+  prior to this wrapper in the ring processing chain!"
   [handler]
   (fn [{:keys [params] :as req}]
     (let [cimi-params (assoc {}

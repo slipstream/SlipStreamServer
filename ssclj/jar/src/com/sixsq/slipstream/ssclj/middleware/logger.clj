@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.middleware.logger
   (:require
-    [superstring.core :as str]
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]))
 
@@ -24,15 +24,15 @@
   [& messages]
   (str/join " " messages))
 
-(defn formatted-request
+(defn format-request
   [request]
   (display-space-separated
-    (-> request :request-method name (.toUpperCase))
+    (-> request :request-method name str/upper-case)
     (:uri request)
     (display-authn-info request)
     (display-querystring request)))
 
-(defn formatted-response
+(defn format-response
   [formatted-request response start current-time-millis]
   (display-space-separated
     (:status response)
@@ -47,8 +47,8 @@
   [handler]
   (fn [request]
     (let [start (System/currentTimeMillis)
-          formatted-request (formatted-request request)
+          formatted-request (format-request request)
           _ (log/info formatted-request)
           response (handler request)
-          _ (log/info (formatted-response formatted-request response start (System/currentTimeMillis)))]
+          _ (log/info (format-response formatted-request response start (System/currentTimeMillis)))]
       response)))
