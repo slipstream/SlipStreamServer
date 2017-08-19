@@ -5,7 +5,7 @@
   (:require
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
-    [com.sixsq.slipstream.ssclj.middleware.accepted-mime-types :as mime]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params.mime :as mime]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.utils :as utils]))
 
 (def ^:const max-size
@@ -98,7 +98,7 @@
        (map str/trim)
        (map str/lower-case)
        (filter mime/accepted-formats)
-       (map #(get mime/accepted-mime-types %))
+       (map mime/accepted-mime-types)
        first))
 
 (defn cimi-orderby
