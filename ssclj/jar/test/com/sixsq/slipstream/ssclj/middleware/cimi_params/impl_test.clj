@@ -81,6 +81,8 @@
                     [["a" :desc] ["b" :desc]] [" a :desc " "b :desc"]))
 
 (deftest check-params->filter
+  (is (nil? (t/cimi-filter {"$filter" nil})))
+  (is (nil? (t/cimi-filter {})))
   (are [arg1 arg2] (= (parser/parse-cimi-filter arg1) (t/cimi-filter {"$filter" arg2}))
                    "(a=1)" "a=1"
                    "(a=1)" ["a=1"]

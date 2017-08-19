@@ -45,11 +45,11 @@
   parameter appears more than once, then the filters are combined with a
   logical AND. If the filter is invalid, then an exception is thrown."
   [{:strs [$filter] :as params}]
-  (->> $filter
-       utils/as-vector
-       utils/wrap-join-with-and
-       parser/parse-cimi-filter
-       utils/throw-illegal-for-invalid-filter))
+  (some->> $filter
+           utils/as-vector
+           utils/wrap-join-with-and
+           parser/parse-cimi-filter
+           utils/throw-illegal-for-invalid-filter))
 
 (defn cimi-expand
   "Calculates the value for the :expand key in the CIMI parameters map. The
