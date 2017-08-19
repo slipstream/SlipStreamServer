@@ -50,14 +50,13 @@
   prior to this wrapper in the ring processing chain!"
   [handler]
   (fn [{:keys [params] :as req}]
-    (let [cimi-params (assoc {}
-                        :first (impl/cimi-first params)
-                        :last (impl/cimi-last params)
-                        :filter (impl/cimi-filter params)
-                        :expand (impl/cimi-expand params)
-                        :select (impl/cimi-select params)
-                        :format (impl/cimi-format params)
-                        :orderby (impl/cimi-orderby params)
-                        :size (impl/cimi-size params)
-                        :metric (impl/cimi-metric params))]
+    (let [cimi-params {:first   (impl/cimi-first params)
+                       :last    (impl/cimi-last params)
+                       :filter  (impl/cimi-filter params)
+                       :expand  (impl/cimi-expand params)
+                       :select  (impl/cimi-select params)
+                       :format  (impl/cimi-format params)
+                       :orderby (impl/cimi-orderby params)
+                       :size    (impl/cimi-size params)
+                       :metric  (impl/cimi-metric params)}]
       (handler (assoc req :cimi-params cimi-params)))))
