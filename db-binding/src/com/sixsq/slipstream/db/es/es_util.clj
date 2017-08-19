@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.db.utils.common :as cu]
     [com.sixsq.slipstream.db.es.es-pagination :as pg]
     [com.sixsq.slipstream.db.es.acl :as acl]
-    [com.sixsq.slipstream.db.es.es-order :as od]
+    [com.sixsq.slipstream.db.es.es-order :as order]
+    [com.sixsq.slipstream.db.es.es-aggregators :as agg]
     [com.sixsq.slipstream.db.es.es-filter :as ef])
   (:import
     (org.elasticsearch.node Node)
@@ -73,21 +74,22 @@
 (defn search
   [^Client client index type options]
   (try
-    (let [query                         (-> options
-                                            ef/es-filter
-                                            (acl/and-acl options))
+    (let [query (-> options
+                    ef/es-filter
+                    (acl/and-acl options))
 
           [from size] (pg/from-size options)
-          ^ActionRequestBuilder request (.. client
-                                            (prepareSearch (into-array String [index]))
-                                            (setTypes (into-array String [(cu/de-camelcase type)]))
-                                            (setSearchType SearchType/DEFAULT)
-                                            (setQuery query)
-                                            (setFrom from)
-                                            (setSize size))
 
-          request-with-sort             (od/add-sorters-from-cimi request options)]
-      (.get request-with-sort))
+          ^ActionRequestBuilder request (-> (.. client
+                                                (prepareSearch (into-array String [index]))
+                                                (setTypes (into-array String [(cu/de-camelcase type)]))
+                                                (setSearchType SearchType/DEFAULT)
+                                                (setQuery query)
+                                                (setFrom from)
+                                                (setSize size))
+                                            (order/add-sorters options)
+                                            (agg/add-aggregators options))]
+      (.get request))
     (catch IndexNotFoundException infe
       (log/warn "index" index "not found, returning empty search result")
       [])
@@ -139,7 +141,7 @@
   ([]
    (create-test-node (cu/random-uuid)))
   ([^String cluster-name]
-   (let [home     (str (fs/temp-dir "es-data-"))
+   (let [home (str (fs/temp-dir "es-data-"))
          settings (.. (Settings/builder)
                       (put "http.enabled" false)
                       (put "node.data" true)
