@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.db.es.es-order
+(ns com.sixsq.slipstream.db.es.order
   (:import
     (org.elasticsearch.action.search SearchRequestBuilder)
     (org.elasticsearch.search.sort SortOrder)))
@@ -6,14 +6,14 @@
 (def sort-order {:asc  SortOrder/ASC
                  :desc SortOrder/DESC})
 
-(defn- direction->sortOrder
+(defn direction->sort-order
   [direction]
   (or (sort-order direction)
-      (throw (IllegalArgumentException. (str "Invalid sorting direction: '" direction "', must be :asc or :desc")))))
+      (throw (IllegalArgumentException. (str "invalid sorting direction '" direction "', must be :asc or :desc")))))
 
-(defn- add-sorter
+(defn add-sorter
   [^SearchRequestBuilder request [field-name direction]]
-  (.addSort request field-name (direction->sortOrder direction)))
+  (.addSort request field-name (direction->sort-order direction)))
 
 (defn add-sorters
   "Adds sorters to request with CIMI :orderby option."

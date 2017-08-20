@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.db.es.es-util
+(ns com.sixsq.slipstream.db.es.utils
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.java.io :as io]
@@ -7,11 +7,11 @@
     [environ.core :as env]
     [me.raynes.fs :as fs]
     [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.db.es.es-pagination :as pg]
+    [com.sixsq.slipstream.db.es.pagination :as pg]
     [com.sixsq.slipstream.db.es.acl :as acl]
-    [com.sixsq.slipstream.db.es.es-order :as order]
-    [com.sixsq.slipstream.db.es.es-aggregators :as agg]
-    [com.sixsq.slipstream.db.es.es-filter :as ef])
+    [com.sixsq.slipstream.db.es.order :as order]
+    [com.sixsq.slipstream.db.es.aggregators :as agg]
+    [com.sixsq.slipstream.db.es.filter :as ef])
   (:import
     (org.elasticsearch.node Node)
     (org.elasticsearch.common.settings Settings)
@@ -29,7 +29,8 @@
     (org.elasticsearch.plugins Plugin)
     (org.elasticsearch.common.transport InetSocketTransportAddress)
     (java.net InetAddress)
-    (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)))
+    (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
+    (java.util UUID)))
 
 (defn json->edn [json]
   (when json (json/read-str json :key-fn keyword)))
@@ -136,8 +137,8 @@
 ;;
 
 (defn create-test-node
-  "Creates a local elasticsearch node which holds data but
-   cannot be accessed through the HTTP protocol."
+  "Creates a local elasticsearch node that holds data but cannot be accessed
+   through the HTTP protocol."
   ([]
    (create-test-node (cu/random-uuid)))
   ([^String cluster-name]
@@ -204,22 +205,21 @@
   (when node (.client node)))
 
 (defn create-es-client
-  "Creates a client connecting to an instance of Elasticsearch
-  Parameters (host and port) are taken from environment variables."
-  []
-  (let [es-host (or (env/env :es-host) "localhost")
-        es-port (or (env/env :es-port) "9300")]
+  "Creates a client connecting to an Elasticsearch instance. The 0-arity
+  version takes the host and port from the environmental variables ES_HOST and
+  ES_PORT. The 2-arity version takes these values as explicit parameters. If
+  the host or port is nil, then \"localhost\" or \"9300\" are used,
+  respectively."
+  ([]
+   (create-es-client (env/env :es-host) (env/env :es-port)))
+  ([es-host es-port]
+   (let [es-host (or es-host "localhost")
+         es-port (or es-port "9300")]
 
-    (log/info "creating elasticsearch client:" es-host es-port)
-    (.. (new PreBuiltTransportClient ^Settings Settings/EMPTY [])
-        (addTransportAddress (InetSocketTransportAddress. (InetAddress/getByName es-host)
-                                                          (read-string es-port))))))
-
-(defn create-test-es-client
-  []
-  (let [node (create-test-node)
-        client (node-client node)]
-    [client node]))
+     (log/info "creating elasticsearch client:" es-host es-port)
+     (.. (new PreBuiltTransportClient ^Settings Settings/EMPTY [])
+         (addTransportAddress (InetSocketTransportAddress. (InetAddress/getByName es-host)
+                                                           (read-string es-port)))))))
 
 (defn wait-for-cluster
   [^Client client]
@@ -244,3 +244,21 @@
         (delete (DeleteIndexRequest. index-name))
         (get)))
   (create-index client index-name))
+
+(defn random-index-name
+  "Creates a random value for an index name. The name is the string value of a
+   random UUID, although that is an implementation detail."
+  []
+  (str (UUID/randomUUID)))
+
+(defmacro with-es-test-client
+  "Creates a new elasticsearch node, client, and test index, executes the body
+   with `node`, `client`, and `index` vars bound to the values, and then
+   reliably closes the node and client."
+  [& body]
+  `(with-open [~'node (create-test-node)
+               ~'client (node-client ~'node)]
+     (let [~'index (random-index-name)]
+       (create-index ~'client ~'index)
+       ~@body)))
+

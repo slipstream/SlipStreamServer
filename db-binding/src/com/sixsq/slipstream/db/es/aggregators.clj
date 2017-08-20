@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.db.es.es-aggregators
+(ns com.sixsq.slipstream.db.es.aggregators
   (:import
     (org.elasticsearch.search.aggregations AggregationBuilders AggregationBuilder)
     (org.elasticsearch.action.search SearchRequestBuilder)))

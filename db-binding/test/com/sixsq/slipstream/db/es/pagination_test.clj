@@ -1,12 +1,12 @@
-(ns com.sixsq.slipstream.db.es.es-pagination-test
+(ns com.sixsq.slipstream.db.es.pagination-test
   (:refer-clojure :exclude [read update])
   (:require
-    [clojure.test :refer :all]
-    [com.sixsq.slipstream.db.es.es-pagination :refer :all]))
+    [clojure.test :refer [deftest is are]]
+    [com.sixsq.slipstream.db.es.pagination :as t]))
 
 (defn- first-last->from-size
   [[first last]]
-  (from-size {:cimi-params {:first first :last last}}))
+  (t/from-size {:cimi-params {:first first :last last}}))
 
 (defn- is-first-last->from-size
   [[first last] [from size]]
@@ -24,11 +24,11 @@
   (is-first-last->from-size [-1 1] [0 0]))
 
 (deftest from-size-incomplete-params
-  (is-first-last->from-size [nil nil] [0 max-return-size])
+  (is-first-last->from-size [nil nil] [0 t/max-return-size])
   (is-first-last->from-size [nil 10] [0 10])
-  (is-first-last->from-size [3 nil] [2 max-return-size]))
+  (is-first-last->from-size [3 nil] [2 t/max-return-size]))
 
 (deftest from-size-last-too-big
-  (is-first-last->from-size [1 max-return-size] [0 max-return-size])
+  (is-first-last->from-size [1 t/max-return-size] [0 t/max-return-size])
   (is (thrown? IllegalArgumentException
-               (first-last->from-size [1 (inc max-return-size)]))))
+               (first-last->from-size [1 (inc t/max-return-size)]))))

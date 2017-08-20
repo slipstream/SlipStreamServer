@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.db.es.javawrapper
   (:require
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
-    [com.sixsq.slipstream.db.es.es-util :as esu]
+    [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.impl :as db])
   (:gen-class
     :name com.sixsq.slipstream.db.es.JavaWrapper

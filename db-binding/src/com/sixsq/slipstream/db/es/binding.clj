@@ -1,12 +1,12 @@
 ;;
 ;; Elastic Search implementation of Binding protocol
 ;;
-(ns com.sixsq.slipstream.db.es.es-binding
+(ns com.sixsq.slipstream.db.es.binding
   (:require
     [ring.util.response :as r]
     [clojure.string :as str]
     [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.db.es.es-util :as esu]
+    [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.es.acl :as acl]
     [com.sixsq.slipstream.db.binding :refer [Binding]])
   (:import (org.elasticsearch.index.engine VersionConflictEngineException)
