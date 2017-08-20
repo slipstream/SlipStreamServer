@@ -16,9 +16,9 @@
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.db.es.es-util :as esu]))
+    [com.sixsq.slipstream.db.es.util :as esu]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 

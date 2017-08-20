@@ -11,8 +11,8 @@
     [superstring.core :as s]
     [korma.core :as kc]
     [korma.db :as kdb]
-    [com.sixsq.slipstream.db.es.es-util :as esu]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.util :as esu]
+    [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.es.acl :as acl])
