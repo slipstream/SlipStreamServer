@@ -12,9 +12,8 @@
 
 (defn from-size
   "Returns [from size] from cimi first and last."
-  [{:keys [cimi-params]}]
-  (let [first (or (:first cimi-params) 1)                   ;; catches also explicit nil values
-        last (:last cimi-params)
+  [{{:keys [first last]} :cimi-params}]
+  (let [first (or first 1)
         from (dec first)
         size (if last (inc (- last first)) max-return-size)]
     (throw-if-size-too-big size)

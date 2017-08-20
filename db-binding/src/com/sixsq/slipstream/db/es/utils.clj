@@ -18,9 +18,9 @@
     (org.elasticsearch.common.unit TimeValue)
     (org.elasticsearch.cluster.health ClusterHealthStatus)
     (org.elasticsearch.client Client)
-    (org.elasticsearch.action.search SearchType SearchPhaseExecutionException)
+    (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse)
     (org.elasticsearch.action.support WriteRequest$RefreshPolicy WriteRequest)
-    (org.elasticsearch.action.bulk BulkRequestBuilder)
+    (org.elasticsearch.action.bulk BulkRequestBuilder BulkResponse)
     (org.elasticsearch.action ActionRequestBuilder)
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
     (org.elasticsearch.index.query QueryBuilders)
@@ -74,7 +74,7 @@
       (get)))
 
 (defn search
-  [^Client client index type options]
+  ^SearchResponse [^Client client index type options]
   (try
     (let [query (-> options
                     ef/es-filter
@@ -112,10 +112,10 @@
     (.add bulk-request-builder new-index)))
 
 (defn bulk-create
-  [^Client client index type uuid-jsons]
+  ^BulkResponse [^Client client index type uuid-jsons]
   (let [bulk-request-builder (.. client
                                  (prepareBulk)
-                                 (setRefresh true))]
+                                 (setRefreshPolicy WriteRequest$RefreshPolicy/WAIT_UNTIL))]
     (.. (reduce (partial add-index client index type) bulk-request-builder uuid-jsons)
         (get))))
 
