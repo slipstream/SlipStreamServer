@@ -1,7 +1,8 @@
-(ns com.sixsq.slipstream.db.es.aggregators
+(ns com.sixsq.slipstream.db.es.aggregate
   (:import
     (org.elasticsearch.search.aggregations AggregationBuilders AggregationBuilder)
-    (org.elasticsearch.action.search SearchRequestBuilder)))
+    (org.elasticsearch.action.search SearchRequestBuilder SearchResponse)
+    (org.elasticsearch.search.aggregations.metrics NumericMetricsAggregation$SingleValue)))
 
 (defmacro aggregator-constructor-fn
   "This takes a form that must evaluate to a string at compile time. The
@@ -21,16 +22,26 @@
                               :sum (aggregator-constructor-fn "sum")
                               :avg (aggregator-constructor-fn "avg")})
 
-(defn add-aggregator [^SearchRequestBuilder builder [algo-kw fields]]
+(defn add-aggregator
+  "Add aggregators for all of the fields associated with a single aggregation
+   function. Intended to be used from within a reduction."
+  [^SearchRequestBuilder request-builder [algo-kw fields]]
   (when-let [f (aggregator-constructors algo-kw)]
     (doseq [field fields]
       (let [^AggregationBuilder aggregator (f field)]
-        (.addAggregation builder aggregator))))
-  builder)
+        (.addAggregation request-builder aggregator))))
+  request-builder)
 
 (defn add-aggregators
     "Adds aggregators to the search request builder from the value of the
      metric parameter. This parameter has keys (as keywords) that identifies
      the algorithm to use and values that are vectors of field names."
-    [^SearchRequestBuilder builder {{:keys [metric]} :cimi-params :as options}]
-    (reduce add-aggregator builder metric))
+    [^SearchRequestBuilder request-builder {{:keys [metric]} :cimi-params :as options}]
+    (reduce add-aggregator request-builder metric))
+
+(defn aggregation-results-as-edn
+  [^SearchResponse response]
+  (some->> (.getAggregations response)
+           .asMap
+           (map (fn [[k ^NumericMetricsAggregation$SingleValue v]] [k (.value v)]))
+           (into {})))

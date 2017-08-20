@@ -10,7 +10,7 @@
     [com.sixsq.slipstream.db.es.pagination :as pg]
     [com.sixsq.slipstream.db.es.acl :as acl]
     [com.sixsq.slipstream.db.es.order :as order]
-    [com.sixsq.slipstream.db.es.aggregators :as agg]
+    [com.sixsq.slipstream.db.es.aggregate :as agg]
     [com.sixsq.slipstream.db.es.filter :as ef])
   (:import
     (org.elasticsearch.node Node)

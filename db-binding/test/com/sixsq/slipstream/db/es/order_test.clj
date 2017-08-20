@@ -35,9 +35,11 @@
   (eu/with-es-test-client
     (let [n 10
           type "test-resource"
-          ascending (doall (for [n (range n)] [(eu/random-index-name) (eu/edn->json {:_acl-users ["admin"], :number n})]))
-          descending (reverse ascending)
-          shuffled (shuffle ascending)]
+          shuffled (shuffle
+                     (doall
+                       (for [n (range n)]
+                         [(eu/random-index-name)
+                          (eu/edn->json {:_acl-users ["admin"], :number n})])))]
 
       ;; insert generated records in random order
       (is (not (.hasFailures (eu/bulk-create client index type shuffled))))
