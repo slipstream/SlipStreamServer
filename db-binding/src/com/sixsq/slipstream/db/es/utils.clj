@@ -30,7 +30,8 @@
     (org.elasticsearch.common.transport InetSocketTransportAddress)
     (java.net InetAddress)
     (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
-    (java.util UUID)))
+    (java.util UUID)
+    (org.elasticsearch.action.admin.indices.create CreateIndexResponse)))
 
 (defn json->edn [json]
   (when json (json/read-str json :key-fn keyword)))
@@ -169,7 +170,7 @@
       (isExists)))
 
 (defn create-index
-  [^Client client index-name]
+  ^CreateIndexResponse [^Client client index-name]
   (log/info "creating index:" index-name)
   (let [settings (.. (Settings/builder)
                      (put "index.max_result_window" pg/max-result-window)
