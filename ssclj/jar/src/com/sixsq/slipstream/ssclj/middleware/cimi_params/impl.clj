@@ -8,22 +8,6 @@
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.mime :as mime]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.utils :as utils]))
 
-(def ^:const max-size
-  "The maximum number of resources that can be returned from a query."
-  10000)
-
-(defn cimi-size
-  "Calculates the value for the :size key in the CIMI parameters map. If the
-  $size parameter is specified more than once, then the first valid long value
-  will be used. If no valid values are specified, then this will return
-  max-size. The value will be clipped to the range [0, max-size]."
-  [{:strs [$size] :as params}]
-  (-> $size
-      utils/first-valid-long
-      (or max-size)
-      (max 0)
-      (min max-size)))
-
 (defn cimi-first
   "Calculates the value for the :first key in the CIMI parameters map. If a
    valid value isn't specified, this defaults to 1."

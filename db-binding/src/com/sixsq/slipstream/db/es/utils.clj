@@ -262,4 +262,3 @@
      (let [~'index (random-index-name)]
        (create-index ~'client ~'index)
        ~@body)))
-

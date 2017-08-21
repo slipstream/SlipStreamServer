@@ -4,17 +4,6 @@
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.impl :as t]))
 
-(deftest check-params->size
-  (are [expect params] (= expect (t/cimi-size params))
-                       t/max-size {}
-                       t/max-size {"$size" "bad"}
-                       t/max-size {"$size" ["bad" "invalid"]}
-                       t/max-size {"$size" (* 2 t/max-size)}
-                       t/max-size {"$size" ["bad" (* 2 t/max-size)]}
-                       0 {"$size" -1}
-                       0 {"$size" [-1 10]}
-                       10 {"$size" [10 "bad" -1]}))
-
 (deftest check-params->first
   (are [expect arg] (= expect (t/cimi-first {"$first" arg}))
                     1 nil

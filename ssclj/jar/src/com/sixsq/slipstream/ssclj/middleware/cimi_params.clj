@@ -34,16 +34,12 @@
   This middleware also processes the following parameters that extend the CIMI
   specification.
 
-    - :size       the maximum number of documents that will be returned
-                  by a database query.  This is independent of the paging
-                  parameters.  Setting this to zero allows queries in
-                  which only aggregated information is returned.
     - :metric     provides a map where the key is the aggregation algorithm
                   and the value is a vector of parameter names to which the
                   aggregation applies.  This is specified by parameter
                   names and values like: '$metric=keyname:algo'.  The
                   ':algo' suffix names the algorithm and is required.
-                  Examples are ':sum', ':min', and ':max'.
+                  Examples are ':sum', ':min', ':max', and ':avg'.
 
   This handler processes CIMI parameters from the :params map in the request.
   Because this uses the :params map, the wrap-params middleware **must** be run
@@ -57,6 +53,5 @@
                        :select  (impl/cimi-select params)
                        :format  (impl/cimi-format params)
                        :orderby (impl/cimi-orderby params)
-                       :size    (impl/cimi-size params)
                        :metric  (impl/cimi-metric params)}]
       (handler (assoc req :cimi-params cimi-params)))))
