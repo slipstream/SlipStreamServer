@@ -57,10 +57,12 @@
       (status)))
 
 (defn read
-  [^Client client index type docid]
-  (.. client
-      (prepareGet index type docid)
-      (get)))
+  [^Client client index type docid {:keys [cimi-params] :as options}]
+  (let [get-request-builder (.. client
+                                (prepareGet index type docid))]
+    (-> get-request-builder
+        (select/add-selected-keys cimi-params)
+        (.get))))
 
 (defn update
   [^Client client index type docid json]

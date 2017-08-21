@@ -101,7 +101,7 @@
 (defn- find-data
   [client index id options action]
   (let [[type docid] (split-id id)]
-    (-> (esu/read client index type docid)
+    (-> (esu/read client index type docid options)
         (.getSourceAsString)
         doc->data
         (throw-if-not-found id))))

@@ -16,17 +16,19 @@
                      (doall
                        (for [n (range n)]
                          [(eu/random-index-name)
-                          (eu/edn->json {:_acl-users ["admin"]
+                          (eu/edn->json {:_acl-users  ["admin"]
                                          :resourceURI "resource-uri"
-                                         :number n
-                                         :doubled (* 2 n)
-                                         :x1 "x1"
-                                         :x2 "x2"
-                                         :acl "acl"})])))]
+                                         :number      n
+                                         :doubled     (* 2 n)
+                                         :x1          "x1"
+                                         :x2          "x2"
+                                         :acl         "acl"})])))
+          uuid (ffirst shuffled)]
 
       ;; insert generated records in random order
       (is (not (.hasFailures (eu/bulk-create client index type shuffled))))
 
+      ;; test search
       (let [result (eu/search client index type {:user-name   "admin"
                                                  :cimi-params {:first  1
                                                                :last   (* 2 n)
@@ -42,4 +44,17 @@
         (is (every? :x1 docs))
         (is (every? :x2 docs))
         (is (every? :acl docs))
-        (is (not-every? :number docs))))))
+        (is (not-every? :number docs)))
+
+      ;; test get
+      (let [doc (-> (eu/read client index type uuid {:user-name   "admin"
+                                                     :cimi-params {:select #{"resourceURI" "doubled"}}})
+                    (.getSourceAsString)
+                    (eu/json->edn))]
+
+        (is (:resourceURI doc))
+        (is (:doubled doc))
+        (is (nil? (:x1 doc)))
+        (is (nil? (:x2 doc)))
+        (is (:acl doc))
+        (is (nil? (:number doc)))))))
