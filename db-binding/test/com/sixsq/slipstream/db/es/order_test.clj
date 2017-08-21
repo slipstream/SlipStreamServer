@@ -15,19 +15,14 @@
   (is (thrown-with-msg? IllegalArgumentException #".*invalid.*:unknown.*" (t/direction->sort-order :unknown))))
 
 (defn test-search-results [client index type n order test-fn]
-  (let [search-response (eu/search client index type {:user-name   "admin"
-                                                      :cimi-params {:first   1
-                                                                    :last    (* 2 n)
-                                                                    :orderby [["number" order]]}})
-        status (.getStatus (.status search-response))
-        ^SearchHits search-hits (.getHits search-response)
-        nhits (.totalHits search-hits)
-        hits (.hits search-hits)
-        docs (map (fn [^SearchHit h] (eu/json->edn (.sourceAsString h))) hits)]
+  (let [result (eu/search client index type {:user-name   "admin"
+                                             :cimi-params {:first   1
+                                                           :last    (* 2 n)
+                                                           :orderby [["number" order]]}})
+        total (-> result :hits :total)
+        docs (map :_source (-> result :hits :hits))]
 
-    (is (= 200 status))
-    (is (= n nhits))
-    (is (= n (count hits)))
+    (is (= n total))
     (is (= n (count docs)))
     (is (apply test-fn (map :number docs)))))
 

@@ -11,27 +11,28 @@
     [com.sixsq.slipstream.db.es.acl :as acl]
     [com.sixsq.slipstream.db.es.order :as order]
     [com.sixsq.slipstream.db.es.aggregate :as agg]
-    [com.sixsq.slipstream.db.es.filter :as ef])
+    [com.sixsq.slipstream.db.es.filter :as ef]
+    [com.sixsq.slipstream.db.es.select :as select])
   (:import
-    (org.elasticsearch.node Node)
-    (org.elasticsearch.common.settings Settings)
-    (org.elasticsearch.common.unit TimeValue)
-    (org.elasticsearch.cluster.health ClusterHealthStatus)
-    (org.elasticsearch.client Client)
+    (java.net InetAddress)
+    (java.util UUID)
+    (org.elasticsearch.action ActionRequestBuilder)
+    (org.elasticsearch.action.admin.indices.create CreateIndexResponse)
+    (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
+    (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
+    (org.elasticsearch.action.bulk BulkRequestBuilder BulkResponse)
     (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse SearchRequestBuilder)
     (org.elasticsearch.action.support WriteRequest$RefreshPolicy WriteRequest)
-    (org.elasticsearch.action.bulk BulkRequestBuilder BulkResponse)
-    (org.elasticsearch.action ActionRequestBuilder)
-    (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
-    (org.elasticsearch.index.query QueryBuilders)
-    (org.elasticsearch.index IndexNotFoundException)
-    (org.elasticsearch.transport.client PreBuiltTransportClient)
-    (org.elasticsearch.plugins Plugin)
+    (org.elasticsearch.common.settings Settings)
     (org.elasticsearch.common.transport InetSocketTransportAddress)
-    (java.net InetAddress)
-    (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
-    (java.util UUID)
-    (org.elasticsearch.action.admin.indices.create CreateIndexResponse)))
+    (org.elasticsearch.common.unit TimeValue)
+    (org.elasticsearch.client Client)
+    (org.elasticsearch.cluster.health ClusterHealthStatus)
+    (org.elasticsearch.index IndexNotFoundException)
+    (org.elasticsearch.index.query QueryBuilders)
+    (org.elasticsearch.node Node)
+    (org.elasticsearch.plugins Plugin)
+    (org.elasticsearch.transport.client PreBuiltTransportClient)))
 
 (def ^:const max-result-window 200000)
 
@@ -75,29 +76,37 @@
       (prepareDelete index type docid)
       (get)))
 
-;; FIXME: Should this return the EDN version of the result directly?
+(defn add-query [^SearchRequestBuilder request-builder options]
+  (.setQuery request-builder (-> options
+                                 ef/es-filter
+                                 (acl/and-acl options))))
+
 (defn search
+  "On success, returns the full response in edn format. On errors, it logs the
+   error and returns an empty map."
   ^SearchResponse [^Client client index type {:keys [cimi-params] :as options}]
   (try
-    (let [query (-> options
-                    ef/es-filter
-                    (acl/and-acl options))
-
-          ^SearchRequestBuilder request (-> (.. client
+    (let [^SearchRequestBuilder request (-> (.. client
                                                 (prepareSearch (into-array String [index]))
                                                 (setTypes (into-array String [(cu/de-camelcase type)]))
-                                                (setSearchType SearchType/DEFAULT)
-                                                (setQuery query))
+                                                (setSearchType SearchType/DEFAULT))
+                                            (add-query options)
+                                            (select/add-selected-keys cimi-params)
                                             (pg/add-paging cimi-params)
                                             (order/add-sorters cimi-params)
-                                            (agg/add-aggregators cimi-params))]
-      (.get request))
+                                            (agg/add-aggregators cimi-params))
+          ^SearchResponse search-response (.get request)
+
+          ;; FIXME: This status should be checked to ensure the query was successful.
+          status (.getStatus (.status search-response))]
+
+      (-> search-response str json->edn))
     (catch IndexNotFoundException infe
       (log/warn "index" index "not found, returning empty search result")
-      [])
+      {})
     (catch SearchPhaseExecutionException spee
       (log/warn "search failed:" (.getMessage spee) ", returning empty search result")
-      [])))
+      {})))
 
 ;;
 ;; Convenience functions

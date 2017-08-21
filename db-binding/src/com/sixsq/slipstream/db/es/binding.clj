@@ -135,13 +135,17 @@
         (response-conflict id))))
 
   (query [_ collection-id options]
-    (let [response (esu/search *client* index-name collection-id options)
-          result (esu/json->edn (str response))
+    (let [result (esu/search *client* index-name collection-id options)
           count-before-pagination (-> result :hits :total)
-          hits (->> (-> result :hits :hits)
+          aggregations (:aggregations result)
+          meta (cond-> {:count count-before-pagination}
+                       aggregations (assoc :aggregations aggregations))
+          hits (->> result
+                    :hits
+                    :hits
                     (map :_source)
                     (map acl/normalize-acl))]
-      [count-before-pagination hits])))
+      [meta hits])))
 
 (defn get-instance
   []
