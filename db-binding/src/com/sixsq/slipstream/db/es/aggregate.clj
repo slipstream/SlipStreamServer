@@ -36,12 +36,6 @@
     "Adds aggregators to the search request builder from the value of the
      metric parameter. This parameter has keys (as keywords) that identifies
      the algorithm to use and values that are vectors of field names."
-    [^SearchRequestBuilder request-builder {{:keys [metric]} :cimi-params :as options}]
+    [^SearchRequestBuilder request-builder {:keys [metric] :as cimi-params}]
     (reduce add-aggregator request-builder metric))
 
-(defn aggregation-results-as-edn
-  [^SearchResponse response]
-  (some->> (.getAggregations response)
-           .asMap
-           (map (fn [[k ^NumericMetricsAggregation$SingleValue v]] [k (.value v)]))
-           (into {})))

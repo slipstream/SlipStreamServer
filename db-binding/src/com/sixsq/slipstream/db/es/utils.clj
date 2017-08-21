@@ -18,7 +18,7 @@
     (org.elasticsearch.common.unit TimeValue)
     (org.elasticsearch.cluster.health ClusterHealthStatus)
     (org.elasticsearch.client Client)
-    (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse)
+    (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse SearchRequestBuilder)
     (org.elasticsearch.action.support WriteRequest$RefreshPolicy WriteRequest)
     (org.elasticsearch.action.bulk BulkRequestBuilder BulkResponse)
     (org.elasticsearch.action ActionRequestBuilder)
@@ -32,6 +32,8 @@
     (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
     (java.util UUID)
     (org.elasticsearch.action.admin.indices.create CreateIndexResponse)))
+
+(def ^:const max-result-window 200000)
 
 (defn json->edn [json]
   (when json (json/read-str json :key-fn keyword)))
@@ -73,24 +75,22 @@
       (prepareDelete index type docid)
       (get)))
 
+;; FIXME: Should this return the EDN version of the result directly?
 (defn search
-  ^SearchResponse [^Client client index type options]
+  ^SearchResponse [^Client client index type {:keys [cimi-params] :as options}]
   (try
     (let [query (-> options
                     ef/es-filter
                     (acl/and-acl options))
 
-          [from size] (pg/from-size options)
-
-          ^ActionRequestBuilder request (-> (.. client
+          ^SearchRequestBuilder request (-> (.. client
                                                 (prepareSearch (into-array String [index]))
                                                 (setTypes (into-array String [(cu/de-camelcase type)]))
                                                 (setSearchType SearchType/DEFAULT)
-                                                (setQuery query)
-                                                (setFrom from)
-                                                (setSize size))
-                                            (order/add-sorters options)
-                                            (agg/add-aggregators options))]
+                                                (setQuery query))
+                                            (pg/add-paging cimi-params)
+                                            (order/add-sorters cimi-params)
+                                            (agg/add-aggregators cimi-params))]
       (.get request))
     (catch IndexNotFoundException infe
       (log/warn "index" index "not found, returning empty search result")
@@ -173,7 +173,7 @@
   ^CreateIndexResponse [^Client client index-name]
   (log/info "creating index:" index-name)
   (let [settings (.. (Settings/builder)
-                     (put "index.max_result_window" pg/max-result-window)
+                     (put "index.max_result_window" max-result-window)
                      (put "index.number_of_shards" 3)
                      (put "index.number_of_replicas" 0)
                      (build))]

@@ -52,26 +52,23 @@
                                                                                  :max ["number" "doubled"]
                                                                                  :sum ["number" "doubled"]
                                                                                  :avg ["number" "doubled"]}}})
-            status (.getStatus (.status search-response))
-            ^SearchHits search-hits (.getHits search-response)
-            nhits (.totalHits search-hits)
 
-            aggregation-results (t/aggregation-results-as-edn search-response)]
+            status (.getStatus (.status search-response))
+            result (eu/json->edn (str search-response))
+
+            total-hits (get-in result [:hits :total])
+            aggregations (:aggregations result)]
 
         (is (= 200 status))
-        (is (= n nhits))
+        (is (= n total-hits))
 
-        (is (map? aggregation-results))
-        (is (= 8 (count aggregation-results)))              ;; 4 aggregations x 2 values
+        (is (= {:min:number  {:value 0.0}
+                :max:number  {:value (double (dec n))}
+                :sum:number  {:value (double (apply + (range n)))}
+                :avg:number  {:value (/ (double (apply + (range n))) n)}
 
-        (are [expected field] (= expected (int (aggregation-results field)))
-                              0 "min:number"
-                              0 "min:doubled"
-                              (dec n) "max:number"
-                              (* 2 (dec n)) "max:doubled"
-                              (apply + (range n)) "sum:number"
-                              (* 2 (apply + (range n))) "sum:doubled")
-
-        (are [expected field] (= expected (aggregation-results field))
-                              (/ (double (apply + (range n))) n) "avg:number"
-                              (/ (double (* 2 (apply + (range n)))) n) "avg:doubled")))))
+                :min:doubled {:value 0.0}
+                :max:doubled {:value (double (* 2 (dec n)))}
+                :sum:doubled {:value (double (* 2 (apply + (range n))))}
+                :avg:doubled {:value (/ (double (* 2 (apply + (range n)))) n)}}
+               aggregations))))))

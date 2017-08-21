@@ -4,31 +4,22 @@
     [clojure.test :refer [deftest is are]]
     [com.sixsq.slipstream.db.es.pagination :as t]))
 
-(defn- first-last->from-size
-  [[first last]]
-  (t/from-size {:cimi-params {:first first :last last}}))
+(deftest check-es-paging-params
+  (are [args expected] (= expected (apply t/es-paging-params args))
+                       [1 1] [0 1]                          ;; first value only
+                       [1 10] [0 10]                        ;; normal range
+                       [10 10] [9 1]                        ;; single value
+                       [1 t/max-size] [0 t/max-size] ;; maximum size
+                       [100 0] [99 0]                       ;; zero last -> zero size, always
+                       [10 1] [9 0]                         ;; last smaller than first
+                       [-1 10] [0 10]                       ;; invalid first defaults to 1
+                       [nil nil] [0 t/max-size]      ;; default values when missing args
+                       [nil 10] [0 10]                      ;; missing first value
+                       [3 nil] [2 t/max-size]        ;; missing last value
 
-(defn- is-first-last->from-size
-  [[first last] [from size]]
-  (is (= [from size] (first-last->from-size [first last]))))
+                       [0 1] [0 1]                          ;; invalid first defaults to 1
+                       [1 0] [0 0]                          ;; zero last -> zero size, always
+                       [1 -1] [0 0]                         ;; invalid last value
+                       )
 
-(deftest from-size-nominal-cases
-  (is-first-last->from-size [1 1] [0 1])
-  (is-first-last->from-size [1 10] [0 10]))
-
-(deftest from-size-inconsistent-values
-  (is-first-last->from-size [0 1] [0 0])
-  (is-first-last->from-size [1 0] [0 0])
-  (is-first-last->from-size [10 0] [0 0])
-  (is-first-last->from-size [0 -1] [0 0])
-  (is-first-last->from-size [-1 1] [0 0]))
-
-(deftest from-size-incomplete-params
-  (is-first-last->from-size [nil nil] [0 t/max-return-size])
-  (is-first-last->from-size [nil 10] [0 10])
-  (is-first-last->from-size [3 nil] [2 t/max-return-size]))
-
-(deftest from-size-last-too-big
-  (is-first-last->from-size [1 t/max-return-size] [0 t/max-return-size])
-  (is (thrown? IllegalArgumentException
-               (first-last->from-size [1 (inc t/max-return-size)]))))
+  (is (thrown-with-msg? IllegalArgumentException #".*too large.*" (t/es-paging-params 1 (inc t/max-size)))))

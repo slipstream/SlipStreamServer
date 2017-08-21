@@ -21,7 +21,7 @@
   (.addSort request-builder field-name (direction->sort-order direction)))
 
 (defn add-sorters
-  "Given the sorting information in the [:cimi-params :orderby] parameter, add
-   all of the sorting clauses to the request builder."
-  [request-builder {{:keys [orderby]} :cimi-params :as options}]
+  "Given the sorting information in the :cimi-params parameter, add all of the
+   sorting clauses to the request builder."
+  [request-builder {:keys [orderby] :as cimi-params}]
   (reduce add-sorter request-builder orderby))
