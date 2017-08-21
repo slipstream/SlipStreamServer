@@ -5,7 +5,7 @@
     [superstring.core :as s]
 
     [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.db.es.util :as esu]
+    [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn])

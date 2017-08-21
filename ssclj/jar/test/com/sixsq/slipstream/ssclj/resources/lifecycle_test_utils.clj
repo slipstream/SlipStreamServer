@@ -19,7 +19,7 @@
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
     [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.db.es.util :as esu]))
+    [com.sixsq.slipstream.db.es.utils :as esu]))
 
 (defn serialize-cookie-value
   "replaces the map cookie value with a serialized string"
