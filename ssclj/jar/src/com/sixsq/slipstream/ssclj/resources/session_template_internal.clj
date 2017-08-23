@@ -15,6 +15,7 @@
                        :instance    authn-method
                        :name        "Internal"
                        :description "Internal Authentication via Username/Password"
+                       :group       "Login with Username/Password"
                        :username    "username"
                        :password    "password"
                        :acl         p/resource-acl})
