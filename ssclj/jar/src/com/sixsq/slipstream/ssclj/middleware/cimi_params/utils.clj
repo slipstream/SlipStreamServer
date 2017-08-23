@@ -93,11 +93,11 @@
     (when-not (str/blank? attr)
       [attr (or (keyword order) :asc)])))
 
-(defn metric-clause
-  "Splits a metric clause value at the last colon and then returns [algorithm
-  name, attribute name] where the algorithm name is a keyword. If the value is
-  not valid (e.g. does not contain an algorithm name, then nil will be
-  returned."
+(defn aggregation-clause
+  "Splits a aggregation clause value at the last colon and then returns
+  [algorithm name, attribute name] where the algorithm name is a keyword. If
+  the value is not valid (e.g. does not contain an algorithm name, then nil
+  will be returned."
   [s]
   (let [[attr algo] (->> s
                          (re-matches #"(.+):([a-z]+)")
@@ -106,8 +106,8 @@
     (when-not (str/blank? attr)
       [(keyword algo) attr])))
 
-(defn update-metric-map
-  "Takes a metric map and a key-value pair. Updates the entry in the map
+(defn update-aggregation-map
+  "Takes a aggregation map and a key-value pair. Updates the entry in the map
    corresponding to the key by appending the value to the end of the key's
    value. This is intended to be used in `reduce` where it will group the
    results by key and map these keys to a vector of the values."

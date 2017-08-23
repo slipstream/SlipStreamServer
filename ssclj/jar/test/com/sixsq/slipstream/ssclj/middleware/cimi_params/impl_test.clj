@@ -79,8 +79,8 @@
                    "(a=1) and (b=2) and (c=3)" ["a=1" "b=2" "c=3"]
                    "(a=1 or c=3) and (b=2)" ["a=1 or c=3" "b=2"]))
 
-(deftest check-params->metric
+(deftest check-params->aggregation
   (is (= {:sum ["attr0" "attr1" "attr4"]
-          :min ["attr2"]
+          :min ["attr2/child"]
           :max ["attr3"]}
-         (t/cimi-metric {"$metric" ["attr0:sum,attr1:sum" "invalid" "attr2:min" "attr3:max" "attr4:sum"]}))))
+         (t/cimi-aggregation {"$aggregation" ["attr0:sum,attr1:sum" "invalid" "attr2/child:min" "attr3:max" "attr4:sum"]}))))

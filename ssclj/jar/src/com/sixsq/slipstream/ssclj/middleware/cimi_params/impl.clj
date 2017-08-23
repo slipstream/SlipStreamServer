@@ -98,14 +98,14 @@
        (map utils/orderby-clause)
        (remove nil?)))
 
-(defn cimi-metric
-  "Calculates the value of the :metric key for the CIMI parameters map. The
-  value is a map where the keys are algorithm names (as keywords) and the
+(defn cimi-aggregation
+  "Calculates the value of the :aggregation key for the CIMI parameters map.
+  The value is a map where the keys are algorithm names (as keywords) and the
   values are the attribute names to which the algorithms should be applied."
-  [{:strs [$metric] :as params}]
-  (->> $metric
+  [{:strs [$aggregation] :as params}]
+  (->> $aggregation
        utils/as-vector
        (mapcat utils/comma-split)
-       (map utils/metric-clause)
+       (map utils/aggregation-clause)
        (remove nil?)
-       (reduce utils/update-metric-map {})))
+       (reduce utils/update-aggregation-map {})))

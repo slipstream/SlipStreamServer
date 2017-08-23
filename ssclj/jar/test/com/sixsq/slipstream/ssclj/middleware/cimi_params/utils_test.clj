@@ -77,8 +77,8 @@
                     ["a" :desc] "a:desc"
                     ["a:dummy" :asc] "a:dummy"))
 
-(deftest check-metric-clause
-  (are [expect arg] (= expect (t/metric-clause arg))
+(deftest check-aggregation-clause
+  (are [expect arg] (= expect (t/aggregation-clause arg))
                     nil ""
                     nil "attr-name"
                     nil "attr-name:"
@@ -90,8 +90,8 @@
                     [:sum "attr"] " attr:sum"
                     [:sum "attr:name"] "attr:name:sum"))
 
-(deftest check-update-metric-map
-  (are [expect initial] (t/update-metric-map initial (t/metric-clause "attr1:sum"))
+(deftest check-update-aggregation-map
+  (are [expect initial] (t/update-aggregation-map initial (t/aggregation-clause "attr1:sum"))
                         {:sum ["attr1"]} {}
                         {:sum ["attr0" "attr1"]} {:sum ["attr0"]}
                         {:min ["attr0"], :sum ["attr0" "attr1"]} {:min ["attr0"], :sum ["attr0"]}))

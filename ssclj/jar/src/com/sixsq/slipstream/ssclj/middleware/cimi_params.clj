@@ -34,24 +34,26 @@
   This middleware also processes the following parameters that extend the CIMI
   specification.
 
-    - :metric     provides a map where the key is the aggregation algorithm
-                  and the value is a vector of parameter names to which the
-                  aggregation applies.  This is specified by parameter
-                  names and values like: '$metric=keyname:algo'.  The
-                  ':algo' suffix names the algorithm and is required.
-                  Examples are ':sum', ':min', ':max', and ':avg'.
+    - :aggregation provides a map where the key is the aggregation algorithm
+                   and the value is a vector of parameter names to which the
+                   aggregation applies.  This is specified by parameter
+                   names and values like: '$aggregation=key1:algo,key2:algo'.
+                   The ':algo' suffix names the algorithm and is required.
+                   Supported algorithms are: min, max, sum, avg, stats,
+                   extendedstats, count, percentiles, cardinality, missing,
+                   and terms.
 
   This handler processes CIMI parameters from the :params map in the request.
   Because this uses the :params map, the wrap-params middleware **must** be run
   prior to this wrapper in the ring processing chain!"
   [handler]
   (fn [{:keys [params] :as req}]
-    (let [cimi-params {:first   (impl/cimi-first params)
-                       :last    (impl/cimi-last params)
-                       :filter  (impl/cimi-filter params)
-                       :expand  (impl/cimi-expand params)
-                       :select  (impl/cimi-select params)
-                       :format  (impl/cimi-format params)
-                       :orderby (impl/cimi-orderby params)
-                       :metric  (impl/cimi-metric params)}]
+    (let [cimi-params {:first       (impl/cimi-first params)
+                       :last        (impl/cimi-last params)
+                       :filter      (impl/cimi-filter params)
+                       :expand      (impl/cimi-expand params)
+                       :select      (impl/cimi-select params)
+                       :format      (impl/cimi-format params)
+                       :orderby     (impl/cimi-orderby params)
+                       :aggregation (impl/cimi-aggregation params)}]
       (handler (assoc req :cimi-params cimi-params)))))
