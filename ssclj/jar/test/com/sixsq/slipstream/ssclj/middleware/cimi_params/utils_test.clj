@@ -80,15 +80,15 @@
 (deftest check-aggregation-clause
   (are [expect arg] (= expect (t/aggregation-clause arg))
                     nil ""
-                    nil "attr-name"
-                    nil "attr-name:"
-                    nil "attr-name: "
-                    nil ":algo"
-                    nil " :algo"
-                    nil "attr-name:BAD"
-                    [:sum "attr"] "attr:sum"
-                    [:sum "attr"] " attr:sum"
-                    [:sum "attr:name"] "attr:name:sum"))
+                    nil "algo"
+                    nil "algo:"
+                    nil "algo: "
+                    nil ":attr-name"
+                    nil " :attr-name"
+                    nil "BAD:attr-name"
+                    [:sum "attr"] "sum:attr"
+                    [:extended-algo "attr"] "extended-algo:attr"
+                    [:sum "attr:name"] "sum:attr:name"))
 
 (deftest check-update-aggregation-map
   (are [expect initial] (t/update-aggregation-map initial (t/aggregation-clause "attr1:sum"))

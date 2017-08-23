@@ -94,13 +94,13 @@
       [attr (or (keyword order) :asc)])))
 
 (defn aggregation-clause
-  "Splits a aggregation clause value at the last colon and then returns
+  "Splits a aggregation clause value at the first colon and then returns
   [algorithm name, attribute name] where the algorithm name is a keyword. If
   the value is not valid (e.g. does not contain an algorithm name, then nil
   will be returned."
   [s]
-  (let [[attr algo] (->> s
-                         (re-matches #"(.+):([a-z]+)")
+  (let [[algo attr] (->> s
+                         (re-matches #"([a-z-]+):(\S+)")
                          rest
                          (map str/trim))]
     (when-not (str/blank? attr)

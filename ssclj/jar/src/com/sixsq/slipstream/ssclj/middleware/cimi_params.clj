@@ -37,8 +37,8 @@
     - :aggregation provides a map where the key is the aggregation algorithm
                    and the value is a vector of parameter names to which the
                    aggregation applies.  This is specified by parameter
-                   names and values like: '$aggregation=key1:algo,key2:algo'.
-                   The ':algo' suffix names the algorithm and is required.
+                   names and values like: '$aggregation=algo:key1,algo:key2'.
+                   The 'algo:' prefix names the algorithm and is required.
                    Supported algorithms are: min, max, sum, avg, stats,
                    extendedstats, count, percentiles, cardinality, missing,
                    and terms.
