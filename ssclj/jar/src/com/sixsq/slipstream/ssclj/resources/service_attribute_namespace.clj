@@ -2,7 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [superstring.core :as str]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.spec.service-attribute-namespace]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]

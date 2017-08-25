@@ -21,12 +21,12 @@
 
 (defn is-request-formatted
   [expected & {:as req-params}]
-  (is (= expected (formatted-request (req req-params)))))
+  (is (= expected (format-request (req req-params)))))
 
 (defn is-reponse-formatted
   [expected & {:keys [:start :end :status] :as response-params}]
-  (is (= expected (formatted-response
-                    (formatted-request (req response-params))
+  (is (= expected (format-response
+                    (format-request (req response-params))
                     {:status status} start end))))
 
 (deftest log-does-not-display-password

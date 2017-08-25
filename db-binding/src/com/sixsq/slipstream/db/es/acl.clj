@@ -2,7 +2,7 @@
   (:require
     [superstring.core :as s]
     [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.db.es.es-filter :as ef]))
+    [com.sixsq.slipstream.db.es.filter :as ef]))
 
 (defn- rule-of-type?
   [type rule]

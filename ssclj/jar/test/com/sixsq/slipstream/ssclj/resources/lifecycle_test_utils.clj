@@ -12,15 +12,14 @@
     [ring.middleware.nested-params :refer [wrap-nested-params]]
     [ring.util.codec :as codec]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.es.es-util :as esu]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
-    [com.sixsq.slipstream.db.es.es-util :as esu]))
+    [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.db.es.utils :as esu]))
 
 (defn serialize-cookie-value
   "replaces the map cookie value with a serialized string"

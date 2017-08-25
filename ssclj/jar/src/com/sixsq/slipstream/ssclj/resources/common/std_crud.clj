@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
@@ -80,9 +80,8 @@
     (a/can-view? {:acl collection-acl} request)
     (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)
           options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
-          [count-before-pagination entries] (db/query resource-name options)
-          wrapped-entries (wrapper-fn request entries)
-          entries-and-count (assoc wrapped-entries :count count-before-pagination)]
+          [metadata entries] (db/query resource-name options)
+          entries-and-count (merge metadata (wrapper-fn request entries))]
       (r/json-response entries-and-count))))
 
 (defn resolve-href-keep

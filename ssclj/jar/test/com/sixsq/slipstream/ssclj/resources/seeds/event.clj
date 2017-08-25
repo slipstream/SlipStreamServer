@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]))
+    [com.sixsq.slipstream.db.es.binding :as esb]))
 
 (def base-uri (str p/service-context (u/de-camelcase e/resource-name)))
 

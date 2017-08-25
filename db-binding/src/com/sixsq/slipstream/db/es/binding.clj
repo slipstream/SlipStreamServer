@@ -1,12 +1,12 @@
 ;;
 ;; Elastic Search implementation of Binding protocol
 ;;
-(ns com.sixsq.slipstream.db.es.es-binding
+(ns com.sixsq.slipstream.db.es.binding
   (:require
     [ring.util.response :as r]
     [clojure.string :as str]
     [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.db.es.es-util :as esu]
+    [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.es.acl :as acl]
     [com.sixsq.slipstream.db.binding :refer [Binding]])
   (:import (org.elasticsearch.index.engine VersionConflictEngineException)
@@ -101,7 +101,7 @@
 (defn- find-data
   [client index id options action]
   (let [[type docid] (split-id id)]
-    (-> (esu/read client index type docid)
+    (-> (esu/read client index type docid options)
         (.getSourceAsString)
         doc->data
         (throw-if-not-found id))))
@@ -135,13 +135,17 @@
         (response-conflict id))))
 
   (query [_ collection-id options]
-    (let [response (esu/search *client* index-name collection-id options)
-          result (esu/json->edn (str response))
+    (let [result (esu/search *client* index-name collection-id options)
           count-before-pagination (-> result :hits :total)
-          hits (->> (-> result :hits :hits)
+          aggregations (:aggregations result)
+          meta (cond-> {:count count-before-pagination}
+                       aggregations (assoc :aggregations aggregations))
+          hits (->> result
+                    :hits
+                    :hits
                     (map :_source)
                     (map acl/normalize-acl))]
-      [count-before-pagination hits])))
+      [meta hits])))
 
 (defn get-instance
   []
