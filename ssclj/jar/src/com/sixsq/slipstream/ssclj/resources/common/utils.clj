@@ -112,6 +112,12 @@
 
 (def not-expired? (complement expired?))
 
+(defn select-desc-keys
+  "Selects the common attributes that are related to the description of the
+   resource, namely 'name', 'description', and properties."
+  [m]
+  (select-keys m #{:name :description :properties}))
+
 (defn create-spec-validation-fn
   "Creates a validation function that compares a resource against the
    given schema.  The generated function raises an exception with the

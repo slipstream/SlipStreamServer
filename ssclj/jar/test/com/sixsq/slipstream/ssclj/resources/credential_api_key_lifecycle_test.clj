@@ -45,6 +45,10 @@
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
 
+        name-attr "name"
+        description-attr "description"
+        properties-attr {:a "one", :b "two"}
+
         href (str ct/resource-url "/" akey/method)
         template-url (str p/service-context ct/resource-url "/" akey/method)
 
@@ -56,7 +60,10 @@
 
         create-import-no-href {:credentialTemplate (strip-unwanted-attrs template)}
 
-        create-import-href {:credentialTemplate {:href href
+        create-import-href {:name name-attr
+                            :description description-attr
+                            :properties properties-attr
+                            :credentialTemplate {:href href
                                                  :ttl  1000}}
 
         create-import-href-zero-ttl {:credentialTemplate {:href href
@@ -129,12 +136,16 @@
             (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
-      (let [{:keys [digest expiry claims]} (-> session-user
+      (let [{:keys [name description properties
+                    digest expiry claims]} (-> session-user
                                                (request abs-uri)
                                                (ltu/body->edn)
                                                (ltu/is-status 200)
                                                :response
                                                :body)]
+        (is (= name name-attr))
+        (is (= description description-attr))
+        (is (= properties properties-attr))
         (is digest)
         (is (key-utils/valid? secret-key digest))
         (is expiry)
