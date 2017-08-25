@@ -83,4 +83,4 @@
   (is (= {:sum ["attr0" "attr1" "attr4"]
           :min ["attr2/child"]
           :max ["attr3"]}
-         (t/cimi-aggregation {"$aggregation" ["attr0:sum,attr1:sum" "invalid" "attr2/child:min" "attr3:max" "attr4:sum"]}))))
+         (t/cimi-aggregation {"$aggregation" ["sum:attr0,sum:attr1" "invalid" "min:attr2/child" "max:attr3" "sum:attr4"]}))))
