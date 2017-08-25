@@ -15,6 +15,14 @@
     (is (false? (t/not-expired? past-time)))
     (is (true? (t/not-expired? future-time)))))
 
+(deftest check-select-desc-keys
+  (let [resource {:name "name"
+                  :description "description"
+                  :properties {"first" "one", "second" "two"}}]
+    (is (= resource (t/select-desc-keys resource)))
+    (is (= resource (t/select-desc-keys (assoc resource :other "ignored"))))
+    (is (= (dissoc resource :name) (t/select-desc-keys (dissoc resource :name))))))
+
 (deftest check-de-camelcase
   (are [expect arg] (= expect (t/de-camelcase arg))
                     "" ""
@@ -32,3 +40,4 @@
                     "" ""
                     "Abc" "abc"
                     "AbcDef" "abc-def"))
+

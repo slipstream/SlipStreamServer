@@ -43,6 +43,11 @@
         session-anon (-> (session (ring-app))
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
+
+        name-attr "name"
+        description-attr "description"
+        properties-attr {:a "one", :b "two"}
+
         template (-> session-admin
                      (request template-url)
                      (ltu/body->edn)
@@ -52,9 +57,12 @@
         no-href-create {:userTemplate (strip-unwanted-attrs (assoc template
                                                               :username "user"
                                                               :emailAddress "user@example.org"))}
-        href-create {:userTemplate {:href         href
-                                    :username     "user"
-                                    :emailAddress "user@example.org"}}
+        href-create {:name         name-attr
+                     :description  description-attr
+                     :properties   properties-attr
+                     :userTemplate {:href         href
+                                    :username     "jane"
+                                    :emailAddress "jane@example.org"}}
         invalid-create (assoc-in href-create [:userTemplate :href] "user-template/unknown-template")]
 
     ;; anonymous user collection query should succeed but be empty
@@ -103,13 +111,10 @@
         (ltu/is-status 400))
 
     ;; create a user anonymously
-    (let [create-req {:userTemplate {:href         href
-                                     :username     "jane"
-                                     :emailAddress "jane@example.org"}}
-          resp (-> session-anon
+    (let [resp (-> session-anon
                    (request base-uri
                             :request-method :post
-                            :body (json/write-str create-req))
+                            :body (json/write-str href-create))
                    (ltu/body->edn)
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
@@ -121,7 +126,7 @@
       (-> session-anon
           (request base-uri
                    :request-method :post
-                   :body (json/write-str create-req))
+                   :body (json/write-str href-create))
           (ltu/body->edn)
           (ltu/is-status 409))
 
@@ -140,23 +145,19 @@
           (ltu/is-operation-present "delete")
           (ltu/is-operation-present "edit"))
 
+      ;; check contents of resource
+      (let [{:keys [name description properties] :as user} (-> session-admin
+                                                               (request abs-uri)
+                                                               (ltu/body->edn)
+                                                               :response
+                                                               :body)]
+        (is (= name name-attr))
+        (is (= description description-attr))
+        (is (= properties properties-attr)))
+
       ;; admin can delete resource
       (-> session-admin
           (request abs-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200)))))
-
-(deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id user/resource-name))]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :delete]
-                          [resource-uri :options]
-                          [resource-uri :put]
-                          [resource-uri :post]]]
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))

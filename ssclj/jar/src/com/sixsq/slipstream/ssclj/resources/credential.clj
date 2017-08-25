@@ -110,14 +110,17 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        [create-resp body] (-> body
-                               (assoc :resourceURI create-uri)
-                               (update-in [:credentialTemplate] dissoc :type) ;; forces use of template reference
-                               (std-crud/resolve-hrefs idmap)
-                               (crud/validate)
-                               (:credentialTemplate)
-                               (tpl->credential request))]
-    (-> (assoc request :id (:id body) :body body)
+        desc-attrs (u/select-desc-keys body)
+        [create-resp {:keys [id] :as body}] (-> body
+                                                (assoc :resourceURI create-uri)
+                                                (update-in [:credentialTemplate] dissoc :type) ;; forces use of template reference
+                                                (std-crud/resolve-hrefs idmap)
+                                                (update-in [:credentialTemplate] merge desc-attrs) ;; ensure desc attrs are validated
+                                                crud/validate
+                                                :credentialTemplate
+                                                (tpl->credential request))]
+    (-> request
+        (assoc :id id :body (merge body desc-attrs))
         add-impl
         (update-in [:body] merge create-resp))))
 
