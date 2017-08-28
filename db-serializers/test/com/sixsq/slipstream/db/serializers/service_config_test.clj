@@ -9,7 +9,6 @@
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
-    [com.sixsq.slipstream.db.serializers.test-utils :as tu]
     [com.sixsq.slipstream.db.serializers.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as sd]
     [com.sixsq.slipstream.ssclj.resources.spec.description]
@@ -42,7 +41,7 @@
 
 
 ;; Fixtures
-(use-fixtures :once tu/fixture-start-es-db)
+(use-fixtures :once u/test-fixture-es-client-and-db-impl)
 
 ;; initialize resource (including possible connectors on the classpath).
 (u/initialize)

@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.db.es.es-util
+(ns com.sixsq.slipstream.db.es.utils
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.java.io :as io]
@@ -7,28 +7,34 @@
     [environ.core :as env]
     [me.raynes.fs :as fs]
     [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.db.es.es-pagination :as pg]
+    [com.sixsq.slipstream.db.es.pagination :as pg]
     [com.sixsq.slipstream.db.es.acl :as acl]
-    [com.sixsq.slipstream.db.es.es-order :as od]
-    [com.sixsq.slipstream.db.es.es-filter :as ef])
+    [com.sixsq.slipstream.db.es.order :as order]
+    [com.sixsq.slipstream.db.es.aggregation :as agg]
+    [com.sixsq.slipstream.db.es.filter :as ef]
+    [com.sixsq.slipstream.db.es.select :as select])
   (:import
-    (org.elasticsearch.node Node)
-    (org.elasticsearch.common.settings Settings)
-    (org.elasticsearch.common.unit TimeValue)
-    (org.elasticsearch.cluster.health ClusterHealthStatus)
-    (org.elasticsearch.client Client)
-    (org.elasticsearch.action.search SearchType SearchPhaseExecutionException)
-    (org.elasticsearch.action.support WriteRequest$RefreshPolicy WriteRequest)
-    (org.elasticsearch.action.bulk BulkRequestBuilder)
-    (org.elasticsearch.action ActionRequestBuilder)
-    (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
-    (org.elasticsearch.index.query QueryBuilders)
-    (org.elasticsearch.index IndexNotFoundException)
-    (org.elasticsearch.transport.client PreBuiltTransportClient)
-    (org.elasticsearch.plugins Plugin)
-    (org.elasticsearch.common.transport InetSocketTransportAddress)
     (java.net InetAddress)
-    (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)))
+    (java.util UUID)
+    (org.elasticsearch.action ActionRequestBuilder)
+    (org.elasticsearch.action.admin.indices.create CreateIndexResponse)
+    (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
+    (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
+    (org.elasticsearch.action.bulk BulkRequestBuilder BulkResponse)
+    (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse SearchRequestBuilder)
+    (org.elasticsearch.action.support WriteRequest$RefreshPolicy WriteRequest)
+    (org.elasticsearch.common.settings Settings)
+    (org.elasticsearch.common.transport InetSocketTransportAddress)
+    (org.elasticsearch.common.unit TimeValue)
+    (org.elasticsearch.client Client)
+    (org.elasticsearch.cluster.health ClusterHealthStatus)
+    (org.elasticsearch.index IndexNotFoundException)
+    (org.elasticsearch.index.query QueryBuilders)
+    (org.elasticsearch.node Node)
+    (org.elasticsearch.plugins Plugin)
+    (org.elasticsearch.transport.client PreBuiltTransportClient)))
+
+(def ^:const max-result-window 200000)
 
 (defn json->edn [json]
   (when json (json/read-str json :key-fn keyword)))
@@ -51,10 +57,12 @@
       (status)))
 
 (defn read
-  [^Client client index type docid]
-  (.. client
-      (prepareGet index type docid)
-      (get)))
+  [^Client client index type docid {:keys [cimi-params] :as options}]
+  (let [get-request-builder (.. client
+                                (prepareGet index type docid))]
+    (-> get-request-builder
+        (select/add-selected-keys cimi-params)
+        (.get))))
 
 (defn update
   [^Client client index type docid json]
@@ -70,30 +78,37 @@
       (prepareDelete index type docid)
       (get)))
 
+(defn add-query [^SearchRequestBuilder request-builder options]
+  (.setQuery request-builder (-> options
+                                 ef/es-filter
+                                 (acl/and-acl options))))
+
 (defn search
-  [^Client client index type options]
+  "On success, returns the full response in edn format. On errors, it logs the
+   error and returns an empty map."
+  ^SearchResponse [^Client client index type {:keys [cimi-params] :as options}]
   (try
-    (let [query                         (-> options
-                                            ef/es-filter
-                                            (acl/and-acl options))
+    (let [^SearchRequestBuilder request (-> (.. client
+                                                (prepareSearch (into-array String [index]))
+                                                (setTypes (into-array String [(cu/de-camelcase type)]))
+                                                (setSearchType SearchType/DEFAULT))
+                                            (add-query options)
+                                            (select/add-selected-keys cimi-params)
+                                            (pg/add-paging cimi-params)
+                                            (order/add-sorters cimi-params)
+                                            (agg/add-aggregators cimi-params))
+          ^SearchResponse search-response (.get request)
 
-          [from size] (pg/from-size options)
-          ^ActionRequestBuilder request (.. client
-                                            (prepareSearch (into-array String [index]))
-                                            (setTypes (into-array String [(cu/de-camelcase type)]))
-                                            (setSearchType SearchType/DEFAULT)
-                                            (setQuery query)
-                                            (setFrom from)
-                                            (setSize size))
+          ;; FIXME: This status should be checked to ensure the query was successful.
+          status (.getStatus (.status search-response))]
 
-          request-with-sort             (od/add-sorters-from-cimi request options)]
-      (.get request-with-sort))
+      (-> search-response str json->edn))
     (catch IndexNotFoundException infe
       (log/warn "index" index "not found, returning empty search result")
-      [])
+      {})
     (catch SearchPhaseExecutionException spee
       (log/warn "search failed:" (.getMessage spee) ", returning empty search result")
-      [])))
+      {})))
 
 ;;
 ;; Convenience functions
@@ -108,10 +123,10 @@
     (.add bulk-request-builder new-index)))
 
 (defn bulk-create
-  [^Client client index type uuid-jsons]
+  ^BulkResponse [^Client client index type uuid-jsons]
   (let [bulk-request-builder (.. client
                                  (prepareBulk)
-                                 (setRefresh true))]
+                                 (setRefreshPolicy WriteRequest$RefreshPolicy/WAIT_UNTIL))]
     (.. (reduce (partial add-index client index type) bulk-request-builder uuid-jsons)
         (get))))
 
@@ -134,12 +149,12 @@
 ;;
 
 (defn create-test-node
-  "Creates a local elasticsearch node which holds data but
-   cannot be accessed through the HTTP protocol."
+  "Creates a local elasticsearch node that holds data but cannot be accessed
+   through the HTTP protocol."
   ([]
    (create-test-node (cu/random-uuid)))
   ([^String cluster-name]
-   (let [home     (str (fs/temp-dir "es-data-"))
+   (let [home (str (fs/temp-dir "es-data-"))
          settings (.. (Settings/builder)
                       (put "http.enabled" false)
                       (put "node.data" true)
@@ -166,10 +181,10 @@
       (isExists)))
 
 (defn create-index
-  [^Client client index-name]
+  ^CreateIndexResponse [^Client client index-name]
   (log/info "creating index:" index-name)
   (let [settings (.. (Settings/builder)
-                     (put "index.max_result_window" pg/max-result-window)
+                     (put "index.max_result_window" max-result-window)
                      (put "index.number_of_shards" 3)
                      (put "index.number_of_replicas" 0)
                      (build))]
@@ -202,20 +217,21 @@
   (when node (.client node)))
 
 (defn create-es-client
-  "Creates a client connecting to an instance of Elasticsearch
-  Parameters (host and port) are taken from environment variables."
-  []
-  (let [es-host (or (env/env :es-host) "localhost")
-        es-port (or (env/env :es-port) "9300")]
+  "Creates a client connecting to an Elasticsearch instance. The 0-arity
+  version takes the host and port from the environmental variables ES_HOST and
+  ES_PORT. The 2-arity version takes these values as explicit parameters. If
+  the host or port is nil, then \"localhost\" or \"9300\" are used,
+  respectively."
+  ([]
+   (create-es-client (env/env :es-host) (env/env :es-port)))
+  ([es-host es-port]
+   (let [es-host (or es-host "localhost")
+         es-port (or es-port "9300")]
 
-    (log/info "creating elasticsearch client:" es-host es-port)
-    (.. (new PreBuiltTransportClient ^Settings Settings/EMPTY [])
-        (addTransportAddress (InetSocketTransportAddress. (InetAddress/getByName es-host)
-                                                          (read-string es-port))))))
-
-(defn create-test-es-client
-  []
-  (node-client (create-test-node)))
+     (log/info "creating elasticsearch client:" es-host es-port)
+     (.. (new PreBuiltTransportClient ^Settings Settings/EMPTY [])
+         (addTransportAddress (InetSocketTransportAddress. (InetAddress/getByName es-host)
+                                                           (read-string es-port)))))))
 
 (defn wait-for-cluster
   [^Client client]
@@ -240,3 +256,20 @@
         (delete (DeleteIndexRequest. index-name))
         (get)))
   (create-index client index-name))
+
+(defn random-index-name
+  "Creates a random value for an index name. The name is the string value of a
+   random UUID, although that is an implementation detail."
+  []
+  (str (UUID/randomUUID)))
+
+(defmacro with-es-test-client
+  "Creates a new elasticsearch node, client, and test index, executes the body
+   with `node`, `client`, and `index` vars bound to the values, and then
+   reliably closes the node and client."
+  [& body]
+  `(with-open [~'node (create-test-node)
+               ~'client (node-client ~'node)]
+     (let [~'index (random-index-name)]
+       (create-index ~'client ~'index)
+       ~@body)))

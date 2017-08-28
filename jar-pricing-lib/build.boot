@@ -1,4 +1,4 @@
-(def +version+ "3.33-SNAPSHOT")
+(def +version+ "3.36-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPricingLib-jar
@@ -6,7 +6,7 @@
   :license {"commercial" "http://sixsq.com"}
   :edition "community"
   
-  :dependencies '[[org.clojure/clojure "1.9.0-alpha17"]
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha19"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults

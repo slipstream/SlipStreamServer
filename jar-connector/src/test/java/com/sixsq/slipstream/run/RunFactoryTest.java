@@ -496,6 +496,10 @@ public class RunFactoryTest extends RunTest {
 	public void accountingRecordFromDeploymentRun() throws SlipStreamClientException {
 		Event.muteForTests();
 
+		String realm = "myRealm";
+		user.setOrganization(realm);
+		user.store();
+
 		Run run = getDeploymentRun(deployment);
 
 		for (String nodeInstanceName: run.getNodeInstanceNamesList()) {
@@ -509,6 +513,7 @@ public class RunFactoryTest extends RunTest {
 			assertStringEquals(run.getUuid(), arh.getContext().getRunId());
 			assertStringEquals("test/deployment", arh.getModuleName());
 			assertStringEquals("RunTestBaseUser", arh.getUser());
+			assertStringEquals(realm, arh.getRealm());
 
 			AccountingRecordVM vmData = arh.getVmData();
 			assertEquals(2, vmData.getCpu().intValue());
@@ -528,17 +533,19 @@ public class RunFactoryTest extends RunTest {
 		Run run = getImageRun(image);
 		String nodeInstanceName = Run.MACHINE_NAME;
 
-		AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
+        String realm = "myRealm";
+        user.setOrganization(realm);
+        user.store();
+
+        AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
 		arh.setServiceOffer(serviceOffer);
-
-
-
 		assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
 		assertStringEquals(cloudServiceName, arh.getCloudName());
 		AccountingRecordContext ctx = arh.getContext();
 		assertStringEquals(run.getUuid(), ctx.getRunId());
 		assertStringEquals("test/image", arh.getModuleName());
 		assertStringEquals("RunTestBaseUser", arh.getUser());
+        assertStringEquals(realm, arh.getRealm());
 
 		AccountingRecordVM vmData = arh.getVmData();
 		assertEquals(2, vmData.getCpu().intValue());

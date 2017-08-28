@@ -14,11 +14,11 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.ssclj.usage.record-keeper :as rk]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]))
 
-(use-fixtures :each t/with-test-client-fixture)
+(use-fixtures :each t/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
@@ -143,7 +143,7 @@
       (request state "/api/usage-event" :request-method :post :body (json/write-str close-usage-event))
       (is (= urs (all-records state))))))
 
-(deftest post-open-usage-event-when-already-open-should-close-restart
+(deftest post-open-usage-event-when-already-open-should-do-nothing
   (let [state
         (-> (session (ring-app))
             (content-type "application/json")
@@ -152,9 +152,8 @@
     (is (= 2 (count (all-records state))))
     (request state "/api/usage-event" :request-method :post :body (json/write-str reopen-usage-event-new-value))
     (let [urs (all-records state)]
-      (is (= 3 (count urs)))
-      (is (= [["2015-05-04T15:32:22.853Z" "2015-05-04T16:07:22.853Z"]
-              ["2015-05-04T16:07:22.853Z" ur/date-in-future]]
+      (is (= 2 (count urs)))
+      (is (= [["2015-05-04T15:32:22.853Z" ur/date-in-future]]
              (->> urs
                   (filter #(= "vm" (:metric-name %)))
                   (sort-by :start-timestamp)

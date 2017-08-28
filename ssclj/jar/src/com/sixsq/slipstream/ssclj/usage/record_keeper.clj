@@ -102,7 +102,8 @@
       :close-restart (close-restart-record usage-metric options)
       :insert-start (open-record usage-metric options)
       :wrong-transition (log-wrong-transition current-state trigger)
-      :close-record (close-record usage-metric options))))
+      :close-record (close-record usage-metric options)
+      nil)))
 
 (defn- insertStart
   [usage-event-json options]

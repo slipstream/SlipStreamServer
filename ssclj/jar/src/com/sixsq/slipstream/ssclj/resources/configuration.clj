@@ -92,13 +92,15 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
+        desc-attrs (u/select-desc-keys body)
         body (-> body
                  (assoc :resourceURI create-uri)
                  (std-crud/resolve-hrefs idmap)
+                 (update-in [:configurationTemplate] merge desc-attrs) ;; validate desc attrs
                  (crud/validate)
                  (:configurationTemplate)
                  (tpl->configuration))]
-    (add-impl (assoc request :body body))))
+    (add-impl (assoc request :body (merge body desc-attrs)))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 

@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.33-SNAPSHOT</version>
+    <version>3.36-SNAPSHOT</version>
   </parent>
   <properties>
     <slipstream.logs.dir>/var/log/slipstream/server</slipstream.logs.dir>
@@ -523,6 +523,7 @@
 
             <mapping>
               <directory>/etc/default</directory>
+              <configuration>true</configuration>
               <sources>
                 <softlinkSource>
                   <destination>slipstream</destination>

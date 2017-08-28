@@ -22,18 +22,15 @@ package com.sixsq.slipstream.persistence;
 
 import java.io.Serializable;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @SuppressWarnings("serial")
 @Entity
 public class VersionCounter implements Serializable {
 
 	private static int ID = 1;
-	
-	public static int getNextVersion() {
+
+	synchronized static int getNextVersion() {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();

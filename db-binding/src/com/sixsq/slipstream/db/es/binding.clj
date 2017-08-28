@@ -1,12 +1,12 @@
 ;;
 ;; Elastic Search implementation of Binding protocol
 ;;
-(ns com.sixsq.slipstream.db.es.es-binding
+(ns com.sixsq.slipstream.db.es.binding
   (:require
     [ring.util.response :as r]
-    [superstring.core :as s]
+    [clojure.string :as str]
     [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.db.es.es-util :as esu]
+    [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.es.acl :as acl]
     [com.sixsq.slipstream.db.binding :refer [Binding]])
   (:import (org.elasticsearch.index.engine VersionConflictEngineException)
@@ -14,7 +14,7 @@
 
 (def ^:const index-name "resources-index")
 
-(defn- wait-client-create-index
+(defn wait-client-create-index
   [client]
   (esu/wait-for-cluster client)
   (when-not (esu/index-exists? client index-name)
@@ -25,10 +25,6 @@
 (defn create-client
   []
   (wait-client-create-index (esu/create-es-client)))
-
-(defn create-test-client
-  []
-  (wait-client-create-index (esu/create-test-es-client)))
 
 (def ^:dynamic *client*)
 
@@ -45,7 +41,7 @@
   id is usually in the form type/docid.
   Exception for cloud-entry-point: in this case id is only type (there is only one cloud-entry-point)"
   [id]
-  (let [[type docid] (s/split id #"/")]
+  (let [[type docid] (str/split id #"/")]
     [type (or docid type)]))
 
 (defn- data->doc
@@ -105,7 +101,7 @@
 (defn- find-data
   [client index id options action]
   (let [[type docid] (split-id id)]
-    (-> (esu/read client index type docid)
+    (-> (esu/read client index type docid options)
         (.getSourceAsString)
         doc->data
         (throw-if-not-found id))))
@@ -139,13 +135,17 @@
         (response-conflict id))))
 
   (query [_ collection-id options]
-    (let [response (esu/search *client* index-name collection-id options)
-          result (esu/json->edn (str response))
+    (let [result (esu/search *client* index-name collection-id options)
           count-before-pagination (-> result :hits :total)
-          hits (->> (-> result :hits :hits)
+          aggregations (:aggregations result)
+          meta (cond-> {:count count-before-pagination}
+                       aggregations (assoc :aggregations aggregations))
+          hits (->> result
+                    :hits
+                    :hits
                     (map :_source)
                     (map acl/normalize-acl))]
-      [count-before-pagination hits])))
+      [meta hits])))
 
 (defn get-instance
   []

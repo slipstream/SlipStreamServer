@@ -129,14 +129,17 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        body (-> body
-                 (assoc :resourceURI create-uri)
-                 (update-in [:userTemplate] dissoc :method) ;; forces use of template reference
-                 (std-crud/resolve-hrefs idmap)
-                 (crud/validate)
-                 (:userTemplate)
-                 (tpl->user request))]
-    (add-impl (assoc request :id (:id body) :body body))))  ;; FIXME: WRONG, need to have id=username
+        desc-attrs (u/select-desc-keys body)
+        {:keys [id] :as body} (-> body
+                                  (assoc :resourceURI create-uri)
+                                  (update-in [:userTemplate] dissoc :method) ;; forces use of template reference
+                                  (std-crud/resolve-hrefs idmap)
+                                  (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
+                                  (crud/validate)
+                                  (:userTemplate)
+                                  (tpl->user request)
+                                  (merge desc-attrs))]      ;; ensure desc attrs are added
+    (add-impl (assoc request :id id :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name

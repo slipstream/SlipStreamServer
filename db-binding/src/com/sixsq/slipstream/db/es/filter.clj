@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.db.es.es-filter
+(ns com.sixsq.slipstream.db.es.filter
   (:require
     [clojure.walk :as w]
     [superstring.core :as s]

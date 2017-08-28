@@ -57,15 +57,17 @@
 
   (query
     [this collection-id options]
-    "This function returns a list of resources, where the collection-id
+    "This function returns metadata and resources, where the collection-id
      corresponds to the name of a Collection.
 
-     On success, the function must return a list of the given resources.
-     This list may possibly be empty.  The list must not be embedded in
-     a ring response.
+     On success, the function must return a two-element tuple. The first
+     element is metadata concerning the query (usually with the count and
+     aggregations). The second element is a list of the returned resources.
+     This list may possibly be empty. The list must not be embedded in a ring
+     response.
 
      On failure, the function must throw an ex-info containing the error
-     ring response.  If the resource-id does not correpond to a Collection,
+     ring response.  If the resource-id does not correspond to a Collection,
      then a 400 (bad-request) response must be returned.  Other appropriate
      error codes can also be thrown.")
   )

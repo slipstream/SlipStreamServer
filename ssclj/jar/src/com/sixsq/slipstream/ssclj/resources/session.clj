@@ -203,13 +203,16 @@
   [{:keys [body form-params headers] :as request}]
   (let [idmap {:identity (:identity request)}
         body (if (is-form? headers) (convert-form form-params) body)
-        [cookie-header body] (-> body
-                                 (assoc :resourceURI create-uri)
-                                 (std-crud/resolve-hrefs idmap true)
-                                 (crud/validate)
-                                 (:sessionTemplate)
-                                 (tpl->session request))]
-    (-> (assoc request :id (:id body) :body body)
+        desc-attrs (u/select-desc-keys body)
+        [cookie-header {:keys [id] :as body}] (-> body
+                                                  (assoc :resourceURI create-uri)
+                                                  (std-crud/resolve-hrefs idmap true)
+                                                  (update-in [:sessionTemplate] merge desc-attrs) ;; validate desc attrs
+                                                  (crud/validate)
+                                                  (:sessionTemplate)
+                                                  (tpl->session request))]
+    (-> request
+        (assoc :id id :body (merge body desc-attrs))
         add-impl
         (merge cookie-header))))
 

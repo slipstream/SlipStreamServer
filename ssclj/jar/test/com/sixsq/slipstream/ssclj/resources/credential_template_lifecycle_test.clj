@@ -6,8 +6,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-username-password :as upc]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as spk]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as akey]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
@@ -15,7 +16,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
@@ -26,8 +27,7 @@
 (dyn/initialize)
 
 (deftest check-retrieve-by-id
-  (doseq [registration-method [upc/credential-type
-                               spk/credential-type]]
+  (doseq [registration-method [spk/method skp/method akey/method]]
     (let [id (str ct/resource-url "/" registration-method)
           doc (crud/retrieve-by-id id)]
       (is (= id (:id doc))))))
@@ -49,13 +49,14 @@
                     (ltu/is-operation-absent "describe")
                     (ltu/entries ct/resource-tag))
         ids (set (map :id entries))
+        methods (set (map :method entries))
         types (set (map :type entries))]
-    (is (= #{(str ct/resource-url "/" upc/credential-type)
-             (str ct/resource-url "/" spk/credential-type)}
+    (is (= #{(str ct/resource-url "/" spk/method)
+             (str ct/resource-url "/" skp/method)
+             (str ct/resource-url "/" akey/method)}
            ids))
-    (is (= #{upc/credential-type
-             spk/credential-type}
-           types))
+    (is (= #{spk/method skp/method akey/method} methods))
+    (is (= #{spk/credential-type akey/credential-type} types))
 
     (doseq [entry entries]
       (let [ops (ltu/operations->map entry)

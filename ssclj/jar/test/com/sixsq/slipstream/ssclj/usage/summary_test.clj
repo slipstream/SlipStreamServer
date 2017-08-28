@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as tu]
     [clojure.test :refer :all]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (def past-1 (u/timestamp 2015 04 12))
@@ -21,7 +21,7 @@
 (def start-april (u/timestamp 2015 04))
 (def start-may (u/timestamp 2015 05))
 
-(use-fixtures :each tu/with-test-client-fixture)
+(use-fixtures :each tu/with-test-es-client-fixture)
 
 (deftest truncate-filters-outside-records
   (let [urs [{:start-timestamp in-day-1 :end-timestamp in-day-2}]]

@@ -16,7 +16,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clojure.spec.alpha :as s]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
 
@@ -154,17 +154,3 @@
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200)))))
-
-(deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id user/resource-name))]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :delete]
-                          [resource-uri :options]
-                          [resource-uri :put]
-                          [resource-uri :post]]]
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))

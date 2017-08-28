@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
-;; NOTE: ring uses lowercased values of header names!
+;; NOTE: ring uses lower-cased values of header names!
 (def ^:const authn-info-header
   "slipstream-authn-info")
 

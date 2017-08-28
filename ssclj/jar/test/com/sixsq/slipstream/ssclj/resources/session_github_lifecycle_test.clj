@@ -23,7 +23,7 @@
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
     [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 
@@ -92,7 +92,15 @@
                    (ltu/body->edn)
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
-          href-create {:sessionTemplate {:href href}}
+
+          name-attr "name"
+          description-attr "description"
+          properties-attr {:a "one", :b "two"}
+
+          href-create {:name            name-attr
+                       :description     description-attr
+                       :properties      properties-attr
+                       :sessionTemplate {:href href}}
           href-create-redirect {:sessionTemplate {:href        href
                                                   :redirectURI redirect-uri}}
           invalid-create (assoc-in href-create-redirect [:sessionTemplate :invalid] "BAD")]
@@ -233,6 +241,17 @@
             (ltu/is-operation-present "delete")
             (ltu/is-operation-present (:validate c/action-uri))
             (ltu/is-operation-absent "edit"))
+
+        ;; check contents of session
+        (let [{:keys [name description properties] :as body} (-> session-user
+                                                                 (header authn-info-header (str "user USER ANON " id))
+                                                                 (request abs-uri)
+                                                                 (ltu/body->edn)
+                                                                 :response
+                                                                 :body)]
+          (is (= name name-attr))
+          (is (= description description-attr))
+          (is (= properties properties-attr)))
 
         ;; user query with session role should succeed but and have one entry
         (-> session-user
@@ -461,17 +480,3 @@
                      :body (json/write-str invalid-create))
             (ltu/body->edn)
             (ltu/is-status 400))))))
-
-(deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id session/resource-name))]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :delete]
-                          [resource-uri :options]
-                          [resource-uri :put]
-                          [resource-uri :post]]]
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))

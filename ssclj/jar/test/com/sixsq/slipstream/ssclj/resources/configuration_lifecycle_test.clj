@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.configuration-lifecycle-test-utils :as test-utils]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 ;; initialize must to called to pull in ConfigurationTemplate test examples
 (dyn/initialize)

@@ -14,16 +14,18 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
-;; initialize must to called to pull in SessionTemplate test examples
+;; initialize must to called to pull in CredentialTemplate resources
 (dyn/initialize)
 
 (defn strip-unwanted-attrs [m]
@@ -31,10 +33,8 @@
                    :created :updated :name :description}]
     (into {} (remove #(unwanted (first %)) m))))
 
-(deftest lifecycle
-  (let [href (str ct/resource-url "/" spk/credential-type)
-        template-url (str p/service-context ct/resource-url "/" spk/credential-type)
-        session-admin (-> (session (ring-app))
+(deftest lifecycle-import
+  (let [session-admin (-> (session (ring-app))
                           (content-type "application/json")
                           (header authn-info-header "root ADMIN USER ANON"))
         session-user (-> (session (ring-app))
@@ -43,37 +43,37 @@
         session-anon (-> (session (ring-app))
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
+
+        href (str ct/resource-url "/" spk/method)
+        template-url (str p/service-context ct/resource-url "/" spk/method)
+
         template (-> session-admin
                      (request template-url)
                      (ltu/body->edn)
                      (ltu/is-status 200)
                      (get-in [:response :body]))
 
-        no-href-create {:credentialTemplate (strip-unwanted-attrs (assoc template
-                                                                    :sshPublicKey "some-key-value"))}
-        href-create {:credentialTemplate {:href         href
-                                          :sshPublicKey "some-key-value"}}
-        invalid-create (assoc-in href-create [:credentialTemplate :href] "user-template/unknown-template")]
+        imported-ssh-key-info (ssh-utils/generate)
 
-    ;; admin user collection query should succeed but be empty (no credentials created yet)
-    (-> session-admin
-        (request base-uri)
-        (ltu/body->edn)
-        (ltu/is-status 200)
-        (ltu/is-count zero?)
-        (ltu/is-operation-present "add")
-        (ltu/is-operation-absent "delete")
-        (ltu/is-operation-absent "edit"))
+        create-import-no-href {:credentialTemplate (strip-unwanted-attrs
+                                                     (assoc template
+                                                       :publicKey (:publicKey imported-ssh-key-info)))}
 
-    ;; normal user collection query should succeed but be empty (no credentials created yet)
-    (-> session-admin
-        (request base-uri)
-        (ltu/body->edn)
-        (ltu/is-status 200)
-        (ltu/is-count zero?)
-        (ltu/is-operation-present "add")
-        (ltu/is-operation-absent "delete")
-        (ltu/is-operation-absent "edit"))
+        create-import-href {:credentialTemplate {:href      href
+                                                 :publicKey (:publicKey imported-ssh-key-info)}}
+
+        invalid-create-href (assoc-in create-import-href [:credentialTemplate :href] "user-template/unknown-template")]
+
+    ;; admin/user query should succeed but be empty (no credentials created yet)
+    (doseq [session [session-admin session-user]]
+      (-> session
+          (request base-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/is-count zero?)
+          (ltu/is-operation-present "add")
+          (ltu/is-operation-absent "delete")
+          (ltu/is-operation-absent "edit")))
 
     ;; anonymous credential collection query should not succeed
     (-> session-anon
@@ -81,37 +81,28 @@
         (ltu/body->edn)
         (ltu/is-status 403))
 
-    ;; create a new credential as administrator; fail without reference
-    (-> session-admin
-        (request base-uri
-                 :request-method :post
-                 :body (json/write-str no-href-create))
-        (ltu/body->edn)
-        (ltu/is-status 400))
+    ;; creating a new credential without reference will fail for all types of users
+    (doseq [session [session-admin session-user session-anon]]
+      (-> session
+          (request base-uri
+                   :request-method :post
+                   :body (json/write-str create-import-no-href))
+          (ltu/body->edn)
+          (ltu/is-status 400)))
 
-    ;; anonymous create without template reference fails
+    ;; creating a new credential as anon will fail
     (-> session-anon
         (request base-uri
                  :request-method :post
-                 :body (json/write-str no-href-create))
+                 :body (json/write-str create-import-href))
         (ltu/body->edn)
-        (ltu/is-status 400))
-
-    ;; admin create with invalid template fails
-    (-> session-admin
-        (request base-uri
-                 :request-method :post
-                 :body (json/write-str invalid-create))
-        (ltu/body->edn)
-        (ltu/is-status 400))
+        (ltu/is-status 403))
 
     ;; create a credential as a normal user
-    (let [create-req {:credentialTemplate {:href         href
-                                           :sshPublicKey "some-key-value"}}
-          resp (-> session-user
+    (let [resp (-> session-user
                    (request base-uri
                             :request-method :post
-                            :body (json/write-str create-req))
+                            :body (json/write-str create-import-href))
                    (ltu/body->edn)
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
@@ -119,37 +110,101 @@
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
-      ;; admin should be able to see, edit, and delete credential
-      (-> session-admin
-          (request abs-uri)
-          (ltu/body->edn)
-          (ltu/is-status 200)
-          (ltu/is-operation-present "delete")
-          (ltu/is-operation-present "edit"))
+      ;; resource id and the uri (location) should be the same
+      (is (= id uri))
 
-      (-> session-user
-          (request abs-uri)
-          (ltu/body->edn)
-          (ltu/is-status 200)
-          (ltu/is-operation-present "delete")
-          (ltu/is-operation-present "edit"))
+      ;; admin/user should be able to see, edit, and delete credential
+      (doseq [session [session-admin session-user]]
+        (-> session
+            (request abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-operation-present "delete")
+            (ltu/is-operation-present "edit")))
 
+      ;; ensure credential contains correct information
+      (let [resource (-> session-user
+                         (request abs-uri)
+                         (ltu/body->edn)
+                         (ltu/is-status 200)
+                         :response
+                         :body)]
+        (is (= "rsa" (:algorithm resource)))
+        (is (= (:fingerprint resource) (:fingerprint imported-ssh-key-info)))
+        (is (= (:publicKey resource) (:publicKey imported-ssh-key-info))))
+
+      ;; delete the credential
       (-> session-user
           (request abs-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200)))))
 
-(deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id credential/resource-name))]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :delete]
-                          [resource-uri :options]
-                          [resource-uri :put]
-                          [resource-uri :post]]]
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))
+(deftest lifecycle-generate
+  (let [session-admin (-> (session (ring-app))
+                          (content-type "application/json")
+                          (header authn-info-header "root ADMIN USER ANON"))
+        session-user (-> (session (ring-app))
+                         (content-type "application/json")
+                         (header authn-info-header "jane USER ANON"))
+        session-anon (-> (session (ring-app))
+                         (content-type "application/json")
+                         (header authn-info-header "unknown ANON"))
+
+        href (str ct/resource-url "/" skp/method)
+        template-url (str p/service-context ct/resource-url "/" skp/method)
+
+        template (-> session-admin
+                     (request template-url)
+                     (ltu/body->edn)
+                     (ltu/is-status 200)
+                     (get-in [:response :body]))
+
+        create-import-href {:credentialTemplate {:href href}}]
+
+    ;; create a credential as a normal user
+    (let [resp (-> session-user
+                   (request base-uri
+                            :request-method :post
+                            :body (json/write-str create-import-href))
+                   (ltu/body->edn)
+                   (ltu/is-status 201))
+          id (get-in resp [:response :body :resource-id])
+          private-key (get-in resp [:response :body :privateKey])
+          uri (-> resp
+                  (ltu/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
+
+      ;; resource id and the uri (location) should be the same
+      (is (= id uri))
+
+      ;; the private key must be returned as part of the 201 response
+      (is private-key)
+
+      ;; admin/user should be able to see, edit, and delete credential
+      (doseq [session [session-admin session-user]]
+        (-> session
+            (request abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-operation-present "delete")
+            (ltu/is-operation-present "edit")))
+
+      ;; ensure credential contains correct information
+      (let [resource (-> session-user
+                         (request abs-uri)
+                         (ltu/body->edn)
+                         (ltu/is-status 200)
+                         :response
+                         :body)]
+        (is (= "rsa" (:algorithm resource)))
+        (is (:fingerprint resource))
+        (is (:publicKey resource)))
+
+      ;; delete the credential
+      (-> session-user
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 200)))))
+

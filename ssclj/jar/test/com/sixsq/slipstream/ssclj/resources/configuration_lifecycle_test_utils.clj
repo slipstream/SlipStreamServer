@@ -42,6 +42,10 @@
                           (content-type "application/json")
                           (header authn-info-header "root ADMIN USER ANON"))
 
+        name-attr "name"
+        description-attr "description"
+        properties-attr {:a "one", :b "two"}
+
         href (str ct/resource-url "/" service)
         template-url (str p/service-context ct/resource-url "/" service)
         resp (-> session-admin
@@ -49,7 +53,10 @@
                  (ltu/body->edn)
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
-        valid-create {:configurationTemplate (strip-unwanted-attrs (assoc template attr-kw attr-value))}
+        valid-create {:name            name-attr
+                      :description     description-attr
+                      :properties      properties-attr
+                      :configurationTemplate (strip-unwanted-attrs (assoc template attr-kw attr-value))}
         href-create {:configurationTemplate {:href   href
                                              attr-kw attr-value}}
         invalid-create (assoc-in valid-create [:configurationTemplate :invalid] "BAD")]
@@ -94,6 +101,16 @@
           (request abs-uri)
           (ltu/body->edn)
           (ltu/is-status 200))
+
+      ;; check the contents
+      (let [{:keys [name description properties] :as body} (-> session-admin
+                                                               (request abs-uri)
+                                                               (ltu/body->edn)
+                                                               :response
+                                                               :body)]
+        (is (= name name-attr))
+        (is (= description description-attr))
+        (is (= properties properties-attr)))
 
       ;; anonymous query fails
       (-> session-anon

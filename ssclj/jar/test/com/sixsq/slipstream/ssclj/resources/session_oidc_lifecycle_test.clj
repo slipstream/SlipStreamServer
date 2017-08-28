@@ -23,7 +23,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
 
-(use-fixtures :each ltu/with-test-client-fixture)
+(use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 
@@ -103,8 +103,16 @@
                    (ltu/body->edn)
                    (ltu/is-status 200))
           template (get-in resp [:response :body])
+
+          name-attr "name"
+          description-attr "description"
+          properties-attr {:a "one", :b "two"}
+
           ;;valid-create {:sessionTemplate (strip-unwanted-attrs template)}
-          href-create {:sessionTemplate {:href href}}
+          href-create {:name            name-attr
+                       :description     description-attr
+                       :properties      properties-attr
+                       :sessionTemplate {:href href}}
           href-create-redirect {:sessionTemplate {:href        href
                                                   :redirectURI redirect-uri}}
           invalid-create (assoc-in href-create [:sessionTemplate :invalid] "BAD")]
@@ -252,6 +260,17 @@
               (ltu/is-operation-present "delete")
               (ltu/is-operation-present (:validate c/action-uri))
               (ltu/is-operation-absent "edit"))
+
+          ;; check contents of session resource
+          (let [{:keys [name description properties] :as body} (-> (session app)
+                                                                   (header authn-info-header (str "user USER " id))
+                                                                   (request abs-uri)
+                                                                   (ltu/body->edn)
+                                                                   :response
+                                                                   :body)]
+            (is (= name name-attr))
+            (is (= description description-attr))
+            (is (= properties properties-attr)))
 
           ;; user query with session role should succeed but and have one entry
           (-> session-user

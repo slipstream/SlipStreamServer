@@ -23,7 +23,7 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.es.es-binding :as esb]
+    [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]))
 

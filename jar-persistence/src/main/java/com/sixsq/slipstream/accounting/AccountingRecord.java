@@ -102,7 +102,7 @@ public class AccountingRecord {
 
     //Record Type VM
     @SuppressWarnings("unused")
-    Float ram;
+    Integer ram;
 
     //Record Type VM
     @SuppressWarnings("unused")
@@ -121,7 +121,7 @@ public class AccountingRecord {
 
 
     public AccountingRecord(ACL acl, AccountingRecordType type, Date start, Date stop, String user, String cloud, List<String> roles, List<String> groups,
-                            String realm, String module, ServiceOfferRef serviceOfferRef, AccountingRecordContext context, Integer cpu, Float ram, Integer disk, String instanceType) {
+                            String realm, String module, ServiceOfferRef serviceOfferRef, AccountingRecordContext context, Integer cpu, Integer ram, Integer disk, String instanceType) {
         this.acl = acl;
         this.resourceURI = ACCOUNTING_RECORD_URI;
         this.created = start;
