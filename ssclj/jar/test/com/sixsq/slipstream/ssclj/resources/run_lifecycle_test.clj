@@ -14,7 +14,7 @@
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as ru]))
 
-(use-fixtures :each t/with-test-client-fixture)
+(use-fixtures :each t/with-test-es-client-fixture)
 
 (use-fixtures :once t/setup-embedded-zk)
 
