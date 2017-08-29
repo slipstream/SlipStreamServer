@@ -13,7 +13,7 @@
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
-(def ^:const resource-tag :virtual-machine)
+(def ^:const resource-tag :virtualMachines)
 
 (def ^:const resource-name "VirtualMachine")
 
@@ -24,8 +24,6 @@
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
-
-(def ^:const create-uri (str c/slipstream-schema-uri resource-name "Create"))
 
 ;; only authenticated users can view and create credentials
 (def collection-acl {:owner {:principal "ADMIN"
@@ -64,7 +62,6 @@
     (let [user-id (:identity (a/current-authentication request))]
       (assoc resource :acl (create-acl user-id)))))
 
-
 ;;
 ;; CRUD operations
 ;;
@@ -77,7 +74,6 @@
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
-
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
