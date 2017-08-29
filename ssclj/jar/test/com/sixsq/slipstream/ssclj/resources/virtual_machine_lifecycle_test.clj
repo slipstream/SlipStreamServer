@@ -20,11 +20,16 @@
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
+(defn strip-unwanted-attrs [m]
+  (let [unwanted #{:id :resourceURI :acl :operations
+                   :created :updated :name :description}]
+    (into {} (remove #(unwanted (first %)) m))))
+
 (deftest lifecycle
   (let [session-admin (-> (session (ring-app))
                           (content-type "application/json")
                           (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
+        session-jane (-> (session (ring-app))
                          (content-type "application/json")
                          (header authn-info-header "jane USER ANON"))
         session-anon (-> (session (ring-app))
@@ -42,7 +47,7 @@
         (ltu/is-operation-absent "edit"))
 
     ;; normal user collection query should succeed but be empty (no vm created yet)
-    (-> session-user
+    (-> session-jane
         (request base-uri)
         (ltu/body->edn)
         (ltu/is-status 200)
@@ -61,63 +66,71 @@
 
     ;; create a vm as a normal user
     (let [timestamp "1964-08-25T10:00:00.0Z"
-          create-req {:id           (str vm/resource-url "/uuid")
-                      :resourceURI  vm/resource-uri
-                      :created      timestamp
-                      :updated      timestamp
+          create-test-vm {:id           (str vm/resource-url "/uuid")
+                          :resourceURI  vm/resource-uri
+                          :created      timestamp
+                          :updated      timestamp
 
-                      :name         "short name"
-                      :description  "short description",
-                      :properties   {:a "one",
-                                     :b "two"}
+                          :name         "short name"
+                          :description  "short description",
+                          :properties   {:a "one",
+                                         :b "two"}
 
-                      :instanceID   "aaa-bbb-111"
-                      :state        "Running"
-                      :ip           "127.0.0.1"
-
-
-                      :cloud        {:href  "connector/0123-4567-8912",
-                                     :roles ["realm:cern", "realm:my-accounting-group"]}
+                          :instanceID   "aaa-bbb-111"
+                          :state        "Running"
+                          :ip           "127.0.0.1"
 
 
-                      :run          {:href "run/aaa-bbb-ccc",
-                                     :user {:href "user/test"}}
+                          :cloud        {:href  "connector/0123-4567-8912",
+                                         :roles ["realm:cern", "realm:my-accounting-group"]}
 
-                      :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
-                                     :resource:vcpu         1
-                                     :resource:ram          4096
-                                     :resource:disk         10
-                                     :resource:instanceType "Large"}}
 
-          create-priv-req (assoc create-req :run {:href "run/444-555-666"
-                                                  :user {:href "user/jane"}})
+                          :run          {:href "run/aaa-bbb-ccc",
+                                         :user {:href "user/test"}}
 
-          resp (-> session-admin
-                   (request base-uri
-                            :request-method :post
-                            :body (json/write-str create-req))
-                   (ltu/body->edn)
-                   (ltu/is-status 201))
+                          :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                                         :resource:vcpu         1
+                                         :resource:ram          4096
+                                         :resource:disk         10
+                                         :resource:instanceType "Large"}}
 
-          resp-priv (-> session-admin
+          create-jane-vm (assoc create-test-vm :run {:href "run/444-555-666"
+                                                     :user {:href "user/jane"}})
+
+          resp-test (-> session-admin
                         (request base-uri
                                  :request-method :post
-                                 :body (json/write-str create-priv-req))
+                                 :body (json/write-str create-test-vm))
                         (ltu/body->edn)
                         (ltu/is-status 201))
 
-          id (get-in resp [:response :body :resource-id])
-          id-priv (get-in resp-priv [:response :body :resource-id])
-          id-other (get-in resp-priv [:response :body :resource-id])
-          uri (-> resp
-                  (ltu/location))
-          uri-priv (-> resp-priv
-                       (ltu/location))
+          resp-jane (-> session-admin
+                        (request base-uri
+                                 :request-method :post
+                                 :body (json/write-str create-jane-vm))
+                        (ltu/body->edn)
+                        (ltu/is-status 201))
 
-          jane-uri (str p/service-context (u/de-camelcase uri))
-          janet-uri (str p/service-context (u/de-camelcase uri-priv))]
+          id-test (get-in resp-test [:response :body :resource-id])
+          id-jane (get-in resp-jane [:response :body :resource-id])
+
+          location-test (str p/service-context (-> resp-test ltu/location))
+          location-jane (str p/service-context (-> resp-jane ltu/location))
+
+          test-uri (str p/service-context id-test)
+          jane-uri (str p/service-context id-jane)]
+
+      (is (= location-test test-uri))
+      (is (= location-jane jane-uri))
 
       ;; admin should be able to see everyone's records
+      (-> session-admin
+          (request test-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/is-operation-present "delete")
+          (ltu/is-operation-present "edit"))
+
       (-> session-admin
           (request jane-uri)
           (ltu/body->edn)
@@ -125,88 +138,81 @@
           (ltu/is-operation-present "delete")
           (ltu/is-operation-present "edit"))
 
-      (-> session-admin
-          (request janet-uri)
-          (ltu/body->edn)
-          (ltu/is-status 200)
-          (ltu/is-operation-present "delete")
-          (ltu/is-operation-present "edit"))
-
-      (-> session-user
-          (request janet-uri)
+      (-> session-jane
+          (request jane-uri)
           (ltu/body->edn)
           (ltu/is-status 403)
           (ltu/is-operation-absent "delete")
           (ltu/is-operation-absent "edit"))
 
-      ;;edit
-      (-> session-admin
-          (request base-uri
-                   :request-method :put
-                   :body (json/write-str create-req))
-          (ltu/body->edn)
-          (ltu/is-status 200))
+      ;; check contents and editing
+      (let [reread-test-vm (-> session-admin
+                               (request test-uri)
+                               (ltu/body->edn)
+                               (ltu/is-status 200)
+                               :response
+                               :body)]
 
-      (-> session-admin
-          (request jane-uri
-                   :request-method :put
-                   :body (json/write-str (assoc create-req :id id)))
-          (ltu/body->edn)
-          (ltu/is-status 200))
+        (is (= (strip-unwanted-attrs reread-test-vm) (strip-unwanted-attrs create-test-vm)))
 
-      (-> session-user
-          (request jane-uri
+        (let [edited-test-vm (-> session-admin
+                                 (request test-uri
+                                          :request-method :put
+                                          :body (json/write-str (assoc reread-test-vm :state "UPDATED!")))
+                                 (ltu/body->edn)
+                                 (ltu/is-status 200)
+                                 :response
+                                 :body)]
+
+          (is (= (assoc (strip-unwanted-attrs reread-test-vm) :state "UPDATED!")
+                 (strip-unwanted-attrs edited-test-vm)))))
+
+      ;; disallowed edits
+      (-> session-jane
+          (request test-uri
                    :request-method :put
-                   :body (json/write-str (assoc create-req :id id)))
+                   :body (json/write-str create-test-vm))
           (ltu/body->edn)
           (ltu/is-status 403))
-
-
-      (-> session-user
-          (request jane-uri
-                   :request-method :put
-                   :body (json/write-str create-req))
-          (ltu/body->edn)
-          (ltu/is-status 403))
-
 
       (-> session-anon
-          (request base-uri
+          (request test-uri
                    :request-method :put
-                   :body (json/write-str create-req))
+                   :body (json/write-str create-test-vm))
           (ltu/body->edn)
           (ltu/is-status 403))
 
+      ;; search
       (-> session-admin
           (request base-uri
                    :request-method :put
-                   :body (json/write-str create-req))
+                   :body (json/write-str create-test-vm))
           (ltu/body->edn)
           (ltu/is-count 2)
           (ltu/is-status 200))
 
       ;;delete
-      (-> session-user
-          (request jane-uri
+      (-> session-jane
+          (request test-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 403))
 
       (-> session-admin
-          (request jane-uri
+          (request test-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200))
 
       (-> session-admin
-          (request janet-uri
+          (request jane-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200))
 
       ;;record should be deleted
       (-> session-admin
-          (request jane-uri
+          (request test-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 404)))))
