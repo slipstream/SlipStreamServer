@@ -38,8 +38,6 @@
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
 
-
-
         ]
 
     ;; admin user collection query should succeed but be empty (no  records created yet)
@@ -77,24 +75,46 @@
                       :created      timestamp
                       :updated      timestamp
 
-                      ;; common accounting record attributes
+                      :name         "short name"
+                      :description  "short description",
+                      :properties   {
+                                     :a "one",
+                                     :b "two"
+                                     }
 
-                      :user         {:href "user/test"}
-                      :connector    {:href "connector/scissor-fr1"}
-                      :serviceOffer {:href "service-offer/my-uuid"
-                                     :resource:vcpu 1
-                                     :resource:ram 4096
-                                     :resource:disk 10
+                      :instanceId   "aaa-bbb-111"
+                      :state        "Running"
+                      :ip           "127.0.0.1"
+
+
+                      :cloud        {
+                                     :href  "connector/0123-4567-8912",
+                                     :roles ["realm:cern", "realm:my-accounting-group"]
+                                     }
+
+
+                      :run          {
+                                     :href "run/aaa-bbb-ccc",
+                                     :user {
+                                            :href "user/test"
+                                            }
+                                     }
+
+                      :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                                     :resource:vcpu         1
+                                     :resource:ram          4096
+                                     :resource:disk         10
                                      :resource:instanceType "Large"
                                      }
-                      :instanceId "aaa-ddd-bbb-42"
-                      :state "Running"
-                      :run {:href "run/aaa-bb-cccc"}
-
-
-
                       }
-          create-priv-req (assoc create-req :user {:href "user/janet"})
+
+
+
+          create-priv-req (assoc create-req :run {:href "run/444-555-666"
+                                                  :user {
+                                                         :href "user/jane"
+                                                         }
+                                                  })
 
           resp (-> session-admin
                    (request base-uri
@@ -139,16 +159,6 @@
 
 
 
-
-      ;;FIXME :standard user should be able to see her own records
-      #_(-> session-user
-          (request jane-uri)
-          (ltu/body->edn)
-          (ltu/is-status 200)
-          (ltu/is-operation-absent "delete")
-          (ltu/is-operation-absent "edit"))
-
-
       (-> session-user
           (request janet-uri)
           (ltu/body->edn)
@@ -186,16 +196,6 @@
                    :body (json/write-str create-req))
           (ltu/body->edn)
           (ltu/is-status 403))
-
-      ;;FIXME : wrong expected count
-      #_(-> session-user
-          (request base-uri
-                   :request-method :put
-                   :body (json/write-str create-req))
-          (ltu/body->edn)
-          (ltu/dump)
-          (ltu/is-count 1)
-          (ltu/is-status 200))
 
 
       (-> session-anon

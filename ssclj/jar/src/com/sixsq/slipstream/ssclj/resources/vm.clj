@@ -13,11 +13,11 @@
 
 (def ^:const resource-tag :vm)
 
-(def ^:const resource-name "VM")
+(def ^:const resource-name "VirtualMachine")
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "VMCollection")
+(def ^:const collection-name "VirtualMachineCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 

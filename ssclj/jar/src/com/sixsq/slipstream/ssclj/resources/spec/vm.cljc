@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
-(s/def :cimi.vm/connector :cimi.common/resource-link)
+(s/def :cimi.vm/cloud :cimi.common/resource-link)
 (s/def :cimi.vm/user :cimi.common/resource-link)
 (s/def :cimi.vm/instanceId :cimi.core/identifier)
 (s/def :cimi.vm/instanceType :cimi.core/nonblank-string)
@@ -21,8 +21,7 @@
 (s/def :cimi.vm/run :cimi.common/resource-link)
 
 
-(def vm-specs {:req-un [:cimi.vm/connector
-                        :cimi.vm/user
+(def vm-specs {:req-un [:cimi.vm/cloud
                         :cimi.vm/instanceId
                         :cimi.vm/state
                         ]
