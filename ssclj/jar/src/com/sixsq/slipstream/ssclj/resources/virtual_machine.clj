@@ -1,6 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.resources.vm
+(ns com.sixsq.slipstream.ssclj.resources.virtual-machine
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine]
+
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -11,7 +13,7 @@
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
-(def ^:const resource-tag :vm)
+(def ^:const resource-tag :virtual-machine)
 
 (def ^:const resource-name "VirtualMachine")
 
@@ -33,9 +35,7 @@
                               :right     "MODIFY"}
                              {:principal "USER"
                               :type      "ROLE"
-                              :right     "VIEW"}
-                             ]})
-
+                              :right     "VIEW"}]})
 
 ;;
 ;; multimethod for ACLs
@@ -50,8 +50,7 @@
             :right     "VIEW"}]})
 
 
-
-(def validate-fn (u/create-spec-validation-fn :cimi/vm))
+(def validate-fn (u/create-spec-validation-fn :cimi/virtual-machine))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -94,6 +93,3 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
-
-(def validate-fn (u/create-spec-validation-fn :cimi/vm))
-

@@ -1,9 +1,9 @@
-(ns com.sixsq.slipstream.ssclj.resources.vm-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.virtual-machine-lifecycle-test
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.vm :as vm]
+    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
@@ -20,15 +20,8 @@
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
-
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
 (deftest lifecycle
-  (let [
-        session-admin (-> (session (ring-app))
+  (let [session-admin (-> (session (ring-app))
                           (content-type "application/json")
                           (header authn-info-header "root ADMIN USER ANON"))
         session-user (-> (session (ring-app))
@@ -36,9 +29,7 @@
                          (header authn-info-header "jane USER ANON"))
         session-anon (-> (session (ring-app))
                          (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
-
-        ]
+                         (header authn-info-header "unknown ANON"))]
 
     ;; admin user collection query should succeed but be empty (no  records created yet)
     (-> session-admin
@@ -77,44 +68,29 @@
 
                       :name         "short name"
                       :description  "short description",
-                      :properties   {
-                                     :a "one",
-                                     :b "two"
-                                     }
+                      :properties   {:a "one",
+                                     :b "two"}
 
                       :instanceId   "aaa-bbb-111"
                       :state        "Running"
                       :ip           "127.0.0.1"
 
 
-                      :cloud        {
-                                     :href  "connector/0123-4567-8912",
-                                     :roles ["realm:cern", "realm:my-accounting-group"]
-                                     }
+                      :cloud        {:href  "connector/0123-4567-8912",
+                                     :roles ["realm:cern", "realm:my-accounting-group"]}
 
 
-                      :run          {
-                                     :href "run/aaa-bbb-ccc",
-                                     :user {
-                                            :href "user/test"
-                                            }
-                                     }
+                      :run          {:href "run/aaa-bbb-ccc",
+                                     :user {:href "user/test"}}
 
                       :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
                                      :resource:vcpu         1
                                      :resource:ram          4096
                                      :resource:disk         10
-                                     :resource:instanceType "Large"
-                                     }
-                      }
-
-
+                                     :resource:instanceType "Large"}}
 
           create-priv-req (assoc create-req :run {:href "run/444-555-666"
-                                                  :user {
-                                                         :href "user/jane"
-                                                         }
-                                                  })
+                                                  :user {:href "user/jane"}})
 
           resp (-> session-admin
                    (request base-uri
@@ -139,9 +115,8 @@
                        (ltu/location))
 
           jane-uri (str p/service-context (u/de-camelcase uri))
-          janet-uri (str p/service-context (u/de-camelcase uri-priv))
+          janet-uri (str p/service-context (u/de-camelcase uri-priv))]
 
-          ]
       ;; admin should be able to see everyone's records
       (-> session-admin
           (request jane-uri)
@@ -157,15 +132,12 @@
           (ltu/is-operation-present "delete")
           (ltu/is-operation-present "edit"))
 
-
-
       (-> session-user
           (request janet-uri)
           (ltu/body->edn)
           (ltu/is-status 403)
           (ltu/is-operation-absent "delete")
           (ltu/is-operation-absent "edit"))
-
 
       ;;edit
       (-> session-admin
@@ -220,7 +192,6 @@
           (ltu/body->edn)
           (ltu/is-status 403))
 
-
       (-> session-admin
           (request jane-uri
                    :request-method :delete)
@@ -233,20 +204,12 @@
           (ltu/body->edn)
           (ltu/is-status 200))
 
-
-
       ;;record should be deleted
       (-> session-admin
           (request jane-uri
                    :request-method :delete)
           (ltu/body->edn)
-          (ltu/is-status 404))
-
-      )
-    )
-
-  )
-
+          (ltu/is-status 404)))))
 
 
 (deftest bad-methods
