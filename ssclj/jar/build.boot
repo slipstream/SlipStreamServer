@@ -24,6 +24,7 @@
                  '[[org.clojure/clojure]
 
                    [aleph]
+                   [manifold]
                    [cheshire] ;; newer version needed for ring-json
                    [compojure]
                    [com.jcraft/jsch]
@@ -37,6 +38,7 @@
                    [metrics-clojure-jvm]
                    [metrics-clojure-graphite]
                    [me.raynes/fs]
+                   [org.clojure/core.async :exclusions []]
                    [org.clojure/data.json]
                    [org.clojure/java.classpath]
                    [org.clojure/tools.cli]
@@ -46,6 +48,7 @@
                    [ring/ring-core]
                    [ring/ring-json]
                    [superstring]
+                   [zookeeper-clj]
 
                    [com.sixsq.slipstream/utils]
                    [com.sixsq.slipstream/auth]
@@ -64,6 +67,7 @@
                    [honeysql]
                    [org.clojure/test.check]
                    [org.slf4j/slf4j-log4j12 :scope "test"]
+                   [org.apache.curator/curator-test :scope "test"]
 
                    ;; boot tasks
                    [boot-environ]
@@ -104,13 +108,18 @@
                         :auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
                         :auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))}))
 
+(deftask run-tests-ns
+         [n namespaces NAMESPACES #{sym} "The set of namespace symbols to run tests in."]
+         (comp
+           (dev-env)
+           (dev-fixture-env)
+           (test :namespaces namespaces)))
+
 (deftask run-tests
          "runs all tests and performs full compilation"
          []
          (comp
-           (dev-env)
-           (dev-fixture-env)
-           (test)
+           (run-tests-ns)
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
