@@ -34,7 +34,7 @@
                 :properties   {:a "one",
                                :b "two"}
 
-                :instanceId   "aaa-bbb-111"
+                :instanceID   "aaa-bbb-111"
                 :state        "Running"
                 :ip           "127.0.0.1"
 
@@ -56,20 +56,17 @@
 
   (are [expect-fn arg] (expect-fn (s/valid? :cimi/virtual-machine arg))
                        true? vm-sample
-                       false? (assoc vm-sample :user {})
-                       false? (assoc vm-sample :user "test")
-                       false? (assoc vm-sample :connector {})
-                       false? (assoc vm-sample :connector "scissor-fr1")
+
+                       false? (assoc vm-sample :bad-attr {})
+                       false? (assoc vm-sample :bad-attr "test")
+
                        true? (assoc vm-sample :run {:href "run/fff-42"})
-                       true? (assoc vm-sample :nodeName "node name")
-                       true? (assoc vm-sample :name "name")
-                       true? (assoc vm-sample :nodeInstanceId "aaa-bbb-111")
-                       true? (assoc vm-sample :usable true))
+                       true? (assoc vm-sample :name "name"))
 
   ;; mandatory keywords
-  (doseq [k #{:cloud :state :instanceId}]
+  (doseq [k #{:cloud :state :instanceID}]
     (is (not (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))
 
   ;; optional keywords
-  (doseq [k #{:run :serviceOffer :ip :nodeName :name :nodeInstanceId :usable}]
+  (doseq [k #{:run :serviceOffer :ip}]
     (is (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))

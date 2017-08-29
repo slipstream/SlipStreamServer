@@ -71,7 +71,7 @@
                       :properties   {:a "one",
                                      :b "two"}
 
-                      :instanceId   "aaa-bbb-111"
+                      :instanceID   "aaa-bbb-111"
                       :state        "Running"
                       :ip           "127.0.0.1"
 
