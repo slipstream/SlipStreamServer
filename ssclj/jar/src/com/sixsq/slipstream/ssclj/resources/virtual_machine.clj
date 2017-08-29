@@ -1,6 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.resources.accounting-record
+(ns com.sixsq.slipstream.ssclj.resources.virtual-machine
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine]
+
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -11,13 +13,13 @@
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
-(def ^:const resource-tag :accountingRecords)
+(def ^:const resource-tag :virtualMachines)
 
-(def ^:const resource-name "AccountingRecord")
+(def ^:const resource-name "VirtualMachine")
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "AccountingRecordCollection")
+(def ^:const collection-name "VirtualMachineCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
@@ -31,60 +33,39 @@
                               :right     "MODIFY"}
                              {:principal "USER"
                               :type      "ROLE"
-                              :right     "VIEW"}
-                             ]})
+                              :right     "VIEW"}]})
 
-;;
-;; validate the created credential resource
-;; must dispatch on the type because each credential has a different schema
-;;
-(defmulti validate-subtype :type)
-
-(defmethod validate-subtype :default
-  [resource]
-  (logu/log-and-throw-400 (str "unknown AccountingRecord type: '" (:type resource) "'")))
-
-(defmethod crud/validate resource-uri
-  [resource]
-  (validate-subtype resource))
-
-
-
-(def ^:const view-accounting-role "view_accounting")
 ;;
 ;; multimethod for ACLs
 ;;
 
 (defn create-acl
-  [id realm]
+  [id]
+  {:owner {:principal "ADMIN"
+           :type      "ROLE"}
+   :rules [{:principal id
+            :type      "USER"
+            :right     "VIEW"}]})
 
-  (let [default-acl {:owner {:principal "ADMIN"
-                             :type      "ROLE"}
-                     :rules [{:principal id
-                              :type      "USER"
-                              :right     "VIEW"}
 
-                             ]}]
-    (cond
-      realm (update-in default-acl [:rules] conj {:principal (str realm ":" view-accounting-role)
-                                                  :type      "ROLE"
-                                                  :right     "VIEW"})
-      :else default-acl
-      )
-    )
-  )
+(def validate-fn (u/create-spec-validation-fn :cimi/virtual-machine))
+(defmethod crud/validate
+  resource-uri
+  [resource]
+  (validate-fn resource))
+
 
 (defmethod crud/add-acl resource-uri
-  [{:keys [user realm] :as resource} request]
-  (assoc resource :acl (create-acl user realm))
-  )
+  [{:keys [acl] :as resource} request]
+  (if acl
+    resource
+    (let [user-id (:identity (a/current-authentication request))]
+      (assoc resource :acl (create-acl user-id)))))
 
 ;;
 ;; CRUD operations
 ;;
-
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
-
 (defmethod crud/add resource-name
   [request]
   (add-impl request))
@@ -108,4 +89,3 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
-
