@@ -267,6 +267,7 @@ public class Collector {
 			setVmStateRuntimeParameter(em, goneVmRtpMap, "Unknown");
 			logger.fine("updateDbVmsWithCloudVms: Deleting from VM: id=" + goneVm.getInstanceId() + ", state=" + goneVm.getState());
 			em.remove(goneVm);
+			VirtualMachineHandler.removeVM(goneVm);
 		}
 
 		for(Vm newVm : classifier.newVms()) {
@@ -286,6 +287,7 @@ public class Collector {
 					+ ", state=" + newVm.getState());
 
 			em.persist(newVm);
+            VirtualMachineHandler.addVM(newVm);
 		}
 
 		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
@@ -356,6 +358,7 @@ public class Collector {
 			if (merge) {
 				logger.info("updateDbVmsWithCloudVms: Updating db VM: id=" + dbVm.getInstanceId() + ", state=" + dbVm.getState());
 				em.merge(dbVm);
+				VirtualMachineHandler.updateVM(dbVm);
 			} else {
 				logger.info("updateDbVmsWithCloudVms: Doing nothing with VM: id=" + dbVm.getInstanceId() + ", state=" + dbVm.getState());
 			}
