@@ -27,15 +27,15 @@ public class VirtualMachineHandler {
     }
 
     public static void removeVM(Vm vm) {
-        VirtualMachine vmDb = loadVirtualMachine(vm.getInstanceId());
+        VirtualMachine vmDb = loadVirtualMachine(vm.getCloud(), vm.getInstanceId());
         if (vmDb == null) return; //nothing to remove
 
-        VirtualMachine vmRecord = loadVirtualMachine(vm.getInstanceId());
+        VirtualMachine vmRecord = loadVirtualMachine(vm.getCloud(),vm.getInstanceId());
         SscljProxy.delete("api/" + vmDb.getId(), USERNAME, vmRecord);
     }
 
     public static void updateVM(Vm vm) {
-        VirtualMachine vmDb = loadVirtualMachine(vm.getInstanceId());
+        VirtualMachine vmDb = loadVirtualMachine(vm.getCloud(),vm.getInstanceId());
         if (vmDb == null) return; //nothing to update
 
         VirtualMachine vmToUpdate = VirtualMachineHandler.getResourceFromPojo(vm);
@@ -43,9 +43,11 @@ public class VirtualMachineHandler {
 
     }
 
-    public static VirtualMachine loadVirtualMachine(String instanceID) {
+    //Identify a VirtualMachine document in ES from its cloud and instanceID
+    public static VirtualMachine loadVirtualMachine( String cloud,String instanceID) {
 
         StringBuffer sb = new StringBuffer("instanceID='").append(instanceID).append("'");
+        sb.append(" and credential/href='").append("connector/").append(cloud).append("'");
         String cimiQuery = sb.toString();
         VirtualMachine virtualMachine = null;
 
