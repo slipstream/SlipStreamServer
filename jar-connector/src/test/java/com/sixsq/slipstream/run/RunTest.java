@@ -20,7 +20,6 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.accounting.AccountingRecordHelper;
 import com.sixsq.slipstream.connector.ConnectorTestBase;
 import com.sixsq.slipstream.connector.UsageRecorder;
 import com.sixsq.slipstream.event.Event;
@@ -59,7 +58,6 @@ public class RunTest extends RunTestBase {
 			ClassNotFoundException {
 		UsageRecorder.muteForTests();
 		Event.muteForTests();
-		AccountingRecordHelper.muteForTests();
 		ConnectorTestBase.setupElasticseach();
 		setupImages();
 		CommonTestUtil
