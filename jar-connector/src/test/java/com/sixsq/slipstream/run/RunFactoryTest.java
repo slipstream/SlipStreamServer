@@ -21,16 +21,12 @@ package com.sixsq.slipstream.run;
  */
 
 import com.google.gson.JsonObject;
-import com.sixsq.slipstream.accounting.AccountingRecordContext;
-import com.sixsq.slipstream.accounting.AccountingRecordHelper;
-import com.sixsq.slipstream.accounting.AccountingRecordVM;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.CommonTestUtil;
-import static com.sixsq.slipstream.util.CommonTestUtil.assertStringEquals;
 
 import com.sixsq.slipstream.util.ServiceOffersUtil;
 import org.junit.AfterClass;
@@ -492,69 +488,6 @@ public class RunFactoryTest extends RunTest {
 				"node:param", 1), is("node.1:param"));
 	}
 
-	@Test
-	public void accountingRecordFromDeploymentRun() throws SlipStreamClientException {
-		Event.muteForTests();
-
-		String realm = "myRealm";
-		user.setOrganization(realm);
-		user.store();
-
-		Run run = getDeploymentRun(deployment);
-
-		for (String nodeInstanceName: run.getNodeInstanceNamesList()) {
-			AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
-			arh.setServiceOffer(serviceOffer);
-
-
-
-			assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
-			assertStringEquals(cloudServiceName, arh.getCloudName());
-			assertStringEquals(run.getUuid(), arh.getContext().getRunId());
-			assertStringEquals("test/deployment", arh.getModuleName());
-			assertStringEquals("RunTestBaseUser", arh.getUser());
-			assertStringEquals(realm, arh.getRealm());
-
-			AccountingRecordVM vmData = arh.getVmData();
-			assertEquals(2, vmData.getCpu().intValue());
-			assertEquals(4096F, vmData.getRam(), 0);
-			assertEquals(200, vmData.getDisk().intValue());
-			assertStringEquals("Medium", vmData.getInstanceType());
-		}
-
-		run.remove();
-	}
-
-	@Test
-	public void accountingRecordFromImageRun() throws SlipStreamClientException, AbortException {
-
-		Event.muteForTests();
-
-		Run run = getImageRun(image);
-		String nodeInstanceName = Run.MACHINE_NAME;
-
-        String realm = "myRealm";
-        user.setOrganization(realm);
-        user.store();
-
-        AccountingRecordHelper arh = new AccountingRecordHelper(run, nodeInstanceName);
-		arh.setServiceOffer(serviceOffer);
-		assertStringEquals(nodeInstanceName, arh.getNodeInstanceName());
-		assertStringEquals(cloudServiceName, arh.getCloudName());
-		AccountingRecordContext ctx = arh.getContext();
-		assertStringEquals(run.getUuid(), ctx.getRunId());
-		assertStringEquals("test/image", arh.getModuleName());
-		assertStringEquals("RunTestBaseUser", arh.getUser());
-        assertStringEquals(realm, arh.getRealm());
-
-		AccountingRecordVM vmData = arh.getVmData();
-		assertEquals(2, vmData.getCpu().intValue());
-		assertEquals(4096F, vmData.getRam(), 0);
-		assertEquals(200, vmData.getDisk().intValue());
-		assertStringEquals("Medium", vmData.getInstanceType());
-
-		run.remove();
-	}
 
 	public static String serviceOfferJson = "" +
 			"  {\n" +

@@ -20,8 +20,6 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.accounting.AccountingRecord;
-import com.sixsq.slipstream.accounting.AccountingRecordHelper;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.event.Event.EventType;
@@ -1061,20 +1059,9 @@ public class Run extends Parameterized<Run, RunParameter> {
         boolean shouldPost = forcePost || stateWillChange;
         if (shouldPost) {
             postEventRun(Event.Severity.medium, newState.toString(), EventType.state);
-            //send new state to the account record processing
-            postAccountingEvent(newState);
         }
     }
 
-    private void postAccountingEvent(States state) {
-        List<String> nodeInstanceNames = this.getNodeInstanceNamesList();
-
-                if (STOP_ACCOUNTING_STATES.contains(state)) {
-                    for(String nodeInstanceName : nodeInstanceNames) {
-                        AccountingRecordHelper.postStopAccountingRecord(this, nodeInstanceName);
-                    }
-                }
-    }
 
 
     private void postEventAbort(String origin, String abortMessage) {

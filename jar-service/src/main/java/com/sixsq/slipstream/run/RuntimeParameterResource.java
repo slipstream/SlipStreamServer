@@ -20,7 +20,6 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.accounting.AccountingRecordHelper;
 import com.sixsq.slipstream.exceptions.CannotAdvanceFromTerminalStateException;
 import com.sixsq.slipstream.exceptions.InvalidStateException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -279,22 +278,10 @@ public class RuntimeParameterResource extends RunBaseResource {
 		return newState;
 	}
 
-	private void postAccountingStartEvent() {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		try {
-			Run run = Run.loadFromUuid(getUuid(), em);
-			if (run.getState() == States.Provisioning) {
-				AccountingRecordHelper.postStartAccountingRecord(run, runtimeParameter.getNodeName());
-			}
-		} finally {
-			em.close();
-		}
-	}
+
 
 	@Post
 	public void completeCurrentNodeStateOrChangeGlobalState(Representation entity) {
-		postAccountingStartEvent();
-
 		String nodeName = runtimeParameter.getNodeName();
 		States newState = attemptCompleteCurrentNodeState(nodeName);
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);
