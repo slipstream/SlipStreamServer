@@ -12,11 +12,13 @@
 (s/def :cimi.run-parameter/node-name :cimi.core/nonblank-string)
 (s/def :cimi.run-parameter/node-index pos-int?)
 (s/def :cimi.run-parameter/description string?)
+(s/def :cimi.run-parameter/type #{"run" "node" "node-instance"})
 
 (s/def :cimi/run-parameter
   (su/only-keys-maps c/common-attrs
                      {:req-un [:cimi.run-parameter/run-href
-                               :cimi.run-parameter/name]
+                               :cimi.run-parameter/name
+                               :cimi.run-parameter/type]
                       :opt-un [:cimi.run-parameter/node-name
                                :cimi.run-parameter/node-index
                                :cimi.run-parameter/description
