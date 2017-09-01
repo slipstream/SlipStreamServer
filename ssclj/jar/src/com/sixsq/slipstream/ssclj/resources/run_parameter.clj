@@ -55,6 +55,15 @@
 ;; CRUD operations
 ;;
 
+(defn add-value-run-parameter [run-parameter & {:keys [watcher]}]
+  (try
+    (let [value (if watcher
+                  (uzk/get-data (zkru/run-parameter-znode-path run-parameter) :watcher watcher)
+                  (uzk/get-data (zkru/run-parameter-znode-path run-parameter)))]
+      (assoc run-parameter :value value))
+    (catch ExceptionInfo ei ;TODO what if data not found
+      (ex-data ei))))
+
 (defn add-impl [{:keys [body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
   (let [run-parameter (-> body
@@ -78,36 +87,29 @@
 
 (defn transiant-watch-fn [event-ch id name {:keys [event-type path :as zk-event]}]
   (when (= event-type :NodeDataChanged)
-    (let [run-parameter (db/retrieve id {})
-          value (uzk/get-data path)
-          run-parameter (assoc run-parameter :value value)]
+    (let [run-parameter (-> (db/retrieve id {})
+                            (add-value-run-parameter))]
       (sse/send-event id name run-parameter event-ch)
       (async/close! event-ch))))
 
 (defn persistent-watch-fn [event-ch id name {:keys [event-type path :as zk-event]}]
   (when (= event-type :NodeDataChanged)
-    (let [run-parameter (db/retrieve id {})
-          value (uzk/get-data path :watcher (partial persistent-watch-fn event-ch id name))
-          run-parameter (assoc run-parameter :value value)]
+    (let [run-parameter (-> (db/retrieve id {})
+                            (add-value-run-parameter :watcher (partial persistent-watch-fn event-ch id name)))]
       (sse/send-event id name run-parameter event-ch))))
 
 (defn send-event-and-set-watcher
   [event-ch watch-fn {id :id name :name :as run-parameter}]
-  (let [node-path (zkru/run-parameter-znode-path run-parameter)
-        value (uzk/get-data node-path :watcher (partial watch-fn event-ch id name))
-        run-parameter (assoc run-parameter :value value)]
+  (let [run-parameter (-> run-parameter
+                          (add-value-run-parameter :watcher (partial watch-fn event-ch id name)))]
     (sse/send-event id name run-parameter event-ch)))
 
 (defn retrieve-run-parameter [{{uuid :uuid} :params :as request}]
-  (try
-    (let [run-parameter (-> (str (u/de-camelcase resource-name) "/" uuid)
-                            (db/retrieve request)
-                            (a/can-view? request)
-                            (crud/set-operations request))
-          value (uzk/get-data (zkru/run-parameter-znode-path run-parameter))] ;TODO what if data not found
-      (assoc run-parameter :value value))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+  (-> (str (u/de-camelcase resource-name) "/" uuid)
+      (db/retrieve request)
+      (a/can-view? request)
+      (crud/set-operations request)
+      (add-value-run-parameter)))
 
 (def retrieve-sse-impl
   (sse/event-channel-handler
@@ -161,6 +163,15 @@
     {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %) :heartbeat-delay 10}))
 
 (def query-json-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
+(defn query-json-impl [request]
+  (a/can-view? {:acl collection-acl} request)
+  (let [wrapper-fn (std-crud/collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
+        options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+        [metadata entries] (db/query resource-name options)
+        entries (doall (map add-value-run-parameter entries))
+        entries-and-count (merge metadata (wrapper-fn request entries))]
+    (r/json-response entries-and-count)))
 
 (defmethod crud/query resource-name
   [{{accept :accept} :headers :as request}]
