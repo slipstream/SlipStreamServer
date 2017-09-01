@@ -108,13 +108,18 @@
                         :auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
                         :auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))}))
 
+(deftask run-tests-ns
+         [n namespaces NAMESPACES #{sym} "The set of namespace symbols to run tests in."]
+         (comp
+           (dev-env)
+           (dev-fixture-env)
+           (test :namespaces namespaces)))
+
 (deftask run-tests
          "runs all tests and performs full compilation"
          []
          (comp
-           (dev-env)
-           (dev-fixture-env)
-           (test)
+           (run-tests-ns)
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"

@@ -34,7 +34,6 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import com.sixsq.slipstream.accounting.AccountingRecordHelper;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -79,7 +78,6 @@ public class StateMachinetTest {
 			ValidationException {
 
 		Event.muteForTests();
-		AccountingRecordHelper.muteForTests();
 		CljElasticsearchHelper.createAndInitTestDb();
 
 		user = CommonTestUtil.createTestUser();
