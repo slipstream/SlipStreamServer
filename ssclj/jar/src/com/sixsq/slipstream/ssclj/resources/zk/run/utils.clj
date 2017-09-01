@@ -7,16 +7,13 @@
 
 (def nodes-txt "nodes")
 
-(defn parameter-znode-path [run-href node-name node-index name]
+(defn run-parameter-znode-path
+  [{run-href :run-href node-name :node-name node-index :node-index name :name :as run-parameter}]
   (->> (cond
          (and run-href node-name node-index) (string/join znode-separator [run-href nodes-txt node-name node-index name])
          (and run-href node-name) (string/join znode-separator [run-href nodes-txt node-name name])
          run-href (string/join znode-separator [run-href name]))
        (str znode-separator)))
-
-(defn run-parameter-znode-path
-  [{run-href :run-href node-name :node-name node-index :node-index name :name :as run-parameter}]
-  (parameter-znode-path run-href node-name node-index name))
 
 ;(defn run-id-path [run-id])
 

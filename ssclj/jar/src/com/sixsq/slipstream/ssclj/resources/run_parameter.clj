@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.run-parameter
   (:require
     [clojure.spec.alpha :as s]
+    [clojure.string :as string]
     [com.sixsq.slipstream.ssclj.resources.spec.run-parameter]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -55,6 +56,21 @@
 ;; CRUD operations
 ;;
 
+(def run-parameter-id-separator "_")
+
+(defn run-parameter-id
+  [{run-href :run-href node-name :node-name node-index :node-index name :name :as run-parameter}]
+  (let [run-href (string/replace-first run-href #"^run/" "")]
+    (cond
+      (and run-href node-name node-index) (string/join run-parameter-id-separator [run-href node-name node-index name])
+      (and run-href node-name) (string/join run-parameter-id-separator [run-href node-name name])
+      run-href (string/join run-parameter-id-separator [run-href name]))))
+
+(defmethod crud/new-identifier resource-name
+  [json resource-name]
+  (let [new-id (str resource-url "/" (run-parameter-id json))]
+    (assoc json :id new-id)))
+
 (defn add-value-run-parameter [run-parameter & {:keys [watcher]}]
   (try
     (let [value (if watcher
@@ -68,19 +84,14 @@
   (a/can-modify? {:acl collection-acl} request)
   (let [run-parameter (-> body
                           u/strip-service-attrs
-                          (dissoc :value)
                           (crud/new-identifier resource-name)
                           (assoc :resourceURI resource-uri)
                           u/update-timestamps
                           (crud/add-acl request)
                           crud/validate)
         response (db/add resource-name run-parameter {})
-        run-href (:run-href body)
-        node-name (:node-name body)
-        node-index (:node-index body)
-        name (:name body)
         value (:value body)
-        node-path (zkru/parameter-znode-path run-href node-name node-index name)]
+        node-path (zkru/run-parameter-znode-path body)]
     (uzk/create-all node-path :persistent? true)
     (uzk/set-data node-path value)
     response))
@@ -104,12 +115,15 @@
                           (add-value-run-parameter :watcher (partial watch-fn event-ch id name)))]
     (sse/send-event id name run-parameter event-ch)))
 
-(defn retrieve-run-parameter [{{uuid :uuid} :params :as request}]
-  (-> (str (u/de-camelcase resource-name) "/" uuid)
-      (db/retrieve request)
-      (a/can-view? request)
-      (crud/set-operations request)
-      (add-value-run-parameter)))
+(defn retrieve-run-parameter
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (-> (str (u/de-camelcase resource-name) "/" uuid)
+        (db/retrieve request)
+        (a/can-view? request)
+        (crud/set-operations request))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
 
 (def retrieve-sse-impl
   (sse/event-channel-handler
@@ -119,8 +133,7 @@
         (send-event-and-set-watcher event-ch transiant-watch-fn run-parameter)))
     {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
 
-(defn retrieve-json-impl [request]
-  (r/json-response (retrieve-run-parameter request)))
+(def retrieve-json-impl (std-crud/retrieve-fn resource-name))
 
 (defmethod crud/retrieve resource-name
   [{{accept :accept} :headers :as request}]
@@ -138,7 +151,6 @@
     (-> merged
         (u/update-timestamps)
         (crud/validate)
-        (dissoc :value)
         (db/edit request))
     (when value
       (uzk/set-data (zkru/run-parameter-znode-path merged) value)))) ;TODO what if znode not found
@@ -163,15 +175,6 @@
     {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %) :heartbeat-delay 10}))
 
 (def query-json-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
-
-(defn query-json-impl [request]
-  (a/can-view? {:acl collection-acl} request)
-  (let [wrapper-fn (std-crud/collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
-        options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
-        [metadata entries] (db/query resource-name options)
-        entries (doall (map add-value-run-parameter entries))
-        entries-and-count (merge metadata (wrapper-fn request entries))]
-    (r/json-response entries-and-count)))
 
 (defmethod crud/query resource-name
   [{{accept :accept} :headers :as request}]
