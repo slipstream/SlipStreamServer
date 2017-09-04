@@ -18,7 +18,6 @@ public class VirtualMachineHandlerTest {
 
     @Test
     public void addVMTest(){
-
         String instanceID = UUID.randomUUID().toString();
         Vm vm = new Vm(instanceID, "0123-4567-8912", "Running", "user", true);
 
@@ -35,8 +34,7 @@ public class VirtualMachineHandlerTest {
     }
 
     @Test
-    public void updateVMTest(){
-
+    public void updateVMTestChangeState(){
         String instanceID = UUID.randomUUID().toString();
         String cloud = "aCloudName";
         Vm vm = new Vm (instanceID, cloud, "Running", "user", true);
@@ -51,6 +49,24 @@ public class VirtualMachineHandlerTest {
         if (virtualMachine != null) {
             Assert.assertEquals(newState, virtualMachine.getState());
         }
+    }
 
+    @Test
+    public void updateVMTestWithRunResource(){
+        String instanceID = UUID.randomUUID().toString();
+        String cloud = "aCloudName";
+        Vm vm = new Vm (instanceID, cloud, "Running", "user", true);
+        VirtualMachineHandler.addVM(vm);
+
+        vm.setRunUuid(UUID.randomUUID().toString());
+        String runOwner = "runOwner";
+        vm.setRunOwner(runOwner);
+
+        VirtualMachineHandler.updateVM(vm);
+
+        VirtualMachine virtualMachine = VirtualMachineHandler.loadVirtualMachine( cloud, instanceID );
+        if (virtualMachine != null) {
+            Assert.assertEquals(runOwner, virtualMachine.getRun().getUserName());
+        }
     }
 }

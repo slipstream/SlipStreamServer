@@ -96,6 +96,18 @@ public class VirtualMachineHandler {
         VirtualMachine.CredentialRef cloudref = new VirtualMachine.CredentialRef(cloudHref);
         resource.setCredential(cloudref);
 
+        //the VM may have a runUuid which will be the run reference of the Virtual Machine CIMI resource
+        if (vm.getRunUuid() != null){
+
+            String runOwner = vm.getRunOwner();
+            VirtualMachine.UserRef userRef = new VirtualMachine.UserRef(runOwner);
+
+            String runHref = "run/"+vm.getRunUuid();
+            VirtualMachine.RunRef runRef = new VirtualMachine.RunRef(runHref, userRef);
+            resource.setRun(runRef);
+
+        }
+
         return resource;
     }
 

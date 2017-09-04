@@ -14,7 +14,6 @@ import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
 import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
 
 public class VirtualMachine {
-
     public String toJson() {
         return SscljProxy.toJson(this);
     }
@@ -24,11 +23,9 @@ public class VirtualMachine {
         public ServiceOfferRef(String href) {
             this.href = href;
         }
-
     };
 
     public static class CredentialRef {
-
         private String href;
 
         public CredentialRef(String href) {
@@ -36,12 +33,30 @@ public class VirtualMachine {
         }
     };
 
-    private class RunRef{
-
+    public static class UserRef {
         private String href;
 
-        public RunRef(String href) {
+        public UserRef(String username){
+            this.href = "user/"+username;
+        }
+
+        public String getUserName(){
+            return this.href.substring(5);
+        }
+    }
+
+
+    public static class RunRef{
+        private String href;
+        private UserRef user;
+
+        public RunRef(String href, UserRef userRef) {
             this.href = href;
+            this.user = userRef;
+        }
+
+        public String getUserName() {
+            return this.user.getUserName();
         }
     };
 
@@ -98,9 +113,6 @@ public class VirtualMachine {
     }
 
 
-
-
-
     public void setInstanceID(String instanceID) {
         this.instanceID = instanceID;
     }
@@ -123,6 +135,10 @@ public class VirtualMachine {
 
     public void setRun(RunRef runRef) {
         this.run = runRef;
+    }
+
+    public RunRef getRun(){
+        return this.run;
     }
 
     public void setCredential(CredentialRef cloudRef) {
