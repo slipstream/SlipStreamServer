@@ -104,10 +104,12 @@ public class ServiceOffersUtil {
 
     public static String getServiceOfferAttributeAsStringOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
         try {
-            return getServiceOfferAttributeAsString(serviceOffer, serviceOfferAttributeName);
-        } catch (ValidationException ignored) {
-            return null;
-        }
+            JsonElement serviceOfferAttribute = getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName);
+            if (serviceOfferAttribute != null) {
+                return serviceOfferAttribute.getAsString();
+            }
+        } catch (ValidationException ignored) { }
+        return null;
     }
 
 }
