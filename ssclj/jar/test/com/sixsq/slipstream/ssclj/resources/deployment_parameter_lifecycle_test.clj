@@ -1,18 +1,17 @@
-(ns com.sixsq.slipstream.ssclj.resources.run-parameter-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.deployment-parameter-lifecycle-test
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [ring.util.codec :as rc]
-    [com.sixsq.slipstream.ssclj.resources.run-parameter :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.deployment-parameter :refer :all]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header create-identity-map]]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-    [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as ru]
-    [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as zkru]))
+    [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]))
 
 (use-fixtures :each t/with-test-es-client-fixture)
 
@@ -39,12 +38,12 @@
                                  :type      "USER"
                                  :right     "MODIFY"}]})
 
-(deftest create-run-parameter-xyz
-  (let [run-href "run/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
-        valid-entry {:run-href run-href :node-name "machine" :node-index 1 :type "node"
+(deftest create-deployment-parameter-xyz
+  (let [deployment-href "deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
+        valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node"
                      :name     "xyz" :value "XYZ" :acl resource-acl-jane}
-        znode-path (zkru/run-parameter-znode-path valid-entry)
-        run-parameter-id (->
+        znode-path (zdu/deployment-parameter-znode-path valid-entry)
+        deployment-parameter-id (->
                            (->> {:params   {:resource-name resource-url}
                                  :identity identity-admin
                                  :body     valid-entry}
@@ -52,8 +51,8 @@
                                 (assoc {} :response))
                            (t/is-status 201)
                            (t/location))
-        abs-uri (str p/service-context (u/de-camelcase run-parameter-id))
-        created-run-parameter (-> session-user-jane
+        abs-uri (str p/service-context (u/de-camelcase deployment-parameter-id))
+        created-deployment-parameter (-> session-user-jane
                                   (request abs-uri)
                                   (t/body->edn)
                                   (t/is-status 200))]
@@ -66,7 +65,7 @@
         (t/body->edn)
         (t/is-status 200))
 
-    (is (= "newvalue" (uzk/get-data znode-path)) "run parameter can be updated")
+    (is (= "newvalue" (uzk/get-data znode-path)) "deployment parameter can be updated")
 
     (-> session-user-albert
         (request abs-uri :request-method :put
@@ -74,5 +73,5 @@
         (t/body->edn)
         (t/is-status 403))
 
-    (is (not (= "newvalue-albert" (uzk/get-data znode-path))) "run parameter can be updated")))
+    (is (not (= "newvalue-albert" (uzk/get-data znode-path))) "deployment parameter can be updated")))
 

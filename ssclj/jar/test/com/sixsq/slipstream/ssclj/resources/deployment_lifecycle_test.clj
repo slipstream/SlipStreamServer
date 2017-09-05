@@ -1,18 +1,18 @@
-(ns com.sixsq.slipstream.ssclj.resources.run-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.deployment-lifecycle-test
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [ring.util.codec :as rc]
-    [com.sixsq.slipstream.ssclj.resources.run :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.run-parameter :as rp]
+    [com.sixsq.slipstream.ssclj.resources.deployment :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.deployment-parameter :as rp]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-    [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as ru]))
+    [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]))
 
 (use-fixtures :each t/with-test-es-client-fixture)
 
@@ -41,7 +41,7 @@
                          :node2 {:parameters {:cloudservice {:description   "param1 description"
                                                              :default-value "abc"}}}}})
 
-(deftest create-run
+(deftest create-deployment
 
   (let [session-admin-json (-> (session (ring-app))
                                (content-type "application/json")
@@ -56,32 +56,34 @@
                          (content-type "application/json"))]
 
     ;; adding, retrieving and  deleting entry as user should succeed
-    (let [run-href (-> session-user
-                       (request base-uri
-                                :request-method :post
-                                :body (json/write-str valid-entry))
-                       (t/body->edn)
-                       (t/is-status 201)
-                       (t/location))
-          abs-uri (str p/service-context (u/de-camelcase run-href))
-          created-run (-> session-user
-                          (request abs-uri)
-                          (t/body->edn)
-                          (t/is-status 200))]
+    (let [deployment-href (-> session-user
+                              (request base-uri
+                                       :request-method :post
+                                       :body (json/write-str valid-entry))
+                              (t/body->edn)
+                              (t/is-status 201)
+                              (t/location))
+          abs-uri (str p/service-context (u/de-camelcase deployment-href))
+          created-deployment (-> session-user
+                                 (request abs-uri)
+                                 (t/body->edn)
+                                 (t/is-status 200))]
 
-      (is (not (uzk/exists (str ru/znode-separator run-href))))
+      (is (not (uzk/exists (str zdu/znode-separator deployment-href))))
 
-      (let [start-uri (str p/service-context (t/get-op created-run "http://schemas.dmtf.org/cimi/2/action/start"))
-            started-run (-> session-user
-                            (request start-uri)
-                            (t/body->edn)
-                            (t/is-status 200))]
+      (let [start-uri (str p/service-context
+                           (t/get-op created-deployment "http://schemas.dmtf.org/cimi/2/action/start"))
+            started-deployment (-> session-user
+                                   (request start-uri)
+                                   (t/body->edn)
+                                   (t/is-status 200))]
 
-        (is (not (get-in created-run [:body :start-time])))
-        (is (get-in started-run [:response :body :start-time]))
+        (is (not (get-in created-deployment [:body :start-time])))
+        (is (get-in started-deployment [:response :body :start-time]))
 
-        (are [expected value] (= expected value)
-                              "init" (uzk/get-data (str ru/znode-separator run-href "/state"))
-                              "init" (uzk/get-data
-                                       (str ru/znode-separator run-href "/" ru/nodes-txt "/node2/1/" "vmstate")))))))
+        (are [expected value]
+          (= expected value)
+          "init" (uzk/get-data (str zdu/znode-separator deployment-href "/state"))
+          "init" (uzk/get-data
+                   (str zdu/znode-separator deployment-href "/" zdu/nodes-txt "/node2/1/" "vmstate")))))))
 

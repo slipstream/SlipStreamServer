@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.zk.run.utils
+(ns com.sixsq.slipstream.ssclj.resources.zk.deployment.utils
   (:require [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
             [zookeeper :as zk]
             [clojure.string :as string]))
@@ -7,12 +7,13 @@
 
 (def nodes-txt "nodes")
 
-(defn run-parameter-znode-path
-  [{run-href :run-href node-name :node-name node-index :node-index name :name :as run-parameter}]
+(defn deployment-parameter-znode-path
+  [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
   (->> (cond
-         (and run-href node-name node-index) (string/join znode-separator [run-href nodes-txt node-name node-index name])
-         (and run-href node-name) (string/join znode-separator [run-href nodes-txt node-name name])
-         run-href (string/join znode-separator [run-href name]))
+         (and deployment-href node-name node-index)
+         (string/join znode-separator [deployment-href nodes-txt node-name node-index name])
+         (and deployment-href node-name) (string/join znode-separator [deployment-href nodes-txt node-name name])
+         deployment-href (string/join znode-separator [deployment-href name]))
        (str znode-separator)))
 
 ;(defn run-id-path [run-id])

@@ -1,16 +1,15 @@
-(ns com.sixsq.slipstream.ssclj.resources.run
+(ns com.sixsq.slipstream.ssclj.resources.deployment
   (:require
     [clojure.stacktrace :as st]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.run]
+    [com.sixsq.slipstream.ssclj.resources.spec.deployment]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as zru]
-    [com.sixsq.slipstream.ssclj.resources.run-parameter :as rp]
+    [com.sixsq.slipstream.ssclj.resources.deployment-parameter :as dp]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [create-identity-map]]
-    [com.sixsq.slipstream.ssclj.resources.zk.run.state-machine :as rsm]
+    [com.sixsq.slipstream.ssclj.resources.zk.deployment.state-machine :as zdsm]
     [com.sixsq.slipstream.auth.acl :as a]
     [superstring.core :as str]
     [ring.util.response :as r]
@@ -21,13 +20,13 @@
     [clj-time.core :as time])
   (:import (clojure.lang ExceptionInfo)))
 
-(def ^:const resource-name "Run")
+(def ^:const resource-name "Deployment")
 
 (def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "RunCollection")
+(def ^:const collection-name "DeploymentCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
@@ -43,7 +42,7 @@
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/run))
+(def validate-fn (u/create-spec-validation-fn :cimi/deployment))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -60,48 +59,48 @@
   [json _]
   json)
 
-(defn create-parameter [run-parameter]
+(defn create-parameter [deployment-parameter]
   (try
-    (let [request {:params   {:resource-name rp/resource-url}
+    (let [request {:params   {:resource-name dp/resource-url}
                    :identity (create-identity-map ["super" #{"ADMIN"}])
-                   :body     run-parameter}
-          {:keys [status body]} (rp/add-impl request)]
+                   :body     deployment-parameter}
+          {:keys [status body]} (dp/add-impl request)]
       (case status
-        201 (log/info "created run-parameter: " body)
-        (log/info "unexpected status code when creating run-parameter resource:" status)))
+        201 (log/info "created deployment-parameter: " body)
+        (log/info "unexpected status code when creating deployment-parameter resource:" status)))
     (catch Exception e
-      (log/warn "error when creating run-parameter resource: " (str e) "\n"
+      (log/warn "error when creating deployment-parameter resource: " (str e) "\n"
                 (with-out-str (st/print-cause-trace e))))))
 
-(defn create-parameters [identity {nodes :nodes run-href :id state :state}] ; run parameter state should not
+(defn create-parameters [identity {nodes :nodes deployment-href :id state :state}] ; deployment parameter state should not
   (let [user (:current identity)]
-    (create-parameter {:run-href run-href :name "state" :value state :type "run" :acl {:owner {:principal "ADMIN"
-                                                                                               :type      "ROLE"}
-                                                                                       :rules [{:principal user
-                                                                                                :type      "USER"
-                                                                                                :right     "VIEW"}]}})
+    (create-parameter {:deployment-href deployment-href :name "state" :value state :type "deployment" :acl {:owner {:principal "ADMIN"
+                                                                                                                    :type      "ROLE"}
+                                                                                                            :rules [{:principal user
+                                                                                                                     :type      "USER"
+                                                                                                                     :right     "VIEW"}]}})
     (doseq [n nodes]
       ()
       (let [node-name (name (key n))
             multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
         (doseq [i (range 1 (inc multiplicity))]
-          (create-parameter {:run-href run-href :node-name node-name :node-index i :type "node-instance"
-                             :name     "vmstate" :value "init" :acl {:owner {:principal "ADMIN"
-                                                                             :type      "ROLE"}
-                                                                     :rules [{:principal user
-                                                                              :type      "USER"
-                                                                              :right     "MODIFY"}]}}))))))
+          (create-parameter {:deployment-href deployment-href :node-name node-name :node-index i :type "node-instance"
+                             :name            "vmstate" :value "init" :acl {:owner {:principal "ADMIN"
+                                                                                    :type      "ROLE"}
+                                                                            :rules [{:principal user
+                                                                                     :type      "USER"
+                                                                                     :right     "MODIFY"}]}}))))))
 
 (defn add-impl [{body :body :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (let [new-run (-> body
-                    (dissoc :created :updated :resourceURI :operations)
-                    (crud/new-identifier resource-name)
-                    (assoc :resourceURI resource-uri)
-                    u/update-timestamps
-                    (crud/add-acl request)
-                    (assoc :state rsm/initial-state))
-        response (db/add resource-name (crud/validate new-run) {})]
+  (let [new-deployment (-> body
+                           (dissoc :created :updated :resourceURI :operations)
+                           (crud/new-identifier resource-name)
+                           (assoc :resourceURI resource-uri)
+                           u/update-timestamps
+                           (crud/add-acl request)
+                           (assoc :state zdsm/initial-state))
+        response (db/add resource-name (crud/validate new-deployment) {})]
     response))
 
 (defmethod crud/add resource-name
@@ -156,9 +155,9 @@
 ;; actions
 ;;
 
-(defn add-start-time [run]
+(defn add-start-time [deployment]
   (let [now (u/time-now)]
-    (assoc run :start-time now)))
+    (assoc deployment :start-time now)))
 
 (defmethod crud/do-action [resource-url "start"]
   [{{uuid :uuid} :params identity :identity :as request}]
@@ -166,12 +165,12 @@
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                       (db/retrieve request)
                       (a/can-modify? request))
-          run (-> current
-                  (add-start-time)
-                  (u/update-timestamps)
-                  (crud/validate)
-                  (db/edit request))]
+          deployment (-> current
+                         (add-start-time)
+                         (u/update-timestamps)
+                         (crud/validate)
+                         (db/edit request))]
       (create-parameters identity current)
-      run)
+      deployment)
     (catch ExceptionInfo ei
       (ex-data ei))))

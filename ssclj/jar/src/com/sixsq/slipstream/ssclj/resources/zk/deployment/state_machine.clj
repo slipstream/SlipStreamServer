@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.zk.run.state-machine
+(ns com.sixsq.slipstream.ssclj.resources.zk.deployment.state-machine
   "This namespace uses ZooKeeper to create a distributed system to host the state of a run. Each VM is represented
   by an index node under its corresponding node. As each VM reports its current state completed, the corresponding
   index znode (i.e. ZooKeeper node) is removed from the structure.  When no node remains, it means all VMs have

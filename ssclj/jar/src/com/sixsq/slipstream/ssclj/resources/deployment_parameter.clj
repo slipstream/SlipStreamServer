@@ -1,8 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.resources.run-parameter
+(ns com.sixsq.slipstream.ssclj.resources.deployment-parameter
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
-    [com.sixsq.slipstream.ssclj.resources.spec.run-parameter]
+    [com.sixsq.slipstream.ssclj.resources.spec.deployment-parameter]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -17,17 +17,17 @@
     [clojure.core.async :as async]
     [zookeeper :as zk]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-    [com.sixsq.slipstream.ssclj.resources.zk.run.utils :as zkru]
+    [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]
     )
   (:import (clojure.lang ExceptionInfo)))
 
-(def ^:const resource-name "RunParameter")
+(def ^:const resource-name "DeploymentParameter")
 
 (def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "RunParameterCollection")
+(def ^:const collection-name "DeploymentParameterCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
@@ -43,7 +43,7 @@
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/run-parameter))
+(def validate-fn (u/create-spec-validation-fn :cimi/deployment-parameter))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -56,66 +56,66 @@
 ;; CRUD operations
 ;;
 
-(def run-parameter-id-separator "_")
+(def deployment-parameter-id-separator "_")
 
-(defn run-parameter-id
-  [{run-href :run-href node-name :node-name node-index :node-index name :name :as run-parameter}]
-  (let [run-href (string/replace-first run-href #"^run/" "")]
+(defn deployment-parameter-id
+  [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
+  (let [deployment-href (string/replace-first deployment-href #"^deployment/" "")]
     (cond
-      (and run-href node-name node-index) (string/join run-parameter-id-separator [run-href node-name node-index name])
-      (and run-href node-name) (string/join run-parameter-id-separator [run-href node-name name])
-      run-href (string/join run-parameter-id-separator [run-href name]))))
+      (and deployment-href node-name node-index) (string/join deployment-parameter-id-separator [deployment-href node-name node-index name])
+      (and deployment-href node-name) (string/join deployment-parameter-id-separator [deployment-href node-name name])
+      deployment-href (string/join deployment-parameter-id-separator [deployment-href name]))))
 
 (defmethod crud/new-identifier resource-name
   [json resource-name]
-  (let [new-id (str resource-url "/" (run-parameter-id json))]
+  (let [new-id (str resource-url "/" (deployment-parameter-id json))]
     (assoc json :id new-id)))
 
-(defn add-value-run-parameter [run-parameter & {:keys [watcher]}]
+(defn add-value-deployment-parameter [deployment-parameter & {:keys [watcher]}]
   (try
     (let [value (if watcher
-                  (uzk/get-data (zkru/run-parameter-znode-path run-parameter) :watcher watcher)
-                  (uzk/get-data (zkru/run-parameter-znode-path run-parameter)))]
-      (assoc run-parameter :value value))
-    (catch ExceptionInfo ei ;TODO what if data not found
+                  (uzk/get-data (zdu/deployment-parameter-znode-path deployment-parameter) :watcher watcher)
+                  (uzk/get-data (zdu/deployment-parameter-znode-path deployment-parameter)))]
+      (assoc deployment-parameter :value value))
+    (catch ExceptionInfo ei                                 ;TODO what if data not found
       (ex-data ei))))
 
 (defn add-impl [{:keys [body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (let [run-parameter (-> body
-                          u/strip-service-attrs
-                          (crud/new-identifier resource-name)
-                          (assoc :resourceURI resource-uri)
-                          u/update-timestamps
-                          (crud/add-acl request)
-                          crud/validate)
-        response (db/add resource-name run-parameter {})
+  (let [deployment-parameter (-> body
+                                 u/strip-service-attrs
+                                 (crud/new-identifier resource-name)
+                                 (assoc :resourceURI resource-uri)
+                                 u/update-timestamps
+                                 (crud/add-acl request)
+                                 crud/validate)
+        response (db/add resource-name deployment-parameter {})
         value (:value body)
-        node-path (zkru/run-parameter-znode-path body)]
+        node-path (zdu/deployment-parameter-znode-path body)]
     (uzk/create-all node-path :persistent? true)
     (uzk/set-data node-path value)
     response))
 
 (defn transiant-watch-fn [event-ch id name {:keys [event-type path :as zk-event]}]
   (when (= event-type :NodeDataChanged)
-    (let [run-parameter (-> (db/retrieve id {})
-                            (add-value-run-parameter))]
-      (sse/send-event id name run-parameter event-ch)
+    (let [deployment-parameter (-> (db/retrieve id {})
+                                   (add-value-deployment-parameter))]
+      (sse/send-event id name deployment-parameter event-ch)
       (async/close! event-ch))))
 
 (defn persistent-watch-fn [event-ch id name {:keys [event-type path :as zk-event]}]
   (when (= event-type :NodeDataChanged)
-    (let [run-parameter (-> (db/retrieve id {})
-                            (add-value-run-parameter :watcher (partial persistent-watch-fn event-ch id name)))]
-      (sse/send-event id name run-parameter event-ch))))
+    (let [deployment-parameter (-> (db/retrieve id {})
+                                   (add-value-deployment-parameter :watcher (partial persistent-watch-fn event-ch id name)))]
+      (sse/send-event id name deployment-parameter event-ch))))
 
 (defn send-event-and-set-watcher
-  [event-ch watch-fn {id :id name :name :as run-parameter}]
-  (let [run-parameter (-> run-parameter
-                          (add-value-run-parameter :watcher (partial watch-fn event-ch id name)))]
-    (sse/send-event id name run-parameter event-ch)))
+  [event-ch watch-fn {id :id name :name :as deployment-parameter}]
+  (let [deployment-parameter (-> deployment-parameter
+                                 (add-value-deployment-parameter :watcher (partial watch-fn event-ch id name)))]
+    (sse/send-event id name deployment-parameter event-ch)))
 
-(defn retrieve-run-parameter
+(defn retrieve-deployment-parameter
   [{{uuid :uuid} :params :as request}]
   (try
     (-> (str (u/de-camelcase resource-name) "/" uuid)
@@ -128,9 +128,9 @@
 (def retrieve-sse-impl
   (sse/event-channel-handler
     (fn [request response raise event-ch]
-      (let [{id :id name :name :as run-parameter} (retrieve-run-parameter request)
-            node-path (zkru/run-parameter-znode-path run-parameter)]
-        (send-event-and-set-watcher event-ch transiant-watch-fn run-parameter)))
+      (let [{id :id name :name :as deployment-parameter} (retrieve-deployment-parameter request)
+            node-path (zdu/deployment-parameter-znode-path deployment-parameter)]
+        (send-event-and-set-watcher event-ch transiant-watch-fn deployment-parameter)))
     {:on-client-disconnect #(log/debug "sse/on-client-disconnect: " %)}))
 
 (def retrieve-json-impl (std-crud/retrieve-fn resource-name))
@@ -153,7 +153,7 @@
         (crud/validate)
         (db/edit request))
     (when value
-      (uzk/set-data (zkru/run-parameter-znode-path merged) value)))) ;TODO what if znode not found
+      (uzk/set-data (zdu/deployment-parameter-znode-path merged) value)))) ;TODO what if znode not found
 
 (defmethod crud/edit resource-name
   [request]
