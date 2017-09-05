@@ -22,7 +22,13 @@ public class VirtualMachineHandler {
 
 
     public static void addVM(Vm vm) {
+
         VirtualMachine vmRecord = VirtualMachineHandler.getResourceFromPojo(vm);
+        VirtualMachine vmDb = loadVirtualMachine(vm.getCloud(), vm.getInstanceId());
+        if (vmDb != null){
+            updateVM(vm);
+        }
+
         SscljProxy.post(VIRTUAL_MACHINE_RESOURCE, USERNAME, vmRecord);
     }
 
@@ -30,8 +36,7 @@ public class VirtualMachineHandler {
         VirtualMachine vmDb = loadVirtualMachine(vm.getCloud(), vm.getInstanceId());
         if (vmDb == null) return; //nothing to remove
 
-        VirtualMachine vmRecord = loadVirtualMachine(vm.getCloud(),vm.getInstanceId());
-        SscljProxy.delete("api/" + vmDb.getId(), USERNAME, vmRecord);
+        SscljProxy.delete("api/" + vmDb.getId(), USERNAME);
     }
 
     public static void updateVM(Vm vm) {
@@ -61,7 +66,8 @@ public class VirtualMachineHandler {
 
             if (records == null) return null;
 
-            int nbRecords = records.getVirtualMachines().size();
+            List<VirtualMachine> machines = records.getVirtualMachines();
+            int nbRecords = machines.size();
 
             switch (nbRecords) {
                 case 0: //  no corresponding record was found
@@ -69,13 +75,17 @@ public class VirtualMachineHandler {
                     break;
 
                 case 1: //happy case : a corresponding record was found in ES
-                    virtualMachine = records.getVirtualMachines().get(0);
+                    virtualMachine = machines.get(0);
                     logger.info("Found  record" + SscljProxy.toJson(virtualMachine));
                     break;
 
                 default:
                     // more than one record found, we expect to identify a single document
+
                     logger.warning("Loading ressource with Query " + resource + " did  return too many (" + nbRecords + ")  records");
+                    for (VirtualMachine vmToDelete : machines){
+                        SscljProxy.delete("api/" + vmToDelete.getId(), USERNAME);
+                    }
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

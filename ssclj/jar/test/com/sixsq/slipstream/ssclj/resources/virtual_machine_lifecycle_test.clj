@@ -142,7 +142,7 @@
       (-> session-jane
           (request jane-uri)
           (ltu/body->edn)
-          (ltu/is-status 403)
+          (ltu/is-status 200)
           (ltu/is-operation-absent "delete")
           (ltu/is-operation-absent "edit"))
 

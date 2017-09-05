@@ -48,6 +48,8 @@
             :right     "VIEW"}]})
 
 
+
+
 (def validate-fn (u/create-spec-validation-fn :cimi/virtual-machine))
 (defmethod crud/validate
   resource-uri
@@ -59,8 +61,25 @@
   [{:keys [acl] :as resource} request]
   (if acl
     resource
-    (let [user-id (:identity (a/current-authentication request))]
-      (assoc resource :acl (create-acl user-id)))))
+    (let [user-id (:identity (a/current-authentication request))
+          run-owner (subs (-> request
+                              :body
+                              :run
+                              :user
+                              :href
+                              )
+                          (count "/user"))
+
+          ]
+      (if run-owner
+        (assoc resource :acl (create-acl run-owner))
+        (assoc resource :acl (create-acl user-id))
+        )
+
+
+      )
+    )
+  )
 
 ;;
 ;; CRUD operations
@@ -74,6 +93,8 @@
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
+
+
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name

@@ -105,9 +105,6 @@ public class SscljProxy {
         return request(Method.DELETE, resource, null, username, null, null, null);
     }
 
-    public static Response delete(String resource, String username, Object obj) {
-        return request(Method.DELETE, resource, obj, username, null, null, null);
-    }
 
 
     public static Response delete(String resource, String username, Form queryParameters) {
