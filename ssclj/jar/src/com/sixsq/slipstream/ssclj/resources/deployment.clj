@@ -10,6 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.deployment-parameter :as dp]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [create-identity-map]]
     [com.sixsq.slipstream.ssclj.resources.zk.deployment.state-machine :as zdsm]
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
     [com.sixsq.slipstream.auth.acl :as a]
     [superstring.core :as str]
     [ring.util.response :as r]
@@ -20,11 +21,11 @@
     [clj-time.core :as time])
   (:import (clojure.lang ExceptionInfo)))
 
-(def ^:const resource-name "Deployment")
+(def ^:const resource-name du/deployment-resource-name)
 
 (def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
 
-(def ^:const resource-url (u/de-camelcase resource-name))
+(def ^:const resource-url du/deployment-resource-url)
 
 (def ^:const collection-name "DeploymentCollection")
 
@@ -59,38 +60,6 @@
   [json _]
   json)
 
-(defn create-parameter [deployment-parameter]
-  (try
-    (let [request {:params   {:resource-name dp/resource-url}
-                   :identity (create-identity-map ["super" #{"ADMIN"}])
-                   :body     deployment-parameter}
-          {:keys [status body]} (dp/add-impl request)]
-      (case status
-        201 (log/info "created deployment-parameter: " body)
-        (log/info "unexpected status code when creating deployment-parameter resource:" status)))
-    (catch Exception e
-      (log/warn "error when creating deployment-parameter resource: " (str e) "\n"
-                (with-out-str (st/print-cause-trace e))))))
-
-(defn create-parameters [identity {nodes :nodes deployment-href :id state :state}] ; deployment parameter state should not
-  (let [user (:current identity)]
-    (create-parameter {:deployment-href deployment-href :name "state" :value state :type "deployment" :acl {:owner {:principal "ADMIN"
-                                                                                                                    :type      "ROLE"}
-                                                                                                            :rules [{:principal user
-                                                                                                                     :type      "USER"
-                                                                                                                     :right     "VIEW"}]}})
-    (doseq [n nodes]
-      ()
-      (let [node-name (name (key n))
-            multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
-        (doseq [i (range 1 (inc multiplicity))]
-          (create-parameter {:deployment-href deployment-href :node-name node-name :node-index i :type "node-instance"
-                             :name            "vmstate" :value "init" :acl {:owner {:principal "ADMIN"
-                                                                                    :type      "ROLE"}
-                                                                            :rules [{:principal user
-                                                                                     :type      "USER"
-                                                                                     :right     "MODIFY"}]}}))))))
-
 (defn add-impl [{body :body :as request}]
   (a/can-modify? {:acl collection-acl} request)
   (let [new-deployment (-> body
@@ -113,11 +82,9 @@
   [request]
   (retrieve-impl request))
 
-(def edit-impl (std-crud/edit-fn resource-name))
-
 (defmethod crud/edit resource-name
   [request]
-  (edit-impl request))
+  (du/edit-deployment-impl request))
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
@@ -170,7 +137,7 @@
                          (u/update-timestamps)
                          (crud/validate)
                          (db/edit request))]
-      (create-parameters identity current)
+      (du/create-parameters identity current)
       deployment)
     (catch ExceptionInfo ei
       (ex-data ei))))

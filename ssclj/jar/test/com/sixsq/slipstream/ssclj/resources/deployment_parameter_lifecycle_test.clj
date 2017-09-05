@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-    [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]))
+    [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]))
 
 (use-fixtures :each t/with-test-es-client-fixture)
 
@@ -47,7 +48,7 @@
                            (->> {:params   {:resource-name resource-url}
                                  :identity identity-admin
                                  :body     valid-entry}
-                                (add-impl)
+                                (du/add-deployment-parameter-impl)
                                 (assoc {} :response))
                            (t/is-status 201)
                            (t/location))

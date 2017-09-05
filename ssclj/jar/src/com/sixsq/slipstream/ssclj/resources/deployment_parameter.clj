@@ -18,26 +18,23 @@
     [zookeeper :as zk]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
     )
   (:import (clojure.lang ExceptionInfo)))
 
-(def ^:const resource-name "DeploymentParameter")
+(def ^:const resource-name du/deployment-parameter-resource-name)
 
 (def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
 
-(def ^:const resource-url (u/de-camelcase resource-name))
+(def ^:const resource-url du/deployment-parameter-resource-url)
 
 (def ^:const collection-name "DeploymentParameterCollection")
 
-(def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
+(def ^:const resource-uri du/deployment-parameter-resource-uri)
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
-(def collection-acl {:owner {:principal "ADMIN"
-                             :type      "ROLE"}
-                     :rules [{:principal "USER"
-                              :type      "ROLE"
-                              :right     "MODIFY"}]})
+(def collection-acl du/deployment-parameter-collection-acl)
 
 ;;
 ;; multimethods for validation and operations
@@ -60,11 +57,11 @@
 
 (defn deployment-parameter-id
   [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
-  (let [deployment-href (string/replace-first deployment-href #"^deployment/" "")]
+  (let [deployment-uuid (du/deployment-href-to-uuid deployment-href)]
     (cond
-      (and deployment-href node-name node-index) (string/join deployment-parameter-id-separator [deployment-href node-name node-index name])
-      (and deployment-href node-name) (string/join deployment-parameter-id-separator [deployment-href node-name name])
-      deployment-href (string/join deployment-parameter-id-separator [deployment-href name]))))
+      (and deployment-uuid node-name node-index) (string/join deployment-parameter-id-separator [deployment-uuid node-name node-index name])
+      (and deployment-uuid node-name) (string/join deployment-parameter-id-separator [deployment-uuid node-name name])
+      deployment-uuid (string/join deployment-parameter-id-separator [deployment-uuid name]))))
 
 (defmethod crud/new-identifier resource-name
   [json resource-name]
@@ -79,22 +76,6 @@
       (assoc deployment-parameter :value value))
     (catch ExceptionInfo ei                                 ;TODO what if data not found
       (ex-data ei))))
-
-(defn add-impl [{:keys [body] :as request}]
-  (a/can-modify? {:acl collection-acl} request)
-  (let [deployment-parameter (-> body
-                                 u/strip-service-attrs
-                                 (crud/new-identifier resource-name)
-                                 (assoc :resourceURI resource-uri)
-                                 u/update-timestamps
-                                 (crud/add-acl request)
-                                 crud/validate)
-        response (db/add resource-name deployment-parameter {})
-        value (:value body)
-        node-path (zdu/deployment-parameter-znode-path body)]
-    (uzk/create-all node-path :persistent? true)
-    (uzk/set-data node-path value)
-    response))
 
 (defn transiant-watch-fn [event-ch id name {:keys [event-type path :as zk-event]}]
   (when (= event-type :NodeDataChanged)
@@ -153,7 +134,13 @@
         (crud/validate)
         (db/edit request))
     (when value
-      (uzk/set-data (zdu/deployment-parameter-znode-path merged) value)))) ;TODO what if znode not found
+      (uzk/set-data (zdu/deployment-parameter-znode-path merged) value)
+      (when
+        (and (= (:type merged) "deployment")
+             (= (:name merged) "state"))
+        (du/update-deployment-state (du/deployment-href-to-uuid (:deployment-href merged)) value)))
+    merged)
+  ) ;TODO what if znode not found
 
 (defmethod crud/edit resource-name
   [request]

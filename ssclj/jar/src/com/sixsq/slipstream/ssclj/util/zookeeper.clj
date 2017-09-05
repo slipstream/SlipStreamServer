@@ -53,3 +53,6 @@
 
 (defn exists [path & options]
   (apply zk/exists *client* path options))
+
+(defn children [path & options]
+  (apply zk/children *client* path options))
