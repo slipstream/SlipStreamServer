@@ -81,9 +81,9 @@
                           :ip           "127.0.0.1"
 
 
-                          :credential   {:href  "connector/0123-4567-8912",
+                          :credentials  [{:href  "connector/0123-4567-8912",
                                          :roles ["realm:cern", "realm:my-accounting-group"]
-                                         :users ["long-user-id-1", "long-user-id-2"]}
+                                         :users ["long-user-id-1", "long-user-id-2"]}]
 
 
                           :run          {:href "run/aaa-bbb-ccc",
