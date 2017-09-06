@@ -52,19 +52,9 @@
 ;; CRUD operations
 ;;
 
-(def deployment-parameter-id-separator "_")
-
-(defn deployment-parameter-id
-  [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
-  (let [deployment-uuid (du/deployment-href-to-uuid deployment-href)]
-    (cond
-      (and deployment-uuid node-name node-index) (string/join deployment-parameter-id-separator [deployment-uuid node-name node-index name])
-      (and deployment-uuid node-name) (string/join deployment-parameter-id-separator [deployment-uuid node-name name])
-      deployment-uuid (string/join deployment-parameter-id-separator [deployment-uuid name]))))
-
 (defmethod crud/new-identifier resource-name
   [json resource-name]
-  (let [new-id (str resource-url "/" (deployment-parameter-id json))]
+  (let [new-id (str resource-url "/" (du/deployment-parameter-id json))]
     (assoc json :id new-id)))
 
 (defn add-value-deployment-parameter [deployment-parameter & {:keys [watcher]}]
@@ -125,21 +115,34 @@
   [{{uuid :uuid} :params body :body :as request}]
   (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                     (db/retrieve request)
-                    (a/can-modify? request))
+                    (a/can-modify? request)) ;TODO we should not allow user to update type and some other properties of deployment parameter (use dissoc)
         merged (merge current body)
-        value (:value merged)]
+        value (:value merged)
+        deployment-href (:deployment-href merged)]
     (-> merged
         (u/update-timestamps)
         (crud/validate)
         (db/edit request))
     (when value
-      (uzk/set-data (zdu/deployment-parameter-znode-path merged) value)
-      (when
-        (and (= (:type merged) "deployment")
-             (= (:name merged) "state"))
-        (du/update-deployment-state (du/deployment-href-to-uuid (:deployment-href merged)) value)))
-    merged)
-  ) ;TODO what if znode not found
+      ;TODO what if znode not found
+      (condp = (:type merged)
+        "deployment" (do
+                       (uzk/set-data (zdu/deployment-parameter-znode-path merged) value)
+                       (du/update-deployment-attribut
+                           (du/deployment-href-to-uuid deployment-href) (:name merged) value))
+        "node-instance" (condp = (:name merged)
+                          "state-complete" (do
+                                             (uzk/set-data (zdu/deployment-parameter-znode-path merged) value)
+                                             (uzk/delete (zdu/deployment-parameter-node-instance-complete-state-znode-path merged))
+                                             (let [children-in-state-count (count (uzk/children (zdu/deployment-parameter-znode-path {:deployment-href deployment-href :name "state"})))]
+                                               (when (= 0 children-in-state-count)
+                                                 ;TODO function trigger next state for current deployment
+                                                 (println "post with next state on run parameter state with next state value")
+                                                 (println "create all nodes instances state-compete of next global state")
+                                                 )))
+                          (uzk/set-data (zdu/deployment-parameter-znode-path merged) value)
+                          )))
+    merged))
 
 (defmethod crud/edit resource-name
   [request]

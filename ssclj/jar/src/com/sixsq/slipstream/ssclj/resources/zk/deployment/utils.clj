@@ -16,6 +16,12 @@
          deployment-href (string/join znode-separator [deployment-href name]))
        (str znode-separator)))
 
+(defn deployment-parameter-node-instance-complete-state-znode-path
+  [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
+  (let [node-instance-complete-state-znode-id (string/join "_" [node-name node-index name])]
+    (str znode-separator
+         (string/join znode-separator [deployment-href "state" node-instance-complete-state-znode-id]))))
+
 ;(defn run-id-path [run-id])
 
 ;  (str runs-path "/" run-id))

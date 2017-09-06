@@ -89,7 +89,7 @@
 
 (defmethod crud/delete resource-name
   [request]
-  (delete-impl request))
+  (delete-impl request)) ;TODO cleanup of deployment parameter and in zk should also be done
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 

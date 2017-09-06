@@ -12,9 +12,10 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]
-    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
+    [zookeeper :as zk]))
 
-(use-fixtures :each t/with-test-es-client-fixture)
+(use-fixtures :each (join-fixtures [t/with-test-es-client-fixture t/cleanup-all-zk-nodes]))
 
 (use-fixtures :once t/setup-embedded-zk)
 
@@ -41,7 +42,7 @@
 
 (deftest create-deployment-parameter-xyz
   (let [deployment-href "deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
-        valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node"
+        valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node-instance"
                      :name     "xyz" :value "XYZ" :acl resource-acl-jane}
         znode-path (zdu/deployment-parameter-znode-path valid-entry)
         deployment-parameter-id (->
@@ -75,4 +76,35 @@
         (t/is-status 403))
 
     (is (not (= "newvalue-albert" (uzk/get-data znode-path))) "deployment parameter can be updated")))
+
+(deftest deployment-parameter-state-complete
+  (let [deployment-href "deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
+        valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node-instance"
+                     :name     "state-complete" :value "executing" :acl resource-acl-jane}
+        znode-path (zdu/deployment-parameter-znode-path valid-entry)
+        deployment-parameter-id (->
+                                  (->> {:params   {:resource-name resource-url}
+                                        :identity identity-admin
+                                        :body     valid-entry}
+                                       (du/add-deployment-parameter-impl)
+                                       (assoc {} :response))
+                                  (t/is-status 201)
+                                  (t/location))
+        abs-uri (str p/service-context (u/de-camelcase deployment-parameter-id))
+        created-deployment-parameter (-> session-user-jane
+                                         (request abs-uri)
+                                         (t/body->edn)
+                                         (t/is-status 200))]
+    (is (uzk/exists "/deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b/state/machine_1_state-complete"))
+
+    (is (= "executing" (uzk/get-data znode-path)))
+
+    (-> session-user-jane
+        (request abs-uri :request-method :put
+                 :body (json/write-str {:value "running"}))
+        (t/body->edn)
+        (t/is-status 200))
+
+    (is (not (uzk/exists "/deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b/state/machine_1_state-complete")))))
+
 

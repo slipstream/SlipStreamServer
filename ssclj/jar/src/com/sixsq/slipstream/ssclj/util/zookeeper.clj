@@ -59,3 +59,6 @@
 
 (defn delete-all [path & options]
   (apply zk/delete-all *client* path options))
+
+(defn delete [path & options]
+  (apply zk/delete *client* path options))

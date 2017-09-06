@@ -13,6 +13,29 @@
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [clojure.string :as string]))
 
+
+(def ^:const deployment-resource-name "Deployment")
+
+(def ^:const deployment-resource-url (u/de-camelcase deployment-resource-name))
+
+(def edit-deployment-impl (std-crud/edit-fn deployment-resource-name))
+
+(defn deployment-href-to-uuid [href] (string/replace-first href #"^deployment/" ""))
+
+(defn update-deployment-attribut [deployment-uuid attribute-name value]
+  (try
+    (let [request {:params   {:resource-name deployment-resource-url
+                              :uuid deployment-uuid}
+                   :identity (create-identity-map ["super" #{"ADMIN"}])
+                   :body     {(keyword attribute-name) value}}
+          {:keys [status body]} (edit-deployment-impl request)]
+      (case status
+        200 (log/info "udpated deployment attribute: " body)
+        (log/info "unexpected status code when udpating deployment resource:" status)))
+    (catch Exception e
+      (log/warn "error when updating deployment resource: " (str e) "\n"
+                (with-out-str (st/print-cause-trace e))))))
+
 (def ^:const deployment-parameter-resource-name "DeploymentParameter")
 
 (def ^:const deployment-parameter-resource-url (u/de-camelcase deployment-parameter-resource-name))
@@ -24,6 +47,16 @@
                                           :rules [{:principal "USER"
                                                    :type      "ROLE"
                                                    :right     "MODIFY"}]})
+
+(def deployment-parameter-id-separator "_")
+
+(defn deployment-parameter-id
+  [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
+  (let [deployment-uuid (deployment-href-to-uuid deployment-href)]
+    (cond
+      (and deployment-uuid node-name node-index) (string/join deployment-parameter-id-separator [deployment-uuid node-name node-index name])
+      (and deployment-uuid node-name) (string/join deployment-parameter-id-separator [deployment-uuid node-name name])
+      deployment-uuid (string/join deployment-parameter-id-separator [deployment-uuid name]))))
 
 (defn add-deployment-parameter-impl [{:keys [body] :as request}]
   (a/can-modify? {:acl deployment-parameter-collection-acl} request)
@@ -39,6 +72,9 @@
         node-path (zdu/deployment-parameter-znode-path body)]
     (uzk/create-all node-path :persistent? true)
     (uzk/set-data node-path value)
+    (when (and (= "state-complete" (:name deployment-parameter))
+               (= "node-instance" (:type deployment-parameter)))
+      (uzk/create-all (zdu/deployment-parameter-node-instance-complete-state-znode-path deployment-parameter)))
     response))
 
 (defn create-parameter [deployment-parameter]
@@ -64,10 +100,15 @@
                                   :type      "USER"
                                   :right     "VIEW"}]}})
     (doseq [n nodes]
-      ()
       (let [node-name (name (key n))
             multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
         (doseq [i (range 1 (inc multiplicity))]
+          (create-parameter {:deployment-href deployment-href :node-name node-name :node-index i :type "node-instance"
+                             :name            "state-complete" :value "" :acl {:owner {:principal "ADMIN"
+                                                                                       :type      "ROLE"}
+                                                                               :rules [{:principal user
+                                                                                        :type      "USER"
+                                                                                        :right     "MODIFY"}]}})
           (create-parameter {:deployment-href deployment-href :node-name node-name :node-index i :type "node-instance"
                              :name            "vmstate" :value "init" :acl {:owner {:principal "ADMIN"
                                                                                     :type      "ROLE"}
@@ -75,24 +116,3 @@
                                                                                      :type      "USER"
                                                                                      :right     "MODIFY"}]}}))))))
 
-(def ^:const deployment-resource-name "Deployment")
-
-(def ^:const deployment-resource-url (u/de-camelcase deployment-resource-name))
-
-(def edit-deployment-impl (std-crud/edit-fn deployment-resource-name))
-
-(defn deployment-href-to-uuid [href] (string/replace-first href #"^deployment/" ""))
-
-(defn update-deployment-state [deployment-uuid state]
-  (try
-    (let [request {:params   {:resource-name deployment-resource-url
-                              :uuid deployment-uuid}
-                   :identity (create-identity-map ["super" #{"ADMIN"}])
-                   :body     {:state state}}
-          {:keys [status body]} (edit-deployment-impl request)]
-      (case status
-        200 (log/info "udpated deployment state: " body)
-        (log/info "unexpected status code when udpating deployment resource:" status)))
-    (catch Exception e
-      (log/warn "error when updating deployment resource: " (str e) "\n"
-                (with-out-str (st/print-cause-trace e))))))
