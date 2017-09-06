@@ -39,6 +39,7 @@
                    [metrics-clojure-graphite]
                    [me.raynes/fs]
                    [org.clojure/core.async :exclusions []]
+                   [org.clojure/tools.reader "1.0.0-beta4"]
                    [org.clojure/data.json]
                    [org.clojure/java.classpath]
                    [org.clojure/tools.cli]
