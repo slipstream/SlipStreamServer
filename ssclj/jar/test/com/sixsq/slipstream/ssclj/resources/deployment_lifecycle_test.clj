@@ -14,11 +14,13 @@
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]))
 
-(use-fixtures :each t/with-test-es-client-fixture)
-
 (use-fixtures :once t/setup-embedded-zk)
 
+(use-fixtures :each (join-fixtures [t/with-test-es-client-fixture t/cleanup-all-zk-nodes]))
+
 (def base-uri (str p/service-context resource-url))
+
+
 
 (defn ring-app []
   (t/make-ring-app (t/concat-routes routes/final-routes)))

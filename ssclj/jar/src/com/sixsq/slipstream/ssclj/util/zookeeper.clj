@@ -56,3 +56,6 @@
 
 (defn children [path & options]
   (apply zk/children *client* path options))
+
+(defn delete-all [path & options]
+  (apply zk/delete-all *client* path options))

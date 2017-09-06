@@ -227,3 +227,9 @@
       (catch Exception e))
     (.close server)
     ))
+
+(defn cleanup-all-zk-nodes [f]
+  (f)
+  (let [nodes (->> (uzk/children "/")
+                   (remove #{"zookeeper"}))]
+    (doall (map #(uzk/delete-all (str "/" %)) nodes))))
