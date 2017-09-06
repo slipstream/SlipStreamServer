@@ -15,7 +15,6 @@
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.ssclj.util.sse :as sse]
     [clojure.core.async :as async]
-    [zookeeper :as zk]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]
     [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]

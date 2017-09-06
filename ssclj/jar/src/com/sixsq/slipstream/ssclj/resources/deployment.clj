@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment
   (:require
-    [clojure.stacktrace :as st]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
