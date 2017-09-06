@@ -22,13 +22,27 @@ public class ACL {
 		return rules;
 	}
 
-	public void setRules(List<TypePrincipalRight> rules) {
-		this.rules = rules;
+	public void addRule(TypePrincipalRight rule){
+
+		TypePrincipal.PrincipalType type = rule.getType();
+		String principal =rule.getPrincipal();
+
+		//ignore new rule if type and principal already exists
+		boolean duplicate = false;
+		for(TypePrincipalRight r : rules){
+			if ((r.getType() == type) && (r.getPrincipal() == principal)){
+				duplicate = true;
+				break;
+			}
+		}
+
+		if (!duplicate){
+			rules.add(rule);
+		}
 	}
 
 	public ACL(TypePrincipal owner, List<TypePrincipalRight> rules) {
 		this.owner = owner;
 		this.rules = rules;
-	}	
-	
+	}
 }

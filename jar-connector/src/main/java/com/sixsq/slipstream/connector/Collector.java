@@ -26,6 +26,8 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.metering.Metering;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.persistence.*;
 
 import javax.persistence.EntityManager;
@@ -34,16 +36,12 @@ import javax.persistence.Query;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.sixsq.slipstream.metrics.Metrics;
-import com.sixsq.slipstream.metrics.MetricsTimer;
 
 public class Collector {
-
-	private static Logger logger = Logger.getLogger(Collector.class.getName());
-	private static MetricsTimer collectTimer = Metrics.newTimer(Collector.class, "collect");
-
 	public static final int EXCEPTION_OCCURRED = -2;
 	public static final int NO_CREDENTIALS = -1;
+	private static final Logger logger = Logger.getLogger(Collector.class.getName());
+	private static final MetricsTimer collectTimer = Metrics.newTimer(Collector.class, "collect");
 
 	public static int collect(User user, Connector connector, int timeout) {
 		return collect(user, connector, timeout, "test-worker");
@@ -53,19 +51,16 @@ public class Collector {
 		int res = EXCEPTION_OCCURRED;
 		if (connector.isCredentialsSet(user)) {
 			String uuid = UUID.randomUUID().toString();
-			String logBase = "Worker " + workerId
-					+ ", collect request " + uuid
-					+ " [" + user.getName() + "/" + connector.getConnectorInstanceName() + "]";
+			String logBase = "Worker " + workerId + ", collect request " + uuid + " [" + user.getName() + "/" + connector.getConnectorInstanceName() + "]";
 			logger.info(logBase + " - TODO");
 			long startTime = System.currentTimeMillis();
-                        collectTimer.start();
+			collectTimer.start();
 			try {
 				res = describeInstances(user, connector, timeout);
 				logger.info(logBase + " - DONE in " + (System.currentTimeMillis() - startTime));
 			} catch (Exception e) {
 				e.printStackTrace();
-				logger.severe(logBase + " - DONE in " + (System.currentTimeMillis() - startTime)
-						+ ". EXCEPTION: " + e.getMessage());
+				logger.severe(logBase + " - DONE in " + (System.currentTimeMillis() - startTime) + ". EXCEPTION: " + e.getMessage());
 			} finally {
 				collectTimer.stop();
 			}
@@ -75,8 +70,7 @@ public class Collector {
 		return res;
 	}
 
-	private static int describeInstances(User user, Connector connector, int timeout)
-			throws ConfigurationException, ValidationException {
+	private static int describeInstances(User user, Connector connector, int timeout) throws ConfigurationException, ValidationException {
 
 		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
 
@@ -85,17 +79,12 @@ public class Collector {
 		try {
 			instances = connector.describeInstances(user, timeout);
 		} catch (SlipStreamException e) {
-			logger.warning("Failed contacting cloud [SlipStreamException]: "
-					+ getUserCloudLogRepr(user, connector) + " with '" + e.getMessage() + "'");
+			logger.warning("Failed contacting cloud [SlipStreamException]: " + getUserCloudLogRepr(user, connector) + " with '" + e.getMessage() + "'");
 			return 0;
 		} catch (SlipStreamRuntimeException e) {
-			logger.warning("Failed contacting cloud [SlipStreamRuntimeException]: "
-					+ getUserCloudLogRepr(user, connector) + " with '" + e.getMessage() + "'");
+			logger.warning("Failed contacting cloud [SlipStreamRuntimeException]: " + getUserCloudLogRepr(user, connector) + " with '" + e.getMessage() + "'");
 		} catch (Exception e) {
-			logger.log(
-					Level.SEVERE,
-					"Error in describeInstances for "
-							+ getUserCloudLogRepr(user, connector) + ": " + e.getMessage(), e);
+			logger.log(Level.SEVERE, "Error in describeInstances for " + getUserCloudLogRepr(user, connector) + ": " + e.getMessage(), e);
 		} finally {
 			logTiming(user, connector, startTime, "describe VMs done.");
 		}
@@ -110,14 +99,12 @@ public class Collector {
 		String cloud = connector.getConnectorInstanceName();
 
 		List<Vm> cloudVms = new ArrayList<Vm>();
-		for (Map.Entry<String, Properties> entry: instances.entrySet()) {
+		for (Map.Entry<String, Properties> entry : instances.entrySet()) {
 			String instanceId = entry.getKey();
 			Properties properties = entry.getValue();
 			String state = properties.getProperty(ConnectorBase.VM_STATE);
 
-			Vm vm = new Vm(instanceId, cloud, state, user.getName(), connector.isVmUsable(state),
-					properties.getProperty(ConnectorBase.VM_CPU), properties.getProperty(ConnectorBase.VM_RAM),
-					properties.getProperty(ConnectorBase.VM_DISK), properties.getProperty(ConnectorBase.VM_INSTANCE_TYPE));
+			Vm vm = new Vm(instanceId, cloud, state, user.getName(), connector.isVmUsable(state), properties.getProperty(ConnectorBase.VM_CPU), properties.getProperty(ConnectorBase.VM_RAM), properties.getProperty(ConnectorBase.VM_DISK), properties.getProperty(ConnectorBase.VM_INSTANCE_TYPE));
 			cloudVms.add(vm);
 		}
 
@@ -130,7 +117,7 @@ public class Collector {
 
 		if (vmRtpMap != null) {
 			RuntimeParameter rp = vmRtpMap.getVmstateRuntimeParameter();
-			if(rp!=null) {
+			if (rp != null) {
 				logger.fine("isVmRunOwnedByUser:: Using state runtime parameter");
 				return user.equals(rp.getContainer().getUser());
 			} else {
@@ -155,6 +142,7 @@ public class Collector {
 			return false;
 		}
 	}
+
 	public static void update(List<Vm> cloudVms, String user, String cloud) {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -181,7 +169,9 @@ public class Collector {
 	}
 
 	private static void updateGraphite(VmsClassifier classifier, String user, String cloud, EntityManager em) {
-		if (!isMeteringEnabled()) { return; }
+		if (!isMeteringEnabled()) {
+			return;
+		}
 
 		int cpu = 0;
 		float ram = 0;
@@ -226,7 +216,6 @@ public class Collector {
 
 	private static void updateUsageRecords(VmsClassifier classifier, String user, String cloud, EntityManager em) {
 
-
 		for (Vm goneVm : classifier.goneVms()) {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
 			if (isVmRunOwnedByUser(goneVm, goneVmRtpMap, user)) {
@@ -262,7 +251,7 @@ public class Collector {
 
 	private static void updateDbVmsWithCloudVms(VmsClassifier classifier, EntityManager em) {
 
-		for(Vm goneVm : classifier.goneVms()) {
+		for (Vm goneVm : classifier.goneVms()) {
 			VmRuntimeParameterMapping goneVmRtpMap = getMapping(goneVm);
 			setVmStateRuntimeParameter(em, goneVmRtpMap, "Unknown");
 			logger.fine("updateDbVmsWithCloudVms: Deleting from VM: id=" + goneVm.getInstanceId() + ", state=" + goneVm.getState());
@@ -270,12 +259,12 @@ public class Collector {
 			VirtualMachineHandler.removeVM(goneVm);
 		}
 
-		for(Vm newVm : classifier.newVms()) {
+		for (Vm newVm : classifier.newVms()) {
 
 			VmRuntimeParameterMapping newVmRtpMap = getMapping(newVm);
 
 			logger.fine("updateDbVmsWithCloudVms::looping newVms, newVmRtpMap=" + newVmRtpMap);
-			if(newVmRtpMap != null) {
+			if (newVmRtpMap != null) {
 				logger.fine("updateDbVmsWithCloudVms::looping newVms, newVmRtpMap.runownwer=" + newVmRtpMap.getRunOwner());
 			}
 
@@ -283,16 +272,15 @@ public class Collector {
 
 			setVmStateRuntimeParameter(em, newVmRtpMap, newVm);
 
-			logger.fine("updateDbVmsWithCloudVms: Persisting into VM: id=" + newVm.getInstanceId()
-					+ ", state=" + newVm.getState());
+			logger.fine("updateDbVmsWithCloudVms: Persisting into VM: id=" + newVm.getInstanceId() + ", state=" + newVm.getState());
 
 			em.persist(newVm);
-            VirtualMachineHandler.addVM(newVm);
+			VirtualMachineHandler.handleVM(newVm);
 		}
 
-		for(Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
+		for (Map.Entry<String, Map<String, Vm>> idDbCloud : classifier.stayingVms()) {
 			Vm cloudVm = idDbCloud.getValue().get(VmsClassifier.CLOUD_VM);
-			Vm dbVm  = idDbCloud.getValue().get(VmsClassifier.DB_VM);
+			Vm dbVm = idDbCloud.getValue().get(VmsClassifier.DB_VM);
 
 			VmRuntimeParameterMapping cloudVmRtpMap = getMapping(cloudVm);
 			updateVmFromRuntimeParametersMappings(cloudVm, cloudVmRtpMap);
@@ -320,6 +308,7 @@ public class Collector {
 					setRunOwner(dbVm, cloudVmRtpMap);
 					merge = true;
 				}
+
 				if (dbVm.getIp() == null) {
 					// DB select
 					setIp(dbVm, cloudVmRtpMap);
@@ -358,7 +347,7 @@ public class Collector {
 			if (merge) {
 				logger.info("updateDbVmsWithCloudVms: Updating db VM: id=" + dbVm.getInstanceId() + ", state=" + dbVm.getState());
 				em.merge(dbVm);
-				VirtualMachineHandler.updateVM(dbVm);
+				VirtualMachineHandler.handleVM(dbVm);
 			} else {
 				logger.info("updateDbVmsWithCloudVms: Doing nothing with VM: id=" + dbVm.getInstanceId() + ", state=" + dbVm.getState());
 			}
@@ -457,10 +446,10 @@ public class Collector {
 	}
 
 	public static boolean areEquals(Comparable a, Comparable b) {
-		if(a==null) {
-			return b==null;
+		if (a == null) {
+			return b == null;
 		}
-		return b!=null && a.compareTo(b)==0;
+		return b != null && a.compareTo(b) == 0;
 	}
 
 }
