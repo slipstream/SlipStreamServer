@@ -1,17 +1,17 @@
 package com.sixsq.slipstream.persistence;
 
 
-import com.sixsq.slipstream.event.ACL;
-import com.sixsq.slipstream.event.TypePrincipal;
-import com.sixsq.slipstream.event.TypePrincipalRight;
+import com.sixsq.slipstream.acl.ACL;
+import com.sixsq.slipstream.acl.TypePrincipal;
+import com.sixsq.slipstream.acl.TypePrincipalRight;
 import com.sixsq.slipstream.util.SscljProxy;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
-import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
+import static com.sixsq.slipstream.acl.TypePrincipal.PrincipalType.USER;
+import static com.sixsq.slipstream.acl.TypePrincipalRight.Right.ALL;
 
 public class VirtualMachine {
     public String toJson() {
@@ -71,6 +71,14 @@ public class VirtualMachine {
 
     @SuppressWarnings("unused")
     private ACL acl;
+
+    public ACL getAcl() {
+        return acl;
+    }
+
+    public void setAcl(ACL acl) {
+        this.acl = acl;
+    }
 
     @SuppressWarnings("unused")
     private String resourceURI;

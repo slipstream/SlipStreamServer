@@ -1,12 +1,15 @@
 package com.sixsq.slipstream.event;
 
+import com.sixsq.slipstream.acl.ACL;
+import com.sixsq.slipstream.acl.TypePrincipal;
+import com.sixsq.slipstream.acl.TypePrincipalRight;
 import com.sixsq.slipstream.util.SscljProxy;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.ROLE;
-import static com.sixsq.slipstream.event.TypePrincipal.PrincipalType.USER;
-import static com.sixsq.slipstream.event.TypePrincipalRight.Right.ALL;
+import static com.sixsq.slipstream.acl.TypePrincipal.PrincipalType.ROLE;
+import static com.sixsq.slipstream.acl.TypePrincipal.PrincipalType.USER;
+import static com.sixsq.slipstream.acl.TypePrincipalRight.Right.ALL;
 
 public class Event {
 

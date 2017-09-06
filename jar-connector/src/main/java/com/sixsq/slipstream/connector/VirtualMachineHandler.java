@@ -6,6 +6,9 @@ import com.sixsq.slipstream.persistence.VirtualMachines;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Response;
+import com.sixsq.slipstream.acl.ACL;
+import com.sixsq.slipstream.acl.TypePrincipal;
+import com.sixsq.slipstream.acl.TypePrincipalRight;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -41,9 +44,32 @@ public class VirtualMachineHandler {
 
     public static void updateVM(Vm vm) {
         VirtualMachine vmDb = loadVirtualMachine(vm.getCloud(),vm.getInstanceId());
-        if (vmDb == null) return; //nothing to update
+
+        if (vmDb == null){
+            addVM(vm);
+            return;
+        };
+
+        ACL acl =vmDb.getAcl();
+        List<TypePrincipalRight> rules = acl.getRules();
+
+
+
+        //Update ACL so that any runOwner can view the resource
+        //TODO : update code when the credential resource is available
+        String runUuid =vm.getRunUuid();
+
+        if (runUuid != null){
+            String runOwner = vm.getRunOwner();
+            rules.add(new TypePrincipalRight(TypePrincipal.PrincipalType.USER, runOwner, TypePrincipalRight.Right.VIEW));
+            acl.setRules(rules);
+
+        }
+
 
         VirtualMachine vmToUpdate = VirtualMachineHandler.getResourceFromPojo(vm);
+        //ACL may have been updated
+        vmToUpdate.setAcl(acl);
         SscljProxy.put("api/" + vmDb.getId(), USERNAME, vmToUpdate);
 
     }
@@ -123,9 +149,9 @@ public class VirtualMachineHandler {
 
 
     private static ACL getAcl() {
-        com.sixsq.slipstream.connector.TypePrincipal owner = new com.sixsq.slipstream.connector.TypePrincipal(com.sixsq.slipstream.connector.TypePrincipal.PrincipalType.USER, "joe");
-        List<com.sixsq.slipstream.connector.TypePrincipalRight> rules = new ArrayList<com.sixsq.slipstream.connector.TypePrincipalRight>();
-        rules.add(new com.sixsq.slipstream.connector.TypePrincipalRight(com.sixsq.slipstream.connector.TypePrincipal.PrincipalType.USER, "joe", com.sixsq.slipstream.connector.TypePrincipalRight.Right.ALL));
+        TypePrincipal owner = new TypePrincipal(TypePrincipal.PrincipalType.USER, "joe");
+        List<TypePrincipalRight> rules = new ArrayList<com.sixsq.slipstream.connector.TypePrincipalRight>();
+        rules.add(new TypePrincipalRight(TypePrincipal.PrincipalType.USER, "joe", TypePrincipalRight.Right.ALL));
         return new ACL(owner, rules);
     }
 

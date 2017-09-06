@@ -4,12 +4,15 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.sixsq.slipstream.acl.ACL;
+import com.sixsq.slipstream.acl.TypePrincipal;
+import com.sixsq.slipstream.acl.TypePrincipalRight;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.sixsq.slipstream.event.Event.EventType;
-import com.sixsq.slipstream.event.TypePrincipal.PrincipalType;
-import com.sixsq.slipstream.event.TypePrincipalRight.Right;
+import com.sixsq.slipstream.acl.TypePrincipal.PrincipalType;
+import com.sixsq.slipstream.acl.TypePrincipalRight.Right;
 
 
 public class EventTest {
@@ -17,7 +20,7 @@ public class EventTest {
 	@Test
 	public void eventCanBeCreatedAndJsonified() {
 		
-		TypePrincipal owner = new TypePrincipal(PrincipalType.USER, "joe");		
+		TypePrincipal owner = new TypePrincipal(PrincipalType.USER, "joe");
 		List<TypePrincipalRight> rules = Arrays.asList(new TypePrincipalRight(
 				PrincipalType.ROLE, "ANON", Right.ALL));
 		ACL acl = new ACL(owner, rules);
