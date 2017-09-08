@@ -98,6 +98,15 @@
         (ltu/body->edn)
         (ltu/is-status 403))
 
+    ;; creating a new credential with bad key must return 400
+    (-> session-user
+        (request base-uri
+                 :request-method :post
+                 :body (json/write-str (assoc-in create-import-href [:credentialTemplate :publicKey] "bad-ssh-key")))
+        (ltu/body->edn)
+        (ltu/is-status 400)
+        (ltu/message-matches #".*invalid public key.*"))
+
     ;; create a credential as a normal user
     (let [resp (-> session-user
                    (request base-uri
