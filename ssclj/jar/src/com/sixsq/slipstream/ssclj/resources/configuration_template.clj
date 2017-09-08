@@ -90,14 +90,14 @@
                      :type        "string"
                      :mandatory   true
                      :readOnly    true
-                     :order       0}
+                     :order       10}
           :instance {:displayName "Instance"
                      :category    "general"
                      :description "identifies the service instance to be configured"
                      :type        "string"
                      :mandatory   false
                      :readOnly    false
-                     :order       1}}))
+                     :order       11}}))
 ;;
 ;; multimethods for validation
 ;;

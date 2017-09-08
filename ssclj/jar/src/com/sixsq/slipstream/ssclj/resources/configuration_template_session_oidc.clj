@@ -29,19 +29,19 @@
                       :description "client identifier assigned by the OIDC server"
                       :mandatory   true
                       :readOnly    false
-                      :order       1}
+                      :order       20}
           :baseURL   {:displayName "Base URL"
                       :type        "string"
                       :description "server's endpoint URL for the OIDC protocol"
                       :mandatory   true
                       :readOnly    false
-                      :order       2}
+                      :order       21}
           :publicKey {:displayName "Public Key"
                       :type        "string"
                       :description "public key to verify signed tokens from the OIDC server"
                       :mandatory   true
                       :readOnly    false
-                      :order       3}}))
+                      :order       22}}))
 
 ;;
 ;; initialization: register this Configuration template

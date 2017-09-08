@@ -150,37 +150,7 @@
     :mandatory   true
     :readOnly    false
     :order       10}
-   :nativeContextualization
-   {:displayName  "native-contextualization"
-    :type         "enum"
-    :category     ""
-    :description  "Use native cloud contextualisation"
-    :mandatory    true
-    :readOnly     false
-    :order        920
-    :enum         ["never" "linux-only" "windows-only" "always"]
-    :instructions (str "Here you can define when SlipStream should use the native Cloud "
-                       "contextualization or when it should try other methods like SSH and WinRM. <br/>")}
-   :orchestratorSSHUsername
-   {:displayName  "orchestrator.ssh.username"
-    :type         "string"
-    :category     ""
-    :description  "Orchestrator username"
-    :mandatory    true
-    :readOnly     false
-    :order        30
-    :instructions (str "Username used to contextualize the orchestrator VM. Leave this "
-                       "field empty if you are using a native Cloud contextualization.")}
-   :orchestratorSSHPassword
-   {:displayName  "orchestrator.ssh.password"
-    :type         "password"
-    :category     ""
-    :description  "Orchestrator password"
-    :mandatory    true
-    :readOnly     false
-    :order        31
-    :instructions (str "Password used to contextualize the orchestrator VM. Leave this "
-                       "field empty if you are using a native Cloud contextualization.")}
+
    :securityGroups
    {:displayName "security.groups"
     :type        "string"
@@ -188,7 +158,41 @@
     :description "Orchestrator security groups (comma separated list)"
     :mandatory   true
     :readOnly    false
-    :order       25}
+    :order       11}
+
+   :orchestratorSSHUsername
+   {:displayName  "orchestrator.ssh.username"
+    :type         "string"
+    :category     ""
+    :description  "Orchestrator username"
+    :mandatory    true
+    :readOnly     false
+    :order        20
+    :instructions (str "Username used to contextualize the orchestrator VM. Leave this "
+                       "field empty if you are using a native Cloud contextualization.")}
+
+   :orchestratorSSHPassword
+   {:displayName  "orchestrator.ssh.password"
+    :type         "password"
+    :category     ""
+    :description  "Orchestrator password"
+    :mandatory    true
+    :readOnly     false
+    :order        21
+    :instructions (str "Password used to contextualize the orchestrator VM. Leave this "
+                       "field empty if you are using a native Cloud contextualization.")}
+   :nativeContextualization
+   {:displayName  "native-contextualization"
+    :type         "enum"
+    :category     ""
+    :description  "Use native cloud contextualisation"
+    :mandatory    true
+    :readOnly     false
+    :order        30
+    :enum         ["never" "linux-only" "windows-only" "always"]
+    :instructions (str "Here you can define when SlipStream should use the native Cloud "
+                       "contextualization or when it should try other methods like SSH and WinRM. <br/>")}
+
    :updateClientURL
    {:displayName "update.clienturl"
     :type        "string"
@@ -196,7 +200,7 @@
     :description "URL pointing to the tarball containing the client for the connector"
     :mandatory   true
     :readOnly    false
-    :order       950}})
+    :order       31}})
 
 ;;
 ;; multimethods for validation

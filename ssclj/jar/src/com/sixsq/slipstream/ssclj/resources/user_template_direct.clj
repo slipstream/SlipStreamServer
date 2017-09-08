@@ -36,35 +36,35 @@
                          :type        "string"
                          :mandatory   true
                          :readOnly    false
-                         :order       1}
+                         :order       20}
           :emailAddress {:displayName "Email Address"
                          :category    "general"
                          :description "email address"
                          :type        "string"
                          :mandatory   true
                          :readOnly    false
-                         :order       2}
+                         :order       21}
           :firstName    {:displayName "First Name"
                          :category    "general"
                          :description "user's given name"
                          :type        "string"
                          :mandatory   false
                          :readOnly    false
-                         :order       3}
+                         :order       22}
           :lastName     {:displayName "Last Name"
                          :category    "general"
                          :description "user's last or family name"
                          :type        "string"
                          :mandatory   false
                          :readOnly    false
-                         :order       4}
+                         :order       23}
           :organization {:displayName "Organization"
                          :category    "general"
                          :description "user's organization"
                          :type        "string"
                          :mandatory   false
                          :readOnly    false
-                         :order       5}}))
+                         :order       24}}))
 
 ;;
 ;; initialization: register this User template

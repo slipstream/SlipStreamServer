@@ -37,14 +37,14 @@
                          :type        "string"
                          :mandatory   true
                          :readOnly    false
-                         :order       1}
+                         :order       20}
           :emailAddress {:displayName "Email Address"
                          :category    "general"
                          :description "email address"
                          :type        "string"
                          :mandatory   true
                          :readOnly    false
-                         :order       2}}))
+                         :order       21}}))
 
 ;;
 ;; initialization: register this User template

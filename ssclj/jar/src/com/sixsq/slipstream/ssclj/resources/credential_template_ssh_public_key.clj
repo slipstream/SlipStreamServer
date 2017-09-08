@@ -39,7 +39,7 @@
                       :type        "string"
                       :mandatory   true
                       :readOnly    false
-                      :order       1}}))
+                      :order       20}}))
 
 ;;
 ;; initialization: register this Credential template

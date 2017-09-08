@@ -96,7 +96,7 @@
                    :type        "string"
                    :mandatory   true
                    :readOnly    true
-                   :order       0}}))
+                   :order       10}}))
 ;;
 ;; multimethods for validation
 ;;
