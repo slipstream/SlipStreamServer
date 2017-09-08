@@ -25,14 +25,14 @@
                    :type        "string"
                    :mandatory   true
                    :readOnly    false
-                   :order       3}
+                   :order       20}
           :secret {:displayName "Secret"
                    :category    "general"
                    :description "secret associated with API key"
                    :type        "password"
                    :mandatory   true
                    :readOnly    false
-                   :order       4}}))
+                   :order       21}}))
 
 ;;
 ;; initialization: register this Session template

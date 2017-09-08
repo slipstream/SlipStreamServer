@@ -40,14 +40,14 @@
                       :type        "int"
                       :mandatory   false
                       :readOnly    false
-                      :order       1}
+                      :order       20}
           :algorithm {:displayName "SSH Key Algorithm"
                       :category    "general"
                       :description "algorithm ('rsa', 'dsa') to use to generate key pair"
                       :type        "string"
                       :mandatory   false
                       :readOnly    false
-                      :order       2}}))
+                      :order       21}}))
 
 ;;
 ;; initialization: register this Credential template

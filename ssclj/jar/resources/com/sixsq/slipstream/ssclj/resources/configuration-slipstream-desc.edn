@@ -6,7 +6,8 @@
   "Location where the deployments and build reports are saved",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 20},
+
  :connectorOrchPrivateSSHKey
  {:displayName "cloud.connector.orchestrator.privatesshkey",
   :type "string",
@@ -15,7 +16,8 @@
   "Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 21},
+
  :clientBootstrapURL
  {:displayName "slipstream.update.clientbootstrapurl",
   :type "string",
@@ -23,7 +25,8 @@
   :description "Endpoint of the SlipStream client bootstrap script",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 22},
+
  :meteringEndpoint
  {:displayName "slipstream.metering.hostname",
   :type "string",
@@ -32,7 +35,8 @@
   "Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:2005).",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 23},
+
  :mailHost
  {:displayName "slipstream.mail.host",
   :type "string",
@@ -40,7 +44,8 @@
   :description "Host for SMTP server for email notifications.",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 24},
+
  :mailPort
  {:displayName "slipstream.mail.port",
   :type "string",
@@ -48,7 +53,8 @@
   :description "Port on SMTP server (defaults to standard ports).",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 25},
+
  :registrationEnable
  {:displayName "slipstream.registration.enable",
   :type "boolean",
@@ -57,7 +63,8 @@
   "Allow user self registration. If checked, user will be able to create accounts themselves.",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 26},
+
  :mailSSL
  {:displayName "slipstream.mail.ssl",
   :type "boolean",
@@ -65,7 +72,8 @@
   :description "Use SSL for SMTP server.",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 27},
+
  :registrationEmail
  {:displayName "slipstream.registration.email",
   :type "string",
@@ -73,8 +81,9 @@
   :description "Email address for account approvals, etc.",
   :mandatory true,
   :readOnly false,
-  :order 0,
+  :order 28,
   :instructions "Email address to use for registration."},
+
  :serviceURL
  {:displayName "slipstream.base.url",
   :type "string",
@@ -82,7 +91,8 @@
   :description "Default URL and port for the SlipStream RESTlet",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 29},
+
  :meteringEnable
  {:displayName "slipstream.metering.enable",
   :type "boolean",
@@ -90,7 +100,8 @@
   :description "Metering enabled",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 30},
+
  :supportEmail
  {:displayName "slipstream.support.email",
   :type "string",
@@ -98,7 +109,8 @@
   :description "Email address for SlipStream support requests",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 31},
+
  :clientURL
  {:displayName "slipstream.update.clienturl",
   :type "string",
@@ -106,7 +118,8 @@
   :description "Endpoint of the SlipStream client tarball",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 32},
+
  :connectorLibcloudURL
  {:displayName "cloud.connector.library.libcloud.url",
   :type "string",
@@ -114,8 +127,9 @@
   :description "URL to fetch libcloud library from",
   :mandatory true,
   :readOnly false,
-  :order 0,
+  :order 33,
   :instructions "URL should point to a valid gzipped tarball."},
+
  :quotaEnable
  {:displayName "slipstream.quota.enable",
   :type "boolean",
@@ -123,7 +137,8 @@
   :description "Quota enforcement enabled",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 34},
+
  :mailDebug
  {:displayName "slipstream.mail.debug",
   :type "boolean",
@@ -131,7 +146,8 @@
   :description "Debug mail sending.",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 35},
+
  :connectorOrchPublicSSHKey
  {:displayName "cloud.connector.orchestrator.publicsshkey",
   :type "string",
@@ -139,7 +155,8 @@
   :description "Path to the SSH public key to put in the orchestrator",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 36},
+
  :mailUsername
  {:displayName "slipstream.mail.username",
   :type "string",
@@ -147,9 +164,10 @@
   :description "Username for SMTP server.",
   :mandatory true,
   :readOnly false,
-  :order 0,
+  :order 37,
   :instructions
   "Username of the mail server account you want to use to send registration emails."},
+
  :serviceCatalogEnable
  {:displayName "slipstream.service.catalog.enable",
   :type "boolean",
@@ -157,7 +175,8 @@
   :description "Enable service catalog feature.",
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 38},
+
  :mailPassword
  {:displayName "slipstream.mail.password",
   :type "password",
@@ -165,7 +184,8 @@
   :description "Password for SMTP server.",
   :mandatory true,
   :readOnly false,
-  :order 0}
+  :order 39}
+
  :slipstreamVersion
  {:displayName  "slipstream.version"
   :type         "string"
@@ -174,9 +194,9 @@
   :mandatory    true
   :readOnly     true
   :instructions ""
-  :order        0}
+  :order        40}
 
- ;; FIXME: used only for compatibilty with the Java server. To be removed.
+ ;; FIXME: used only for compatibility with the Java server. To be removed.
  :cloudConnectorClass
  {:displayName  "cloud.connector.class"
   :type         "Text"
@@ -185,7 +205,7 @@
   :mandatory    true
   :readOnly     false
   :instructions ""
-  :order        0}
+  :order        41}
 
  :metricsLoggerEnable
  {:displayName "slipstream.metrics.logger.enable",
@@ -195,7 +215,8 @@
   :instructions "Please restart SlipStream for this change to be taken into account"
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 42},
+
  :metricsGraphiteEnable
  {:displayName "slipstream.metrics.graphite.enable",
   :type "boolean",
@@ -204,7 +225,7 @@
   :instructions "Please restart SlipStream for this change to be taken into account"
   :mandatory true,
   :readOnly false,
-  :order 0},
+  :order 43},
 
  }
 

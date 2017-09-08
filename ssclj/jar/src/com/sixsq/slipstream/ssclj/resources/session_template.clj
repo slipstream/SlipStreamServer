@@ -77,28 +77,28 @@
                         :type        "string"
                         :mandatory   true
                         :readOnly    true
-                        :order       0}
+                        :order       10}
           :instance    {:displayName "Authentication Method Key (Name)"
                         :category    "general"
                         :description "key used to identify this authentication source"
                         :type        "string"
                         :mandatory   true
                         :readOnly    true
-                        :order       1}
+                        :order       11}
           :group       {:displayName "Authentication Group"
                         :category    "general"
                         :description "optional label to group authentication methods"
                         :type        "string"
                         :mandatory   false
                         :readOnly    false
-                        :order       2}
+                        :order       12}
           :redirectURI {:displayName "Redirect URI"
                         :category    "general"
                         :description "optional redirect URI to be used on success"
                         :type        "hidden"
                         :mandatory   false
                         :readOnly    false
-                        :order       3}}))
+                        :order       13}}))
 ;;
 ;; multimethods for validation
 ;;
