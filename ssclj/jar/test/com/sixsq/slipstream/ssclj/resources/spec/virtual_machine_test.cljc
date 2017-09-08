@@ -38,10 +38,10 @@
                 :state        "Running"
                 :ip           "127.0.0.1"
 
-                :credential   {:href  "connector/0123-4567-8912",
-                               :roles ["realm:cern", "realm:my-accounting-group"]
-                               :users ["long-user-id-1", "long-user-id-2"]}
-
+                :credentials  [{:href  "connector/0123-4567-8912",
+                                :roles ["realm:cern", "realm:my-accounting-group"]
+                                :users ["long-user-id-1", "long-user-id-2"]}
+                               ]
                 :run          {:href "run/aaa-bbb-ccc",
                                :user {:href "user/test"}}
 
@@ -65,7 +65,7 @@
                        true? (assoc vm-sample :name "name"))
 
   ;; mandatory keywords
-  (doseq [k #{:credential :state :instanceID}]
+  (doseq [k #{:credentials :state :instanceID}]
     (is (not (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))
 
   ;; optional keywords

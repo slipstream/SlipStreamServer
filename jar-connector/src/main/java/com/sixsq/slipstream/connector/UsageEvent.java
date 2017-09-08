@@ -2,6 +2,7 @@ package com.sixsq.slipstream.connector;
 
 import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.util.SscljProxy;
+import com.sixsq.slipstream.acl.ACL;
 
 import java.util.*;
 import java.util.logging.Logger;

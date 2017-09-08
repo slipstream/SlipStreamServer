@@ -3,6 +3,9 @@ package com.sixsq.slipstream.connector;
 
 import org.junit.Assert;
 import org.junit.Test;
+import com.sixsq.slipstream.acl.ACL;
+import com.sixsq.slipstream.acl.TypePrincipal;
+import com.sixsq.slipstream.acl.TypePrincipalRight;
 
 import java.util.*;
 
