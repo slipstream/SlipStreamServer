@@ -347,10 +347,11 @@ public class Collector {
 			if (merge) {
 				logger.info("updateDbVmsWithCloudVms: Updating db VM: id=" + dbVm.getInstanceId() + ", state=" + dbVm.getState());
 				em.merge(dbVm);
-				VirtualMachineHandler.handleVM(dbVm);
 			} else {
 				logger.info("updateDbVmsWithCloudVms: Doing nothing with VM: id=" + dbVm.getInstanceId() + ", state=" + dbVm.getState());
 			}
+
+			VirtualMachineHandler.handleVM(dbVm);
 
 		}
 	}
