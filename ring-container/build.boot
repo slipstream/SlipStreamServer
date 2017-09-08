@@ -1,4 +1,4 @@
-(def +version+ "3.36-SNAPSHOT")
+(def +version+ "3.36")
 
 (set-env!
   :project 'com.sixsq.slipstream/slipstream-ring-container
