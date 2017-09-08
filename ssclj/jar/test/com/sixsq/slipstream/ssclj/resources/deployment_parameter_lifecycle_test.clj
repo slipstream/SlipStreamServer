@@ -44,7 +44,7 @@
   (let [deployment-href "deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
         valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node-instance"
                      :name     "xyz" :value "XYZ" :acl resource-acl-jane}
-        znode-path (zdu/deployment-parameter-znode-path valid-entry)
+        znode-path (zdu/deployment-parameter-path valid-entry)
         deployment-parameter-id (->
                            (->> {:params   {:resource-name resource-url}
                                  :identity identity-admin
@@ -77,11 +77,13 @@
 
     (is (not (= "newvalue-albert" (uzk/get-data znode-path))) "deployment parameter can be updated")))
 
-(deftest deployment-parameter-state-complete
+
+; TODO move deployment parameter with special behavior to deployment lifecycle test
+#_(deftest deployment-parameter-state-complete
   (let [deployment-href "deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
         valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node-instance"
                      :name     "state-complete" :value "executing" :acl resource-acl-jane}
-        znode-path (zdu/deployment-parameter-znode-path valid-entry)
+        znode-path (zdu/deployment-parameter-path valid-entry)
         deployment-parameter-id (->
                                   (->> {:params   {:resource-name resource-url}
                                         :identity identity-admin
@@ -99,9 +101,11 @@
 
     (is (= "executing" (uzk/get-data znode-path)))
 
+
+
     (-> session-user-jane
         (request abs-uri :request-method :put
-                 :body (json/write-str {:value "running"}))
+                 :body (json/write-str {:value ""}))
         (t/body->edn)
         (t/is-status 200))
 

@@ -134,9 +134,8 @@
           deployment (-> current
                          (add-start-time)
                          (u/update-timestamps)
-                         (crud/validate)
-                         (db/edit request))]
+                         (crud/validate))]
       (du/create-parameters identity current)
-      deployment)
+      (db/edit deployment request))
     (catch ExceptionInfo ei
       (ex-data ei))))

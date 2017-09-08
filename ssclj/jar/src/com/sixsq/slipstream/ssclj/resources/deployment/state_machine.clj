@@ -30,3 +30,9 @@
    "ready" ["provisioning" ]
    "finalyzing" ["terminated"]
    "terminated" []})
+
+
+(defn get-next-state [current-state]
+  (-> current-state
+      (get valid-transitions)
+      first))

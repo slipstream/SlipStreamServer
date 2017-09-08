@@ -73,53 +73,7 @@
                                  (t/body->edn)
                                  (t/is-status 200))]
 
-      (is (not (uzk/exists (str zdu/znode-separator deployment-href)))))))
-
-(deftest start-deployment
-
-  (let [session-admin-json (-> (session (ring-app))
-                               (content-type "application/json")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
-                               (content-type "application/x-www-form-urlencoded")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
-
-    ;; adding, retrieving and  deleting entry as user should succeed
-    (let [deployment-href (-> session-user
-                              (request base-uri
-                                       :request-method :post
-                                       :body (json/write-str valid-entry))
-                              (t/body->edn)
-                              (t/is-status 201)
-                              (t/location))
-          abs-uri (str p/service-context (u/de-camelcase deployment-href))
-          created-deployment (-> session-user
-                                 (request abs-uri)
-                                 (t/body->edn)
-                                 (t/is-status 200))
-          start-uri (str p/service-context
-                         (t/get-op created-deployment "http://schemas.dmtf.org/cimi/2/action/start"))
-          started-deployment (-> session-user
-                                 (request start-uri)
-                                 (t/body->edn)
-                                 (t/is-status 200))
-          ]
-
-      (is (not (get-in created-deployment [:body :start-time])))
-      (is (get-in started-deployment [:response :body :start-time]))
-
-      (is (= "init" (get-in started-deployment [:response :body :state])))
-
-      (are [expected value]
-        (= expected value)
-        "init" (uzk/get-data (str zdu/znode-separator deployment-href "/state"))
-        "init" (uzk/get-data
-                 (str zdu/znode-separator deployment-href "/" zdu/nodes-txt "/node2/1/" "vmstate"))))))
+      (is (not (uzk/exists (str zdu/separator deployment-href)))))))
 
 
 (deftest start-deployment
@@ -164,9 +118,10 @@
 
       (are [expected value]
         (= expected value)
-        "init" (uzk/get-data (str zdu/znode-separator deployment-href "/state"))
+        "init" (uzk/get-data (str zdu/separator deployment-href "/state"))
         "init" (uzk/get-data
-                 (str zdu/znode-separator deployment-href "/" zdu/nodes-txt "/node2/1/" "vmstate"))))))
+                 (str zdu/separator deployment-href "/" zdu/nodes-name "/node2/1/" "vmstate"))))))
+
 (deftest create-deployment-update-deployment-state
 
   (let [session-admin-json (-> (session (ring-app))
@@ -215,5 +170,5 @@
 
       (is (= "provisioning" (get-in provisioning-deployment [:response :body :state])))
 
-      (is (= "provisioning" (uzk/get-data (str zdu/znode-separator deployment-href "/state"))))
+      (is (= "provisioning" (uzk/get-data (str zdu/separator deployment-href "/state"))))
       )))

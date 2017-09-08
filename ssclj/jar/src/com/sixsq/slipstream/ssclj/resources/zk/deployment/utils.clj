@@ -1,58 +1,74 @@
 (ns com.sixsq.slipstream.ssclj.resources.zk.deployment.utils
   (:require [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-            [zookeeper :as zk]
             [clojure.string :as string]))
 
-(def znode-separator "/")
+(def separator "/")
+(def nodes-name "nodes")
+(def lock-name "lock")
 
-(def nodes-txt "nodes")
+(defn deployment-path [deployment-href]
+  (str separator deployment-href))
 
-(defn deployment-parameter-znode-path
+(defn lock-deployment-path [deployment-href]
+  (str (deployment-path deployment-href) separator lock-name))
+
+(defn deployment-parameter-path
   [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
   (->> (cond
-         (and deployment-href node-name node-index)
-         (string/join znode-separator [deployment-href nodes-txt node-name node-index name])
-         (and deployment-href node-name) (string/join znode-separator [deployment-href nodes-txt node-name name])
-         deployment-href (string/join znode-separator [deployment-href name]))
-       (str znode-separator)))
+         (and node-name node-index)
+         (string/join separator [nodes-name node-name node-index name])
+         (and deployment-href node-name)
+         (string/join separator [nodes-name node-name name])
+         deployment-href name)
+       (str (deployment-path deployment-href) separator)))
 
-(defn deployment-parameter-node-instance-complete-state-znode-path
+(defn deployment-parameter-node-instance-complete-state-path
   [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
   (let [node-instance-complete-state-znode-id (string/join "_" [node-name node-index name])]
-    (str znode-separator
-         (string/join znode-separator [deployment-href "state" node-instance-complete-state-znode-id]))))
+    (str separator
+         (string/join separator [deployment-href "state" node-instance-complete-state-znode-id]))))
 
-;(defn run-id-path [run-id])
+(defn lock-deployment
+  "Create a lock for the deployment. This should be used each time multi-operations on zookeeper are needed to complete
+  a request on deployment or deployment-parameter HTTP resource."
+  [deployment-href]
+  (uzk/create (lock-deployment-path deployment-href) :persistent? false))
 
-;  (str runs-path "/" run-id))
-;
-;(defn nodes-path [run-id]
-;  (str (run-id-path run-id) "/nodes"))
-;
-;(defn node-path
-;  [run-id node-name]
-;  (str (nodes-path run-id) "/" node-name))
-;
-;(defn indexed-node-path [run-id node-name node-index]
-;  (str (node-path run-id node-name) "/" node-index))
-;
-;(defn create-run [run-id]
-;  (uzk/create (run-id-path run-id) :persistent? true))
+(defn unlock-deployment
+  "Release the lock for the specified deployment."
+  [deployment-href]
+  (uzk/delete (lock-deployment-path deployment-href)))
 
+(defn is-deployment-locked?
+  "Check if the deployment is locked."
+  [deployment-href]
+  (not (nil? (uzk/exists (lock-deployment-path deployment-href)))))
 
+(defn check-deployment-lock-and-throw!
+  "Throw if deployment is locked."
+  [deployment-href]
+  (when (is-deployment-locked? deployment-href) ; TODO throw well know error code
+    (throw (Exception. "Deployment is locked, come back later!"))))
 
-#_(defn create-zk-run [{run-id :id nodes :nodes :as run}]
-    (doseq [n nodes]
-      (zk/create-all uzk/*client* (node-path run-id (key n)) :persistent? true)
-      (let [{:keys [params multiplicity mapping]} (val n)]
-        (doseq [i (range 1 (inc multiplicity))]
-          (zk/create-all client (rzu/params-znode-path run-id (key n) i) :persistent? true)
-          (doseq [p params]
-            (if-let [default (-> p val :default)]
-              (zk/create client (rzu/param-znode-path run-id (key n) i (key p))
-                         :data (zdata/to-bytes default)
-                         :persistent? true)
-              (zk/create client (rzu/param-znode-path run-id (key n) i (key p))
-                         :persistent? true))))))
-    (rsm/create client run-id module params)
-    )
+(defn get-deployment-parameter-value [deployment-parameter & {:keys [watcher]}]
+  (if watcher
+    (uzk/get-data (deployment-parameter-path deployment-parameter) :watcher watcher)
+    (uzk/get-data (deployment-parameter-path deployment-parameter))))
+
+(defn deployment-state-path [deployment-href]
+  (deployment-parameter-path {:deployment-href deployment-href :name "state"}))
+
+(defn get-deployment-state [deployment-href]
+  (uzk/get-data (deployment-state-path deployment-href)))
+
+(defn check-same-state-and-throw!
+  [deployment-href state]
+  (let [current-state (get-deployment-state deployment-href)]
+    (when-not (= state current-state)
+      (throw (Exception.
+               (str "State machine (complete-state = " current-state
+                    ") in different state from deployment state = " state "!"))))))
+
+(defn complete-node-instance-state [{state :value :as deployment-parameter}]
+  (uzk/delete (deployment-parameter-node-instance-complete-state-path deployment-parameter))
+  (uzk/set-data (deployment-parameter-path deployment-parameter) state))

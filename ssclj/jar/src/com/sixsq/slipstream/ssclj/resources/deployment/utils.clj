@@ -10,6 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [create-identity-map]]
     [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]
+    [com.sixsq.slipstream.ssclj.resources.zk.deployment.state-machine :as dsm]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [clojure.string :as string]))
 
@@ -25,7 +26,7 @@
 (defn update-deployment-attribut [deployment-uuid attribute-name value]
   (try
     (let [request {:params   {:resource-name deployment-resource-url
-                              :uuid deployment-uuid}
+                              :uuid          deployment-uuid}
                    :identity (create-identity-map ["super" #{"ADMIN"}])
                    :body     {(keyword attribute-name) value}}
           {:keys [status body]} (edit-deployment-impl request)]
@@ -54,7 +55,8 @@
   [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
   (let [deployment-uuid (deployment-href-to-uuid deployment-href)]
     (cond
-      (and deployment-uuid node-name node-index) (string/join deployment-parameter-id-separator [deployment-uuid node-name node-index name])
+      (and deployment-uuid node-name node-index) (string/join deployment-parameter-id-separator
+                                                              [deployment-uuid node-name node-index name])
       (and deployment-uuid node-name) (string/join deployment-parameter-id-separator [deployment-uuid node-name name])
       deployment-uuid (string/join deployment-parameter-id-separator [deployment-uuid name]))))
 
@@ -67,15 +69,69 @@
                                  u/update-timestamps
                                  (crud/add-acl request)
                                  crud/validate)
-        response (db/add deployment-parameter-resource-name deployment-parameter {})
         value (:value body)
-        node-path (zdu/deployment-parameter-znode-path body)]
+        node-path (zdu/deployment-parameter-path body)]
     (uzk/create-all node-path :persistent? true)
     (uzk/set-data node-path value)
     (when (and (= "state-complete" (:name deployment-parameter))
                (= "node-instance" (:type deployment-parameter)))
-      (uzk/create-all (zdu/deployment-parameter-node-instance-complete-state-znode-path deployment-parameter)))
-    response))
+      (uzk/create-all
+        (zdu/deployment-parameter-node-instance-complete-state-path deployment-parameter) :persistent? true))
+    (db/add deployment-parameter-resource-name deployment-parameter {})))
+
+(defn edit-deployment-parameter-impl
+  [{{uuid :uuid} :params body :body :as request}]
+  (let [current (-> (str deployment-parameter-resource-url "/" uuid)
+                    (db/retrieve request)
+                    (a/can-modify? request)) ;TODO we should not allow user to update type and some other properties of deployment parameter (use dissoc)
+        merged (merge current body)
+        value (:value merged)
+        deployment-href (:deployment-href merged)
+        deployment-parameter (-> merged
+                                 (u/update-timestamps)
+                                 (crud/validate))]
+    (when value
+      (condp = (:type merged)
+        "deployment" (do
+                       (zdu/check-deployment-lock-and-throw! deployment-href)
+                       (zdu/lock-deployment deployment-href)
+                       (uzk/set-data (zdu/deployment-parameter-path merged) value)
+                       (update-deployment-attribut
+                         (deployment-href-to-uuid deployment-href) (:name merged) value)
+                       (zdu/unlock-deployment deployment-href))
+        "node-instance" (condp = (:name merged)
+                          "state-complete" (do
+                                             (zdu/check-deployment-lock-and-throw! deployment-href)
+                                             (zdu/check-same-state-and-throw! deployment-href value)
+                                             (zdu/lock-deployment deployment-href)
+                                             (zdu/complete-node-instance-state merged)
+                                             (when-not (uzk/children
+                                                         (zdu/deployment-state-path deployment-href))
+                                               ;TODO function trigger next state for current deployment
+                                               (println "post with next state on run parameter state with next state value")
+                                               (println "create all nodes instances state-complete of next global state")
+                                               #_(update-deployment-attribut ;TODO this will create a deadlock, I should update directly ES db
+                                                 (deployment-href-to-uuid deployment-href) (:name "state")
+                                                 (dsm/get-next-state value))
+                                               (zdu/unlock-deployment deployment-href)
+                                               ))
+                          (uzk/set-data (zdu/deployment-parameter-path merged) value)
+                          )))
+    (db/edit deployment-parameter request)))
+
+(defn update-parameter [deployment-parameter]
+  (try
+    (let [request {:params   {:resource-name deployment-parameter-resource-url
+                              :uuid          (deployment-href-to-uuid (:deployment-href deployment-parameter))}
+                   :identity (create-identity-map ["super" #{"ADMIN"}])
+                   :body     deployment-parameter}
+          {:keys [status body]} (edit-deployment-parameter-impl request)]
+      (case status
+        200 (log/info "updated deployment-parameter: " body)
+        (log/info "unexpected status code when updating deployment-parameter resource:" status)))
+    (catch Exception e
+      (log/warn "error when updating deployment-parameter resource: " (str e) "\n"
+                (with-out-str (st/print-cause-trace e))))))
 
 (defn create-parameter [deployment-parameter]
   (try
